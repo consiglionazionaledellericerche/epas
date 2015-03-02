@@ -373,7 +373,9 @@ public class PersonDayManager {
 	 */
 	private static void updateDifference(PersonDay pd){
 		
-		int worktime =  WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person).workingTimeTypeDays.get(pd.date.getDayOfWeek()-1).workingTime;
+		int worktime =  WorkingTimeTypeDao
+				.getWorkingTimeTypeStatic(pd.date, pd.person)
+				.workingTimeTypeDays.get(pd.date.getDayOfWeek()-1).workingTime;
 		
 		//persona fixed
 		if(pd.isFixedTimeAtWork() && pd.timeAtWork == 0){

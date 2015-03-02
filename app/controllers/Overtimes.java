@@ -1,11 +1,15 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
+
+import javax.inject.Inject;
+
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
 import manager.OvertimesManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.PersonResidualYearRecapFactory;
 import models.CompetenceCode;
 import models.Contract;
 import models.Person;
@@ -37,6 +41,9 @@ import dao.PersonDao;
  */
 
 public class Overtimes extends Controller {
+
+	@Inject
+	static PersonResidualYearRecapFactory yearFactory;
 	
 	/*
 	 * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario)
@@ -62,7 +69,7 @@ public class Overtimes extends Controller {
 		
 		Contract contract = ContractDao.getCurrentContract(person);
 		PersonResidualYearRecap c = 
-				PersonResidualYearRecap.factory(contract, year, null);
+				yearFactory.create(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
 		
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;

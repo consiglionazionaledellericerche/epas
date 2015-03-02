@@ -9,12 +9,14 @@ import org.joda.time.LocalDate;
 
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.MealTicket;
 import models.Person;
 import models.PersonDay;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 import dao.MealTicketDao;
 import dao.PersonDao;
@@ -26,6 +28,8 @@ import dao.PersonDao;
  */
 public class MealTicketManager {
 	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
 	
 	/**
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
@@ -66,7 +70,7 @@ public class MealTicketManager {
 	 * @param contract
 	 * @return il numero di buoni pasto trasferiti fra un contratto e l'altro.
 	 */
-	public static int mealTicketsLegacy(Contract contract) {
+	public int mealTicketsLegacy(Contract contract) {
 		
 		Contract previousContract = PersonDao.getPreviousPersonContract(contract);
 		if(previousContract == null)
@@ -76,8 +80,7 @@ public class MealTicketManager {
 		
 		//Data inizio utilizzo mealticket
 		PersonResidualYearRecap c = 
-				PersonResidualYearRecap
-				.factory(previousContract, previousContractInterval.getEnd().getYear(), null);
+				yearFactory.create(previousContract, previousContractInterval.getEnd().getYear(), null);
 		PersonResidualMonthRecap monthRecap = c.getMese(previousContractInterval.getEnd().getMonthOfYear());
 		
 		if(monthRecap == null)

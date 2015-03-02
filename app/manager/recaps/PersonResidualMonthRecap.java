@@ -5,8 +5,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-import manager.ContractManager;
-import manager.PersonManager;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -24,20 +22,24 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
-import dao.WorkingTimeTypeDao;
+import dao.WorkingTimeTypeDayDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonResidualMonthRecap {
+	
+	public final IWrapperFactory wrapperFactory; 
+	private final AbsenceDao absenceDao;
 
+	public final Contract contract;
+	
 	public Person person;
-	public Contract contract;
-	
 	public String contractDescription;
-	
+	public PersonResidualMonthRecap mesePrecedente;
 	public int qualifica;
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
-	public PersonResidualMonthRecap mesePrecedente;
-	public int anno;
-	public int mese;
+	public final int anno;
+	public final int mese;
 	
 	public int initMonteOreAnnoPassato;
 	public int initMonteOreAnnoCorrente;
@@ -78,149 +80,111 @@ public class PersonResidualMonthRecap {
 	public int buoniPastoUsatiNelMese = 0;
 	public int buoniPastoResidui = 0;
 	
-	private PersonResidualMonthRecap() {}
-	
-	/**
-	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona nell'ambito del contratto passato come argomento.
-	 * Visibile solo all'interno del package models.personalMonthSituation.
-	 * @param mesePrecedente
-	 * @param year
-	 * @param month
-	 * @param contract
-	 * @param initMonteOreAnnoPassato
-	 * @param initMonteOreAnnoCorrente
-	 * @param validDataForPersonDay
-	 * @param validDataForCompensatoryRest 
-	 */
-	public static PersonResidualMonthRecap factory(PersonResidualMonthRecap mesePrecedente, int year, int month, Contract contract, 
-			int initMonteOreAnnoPassato, int initMonteOreAnnoCorrente, int initMealTickets,
-			DateInterval validDataForPersonDay, DateInterval validDataForCompensatoryRest, DateInterval validDataForMealTickets) {
+	public PersonResidualMonthRecap(AbsenceDao absenceDao, IWrapperFactory wrapperFactory,
+			PersonResidualMonthRecap mesePrecedente,
+			Contract contract, int anno, int mese, int initMonteOreAnnoPassato,
+			int initMonteOreAnnoCorrente, int initMealTickets,
+			DateInterval validDataForPersonDay, 
+			DateInterval validDataForCompensatoryRest, 
+			DateInterval validDataForMealTickets) {
 		
+		this.absenceDao = absenceDao;
+		this.wrapperFactory = wrapperFactory;
+		this.mesePrecedente = mesePrecedente;
+		this.contract = contract;
+		this.person = contract.person;
+		this.anno = anno;
+		this.mese = mese;
 		
-		PersonResidualMonthRecap newMese = new PersonResidualMonthRecap();
-		
-		newMese.contract = contract;
-		newMese.person = contract.person;
-		newMese.qualifica = newMese.person.qualification.qualification;
-		newMese.anno = year;
-		newMese.mese = month;
-
-		newMese.initMonteOreAnnoCorrente = initMonteOreAnnoCorrente;
-		newMese.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
+		this.initMonteOreAnnoCorrente = initMonteOreAnnoCorrente;
+		this.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
 		
 		
 		//Per stampare a video il residuo da inizializzazione se riferito al mese
 		if(contract.sourceDate != null && 
-				contract.sourceDate.getMonthOfYear() == month && contract.sourceDate.getYear() == year) {
-			newMese.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
+				contract.sourceDate.getMonthOfYear() == mese && 
+				contract.sourceDate.getYear() == anno) {
+			initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
 		}
 		
-		setContractDescription(newMese);
+		setContractDescription(this);
 		
 		//Inizializzazione residui
 		//Gennaio
-		if(month==1)
+		if(mese==1)
 		{
-			newMese.mesePrecedente = null;
-			newMese.monteOreAnnoPassato = initMonteOreAnnoPassato;
-			newMese.monteOreAnnoCorrente = initMonteOreAnnoCorrente;
+			mesePrecedente = null;
+			monteOreAnnoPassato = initMonteOreAnnoPassato;
+			monteOreAnnoCorrente = initMonteOreAnnoCorrente;
 			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
-			if(newMese.monteOreAnnoPassato<0)
+			if(monteOreAnnoPassato<0)
 			{
-				newMese.progressivoFinalePositivoMese = newMese.progressivoFinalePositivoMese + newMese.monteOreAnnoPassato;
-				newMese.monteOreAnnoPassato = 0;
+				progressivoFinalePositivoMese = progressivoFinalePositivoMese + monteOreAnnoPassato;
+				monteOreAnnoPassato = 0;
 			}
 		}
 		
 		//Febbraio / Marzo
-		else if(month==2 || month==3)
+		else if(mese==2 || mese==3)
 		{
-			newMese.mesePrecedente = mesePrecedente;
-			newMese.monteOreAnnoPassato = initMonteOreAnnoPassato;
-			newMese.monteOreAnnoCorrente= initMonteOreAnnoCorrente;
+			this.mesePrecedente = mesePrecedente;
+			monteOreAnnoPassato = initMonteOreAnnoPassato;
+			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
 		}
 		
 		// Aprile -> Dicembre
 		else
 		{
-			newMese.mesePrecedente = mesePrecedente;
-			newMese.monteOreAnnoPassato = initMonteOreAnnoPassato;
-			newMese.monteOreAnnoCorrente= initMonteOreAnnoCorrente;
+			this.mesePrecedente = mesePrecedente;
+			monteOreAnnoPassato = initMonteOreAnnoPassato;
+			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
 			
-			if(newMese.qualifica>3)
+			if(qualifica>3)
 			{
-				newMese.possibileUtilizzareResiduoAnnoPrecedente = false;
-				newMese.monteOreAnnoPassato = 0;
+				possibileUtilizzareResiduoAnnoPrecedente = false;
+				monteOreAnnoPassato = 0;
 			}
 		}
 		
 		//Inizializzazione buoni pasto
-		if(month==1) 
+		if(mese==1) 
 		{
-			newMese.mesePrecedente = null;
-			newMese.buoniPastoDalMesePrecedente = initMealTickets;
+			mesePrecedente = null;
+			buoniPastoDalMesePrecedente = initMealTickets;
 		}
-		else if(newMese.mesePrecedente != null)
+		else if(mesePrecedente != null)
 		{
-			newMese.buoniPastoDalMesePrecedente = 
+			buoniPastoDalMesePrecedente = 
 					mesePrecedente.buoniPastoDalMesePrecedente 
 					+ mesePrecedente.buoniPastoConsegnatiNelMese
 					- mesePrecedente.buoniPastoUsatiNelMese;
 		}
 		
-		setMealTicketsInformation(newMese, validDataForMealTickets);
+		setMealTicketsInformation(this, validDataForMealTickets);
 		
-		setPersonDayInformation(newMese, validDataForPersonDay);
-		setPersonMonthInformation(newMese, validDataForCompensatoryRest);
+		setPersonDayInformation(this, validDataForPersonDay);
+		setPersonMonthInformation(this, validDataForCompensatoryRest);
 		
 
-		assegnaProgressivoFinaleNegativo(newMese);
-		assegnaStraordinari(newMese);
-		assegnaRiposiCompensativi(newMese);
+		assegnaProgressivoFinaleNegativo(this);
+		assegnaStraordinari(this);
+		assegnaRiposiCompensativi(this);
 		
 		//All'anno corrente imputo sia ciò che ho imputato al residuo del mese precedente dell'anno corrente sia ciò che ho imputato al progressivo finale positivo del mese
 		//perchè non ho interesse a visualizzarli separati nel template. 
-		newMese.progressivoFinaleNegativoMeseImputatoAnnoCorrente = newMese.progressivoFinaleNegativoMeseImputatoAnnoCorrente + newMese.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-		newMese.riposiCompensativiMinutiImputatoAnnoCorrente = newMese.riposiCompensativiMinutiImputatoAnnoCorrente + newMese.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
+		progressivoFinaleNegativoMeseImputatoAnnoCorrente = progressivoFinaleNegativoMeseImputatoAnnoCorrente + progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
+		riposiCompensativiMinutiImputatoAnnoCorrente = riposiCompensativiMinutiImputatoAnnoCorrente + riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
 		
 		//Al monte ore dell'anno corrente aggiungo ciò che non ho utilizzato del progressivo finale positivo del mese
-		newMese.monteOreAnnoCorrente = newMese.monteOreAnnoCorrente + newMese.progressivoFinalePositivoMese;
-		
-		return newMese;
+		monteOreAnnoCorrente = monteOreAnnoCorrente + progressivoFinalePositivoMese;	
 	}
-	
-	/**
-	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
-	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
-	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.
-	 * Nel caso di nessun contratto attivo nel mese viene ritornato il valore 0.
-	 * @param person
-	 * @param year
-	 * @param month
-	 */
-	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
-		for(Contract contract : monthContracts)
-		{
-			if(ContractManager.isLastInMonth(contract, month, year))
-			{
-				PersonResidualYearRecap c = 
-						PersonResidualYearRecap.factory(contract, year, null);
-				if(c.getMese(month)!=null)
-					return c.getMese(month).progressivoFinalePositivoMese;
-			}
-		}
-		return 0;
-	}
-	
-
 	
 	/**
 	 * 
 	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
 	 */
-	private static void setPersonDayInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForPersonDay)
+	private void setPersonDayInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForPersonDay)
 	{
 		if(validDataForPersonDay!=null)
 		{
@@ -291,69 +255,53 @@ public class PersonResidualMonthRecap {
 	 * 
 	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
 	 */
-	private static void setPersonMonthInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForCompensatoryRest)
+	private void setPersonMonthInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForCompensatoryRest)
 	{
 		CompetenceCode s1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
 		CompetenceCode s2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
 		CompetenceCode s3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
-		//gli straordinari li assegno solo all'ultimo contratto attivo del mese
-		if(ContractManager.isLastInMonth(monthRecap.contract, monthRecap.mese, monthRecap.anno))
+		
+		IWrapperContract wContract = wrapperFactory.create(monthRecap.contract);
+		
+		if(wContract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
 			Optional<Competence> competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
-//			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-//					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S1").fetch();
-//			for(Competence comp : competenceList)
-//			{
+
 			if(competenceS1.isPresent())
 				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS1Print = 0;
-//			}
-
 			//straordinari s2
 			Optional<Competence> competenceS2 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
 			
-//			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-//					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S2").fetch();
-//			for(Competence comp : competenceList)
-//			{
+
 			if(competenceS2.isPresent())
 				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS2Print = 0;
-//			}
-
 			//straordinari s3
 			Optional<Competence> competenceS3 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s3);
-//			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-//					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S3").fetch();
-//			for(Competence comp : competenceList)
-//			{
 			if(competenceS3.isPresent())
 				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS3Print = 0;
-//			}
+
 
 			monthRecap.straordinariMinuti = monthRecap.straordinariMinutiS1Print + monthRecap.straordinariMinutiS2Print + monthRecap.straordinariMinutiS3Print;
 		}
 		
 		if(validDataForCompensatoryRest!=null)
 		{
-			List<Absence> riposiCompensativi = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("91"), 
+			List<Absence> riposiCompensativi = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("91"), 
 					validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd(), 
 					Optional.<JustifiedTimeAtWork>absent(), false, false);
-//			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
-//					+ "and pd.date between ? and ?", "91", monthRecap.person, validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd()).fetch();
 			monthRecap.riposiCompensativiMinuti = 0;
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
 				//monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + monthRecap.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
 				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
-						
-						WorkingTimeTypeDao.getWorkingTimeType(abs.personDay.date, abs.personDay.person).workingTimeTypeDays.get(abs.personDay.date.getDayOfWeek()-1).workingTime;
-						
+						WorkingTimeTypeDayDao.getWorkingTimeTypeDay(person, abs.personDay.date).workingTime;	//FIXME potrebbe essere null
 				monthRecap.numeroRiposiCompensativi++;
 			}
 			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;
@@ -457,15 +405,6 @@ public class PersonResidualMonthRecap {
 		else
 			monthRecap.contractDescription = "";
 		
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isContractLastInMonth(int month, int year) {
-		
-		return ContractManager.isLastInMonth(this.contract, month, year);
 	}
 	
 	

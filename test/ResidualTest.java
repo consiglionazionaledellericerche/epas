@@ -6,6 +6,7 @@ import manager.ContractYearRecapManager;
 import manager.PersonManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.Person;
 import models.rendering.VacationsRecap;
@@ -23,6 +24,12 @@ public class ResidualTest extends UnitTest {
 	
 	@Inject
 	public ConsistencyManager consistencyManager;
+	
+	@Inject
+	public ContractYearRecapManager contractYearRecapManager;
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
 	
     @Test
     public void residualLucchesi() throws EmailException {
@@ -43,7 +50,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
-    		ContractYearRecapManager.buildContractYearRecap(contract);
+    		contractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -52,7 +59,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(contract, year, dateToTest);
+					yearFactory.create(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -105,7 +112,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
-    		ContractYearRecapManager.buildContractYearRecap(contract);
+    		contractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -114,7 +121,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(contract, year, dateToTest);
+					yearFactory.create(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -167,7 +174,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
-    		ContractYearRecapManager.buildContractYearRecap(contract);
+    		contractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -176,7 +183,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(contract, year, dateToTest);
+					yearFactory.create(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -229,7 +236,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
-    		ContractYearRecapManager.buildContractYearRecap(contract);
+    		contractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -238,7 +245,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(contract, year, dateToTest);
+					yearFactory.create(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -291,7 +298,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
-    		ContractYearRecapManager.buildContractYearRecap(contract);
+    		contractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -300,7 +307,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(contract, year, dateToTest);
+					yearFactory.create(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}

@@ -5,8 +5,11 @@ import it.cnr.iit.epas.PersonUtility;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.PersonResidualYearRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
@@ -54,6 +57,15 @@ import dao.WorkingTimeTypeDao;
  *
  */
 public class AbsenceManager {
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	public ContractYearRecapManager contractYearRecapManager;
+	
+	@Inject
+	public WorkingTimeTypeDao workingTimeTypeDao;
 	
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
@@ -147,7 +159,7 @@ public class AbsenceManager {
 	 * @param date
 	 * @return 
 	 */
-	private static boolean canTakeCompensatoryRest(Person person, LocalDate date){
+	private boolean canTakeCompensatoryRest(Person person, LocalDate date){
 		//Data da considerare 
 
 		// (1) Se voglio inserire un riposo compensativo per il mese successivo considero il residuo a ieri.
@@ -171,7 +183,7 @@ public class AbsenceManager {
 		Contract contract = ContractDao.getContract(dateToCheck, person);
 
 		PersonResidualYearRecap c = 
-				PersonResidualYearRecap.factory(contract, dateToCheck.getYear(), dateToCheck);
+				yearFactory.create(contract, dateToCheck.getYear(), dateToCheck);
 
 		if(c == null){
 			return false;
@@ -181,7 +193,8 @@ public class AbsenceManager {
 
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato 
 				> //mese.person.getWorkingTimeType(dateToCheck).getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
-			WorkingTimeTypeDao.getWorkingTimeType(dateToCheck, person).workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
+			workingTimeTypeDao.getWorkingTimeType(dateToCheck, person)
+				.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
 			return true;
 		} 
 		return false;	
@@ -196,7 +209,7 @@ public class AbsenceManager {
 	 * @param mealTicket
 	 * @return
 	 */
-	public static AbsenceInsertReport insertAbsence(Person person, LocalDate dateFrom,Optional<LocalDate> dateTo, 
+	public AbsenceInsertReport insertAbsence(Person person, LocalDate dateFrom,Optional<LocalDate> dateTo, 
 			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket){
 
 		Preconditions.checkNotNull(person);
@@ -287,7 +300,7 @@ public class AbsenceManager {
 			for(Contract c : PersonDao.getContractList(person, 
 					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
 					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
-				ContractYearRecapManager.buildContractYearRecap(c);
+				contractYearRecapManager.buildContractYearRecap(c);
 			}
 		}
 		
@@ -379,7 +392,7 @@ public class AbsenceManager {
 	 * @param absenceType
 	 * @throws EmailException 
 	 */
-	private static AbsencesResponse handlerCompensatoryRest(Person person,
+	private AbsencesResponse handlerCompensatoryRest(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
 		Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYearManager.getFieldValue(
@@ -406,7 +419,7 @@ public class AbsenceManager {
 							" - Usati %s", alreadyUsed));
 		}
 		//Controllo del residuo
-		if(AbsenceManager.canTakeCompensatoryRest(person, date)){
+		if(canTakeCompensatoryRest(person, date)){
 			return insert(person, date, absenceType, file);
 		}
 
@@ -643,7 +656,7 @@ public class AbsenceManager {
 	 * @param dateFrom
 	 * @param dateTo
 	 */
-	public static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, 
+	public int removeAbsencesInPeriod(Person person, LocalDate dateFrom, 
 			LocalDate dateTo, AbsenceType absenceType){
 
 		LocalDate today = LocalDate.now();
@@ -687,7 +700,7 @@ public class AbsenceManager {
 			for(Contract c : PersonDao.getContractList(person, 
 					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
 					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
-				ContractYearRecapManager.buildContractYearRecap(c);
+				contractYearRecapManager.buildContractYearRecap(c);
 			}
 		}
 		return deleted;

@@ -138,6 +138,7 @@ public class Competences extends Controller{
 		{
 			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
 			month = today.getMonthOfYear();
+			//FIXME impostare il redirect!!
 		}
 		
 		for(IWrapperPerson p : activePersons){

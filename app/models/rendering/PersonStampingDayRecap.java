@@ -84,9 +84,9 @@ public class PersonStampingDayRecap {
 		
 		this.setStampingTemplate( stampingsForTemplate, pd );
 		//if(pd.person.getWorkingTimeType(pd.date) != null){
-		if(WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
+		if(WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person) != null){
 			//this.wtt = pd.person.getWorkingTimeType(pd.date);
-			this.wtt = WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person);
+			this.wtt = WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person);
 			
 			this.wttd = this.wtt.workingTimeTypeDays.get(pd.date.getDayOfWeek()-1);
 			

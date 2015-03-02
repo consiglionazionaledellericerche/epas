@@ -55,6 +55,9 @@ public class WorkingTimes extends Controller{
 	@Inject
 	static OfficeDao officeDao;
 	
+	@Inject
+	static ContractManager contractManager;
+	
 	public static void manageWorkingTime(Office office){
 		
 		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
@@ -425,7 +428,7 @@ public class WorkingTimes extends Controller{
 					replaceContractWorkingTimeTypeList(contract, newCwttListClean);
 					Logger.info("recompute");
 
-					ContractManager.recomputeContract(contract, inputBegin, null);
+					contractManager.recomputeContract(contract, inputBegin, null);
 					
 					contractChanges++;
 

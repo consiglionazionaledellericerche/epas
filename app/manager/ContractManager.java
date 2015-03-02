@@ -23,6 +23,7 @@ import play.Logger;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 import dao.ContractDao;
 import dao.PersonDao;
@@ -38,6 +39,9 @@ import dao.VacationPeriodDao;
  *
  */
 public class ContractManager {
+	
+	@Inject
+	public ContractYearRecapManager contractYearRecapManager;
 	
 	/**
 	 * Validatore per il contratto. Controlla la consistenza delle date all'interno del contratto
@@ -145,7 +149,7 @@ public class ContractManager {
 	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
 	 *   modifica la data fine che potrebbe non essere persistita)
 	 */
-	public static void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
@@ -210,7 +214,7 @@ public class ContractManager {
 		Logger.info("BuildContractYearRecap");
 
 		//(3) Ricalcolo dei riepiloghi annuali
-		ContractYearRecapManager.buildContractYearRecap(contract);
+		contractYearRecapManager.buildContractYearRecap(contract);
 
 
 	}
@@ -476,22 +480,6 @@ public class ContractManager {
 		return true;
 	}
 	
-	/**
-	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public static boolean isLastInMonth(Contract contract, int month, int year) {
-		List<Contract> contractInMonth = PersonManager.getMonthContracts(contract.person, month, year);
-		if (contractInMonth.size() == 0)
-			return false;
-		if (contractInMonth.get(contractInMonth.size()-1).id.equals(contract.id))
-			return true;
-		else
-			return false;
-	}
-
 	/**
 	 * 
 	 * @param contract
