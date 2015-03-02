@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import models.Contract;
 import dao.AbsenceDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 
 /**
@@ -19,11 +20,13 @@ import dao.wrapper.IWrapperFactory;
 public class PersonResidualMonthRecapFactory {
 	
 	private final AbsenceDao absenceDao;
+	private final PersonDayDao personDayDao;
 	private final IWrapperFactory wrapperFactory;
 
 	@Inject
-	PersonResidualMonthRecapFactory(AbsenceDao ad, IWrapperFactory wrapperFactory) {
+	PersonResidualMonthRecapFactory(AbsenceDao ad, PersonDayDao pd, IWrapperFactory wrapperFactory) {
 		this.absenceDao = ad;
+		this.personDayDao = pd;
 		this.wrapperFactory = wrapperFactory;
 	}
 	
@@ -48,7 +51,8 @@ public class PersonResidualMonthRecapFactory {
 			DateInterval validDataForCompensatoryRest, 
 			DateInterval validDataForMealTickets) {
 		
-		return new PersonResidualMonthRecap(absenceDao, wrapperFactory, mesePrecedente,
+		return new PersonResidualMonthRecap(absenceDao, personDayDao, 
+				wrapperFactory, mesePrecedente,
 				contract, year, month, initMonteOreAnnoPassato,
 				initMonteOreAnnoCorrente, initMealTickets,
 				validDataForPersonDay, validDataForCompensatoryRest,

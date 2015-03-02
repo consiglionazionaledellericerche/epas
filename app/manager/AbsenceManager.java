@@ -67,6 +67,12 @@ public class AbsenceManager {
 	@Inject
 	public WorkingTimeTypeDao workingTimeTypeDao;
 	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
@@ -292,7 +298,7 @@ public class AbsenceManager {
 		}
 		
 		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		PersonDayManager.updatePersonDaysFromDate(person, dateFrom);
+		personDayManager.updatePersonDaysFromDate(person, dateFrom);
 		
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
@@ -320,7 +326,7 @@ public class AbsenceManager {
 	 * @param file
 	 * @return	un resoconto dell'inserimento tramite la classe AbsenceInsertModel
 	 */
-	private static AbsencesResponse insert(Person person, LocalDate date, 
+	private AbsencesResponse insert(Person person, LocalDate date, 
 			AbsenceType absenceType, Optional<Blob> file){
 
 		Preconditions.checkNotNull(person);
@@ -342,7 +348,7 @@ public class AbsenceManager {
 				ar.setDayInReperibilityOrShift(true);				
 			}
 
-			List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false);
+			List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false);
 			PersonDay pd = 	FluentIterable.from(personDays).first().or(new PersonDay(person, date));
 
 			if(personDays.isEmpty()){
@@ -482,7 +488,7 @@ public class AbsenceManager {
 	 * @param absenceType
 	 * @param file
 	 */		
-	private static AbsencesResponse handler31_32_94(Person person,
+	private AbsencesResponse handler31_32_94(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
 		if(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType) && canTake32(person, date)){
@@ -508,10 +514,10 @@ public class AbsenceManager {
 	 * @param file
 	 * @throws EmailException 
 	 */
-	private static AbsencesResponse handler37(Person person,
+	private AbsencesResponse handler37(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-//  	FIXME Verificare i controlli d'inserimento
+		//FIXME Verificare i controlli d'inserimento
 		if(date.getYear() == LocalDate.now().getYear()){
 
 			int remaining37 = VacationsRecap.remainingPastVacationsAs37(date.getYear(), person);
@@ -533,7 +539,7 @@ public class AbsenceManager {
 	 * @param file
 	 * @throws EmailException 
 	 */
-	private static List<AbsencesResponse> handlerAbsenceTypeGroup(Person person,LocalDate date,
+	private List<AbsencesResponse> handlerAbsenceTypeGroup(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file){
 
 		CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, date);
@@ -560,7 +566,7 @@ public class AbsenceManager {
 	 * @param absenceType
 	 * @throws EmailException 
 	 */
-	private static AbsencesResponse handlerChildIllness(Person person,LocalDate date,
+	private AbsencesResponse handlerChildIllness(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file){
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
@@ -591,7 +597,7 @@ public class AbsenceManager {
 	 * @param absenceType
 	 * @throws EmailException 
 	 */
-	private static AbsencesResponse handlerFER(Person person,LocalDate date,
+	private AbsencesResponse handlerFER(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file){
 
 		AbsenceType wichFer = AbsenceManager.whichVacationCode(person, date);
@@ -604,7 +610,7 @@ public class AbsenceManager {
 		return insert(person, date, wichFer, file);
 	}
 
-	private static AbsencesResponse handlerGenericAbsenceType(Person person,LocalDate date,
+	private AbsencesResponse handlerGenericAbsenceType(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket){
 
 		AbsencesResponse aim = insert(person, date, absenceType, file);
@@ -621,32 +627,32 @@ public class AbsenceManager {
 	 * @param mealTicket
 	 * @param abt
 	 */
-	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
+	private void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
 
-		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0);
+		PersonDay pd = personDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0);
 
-		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(pd == null)
 			pd = new PersonDay(person, date);
-		if(abt==null || !abt.code.equals("92")){
+
+		if(abt == null || !abt.code.equals("92")){
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
-			PersonDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(pd);
 			return;
 		}
-		if(mealTicket!= null && mealTicket.equals("si")){
+		if(mealTicket != null && mealTicket.equals("si")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = true;
-			PersonDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(pd);
 		}
-		if(mealTicket!= null && mealTicket.equals("no")){
+		if(mealTicket != null && mealTicket.equals("no")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = false;
-			PersonDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(pd);
 		}
 
-		if(mealTicket!= null && mealTicket.equals("calcolato")){
+		if(mealTicket != null && mealTicket.equals("calcolato")){
 			pd.isTicketForcedByAdmin = false;
-			PersonDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(pd);
 		}
 	}
 
@@ -664,7 +670,7 @@ public class AbsenceManager {
 		int deleted = 0;
 		while(!actualDate.isAfter(dateTo)){
 
-			List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
+			List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
 			PersonDay pd = FluentIterable.from(personDays).first().orNull();
 
 			//Costruisco se non esiste il person day
@@ -692,7 +698,7 @@ public class AbsenceManager {
 		}
 
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		PersonDayManager.updatePersonDaysFromDate(person, dateFrom);
+		personDayManager.updatePersonDaysFromDate(person, dateFrom);
 
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno

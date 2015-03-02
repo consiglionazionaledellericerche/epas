@@ -49,6 +49,12 @@ public class ConsistencyManager {
 	@Inject
 	public ContractYearRecapManager contractYearRecapManager;
 	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -82,7 +88,7 @@ public class ConsistencyManager {
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		for(Person person : personList) {
-				ConsistencyManager.checkHistoryError(person, year, month);
+				checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
 
@@ -96,13 +102,15 @@ public class ConsistencyManager {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth)) {
 
-				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
+				List<PersonDay> pdList = personDayDao
+						.getPersonDayInPeriod(p, actualMonth,
+								Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
 
 				for(PersonDay pd : pdList){
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
 					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
-					PersonDayManager.populatePersonDay(pd1);
+					personDayManager.populatePersonDay(pd1);
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
 				}
@@ -267,7 +275,7 @@ public class ConsistencyManager {
 	 * @param personid la persona da controllare
 	 * @param dayToCheck il giorno da controllare
 	 */
-	public static void checkPersonDay(Long personid, LocalDate dayToCheck)
+	public void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
 		Person personToCheck = PersonDao.getPersonById(personid);
 
@@ -278,7 +286,7 @@ public class ConsistencyManager {
 		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(personToCheck, dayToCheck);
 
 		if(pd.isPresent()){
-			PersonDayManager.checkForPersonDayInTrouble(pd.get()); 
+			personDayManager.checkForPersonDayInTrouble(pd.get()); 
 			return;
 		}
 		else {
@@ -287,9 +295,9 @@ public class ConsistencyManager {
 				return;
 			}
 			personDay.create();
-			PersonDayManager.populatePersonDay(personDay);
+			personDayManager.populatePersonDay(personDay);
 			personDay.save();
-			PersonDayManager.checkForPersonDayInTrouble(personDay);
+			personDayManager.checkForPersonDayInTrouble(personDay);
 			return;
 		}
 	}
@@ -302,7 +310,7 @@ public class ConsistencyManager {
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
 	 */
-	private static void checkHistoryError(Person person, int year, int month)
+	private void checkHistoryError(Person person, int year, int month)
 	{
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
@@ -313,7 +321,7 @@ public class ConsistencyManager {
 			JPAPlugin.closeTx(false);
 			JPAPlugin.startTx(false);
 			
-			ConsistencyManager.checkPersonDay(person.id, date);
+			checkPersonDay(person.id, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;

@@ -52,6 +52,9 @@ public class CompetenceManager {
 	@Inject
 	public PersonManager personManager;
 	
+	@Inject
+	public PersonDayDao personDayDao;
+	
 	/**
 	 * 
 	 * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili
@@ -192,7 +195,7 @@ public class CompetenceManager {
 	 * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su orario di lavoro, straordinario,
 	 * riposi compensativi per l'anno year e il mese month per le persone dell'ufficio office
 	 */
-	public static Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
+	public Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
 			String name, Office office, LocalDate beginMonth, SimpleResults<Person> simpleResults, CompetenceCode code){
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
@@ -206,7 +209,7 @@ public class CompetenceManager {
 			Integer difference = 0;
 			Integer overtime = 0;
 			
-			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;

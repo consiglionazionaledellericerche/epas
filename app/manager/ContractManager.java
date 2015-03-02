@@ -43,6 +43,15 @@ public class ContractManager {
 	@Inject
 	public ContractYearRecapManager contractYearRecapManager;
 	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public ConsistencyManager consistencyManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
 	/**
 	 * Validatore per il contratto. Controlla la consistenza delle date all'interno del contratto
 	 * e la coerenza con gli altri contratti della persona.
@@ -181,7 +190,7 @@ public class ContractManager {
 				continue;
 			}
 
-			ConsistencyManager.checkPersonDay(contract.person.id, date);
+			consistencyManager.checkPersonDay(contract.person.id, date);
 			date = date.plusDays(1);
 
 
@@ -195,17 +204,14 @@ public class ContractManager {
 
 		while( !actualMonth.isAfter(endMonth) )
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
-			//			List<PersonDay> pdList = 
-			//					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-			//							contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
 
 			for(PersonDay pd : pdList){
 
 				PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
 				//PersonDay pd1 = PersonDay.findById(pd.id);
 				Logger.debug("RecomputePopulate %s", pd1.date);				
-				PersonDayManager.populatePersonDay(pd1);
+				personDayManager.populatePersonDay(pd1);
 			}
 
 			actualMonth = actualMonth.plusMonths(1);

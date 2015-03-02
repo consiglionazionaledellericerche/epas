@@ -34,6 +34,12 @@ public class StampingManager {
 	@Inject
 	public PersonStampingDayRecapFactory stampingDayRecapFactory;
 	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
 	/**
 	 * Versione per inserimento amministratore.
 	 * Costruisce la LocalDateTime della timbratura a partire dai parametri passati come argomento.
@@ -72,7 +78,7 @@ public class StampingManager {
 	 * @param type
 	 * @param markedByAdmin
 	 */
-	public static void addStamping(PersonDay pd, LocalDateTime time, String note,
+	public void addStamping(PersonDay pd, LocalDateTime time, String note,
 			boolean service, boolean type, boolean markedByAdmin) {
 
 		Stamping stamp = new Stamping();
@@ -104,7 +110,7 @@ public class StampingManager {
 		pd.stampings.add(stamp);
 		pd.save();
 
-		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	}
 
 	/**
@@ -143,7 +149,7 @@ public class StampingManager {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public static boolean createStamping(StampingFromClient stamping){
+	public boolean createStamping(StampingFromClient stamping){
 
 		if(stamping == null)
 			return false;
@@ -217,7 +223,7 @@ public class StampingManager {
 
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
-		PersonDayManager.populatePersonDay(personDay);
+		personDayManager.populatePersonDay(personDay);
 
 		personDay.save();
 		return true;
@@ -279,7 +285,10 @@ public class StampingManager {
 	 * @param numberOfInOut
 	 * @return  
 	 */
-	public List<PersonStampingDayRecap> populatePersonStampingDayRecapList(List<Person> activePersonsInDay, LocalDate dayPresence, int numberOfInOut){
+	public List<PersonStampingDayRecap> populatePersonStampingDayRecapList(
+			List<Person> activePersonsInDay,
+			LocalDate dayPresence, int numberOfInOut) {
+		
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
 
@@ -295,7 +304,7 @@ public class StampingManager {
 				personDay = pd.get();
 			}
 
-			PersonDayManager.computeValidStampings(personDay);
+			personDayManager.computeValidStampings(personDay);
 			daysRecap.add( stampingDayRecapFactory.create(personDay, numberOfInOut) );
 
 		}
@@ -309,7 +318,7 @@ public class StampingManager {
 	 * @param beginMonth
 	 * @return la tabella contenente la struttura persona-data-buonopasto per tutte le persone attive
 	 */
-	public static Table<Person, LocalDate, String> populatePersonTicketTable(List<Person> activePersons, LocalDate beginMonth){
+	public Table<Person, LocalDate, String> populatePersonTicketTable(List<Person> activePersons, LocalDate beginMonth){
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 			public int compare(LocalDate date1, LocalDate date2) {
 				return date1.compareTo(date2);
@@ -323,7 +332,8 @@ public class StampingManager {
 		});
 		for(Person p : activePersons)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+			List<PersonDay> pdList = personDayDao
+					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
 
 			for(PersonDay pd : pdList){
 				if(pd.isTicketForcedByAdmin) {

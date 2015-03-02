@@ -39,28 +39,6 @@ import dao.PersonDayDao;
 public class PersonUtility {
 
 
-	/** TODO usato in Competences.java ma riscritto più volte con nuovi algoritmi, rimuoverlo dopo averlo sostituito
-	 * questa funzione all'apparenza oscura calcola nel mese passato come parametro, quanti sono stati i giorni in cui la persona ha fatto ore/minuti
-	 * in più rispetto al proprio orario di lavoro. Questa somma mi servirà per stabilire se in quel mese quella persona potrà beneficiare o meno
-	 * di straordinari
-	 * @return la somma delle differenze positive dei giorni del mese
-	 */
-	public static int getPositiveDaysForOvertime(PersonMonthRecap personMonth){
-		int positiveDifference = 0;
-		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(personMonth.person, date, Optional.fromNullable(date.dayOfMonth().withMaximumValue()), false);
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				personMonth.person, date, date.dayOfMonth().withMaximumValue()).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.difference > 0)
-				positiveDifference = positiveDifference + pd.difference;
-		}
-
-
-		return positiveDifference;
-	}
-
-
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
 	 */
@@ -656,82 +634,9 @@ public class PersonUtility {
 		return coupleOfStampings;
 	}
 
-	/**
-	 * Calcola il numero massimo di coppie di colonne ingresso/uscita da stampare nell'intero mese
-	 * @param person
-	 * @param year
-	 * @param month
-	 * @return
-	 */
-	public static int getMaximumCoupleOfStampings(Person person, int year, int month){
+	
 
-		LocalDate begin = new LocalDate(year, month, 1);
-		if(begin.isAfter(new LocalDate()))
-			return 0;
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(begin.dayOfMonth().withMaximumValue()), false);
-		//List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
-
-		int max = 0;
-		for(PersonDay pd : pdList)
-		{
-			int coupleOfStampings = PersonUtility.numberOfInOutInPersonDay(pd);
-
-			if(max<coupleOfStampings)
-				max = coupleOfStampings;
-		}
-
-		return max;
-	}
-
-	/**
-	 * Genera una lista di PersonDay aggiungendo elementi fittizzi per coprire ogni giorno del mese
-	 * @param person
-	 * @param year
-	 * @param month
-	 * @return
-	 */
-	public static List<PersonDay> getTotalPersonDayInMonth(Person person, int year, int month)
-	{
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
-		List<PersonDay> totalDays = new ArrayList<PersonDay>();
-		List<PersonDay> workingDays = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
-//		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-//				person, beginMonth, endMonth).fetch();
-
-		int currentWorkingDays = 0;
-		LocalDate currentDate = beginMonth;
-		while(!currentDate.isAfter(endMonth))
-		{
-			if(currentWorkingDays<workingDays.size() && workingDays.get(currentWorkingDays).date.isEqual(currentDate))
-			{
-				totalDays.add(workingDays.get(currentWorkingDays));
-				currentWorkingDays++;
-			}
-			else
-			{
-				PersonDay previusPersonDay = null;
-				if(totalDays.size()>0)
-					previusPersonDay = totalDays.get(totalDays.size()-1);
-
-				PersonDay newPersonDay; 
-				//primo giorno del mese festivo 
-				if(previusPersonDay==null)
-					newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0);
-				//altri giorni festivi
-				else
-				{
-					newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, previusPersonDay.progressive);
-				}
-
-				totalDays.add(newPersonDay);
-
-			}
-			currentDate = currentDate.plusDays(1);
-		}
-		return totalDays;
-	}
+	
 
 	/**
 	 * //TODO utilizzare jpa per prendere direttamente i codici (e migrare ad una lista)
@@ -862,43 +767,6 @@ public class PersonUtility {
 
 		return query.getResultList().size();
 	}
-
-	/**
-	 * Aggiorna i person day della persona dei mesi che cadono entro l'intervallo temporale [dateFrom,dateTo]
-	 * @param person
-	 * @param dateFrom
-	 * @param dateTo
-	 * 
-	 * @deprecated use {@link #PersonUtility.updatePersonDaysFromDate()} instead. 
-	 */
-	@Deprecated
-	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
-	{
-		LocalDate monthBegin = new LocalDate(dateFrom.getYear(), dateFrom.getMonthOfYear(), 1);
-		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-		while(true)
-		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), true);
-//			List<PersonDay> pdList = PersonDay.find(
-//					"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
-//					person,
-//					monthBegin,
-//					monthEnd).fetch();
-			for(PersonDay pd : pdList)
-			{
-				PersonDayManager.populatePersonDay(pd);
-			}
-//			FIXME c'è realmente bisogno di fare la populate oltre la data di oggi??
-			if(monthEnd.isEqual(dateTo) || monthEnd.isAfter(dateTo))
-				return;
-			monthBegin = monthBegin.plusMonths(1);
-			monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-		}
-
-	}
-
-
-	
 
 	/**
 	 * 

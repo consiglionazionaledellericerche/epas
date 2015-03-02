@@ -48,6 +48,10 @@ public class PrintTags extends Controller{
 	@Inject
 	static PersonStampingDayRecapFactory stampingDayRecapFactory;
 	
+	@Inject
+	static PersonDayManager personDayManager;
+	
+	
 	public static void showTag(Long personId){
 		if(personId == null){
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
@@ -66,14 +70,14 @@ public class PrintTags extends Controller{
 		int year = params.get("year", Integer.class);
 	
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
-		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
+		int numberOfInOut = Math.max(minInOutColumn, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
 		
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
+			personDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
 		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
 		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
@@ -128,15 +132,15 @@ public class PrintTags extends Controller{
 		}
 	
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
-		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
+		int numberOfInOut = Math.max(minInOutColumn, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
 		
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
+			personDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
 		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
 		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							

@@ -4,6 +4,8 @@ import helpers.ModelQuery;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import models.Person;
 import models.PersonDay;
 import models.query.QPersonDay;
@@ -11,8 +13,10 @@ import models.query.QPersonDay;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 
 /**
@@ -20,9 +24,13 @@ import com.mysema.query.jpa.JPQLQuery;
  * @author dario
  *
  */
-public class PersonDayDao {
+public class PersonDayDao extends DaoBase {
 
 	
+	PersonDayDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
+
 	/**
 	 * 
 	 * @param person
@@ -32,10 +40,10 @@ public class PersonDayDao {
 	 * @return la lista dei personday relativi a una persona in un certo periodo di tempo  
 	 * Se ordered è 'true' la lista dei personDay viene ordinata per data crescente
 	 */
-	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, Optional<LocalDate> end, boolean ordered){
+	public List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, Optional<LocalDate> end, boolean ordered){
 		QPersonDay personDay = QPersonDay.personDay;
 		final BooleanBuilder condition = new BooleanBuilder();
-		final JPQLQuery query = ModelQuery.queryFactory().from(personDay);
+		final JPQLQuery query = getQueryFactory().from(personDay);
 		
 		condition.and(personDay.date.between(begin, end.or(begin)));
 		condition.and(personDay.person.eq(person));
