@@ -78,6 +78,9 @@ public class Persons extends Controller {
 
 	@Inject
 	static ContractManager contractManager;
+	
+	@Inject 
+	static PersonDayManager personDayManager;
 
 	@NoCheck
 	public static void list(String name){
@@ -311,7 +314,7 @@ public class Persons extends Controller {
 		PersonManager.deletePersonChildren(person);
 
 		// Eliminazione person day
-		PersonDayManager.deletePersonDays(person);
+		personDayManager.deletePersonDays(person);
 	
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);

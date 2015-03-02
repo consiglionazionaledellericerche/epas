@@ -37,7 +37,7 @@ public class PersonStampingRecap {
 
 	private static final int MIN_IN_OUT_COLUMN = 2;
 
-	private final PersonDayManager personDayManager;
+	//private final PersonDayManager personDayManager;
 	private final PersonManager personManager;
 	private final PersonResidualYearRecapFactory yearFactory;
 	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
@@ -82,7 +82,7 @@ public class PersonStampingRecap {
 			
 			int year, int month, Person person) {
 		
-		this.personDayManager = personDayManager;
+		//this.personDayManager = personDayManager;
 		this.personManager = personManager;
 		this.yearFactory = yearFactory;
 		this.stampingDayRecapFactory = stampingDayRecapFactory;
@@ -112,8 +112,8 @@ public class PersonStampingRecap {
 		this.stampTypeSet = PersonStampingDayRecap.stampTypeSet;
 
 		this.numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		this.numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
-		this.numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);
+		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
+		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
 		this.basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		this.absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 

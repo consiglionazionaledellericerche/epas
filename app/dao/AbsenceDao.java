@@ -38,10 +38,12 @@ public class AbsenceDao extends DaoBase {
 		super(queryFactory, emp);
 	}
 
-	private final static QAbsence absence = QAbsence.absence;
+	private final static QAbsence absence = QAbsence.absence;	//TODO rimuoverli e metterli nei metodi!!!
 
 	public Absence getAbsenceById(Long id){
 
+		final QAbsence absence = QAbsence.absence;
+		
 		final JPQLQuery query = getQueryFactory().from(absence)
 				.where(absence.id.eq(id));
 		return query.singleResult(absence);

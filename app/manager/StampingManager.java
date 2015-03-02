@@ -122,14 +122,14 @@ public class StampingManager {
 	 * @param activePersonsInDay
 	 * @return 
 	 */
-	public static int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day, List<Person> activePersonsInDay){
+	public int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day, List<Person> activePersonsInDay){
 
 		LocalDate date = new LocalDate(year, month, day);
 		int max = 0;
 
 		for(Person person : activePersonsInDay){
 			PersonDay personDay = null;
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
+			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
 
 			if(pd.isPresent()) 
 			{
@@ -174,7 +174,7 @@ public class StampingManager {
 
 		Logger.debug("Sto per segnare la timbratura di %s %s", person.name, person.surname);
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
 		if(!pd.isPresent()){
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
@@ -294,7 +294,7 @@ public class StampingManager {
 
 			PersonDay personDay = null;
 			person = PersonDao.getPersonById(person.id);
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
+			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){
 				personDay = new PersonDay(person, dayPresence);

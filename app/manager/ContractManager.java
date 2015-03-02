@@ -208,7 +208,7 @@ public class ContractManager {
 
 			for(PersonDay pd : pdList){
 
-				PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
+				PersonDay pd1 = personDayDao.getPersonDayById(pd.id);
 				//PersonDay pd1 = PersonDay.findById(pd.id);
 				Logger.debug("RecomputePopulate %s", pd1.date);				
 				personDayManager.populatePersonDay(pd1);

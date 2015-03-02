@@ -18,8 +18,8 @@ import dao.StampingDao;
  */
 public class StampingTemplate {
 	
-	private final PersonDayManager personDayManager;
-	private final StampingDao stampingDao;
+	//private final PersonDayManager personDayManager;
+	//private final StampingDao stampingDao;
 	
 	public Long stampingId;
 	public String colour;
@@ -38,8 +38,8 @@ public class StampingTemplate {
 			StampingDao stampingDao, Stamping stamping,
 			int index, PersonDay pd, int pairId, String pairPosition)
 	{
-		this.stampingDao = stampingDao;
-		this.personDayManager = personDayManager;
+		//this.stampingDao = stampingDao;
+		//this.personDayManager = personDayManager;
 		
 		this.stampingId = stamping.id;
 		this.pairId = pairId;
@@ -79,7 +79,7 @@ public class StampingTemplate {
 		//----------------------------------------- timbratura modificata dall'amministatore ---------------------------------
 		if(stamping.markedByAdmin) 
 		{
-			StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+			StampModificationType smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
 			this.markedByAdminCode = smt.code;
 			PersonStampingDayRecap.stampModificationTypeSet.add(smt);
 		}
@@ -91,7 +91,7 @@ public class StampingTemplate {
 		//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
 		if(stamping.stampModificationType!=null)
 		{
-			StampModificationType smt = PersonDayManager.checkMissingExitStampBeforeMidnight(pd);
+			StampModificationType smt = personDayManager.checkMissingExitStampBeforeMidnight(pd);
 			if(smt!=null)
 			{
 				this.missingExitStampBeforeMidnightCode = smt.code;

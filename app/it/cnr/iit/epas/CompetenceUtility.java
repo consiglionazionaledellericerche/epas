@@ -483,7 +483,7 @@ public class CompetenceUtility {
 			//check for the absence inconsistencies
 			//------------------------------------------
 				
-			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDayStatic(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 			//Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
 			
@@ -561,7 +561,7 @@ public class CompetenceUtility {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDayStatic(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			//Logger.debug("Prelevo il personDay %s per la persona %s - personDay=%s", personShiftDay.date, person, personDay);
 			

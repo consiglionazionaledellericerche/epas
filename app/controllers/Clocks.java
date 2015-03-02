@@ -48,6 +48,9 @@ public class Clocks extends Controller{
 	
 	@Inject
 	static PersonDayManager personDayManager;
+	
+	@Inject
+	static PersonDayDao personDayDao;
 
 	public static void show(){
 		
@@ -79,7 +82,7 @@ public class Clocks extends Controller{
 			Clocks.show();
 		}	
 		PersonDay personDay = null;			
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(user.person, today);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
 		
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
@@ -112,7 +115,7 @@ public class Clocks extends Controller{
 		LocalDateTime ldt = new LocalDateTime();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, ldt.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, ldt.toLocalDate());
 		
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
@@ -172,7 +175,7 @@ public class Clocks extends Controller{
 		
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, today);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, today);
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			personDay = new PersonDay(person, today);

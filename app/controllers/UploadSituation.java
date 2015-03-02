@@ -5,7 +5,6 @@ import helpers.attestati.AttestatiClient.LoginResponse;
 import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,6 +21,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.PersonDayManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -70,6 +70,10 @@ public class UploadSituation extends Controller{
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static PersonDayManager personDayManager;
+	
 	
 	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
 	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
@@ -415,7 +419,7 @@ public class UploadSituation extends Controller{
 			List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
 
 			//Numero di buoni mensa da passare alla procedura di invio attestati
-			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
+			Integer mealTicket = personDayManager.numberOfMealTicketToUse(person, year, month);
 			
 			//vedere se l'ho gia' inviato con successo
 			CertificatedData cert = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
