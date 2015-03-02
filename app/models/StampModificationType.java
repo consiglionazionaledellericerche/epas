@@ -37,20 +37,5 @@ public class StampModificationType extends BaseModel{
 	
 	@OneToMany(mappedBy="stampModificationType")
 	public List<PersonDay> personDays;
-	
-	
-	public static StampModificationType getStampModificationTypeByCode(String code)
-	{
-		if(code==null)
-			return null;
-		
-		Optional<StampModificationType> smt = StampingDao.getStampModificationTypeByCode(code);
-		//StampModificationType smt = StampModificationType.find("byCode", code).first();
-		if(!smt.isPresent())
-		{
-			return null;
-		}
-		return smt.get();
-	}
 
 }

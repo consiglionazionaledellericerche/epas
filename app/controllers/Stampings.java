@@ -61,6 +61,9 @@ public class Stampings extends Controller {
 	@Inject
 	static PersonDayDao personDayDao;
 	
+	@Inject
+	static StampingDao stampingDao;
+	
 	public static void stampings(Integer year, Integer month) {
 
 		Person person = Security.getUser().get().person;
@@ -185,7 +188,7 @@ public class Stampings extends Controller {
 
 	public static void edit(@Required Long stampingId) {
 		
-		Stamping stamping = StampingDao.getStampingById(stampingId);
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		
 		if (stamping == null) {
 			notFound();
@@ -205,7 +208,7 @@ public class Stampings extends Controller {
 			Integer stampingHour, Integer stampingMinute,
 			@Required boolean service, String note) {
 		
-		Stamping stamping = StampingDao.getStampingById(stampingId);
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		if (stamping == null) {
 			notFound();
 		}
