@@ -70,6 +70,9 @@ public class Absences extends Controller{
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static AbsenceManager absenceManager;
 			
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
@@ -215,7 +218,7 @@ public class Absences extends Controller{
 	
 		rules.checkIfPermitted(person.office);
 		
-		AbsenceInsertReport air = AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
+		AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
 				absenceType, Optional.fromNullable(file), Optional.<String>absent());
 
 //		Verifica errori generali nel periodo specificato
@@ -347,7 +350,7 @@ public class Absences extends Controller{
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
 							
-		int deleted = AbsenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
+		int deleted = absenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
 		
 		if(deleted > 0){
 			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
@@ -359,7 +362,7 @@ public class Absences extends Controller{
 			AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
 			Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
 
-			AbsenceInsertReport air = AbsenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
+			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
 					absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
 //			Verifica errori generali nel periodo specificato
 			if(air.hasWarningOrDaysInTrouble()){

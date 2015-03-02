@@ -6,8 +6,11 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.PersonResidualYearRecapFactory;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
@@ -27,6 +30,9 @@ import dao.AbsenceTypeDao;
  *
  */
 public class ContractYearRecapManager {
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
 	
 	/**
 	 * NB !!!
@@ -71,7 +77,7 @@ public class ContractYearRecapManager {
 	 * 
 	 * @param contract
 	 */
-	public static void buildContractYearRecap(Contract contract)
+	public void buildContractYearRecap(Contract contract)
 	{
 		Logger.info("PopulateContractYearRecap %s %s contract id = %s", contract.person.name, contract.person.surname, contract.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
@@ -131,7 +137,7 @@ public class ContractYearRecapManager {
 			
 			//RESIDUI
 			PersonResidualYearRecap csap = 
-					PersonResidualYearRecap.factory(contract, yearToCompute, new LocalDate().minusDays(1));
+					yearFactory.create(contract, yearToCompute, new LocalDate().minusDays(1));
 			PersonResidualMonthRecap lastComputedMonthInYear;
 			if(yearToCompute!=currentYear)
 				lastComputedMonthInYear = csap.getMese(12);
@@ -168,7 +174,7 @@ public class ContractYearRecapManager {
 	 *    
 	 * @return l'anno di cui si deve costruire il prossimo contractYearRecap
 	 */
-	private static int populateContractYearFromSource(Contract contract)
+	private int populateContractYearFromSource(Contract contract)
 	{
 		//Caso semplice source riepilogo dell'anno
 		
@@ -214,7 +220,7 @@ public class ContractYearRecapManager {
 		cyr.vacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed + abs32.size();
 		cyr.permissionUsed = contract.sourcePermissionUsed + abs94.size();
 		PersonResidualYearRecap csap = 
-				PersonResidualYearRecap.factory(contract, yearToCompute, new LocalDate().minusDays(1));
+				yearFactory.create(contract, yearToCompute, new LocalDate().minusDays(1));
 		PersonResidualMonthRecap december = csap.getMese(12);
 		cyr.remainingMinutesCurrentYear = december.monteOreAnnoCorrente;
 		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;

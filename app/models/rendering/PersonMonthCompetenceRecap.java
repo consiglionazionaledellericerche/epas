@@ -1,18 +1,17 @@
 package models.rendering;
 
-import com.google.common.base.Optional;
-
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.ContractDao;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.Person;
 import play.Logger;
 import play.data.validation.Valid;
+
+import com.google.common.base.Optional;
+
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.ContractDao;
 
 public class PersonMonthCompetenceRecap {
 	public Person person;
@@ -40,10 +39,13 @@ public class PersonMonthCompetenceRecap {
 		this.nightShift = getNightShift(person, year, month);
 		
 		Contract contract = ContractDao.getCurrentContract(person);
+		//FIXME factory o AssistedInject per questo Recap
+		/*
 		PersonResidualYearRecap c = 
 				PersonResidualYearRecap.factory(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
 		this.progressivoFinalePositivoMese = mese.progressivoFinalePositivoMese;
+		*/
 	}
 
 	/**

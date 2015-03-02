@@ -102,10 +102,13 @@ public class PersonStampingDto {
 		
 		for(Contract contract : monthContracts)
 		{
+			//FIXME factory o AssistedInject per questo Dto
+			/*
 			PersonResidualYearRecap c = PersonResidualYearRecap.factory(contract, year, null);
 			if(c.getMese(month)!=null) {
 				psDto.contractMonths.add(c.getMese(month));
 			}
+			*/
 		}
 
 		psDto.month_capitalized = DateUtility.fromIntToStringMonth(month);

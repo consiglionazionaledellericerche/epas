@@ -46,6 +46,9 @@ public class ConsistencyManager {
 	@Inject
 	public OfficeDao officeDao;
 	
+	@Inject
+	public ContractYearRecapManager contractYearRecapManager;
+	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -123,7 +126,7 @@ public class ConsistencyManager {
 
 			for(Contract contract : contractList) {
 
-				ContractYearRecapManager.buildContractYearRecap(contract);
+				contractYearRecapManager.buildContractYearRecap(contract);
 			}
 		}
 		JPAPlugin.closeTx(false);		
