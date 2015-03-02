@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
-import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -22,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.ImmutableTable.Builder;
+import com.google.inject.Inject;
 
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -29,6 +31,9 @@ import dao.StampingDao;
 
 public class StampingManager {
 
+	@Inject
+	public PersonStampingDayRecapFactory stampingDayRecapFactory;
+	
 	/**
 	 * Versione per inserimento amministratore.
 	 * Costruisce la LocalDateTime della timbratura a partire dai parametri passati come argomento.
@@ -268,13 +273,13 @@ public class StampingManager {
 
 
 	/**
-	 * 
+	 * La lista dei PersonStampingDayRecap renderizzata da presenza giornaliera.
 	 * @param activePersonsInDay
 	 * @param dayPresence
 	 * @param numberOfInOut
-	 * @return la lista di PersonStampingDayRecap che dovrà essere passata al template per 
+	 * @return  
 	 */
-	public static List<PersonStampingDayRecap> populatePersonStampingDayRecapList(List<Person> activePersonsInDay, LocalDate dayPresence, int numberOfInOut){
+	public List<PersonStampingDayRecap> populatePersonStampingDayRecapList(List<Person> activePersonsInDay, LocalDate dayPresence, int numberOfInOut){
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
 
@@ -291,7 +296,7 @@ public class StampingManager {
 			}
 
 			PersonDayManager.computeValidStampings(personDay);
-			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
+			daysRecap.add( stampingDayRecapFactory.create(personDay, numberOfInOut) );
 
 		}
 		return daysRecap;

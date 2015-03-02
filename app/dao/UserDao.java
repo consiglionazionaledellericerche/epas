@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 /**
  * 
@@ -28,14 +29,13 @@ import com.mysema.query.jpa.JPQLQuery;
  */
 public class UserDao extends DaoBase {
 	
+	UserDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
+
 	@Inject
 	public UsersRolesOfficesDao usersRolesOfficesDao;
 	
-	@Inject
-	UserDao(/*JPQLQueryFactory queryFactory, */Provider<EntityManager> emp) {
-		super(/*queryFactory, */emp);
-	}
-
 	/**
 	 * 
 	 * @param id

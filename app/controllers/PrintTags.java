@@ -7,12 +7,15 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
@@ -20,7 +23,6 @@ import models.StampModificationType;
 import models.StampType;
 import models.User;
 import models.enumerate.ConfigurationFields;
-import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 
@@ -29,6 +31,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -41,6 +44,9 @@ public class PrintTags extends Controller{
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static PersonStampingDayRecapFactory stampingDayRecapFactory;
 	
 	public static void showTag(Long personId){
 		if(personId == null){
@@ -69,17 +75,17 @@ public class PrintTags extends Controller{
 		{
 			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : totalPersonDays )
 		{
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
-		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		Set<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeSet;
+		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
 		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
@@ -132,17 +138,17 @@ public class PrintTags extends Controller{
 		{
 			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : totalPersonDays )
 		{
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
-		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		Set<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeSet;
+		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
 		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);

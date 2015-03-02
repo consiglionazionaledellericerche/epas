@@ -9,15 +9,15 @@ import models.UsersRolesOffices;
 import models.query.QUsersRolesOffices;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 public class UsersRolesOfficesDao extends DaoBase {
 
-	@Inject
-	UsersRolesOfficesDao(/*JPQLQueryFactory queryFactory, */Provider<EntityManager> emp) {
-		super(/*queryFactory, */emp);
+	UsersRolesOfficesDao(JPQLQueryFactory queryFactory,
+			Provider<EntityManager> emp) {
+		super(queryFactory, emp);
 	}
 
 	private final static QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;

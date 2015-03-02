@@ -1,4 +1,4 @@
-package manager.recaps;
+package manager.recaps.residual;
 
 import it.cnr.iit.epas.DateInterval;
 

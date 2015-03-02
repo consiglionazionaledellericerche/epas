@@ -8,8 +8,8 @@ import javax.validation.Valid;
 
 import manager.PersonMonthsManager;
 import manager.PersonMonthsManager.Insertable;
-import manager.recaps.PersonResidualYearRecap;
-import manager.recaps.PersonResidualYearRecapFactory;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.Person;
 import models.PersonMonthRecap;

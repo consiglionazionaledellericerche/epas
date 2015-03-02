@@ -8,9 +8,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
-import manager.recaps.PersonResidualYearRecapFactory;
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;

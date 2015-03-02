@@ -1,9 +1,10 @@
-package manager.recaps;
+package manager.recaps.personStamping;
 
 import javax.inject.Inject;
 
 import manager.PersonDayManager;
 import manager.PersonManager;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Person;
 
 public class PersonStampingRecapFactory {
@@ -11,16 +12,18 @@ public class PersonStampingRecapFactory {
 	private final PersonDayManager personDayManager;
 	private final PersonManager personManager;
 	private final PersonResidualYearRecapFactory yearFactory;
-	//private final PersonStampingDayRecapFactory dayRecapFactory;
+	private final PersonStampingDayRecapFactory dayRecapFactory;
 	
 	@Inject
 	PersonStampingRecapFactory(PersonDayManager personDayManager,
 			PersonManager personManager,
-			PersonResidualYearRecapFactory yearFactory) {
+			PersonResidualYearRecapFactory yearFactory,
+			PersonStampingDayRecapFactory dayRecapFactory) {
 		
 		this.personDayManager = personDayManager;
 		this.personManager = personManager;
 		this.yearFactory = yearFactory;
+		this.dayRecapFactory = dayRecapFactory;
 		
 	}
 	
@@ -33,7 +36,8 @@ public class PersonStampingRecapFactory {
 	 */
 	public PersonStampingRecap create(Person person, int year, int month) {
 		return new PersonStampingRecap(personDayManager, personManager,
-				yearFactory, year, month, person);
+				yearFactory, dayRecapFactory,
+				year, month, person);
 	}
 	
 }

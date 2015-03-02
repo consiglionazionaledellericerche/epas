@@ -3,7 +3,6 @@ package controllers;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -11,16 +10,15 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.StampModificationType;
-import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.ConfigurationFields;
-import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -31,6 +29,7 @@ import play.mvc.With;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
 import dao.OfficeDao;
@@ -43,6 +42,9 @@ public class Clocks extends Controller{
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static PersonStampingDayRecapFactory stampingDayRecapFactory;
 
 	public static void show(){
 		
@@ -87,9 +89,9 @@ public class Clocks extends Controller{
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, user.person.office));
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
-		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(personDay,numberOfInOut);
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
 		
 		render(user, dayRecap, numberOfInOut);
 	}
@@ -180,9 +182,9 @@ public class Clocks extends Controller{
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
-		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(personDay,numberOfInOut);
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
 		
 		render(person, dayRecap, numberOfInOut);
 		

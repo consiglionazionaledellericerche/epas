@@ -1,4 +1,4 @@
-package manager.recaps;
+package manager.recaps.residual;
 
 import javax.annotation.Nullable;
 
