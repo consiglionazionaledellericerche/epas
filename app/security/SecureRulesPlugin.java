@@ -23,7 +23,7 @@ import play.vfs.VirtualFile;
  */
 public class SecureRulesPlugin extends PlayPlugin {
 	
-	private final static Logger LOG = LoggerFactory.getLogger(SecureRulesPlugin.class);
+	private final static Logger log = LoggerFactory.getLogger(SecureRulesPlugin.class);
 	private final static String FILENAME = "permissions.drl";
 	
 	static KnowledgeBase knowledgeBase;
@@ -44,14 +44,14 @@ public class SecureRulesPlugin extends PlayPlugin {
     private void loadRulesIfNecessary() {
     	final VirtualFile rulesFile = Play.getVirtualFile("conf").child(FILENAME);
     	if (!rulesFile.exists()) {
-    		LOG.warn("file not found {}", rulesFile.relativePath());
+    		log.warn("file not found {}", rulesFile.relativePath());
     	} else {
     		if (Play.mode == Mode.PROD){
     			loadRules(rulesFile.content());
     		} else {
     			if (!rulesFile.lastModified().equals(lastModified)) {
     				// Hashing.md5().hashBytes(rules);
-    				LOG.info("(re)loading drools ({} -> {})", lastModified, 
+    				log.info("(re)loading drools ({} -> {})", lastModified, 
     						rulesFile.lastModified());
     				lastModified = rulesFile.lastModified();
     				loadRules(rulesFile.content());
@@ -78,7 +78,7 @@ public class SecureRulesPlugin extends PlayPlugin {
         // Compile the rules file.
         builder.add(ResourceFactory.newByteArrayResource(rulesContent), ResourceType.DRL);
         if (builder.hasErrors()) {
-        	LOG.error(builder.getErrors().toString());
+        	log.error(builder.getErrors().toString());
             throw new RuntimeException("Drools compilation failed: " + 
             		builder.getErrors().size() + " errors");
         }

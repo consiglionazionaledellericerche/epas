@@ -21,14 +21,16 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -44,6 +46,7 @@ import dao.PersonDayInTroubleDao;
  */
 public class ConsistencyManager {
 	
+	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -76,10 +79,10 @@ public class ConsistencyManager {
 			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 				ConsistencyManager.checkHistoryError(p, fromDate);
 			// (2) Ricalcolo i valori dei person day	
-				Logger.info("Update person situation %s dal %s a oggi", p.getFullname(), fromDate);
+				log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
 				PersonDayManager.updatePersonDaysFromDate(p,fromDate);
 			// (3) Ricalcolo dei residui
-				Logger.info("Update residui %s dal %s a oggi", p.getFullname(), fromDate);
+				log.info("Update residui {} dal {} a oggi", p.getFullname(), fromDate);
 				List<Contract> contractList = ContractDao.getPersonContractList(p);
 
 				for(Contract contract : contractList) {
@@ -101,11 +104,11 @@ public class ConsistencyManager {
 
 				for(Person p : personList){
 					
-					Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
+					log.debug("Chiamato controllo sul giorni {} - {}", begin, end);
 					if(p.wantEmail)
 						checkPersonDayForSendingEmail(p, begin, end, "timbratura");
 					else
-						Logger.info("Non verrà inviata la mail a %s %s in quanto il campo di invio mail è false", p.name, p.surname);
+						log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
 
 				}
 				JPAPlugin.closeTx(false);
@@ -126,7 +129,7 @@ public class ConsistencyManager {
 
 		if(p.surname.equals("Conti") && p.name.equals("Marco")) {
 			
-			Logger.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
+			log.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
 			return;
 		}
 		
@@ -139,8 +142,8 @@ public class ConsistencyManager {
 			Contract contract = ContractDao.getContract(pdt.personDay.date, pdt.personDay.person);
 			if(contract == null) {
 				
-				Logger.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: %s %s - Data: %s",
-						p.surname, p.name, pdt.personDay.date);
+				log.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: {} - Data: {}",
+						p.getFullname(), pdt.personDay.date);
 				continue;
 			}
 			
@@ -161,7 +164,8 @@ public class ConsistencyManager {
 
 		} catch (Exception e) {
 
-			Logger.debug("sendEmailToPerson(dateTroubleStampingList, p, cause): fallito invio email per %s %s", p.name, p.surname); 
+			log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
+					new Object[] {dateTroubleStampingList, p, cause,p.getFullname()}); 
 			e.printStackTrace();
 			return;
 		}
@@ -196,13 +200,13 @@ public class ConsistencyManager {
 		
 		for(Person p : personList){
 		
-			Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
+			log.debug("Chiamato controllo sul giorni {}-{}", begin, end);
 			
 			if(p.wantEmail) {
 				checkPersonDayForSendingEmail(p, begin, end, "no assenze");
 			}
 			else {
-				Logger.info("Non verrà inviata la mail a %s %s in quanto il campo di invio mail è false", p.name, p.surname);
+				log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
 			}
 
 		}
@@ -257,7 +261,7 @@ public class ConsistencyManager {
 	 * @param month il mese di partenza
 	 */
 	private static void checkHistoryError(Person person, LocalDate from){
-		Logger.info("Check history error %s dal %s a oggi", person.getFullname(), from);
+		log.info("Check history error {} dal {} a oggi", person.getFullname(), from);
 		
 		LocalDate date = from;
 		LocalDate today = LocalDate.now();
@@ -279,7 +283,7 @@ public class ConsistencyManager {
 		if(dateList.size() == 0){
 			return false;
 		}
-		Logger.info("Preparo invio mail per %s %s", person.name, person.surname);
+		log.info("Preparo invio mail per {}", person.getFullname());
 		SimpleEmail simpleEmail = new SimpleEmail();
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
@@ -338,7 +342,7 @@ public class ConsistencyManager {
 		
 		Mail.send(simpleEmail);
 
-		Logger.info("Inviata mail a %s %s contenente le date da controllare : %s", person.name, person.surname, date);
+		log.info("Inviata mail a {} contenente le date da controllare : {}", person.getFullname(), date);
 		return true;
 
 	}
