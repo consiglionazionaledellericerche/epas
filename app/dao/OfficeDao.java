@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 import controllers.Security;
 import dao.wrapper.IWrapperFactory;
@@ -30,13 +31,14 @@ import dao.wrapper.IWrapperOffice;
  */
 public class OfficeDao extends DaoBase {
 
+	OfficeDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
+
 	@Inject
 	public IWrapperFactory wrapperFactory;
 	
-	@Inject
-	OfficeDao(/*JPQLQueryFactory queryFactory, */Provider<EntityManager> emp) {
-		super(/*queryFactory, */emp);
-	}
+	
 
 	private final static QOffice office = QOffice.office1;
 	

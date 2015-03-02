@@ -18,9 +18,9 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.db.jpa.Blob;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
-import manager.recaps.PersonResidualYearRecapFactory;
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Absence;
 import models.CompetenceCode;
 import models.ConfGeneral;

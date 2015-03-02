@@ -1,4 +1,4 @@
-package manager.recaps;
+package manager.recaps.personStamping;
 
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
@@ -6,19 +6,33 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import manager.PersonDayManager;
 import manager.PersonManager;
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
-import models.rendering.PersonStampingDayRecap;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
+/**
+ * Oggetto che modella il contenuto della vista contenente il tabellone timbrature.
+ * Gerarchia:
+ * PersonStampingRecap (tabella mese) 
+ * 	  -> PersonStampingDayRecap (riga giorno) 
+ * 		-> StampingTemplate (singola timbratura)
+ * 
+ * @author alessandro
+ *
+ */
 public class PersonStampingRecap {
 
 	private static final int MIN_IN_OUT_COLUMN = 2;
@@ -26,6 +40,7 @@ public class PersonStampingRecap {
 	private final PersonDayManager personDayManager;
 	private final PersonManager personManager;
 	private final PersonResidualYearRecapFactory yearFactory;
+	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
 	
 	public Person person;
 	public int year;
@@ -41,8 +56,8 @@ public class PersonStampingRecap {
 	public List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
 	
 	//I riepiloghi codici sul mese
-	public List<StampModificationType> stampModificationTypeList = Lists.newArrayList();
-	public List<StampType> stampTypeList = Lists.newArrayList();
+	public Set<StampModificationType> stampModificationTypeSet = Sets.newHashSet();
+	public Set<StampType> stampTypeSet = Sets.newHashSet();
 	public Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
 	//I riepiloghi mensili (uno per ogni contratto attivo nel mese)
@@ -53,8 +68,6 @@ public class PersonStampingRecap {
 	public int numberOfInOut = 0;
 
 	/**
-	 * Costruisce il riepilogo mensile di una persona. 
-	 * Alimenta la vista tabellone timbrature.
 	 * @param personDayManager
 	 * @param personManager
 	 * @param yearFactory
@@ -65,12 +78,14 @@ public class PersonStampingRecap {
 	public PersonStampingRecap(PersonDayManager personDayManager,
 			PersonManager personManager,
 			PersonResidualYearRecapFactory yearFactory,
+			PersonStampingDayRecapFactory stampingDayRecapFactory,
 			
 			int year, int month, Person person) {
 		
 		this.personDayManager = personDayManager;
 		this.personManager = personManager;
 		this.yearFactory = yearFactory;
+		this.stampingDayRecapFactory = stampingDayRecapFactory;
 		
 		this.month = month;
 		this.year = year;
@@ -87,14 +102,14 @@ public class PersonStampingRecap {
 			PersonDayManager.computeValidStampings(pd);
 		}
 		
-		PersonStampingDayRecap.stampModificationTypeList = Lists.newArrayList(); 
-		PersonStampingDayRecap.stampTypeList = Lists.newArrayList();
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet(); 
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();
 		for(PersonDay pd : totalPersonDays ) {
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd, this.numberOfInOut);
+			PersonStampingDayRecap dayRecap = this.stampingDayRecapFactory.create(pd, this.numberOfInOut);
 			this.daysRecap.add(dayRecap);
 		}
-		this.stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
-		this.stampTypeList = PersonStampingDayRecap.stampTypeList;
+		this.stampModificationTypeSet = PersonStampingDayRecap.stampModificationTypeSet;
+		this.stampTypeSet = PersonStampingDayRecap.stampTypeSet;
 
 		this.numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
 		this.numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);

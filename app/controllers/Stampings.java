@@ -11,16 +11,14 @@ import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
-import manager.recaps.PersonStampingRecap;
-import manager.recaps.PersonStampingRecapFactory;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingRecap;
+import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
-import models.StampModificationType;
-import models.StampType;
 import models.Stamping;
 import models.User;
-import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
 import org.joda.time.LocalDate;
@@ -33,6 +31,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import dao.OfficeDao;
@@ -49,6 +48,9 @@ public class Stampings extends Controller {
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static StampingManager stampingManager;
 	
 	@Inject 
 	static PersonStampingRecapFactory stampingsRecapFactory;
@@ -279,11 +281,11 @@ public class Stampings extends Controller {
 
 		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		
-		daysRecap = StampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
 
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		

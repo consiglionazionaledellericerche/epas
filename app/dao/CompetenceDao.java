@@ -5,7 +5,7 @@ import helpers.ModelQuery.SimpleResults;
 
 import java.util.List;
 
-import manager.recaps.PersonResidualYearRecapFactory;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
