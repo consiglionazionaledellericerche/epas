@@ -221,12 +221,16 @@ public class PersonDayManager {
 				workTime -= breakTimeDiff;
 			
 			// caso in cui non sia stata effettuata una pausa pranzo
-			if(breakTimeDiff == breakTicketTime){
-				pd.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
+			if(breakTimeDiff == breakTicketTime) {
+				
+				pd.stampModificationType = stampingDao
+							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
 			}
 			// Caso in cui la pausa pranzo fatta è inferiore a quella minima
-			else if(breakTimeDiff > 0 && breakTimeDiff != breakTicketTime){
-				pd.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
+			else if(breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
+				
+				pd.stampModificationType = stampingDao
+						.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
 			}
 		}
 		
