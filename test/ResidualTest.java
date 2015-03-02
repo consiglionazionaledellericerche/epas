@@ -31,6 +31,9 @@ public class ResidualTest extends UnitTest {
 	@Inject
 	public PersonResidualYearRecapFactory yearFactory;
 	
+	@Inject
+	public PersonManager personManager;
+	
     @Test
     public void residualLucchesi() throws EmailException {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
@@ -47,7 +50,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
+    	List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
     		contractYearRecapManager.buildContractYearRecap(contract);
@@ -109,7 +112,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
+    	List<Contract> monthContracts = personManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		contractYearRecapManager.buildContractYearRecap(contract);
@@ -171,7 +174,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
+    	List<Contract> monthContracts = personManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		contractYearRecapManager.buildContractYearRecap(contract);
@@ -233,7 +236,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
+    	List<Contract> monthContracts = personManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		contractYearRecapManager.buildContractYearRecap(contract);
@@ -295,7 +298,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
+    	List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
     		contractYearRecapManager.buildContractYearRecap(contract);

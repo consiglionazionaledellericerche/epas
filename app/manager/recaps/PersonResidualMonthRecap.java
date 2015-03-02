@@ -28,10 +28,10 @@ import dao.wrapper.IWrapperFactory;
 
 public class PersonResidualMonthRecap {
 	
-	public final IWrapperFactory wrapperFactory; 
+	private final IWrapperFactory wrapperFactory; 
 	private final AbsenceDao absenceDao;
 
-	public final Contract contract;
+	public final IWrapperContract contract;
 	
 	public Person person;
 	public String contractDescription;
@@ -91,8 +91,9 @@ public class PersonResidualMonthRecap {
 		this.absenceDao = absenceDao;
 		this.wrapperFactory = wrapperFactory;
 		this.mesePrecedente = mesePrecedente;
-		this.contract = contract;
+		this.contract = this.wrapperFactory.create(contract);
 		this.person = contract.person;
+		this.qualifica = this.person.qualification.qualification;
 		this.anno = anno;
 		this.mese = mese;
 		
@@ -188,9 +189,8 @@ public class PersonResidualMonthRecap {
 	{
 		if(validDataForPersonDay!=null)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriodDesc(monthRecap.person, validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), true);
-//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
-//					monthRecap.person, validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd()).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriodDesc(monthRecap.person,
+					validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), true);
 
 			//progressivo finale fine mese
 			for(PersonDay pd : pdList){
@@ -224,14 +224,13 @@ public class PersonResidualMonthRecap {
 	 * 
 	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
 	 */
-	private static void setMealTicketsInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForMealTickets)
+	private void setMealTicketsInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForMealTickets)
 	{
 		
 		if(validDataForMealTickets!=null)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person, validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
-//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-//					monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person,
+					validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
 
 			//buoni pasto utilizzati
 			for(PersonDay pd : pdList){
@@ -243,10 +242,11 @@ public class PersonResidualMonthRecap {
 			//Numero ticket consegnati nel mese
 			monthRecap.buoniPastoConsegnatiNelMese = 
 					MealTicketDao.getMealTicketAssignedToPersonIntoInterval(
-							monthRecap.contract, validDataForMealTickets).size();
+							monthRecap.contract.getValue(), validDataForMealTickets).size();
 			
 			//residuo
-			monthRecap.buoniPastoResidui = monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
+			monthRecap.buoniPastoResidui = monthRecap.buoniPastoDalMesePrecedente 
+					+ monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
 						
 		}
 	}
@@ -261,9 +261,7 @@ public class PersonResidualMonthRecap {
 		CompetenceCode s2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
 		CompetenceCode s3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
 		
-		IWrapperContract wContract = wrapperFactory.create(monthRecap.contract);
-		
-		if(wContract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
+		if(this.contract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
 			Optional<Competence> competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
@@ -299,7 +297,6 @@ public class PersonResidualMonthRecap {
 			monthRecap.riposiCompensativiMinuti = 0;
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
-				//monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + monthRecap.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
 				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
 						WorkingTimeTypeDayDao.getWorkingTimeTypeDay(person, abs.personDay.date).workingTime;	//FIXME potrebbe essere null
 				monthRecap.numeroRiposiCompensativi++;
@@ -310,7 +307,7 @@ public class PersonResidualMonthRecap {
 
 	}
 	
-	private static void assegnaProgressivoFinaleNegativo(PersonResidualMonthRecap monthRecap)
+	private void assegnaProgressivoFinaleNegativo(PersonResidualMonthRecap monthRecap)
 	{
 		
 		//quello che assegno al monte ore passato
@@ -348,12 +345,12 @@ public class PersonResidualMonthRecap {
 		
 	}
 	
-	private static void assegnaStraordinari(PersonResidualMonthRecap monthRecap)
+	private void assegnaStraordinari(PersonResidualMonthRecap monthRecap)
 	{
 		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.straordinariMinuti;
 	}
 	
-	private static void assegnaRiposiCompensativi(PersonResidualMonthRecap monthRecap)
+	private void assegnaRiposiCompensativi(PersonResidualMonthRecap monthRecap)
 	{
 		//quello che assegno al monte ore passato
 		if(monthRecap.riposiCompensativiMinuti < monthRecap.monteOreAnnoPassato)
@@ -391,23 +388,20 @@ public class PersonResidualMonthRecap {
 	/**
 	 * Costruisce una stringa di descrizione per il contratto utilizzata in stampings.html e personStampings.html
 	 */
-	private static void setContractDescription(PersonResidualMonthRecap monthRecap)
+	private void setContractDescription(PersonResidualMonthRecap monthRecap)
 	{
 		LocalDate beginMonth = new LocalDate(monthRecap.anno, monthRecap.mese, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		DateInterval monthInterval = new DateInterval(beginMonth, endMonth);	
-		LocalDate endContract = monthRecap.contract.expireContract;
-		if(monthRecap.contract.endContract!=null)
-			endContract = monthRecap.contract.endContract;
+		LocalDate endContract = monthRecap.contract.getValue().expireContract;
+		if(monthRecap.contract.getValue().endContract!=null)
+			endContract = monthRecap.contract.getValue().endContract;
 		
 		if(DateUtility.isDateIntoInterval(endContract, monthInterval))
 			monthRecap.contractDescription = "(contratto scaduto in data " + endContract+")";
 		else
 			monthRecap.contractDescription = "";
-		
 	}
-	
-	
 }
 
 

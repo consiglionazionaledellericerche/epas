@@ -123,7 +123,7 @@ public class ChartsManager {
 	public PersonResidualYearRecapFactory yearFactory;
 	
 	@Inject
-	public CompetenceDao competenceDao;
+	public CompetenceManager competenceManager;
 	
 	/**
 	 * 
@@ -212,7 +212,7 @@ public class ChartsManager {
 				po.overtimeHour = val;
 				po.name = p.name;
 				po.surname = p.surname;
-				po.positiveHourForOvertime = competenceDao.positiveResidualInMonth(p, year, month)/60;
+				po.positiveHourForOvertime = competenceManager.positiveResidualInMonth(p, year, month)/60;
 				poList.add(po);
 			}
 
@@ -231,7 +231,7 @@ public class ChartsManager {
 		for(Person p : personeProva){
 			if(p.office.equals(Security.getUser().get().person.office)){
 				for(int month=1; month<13;month++){
-					totaleOreResidue = totaleOreResidue+(competenceDao.positiveResidualInMonth(p, year, month)/60);
+					totaleOreResidue = totaleOreResidue+(competenceManager.positiveResidualInMonth(p, year, month)/60);
 				}
 				Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
 			}

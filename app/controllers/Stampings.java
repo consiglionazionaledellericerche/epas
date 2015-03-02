@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
+import manager.recaps.PersonStampingRecap;
+import manager.recaps.PersonStampingRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
@@ -37,7 +39,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dto.PersonStampingDto;
 
 @With( {RequestInit.class, Resecure.class} )
 
@@ -48,6 +49,9 @@ public class Stampings extends Controller {
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject 
+	static PersonStampingRecapFactory stampingsRecapFactory;
 	
 	public static void stampings(Integer year, Integer month) {
 
@@ -67,7 +71,7 @@ public class Stampings extends Controller {
 			
 		}
 		
-		PersonStampingDto psDto = PersonStampingDto.build(year, month, person);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
 		render(psDto) ;
 
@@ -104,7 +108,7 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		PersonStampingDto psDto = PersonStampingDto.build(year, month, person);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
 		render(psDto) ;
 
