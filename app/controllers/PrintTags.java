@@ -51,7 +51,6 @@ public class PrintTags extends Controller{
 	@Inject
 	static PersonDayManager personDayManager;
 	
-	
 	public static void showTag(Long personId){
 		if(personId == null){
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
@@ -92,8 +91,8 @@ public class PrintTags extends Controller{
 		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
-		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);
+		int numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
+		int numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
@@ -155,8 +154,8 @@ public class PrintTags extends Controller{
 		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
-		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);
+		int numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
+		int numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 

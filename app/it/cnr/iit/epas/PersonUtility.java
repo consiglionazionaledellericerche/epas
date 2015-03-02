@@ -16,7 +16,6 @@ import models.CompetenceCode;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.Stamping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
@@ -34,7 +33,6 @@ import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 
 public class PersonUtility {
 
@@ -669,59 +667,7 @@ public class PersonUtility {
 		return absenceCodeMap;
 	}
 
-	/**
-	 * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
-	 * @return
-	 */
-	public static int numberOfMealTicketToUse(Person person, int year, int month){
-
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
-		List<PersonDay> workingDays = PersonDayDao.getPersonDayForTicket(person, beginMonth, endMonth, true);
-//		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
-//				person, beginMonth, endMonth, true).fetch();
-		int number = 0;
-		for(PersonDay pd : workingDays)
-		{
-			if(!pd.isHoliday() )
-				number++;
-		}
-		return number;
-	}
-
-
-
-	/**
-	 * Il numero di buoni pasto da restituire all'interno della lista di person day passata come parametro
-	 * @return
-	 */
-	public static int numberOfMealTicketToRender(Person person, int year, int month){
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
-		List<PersonDay> pdListNoTicket = PersonDayDao.getPersonDayForTicket(person, beginMonth, endMonth, false);
-//		List<PersonDay> pdListNoTicket = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
-//				person, beginMonth, endMonth, false).fetch();
-		int ticketTorender = pdListNoTicket.size();
-
-		
-		for(PersonDay pd : pdListNoTicket) {
-			
-			//tolgo da ticket da restituire i giorni festivi e oggi e i giorni futuri
-			if(pd.isHoliday() || pd.isToday() ) 
-			{
-				ticketTorender--;
-				continue;
-			}
-			
-			//tolgo da ticket da restituire i giorni futuri in cui non ho assenze
-			if(pd.date.isAfter(LocalDate.now()) && pd.absences.isEmpty())
-				ticketTorender--;
-		}
-
-		return ticketTorender;
-	}
+	
 
 	/**
 	 * 

@@ -30,8 +30,7 @@ import dao.WorkingTimeTypeDao;
  */
 public class PersonStampingDayRecap {
 	
-	//FIXME se è usato solo nel costruttore ha senso tenerlo come variabile istanza??
-	private final PersonDayManager personDayManager;	
+	//private final PersonDayManager personDayManager;	
 	
 	private final StampingTemplateFactory stampingTemplateFactory;
 
@@ -77,10 +76,11 @@ public class PersonStampingDayRecap {
 		
 	public PersonStampingDayRecap(PersonDayManager personDayManager, 
 			StampingTemplateFactory stampingTemplateFactory,
+			StampingDao stampingDao,
 			
 			PersonDay pd, int numberOfInOut) {			
 		
-		this.personDayManager = personDayManager;
+		//this.personDayManager = personDayManager;
 		this.stampingTemplateFactory = stampingTemplateFactory;
 		
 		this.personDayId = pd.id;
@@ -151,7 +151,7 @@ public class PersonStampingDayRecap {
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			this.personDayManager.queSeraSera(pd);
+			personDayManager.queSeraSera(pd);
 			this.setWorkTime(pd.timeAtWork);
 			this.setDifference( pd.difference );
 			this.setProgressive(pd.progressive);
@@ -187,7 +187,7 @@ public class PersonStampingDayRecap {
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
 		if(this.today && !this.holiday && !PersonDayManager.isAllDayAbsences(pd)) 
 		{
-			StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+			StampModificationType smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
 			stampModificationTypeSet.add(smt);
 			//addStampModificationTypeToList(smt);

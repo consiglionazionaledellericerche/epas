@@ -191,7 +191,7 @@ public class PersonResidualMonthRecap {
 	{
 		if(validDataForPersonDay!=null)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriodDesc(monthRecap.person,
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriodDesc(monthRecap.person,
 					validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), true);
 
 			//progressivo finale fine mese

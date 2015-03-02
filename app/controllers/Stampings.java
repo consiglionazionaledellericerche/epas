@@ -58,6 +58,9 @@ public class Stampings extends Controller {
 	@Inject
 	static PersonDayManager personDayManager;
 	
+	@Inject
+	static PersonDayDao personDayDao;
+	
 	public static void stampings(Integer year, Integer month) {
 
 		Person person = Security.getUser().get().person;
@@ -160,7 +163,7 @@ public class Stampings extends Controller {
 		}
 		
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
 
 		if(!pd.isPresent()){
 			personDay = new PersonDay(person, date);
@@ -282,7 +285,7 @@ public class Stampings extends Controller {
 		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
 				officeDao.getOfficeAllowed(Optional.<User>absent()), false, dayPresence, dayPresence, true).list();
 
-		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
+		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
 		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
 		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();						

@@ -1,9 +1,14 @@
 package dao;
 
+import javax.persistence.EntityManager;
+
 import helpers.ModelQuery;
 
 import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.StampModificationType;
 import models.StampType;
@@ -17,7 +22,12 @@ import models.query.QStamping;
  * @author dario
  *
  */
-public class StampingDao {
+public class StampingDao extends DaoBase {
+
+	@Inject
+	StampingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
 
 	/**
 	 * 
@@ -31,12 +41,6 @@ public class StampingDao {
 		return query.singleResult(stamping);
 	}
 	
-	
-	/************************************************************************************************************************************/
-	/*Inserisco in questa classe anche i metodi di ricerca per gli StampType di modo da evitare di creare classi che farebbero risultare*/
-	/*la ricerca troppo dispersiva																										*/
-	/************************************************************************************************************************************/
-	
 	/**
 	 * 
 	 * @param description
@@ -48,21 +52,16 @@ public class StampingDao {
 				.where(stampType.code.eq(code));
 		return query.singleResult(stampType);
 	}
-	
-	
-	/************************************************************************************************************************************/
-	/*Inserisco in questa classe anche i metodi di ricerca per gli StampModificationType di modo da evitare di creare classi che        */
-	/*farebbero risultare la ricerca troppo dispersiva																				    */
-	/************************************************************************************************************************************/
 
 	/**
 	 * 
 	 * @param id
 	 * @return lo stampModificationType relativo all'id passato come parametro
 	 */
-	public static StampModificationType getStampModificationTypeById(Long id){
-		QStampModificationType smt = QStampModificationType.stampModificationType;
-		JPQLQuery query = ModelQuery.queryFactory().from(smt)
+	public StampModificationType getStampModificationTypeById(Long id){
+		final QStampModificationType smt = QStampModificationType.stampModificationType;
+		
+		JPQLQuery query = getQueryFactory().from(smt)
 				.where(smt.id.eq(id));
 		return query.singleResult(smt);
 	}

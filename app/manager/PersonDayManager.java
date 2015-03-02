@@ -40,6 +40,9 @@ public class PersonDayManager {
 	@Inject
 	public PersonDayDao personDayDao;
 	
+	@Inject
+	public StampingDao stampingDao;
+	
 	/**
 	 * 
 	 * @param abt
@@ -242,7 +245,7 @@ public class PersonDayManager {
 	public StampModificationType getFixedWorkingTime() {
 		
 		//TODO usato solo in PersonStampingDayRecap bisogna metterlo nella cache
-		return StampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+		return stampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 	}
 
 	/**
@@ -496,7 +499,8 @@ public class PersonDayManager {
 	public PersonDay previousPersonDay(PersonDay pd)
 	{
 		//TODO usato solo in PersonStampingDayRecap, vedere come ottimizzarlo
-		PersonDay lastPreviousPersonDayInMonth = PersonDayDao.getPersonDayForRecap(pd.person, Optional.fromNullable(pd.date.dayOfMonth().withMinimumValue()), pd.date);
+		PersonDay lastPreviousPersonDayInMonth = 
+				personDayDao.getPersonDayForRecap(pd.person, Optional.fromNullable(pd.date.dayOfMonth().withMinimumValue()), pd.date);
 		return lastPreviousPersonDayInMonth;
 	}
 
@@ -1000,8 +1004,8 @@ public class PersonDayManager {
 		if(pd.isFixedTimeAtWork())
 			return;
 		
-		if(pd.date.getDayOfMonth()==1){
-			pd.previousPersonDayInMonth = PersonDayDao.getPersonDayForRecap(pd.person, Optional.<LocalDate>absent(), pd.date);
+		if(pd.date.getDayOfMonth()==1) {
+			pd.previousPersonDayInMonth = personDayDao.getPersonDayForRecap(pd.person, Optional.<LocalDate>absent(), pd.date);
 			if(pd.previousPersonDayInMonth != null && pd.previousPersonDayInMonth.date.isBefore( 
 					new LocalDate(pd.previousPersonDayInMonth.date.getYear(), 
 							pd.previousPersonDayInMonth.date.getMonthOfYear(), 
@@ -1029,7 +1033,7 @@ public class PersonDayManager {
 				correctStamp.date = new LocalDateTime(pd.previousPersonDayInMonth.date.getYear(), pd.previousPersonDayInMonth.date.getMonthOfYear(), pd.previousPersonDayInMonth.date.getDayOfMonth(), 23, 59);
 				correctStamp.way = WayType.out;
 				correctStamp.markedByAdmin = false;
-				correctStamp.stampModificationType = StampingDao.getStampModificationTypeById(4l);
+				correctStamp.stampModificationType = stampingDao.getStampModificationTypeById(4l);
 				correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 				correctStamp.personDay = pd.previousPersonDayInMonth;
 				correctStamp.save();
@@ -1041,7 +1045,7 @@ public class PersonDayManager {
 				newEntranceStamp.date = new LocalDateTime(pd.date.getYear(), pd.date.getMonthOfYear(), pd.date.getDayOfMonth(),0,0);
 				newEntranceStamp.way = WayType.in;
 				newEntranceStamp.markedByAdmin = false;
-				newEntranceStamp.stampModificationType = StampingDao.getStampModificationTypeById(4l);
+				newEntranceStamp.stampModificationType = stampingDao.getStampModificationTypeById(4l);
 				newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 				newEntranceStamp.personDay = pd;
 				newEntranceStamp.save();
@@ -1067,13 +1071,13 @@ public class PersonDayManager {
 	 * @return lo stamp modification type relativo alla timbratura aggiunta dal sistema nel caso mancasse la timbratura d'uscita prima
 	 * della mezzanotte del giorno in questione
 	 */
-	public static StampModificationType checkMissingExitStampBeforeMidnight(PersonDay pd)
+	public StampModificationType checkMissingExitStampBeforeMidnight(PersonDay pd)
 	{
 		//FIXME renderlo efficiente
 		StampModificationType smt = null;
 		for(Stamping st : pd.stampings){
 			if(st.stampModificationType != null && st.stampModificationType.equals(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getStampModificationType()))
-				smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
+				smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
 			}
 		return smt;
 	}
@@ -1083,8 +1087,9 @@ public class PersonDayManager {
 	 * Utilizzata nel metodo delete del controller Persons per cancellare tutti i personDays relativi alla persona person
 	 * @param person
 	 */
-	public static void deletePersonDays(Person person){
-		List<PersonDay> helpPdList = PersonDayDao.getAllPersonDay(person);
+	public void deletePersonDays(Person person){
+		
+		List<PersonDay> helpPdList = personDayDao.getAllPersonDay(person);
 		for(PersonDay pd : helpPdList){
 
 			pd.delete();
@@ -1166,6 +1171,57 @@ public class PersonDayManager {
 			currentDate = currentDate.plusDays(1);
 		}
 		return totalDays;
+	}
+	
+	/**
+	 * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
+	 * @return
+	 */
+	public int numberOfMealTicketToUse(Person person, int year, int month){
+
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+
+		List<PersonDay> workingDays = personDayDao.getPersonDayForTicket(person, beginMonth, endMonth, true);
+
+		int number = 0;
+		for(PersonDay pd : workingDays)
+		{
+			if(!pd.isHoliday() )
+				number++;
+		}
+		return number;
+	}
+
+
+
+	/**
+	 * Il numero di buoni pasto da restituire all'interno della lista di person day passata come parametro
+	 * @return
+	 */
+	public int numberOfMealTicketToRender(Person person, int year, int month){
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+
+		List<PersonDay> pdListNoTicket = personDayDao.getPersonDayForTicket(person, beginMonth, endMonth, false);
+
+		int ticketTorender = pdListNoTicket.size();
+
+		for(PersonDay pd : pdListNoTicket) {
+			
+			//tolgo da ticket da restituire i giorni festivi e oggi e i giorni futuri
+			if(pd.isHoliday() || pd.isToday() ) 
+			{
+				ticketTorender--;
+				continue;
+			}
+			
+			//tolgo da ticket da restituire i giorni futuri in cui non ho assenze
+			if(pd.date.isAfter(LocalDate.now()) && pd.absences.isEmpty())
+				ticketTorender--;
+		}
+
+		return ticketTorender;
 	}
 
 }

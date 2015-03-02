@@ -109,7 +109,7 @@ public class ConsistencyManager {
 				for(PersonDay pd : pdList){
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
-					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
+					PersonDay pd1 = personDayDao.getPersonDayById(pd.id);
 					personDayManager.populatePersonDay(pd1);
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
@@ -283,7 +283,7 @@ public class ConsistencyManager {
 			return;
 		}
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(personToCheck, dayToCheck);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(personToCheck, dayToCheck);
 
 		if(pd.isPresent()){
 			personDayManager.checkForPersonDayInTrouble(pd.get()); 
