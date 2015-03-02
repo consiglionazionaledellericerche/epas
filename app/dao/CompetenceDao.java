@@ -5,12 +5,9 @@ import helpers.ModelQuery.SimpleResults;
 
 import java.util.List;
 
-import manager.PersonManager;
-import manager.recaps.PersonResidualYearRecap;
 import manager.recaps.PersonResidualYearRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
-import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonHourForOvertime;
@@ -28,7 +25,6 @@ import com.google.inject.Inject;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 /**
@@ -250,34 +246,6 @@ public class CompetenceDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(personHourForOvertime)
 				.where(personHourForOvertime.person.eq(person));
 		return query.singleResult(personHourForOvertime);
-	}
-	
-	/**
-	 * //TODO decide in quale manager dovrebbe stare questo metodo.
-	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
-	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
-	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.
-	 * Nel caso di nessun contratto attivo nel mese viene ritornato il valore 0.
-	 * @param person
-	 * @param year
-	 * @param month
-	 */
-	public Integer positiveResidualInMonth(Person person, int year, int month){
-		
-		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
-		for(Contract contract : monthContracts)
-		{
-			IWrapperContract wContract = wrapperFactory.create(contract);
-			
-			if(wContract.isLastInMonth(month, year))
-			{
-				PersonResidualYearRecap c = 
-						yearFactory.create(contract, year, null);
-				if(c.getMese(month)!=null)
-					return c.getMese(month).progressivoFinalePositivoMese;
-			}
-		}
-		return 0;
 	}
 	
 }

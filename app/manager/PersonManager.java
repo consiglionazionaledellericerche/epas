@@ -223,7 +223,37 @@ public class PersonManager {
 	 * @param year
 	 * @return
 	 */
-	public static List<Contract> getMonthContracts(Person person, Integer month, Integer year)
+	public List<Contract> getMonthContracts(Person person, Integer month, Integer year)
+	{
+		List<Contract> monthContracts = new ArrayList<Contract>();
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
+		if(contractList == null){
+			return monthContracts;
+		}
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		for(Contract contract : contractList)
+		{
+			if(!contract.onCertificate)
+				continue;
+			DateInterval contractInterval = contract.getContractDateInterval();
+			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
+			{
+				monthContracts.add(contract);
+			}
+		}
+		return monthContracts;
+	}
+	
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public static List<Contract> getMonthContractsStatic(Person person, Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
