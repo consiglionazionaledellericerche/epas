@@ -1,10 +1,10 @@
 package dao;
 
-import java.util.List;
-
-import play.Logger;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+
+import java.util.List;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -15,9 +15,11 @@ import models.TotalOvertime;
 import models.query.QCompetence;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
-import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
@@ -30,6 +32,7 @@ import com.mysema.query.jpa.JPQLQuery;
  */
 public class CompetenceDao {
 
+	private final static Logger log = LoggerFactory.getLogger(CompetenceDao.class);
 	/**
 	 * 
 	 * @param id
@@ -181,9 +184,10 @@ public class CompetenceDao {
 	 */
 	public static List<Competence> getCompetenceInMonthForUploadSituation(Person person, Integer year, Integer month){
 		List<Competence> competenceList = CompetenceDao.getAllCompetenceForPerson(person, year, month);
-//		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
-//				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
-		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
+		
+		log.trace("Per la persona {} trovate {} competenze approvate nei mesi di {}/{}", 
+				new Object[]{person.getFullname(),competenceList.size(),month,year});
+		
 		return competenceList;
 	}
 	

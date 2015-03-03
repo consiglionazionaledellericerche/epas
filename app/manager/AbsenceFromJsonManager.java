@@ -5,16 +5,6 @@ import helpers.ModelQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-
-import dao.AbsenceDao;
 import models.Absence;
 import models.Person;
 import models.exports.FrequentAbsenceCode;
@@ -23,7 +13,20 @@ import models.exports.PersonPeriodAbsenceCode;
 import models.query.QAbsence;
 import models.query.QPersonDay;
 
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+
+import dao.AbsenceDao;
+
 public class AbsenceFromJsonManager {
+	
+	private final static Logger log = LoggerFactory.getLogger(AbsenceFromJsonManager.class);
 
 	/**
 	 * 
@@ -44,11 +47,11 @@ public class AbsenceFromJsonManager {
 		for(Person person : body.persons){
 			personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
 			if(person != null){
-				Logger.debug("Controllo %s %s", person.name, person.surname);
+				log.debug("Controllo {}", person.getFullname());
 
 				List<Absence> absences = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
 
-				Logger.debug("Lista assenze per %s %s: %s", person.name, person.surname, absences.toString());
+				log.debug("Lista assenze per {}: {}", person.getFullname(), absences);
 
 				LocalDate startCurrentPeriod = null;
 				LocalDate endCurrentPeriod = null;
@@ -165,7 +168,7 @@ public class AbsenceFromJsonManager {
 				}
 			}
 			else{
-				Logger.error("Richiesta persona non presente in anagrafica. Possibile sia un non strutturato.");
+				log.error("Richiesta persona non presente in anagrafica. Possibile sia un non strutturato.");
 			}
 		}
 		return personsToRender;
@@ -210,8 +213,8 @@ public class AbsenceFromJsonManager {
 						);
 		List<String> listaMissioni = queryMissione.distinct().list(absence.absenceType.code);
 
-		Logger.debug("Liste di codici di assenza completate con dimensioni: %d %d %d", 
-				listaFerie.size(), listaMissioni.size(), listaRiposiCompensativi.size());
+		log.debug("Liste di codici di assenza completate con dimensioni: {} {} {}", 
+				new Object[] {listaFerie.size(), listaMissioni.size(), listaRiposiCompensativi.size()});
 
 		Joiner joiner = Joiner.on("-").skipNulls();
 		
@@ -219,7 +222,7 @@ public class AbsenceFromJsonManager {
 		frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaRiposiCompensativi),"Riposo compensativo"));
 		frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaMissioni),"Missione"));		
 		
-		Logger.info("Lista di codici trovati: %s", frequentAbsenceCodeList);
+		log.info("Lista di codici trovati: {}", frequentAbsenceCodeList);
 		return frequentAbsenceCodeList;
 	}
 }

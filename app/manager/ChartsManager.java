@@ -12,10 +12,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.db.jpa.Blob;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
@@ -29,6 +25,12 @@ import models.enumerate.ConfigurationFields;
 import models.exports.PersonOvertime;
 import models.rendering.VacationsRecap;
 
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import play.db.jpa.Blob;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -41,6 +43,8 @@ import dao.ContractDao;
 import dao.PersonDao;
 
 public class ChartsManager {
+	
+	private final static Logger log = LoggerFactory.getLogger(ChartsManager.class);
 	
 	/**Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici**/
 	
@@ -224,7 +228,8 @@ public class ChartsManager {
 				for(int month=1; month<13;month++){
 					totaleOreResidue = totaleOreResidue+(PersonResidualMonthRecap.positiveResidualInMonth(p, year, month)/60);
 				}
-				Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
+				log.debug("Ore in più per {} nell'anno {}: {}",
+						new Object[] {p.getFullname(), year,totaleOreResidue});
 			}
 
 		}
@@ -234,7 +239,7 @@ public class ChartsManager {
 	
 	public static RenderList checkSituationPastYear(Blob file){
 		if(file == null){
-			Logger.error("E' una waterloo...");
+			log.error("file nullo nella chiamata della checkSituationPastYear");
 		}
 
 		List<RenderResult> listTrueFalse = new ArrayList<RenderResult>();
@@ -307,7 +312,7 @@ public class ChartsManager {
 		}
 		catch(Exception e)
 		{
-			Logger.warn("C'è del casino...");
+			log.warn("C'è del casino...");
 		}
 		return new RenderList(listTrueFalse, listNull);
 	}
@@ -351,7 +356,7 @@ public class ChartsManager {
 		int totalPlusHours = 0;
 		
 		for(Person p : personList){
-			Logger.debug("Scrivo i dati per %s %s", p.name, p.surname);
+			log.debug("Scrivo i dati per {}", p.getFullname());
 
 			out.append(p.surname+' '+p.name+',');
 			String situazione = "";
@@ -363,7 +368,7 @@ public class ChartsManager {
 			
 			for(Contract contract : contractList){
 				if(beginContract != null && beginContract.equals(contract.beginContract)){
-					Logger.debug("Due contratti uguali nella stessa lista di contratti per %s %s : come è possibile!?!?", p.name, p.surname);
+					log.error("Due contratti uguali nella stessa lista di contratti per {} : come è possibile!?!?", p.getFullname());
 				}
 				else{
 					beginContract = contract.beginContract;

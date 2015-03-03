@@ -2,10 +2,13 @@ package manager;
 
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import play.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PersonDayInTroubleManager {
 
+	private final static Logger log = LoggerFactory.getLogger(PersonDayInTroubleManager.class);
 	/**
 	 * 
 	 * @param pd
@@ -16,7 +19,8 @@ public class PersonDayInTroubleManager {
 		if(pd.troubles==null || pd.troubles.size()==0)
 		{	
 			//se non esiste lo creo
-			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
+			log.info("Nuovo PersonDayInTrouble {} - {} - {}", 
+					new Object[]{pd.person.getFullname(), pd.date, cause});
 			PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
 			trouble.save();
 			pd.troubles.add(trouble);

@@ -3,23 +3,24 @@ package manager;
 import java.util.Comparator;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-
-import dao.AbsenceDao;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceDao;
+
 public class YearlyAbsencesManager {
 	
+    private final static Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
 	
 	/*Non è molto chiaro cosa facesse questa classe innestata all'interno di YearlyAbsences*/
 	public final static class AbsenceTypeDays{
@@ -121,14 +122,16 @@ public class YearlyAbsencesManager {
 			tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
 			for(Absence abs : absenceInMonth){
 				Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
-				Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
+				log.debug("Per la persona {} il codice {} vale: {}",
+						new Object[]{p, abs.absenceType.code, value});
 				if(value == null){
-					Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
+					log.debug("Inserisco in tabella nuova assenza per {} con codice {}", p, abs.absenceType.code);
 					tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
 				}
 				else{
 					tableMonthlyAbsences.row(p).put(abs.absenceType, value+1);
-					Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
+					log.debug("Incremento il numero di giorni per l'assenza {} di {} al valore {}", 
+							new Object[]{abs.absenceType.code, p, value+1});
 
 				}
 			}

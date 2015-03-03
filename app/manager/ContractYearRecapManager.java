@@ -15,8 +15,9 @@ import models.ContractYearRecap;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
 import dao.AbsenceTypeDao;
 
 /**
@@ -27,6 +28,8 @@ import dao.AbsenceTypeDao;
  *
  */
 public class ContractYearRecapManager {
+	
+	private final static Logger log = LoggerFactory.getLogger(ContractYearRecapManager.class);
 	
 	/**
 	 * NB !!!
@@ -73,7 +76,7 @@ public class ContractYearRecapManager {
 	 */
 	public static void buildContractYearRecap(Contract contract)
 	{
-		Logger.info("PopulateContractYearRecap %s %s contract id = %s", contract.person.name, contract.person.surname, contract.id);
+		log.info("PopulateContractYearRecap {} contract id = {}", contract.person.getFullname(), contract.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
 		
 		while(contract.recapPeriods.size()>0)
@@ -118,7 +121,7 @@ public class ContractYearRecapManager {
 			currentYear = contractInterval.getEnd().getYear();
 		while(yearToCompute<currentYear)
 		{
-			Logger.debug("yearToCompute %s", yearToCompute);
+			log.debug("yearToCompute {}", yearToCompute);
 			ContractYearRecap cyr = new ContractYearRecap();
 			cyr.year = yearToCompute;
 			cyr.contract = contract;

@@ -29,7 +29,7 @@ import com.google.inject.name.Named;
 @Singleton
 public class SecurityRules {
 	
-	private final static Logger LOG = LoggerFactory.getLogger(SecurityRules.class);
+	private final static Logger log = LoggerFactory.getLogger(SecurityRules.class);
 	
 	private final Provider<Optional<User>> currentUser;
 	private final Provider<String> currentAction;
@@ -110,7 +110,7 @@ public class SecurityRules {
         final StatelessKnowledgeSession session = knowledge.get().newStatelessKnowledgeSession();
         session.addEventListener(new AgendaLogger());
         
-        LOG.debug("SecurityRules: currentUser = " + user);
+        log.debug("SecurityRules: currentUser = " + user);
         
         session.setGlobal(CURRENT_OPERATOR_IDENTIFIER, user);
         
@@ -121,14 +121,14 @@ public class SecurityRules {
         commands.add(CommandFactory.newInsertElements(user.usersRolesOffices));
         session.execute(CommandFactory.newBatchExecution(commands));
         
-        LOG.debug("{}", check);
+        log.debug("{}", check);
         return check.isGranted();
 	}
 	
 	 private static class AgendaLogger extends DefaultAgendaEventListener {
          @Override
          public void afterActivationFired(AfterActivationFiredEvent event) {
-        	 LOG.debug("RULE {} {}", event.getActivation().getRule().getName(), event.getActivation().getFactHandles());
+        	 log.debug("RULE {} {}", event.getActivation().getRule().getName(), event.getActivation().getFactHandles());
          }
 	 }
 }
