@@ -26,8 +26,9 @@ import models.rendering.VacationsRecap;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
 import play.db.jpa.Blob;
 import play.libs.Mail;
 
@@ -55,6 +56,7 @@ import dao.WorkingTimeTypeDao;
  */
 public class AbsenceManager {
 	
+	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
@@ -206,8 +208,8 @@ public class AbsenceManager {
 		Preconditions.checkNotNull(file);
 		Preconditions.checkNotNull(mealTicket);
 
-		Logger.info("Ricevuta richiesta di inserimento assenza per %s. AbsenceType = %s, dal %s al %s, mealTicket = %s. Attachment = %s",
-				person.fullName(), absenceType.code, dateFrom, dateTo.or(dateFrom), mealTicket.orNull(), file.orNull());
+		log.info("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, mealTicket = {}. Attachment = {}",
+				new Object[] {person.fullName(), absenceType.code, dateFrom, dateTo.or(dateFrom), mealTicket.orNull(), file.orNull()});
 
 		AbsenceInsertReport air = new AbsenceInsertReport();
 
@@ -346,9 +348,8 @@ public class AbsenceManager {
 			ar.setAbsenceCode(absenceType.code);
 			ar.setInsertSucceeded(true);
 
-			Logger.info("Inserita nuova assenza %s per %s %s in data: %s", 
-					absence.absenceType.code, absence.personDay.person.name,
-					absence.personDay.person.surname, absence.personDay.date);
+			log.info("Inserita nuova assenza {} per {} in data: {}", new Object[]{
+					absence.absenceType.code, absence.personDay.person.getFullname(),absence.personDay.date});
 
 			pd.absences.add(absence);
 		}
@@ -669,7 +670,7 @@ public class AbsenceManager {
 					pd.absences.remove(absence);
 					pd.isTicketForcedByAdmin = false;
 					deleted++;
-					Logger.info("Rimossa assenza del %s per %s %s", actualDate, person.name, person.surname);
+					log.info("Rimossa assenza del {} per {}", actualDate, person.getFullname());
 				}
 			}
 			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){

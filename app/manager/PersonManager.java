@@ -16,8 +16,8 @@ import models.PersonYear;
 import models.User;
 
 import org.joda.time.LocalDate;
-
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -25,6 +25,7 @@ import dao.PersonChildrenDao;
 
 public class PersonManager {
 
+	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
 	/**
 	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
@@ -262,7 +263,7 @@ public class PersonManager {
 	public static void deletePersonChildren(Person person){
 		for(PersonChildren pc : person.personChildren){
 			long id = pc.id;
-			Logger.debug("Elimino figli...");
+			log.debug("Elimino figli di {}", person.getFullname());
 			pc = PersonChildrenDao.getPersonChildrenById(id);
 			pc.delete();
 		}

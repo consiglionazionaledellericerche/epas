@@ -15,13 +15,13 @@ import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
 import com.google.common.collect.ImmutableTable.Builder;
+import com.google.common.collect.Table;
 
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -29,6 +29,7 @@ import dao.StampingDao;
 
 public class StampingManager {
 
+	private final static Logger log = LoggerFactory.getLogger(StampingManager.class);
 	/**
 	 * Versione per inserimento amministratore.
 	 * Costruisce la LocalDateTime della timbratura a partire dai parametri passati come argomento.
@@ -144,24 +145,24 @@ public class StampingManager {
 			return false;
 
 		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
-			Logger.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
+			log.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
 			return false;
 		}
 		Long id = stamping.personId;
 
 		if(id == null){
-			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = null");
+			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = null");
 			return false;
 		}
 
 		Person person = PersonDao.getPersonById(id);
 
 		if(person == null){
-			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = %s", id);
+			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = {}", id);
 			return false;
 		}
 
-		Logger.debug("Sto per segnare la timbratura di %s %s", person.name, person.surname);
+		log.debug("Sto per segnare la timbratura di {}", person.getFullname());
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
 		if(!pd.isPresent()){
@@ -171,7 +172,7 @@ public class StampingManager {
 			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
 			personDay = new PersonDay(person, stamping.dateTime.toLocalDate());
 			personDay.save();		
-			Logger.debug("Salvato il nuovo personDay %s", personDay);
+			log.debug("Salvato il nuovo personDay {}", personDay);
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
@@ -205,13 +206,13 @@ public class StampingManager {
 				personDay.save();
 			}
 			else{
-				Logger.info("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
-						"stampingsFromClient: %s", person.name, person.surname, personDay.date, stamping.dateTime);
+				log.info("All'interno della lista di timbrature di {} nel giorno {} c'è una timbratura uguale a quella passata dallo" +
+						"stampingsFromClient: {}", new Object[]{person.getFullname(), personDay.date, stamping.dateTime});
 			}
 
 
 		}
-		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
+		log.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay {}", pd);
 		PersonDayManager.populatePersonDay(personDay);
 
 		personDay.save();

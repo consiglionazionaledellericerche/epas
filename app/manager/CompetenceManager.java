@@ -11,9 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.LocalDate;
+import models.Absence;
+import models.Competence;
+import models.CompetenceCode;
+import models.Office;
+import models.Person;
+import models.PersonDay;
+import models.TotalOvertime;
 
-import play.Logger;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
@@ -24,16 +32,10 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDayDao;
-import models.Absence;
-import models.Competence;
-import models.CompetenceCode;
-import models.Office;
-import models.Person;
-import models.PersonDay;
-import models.TotalOvertime;
 
 public class CompetenceManager {
 	
+	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
 	/**
 	 * 
 	 * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili
@@ -267,7 +269,7 @@ public class CompetenceManager {
 			boolean value = false;
 			if (competence.containsKey(code.code)) {
 				value = competence.get(code.code);
-				Logger.info("competence %s is %s",  code.code, value);
+				log.info("competence {} is {}",  code.code, value);
 			}
 			if (!value){
 				if(person.competenceCode.contains(CompetenceCodeDao.getCompetenceCodeById(code.id)))
@@ -309,7 +311,7 @@ public class CompetenceManager {
 			if(result.isPresent())
 				totale = result.get().longValue();
 		
-			Logger.debug("Totale per %s %s vale %d", p.name, p.surname, totale);
+			log.debug("Totale per {} vale %d", p.getFullname(), totale);
 			out.write(p.surname+' '+p.name+',');
 			if(totale != null)			
 				out.append(totale.toString());

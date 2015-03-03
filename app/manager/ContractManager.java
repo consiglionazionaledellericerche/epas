@@ -18,8 +18,8 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
-
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -39,6 +39,7 @@ import dao.VacationPeriodDao;
  */
 public class ContractManager {
 	
+	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	/**
 	 * Validatore per il contratto. Controlla la consistenza delle date all'interno del contratto
 	 * e la coerenza con gli altri contratti della persona.
@@ -165,9 +166,9 @@ public class ContractManager {
 
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		LocalDate today = new LocalDate();
-		Logger.info("CheckPersonDay (creazione ed history error) DA %s A %s", date, today);
+		log.info("CheckPersonDay (creazione ed history error) DA {} A {}", date, today);
 		while(true) {
-			Logger.debug("RecomputePopulate %s", date);
+			log.debug("RecomputePopulate {}", date);
 
 			if(date.isEqual(today))
 				break;
@@ -187,7 +188,7 @@ public class ContractManager {
 		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
 		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
 
-		Logger.debug("PopulatePersonDay (ricalcoli ed history error) DA %s A %s", actualMonth, endMonth);
+		log.debug("PopulatePersonDay (ricalcoli ed history error) DA {} A {}", actualMonth, endMonth);
 
 		while( !actualMonth.isAfter(endMonth) )
 		{
@@ -200,14 +201,14 @@ public class ContractManager {
 
 				PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
 				//PersonDay pd1 = PersonDay.findById(pd.id);
-				Logger.debug("RecomputePopulate %s", pd1.date);				
+				log.debug("RecomputePopulate {}", pd1.date);				
 				PersonDayManager.populatePersonDay(pd1);
 			}
 
 			actualMonth = actualMonth.plusMonths(1);
 		}
 
-		Logger.info("BuildContractYearRecap");
+		log.info("Calcolato il riepilogo per il contratto {}",contract);
 
 		//(3) Ricalcolo dei riepiloghi annuali
 		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -547,7 +548,8 @@ public class ContractManager {
 		List<Contract> helpList = ContractDao.getPersonContractList(person);
 		for(Contract c : helpList){
 
-			Logger.debug("Elimino contratto di %s %s che va da %s a %s", person.name, person.surname, c.beginContract, c.expireContract);
+			log.debug("Elimino contratto di {} che va da {} a {}", 
+					new Object[]{person.getFullname(), c.beginContract, c.expireContract});
 
 			// Eliminazione orari di lavoro
 			List<ContractWorkingTimeType> cwttList = ContractDao.getContractWorkingTimeTypeList(c);

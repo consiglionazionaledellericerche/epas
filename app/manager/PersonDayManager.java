@@ -20,8 +20,8 @@ import models.enumerate.JustifiedTimeAtWork;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -34,7 +34,7 @@ import dao.WorkingTimeTypeDao;
 
 public class PersonDayManager {
 
-	
+	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
 	 */
@@ -645,7 +645,8 @@ public class PersonDayManager {
 					if(pdt.fixed == false) {
 						pdt.fixed = true;
 						pdt.save();
-						Logger.info("Fixato %s perchè precedente a sourceContract(%s)", pd.date, pd.getPersonDayContract().sourceDate);
+						log.info("Fixato {} perchè precedente a sourceContract({})",
+								pd.date, pd.getPersonDayContract().sourceDate);
 					}
 				}
 				return;
