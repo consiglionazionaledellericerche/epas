@@ -107,7 +107,6 @@ public class CompetenceDao {
 	}
 	
 	/**
-	 * 
 	 * @param person
 	 * @param year
 	 * @param month

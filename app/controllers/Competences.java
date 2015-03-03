@@ -13,6 +13,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
+import manager.recaps.competence.PersonMonthCompetenceRecap;
+import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -20,7 +22,6 @@ import models.Person;
 import models.TotalOvertime;
 import models.User;
 import models.rendering.PersonCompetenceRecap;
-import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
 
@@ -64,6 +65,9 @@ public class Competences extends Controller{
 	@Inject
 	static CompetenceManager competenceManager;
 	
+	@Inject 
+	static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
+	
 	public static void competences(int year, int month) {
 
 		//controllo dei parametri
@@ -73,7 +77,8 @@ public class Competences extends Controller{
 			renderTemplate("Application/indexAdmin.html");
 		}
 
-		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.get().person, month, year);
+		PersonMonthCompetenceRecap personMonthCompetenceRecap =
+				personMonthCompetenceRecapFactory.create(user.get().person, month, year);
 
 		Person person = user.get().person;
 		render(personMonthCompetenceRecap, person, year, month);

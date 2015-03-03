@@ -7,13 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
-import com.google.common.base.Optional;
-
-import dao.StampingDao;
 import models.base.BaseModel;
 import net.sf.oval.constraint.MinLength;
+
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 
 
