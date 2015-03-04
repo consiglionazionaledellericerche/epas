@@ -1,8 +1,9 @@
 package controllers;
 
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Person;
 import models.User;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
@@ -11,6 +12,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
+import com.google.inject.Inject;
 
 import dao.ContractDao;
 import dto.VacationsShowDto;
@@ -18,6 +20,8 @@ import dto.VacationsShowDto;
 @With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{
 		
+	@Inject
+	static VacationsRecapFactory vacationsFactory;
 	
 	public static void show(Integer year) {
 		
@@ -39,10 +43,10 @@ public class Vacations extends Controller{
     			year = new LocalDate().getYear(); 
         	}
     		
-    		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(year, 
+    		VacationsRecap vacationsRecap = vacationsFactory.create( year, 
     				ContractDao.getCurrentContract(user.person), new LocalDate(), true);
     		
-    		VacationsRecap vacationsRecapPrevious = VacationsRecap.Factory.build(year-1, 
+    		VacationsRecap vacationsRecapPrevious = vacationsFactory.create( year-1, 
     				ContractDao.getCurrentContract(user.person), new LocalDate(year-1,12,31), true);
     		
     	 	VacationsShowDto vacationShowDto = VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
@@ -71,7 +75,7 @@ public class Vacations extends Controller{
 
     	//Costruzione oggetto di riepilogo per la persona
 		
-		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
+		VacationsRecap vacationsRecap = vacationsFactory.create(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
     	if(vacationsRecap == null) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -102,7 +106,7 @@ public class Vacations extends Controller{
     	
     	//Costruzione oggetto di riepilogo per la persona
 		
-		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
+		VacationsRecap vacationsRecap = vacationsFactory.create(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
     	if(vacationsRecap == null) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -132,7 +136,7 @@ public class Vacations extends Controller{
 		
     	//Costruzione oggetto di riepilogo per la persona
 		
-		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
+		VacationsRecap vacationsRecap = vacationsFactory.create(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
     	if(vacationsRecap == null) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");

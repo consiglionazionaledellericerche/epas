@@ -9,6 +9,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
@@ -46,6 +48,9 @@ public class RequestInit extends Controller {
 	
 	//@Inject
 	//static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
 	
 	public static class ItemsPermitted {
 		
@@ -246,7 +251,7 @@ public class RequestInit extends Controller {
 		}
 		
 		public Set<Office> getAllOfficesAllowed() {
-			return OfficeDao.getOfficeAllowed(Security.getUser().get());
+			return officeDao.getOfficeAllowed(Security.getUser().get());
 		}
 	}
 	
@@ -357,7 +362,7 @@ public class RequestInit extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		String name = null;
 		if(Security.getUser().get().person != null) {
-			Set<Office> officeList = OfficeDao.getOfficeAllowed(Security.getUser().get());
+			Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 			if(!officeList.isEmpty()) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					officeList, false, beginMonth, endMonth, true).list();
@@ -366,7 +371,7 @@ public class RequestInit extends Controller {
 		} 
 		else {
 
-			List<Office> allOffices = OfficeDao.getAllOffices();
+			List<Office> allOffices = officeDao.getAllOffices();
 			if (allOffices!=null && !allOffices.isEmpty()){
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
@@ -391,7 +396,7 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 
 		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
-				OfficeDao.getOfficeAllowed(Security.getUser().get()).iterator().next());
+				officeDao.getOfficeAllowed(Security.getUser().get()).iterator().next());
 		
 		Integer yearBeginProgram;
 		if(yearInitUseProgram.isPresent()){

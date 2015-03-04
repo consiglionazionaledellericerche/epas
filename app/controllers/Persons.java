@@ -72,7 +72,15 @@ public class Persons extends Controller {
 	
 	@Inject
 	static PersonDao personDao;
+	
+	@Inject
+	static OfficeDao officeDao;
 
+	@Inject
+	static ContractManager contractManager;
+	
+	@Inject 
+	static PersonDayManager personDayManager;
 
 	@NoCheck
 	public static void list(String name){
@@ -201,7 +209,7 @@ public class Persons extends Controller {
 
 
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
-		Set<Office> officeList = OfficeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		List<ContractStampProfile> contractStampProfileList =
 				ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
@@ -306,7 +314,7 @@ public class Persons extends Controller {
 		PersonManager.deletePersonChildren(person);
 
 		// Eliminazione person day
-		PersonDayManager.deletePersonDays(person);
+		personDayManager.deletePersonDays(person);
 	
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
@@ -493,7 +501,7 @@ public class Persons extends Controller {
 
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();
-		ContractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 
 		contract.save();
 
@@ -569,7 +577,7 @@ public class Persons extends Controller {
 		ContractManager.saveSourceContract(contract);
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();
-		ContractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 		//contract.buildContractYearRecap();
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
@@ -659,7 +667,7 @@ public class Persons extends Controller {
 		ContractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
 
 		//Ricalcolo valori
-		ContractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
 		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);
@@ -680,7 +688,7 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		ContractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);
@@ -803,7 +811,7 @@ public class Persons extends Controller {
 
 		contract.save();
 
-		ContractManager.recomputeContract(contract.contract, contract.startFrom, null);
+		contractManager.recomputeContract(contract.contract, contract.startFrom, null);
 
 		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 		Persons.edit(contract.contract.person.id);
@@ -864,7 +872,7 @@ public class Persons extends Controller {
 		ContractStampProfileManager.deleteContractStampProfile(contract, index, csp);
 
 		//Ricalcolo i valori
-		ContractManager.recomputeContract(previous.contract, csp.startFrom, null);
+		contractManager.recomputeContract(previous.contract, csp.startFrom, null);
 
 		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 		Persons.edit(csp.contract.person.id);

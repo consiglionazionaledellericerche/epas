@@ -7,19 +7,21 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
 import models.enumerate.ConfigurationFields;
-import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 
@@ -28,6 +30,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -37,6 +40,15 @@ public class PrintTags extends Controller{
 	
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static PersonStampingDayRecapFactory stampingDayRecapFactory;
+	
+	@Inject
+	static PersonDayManager personDayManager;
 	
 	public static void showTag(Long personId){
 		if(personId == null){
@@ -56,30 +68,30 @@ public class PrintTags extends Controller{
 		int year = params.get("year", Integer.class);
 	
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
-		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
+		int numberOfInOut = Math.max(minInOutColumn, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
 		
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
+			personDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : totalPersonDays )
 		{
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
-		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		Set<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeSet;
+		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
-		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);
+		int numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
+		int numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
@@ -103,7 +115,7 @@ public class PrintTags extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
 		render(personList, date, year, month);
 	}
 	
@@ -118,31 +130,31 @@ public class PrintTags extends Controller{
 		}
 	
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
-		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
+		int numberOfInOut = Math.max(minInOutColumn, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
 		
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
+			personDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : totalPersonDays )
 		{
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
-		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		Set<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeSet;
+		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
-		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);
+		int numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
+		int numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 

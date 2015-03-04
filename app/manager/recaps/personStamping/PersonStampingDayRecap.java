@@ -1,9 +1,10 @@
-package models.rendering;
+package manager.recaps.personStamping;
 
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
@@ -18,7 +19,6 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
@@ -29,9 +29,13 @@ import dao.WorkingTimeTypeDao;
  *
  */
 public class PersonStampingDayRecap {
+	
+	//private final PersonDayManager personDayManager;	
+	
+	private final StampingTemplateFactory stampingTemplateFactory;
 
-	public static List<StampModificationType> stampModificationTypeList;
-	public static List<StampType> stampTypeList;
+	public static Set<StampModificationType> stampModificationTypeSet;
+	public static Set<StampType> stampTypeSet;
 	
 	private static StampModificationType fixedStampModificationType = null;
 	
@@ -53,7 +57,6 @@ public class PersonStampingDayRecap {
 	public boolean today;
 	public boolean future;
 	
-	
 	public List<Absence> absences;
 	
 	public List<StampingTemplate> stampingsTemplate;
@@ -69,24 +72,31 @@ public class PersonStampingDayRecap {
 	public boolean progressiveNegative;
 	public String workingTimeTypeDescription = "";
 	
-	
 	public List<String> note = new ArrayList<String>();
 		
-	public PersonStampingDayRecap(PersonDay pd, int numberOfInOut){			
+	public PersonStampingDayRecap(PersonDayManager personDayManager, 
+			StampingTemplateFactory stampingTemplateFactory,
+			StampingDao stampingDao,
+			
+			PersonDay pd, int numberOfInOut) {			
+		
+		//this.personDayManager = personDayManager;
+		this.stampingTemplateFactory = stampingTemplateFactory;
+		
 		this.personDayId = pd.id;
 		this.holiday = pd.isHoliday();
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
 
-		List<Stamping> stampingsForTemplate = PersonDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
+		List<Stamping> stampingsForTemplate = personDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
 
 		
 		this.setStampingTemplate( stampingsForTemplate, pd );
-		//if(pd.person.getWorkingTimeType(pd.date) != null){
-		if(WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
-			//this.wtt = pd.person.getWorkingTimeType(pd.date);
-			this.wtt = WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person);
+
+		if(WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person) != null){
+
+			this.wtt = WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person);
 			
 			this.wttd = this.wtt.workingTimeTypeDays.get(pd.date.getDayOfWeek()-1);
 			
@@ -122,9 +132,11 @@ public class PersonStampingDayRecap {
 				if(pd.timeAtWork!=0)
 				{
 					if(fixedStampModificationType==null)							//DEVE ANDARE NELLA CACHE
-						fixedStampModificationType = PersonDayManager.getFixedWorkingTime();
+						fixedStampModificationType = personDayManager.getFixedWorkingTime();
 					this.fixedWorkingTimeCode = fixedStampModificationType.code;
-					addStampModificationTypeToList(fixedStampModificationType);
+					
+					stampModificationTypeSet.add(fixedStampModificationType);
+					//addStampModificationTypeToList(fixedStampModificationType);
 				}
 				
 			}
@@ -139,7 +151,7 @@ public class PersonStampingDayRecap {
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			PersonDayManager.queSeraSera(pd);
+			personDayManager.queSeraSera(pd);
 			this.setWorkTime(pd.timeAtWork);
 			this.setDifference( pd.difference );
 			this.setProgressive(pd.progressive);
@@ -169,15 +181,16 @@ public class PersonStampingDayRecap {
 		if(pd.stampModificationType!=null && !this.future)
 		{
 			this.todayLunchTimeCode = pd.stampModificationType.code;
-			addStampModificationTypeToList(pd.stampModificationType);
+			stampModificationTypeSet.add(pd.stampModificationType);
+			//addStampModificationTypeToList(pd.stampModificationType);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
 		if(this.today && !this.holiday && !PersonDayManager.isAllDayAbsences(pd)) 
 		{
-			StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
-			//StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+			StampModificationType smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
-			addStampModificationTypeToList(smt);
+			stampModificationTypeSet.add(smt);
+			//addStampModificationTypeToList(smt);
 		}
 		//------------------------------------------------description work time type ----------------------------------------------------
 		
@@ -266,21 +279,21 @@ public class PersonStampingDayRecap {
 			//Setto pairId e type
 			if(stamping.pairId!=0 && stamping.isIn())
 			{
-				st = new StampingTemplate(stamping, i, pd, stamping.pairId, "left");
+				st = stampingTemplateFactory.create(stamping, i, pd, stamping.pairId, "left");
 				actualPair = stamping.pairId;
 			}
 			else if(stamping.pairId!=0 && stamping.isOut())
 			{
-				st = new StampingTemplate(stamping, i, pd, stamping.pairId, "right");
+				st = stampingTemplateFactory.create(stamping, i, pd, stamping.pairId, "right");
 				actualPair = 0;
 			}
 			else if(actualPair!=0)
 			{
-				st = new StampingTemplate(stamping, i, pd, actualPair, "center");
+				st = stampingTemplateFactory.create(stamping, i, pd, actualPair, "center");
 			}
 			else
 			{
-				st = new StampingTemplate(stamping, i, pd, 0, "none");
+				st = stampingTemplateFactory.create(stamping, i, pd, 0, "none");
 			}
 			
 			
@@ -372,146 +385,7 @@ public class PersonStampingDayRecap {
 		}
 		this.progressive = DateUtility.fromMinuteToHourMinute(progressive);
 	}
-	
 
-	private static void addStampModificationTypeToList(StampModificationType smt)
-	{
-		try
-		{
-			if(!stampModificationTypeList.contains(smt))
-			{
-				stampModificationTypeList.add(smt);
-			}
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	private static void addStampTypeToList(StampType st)
-	{
-		if(!stampTypeList.contains(st))
-		{
-			stampTypeList.add(st);
-		}
-
-	}
-	
-	protected static class StampingTemplate
-	{
-		protected Long stampingId;
-		protected String colour;
-		protected int pairId;
-		protected String pairPosition;			//left center right none
-		protected LocalDateTime date;
-		protected String way;
-		protected String hour;
-		protected String insertStampingClass;
-		protected String markedByAdminCode;
-		protected String identifier;
-		protected String missingExitStampBeforeMidnightCode;
-		protected boolean valid;
-		
-		protected StampingTemplate(Stamping stamping, int index, PersonDay pd, int pairId, String pairPosition)
-		{
-			this.stampingId = stamping.id;
-			this.pairId = pairId;
-			this.pairPosition = pairPosition;
-
-			//stamping nulle o exiting now non sono visualizzate
-			if(stamping.date == null  || stamping.exitingNow)
-			{
-				this.hour = ""; 
-				this.markedByAdminCode = "";
-				this.identifier = "";
-				this.insertStampingClass = "";
-				this.missingExitStampBeforeMidnightCode = "";
-				this.valid = true;
-				setColor(stamping);
-				return;
-			}
-			
-			this.date = stamping.date;
-			
-			this.way = stamping.way.description;
-			
-			setHour(stamping.date);//stamping.date.getHourOfDay() + ":" + stamping.date.getMinuteOfHour();
-			
-			this.insertStampingClass = "insertStamping" + stamping.date.getDayOfMonth() + "-" + index;
-			
-			
-			//----------------------------------------- timbratura di servizio ---------------------------------------------------
-			if(stamping.stampType!=null && stamping.stampType.identifier!=null)
-			{
-				this.identifier = stamping.stampType.identifier;
-				addStampTypeToList(stamping.stampType);
-			}
-			else
-				this.identifier = "";
-			
-			//----------------------------------------- timbratura modificata dall'amministatore ---------------------------------
-			if(stamping.markedByAdmin) 
-			{
-				StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
-				//StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
-				this.markedByAdminCode = smt.code;
-				addStampModificationTypeToList(smt);
-			}
-			else
-			{
-				this.markedByAdminCode = "";
-			}
-			
-			//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
-			if(stamping.stampModificationType!=null)
-			{
-				StampModificationType smt = PersonDayManager.checkMissingExitStampBeforeMidnight(pd);
-				if(smt!=null)
-				{
-					this.missingExitStampBeforeMidnightCode = smt.code;
-					addStampModificationTypeToList(smt);
-				}
-				else
-				{
-					this.missingExitStampBeforeMidnightCode = "";
-				}
-			}
-			//------------------------------------------- timbratura valida (colore cella) -----------------------------------------
-			LocalDate today = new LocalDate();
-			LocalDate stampingDate = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth());
-			if(today.isEqual(stampingDate))
-			{
-				this.valid = true;
-			}
-			else
-			{
-				this.valid = stamping.isValid();
-			}
-			setColor(stamping);
-			//-----------------------------------------------------------------------------------------------------------------------
-		}
-		
-		protected void setColor(Stamping stamping)
-		{
-			this.colour = stamping.way.description;
-			if(this.valid==false)
-			{
-				this.colour = "warn";
-			}
-		}
-		
-		protected void setHour(LocalDateTime date)
-		{
-			String hour = date.getHourOfDay() + "";
-			if(hour.length() == 1)
-				hour="0"+hour;
-			String minute = date.getMinuteOfHour()+"";
-			if(minute.length() == 1)
-				minute="0"+minute;
-			this.hour = hour + ":" + minute;
-		}
-	}
-	
 }
 
 

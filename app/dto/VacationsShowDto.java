@@ -6,9 +6,9 @@ import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 
+import manager.recaps.vacation.VacationsRecap;
 import models.Absence;
 import models.Contract;
-import models.rendering.VacationsRecap;
 
 /**
  * 

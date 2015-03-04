@@ -19,6 +19,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -99,6 +101,12 @@ public class Security extends Secure.Security {
 		
 	public final static String CACHE_DURATION = "30mn";
 	
+
+	@Inject
+	static UserDao userDao;
+	
+	@Inject
+	static OfficeDao officeDao;
 
 	/**
 	 * @param username
@@ -204,7 +212,7 @@ public class Security extends Secure.Security {
 		
 		if( personId == null && officeId != null ) {
 			
-			Office office = OfficeDao.getOfficeById(officeId);
+			Office office = officeDao.getOfficeById(officeId);
 			//Office office = Office.findById(officeId);
 			if( checkUro(user.usersRolesOffices, permission, office) ) {
 				
@@ -219,7 +227,7 @@ public class Security extends Secure.Security {
 			
 			Person person = PersonDao.getPersonById(personId);
 			//Person person = Person.findById(personId);
-			Office office = OfficeDao.getOfficeById(officeId);
+			Office office = officeDao.getOfficeById(officeId);
 			//Office office = Office.findById(officeId);
 			if( checkUro(user.usersRolesOffices, permission, person.office) && checkUro(user.usersRolesOffices, permission, office) ) {
 				
@@ -283,7 +291,7 @@ public class Security extends Secure.Security {
 		if (permissions == null) {
 			user.get().refresh();
 			//permissions = user.get().getAllPermissions();
-			permissions = RoleDao.getAllPermissions(user.get());
+			permissions = userDao.getAllPermissions(user.get());
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		

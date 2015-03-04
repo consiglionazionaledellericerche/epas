@@ -11,9 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -27,13 +30,32 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import com.google.inject.Inject;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDayDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+
 
 public class CompetenceManager {
+	
+	@Inject
+	public OfficeDao officeDao;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory;
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	public PersonManager personManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
 	
 	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
 	/**
@@ -135,8 +157,8 @@ public class CompetenceManager {
 	 * @param officeId
 	 * @return true se è stato possibile inserire un aggiornamento per le ore di straordinario totali per l'ufficio office nell'anno year
 	 */
-	public static boolean saveOvertime(Integer year, String numeroOre, Long officeId){
-		Office office = OfficeDao.getOfficeById(officeId);
+	public boolean saveOvertime(Integer year, String numeroOre, Long officeId){
+		Office office = officeDao.getOfficeById(officeId);
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;
@@ -176,7 +198,7 @@ public class CompetenceManager {
 	 * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su orario di lavoro, straordinario,
 	 * riposi compensativi per l'anno year e il mese month per le persone dell'ufficio office
 	 */
-	public static Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
+	public Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
 			String name, Office office, LocalDate beginMonth, SimpleResults<Person> simpleResults, CompetenceCode code){
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
@@ -190,7 +212,7 @@ public class CompetenceManager {
 			Integer difference = 0;
 			Integer overtime = 0;
 			
-			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
@@ -333,5 +355,32 @@ public class CompetenceManager {
 			c = CompetenceDao.getCompetenceById(id);
 			c.delete();
 		}
+	}
+	
+	/**
+	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
+	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
+	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.
+	 * Nel caso di nessun contratto attivo nel mese viene ritornato il valore 0.
+	 * @param person
+	 * @param year
+	 * @param month
+	 */
+	public Integer positiveResidualInMonth(Person person, int year, int month){
+		
+		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		for(Contract contract : monthContracts)
+		{
+			IWrapperContract wContract = wrapperFactory.create(contract);
+			
+			if(wContract.isLastInMonth(month, year))
+			{
+				PersonResidualYearRecap c = 
+						yearFactory.create(contract, year, null);
+				if(c.getMese(month)!=null)
+					return c.getMese(month).progressivoFinalePositivoMese;
+			}
+		}
+		return 0;
 	}
 }

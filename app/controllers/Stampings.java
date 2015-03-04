@@ -11,13 +11,13 @@ import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingRecap;
+import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
-import models.StampModificationType;
-import models.StampType;
 import models.Stamping;
-import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
 import org.joda.time.LocalDate;
@@ -30,13 +30,13 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dto.PersonStampingDto;
 
 @With( {RequestInit.class, Resecure.class} )
 
@@ -45,6 +45,23 @@ public class Stampings extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static StampingManager stampingManager;
+	
+	@Inject 
+	static PersonStampingRecapFactory stampingsRecapFactory;
+	
+	@Inject
+	static PersonDayManager personDayManager;
+	
+	@Inject
+	static PersonDayDao personDayDao;
+	
+	@Inject
+	static StampingDao stampingDao;
 	
 	public static void stampings(Integer year, Integer month) {
 
@@ -64,7 +81,7 @@ public class Stampings extends Controller {
 			
 		}
 		
-		PersonStampingDto psDto = PersonStampingDto.build(year, month, person);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
 		render(psDto) ;
 
@@ -101,7 +118,7 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		PersonStampingDto psDto = PersonStampingDto.build(year, month, person);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
 		render(psDto) ;
 
@@ -148,7 +165,7 @@ public class Stampings extends Controller {
 		}
 		
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
 
 		if(!pd.isPresent()){
 			personDay = new PersonDay(person, date);
@@ -158,7 +175,7 @@ public class Stampings extends Controller {
 			personDay = pd.get();
 		}
 		
-		StampingManager.addStamping(personDay, time, note, service, type, true);
+		stampingManager.addStamping(personDay, time, note, service, type, true);
 				
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -170,7 +187,7 @@ public class Stampings extends Controller {
 
 	public static void edit(@Required Long stampingId) {
 		
-		Stamping stamping = StampingDao.getStampingById(stampingId);
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		
 		if (stamping == null) {
 			notFound();
@@ -190,7 +207,7 @@ public class Stampings extends Controller {
 			Integer stampingHour, Integer stampingMinute,
 			@Required boolean service, String note) {
 		
-		Stamping stamping = StampingDao.getStampingById(stampingId);
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		if (stamping == null) {
 			notFound();
 		}
@@ -205,7 +222,7 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -220,7 +237,7 @@ public class Stampings extends Controller {
 
 		StampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
 
-		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
@@ -242,7 +259,7 @@ public class Stampings extends Controller {
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Security.getUser().get()), 
+				PersonDao.list(Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()), 
 						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
@@ -268,15 +285,15 @@ public class Stampings extends Controller {
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
 		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, dayPresence, dayPresence, true).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, dayPresence, dayPresence, true).list();
 
-		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
+		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		
-		daysRecap = StampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
 
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -294,12 +311,13 @@ public class Stampings extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, beginMonth, endMonth, true);
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, beginMonth, endMonth, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();		
 
 		int numberOfDays = endMonth.getDayOfMonth();
-		Table<Person, LocalDate, String> tablePersonTicket = StampingManager.populatePersonTicketTable(activePersons, beginMonth);
+		Table<Person, LocalDate, String> tablePersonTicket = 
+				stampingManager.populatePersonTicketTable(activePersons, beginMonth);
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
 }

@@ -3,11 +3,13 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
 import manager.PersonMonthsManager;
 import manager.PersonMonthsManager.Insertable;
-import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.Person;
 import models.PersonMonthRecap;
@@ -26,6 +28,8 @@ import play.mvc.With;
 @With( {Resecure.class, RequestInit.class} )
 public class PersonMonths extends Controller{
 	
+	@Inject
+	static PersonResidualYearRecapFactory yearFactory;
 	
 	public static void hourRecap(int year){
 
@@ -43,7 +47,7 @@ public class PersonMonths extends Controller{
 		
 		Contract contract = ContractDao.getCurrentContract(user.person);
 		PersonResidualYearRecap csap = 
-				PersonResidualYearRecap.factory(contract, year, null);
+				yearFactory.create(contract, year, null);
 		render(csap, user.person, year);	
 	}
 

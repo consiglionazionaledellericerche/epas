@@ -2,8 +2,8 @@ package dao.wrapper;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import manager.CompetenceManager;
 import manager.ContractManager;
-import manager.recaps.PersonResidualMonthRecap;
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -35,6 +35,7 @@ public class WrapperPerson implements IWrapperPerson {
 	private final Person value;
 	private final ContractManager contractManager;
 	private final ContractDao contractDao;
+	private final CompetenceManager competenceManager;
 
 	private Optional<Contract> currentContract;
 	private WorkingTimeType currentWorkingTimeType = null;
@@ -42,10 +43,11 @@ public class WrapperPerson implements IWrapperPerson {
 
 	@Inject
 	WrapperPerson(@Assisted Person person,	ContractManager contractManager,
-			ContractDao contractDao) {
+			ContractDao contractDao, CompetenceManager competenceManager) {
 		this.value = person;
 		this.contractManager = contractManager;
 		this.contractDao = contractDao;
+		this.competenceManager = competenceManager;
 	}
 
 	@Override
@@ -163,8 +165,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 */
 	public Integer getPositiveResidualInMonth(int year, int month) {
 
-		return PersonResidualMonthRecap
-				.positiveResidualInMonth(this.value, year, month)/60;
+		return competenceManager.positiveResidualInMonth(this.value, year, month)/60;
 	}
 	
 	/**

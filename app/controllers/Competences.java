@@ -13,6 +13,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
+import manager.recaps.competence.PersonMonthCompetenceRecap;
+import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -20,7 +22,6 @@ import models.Person;
 import models.TotalOvertime;
 import models.User;
 import models.rendering.PersonCompetenceRecap;
-import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
 
@@ -58,6 +59,15 @@ public class Competences extends Controller{
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static CompetenceManager competenceManager;
+	
+	@Inject 
+	static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
+	
 	public static void competences(int year, int month) {
 
 		//controllo dei parametri
@@ -67,7 +77,8 @@ public class Competences extends Controller{
 			renderTemplate("Application/indexAdmin.html");
 		}
 
-		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.get().person, month, year);
+		PersonMonthCompetenceRecap personMonthCompetenceRecap =
+				personMonthCompetenceRecapFactory.create(user.get().person, month, year);
 
 		Person person = user.get().person;
 		render(personMonthCompetenceRecap, person, year, month);
@@ -77,7 +88,7 @@ public class Competences extends Controller{
 
 	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -87,7 +98,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		if(page==null)
@@ -132,6 +143,7 @@ public class Competences extends Controller{
 		{
 			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
 			month = today.getMonthOfYear();
+			//FIXME impostare il redirect!!
 		}
 		
 		for(IWrapperPerson p : activePersons){
@@ -224,7 +236,7 @@ public class Competences extends Controller{
 	
 	public static void totalOvertimeHours(int year, Long officeId){
 	
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());		
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());		
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
@@ -233,7 +245,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
@@ -246,11 +258,11 @@ public class Competences extends Controller{
 
 	public static void saveOvertime(Integer year, String numeroOre, Long officeId){
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
-		if(CompetenceManager.saveOvertime(year, numeroOre, officeId)){
+		if(competenceManager.saveOvertime(year, numeroOre, officeId)){
 			flash.success(String.format("Aggiornato monte ore per l'anno %s", year));
 		}
 		else{
@@ -262,7 +274,7 @@ public class Competences extends Controller{
 
 	public static void overtime(int year, int month, Long officeId, String name, Integer page){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -272,7 +284,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 
 		rules.checkIfPermitted(office);
@@ -295,7 +307,7 @@ public class Competences extends Controller{
 				false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		tableFeature = CompetenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
+		tableFeature = competenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
 		
 		if(year != 0 && month != 0)
 			render(tableFeature, year, month, simpleResults, name, office, offices);
@@ -311,7 +323,7 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(Long officeId, String name){
 
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -321,7 +333,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		LocalDate date = new LocalDate();		
