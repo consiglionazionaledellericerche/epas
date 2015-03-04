@@ -22,7 +22,6 @@ import org.joda.time.LocalDate;
 import play.Logger;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
