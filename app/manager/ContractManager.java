@@ -29,7 +29,6 @@ import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
-import dao.VacationPeriodDao;
 
 /**
  * 
@@ -418,25 +417,6 @@ public class ContractManager {
 		return null;
 	}
 	
-	/**
-	 * La lista dei VacationPeriod associati al contratto in ordine crescente per data di inizio periodo.
-	 * @param contract
-	 * @return null in caso di piani ferie inesistenti.
-	 */
-	public static List<VacationPeriod> getContractVacationPeriods(Contract contract)
-	{
-	
-		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(contract);
-
-		//se il piano ferie associato al contratto non esiste 
-		if(vpList.isEmpty())
-		{
-			return null;
-		}
-
-		return vpList;
-	}
-
 	/**
 	 * Ritorna il riepilogo annule del contatto.
 	 * @param year

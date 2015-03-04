@@ -11,15 +11,17 @@ import javax.inject.Inject;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 
 /**
@@ -33,6 +35,12 @@ public class ContractYearRecapManager {
 	
 	@Inject
 	public PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	public VacationsRecapFactory vacationsFactory;
+	
+	@Inject
+	public AbsenceDao absenceDao;
 	
 	/**
 	 * NB !!!
@@ -130,7 +138,7 @@ public class ContractYearRecapManager {
 			cyr.contract = contract;
 			
 			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = VacationsRecap.Factory.build(yearToCompute, contract, new LocalDate(), true);
+			VacationsRecap vacationRecap = vacationsFactory.create(yearToCompute, contract, new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();
@@ -208,10 +216,10 @@ public class ContractYearRecapManager {
 		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode("37"); 
 		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode("94"); 
 		DateInterval yearInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInYear);
-		List<Absence> abs32 = VacationsRecap.getVacationDays(yearInterSource, contract, ab32);
-		List<Absence> abs31 = VacationsRecap.getVacationDays(yearInterSource, contract, ab31);
-		List<Absence> abs37 = VacationsRecap.getVacationDays(yearInterSource, contract, ab37);
-		List<Absence> abs94 = VacationsRecap.getVacationDays(yearInterSource, contract, ab94);
+		List<Absence> abs32 = absenceDao.getAbsenceDays(yearInterSource, contract, ab32);
+		List<Absence> abs31 = absenceDao.getAbsenceDays(yearInterSource, contract, ab31);
+		List<Absence> abs37 = absenceDao.getAbsenceDays(yearInterSource, contract, ab37);
+		List<Absence> abs94 = absenceDao.getAbsenceDays(yearInterSource, contract, ab94);
 		int yearToCompute = contract.sourceDate.getYear();
 		ContractYearRecap cyr = new ContractYearRecap();
 		cyr.year = yearToCompute;

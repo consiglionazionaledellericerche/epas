@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
@@ -24,7 +26,6 @@ import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
-import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
@@ -73,6 +74,12 @@ public class AbsenceManager {
 	@Inject
 	public PersonDayDao personDayDao;
 	
+	@Inject
+	public VacationManager vacationManager;
+	
+	@Inject
+	public VacationsRecapFactory vacationsFactory;
+	
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
@@ -90,9 +97,9 @@ public class AbsenceManager {
 	 * @param actualDate
 	 * @return
 	 */
-	private static AbsenceType whichVacationCode(Person person, LocalDate date){
+	private AbsenceType whichVacationCode(Person person, LocalDate date){
 
-		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				ContractDao.getCurrentContract(person), date, true);
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
@@ -116,9 +123,9 @@ public class AbsenceManager {
 	 * @return l'absenceType 32 in caso affermativo. Null in caso di esaurimento bonus.
 	 * 
 	 */
-	private static boolean canTake32(Person person, LocalDate date) {
+	private boolean canTake32(Person person, LocalDate date) {
 
-		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				ContractDao.getCurrentContract(person), date, true);
 
 		return (vr.vacationDaysCurrentYearNotYetUsed > 0);		
@@ -132,9 +139,9 @@ public class AbsenceManager {
 	 * @return true in caso affermativo, false altrimenti
 	 * 
 	 */
-	private static boolean canTake31(Person person, LocalDate date) {
+	private boolean canTake31(Person person, LocalDate date) {
 
-		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				ContractDao.getCurrentContract(person), date, true);
 		
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
@@ -147,9 +154,9 @@ public class AbsenceManager {
 	 * @return l'absenceType 94 in caso affermativo. Null in caso di esaurimento bonus.
 	 * 
 	 */
-	private static boolean canTake94(Person person, LocalDate date) {
+	private boolean canTake94(Person person, LocalDate date) {
 
-		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				ContractDao.getCurrentContract(person), date, true);
 
 		return (vr.persmissionNotYetUsed > 0);
@@ -520,7 +527,7 @@ public class AbsenceManager {
 		//FIXME Verificare i controlli d'inserimento
 		if(date.getYear() == LocalDate.now().getYear()){
 
-			int remaining37 = VacationsRecap.remainingPastVacationsAs37(date.getYear(), person);
+			int remaining37 = vacationManager.remainingPastVacationsAs37(date.getYear(), person);
 			if(remaining37 > 0){
 				return insert(person, date,absenceType, file);
 			}
@@ -600,7 +607,7 @@ public class AbsenceManager {
 	private AbsencesResponse handlerFER(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file){
 
-		AbsenceType wichFer = AbsenceManager.whichVacationCode(person, date);
+		AbsenceType wichFer = whichVacationCode(person, date);
 
 		//FER esauriti
 		if(wichFer==null){

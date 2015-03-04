@@ -7,9 +7,9 @@ import manager.PersonManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
+import manager.recaps.vacation.VacationsRecap;
 import models.Contract;
 import models.Person;
-import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;

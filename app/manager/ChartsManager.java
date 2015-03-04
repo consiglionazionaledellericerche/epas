@@ -21,6 +21,8 @@ import play.db.jpa.Blob;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
 import models.CompetenceCode;
 import models.ConfGeneral;
@@ -30,7 +32,6 @@ import models.Person;
 import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
 import models.exports.PersonOvertime;
-import models.rendering.VacationsRecap;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -124,6 +125,9 @@ public class ChartsManager {
 	
 	@Inject
 	public CompetenceManager competenceManager;
+	
+	@Inject
+	public VacationsRecapFactory vacationsFactory;
 	
 	/**
 	 * 
@@ -431,7 +435,7 @@ public class ChartsManager {
 		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
 		out.newLine();
 		
-		VacationsRecap vr = VacationsRecap.Factory.build(LocalDate.now().getYear(), ContractDao.getCurrentContract(person), LocalDate.now(), false);
+		VacationsRecap vr = vacationsFactory.create(LocalDate.now().getYear(), ContractDao.getCurrentContract(person), LocalDate.now(), false);
 		
 		PersonResidualYearRecap pryr = 
 				yearFactory.create(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
