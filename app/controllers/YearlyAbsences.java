@@ -37,6 +37,9 @@ public class YearlyAbsences extends Controller{
 	@Inject
 	static SecurityRules rules;
 		
+	@Inject
+	static OfficeDao officeDao;
+	
 	public static void yearlyAbsences(Long personId, int year) {
 		//controllo sui parametri
 		Person person = null;
@@ -76,7 +79,7 @@ public class YearlyAbsences extends Controller{
 		abt.code = "Totale";		
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), 
+				officeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, new LocalDate(year, month,1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
 

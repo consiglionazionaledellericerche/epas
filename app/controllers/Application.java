@@ -2,7 +2,8 @@ package controllers;
 
 import java.util.List;
 
-import manager.OfficeManager;
+import javax.inject.Inject;
+
 import models.Office;
 
 import org.joda.time.LocalDate;
@@ -10,24 +11,34 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import dao.OfficeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 @With( {Secure.class, RequestInit.class} )
 public class Application extends Controller {
     
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
     public static void indexAdmin() {
 		Logger.debug("chiamato metodo indexAdmin dell'Application controller");
 		render();
        
     }
     
-	
     public static void index() {
     	    	
     	List<Office> officeList = Office.findAll();
     	boolean seatExist = false;
     	for(Office office : officeList) {
     		
-    		if(OfficeManager.isSeat(office)) {
+    		IWrapperOffice wOffice = wrapperFactory.create(office);
+    		
+    		if(wOffice.isSeat()) {
     			seatExist = true;
     			break;
     		}

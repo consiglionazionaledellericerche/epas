@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
-import dao.VacationPeriodDao;
 
 /**
  * 
@@ -38,6 +38,18 @@ import dao.VacationPeriodDao;
  *
  */
 public class ContractManager {
+	
+	@Inject
+	public ContractYearRecapManager contractYearRecapManager;
+	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public ConsistencyManager consistencyManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	/**
@@ -146,7 +158,7 @@ public class ContractManager {
 	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
 	 *   modifica la data fine che potrebbe non essere persistita)
 	 */
-	public static void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
@@ -178,9 +190,9 @@ public class ContractManager {
 				continue;
 			}
 
-			ConsistencyManager.checkPersonDay(contract.person, date);
-			date = date.plusDays(1);
+			consistencyManager.checkPersonDay(contract.person, date);
 
+			date = date.plusDays(1);
 
 		}
 
@@ -192,17 +204,15 @@ public class ContractManager {
 
 		while( !actualMonth.isAfter(endMonth) )
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
-			//			List<PersonDay> pdList = 
-			//					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-			//							contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
 
 			for(PersonDay pd : pdList){
 
-				PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
+				PersonDay pd1 = personDayDao.getPersonDayById(pd.id);
 				//PersonDay pd1 = PersonDay.findById(pd.id);
+
 				log.debug("RecomputePopulate {}", pd1.date);				
-				PersonDayManager.populatePersonDay(pd1);
+				personDayManager.populatePersonDay(pd1);
 			}
 
 			actualMonth = actualMonth.plusMonths(1);
@@ -211,7 +221,7 @@ public class ContractManager {
 		log.info("Calcolato il riepilogo per il contratto {}",contract);
 
 		//(3) Ricalcolo dei riepiloghi annuali
-		ContractYearRecapManager.buildContractYearRecap(contract);
+		contractYearRecapManager.buildContractYearRecap(contract);
 
 
 	}
@@ -410,25 +420,6 @@ public class ContractManager {
 	}
 	
 	/**
-	 * La lista dei VacationPeriod associati al contratto in ordine crescente per data di inizio periodo.
-	 * @param contract
-	 * @return null in caso di piani ferie inesistenti.
-	 */
-	public static List<VacationPeriod> getContractVacationPeriods(Contract contract)
-	{
-	
-		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(contract);
-
-		//se il piano ferie associato al contratto non esiste 
-		if(vpList.isEmpty())
-		{
-			return null;
-		}
-
-		return vpList;
-	}
-
-	/**
 	 * Ritorna il riepilogo annule del contatto.
 	 * @param year
 	 * @return
@@ -477,22 +468,6 @@ public class ContractManager {
 		return true;
 	}
 	
-	/**
-	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public static boolean isLastInMonth(Contract contract, int month, int year) {
-		List<Contract> contractInMonth = PersonManager.getMonthContracts(contract.person, month, year);
-		if (contractInMonth.size() == 0)
-			return false;
-		if (contractInMonth.get(contractInMonth.size()-1).id.equals(contract.id))
-			return true;
-		else
-			return false;
-	}
-
 	/**
 	 * 
 	 * @param contract

@@ -1,13 +1,26 @@
 package dao;
 
+import helpers.ModelQuery;
+import helpers.ModelQuery.SimpleResults;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.joda.time.LocalDate;
+import models.Absence;
+import models.AbsenceType;
+import models.Contract;
+import models.Person;
+import models.PersonDay;
+import models.enumerate.JustifiedTimeAtWork;
+import models.query.QAbsence;
+import models.query.QAbsenceType;
+import models.query.QAbsenceTypeGroup;
 
-import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
+import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -16,15 +29,6 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import models.Absence;
-import models.AbsenceType;
-import models.Person;
-import models.PersonDay;
-import models.enumerate.JustifiedTimeAtWork;
-import models.query.QAbsence;
-import models.query.QAbsenceType;
-import models.query.QAbsenceTypeGroup;
 
 /**
  *
@@ -38,28 +42,30 @@ public class AbsenceDao extends DaoBase {
 		super(queryFactory, emp);
 	}
 
-	private final static QAbsence absence = QAbsence.absence;
+	private final static QAbsence absence = QAbsence.absence;	//TODO rimuoverli e metterli nei metodi!!!
 
-//	public Absence getAbsenceById(Long id){
-//
-//		final JPQLQuery query = getQueryFactory().from(absence)
-//				.where(absence.id.eq(id));
-//		return query.singleResult(absence);
-//
-//	}
+	public Absence getAbsenceById(Long id){
+
+		final QAbsence absence = QAbsence.absence;
+		
+		final JPQLQuery query = getQueryFactory().from(absence)
+				.where(absence.id.eq(id));
+		return query.singleResult(absence);
+
+	}
 
 	/**
 	 *
 	 * @param id
 	 * @return l'assenza con id specificato come parametro
 	 */
-	public static Absence getAbsenceById(Long id){
-
-		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-				.where(absence.id.eq(id));
-		return query.singleResult(absence);
-
-	}
+//	public static Absence getAbsenceById(Long id){
+//
+//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+//				.where(absence.id.eq(id));
+//		return query.singleResult(absence);
+//
+//	}
 	
 	
 
@@ -362,5 +368,26 @@ public class AbsenceDao extends DaoBase {
 		if(ordered)
 			query.orderBy(absence.personDay.date.asc());
 		return query.list(absence);
+	}
+	
+	/**
+	 * 
+	 * @param inter
+	 * @param contract
+	 * @param ab
+	 * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo temporale inter
+	 */
+	public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab)
+	{
+		
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
+		if(contractInterInterval==null)
+			return new ArrayList<Absence>();
+				
+		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
+				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
+		
+		return absences;	
+
 	}
 }

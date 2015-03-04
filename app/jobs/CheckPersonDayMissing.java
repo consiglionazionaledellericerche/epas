@@ -9,6 +9,8 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
+import com.google.inject.Inject;
+
 import play.Logger;
 import play.jobs.Job;
 
@@ -17,6 +19,8 @@ import play.jobs.Job;
 @SuppressWarnings("rawtypes")
 public class CheckPersonDayMissing extends Job{
 
+	@Inject
+	static PersonDayManager personDayManager; 
 	/**
 	 * controlla che nel giorno trascorso non ci siano persone senza timbrature e assenze (quindi non sia stato creato il personday corrispondente).
 	 * In tal caso lo crea e valorizza il tempo di lavoro a -workingTime e la differenza a -difference aggiornando di conseguenza il progressivo 
@@ -39,7 +43,7 @@ public class CheckPersonDayMissing extends Job{
 					Logger.debug("Non c'è personDay e non è festa per %s %s nel giorno %s", p.name, p.surname, dateBegin);
 					pd = new PersonDay(p, dateBegin);
 					pd.create();
-					PersonDayManager.populatePersonDay(pd);
+					personDayManager.populatePersonDay(pd);
 					pd.save();
 					Logger.debug("Creato person day per %s %s per il giorno %s in cui non risultavano nè timbrature nè codici di assenza", 
 							p.name, p.surname, dateBegin);

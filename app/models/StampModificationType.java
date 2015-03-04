@@ -7,13 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
-import com.google.common.base.Optional;
-
-import dao.StampingDao;
 import models.base.BaseModel;
 import net.sf.oval.constraint.MinLength;
+
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 
 
@@ -37,20 +35,5 @@ public class StampModificationType extends BaseModel{
 	
 	@OneToMany(mappedBy="stampModificationType")
 	public List<PersonDay> personDays;
-	
-	
-	public static StampModificationType getStampModificationTypeByCode(String code)
-	{
-		if(code==null)
-			return null;
-		
-		Optional<StampModificationType> smt = StampingDao.getStampModificationTypeByCode(code);
-		//StampModificationType smt = StampModificationType.find("byCode", code).first();
-		if(!smt.isPresent())
-		{
-			return null;
-		}
-		return smt.get();
-	}
 
 }

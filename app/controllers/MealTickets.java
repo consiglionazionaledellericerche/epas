@@ -35,6 +35,12 @@ public class MealTickets  extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static MealTicketManager mealTicketManager;
+	
 	public static void recapMealTickets(String name, Integer page, Integer max, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
@@ -44,7 +50,7 @@ public class MealTickets  extends Controller {
 		rules.checkIfPermitted();
 		
 		final List<Person> personList = PersonDao.list( 
-				Optional.fromNullable(name), OfficeDao.getOfficeAllowed(Security.getUser().get()), 
+				Optional.fromNullable(name), officeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 
@@ -119,7 +125,7 @@ public class MealTickets  extends Controller {
 		
 		rules.checkIfPermitted(contract.person.office);
 		
-		int mealTicketsTransfered = MealTicketManager.mealTicketsLegacy(contract);
+		int mealTicketsTransfered = mealTicketManager.mealTicketsLegacy(contract);
 		
 		if(mealTicketsTransfered == 0) {
 			flash.error("Non e' stato trasferito alcun buono pasto. Riprovare o effettuare una segnalazione.");

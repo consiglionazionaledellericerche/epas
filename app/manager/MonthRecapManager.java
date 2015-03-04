@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.google.inject.Inject;
 
 import dao.CompetenceDao;
 import dao.PersonDao;
@@ -22,6 +23,8 @@ import dao.PersonDayDao;
 
 public class MonthRecapManager {
 	
+	@Inject
+	public PersonDayDao personDayDao;
 	
 	private final static Logger log = LoggerFactory.getLogger(MonthRecapManager.class);
 	
@@ -153,7 +156,7 @@ public class MonthRecapManager {
 	 * @param listType enum: notJustifiedAbsences, justifiedAbsences, workingDayHoliday, workingDayNotHoliday
 	 * @return
 	 */
-	public static List<PersonDay> getPersonDayListRecap(Long id, int year, int month, String listType)
+	public List<PersonDay> getPersonDayListRecap(Long id, int year, int month, String listType)
 	{
 		
 		Person person = PersonDao.getPersonById(id);
@@ -178,7 +181,7 @@ public class MonthRecapManager {
 
 		}
 		
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
+		List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
 		
 		PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 		mr.populatePersonMonthRecap(person, pdList, year, month);
@@ -224,12 +227,12 @@ public class MonthRecapManager {
 	 * @param month
 	 * @return
 	 */
-	public static Table<Person,String,Integer> populateRealValueTable(List<Person> personList, LocalDate monthBegin, LocalDate monthEnd, int year, int month){
+	public Table<Person,String,Integer> populateRealValueTable(List<Person> personList, LocalDate monthBegin, LocalDate monthEnd, int year, int month){
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 		for(Person person : personList)
 		{
 			//person day list
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
 						
 			log.debug("populateRealValueTable -> costruisco riepilogo mensile per {} {} {}",
 					new Object[] { person.id, person.name, person.surname });

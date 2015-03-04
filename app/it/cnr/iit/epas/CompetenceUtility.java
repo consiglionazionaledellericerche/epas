@@ -6,7 +6,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import manager.PersonDayManager.PairStamping;
+
+import manager.PairStamping;
+import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Absence;
 import models.CertificatedData;
@@ -481,7 +483,7 @@ public class CompetenceUtility {
 			//check for the absence inconsistencies
 			//------------------------------------------
 				
-			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDayStatic(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 			//Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
 			
@@ -559,7 +561,7 @@ public class CompetenceUtility {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDayStatic(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			//Logger.debug("Prelevo il personDay %s per la persona %s - personDay=%s", personShiftDay.date, person, personDay);
 			
@@ -603,7 +605,8 @@ public class CompetenceUtility {
 						//-----------------------------
 						
 						// legge le coppie di timbrature valide 
-						List<PairStamping> pairStampings = PairStamping.getValidPairStamping(personDay.get().stampings);
+						//FIXME injettare il PersonDayManager
+						List<PairStamping> pairStampings = new PersonDayManager().getValidPairStamping(personDay.get().stampings);
 						
 						// se c'è una timbratura guardo se è entro il turno
 						if ((personDay.get().stampings.size() == 1) &&

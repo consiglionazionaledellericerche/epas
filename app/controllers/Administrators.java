@@ -2,7 +2,20 @@ package controllers;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import manager.OfficeManager;
+import models.Office;
+import models.Person;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
+
 import org.joda.time.LocalDate;
+
+import play.Play;
+import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 
@@ -12,15 +25,8 @@ import dao.PersonDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
-import manager.OfficeManager;
-import models.Office;
-import models.Person;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-import play.Play;
-import play.mvc.Controller;
-import play.mvc.With;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administrators extends Controller {
@@ -28,10 +34,22 @@ public class Administrators extends Controller {
 	private static final String SUDO_USERNAME = "sudo.username";
 	private static final String USERNAME = "username";
 
+	@Inject
+	static UsersRolesOfficesDao usersRolesOfficesDao;
+	
+	@Inject
+	static OfficeManager officeManager;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
 	@NoCheck
 	public static void insertNewAdministrator(Long officeId, Long roleId) {
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		//Office office = Office.findById(officeId);
 		if(office==null) {
 			
@@ -49,8 +67,8 @@ public class Administrators extends Controller {
 		
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, 
-					LocalDate.now(), LocalDate.now(), true).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
+				LocalDate.now(), LocalDate.now(), true).list();
 		
 		render(office, role, personList);
 	}
@@ -64,14 +82,16 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
 		//Per adesso faccio inserire solo alle sedi
-		if( !OfficeManager.isSeat(office) ) {
+		if( !wOffice.isSeat() ) {
 			
 			flash.error("Impossibile assegnare amministratori a livello diverso da quello Sede. Operazione annullata.");
 			Offices.showOffices();
 		}
 		
-		if( !OfficeManager.setUroIfImprove(person.user, office, role, true) ) {
+		if( !officeManager.setUroIfImprove(person.user, office, role, true) ) {
 		
 			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
 			Offices.showOffices();
@@ -84,7 +104,7 @@ public class Administrators extends Controller {
 	@NoCheck
 	public static void deleteAdministrator(Long officeId, Long personId) {
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		//Office office = Office.findById(officeId);
 		if(office==null) {
 			
@@ -100,7 +120,7 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
-		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(person.user, office);
+		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(person.user, office);
 		if( !uro.isPresent()) {
 			
 			flash.error("La persona non dispone di alcun ruolo amministrativo. Operazione annullata.");
@@ -142,7 +162,7 @@ public class Administrators extends Controller {
 	@NoCheck //TODO IMPORTANTE VA TOLTO!!!! admin non può chiamarlo
 	public static void deleteSelfAsAdministrator(Long officeId) {
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		//Office office = Office.findById(officeId);
 		if(office==null) {
 			

@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ContractManager;
-import manager.OfficeManager;
 import manager.WorkingTimeTypeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -34,6 +33,7 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperWorkingTimeType;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -50,9 +50,15 @@ public class WorkingTimes extends Controller{
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static ContractManager contractManager;
+	
 	public static void manageWorkingTime(Office office){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 		if(office == null || office.id == null) {
 			//TODO se offices è vuota capire come comportarsi
 			office = offices.iterator().next();
@@ -114,14 +120,17 @@ public class WorkingTimes extends Controller{
 	
 	public static void insertWorkingTime(Long officeId){
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
+		
 		if(office == null) {
 			
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!OfficeManager.isSeat(office)) {
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(!wOffice.isSeat()) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
@@ -158,7 +167,9 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!OfficeManager.isSeat(office)) {
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(!wOffice.isSeat()) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
@@ -283,7 +294,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		if(office == null) {
 			
 			flash.error("La sede inerente il cambio di orario è obbligatoria. Operazione annullata.");
@@ -318,7 +329,7 @@ public class WorkingTimes extends Controller{
 		
 		JPAPlugin.startTx(false);
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		if(office == null) {
 			
 			flash.error("Fornire la sede interessata per il cambio di orario. Operazione annullata.");
@@ -415,7 +426,7 @@ public class WorkingTimes extends Controller{
 					replaceContractWorkingTimeTypeList(contract, newCwttListClean);
 					Logger.info("recompute");
 
-					ContractManager.recomputeContract(contract, inputBegin, null);
+					contractManager.recomputeContract(contract, inputBegin, null);
 					
 					contractChanges++;
 

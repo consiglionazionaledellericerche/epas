@@ -7,10 +7,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.ConfYearManager;
+import manager.VacationManager;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Office;
 import models.Person;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
@@ -31,6 +32,14 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static VacationsRecapFactory vacationsFactory;
+	
+	@Inject
+	static VacationManager vacationManager;
 	
 	public static void list(Integer year, String name, Integer page){
 		
@@ -40,7 +49,7 @@ public class VacationsAdmin extends Controller{
 		LocalDate date = new LocalDate();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, date, date, true);
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, date, date, true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		
@@ -54,7 +63,7 @@ public class VacationsAdmin extends Controller{
 			Logger.info("%s", person.surname);
 			VacationsRecap vr = null;
 			try {
-				vr = VacationsRecap.Factory.build(year, ContractDao.getCurrentContract(person), new LocalDate(), true);
+				vr = vacationsFactory.create(year, ContractDao.getCurrentContract(person), new LocalDate(), true);
 				vacationsList.add(vr);
 			}
 			catch(IllegalStateException e){
@@ -63,11 +72,10 @@ public class VacationsAdmin extends Controller{
 		}
 				
 		Office office = Security.getUser().get().person.office;
-		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, office));
-		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, office));
-		LocalDate expireDate = LocalDate.now().withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
-		boolean isVacationLastYearExpired = VacationsRecap.isVacationsLastYearExpired(year, expireDate);
+		LocalDate expireDate =  vacationManager.vacationsLastYearExpireDate(year, office);
+		
+		boolean isVacationLastYearExpired = vacationManager.isVacationsLastYearExpired(year, expireDate);
 		render(vacationsList, isVacationLastYearExpired, personsWithVacationsProblems, year, simpleResults, name);
 	}
 	
@@ -84,7 +92,7 @@ public class VacationsAdmin extends Controller{
 		
 		VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
+    		vacationsRecap = vacationsFactory.create(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -115,7 +123,7 @@ public class VacationsAdmin extends Controller{
     	
     	VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
+    		vacationsRecap = vacationsFactory.create(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -145,7 +153,7 @@ public class VacationsAdmin extends Controller{
 		
     	VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
+    		vacationsRecap = vacationsFactory.create(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");

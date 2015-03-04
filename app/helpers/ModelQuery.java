@@ -69,6 +69,7 @@ public final class ModelQuery {
 	/**
 	 * @return un query factory per il querydsl
 	 */
+	@Deprecated
 	public static JPQLQueryFactory queryFactory() {
 		return factory;
 	}

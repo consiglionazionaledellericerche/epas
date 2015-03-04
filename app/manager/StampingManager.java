@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
-import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -22,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
+import com.google.inject.Inject;
 
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -30,6 +32,16 @@ import dao.StampingDao;
 public class StampingManager {
 
 	private final static Logger log = LoggerFactory.getLogger(StampingManager.class);
+
+	@Inject
+	public PersonStampingDayRecapFactory stampingDayRecapFactory;
+	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
 	/**
 	 * Versione per inserimento amministratore.
 	 * Costruisce la LocalDateTime della timbratura a partire dai parametri passati come argomento.
@@ -68,7 +80,7 @@ public class StampingManager {
 	 * @param type
 	 * @param markedByAdmin
 	 */
-	public static void addStamping(PersonDay pd, LocalDateTime time, String note,
+	public void addStamping(PersonDay pd, LocalDateTime time, String note,
 			boolean service, boolean type, boolean markedByAdmin) {
 
 		Stamping stamp = new Stamping();
@@ -100,7 +112,7 @@ public class StampingManager {
 		pd.stampings.add(stamp);
 		pd.save();
 
-		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	}
 
 	/**
@@ -112,14 +124,14 @@ public class StampingManager {
 	 * @param activePersonsInDay
 	 * @return 
 	 */
-	public static int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day, List<Person> activePersonsInDay){
+	public int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day, List<Person> activePersonsInDay){
 
 		LocalDate date = new LocalDate(year, month, day);
 		int max = 0;
 
 		for(Person person : activePersonsInDay){
 			PersonDay personDay = null;
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
+			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
 
 			if(pd.isPresent()) 
 			{
@@ -139,7 +151,7 @@ public class StampingManager {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public static boolean createStamping(StampingFromClient stamping){
+	public boolean createStamping(StampingFromClient stamping){
 
 		if(stamping == null)
 			return false;
@@ -164,7 +176,7 @@ public class StampingManager {
 
 		log.debug("Sto per segnare la timbratura di {}", person.getFullname());
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
 		if(!pd.isPresent()){
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
@@ -212,8 +224,9 @@ public class StampingManager {
 
 
 		}
+
 		log.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay {}", pd);
-		PersonDayManager.populatePersonDay(personDay);
+		personDayManager.populatePersonDay(personDay);
 
 		personDay.save();
 		return true;
@@ -269,19 +282,22 @@ public class StampingManager {
 
 
 	/**
-	 * 
+	 * La lista dei PersonStampingDayRecap renderizzata da presenza giornaliera.
 	 * @param activePersonsInDay
 	 * @param dayPresence
 	 * @param numberOfInOut
-	 * @return la lista di PersonStampingDayRecap che dovrà essere passata al template per 
+	 * @return  
 	 */
-	public static List<PersonStampingDayRecap> populatePersonStampingDayRecapList(List<Person> activePersonsInDay, LocalDate dayPresence, int numberOfInOut){
+	public List<PersonStampingDayRecap> populatePersonStampingDayRecapList(
+			List<Person> activePersonsInDay,
+			LocalDate dayPresence, int numberOfInOut) {
+		
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
 
 			PersonDay personDay = null;
 			person = PersonDao.getPersonById(person.id);
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
+			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){
 				personDay = new PersonDay(person, dayPresence);
@@ -291,8 +307,8 @@ public class StampingManager {
 				personDay = pd.get();
 			}
 
-			PersonDayManager.computeValidStampings(personDay);
-			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
+			personDayManager.computeValidStampings(personDay);
+			daysRecap.add( stampingDayRecapFactory.create(personDay, numberOfInOut) );
 
 		}
 		return daysRecap;
@@ -305,7 +321,7 @@ public class StampingManager {
 	 * @param beginMonth
 	 * @return la tabella contenente la struttura persona-data-buonopasto per tutte le persone attive
 	 */
-	public static Table<Person, LocalDate, String> populatePersonTicketTable(List<Person> activePersons, LocalDate beginMonth){
+	public Table<Person, LocalDate, String> populatePersonTicketTable(List<Person> activePersons, LocalDate beginMonth){
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 			public int compare(LocalDate date1, LocalDate date2) {
 				return date1.compareTo(date2);
@@ -319,7 +335,8 @@ public class StampingManager {
 		});
 		for(Person p : activePersons)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+			List<PersonDay> pdList = personDayDao
+					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
 
 			for(PersonDay pd : pdList){
 				if(pd.isTicketForcedByAdmin) {
