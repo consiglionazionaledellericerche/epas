@@ -43,6 +43,9 @@ public class MealTickets  extends Controller {
 	static MealTicketManager mealTicketManager;
 	
 	@Inject
+	static MealTicketDao mealTicketDao;
+	
+	@Inject
 	static MealTicketRecapFactory mealTicketFactory;
 	
 	public static void recapMealTickets(String name, Integer page, Integer max, 
@@ -82,7 +85,7 @@ public class MealTickets  extends Controller {
 			Preconditions.checkArgument(personAdded.isPersistent());
 			
 			List<BlockMealTicket> blockAdded = null;
-			List<MealTicket> mealTicketAdded = MealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
+			List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
 			blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
 
 			render(paginableList, page, max, name, blockAdded, personAdded);
@@ -111,7 +114,7 @@ public class MealTickets  extends Controller {
 		
 		LocalDate today = new LocalDate();
 		
-		LocalDate expireDate = MealTicketDao.getFurtherExpireDateInOffice(person.office);
+		LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
 		
 		User admin = Security.getUser().get();
 
@@ -183,7 +186,7 @@ public class MealTickets  extends Controller {
 		//Controllo esistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 					
-			MealTicket exist = MealTicketDao.getMealTicketByCode(mealTicket.code);
+			MealTicket exist = mealTicketDao.getMealTicketByCode(mealTicket.code);
 			if(exist!=null)  {
 				
 				flash.error("Il buono pasto con codice %s risulta già essere assegnato alla persona %s %s in data %s."
@@ -221,7 +224,7 @@ public class MealTickets  extends Controller {
 		}
 		List<Integer> codeBlockIds = Lists.newArrayList();
 		codeBlockIds.add(codeBlock);
-		List<MealTicket> mealTicketList = MealTicketDao.getMealTicketsInCodeBlockIds(codeBlockIds);
+		List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlockIds(codeBlockIds);
 		
 		if(mealTicketList == null || mealTicketList.size() == 0) {
 			flash.error("Il blocco selezionato è inesistente. Operazione annullata");

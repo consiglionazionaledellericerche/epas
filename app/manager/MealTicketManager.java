@@ -31,6 +31,9 @@ public class MealTicketManager {
 	@Inject
 	public PersonResidualYearRecapFactory yearFactory;
 	
+	@Inject
+	public MealTicketDao mealTicketDao;
+	
 	/**
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
 	 * @param codeBlock il codice del blocco di meal ticket
@@ -91,7 +94,7 @@ public class MealTicketManager {
 		
 		int mealTicketsTransfered = 0;
 		
-		List<MealTicket> contractMealTicketsDesc = MealTicketDao.getOrderedMealTicketInContract(previousContract);
+		List<MealTicket> contractMealTicketsDesc = mealTicketDao.getOrderedMealTicketInContract(previousContract);
 		for(int i = 0; i<monthRecap.buoniPastoResidui; i++) {
 
 			MealTicket ticketToChange = contractMealTicketsDesc.get(i);
@@ -114,7 +117,7 @@ public class MealTicketManager {
 		
 		DateInterval contractDataBaseInterval = ContractManager.getContractDatabaseDateInterval(contract);
 		
-		LocalDate officeStartDate = MealTicketDao.getMealTicketStartDate(contract.person.office);
+		LocalDate officeStartDate = mealTicketDao.getMealTicketStartDate(contract.person.office);
 		if(officeStartDate == null)
 			return null;
 		

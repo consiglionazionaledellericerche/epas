@@ -9,13 +9,18 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import dao.MealTicketDao;
+
 public class PersonResidualYearRecapFactory {
 	
 	private final PersonResidualMonthRecapFactory personResidualMonthRecapFactory;
+	private final MealTicketDao mealTicketDao;
 	
 	@Inject
-	public PersonResidualYearRecapFactory(PersonResidualMonthRecapFactory monthFactory) {
+	public PersonResidualYearRecapFactory(PersonResidualMonthRecapFactory monthFactory,
+			MealTicketDao mealTicketDao) {
 		personResidualMonthRecapFactory = monthFactory;
+		this.mealTicketDao = mealTicketDao;
 	}
 	
 	/**
@@ -29,7 +34,10 @@ public class PersonResidualYearRecapFactory {
 	 * forniti.
 	 */
 	public PersonResidualYearRecap create(Contract contract, int year, @Nullable LocalDate finoA) {
+		
 		Preconditions.checkNotNull(contract, "è richiesto un contratto non nullo");
-		return new PersonResidualYearRecap(contract, year, finoA, personResidualMonthRecapFactory);
+		
+		return new PersonResidualYearRecap(mealTicketDao, 
+				contract, year, finoA, personResidualMonthRecapFactory);
 	}
 }

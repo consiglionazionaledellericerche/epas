@@ -30,6 +30,7 @@ public class PersonResidualMonthRecap {
 	
 	private final IWrapperFactory wrapperFactory; 
 	private final AbsenceDao absenceDao;
+	private MealTicketDao mealTicketDao;
 	private final PersonDayDao personDayDao;
 
 	public final IWrapperContract contract;
@@ -80,8 +81,10 @@ public class PersonResidualMonthRecap {
 	public int buoniPastoConsegnatiNelMese = 0;
 	public int buoniPastoUsatiNelMese = 0;
 	public int buoniPastoResidui = 0;
+
 	
 	public PersonResidualMonthRecap(AbsenceDao absenceDao, PersonDayDao personDayDao,
+			MealTicketDao mealTicketDao,
 			IWrapperFactory wrapperFactory,	PersonResidualMonthRecap mesePrecedente,
 			Contract contract, int anno, int mese, int initMonteOreAnnoPassato,
 			int initMonteOreAnnoCorrente, int initMealTickets,
@@ -91,6 +94,7 @@ public class PersonResidualMonthRecap {
 		
 		this.absenceDao = absenceDao;
 		this.personDayDao = personDayDao;
+		this.mealTicketDao = mealTicketDao;
 		this.wrapperFactory = wrapperFactory;
 		this.mesePrecedente = mesePrecedente;
 		this.contract = this.wrapperFactory.create(contract);
@@ -243,7 +247,7 @@ public class PersonResidualMonthRecap {
 			
 			//Numero ticket consegnati nel mese
 			monthRecap.buoniPastoConsegnatiNelMese = 
-					MealTicketDao.getMealTicketAssignedToPersonIntoInterval(
+					mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
 							monthRecap.contract.getValue(), validDataForMealTickets).size();
 			
 			//residuo
