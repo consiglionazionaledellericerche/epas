@@ -60,7 +60,7 @@
      	   <!-- (1) definire colore riga tr: warning=nonInCnr, success=elaboratoOk, danger="elaboratoProblems" -->
 
 		   <!-- Non ancora elaborato -->
-		   #{if dipendente.getWrapperPerson().getCertificatedData(year, month) == null}
+		   #{if dipendente.person.getCertificatedData(year, month) == null}
 		     #{if dipendentiNonInCNR.contains(dipendente)}
 		     	<!-- non in cnr -->
 		     	<tr">
@@ -73,7 +73,7 @@
 		      
 		   <!-- Già elaborato -->
 		   #{else}
-		     #{if dipendente.getWrapperPerson().getCertificatedData(year, month).isOk }
+		     #{if dipendente.person.getCertificatedData(year, month).isOk }
 		       <tr class="success">
 		     #{/if}
 		     #{else}
@@ -89,7 +89,7 @@
 		      <td>${dipendente.cognomeNome}</td>
 		      
 		      <!-- Non ancora elaborato -->
-		      #{if dipendente.getWrapperPerson().getCertificatedData(year, month) == null}
+		      #{if dipendente.person.getCertificatedData(year, month) == null}
 		           #{if dipendentiNonInCNR.contains(dipendente)}
 		             <td>Non in CNR</td>
 		             <td></td>
@@ -108,7 +108,7 @@
 		      #{else}
 		        <!-- esito -->
 		        
-		        #{if dipendente.getWrapperPerson().getCertificatedData(year, month).isOk }
+		        #{if dipendente.person.getCertificatedData(year, month).isOk }
 		           <td class="success"><span class="glyphicon glyphicon-ok" style="color: green;"></span></td>
 		        #{/if}
 		        #{else}
@@ -118,14 +118,14 @@
 		        
 		        <!-- dati elaborati -->
 		        <td>
-		          #{if dipendente.getWrapperPerson().getCertificatedData(year, month) != null}
-		            <a href="@{UploadSituation.showCertificatedData(dipendente.getWrapperPerson().getCertificatedData(year, month).id)}" data-modal=".my-modal">dati</a>
+		          #{if dipendente.person.getCertificatedData(year, month) != null}
+		            <a href="@{UploadSituation.showCertificatedData(dipendente.person.getCertificatedData(year, month).id)}" data-modal=".my-modal">dati</a>
 		          #{/if}
 		        </td>
 		        <!-- problemi -->
 		        <td>
-		        #{if dipendente.getWrapperPerson().getCertificatedData(year, month).problems != null}
-		          <a href="@{UploadSituation.showProblems(dipendente.getWrapperPerson().getCertificatedData(year, month).id)}" data-modal=".my-modal">problemi</a>
+		        #{if dipendente.person.getCertificatedData(year, month).problems != null}
+		          <a href="@{UploadSituation.showProblems(dipendente.person.getCertificatedData(year, month).id)}" data-modal=".my-modal">problemi</a>
 		        #{/if}
 		        </td>
 		        <!-- elabora singolo -->
