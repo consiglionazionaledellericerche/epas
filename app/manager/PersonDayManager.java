@@ -671,7 +671,7 @@ public class PersonDayManager {
 				{
 					if(!s.valid)
 					{
-						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "timbratura disaccoppiata persona fixed");
+						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, PersonDayInTrouble.UNCOUPLED_FIXED);
 						return;
 					}
 				}
@@ -683,7 +683,7 @@ public class PersonDayManager {
 			//caso no festa, no assenze, no timbrature
 			if(!isAllDayAbsences(pd) && pd.stampings.size()==0 && !pd.isHoliday() && !isEnoughHourlyAbsences(pd))
 			{
-				PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
+				PersonDayInTroubleManager.insertPersonDayInTrouble(pd, PersonDayInTrouble.NO_ABS_NO_STAMP);
 				return;
 			}
 			
@@ -695,7 +695,7 @@ public class PersonDayManager {
 				{
 					if(!s.valid)
 					{
-						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "timbratura disaccoppiata giorno feriale");
+						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, PersonDayInTrouble.UNCOUPLED_WORKING);
 						return;
 					}
 				}
@@ -709,7 +709,7 @@ public class PersonDayManager {
 				{
 					if(!s.valid)
 					{
-						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "timbratura disaccoppiata giorno festivo");
+						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, PersonDayInTrouble.UNCOUPLED_HOLIDAY);
 						return;
 					}
 				}
