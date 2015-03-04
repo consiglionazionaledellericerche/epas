@@ -14,11 +14,12 @@ import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.troubles.PersonTroublesInMonthRecap;
+import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
 import models.Stamping;
-import models.rendering.PersonTroublesInMonthRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -62,6 +63,9 @@ public class Stampings extends Controller {
 	
 	@Inject
 	static StampingDao stampingDao;
+	
+	@Inject
+	static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
 	
 	public static void stampings(Integer year, Integer month) {
 
@@ -266,7 +270,7 @@ public class Stampings extends Controller {
 		
 		for(Person person : activePersons)
 		{
-			PersonTroublesInMonthRecap pt = new PersonTroublesInMonthRecap(person, monthBegin, monthEnd);
+			PersonTroublesInMonthRecap pt = personTroubleRecapFactory.create(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
 		render(month, year, missingStampings);

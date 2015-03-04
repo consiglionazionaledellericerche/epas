@@ -65,6 +65,9 @@ public class ConsistencyManager {
 	@Inject
 	public PersonDayDao personDayDao;
 	
+	@Inject
+	public PersonDayInTroubleDao personDayInTroubleDao;
+	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -143,7 +146,7 @@ public class ConsistencyManager {
 	 * @param end
 	 * @throws EmailException
 	 */
-	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
+	private void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
 
 		if(p.surname.equals("Conti") && p.name.equals("Marco")) {
 			
@@ -151,7 +154,7 @@ public class ConsistencyManager {
 			return;
 		}
 		
-		List<PersonDayInTrouble> pdList = PersonDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
+		List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
