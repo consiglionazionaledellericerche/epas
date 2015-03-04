@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.ConsistencyManager;
 import manager.ContractYearRecapManager;
 import manager.PersonManager;
@@ -20,7 +22,6 @@ import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 
 public class ResidualTest extends UnitTest {
 	

@@ -3,7 +3,6 @@ package manager.recaps.vacation;
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
-import manager.ContractManager;
 import manager.VacationManager;
 import models.Contract;
 
@@ -15,7 +14,6 @@ import dao.wrapper.IWrapperFactory;
 
 public class VacationsRecapFactory {
 
-	private ContractManager contractManager;
 	private AbsenceDao absenceDao;
 	private AbsenceTypeDao absenceTypeDao;
 	private ConfYearManager confYearManager;
@@ -26,12 +24,10 @@ public class VacationsRecapFactory {
 	VacationsRecapFactory(IWrapperFactory wrapperFactory, AbsenceDao absenceDao, 
 			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, VacationManager vacationManager) {
 				this.wrapperFactory = wrapperFactory;
-				this.contractManager = contractManager;
 				this.absenceDao = absenceDao;
 				this.absenceTypeDao = absenceTypeDao;
 				this.confYearManager = confYearManager;
 				this.vacationManager = vacationManager;
-		
 	}
 	
 	/**

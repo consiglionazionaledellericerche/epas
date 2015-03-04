@@ -2,14 +2,14 @@ package jobs;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Person;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
-
-import com.google.inject.Inject;
 
 import play.Logger;
 import play.jobs.Job;
