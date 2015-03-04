@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Office;
 import models.Permission;
 import models.Person;
@@ -19,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 
 import dao.OfficeDao;
 import dao.PersonDao;

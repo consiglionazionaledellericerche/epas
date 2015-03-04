@@ -1,5 +1,7 @@
 package controllers;
 
+import javax.inject.Inject;
+
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Person;
@@ -12,7 +14,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 
 import dao.ContractDao;
 import dto.VacationsShowDto;

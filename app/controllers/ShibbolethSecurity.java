@@ -5,10 +5,8 @@ import helpers.ModelQuery;
 
 import java.util.HashMap;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 
-import dao.RoleDao;
-import dao.UserDao;
 import models.Person;
 import models.query.QPerson;
 import play.Logger;
@@ -16,6 +14,7 @@ import play.Play;
 import play.Play.Mode;
 import play.cache.Cache;
 import play.mvc.Router;
+import dao.UserDao;
 
 /**
  * 
