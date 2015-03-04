@@ -24,9 +24,11 @@ public class PersonResidualYearRecap {
 	
 	public final List<PersonResidualMonthRecap> mesi;
 
-	public PersonResidualYearRecap(Contract contract, int year, LocalDate calcolaFinoA,
+	public PersonResidualYearRecap(MealTicketDao mealTicketDao, 
+			Contract contract, int year, LocalDate calcolaFinoA,
 			PersonResidualMonthRecapFactory factory) {
-		LocalDate dateStartMealTicket = MealTicketDao.getMealTicketStartDate(contract.person.office);
+		
+		LocalDate dateStartMealTicket = mealTicketDao.getMealTicketStartDate(contract.person.office);
 		
 		int firstMonthToCompute = 1;
 		LocalDate firstDayInDatabase = new LocalDate(year,1,1);
