@@ -4,9 +4,13 @@ import java.util.List;
 
 import manager.PersonManager;
 import models.Contract;
+import models.VacationPeriod;
 
+import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
+import dao.VacationPeriodDao;
 
 /**
  * @author marco
@@ -43,6 +47,20 @@ public class WrapperContract implements IWrapperContract {
 			return true;
 		else
 			return false;
+	}
+	
+	/**
+	 * La lista dei VacationPeriod associati al contratto in ordine crescente per data di inizio periodo.
+	 * @param contract
+	 * @return
+	 */
+	public List<VacationPeriod> getContractVacationPeriods() {
+	
+		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(this.value);
+
+		Verify.verify( ! vpList.isEmpty() );
+
+		return vpList;
 	}
 
 }

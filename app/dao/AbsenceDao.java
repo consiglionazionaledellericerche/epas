@@ -2,13 +2,17 @@ package dao;
 
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
@@ -364,5 +368,26 @@ public class AbsenceDao extends DaoBase {
 		if(ordered)
 			query.orderBy(absence.personDay.date.asc());
 		return query.list(absence);
+	}
+	
+	/**
+	 * 
+	 * @param inter
+	 * @param contract
+	 * @param ab
+	 * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo temporale inter
+	 */
+	public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab)
+	{
+		
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
+		if(contractInterInterval==null)
+			return new ArrayList<Absence>();
+				
+		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
+				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
+		
+		return absences;	
+
 	}
 }

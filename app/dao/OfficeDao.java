@@ -1,5 +1,7 @@
 package dao;
 
+import helpers.ModelQuery;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -60,8 +62,10 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista di tutti gli uffici presenti sul database
 	 */
 	public List<Office> getAllOffices(){
+		
 		QOffice office = QOffice.office1;
-		final JPQLQuery query = getQueryFactory().from(office);
+		
+		final JPQLQuery query = ModelQuery.queryFactory().from(office);
 		
 		return query.list(office);
 				
