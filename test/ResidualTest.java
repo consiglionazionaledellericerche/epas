@@ -8,6 +8,7 @@ import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
 import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
 import models.Person;
 
@@ -33,6 +34,9 @@ public class ResidualTest extends UnitTest {
 	
 	@Inject
 	public PersonManager personManager;
+	
+	@Inject
+	public VacationsRecapFactory vacationsFactory;
 	
     @Test
     public void residualLucchesi() throws EmailException {
@@ -71,7 +75,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
+			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -133,7 +137,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
+			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -195,7 +199,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
+			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -257,7 +261,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
+			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -319,7 +323,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
+			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
