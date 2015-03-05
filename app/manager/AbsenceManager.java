@@ -13,6 +13,7 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
+import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
@@ -42,6 +43,7 @@ import com.google.common.collect.Lists;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
+import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
@@ -263,7 +265,7 @@ public class AbsenceManager {
 				continue;
 			}
 			//TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
-			if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
+			if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13"))){
 				air.add(handlerChildIllness(person, actualDate, absenceType, file));
 				actualDate = actualDate.plusDays(1);
 				continue;
@@ -555,7 +557,7 @@ public class AbsenceManager {
 		 * lista dei codici di assenza da usare per le malattie dei figli
 		 */
 		//TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi		
-		if(PersonUtility.canTakePermissionIllnessChild(person, date, absenceType)){
+		if(canTakePermissionIllnessChild(person, date, absenceType)){
 			return insert(person, date,absenceType,file);
 		}
 		//		TODO Completare i controlli nel caso non sia possibile prendere il codice assenza per malattia dei figli
@@ -703,6 +705,55 @@ public class AbsenceManager {
 			return QualificationMapping.TECNICI.getRange().contains(q.qualification);
 		}
 		return false;
+	}
+	
+	/**
+	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
+	 */
+	private static boolean canTakePermissionIllnessChild(Person person, LocalDate date, AbsenceType abt){
+	
+		Preconditions.checkNotNull(person);
+		Preconditions.checkNotNull(abt);
+		Preconditions.checkNotNull(date);
+		Preconditions.checkState(person.isPersistent());
+		Preconditions.checkState(abt.isPersistent());
+
+		List<PersonChildren> childList = PersonChildrenDao.getAllPersonChildren(person);
+			
+//      1.Si verifica come prima cosa che la persona abbia il numero di figli adatto all'utilizzo del codice richiesto
+		
+		int childNumber = 1;
+		if (abt.code.length() >= 3){
+//		Se il codice è richiesto per i successivi figli lo recupero dal codice
+			childNumber = Integer.parseInt(abt.code.substring(2));
+		}
+		if(childList.size() < childNumber){
+			return false;
+		}
+		
+//		2. Si verifica che il figlio sia in età per l'utilizzo del codice d'assenza
+		
+		LocalDate limitDate = null; 
+		PersonChildren child = childList.get(childNumber-1);
+		int yearAbsences = 0;
+		if (abt.code.startsWith("12")){
+			limitDate = child.bornDate.plusYears(3);
+			yearAbsences = 30;
+		}
+		if (abt.code.startsWith("13")){
+			limitDate = child.bornDate.plusYears(8);
+			yearAbsences = 5;
+		}
+		if(limitDate.isBefore(date)){
+			return false;
+		}
+		
+//		3.  Verifica del numero di assenze prese con quel codice nell'ultimo anno permesso
+		
+		return AbsenceDao.getAbsenceByCodeInPeriod(Optional.of(person), 
+				Optional.of(abt.code),limitDate.minusYears(1), limitDate, 
+				Optional.<JustifiedTimeAtWork>absent(), false, false).size() < yearAbsences;
+		
 	}
 
 }
