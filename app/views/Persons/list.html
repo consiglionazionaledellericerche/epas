@@ -54,24 +54,24 @@
 		<td><font color="#000000">${person.currentContract.get().expireContract}</font></td>
 
 		<td>
-		  #{if person.currentWorkingTimeType != null}
+		  #{if person.currentWorkingTimeType.present}
 		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal">
-		      ${person.currentWorkingTimeType.description}
+		      ${person.currentWorkingTimeType.get().description}
 		    </a>
 		  #{/if}
 		</td>
 
 		<td>
-		  #{if person.currentVacationCode != null }
+		  #{if person.currentVacationPeriod.present }
 		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal">
-		        ${person.currentVacationCode.description}
+		        ${person.currentVacationPeriod.get().vacationCode.description}
 		     </a>
 		  #{/if}
 		</td>
 
 		<td><font color="#000000">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
 		<td>
-		  #{if person.currentContractStampProfile?.fixedworkingtime}
+		  #{if person.currentContractStampProfile.present && person.currentContractStampProfile.get().fixedworkingtime}
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>

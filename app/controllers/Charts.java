@@ -27,6 +27,7 @@ import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import exceptions.EpasExceptionNoSourceData;
 import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -189,8 +190,17 @@ public class Charts extends Controller{
 		
 		Person person = PersonDao.getPersonById(personId);
 		
-		FileInputStream inputStream = chartsManager.exportDataSituation(person);
-		renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
+		try {
+			
+			FileInputStream inputStream = chartsManager.exportDataSituation(person);
+			renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
+			
+		} catch (EpasExceptionNoSourceData e) {
+    		flash.error("Mancano i dati di inizializzazione per " 
+    				+ person.fullName());
+    		renderTemplate("Application/indexAdmin.html");
+		}
+		
 
 	}
 }

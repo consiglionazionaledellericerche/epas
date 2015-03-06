@@ -29,6 +29,7 @@ import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MealTickets  extends Controller {
@@ -48,6 +49,9 @@ public class MealTickets  extends Controller {
 	@Inject
 	static MealTicketRecapFactory mealTicketFactory;
 	
+	@Inject 
+	static IWrapperFactory wrapperFactory;
+	
 	public static void recapMealTickets(String name, Integer page, Integer max, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
@@ -56,24 +60,22 @@ public class MealTickets  extends Controller {
 				
 		rules.checkIfPermitted();
 		
+		//La lista di tutte le person con contratto attivo ad oggi.
 		final List<Person> personList = PersonDao.list( 
-				Optional.fromNullable(name), officeDao.getOfficeAllowed(Security.getUser().get()), 
-				false, LocalDate.now(), LocalDate.now(), true)
-				.list();
+				Optional.fromNullable(name), 
+				officeDao.getOfficeAllowed(Security.getUser().get()), 
+				false, LocalDate.now(), LocalDate.now(), true).list();
 
 		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
+		
 		for(Person person : personList) {
+
+			MealTicketRecap recap = mealTicketFactory.create(
+					wrapperFactory.create(person).getCurrentContract().get());
 			
-			MealTicketRecap recap = mealTicketFactory.create(ContractDao.getCurrentContract(person));
-			if(recap == null) {
-				System.out.println(person.toString());
-				continue;
-			}
 			if( max == null || recap.getRemaining() <= max ) {
 				mealTicketRecaps.add(recap);
 			}
-			
-			
 		}
 		
 		PaginableList<MealTicketRecap> paginableList = new PaginableList<MealTicketRecap>(mealTicketRecaps, page);
@@ -103,16 +105,19 @@ public class MealTickets  extends Controller {
 		
 		rules.checkIfPermitted(person.office);
 		
-		Contract contract = ContractDao.getCurrentContract(person);
-		Preconditions.checkNotNull(contract);
-		MealTicketRecap recap = mealTicketFactory.create(contract);
+		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+		Preconditions.checkState(contract.isPresent());
+				
+		MealTicketRecap recap = mealTicketFactory.create(contract.get());
 		
-		Contract previousContract = PersonDao.getPreviousPersonContract(contract);
+		Contract previousContract = PersonDao.getPreviousPersonContract(contract.get());
+		
 		MealTicketRecap recapPrevious = null;
+		
 		if(previousContract != null)
 			recapPrevious = mealTicketFactory.create(previousContract);
 		
-		LocalDate today = new LocalDate();
+		LocalDate today = LocalDate.now();
 		
 		LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
 		
@@ -198,7 +203,6 @@ public class MealTickets  extends Controller {
 		//Persistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 			mealTicket.date = LocalDate.now();
-			//mealTicket.contract = person.getContract(mealTicket.date);
 			mealTicket.contract = ContractDao.getContract(mealTicket.date, person);
 			mealTicket.admin = admin.person; 
 			mealTicket.save();

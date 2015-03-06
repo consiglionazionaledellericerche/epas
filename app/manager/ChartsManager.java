@@ -37,6 +37,7 @@ import play.db.jpa.Blob;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 
 import controllers.Security;
 import dao.AbsenceDao;
@@ -45,6 +46,9 @@ import dao.CompetenceDao;
 import dao.ConfGeneralDao;
 import dao.ContractDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import exceptions.EpasExceptionNoSourceData;
 
 public class ChartsManager {
 	
@@ -132,6 +136,9 @@ public class ChartsManager {
 	
 	@Inject
 	public VacationsRecapFactory vacationsFactory;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory;
 	
 	/**
 	 * 
@@ -430,8 +437,9 @@ public class ChartsManager {
 	 * @param person
 	 * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e residuo per la persona passata come parametro
 	 * @throws IOException
+	 * @throws EpasExceptionNoSourceData 
 	 */
-	public FileInputStream exportDataSituation(Person person) throws IOException{
+	public FileInputStream exportDataSituation(Person person) throws IOException, EpasExceptionNoSourceData{
 		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
 		FileInputStream inputStream = new FileInputStream( tempFile );
 		FileWriter writer = new FileWriter(tempFile, true);
@@ -440,13 +448,24 @@ public class ChartsManager {
 		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
 		out.newLine();
 		
-		VacationsRecap vr = vacationsFactory.create(LocalDate.now().getYear(), ContractDao.getCurrentContract(person), LocalDate.now(), false);
+		IWrapperPerson wPerson = wrapperFactory.create(person);
+		
+		Optional<Contract> contract = wPerson.getCurrentContract();
+		
+		Preconditions.checkState(contract.isPresent());
+				
+		VacationsRecap vr = vacationsFactory.create(LocalDate.now().getYear(),
+				contract.get(), LocalDate.now(), false);
 		
 		PersonResidualYearRecap pryr = 
 				yearFactory.create(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
 		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
-		WorkingTimeType wtt = ContractDao.getCurrentWorkingTimeType(person);
-		int workingTime = wtt.workingTimeTypeDays.get(0).workingTime;
+		
+		Optional<WorkingTimeType> wtt = wPerson.getCurrentWorkingTimeType();
+		
+		Preconditions.checkState(wtt.isPresent());
+		
+		int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
 		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
 				new Integer(vr.vacationDaysLastYearUsed.size()).toString()+','+

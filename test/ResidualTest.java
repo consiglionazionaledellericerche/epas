@@ -23,6 +23,8 @@ import play.test.UnitTest;
 
 import com.google.common.base.Optional;
 
+import exceptions.EpasExceptionNoSourceData;
+
 public class ResidualTest extends UnitTest {
 	
 	@Inject
@@ -41,7 +43,7 @@ public class ResidualTest extends UnitTest {
 	public VacationsRecapFactory vacationsFactory;
 	
     @Test
-    public void residualLucchesi() throws EmailException {
+    public void residualLucchesi() throws EmailException, EpasExceptionNoSourceData {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -100,7 +102,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualSanterini() throws EmailException {
+    public void residualSanterini() throws EmailException, EpasExceptionNoSourceData {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -162,7 +164,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualMartinelli() throws EmailException {
+    public void residualMartinelli() throws EmailException, EpasExceptionNoSourceData {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -224,7 +226,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualSuccurro() throws EmailException {
+    public void residualSuccurro() throws EmailException, EpasExceptionNoSourceData {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -286,7 +288,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualAbba() throws EmailException {
+    public void residualAbba() throws EmailException, EpasExceptionNoSourceData {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;

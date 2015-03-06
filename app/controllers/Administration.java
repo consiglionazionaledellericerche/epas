@@ -3,14 +3,11 @@ package controllers;
 import it.cnr.iit.epas.ExportToYaml;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.Person;
@@ -25,7 +22,7 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 
-import dao.ContractDao;
+import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 
@@ -42,7 +39,7 @@ public class Administration extends Controller {
 	@Inject
 	static PersonResidualYearRecapFactory yearFactory;
 	
-	
+	@NoCheck
 	public static void utilities(){
 
 		final List<Person> personList = PersonDao.list(
@@ -60,6 +57,7 @@ public class Administration extends Controller {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */
+	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
 
 		//TODO permessi
@@ -75,26 +73,6 @@ public class Administration extends Controller {
 		
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void personalResidualSituation() {
-		
-		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(), LocalDate.now(), true).list();
-
-		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
-		for(Person person : listPerson)
-		{
-			LocalDate today = new LocalDate().minusMonths(1);
-			PersonResidualYearRecap c = 
-					yearFactory.create(ContractDao.getCurrentContract(person), today.getYear(), null);
-			PersonResidualMonthRecap mese = c.getMese(today.getMonthOfYear());
-			listMese.add(mese);
-		}
-		render(listMese);
-	} 
-
-
-
 	public static void buildYaml()
 	{
 		//general

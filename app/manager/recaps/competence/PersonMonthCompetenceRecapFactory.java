@@ -3,7 +3,7 @@ package manager.recaps.competence;
 import javax.inject.Inject;
 
 import manager.recaps.residual.PersonResidualYearRecapFactory;
-import models.Person;
+import models.Contract;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 
@@ -22,18 +22,18 @@ public class PersonMonthCompetenceRecapFactory {
 	}
 	
 	/**
-	 * 
-	 * @param person
+	 * Il riepilogo competenze per il dipendente.
+	 * @param contract requires not null.
 	 * @param month
 	 * @param year
 	 * @return
 	 */
-	public PersonMonthCompetenceRecap create(Person person, int month,
+	public PersonMonthCompetenceRecap create(Contract contract, int month,
 			int year) {
 		
 		return new PersonMonthCompetenceRecap(competenceCodeDao,
 				competenceDao, yearFactory,
-				person, month, year);
+				contract, month, year);
 	}
 	
 }

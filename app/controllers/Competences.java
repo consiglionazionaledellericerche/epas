@@ -17,6 +17,7 @@ import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.TotalOvertime;
@@ -24,8 +25,9 @@ import models.User;
 import models.rendering.PersonCompetenceRecap;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -68,19 +70,30 @@ public class Competences extends Controller{
 	@Inject 
 	static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
 	
+	private final static Logger log = LoggerFactory.getLogger(Competences.class);
+	
 	public static void competences(int year, int month) {
 
-		//controllo dei parametri
 		Optional<User> user = Security.getUser();
+		
 		if( ! user.isPresent() || user.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-
-		PersonMonthCompetenceRecap personMonthCompetenceRecap =
-				personMonthCompetenceRecapFactory.create(user.get().person, month, year);
-
+		
 		Person person = user.get().person;
+		
+		Optional<Contract> contract = wrapperFactory.create(person)
+				.getLastContractInMonth(year, month);
+		
+		if(! contract.isPresent() ) {
+			flash.error("Nessun contratto attivo nel mese.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
+		PersonMonthCompetenceRecap personMonthCompetenceRecap =
+				personMonthCompetenceRecapFactory.create(contract.get(), month, year);
+
 		render(personMonthCompetenceRecap, person, year, month);
 
 	}
@@ -184,12 +197,20 @@ public class Competences extends Controller{
 		}
 		rules.checkIfPermitted(competence.person.office);
 		
-		Logger.info("Anno competenza: %s Mese competenza: %s", competence.year, competence.month);
-		Logger.info("value approved before = %s", competence.valueApproved);
+		log.info("Anno competenza: {} Mese competenza: {}", 
+				new Object[]{competence.year, competence.month});
+		
 		competence.valueApproved = value;
-		Logger.info("saved id=%s (person=%s) code=%s (value=%s)", competence.id, competence.person, 
-				competence.competenceCode.code, competence.valueApproved);
+
+		log.info("value approved before = {}", 
+				new Object[]{competence.valueApproved});
+		
 		competence.save();
+		
+		log.info("saved id={} (person={}) code={} (value={})", 
+				new Object[] { competence.id, competence.person, 
+				competence.competenceCode.code, competence.valueApproved} );
+
 		renderText("ok");
 	}
 		

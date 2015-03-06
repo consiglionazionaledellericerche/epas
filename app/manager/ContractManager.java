@@ -29,6 +29,7 @@ import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
+import exceptions.EpasExceptionNoSourceData;
 
 /**
  * 
@@ -157,8 +158,9 @@ public class ContractManager {
 	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
 	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
 	 *   modifica la data fine che potrebbe non essere persistita)
+	 * @throws EpasExceptionNoSourceData 
 	 */
-	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) throws EpasExceptionNoSourceData {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
@@ -408,15 +410,18 @@ public class ContractManager {
 	 * @param date
 	 * @return
 	 */
-	public static ContractStampProfile getContractStampProfileFromDate(Contract contract, LocalDate date) {
+	public static Optional<ContractStampProfile> getContractStampProfileFromDate(
+			Contract contract, LocalDate date) {
 		
 		for(ContractStampProfile csp : contract.contractStampProfile) {
+			
 			DateInterval interval = new DateInterval(csp.startFrom, csp.endTo);
+			
 			if(DateUtility.isDateIntoInterval(date, interval))
-				return csp;
+				return Optional.fromNullable(csp);
 			
 		}
-		return null;
+		return Optional.absent();
 	}
 	
 	/**

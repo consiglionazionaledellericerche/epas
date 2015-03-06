@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import exceptions.EpasExceptionNoSourceData;
 
 /**
  * 
@@ -87,8 +88,9 @@ public class ContractYearRecapManager {
 	 * Cancella i riepiloghi precedenti sovrascrivendoli con i nuovi calcoli.
 	 * 
 	 * @param contract
+	 * @throws EpasExceptionNoSourceData 
 	 */
-	public void buildContractYearRecap(Contract contract)
+	public void buildContractYearRecap(Contract contract) throws EpasExceptionNoSourceData
 	{
 		log.info("PopulateContractYearRecap {} contract id = {}", contract.person.getFullname(), contract.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
