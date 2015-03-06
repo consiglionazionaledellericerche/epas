@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QVacationCode extends EntityPathBase<VacationCode> {
 
-    private static final long serialVersionUID = -1221959794;
+    private static final long serialVersionUID = -1221959794L;
 
     public static final QVacationCode vacationCode = new QVacationCode("vacationCode");
 

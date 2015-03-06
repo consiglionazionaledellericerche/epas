@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QContract extends EntityPathBase<Contract> {
 
-    private static final long serialVersionUID = 2041582646;
+    private static final long serialVersionUID = 2041582646L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

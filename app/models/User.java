@@ -17,7 +17,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 @Entity
 @Audited
@@ -33,24 +33,24 @@ public class User extends BaseModel{
 	@NotAudited
 	@OneToOne(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Person person;
-	
+
 	@NotAudited
 	@OneToMany(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
-	
+
 
 	@Column(name="expire_recovery_token")
 	public LocalDate expireRecoveryToken;
-	
+
 	@Column(name="recovery_token")
 	public String recoveryToken;
-	
+
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
+		return MoreObjects.toStringHelper(this)
 				.add("id", this.id)
 				.add("user", this.username)
 				.toString();
-	}	
-	
+	}
+
 }

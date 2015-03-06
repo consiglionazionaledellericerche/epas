@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QInitializationTime extends EntityPathBase<InitializationTime> {
 
-    private static final long serialVersionUID = 1450202545;
+    private static final long serialVersionUID = 1450202545L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

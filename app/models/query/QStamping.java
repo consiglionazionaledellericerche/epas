@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QStamping extends EntityPathBase<Stamping> {
 
-    private static final long serialVersionUID = -374367133;
+    private static final long serialVersionUID = -374367133L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

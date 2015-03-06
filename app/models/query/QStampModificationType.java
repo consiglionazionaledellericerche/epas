@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QStampModificationType extends EntityPathBase<StampModificationType> {
 
-    private static final long serialVersionUID = 928972853;
+    private static final long serialVersionUID = 928972853L;
 
     public static final QStampModificationType stampModificationType = new QStampModificationType("stampModificationType");
 

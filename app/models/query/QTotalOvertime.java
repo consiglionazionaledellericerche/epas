@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QTotalOvertime extends EntityPathBase<TotalOvertime> {
 
-    private static final long serialVersionUID = -695659423;
+    private static final long serialVersionUID = -695659423L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
