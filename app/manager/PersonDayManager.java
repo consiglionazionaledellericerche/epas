@@ -149,7 +149,13 @@ public class PersonDayManager {
 			}
 			
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
-				justifiedTimeAtWork = justifiedTimeAtWork + ContractDao.getCurrentWorkingTimeType(pd.person).workingTimeTypeDays.get(pd.date.getDayOfWeek()).workingTime / 2;
+				
+				//FIXME controllare perchè secondo me qua c'era un errore. 
+				//Inoltre Va creato il Lazy personDayWorkingTimeTypeDay
+				justifiedTimeAtWork = justifiedTimeAtWork + 
+						WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person)
+						.workingTimeTypeDays.get(pd.date.getDayOfWeek()).workingTime / 2;
+				//justifiedTimeAtWork = justifiedTimeAtWork + ContractDao.getCurrentWorkingTimeType(pd.person).workingTimeTypeDays.get(pd.date.getDayOfWeek()).workingTime / 2;
 				continue;
 			}
 		}

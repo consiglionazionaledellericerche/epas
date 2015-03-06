@@ -56,6 +56,7 @@ import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
+import exceptions.EpasExceptionNoSourceData;
 
 
 @With( {Resecure.class, RequestInit.class} )
@@ -217,38 +218,45 @@ public class Absences extends Controller{
 	
 		rules.checkIfPermitted(person.office);
 		
-		AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
-				absenceType, Optional.fromNullable(file), Optional.<String>absent());
+		try {
+			
+			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
+					absenceType, Optional.fromNullable(file), Optional.<String>absent());
+			
+			//Verifica errori generali nel periodo specificato
+			if(air.hasWarningOrDaysInTrouble()){
+				
+				flash.error(String.format(air.getWarnings().iterator().next() + 
+						" - %s",air.getDatesInTrouble()));
+			}
+			
+			//Verifica degli errori sui singoli giorni
+			if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+				
+				Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+				
+				for(AbsencesResponse ar : air.getAbsences()){
+					errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+				}
 
-//		Verifica errori generali nel periodo specificato
-		if(air.hasWarningOrDaysInTrouble()){
-			
-			flash.error(String.format(air.getWarnings().iterator().next() + 
-					" - %s",air.getDatesInTrouble()));
-		}
-		
-//		Verifica degli errori sui singoli giorni
-		if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
-			
-			Multimap<String, LocalDate> errors = ArrayListMultimap.create();
-			
-			for(AbsencesResponse ar : air.getAbsences()){
-				errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+				flash.error(errors.toString());
 			}
 
-			flash.error(errors.toString());
-		}
-
-//		Verifica per eventuali giorni di reperibilità
-		if(air.getAbsenceInReperibilityOrShift() > 0){
-			flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
-		}
+			//Verifica per eventuali giorni di reperibilità
+			if(air.getAbsenceInReperibilityOrShift() > 0){
+				flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
+			}
+				
+			if(air.getTotalAbsenceInsert() > 0){
+				flash.success("Inserite %s assenze con codice %s", 
+						air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
+			}
 			
-		if(air.getTotalAbsenceInsert() > 0){
-			flash.success("Inserite %s assenze con codice %s", 
-					air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
+		} catch(EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+    				+ person.fullName());
 		}
-
+		
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
 	}
 	
@@ -334,67 +342,80 @@ public class Absences extends Controller{
 		Verify.verify(absence.isPersistent(),"Assenza specificata inesistente!");
 						
 		rules.checkIfPermitted(absence.personDay.person.office);
-		
+
 		if(file != null && file.exists()){
 			Logger.debug("ricevuto file di tipo: %s", file.type());
 		}
-		
+
 		Person person = absence.personDay.person;
 		LocalDate dateFrom =  absence.personDay.date;	
-			
+
 		if(dateTo != null && dateTo.isBefore(dateFrom)){
 			flash.error("Errore nell'inserimento del campo Fino a, inserire una data valida. Operazione annullata");
 		}
 		if(flash.contains("error")){
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
-							
-		int deleted = absenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
-		
-		if(deleted > 0){
-			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
-		}
-		
-//		Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
-		if(!absenceCode.isEmpty()){
-			
-			AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-			Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
 
-			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-					absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
-//			Verifica errori generali nel periodo specificato
-			if(air.hasWarningOrDaysInTrouble()){
-				flash.error(String.format(air.getWarnings().iterator().next() + 
-						" - %s",air.getDatesInTrouble()));
+		try {
+
+			//Logica
+			
+			int deleted = absenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
+
+			if(deleted > 0){
+				flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
 			}
 
-//			Verifica degli errori sui singoli giorni
-			if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+			//Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
+			if(!absenceCode.isEmpty()){
 
-				Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+				AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+				Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
 
-				for(AbsencesResponse ar : air.getAbsences()){
-					errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+
+
+				AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
+						absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
+
+				//Verifica errori generali nel periodo specificato
+				if(air.hasWarningOrDaysInTrouble()){
+					flash.error(String.format(air.getWarnings().iterator().next() + 
+							" - %s",air.getDatesInTrouble()));
 				}
 
-				flash.error(errors.toString());
-			}
+				//Verifica degli errori sui singoli giorni
+				if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
 
-//			Verifica per eventuali giorni di reperibilità
-			if(air.getAbsenceInReperibilityOrShift() > 0){
-				flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
-			}
+					Multimap<String, LocalDate> errors = ArrayListMultimap.create();
 
-			if(air.getTotalAbsenceInsert() > 0){
-				flash.success("Sostituito codice %s con codice %s in %s assenza/e", 
-					absence.absenceType.code,absenceCode,air.getTotalAbsenceInsert());
-			}
+					for(AbsencesResponse ar : air.getAbsences()){
+						errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+					}
+
+					flash.error(errors.toString());
+				}
+
+				//Verifica per eventuali giorni di reperibilità
+				if(air.getAbsenceInReperibilityOrShift() > 0){
+					flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
+				}
+
+				if(air.getTotalAbsenceInsert() > 0){
+					flash.success("Sostituito codice %s con codice %s in %s assenza/e", 
+							absence.absenceType.code,absenceCode,air.getTotalAbsenceInsert());
+				}
+
+			} 
+			
+		} catch (EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+					+ person.fullName());
 		}
-		
+
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 	}
-	
+
 	public static class AttachmentsPerCodeRecap {
 		
 		List<Absence> absenceSameType = new ArrayList<Absence>();

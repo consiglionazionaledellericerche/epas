@@ -1,17 +1,20 @@
 package manager;
 
 import manager.recaps.vacation.VacationsRecap;
+import models.Contract;
 import models.Office;
 import models.Person;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import dao.ContractDao;
 import dao.wrapper.IWrapperFactory;
+import exceptions.EpasExceptionNoSourceData;
 
 public class VacationManager {
 
@@ -38,11 +41,15 @@ public class VacationManager {
 	 * @param person
 	 * @param abt
 	 * @return
+	 * @throws EpasExceptionNoSourceData 
 	 */
-	public int remainingPastVacationsAs37(int year, Person person){
+	public int remainingPastVacationsAs37(int year, Person person) throws EpasExceptionNoSourceData{
 
+		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+		Preconditions.checkState(contract.isPresent());
+		
 		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
-				confYearManager, this, year, ContractDao.getCurrentContract(person), new LocalDate(), false)
+				confYearManager, this, year, contract.get(), new LocalDate(), false)
 					.vacationDaysLastYearNotYetUsed;
 		
 	}

@@ -32,12 +32,14 @@ import play.libs.Mail;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
+import exceptions.EpasExceptionNoSourceData;
 
 /**
  * Manager che gestisce la consistenza e la coerenza dei dati in Epas.
@@ -107,7 +109,13 @@ public class ConsistencyManager {
 				List<Contract> contractList = ContractDao.getPersonContractList(p);
 
 				for(Contract contract : contractList) {
-					contractYearRecapManager.buildContractYearRecap(contract);
+					try {
+						contractYearRecapManager.buildContractYearRecap(contract);
+					} catch (EpasExceptionNoSourceData e) {
+							log.warn("Manca l'inizializzazione per il contratto {} di {}",
+									new Object[]{contract.id, contract.person.getFullname()});
+						
+					}
 				}
 				
 			JPAPlugin.closeTx(false);
@@ -168,8 +176,12 @@ public class ConsistencyManager {
 				continue;
 			}
 			
-			ContractStampProfile csp = ContractManager.getContractStampProfileFromDate(contract, pdt.personDay.date);
-			if(csp.fixedworkingtime == true) {
+			Optional<ContractStampProfile> csp = ContractManager
+						.getContractStampProfileFromDate(contract, pdt.personDay.date);
+			
+			Preconditions.checkState(csp.isPresent());
+			
+			if(csp.get().fixedworkingtime == true) {
 				continue;
 			}
 			

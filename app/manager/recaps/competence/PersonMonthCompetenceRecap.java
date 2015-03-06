@@ -7,14 +7,13 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.Person;
-import play.Logger;
 import play.data.validation.Valid;
 
 import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
-import dao.ContractDao;
 
 /**
  * Riepilogo che popola la vista competenze del dipendente.
@@ -25,7 +24,7 @@ public class PersonMonthCompetenceRecap {
 	private CompetenceCodeDao competenceCodeDao;
 	private CompetenceDao competenceDao;	
 	
-	public Person person;
+	public Contract contract;
 	public int year;
 	public int month;
 	
@@ -35,30 +34,30 @@ public class PersonMonthCompetenceRecap {
 	public int daylightholidaysOvertime = 0;
 	public int ordinaryShift = 0;
 	public int nightShift = 0;
-	public int progressivoFinalePositivoMese;
+	public int progressivoFinalePositivoMese = 0;
 
 
 	public PersonMonthCompetenceRecap(CompetenceCodeDao competenceCodeDao,
 			CompetenceDao competenceDao, PersonResidualYearRecapFactory yearFactory,
-			Person person, int month, int year) {
+			Contract contract, int month, int year) {
 		
 		this.competenceCodeDao = competenceCodeDao;
 		this.competenceDao = competenceDao;
 		
-		this.person = person;
+		Preconditions.checkNotNull(contract);
+		
+		this.contract = contract;
 		this.year = year;
 		this.month = month;
 		
 		//TODO implementare dei metodi un pò più generali (con enum come parametro)
-		this.holidaysAvailability = getHolidaysAvailability(person, year, month);
-		this.weekDayAvailability = getWeekDayAvailability(person, year, month);
-		this.daylightWorkingDaysOvertime = getDaylightWorkingDaysOvertime(person, year, month);
-		this.daylightholidaysOvertime = getDaylightholidaysOvertime(person, year, month);
-		this.ordinaryShift = getOrdinaryShift(person, year, month);
-		this.nightShift = getNightShift(person, year, month);
-		
-		Contract contract = ContractDao.getCurrentContract(person);
-			
+		this.holidaysAvailability = getHolidaysAvailability(contract.person, year, month);
+		this.weekDayAvailability = getWeekDayAvailability(contract.person, year, month);
+		this.daylightWorkingDaysOvertime = getDaylightWorkingDaysOvertime(contract.person, year, month);
+		this.daylightholidaysOvertime = getDaylightholidaysOvertime(contract.person, year, month);
+		this.ordinaryShift = getOrdinaryShift(contract.person, year, month);
+		this.nightShift = getNightShift(contract.person, year, month);
+
 		PersonResidualYearRecap c = 
 				yearFactory.create(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
@@ -100,7 +99,6 @@ public class PersonMonthCompetenceRecap {
 		int weekDayAvailability = 0;
 		CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("207");
 
-		Logger.debug("Il codice competenza é: %s", cmpCode);
 		Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
 		if(competence.isPresent())
@@ -121,7 +119,6 @@ public class PersonMonthCompetenceRecap {
 		int daylightWorkingDaysOvertime = 0;
 		CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("S1");
 
-		Logger.debug("Il codice competenza é: %s", cmpCode);
 		Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
 		if(competence.isPresent())
@@ -141,7 +138,7 @@ public class PersonMonthCompetenceRecap {
 	private int getDaylightholidaysOvertime(Person person, int year, int month){
 		int daylightholidaysOvertime = 0;
 		CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("S2");
-		Logger.debug("Il codice competenza é: %s", cmpCode);
+
 		Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode); 
 
 		if(competence.isPresent())
@@ -162,7 +159,6 @@ public class PersonMonthCompetenceRecap {
 		int ordinaryShift = 0;
 		CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("T1");
 
-		Logger.debug("Il codice competenza é: %s", cmpCode);
 		Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
 		if(competence.isPresent())
@@ -183,7 +179,6 @@ public class PersonMonthCompetenceRecap {
 		int nightShift = 0;
 		CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("T2");
 
-		Logger.debug("Il codice competenza é: %s", cmpCode);
 		if(cmpCode == null)
 			return 0;
 		Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);

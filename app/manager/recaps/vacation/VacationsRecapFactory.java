@@ -11,6 +11,7 @@ import org.joda.time.LocalDate;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperFactory;
+import exceptions.EpasExceptionNoSourceData;
 
 public class VacationsRecapFactory {
 
@@ -36,9 +37,11 @@ public class VacationsRecapFactory {
 	 * @param month
 	 * @param year
 	 * @return
+	 * @throws EpasExceptionNoSourceData 
 	 */
 	public VacationsRecap create(int year, Contract contract,
-			LocalDate actualDate, boolean considerExpireLastYear) {
+			LocalDate actualDate, boolean considerExpireLastYear) 
+					throws EpasExceptionNoSourceData {
 		
 		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
 				confYearManager, vacationManager, year, contract,

@@ -18,8 +18,8 @@ import models.VacationPeriod;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
-
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -27,6 +27,7 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+import exceptions.EpasExceptionNoSourceData;
 
 
 /**
@@ -62,6 +63,8 @@ public class VacationsRecap {
 	public boolean isExpireBeforeEndYear = false;	/* true se il contratto termina prima della fine dell'anno richiesto */
 	public boolean isActiveAfterBeginYear = false;	/* true se il contratto inizia dopo l'inizio dell'anno richiesto */
 	
+	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
+	
 	/**
 	 * @param person
 	 * @param year l'anno in considerazione
@@ -70,10 +73,13 @@ public class VacationsRecap {
 	 * la situazione in termini di ferie e permessi maturati (tipicamente oggi)
 	 * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza per l'utilizzo
 	 * @return
+	 * @throws EpasExceptionNoSourceData 
 	 */
 	public VacationsRecap( IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
-			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, VacationManager vacationManager,
-			int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) {
+			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, 
+			VacationManager vacationManager,
+			int year, Contract contract, LocalDate actualDate, 
+			boolean considerExpireLastYear) throws EpasExceptionNoSourceData {
 		
 		Preconditions.checkNotNull(year);
 		Preconditions.checkNotNull(contract);
@@ -86,6 +92,9 @@ public class VacationsRecap {
 		IWrapperContract wrapperContract = wrapperFactory.create(this.contract);
 		
 		List<VacationPeriod> vacationPeriodList = wrapperContract.getContractVacationPeriods();
+		
+		Preconditions.checkNotNull(vacationPeriodList);
+		Preconditions.checkState( ! vacationPeriodList.isEmpty() );
 		
 		this.activeContractInterval = this.contract.getContractDateInterval();
 		this.vacationPeriodList = vacationPeriodList;
@@ -159,8 +168,11 @@ public class VacationsRecap {
 		else{
 			//Popolare da contractYearRecap
 			ContractYearRecap recapPastYear = ContractManager.getContractYearRecap(this.contract, year-1);
-			if(recapPastYear==null)
-				throw new IllegalStateException("Mancano i riepiloghi annuali.");
+			if(recapPastYear==null) {
+				log.error("Per {} manca il riepilogo anno {}, definire l'inizializzazione.", 
+						new Object[]{this.contract.person.getFullname() , year-1});
+				throw new EpasExceptionNoSourceData();
+			}
 			vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
 			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);						
@@ -174,7 +186,6 @@ public class VacationsRecap {
 		this.vacationDaysLastYearUsed.addAll(abs37Last);
 		while(this.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
 		{
-			Logger.debug("Inserita assenza nulla");
 			Absence nullAbsence = null;
 			this.vacationDaysLastYearUsed.add(nullAbsence);
 		}
@@ -199,7 +210,6 @@ public class VacationsRecap {
 		this.vacationDaysCurrentYearUsed.addAll(abs32Current);
 		while(this.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
 		{
-			Logger.debug("Inserita assenza nulla");
 			Absence nullAbsence = null;
 			this.vacationDaysCurrentYearUsed.add(nullAbsence);
 		}
@@ -223,7 +233,6 @@ public class VacationsRecap {
 		this.permissionUsed.addAll(abs94Current);
 		while(this.permissionUsed.size()<permissionCurrentYearUsedNew)
 		{
-			Logger.debug("Inserita assenza nulla");
 			Absence nullAbsence = null;
 			this.permissionUsed.add(nullAbsence);
 		}
