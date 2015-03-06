@@ -25,7 +25,7 @@ public class PersonChildrenDao {
 	 * @param id
 	 * @return il personChildren relativo all'id passato come parametro
 	 */
-	public static PersonChildren getPersonChildrenById(Long id){
+	public static PersonChildren getById(Long id){
 		QPersonChildren personChildren = QPersonChildren.personChildren;
 		final JPQLQuery query = ModelQuery.queryFactory().from(personChildren)
 				.where(personChildren.id.eq(id));

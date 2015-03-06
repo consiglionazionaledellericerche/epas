@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Office;
 import models.Permission;
 import models.Qualification;
@@ -30,6 +32,9 @@ import play.libs.Codec;
 import com.google.common.io.Resources;
 
 import controllers.Security;
+import dao.OfficeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
@@ -39,6 +44,12 @@ import controllers.Security;
  */
 @OnApplicationStart
 public class Bootstrap extends Job<Void> {
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 
 	public static class DatasetImport implements Work {
 
@@ -142,7 +153,9 @@ public class Bootstrap extends Job<Void> {
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
 			
-			if( !office.isSeat() )
+			IWrapperOffice wOffice = wrapperFactory.create(office);
+			
+			if( !wOffice.isSeat() )
 				continue;
 			
 			boolean hasBadgeReader = false;

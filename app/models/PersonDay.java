@@ -24,7 +24,6 @@ import javax.persistence.UniqueConstraint;
 import manager.PersonManager;
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -181,6 +180,7 @@ public class PersonDay extends BaseModel {
 	}
 
 	/**
+	 * FIXME il modello non deve usare i Dao. Spostare nel Dao o nel WrapperPersonDay
 	 * Il piano giornaliero di lavoro previsto dal contratto per quella data
 	 * @return 
 	 */
@@ -188,7 +188,7 @@ public class PersonDay extends BaseModel {
 		
 		//return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
 		//WorkingTimeType wtt = person.getWorkingTimeType(date);
-		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeType(date, person);
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeStatic(date, person);
 		if(wtt == null)
 			return null;
 		

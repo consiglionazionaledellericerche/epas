@@ -6,9 +6,9 @@ import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 
+import manager.recaps.vacation.VacationsRecap;
 import models.Absence;
 import models.Contract;
-import models.rendering.VacationsRecap;
 
 /**
  * 
@@ -58,7 +58,7 @@ public class VacationsShowDto {
 		
 		vacationsShow.year = year;
 		
-		vacationsShow.contract = first.activeContract;
+		vacationsShow.contract = first.contract;
 		
 		//Query anno corrente oppure anni passati
 		if(year <= LocalDate.now().getYear()) {

@@ -157,17 +157,16 @@ public class AbsenceTypeDao {
 
 	/**
 	 * 
-	 * @param begin
-	 * @param end
-	 * @param person
-	 * @return la lista dei codici di assenza presi dalla persona person nel periodo compreso tra begin e end
+	 * @return la lista di tutti i codici di assenza che prevedono la riduzione
+	 * dei giorni dell'anno su cui computare la maturazione delle ferie
 	 */
-//	public static List<AbsenceType> getAbsenceTypeInPeriod(LocalDate begin, LocalDate end, Person person){
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
-//		QAbsence absence = QAbsence.absence;
-//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-//				.where(absence.personDay.date.between(begin, end).and(absence.personDay.person.eq(person)).and(absence.absenceType.eq(absenceType)));
-//		return query.list(absenceType);
-//	}
+	public static List<AbsenceType> getReducingAccruingDaysForVacations(){
+		
+		JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.where(absenceType.code.startsWith("24")
+						.or(absenceType.code.startsWith("25").or(absenceType.code.startsWith("17C"))));
+		return query.list(absenceType);
+		
+	}
 	
 }

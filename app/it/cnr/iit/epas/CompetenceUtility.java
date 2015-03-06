@@ -5,26 +5,19 @@ import helpers.ModelQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.persistence.Query;
-
-import manager.PersonDayManager.PairStamping;
+import manager.PairStamping;
+import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
-import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.Stamping;
-import models.User;
-import manager.PersonDayManager;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
@@ -43,8 +36,6 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 
 
 public class CompetenceUtility {
@@ -492,24 +483,25 @@ public class CompetenceUtility {
 			//check for the absence inconsistencies
 			//------------------------------------------
 				
-			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDayStatic(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 			//Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
 			
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				//if (!person.isHoliday(personReperibilityDay.date)) {
-				if(PersonManager.isHoliday(person, personReperibilityDay.date)){
-					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
-				
-					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
-					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
-					inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);	
-				}
-			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
-				// check for the stampings in working days
-				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
-				if(PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+				 if(!PersonManager.isHoliday(person, personReperibilityDay.date)){
+					 Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+
+
+					 noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
+					 noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
+					 inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);	
+					   }
+					 } else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
+					 // check for the stampings in working days
+					 //if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
+					 if (!PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 					
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();	
@@ -569,7 +561,7 @@ public class CompetenceUtility {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDayStatic(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			//Logger.debug("Prelevo il personDay %s per la persona %s - personDay=%s", personShiftDay.date, person, personDay);
 			
@@ -613,7 +605,8 @@ public class CompetenceUtility {
 						//-----------------------------
 						
 						// legge le coppie di timbrature valide 
-						List<PairStamping> pairStampings = PairStamping.getValidPairStamping(personDay.get().stampings);
+						//FIXME injettare il PersonDayManager
+						List<PairStamping> pairStampings = new PersonDayManager().getValidPairStamping(personDay.get().stampings);
 						
 						// se c'è una timbratura guardo se è entro il turno
 						if ((personDay.get().stampings.size() == 1) &&

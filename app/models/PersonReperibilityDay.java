@@ -9,7 +9,6 @@ import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -35,7 +34,7 @@ public class PersonReperibilityDay extends BaseModel {
 	public PersonReperibility personReperibility;
 
 	@Required
-	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate date;
 
 	@Column(name = "holiday_day")

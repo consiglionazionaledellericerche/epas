@@ -10,10 +10,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-
-import models.base.BaseModel;
 
 
 

@@ -1,19 +1,18 @@
 package dao;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
@@ -21,30 +20,57 @@ import models.query.QAbsence;
 import models.query.QAbsenceType;
 import models.query.QAbsenceTypeGroup;
 
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+
 /**
- * 
+ *
  * @author dario
  *
  */
-public class AbsenceDao {
+public class AbsenceDao extends DaoBase {
 
-	private final static QAbsence absence = QAbsence.absence;
+	@Inject
+	AbsenceDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
 
-	/**
-	 * 
-	 * @param id
-	 * @return l'assenza con id specificato come parametro
-	 */
-	public static Absence getAbsenceById(Long id){
+	private final static QAbsence absence = QAbsence.absence;	//TODO rimuoverli e metterli nei metodi!!!
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+	public Absence getAbsenceById(Long id){
+
+		final QAbsence absence = QAbsence.absence;
+		
+		final JPQLQuery query = getQueryFactory().from(absence)
 				.where(absence.id.eq(id));
 		return query.singleResult(absence);
 
 	}
 
 	/**
-	 * 
+	 *
+	 * @param id
+	 * @return l'assenza con id specificato come parametro
+	 */
+//	public static Absence getAbsenceById(Long id){
+//
+//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+//				.where(absence.id.eq(id));
+//		return query.singleResult(absence);
+//
+//	}
+	
+	
+
+	/**
+	 *
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
@@ -53,7 +79,7 @@ public class AbsenceDao {
 	 * In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno.
 	 * Se il booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
 	 */
-	public static List<Absence> getAbsenceInDay(Optional<Person> person, LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment){
+	public static List<Absence> getAbsencesInPeriod(Optional<Person> person, LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment){
 
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence);
@@ -74,18 +100,18 @@ public class AbsenceDao {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param person
 	 * @param code
 	 * @param from
 	 * @param to
 	 * @param justifiedTimeAtWork
 	 * @param forAttachment
-	 * @return A seconda dei parametri passati alla funzione, può ritornare la lista dei codici di assenza in un certo periodo, 
+	 * @return A seconda dei parametri passati alla funzione, può ritornare la lista dei codici di assenza in un certo periodo,
 	 * le eventuali assenze di una persona in un certo periodo di tempo, le assenze da ritornare con codice giustificativo giornaliero,
 	 * le assenze da ritornare per il download degli allegati
 	 */
-	public static List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, Optional<String> code, 
+	public static List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, Optional<String> code,
 			LocalDate from, LocalDate to, Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment, boolean ordered){
 
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence);
@@ -110,11 +136,11 @@ public class AbsenceDao {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param begin
 	 * @param end
 	 * @param code
-	 * @return il numero di volte in cui viene utilizzato un certo codice di assenza nel periodo che va da begin a end 
+	 * @return il numero di volte in cui viene utilizzato un certo codice di assenza nel periodo che va da begin a end
 	 */
 	public static Long howManyAbsenceInPeriod(LocalDate begin, LocalDate end, String code){
 
@@ -127,7 +153,7 @@ public class AbsenceDao {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param begin
 	 * @param end
 	 * @param absenceCode
@@ -144,12 +170,20 @@ public class AbsenceDao {
 			return new Long(0);
 	}
 
+	/**
+	 * 
+	 * @param person
+	 * @param fromDate
+	 * @param toDate
+	 * @param absenceType
+	 * @return
+	 */
 	public static SimpleResults<Absence> findByPersonAndDate(Person person, LocalDate fromDate, Optional<LocalDate> toDate,Optional<AbsenceType> absenceType) {
 
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
 
-		BooleanBuilder conditions = 
+		BooleanBuilder conditions =
 				new BooleanBuilder(absence.personDay.person.eq(person).and(
 						absence.personDay.date.between(fromDate, toDate.or(fromDate))));
 		if(absenceType.isPresent()){
@@ -159,19 +193,19 @@ public class AbsenceDao {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param abt
 	 * @param person
 	 * @param begin
 	 * @param end
 	 * @return nella storia dei personDay, l'ultima occorrenza in ordine temporale del codice di rimpiazzamento (abt.absenceTypeGroup.replacingAbsenceType)
 	 * relativo al codice di assenza che intendo inserire.
-	 *  
+	 *
 	 */
 	public static Absence getLastOccurenceAbsenceInPeriod(AbsenceType abt, Person person, Optional<LocalDate> begin, LocalDate end){
 		QAbsence absence = QAbsence.absence;
 		final BooleanBuilder condition = new BooleanBuilder();
-		final JPQLQuery query = ModelQuery.queryFactory().from(absence);				
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence);
 		if(begin.isPresent())
 			condition.and(absence.personDay.date.between(begin.get(), end));
 		else
@@ -184,7 +218,7 @@ public class AbsenceDao {
 
 
 	/**
-	 * 
+	 *
 	 * @param abt
 	 * @param person
 	 * @param begin
@@ -194,13 +228,13 @@ public class AbsenceDao {
 	public static List<Absence> getReplacingAbsenceOccurrenceListInPeriod(AbsenceType abt, Person person, LocalDate begin, LocalDate end){
 		QAbsence absence = QAbsence.absence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-				.where(absence.absenceType.eq(abt.absenceTypeGroup.replacingAbsenceType)
+				.where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
 						.and(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end))));
 		return query.list(absence);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param abt
 	 * @param person
 	 * @param begin
@@ -218,7 +252,7 @@ public class AbsenceDao {
 
 
 	/**
-	 * 
+	 *
 	 * @param person
 	 * @param begin
 	 * @param end
@@ -236,9 +270,10 @@ public class AbsenceDao {
 
 	}
 
+
 	/**
 	 * Controlla che nell'intervallo passato in args non esista gia' una assenza giornaliera
-	 * 
+	 *
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
@@ -258,23 +293,23 @@ public class AbsenceDao {
 
 
 	/**
-	 * La lista delle assenze restituite è prelevata in FETCH JOIN con le absenceType i personDay e la person 
+	 * La lista delle assenze restituite è prelevata in FETCH JOIN con le absenceType i personDay e la person
 	 * in modo da non effettuare ulteriori select.
-	 * 
+	 *
 	 * @return la lista delle assenze che non sono di tipo internalUse effettuate in questo mese dalla persona relativa
 	 * 	a questo personMonth.
-	 * 
+	 *
 	 */
 	public static List<Absence> getAbsencesNotInternalUseInMonth(Person person, Integer year, Integer month) {
 		return AbsenceDao.getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 		//		return Absence.find(
 		//				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
-		//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
+		//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id",
 		//					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 	}
 
 	/**
-	 * 
+	 *
 	 * @param abt
 	 * @param pd
 	 * @return
@@ -297,5 +332,62 @@ public class AbsenceDao {
 		query2.where(condition);
 
 		return query2.count() > 0;
+	}
+	
+	/**
+	 * 
+	 * @param personList
+	 * @param from
+	 * @param to
+	 * @return la lista di assenze effettuate dalle persone presenti nella lista personList nel periodo temporale compreso tra 
+	 * from e to
+	 */
+	public static List<Absence> getAbsenceForPersonListInPeriod(List<Person> personList, LocalDate from, LocalDate to){
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+				.where(absence.personDay.date.between(from, to)
+						.and(absence.personDay.person.in(personList)))
+						.orderBy(absence.personDay.person.id.asc(),absence.personDay.date.asc());
+		return query.list(absence);
+	}
+
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @param postPartumCodeList
+	 * @param ordered
+	 * @return la lista delle assenze effettuate nel period begin-end dalla persona person appartenenti al tipo 'post-partum' presenti
+	 * nella lista passata come parametro
+	 */
+	public static List<Absence> getAbsenceWithPostPartumCode(Person person, LocalDate begin, LocalDate end, List<AbsenceType> postPartumCodeList, boolean ordered){
+		QAbsence absence = QAbsence.absence;
+				
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+				.where(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end).and(absence.absenceType.in(postPartumCodeList))));
+		if(ordered)
+			query.orderBy(absence.personDay.date.asc());
+		return query.list(absence);
+	}
+	
+	/**
+	 * 
+	 * @param inter
+	 * @param contract
+	 * @param ab
+	 * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo temporale inter
+	 */
+	public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab)
+	{
+		
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
+		if(contractInterInterval==null)
+			return new ArrayList<Absence>();
+				
+		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
+				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
+		
+		return absences;	
+
 	}
 }

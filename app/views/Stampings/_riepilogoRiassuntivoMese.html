@@ -17,7 +17,7 @@
     <div id="collapseFirst${mese.contract.id}" class="accordion-body collapse in">
       <div class="accordion-inner">
        
-	    #{if mese.contract.isLastInMonth(month,year)}
+	    #{if mese.isContractLastInMonth(month,year)}
 	      <p>Tempo disponibile per straordinari: 
 		    <strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong>
 	  	  </p>

@@ -8,7 +8,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -27,7 +26,7 @@ public class TotalOvertime extends BaseModel{
 	private static final long serialVersionUID = 468974629639837568L;
 
 	@Required
-	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate date;
 	
 	public Integer numberOfHours;

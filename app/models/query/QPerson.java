@@ -30,8 +30,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
-    public final BooleanPath boatsAllowanceAvailable = createBoolean("boatsAllowanceAvailable");
-
     public final DateTimePath<java.util.Date> bornDate = createDateTime("bornDate", java.util.Date.class);
 
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
@@ -53,15 +51,9 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath fax = createString("fax");
 
-    public final BooleanPath handleValuesAllowanceAvailable = createBoolean("handleValuesAllowanceAvailable");
-
-    public final BooleanPath hardshipAllowance = createBoolean("hardshipAllowance");
+    public final StringPath fullname = createString("fullname");
 
     public final StringPath headOffice = createString("headOffice");
-
-    public final BooleanPath holidayReperibilityAvailable = createBoolean("holidayReperibilityAvailable");
-
-    public final BooleanPath holidayShiftAvailable = createBoolean("holidayShiftAvailable");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -70,41 +62,19 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.InitializationTime, QInitializationTime> initializationTimes = this.<models.InitializationTime, QInitializationTime>createList("initializationTimes", models.InitializationTime.class, QInitializationTime.class, PathInits.DIRECT2);
 
-    public final BooleanPath ionicRadianceRiskCom1Available = createBoolean("ionicRadianceRiskCom1Available");
-
-    public final BooleanPath ionicRadianceRiskCom1AvailableBis = createBoolean("ionicRadianceRiskCom1AvailableBis");
-
-    public final BooleanPath ionicRadianceRiskCom3Available = createBoolean("ionicRadianceRiskCom3Available");
-
-    public final BooleanPath ionicRadianceRiskCom3AvailableBis = createBoolean("ionicRadianceRiskCom3AvailableBis");
-
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
-
-    public final BooleanPath mechanographicalAllowanceAvailable = createBoolean("mechanographicalAllowanceAvailable");
 
     public final StringPath mobile = createString("mobile");
 
     public final StringPath name = createString("name");
 
-    public final BooleanPath nightlyShiftAvailable = createBoolean("nightlyShiftAvailable");
-
     public final NumberPath<Integer> number = createNumber("number", Integer.class);
 
     public final QOffice office;
 
-    public final ListPath<models.Office, QOffice> officeAllowed = this.<models.Office, QOffice>createList("officeAllowed", models.Office.class, QOffice.class, PathInits.DIRECT2);
-
     public final NumberPath<Long> oldId = createNumber("oldId", Long.class);
 
-    public final BooleanPath ordinaryShiftAvailable = createBoolean("ordinaryShiftAvailable");
-
     public final StringPath othersSurnames = createString("othersSurnames");
-
-    public final BooleanPath overtimeInHolidayOrNightlyInWorkDayAvailable = createBoolean("overtimeInHolidayOrNightlyInWorkDayAvailable");
-
-    public final BooleanPath overtimeInNightlyHolidayAvailable = createBoolean("overtimeInNightlyHolidayAvailable");
-
-    public final BooleanPath overtimeInWorkDayAvailable = createBoolean("overtimeInWorkDayAvailable");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -125,29 +95,11 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final QPersonReperibility reperibility;
 
-    public final BooleanPath riskDegreeFiveAvailable = createBoolean("riskDegreeFiveAvailable");
-
-    public final BooleanPath riskDegreeFourAvailable = createBoolean("riskDegreeFourAvailable");
-
-    public final BooleanPath riskDegreeOneAvailable = createBoolean("riskDegreeOneAvailable");
-
-    public final BooleanPath riskDegreeThreeAvailable = createBoolean("riskDegreeThreeAvailable");
-
-    public final BooleanPath riskDegreeTwoAvailable = createBoolean("riskDegreeTwoAvailable");
-
-    public final BooleanPath riskDivingAllowanceAvailable = createBoolean("riskDivingAllowanceAvailable");
-
     public final StringPath room = createString("room");
 
     public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
 
-    public final ListPath<models.StampProfile, QStampProfile> stampProfiles = this.<models.StampProfile, QStampProfile>createList("stampProfiles", models.StampProfile.class, QStampProfile.class, PathInits.DIRECT2);
-
     public final StringPath surname = createString("surname");
-
-    public final BooleanPath taskAllowanceAvailable = createBoolean("taskAllowanceAvailable");
-
-    public final BooleanPath taskAllowanceIncreasedAvailable = createBoolean("taskAllowanceIncreasedAvailable");
 
     public final StringPath telephone = createString("telephone");
 
@@ -156,8 +108,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final NumberPath<Integer> version = createNumber("version", Integer.class);
 
     public final BooleanPath wantEmail = createBoolean("wantEmail");
-
-    public final BooleanPath workDayReperibilityAvailable = createBoolean("workDayReperibilityAvailable");
 
     public QPerson(String variable) {
         this(Person.class, forVariable(variable), INITS);

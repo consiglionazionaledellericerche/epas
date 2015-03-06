@@ -5,7 +5,6 @@ import helpers.attestati.AttestatiClient.LoginResponse;
 import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,6 +21,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.PersonDayManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -51,6 +51,7 @@ import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 
@@ -66,6 +67,13 @@ public class UploadSituation extends Controller{
 	
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static PersonDayManager personDayManager;
+	
 	
 	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
 	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
@@ -239,8 +247,8 @@ public class UploadSituation extends Controller{
 			}
 		}
 		
-		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(),
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -411,7 +419,7 @@ public class UploadSituation extends Controller{
 			List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
 
 			//Numero di buoni mensa da passare alla procedura di invio attestati
-			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
+			Integer mealTicket = personDayManager.numberOfMealTicketToUse(person, year, month);
 			
 			//vedere se l'ho gia' inviato con successo
 			CertificatedData cert = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
@@ -475,8 +483,10 @@ public class UploadSituation extends Controller{
 	 * Carica in cache la lista dipendenti abilitati in attestati.cnr
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private static List<Dipendente> loadAttestatiListaCached()
 	{
+		
 		return (List<Dipendente>)Cache.get(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().get().username);
 	}
 	
@@ -502,7 +512,8 @@ public class UploadSituation extends Controller{
 	{
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		final List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+				PersonDao.list(Optional.<String>absent(),
+						officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

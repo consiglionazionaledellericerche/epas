@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
+import manager.OfficeManager;
 import models.Office;
 import models.Role;
 
@@ -15,128 +16,128 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.RoleDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class})
 public class Offices extends Controller {
 
 	@Inject
 	static SecurityRules rules;
+
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory;
 	
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static OfficeManager officeManager;
+
 	@NoCheck
 	public static void showOffices(){
-		
-		List<Office> allAreas = Office.getAllAreas();
-		
+
+		List<IWrapperOffice> allAreas = FluentIterable
+				.from(officeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
+
 		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
 		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-//		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-//		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
-		
+
 		render(allAreas, roleAdmin, roleAdminMini);
 	}
-	
+
 	@NoCheck
 	public static void insertArea() {
-		
+
 		render();
 	}
-	
+
 	@NoCheck
 	public static void insertInstitute(Long areaId) {
+
+		Office area = officeDao.getOfficeById(areaId);
 		
-		Office area = OfficeDao.getOfficeById(areaId);
-		//Office area = Office.findById(areaId);
+		IWrapperOffice wArea = wrapperFactory.create(area);
 		
-		if(area == null || !area.isArea()) {
-			
-			flash.error("L'area specificata è inesistente. Operazione annullata.");
-			Offices.showOffices();
-		}
-		
-		rules.checkIfPermitted(area);
-		
-		render(area);
-	}
-	
-	@NoCheck
-	public static void saveInstitute(Long areaId, String name, String contraction) {
-		
-		Office area = OfficeDao.getOfficeById(areaId);
-		//Office area = Office.findById(areaId);
-		
-		if(area == null || !area.isArea()) {
-			
+		if(area == null || !wArea.isArea()) {
+
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
 		}
 
 		rules.checkIfPermitted(area);
+
+		render(area);
+	}
+
+	@NoCheck
+	public static void saveInstitute(Long areaId, String name, String contraction) {
+
+		Office area = officeDao.getOfficeById(areaId);
 		
+		IWrapperOffice wArea = wrapperFactory.create(area);
+
+		if(area == null || !wArea.isArea()) {
+
+			flash.error("L'area specificata è inesistente. Operazione annullata.");
+			Offices.showOffices();
+		}
+
+		rules.checkIfPermitted(area);
+
 		if( name == null || name.equals("") || contraction == null || contraction.equals("") ) {
-			
+
 			flash.error("Valorizzare correttamente entrambi i campi, operazione annullata.");
 			Offices.showOffices();
 		}
-		
-		Office office = OfficeDao.getOfficeByNameOrByContraction(Optional.fromNullable(name), Optional.<String>absent());
-		//Office office = Office.find("byName",name).first();
-		if( office != null ) {
-			
-			flash.error("Esiste gia' un istituto con nome %s, operazione annullata.", name);
+		Office office = officeDao.getOfficeByName(name);
+		String message = officeManager.checkIfExists(office, name, contraction); 
+		if(!message.equals("")){
+			flash.error(message);
 			Offices.showOffices();
 		}
-		
-		office = OfficeDao.getOfficeByNameOrByContraction(Optional.<String>absent(), Optional.fromNullable(contraction));
-		//office = Office.find("byContraction",name).first();
-		if( office != null ) {
-			
-			flash.error("Esiste gia' un istituto con sigla %s, operazione annullata.", contraction);
-			Offices.showOffices();
-		}
-
 		office = new Office();
-		office.name = name;
-		office.contraction = contraction;
-		office.office = area;
-		office.save();
-		
-		office.setPermissionAfterCreation();
-		
+		officeManager.saveInstitute(office, area, name, contraction);
+
+		officeManager.setPermissionAfterCreation(office);
+
 		flash.success("Istituto %s con sigla %s correttamente inserito", name, contraction);
 		Offices.showOffices();
 	}
-			
+
 	@NoCheck
 	public static void insertSeat(Long instituteId) {
-		Office institute = OfficeDao.getOfficeById(instituteId);
-		//Office institute = Office.findById(instituteId);
+		Office institute = officeDao.getOfficeById(instituteId);
 		if(institute==null) {
-			
+
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
+
 		rules.checkIfPermitted(institute);
-		
+
 		render(institute);
 	}
-	
+
 	@NoCheck
 	public static void saveSeat(Long instituteId, String name, String address, String code, String date) {
-	
-		Office institute = OfficeDao.getOfficeById(instituteId);
-		//Office institute = Office.findById(instituteId);
+
+		Office institute = officeDao.getOfficeById(instituteId);
 		if(institute==null) {
-			
+
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
+
 		rules.checkIfPermitted(institute);
 
 		//Parametri null
@@ -145,80 +146,59 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 
-		//errore campo data
-		if(getLocalDate(date)==null){
-			flash.error("Errore nell'inserimento del campo data. Valorizzare correttamente tutti i parametri.");
-			Offices.showOffices();
-		}
-
-		//errore campo sede
-		if(getInteger(code)==null){
-			flash.error("Errore nell'inserimento del campo codice sede. Valorizzare correttamente tutti i parametri.");
+		String message = OfficeManager.checkIfExistsSeat(code, date);
+		if(!message.equals("")){
+			flash.error(message);
 			Offices.showOffices();
 		}
 
 		//codice esistente
-		Office alreadyExist = OfficeDao.getOfficeByCode(getInteger(code));
-		//Office alreadyExist = Office.find("Select o from Office o where o.code = ?", getInteger(code)).first();
+		Office alreadyExist = officeDao.getOfficeByCode(OfficeManager.getInteger(code));
 		if(alreadyExist!=null){
 			flash.error("Il codice sede risulta gia' presente. Valorizzare correttamente tutti i parametri.");
 			Offices.showOffices();
 		}
-		
 		Office office = new Office();
-		office.name = name;
-		office.address = address;
-		office.code = getInteger(code);
-		office.joiningDate = getLocalDate(date);
-		office.office = institute;
-		office.save();
-		
-		//ConfGeneral
+		officeManager.saveSeat(office, name, address, code, date, institute);
+
 		ConfGeneralManager.buildDefaultConfGeneral(office);
-		
-		//ConfYear
-		//ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear());
-		//ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);
+
 		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear());
-		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);
-		
-		
-		
-		office.setPermissionAfterCreation();
-		
+		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);		
+
+		officeManager.setPermissionAfterCreation(office);
+
 		flash.success("Sede correttamente inserita");
 		Offices.showOffices();
 	}
 
 	@NoCheck
 	public static void editSeat(Long officeId){
-		
-		Office office = OfficeDao.getOfficeById(officeId);
-		//Office office = Office.findById(officeId);
-		
+
+		Office office = officeDao.getOfficeById(officeId);
+
 		if(office==null) {
-			
+
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
+
 		rules.checkIfPermitted(office);
-		
+
 		render(office);
-		
+
 	}
-	
+
 	@NoCheck
 	public static void updateSeat(Long officeId, String name, String address, String code, String date) {
-	
-		Office office = OfficeDao.getOfficeById(officeId);
-		//Office office = Office.findById(officeId);
+
+		Office office = officeDao.getOfficeById(officeId);
 		if(office==null) {
-			
+
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
+
 		rules.checkIfPermitted(office);
 
 		//Parametri null
@@ -228,71 +208,37 @@ public class Offices extends Controller {
 		}
 
 		//errore campo data
-		if(getLocalDate(date)==null){
-			flash.error("Errore nell'inserimento del campo data. Valorizzare correttamente tutti i parametri.");
-			Offices.showOffices();
-		}
-
-		//errore campo sede
-		if(getInteger(code)==null){
-			flash.error("Errore nell'inserimento del campo codice sede. Valorizzare correttamente tutti i parametri.");
+		String message = OfficeManager.checkIfExistsSeat(code, date);
+		if(!message.equals("")){
+			flash.error(message);
 			Offices.showOffices();
 		}
 
 		//codice uguale a sedi diverse da remoteOffice
-		List<Office> officeList = OfficeDao.getOfficesByCode(getInteger(code));
-		//List<Office> officeList = Office.find("Select o from Office o where o.code = ?", getInteger(code)).fetch();
+		List<Office> officeList = officeDao.getOfficesByCode(OfficeManager.getInteger(code));
 		for(Office off : officeList) {
-			
+
 			if( !off.id.equals(office.id) ) {
-				
+
 				flash.error("Il codice sede risulta gia' presente. Valorizzare correttamente tutti i parametri.");
 				Offices.showOffices();
 			}
 		}
-		
-		office.name = name;
-		office.address = address;
-		office.code = getInteger(code);
-		office.joiningDate = getLocalDate(date);
-		
-		office.save();
+		officeManager.updateSeat(office, name, address, code, date);
 		
 		flash.success("Sede correttamente modificata");
 		Offices.showOffices();
 	}
-	
-	
-	
+
+
+
 	private static boolean isNullOrEmpty(String parameter)
 	{
 		if( (parameter==null || parameter.equals("") ))
 			return true;
 		return false;
 	}
-	
-	private static Integer getInteger(String parameter)
-	{
-		try{
-			Integer i = Integer.parseInt(parameter);
-			return i;
 
-		}catch(Exception e)
-		{
-			return null;
-		}
-	}
-	
-	private static LocalDate getLocalDate(String parameter)
-	{
-		try{
-			LocalDate date = new LocalDate(parameter);
-			return date;
 
-		}catch(Exception e)
-		{
-			return null;
-		}
-	}
 
 }

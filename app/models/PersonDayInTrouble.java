@@ -16,6 +16,11 @@ import org.hibernate.envers.NotAudited;
 public class PersonDayInTrouble extends BaseModel
 {
 	
+	public final static String UNCOUPLED_FIXED = "timbratura disaccoppiata persona fixed";
+	public final static String NO_ABS_NO_STAMP = "no assenze giornaliere e no timbrature";
+	public final static String UNCOUPLED_WORKING = "timbratura disaccoppiata giorno feriale";
+	public final static String UNCOUPLED_HOLIDAY = "timbratura disaccoppiata giorno festivo";
+	
 	private static final long serialVersionUID = 4802468368796902865L;
 	
 	public String cause;
