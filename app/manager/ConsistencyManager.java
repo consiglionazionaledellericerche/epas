@@ -31,6 +31,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import controllers.Resecure.NoCheck;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -55,6 +56,7 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
+	@NoCheck
 	public static void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendEmail){
 		
