@@ -7,31 +7,35 @@ import models.Contract;
 import dao.MealTicketDao;
 import dao.PersonDao;
 
+/**
+ * @author alessandro
+ *
+ */
 public class MealTicketRecapFactory {
 
-	private MealTicketManager mealTicketManager;
-	private PersonDao personDao;
-	private MealTicketDao mealTicketDao;
+	private final MealTicketManager mealTicketManager;
+	private final PersonDao personDao;
+	private final MealTicketDao mealTicketDao;
 
 	@Inject
-	MealTicketRecapFactory(MealTicketManager mealTicketManager, 
+	MealTicketRecapFactory(MealTicketManager mealTicketManager,
 			PersonDao personDao, MealTicketDao mealTicketDao) {
 				this.mealTicketManager = mealTicketManager;
 				this.personDao = personDao;
 				this.mealTicketDao = mealTicketDao;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param person
 	 * @param month
 	 * @param year
 	 * @return
 	 */
 	public MealTicketRecap create(Contract contract) {
-		
+
 		return new MealTicketRecap(mealTicketManager,
 				personDao, mealTicketDao, contract);
 	}
-	
+
 }
