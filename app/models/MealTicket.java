@@ -15,6 +15,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 @Audited
@@ -61,7 +62,7 @@ public class MealTicket extends BaseModel{
 	@Override
 	public String toString() {
 
-		return Objects.toStringHelper(this)
+		return MoreObjects.toStringHelper(this)
 				.add("id", id)
 				.add("contract", contract.id)
 				.add("person", contract.person.name + " " + contract.person.surname)
@@ -69,6 +70,4 @@ public class MealTicket extends BaseModel{
 				.add("expire", expireDate).toString();
 
 	}
-
-
 }

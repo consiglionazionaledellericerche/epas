@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
 
-    private static final long serialVersionUID = 435340666;
+    private static final long serialVersionUID = 435340666L;
 
     public static final QCompetenceCode competenceCode = new QCompetenceCode("competenceCode");
 
