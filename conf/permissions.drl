@@ -327,6 +327,7 @@ when
      	"Persons.childrenList",
      	"Persons.saveChild",
      	"Persons.insertChild",
+     	"Persons.deleteChild",
      	"Persons.childrenList",
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
