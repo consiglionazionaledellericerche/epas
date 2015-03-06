@@ -286,23 +286,6 @@ public class PersonManager {
 		return monthContracts;
 	}
 	
-	
-	/**
-	 * 
-	 * @param name
-	 * @param surname
-	 * @param bornDate
-	 * @param person
-	 */
-	public static void savePersonChild(String name, String surname, LocalDate bornDate, Person person){
-		PersonChildren personChildren = new PersonChildren();
-		personChildren.name = name;
-		personChildren.surname = surname;
-		personChildren.bornDate = bornDate;
-		personChildren.person = person;
-		personChildren.save();
-	}
-	
 	/**
 	 * utilizzata nel metodo delete del controller Persons per cancellare gli eventuali figli della persona passata come parametro
 	 * @param person
@@ -311,7 +294,7 @@ public class PersonManager {
 		for(PersonChildren pc : person.personChildren){
 			long id = pc.id;
 			log.debug("Elimino figli di {}", person.getFullname());
-			pc = PersonChildrenDao.getPersonChildrenById(id);
+			pc = PersonChildrenDao.getById(id);
 			pc.delete();
 		}
 	}

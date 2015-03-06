@@ -309,7 +309,7 @@ public class ChartsManager {
 					}
 					else{
 						if(abs.absenceType.certificateCode.equalsIgnoreCase(assenza)){
-							continue;							
+							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, true, "", null);							
 						}
 						else{
 							if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
@@ -324,17 +324,18 @@ public class ChartsManager {
 					listNull.add(renderResult);
 					continue;
 				}
-
 				listTrueFalse.add(renderResult);
+				log.debug("Inserito in lista render result per {} in data {}", renderResult.cognome, renderResult.data);
 
 			}
+			System.out.print("Qui");
 			return new RenderList(listNull, listTrueFalse);
 		}
 		catch(Exception e)
 		{
 			log.warn("C'è del casino...");
 		}
-		return new RenderList(listTrueFalse, listNull);
+		return new RenderList(listNull, listTrueFalse);
 	}
 
 	/**
