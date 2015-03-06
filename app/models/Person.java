@@ -29,8 +29,6 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Email;
 import play.data.validation.Required;
-import play.mvc.With;
-import controllers.Secure;
 import dao.PersonMonthRecapDao;
 
 /**
@@ -40,7 +38,6 @@ import dao.PersonMonthRecapDao;
 @Entity
 @Audited
 @Table(name = "persons")
-@With(Secure.class)
 public class Person extends BaseModel implements Comparable<Person>{
 
 	private static final long serialVersionUID = -2293369685203872207L;
@@ -236,17 +233,17 @@ public class Person extends BaseModel implements Comparable<Person>{
 		int res = (this.surname.compareTo(person.surname) == 0) ?  this.name.compareTo(person.name) :  this.surname.compareTo(person.surname);
 		return res;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * //FIXME Questo metodo deve sparire una volta rifattorizzata UploadSituation....
 	 * Adesso viene reintrodotto per far funzionare la procedura dell'invio attestati.
-	 * 
+	 *
 	 * L'esito dell'invio attestati per la persona (null se non è ancora stato effettuato).
 	 * @param year
 	 * @param month
-	 * @return 
+	 * @return
 	 */
 	public CertificatedData getCertificatedData(int year, int month) {
 
