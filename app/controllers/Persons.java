@@ -781,7 +781,8 @@ public class Persons extends Controller {
 		PersonChildren child = PersonChildrenDao.getById(childId);
 		notFoundIfNull(child);
 		Person person = child.person;
-        
+		rules.checkIfPermitted(person.office);
+		
 		flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname, person.getFullname());
 		child.delete();
 		person.save();
