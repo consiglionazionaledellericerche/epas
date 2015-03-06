@@ -3,32 +3,31 @@ package controllers;
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
-import models.Absence;
+import manager.recaps.competence.PersonMonthCompetenceRecap;
+import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.TotalOvertime;
 import models.User;
 import models.rendering.PersonCompetenceRecap;
-import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -36,8 +35,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -46,7 +44,10 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
+import dao.wrapper.IWrapperCompetenceCode;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
@@ -54,18 +55,45 @@ public class Competences extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory; 
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static CompetenceManager competenceManager;
+	
+	@Inject 
+	static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
+	
+	private final static Logger log = LoggerFactory.getLogger(Competences.class);
+	
 	public static void competences(int year, int month) {
 
-		//controllo dei parametri
 		Optional<User> user = Security.getUser();
+		
 		if( ! user.isPresent() || user.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-
-		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.get().person, month, year);
-
+		
 		Person person = user.get().person;
+		
+		Optional<Contract> contract = wrapperFactory.create(person)
+				.getLastContractInMonth(year, month);
+		
+		if(! contract.isPresent() ) {
+			flash.error("Nessun contratto attivo nel mese.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
+		PersonMonthCompetenceRecap personMonthCompetenceRecap =
+				personMonthCompetenceRecapFactory.create(contract.get(), month, year);
+
 		render(personMonthCompetenceRecap, person, year, month);
 
 	}
@@ -73,46 +101,54 @@ public class Competences extends Controller{
 
 	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
 		
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		if(page==null)
 			page = 0;
 				
 		List<CompetenceCode> activeCompetenceCodes = PersonUtility.activeCompetence();
-		CompetenceCode competenceCode = null;
-		if(codice==null || codice=="")
-		{
-			competenceCode = activeCompetenceCodes.get(0);	//per adesso assumiamo che almeno una attiva ci sia (esempio S1)
+		
+		IWrapperCompetenceCode competenceCode = null;
+		
+		if(activeCompetenceCodes.size() == 0) {
+			flash.error("Per visualizzare la sezione Competenze è necessario abilitare almeno un codice competenza ad un dipendente.");
+			Competences.enabledCompetences(officeId, null);
+		}
+		
+		if(codice==null || codice=="") {
+			competenceCode = wrapperFactory.create(activeCompetenceCodes.get(0));
 		}
 		else
 		{
 			for(CompetenceCode compCode : activeCompetenceCodes)
 			{
 				if(compCode.code.equals(codice))
-					competenceCode = compCode;
+					competenceCode = wrapperFactory.create(compCode);
 			}
 		}		
-		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode, Optional.fromNullable(name), 
-				Sets.newHashSet(office), 
-				false, 
+		
+		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode.getValue(),
+				Optional.fromNullable(name), Sets.newHashSet(office), false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 
-		List<Person> activePersons = simpleResults.paginated(page).getResults();
+		List<IWrapperPerson> activePersons = FluentIterable
+				.from(simpleResults.paginated(page).getResults())
+				.transform(wrapperFunctionFactory.person()).toList();
 		
 		if(activePersons == null)
-			activePersons = new ArrayList<Person>();
+			activePersons = new ArrayList<IWrapperPerson>();
 		
 		//Redirect in caso di mese futuro
 		LocalDate today = new LocalDate();
@@ -120,14 +156,15 @@ public class Competences extends Controller{
 		{
 			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
 			month = today.getMonthOfYear();
+			//FIXME impostare il redirect!!
 		}
 		
-		for(Person p : activePersons){
+		for(IWrapperPerson p : activePersons){
 			Competence competence = null;
-			for(CompetenceCode c : p.competenceCode){
-				Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, c);
+			for(CompetenceCode c : p.getValue().competenceCode){
+				Optional<Competence> comp = CompetenceDao.getCompetence(p.getValue(), year, month, c);
 				if(!comp.isPresent()){
-					competence = new Competence(p, c, year, month);
+					competence = new Competence(p.getValue(), c, year, month);
 					competence.valueApproved = 0;
 					competence.save();
 				}
@@ -160,12 +197,20 @@ public class Competences extends Controller{
 		}
 		rules.checkIfPermitted(competence.person.office);
 		
-		Logger.info("Anno competenza: %s Mese competenza: %s", competence.year, competence.month);
-		Logger.info("value approved before = %s", competence.valueApproved);
+		log.info("Anno competenza: {} Mese competenza: {}", 
+				new Object[]{competence.year, competence.month});
+		
 		competence.valueApproved = value;
-		Logger.info("saved id=%s (person=%s) code=%s (value=%s)", competence.id, competence.person, 
-				competence.competenceCode.code, competence.valueApproved);
+
+		log.info("value approved before = {}", 
+				new Object[]{competence.valueApproved});
+		
 		competence.save();
+		
+		log.info("saved id={} (person={}) code={} (value={})", 
+				new Object[] { competence.id, competence.person, 
+				competence.competenceCode.code, competence.valueApproved} );
+
 		renderText("ok");
 	}
 		
@@ -212,16 +257,16 @@ public class Competences extends Controller{
 	
 	public static void totalOvertimeHours(int year, Long officeId){
 	
-		List<Office> offices = Security.getOfficeAllowed();		
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());		
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
@@ -234,11 +279,11 @@ public class Competences extends Controller{
 
 	public static void saveOvertime(Integer year, String numeroOre, Long officeId){
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
-		if(CompetenceManager.saveOvertime(year, numeroOre, officeId)){
+		if(competenceManager.saveOvertime(year, numeroOre, officeId)){
 			flash.success(String.format("Aggiornato monte ore per l'anno %s", year));
 		}
 		else{
@@ -250,17 +295,17 @@ public class Competences extends Controller{
 
 	public static void overtime(int year, int month, Long officeId, String name, Integer page){
 		
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 
 		rules.checkIfPermitted(office);
@@ -283,7 +328,7 @@ public class Competences extends Controller{
 				false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		tableFeature = CompetenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
+		tableFeature = competenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
 		
 		if(year != 0 && month != 0)
 			render(tableFeature, year, month, simpleResults, name, office, offices);
@@ -299,17 +344,17 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(Long officeId, String name){
 
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		LocalDate date = new LocalDate();		

@@ -8,6 +8,38 @@ import models.Permission;
 
 global models.User currentOperator;
 
+
+/*
+ * 		Permission: editAbsenceType
+ */
+rule editAbsenceType_generic
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "editAbsenceType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Absences.manageAbsenceCode"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ * 		Permission: developer
+ */
+rule developer
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "developer") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Administration.utilities",
+        "Administration.fixPersonSituation"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
 /*  
  *	Azioni eseguibili solo per le persone fisiche
  */
@@ -78,8 +110,12 @@ when
      	"Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
-     	"Persons.personChildrenList",
+     	"Persons.childrenList",
+     	"Persons.insertChild",
+     	"Persons.editChild",
+     	"Persons.removeChild",
      	"Persons.saveChild",
+     	"Persons.deleteChild",
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
@@ -235,7 +271,6 @@ when
        "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
- System.out.println("puppa");
  $c.grant();
 end
 
@@ -289,8 +324,11 @@ when
      	"Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
-     	"Persons.personChildrenList",
+     	"Persons.childrenList",
      	"Persons.saveChild",
+     	"Persons.insertChild",
+     	"Persons.deleteChild",
+     	"Persons.childrenList",
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",

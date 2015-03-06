@@ -5,19 +5,32 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
+import models.PersonChildren;
+import models.PersonYear;
+import models.User;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dao.ContractDao;
 import dao.OfficeDao;
+import dao.PersonChildrenDao;
 
 public class PersonManager {
 
+	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
+	@Inject
+	public OfficeDao officeDao;
+	
 	/**
 	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
@@ -74,16 +87,25 @@ public class PersonManager {
 	 * @param administrator
 	 * @return true se la persona è visibile al parametro amministratore
 	 */
-	public boolean isAllowedBy(Person administrator, Person person)
+	public boolean isAllowedBy(User admin, Person person)
 	{
+
+		Set<Office> adminOffices = officeDao.getOfficeAllowed(admin);
+		Set<Office> officeAllowed = officeDao.getOfficeAllowed(person.user);
+		
+		return adminOffices.contains(officeAllowed.iterator().next());
+		
+		/*
 		//List<Office> officeAllowed = administrator.getOfficeAllowed();
-		List<Office> officeAllowed = OfficeDao.getOfficeAllowed(person);
+		Set<Office> officeAllowed = officeDao.getOfficeAllowed(Optional.of(person.user));
 		for(Office office : officeAllowed)
 		{
 			if(office.id.equals(administrator.office.id))
 				return true;
 		}
 		return false;
+		*/
+
 	}
 	
 	/**
@@ -181,8 +203,7 @@ public class PersonManager {
 		{
 			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
 			{
-				//return cwtt.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-				return WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), cwtt.workingTimeType).holiday;
+				return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()-1).holiday;
 			}
 		}
 		
@@ -211,7 +232,7 @@ public class PersonManager {
 	 * @param year
 	 * @return
 	 */
-	public static List<Contract> getMonthContracts(Person person, Integer month, Integer year)
+	public List<Contract> getMonthContracts(Person person, Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
@@ -233,5 +254,65 @@ public class PersonManager {
 			}
 		}
 		return monthContracts;
+	}
+	
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public static List<Contract> getMonthContractsStatic(Person person, Integer month, Integer year)
+	{
+		List<Contract> monthContracts = new ArrayList<Contract>();
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
+		if(contractList == null){
+			return monthContracts;
+		}
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		for(Contract contract : contractList)
+		{
+			if(!contract.onCertificate)
+				continue;
+			DateInterval contractInterval = contract.getContractDateInterval();
+			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
+			{
+				monthContracts.add(contract);
+			}
+		}
+		return monthContracts;
+	}
+	
+	/**
+	 * utilizzata nel metodo delete del controller Persons per cancellare gli eventuali figli della persona passata come parametro
+	 * @param person
+	 */
+	public static void deletePersonChildren(Person person){
+		for(PersonChildren pc : person.personChildren){
+			long id = pc.id;
+			log.debug("Elimino figli di {}", person.getFullname());
+			pc = PersonChildrenDao.getById(id);
+			pc.delete();
+		}
+	}
+	
+	/**
+	 * Utilizzato nel metodo delete del controller Persons per eleminare turni, reperibilità, ore di formazione e riepiloghi annuali
+	 * per la persona person
+	 * @param person
+	 */
+	public static void deleteShiftReperibilityTrainingHoursAndYearRecap(Person person){
+		if(person.personHourForOvertime != null)
+			person.personHourForOvertime.delete();
+		if(person.personShift != null)
+			person.personShift.delete();
+		if(person.reperibility != null)
+			person.reperibility.delete();
+		for(PersonYear py : person.personYears){
+			py.delete();
+		}
 	}
 }

@@ -1,23 +1,33 @@
 package dao;
 
-import java.util.List;
-
-import play.Logger;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+
+import java.util.List;
+
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.PersonHourForOvertime;
+import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.query.QCompetence;
+import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
+import com.google.inject.Inject;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+
+import dao.wrapper.IWrapperFactory;
 
 /**
  * 
@@ -26,6 +36,14 @@ import com.mysema.query.jpa.JPQLQuery;
  */
 public class CompetenceDao {
 
+	private final static Logger log = LoggerFactory.getLogger(CompetenceDao.class);
+
+	@Inject
+	public IWrapperFactory wrapperFactory;
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
+	
 	/**
 	 * 
 	 * @param id
@@ -93,7 +111,6 @@ public class CompetenceDao {
 	}
 	
 	/**
-	 * 
 	 * @param person
 	 * @param year
 	 * @param month
@@ -177,14 +194,38 @@ public class CompetenceDao {
 	 */
 	public static List<Competence> getCompetenceInMonthForUploadSituation(Person person, Integer year, Integer month){
 		List<Competence> competenceList = CompetenceDao.getAllCompetenceForPerson(person, year, month);
-//		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
-//				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
-		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
+		
+		log.trace("Per la persona {} trovate {} competenze approvate nei mesi di {}/{}", 
+				new Object[]{person.getFullname(),competenceList.size(),month,year});
+		
 		return competenceList;
 	}
 	
-	/*********************************************************************************************************************************/
-	/*Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
+	
+	/**
+	 * 
+	 * @param type
+	 * @param year
+	 * @param month
+	 * @param code
+	 * @return la lista di competenze relative all'anno year, al mese month e al codice code di persone che hanno reperibilità 
+	 * di tipo type associata
+	 */
+	public static List<Competence> getCompetenceInReperibility(PersonReperibilityType type, int year, int month, CompetenceCode code){
+	      QCompetence competence = QCompetence.competence;
+	      QPerson person = QPerson.person;
+	      QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+	      JPQLQuery query = ModelQuery.queryFactory().from(competence)
+	              .leftJoin(competence.person, person)
+	              .leftJoin(person.reperibility.personReperibilityType, prt)
+	              .where(prt.eq(type)
+	            		  .and(competence.year.eq(year)
+	            				  .and(competence.month.eq(month)
+	            						  .and(competence.competenceCode.eq(code)))))
+	            						  .orderBy(competence.person.surname.asc());
+
+	      return query.list(competence);
+	  }
 	
 	/**
 	 * 
@@ -198,9 +239,6 @@ public class CompetenceDao {
 				.where(totalOvertime.year.eq(year).and(totalOvertime.office.eq(office)));
 		return query.list(totalOvertime);
 	}
-	
-	/**********************************************************************************************************************************/
-	/*Parte relativa a query su PersonHourForOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
 	
 	/**
 	 * 

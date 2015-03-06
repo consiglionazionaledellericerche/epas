@@ -5,7 +5,8 @@ import helpers.ModelQuery;
 
 import java.util.HashMap;
 
-import dao.RoleDao;
+import javax.inject.Inject;
+
 import models.Person;
 import models.query.QPerson;
 import play.Logger;
@@ -13,6 +14,7 @@ import play.Play;
 import play.Play.Mode;
 import play.cache.Cache;
 import play.mvc.Router;
+import dao.UserDao;
 
 /**
  * 
@@ -23,6 +25,9 @@ import play.mvc.Router;
  */
 public class ShibbolethSecurity extends controllers.shib.Security {
 
+	@Inject
+	static UserDao userDao;
+	
 	/**
 	 * This method checks that a profile is allowed to view this page/method.
 	 * This method is called prior to the method's controller annotated with the
@@ -68,7 +73,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 		if(person != null){
 			Cache.set(person.user.username, person, Security.CACHE_DURATION);
 			//Cache.set(Security.PERMISSION_CACHE_PREFIX + person.user.username, person.user.getAllPermissions(), Security.CACHE_DURATION);
-			Cache.set(Security.PERMISSION_CACHE_PREFIX + person.user.username, RoleDao.getAllPermissions(person.user), Security.CACHE_DURATION);
+			Cache.set(Security.PERMISSION_CACHE_PREFIX + person.user.username, userDao.getAllPermissions(person.user), Security.CACHE_DURATION);
 			Cache.set("personId", person.id, Security.CACHE_DURATION);
 
 			session.put("username", person.user.username);

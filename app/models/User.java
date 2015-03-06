@@ -13,7 +13,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -39,7 +38,7 @@ public class User extends BaseModel{
 	@OneToMany(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 	
-	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="expire_recovery_token")
 	public LocalDate expireRecoveryToken;
 	

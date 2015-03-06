@@ -11,33 +11,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-
-import controllers.Application;
-import controllers.Competences;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
 
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
+import com.google.inject.Inject;
+
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+
+
 public class CompetenceManager {
 	
+	@Inject
+	public OfficeDao officeDao;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory;
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	public PersonManager personManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
+	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
 	/**
 	 * 
 	 * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili
@@ -137,8 +157,8 @@ public class CompetenceManager {
 	 * @param officeId
 	 * @return true se è stato possibile inserire un aggiornamento per le ore di straordinario totali per l'ufficio office nell'anno year
 	 */
-	public static boolean saveOvertime(Integer year, String numeroOre, Long officeId){
-		Office office = OfficeDao.getOfficeById(officeId);
+	public boolean saveOvertime(Integer year, String numeroOre, Long officeId){
+		Office office = officeDao.getOfficeById(officeId);
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;
@@ -178,7 +198,7 @@ public class CompetenceManager {
 	 * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su orario di lavoro, straordinario,
 	 * riposi compensativi per l'anno year e il mese month per le persone dell'ufficio office
 	 */
-	public static Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
+	public Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
 			String name, Office office, LocalDate beginMonth, SimpleResults<Person> simpleResults, CompetenceCode code){
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
@@ -192,7 +212,7 @@ public class CompetenceManager {
 			Integer difference = 0;
 			Integer overtime = 0;
 			
-			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
@@ -237,6 +257,13 @@ public class CompetenceManager {
 			if( compCode.persons.size() > 0 )
 				codeList.add(compCode);			
 		}			
+		if(codeList.size() == 0){
+			for(Person p : personList){
+				builder.put(p, "", false);
+			}
+			tableRecapCompetence = builder.build();
+			return tableRecapCompetence;
+		}
 		for(Person p : personList) {
 
 			for(CompetenceCode comp : codeList){
@@ -264,7 +291,7 @@ public class CompetenceManager {
 			boolean value = false;
 			if (competence.containsKey(code.code)) {
 				value = competence.get(code.code);
-				Logger.info("competence %s is %s",  code.code, value);
+				log.info("competence {} is {}",  code.code, value);
 			}
 			if (!value){
 				if(person.competenceCode.contains(CompetenceCodeDao.getCompetenceCodeById(code.id)))
@@ -306,7 +333,7 @@ public class CompetenceManager {
 			if(result.isPresent())
 				totale = result.get().longValue();
 		
-			Logger.debug("Totale per %s %s vale %d", p.name, p.surname, totale);
+			log.debug("Totale per {} vale %d", p.getFullname(), totale);
 			out.write(p.surname+' '+p.name+',');
 			if(totale != null)			
 				out.append(totale.toString());
@@ -316,5 +343,44 @@ public class CompetenceManager {
 		}
 		out.close();
 		return inputStream;
+	}
+	
+	/**
+	 * Viene utilizzata nella delete della persona nel controller Persons
+	 * @param person
+	 */
+	public static void deletePersonCompetence(Person person){
+		for(Competence c : person.competences){
+			long id = c.id;
+			c = CompetenceDao.getCompetenceById(id);
+			c.delete();
+		}
+	}
+	
+	/**
+	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
+	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
+	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.
+	 * Nel caso di nessun contratto attivo nel mese viene ritornato il valore 0.
+	 * @param person
+	 * @param year
+	 * @param month
+	 */
+	public Integer positiveResidualInMonth(Person person, int year, int month){
+		
+		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		for(Contract contract : monthContracts)
+		{
+			IWrapperContract wContract = wrapperFactory.create(contract);
+			
+			if(wContract.isLastInMonth(month, year))
+			{
+				PersonResidualYearRecap c = 
+						yearFactory.create(contract, year, null);
+				if(c.getMese(month)!=null)
+					return c.getMese(month).progressivoFinalePositivoMese;
+			}
+		}
+		return 0;
 	}
 }

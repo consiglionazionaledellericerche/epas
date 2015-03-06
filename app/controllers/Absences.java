@@ -1,29 +1,19 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.CheckAbsenceInsert;
-import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.MainMenu;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
@@ -32,51 +22,41 @@ import manager.response.AbsencesResponse;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
-import models.ConfYear;
 import models.Person;
 import models.PersonDay;
-import models.PersonReperibilityDay;
-import models.PersonShiftDay;
 import models.Qualification;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
-import models.rendering.VacationsRecap;
+import models.enumerate.QualificationMapping;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-
 import play.Logger;
-import play.data.validation.InFuture;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.Blob;
-import play.db.jpa.JPA;
-import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
-import controllers.Resecure.NoCheck;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Range;
+
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import dao.AbsenceTypeGroupDao;
+import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.PersonReperibilityDayDao;
-import dao.PersonShiftDayDao;
 import dao.QualificationDao;
+import exceptions.EpasExceptionNoSourceData;
 
 
 @With( {Resecure.class, RequestInit.class} )
@@ -84,6 +64,15 @@ public class Absences extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static AbsenceDao absenceDao;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static AbsenceManager absenceManager;
 			
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
@@ -116,7 +105,6 @@ public class Absences extends Controller{
 		render(dateAbsences, absenceCode);
 	}
 
-	@NoCheck
 	public static void manageAbsenceCode(String name, Integer page){
 		if(page==null)
 			page = 0;
@@ -130,61 +118,78 @@ public class Absences extends Controller{
 	public static void insertAbsenceCode(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		List<Qualification> qualificationList = QualificationDao.getQualification(null, null, true);
-		List<AbsenceTypeGroup> abtList = AbsenceTypeGroupDao.getAbsenceTypeGroup(null,true);
 		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
 		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
 		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
 
-		render(qualificationList, abtList, justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
+		render(justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
 	}
 
 	public static void saveAbsenceCode(
 			@Required @Valid AbsenceType absenceType,
-			@Required String jwt,
-			@Required int qual,
-			AbsenceTypeGroup abtg,
+			@Required String justifiedTimeAtWork,
+			boolean tecnologi,
+			boolean tecnici,
+			AbsenceTypeGroup absenceTypeGroup,
 			String accBehaviour,
 			String accType,
 			String codiceSostituzione
 			){
 		
+		if (!(tecnologi || tecnici)){
+    	    params.flash();
+			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+			insertAbsenceCode();
+		}
+		
     	if (validation.hasErrors()){
     		flash.error(validation.errorsMap().toString());
-    		// TODO modificare il template per visualizzare gli errori di validazione
+//			TODO modificare il template per visualizzare gli errori di validazione
     	    insertAbsenceCode();
     	}
     	
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(jwt);
+		absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
 		
-		for(int i = 1; i <= qual; i++){
+		Range<Integer> qualifiche;
+		if(tecnologi && tecnici){
+			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
+		}
+		else if(tecnologi){
+			qualifiche = QualificationMapping.TECNOLOGI.getRange();
+		}
+		else{
+			qualifiche = QualificationMapping.TECNICI.getRange();
+		}
+				
+		for(int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++){
 			Qualification q = QualificationDao.byQualification(i).orNull();
 			absenceType.qualifications.add(q);
 		}
 
-		if(abtg.label != null && !abtg.label.isEmpty()){
-			abtg.accumulationBehaviour = AccumulationBehaviour.getByDescription(accBehaviour);
-			abtg.accumulationType = AccumulationType.getByDescription(accType);
+		if(absenceTypeGroup.label != null && !absenceTypeGroup.label.isEmpty()){
+			absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription(accBehaviour);
+			absenceTypeGroup.accumulationType = AccumulationType.getByDescription(accType);
 
 			if(accBehaviour.equals(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation.description)){
-				abtg.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione);
+				absenceTypeGroup.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione);
 			}
-			absenceType.absenceTypeGroup = abtg;
-			abtg.save();
+			absenceType.absenceTypeGroup = absenceTypeGroup;
+			absenceTypeGroup.save();
 		}
 		
 		absenceType.save();
+		Logger.info("Inserito nuovo codice di assenza %s", absenceType.code);
 		flash.success("Inserito nuovo codice di assenza %s", absenceType.code);
 		
 		manageAbsenceCode(null, null);
 	}
 
-	public static void create(@Required Long personId, @Valid @Required LocalDate date) {
+	public static void create(@Required Long personId, @Valid @NotNull LocalDate date) {
 		
 		if (validation.hasErrors()){
-    		flash.error(validation.errorsMap().toString());
+    		flash.error(validation.errors().toString());
     	    render();
     	}
 		
@@ -193,7 +198,6 @@ public class Absences extends Controller{
 		
 		rules.checkIfPermitted(person.office);
 		
-		Logger.debug("Insert absence called for personId = %s, %s", personId, date);
 		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
 		List<AbsenceType> allCodes = AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
 
@@ -201,63 +205,58 @@ public class Absences extends Controller{
 		render(personDay, frequentAbsenceTypeList, allCodes);
 	}
 
-	public static void insert(@Required Long personId, 
-			@Required LocalDate dateFrom,
+	public static void insert(@Required Person person, 
+			@NotNull LocalDate dateFrom,
 			LocalDate dateTo,
 			@Required String absenceCode, 
 			Blob file){
 
 		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-		Person person = PersonDao.getPersonById(personId);
 		
-		if(person == null){
-			flash.error("id della persona non valido");
-		}
-		if(absenceType == null){
-			flash.error("codice di assenza %s inesistente", absenceCode);
-		}
-	
-		if(flash.contains("error")){
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
-		}
+		Verify.verify(person.isPersistent(),"Persona specificata non esistente!");
+		Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
 	
 		rules.checkIfPermitted(person.office);
 		
-		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
-		AbsenceInsertReport air = AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
-				absenceType, Optional.fromNullable(file), Optional.<String>absent());
-		
+		try {
+			
+			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
+					absenceType, Optional.fromNullable(file), Optional.<String>absent());
+			
+			//Verifica errori generali nel periodo specificato
+			if(air.hasWarningOrDaysInTrouble()){
+				
+				flash.error(String.format(air.getWarnings().iterator().next() + 
+						" - %s",air.getDatesInTrouble()));
+			}
+			
+			//Verifica degli errori sui singoli giorni
+			if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+				
+				Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+				
+				for(AbsencesResponse ar : air.getAbsences()){
+					errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+				}
 
-//		Verifica errori generali nel periodo specificato
-		if(air.hasWarningOrDaysInTrouble()){
-			
-			flash.error(String.format(air.getWarnings().iterator().next() + 
-					" - %s",air.getDatesInTrouble()));
-		}
-		
-//		Verifica degli errori sui singoli giorni
-		if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
-			
-			Multimap<String, LocalDate> errors = ArrayListMultimap.create();
-			
-			for(AbsencesResponse ar : air.getAbsences()){
-				errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+				flash.error(errors.toString());
 			}
 
-			flash.error(errors.toString());
-		}
-
-
-//		Verifica per eventuali giorni di reperibilità
-		if(air.getAbsenceInReperibilityOrShift() > 0){
-			flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
-		}
+			//Verifica per eventuali giorni di reperibilità
+			if(air.getAbsenceInReperibilityOrShift() > 0){
+				flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
+			}
+				
+			if(air.getTotalAbsenceInsert() > 0){
+				flash.success("Inserite %s assenze con codice %s", 
+						air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
+			}
 			
-		if(air.getTotalAbsenceInsert() > 0){
-			flash.success("Inserite %s assenze con codice %s", 
-					air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
+		} catch(EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+    				+ person.fullName());
 		}
-
+		
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
 	}
 	
@@ -266,150 +265,157 @@ public class Absences extends Controller{
 		
 		AbsenceType abt = AbsenceTypeDao.getAbsenceTypeById(absenceCodeId);
 		
-		List<Qualification> qualList = QualificationDao.getQualification(null, null, true);
-		List<JustifiedTimeAtWork> justList = Lists.newArrayList(JustifiedTimeAtWork.values());
-		List<AccumulationType> accType = Lists.newArrayList(AccumulationType.values());
-		List<AccumulationBehaviour> behaviourType = Lists.newArrayList(AccumulationBehaviour.values());
-
-		render(abt, justList, qualList, accType, behaviourType);
+		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
+		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
+		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
+		
+		boolean tecnologo = false;
+		boolean tecnico = false;
+		
+		for(Qualification q : abt.qualifications){
+			tecnologo = !tecnologo ? QualificationMapping.TECNOLOGI.contains(q) : tecnologo;
+			tecnico = !tecnico ? QualificationMapping.TECNICI.contains(q) : tecnico;
+		}
+				
+		render(abt,justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
 	}
 
 	
-	public static void updateCode(){
+	public static void updateCode(@Required @Valid AbsenceType absenceType,
+			boolean tecnologi,
+			boolean tecnici){
+		
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		//TODO: rimuovere tutti i params.get presenti nel metodo passandoli invece come parametri al metodo stesso
-		AbsenceType absence = AbsenceTypeDao.getAbsenceTypeById(params.get("absenceTypeId", Long.class));
-		//AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
-		if(absence == null)
-			notFound();
-		Logger.debug("Il codice d'assenza da modificare è %s", absence.code);
-		absence.description = params.get("descrizione");
-		Logger.debug("Il valore di uso interno è: %s", params.get("usoInterno", Boolean.class));
-		Logger.debug("Il valore di uso multiplo è: %s", params.get("usoMultiplo", Boolean.class));
-		Logger.debug("Il valore di tempo giustificato è: %s", params.get("abt.justifiedTimeAtWork"));
-		absence.internalUse = params.get("usoInterno", Boolean.class);		
-		absence.multipleUse = params.get("usoMultiplo", Boolean.class);
-		absence.consideredWeekEnd = params.get("weekEnd", Boolean.class);
-		absence.validFrom = new LocalDate(params.get("inizio"));
-		absence.validTo = new LocalDate(params.get("fine"));
-		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");			
-		absence.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
-
-		for(int i = 1; i <= 10; i++){
-			if(params.get("qualification"+i) != null){
-				Qualification q = QualificationDao.getQualification(Optional.fromNullable(new Integer(i)), Optional.fromNullable(new Long(i)), false).get(0);
-				//Qualification q = Qualification.findById(new Long(i));
-				if(!absence.qualifications.contains(q))
-					absence.qualifications.add(q);
-			}
-			else{
-				Qualification q = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.fromNullable(new Long(i)), false).get(0);
-				//Qualification q = Qualification.findById(new Long(i));
-				if(absence.qualifications.contains(q))
-					absence.qualifications.remove(q);
-			}
+		if (!(tecnologi || tecnici)){
+    	    params.flash();
+			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+			insertAbsenceCode();
 		}
-
-
-		absence.mealTicketCalculation = params.get("calcolaBuonoPasto", Boolean.class);
-//		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
-		if(!params.get("gruppo").equals("")){
-			absence.absenceTypeGroup.label = params.get("gruppo");
-			absence.absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription((params.get("abt.absenceTypeGroup.accumulationBehaviour")));
-			absence.absenceTypeGroup.accumulationType = AccumulationType.getByDescription((params.get("abt.absenceTypeGroup.accumulationType")));
-			absence.absenceTypeGroup.limitInMinute = params.get("limiteAccumulo", Integer.class);
-			absence.absenceTypeGroup.minutesExcess = params.get("minutiEccesso", Boolean.class);
-			String codeToReplace = params.get("codiceSostituzione");
-			AbsenceTypeGroup abtg = AbsenceTypeGroupDao.getAbsenceTypeGroup(Optional.fromNullable(codeToReplace), false).get(0);
-			//AbsenceTypeGroup abtg = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.code = ?", codeToReplace).first();
-			absence.absenceTypeGroup = abtg;
+		
+		Verify.verify(absenceType.isPersistent(),"Codice d'assenza inesistente!");
+		
+		absenceType.qualifications.clear();
+		Range<Integer> qualifiche;
+		if(tecnologi && tecnici){
+			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
 		}
-		absence.save();
+		else if(tecnologi){
+			qualifiche = QualificationMapping.TECNOLOGI.getRange();
+		}
+		else{
+			qualifiche = QualificationMapping.TECNICI.getRange();
+		}
+				
+		for(int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++){
+			Qualification q = QualificationDao.byQualification(i).orNull();
+			absenceType.qualifications.add(q);
+		}
+		
+		absenceType.save();
+		
+		Logger.info("Modificato codice di assenza %s", absenceType.code);
 
-		flash.success("Modificato codice di assenza %s", absence.code);
+		flash.success("Modificato codice di assenza %s", absenceType.code);
 		Absences.manageAbsenceCode(null, null);
-
 	}
-
 
 	public static void edit(@Required Long absenceId) {
 		Logger.debug("Edit absence called for absenceId=%d", absenceId);
 
-		Absence absence = AbsenceDao.getAbsenceById(absenceId);
-		//Absence absence = Absence.findById(absenceId);
-		if (absence == null) {
-			notFound();
-		}
+		Absence absence = absenceDao.getAbsenceById(absenceId);
+		
+		Verify.verify(absence != null,"Assenza specificata inesistente!");
 		
 		rules.checkIfPermitted(absence.personDay.person.office);
 		
-		LocalDate date = absence.personDay.date;
 		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
-		//List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
-		MainMenu mainMenu = new MainMenu(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth());
 		List<AbsenceType> allCodes = AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(absence.personDay.date);
-		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
+		
+		render(absence, frequentAbsenceTypeList, allCodes);				
 	}
+	
     
-	public static void update(@Required Long absenceId,@Valid LocalDate dateTo,
+	public static void update(@Required Absence absence,@Valid LocalDate dateTo,
 		@Required String absenceCode, Blob file, String mealTicket){
 		
-		Absence absence = AbsenceDao.getAbsenceById(absenceId);
-		
-		if(absence == null){
-			notFound();
-		}
-		
+		Verify.verify(absence.isPersistent(),"Assenza specificata inesistente!");
+						
 		rules.checkIfPermitted(absence.personDay.person.office);
-		
+
 		if(file != null && file.exists()){
 			Logger.debug("ricevuto file di tipo: %s", file.type());
 		}
-		
+
 		Person person = absence.personDay.person;
 		LocalDate dateFrom =  absence.personDay.date;	
-		
-		AbsenceType absenceType = null;
-//		Verifico se si tratta di un aggiornamento o di una rimozione
-		if(!absenceCode.isEmpty()){
-			absenceType  = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-			
-			if(absenceType == null){
-				flash.error("codice di assenza inesistente", absenceCode);
-			}
-		}
-	
+
 		if(dateTo != null && dateTo.isBefore(dateFrom)){
-			flash.error("Errore nell'inserimento del campo Fino A, inserire una data valida. Operazione annullata");
+			flash.error("Errore nell'inserimento del campo Fino a, inserire una data valida. Operazione annullata");
 		}
 		if(flash.contains("error")){
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
-							
-		int deleted = AbsenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
-		
-		if(deleted > 0){
-			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
+
+		try {
+
+			//Logica
+			
+			int deleted = absenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
+
+			if(deleted > 0){
+				flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
+			}
+
+			//Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
+			if(!absenceCode.isEmpty()){
+
+				AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+				Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
+
+
+
+				AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
+						absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
+
+				//Verifica errori generali nel periodo specificato
+				if(air.hasWarningOrDaysInTrouble()){
+					flash.error(String.format(air.getWarnings().iterator().next() + 
+							" - %s",air.getDatesInTrouble()));
+				}
+
+				//Verifica degli errori sui singoli giorni
+				if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+
+					Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+
+					for(AbsencesResponse ar : air.getAbsences()){
+						errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+					}
+
+					flash.error(errors.toString());
+				}
+
+				//Verifica per eventuali giorni di reperibilità
+				if(air.getAbsenceInReperibilityOrShift() > 0){
+					flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
+				}
+
+				if(air.getTotalAbsenceInsert() > 0){
+					flash.success("Sostituito codice %s con codice %s in %s assenza/e", 
+							absence.absenceType.code,absenceCode,air.getTotalAbsenceInsert());
+				}
+
+			} 
+			
+		} catch (EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+					+ person.fullName());
 		}
-//		Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
-		if(!absenceCode.isEmpty()){
-			AbsenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-					absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
-		}
-		
+
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 	}
-				
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void insertPersonChildren(){
-		int month = new LocalDate().getMonthOfYear();
-		int year = new LocalDate().getYear();
-		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
-		render(personList);
-	}
-	
+
 	public static class AttachmentsPerCodeRecap {
 		
 		List<Absence> absenceSameType = new ArrayList<Absence>();
@@ -420,17 +426,12 @@ public class Absences extends Controller{
 		
 	}
 	
-	
 	public static void manageAttachmentsPerCode(Integer year, Integer month){
 		
-		rules.checkIfPermitted("");
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		
 		//Prendere le assenze ordinate per tipo
-		List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.<Person>absent(), beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
-//		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
-//				"abs.personDay.date between ? and ? and abs.absenceFile is not null order by abs.absenceType.code", 
-//				beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+		List<Absence> absenceList = AbsenceDao.getAbsencesInPeriod(Optional.<Person>absent(), beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
 	
 		List<AttachmentsPerCodeRecap> attachmentRecapList = new ArrayList<AttachmentsPerCodeRecap>();
 		AttachmentsPerCodeRecap currentRecap = new AttachmentsPerCodeRecap();
@@ -466,11 +467,13 @@ public class Absences extends Controller{
 	
 	
 	public static void downloadAttachment(long id){
+		
 		Logger.debug("Assenza con id: %d", id);
-		Absence absence = AbsenceDao.getAbsenceById(id);   
-		//Absence absence = Absence.findById(id);
-		rules.checkIfPermitted(absence.personDay.person.office);
+		Absence absence = absenceDao.getAbsenceById(id); 
 		notFoundIfNull(absence);
+		
+		rules.checkIfPermitted(absence.personDay.person.office);
+
 		response.setContentTypeIfNotSet(absence.absenceFile.type());
 		Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
 		renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
@@ -485,9 +488,6 @@ public class Absences extends Controller{
 		List<Absence> absList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.<Person>absent(),Optional.fromNullable(code), 
 				new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
 				Optional.<JustifiedTimeAtWork>absent(), true, false);
-//		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.absenceType.code = ? "
-//				+ "and abs.personDay.date between ? and ? and abs.absenceFile is not null",
-//				code, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 		byte[] buffer = new byte[1024];
 
 		for(Absence abs : absList){
@@ -526,10 +526,8 @@ public class Absences extends Controller{
 		}
 		rules.checkIfPermitted(person.office);
 		List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
-		List<Absence> personAbsenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), new LocalDate(year, month,1), Optional.fromNullable(new LocalDate(year, month,1).dayOfMonth().withMaximumValue()), false);
-//		List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-//				"and abs.personDay.date between ? and ?", 
-//				person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
+		List<Absence> personAbsenceList = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(person), new LocalDate(year, month,1), Optional.fromNullable(new LocalDate(year, month,1).dayOfMonth().withMaximumValue()), false);
+
 		for(Absence abs : personAbsenceList){
 			if (abs.absenceFile.get() != null){
 				personAbsenceListWithFile.add(abs);
@@ -538,62 +536,53 @@ public class Absences extends Controller{
 		render(personAbsenceListWithFile, year, month, person);
 	}	
 	
-	public static void absenceInPeriod(Long personId){
-
-		//List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(),Security.getOfficeAllowed(), false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();;
-		if(personId == null)
-			personId = Security.getUser().get().person.id;
-		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
-		if(person == null){
-			flash.error("Persona inesistente");
-			Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+	public static void absenceInPeriod(Person person,
+			LocalDate from,
+			LocalDate to){
+    	
+//		Se la persona non è specificata si usa l'utente attualmente connesso
+		if(!person.isPersistent())
+			person = Security.getUser().get().person;
+//		Se le date non sono specificate imposto il giorno corrente
+		if(from == null || to == null){
+			from = LocalDate.now();
+			to = LocalDate.now();
 		}
+				
+		List<Absence> missioni = Lists.newArrayList();
+		List<Absence> ferie = Lists.newArrayList();
+		List<Absence> riposiCompensativi = Lists.newArrayList();
+		List<Absence> altreAssenze = Lists.newArrayList();
 		
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
+		officeDao.getOfficeAllowed(Security.getUser().get()), false, from, to, true).list();
+		
+		if(from.isAfter(to)){
+			flash.error("Intervallo non valido (%s - %s)", from,to);
+			render(personList, person, from, to, missioni, ferie, riposiCompensativi, altreAssenze);
+		}
 		
 		rules.checkIfPermitted(person.office);
 		
-		LocalDate dateFrom = null;
-		LocalDate dateTo = null;
-		
-		try {
-			
-			String dataInizio = params.get("dataInizio");
-			String dataFine = params.get("dataFine");
-			dateFrom = new LocalDate(dataInizio);
-			dateTo = new LocalDate(dataFine);
-			
-		} catch (Exception e) {
-			
-			flash.error("Errore nell'inserimento dei parametri. Valorizzare correttamente data inizio e data fine secondo il formato aaaa-mm-dd");
-			render(personId, personList);
-		}
-		personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, dateFrom, dateTo, true).list();
-		List<Absence> missioni = new ArrayList<Absence>();
-		List<Absence> ferie = new ArrayList<Absence>();
-		List<Absence> riposiCompensativi = new ArrayList<Absence>();
-		List<Absence> altreAssenze = new ArrayList<Absence>();
-		
 		List<Absence> absenceList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
-				Optional.<String>absent(), dateFrom, dateTo, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false, false);
-//		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-//				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
-
+				Optional.<String>absent(), from, to, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false, false);
+		
 		for(Absence abs : absenceList){
-			if(abs.absenceType.code.equals("92")){
+			if(AbsenceTypeMapping.MISSIONE.is(abs.absenceType)){
 				missioni.add(abs);
 			}
-			else if(abs.absenceType.code.equals("31") || abs.absenceType.code.equals("32") || abs.absenceType.code.equals("94")){
+			else if(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(abs.absenceType) ||
+					AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(abs.absenceType) || 
+					AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(abs.absenceType)){
 				ferie.add(abs);
 			}
-			else if(abs.absenceType.code.equals("91")){
+			else if(AbsenceTypeMapping.RIPOSO_COMPENSATIVO.is(abs.absenceType)){
 				riposiCompensativi.add(abs);
 			}
 			else
 				altreAssenze.add(abs);
 		}
-		render(personList, person, absenceList, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze, personId);
+		render(personList, person, absenceList, from, to, missioni, ferie, riposiCompensativi, altreAssenze, person.id);
 
 	}
 	

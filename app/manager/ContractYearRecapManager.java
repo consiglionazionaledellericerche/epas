@@ -6,21 +6,25 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
+import javax.inject.Inject;
+
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
-
-import com.google.common.base.Optional;
-
+import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import exceptions.EpasExceptionNoSourceData;
 
 /**
  * 
@@ -30,6 +34,17 @@ import dao.AbsenceTypeDao;
  *
  */
 public class ContractYearRecapManager {
+	
+	private final static Logger log = LoggerFactory.getLogger(ContractYearRecapManager.class);
+
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	public VacationsRecapFactory vacationsFactory;
+	
+	@Inject
+	public AbsenceDao absenceDao;
 	
 	/**
 	 * NB !!!
@@ -73,10 +88,11 @@ public class ContractYearRecapManager {
 	 * Cancella i riepiloghi precedenti sovrascrivendoli con i nuovi calcoli.
 	 * 
 	 * @param contract
+	 * @throws EpasExceptionNoSourceData 
 	 */
-	public static void buildContractYearRecap(Contract contract)
+	public void buildContractYearRecap(Contract contract) throws EpasExceptionNoSourceData
 	{
-		Logger.info("PopulateContractYearRecap %s %s contract id = %s", contract.person.name, contract.person.surname, contract.id);
+		log.info("PopulateContractYearRecap {} contract id = {}", contract.person.getFullname(), contract.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
 		
 		while(contract.recapPeriods.size()>0)
@@ -121,20 +137,20 @@ public class ContractYearRecapManager {
 			currentYear = contractInterval.getEnd().getYear();
 		while(yearToCompute<currentYear)
 		{
-			Logger.debug("yearToCompute %s", yearToCompute);
+			log.debug("yearToCompute {}", yearToCompute);
 			ContractYearRecap cyr = new ContractYearRecap();
 			cyr.year = yearToCompute;
 			cyr.contract = contract;
 			
 			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = VacationsRecap.Factory.build(contract.person, yearToCompute, Optional.of(contract), new LocalDate(), true);
+			VacationsRecap vacationRecap = vacationsFactory.create(yearToCompute, contract, new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();
 			
 			//RESIDUI
 			PersonResidualYearRecap csap = 
-					PersonResidualYearRecap.factory(contract, yearToCompute, new LocalDate().minusDays(1));
+					yearFactory.create(contract, yearToCompute, new LocalDate().minusDays(1));
 			PersonResidualMonthRecap lastComputedMonthInYear;
 			if(yearToCompute!=currentYear)
 				lastComputedMonthInYear = csap.getMese(12);
@@ -171,7 +187,7 @@ public class ContractYearRecapManager {
 	 *    
 	 * @return l'anno di cui si deve costruire il prossimo contractYearRecap
 	 */
-	private static int populateContractYearFromSource(Contract contract)
+	private int populateContractYearFromSource(Contract contract)
 	{
 		//Caso semplice source riepilogo dell'anno
 		
@@ -205,10 +221,10 @@ public class ContractYearRecapManager {
 		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode("37"); 
 		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode("94"); 
 		DateInterval yearInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInYear);
-		List<Absence> abs32 = VacationsRecap.getVacationDays(yearInterSource, contract, ab32);
-		List<Absence> abs31 = VacationsRecap.getVacationDays(yearInterSource, contract, ab31);
-		List<Absence> abs37 = VacationsRecap.getVacationDays(yearInterSource, contract, ab37);
-		List<Absence> abs94 = VacationsRecap.getVacationDays(yearInterSource, contract, ab94);
+		List<Absence> abs32 = absenceDao.getAbsenceDays(yearInterSource, contract, ab32);
+		List<Absence> abs31 = absenceDao.getAbsenceDays(yearInterSource, contract, ab31);
+		List<Absence> abs37 = absenceDao.getAbsenceDays(yearInterSource, contract, ab37);
+		List<Absence> abs94 = absenceDao.getAbsenceDays(yearInterSource, contract, ab94);
 		int yearToCompute = contract.sourceDate.getYear();
 		ContractYearRecap cyr = new ContractYearRecap();
 		cyr.year = yearToCompute;
@@ -217,7 +233,7 @@ public class ContractYearRecapManager {
 		cyr.vacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed + abs32.size();
 		cyr.permissionUsed = contract.sourcePermissionUsed + abs94.size();
 		PersonResidualYearRecap csap = 
-				PersonResidualYearRecap.factory(contract, yearToCompute, new LocalDate().minusDays(1));
+				yearFactory.create(contract, yearToCompute, new LocalDate().minusDays(1));
 		PersonResidualMonthRecap december = csap.getMese(12);
 		cyr.remainingMinutesCurrentYear = december.monteOreAnnoCorrente;
 		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;

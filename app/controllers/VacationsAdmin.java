@@ -7,23 +7,26 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.ConfYearManager;
+import manager.VacationManager;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
 import models.Office;
 import models.Person;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import exceptions.EpasExceptionNoSourceData;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{
@@ -31,16 +34,28 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static VacationsRecapFactory vacationsFactory;
+	
+	@Inject
+	static VacationManager vacationManager;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	public static void list(Integer year, String name, Integer page){
 		
 		if(page==null)
 			page = 0;
+
 		rules.checkIfPermitted("");
-		LocalDate date = new LocalDate();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, date, date, true);
+				officeDao.getOfficeAllowed(Security.getUser().get()),
+				false, LocalDate.now(), LocalDate.now(), true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		
@@ -48,28 +63,31 @@ public class VacationsAdmin extends Controller{
 		
 		List<Person> personsWithVacationsProblems = new ArrayList<Person>();
 
-		for(Person person: personList)
-		{
-			person.refresh();
-			Logger.info("%s", person.surname);
-			VacationsRecap vr = null;
+		for(Person person: personList) {
+			
+			Optional<Contract> contract = wrapperFactory
+					.create(person).getCurrentContract();
+			
 			try {
-				vr = VacationsRecap.Factory.build(person, year, Optional.<Contract>absent(), new LocalDate(), true);
+				VacationsRecap vr = vacationsFactory.create(
+						year, contract.get(), LocalDate.now(), true);
 				vacationsList.add(vr);
-			}
-			catch(IllegalStateException e){
+				
+			} catch (EpasExceptionNoSourceData e) {
 				personsWithVacationsProblems.add(person);
 			}
 		}
-		
-		//ConfYear conf = ConfYear.getConfYear(year);
+				
 		Office office = Security.getUser().get().person.office;
-		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, office));
-		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, office));
-		LocalDate expireDate = LocalDate.now().withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
-		boolean isVacationLastYearExpired = VacationsRecap.isVacationsLastYearExpired(year, expireDate);
-		render(vacationsList, isVacationLastYearExpired, personsWithVacationsProblems, year, simpleResults, name);
+		LocalDate expireDate =  vacationManager
+				.vacationsLastYearExpireDate(year, office);
+		
+		boolean isVacationLastYearExpired = vacationManager
+				.isVacationsLastYearExpired(year, expireDate);
+		
+		render(vacationsList, isVacationLastYearExpired, 
+				personsWithVacationsProblems, year, simpleResults, name);
 	}
 	
 	
@@ -77,31 +95,33 @@ public class VacationsAdmin extends Controller{
 	public static void vacationsCurrentYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
+
 		rules.checkIfPermitted(person.office);
-    	//Costruzione oggetto di riepilogo per la persona
+
+		//FIXME tutti questi metodi con parametro anno vanno applicati sul
+		//contratto lastContractInYear, e non sul currentContract. Inoltre 
+		//potrebbe essere necessario renderizzare tutti i contratti attivi nell
+		//anno. 
+		Optional<Contract> contract = wrapperFactory
+				.create(person).getCurrentContract();
 		
-		VacationsRecap vacationsRecap = null;
+		Preconditions.checkState(contract.isPresent());
+		
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
-    	} catch(IllegalStateException e) {
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		VacationsRecap vacationsRecap = vacationsFactory
+    				.create(anno, contract.get(), LocalDate.now(), true);
+    		
+    		renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
+    		
+    	} catch(EpasExceptionNoSourceData e) {
+    		flash.error("Mancano i dati di inizializzazione per " 
+    				+ contract.get().person.fullName());
     		renderTemplate("Application/indexAdmin.html");
-    		return;
-    	}
-		    	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
     	}
     	
-    	//rendering
-    	renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
 	}
 	
 
@@ -109,62 +129,57 @@ public class VacationsAdmin extends Controller{
 	public static void vacationsLastYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
-    	rules.checkIfPermitted(person.office);
-    	//Costruzione oggetto di riepilogo per la persona
     	
-    	VacationsRecap vacationsRecap = null;
+		rules.checkIfPermitted(person.office);
+    	    	
+		Optional<Contract> contract = wrapperFactory
+				.create(person).getCurrentContract();
+		
+		Preconditions.checkState(contract.isPresent());
+		
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
-    	} catch(IllegalStateException e) {
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		VacationsRecap vacationsRecap = vacationsFactory
+    				.create(anno, contract.get(), LocalDate.now(), true);
+    		
+    		renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
+    		
+    	} catch(EpasExceptionNoSourceData e) {
+    		flash.error("Mancano i dati di inizializzazione per " 
+    				+ contract.get().person.fullName());
     		renderTemplate("Application/indexAdmin.html");
-    		return;
     	}
-    	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-    	renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
+
 	}
 	
 	
 	public static void permissionCurrentYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
 		rules.checkIfPermitted(person.office);
-    	//Costruzione oggetto di riepilogo per la persona
+    	
+		Optional<Contract> contract = wrapperFactory
+				.create(person).getCurrentContract();
 		
-    	VacationsRecap vacationsRecap = null;
+		Preconditions.checkState(contract.isPresent());
+		
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
-    	} catch(IllegalStateException e) {
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		VacationsRecap vacationsRecap = vacationsFactory
+    				.create(anno, contract.get(), LocalDate.now(), true);
+    		
+    		renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
+    		
+    	} catch(EpasExceptionNoSourceData e) {
+    		flash.error("Mancano i dati di inizializzazione per " 
+    				+ contract.get().person.fullName());
     		renderTemplate("Application/indexAdmin.html");
-    		return;
     	}
-    	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-    	renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
+
 	}
 	
 }

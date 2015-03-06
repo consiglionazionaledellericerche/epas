@@ -1,17 +1,15 @@
 #!/bin/bash
 set -e
 
-if [ -z "${EPAS_HOST}" ]; then
+if [ -z "${VIRTUAL_HOST}" ]; then
     echo "ERROR: "
-    echo "Per favore specifica il nome del host che conterrà ePAS, es. epas.tools.iit.cnr.it attraverso il parametro EPAS_HOST."
+    echo "Per favore specifica il nome del host che conterrà ePAS, es. epas.tools.iit.cnr.it attraverso il parametro VIRTUAL_HOST."
     exit 1
 fi
 
-chown -R epas:epas /home/epas
+EPAS_HOST=${VIRTUAL_HOST}
 
-#EPAS_PORT=${EPAS_PORT:-9000}
-#EPAS_SSH_HOST=${EPAS_SSH_HOST:-$EPAS_HOST}
-#EPAS_SSH_PORT=${EPAS_SSH_PORT:-10022}
+chown -R epas:epas /home/epas
 
 HTTPS=${HTTPS:-false}
 
@@ -20,20 +18,7 @@ EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
 # use default port number if it is still not set
 case "${HTTPS}" in
   false) EPAS_APPLICATION_BASEURL="http:\/\/${EPAS_HOST}" ;;
-  true) EPAS_APPLICATION_BASEURL="https:\/\/${EPAS_HOST}" 
-
-if [ -z "${SSL_CERTIFICATE}" ]; then
-    echo "ERROR: "
-    echo "Per favore specifica il nome del file del certificato ssl tramite il parametro SSL_CERTIFICATE."
-    exit 1
-fi
-
-if [ -z "${SSL_KEY}" ]; then
-    echo "ERROR: "
-    echo "Per favore specifica il nome del file del certificato ssl tramite il parametro SSL_KEY."
-    exit 1
-fi
-;;
+  true) EPAS_APPLICATION_BASEURL="https:\/\/${EPAS_HOST}" ;;
   *)
     echo "ERROR: "
     echo "  Please specify the database http/https protocol via the HTTPS configuration option."
@@ -41,28 +26,6 @@ fi
     exit 1
     ;;
 esac
-
-#case "${HTTPS}" in
-#  true)
-#    NGINX_PORT=${NGNIX_PORT:-443}
-#    NGINX_X_FORWARDED_PROTO=${NGINX_X_FORWARDED_PROTO:-https}
-#    ;;
-#  *)
-#    NGINX_PORT=${NGINX_PORT_PORT:-80}
-#    NGINX_X_FORWARDED_PROTO=${NGINX_X_FORWARDED_PROTO:-\$scheme}
-#    ;;
-#esac
-
-# SSL_SELF_SIGNED=${SSL_SELF_SIGNED:-false}
-# SSL_CERTIFICATE_PATH=${SSL_CERTIFICATE_PATH:-/opt/epas/certs/epas.crt}
-# SSL_KEY_PATH=${SSL_KEY_PATH:-"/opt/epas/certs/epas.key"}
-# SSL_DHPARAM_PATH=${SSL_DHPARAM_PATH:-$EPAS_DATA_DIR/certs/dhparam.pem}
-
-#CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$EPAS_DATA_DIR/certs/ca.crt}
-#EPAS_BACKUPS=${EPAS_BACKUPS:-disable}
-#EPAS_BACKUP_EXPIRY=${EPAS_BACKUP_EXPIRY:-}
-
-#NGINX_MAX_UPLOAD_SIZE=${NGINX_MAX_UPLOAD_SIZE:-20m}
 
 DB_HOST=${DB_HOST:-$POSTGRES_PORT_5432_TCP_ADDR}
 DB_PORT=${DB_PORT:-$POSTGRES_PORT_5432_TCP_PORT}
@@ -79,8 +42,8 @@ SMTP_HOST=${SMTP_HOST:-smtp.cnr.it}
 SMTP_PORT=${SMTP_PORT:-587}
 SMTP_CHANNEL=${SMTP_CHANNEL:-starttls}
 
-CRON_MINUTES=${CRON_MINUTES:-5}
-CRON_HOURS=${CRON_HOURS:-6,12,18}
+BACKUP_MINUTES=${BACKUP_MINUTES:-5}
+BACKUP_HOURS=${BACKUP_HOURS:-6,12,18}
 
 # LOGCHECK
 LOGCHECK_ADDRESSES=${LOGCHECK_ADDRESSES:-cristian.lucchesi@iit.cnr.it,dario.tagliaferri@iit.cnr.it alessandro.martelli@iit.cnr.it, daniele.murgia@iit.cnr.it}
@@ -102,13 +65,17 @@ sudo -u epas -H sed 's/{{EPAS_HOST}}/'"${EPAS_HOST}"'/g' -i /home/epas/epas/tool
 
 sudo -u epas chmod +x /home/epas/epas/tools/backupdb.sh
 
-sudo -u epas -H cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron 
+sudo -u epas -H cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron
 
-sudo -u epas -H sed 's/{{CRON_MINUTES}}/'"${CRON_MINUTES}"'/' -i /home/epas/epas/tools/cron
-sudo -u epas -H sed 's/{{CRON_HOURS}}/'"${CRON_HOURS}"'/' -i /home/epas/epas/tools/cron
+sudo -u epas -H sed 's/{{BACKUP_MINUTES}}/'"${BACKUP_MINUTES}"'/' -i /home/epas/epas/tools/cron
+sudo -u epas -H sed 's/{{BACKUP_HOURS}}/'"${BACKUP_HOURS}"'/' -i /home/epas/epas/tools/cron
 
+BACKUP=${BACKUP:-false}
+
+if [ "${BACKUP}" == true ]; then
 crontab -u epas /home/epas/epas/tools/cron
 cron
+fi
 
 # configure ePAS
 sudo -u epas -H cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/prod.conf

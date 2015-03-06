@@ -1,16 +1,7 @@
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,17 +12,10 @@ import manager.ChartsManager.Month;
 import manager.ChartsManager.RenderList;
 import manager.ChartsManager.RenderResult;
 import manager.ChartsManager.Year;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
-import models.Absence;
-import models.Competence;
 import models.CompetenceCode;
-import models.Contract;
 import models.Office;
 import models.Person;
-import models.WorkingTimeType;
 import models.exports.PersonOvertime;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
@@ -40,10 +24,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
-import dao.ContractDao;
+import dao.OfficeDao;
 import dao.PersonDao;
+import exceptions.EpasExceptionNoSourceData;
 import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -55,6 +39,12 @@ public class Charts extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static ChartsManager chartsManager;
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
@@ -72,12 +62,13 @@ public class Charts extends Controller{
 
 		year = params.get("yearChart", Integer.class);
 		month = params.get("monthChart", Integer.class);
-		//List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
-		List<Person> personeProva = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
 		
+		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
+				officeDao.getOfficeAllowed(Security.getUser().get()), true, 
+				new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
-		List<PersonOvertime> poList = ChartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
+		List<PersonOvertime> poList = chartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
 		
 		render(poList, year, month, annoList, meseList);
 	}
@@ -108,8 +99,9 @@ public class Charts extends Controller{
 		if(result.isPresent())
 			val = result.get().longValue();
 
-		List<Person> personeProva = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
-		int totaleOreResidue = ChartsManager.calculateTotalResidualHour(personeProva, year);
+		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
+				officeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
+		int totaleOreResidue = chartsManager.calculateTotalResidualHour(personeProva, year);
 
 		render(annoList, val, totaleOreResidue);
 
@@ -175,9 +167,10 @@ public class Charts extends Controller{
 	public static void export(Integer year) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
+				officeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
 		Logger.debug("Esporto dati per %s persone", personList.size());
-		FileInputStream inputStream = ChartsManager.export(year, personList);
+		FileInputStream inputStream = chartsManager.export(year, personList);
 		
 		renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi"+year+".csv");
 	}
@@ -188,7 +181,7 @@ public class Charts extends Controller{
 		offices.add(Security.getUser().get().person.office);
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(), LocalDate.now(), true).list();
 		render(personList);
 	}
 
@@ -197,8 +190,17 @@ public class Charts extends Controller{
 		
 		Person person = PersonDao.getPersonById(personId);
 		
-		FileInputStream inputStream = ChartsManager.exportDataSituation(person);
-		renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
+		try {
+			
+			FileInputStream inputStream = chartsManager.exportDataSituation(person);
+			renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
+			
+		} catch (EpasExceptionNoSourceData e) {
+    		flash.error("Mancano i dati di inizializzazione per " 
+    				+ person.fullName());
+    		renderTemplate("Application/indexAdmin.html");
+		}
+		
 
 	}
 }

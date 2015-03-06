@@ -13,7 +13,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -41,11 +40,11 @@ public class PersonReperibility extends BaseModel {
 	public Person person;
 	
 	@Column(name="start_date")
-	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate startDate;
 	
 	@Column(name="end_date")
-	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate endDate;
 	
 	@Required

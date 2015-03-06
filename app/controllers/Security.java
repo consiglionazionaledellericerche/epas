@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Office;
 import models.Permission;
 import models.Person;
@@ -101,6 +103,12 @@ public class Security extends Secure.Security {
 	public final static String CACHE_DURATION = "30mn";
 	
 
+	@Inject
+	static UserDao userDao;
+	
+	@Inject
+	static OfficeDao officeDao;
+
 	/**
 	 * @param username
 	 * @param password
@@ -157,6 +165,9 @@ public class Security extends Secure.Security {
 	}
 	
 	static String connected() {
+		if (request == null){
+			return null;
+		}
 		if (request.user != null) {
 			return request.user;
 		} else {
@@ -202,7 +213,7 @@ public class Security extends Secure.Security {
 		
 		if( personId == null && officeId != null ) {
 			
-			Office office = OfficeDao.getOfficeById(officeId);
+			Office office = officeDao.getOfficeById(officeId);
 			//Office office = Office.findById(officeId);
 			if( checkUro(user.usersRolesOffices, permission, office) ) {
 				
@@ -217,7 +228,7 @@ public class Security extends Secure.Security {
 			
 			Person person = PersonDao.getPersonById(personId);
 			//Person person = Person.findById(personId);
-			Office office = OfficeDao.getOfficeById(officeId);
+			Office office = officeDao.getOfficeById(officeId);
 			//Office office = Office.findById(officeId);
 			if( checkUro(user.usersRolesOffices, permission, person.office) && checkUro(user.usersRolesOffices, permission, office) ) {
 				
@@ -281,7 +292,7 @@ public class Security extends Secure.Security {
 		if (permissions == null) {
 			user.get().refresh();
 			//permissions = user.get().getAllPermissions();
-			permissions = RoleDao.getAllPermissions(user.get());
+			permissions = userDao.getAllPermissions(user.get());
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		
@@ -291,16 +302,7 @@ public class Security extends Secure.Security {
 	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
 	}
-	
-	public static List<Office> getOfficeAllowed()
-	{	
-		if (!getUser().isPresent()) {
-			return Lists.newArrayList();
-		}
-		//return getUser().get().getOfficeAllowed();
-		return OfficeDao.getOfficeAllowed(getUser().get());
-	}
-	
+		
 	public static List<Office> getOfficeAllowed(String profile) {
 		if (!getUser().isPresent()) {
 			return Lists.newArrayList();

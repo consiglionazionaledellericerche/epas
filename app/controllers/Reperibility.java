@@ -25,13 +25,9 @@ import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
-import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
-import models.ShiftType;
-
-import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
@@ -51,13 +47,19 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.binding.As;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.PersonDao;
+import dao.PersonReperibilityDayDao;
 
 
 /**
@@ -91,7 +93,8 @@ public class Reperibility extends Controller {
 		Long type = Long.parseLong(params.get("type"));
 		Logger.debug("Esegue la personList con type=%s", type);
 		
-		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+	//	List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		List<Person> personList = PersonDao.getPersonForReperibility(type);
 		Logger.debug("Reperibility personList called, found %s reperible person", personList.size());
 		render(personList);
 	}
@@ -118,8 +121,8 @@ public class Reperibility extends Controller {
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
-		List<PersonReperibilityDay> reperibilityDays = 
-				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
+		List<PersonReperibilityDay> reperibilityDays = PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, reperibilityType, Optional.<PersonReperibility>absent());
+		//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
 
 		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
 
@@ -166,8 +169,8 @@ public class Reperibility extends Controller {
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
-		List<PersonReperibilityDay> reperibilityDays = 
-				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
+		List<PersonReperibilityDay> reperibilityDays = PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, reperibilityType, Optional.<PersonReperibility>absent());
+		//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
 
 		Logger.debug("Reperibility who called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
 
@@ -196,12 +199,13 @@ public class Reperibility extends Controller {
 		Logger.debug("Sono nella absebce");
 		
 		Long type = Long.parseLong(params.get("type"));
-		
+	
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
 		// read the reperibility person list 
-		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		//List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		List<Person> personList = PersonDao.getPersonForReperibility(type);
 		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
 		
 		// Lists of absence for a single reperibility person and for all persons
@@ -217,12 +221,12 @@ public class Reperibility extends Controller {
 				
 		AbsenceReperibilityPeriod absenceReperibilityPeriod = null;
 		
-		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
-			.setParameter("from", from)
-			.setParameter("to", to)
-			.setParameter("personList", personList)
-			.getResultList();
-		
+//		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+//			.setParameter("from", from)
+//			.setParameter("to", to)
+//			.setParameter("personList", personList)
+//			.getResultList();
+		absencePersonReperibilityDays = AbsenceDao.getAbsenceForPersonListInPeriod(personList, from, to);
 		
 		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
 		
@@ -259,7 +263,8 @@ public class Reperibility extends Controller {
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
 		// read the reperibility person list 
-		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		//List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		List<Person> personList = PersonDao.getPersonForReperibility(type);
 		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
 		
 		// Lists of absence for a single reperibility person and for all persons
@@ -270,12 +275,13 @@ public class Reperibility extends Controller {
 			return;
 		}
 		
-		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
-			.setParameter("from", from)
-			.setParameter("to", to)
-			.setParameter("personList", personList)
-			.getResultList();
-		
+//		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+//			.setParameter("from", from)
+//			.setParameter("to", to)
+//			.setParameter("personList", personList)
+//			.getResultList();
+
+		absencePersonReperibilityDays = AbsenceDao.getAbsenceForPersonListInPeriod(personList, from, to);
 		
 		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
 		
@@ -309,7 +315,8 @@ public class Reperibility extends Controller {
 			badRequest();	
 		}
 		
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
+		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
+		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
 		if (reperibilityType == null) {
 			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
@@ -345,15 +352,16 @@ public class Reperibility extends Controller {
 				}
 				
 				//Se la persona è assente in questo giorno non può essere reperibile 
-				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
+				//if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
+				if(AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(reperibilityPeriod.person), day, Optional.<LocalDate>absent(), false).size() > 0){
 							String msg = String.format("La reperibilità di %s %s è incompatibile con la sua assenza nel giorno %s", reperibilityPeriod.person.name, reperibilityPeriod.person.surname, day);
 							BadRequest.badRequest(msg);
 				}
 
 				//Salvataggio del giorno di reperibilità
 				//Se c'è un giorno di reperibilità già presente viene sostituito, altrimenti viene creato un PersonReperibilityDay nuovo
-				PersonReperibilityDay personReperibilityDay = 
-					PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, day).first();
+				PersonReperibilityDay personReperibilityDay = PersonReperibilityDayDao.getPersonReperibilityDayByTypeAndDate(reperibilityPeriod.reperibilityType, day); 
+			//		PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, day).first();
 				
 				if (personReperibilityDay == null) {
 					personReperibilityDay = new PersonReperibilityDay();
@@ -384,11 +392,15 @@ public class Reperibility extends Controller {
 			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
 			Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
 			
-			int cancelled = JPA.em().createQuery("DELETE FROM PersonReperibilityDay WHERE reperibilityType = :reperibilityType AND date = :dateToRemove)")
-			.setParameter("reperibilityType", reperibilityType)
-			.setParameter("dateToRemove", dateToRemove)
-			.executeUpdate();
-			if (cancelled == 1) {
+//			int cancelled = JPA.em().createQuery("DELETE FROM PersonReperibilityDay WHERE reperibilityType = :reperibilityType AND date = :dateToRemove)")
+//			.setParameter("reperibilityType", reperibilityType)
+//			.setParameter("dateToRemove", dateToRemove)
+//			.executeUpdate();
+//			if (cancelled == 1) {
+//				Logger.info("Rimossa reperibilità di tipo %s del giorno %s", reperibilityType, dateToRemove);
+//			}
+			long cancelled = PersonReperibilityDayDao.deletePersonReperibilityDay(reperibilityType, dateToRemove);
+			if(cancelled == 1){
 				Logger.info("Rimossa reperibilità di tipo %s del giorno %s", reperibilityType, dateToRemove);
 			}
 		}
@@ -413,7 +425,8 @@ public class Reperibility extends Controller {
 			badRequest();	
 		}
 		
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
+		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
+		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
 		if (reperibilityType == null) {
 			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
@@ -471,14 +484,15 @@ public class Reperibility extends Controller {
 				while (reqStartDay.isBefore(reqEndDay.plusDays(1))) {
 					
 					//Se il sostituto è in ferie questo giorno non può essere reperibile 
-					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", reqStartDay, substitute).fetch().size() > 0) {
+					//if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", reqStartDay, substitute).fetch().size() > 0) {
+					if(AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(substitute), reqStartDay, Optional.<LocalDate>absent(), false).size() > 0){
 						throw new IllegalArgumentException(
 							String.format("ReperibilityPeriod substitute.id %s is not compatible with a Absence in the same day %s", substitute, reqStartDay));
 					}
 
 					// cambia le reperibilità mettendo quelle del sostituto al posto di quelle del richiedente
-					PersonReperibilityDay personReperibilityDay = 
-						PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, reqStartDay).first();
+					PersonReperibilityDay personReperibilityDay = PersonReperibilityDayDao.getPersonReperibilityDayByTypeAndDate(reperibilityPeriod.reperibilityType, reqStartDay); 
+					//	PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, reqStartDay).first();
 					
 					Logger.debug("trovato personReperibilityDay.personReperibility.person=%s e reqStartDay=%s", personReperibilityDay.personReperibility.person, reqStartDay);
 					
@@ -507,14 +521,15 @@ public class Reperibility extends Controller {
 					Logger.debug("subStartDay=%s", subStartDay);
 					
 					//Se la persona è in ferie questo giorno non può essere reperibile 
-					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", subStartDay, requestor).fetch().size() > 0) {
+					//if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", subStartDay, requestor).fetch().size() > 0) {
+					if(AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(requestor), subStartDay, Optional.<LocalDate>absent(), false).size() > 0){
 						throw new IllegalArgumentException(
 							String.format("ReperibilityPeriod requestor.id %s is not compatible with a Absence in the same day %s", requestor, subStartDay));
 					}
 
 					// cambia la persona mettendo il richiedente ai giorni di reperibilità del sostituto
-					PersonReperibilityDay personReperibilityDay = 
-						PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, subStartDay).first();
+					PersonReperibilityDay personReperibilityDay = PersonReperibilityDayDao.getPersonReperibilityDayByTypeAndDate(reperibilityPeriod.reperibilityType, subStartDay);
+						//PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, subStartDay).first();
 					
 					Logger.debug("trovato personReperibilityDay.personReperibility.person=%s e subStartDay=%s", personReperibilityDay.personReperibility.person, subStartDay);
 					
@@ -523,7 +538,8 @@ public class Reperibility extends Controller {
 								String.format("Impossible to take the day %s because is not associated to the substitute given %s", subStartDay, substitute));
 					} else {
 						Logger.debug("Aggiorno il personReperibilityDay = %s", personReperibilityDay);
-						PersonReperibility requestorRep = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.person=? AND pr.personReperibilityType=?", requestor, reperibilityPeriod.reperibilityType).first();
+						//PersonReperibility requestorRep = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.person=? AND pr.personReperibilityType=?", requestor, reperibilityPeriod.reperibilityType).first();
+						PersonReperibility requestorRep = PersonReperibilityDayDao.getPersonReperibilityByPersonAndType(requestor, reperibilityPeriod.reperibilityType);
 						personReperibilityDay.personReperibility = requestorRep;
 						
 						Logger.info("cambiata reperibilità del sostituto con personReperibilityDay.personReperibility.person=%s e subStartDay=%s", personReperibilityDay.personReperibility.person, subStartDay);
@@ -552,7 +568,8 @@ public class Reperibility extends Controller {
 	public static void exportYearAsPDF() {
 		int year = params.get("year", Integer.class);
 		Long reperibilityId = params.get("type", Long.class);
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
+		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
+		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
@@ -565,11 +582,12 @@ public class Reperibility extends Controller {
 			LocalDate firstOfMonth = new LocalDate(year, i, 1);
 			
 			List<PersonReperibilityDay> personReperibilityDays = 
-					JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
-					.setParameter("firstOfMonth", firstOfMonth)
-					.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
-					.setParameter("reperibilityType", reperibilityType)
-					.getResultList();
+					PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), reperibilityType, Optional.<PersonReperibility>absent());
+//					JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
+//					.setParameter("firstOfMonth", firstOfMonth)
+//					.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
+//					.setParameter("reperibilityType", reperibilityType)
+//					.getResultList();
 			
 			ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
 			Table<Person, Integer, String> reperibilityMonth = null;
@@ -626,18 +644,20 @@ public class Reperibility extends Controller {
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
 		
 		
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);	
+		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
+		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
 		
 		
 		List<PersonReperibilityDay> personReperibilityDays = 
-				JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :startDate AND :endDate AND reperibilityType = :reperibilityType ORDER by date")
-				.setParameter("firstOfMonth", startDate)
-				.setParameter("endOfMonth", endDate)
-				.setParameter("reperibilityType", reperibilityType)
-				.getResultList();
+				PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(startDate, endDate, reperibilityType, Optional.<PersonReperibility>absent());
+//				JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :startDate AND :endDate AND reperibilityType = :reperibilityType ORDER by date")
+//				.setParameter("firstOfMonth", startDate)
+//				.setParameter("endOfMonth", endDate)
+//				.setParameter("reperibilityType", reperibilityType)
+//				.getResultList();
 		
 		inconsistentAbsence = CompetenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
 			
@@ -671,12 +691,16 @@ public class Reperibility extends Controller {
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
 		
 		// get the Competence code for the reperibility working or non-working days  
-		CompetenceCode competenceCodeFS = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFs).first();
-		CompetenceCode competenceCodeFR = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFr).first();
+		//CompetenceCode competenceCodeFS = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFs).first();
+		CompetenceCode competenceCodeFS = CompetenceCodeDao.getCompetenceCodeByCode(codFs); 
+		//CompetenceCode competenceCodeFR = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFr).first();
+		CompetenceCode competenceCodeFR = CompetenceCodeDao.getCompetenceCodeByCode(codFr);
+		
 		Logger.debug("Creazione dei  competenceCodeFS competenceCodeFR %s/%s", competenceCodeFS, competenceCodeFR);
 		
 				
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);	
+		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
+		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
@@ -686,11 +710,12 @@ public class Reperibility extends Controller {
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
 			
 		List<PersonReperibilityDay> personReperibilityDays = 
-				JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
-				.setParameter("firstOfMonth", firstOfMonth)
-				.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
-				.setParameter("reperibilityType", reperibilityType)
-				.getResultList();
+				PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), reperibilityType, Optional.<PersonReperibility>absent());
+//				JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
+//				.setParameter("firstOfMonth", firstOfMonth)
+//				.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
+//				.setParameter("reperibilityType", reperibilityType)
+//				.getResultList();
 		
 		Logger.debug("dimensione personReperibilityDays = %s", personReperibilityDays.size());
 		
@@ -700,7 +725,8 @@ public class Reperibility extends Controller {
 
 		// builds the table with the summary of days and reperibility periods description
 		// reading data from the Competence table in the DB
-		List<Competence> frCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFR).fetch();
+		//List<Competence> frCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFR).fetch();
+		List<Competence> frCompetences = CompetenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFR);
 		Logger.debug("Trovate %d competences di tipo %s nel mese %d/%d", frCompetences.size(), reperibilityType,  month, year);
 		
 		for (Competence frCompetence : frCompetences) {	
@@ -712,7 +738,8 @@ public class Reperibility extends Controller {
 		
 		// builds the table with the summary of days and reperibility periods description
 		// reading data from the Competence table in the DB
-		List<Competence> fsCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFS).fetch();
+		//List<Competence> fsCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFS).fetch();
+		List<Competence> fsCompetences = CompetenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFS);
 		Logger.debug("Trovate %d competences di tipo %s nel mese %d/%d", fsCompetences.size(), reperibilityType,  month, year);
 		
 		for (Competence fsCompetence : fsCompetences) {		
@@ -750,21 +777,24 @@ public class Reperibility extends Controller {
 		
 		// check for the parameter
 		//---------------------------
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
+		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
+		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
 		
 		if (personId == 0) {
 			// read the reperibility person 
-			List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
+			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
+			List<PersonReperibility> personsReperibility = PersonReperibilityDayDao.getPersonReperibilityByType(PersonReperibilityDayDao.getPersonReperibilityTypeById(type));
 			if (personsReperibility.isEmpty()) {
 				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
 			}
 			personsInTheCalList = personsReperibility;
 		} else {
 			// read the reperibility person 
-			PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
+			//PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
+			PersonReperibility personReperibility = PersonReperibilityDayDao.getPersonReperibilityByPersonAndType(PersonDao.getPersonById(personId), PersonReperibilityDayDao.getPersonReperibilityTypeById(type));
 			if (personReperibility == null) {
 				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
 			}
@@ -787,8 +817,8 @@ public class Reperibility extends Controller {
 		
 		for (PersonReperibility personReperibility: personsInTheCalList) {
 			eventLabel = (personsInTheCalList.size() == 0) ? "Reperibilità Registro" : "Reperibilità ".concat(personReperibility.person.surname);
-			List<PersonReperibilityDay> reperibilityDays = 
-					PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
+			List<PersonReperibilityDay> reperibilityDays = PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, reperibilityType, Optional.fromNullable(personReperibility));
+			//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
 	
 			Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personId);
 	

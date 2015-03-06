@@ -1,6 +1,7 @@
 package dao;
 
 import helpers.ModelQuery;
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
+import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
@@ -123,25 +125,21 @@ public class ContractDao {
 				return c;
 		}
 		//-----------------------
-		
-		
 		return null;
-
 	}
 	
-	/******************************************************************************************************************************************/
-	/*Inserisco in questa parte del Dao le query relative ai ContractStampProfile per evitare di creare una classe specifica che contenga     */
-	/*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
-	/******************************************************************************************************************************************/
-	
+
 	/**
 	 * 
 	 * @param person
-	 * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract passati come parametro 
+	 * @return la lista dei contractStampProfile relativi alla persona person o 
+	 * al contratto contract passati come parametro 
 	 * e ordinati per data inizio del contractStampProfile
-	 * La funzione permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono mutuamente esclusivi
+	 * La funzione permette di scegliere quale dei due parametri indicare 
+	 * per effettuare la ricerca. Sono mutuamente esclusivi
 	 */
-	public static List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person, Optional<Contract> contract){
+	public static List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
+			Optional<Contract> contract){
 		QContractStampProfile csp = QContractStampProfile.contractStampProfile;
 		final BooleanBuilder condition = new BooleanBuilder();
 		if(person.isPresent())

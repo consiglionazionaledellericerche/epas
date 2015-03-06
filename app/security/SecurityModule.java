@@ -1,10 +1,11 @@
 package security;
 
+import models.User;
+
 import org.drools.KnowledgeBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import models.User;
 import play.mvc.Http;
 
 import com.google.common.base.Optional;
@@ -23,7 +24,7 @@ import controllers.Security;
  */
 public class SecurityModule implements Module {
 	
-	private final static Logger LOG = LoggerFactory.getLogger(SecurityModule.class);
+	private final static Logger log = LoggerFactory.getLogger(SecurityModule.class);
 	public final static String REMOTE_ADDRESS = "request.remoteAddress";
 	
 	@Provides @Named("request.action")
@@ -44,7 +45,7 @@ public class SecurityModule implements Module {
 	@Provides
 	public Optional<User> currentOperator() {
 		Optional<User> user = Security.getUser();
-		LOG.debug("SecurityModule: currentOperator = " 
+		log.debug("SecurityModule: currentOperator = " 
 				+ (user.isPresent() ? user.get() : "non presente"));
 		return Security.getUser();
 	}

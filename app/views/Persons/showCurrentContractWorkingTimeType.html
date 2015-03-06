@@ -30,79 +30,80 @@
 
 		<tr>
 			<td class="center">Tempo lavoro</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(0).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(1).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(2).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(3).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(4).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(5).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.workingTimeTypeDays.get(6).workingTime.toHourTime()}</td>
 
 			
 		</tr>
 		<tr>
 			<td class="center">Tempo minimo per intervallo pranzo</td>
-			<td>${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(4, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(5, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(6, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(7, wtt).toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(0).mealTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(1).mealTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(2).mealTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(3).mealTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(4).mealTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(5).mealTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(6).mealTicketTime.toHourTime()}</td>
 
 			
 		</tr>
+		
 		<tr>
 			<td class="center">Intervallo pranzo</td>
-			<td>${wtt.getBreakTime(1, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(2, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(3, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(4, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(5, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(6, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(7, wtt).toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(0).breakTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(1).breakTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(2).breakTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(3).breakTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(4).breakTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(5).breakTicketTime.toHourTime()}</td>
+			<td>${wtt.workingTimeTypeDays.get(6).breakTicketTime.toHourTime()}</td>
 
 		</tr>
+
 		<tr>
 			<td class="center">Giorno festivo</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(1, wtt)}
+				#{if wtt.workingTimeTypeDays.get(0).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(2, wtt)}
+				#{if  wtt.workingTimeTypeDays.get(1).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(3, wtt)}
+				#{if  wtt.workingTimeTypeDays.get(2).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(4, wtt)}
+				#{if  wtt.workingTimeTypeDays.get(3).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(5, wtt)}
+				#{if  wtt.workingTimeTypeDays.get(4).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(6, wtt)}
+				#{if  wtt.workingTimeTypeDays.get(5).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 			<td>
-				#{if wtt.getHolidayFromWorkinTimeType(7, wtt)}
+				#{if  wtt.workingTimeTypeDays.get(6).holiday}
 				  <span class="glyphicon glyphicon-ok"></span>
 				#{/if}
 			</td>
 
 		</tr>
-
 
 </table>
 

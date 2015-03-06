@@ -4,8 +4,6 @@ import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,15 +11,15 @@ import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
-import models.Office;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingRecap;
+import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.troubles.PersonTroublesInMonthRecap;
+import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
-import models.StampModificationType;
-import models.StampType;
 import models.Stamping;
-import models.rendering.PersonStampingDayRecap;
-import models.rendering.PersonTroublesInMonthRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -33,15 +31,13 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dto.PersonStampingDto;
 
 @With( {RequestInit.class, Resecure.class} )
 
@@ -50,6 +46,26 @@ public class Stampings extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static StampingManager stampingManager;
+	
+	@Inject 
+	static PersonStampingRecapFactory stampingsRecapFactory;
+	
+	@Inject
+	static PersonDayManager personDayManager;
+	
+	@Inject
+	static PersonDayDao personDayDao;
+	
+	@Inject
+	static StampingDao stampingDao;
+	
+	@Inject
+	static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
 	
 	public static void stampings(Integer year, Integer month) {
 
@@ -69,7 +85,7 @@ public class Stampings extends Controller {
 			
 		}
 		
-		PersonStampingDto psDto = PersonStampingDto.build(year, month, person);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
 		render(psDto) ;
 
@@ -106,7 +122,7 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		PersonStampingDto psDto = PersonStampingDto.build(year, month, person);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
 		render(psDto) ;
 
@@ -153,7 +169,7 @@ public class Stampings extends Controller {
 		}
 		
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
 
 		if(!pd.isPresent()){
 			personDay = new PersonDay(person, date);
@@ -163,7 +179,7 @@ public class Stampings extends Controller {
 			personDay = pd.get();
 		}
 		
-		StampingManager.addStamping(personDay, time, note, service, type, true);
+		stampingManager.addStamping(personDay, time, note, service, type, true);
 				
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -175,7 +191,7 @@ public class Stampings extends Controller {
 
 	public static void edit(@Required Long stampingId) {
 		
-		Stamping stamping = StampingDao.getStampingById(stampingId);
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		
 		if (stamping == null) {
 			notFound();
@@ -195,7 +211,7 @@ public class Stampings extends Controller {
 			Integer stampingHour, Integer stampingMinute,
 			@Required boolean service, String note) {
 		
-		Stamping stamping = StampingDao.getStampingById(stampingId);
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		if (stamping == null) {
 			notFound();
 		}
@@ -210,7 +226,7 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -223,30 +239,9 @@ public class Stampings extends Controller {
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
 
-		stamping.date = stamping.date.withHourOfDay(stampingHour);
-		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
-		
-		//TODO rivedere questi if se possono essere semplificati  
-		if(service == false && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = note;
-		}
-		if(service == true && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = "timbratura di servizio";
-			stamping.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
-		}
-		if(service == false && (stamping.stampType != null)){
-			stamping.stampType = null;
-			stamping.note = "timbratura inserita dall'amministratore";
-		}
-		if(service == true && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
-			stamping.note = note;
-		}
+		StampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
 
-		stamping.markedByAdmin = true;
-
-		stamping.save();
-
-		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
@@ -268,17 +263,17 @@ public class Stampings extends Controller {
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), 
+				PersonDao.list(Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()), 
 						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 		
 		for(Person person : activePersons)
 		{
-			PersonTroublesInMonthRecap pt = new PersonTroublesInMonthRecap(person, monthBegin, monthEnd);
+			PersonTroublesInMonthRecap pt = personTroubleRecapFactory.create(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
-		
+		render(month, year, missingStampings);
 	}
 
 	/**
@@ -293,32 +288,16 @@ public class Stampings extends Controller {
 		
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
-		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, dayPresence, dayPresence, true).list();
+		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, dayPresence, dayPresence, true).list();
 
-		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
+		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		
-		for(Person person : activePersonsInDay){
-		
-			PersonDay personDay = null;
-			person = PersonDao.getPersonById(person.id);
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
-			
-			if(!pd.isPresent()){
-				personDay = new PersonDay(person, dayPresence);
-				personDay.create();
-			}
-			else{
-				personDay = pd.get();
-			}
-
-			PersonDayManager.computeValidStampings(personDay);
-			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
-			
-		}
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
 
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -334,60 +313,15 @@ public class Stampings extends Controller {
 		rules.checkIfPermitted("");
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth, true);
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, beginMonth, endMonth, true);
 
-		List<Person> activePersons = simpleResults.paginated(page).getResults();
-		
-		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
-
-			public int compare(LocalDate date1, LocalDate date2) {
-				return date1.compareTo(date2);
-			}
-		}).orderRowsBy(new Comparator<Person>(){
-			public int compare(Person p1, Person p2) {
-
-				return p1.surname.compareTo(p2.surname);
-			}
-
-		});
-		
-		for(Person p : activePersons)
-		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
-
-			for(PersonDay pd : pdList){
-				if(pd.isTicketForcedByAdmin) {
-					
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "siAd");
-					}
-					else {
-						builder.put(p, pd.date, "noAd");
-					}
-				}
-				else {
-					
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "si");
-					}
-					else {
-						builder.put(p, pd.date, "");
-					}
-				}    			
-
-			}
-
-		}
+		List<Person> activePersons = simpleResults.paginated(page).getResults();		
 
 		int numberOfDays = endMonth.getDayOfMonth();
-		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
+		Table<Person, LocalDate, String> tablePersonTicket = 
+				stampingManager.populatePersonTicketTable(activePersons, beginMonth);
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
-
-
-
-
 }
