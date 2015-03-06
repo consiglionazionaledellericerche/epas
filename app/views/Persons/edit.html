@@ -1,6 +1,6 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title: 'ePAS - Modifica ' + person.name + ' ' + person.surname /}
+#{set title: 'ePAS - Modifica ' + person.getFullname() /}
 
 #{set 'moreStyles'}
 <style>
@@ -13,13 +13,12 @@
   	margin-bottom: 10px;
   
   }
- 
 </style>
 #{/set}
 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici ${person.name} ${person.surname}</a></li>
-  <li><a href="@{Persons.insertChild(person.id)}#">Inserisci figlio per ${person.name} ${person.surname}</a></li>
+  <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
+  <li><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
 </ul>
 
 <div class="container">		<!-- Container dati personali e di contatto -->
