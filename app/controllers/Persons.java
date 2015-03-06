@@ -52,6 +52,7 @@ import com.google.common.hash.Hashing;
 import controllers.Resecure.NoCheck;
 import dao.ContractDao;
 import dao.OfficeDao;
+import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.UserDao;
@@ -743,30 +744,65 @@ public class Persons extends Controller {
 		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
 	}
 
-	@NoCheck
+	public static void childrenList(Long personId){
+
+		Person person = PersonDao.getPersonById(personId);
+		render(person);
+	}
+	
 	public static void insertChild(Long personId){
-
+		
 		Person person = PersonDao.getPersonById(personId);
-		PersonChildren personChildren = new PersonChildren();
-		render(person, personChildren);
-	}
-
-	public static void saveChild(String name, String surname, String date){
-
-		Person person = PersonDao.getPersonById(params.get("personId", Long.class));
-		rules.checkIfPermitted(person.office);
-		LocalDate bornDate = new LocalDate(date);
-		PersonManager.savePersonChild(name, surname, bornDate, person);
-		person.save();
-		flash.success("Aggiunto %s %s nell'anagrafica dei figli di %s %s", name, surname, person.name, person.surname);
-		Persons.insertChild(person.id);
-	}
-
-	public static void personChildrenList(Long personId){
-
-		Person person = PersonDao.getPersonById(personId);
+		notFoundIfNull(person);
 		rules.checkIfPermitted(person.office);
 		render(person);
+	}
+	
+	public static void editChild(Long childId){
+		
+		PersonChildren child = PersonChildrenDao.getById(childId);
+		notFoundIfNull(child);
+		Person person = child.person;
+	
+		render("@insertChild", child, person);
+	}
+	
+	public static void removeChild(Long childId){
+		
+		PersonChildren child = PersonChildrenDao.getById(childId);
+		notFoundIfNull(child);
+		Person person = child.person;
+	
+		render(child, person);
+	}
+	
+	public static void deleteChild(Long childId){
+		
+		PersonChildren child = PersonChildrenDao.getById(childId);
+		notFoundIfNull(child);
+		Person person = child.person;
+		rules.checkIfPermitted(person.office);
+		
+		flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname, person.getFullname());
+		child.delete();
+		person.save();
+	
+		childrenList(person.id);
+	}
+
+
+	public static void saveChild(PersonChildren child,Person person){
+		
+		rules.checkIfPermitted(person.office);
+		
+		child.person = person;
+		child.save();
+		person.save();
+		
+		Logger.debug("Aggiunto/Modificato %s %s nell'anagrafica dei figli di %s", child.name, child.surname, person);
+		flash.success("Aggiunto/Modificato %s %s nell'anagrafica dei figli di %s", child.name, child.surname, person.getFullname());
+
+		childrenList(person.id);
 	}
 
 	public static void updateContractStampProfile(Long id){
