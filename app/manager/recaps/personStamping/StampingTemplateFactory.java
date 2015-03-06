@@ -11,26 +11,25 @@ public class StampingTemplateFactory {
 
 	private final PersonDayManager personDayManager;
 	private final StampingDao stampingDao;
-	
+
 	@Inject
 	StampingTemplateFactory(PersonDayManager personDayManager,
 			StampingDao stampingDao) {
 		this.personDayManager = personDayManager;
 		this.stampingDao = stampingDao;
 	}
-	
+
 	/**
-	 * Costruisce il riepilogo mensile delle timbrature. 
 	 * @param person
 	 * @param year
 	 * @param month
-	 * @return
+	 * @return il riepilogo mensile delle timbrature.
 	 */
 	public StampingTemplate create(Stamping stamping, int index,
 			PersonDay pd, int pairId, String pairPosition) {
-		
+
 		return new StampingTemplate(personDayManager, stampingDao,
 				stamping, index, pd, pairId, pairPosition);
 	}
-	
+
 }
