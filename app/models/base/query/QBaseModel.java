@@ -17,7 +17,7 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.SupertypeSerializer")
 public class QBaseModel extends EntityPathBase<BaseModel> {
 
-    private static final long serialVersionUID = 721081311;
+    private static final long serialVersionUID = 721081311L;
 
     public static final QBaseModel baseModel = new QBaseModel("baseModel");
 

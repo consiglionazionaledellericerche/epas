@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QUser extends EntityPathBase<User> {
 
-    private static final long serialVersionUID = 1339629807;
+    private static final long serialVersionUID = 1339629807L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

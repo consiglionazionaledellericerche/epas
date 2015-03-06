@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QCertificatedData extends EntityPathBase<CertificatedData> {
 
-    private static final long serialVersionUID = -122268133;
+    private static final long serialVersionUID = -122268133L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

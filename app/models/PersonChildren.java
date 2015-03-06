@@ -8,7 +8,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -31,7 +30,7 @@ public class PersonChildren extends BaseModel{
 	
 	public String surname;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate bornDate;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

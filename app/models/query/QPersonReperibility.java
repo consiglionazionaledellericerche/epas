@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonReperibility extends EntityPathBase<PersonReperibility> {
 
-    private static final long serialVersionUID = -1594033151;
+    private static final long serialVersionUID = -1594033151L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

@@ -1,10 +1,11 @@
 package security;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
  * Seam like check.
- * 
+ *
  * @author marco
  *
  */
@@ -42,7 +43,7 @@ public class PermissionCheck {
 
     @Override
     public String toString() {
-    	return Objects.toStringHelper(this).omitNullValues()
+    	return MoreObjects.toStringHelper(this).omitNullValues()
     			.add("action", action)
     			.add("target", target)
     			.addValue(granted ? "GRANTED" : "DENIED").toString();
