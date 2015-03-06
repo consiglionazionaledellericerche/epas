@@ -29,6 +29,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
  */
 public class UserDao extends DaoBase {
 	
+	@Inject
 	UserDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 	}
