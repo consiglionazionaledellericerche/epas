@@ -262,6 +262,7 @@ public class PersonManager {
 	 * @param year
 	 * @return
 	 */
+	@Deprecated
 	public static List<Contract> getMonthContractsStatic(Person person, Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();

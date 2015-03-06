@@ -99,6 +99,7 @@ public class WorkingTimeTypeDao {
 	 * @param date
 	 * @return il tipo di orario di lavoro utilizzato in date
 	 */
+	@Deprecated
 	public static WorkingTimeType getWorkingTimeTypeStatic(LocalDate date, Person person) {
 		//Contract contract = this.getContract(date);
 		Contract contract = ContractDao.getContract(date, person);
