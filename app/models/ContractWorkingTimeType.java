@@ -35,11 +35,11 @@ public class ContractWorkingTimeType extends BaseModel implements Comparable<Con
 	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="begin_date")
 	public LocalDate beginDate;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="end_date")
 	public LocalDate endDate;
 	

@@ -19,7 +19,6 @@ import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
@@ -30,100 +29,100 @@ import com.google.common.collect.Sets;
 
 
 /**
- * 
+ *
  * @author dario
- * 
+ *
  */
 @Entity
 @Table(name="contracts")
 public class Contract extends BaseModel {
-	
+
 	private static final long serialVersionUID = -4472102414284745470L;
 
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="source_date")
 	public LocalDate sourceDate = null;
-	
+
 	@Column(name="source_vacation_last_year_used")
 	public Integer sourceVacationLastYearUsed = null;
-	
+
 	@Column(name="source_vacation_current_year_used")
 	public Integer sourceVacationCurrentYearUsed = null;
-	
+
 	@Column(name="source_permission_used")
 	public Integer sourcePermissionUsed = null;
-	
+
 	@Column(name="source_recovery_day_used")
 	public Integer sourceRecoveryDayUsed = null;
-	
+
 	@Column(name="source_remaining_minutes_last_year")
 	public Integer sourceRemainingMinutesLastYear = null;
-	
+
 	@Column(name="source_remaining_minutes_current_year")
 	public Integer sourceRemainingMinutesCurrentYear = null;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
-	
+
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@OrderBy("beginFrom")
 	public Set<VacationPeriod> vacationPeriods = Sets.newHashSet();
-	
+
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractYearRecap> recapPeriods;
 
 	@Required @NotNull
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="begin_contract")
 	public LocalDate beginContract;
 
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
 
 	//data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	@Column(name="end_contract")
 	public LocalDate endContract;
-	
+
 	@NotAudited
 	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
-	
+
 	@NotAudited
 	@OneToMany(mappedBy="contract")
 	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
-	
+
 	@NotAudited
 	@OneToMany(mappedBy="contract", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTickets;
-	
-	
+
+
 	@Transient
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
-	
-	
+
+
 	public void setSourceDate(String date){
 		this.sourceDate = new LocalDate(date);
 	}
-	
+
 	/**
-	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e 
-	 * corrispondono a quelli con l'obbligo dell'attestato di presenza 
+	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e
+	 * corrispondono a quelli con l'obbligo dell'attestato di presenza
 	 * da inviare a Roma
 	 */
 	@Required
 	public boolean onCertificate = false;
-	
+
 	@Override
 	public String toString() {
 		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
 				id, person.id, beginContract, expireContract, endContract);
 	}
-	
+
 
 	/**
 	 * FIXME ha una dipendenza con DateUtility, capire se può rimanere nel modello.
@@ -139,7 +138,7 @@ public class Contract extends BaseModel {
 			contractInterval = new DateInterval(this.beginContract, this.expireContract);
 		return contractInterval;
 	}
-	
+
 	/**
 	 * FIXME variabile transiente richiamata nel template. Spostare nel wrapper.
 	 * Conversione della lista dei contractWorkingtimeType da Set a List
@@ -147,12 +146,12 @@ public class Contract extends BaseModel {
 	 * * @return
 	 */
 	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
-		
+
 		return Lists.newArrayList(this.contractWorkingTimeType);
 	}
-	
+
 
 }
-	
-	
+
+
 

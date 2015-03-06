@@ -24,7 +24,6 @@ import javax.persistence.UniqueConstraint;
 import manager.PersonManager;
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -54,7 +53,7 @@ public class PersonDay extends BaseModel {
 	public Person person;
 
 	@Required
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+//	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 
 	@Column(name = "time_at_work")

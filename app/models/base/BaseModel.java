@@ -8,12 +8,13 @@ import javax.persistence.Transient;
 
 import play.db.jpa.GenericModel;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
  * Default base class per sovrascrivere la generazione delle nuove chiavi
  * primarie.
- * 
+ *
  * @author marco
  *
  */
@@ -21,22 +22,22 @@ import com.google.common.base.Objects;
 public abstract class BaseModel extends GenericModel {
 
 	private static final long serialVersionUID = 4849404810311166199L;
-	
+
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long id;
-	
+
 	@Transient
 	public Long getId() {
 		return id;
 	}
-	
+
 	@Transient
 	public String getLabel() {
-		return ""; 
+		return "";
 	}
-	
+
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).add("id", id).toString();
+		return MoreObjects.toStringHelper(this).add("id", id).toString();
 	}
 }
