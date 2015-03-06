@@ -23,11 +23,11 @@ public class PersonStampingDayRecapFactory {
 	}
 	
 	/**
-	 * Costruisce il riepilogo mensile delle timbrature. 
+	 * Costruisce 
 	 * @param person
 	 * @param year
 	 * @param month
-	 * @return
+	 * @return il riepilogo mensile delle timbrature. 
 	 */
 	public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut) {
 		
