@@ -23,10 +23,12 @@
 	<td>${result.codice}</td>
 	<td>
 	  #{if result.check}
-	    <i style="color: green" class="icon-ok"></i>
+	    <i style="color: green"class="fa fa-check"></i>
+<!-- 	    <i style="color: green" class="icon-ok"></i> -->
 	  #{/if}
 	  #{else}
-	    <i style="color: red" class="icon-remove"></i>
+	    <i style="color: red" class="fa fa-times"></i>
+<!-- 	    <i style="color: red" class="icon-remove"></i> -->
 	  #{/else}	
 	</td>
 	<td>
@@ -44,9 +46,13 @@
 #{/list}
 </table>
 
+
 #{list items:listNull, as:'result'}
+#{if result != null}
   ${result.line}
+#{/if}
 #{/list}
+
 
 <div class="row">
 <ul class="pager">

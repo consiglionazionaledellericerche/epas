@@ -31,6 +31,7 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 
+import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -87,6 +88,7 @@ public class Administration extends Controller {
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
+	@NoCheck
 	public static void utilities(){
 
 		final List<Person> personList = PersonDao.list( 
@@ -104,6 +106,7 @@ public class Administration extends Controller {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */
+	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
 		//TODO permessi
 		LocalDate date = new LocalDate(year,month,1);
