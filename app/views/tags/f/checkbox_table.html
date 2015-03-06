@@ -13,8 +13,9 @@
   
   <!-- input -->
   <td>
-    <input name="${field.name}" type="checkbox" #{if _checked} checked="checked" #{/if} 
-    	value="${flash[field.name]}"/>
+  	*{ FIXME farsi venire un'idea per rendere checked funzione del valore di flash[field.name]  }*	
+  
+    <input name="${field.name}" type="checkbox" checked="checked" value="true"/>
     #{ifError field.name}<span class="error">${field.error}</span>#{/ifError}
   </td>
   	

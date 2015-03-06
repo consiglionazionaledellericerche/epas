@@ -118,8 +118,7 @@ public class Persons extends Controller {
 	@NoCheck
 	public static void save(@Valid @Required Person person,
 			@Valid @Required Qualification qualification, @Valid @Required Office office,
-			@Valid @Required Contract contract,
-			boolean onCertificate) {
+			@Valid @Required Contract contract) {
 
 		if(Validation.hasErrors()) {
 			
@@ -142,8 +141,6 @@ public class Persons extends Controller {
 			render("@insertPerson", person, qualification, office);
 		}
 		
-		contract.onCertificate = onCertificate;
-
 		person.save();
 
 		contract.save();
