@@ -24,6 +24,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -158,9 +159,16 @@ public class Clocks extends Controller{
 		personDay.stampings.add(stamp);
 		personDay.save();
 		
-		personDayManager.updatePersonDaysFromDate(person, personDay.date);
+		final PersonDay day = personDay;
 		
-		//pd.save();
+		new Job() {
+			@Override
+			public void doJob() {
+				personDayManager.updatePersonDaysFromDate(day.person, day.date);
+
+			}
+		}.afterRequest();
+
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		
 		Clocks.showRecap(personId);
