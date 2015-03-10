@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.PersonTags;
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
@@ -18,7 +19,6 @@ import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Person;
 import models.PersonDay;
-import models.PersonTags;
 import models.Stamping;
 
 import org.joda.time.LocalDate;
