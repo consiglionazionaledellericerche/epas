@@ -16,7 +16,7 @@ public class StringIsTime extends Check {
 				if(hourMinute.size() == 2){
 					if(StringIsNumber(hourMinute.get(0)) && StringIsNumber(hourMinute.get(1))){
 						int hour = Integer.parseInt(hourMinute.get(0));
-						int minute = Integer.parseInt(hourMinute.get(1));;
+						int minute = Integer.parseInt(hourMinute.get(1));
 						return (hour >= 0 && hour <=23) && (minute >= 0 && minute <=59);
 					}
 			
