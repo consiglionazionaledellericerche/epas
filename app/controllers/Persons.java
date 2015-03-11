@@ -826,23 +826,42 @@ public class Persons extends Controller {
 		
 		flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname, person.getFullname());
 		child.delete();
-		person.save();
 	
 		childrenList(person.id);
 	}
 
 
-	public static void saveChild(PersonChildren child,Person person){
+	public static void saveChild(@Valid PersonChildren child,Person person){
+		
+		Preconditions.checkState(person.isPersistent());
+		
+		if(Validation.hasErrors()) {
+			render("@insertChild", person, child);
+		}
+		
+//		Controlli nel caso di un nuovo inserimento
+		if(!child.isPersistent()){
+			for(PersonChildren p : PersonChildrenDao.getAllPersonChildren(person)){
+				
+				if (p.name.equals(child.name) && p.surname.equals(child.surname) || 
+						p.name.equals(child.surname) && p.surname.equals(child.name)){
+					flash.error("%s %s già presente in anagrafica", child.name, child.surname);
+					render("@insertChild", person, child);
+				}
+				if(p.bornDate.isBefore(child.bornDate.plusMonths(9)) || p.bornDate.isBefore(child.bornDate.minusMonths(9))){
+					flash.error("Attenzione: la data di nascita inserita risulta troppo vicina alla data di nascita di un'altro figlio. Verificare!", child.bornDate);
+				}	
+			}
+		}
 		
 		rules.checkIfPermitted(person.office);
 		
 		child.person = person;
 		child.save();
-		person.save();
 		
-		log.debug("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}",
+		log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}",
 				new Object[]{child.name, child.surname, person});
-		flash.success("Aggiunto/Modificato %s %s nell'anagrafica dei figli di %s", child.name, child.surname, person.getFullname());
+		flash.success("Salvato figlio nell'anagrafica dei figli di %s", person.getFullname());
 
 		childrenList(person.id);
 	}

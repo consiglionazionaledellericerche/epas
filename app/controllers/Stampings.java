@@ -26,6 +26,7 @@ import org.joda.time.LocalDateTime;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -218,15 +219,21 @@ public class Stampings extends Controller {
 		
 		rules.checkIfPermitted(stamping.personDay.person.office);
 		
-		PersonDay pd = stamping.personDay;
+		final PersonDay pd = stamping.personDay;
 		
 		//elimina
 		if( elimina != null) {
 			
 			stamping.delete();
 			pd.stampings.remove(stamping);
+						
+			new Job() {
+				@Override
+				public void doJob() {
+					personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 
-			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+				}
+			}.afterRequest();
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -240,8 +247,14 @@ public class Stampings extends Controller {
 		}
 
 		StampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
+		
+		new Job() {
+			@Override
+			public void doJob() {
+				personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 
-		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+			}
+		}.afterRequest();
 
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
