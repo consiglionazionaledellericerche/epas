@@ -39,6 +39,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
+import dao.wrapper.IWrapperFactory;
 import exceptions.EpasExceptionNoSourceData;
 
 /**
@@ -69,6 +70,9 @@ public class ConsistencyManager {
 	
 	@Inject
 	public PersonDayInTroubleDao personDayInTroubleDao;
+	
+	@Inject 
+	public IWrapperFactory wrapperFactory;
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
@@ -270,7 +274,7 @@ public class ConsistencyManager {
 		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayToCheck);
 
 		if(pd.isPresent()){
-			personDayManager.checkForPersonDayInTrouble(pd.get()); 
+			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(pd.get())); 
 			return;
 		}
 		else {
@@ -279,9 +283,9 @@ public class ConsistencyManager {
 				return;
 			}
 			personDay.create();
-			personDayManager.populatePersonDay(personDay);
+			personDayManager.populatePersonDay(wrapperFactory.create(personDay));
 			personDay.save();
-			personDayManager.checkForPersonDayInTrouble(personDay);
+			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(personDay));
 			return;
 		}
 	}

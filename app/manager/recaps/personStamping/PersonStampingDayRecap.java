@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
@@ -76,7 +77,7 @@ public class PersonStampingDayRecap {
 		
 	public PersonStampingDayRecap(PersonDayManager personDayManager, 
 			StampingTemplateFactory stampingTemplateFactory,
-			StampingDao stampingDao,
+			StampingDao stampingDao, IWrapperFactory wrapperFactory,
 			
 			PersonDay pd, int numberOfInOut) {			
 		
@@ -151,7 +152,7 @@ public class PersonStampingDayRecap {
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			personDayManager.queSeraSera(pd);
+			personDayManager.queSeraSera(wrapperFactory.create(pd));
 			this.setWorkTime(pd.timeAtWork);
 			this.setDifference( pd.difference );
 			this.setProgressive(pd.progressive);

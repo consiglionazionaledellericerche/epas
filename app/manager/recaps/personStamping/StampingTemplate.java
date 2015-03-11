@@ -9,6 +9,8 @@ import models.Stamping;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import com.google.common.base.Optional;
+
 import dao.StampingDao;
 
 /**
@@ -89,19 +91,17 @@ public class StampingTemplate {
 		}
 		
 		//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
-		if(stamping.stampModificationType!=null)
-		{
-			StampModificationType smt = personDayManager.checkMissingExitStampBeforeMidnight(pd);
-			if(smt!=null)
-			{
-				this.missingExitStampBeforeMidnightCode = smt.code;
-				PersonStampingDayRecap.stampModificationTypeSet.add(smt);
-			}
-			else
-			{
-				this.missingExitStampBeforeMidnightCode = "";
-			}
+		Optional<StampModificationType> smtMidnight = 
+				personDayManager.checkMissingExitStampBeforeMidnight(stamping);
+		
+		this.missingExitStampBeforeMidnightCode = "";
+		
+		if( smtMidnight.isPresent() ) {
+			
+				this.missingExitStampBeforeMidnightCode = smtMidnight.get().code;
+				PersonStampingDayRecap.stampModificationTypeSet.add(smtMidnight.get());
 		}
+		
 		//------------------------------------------- timbratura valida (colore cella) -----------------------------------------
 		LocalDate today = new LocalDate();
 		LocalDate stampingDate = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth());
