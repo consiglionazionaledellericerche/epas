@@ -122,6 +122,7 @@ public class PersonDay extends BaseModel {
 	}
 	
 	@Transient
+	@Deprecated
 	public Contract getPersonDayContract() {
 
 		if(this.personDayContract != null)
