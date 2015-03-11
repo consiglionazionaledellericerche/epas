@@ -11,7 +11,10 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
-
+import play.data.validation.CheckWith;
+import play.data.validation.InPast;
+import play.data.validation.Required;
+import validators.LocalDatePast;
 
 /**
  * 
@@ -25,12 +28,15 @@ import org.joda.time.LocalDate;
 public class PersonChildren extends BaseModel{
 
 	private static final long serialVersionUID = 2528486222814596830L;
-
+	
+	@Required
 	public String name;
 	
+	@Required
 	public String surname;
 	
-
+	@CheckWith (LocalDatePast.class)
+	@Required
 	public LocalDate bornDate;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
