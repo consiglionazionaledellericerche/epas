@@ -19,7 +19,6 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 
-import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -46,21 +45,17 @@ public class Administrators extends Controller {
 	@Inject
 	static IWrapperFactory wrapperFactory;
 	
-	@NoCheck
 	public static void insertNewAdministrator(Long officeId, Long roleId) {
 		
 		Office office = officeDao.getOfficeById(officeId);
-		//Office office = Office.findById(officeId);
 		if(office==null) {
-			
 			flash.error("La sede per la quale si vuole definire l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
 			Offices.showOffices();
 		}
 		
 		Role role = RoleDao.getRoleById(roleId);
-		//Role role = Role.findById(roleId);
-		if(office==null) {
-			
+
+		if(role==null) {
 			flash.error("Il ruolo selezionato è inesistente. Riprovare o effettuare una segnalazione.");
 			Offices.showOffices();
 		}
@@ -69,11 +64,10 @@ public class Administrators extends Controller {
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
 				LocalDate.now(), LocalDate.now(), true).list();
-		
+
 		render(office, role, personList);
 	}
 	
-	@NoCheck
 	public static void saveNewAdministrator(Person person, Office office, Role role) {
 		
 		if(person==null || office==null || role==null) {
@@ -101,19 +95,17 @@ public class Administrators extends Controller {
 		Offices.showOffices();
 	}
 	
-	@NoCheck
+
 	public static void deleteAdministrator(Long officeId, Long personId) {
 		
 		Office office = officeDao.getOfficeById(officeId);
-		//Office office = Office.findById(officeId);
 		if(office==null) {
-			
 			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
 			Offices.showOffices();
 		}
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
+
 		if(person == null) {
 			
 			flash.error("La persona per la quale si vuole rimuovere il ruolo di ammninistratore è inesistente. Riprovare o effettuare una segnalazione.");
@@ -159,28 +151,22 @@ public class Administrators extends Controller {
 	
 	}
 	
-	@NoCheck //TODO IMPORTANTE VA TOLTO!!!! admin non può chiamarlo
 	public static void deleteSelfAsAdministrator(Long officeId) {
 		
 		Office office = officeDao.getOfficeById(officeId);
-		//Office office = Office.findById(officeId);
 		if(office==null) {
-			
 			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
 			Offices.showOffices();
 		}
-		
+
 		Person person = Security.getUser().get().person;
 		render(office, person);
 	
 	}
-	
-	
-	
+		
 	/**
 	 * Switch in un'altra persona
 	 */ 
-	@NoCheck
 	public static void switchUserTo(long id) {
 		final User user = UserDao.getUserById(id, Optional.<String>absent());
 		//final User user = User.findById(id);
@@ -204,7 +190,6 @@ public class Administrators extends Controller {
 	/**
 	 * ritorna alla precedente persona.
 	 */
-	@NoCheck
 	public static void restoreUser() {
 		if (session.contains(SUDO_USERNAME)) {
 			session.put(USERNAME, session.get(SUDO_USERNAME));

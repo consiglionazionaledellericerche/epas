@@ -56,21 +56,6 @@ public class AbsenceDao extends DaoBase {
 
 	/**
 	 *
-	 * @param id
-	 * @return l'assenza con id specificato come parametro
-	 */
-//	public static Absence getAbsenceById(Long id){
-//
-//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-//				.where(absence.id.eq(id));
-//		return query.singleResult(absence);
-//
-//	}
-	
-	
-
-	/**
-	 *
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
