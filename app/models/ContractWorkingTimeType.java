@@ -1,5 +1,7 @@
 package models;
 
+import it.cnr.iit.epas.DateInterval;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -54,6 +56,16 @@ public class ContractWorkingTimeType extends BaseModel implements Comparable<Con
 			return 1;
 		else
 			return 0; 
+	}
+	
+	/**
+	 * L'intervallo temporale del periodo
+	 * 
+	 * @return
+	 */
+	public DateInterval getDateInverval() {
+		
+		return new DateInterval(this.beginDate, this.endDate);
 	}
 	
 

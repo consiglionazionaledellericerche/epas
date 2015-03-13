@@ -29,6 +29,7 @@ import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
+import dao.wrapper.IWrapperFactory;
 import exceptions.EpasExceptionNoSourceData;
 
 /**
@@ -51,6 +52,9 @@ public class ContractManager {
 	
 	@Inject
 	public PersonDayDao personDayDao;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory;
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	/**
@@ -211,10 +215,10 @@ public class ContractManager {
 			for(PersonDay pd : pdList){
 
 				PersonDay pd1 = personDayDao.getPersonDayById(pd.id);
-				//PersonDay pd1 = PersonDay.findById(pd.id);
 
-				log.debug("RecomputePopulate {}", pd1.date);				
-				personDayManager.populatePersonDay(pd1);
+				log.debug("RecomputePopulate {}", pd1.date);	
+				
+				personDayManager.populatePersonDay(wrapperFactory.create(pd1));
 			}
 
 			actualMonth = actualMonth.plusMonths(1);

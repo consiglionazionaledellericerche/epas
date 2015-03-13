@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
+import dao.wrapper.IWrapperFactory;
 
 public class StampingManager {
 
@@ -41,6 +42,9 @@ public class StampingManager {
 	
 	@Inject
 	public PersonDayDao personDayDao;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory;
 	
 	/**
 	 * Versione per inserimento amministratore.
@@ -227,7 +231,7 @@ public class StampingManager {
 		}
 
 		log.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay {}", pd);
-		personDayManager.populatePersonDay(personDay);
+		personDayManager.populatePersonDay(wrapperFactory.create(personDay));
 
 		personDay.save();
 		return true;

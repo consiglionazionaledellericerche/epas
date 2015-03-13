@@ -11,6 +11,7 @@ import models.PersonDay;
 import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -54,6 +55,29 @@ public class PersonDayDao extends DaoBase {
 		if(ordered)
 			query.orderBy(personDay.date.asc());
 		return query.list(personDay);
+	}
+	
+	/**
+	 * La lista dei PersonDay appartenenti al mese anno. Ordinati in modo crescente.
+	 * 
+	 * @param person
+	 * @param yearMonth
+	 * @return
+	 */
+	public List<PersonDay> getPersonDayInMonth(Person person, YearMonth yearMonth) {
+	
+		LocalDate monthBegin = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		
+		final QPersonDay personDay = QPersonDay.personDay;
+		final JPQLQuery query = getQueryFactory()
+				.from(personDay)
+				.where(personDay.person.eq(person)
+				.and(personDay.date.between(monthBegin, monthEnd)))
+				.orderBy(personDay.date.asc());
+		
+		return query.list(personDay);
+		
 	}
 	
 	/**
@@ -148,28 +172,23 @@ public class PersonDayDao extends DaoBase {
 						.and(personDay.isTicketAvailable.eq(isAvailable)));
 		return query.orderBy(personDay.date.asc()).list(personDay);
 	}
-	
-	
+		
 	/**
+	 * Il primo personDay esistente precedente a date per person.
 	 * 
 	 * @param person
-	 * @param begin
-	 * @param end
-	 * @return il personDay precedente al giorno in cui viene richiamata questa funzione. Utilizzato per creare il recap della lista
-	 * dei personDay
+	 * @param date
+	 * @return
 	 */
-	public PersonDay getPersonDayForRecap(Person person, Optional<LocalDate> begin, LocalDate end){
+	public PersonDay getPreviousPersonDay(Person person, LocalDate date){
 		
 		final QPersonDay personDay = QPersonDay.personDay;
 		
-		BooleanBuilder condition = new BooleanBuilder();
-		
-		if(begin.isPresent())
-			condition.and(personDay.date.goe(begin.get()));
-		
-		final JPQLQuery query = getQueryFactory().from(personDay)
-				.where(personDay.person.eq(person).and(condition.and(personDay.date.lt(end))))
+		final JPQLQuery query = getQueryFactory()
+				.from(personDay)
+				.where(personDay.person.eq(person).and(personDay.date.lt(date)))
 				.orderBy(personDay.date.desc());
+		
 		return query.singleResult(personDay);
 	}
 }
