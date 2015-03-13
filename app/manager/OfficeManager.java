@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.mysema.query.BooleanBuilder;
 
 import controllers.Security;
 import dao.OfficeDao;
@@ -41,13 +42,13 @@ public class OfficeManager {
 	 * @param name
 	 * @param contraction
 	 */
-	public void saveInstitute(Office office, Office area, String name, String contraction){
-
-		office.name = name;
-		office.contraction = contraction;
-		office.office = area;
-		office.save();
-	}	
+//	public void saveInstitute(Office office, Office area, String name, String contraction){
+//
+//		office.name = name;
+//		office.contraction = contraction;
+//		office.office = area;
+//		office.save();
+//	}	
 
 	/**
 	 * 
@@ -57,15 +58,15 @@ public class OfficeManager {
 	 * @param date
 	 * @param institute
 	 */
-	public void saveSeat(Office office, String name, String address, String code, String date, Office institute){
-
-		office.name = name;
-		office.address = address;
-		office.code = getInteger(code);
-		office.joiningDate = getLocalDate(date);
-		office.office = institute;
-		office.save();
-	}
+//	public void saveSeat(Office office, String name, String address, String code, String date, Office institute){
+//
+//		office.name = name;
+//		office.address = address;
+//		office.code = getInteger(code);
+//		office.joiningDate = getLocalDate(date);
+//		office.office = institute;
+//		office.save();
+//	}
 
 	/**
 	 * 
@@ -75,15 +76,15 @@ public class OfficeManager {
 	 * @param code
 	 * @param date
 	 */
-	public void updateSeat(Office office, String name, String address, String code, String date){
-		office.name = name;
-		office.address = address;
-		office.code = getInteger(code);
-		office.joiningDate = getLocalDate(date);
-
-		office.save();
-
-	}
+//	public void updateSeat(Office office, String name, String address, String code, String date){
+//		office.name = name;
+//		office.address = address;
+//		office.code = getInteger(code);
+//		office.joiningDate = getLocalDate(date);
+//
+//		office.save();
+//
+//	}
 	
 	/**
 	 * 
@@ -93,7 +94,7 @@ public class OfficeManager {
 	 */
 	public boolean isRightPermittedOnOfficeTree(Office office, Role role) {
 		
-		if(checkUserRoleOffice(Security.getUser().get(), role, office))
+		if(usersRolesOfficesDao.getUsersRolesOffices(Security.getUser().get(), role, office).isPresent())
 			return true;
 		
 		for(Office subOff : office.subOffices) {
@@ -104,21 +105,7 @@ public class OfficeManager {
 		
 		return false;
 	}
-	
-	/**
-	 * 	Check del Permesso
-	 */
-	private boolean checkUserRoleOffice(User user, Role role, Office office) {
 		
-		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOffices(user, role, office);
-				
-		if(!uro.isPresent())
-			return false;
-		else
-			return true;		
-		
-	}
-	
 	/**
 	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
 	 * @param office
@@ -164,8 +151,6 @@ public class OfficeManager {
 
 	}
 	
-
-
 	/**
 	 * Setta il ruolo per la tripla <user,office,role>. Se non esiste viene creato.
 	 * Se ifImprove è false il precedente ruolo viene sovrascritto. Se ifImprove è true 
@@ -228,66 +213,15 @@ public class OfficeManager {
 
 	}
 	
-	public static Integer getInteger(String parameter)
-	{
-		try{
-			Integer i = Integer.parseInt(parameter);
-			return i;
+//	/**
+//	 * @param office
+//	 * @return Restituisce true se uno dei parametri nome,sigla o codice sono già assegnati ad un altro ufficio
+//	 */
+//	public boolean isDuplicated(Office office){
+//		
+//		return officeDao.getOfficeByName(office.name).isPresent() ||  
+//				officeDao.getOfficeByContraction(office.contraction).isPresent() ||
+//				 office.code!=0 && officeDao.getOfficeByCode(office.code).isPresent();
+//	}
 
-		}catch(Exception e)
-		{
-			return null;
-		}
-	}
-
-	public static LocalDate getLocalDate(String parameter)
-	{
-		try{
-			LocalDate date = new LocalDate(parameter);
-			return date;
-
-		}catch(Exception e)
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * 
-	 * @param name
-	 * @param contraction
-	 * @return un messaggio che descrive se ci sono stati errori nel passaggio dei parametri name e contraction
-	 */
-	public String checkIfExists(Office office, String name, String contraction){
-		String result = "";
-
-		if( office != null ) {
-			result = "Esiste gia' un istituto con nome "+name+" operazione annullata.";
-		}
-
-		office = officeDao.getOfficeByContraction(contraction);
-		if( office != null ) {
-			result = "Esiste gia' un istituto con sigla "+contraction+ ", operazione annullata.";
-		}
-		return result;
-	}
-
-	/**
-	 * 
-	 * @param code
-	 * @param date
-	 * @return un messaggio che descrive se ci sono stati errori nel passaggio dei parametri code e date
-	 */
-	public static String checkIfExistsSeat(String code, String date){
-		String result = "";
-		//errore campo data
-		if(getLocalDate(date)==null){
-			result = "Errore nell'inserimento del campo data. Valorizzare correttamente tutti i parametri.";
-		}
-		//errore campo sede
-		if(OfficeManager.getInteger(code)==null){
-			result = "Errore nell'inserimento del campo codice sede. Valorizzare correttamente tutti i parametri.";
-		}
-		return result;
-	}
 }

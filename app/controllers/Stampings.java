@@ -181,6 +181,16 @@ public class Stampings extends Controller {
 		}
 		
 		stampingManager.addStamping(personDay, time, note, service, type, true);
+		
+		final PersonDay giorno = personDay;
+		
+		new Job() {
+			@Override
+			public void doJob() {
+				personDayManager.updatePersonDaysFromDate(giorno.person, giorno.date);
+
+			}
+		}.afterRequest();
 				
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 

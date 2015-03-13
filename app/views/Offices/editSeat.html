@@ -1,32 +1,32 @@
 #{extends 'modal.html' /}
-#{set modalHeader: 'Modifica ' + office.name /}
+#{set modalHeader: 'Modifica ' + seat.name /}
 
 <div class="container-fluid">
 
-#{form @Offices.updateSeat()}
+#{form @Offices.saveSeat()}
+  <input type="hidden" name="institute.id" value="${seat.office.id}"/>
+  <input type="hidden" name="seat.id" value="${seat.id}"/>
 
-  <input type="hidden" name="officeId" value="${office.id}"/>
-  
   <table class="table table-form table-hover">
   
     <tr>
       <td><strong>Sede</strong></td>
-      <td><input name="name" value="${office.name}"/></td>
+      <td><input name="seat.name" value="${seat.name}"/></td>
     </tr>
     
     <tr>
       <td><strong>Indirizzo</strong></td>
-      <td><input name="address" value="${office.address}" /></td>
+      <td><input name="seat.address" value="${seat.address}" /></td>
     </tr>
     
     <tr>
       <td><strong>Codice</strong></td>
-      <td><input name="code" value="${office.code}" /></td>
+      <td><input name="code" value="${seat.code}" /></td>
     </tr>
 
     <tr>
       <td><strong>Data affiliazione</strong></td>
-      <td><input name="date" value="${office.joiningDate}" type="text" datepicker /></td>
+      <td><input name="seat.joiningDate" value="${seat.joiningDate}" type="text" datepicker /></td>
    	</tr>  
     
  </table>
