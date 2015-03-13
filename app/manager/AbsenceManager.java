@@ -53,6 +53,8 @@ import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPersonDay;
 import exceptions.EpasExceptionNoSourceData;
 
 
@@ -88,6 +90,9 @@ public class AbsenceManager {
 	
 	@Inject
 	public AbsenceGroupManager absenceGroupManager;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory; 
 	
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
@@ -673,25 +678,27 @@ public class AbsenceManager {
 		if(pd == null)
 			pd = new PersonDay(person, date);
 
+		IWrapperPersonDay wPd = wrapperFactory.create(pd);
+		
 		if(abt == null || !abt.code.equals("92")){
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
-			personDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(wPd);
 			return;
 		}
 		if(mealTicket != null && mealTicket.equals("si")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = true;
-			personDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(wPd);
 		}
 		if(mealTicket != null && mealTicket.equals("no")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = false;
-			personDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(wPd);
 		}
 
 		if(mealTicket != null && mealTicket.equals("calcolato")){
 			pd.isTicketForcedByAdmin = false;
-			personDayManager.populatePersonDay(pd);
+			personDayManager.populatePersonDay(wPd);
 		}
 	}
 
