@@ -115,8 +115,9 @@ public class StampingManager {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
-
-		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		
+//		TODO implementare un ricalcolo asincrono, per il momento è stato spostato nel controlle utilizzando i job play
+//		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	}
 
 	/**

@@ -42,12 +42,10 @@ public class Office extends BaseModel{
     @Column(name = "address")
     public String address = "";
     
-    @Required
     @Column(name = "code")
-    public Integer code = 0;
+    public Integer code;
     
     @Column(name="joining_date")
-    //  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
     public LocalDate joiningDate;
     
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})

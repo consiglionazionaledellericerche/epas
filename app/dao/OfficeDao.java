@@ -12,12 +12,14 @@ import models.UsersRolesOffices;
 import models.query.QOffice;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -41,7 +43,6 @@ public class OfficeDao extends DaoBase {
 
 	private final static QOffice office = QOffice.office1;
 	
-	
 	/**
 	 * 
 	 * @param id
@@ -59,9 +60,7 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista di tutti gli uffici presenti sul database
 	 */
 	public List<Office> getAllOffices(){
-		
-		QOffice office = QOffice.office1;
-		
+				
 		final JPQLQuery query = getQueryFactory().from(office);
 		
 		return query.list(office);
@@ -73,12 +72,12 @@ public class OfficeDao extends DaoBase {
 	 * @param contraction
 	 * @return  
 	 */
-	public Office getOfficeByContraction(String contraction){
+	public Optional<Office> getOfficeByContraction(String contraction){
 		
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.contraction.eq(contraction));
 		
-		return query.singleResult(office);
+		return Optional.fromNullable(query.singleResult(office));
 	}
 	
 	/**
@@ -86,13 +85,12 @@ public class OfficeDao extends DaoBase {
 	 * @param name
 	 * @return  
 	 */
-	public Office getOfficeByName(String name){
-		QOffice office = QOffice.office1;
+	public Optional<Office> getOfficeByName(String name){
 		
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.name.eq(name));
 		
-		return query.singleResult(office);
+		return Optional.fromNullable(query.singleResult(office));
 	}
 	
 	/**
@@ -100,11 +98,11 @@ public class OfficeDao extends DaoBase {
 	 * @param code
 	 * @return l'ufficio associato al codice passato come parametro
 	 */
-	public Office getOfficeByCode(Integer code){
-		QOffice office = QOffice.office1;
+	public Optional<Office> getOfficeByCode(Integer code){
+
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
-		return query.singleResult(office);
+		return Optional.fromNullable(query.singleResult(office));
 		
 	}
 	
@@ -114,7 +112,7 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
 	 */
 	public List<Office> getOfficesByCode(Integer code){
-		QOffice office = QOffice.office1;
+
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
 		return query.list(office);
@@ -125,7 +123,7 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista delle aree presenti in anagrafica
 	 */
 	public List<Office> getAreas(){
-		QOffice office = QOffice.office1;
+
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.office.isNull());
 		return query.list(office);
@@ -186,6 +184,8 @@ public class OfficeDao extends DaoBase {
 		return office.office;
 	}
 	
+	
+	
 	/**
 	 * 
 	 * @param user
@@ -218,5 +218,26 @@ public class OfficeDao extends DaoBase {
 	    							return wrapperFactory.create(o).isSeat();
 	    						}}).toSet();
 		
+	}
+	
+	public boolean checkForDuplicate(Office o){
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		condition.or(office.name.equalsIgnoreCase(o.name));
+		
+		if(o.contraction!=null){
+			condition.or(office.contraction.equalsIgnoreCase(o.contraction));
+		}
+		
+		if(o.code!=null){
+			condition.or(office.code.eq(o.code));
+		}
+		
+		if(o.id!=null){
+			condition.and(office.id.ne(o.id));
+		}
+	
+		return getQueryFactory().from(office)
+				.where(condition).exists();
 	}
 }

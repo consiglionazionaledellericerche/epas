@@ -25,10 +25,8 @@ public class Permission extends BaseModel{
 
 	private static final long serialVersionUID = 7368960878704914559L;
 
-
 	public String description;
-    
- 
+     
 	@ManyToMany(mappedBy="permissions")
 	public Set<Role> roles = Sets.newHashSet();
 }
