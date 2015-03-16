@@ -8,6 +8,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.Person;
@@ -21,10 +23,15 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 
 @With( {Resecure.class, RequestInit.class} )
@@ -34,10 +41,19 @@ public class Administration extends Controller {
 	static OfficeDao officeDao;
 	
 	@Inject
+	static PersonDao personDao;
+	
+	@Inject
 	static ConsistencyManager consistencyManager;
 	
 	@Inject
 	static PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory; 
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	@NoCheck
 	public static void utilities(){
@@ -70,6 +86,39 @@ public class Administration extends Controller {
 	public static void createOvertimeFile(int year) throws IOException{
 		Logger.debug("Chiamo overtime in year...");
 		Competences.getOvertimeInYear(year);
+		
+	}
+	
+	@NoCheck
+	public static void showResidualSituation() {
+		
+		String name = null;
+		//Prendo la lista delle persone attive oggi
+		List<Person> personList = personDao.list(Optional.fromNullable(name),
+					officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(),
+					LocalDate.now(), false).list();
+		
+		//Calcolo i riepiloghi
+		
+		List<IWrapperPerson> wrapperPersonList = FluentIterable
+				.from(personList)
+				.transform(wrapperFunctionFactory.person()).toList();
+		
+		List<PersonResidualMonthRecap> monthRecapList = Lists.newArrayList();
+		
+		for(IWrapperPerson person : wrapperPersonList){
+			
+			Logger.debug("Persona %s", person.getValue().getFullname());
+			PersonResidualYearRecap residual = 
+					yearFactory.create(person.getCurrentContract().get(), LocalDate.now().getYear(), null);
+			
+			//monthRecapList.add(residual.getMese(LocalDate.now().getMonthOfYear()));
+			monthRecapList.add(residual.getMese(2));
+			
+		}
+		
+		//Render
+		render(monthRecapList);
 		
 	}
 	
