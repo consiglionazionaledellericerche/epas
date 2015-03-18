@@ -72,18 +72,13 @@ public class Stampings extends Controller {
 
 		Person person = Security.getUser().get().person;
 
-		if(!PersonManager.isActiveInMonth(person, month, year, false))
-		{
-			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
-					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+		if(!PersonManager.isActiveInMonth(person, month, year, false)) {
 			
-			//Un dipendente fuori contratto non può accedere a ePAS ??
-			try {
-				Secure.login();
-			} catch(Throwable e) {
-				Application.index();
-			}
+			flash.error("Non esiste situazione mensile per il mese di %s %s", 
+					DateUtility.fromIntToStringMonth(month), year);
 			
+			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+			return;
 		}
 		
 		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
@@ -101,6 +96,7 @@ public class Stampings extends Controller {
 			year = LocalDate.now().getYear();
 			month = LocalDate.now().getMonthOfYear();
 		}
+		
 		if (year == 0 || month == 0) {
 			
 			year = LocalDate.now().getYear();

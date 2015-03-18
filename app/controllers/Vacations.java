@@ -47,23 +47,36 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 		
+		VacationsRecap vacationsRecap;
+		Optional<VacationsRecap> vacationsRecapPrevious;
+		
 		try {
-			VacationsRecap vacationsRecap = vacationsFactory.create(
+			vacationsRecap = vacationsFactory.create(
 					year, contract.get(), LocalDate.now(), true);
-	
-			VacationsRecap vacationsRecapPrevious = vacationsFactory.create( 
-					year-1, contract.get(), new LocalDate(year-1,12,31), true);
-			
-			VacationsShowDto vacationShowDto = 
-					VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
-
-			render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
 	
 		} catch (EpasExceptionNoSourceData e) {
 			
-			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
-			renderTemplate("Application/indexAdmin.html");
+			flash.error("L'anno %s è al di fuori del contratto "
+					+ "oppure mancano i dati di inizializzazione.", year);
+			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+			return;
 		}
+		
+		try {
+			vacationsRecapPrevious = Optional.fromNullable(
+					vacationsFactory.create(year-1, contract.get(), 
+							new LocalDate(year-1,12,31), true));
+		}
+		catch (EpasExceptionNoSourceData e) {
+			vacationsRecapPrevious = Optional.absent();
+		}
+		
+		VacationsShowDto vacationShowDto = 
+		VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
+
+		render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
+	
+		
 	}
 	
 	public static void vacationsCurrentYear(Integer anno){
