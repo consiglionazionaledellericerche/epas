@@ -135,7 +135,7 @@ public final class PersonDao {
 
 		Preconditions.checkState(!offices.isEmpty());
 		
-		return ModelQuery.simpleResults(queryList(name, offices, onlyOnCertificate, start, end, onlyOnCertificate), 
+		return ModelQuery.simpleResults(queryList(name, offices, onlyTechnician, start, end, onlyOnCertificate), 
 				person);
 	}
 

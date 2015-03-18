@@ -19,6 +19,7 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 
+import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -190,6 +191,7 @@ public class Administrators extends Controller {
 	/**
 	 * ritorna alla precedente persona.
 	 */
+	@NoCheck
 	public static void restoreUser() {
 		if (session.contains(SUDO_USERNAME)) {
 			session.put(USERNAME, session.get(SUDO_USERNAME));
