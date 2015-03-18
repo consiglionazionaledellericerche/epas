@@ -35,7 +35,7 @@ public class User extends BaseModel{
 	public Person person;
 
 	@NotAudited
-	@OneToMany(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="user", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 
 

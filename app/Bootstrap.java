@@ -121,10 +121,63 @@ public class Bootstrap extends Job<Void> {
 		bootstrapStampingCreateHandler();
 				
 		bootstrapPermissionsHandler();
+		
+		bootstrapSuperAdminCreation();
 				
 
 	}
 	
+	/**
+	 * Crea il ruolo SuperAdmin con il permesso Developer. 
+	 * Per adesso viene assegnato ad ogni sede.
+	 */
+	private static void bootstrapSuperAdminCreation() {
+		
+		//1) Creazione Ruolo con permesso
+		Role role = Role.find("byName",  Role.SUPER_ADMIN).first();
+		if(role == null) {
+			role = new Role();
+			role.name = Role.SUPER_ADMIN;
+			role.save();
+			Permission permission = new Permission();
+			permission.description = Security.DEVELOPER;
+			permission.save();
+			role.permissions.add(permission);
+			role.save();
+		}
+		
+		User admin = User.find("byUsername", "admin").first();
+		
+		//2) Assegno il permesso ad admin ad ogni office
+		List<Office> officeList = Office.findAll();
+		for(Office office : officeList) {
+
+			IWrapperOffice wOffice = wrapperFactory.create(office);
+
+			if( !wOffice.isSeat() )
+				continue;
+
+			boolean hasSuperAdminRole = false;
+
+			for(UsersRolesOffices uro : office.usersRolesOffices) {
+				if(uro.role.name.equals(Role.SUPER_ADMIN)) {
+					hasSuperAdminRole = true;
+					break;
+				}
+			}
+			if(hasSuperAdminRole) {
+				continue;
+			}
+
+			UsersRolesOffices uro = new UsersRolesOffices();
+			uro.user = admin;
+			uro.office = office;
+			uro.role = role;
+			uro.save();
+		}
+
+	}
+
 	private static void bootstrapStampingCreateHandler() {
 		
 		//1) Creazione Ruolo con permesso
@@ -241,10 +294,6 @@ public class Bootstrap extends Job<Void> {
 			
 			Role roleMini = new Role();
 			roleMini.name = Role.PERSONNEL_ADMIN_MINI;
-			
-			permission = new Permission();
-			permission.description = Security.DEVELOPER;
-			permission.save();
 			
 			permission = new Permission();
 			permission.description = Security.EMPLOYEE;

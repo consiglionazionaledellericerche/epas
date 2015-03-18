@@ -35,8 +35,8 @@ when
         /* inserire le action interessate */
         "Administration.utilities",
         "Administration.fixPersonSituation",
-        "Administration.switchUserTo",
-        "Administration.restoreUser"
+        "Administrators.switchUserTo",
+        "Administrators.restoreUser"
        ), target == null, granted == false)
 then
  $c.grant();
