@@ -97,8 +97,14 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted();
 
+		LocalDate startEra = new LocalDate(1900,1,1);
+		LocalDate endEra = new LocalDate(9999,1,1);
+		List<Person> simplePersonList = PersonDao.list(Optional.fromNullable(name),
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, startEra,
+				endEra, false).list();
+		
 		List<IWrapperPerson> personList = FluentIterable
-				.from(personDao.simpleList(name))
+				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
 		render(personList);
 	}

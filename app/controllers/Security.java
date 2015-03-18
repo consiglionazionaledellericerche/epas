@@ -35,7 +35,7 @@ public class Security extends Secure.Security {
 	
 	/* Sviluppatore */
 	
-	public final static String DEVELOPER = "develop";
+	public final static String DEVELOPER = "developer";
 	
 	/* Dipendente */
 	

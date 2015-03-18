@@ -51,7 +51,7 @@ public class Office extends BaseModel{
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<Office> subOffices = new ArrayList<Office>();
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="office_id")
     public Office office;
      

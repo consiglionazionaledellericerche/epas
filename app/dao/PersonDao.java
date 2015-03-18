@@ -31,6 +31,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.types.Projections;
 
 import controllers.Security;
 
@@ -41,6 +42,19 @@ import controllers.Security;
  *
  */
 public final class PersonDao {
+	
+	public static class PersonLiteDto {
+		
+		public Long id;
+		public String name;
+		public String surname;
+
+		public PersonLiteDto(Long id, String name, String surname) {
+			this.id = id;
+			this.name = name;
+			this.surname = surname;
+		}
+	}
 
 	private final static QPerson person = QPerson.person;
 	private final static QContract contract = QContract.contract;
@@ -48,30 +62,13 @@ public final class PersonDao {
 	@Inject
 	public OfficeDao officeDao;
 
-	/**
-	 * @param name
-	 * @param offices obbligatorio
-	 * @param onlyTechnician
-	 * @return la lista delle person corrispondenti
-	 */
-	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
+	private static JPQLQuery queryList(Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
-
-		Preconditions.checkState(!offices.isEmpty());
-
-		// TODO: completare con l'intervallo
-		//final LocalDate start = new LocalDate();
-		//final LocalDate end = start;
-
+		
 		 final JPQLQuery query = ModelQuery.queryFactory().from(person)
-					.leftJoin(person.contracts, contract).fetch()
-					.leftJoin(contract.contractWorkingTimeType).fetch()
-					.leftJoin(contract.contractStampProfile).fetch()
-					.leftJoin(contract.vacationPeriods).fetch()
-					.leftJoin(person.personHourForOvertime).fetch()
-					.leftJoin(person.reperibility).fetch()
-					.leftJoin(person.personShift).fetch()
+					.leftJoin(person.contracts, contract)
 					.orderBy(person.surname.asc(), person.name.asc())
+					
 					.distinct();
 
 
@@ -112,36 +109,35 @@ public final class PersonDao {
 
 				);
 
-		/*
-		condition.and(qc.beginContract.before(end));
-
-		condition.andAnyOf(
-				qc.endContract.isNull().and(qc.expireContract.isNull()),											//contratto indeterminato non terminato
-
-				qc.endContract.isNull().and( qc.expireContract.isNotNull().and(qc.expireContract.goe(start)) ), 	//contratto determinato non terminato
-
-				qc.endContract.isNotNull().and(qc.endContract.goe(start)) );										//contratto terminato
-
-				*/
-
-
-		query.where(condition);
-
-		return ModelQuery.simpleResults(query, person);
+		return query.where(condition);
+		
 	}
-
+	
+	public static List<PersonLiteDto> liteList(Set<Office> offices, int year, int month) {
+		
+		final QPerson person = QPerson.person;
+		
+		LocalDate beginMonth = new LocalDate(year,month,1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		
+		return queryList(Optional.<String>absent(), offices, false, beginMonth, endMonth, true)
+				.list((Projections.bean(PersonLiteDto.class, person.id, person.name, person.surname)));
+	}
+	
 	/**
 	 * @param name
-	 * @return l'elenco delle persone corrispondenti a `name`
+	 * @param offices obbligatorio
+	 * @param onlyTechnician
+	 * @return la lista delle person corrispondenti
 	 */
-	public List<Person> simpleList(@Nullable String name) {
-		LocalDate startEra = new LocalDate(1900,1,1);
-		LocalDate endEra = new LocalDate(9999,1,1);
-		return list(Optional.fromNullable(name),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, startEra,
-				endEra, false).list();
-	}
+	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
+			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 
+		Preconditions.checkState(!offices.isEmpty());
+		
+		return ModelQuery.simpleResults(queryList(name, offices, onlyOnCertificate, start, end, onlyOnCertificate), 
+				person);
+	}
 
 	/**
 	 * @param name

@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
-import models.Person;
 import models.Qualification;
 import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
@@ -22,6 +21,12 @@ import models.query.QRole;
 import models.query.QUsersRolesOffices;
 
 import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.i18n.Messages;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Http;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -33,12 +38,8 @@ import controllers.Resecure.NoCheck;
 import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDao.PersonLiteDto;
 import dao.QualificationDao;
-import play.Logger;
-import play.i18n.Messages;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.Http;
 
 /**
  * @author cristian
@@ -357,25 +358,19 @@ public class RequestInit extends Controller {
 		renderArgs.put("currentData", new CurrentData(year, month, day, 
 				Long.valueOf(session.get("personSelected"))));
 
-		
-		LocalDate beginMonth = new LocalDate(year,month,1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		String name = null;
 		if(Security.getUser().get().person != null) {
 			Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 			if(!officeList.isEmpty()) {
-			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					officeList, false, beginMonth, endMonth, true).list();
-			renderArgs.put("navPersons", persons);
+				List<PersonLiteDto> persons = PersonDao.liteList(officeList, year, month); 	
+				renderArgs.put("navPersons", persons);
 			}
 		} 
 		else {
 
 			List<Office> allOffices = officeDao.getAllOffices();
-			if (allOffices!=null && !allOffices.isEmpty()){
-			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
-			renderArgs.put("navPersons", persons);
+			if (allOffices!=null && !allOffices.isEmpty()) {
+				List<PersonLiteDto> persons = PersonDao.liteList(Sets.newHashSet(allOffices), year, month);
+				renderArgs.put("navPersons", persons);
 			}
 		}
 
