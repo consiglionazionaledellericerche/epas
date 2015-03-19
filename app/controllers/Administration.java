@@ -55,7 +55,6 @@ public class Administration extends Controller {
 	@Inject
 	static IWrapperFactory wrapperFactory;
 	
-	@NoCheck
 	public static void utilities(){
 
 		final List<Person> personList = PersonDao.list(
@@ -73,10 +72,7 @@ public class Administration extends Controller {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */
-	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
-
-		//TODO permessi
 		LocalDate date = new LocalDate(year,month,1);
 		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(PersonDao.getPersonById(personId));
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
@@ -89,7 +85,6 @@ public class Administration extends Controller {
 		
 	}
 	
-	@NoCheck
 	public static void showResidualSituation() {
 		
 		String name = null;
