@@ -1,9 +1,10 @@
 package dao;
 
-import helpers.ModelQuery;
 import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import manager.ConfGeneralManager;
 import models.Contract;
@@ -16,8 +17,11 @@ import models.query.QPerson;
 
 import org.joda.time.LocalDate;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 /**
  * DAO per i MealTicket.
@@ -25,7 +29,12 @@ import com.mysema.query.jpa.JPQLQuery;
  * @author alessandro
  *
  */
-public class MealTicketDao {
+public class MealTicketDao extends DaoBase {
+
+	@Inject
+	MealTicketDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
 
 	/**
 	 * Ritorna la lista di mealTickt assegnati alla persona nella finestra temporale specificata.
@@ -35,12 +44,12 @@ public class MealTicketDao {
 	 * @param dateTo
 	 * @return
 	 */
-	public static List<MealTicket> getMealTicketAssignedToPersonIntoInterval(
+	public List<MealTicket> getMealTicketAssignedToPersonIntoInterval(
 			Contract c, DateInterval interval) {
 		
 		final QMealTicket mealTicket = QMealTicket.mealTicket;
 		
-		final JPQLQuery query = ModelQuery.queryFactory()
+		final JPQLQuery query = getQueryFactory()
 				.from(mealTicket)
 				.where(mealTicket.contract.id.eq(c.id))
 				.where(mealTicket.date.goe(interval.getBegin()))
@@ -57,14 +66,13 @@ public class MealTicketDao {
 	 * @param office
 	 * @return
 	 */
-	public static LocalDate getFurtherExpireDateInOffice(Office office) {
+	public LocalDate getFurtherExpireDateInOffice(Office office) {
 		
 		final QMealTicket qmt = QMealTicket.mealTicket;
 		final QPerson qp = QPerson.person;
 		final QContract qc = QContract.contract;
 		
-		final JPQLQuery query = ModelQuery.queryFactory()
-				
+		final JPQLQuery query = getQueryFactory()
 				.from(qmt)
 				.leftJoin(qmt.contract, qc)
 				.leftJoin(qc.person, qp)
@@ -88,10 +96,10 @@ public class MealTicketDao {
 	 * @param contract
 	 * @return
 	 */
-	public static List<MealTicket> getOrderedMealTicketInContract(Contract contract) {
+	public List<MealTicket> getOrderedMealTicketInContract(Contract contract) {
 		final QMealTicket mealTicket = QMealTicket.mealTicket;
 		
-		final JPQLQuery query = ModelQuery.queryFactory()
+		final JPQLQuery query = getQueryFactory()
 				.from(mealTicket)
 				.where(mealTicket.contract.eq(contract))
 				.orderBy(mealTicket.date.desc());
@@ -107,7 +115,7 @@ public class MealTicketDao {
 	 * @param office
 	 * @return
 	 */
-	public static LocalDate getMealTicketStartDate(Office office) {
+	public LocalDate getMealTicketStartDate(Office office) {
 		
 		String confParam = ConfGeneralManager.getFieldValue(
 				ConfigurationFields.DateStartMealTicket.description, office);
@@ -124,11 +132,11 @@ public class MealTicketDao {
 	 * @param codeBlockIds
 	 * @return
 	 */
-	public static List<MealTicket> getMealTicketsInCodeBlockIds(List<Integer> codeBlockIds) {
+	public List<MealTicket> getMealTicketsInCodeBlockIds(List<Integer> codeBlockIds) {
 		
-	final QMealTicket mealTicket = QMealTicket.mealTicket;
+		final QMealTicket mealTicket = QMealTicket.mealTicket;
 		
-		final JPQLQuery query = ModelQuery.queryFactory()
+		final JPQLQuery query = getQueryFactory()
 				.from(mealTicket)
 				.orderBy(mealTicket.code.asc());
 		
@@ -148,10 +156,14 @@ public class MealTicketDao {
 	 * @param code
 	 * @return il mealTicket corrispondente al codice code passato come parametro
 	 */
-	public static MealTicket getMealTicketByCode(String code){
+	public MealTicket getMealTicketByCode(String code){
+		
 		QMealTicket mealTicket = QMealTicket.mealTicket;
-		final JPQLQuery query = ModelQuery.queryFactory().from(mealTicket)
+		
+		final JPQLQuery query = getQueryFactory()
+				.from(mealTicket)
 				.where(mealTicket.code.eq(code));
+		
 		return query.singleResult(mealTicket);
 	}
 	

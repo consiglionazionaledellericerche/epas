@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
@@ -30,13 +32,15 @@ import play.libs.Mail;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 
-import controllers.Resecure.NoCheck;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
+import dao.wrapper.IWrapperFactory;
+import exceptions.EpasExceptionNoSourceData;
 
 /**
  * Manager che gestisce la consistenza e la coerenza dei dati in Epas.
@@ -48,6 +52,28 @@ import dao.PersonDayInTroubleDao;
 public class ConsistencyManager {
 	
 	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
+
+	@Inject
+	public OfficeDao officeDao;
+	
+	@Inject
+	public ContractYearRecapManager contractYearRecapManager;
+	
+	@Inject
+	public PersonDayManager personDayManager;
+	
+	@Inject
+	public PersonManager personManager;
+	
+	@Inject
+	public PersonDayDao personDayDao;
+	
+	@Inject
+	public PersonDayInTroubleDao personDayInTroubleDao;
+	
+	@Inject 
+	public IWrapperFactory wrapperFactory;
+	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -56,17 +82,16 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	@NoCheck
-	public static void fixPersonSituation(Optional<Person> person,Optional<User> user,
+	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendEmail){
 		
-		Set<Office> offices = user.isPresent() ? OfficeDao.getOfficeAllowed(user.get()) : Sets.newHashSet(OfficeDao.getAllOffices());
+		Set<Office> offices = user.isPresent() ? officeDao.getOfficeAllowed(user.get()) : Sets.newHashSet(officeDao.getAllOffices());
 
 		//  (0) Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = Lists.newArrayList();
 		
 		if(person.isPresent() && user.isPresent()){
-		    if(PersonManager.isAllowedBy(user.get(), person.get()))
+		    if(personManager.isAllowedBy(user.get(), person.get()))
 			personList.add(person.get());
 		}
 		else {
@@ -79,16 +104,22 @@ public class ConsistencyManager {
 			
 			p = PersonDao.getPersonById(p.id);
 			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-				ConsistencyManager.checkHistoryError(p, fromDate);
+				checkHistoryError(p, fromDate);
 			// (2) Ricalcolo i valori dei person day	
 				log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-				PersonDayManager.updatePersonDaysFromDate(p,fromDate);
+				personDayManager.updatePersonDaysFromDate(p,fromDate);
 			// (3) Ricalcolo dei residui
 				log.info("Update residui {} dal {} a oggi", p.getFullname(), fromDate);
 				List<Contract> contractList = ContractDao.getPersonContractList(p);
 
 				for(Contract contract : contractList) {
-					ContractYearRecapManager.buildContractYearRecap(contract);
+					try {
+						contractYearRecapManager.buildContractYearRecap(contract);
+					} catch (EpasExceptionNoSourceData e) {
+							log.warn("Manca l'inizializzazione per il contratto {} di {}",
+									new Object[]{contract.id, contract.person.getFullname()});
+						
+					}
 				}
 				
 			JPAPlugin.closeTx(false);
@@ -127,7 +158,7 @@ public class ConsistencyManager {
 	 * @param end
 	 * @throws EmailException
 	 */
-	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
+	private void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
 
 		if(p.surname.equals("Conti") && p.name.equals("Marco")) {
 			
@@ -135,7 +166,7 @@ public class ConsistencyManager {
 			return;
 		}
 		
-		List<PersonDayInTrouble> pdList = PersonDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
+		List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
@@ -149,8 +180,12 @@ public class ConsistencyManager {
 				continue;
 			}
 			
-			ContractStampProfile csp = ContractManager.getContractStampProfileFromDate(contract, pdt.personDay.date);
-			if(csp.fixedworkingtime == true) {
+			Optional<ContractStampProfile> csp = ContractManager
+						.getContractStampProfileFromDate(contract, pdt.personDay.date);
+			
+			Preconditions.checkState(csp.isPresent());
+			
+			if(csp.get().fixedworkingtime == true) {
 				continue;
 			}
 			
@@ -192,13 +227,13 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public static void checkNoAbsenceNoStamping(int year, int month, User userLogged) throws EmailException{
+	public void checkNoAbsenceNoStamping(int year, int month, User userLogged) throws EmailException{
 
 		LocalDate begin = new LocalDate(year, month, 1);
 		LocalDate end = new LocalDate().minusDays(1);
 
 		List<Person> personList = PersonDao.list(Optional.<String>absent(),
-					OfficeDao.getOfficeAllowed(userLogged), false, begin, end, true).list();
+					officeDao.getOfficeAllowed(userLogged), false, begin, end, true).list();
 		
 		for(Person p : personList){
 		
@@ -215,6 +250,7 @@ public class ConsistencyManager {
 	}
 
 
+
 	/**
 	 * Verifica per la persona (se attiva) che alla data 
 	 * 	(1) in caso di giorno lavorativo il person day esista. 
@@ -229,16 +265,16 @@ public class ConsistencyManager {
 	 * @param personid la persona da controllare
 	 * @param dayToCheck il giorno da controllare
 	 */
-	public static void checkPersonDay(Person person, LocalDate dayToCheck){
+	public void checkPersonDay(Person person, LocalDate dayToCheck){
 
 		if(!PersonManager.isActiveInDay(dayToCheck, person)){
 			return;
 		}
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayToCheck);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayToCheck);
 
 		if(pd.isPresent()){
-			PersonDayManager.checkForPersonDayInTrouble(pd.get()); 
+			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(pd.get())); 
 			return;
 		}
 		else {
@@ -247,12 +283,13 @@ public class ConsistencyManager {
 				return;
 			}
 			personDay.create();
-			PersonDayManager.populatePersonDay(personDay);
+			personDayManager.populatePersonDay(wrapperFactory.create(personDay));
 			personDay.save();
-			PersonDayManager.checkForPersonDayInTrouble(personDay);
+			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(personDay));
 			return;
 		}
 	}
+
 
 	/**
 	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
@@ -262,7 +299,7 @@ public class ConsistencyManager {
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
 	 */
-	private static void checkHistoryError(Person person, LocalDate from){
+	private void checkHistoryError(Person person, LocalDate from){
 		log.info("Check history error {} dal {} a oggi", person.getFullname(), from);
 		
 		LocalDate date = from;
@@ -270,7 +307,7 @@ public class ConsistencyManager {
 		
 		while(date.isBefore(today)) {
 						
-			ConsistencyManager.checkPersonDay(person, date);
+			checkPersonDay(person, date);
 			date = date.plusDays(1);
 			
 		}

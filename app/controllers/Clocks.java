@@ -3,32 +3,34 @@ package controllers;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.StampModificationType;
-import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.ConfigurationFields;
-import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
 import dao.OfficeDao;
@@ -38,12 +40,26 @@ import dao.UserDao;
 
 @With( RequestInit.class )
 public class Clocks extends Controller{
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static PersonStampingDayRecapFactory stampingDayRecapFactory;
+	
+	@Inject
+	static PersonDayManager personDayManager;
+	
+	@Inject
+	static PersonDayDao personDayDao;
 
 	public static void show(){
+		
 		LocalDate data = new LocalDate();
+		
 		//TODO Capire quali office saranno visibili a questo livello
-		List<Office> officeAllowed = OfficeDao.getAllOffices();
-		//List<Office> officeAllowed = Office.findAll();
+		List<Office> officeAllowed = officeDao.getAllOffices();
+
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, data, data, true).list();
 		render(data, personList);
 	}
@@ -67,7 +83,7 @@ public class Clocks extends Controller{
 			Clocks.show();
 		}	
 		PersonDay personDay = null;			
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(user.person, today);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
 		
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
@@ -80,9 +96,9 @@ public class Clocks extends Controller{
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, user.person.office));
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
-		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(personDay,numberOfInOut);
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
 		
 		render(user, dayRecap, numberOfInOut);
 	}
@@ -100,7 +116,7 @@ public class Clocks extends Controller{
 		LocalDateTime ldt = new LocalDateTime();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, ldt.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, ldt.toLocalDate());
 		
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
@@ -143,9 +159,16 @@ public class Clocks extends Controller{
 		personDay.stampings.add(stamp);
 		personDay.save();
 		
-		PersonDayManager.updatePersonDaysFromDate(person, personDay.date);
+		final PersonDay day = personDay;
 		
-		//pd.save();
+		new Job() {
+			@Override
+			public void doJob() {
+				personDayManager.updatePersonDaysFromDate(day.person, day.date);
+
+			}
+		}.afterRequest();
+
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		
 		Clocks.showRecap(personId);
@@ -160,7 +183,7 @@ public class Clocks extends Controller{
 		
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, today);
+		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, today);
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			personDay = new PersonDay(person, today);
@@ -173,9 +196,9 @@ public class Clocks extends Controller{
 		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
-		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(personDay,numberOfInOut);
+		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
 		
 		render(person, dayRecap, numberOfInOut);
 		

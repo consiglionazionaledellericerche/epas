@@ -78,7 +78,29 @@ public class WorkingTimeTypeDao {
 	 * @param date
 	 * @return il tipo di orario di lavoro utilizzato in date
 	 */
-	public static WorkingTimeType getWorkingTimeType(LocalDate date, Person person) {
+	public WorkingTimeType getWorkingTimeType(LocalDate date, Person person) {
+		//Contract contract = this.getContract(date);
+		Contract contract = ContractDao.getContract(date, person);
+		if(contract==null)
+			return null;
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				return cwtt.workingTimeType;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 *	//FIXME eliminare questo metodo affrontando il passaggio ad Injection
+	 *	//del PersonDayManager. 
+	 * @param date
+	 * @return il tipo di orario di lavoro utilizzato in date
+	 */
+	@Deprecated
+	public static WorkingTimeType getWorkingTimeTypeStatic(LocalDate date, Person person) {
 		//Contract contract = this.getContract(date);
 		Contract contract = ContractDao.getContract(date, person);
 		if(contract==null)

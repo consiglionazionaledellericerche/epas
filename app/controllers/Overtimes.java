@@ -3,9 +3,13 @@ package controllers;
 import static play.modules.pdf.PDF.renderPDF;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
+
+import javax.inject.Inject;
+
 import manager.OvertimesManager;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.CompetenceCode;
 import models.Contract;
 import models.Person;
@@ -20,13 +24,15 @@ import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.google.gdata.util.common.base.Preconditions;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
-import dao.ContractDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 
 
 /*
@@ -37,6 +43,12 @@ import dao.PersonDao;
  */
 
 public class Overtimes extends Controller {
+
+	@Inject
+	static PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	/*
 	 * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario)
@@ -60,9 +72,11 @@ public class Overtimes extends Controller {
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
-		Contract contract = ContractDao.getCurrentContract(person);
-		PersonResidualYearRecap c = 
-				PersonResidualYearRecap.factory(contract, year, null);
+		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+		
+		Preconditions.checkState(contract.isPresent());
+		
+		PersonResidualYearRecap c =	yearFactory.create(contract.get(), year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
 		
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;

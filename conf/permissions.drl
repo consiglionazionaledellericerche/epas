@@ -34,7 +34,9 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "Administration.utilities",
-        "Administration.fixPersonSituation"
+        "Administration.fixPersonSituation",
+        "Administrators.switchUserTo",
+        "Administrators.restoreUser"
        ), target == null, granted == false)
 then
  $c.grant();
@@ -514,13 +516,13 @@ end
 /*
  *		Permission: viewOffice
  */
-rule viewOffice_Generic
+rule viewOffice
 when 
  $uro: UsersRolesOffices()
  $p: Permission(description == "viewOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Epas.action"
+        "Offices.showOffices"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -539,18 +541,26 @@ then
  $c.grant();
 end
 
-
-
 /*
  *		Permission: editOffice
  */
-rule editOffice_Generic
+rule editOffice
 when 
  $uro: UsersRolesOffices()
  $p: Permission(description == "editOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Epas.action"
+        "Offices.editSeat",
+        "Offices.updateSeat",
+        "Offices.saveSeat",
+        "Offices.insertSeat",
+        "Offices.saveInstitute",
+        "Offices.insertInstitute",
+        "Offices.insertArea",
+        "Administrators.insertNewAdministrator",
+        "Administrators.saveNewAdministrator",
+        "Administrators.deleteAdministrator",
+        "Administrators.deleteSelfAsAdministrator"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -563,12 +573,6 @@ when
  $p: Permission(description == "editOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Offices.insertInstitute",
-        "Offices.saveInstitute",
-        "Offices.insertSeat",
-        "Offices.saveSeat",
-        "Offices.editSeat",
-        "Offices.updateSeat",
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",

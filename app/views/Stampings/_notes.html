@@ -32,7 +32,7 @@
 		  </tr>	
 	    </table>
 	   
-	  #{if !psDto.stampModificationTypeList.isEmpty() }
+	  #{if !psDto.stampModificationTypeSet.isEmpty() }
       <table class="table table-condensed table-bordered">
 		<tr>
 			<th width="80">Codice</th>
@@ -73,14 +73,14 @@
     <div id="notes" class="panel-collapse collapse out">
       <div class="panel-body">
  
- 	  #{if !psDto.stampModificationTypeList.isEmpty() }
+ 	  #{if !psDto.stampModificationTypeSet.isEmpty() }
       <table class="table table-condensed table-bordered">
 		<tr>
 			<th width="80">Codice</th>
 			<th width="400">Descrizione</th>
 				
 		</tr>
-		#{list items:psDto.stampModificationTypeList, as:'smt'}
+		#{list items:psDto.stampModificationTypeSet, as:'smt'}
 		  <tr>
 			<td>${smt.code}</td>     
 			<td>${smt.description}</td>		

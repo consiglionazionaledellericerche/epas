@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package models.enumerate;
 
@@ -7,11 +7,11 @@ package models.enumerate;
  * @author cristian
  *
  */
-public enum StampTypeValues {
-	
-	
+public enum StampTypeValues implements Identified {
+
+
 	/*
- id |          code          |       description        | identifier 
+ id |          code          |       description        | identifier
 ----+------------------------+--------------------------+------------
   1 | motiviDiServizio       | Motivi di servizio       | s
   2 | visitaMedica           | Visita Medica            | vm
@@ -23,7 +23,7 @@ public enum StampTypeValues {
   8 | intramoenia            | Intramoenia              | i
   9 | guardiaMedica          | Guardia Medica           | gm
 	 */
-	
+
 	MOTIVI_DI_SERVIZIO(1l),
 	VISITA_MEDICA(2l),
 	PERMESSO_SINDACALE(3l),
@@ -33,15 +33,15 @@ public enum StampTypeValues {
 	REPERIBILITA(7l),
 	INTRAMOENIA(8l),
 	GUARDIA_MEDICA(9l);
-	
-	private Long id;
-	
+
+	private long id;
+
 	StampTypeValues(Long id) {
 		this.id = id;
 	}
-	
-	public Long getId() {
+
+	public long getId() {
 		return id;
 	}
-	
+
 }

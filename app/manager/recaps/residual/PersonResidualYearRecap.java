@@ -1,9 +1,8 @@
-package manager.recaps;
+package manager.recaps.residual;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractManager;
@@ -11,6 +10,8 @@ import models.Contract;
 import models.ContractYearRecap;
 
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.ImmutableList;
 
 import dao.MealTicketDao;
 
@@ -20,30 +21,15 @@ import dao.MealTicketDao;
  *
  */
 public class PersonResidualYearRecap {
-
-	public List<PersonResidualMonthRecap> mesi;
-
-	private PersonResidualYearRecap() {}
 	
-	/**
-	 * Costruisce la situazione annuale residuale della persona.
-	 * @param contract
-	 * @param year
-	 * @param calcolaFinoA valorizzare questo campo per fotografare la situazione residuale in un certo momento 
-	 *   (ad esempio se si vuole verificare la possibilità di prendere riposo compensativo in un determinato giorno). 
-	 *   Null se si desidera la situazione residuale a oggi. 
-	 */
-	public static PersonResidualYearRecap factory(Contract contract, int year, LocalDate calcolaFinoA) {
+	public final List<PersonResidualMonthRecap> mesi;
 
-		if(contract==null)
-		{
-			return null;
-		}	
+	public PersonResidualYearRecap(MealTicketDao mealTicketDao, 
+			Contract contract, int year, LocalDate calcolaFinoA,
+			PersonResidualMonthRecapFactory factory) {
 		
-		LocalDate dateStartMealTicket = MealTicketDao.getMealTicketStartDate(contract.person.office);
+		LocalDate dateStartMealTicket = mealTicketDao.getMealTicketStartDate(contract.person.office);
 		
-		PersonResidualYearRecap csap = new PersonResidualYearRecap();
-
 		int firstMonthToCompute = 1;
 		LocalDate firstDayInDatabase = new LocalDate(year,1,1);
 		DateInterval contractInterval = contract.getContractDateInterval();
@@ -69,7 +55,9 @@ public class PersonResidualYearRecap {
 			//TODO initMealTickets da source contract
 		}
 
-		csap.mesi = new ArrayList<PersonResidualMonthRecap>();
+		final ImmutableList.Builder<PersonResidualMonthRecap> builder = 
+				ImmutableList.<PersonResidualMonthRecap> builder();
+		
 		PersonResidualMonthRecap previous = null;
 		int actualMonth = firstMonthToCompute;
 		int endMonth = 12;
@@ -100,8 +88,8 @@ public class PersonResidualYearRecap {
 
 			if( DateUtility.isDateIntoInterval(today, monthIntervalForPersonDay) )
 			{
-				// 2.1) Se oggi non è il primo giorno del mese allora tutti i giorni del mese fino a ieri.
-
+				// 2.1) Se oggi non è il primo gPersonResidualYearRecap csap = new PersonResidualYearRecap();iorno del mese allora tutti i giorni del mese fino a ieri.
+				
 				if ( today.getDayOfMonth() != 1 )
 				{
 					monthEndForPersonDay = today.minusDays(1);
@@ -164,6 +152,8 @@ public class PersonResidualYearRecap {
 			
 			if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) )
 			{
+
+
 				// 2.1) Se oggi non è il primo giorno del mese allora tutti i giorni del mese fino a ieri.
 				
 				if ( today.getDayOfMonth() != 1 )
@@ -191,18 +181,18 @@ public class PersonResidualYearRecap {
 			}
 
 			//Costruisco l'oggetto
-			PersonResidualMonthRecap mese = PersonResidualMonthRecap.factory(previous, year, actualMonth, contract, 
+			PersonResidualMonthRecap mese = factory.create(previous, year, actualMonth, contract, 
 					initMonteOreAnnoPassato, initMonteOreAnnoCorrente, initMealTicket,
 					validDataForPersonDay, validDataForCompensatoryRest, validDataForMealTickets);
 			
-			csap.mesi.add(mese);
+			builder.add(mese);
 			previous = mese;
 			actualMonth++;	
 		}
-
-		return csap;
+		
+		mesi = builder.build();
 	}
-	
+
 	/**
 	 * 
 	 * @param month

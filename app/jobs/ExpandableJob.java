@@ -1,5 +1,7 @@
 package jobs;
 
+import javax.inject.Inject;
+
 import manager.ConsistencyManager;
 import models.User;
 
@@ -18,13 +20,16 @@ import dao.UserDao;
 @On("0 0 15 ? * MON,WED,FRI")
 public class ExpandableJob extends Job{
 
+	@Inject
+	static ConsistencyManager consistencyManager;
+	
 	public void doJob(){
 		Logger.info("Start Job expandable");
 		
 		User userLogged = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());	
 		
 		try {
-			ConsistencyManager.checkNoAbsenceNoStamping(2014, 1, userLogged);
+			consistencyManager.checkNoAbsenceNoStamping(2014, 1, userLogged);
 		}
 		catch(EmailException e){
 			e.printStackTrace();

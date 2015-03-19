@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import manager.OfficeManager;
+import javax.inject.Inject;
+
 import models.Office;
 import models.Permission;
 import models.Qualification;
@@ -31,6 +32,9 @@ import play.libs.Codec;
 import com.google.common.io.Resources;
 
 import controllers.Security;
+import dao.OfficeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
@@ -40,6 +44,12 @@ import controllers.Security;
  */
 @OnApplicationStart
 public class Bootstrap extends Job<Void> {
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 
 	public static class DatasetImport implements Work {
 
@@ -111,10 +121,63 @@ public class Bootstrap extends Job<Void> {
 		bootstrapStampingCreateHandler();
 				
 		bootstrapPermissionsHandler();
+		
+		bootstrapSuperAdminCreation();
 				
 
 	}
 	
+	/**
+	 * Crea il ruolo SuperAdmin con il permesso Developer. 
+	 * Per adesso viene assegnato ad ogni sede.
+	 */
+	private static void bootstrapSuperAdminCreation() {
+		
+		//1) Creazione Ruolo con permesso
+		Role role = Role.find("byName",  Role.SUPER_ADMIN).first();
+		if(role == null) {
+			role = new Role();
+			role.name = Role.SUPER_ADMIN;
+			role.save();
+			Permission permission = new Permission();
+			permission.description = Security.DEVELOPER;
+			permission.save();
+			role.permissions.add(permission);
+			role.save();
+		}
+		
+		User admin = User.find("byUsername", "admin").first();
+		
+		//2) Assegno il permesso ad admin ad ogni office
+		List<Office> officeList = Office.findAll();
+		for(Office office : officeList) {
+
+			IWrapperOffice wOffice = wrapperFactory.create(office);
+
+			if( !wOffice.isSeat() )
+				continue;
+
+			boolean hasSuperAdminRole = false;
+
+			for(UsersRolesOffices uro : office.usersRolesOffices) {
+				if(uro.role.name.equals(Role.SUPER_ADMIN)) {
+					hasSuperAdminRole = true;
+					break;
+				}
+			}
+			if(hasSuperAdminRole) {
+				continue;
+			}
+
+			UsersRolesOffices uro = new UsersRolesOffices();
+			uro.user = admin;
+			uro.office = office;
+			uro.role = role;
+			uro.save();
+		}
+
+	}
+
 	private static void bootstrapStampingCreateHandler() {
 		
 		//1) Creazione Ruolo con permesso
@@ -143,7 +206,9 @@ public class Bootstrap extends Job<Void> {
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
 			
-			if( !OfficeManager.isSeat(office) )
+			IWrapperOffice wOffice = wrapperFactory.create(office);
+			
+			if( !wOffice.isSeat() )
 				continue;
 			
 			boolean hasBadgeReader = false;
@@ -229,10 +294,6 @@ public class Bootstrap extends Job<Void> {
 			
 			Role roleMini = new Role();
 			roleMini.name = Role.PERSONNEL_ADMIN_MINI;
-			
-			permission = new Permission();
-			permission.description = Security.DEVELOPER;
-			permission.save();
 			
 			permission = new Permission();
 			permission.description = Security.EMPLOYEE;

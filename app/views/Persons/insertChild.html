@@ -1,40 +1,62 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Inserimento/Modifica figlio per ' + person.getFullname() /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione figli di ' + person.getFullname() /}
 
-<div class="container-fluid center">
+#{set 'moreStyles'}
+<style type="text/css">
+#content{
+  margin-top: 5em;
+}
+.panel-body{
+  padding-top: 3em;
+}
+form > legend{
+  margin-top: 5em;
+}
+</style>
+#{/set}
+
+<div class="panel panel-default col-md-6 col-md-offset-3" id="content" >
+  <div class="panel-heading">
+    <h3>Inserimento/Modifica figlio per ${person.getFullname()}</h3>
+  </div>
+<div class="panel-body">
 
 #{form @Persons.saveChild(),role:'form'}
 <input type="hidden" name="person.id" value="${person.id}"/>
 <input type="hidden" name="child.id" value="${child?.id}"/>
 
+
   #{field 'child.name'}
-  <div class='form-group col-sm-8 col-sm-offset-2'>
-    <label for="${field.id}">Nome</label>
+  <div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Nome</label>
     <input class="form-control" id="${field.id}" type="text" name="${field.name}" value="${field.value}" >
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
   </div>
   #{/field}
 
   #{field 'child.surname'}
-  <div class='form-group col-sm-8 col-sm-offset-2'>
-    <label for="${field.id}">Cognome</label>
+  <div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Cognome</label>
     <input class="form-control" id="${field.id}" type="text" name="${field.name}" value="${field.value}">
     #{if field.error}<span class="help-block">${field.error}</span>#{/if}
   </div>
   #{/field}
 
   #{field 'child.bornDate'}
-    <div class='form-group #{if field.error}has-error#{/if}'>
-      <label for="${field.id}">Data di Nascita</label>
-      <div class="input-group col-sm-6 col-sm-offset-3">
+    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Data di Nascita</label>
+      <div class="input-group">
         <input datepicker-year class="form-control" placeholder="yyyy-mm-dd" id="${field.id}" type="text" name="${field.name}" value="${field.value}">
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
-   #{/field}
+  #{/field}
 
 <legend></legend>
 <button type="submit" class="btn btn-primary col-sm-4 col-sm-offset-4">Salva</button>
 
 #{/form}
+</div>
 </div>

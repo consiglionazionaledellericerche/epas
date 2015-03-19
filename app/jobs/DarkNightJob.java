@@ -1,6 +1,7 @@
 package jobs;
 
 import org.joda.time.LocalDate;
+import javax.inject.Inject;
 
 import manager.ConsistencyManager;
 import models.Person;
@@ -19,11 +20,14 @@ import com.google.common.base.Optional;
 
 public class DarkNightJob extends Job{
 	
+	@Inject
+	static ConsistencyManager consistencyManager;
+	
 	public void doJob(){
 		
 		Logger.info("Start DarkNightJob");
 
-		ConsistencyManager.fixPersonSituation(Optional.<Person>absent(),
+		consistencyManager.fixPersonSituation(Optional.<Person>absent(),
 				Optional.<User>absent(),LocalDate.now().minusYears(1), true);
 		
 		Logger.info("Concluso DarkNightJob");

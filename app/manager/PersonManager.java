@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -26,6 +28,9 @@ import dao.PersonChildrenDao;
 public class PersonManager {
 
 	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
+	@Inject
+	public OfficeDao officeDao;
+	
 	/**
 	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
@@ -82,12 +87,24 @@ public class PersonManager {
 	 * @param administrator
 	 * @return true se la persona è visibile al parametro amministratore
 	 */
-	public static boolean isAllowedBy(User admin, Person person)
+	public boolean isAllowedBy(User admin, Person person)
 	{
-		Set<Office> adminOffices = OfficeDao.getOfficeAllowed(admin);
-		Set<Office> officeAllowed = OfficeDao.getOfficeAllowed(person.user);
+
+		Set<Office> adminOffices = officeDao.getOfficeAllowed(admin);
+		Set<Office> officeAllowed = officeDao.getOfficeAllowed(person.user);
 		
 		return adminOffices.contains(officeAllowed.iterator().next());
+		
+		/*
+		//List<Office> officeAllowed = administrator.getOfficeAllowed();
+		Set<Office> officeAllowed = officeDao.getOfficeAllowed(Optional.of(person.user));
+		for(Office office : officeAllowed)
+		{
+			if(office.id.equals(administrator.office.id))
+				return true;
+		}
+		return false;
+		*/
 
 	}
 	
@@ -215,7 +232,38 @@ public class PersonManager {
 	 * @param year
 	 * @return
 	 */
-	public static List<Contract> getMonthContracts(Person person, Integer month, Integer year)
+	public List<Contract> getMonthContracts(Person person, Integer month, Integer year)
+	{
+		List<Contract> monthContracts = new ArrayList<Contract>();
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
+		if(contractList == null){
+			return monthContracts;
+		}
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		for(Contract contract : contractList)
+		{
+			if(!contract.onCertificate)
+				continue;
+			DateInterval contractInterval = contract.getContractDateInterval();
+			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
+			{
+				monthContracts.add(contract);
+			}
+		}
+		return monthContracts;
+	}
+	
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	@Deprecated
+	public static List<Contract> getMonthContractsStatic(Person person, Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
