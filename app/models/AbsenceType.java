@@ -21,7 +21,6 @@ import models.enumerate.JustifiedTimeAtWork;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -29,7 +28,7 @@ import play.data.validation.Required;
 
 import com.google.common.collect.Sets;
 /**
- * 
+ *
  * @author dario
  *
  */
@@ -37,67 +36,55 @@ import com.google.common.collect.Sets;
 @Table(name="absence_types")
 @Audited
 public class AbsenceType extends BaseModel {
-	
+
 	private static final long serialVersionUID = 7157167508454574329L;
-	
+
 	@ManyToOne
 	@JoinColumn(name="absence_type_group_id")
 	public AbsenceTypeGroup absenceTypeGroup;
-	
+
 	@ManyToMany(fetch = FetchType.LAZY)
 	public List<Qualification> qualifications = new ArrayList<Qualification>();
-	
+
 	@OneToMany(mappedBy= "absenceType", fetch = FetchType.LAZY)
 	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
-	
+
 	@Required
 	public String code;
-	
+
 	@Column(name = "certification_code")
 	public String certificateCode;
-	
+
 	public String description;
-	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
+
 	@Column(name = "valid_from")
 	public LocalDate validFrom;
-	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
+
 	@Column(name = "valid_to")
 	public LocalDate validTo;
-	
+
 	@Column(name = "internal_use")
 	public boolean internalUse = false;
-	
+
 	@Column(name = "multiple_use")
 	public boolean multipleUse = false;
 	//FIXME questo campo non è mai utilizzato. la sua utilità mi sfugge
-	
-	
+
+
 	@Column(name = "meal_ticket_calculation")
 	public boolean mealTicketCalculation = false;
 	//FIXME questo campo non e' mai utilizzato, e' il caso della missione che prevede comunque il calcolo del buono mensa?
 
-	
-//	@Column(name = "ignore_stamping")
-//	public boolean ignoreStamping = false;
-	
+
 	@Column(name = "considered_week_end")
 	public boolean consideredWeekEnd = false;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "justified_time_at_work")
 	public JustifiedTimeAtWork justifiedTimeAtWork;
-	
-	/**
-	 * Se è true è un riposo compensativo che viene trattato in maniera "speciale" 
-	 * rispetto agli altri tipi di assenza
-	 */
-//	@Column(name = "compensatory_rest")
-//	public boolean compensatoryRest = false; 
-	//FIXME questo campo e' inutile, usato solo in FromMysql
-	
-	
+
 	/**
 	 * questo campo booleano serve nei casi in cui il codice sostitutivo da usare non debba essere considerato nel calcolo dell'orario di lavoro
 	 * giornaliero, ma che mi ricordi che arrivati a quel giorno, la quantità di assenze orarie per quel tipo ha superato il limite per cui deve
@@ -107,25 +94,22 @@ public class AbsenceType extends BaseModel {
 	 * giorno.
 	 */
 	@Column(name = "replacing_absence")
-	public boolean replacingAbsence = false; 
+	public boolean replacingAbsence = false;
 	//FIXME questo campo non è mai utilizzato
-	
+
 	/**
 	 * Relazione inversa con le assenze.
 	 */
 	@OneToMany(mappedBy="absenceType")
 	@LazyCollection(LazyCollectionOption.EXTRA)
 	public Set<Absence> absences = Sets.newHashSet();
-	
-	
+
+
 	@Transient
 	public String getShortDescription(){
 		if(description != null && description.length() > 60)
 			return description.substring(0, 60)+"...";
 		return description;
 	}
-	
-
-	
 
 }

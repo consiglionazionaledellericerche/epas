@@ -17,7 +17,7 @@
 	 	#{f.input_table 'person.badgeNumber', type:'number'/}
 		#{f.select_table 'qualification', value: qualification, items:templateUtility.allQualifications, required:'true'/}
 		#{f.select_table 'office', value: office, items:templateUtility.allOfficesAllowed, required:'true'/}
-		#{f.checkbox_table 'person.wantEmail', checked:'true' /}
+		#{f.checkbox_table 'person.wantEmail'/}
 	</table>
     <p>
   	   Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
@@ -38,7 +38,7 @@
 		
      #{f.datepicker_table 'contract.beginContract', required:'true' /}
    	 #{f.datepicker_table 'contract.expireContract' /}
-	 #{f.checkbox_table 'contract.onCertificate', checked:'true', required:'true' /}				
+	 #{f.checkbox_table 'contract.onCertificate', required:'true' /}				
    </table>
   	  
   	  <p>

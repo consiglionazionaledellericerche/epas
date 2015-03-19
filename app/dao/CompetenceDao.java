@@ -5,6 +5,7 @@ import helpers.ModelQuery.SimpleResults;
 
 import java.util.List;
 
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -22,8 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.inject.Inject;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+
+import dao.wrapper.IWrapperFactory;
 
 /**
  * 
@@ -33,6 +37,13 @@ import com.mysema.query.jpa.JPQLQuery;
 public class CompetenceDao {
 
 	private final static Logger log = LoggerFactory.getLogger(CompetenceDao.class);
+
+	@Inject
+	public IWrapperFactory wrapperFactory;
+	
+	@Inject
+	public PersonResidualYearRecapFactory yearFactory;
+	
 	/**
 	 * 
 	 * @param id
@@ -100,7 +111,6 @@ public class CompetenceDao {
 	}
 	
 	/**
-	 * 
 	 * @param person
 	 * @param year
 	 * @param month
@@ -217,9 +227,6 @@ public class CompetenceDao {
 	      return query.list(competence);
 	  }
 	
-	/*********************************************************************************************************************************/
-	/*Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
-	
 	/**
 	 * 
 	 * @param year
@@ -232,9 +239,6 @@ public class CompetenceDao {
 				.where(totalOvertime.year.eq(year).and(totalOvertime.office.eq(office)));
 		return query.list(totalOvertime);
 	}
-	
-	/**********************************************************************************************************************************/
-	/*Parte relativa a query su PersonHourForOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
 	
 	/**
 	 * 

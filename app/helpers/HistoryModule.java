@@ -5,8 +5,6 @@ import javax.persistence.EntityManager;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 
-import play.db.jpa.JPA;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
@@ -15,11 +13,6 @@ import com.google.inject.Provides;
  *
  */
 public class HistoryModule extends AbstractModule {
-
-	@Provides
-	public EntityManager getEntityManager() {
-		return JPA.em();
-	}
 
 	@Provides
 	public AuditReader getAuditReader(EntityManager em) {

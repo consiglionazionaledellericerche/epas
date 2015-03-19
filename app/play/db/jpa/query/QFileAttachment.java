@@ -17,7 +17,7 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.EmbeddableSerializer")
 public class QFileAttachment extends BeanPath<FileAttachment> {
 
-    private static final long serialVersionUID = -1147555192;
+    private static final long serialVersionUID = -1147555192L;
 
     public static final QFileAttachment fileAttachment = new QFileAttachment("fileAttachment");
 

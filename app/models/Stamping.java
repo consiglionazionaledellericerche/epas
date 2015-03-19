@@ -16,7 +16,6 @@ import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 
@@ -67,8 +66,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	
 	@Required
 	@InPast
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
-	
+//	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
 	public LocalDateTime date;
 	
 	@Required

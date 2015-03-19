@@ -30,6 +30,12 @@ public class MonthRecaps extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static MonthRecapManager monthRecapManager;
+	
 	/**
 	 * Controller che gestisce il calcolo del Riepilogo Mensile.
 	 * @param year
@@ -72,7 +78,7 @@ public class MonthRecaps extends Controller{
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(MonthRecapManager.PersonNameComparator, MonthRecapManager.AbsenceCodeComparator);
 
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, monthBegin, monthEnd, true);
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, monthBegin, monthEnd, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		
@@ -90,7 +96,7 @@ public class MonthRecaps extends Controller{
 			monthEnd = today.minusDays(1);			
 		}	
 		
-		tableMonthRecap = MonthRecapManager.populateRealValueTable(activePersons, monthBegin, monthEnd, year, generalWorkingDaysOfMonth);
+		tableMonthRecap = monthRecapManager.populateRealValueTable(activePersons, monthBegin, monthEnd, year, generalWorkingDaysOfMonth);
 
 		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth, year, month, simpleResults, name);
 
@@ -110,7 +116,7 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> notJustifiedAbsences = MonthRecapManager.getPersonDayListRecap(personId, year, month, "notJustifiedAbsences");
+		List<PersonDay> notJustifiedAbsences = monthRecapManager.getPersonDayListRecap(personId, year, month, "notJustifiedAbsences");
 
 		render(notJustifiedAbsences, person);
 	}
@@ -129,7 +135,7 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> justifiedAbsences = MonthRecapManager.getPersonDayListRecap(personId, year, month, "justifiedAbsences");
+		List<PersonDay> justifiedAbsences = monthRecapManager.getPersonDayListRecap(personId, year, month, "justifiedAbsences");
 
 		render(justifiedAbsences, person);
 	}
@@ -148,7 +154,7 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> workingDayHoliday = MonthRecapManager.getPersonDayListRecap(personId, year, month, "workingDayHoliday");
+		List<PersonDay> workingDayHoliday = monthRecapManager.getPersonDayListRecap(personId, year, month, "workingDayHoliday");
 
 		render(workingDayHoliday, person);
 	}
@@ -167,7 +173,7 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> workingDayNotHoliday = MonthRecapManager.getPersonDayListRecap(personId, year, month, "workingDayNotHoliday");
+		List<PersonDay> workingDayNotHoliday = monthRecapManager.getPersonDayListRecap(personId, year, month, "workingDayNotHoliday");
 
 		render(workingDayNotHoliday, person);
 	}

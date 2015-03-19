@@ -15,7 +15,6 @@ import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -43,18 +42,16 @@ public class Office extends BaseModel{
     @Column(name = "address")
     public String address = "";
     
-    @Required
     @Column(name = "code")
-    public Integer code = 0;
+    public Integer code;
     
     @Column(name="joining_date")
-    @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
     public LocalDate joiningDate;
     
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<Office> subOffices = new ArrayList<Office>();
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="office_id")
     public Office office;
      

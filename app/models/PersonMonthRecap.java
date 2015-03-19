@@ -8,7 +8,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -39,10 +38,10 @@ public class PersonMonthRecap extends BaseModel {
 	
 	public Integer month;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate fromDate;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+
 	public LocalDate toDate;
 
 	@Column(name="training_hours")

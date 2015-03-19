@@ -6,6 +6,7 @@ import java.util.List;
 import manager.ConfGeneralManager;
 import models.Office;
 
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
@@ -389,5 +390,21 @@ public class DateUtility {
 		return yearMonth.toInterval().getEnd().minusDays(1).toLocalDate();
 	}
 	
+	/**
+	 * Calcola il numero di minuti trascorsi dall'inizio del giorno 
+	 * all'ora presente nella data.
+	 * @param date
+	 * @return
+	 */
+	public static int toMinute(LocalDateTime date){
+		int dateToMinute = 0;
+		if (date!=null)
+		{
+			int hour = date.get(DateTimeFieldType.hourOfDay());
+			int minute = date.get(DateTimeFieldType.minuteOfHour());
+			dateToMinute = (60*hour)+minute;
+		}
+		return dateToMinute;
+	}
 	
 }

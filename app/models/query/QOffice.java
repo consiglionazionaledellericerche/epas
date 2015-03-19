@@ -18,17 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QOffice extends EntityPathBase<Office> {
 
-    private static final long serialVersionUID = -1289700640;
+    private static final long serialVersionUID = -1289700640L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QOffice office1 = new QOffice("office1");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
-
-    public final ListPath<String, StringPath> activeBadgeReaders = this.<String, StringPath>createList("activeBadgeReaders", String.class, StringPath.class, PathInits.DIRECT2);
-
-    public final ListPath<models.Person, QPerson> activePersons = this.<models.Person, QPerson>createList("activePersons", models.Person.class, QPerson.class, PathInits.DIRECT2);
 
     public final StringPath address = createString("address");
 
@@ -46,8 +42,6 @@ public class QOffice extends EntityPathBase<Office> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final ListPath<Office, QOffice> institutes = this.<Office, QOffice>createList("institutes", Office.class, QOffice.class, PathInits.DIRECT2);
-
     public final DatePath<org.joda.time.LocalDate> joiningDate = createDate("joiningDate", org.joda.time.LocalDate.class);
 
     public final StringPath label = createString("label");
@@ -59,19 +53,9 @@ public class QOffice extends EntityPathBase<Office> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.Person, QPerson> personnelAdmin = this.<models.Person, QPerson>createList("personnelAdmin", models.Person.class, QPerson.class, PathInits.DIRECT2);
-
-    public final ListPath<models.Person, QPerson> personnelAdminMini = this.<models.Person, QPerson>createList("personnelAdminMini", models.Person.class, QPerson.class, PathInits.DIRECT2);
-
     public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
 
-    public final BooleanPath printable = createBoolean("printable");
-
-    public final ListPath<Office, QOffice> seats = this.<Office, QOffice>createList("seats", Office.class, QOffice.class, PathInits.DIRECT2);
-
     public final ListPath<Office, QOffice> subOffices = this.<Office, QOffice>createList("subOffices", Office.class, QOffice.class, PathInits.DIRECT2);
-
-    public final ListPath<Office, QOffice> subOfficeTree = this.<Office, QOffice>createList("subOfficeTree", Office.class, QOffice.class, PathInits.DIRECT2);
 
     public final ListPath<models.TotalOvertime, QTotalOvertime> totalOvertimes = this.<models.TotalOvertime, QTotalOvertime>createList("totalOvertimes", models.TotalOvertime.class, QTotalOvertime.class, PathInits.DIRECT2);
 

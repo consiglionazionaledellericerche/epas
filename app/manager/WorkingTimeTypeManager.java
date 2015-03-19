@@ -12,7 +12,8 @@ public class WorkingTimeTypeManager {
 	 * @param wtt
 	 * @param dayOfWeek
 	 */
-	public static void saveWorkingTimeType(WorkingTimeTypeDay wttd, WorkingTimeType wtt, int dayOfWeek){
+	public static void saveWorkingTimeType(WorkingTimeTypeDay wttd,
+			WorkingTimeType wtt, int dayOfWeek){
 		
 		wttd.dayOfWeek = dayOfWeek;
 		wttd.workingTimeType = wtt;

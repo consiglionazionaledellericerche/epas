@@ -3,11 +3,13 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
 import manager.PersonMonthsManager;
 import manager.PersonMonthsManager.Insertable;
-import manager.recaps.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.Person;
 import models.PersonMonthRecap;
@@ -15,36 +17,47 @@ import models.User;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
-import dao.ContractDao;
-import dao.PersonMonthRecapDao;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
+
+import dao.PersonMonthRecapDao;
+import dao.wrapper.IWrapperFactory;
+
 @With( {Resecure.class, RequestInit.class} )
 public class PersonMonths extends Controller{
 	
+	@Inject
+	static PersonResidualYearRecapFactory yearFactory;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	public static void hourRecap(int year){
 
-		//controllo dei parametri
-		User user = Security.getUser().get();
-		if( user == null || user.person == null ) {
+		Optional<User> user = Security.getUser();
+		if( ! user.isPresent() || user.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 
 		if(year > new LocalDate().getYear()){
-			flash.error("Richiesto riepilogo orario di un anno futuro. Impossibile soddisfare la richiesta");
+			flash.error("Impossibile richiedere riepilogo anno futuro.");
 			renderTemplate("Application/indexAdmin.html");
 		}
+				
+		Person person = user.get().person; 
 		
-		Contract contract = ContractDao.getCurrentContract(user.person);
+		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+		
+		Preconditions.checkState(contract.isPresent());
+		
 		PersonResidualYearRecap csap = 
-				PersonResidualYearRecap.factory(contract, year, null);
-		render(csap, user.person, year);	
+				yearFactory.create(contract.get(), year, null);
+		render(csap, year);	
 	}
 
 	

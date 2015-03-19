@@ -4,11 +4,12 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import manager.recaps.vacation.VacationsRecap;
 import models.Absence;
 import models.Contract;
-import models.rendering.VacationsRecap;
 
 /**
  * 
@@ -26,8 +27,8 @@ public class VacationsShowDto {
 	public int queryYearVacationAccrued;
 	public List<Absence> queryYearVacationUsed = Lists.newArrayList();
 	
-	public int previousYearVacationTotal;
-	public int previousYearVacationAccrued;
+	public int previousYearVacationTotal = 0;
+	public int previousYearVacationAccrued = 0;
 	public List<Absence> previousYearVacationUsed = Lists.newArrayList();
 	
 	public int queryYearPermissionTotal;
@@ -49,10 +50,10 @@ public class VacationsShowDto {
 	 * @param previous
 	 * @return
 	 */
-	public static VacationsShowDto build(int year, VacationsRecap first, VacationsRecap previous) {
+	public static VacationsShowDto build(int year, VacationsRecap first, Optional<VacationsRecap> previous) {
 		
-		if(first == null || previous == null)
-			return null;
+		//if(first == null || previous == null)
+		//	return null;
 		
 		VacationsShowDto vacationsShow = new VacationsShowDto();
 		
@@ -85,9 +86,11 @@ public class VacationsShowDto {
 			vacationsShow.queryYearVacationAccrued = first.vacationDaysCurrentYearAccrued;
 			vacationsShow.queryYearVacationUsed = first.vacationDaysCurrentYearUsed;
 			
-			vacationsShow.previousYearVacationTotal = previous.vacationDaysCurrentYearTotal;
-			vacationsShow.previousYearVacationAccrued = previous.vacationDaysCurrentYearAccrued;
-			vacationsShow.previousYearVacationUsed = previous.vacationDaysCurrentYearUsed;
+			if(previous.isPresent()) {
+				vacationsShow.previousYearVacationTotal = previous.get().vacationDaysCurrentYearTotal;
+				vacationsShow.previousYearVacationAccrued = previous.get().vacationDaysCurrentYearAccrued;
+				vacationsShow.previousYearVacationUsed = previous.get().vacationDaysCurrentYearUsed;
+			}
 			
 			vacationsShow.queryYearPermissionTotal = first.permissionCurrentYearTotal;
 			vacationsShow.queryYearPermissionAccrued = first.permissionCurrentYearAccrued;

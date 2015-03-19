@@ -128,74 +128,18 @@ public class ContractDao {
 		return null;
 	}
 	
-	/**
-	 * Il Contratto corrente per la persona. (Attivo alla data di oggi).
-	 * @param person
-	 * @return null se non esiste contratto attivo alla data di oggi.
-	 */
-	public static Contract getCurrentContract(Person person) {
-		
-		return getContract(LocalDate.now(), person);
-	}
-	
-	/**
-	 * Il Tipo orario attivo per la persona (Attivo alla data di oggi).
-	 * @param person
-	 * @return null se la persona non ha contratto attivo oggi.
-	 */
-	public static WorkingTimeType getCurrentWorkingTimeType(Person person) {
-		
-		Contract currentContract = ContractDao.getCurrentContract(person);
-		
-		if(currentContract == null)
-			return null;
-		
-		//ricerca
-		for(ContractWorkingTimeType cwtt : currentContract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				return cwtt.workingTimeType; 
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Il piano ferie attivo per la person (Attivo alla data di oggi).
-	 * @param person
-	 * @return
-	 */
-	public static VacationPeriod getCurrentVacationPeriod(Person person)
-	{
-		Contract contract = ContractDao.getCurrentContract(person);
-		
-		if(contract == null)
-			return null;
 
-		for(VacationPeriod vp : contract.vacationPeriods) {
-
-			LocalDate now = new LocalDate();
-
-			if(DateUtility.isDateIntoInterval(now, new DateInterval(vp.beginFrom, vp.endTo)))
-				return vp;
-		}
-		return null;
-	}
-	
-	/******************************************************************************************************************************************/
-	/*Inserisco in questa parte del Dao le query relative ai ContractStampProfile per evitare di creare una classe specifica che contenga     */
-	/*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
-	/******************************************************************************************************************************************/
-	
 	/**
 	 * 
 	 * @param person
-	 * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract passati come parametro 
+	 * @return la lista dei contractStampProfile relativi alla persona person o 
+	 * al contratto contract passati come parametro 
 	 * e ordinati per data inizio del contractStampProfile
-	 * La funzione permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono mutuamente esclusivi
+	 * La funzione permette di scegliere quale dei due parametri indicare 
+	 * per effettuare la ricerca. Sono mutuamente esclusivi
 	 */
-	public static List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person, Optional<Contract> contract){
+	public static List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
+			Optional<Contract> contract){
 		QContractStampProfile csp = QContractStampProfile.contractStampProfile;
 		final BooleanBuilder condition = new BooleanBuilder();
 		if(person.isPresent())

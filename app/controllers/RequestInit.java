@@ -9,10 +9,11 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
-import models.Person;
 import models.Qualification;
 import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
@@ -20,6 +21,12 @@ import models.query.QRole;
 import models.query.QUsersRolesOffices;
 
 import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.i18n.Messages;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Http;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -31,12 +38,8 @@ import controllers.Resecure.NoCheck;
 import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDao.PersonLiteDto;
 import dao.QualificationDao;
-import play.Logger;
-import play.i18n.Messages;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.Http;
 
 /**
  * @author cristian
@@ -46,6 +49,9 @@ public class RequestInit extends Controller {
 	
 	//@Inject
 	//static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
 	
 	public static class ItemsPermitted {
 		
@@ -246,7 +252,7 @@ public class RequestInit extends Controller {
 		}
 		
 		public Set<Office> getAllOfficesAllowed() {
-			return OfficeDao.getOfficeAllowed(Security.getUser().get());
+			return officeDao.getOfficeAllowed(Security.getUser().get());
 		}
 	}
 	
@@ -352,25 +358,19 @@ public class RequestInit extends Controller {
 		renderArgs.put("currentData", new CurrentData(year, month, day, 
 				Long.valueOf(session.get("personSelected"))));
 
-		
-		LocalDate beginMonth = new LocalDate(year,month,1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		String name = null;
 		if(Security.getUser().get().person != null) {
-			Set<Office> officeList = OfficeDao.getOfficeAllowed(Security.getUser().get());
+			Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 			if(!officeList.isEmpty()) {
-			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					officeList, false, beginMonth, endMonth, true).list();
-			renderArgs.put("navPersons", persons);
+				List<PersonLiteDto> persons = PersonDao.liteList(officeList, year, month); 	
+				renderArgs.put("navPersons", persons);
 			}
 		} 
 		else {
 
-			List<Office> allOffices = OfficeDao.getAllOffices();
-			if (allOffices!=null && !allOffices.isEmpty()){
-			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
-			renderArgs.put("navPersons", persons);
+			List<Office> allOffices = officeDao.getAllOffices();
+			if (allOffices!=null && !allOffices.isEmpty()) {
+				List<PersonLiteDto> persons = PersonDao.liteList(Sets.newHashSet(allOffices), year, month);
+				renderArgs.put("navPersons", persons);
 			}
 		}
 
@@ -391,7 +391,7 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 
 		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
-				OfficeDao.getOfficeAllowed(Security.getUser().get()).iterator().next());
+				officeDao.getOfficeAllowed(Security.getUser().get()).iterator().next());
 		
 		Integer yearBeginProgram;
 		if(yearInitUseProgram.isPresent()){

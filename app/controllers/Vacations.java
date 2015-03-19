@@ -1,153 +1,165 @@
 package controllers;
 
+import javax.inject.Inject;
+
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
+import models.Contract;
 import models.Person;
 import models.User;
-import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
 
-import dao.ContractDao;
+import dao.wrapper.IWrapperFactory;
 import dto.VacationsShowDto;
+import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{
 		
+	@Inject
+	static VacationsRecapFactory vacationsFactory;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	public static void show(Integer year) {
 		
-		//Controllo parametri
 		Optional<User> currentUser = Security.getUser();
-		
 		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
-		
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 		
-		User user = currentUser.get();
+		Person person = currentUser.get().person;
+		
+		if(year == null) {
+			year = LocalDate.now().getYear(); 
+		}
 
-		//Logica
-    	try {
-    		
-    		if(year == null) {
-    			year = new LocalDate().getYear(); 
-        	}
-    		
-    		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(year, 
-    				ContractDao.getCurrentContract(user.person), new LocalDate(), true);
-    		
-    		VacationsRecap vacationsRecapPrevious = VacationsRecap.Factory.build(year-1, 
-    				ContractDao.getCurrentContract(user.person), new LocalDate(year-1,12,31), true);
-    		
-    	 	VacationsShowDto vacationShowDto = VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
-    	 	
-    	 	render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
-    	 	
-    	} catch(IllegalStateException e) {
-    		
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", user.person.name, user.person.surname);
-    		renderTemplate("Application/indexAdmin.html");
-    	}
-    	
-    	return;
-    }
+		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+		
+		Preconditions.checkState(contract.isPresent());
+		
+		VacationsRecap vacationsRecap;
+		Optional<VacationsRecap> vacationsRecapPrevious;
+		
+		try {
+			vacationsRecap = vacationsFactory.create(
+					year, contract.get(), LocalDate.now(), true);
 	
+		} catch (EpasExceptionNoSourceData e) {
+			
+			flash.error("L'anno %s è al di fuori del contratto "
+					+ "oppure mancano i dati di inizializzazione.", year);
+			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+			return;
+		}
+		
+		try {
+			vacationsRecapPrevious = Optional.fromNullable(
+					vacationsFactory.create(year-1, contract.get(), 
+							new LocalDate(year-1,12,31), true));
+		}
+		catch (EpasExceptionNoSourceData e) {
+			vacationsRecapPrevious = Optional.absent();
+		}
+		
+		VacationsShowDto vacationShowDto = 
+		VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
 
+		render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
+	
+		
+	}
 	
 	public static void vacationsCurrentYear(Integer anno){
 		
-		Person person = Security.getUser().get().person;
-		if( person == null ) {
+		Optional<User> currentUser = Security.getUser();
+		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
-			return;
+		}
+		
+		Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
+				.getCurrentContract();
+		
+		Preconditions.checkState(contract.isPresent());
+		
+		try {
+			
+			VacationsRecap vacationsRecap = vacationsFactory.create(
+					anno, contract.get(), LocalDate.now(), true);
+			render(vacationsRecap);
+			
+		} catch (EpasExceptionNoSourceData e) {
+
+			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
+			renderTemplate("Application/indexAdmin.html");
 		}
 
-    	//Costruzione oggetto di riepilogo per la persona
-		
-		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
-    	if(vacationsRecap == null) {
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
-    		renderTemplate("Application/indexAdmin.html");
-    		return;
-    	}
-		    	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-       	render(vacationsRecap);
 	}
 	
 
 	
 	public static void vacationsLastYear(Integer anno){
 		
-		Person person = Security.getUser().get().person;
-		if( person == null ) {
+		Optional<User> currentUser = Security.getUser();
+		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
-			return;
 		}
     	
-    	//Costruzione oggetto di riepilogo per la persona
+		Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
+				.getCurrentContract();
 		
-		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
-    	if(vacationsRecap == null) {
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
-    		renderTemplate("Application/indexAdmin.html");
-    		return;
-    	}
-    	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-       	render(vacationsRecap);
+		Preconditions.checkState(contract.isPresent());
+		
+		try {
+			
+			VacationsRecap vacationsRecap = vacationsFactory.create(
+					anno, contract.get(), LocalDate.now(), true);
+			render(vacationsRecap);
+			
+		} catch (EpasExceptionNoSourceData e) {
+
+			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+
 	}
 	
 	
 	public static void permissionCurrentYear(Integer anno){
 		
-		Person person = Security.getUser().get().person;
-		if( person == null ) {
+		Optional<User> currentUser = Security.getUser();
+		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
-			return;
 		}
 		
-    	//Costruzione oggetto di riepilogo per la persona
+		Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
+				.getCurrentContract();
 		
-		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(anno, ContractDao.getCurrentContract(person), new LocalDate(), true);
-    	if(vacationsRecap == null) {
-    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
-    		renderTemplate("Application/indexAdmin.html");
-    		return;
-    	}
-    	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-       	render(vacationsRecap);
+		Preconditions.checkState(contract.isPresent());
+		
+		try {
+			
+			VacationsRecap vacationsRecap = vacationsFactory.create(
+					anno, contract.get(), LocalDate.now(), true);
+			render(vacationsRecap);
+			
+		} catch (EpasExceptionNoSourceData e) {
+
+			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
+			renderTemplate("Application/indexAdmin.html");
+		}
 	}
 	
 }

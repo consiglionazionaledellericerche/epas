@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ContractManager;
@@ -60,6 +62,8 @@ public class Wizard extends Controller {
 	public static final String PROPERTIES_KEY = "properties";
 	public static final String OFFICE_COUNT = "officeCount";
 	
+	@Inject
+	static OfficeManager officeManager;
 		
 	public static class WizardStep {
 		public final int index;
@@ -492,7 +496,7 @@ public class Wizard extends Controller {
 		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
 		
 		
-		OfficeManager.setPermissionAfterCreation(seat);
+		officeManager.setPermissionAfterCreation(seat);
 		
 		ConfGeneral confGeneral;
 		

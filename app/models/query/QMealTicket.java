@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QMealTicket extends EntityPathBase<MealTicket> {
 
-    private static final long serialVersionUID = 1842091731;
+    private static final long serialVersionUID = 1842091731L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
