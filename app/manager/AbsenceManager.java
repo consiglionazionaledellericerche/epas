@@ -411,6 +411,8 @@ public class AbsenceManager {
 					absence.absenceType.code, absence.personDay.person.getFullname(),absence.personDay.date});
 
 			pd.absences.add(absence);
+			
+			pd.save();
 		}
 		return ar;
 	}
