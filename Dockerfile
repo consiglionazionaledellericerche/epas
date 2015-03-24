@@ -1,4 +1,4 @@
-FROM criluc/play1:1.2.7
+FROM criluc/play1:1.3.0
 
 USER root
 

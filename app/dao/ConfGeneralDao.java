@@ -1,13 +1,12 @@
 package dao;
 
 import helpers.ModelQuery;
-
-import com.google.common.base.Optional;
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.ConfGeneral;
 import models.Office;
 import models.query.QConfGeneral;
+
+import com.google.common.base.Optional;
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

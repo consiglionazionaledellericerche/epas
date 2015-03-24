@@ -390,11 +390,11 @@ public class AbsenceManager {
 				ar.setDayInReperibilityOrShift(true);				
 			}
 
-			List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false);
-			PersonDay pd = 	FluentIterable.from(personDays).first().or(new PersonDay(person, date));
-
-			if(personDays.isEmpty()){
-				pd.create();
+			PersonDay pd = 	personDayDao.getSinglePersonDay(person, date).orNull();
+			
+			if(pd == null){
+				pd = new PersonDay(person, date);
+				pd.save();
 			}
 
 			//creo l'assenza e l'aggiungo
@@ -402,7 +402,6 @@ public class AbsenceManager {
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
 			absence.absenceFile = file.orNull();
-			absence.save();
 
 			ar.setAbsenceCode(absenceType.code);
 			ar.setInsertSucceeded(true);
@@ -411,7 +410,6 @@ public class AbsenceManager {
 					absence.absenceType.code, absence.personDay.person.getFullname(),absence.personDay.date});
 
 			pd.absences.add(absence);
-			
 			pd.save();
 		}
 		return ar;
