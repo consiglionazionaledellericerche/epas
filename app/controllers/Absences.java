@@ -253,8 +253,7 @@ public class Absences extends Controller{
 			}
 			
 		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-    				+ person.fullName());
+			flash.error("Mancano i dati di inizializzazione per %s" , person.fullName());
 		}
 		
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
@@ -34,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
+import dao.ConfGeneralDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -83,7 +85,7 @@ public class ConsistencyManager {
 	 * @throws EmailException 
 	 */
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
-			LocalDate fromDate, boolean sendEmail){
+			LocalDate fromDate, boolean sendMail){
 		
 		Set<Office> offices = user.isPresent() ? officeDao.getOfficeAllowed(user.get()) : Sets.newHashSet(officeDao.getAllOffices());
 
@@ -124,30 +126,20 @@ public class ConsistencyManager {
 				
 			JPAPlugin.closeTx(false);
 		}
-		
-		//(4) Invio mail per controllo timbrature da farsi solo nei giorni feriali
-		if( sendEmail ) {
 			
-			if( LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
-					&& LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY){
-
-				JPAPlugin.startTx(false);
-				LocalDate begin = new LocalDate().minusMonths(1);
-				LocalDate end = new LocalDate().minusDays(1);
-
-				for(Person p : personList){
-					
-					log.debug("Chiamato controllo sul giorni {} - {}", begin, end);
-					if(p.wantEmail)
-						checkPersonDayForSendingEmail(p, begin, end, "timbratura");
-					else
-						log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
-
-				}
-				JPAPlugin.closeTx(false);
+		if(sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
+				&& LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY){
+			
+			LocalDate begin = new LocalDate().minusMonths(1);
+			LocalDate end = new LocalDate().minusDays(1);
+			
+			try {
+				sendMail(personList, begin, end, "timbratura");
+			}
+			catch(EmailException e){
+				e.printStackTrace();
 			}
 		}
-
 	}
 	
 	/**
@@ -214,8 +206,6 @@ public class ConsistencyManager {
 				pd.save();
 			}
 		}
-
-
 	}
 
 	/**
@@ -227,29 +217,22 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public void checkNoAbsenceNoStamping(int year, int month, User userLogged) throws EmailException{
-
-		LocalDate begin = new LocalDate(year, month, 1);
-		LocalDate end = new LocalDate().minusDays(1);
-
-		List<Person> personList = PersonDao.list(Optional.<String>absent(),
-					officeDao.getOfficeAllowed(userLogged), false, begin, end, true).list();
-		
+	public void sendMail(List<Person> personList, LocalDate fromDate,LocalDate toDate,String cause) throws EmailException{
+						
 		for(Person p : personList){
 		
-			log.debug("Chiamato controllo sul giorni {}-{}", begin, end);
+			log.debug("Chiamato controllo sul giorni {}-{}", fromDate, toDate);
 			
-			if(p.wantEmail) {
-				checkPersonDayForSendingEmail(p, begin, end, "no assenze");
+			ConfGeneral officeMail = ConfGeneralDao.getConfGeneralByField(ConfGeneral.SEND_EMAIL, p.office).orNull();
+			
+			if(p.wantEmail && officeMail != null && officeMail.fieldValue.equals("true")) {
+				checkPersonDayForSendingEmail(p, fromDate, toDate, cause);
 			}
 			else {
 				log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
 			}
-
 		}
 	}
-
-
 
 	/**
 	 * Verifica per la persona (se attiva) che alla data 

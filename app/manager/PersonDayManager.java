@@ -582,11 +582,12 @@ public class PersonDayManager {
 	 * @param date
 	 */
 	public void updatePersonDaysFromDate(Person person, LocalDate date){
-
+		
 		Preconditions.checkNotNull(person);
-		Preconditions.checkState(person.isPersistent());
 		Preconditions.checkNotNull(date);
-
+		
+		person.merge();
+		
 		//Verifico se la data è passata, in caso contrario non è necessario ricalcolare nulla
 		if(date.isAfter(LocalDate.now())){
 			return;
