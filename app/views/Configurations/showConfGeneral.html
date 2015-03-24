@@ -29,9 +29,6 @@
 	  #{/form}
   </div>
 
-
-
-
   <section id="results">
   
   <br>
@@ -54,9 +51,7 @@
   	  </div>
   	</div>
 
-
   <br>
-
 
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -72,7 +67,8 @@
 		          <a href="#" 
 		          id="select1" 
 		          data-type="select" 
-		          data-pk="${webStampingAllowed.id}" 
+		          data-name="${webStampingAllowed?.field}"
+			  	  data-pk="${office.id}" 
 		          data-value="['${webStampingAllowed.fieldValue}']"
 		          data-source="[{'true': 'SI'},{'false': 'NO'}]" 
 		          data-url="@{saveConfGeneral()}" 
@@ -87,7 +83,8 @@
 		      	  <a href="#" 
 		      	    id="textComments1" 
 		      	    data-type="textarea" 
-		      	    data-pk="todo" 
+		     	    data-name="todo"
+			  	    data-pk="${office.id}"  
 		      	    data-title="Inserire un indirizzo IP per linea"
 		      	    data-url="@{saveConfGeneral()}" 
 		      	    class="editable editable-pre-wrapped editable-click">
@@ -119,7 +116,8 @@
 				   data-format="YYYY-MM-DD" 
 				   data-viewformat="DD/MM/YYYY" 
 				   data-template="D / MMM / YYYY" 
-				   data-pk="${dateStartMealTicket.id}" 
+		     	   data-name="${dateStartMealTicket?.field}"
+			  	   data-pk="${office.id}" 
 				   data-title="Select Date of birth" 
 				   data-url="@{saveConfGeneral()}" 
 				   class="editable editable-click">${dateStartMealTicket.fieldValue}</a>
@@ -132,32 +130,48 @@
 
   <br>
 
-
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><span class="badge">3</span> Parametri applicazione</h3>
       </div>
       <div class="panel-body">
 
-  
 		 <table class="table table-condensed table-hover table-xeditable">
 		    <tr>	
 		      <td class="col-sm-6">URL per gestione attestato presenza dell'amministrazione centrale </td>
 		      <td class="col-sm-6">
-		        <strong><a href="#" id="simpleText1" data-type="text" 
-		                   data-pk="${urlToPresence.id}" data-url="@{saveConfGeneral()}" 
-		                   class="editable editable-click" >
-		          ${urlToPresence.fieldValue}
+		        <strong><a href="#" id="simpleText1" 
+		        		   data-type="text" 
+		     			   data-name="${urlToPresence?.field}"
+			  			   data-pk="${office.id}" 		        		
+		                   data-url="@{saveConfGeneral()}" 
+		                   class="editable editable-click">
+		          			${urlToPresence.fieldValue}
 		        </a></strong>
 		      </td>
 		    </tr>
 		    <tr>	
 		      <td class="col-sm-6">User per gestione attestato presenza dell'amministrazione centrale</td>
-		      <td class="col-sm-6"><strong><a href="#" id="simpleText2" data-type="text" data-pk="${userToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${userToPresence.fieldValue}</a></strong></td>
+		      <td class="col-sm-6"><strong>
+		      	<a href="#" 
+		      	id="simpleText2" 
+		      	data-type="text" 
+				data-name="${userToPresence?.field}"
+				data-pk="${office.id}" 
+		      	data-url="@{saveConfGeneral()}" 
+		      	class="editable editable-click">${userToPresence.fieldValue}</a></strong></td>
 		    </tr>
 		    <tr>	
 		      <td class="col-sm-6">Password per gestione attestato presenza dell'amministrazione centrale</td>
-		      <td class="col-sm-6"><strong><a href="#" id="simpleText3" data-type="text" data-pk="${passwordToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${passwordToPresence.fieldValue}</a></strong></td>
+		      <td class="col-sm-6"><strong>
+		      	<a href="#" 
+		      	id="simpleText3" 
+		      	data-type="text" 
+		        data-name="${passwordToPresence?.field}"
+			    data-pk="${office.id}" 
+		      	data-url="@{saveConfGeneral()}" 
+		      	class="editable editable-click">${passwordToPresence.fieldValue}
+		      	</a></strong></td>
 		    </tr>
 		    <tr>	
 		      <td class="col-sm-6">Numero di colonne di entrata/uscita da visualizzare</td>
@@ -166,9 +180,26 @@
 		      	   <a href="#" 
 			          id="select2" 
 		              data-type="select" 
-		              data-pk="${numberOfViewingCouple.id}" 
+		              data-name="${numberOfViewingCouple?.field}"
+			          data-pk="${office.id}"  
 		              data-value="[${numberOfViewingCouple.fieldValue}]"
 		              data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
+		              data-url="@{saveConfGeneral()}" 
+		              class="editable editable-click"></a>
+		        </strong>
+		      </td>
+		    </tr>
+		     <tr>	
+		      <td class="col-sm-6">Invio email di avviso agli utenti</td>
+		      <td class="col-sm-6">
+		        <strong>
+		      	   <a href="#" 
+			          id="select3"
+			          data-name="send_email"
+			          data-pk="${office.id}" 
+		              data-type="select" 
+		              data-value="['${sendEmail?.fieldValue}']"
+		              data-source="[{true: 'Attivo'},{false: 'Inattivo'}]" 
 		              data-url="@{saveConfGeneral()}" 
 		              class="editable editable-click"></a>
 		        </strong>
@@ -177,7 +208,6 @@
 		  </table>  
 	  </div>
 	</div>
-
 
 <br>
 
