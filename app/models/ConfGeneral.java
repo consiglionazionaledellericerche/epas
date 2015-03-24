@@ -39,6 +39,7 @@ public class ConfGeneral extends BaseModel{
 	private static final long serialVersionUID = 4941937973447699263L;
 	
 	public final static String INIT_USE_PROGRAM = "init_use_program";
+	public final static String SEND_MAIL = "send_email";
 	public final static String MONTH_OF_PATRON = "month_of_patron";
 	public final static String DAY_OF_PATRON = "day_of_patron";
 	public final static String WEB_STAMPING_ALLOWED = "web_stamping_allowed";

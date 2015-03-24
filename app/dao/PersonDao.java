@@ -7,7 +7,6 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import models.CompetenceCode;
@@ -32,8 +31,6 @@ import com.google.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.types.Projections;
-
-import controllers.Security;
 
 /**
  * DAO per le person.
