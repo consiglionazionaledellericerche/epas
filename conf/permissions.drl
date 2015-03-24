@@ -255,7 +255,8 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
-        "MealTickets.recapMealTickets"
+        "MealTickets.recapMealTickets",
+        "MonthRecaps.residualYearRecap"
         ), target == null, granted == false)
 then
  $c.grant();
