@@ -13,7 +13,7 @@ public enum ConfigurationFields {
 	InitUseProgram("init_use_program"),
 	InstituteName("institute_name"),
 	JobsEmailAlias("email_from_jobs"),  //%prod.mail.replyTo.alias=segreteria@iit.cnr.it
-	SendMail("send_mail"),				// attiva/disattiva l'invio delle mail dai job
+	SendEMail("send_email"),				// attiva/disattiva l'invio delle mail dai job
 	EmailToContact("email_to_contact"),	//%prod.mail.from.alias=situazione.presenze@cnr.it
 	SeatCode("seat_code"),
 	UrlToPresence("url_to_presence"),
@@ -105,7 +105,7 @@ public enum ConfigurationFields {
 				InitUseProgram.description,
 				InstituteName.description,
 				JobsEmailAlias.description,  
-				SendMail.description,				
+				SendEMail.description,				
 				EmailToContact.description,	
 				SeatCode.description,
 				UrlToPresence.description,

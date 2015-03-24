@@ -35,7 +35,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
-import controllers.Offices;
 import dao.ConfGeneralDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -224,7 +223,7 @@ public class ConsistencyManager {
 		
 			log.debug("Chiamato controllo sul giorni {}-{}", fromDate, toDate);
 			
-			ConfGeneral officeMail = ConfGeneralDao.getConfGeneralByField(ConfGeneral.SEND_MAIL, p.office).orNull();
+			ConfGeneral officeMail = ConfGeneralDao.getConfGeneralByField(ConfGeneral.SEND_EMAIL, p.office).orNull();
 			
 			if(p.wantEmail && officeMail != null && officeMail.fieldValue.equals("true")) {
 				checkPersonDayForSendingEmail(p, fromDate, toDate, cause);
