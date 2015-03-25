@@ -78,7 +78,7 @@
       		</div>
       		
       		%{
-				if (!totalInconsistentAbsences.isEmpty()) {
+				if (!personsShiftInconsistentAbsences.isEmpty()) {
 				
 				fistTr = true;
 			}%
@@ -99,17 +99,17 @@
 			 }%  
 			
 			%{
-					for(person in totalInconsistentAbsences.rowKeySet()) {
+					for(person in personsShiftInconsistentAbsences.rowKeySet()) {
 			}%
 						<tr>
 							<td>${person.surname} ${person.name}</td>
 			%{
 							for(th in thInconsistence) {
-								if (totalInconsistentAbsences.contains(person, th)) {
+								if (personsShiftInconsistentAbsences.contains(person, th)) {
 			}%
 							<td> 
 			%{
-								for(day in totalInconsistentAbsences.get(person, th)) {
+								for(day in personsShiftInconsistentAbsences.get(person, th)) {
 			}%
 								${day}<br/>
 			%{
@@ -142,11 +142,12 @@
       		<div class="note">
       		<p><strong>NOTE</strong>:</p>
       		<ul>
-      		<li><strong>Timbratura errata</strong>: non sono rilevate coppie di timbrature valide o l'orario di lavoro e' inferiore alla durata del turno con una differenza maggiore di 2 ore.</li>
+      		<li><strong>Timbratura errata</strong>: non sono rilevate coppie di timbrature valide</li>
+      		<li><strong>Orario insufficiente</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza maggiore di 2 ore </li>
       		<li><strong>Missione</strong>: e' stata rilevata una missione in concomitanza col turno ed è necessario verificare la compatibilita' degli orari.</li>
-      		<li><strong>Orario da motivare</strong>: l'orario di lavoro e' inferiore alla durata del turno ma con una differenza minore di 2 ore. </li>
+      		<li><strong>Orario da motivare</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza minore di 2 ore. </li>
       		</ul>
-      		<p>Gli orari sono calcolati con una flessibilita' di 5 min. come dalla circolare "Approfondimenti in materia di turni" - PROT. N. 0008692 del 2/12/2014</p>
+      		<p>I controlli sugli orari sono calcolati in acccordo alla circolare "Approfondimenti in materia di turni" - PROT. N. 0008692 del 2/12/2014</p>
       		</div>
       		
 		  	%{

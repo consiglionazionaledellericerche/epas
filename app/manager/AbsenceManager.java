@@ -3,6 +3,7 @@ package manager;
 import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import manager.recaps.PersonResidualMonthRecap;
@@ -704,4 +705,24 @@ public class AbsenceManager {
 		return false;
 	}
 
+	
+	/*
+	 * @author arianna
+	 * @param absencePersonDays	- lista di giorni di assenza effettuati
+	 * @return absentPersons	- lista delle persone assenti coinvolte nelle assenze 
+	 * 							passate come parametro
+	 */
+	public static List<Person> getPersonsFromAbsentDays(List<Absence> absencePersonDays) {
+		List<Person> absentPersons = new ArrayList<Person>();
+		for (Absence abs : absencePersonDays) {
+			if (!absentPersons.contains(abs.personDay.person)) {
+				Logger.trace("inserisco la persona assente ", abs.personDay.person);
+				absentPersons.add(abs.personDay.person);
+				Logger.trace("trovata person=%s", abs.personDay.person);
+			}
+		}
+		
+		return absentPersons;
+	}
+		
 }

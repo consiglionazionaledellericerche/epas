@@ -28,6 +28,9 @@ ALTER TABLE shift_type_history
 ALTER TABLE shift_type DROP COLUMN supervisor;
 ALTER TABLE shift_type_history DROP COLUMN supervisor;
 
+ALTER TABLE competences ADD COLUMN exceeded_mins integer;
+ALTER TABLE competences ALTER COLUMN valuerequested TYPE numeric(5,2);
+
 # ---!Downs
 
 ALTER TABLE shift_type ADD COLUMN supervisor bigint REFERENCES persons(id);
@@ -35,6 +38,9 @@ ALTER TABLE shift_type_history ADD COLUMN supervisor bigint REFERENCES persons(i
 
 ALTER TABLE shift_type DROP COLUMN shift_categories_id;
 ALTER TABLE shift_type_history DROP COLUMN shift_categories_id;
+
+ALTER TABLE competences DROP COLUMN exceeded_mins;
+ALTER TABLE competences ALTER COLUMN valuerequested TYPE numeric(4,1);
 
   
 DROP TABLE shift_categories_history;  

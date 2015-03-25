@@ -6,6 +6,7 @@ import helpers.ModelQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import manager.PersonDayManager.PairStamping;
 import manager.PersonManager;
@@ -20,6 +21,9 @@ import models.PersonShiftDay;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
+import models.query.QCompetenceCode;
+import models.query.QPerson;
+import models.query.QPersonShiftShiftType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -28,16 +32,20 @@ import org.joda.time.Minutes;
 import org.joda.time.Period;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import play.Logger;
+import play.i18n.Messages;
 
 
 public class CompetenceUtility {
@@ -47,195 +55,20 @@ public class CompetenceUtility {
 	public static String codShift = "T1";						// codice dei turni
 	
 	public static String thNoStampings = "Mancata timbratura";  // nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
+	public static String thMissingTime = "Orario insufficiente";// 
 	public static String thAbsences = "Assenza";				// nome della colonna per i giorni di assenza della tabella delle inconsistenze
 	public static String thMissions = "Missione";				// nome della colonna per i giorni di assenza della tabella delle inconsistenze
 	public static String thBadStampings = "Timbratura errata";  // nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
 	public static String thWarnStampings = "Orario da motivare";  // nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni ma 
 																// con le ore lavorate che discostano meno di 2 ore
-	public static String thLackTime = "Tempo mancante";
 	
-	/*
-	 * @author arianna
-	 * Salva il riepilogo dei giorni di reperibilità e le reason di un certo mesenel database.
-	 * La reason contiene la descrizione dei periodi di reperibilità effettuati
-	 * in quel mese
-	 */
-	public static int updateDBReperibilityCompetences(List<PersonReperibilityDay> personReperibilityDays, int year, int month) {
-		
-		// single person reperibility period in a month
-		class PRP {
-			int inizio;
-			int fine;
-			String mese;
-			String tipo;
-			
-			public PRP (int inizio, int fine, String mese, String tipo) {
-				this.inizio = inizio;
-				this.fine = fine;
-				this.mese = mese;
-				this.tipo = tipo;
-			}
-			
-			@Override
-			public String toString() {
-				return (this.inizio != this.fine) ? String.format("%d-%d/%s", inizio, fine, mese) : String.format("%d/%s", inizio, mese);
-			}
-		}
-		
-		// single person reperibility day
-		class PRD {
-			int giorno;
-			String tipo;
-			
-			public PRD (int giorno, String tipo) {
-				this.giorno = giorno;
-				this.tipo  = tipo;
-			}
-		}
-		
-		
-		int numSavedCompetences = 0;
-		
-		
-		// get the Competence code for the reperibility working or non-working days  
-		CompetenceCode competenceCodeFS = CompetenceCodeDao.getCompetenceCodeByCode(codFs);
-		//CompetenceCode competenceCodeFS = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFs).first();
-		CompetenceCode competenceCodeFR = CompetenceCodeDao.getCompetenceCodeByCode(codFr);
-		//CompetenceCode competenceCodeFR = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFr).first();
-		
-		// read the first day of the month and the short month description
-		LocalDate firstOfMonth = new LocalDate(year, month, 1);
-		String shortMonth = firstOfMonth.monthOfYear().getAsShortText();
-				
-		// for each person contains the reperibility days (fs/fr) in the month
-		ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
-		Table<Person, Integer, String> reperibilityMonth = null;
-				
-		// build the reperibility calendar with the reperibility days
-		for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
-			Person person = personReperibilityDay.personReperibility.person;
-			
-			// record the reperibility day
-			//builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? codFs : codFr);
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), PersonManager.isHoliday(person, personReperibilityDay.date) ? codFs : codFr);
+	public static String thDays = "Num. di giorni";				// nome della colonna per i giorni di turno svolti mensilmente da una persona
+	public static String thReqHour = "Num. di ore spettanti";	// nome della colonna per le ore di turno svolte mensilmente da una persona
+	public static String thAppHour = "Num. di ore approvate";		// nome della colonna per le ore di turno approvate mensilmente per una persona
+	public static String thLackTime = "Ore mancanti";
+	public static String thExceededMin = "Minuti accumulati";	// Nome dela colonna contenente i minuti accumulati di turno da riportare nei mesi successivi
 
-		}
-		reperibilityMonth = builder.build();
-		
-		
-		// for each person in the reperibilitymonth conunts the reperibility day
-		// divided by fs and fr and build a string description of the rep periods
-		for (Person person: reperibilityMonth.rowKeySet()) {
-			
-			// lista dei periodi di reperibilità ferieali e festivi
-			List<PRP> fsPeriods = new ArrayList<PRP>();
-			List<PRP> frPeriods = new ArrayList<PRP>();
-		
-			PRD previousPersonReperibilityDay = null;
-			PRP currentPersonReperibilityPeriod = null;
-			
-			// number of working and non-working days
-			int NumOfFsDays = 0;
-			int NumOfFrDays = 0;
-			
-			// for each day of month
-			for (Integer dayOfMonth: reperibilityMonth.columnKeySet()) {
-				
-				// counts the reperibility days fs and fr
-				if (reperibilityMonth.contains(person, dayOfMonth)) { 
-					if (reperibilityMonth.get(person, dayOfMonth).equals(codFr)) {
-						NumOfFrDays++;
-					} else {
-						NumOfFsDays++;
-					}
-				} 
-				
-				// create the reperibility periods strings divided by fs and fr
-				if (reperibilityMonth.contains(person, dayOfMonth)) {
-					if ((previousPersonReperibilityDay == null) || 
-						(!reperibilityMonth.get(person, dayOfMonth).equals(previousPersonReperibilityDay.tipo)) ||
-						((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) { 		
-							currentPersonReperibilityPeriod = new PRP (dayOfMonth, dayOfMonth, shortMonth, reperibilityMonth.get(person, dayOfMonth));
-					
-							if (currentPersonReperibilityPeriod.tipo == codFs) {
-								fsPeriods.add(currentPersonReperibilityPeriod);
-							} else {
-								frPeriods.add(currentPersonReperibilityPeriod);
-							}
-					}
-					else {
-						currentPersonReperibilityPeriod.fine = dayOfMonth;
-					}
-					previousPersonReperibilityDay = new PRD (dayOfMonth, reperibilityMonth.get(person, dayOfMonth));
-				}
-			}
-			
-			Logger.debug("NumOfFsDays=%d fsPeriods=%s - NumOfFrDays=%d frPeriods=%s ", NumOfFsDays, fsPeriods, NumOfFrDays, frPeriods);
-			
-			// build the Fs and Fr reasons
-			String fsReason = "";
-			String frReason = "";			
-			for (PRP prp: fsPeriods) {
-				fsReason = fsReason.concat(prp.toString().concat(" "));
-			}
-			for (PRP prp: frPeriods) {
-				frReason = frReason.concat(prp.toString().concat(" "));
-			}
-			Logger.debug("ReasonFS=%s ReasonFR=%s", fsReason, frReason);
-			
-			Logger.debug("Cerca Competence FS per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFS.id);
-			// save the FS reperibility competences in the DB
-			Optional<Competence> FsCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFS);
-//			Competence FsCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
-//					person, year, month, competenceCodeFS).first();
-			
-			if (FsCompetence.isPresent()) {
-				Logger.debug("Trovato competenza FS =%s", FsCompetence);
-				// update the requested hours
-				FsCompetence.get().setValueApproved(NumOfFsDays, fsReason);
-				FsCompetence.get().save();
-				
-				Logger.debug("Aggiornata competenza %s", FsCompetence);
-				numSavedCompetences++;
-			} else {
-				Logger.debug("Trovato nessuna competenza FS");
-				// insert a new competence with the requested hours and reason
-				Competence competence = new Competence(person, competenceCodeFS, year, month, NumOfFsDays, fsReason);
-				competence.save();
-				
-				Logger.debug("Salvata competenza %s", competence);
-				numSavedCompetences++;
-			}
-			
-			Logger.debug("Cerca Competence FR per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFR.id);
-			// save the FR reperibility competences in the DB
-			Optional<Competence> FrCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFR);
-//			Competence FrCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
-//					person, year, month, competenceCodeFR).first();
-			
-			if (FrCompetence.isPresent()) {
-				// update the requested hours
-				Logger.debug("Trovato competenza FR =%s", FsCompetence);
-				FrCompetence.get().setValueApproved(NumOfFrDays, frReason);
-				FrCompetence.get().save();
-				
-				Logger.debug("Aggiornata competenza %s", FrCompetence);
-				numSavedCompetences++;
-				
-			} else {
-				// insert a new competence with the requested hours an reason
-				Logger.debug("Trovato nessuna competenza FR");
-				Competence competence = new Competence(person, competenceCodeFR, year, month, NumOfFrDays, fsReason);
-				competence.save();
-				Logger.debug("Salvata competenza %s", competence);
-				numSavedCompetences++;
-			}
-		}
-		
-		// return the number of saved competences
-		return numSavedCompetences;
-	}
-
+	
 	
 	/*
 	 * @author arianna
@@ -247,40 +80,45 @@ public class CompetenceUtility {
 		BigDecimal decDays = new BigDecimal(days);
 		BigDecimal due = new BigDecimal("2");
 		
-		Logger.debug("In calcShiftHoursFromDays days = %s", days);
-		
-		BigDecimal minutes = (days%2 == 0) ? BigDecimal.ZERO : new BigDecimal(5); 
-		
-		Logger.debug("In calcShiftHoursFromDays minutes = %s", minutes);
-		
+		BigDecimal minutes = (days%2 == 0) ? BigDecimal.ZERO : new BigDecimal("0.5"); 
 		BigDecimal hours = decDays.multiply(new BigDecimal(6)).add(decDays.divide(due, RoundingMode.HALF_DOWN)).add(minutes);	
 		
-		Logger.debug("In calcShiftHoursFromDays hours = %s", hours);
+		Logger.debug("La calcShiftHoursFromDays restituisce hours = %s", hours);
 		
 		return hours;
 	}
 	
+	
 	/*
 	 * @author arianna
-	 * Calcola i giorni di reperibilità giorni (days)
-	 * dalle ore 
-	 * days = 2 * ore / 13	
+	 * Calcola le oer e i minuti dal numero totale dei minuti 
+	 * lavorati
 	 */
-	public static int calcShiftDaysFromHour (BigDecimal hours) {
-		BigDecimal due = new BigDecimal("2");
-		BigDecimal tredici = new BigDecimal("13");
+	public static BigDecimal calcDecimalShiftHoursFromMinutes (int minutes) {
+		int hours;
+		int mins;
 		
-		int days = due.multiply(hours).divide(tredici).intValue();
-
-		return days;
+		Logger.debug("Nella calcDecimalShiftHoursFromMinutes(%s)", minutes);
+		
+		if (minutes < 60) {
+			hours = 0;
+			mins = minutes;
+		} else {
+			hours = minutes / 60;
+			mins = minutes % 60;		
+		}
+		
+		Logger.debug("hours = %s mins = %s", hours, mins);	
+		return new BigDecimal(Integer.toString(hours).concat(".").concat(Integer.toString(mins)));
 	}
+	
 	
 	/*
 	 * @author arianna
 	 * Calcola il LocalTime dal numero dei minuti 
 	 * che compongono l'orario
 	 */
-	public static String calcLocalTimeFromMinutes (int minutes) {
+	public static String calcStringShiftHoursFromMinutes (int minutes) {
 		int hours;
 		int mins;
 		
@@ -288,187 +126,135 @@ public class CompetenceUtility {
 			hours = 0;
 			mins = minutes;
 		} else {
-			BigDecimal sessanta = new BigDecimal("60");
-			BigDecimal decMinutes = new BigDecimal(minutes);
-			
-			Logger.debug("decMinutes = %s", decMinutes);
-			
-			BigDecimal decHours = decMinutes.divide(sessanta, RoundingMode.HALF_UP);
-			
-			hours = decHours.intValue();
-			
-			Logger.debug("hours = %s decHours = %s", hours, decHours);
-		
-			mins = minutes - (hours * 60);
-			Logger.debug("mins = %s", mins);
+			hours = minutes / 60;
+			mins = minutes % 60;	
 		}
 		
-		return  Integer.toString(hours).concat(":").concat(Integer.toString(mins));
+		Logger.debug("hours = %s mins = %s", hours, mins);	
+		
+		return  Integer.toString(hours).concat(".").concat(Integer.toString(mins));
 	}
 	
+
+	
 	/*
-	 * @author arianna
-	 * Calcola le ore di turno da approvare date quelle richieste.
-	 * Poichè le ore approvate devono essere un numero intero e quelle
-	 * calcolate direttamente dai giorni di turno possono essere decimali,
-	 * le ore approvate devono essere arrotondate per eccesso o per difetto a seconda dell'ultimo
-	 * arrotondamento effettuato in modo che questi vengano alternati 
+	 * Da chiamare per aggiornare la tabella competences inserendo i 30 minuti avanzati nella colonna
+	 * exceeded_min  nel caso in cui ci sia stato un arrotondamento per difetto delle ore approvate
+	 * rispetto a quelle richieste
 	 */
-	public static int calcShiftValueApproved(Person person, int year, int month, BigDecimal requestedHours) {
-		int valueApproved = 0;
+	public static void updateExceedeMinInCompetenceTable () {
+		int year = 2015;
+		int month = 3;
 		
-		// get the Competence code for the ordinary shift  
-		CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode(codShift);
-		//CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
+		int exceddedMin;
+		
+		CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
+		List<Person> personList;
+		
+		
+		QCompetence com = QCompetence.competence;
+		QPerson person = QPerson.person;
+		QPersonShiftShiftType personShiftShiftType = QPersonShiftShiftType.personShiftShiftType;
+		
+		personList = ModelQuery.queryFactory().from(person)
+			.join(person.personShift.personShiftShiftTypes, personShiftShiftType)
+			.where(
+				personShiftShiftType.shiftType.type.in(ImmutableSet.of("A", "B"))
+				).list(person);
+		
+			
+		//		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
+		//				.setParameter("type", type)
+		//				.getResultList(); 
+				//personList = PersonDao.getPersonForShift(type);
+			
+				for (Person p: personList) {
+					
+					final JPQLQuery query = ModelQuery.queryFactory().query();
+		
+					// leggo l'ultima competenza con il numero delle ore approvate
+					// diverso da quello richieste
+					final Competence myCompetence = query
+							.from(com)
+							.where(
+									com.person.eq(p)
+									.and(com.year.eq(year))
+									.and(com.month.lt(month))
+									.and(com.competenceCode.eq(competenceCode))		
+									.and(com.valueApproved.ne(0))
+									.and(com.valueRequested.ne(BigDecimal.ZERO))
+									.and(com.valueRequested.intValue().ne(com.valueApproved)
+									  .or(com.valueRequested.floor().ne(com.valueRequested)))
+							)
+							.orderBy(com.year.desc(), com.month.desc())
+							.limit(1)
+							.uniqueResult(com);
 				
-		final QCompetence com = new QCompetence("competence");
-		final JPQLQuery query = ModelQuery.queryFactory().query();
-		final Competence myCompetence = query
-				.from(com)
-				.where(
-						com.person.eq(person)
-						.and(com.year.eq(year))
-						.and(com.month.lt(month))
-						.and(com.competenceCode.eq(competenceCode))		
-						.and(com.valueApproved.ne(0))
-						.and(com.valueRequested.ne(BigDecimal.ZERO))
-						.and(com.valueRequested.intValue().ne(com.valueApproved)
-						  .or(com.valueRequested.floor().ne(com.valueRequested)))
-				)
-				.orderBy(com.year.desc(), com.month.desc())
-				.limit(1)
-				.uniqueResult(com);
+					// calcolo i minuti in eccesso non ancora remunerati
+					if (myCompetence == null) {
+						 // we are at the first case, so the person has its fist 0.5 hour to accumulate
+						 Logger.debug("myCompetence is null");
+						 exceddedMin = 0;
+					 } else if (myCompetence.valueRequested.setScale(0, RoundingMode.UP).intValue() <= myCompetence.valueApproved) {
+						 Logger.debug("La query sulle competenze ha trovato %s e myCompetence.valueRequested.ROUND_CEILING=%s <= myCompetence.valueApproved=%d", myCompetence.toString(), myCompetence.valueRequested.ROUND_CEILING, myCompetence.valueApproved);
+						 // Last rounding was on ceiling, so we round to floor
+						 //valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
+						 exceddedMin = 0;
+					 } else {
+						 Logger.debug("La query sulle competenze ha trovato %s", myCompetence.toString());
+						 // we round to ceiling
+						 //valueApproved = requestedHours.setScale(0, RoundingMode.UP).intValue();
+						 exceddedMin = 30;
+					 }
+					
+
+					Competence lastCompetence = getLastCompetence(p, year, month, competenceCode);
+					// aggiorno la competenza con i minuti in eccesso calcolati
+					lastCompetence.setExceededMin(exceddedMin);
+					lastCompetence.save();
+				}
+		
+			
 		 
-		 if (myCompetence == null) {
-			 // we are at the first case, so the person has its fist 0.5 hour to accumulate
-			 Logger.debug("myCompetence is null");
-			 valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
-		 } else if (myCompetence.valueRequested.setScale(0, RoundingMode.UP).intValue() <= myCompetence.valueApproved) {
-			 Logger.debug("La query sulle competenze ha trovato %s e myCompetence.valueRequested.ROUND_CEILING=%s <= myCompetence.valueApproved=%d", myCompetence.toString(), myCompetence.valueRequested.ROUND_CEILING, myCompetence.valueApproved);
-			 // Last rounding was on ceiling, so we round to floor
-			 valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
-		 } else {
-			 Logger.debug("La query sulle competenze ha trovato %s", myCompetence.toString());
-			 // we round to ceiling
-			 valueApproved = requestedHours.setScale(0, RoundingMode.UP).intValue();
-		 }
-		
-		
-		Logger.debug("La calcShiftValueApproved ha preso il requsestHour=%s e restituisce %s", requestedHours, valueApproved);
-			
-		return valueApproved;
+		 
 	}
-
+	
+	public static Competence getLastCompetence(Person person, int year, int month, CompetenceCode competenceCode) {
+		QCompetence com2 = QCompetence.competence;
+		QCompetenceCode comCode = QCompetenceCode.competenceCode;
+		// prendo la competenza del mese precedente
+		return ModelQuery.queryFactory()
+				.from(com2)
+				.join(com2.competenceCode, comCode)
+				.where(
+						com2.person.eq(person)
+						.and(com2.year.eq(year))
+						.and(com2.month.lt(month))
+						.and(comCode.eq(competenceCode))		
+				)
+				.orderBy(com2.year.desc(), com2.month.desc())
+				.limit(1)
+				.uniqueResult(com2);
+	}
 	
 	/*
 	 * @author arianna
-	 * Salva le ore di turno di un certo mese nelle competenze.
-	 * Per ogni persona riceve le ore effettive di turno svolte, calcola quelle da approvare e le salva 
-	 * nei campi valueRequested e valueApproved rispettvamente
-	 */
-	public static List<Competence> updateDBShiftCompetences(Table<Person, String, BigDecimal> personsShiftHours, int year, int month) {
-
-		List<Competence> savedCompetences = new ArrayList<Competence>();
-		
-		// get the Competence code for the ordinary shift  
-		CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode(codShift);
-		//CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
-	
-		
-		// for each person
-		for (Person person: personsShiftHours.rowKeySet()) {
-			
-			Logger.debug("Esamino person= %s %s", person.surname, person.name);
-			
-			BigDecimal numOfShiftHours = new BigDecimal(0);  // number of real shift hours
-			int calcApproved = 0;							 // number of approved shift hours
-			
-			// for each shift type
-			for (String shiftType: personsShiftHours.columnKeySet()) {
-				
-				// counts the shift days 
-				if (personsShiftHours.contains(person, shiftType)) { 						
-					numOfShiftHours = numOfShiftHours.add(personsShiftHours.get(person, shiftType));
-				} 
-			}
-		
-			// save the FS reperibility competences in the DB
-			Optional<Competence> shiftCompetence = CompetenceDao.getCompetence(person, year, month, competenceCode);
-//			Competence shiftCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
-//					person, year, month, competenceCode).first();
-			
-			//BigDecimal roundNumOfShiftHours = numOfShiftHours.setScale(0, RoundingMode.FLOOR);
-			//Boolean res = roundNumOfShiftHours.compareTo(numOfShiftHours) == 0;
-		
-			//Logger.debug("Calcola la calcApproved -> numOfShiftHours.abs()=%s  != numOfShiftHours=%s  comparison= %s", roundNumOfShiftHours, numOfShiftHours, res);
-			
-			calcApproved = (numOfShiftHours.setScale(0, RoundingMode.FLOOR).compareTo(numOfShiftHours) == 0) ? numOfShiftHours.intValue() : calcShiftValueApproved(person, year, month, numOfShiftHours);
-			
-			//Competence appCompetence = new Competence(person, competenceCode, year, month);
-			
-			if (shiftCompetence.isPresent()) {
-				// update the requested hours
-				//int calcApproved1 = (shiftCompetence.valueApproved != 0) ? shiftCompetence.valueApproved : calcApproved;
-				
-				// check if the competence has been processed to be sent to Rome
-				// and and this case we don't change the valueApproved
-				CertificatedData certData = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
-				//CertificatedData certData = CertificatedData.find("SELECT cd FROM CertificatedData cd WHERE cd.person = ? AND cd.year = ? AND cd.month = ?", person, year, month).first();
-				
-				//Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
-				
-				Logger.debug("certData=%s", certData);
-				
-				int calcApproved1 = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().valueApproved : calcApproved;
-				//Logger.debug("competenza è inviata = %s vecchia valueApproved=%d, calcolata=%d salvata=%d", certData.isOk, shiftCompetence.valueApproved, calcApproved, calcApproved1);
-				
-				shiftCompetence.get().setValueApproved(calcApproved1);
-				shiftCompetence.get().setValueRequested(numOfShiftHours);
-				shiftCompetence.get().save();
-				
-				Logger.debug("Aggiornata competenza di %s %s: valueApproved=%s, valueRequested=%s, calcApproved=%s", shiftCompetence.get().person.surname, shiftCompetence.get().person.name, shiftCompetence.get().valueApproved, shiftCompetence.get().valueRequested, calcApproved);
-				
-				//---------------				
-				//appCompetence.setValueApproved(calcApproved1);
-				//appCompetence.setValueRequested(numOfShiftHours);
-				//savedCompetences.add(appCompetence);
-				
-				savedCompetences.add(shiftCompetence.get());
-			} else {
-				// insert a new competence with the requested hours an reason
-				Competence competence = new Competence(person, competenceCode, year, month);
-				competence.setValueApproved(calcApproved);
-				competence.setValueRequested(numOfShiftHours);
-				competence.save();
-				
-				//appCompetence.setValueApproved(calcApproved);
-				//appCompetence.setValueRequested(numOfShiftHours);
-				//savedCompetences.add(appCompetence);
-				
-				savedCompetences.add(competence);
-				
-				Logger.debug("Salvata competenza %s", shiftCompetence);
-			}
-		}
-		
-		// return the number of saved competences
-		return savedCompetences;
-	}
-	
-	
-	/*
-	 * @author arianna
-	 * Restituisce la tabella che contiene, per ogni persona nella lista dei turni presi come parametro,
+	 * Aggiorna la tabella totalPersonShiftSumDays per contenere, per ogni persona nella lista dei turni personShiftDays,
 	 * e per ogni tipo di turno trovato, il numero di giorni di turno effettuati
+	 * 
+	 * @param personShiftDays 			- lista di shiftDays
+	 * @param totalPersonShiftSumDays	- tabella contenente il numero di giorni di turno effettuati per ogni persona
+	 * 									  e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
+	 * 									  turno contenuti nella lista personShiftDays passata come parametro
 	 */
-	public static Table<Person, String, Integer> getShiftCompetences(List<PersonShiftDay> personShiftDays) {
+	public static void countPersonsShiftsDays(List<PersonShiftDay> personShiftDays, Table<Person, String, Integer> personShiftSumDaysForTypes) {
 
-		// for each person contains the shift days (A/B) in the month
+		// for each person and dy in the month contains worked shift (A/B)
 		ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
 		Table<Person, Integer, String> shiftMonth = null;
 		
 		// for each person contains the number of days of working shift divided by shift's type 
-    	Table<Person, String, Integer> shiftsSumDays = TreeBasedTable.<Person, String, Integer>create();
+    	//Table<Person, String, Integer> shiftsSumDays = TreeBasedTable.<Person, String, Integer>create();
 		
 		for (PersonShiftDay personShiftDay : personShiftDays) {
 			Person person = personShiftDay.personShift.person;
@@ -480,8 +266,9 @@ public class CompetenceUtility {
 		}
 		shiftMonth = builder.build();
 		
-		// for each person
+		// for each person and shift type counts the total shift days
 		for (Person person: shiftMonth.rowKeySet()) {
+			
 			Logger.debug("conto i turni di %s", person);
 			
 			// number of competence
@@ -490,25 +277,27 @@ public class CompetenceUtility {
 			for (int day: shiftMonth.columnKeySet()) {
 				
 				if (shiftMonth.contains(person, day)) {
-				
+					// get the shift type
 					String shift = shiftMonth.get(person, day);
-					shiftNum = (shiftsSumDays.contains(person, shift)) ? shiftsSumDays.get(person, shift) : 0;
+					shiftNum = (personShiftSumDaysForTypes.contains(person, shift)) ? personShiftSumDaysForTypes.get(person, shift) : 0;
 					shiftNum++;
-					shiftsSumDays.put(person, shift, shiftNum);	
+					personShiftSumDaysForTypes.put(person, shift, shiftNum);	
 				}
 			}
 
 		}
 		
+		Logger.debug("la countPersonsShiftCompetences ritorna  totalPersonShiftSumDays.size() = %s", personShiftSumDaysForTypes.size());
+		
 		// return the number of saved competences
-		return shiftsSumDays;
+		//return shiftsSumDays;
 	}
 	
 	
 	/**
 	 * @author arianna
 	 * crea una tabella con le eventuali inconsistenze tra le timbrature dei reperibili di un certo tipo e i
-	 * turni di reperibilità svolti in un determinato periodo di tempo
+	 * turni di reperibilit√† svolti in un determinato periodo di tempo
 	 * ritorna una tabella del tipo (Person, [thNoStamping, thAbsence], List<'gg/MMM '>)
 	 */
 	public static Table<Person, String, List<String>> getReperibilityInconsistenceAbsenceTable(List<PersonReperibilityDay> personReperibilityDays, LocalDate startDate, LocalDate endDate) {
@@ -528,13 +317,12 @@ public class CompetenceUtility {
 				
 			Optional<PersonDay> personDay = PersonDayDao.getSinglePersonDay(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
-			//Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
 			
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				//if (!person.isHoliday(personReperibilityDay.date)) {
-				if(PersonManager.isHoliday(person, personReperibilityDay.date)){
-					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+				if(!PersonManager.isHoliday(person, personReperibilityDay.date)){
+					Logger.info("La reperibilit√† di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 				
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
 					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
@@ -543,8 +331,8 @@ public class CompetenceUtility {
 			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
 				// check for the stampings in working days
 				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
-				if(PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
-					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
+				if (!PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+					Logger.info("La reperibilit√† di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 					
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();	
 					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));			
@@ -556,7 +344,7 @@ public class CompetenceUtility {
 				if (!personDay.get().absences.isEmpty()) {
 					for (Absence absence : personDay.get().absences) {
 						if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
-							Logger.info("La reperibilità di %s %s è incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+							Logger.info("La reperibilit√† di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 							
 							absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences)) ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();							
 							absenceDays.add(personReperibilityDay.date.toString("dd MMM"));							
@@ -575,22 +363,17 @@ public class CompetenceUtility {
 	 * Costruisce la tabella delle inconsistenza tra i giorni di turno dati e le timbrature
 	 * ritorna una tabella del tipo (Person, [thNoStamping, thAbsence, thBadStampings], [List<'gg MMM'>, List<'gg MMM'>, 'dd MMM -> HH:mm-HH:mm']) 
 	 */
-	public static Table<Person, String, List<String>> getShiftInconsistencyTimestampTable(List<PersonShiftDay> personShiftDays) {
+	public static void getShiftInconsistencyTimestampTable(List<PersonShiftDay> personShiftDays, Table<Person, String, List<String>> inconsistentAbsenceTable) {
 		
 		// tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
-		Table<Person, String, List<String>> inconsistentAbsenceTable = TreeBasedTable.<Person, String, List<String>>create();
+		//Table<Person, String, List<String>> inconsistentAbsenceTable = TreeBasedTable.<Person, String, List<String>>create();
 		
 		// lista dei giorni di assenza nel mese, mancata timbratura e timbratura inconsistente
-		//List<Integer> noStampingDays = new ArrayList<Integer>();
-		List<String> noStampingDays = new ArrayList<String>();
 		
-		//List<Integer> badStampingDays = new ArrayList<Integer>();
-		List<String> badStampingDays = new ArrayList<String>();
-		
-		//List<Integer> absenceDays = new ArrayList<Integer>();
-		List<String> absenceDays = new ArrayList<String>();
-		
-		List<String> lackOfTimes = new ArrayList<String>();
+		List<String> noStampingDays = new ArrayList<String>();		// mancata timbratura
+		List<String> badStampingDays = new ArrayList<String>();		// timbrature errate
+		List<String> absenceDays = new ArrayList<String>();			// giorni di assenza
+		List<String> lackOfTimes = new ArrayList<String>();			// tempo mancante
 		
 		for (PersonShiftDay personShiftDay : personShiftDays) {
 			Person person = personShiftDay.personShift.person;
@@ -599,17 +382,17 @@ public class CompetenceUtility {
 			LocalTime startShift = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.startMorning : personShiftDay.shiftType.shiftTimeTable.startAfternoon;
 			LocalTime endShift = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.endMorning : personShiftDay.shiftType.shiftTimeTable.endAfternoon;
 			
-			// legge l'orario di inizio e fine pausa pranzo
+			// legge l'orario di inizio e fine pausa pranzo del turno
 			LocalTime startLunchTime = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.startMorningLunchTime : personShiftDay.shiftType.shiftTimeTable.startAfternoonLunchTime;
 			LocalTime endLunchTime = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.endMorningLunchTime : personShiftDay.shiftType.shiftTimeTable.endAfternoonLunchTime;
 			
 			//Logger.debug("Turno: %s-%s  %s-%s", startShift, startLunchTime, endLunchTime, endShift);
 			
 			// Add flexibility (15 min.) due to the new rules (PROT. N. 0008692 del 2/12/2014)
-			startShift = startShift.plusMinutes(15);
-			startLunchTime = startLunchTime.minusMinutes(15);
-			endLunchTime = endLunchTime.plusMinutes(15);
-			endShift = endShift.minusMinutes(15);
+			LocalTime roundedStartShift = startShift.plusMinutes(15);
+			LocalTime roundedStartLunchTime = startLunchTime.minusMinutes(15);
+			LocalTime roundedEndLunchTime = endLunchTime.plusMinutes(15);
+			LocalTime roundedEndShift = endShift.minusMinutes(15);
 			
 			//Logger.debug("Turno flessibile: %s-%s  %s-%s", startShift, startLunchTime, endLunchTime, endShift);
 			
@@ -621,19 +404,15 @@ public class CompetenceUtility {
 			
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
-				
 
 				if ( !PersonManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
-					Logger.info("Il turno di %s %s è incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
-
-					
-					/*noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
-					noStampingDays.add(personShiftDay.date.getDayOfMonth());
-					inconsistentAbsence.put(personName, thNoStampings, noStampingDays);*/
+					Logger.info("Il turno di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 					
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
 					noStampingDays.add(personShiftDay.date.toString("dd MMM"));
 					inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
+					
+					Logger.debug("Nuovo inconsistentAbsenceTable(%s, %s) = %s", person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
 				}
 			} else {
 
@@ -643,19 +422,14 @@ public class CompetenceUtility {
 					// check no stampings
 					//-----------------------------
 					if (personDay.get().stampings.isEmpty()) {
-						Logger.info("Il turno di %s %s è incompatibile con la sue mancate timbrature nel giorno %s", person.name, person.surname, personDay.get().date);
+						Logger.info("Il turno di %s %s √® incompatibile con la sue mancate timbrature nel giorno %s", person.name, person.surname, personDay.get().date);
 						
-						/*noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
-						noStampingDays.add(personShiftDay.date.getDayOfMonth());
-						inconsistentAbsence.put(personName, thNoStampings, noStampingDays);*/
 						
 						noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
-						//Logger.debug("leggo da inconsistentAbsenceTable(person=%s, thNoStampings=%s) %s", person, thNoStampings, noStampingDays);
-						
 						noStampingDays.add(personShiftDay.date.toString("dd MMM"));
 						inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
 						
-						Logger.debug("Nuovo inconsistentAbsenceTable(person=%s, thNoStampings=%s) = %s", person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
+						Logger.debug("Nuovo inconsistentAbsenceTable(%s, %s) = %s", person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
 					} else {
 						// check consistent stampings
 						//-----------------------------
@@ -663,11 +437,10 @@ public class CompetenceUtility {
 						// legge le coppie di timbrature valide 
 						List<PairStamping> pairStampings = PairStamping.getValidPairStamping(personDay.get().stampings);
 						
-						// se c'è una timbratura guardo se è entro il turno
-
+						// se c'√® una timbratura guardo se √® entro il turno
 						if ((personDay.get().stampings.size() == 1) &&
-							((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(startShift)) || 
-							(personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(startShift)) )) {
+							((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(roundedStartShift)) || 
+							(personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(roundedStartShift)) )) {
 
 							
 							String stamp = (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm").concat("- **:**") : "- **:**".concat(personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
@@ -675,19 +448,19 @@ public class CompetenceUtility {
 							badStampingDays = (inconsistentAbsenceTable.contains(person, thBadStampings)) ? inconsistentAbsenceTable.get(person, thBadStampings) : new ArrayList<String>();
 							badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stamp));
 							inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+							
+							Logger.debug("Nuovo inconsistentAbsenceTable(%s, %s) = %s", person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 								
-						// se è vuota -> manca qualche timbratura		
+						// se √® vuota => manca qualche timbratura		
 						} else if (pairStampings.isEmpty()) {							
 								
-							Logger.info("Il turno di %s %s è incompatibile con la sue  timbrature disallineate nel giorno %s", person.name, person.surname, personDay.get().date);
-							
-							/*badStampingDays = (inconsistentAbsence.contains(personName, thBadStampings)) ? inconsistentAbsence.get(personName, thBadStampings) : new ArrayList<Integer>();
-							badStampingDays.add(personShiftDay.date.getDayOfMonth());
-							inconsistentAbsence.put(personName, thBadStampings, badStampingDays);*/
+							Logger.info("Il turno di %s %s √® incompatibile con la sue  timbrature disallineate nel giorno %s", person.name, person.surname, personDay.get().date);
 							
 							badStampingDays = (inconsistentAbsenceTable.contains(person, thBadStampings)) ? inconsistentAbsenceTable.get(person, thBadStampings) : new ArrayList<String>();
 							badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
 							inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+							
+							Logger.debug("Nuovo inconsistentAbsenceTable(%s, %s) = %s", person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 						
 						// controlla che le coppie di timbrature coprano
 						// gli intervalli di prima e dopo pranzo
@@ -695,16 +468,20 @@ public class CompetenceUtility {
 							
 							boolean okBeforeLunch = false;  // intervallo prima di pranzo coperto
 							boolean okAfterLunch = false;	// intervallo dopo pranzo coperto
+							
+							String strStamp = "";
 										
 							// per ogni coppia di timbrature
 							for (PairStamping pairStamping : pairStampings) {
 								
+								strStamp = strStamp.concat(pairStamping.in.date.toString("HH:mm")).concat(" - ").concat(pairStamping.out.date.toString("HH:mm")).concat("  ");
+								
 								// controlla se interseca l'intervallo prima e dopo pranzo del turno
 								// controlla se interseca la coppia di timbrature
-								 if (pairStamping.out.date.toLocalTime().isAfter(startShift) && pairStamping.in.date.toLocalTime().isBefore(startLunchTime)) {
+								 if (pairStamping.out.date.toLocalTime().isAfter(roundedStartShift) && pairStamping.in.date.toLocalTime().isBefore(roundedStartLunchTime)) {
 									 okBeforeLunch = true;
 								 }
-								 if (pairStamping.out.date.toLocalTime().isAfter(endLunchTime) && pairStamping.in.date.toLocalTime().isBefore(endShift)) {
+								 if (pairStamping.out.date.toLocalTime().isAfter(roundedEndLunchTime) && pairStamping.in.date.toLocalTime().isBefore(roundedEndShift)) {
 									 okAfterLunch = true;
 								 }
 							}
@@ -718,14 +495,12 @@ public class CompetenceUtility {
 								LocalTime upLimit;
 								String stampings = "";
 								
+								Logger.info("Il turno di %s  nel giorno %s non √® stato completato o c'√® stata una uscita fuori pausa pranzo - orario %s", person, personDay.get().date, strStamp);
+								Logger.debug("Esamino le coppie di timbrature");
 
-								Logger.info("Il turno di %s %s nel giorno %s non è stato completato o c'è stata una uscita fuori pausa pranzo - entrata alle %s, uscita alle %s - " +
-										"pausa pranzo da %s a %s", person.name, person.surname, personDay.get().date, pairStampings.get(0).in.date.toString("HH:mm"), pairStampings.get(1).out.date.toString("HH:mm"), pairStampings.get(0).out.date.toString("HH:mm"), pairStampings.get(1).in.date.toString("HH:mm"));
-							
-								/*badStampingDays = (inconsistentAbsence.contains(personName, thBadStampings)) ? inconsistentAbsence.get(personName, thBadStampings) : new ArrayList<Integer>();
-								badStampingDays.add(personShiftDay.date.getDayOfMonth());
-								inconsistentAbsence.put(personName, thBadStampings, badStampingDays);*/
-
+								// calcolare il lowlimit ecc senza i 15 min!!!!!
+								//------------------------------------------------
+								
 								// per ogni coppia di timbrature
 								for (PairStamping pairStamping : pairStampings) {
 									
@@ -736,9 +511,11 @@ public class CompetenceUtility {
 									 (pairStamping.in.date.toLocalTime().isAfter(startShift))) {
 										 
 										 lowLimit = (pairStamping.in.date.toLocalTime().isBefore(startShift)) ? startShift : pairStamping.in.date.toLocalTime();
+										 
 										 upLimit = (pairStamping.out.date.toLocalTime().isBefore(startLunchTime)) ? pairStamping.out.date.toLocalTime() : startLunchTime;
 										 
 										 workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
+										 Logger.debug("N.1 - lowLimit=%s upLimit=%s workingMinutes=%s", lowLimit, upLimit, workingMinutes);
 										 
 									 }
 									 if ((pairStamping.in.date.toLocalTime().isBefore(endLunchTime) && pairStamping.out.date.toLocalTime().isAfter(endLunchTime)) ||
@@ -749,6 +526,7 @@ public class CompetenceUtility {
 										 
 										 workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
 										 
+										 Logger.debug("N.2 - lowLimit=%s upLimit=%s workingMinutes=%s", lowLimit, upLimit, workingMinutes);
 									 }		
 									 
 									 // write the pair stamping								
@@ -764,34 +542,34 @@ public class CompetenceUtility {
 								int lackOfMinutes = teoreticShiftMinutes - workingMinutes;
 								
 								Logger.debug("teoreticShiftMinutes = %s workingMinutes = %s lackOfMinutes = %s", teoreticShiftMinutes, workingMinutes, lackOfMinutes);
-								String lackOfTime = calcLocalTimeFromMinutes(lackOfMinutes);
-								
+								String lackOfTime = calcStringShiftHoursFromMinutes(lackOfMinutes);
+								String workedTime = calcStringShiftHoursFromMinutes(workingMinutes);
 								
 								if (lackOfMinutes > twoHoursinMinutes) {
 								
-									Logger.info("Il turno di %s %s nel giorno %s non è stato completato - timbrature: %s ", person.name, person.surname, personDay.get().date, stampings);
-								
-									/*badStampingDays = (inconsistentAbsence.contains(personName, thBadStampings)) ? inconsistentAbsence.get(personName, thBadStampings) : new ArrayList<Integer>();
-									badStampingDays.add(personShiftDay.date.getDayOfMonth());
-									inconsistentAbsence.put(personName, thBadStampings, badStampingDays);*/
+									Logger.info("Il turno di %s %s nel giorno %s non √® stato completato - timbrature: %s ", person.name, person.surname, personDay.get().date, stampings);
 									
-									badStampingDays = (inconsistentAbsenceTable.contains(person, thBadStampings)) ? inconsistentAbsenceTable.get(person, thBadStampings) : new ArrayList<String>();
-									badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stampings));
-									inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+									badStampingDays = (inconsistentAbsenceTable.contains(person, thMissingTime)) ? inconsistentAbsenceTable.get(person, thMissingTime) : new ArrayList<String>();
+									badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stampings).concat("(").concat(workedTime).concat(" ore lavorate)"));
+									inconsistentAbsenceTable.put(person, thMissingTime, badStampingDays);
+									
+									Logger.debug("Nuovo inconsistentAbsenceTable(%s, %s) = %s", person, thMissingTime, inconsistentAbsenceTable.get(person, thMissingTime));
 								} else {
 									
-									Logger.info("Il turno di %s %s nel giorno %s non è stato completato per meno di 2 ore (%s minuti (%s)) - CONTROLLARE PERMESSO timbrature: %s", person.name, person.surname, personDay.get().date, lackOfMinutes, lackOfTime, stampings);
+									Logger.info("Il turno di %s %s nel giorno %s non √® stato completato per meno di 2 ore (%s minuti (%s)) - CONTROLLARE PERMESSO timbrature: %s", person.name, person.surname, personDay.get().date, lackOfMinutes, lackOfTime, stampings);
 									
 									badStampingDays = (inconsistentAbsenceTable.contains(person, thWarnStampings)) ? inconsistentAbsenceTable.get(person, thWarnStampings) : new ArrayList<String>();
 									badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)"));
-									lackOfTimes.add(lackOfTime.toString());
+									lackOfTimes.add(Integer.toString(lackOfMinutes));
 									inconsistentAbsenceTable.put(person, thWarnStampings, badStampingDays);
 									inconsistentAbsenceTable.put(person, thLackTime, lackOfTimes);
+									
+									Logger.debug("Nuovo inconsistentAbsenceTable(%s, %s) = %s", person, thLackTime, inconsistentAbsenceTable.get(person, thLackTime));
 								}
 							}
 						} // fine controllo coppie timbrature
 					} // fine if esistenza timbrature
-				} // fine se non è giorno festivo
+				} // fine se non √® giorno festivo
 				
 				// check for absences
 				if (!personDay.get().absences.isEmpty()) {
@@ -799,14 +577,14 @@ public class CompetenceUtility {
 						if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
 							
 							if (absence.absenceType.code.equals("92")) {
-								Logger.info("Il turno di %s %s è coincidente con una missione il giorno %s", person.name, person.surname, personShiftDay.date);
+								Logger.info("Il turno di %s %s √® coincidente con una missione il giorno %s", person.name, person.surname, personShiftDay.date);
 								
 								absenceDays = (inconsistentAbsenceTable.contains(person, thMissions)) ? inconsistentAbsenceTable.get(person, thMissions) : new ArrayList<String>();							
 								absenceDays.add(personShiftDay.date.toString("dd MMM"));							
 								inconsistentAbsenceTable.put(person, thMissions, absenceDays);
 								
 							} else {
-								Logger.info("Il turno di %s %s è incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personShiftDay.date);
+								Logger.info("Il turno di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personShiftDay.date);
 			
 								
 								/*absenceDays = (inconsistentAbsence.contains(personName, thAbsences)) ? inconsistentAbsence.get(personName, thAbsences) : new ArrayList<Integer>();							
@@ -824,7 +602,7 @@ public class CompetenceUtility {
 		}
 		
 		
-		return inconsistentAbsenceTable;
+		//return inconsistentAbsenceTable;
 	}
 	
 }

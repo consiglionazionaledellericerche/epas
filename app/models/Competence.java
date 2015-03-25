@@ -2,6 +2,7 @@ package models;
 
 import java.math.BigDecimal;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -38,9 +39,14 @@ public class Competence extends BaseModel {
 	
 	public int month;	
 	
+	public BigDecimal valueRequested = BigDecimal.ZERO;
+	
+	@Column(name="exceeded_mins")
+	public Integer exceededMins;
+	
 	public int valueApproved;
 	
-	public BigDecimal valueRequested = BigDecimal.ZERO;
+
 	
 	public String reason;
 	
@@ -89,6 +95,10 @@ public class Competence extends BaseModel {
 		this.month = month;
 	}
 
+	public Person getPerson() {
+		return this.person;
+	}
+	
 	public int getValueApproved() {
 		return valueApproved;
 	}
@@ -102,6 +112,14 @@ public class Competence extends BaseModel {
 		this.reason = reason;
 	}
 
+	public Integer getExceededMin() {
+		return exceededMins;
+	}
+
+	public void setExceededMin(Integer min) {
+		this.exceededMins = min;
+	}
+	
 	public BigDecimal getValueRequested() {
 		return valueRequested;
 	}
