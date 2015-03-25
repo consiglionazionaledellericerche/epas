@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
@@ -311,6 +312,11 @@ public class Administration extends Controller {
 		person.save();
 		
 		renderText(person.name);
+	}
+	
+	public static void updateExceedeMinInCompetenceTable() {
+		CompetenceUtility.updateExceedeMinInCompetenceTable();
+		renderText("OK");
 	}
    
 }
