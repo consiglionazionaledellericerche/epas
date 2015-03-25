@@ -53,7 +53,6 @@ import org.postgresql.translation.messages_it;
 
 import play.Logger;
 import play.data.binding.As;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 
 import com.google.common.base.Optional;
