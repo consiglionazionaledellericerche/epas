@@ -54,6 +54,18 @@ contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
 contract.onCertificate=In attestati
 
+PDFReport.thDays=Num. di giorni				
+PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thAppHour =Num. di ore approvate		
+PDFReport.thLackTime=Ore mancanti
+PDFReport.thExceededMin=Minuti accumulati
+
+PDFReport.thNoStampings =Mancata timbratura     		# nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
+PDFReport.thMissingTime=Orario insufficiente
+PDFReport.thAbsences=Assenza						# nome della colonna per i giorni di assenza della tabella delle inconsistenze
+PDFReport.thBadStampings =Timbratura errata  	# nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
+PDFReport.thMissions=Missione					# nome della colonna per i giorni di assenza della tabella delle inconsistenze
+PDFReport.thWarnStampings=Orario da motivare 	# nome della colonna la somma delle ore non lavorate nel turno che devono essere motivate 
 
 qualification=Livello
 
