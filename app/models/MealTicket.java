@@ -16,7 +16,6 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 @Audited
 @Entity

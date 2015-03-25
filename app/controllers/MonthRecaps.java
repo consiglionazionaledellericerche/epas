@@ -12,10 +12,8 @@ import manager.MonthRecapManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
-import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.User;
 
 import org.joda.time.LocalDate;
 

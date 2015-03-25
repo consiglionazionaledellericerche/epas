@@ -12,7 +12,6 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.CheckWith;
-import play.data.validation.InPast;
 import play.data.validation.Required;
 import validators.LocalDatePast;
 
