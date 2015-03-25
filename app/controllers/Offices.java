@@ -12,6 +12,7 @@ import models.Role;
 
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -108,23 +109,23 @@ public class Offices extends Controller {
 	}
 
 	@NoCheck
-	public static void saveSeat(Long instituteId, String name, String address, String code, String date) {
+	public static void saveSeat(Long instituteId, 
+			@Required String name, @Required String address, 
+			@Required String code, @Required String date) {
 
 		Office institute = OfficeDao.getOfficeById(instituteId);
 		if(institute==null) {
-
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-
-		rules.checkIfPermitted(institute);
-
-		//Parametri null
-		if( isNullOrEmpty(name) || isNullOrEmpty(address) || isNullOrEmpty(code) || isNullOrEmpty(date) ){
+		
+    	if (validation.hasErrors()){
 			flash.error("Errore. Valorizzare correttamente tutti i parametri.");
 			Offices.showOffices();
-		}
+    	}
 
+		rules.checkIfPermitted(institute);
+		
 		String message = OfficeManager.checkIfExistsSeat(code, date);
 		if(!message.equals("")){
 			flash.error(message);
@@ -169,7 +170,9 @@ public class Offices extends Controller {
 	}
 
 	@NoCheck
-	public static void updateSeat(Long officeId, String name, String address, String code, String date) {
+	public static void updateSeat(Long officeId, 
+			@Required String name, @Required String address, 
+			@Required String code, @Required String date) {
 
 		Office office = OfficeDao.getOfficeById(officeId);
 		if(office==null) {
@@ -177,14 +180,13 @@ public class Offices extends Controller {
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-
-		rules.checkIfPermitted(office);
-
-		//Parametri null
-		if( isNullOrEmpty(name) || isNullOrEmpty(address) || isNullOrEmpty(code) || isNullOrEmpty(date) ){
+		
+    	if (validation.hasErrors()){
 			flash.error("Valorizzare correttamente tutti i parametri. Operazione annullata.");
 			Offices.showOffices();
-		}
+    	}
+
+		rules.checkIfPermitted(office);
 
 		//errore campo data
 		String message = OfficeManager.checkIfExistsSeat(code, date);
@@ -208,16 +210,5 @@ public class Offices extends Controller {
 		flash.success("Sede correttamente modificata");
 		Offices.showOffices();
 	}
-
-
-
-	private static boolean isNullOrEmpty(String parameter)
-	{
-		if( (parameter==null || parameter.equals("") ))
-			return true;
-		return false;
-	}
-
-
 
 }
