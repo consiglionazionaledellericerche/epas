@@ -219,6 +219,8 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
+        "Persons.showCurrentVacation",
+        "Persons.showCurrentContractWorkingTimeType",
         "MealTickets.recapMealTickets",
         "MonthRecaps.residualYearRecap"
         ), target == null, granted == false)
@@ -261,6 +263,7 @@ when
         /* inserire le action interessate */
         "Persons.update",
         "Persons.deletePerson",
+        "Persons.insertPerson",
      	"Persons.deletePersonConfirmed",
      	"Persons.insertContract",
         "Persons.saveContract",
