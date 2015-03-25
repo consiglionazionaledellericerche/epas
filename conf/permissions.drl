@@ -90,41 +90,6 @@ when
      	"Persons.savePassword",
      	"Persons.resetPassword",
      	
-     	/* Lista Persone */
-     	"Persons.showCurrentVacation",
-     	"Persons.showCurrentContractWorkingTimeType",
-     	"Persons.update",
-     	"Persons.deletePerson",
-     	"Persons.deletePersonConfirmed",
-     	"Persons.insertContract",
-     	"Persons.saveContract",
-     	"Persons.modifyContract",
-     	"Persons.updateContract",
-     	"Persons.deleteContract",
-     	"Persons.deleteContractConfirmed",
-     	"Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.updateContractWorkingTimeType",
-     	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
-     	"Persons.deleteContractWorkingTimeType",
-     	"Persons.insertPerson",
-     	"Persons.save",
-     	"Persons.insertUsername",
-     	"Persons.updateUsername",
-     	"Persons.childrenList",
-     	"Persons.insertChild",
-     	"Persons.editChild",
-     	"Persons.removeChild",
-     	"Persons.saveChild",
-     	"Persons.deleteChild",
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
-     	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail",
-     	
      	/*Assenze*/
      	"YearlyAbsences.showGeneralMonthlyAbsences",
      	"YearlyAbsences.showPersonMonthlyAbsences",
@@ -245,7 +210,6 @@ then
  $c.grant();
 end
 
-
 /*
  *		Permission: viewPerson
  */
@@ -255,6 +219,8 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
+        "Persons.showCurrentVacation",
+        "Persons.showCurrentContractWorkingTimeType",
         "MealTickets.recapMealTickets",
         "MonthRecaps.residualYearRecap"
         ), target == null, granted == false)
@@ -295,7 +261,36 @@ when
  $p: Permission(description == "editPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
+        "Persons.update",
+        "Persons.deletePerson",
         "Persons.insertPerson",
+     	"Persons.deletePersonConfirmed",
+     	"Persons.insertContract",
+        "Persons.saveContract",
+        "Persons.modifyContract",
+     	"Persons.updateContract",
+     	"Persons.deleteContract",
+     	"Persons.deleteContractConfirmed",
+     	"Persons.updateSourceContract",
+     	"Persons.saveSourceContract",
+     	"Persons.updateContractWorkingTimeType",
+     	"Persons.changeTypeOfContractWorkingTimeType",
+     	"Persons.splitContractWorkingTimeType",
+     	"Persons.deleteContractWorkingTimeType",
+     	"Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+     	"Persons.childrenList",
+     	"Persons.saveChild",
+     	"Persons.insertChild",
+     	"Persons.deleteChild",
+     	"Persons.childrenList",
+     	"Persons.updateContractStampProfile",
+     	"Persons.splitContractStampProfile",
+     	"Persons.changeTypeOfContractStampProfile",
+     	"Persons.deleteContractStampProfile",
+     	"Persons.modifySendEmail",
+     	"Persons.updateSendEmail",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll"     	
         ), target == null, granted == false)
 then

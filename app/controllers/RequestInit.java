@@ -62,6 +62,8 @@ public class RequestInit extends Controller {
 	 */
 	public static class ItemsPermitted {
 		
+		public boolean isPerson = false;
+		
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
 		public boolean viewOffice = false;
@@ -79,6 +81,9 @@ public class RequestInit extends Controller {
 			
 			if(!user.isPresent())
 				return;
+			
+			if(user.get().person != null)
+				this.isPerson = true;
 
 			final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
 			final QRole qr = QRole.role;
@@ -139,7 +144,16 @@ public class RequestInit extends Controller {
 		}
 		
 		/**
-		 * Se l'user ha i permessi per vedere il primo DropDown.
+		 * Se l'user può vedere il menu del dipendente.
+		 * 
+		 * @return
+		 */
+		public boolean isPersonMenuVisible() {
+			return isPerson;
+		}
+		
+		/**
+		 * Se l'user ha i permessi per vedere Amministrazione.
 		 * 
 		 * @return
 		 */
@@ -149,7 +163,7 @@ public class RequestInit extends Controller {
 		}
 		
 		/**
-		 * Se l'user ha i permessi per vedere il secondo DropDown.
+		 * Se l'user ha i permessi per vedere Configurazione.
 		 * @return
 		 */
 		public boolean isDropDown2Visible() {
