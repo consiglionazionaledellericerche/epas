@@ -67,7 +67,11 @@
           
           </a>
         </div>
+        
+        
         <div class="collapse navbar-collapse">
+        
+          #{if ip.isPersonMenuVisible() }	
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDown1") }
             <li class="dropdown active">
@@ -95,6 +99,11 @@
             </li>
           </ul>
           
+          #{/if}
+          #{else}
+            
+          #{/else}
+          
           #{if ip.isDropDownVisible() }
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDown2") }
@@ -111,46 +120,49 @@
                   <li><a href="@{Persons.list()}">Lista Persone</a></li> 
                 #{/if}
                 
+                #{if ip.isPersonMenuVisible()}
                 <li class="divider"></li>
                 
-                #{if ip.viewPersonDay }
-                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
-                   session.get("yearSelected"), 
-                   session.get("monthSelected"))}">Timbrature</a></li> 
-                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
-                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
-                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
-                  <li><a href="@{Stampings.mealTicketSituation(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Riepilogo Buoni Mensa</a></li>
-                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
-                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
-                  <li class="divider"></li>
-                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
-                  <li class="divider"></li>
-                  <li><a href="@{MonthRecaps.show(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
-                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-                   session.get("monthSelected"))}">Assenze</a></li>
-                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
-                  
-                  <li class="divider"></li>
-                  
-                #{/if}
-                
-                #{if ip.viewCompetence }
-                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
-                  session.get("monthSelected"))}">Competenze</a></li>
-                <li class="divider"></li>
-                #{/if}
-                
-                #{if ip.uploadSituation }
-                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
-                #{/if}
-                
-                <li class="divider"></li>
-                #{if ip.viewPerson }
-                  <li><a href="@{MealTickets.recapMealTickets()}">Gestione Buoni Pasto</a></li>
+	                #{if ip.viewPersonDay }
+	                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
+	                   session.get("yearSelected"), 
+	                   session.get("monthSelected"))}">Timbrature</a></li> 
+	                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
+	                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
+	                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
+	                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
+	                  <li><a href="@{Stampings.mealTicketSituation(session.get("yearSelected"), 
+	                   session.get("monthSelected") )}">Riepilogo Buoni Mensa</a></li>
+	                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
+	                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
+	                  <li class="divider"></li>
+	                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
+	                  <li class="divider"></li>
+	                  <li><a href="@{MonthRecaps.show(session.get("yearSelected"), 
+	                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
+	                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+	                   session.get("monthSelected"))}">Assenze</a></li>
+	                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+	                  
+	                  <li class="divider"></li>
+	                  
+	                #{/if}
+	                
+	                #{if ip.viewCompetence }
+	                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
+	                  session.get("monthSelected"))}">Competenze</a></li>
+	                <li class="divider"></li>
+	                #{/if}
+	                
+	                #{if ip.uploadSituation }
+	                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
+	                #{/if}
+	                
+	                <li class="divider"></li>
+	                #{if ip.viewPerson }
+	                  <li><a href="@{MealTickets.recapMealTickets()}">Gestione Buoni Pasto</a></li>
+	        		#{/if}
+        		
         		#{/if}
         		
               </ul>
@@ -214,6 +226,11 @@
     	    #{if session.username}
       		  <ul class="nav navbar-nav navbar-right">
       		  
+      		    #{if !ip.isPersonMenuVisible()}
+      		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
+      	          <a style="color: red"><span class="glyphicon glyphicon-user"> admin </a>
+      	        </li>
+      		    #{/if}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"> ${loginResponse.getUsernameCnr()}</a>
