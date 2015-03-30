@@ -55,6 +55,7 @@ public class Configurations extends Controller{
 		ConfGeneral dayOfPatron = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.DayOfPatron.description, office);
 		ConfGeneral monthOfPatron = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.MonthOfPatron.description, office);
 		ConfGeneral webStampingAllowed = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.WebStampingAllowed.description, office);
+		ConfGeneral addressesAllowed = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.AddressesAllowed.description, office);
 		ConfGeneral urlToPresence = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.UrlToPresence.description, office);
 
 		ConfGeneral userToPresence = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.UserToPresence.description, office);
@@ -64,7 +65,7 @@ public class Configurations extends Controller{
 		ConfGeneral dateStartMealTicket = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.DateStartMealTicket.description, office);
 		ConfGeneral sendEmail = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.SendEMail.description, office);
 
-		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, urlToPresence, userToPresence,
+		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, addressesAllowed, urlToPresence, userToPresence,
 				passwordToPresence, numberOfViewingCouple, dateStartMealTicket,sendEmail, offices, office);
 
 

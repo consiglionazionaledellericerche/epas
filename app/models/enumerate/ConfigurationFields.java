@@ -24,6 +24,7 @@ public enum ConfigurationFields {
 	MonthOfPatron("month_of_patron"),
 	DayOfPatron("day_of_patron"),
 	WebStampingAllowed("web_stamping_allowed"),
+	AddressesAllowed("addresses_allowed"),
 	MealTimeStartHour("meal_time_start_hour"),
 	MealTimeStartMinute("meal_time_start_minute"),
 	MealTimeEndHour("meal_time_end_hour"),
