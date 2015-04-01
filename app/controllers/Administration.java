@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
 
 import java.io.IOException;
@@ -26,7 +27,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
@@ -189,6 +189,11 @@ public class Administration extends Controller {
 		person.save();
 		
 		renderText(person.name);
+	}
+	
+	public static void updateExceedeMinInCompetenceTable() {
+		CompetenceUtility.updateExceedeMinInCompetenceTable();
+		renderText("OK");
 	}
    
 }

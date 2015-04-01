@@ -9,8 +9,12 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.MonthRecapManager;
+import manager.recaps.residual.PersonResidualMonthRecap;
+import manager.recaps.residual.PersonResidualYearRecap;
+import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Person;
 import models.PersonDay;
+
 import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
@@ -18,11 +22,16 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
@@ -36,6 +45,53 @@ public class MonthRecaps extends Controller{
 	@Inject
 	static MonthRecapManager monthRecapManager;
 	
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory;
+	
+	@Inject
+	static PersonResidualYearRecapFactory yearFactory;
+	
+	/**
+	 * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
+	 * 
+	 * @param year
+	 */
+	public static void residualYearRecap(int year) {
+		
+		//FIXME per adesso senza paginazione
+		
+		//Prendo la lista delle persone attive in questo momento. 
+		//Secondo me si deve mettere le persone non attive in un elenco da poter
+		//Analizzare singolarmente.
+		
+		List<Person> simplePersonList = PersonDao.list(Optional.<String>absent(),
+				officeDao.getOfficeAllowed(Security.getUser().get()),
+				false, LocalDate.now(), LocalDate.now(), false).list();
+		
+		List<IWrapperPerson> personList = FluentIterable
+				.from(simplePersonList)
+				.transform(wrapperFunctionFactory.person()).toList();
+		
+		List<PersonResidualMonthRecap> recaps = Lists.newArrayList();
+		
+		
+		for(IWrapperPerson person : personList) {
+			
+			PersonResidualYearRecap c = yearFactory.create(person.getCurrentContract().get(), year, null);
+			recaps.add(c.getMese(LocalDate.now().getMonthOfYear()));
+			
+			if(recaps.size() > 10 ) {
+				break;
+			}
+		}
+		
+
+		render(recaps);
+	}
+	
 	/**
 	 * Controller che gestisce il calcolo del Riepilogo Mensile.
 	 * @param year
@@ -43,13 +99,10 @@ public class MonthRecaps extends Controller{
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	
 	public static void show(int year, int month, String name, Integer page) {
 
 		if(page == null)
 			page = 0;
-		
-		rules.checkIfPermitted("");
 		
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
@@ -116,7 +169,8 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> notJustifiedAbsences = monthRecapManager.getPersonDayListRecap(personId, year, month, "notJustifiedAbsences");
+		List<PersonDay> notJustifiedAbsences = monthRecapManager
+				.getPersonDayListRecap(personId, year, month, "notJustifiedAbsences");
 
 		render(notJustifiedAbsences, person);
 	}
@@ -135,7 +189,8 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> justifiedAbsences = monthRecapManager.getPersonDayListRecap(personId, year, month, "justifiedAbsences");
+		List<PersonDay> justifiedAbsences = monthRecapManager
+				.getPersonDayListRecap(personId, year, month, "justifiedAbsences");
 
 		render(justifiedAbsences, person);
 	}
@@ -154,7 +209,8 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> workingDayHoliday = monthRecapManager.getPersonDayListRecap(personId, year, month, "workingDayHoliday");
+		List<PersonDay> workingDayHoliday = monthRecapManager
+				.getPersonDayListRecap(personId, year, month, "workingDayHoliday");
 
 		render(workingDayHoliday, person);
 	}
@@ -173,7 +229,8 @@ public class MonthRecaps extends Controller{
 			MonthRecaps.show(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
-		List<PersonDay> workingDayNotHoliday = monthRecapManager.getPersonDayListRecap(personId, year, month, "workingDayNotHoliday");
+		List<PersonDay> workingDayNotHoliday = monthRecapManager
+				.getPersonDayListRecap(personId, year, month, "workingDayNotHoliday");
 
 		render(workingDayNotHoliday, person);
 	}

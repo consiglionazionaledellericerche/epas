@@ -47,6 +47,8 @@ public class PersonShiftDayDao {
 	 * @param to
 	 * @param type
 	 * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo shiftType 'type'
+	 * 
+	 * PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch();
 	 */
 	public static List<PersonShiftDay> getPersonShiftDayByTypeAndPeriod(LocalDate from, LocalDate to, ShiftType type){
 		JPQLQuery query = ModelQuery.queryFactory().from(personShiftDay).where(personShiftDay.date.between(from, to)
