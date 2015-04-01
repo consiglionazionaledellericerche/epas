@@ -44,10 +44,7 @@ public class ShiftType extends BaseModel{
 	@JoinColumn(name="shift_time_table_id")
 	public ShiftTimeTable shiftTimeTable;
 	
-	/**
-	 * responsabile del turno
-	 */
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "supervisor")
-	public Person supervisor;
+	@JoinColumn(name = "shift_categories_id")
+	public ShiftCategories shiftCategories;
 }

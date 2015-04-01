@@ -59,7 +59,6 @@ public class PersonMonths extends Controller{
 				yearFactory.create(contract.get(), year, null);
 		render(csap, year);	
 	}
-
 	
 	public static void trainingHours(int year){
 		
@@ -81,8 +80,6 @@ public class PersonMonths extends Controller{
 		render(person, year, mesi, pmList, today);
 
 	}
-
-
 	
 	public static void insertTrainingHours(int month, int year){
 
@@ -92,8 +89,6 @@ public class PersonMonths extends Controller{
 		
 		render(person, month, year, max);
 	}
-	
-	
 	
 	public static void insertTrainingHoursPreviousMonth(){
 		

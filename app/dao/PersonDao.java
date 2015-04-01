@@ -7,7 +7,6 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import models.CompetenceCode;
@@ -33,8 +32,6 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.types.Projections;
 
-import controllers.Security;
-
 /**
  * DAO per le person.
  *
@@ -43,6 +40,13 @@ import controllers.Security;
  */
 public final class PersonDao {
 	
+	/**
+	 * Modella il Dto contenente le sole informazioni della persona
+	 * richieste dalla select nel template menu.
+	 * 
+	 * @author alessandro
+	 *
+	 */
 	public static class PersonLiteDto {
 		
 		public Long id;
@@ -62,6 +66,23 @@ public final class PersonDao {
 	@Inject
 	public OfficeDao officeDao;
 
+	/**
+	 * La query effettiva per la ricerca delle persone.
+	 * FIXME Renderla parametrica ed applicarla all'interno di:
+	 *  PersonDao.listForCompetence
+	 *  PersonDao.list
+	 *  PersonDao.liteList
+	 * 
+	 * FIXME Sistemare JPA adesso effettua una successiva query per ogni persona trovata.
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @return
+	 */
 	private static JPQLQuery queryList(Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 		
@@ -113,6 +134,15 @@ public final class PersonDao {
 		
 	}
 	
+	/**
+	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
+	 * appartenenti ad un office in offices.
+	 * 
+	 * @param offices
+	 * @param year
+	 * @param month
+	 * @return
+	 */
 	public static List<PersonLiteDto> liteList(Set<Office> offices, int year, int month) {
 		
 		final QPerson person = QPerson.person;
@@ -125,10 +155,24 @@ public final class PersonDao {
 	}
 	
 	/**
+	 * La liste 
+	 * 
 	 * @param name
 	 * @param offices obbligatorio
 	 * @param onlyTechnician
 	 * @return la lista delle person corrispondenti
+	 */
+	
+	/**
+	 * La lista di persone una volta applicati i filtri dei parametri. 
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @return
 	 */
 	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
@@ -140,10 +184,16 @@ public final class PersonDao {
 	}
 
 	/**
+	 * La lista delle persone abilitate alla competenza compCode.
+	 * E che superano i filtri dei parametri.
+	 * 
+	 * @param compCode
 	 * @param name
-	 * @param offices obbligatorio
+	 * @param offices
 	 * @param onlyTechnician
-	 * @return la lista delle person corrispondenti
+	 * @param start
+	 * @param end
+	 * @return
 	 */
 	public static SimpleResults<Person> listForCompetence(CompetenceCode compCode, Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end) {
