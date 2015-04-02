@@ -1,9 +1,9 @@
 package manager;
 
-import org.joda.time.LocalDate;
-
 import models.Contract;
 import models.ContractStampProfile;
+
+import org.joda.time.LocalDate;
 
 public class ContractStampProfileManager {
 

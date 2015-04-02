@@ -30,10 +30,8 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
-import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 

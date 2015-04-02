@@ -19,8 +19,8 @@ import play.utils.Java;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
+import com.google.common.hash.Hashing;
 
 import dao.OfficeDao;
 import dao.PersonDao;

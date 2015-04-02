@@ -19,12 +19,10 @@ import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.Stamping;
 
-import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 
