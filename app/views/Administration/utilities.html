@@ -1,22 +1,66 @@
-
+#{extends 'main3.html' /}
 <h3>Utility per il Supremo</h3>
 
+#{set 'moreStyles'}
+<style type="text/css">
+
+legend{
+	margin-top: 1em;
+	margin-top: 1em;
+}
+
+</style>
+#{get 'moreStyles' /}
+#{/set}
+
+<legend> Ricalcolo dei personDay </legend>
 #{form @Administration.fixPersonSituation()}
   #{select 'personId', value:personList.get(0), id:'person'}
     #{option -1}Tutti#{/option}
 		%{for(person in personList){}%
 		#{option person.id}${person.surname + ' ' + person.name}#{/option}
 		%{}}%
-	#{/select}
-	<br><br><input type="number" name="month" />Mese da ripristinare 
-
-	<br><input type="number" name="year"/>Anno da ripristinare
-
-	<br><input id="submitCartellino" type="submit" value="Invio"/>
+  #{/select}
+	<input type="number" name="month" />Mese da ripristinare 
+	<input type="number" name="year"/>Anno da ripristinare
+	<input id="submitCartellino" type="submit" value="Invio"/>
 	<input id = "indietroCartellino" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
 #{/form}
+
+<legend> Eliminazione timbrature disaccoppiate </legend>
+
+#{form @Administration.deleteUncoupledStampings()}
+<fieldset>
+<div class="col-sm-2">
+#{field 'peopleId'}
+    #{select field.name, id:field.id,class:'form-control', multiple:'',size:'6'}
+   	  	#{list personList}
+		  #{option _.id}${_.fullname}#{/option}
+		#{/list}
+    #{/select}
+#{/field}
+</div>
+#{field 'begin'}
+	<label for="${field.id}">Dal</label>
+		<input datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
+	#{if field.error}<span class="help-block">${field.error}</span>#{/if}
+#{/field}
+
+#{field 'end'}
+	<label for="${field.id}">Al</label>
+		<input datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
+	#{if field.error}<span class="help-block">${field.error}</span>#{/if}
+#{/field}
+
+<input type="submit" value="Elimina timbrature disaccoppiate"/>
+</fieldset>
+#{/form}
+
+
+<legend> Calcolo straordinari </legend>
+
 #{form @Administration.createOvertimeFile()}
-<br><br>
-<br><input type="number" name="year"/>Anno per straordinari
+
+<input type="number" name="year"/>Anno per straordinari
 <input id="submitCartellino" type="submit" value="Calcola straordinari"/>
 #{/form}

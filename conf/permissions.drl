@@ -35,6 +35,7 @@ when
         /* inserire le action interessate */
         "Administration.utilities",
         "Administration.fixPersonSituation",
+        "Administration.deleteUncoupledStampings",
         "Administrators.switchUserTo",
         "Administrators.restoreUser"
        ), target == null, granted == false)
