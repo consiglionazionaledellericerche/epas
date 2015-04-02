@@ -5,10 +5,10 @@ package helpers.attestati;
 
 import javax.inject.Inject;
 
+import models.Person;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import models.Person;
 
 /**
  * Contiene le informazioni essenziali prelevate dal sistema centrale del CNR

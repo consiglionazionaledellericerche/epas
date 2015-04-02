@@ -1,7 +1,6 @@
 package dao;
 
 import helpers.ModelQuery;
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
-import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;

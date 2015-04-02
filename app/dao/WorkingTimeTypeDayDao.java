@@ -1,15 +1,14 @@
 package dao;
 
-import org.joda.time.LocalDate;
-
 import helpers.ModelQuery;
-
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeTypeDay;
+
+import org.joda.time.LocalDate;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 
