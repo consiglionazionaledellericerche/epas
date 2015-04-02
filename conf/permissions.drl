@@ -36,6 +36,7 @@ when
         "Administration.utilities",
         "Administration.fixPersonSituation",
         "Administration.deleteUncoupledStampings",
+        "Administration.updateExceedeMinInCompetenceTable",
         "Administrators.switchUserTo",
         "Administrators.restoreUser"
        ), target == null, granted == false)
