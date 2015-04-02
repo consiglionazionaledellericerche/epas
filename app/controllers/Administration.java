@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
@@ -17,7 +18,6 @@ import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.Stamping;
 
 import org.joda.time.LocalDate;
 
@@ -225,17 +225,10 @@ public class Administration extends Controller {
 		}
 		
 		for(Person person : people){
-			List<PersonDay> persondays = personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end), true);
-			for(PersonDay pd : persondays){
-				personDayManager.populatePersonDay(wrapperFactory.create(pd));
-				for(Stamping stamping : pd.stampings){
-					if(!stamping.valid){
-						Logger.info("Eliminazione timbratura non valida per %s in data %s : %s",pd.person.fullName(),pd.date, stamping);
-						stamping.delete();
-					}
-				}
-			}
+			new RemoveInvalidStampingsJob(person, begin, end).afterRequest();
 		}
+		
+		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
 	}
    
