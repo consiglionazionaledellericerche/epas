@@ -328,7 +328,7 @@ public class ChartsManager {
 				log.debug("Inserito in lista render result per {} in data {}", renderResult.cognome, renderResult.data);
 
 			}
-			System.out.print("Qui");
+			
 			return new RenderList(listNull, listTrueFalse);
 		}
 		catch(Exception e)
