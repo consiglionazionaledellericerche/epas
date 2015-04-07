@@ -50,20 +50,27 @@ public class LostPassword extends Controller{
 		SimpleEmail simpleEmail = new SimpleEmail();
 		simpleEmail.setFrom("epas@iit.cnr.it");
 		simpleEmail.addTo(email);
-		if(Play.configuration.getProperty("mail.smtp.user")!=null && !Play.configuration.getProperty("mail.smtp.user").equals("")){
-			simpleEmail.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.password"));
+		if(Play.configuration.getProperty("mail.smtp.user")!=null && 
+				!Play.configuration.getProperty("mail.smtp.user").equals("") && 
+				Play.configuration.getProperty("mail.smtp.port") != null && 
+				!Play.configuration.getProperty("mail.smtp.port").equals("")){
+			simpleEmail.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), 
+					Play.configuration.getProperty("mail.smtp.password"));
 			simpleEmail.setSmtpPort(new Integer(Play.configuration.getProperty("mail.smtp.port")).intValue());
 		}
 		
 		simpleEmail.setSubject("ePas Recupero Password");
-		String message = "Utente: " + person.user.username + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: " + GET_RECOVERY_PREFIX + token;
+		String message = "Utente: " + person.user.username + "\r\n" + 
+		"Per ottenere una nuova password apri il seguente collegamento: " + GET_RECOVERY_PREFIX + token;
 		
 		Logger.info("Messaggio recovery password spedito è: %s", message);
 		
 		simpleEmail.setMsg(message);
 		Mail.send(simpleEmail); 
 		
-		flash.success("E' stata inviata una mail all'indirizzo %s. Completare la procedura di recovery password entro la data di oggi.",person.email);
+		flash.success("E' stata inviata una mail all'indirizzo %s. "
+				+ "Completare la procedura di recovery password entro la data di oggi."
+				,person.email);
 		Secure.login();
 	}
 	
