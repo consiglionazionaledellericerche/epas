@@ -1,11 +1,13 @@
 package jobs;
 
-import org.joda.time.LocalDate;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
 import models.Person;
 import models.User;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.jobs.Job;
 import play.jobs.On;

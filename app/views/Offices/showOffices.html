@@ -24,7 +24,7 @@
 		    
 		    #{if session.username.equals("admin") }
 		    <p>
-		      <a  data-modal=".my-modal" href="@{Offices.insertInstitute(area.value.id)}">
+		      <a data-modal=".my-modal" href="@{Offices.insertInstitute(area.value.id)}">
 		        <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto per ${area.value.name}
 		      </a>
 		    </p>
@@ -34,7 +34,7 @@
 		  	  
 		  	  #{if istituto.isPrintable() }
 			  	  <div class="well">
-			  	    <p class="lead">${istituto.value.name}</p>
+			  	     <a data-modal=".my-modal" href="@{Offices.editInstitute(istituto.value.id)}"><p class="lead">${istituto.value.name}</p></a>
 			  	    
 			  	    <strong>Lettori istituto installati</strong> 
 		  	  	    #{list items:istituto.getActiveBadgeReaders(), as:'badgeReader'}

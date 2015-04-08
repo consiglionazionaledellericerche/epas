@@ -1,10 +1,10 @@
 package dao;
 
 import helpers.ModelQuery;
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.BadgeReader;
 import models.query.QBadgeReader;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

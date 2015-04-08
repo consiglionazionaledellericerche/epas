@@ -8,7 +8,6 @@ import models.ConfYear;
 import models.Office;
 import models.query.QConfYear;
 
-
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
