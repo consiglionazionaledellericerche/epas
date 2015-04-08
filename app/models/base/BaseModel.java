@@ -9,7 +9,6 @@ import javax.persistence.Transient;
 import play.db.jpa.GenericModel;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 /**
  * Default base class per sovrascrivere la generazione delle nuove chiavi

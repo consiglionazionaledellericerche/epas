@@ -3,11 +3,12 @@ package controllers;
 import java.io.File;
 import java.io.IOException;
 
+import play.Logger;
+import play.mvc.Controller;
+import play.mvc.With;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-
-import play.Logger;
-import play.mvc.*;
 
 @With( {Secure.class, RequestInit.class} )
 public class Version extends Controller {

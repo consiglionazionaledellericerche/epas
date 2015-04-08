@@ -1,7 +1,6 @@
 package security;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 /**
  * Seam like check.

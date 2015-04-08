@@ -4,12 +4,12 @@ import helpers.ModelQuery;
 
 import java.util.List;
 
+import models.AbsenceTypeGroup;
+import models.query.QAbsenceTypeGroup;
+
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
-
-import models.AbsenceTypeGroup;
-import models.query.QAbsenceTypeGroup;
 
 /**
  * 
