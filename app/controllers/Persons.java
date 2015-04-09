@@ -1024,9 +1024,9 @@ public class Persons extends Controller {
 			@Override
 			public DayRecap apply(PersonDay personday){
 				DayRecap dayRecap = new DayRecap();
-				dayRecap.workingMinutes = personDayManager.getCalculatedTimeAtWork(wrapperFactory.create(personday));
+				dayRecap.workingMinutes = personDayManager.workingMinutes(wrapperFactory.create(personday));
 				dayRecap.date = personday.date.toString();
-				dayRecap.mission = false;
+				dayRecap.mission = personDayManager.isOnMission(personday);
 				return dayRecap;
 			}}).toList();
 		

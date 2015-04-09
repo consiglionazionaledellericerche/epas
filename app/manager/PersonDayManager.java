@@ -18,6 +18,7 @@ import models.StampModificationTypeValue;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
@@ -25,9 +26,10 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
@@ -35,7 +37,6 @@ import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-import dto.DayRecap;
 
 public class PersonDayManager {
 
@@ -118,7 +119,6 @@ public class PersonDayManager {
 		return false;
 	}
 
-	
 	/**
 	 * Calcola i minuti lavorati nel person day. Assegna il campo isTicketAvailable.
 	 *
@@ -251,6 +251,96 @@ public class PersonDayManager {
 
 		return workTime + justifiedTimeAtWork;
 
+	}
+	
+	
+	/**
+	 * Calcola i minuti lavorati nel person day. Assegna il campo
+	 * isTicketAvailable.
+	 *
+	 * @return il numero di minuti trascorsi a lavoro
+	 */
+	public int workingMinutes(IWrapperPersonDay pd) {
+
+		Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
+
+		int workTime = 0;
+
+		// Se hanno il tempo di lavoro fissato non calcolo niente
+		if (pd.isFixedTimeAtWork()) {
+			return pd.getWorkingTimeTypeDay().get().workingTime;
+		}
+
+		if (!pd.isHoliday() && pd.getValue().stampings.size() >= 2) {
+
+			orderStampings(pd.getValue());
+			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
+
+			for (PairStamping validPair : validPairs) {
+
+				workTime = workTime - DateUtility.toMinute(validPair.in.date);
+				workTime = workTime + DateUtility.toMinute(validPair.out.date);
+			}
+
+			// Il pranzo e' servito??
+			WorkingTimeTypeDay wttd = pd.getWorkingTimeTypeDay().get();
+
+			// se mealTicketTime è zero significa che il dipendente nel giorno
+			// non ha diritto al calcolo del buono pasto
+			if (!wttd.mealTicketEnabled()) {
+
+				setIsTickeAvailable(pd, false);
+				return workTime;
+			}
+
+			int mealTicketTime = wttd.mealTicketTime; // 6 ore
+			int breakTicketTime = wttd.breakTicketTime; // 30 minuti
+			int breakTimeDiff = breakTicketTime;
+			pd.getValue().stampModificationType = null;
+			List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(),
+					validPairs);
+
+			if (gapLunchPairs.size() > 0) {
+				// recupero la durata della pausa pranzo fatta
+				int minTimeForLunch = gapLunchPairs.get(0).timeInPair;
+				// Calcolo l'eventuale differenza tra la pausa fatta e la pausa
+				// minima
+				breakTimeDiff = (breakTicketTime - minTimeForLunch <= 0) ? 0
+						: (breakTicketTime - minTimeForLunch);
+			}
+
+			if (workTime - breakTimeDiff >= mealTicketTime) {
+
+				if (!pd.getValue().isTicketForcedByAdmin
+						|| pd.getValue().isTicketForcedByAdmin
+						&& pd.getValue().isTicketAvailable) {// TODO decidere la
+																// situazione
+																// intricata se
+																// l'amministratore
+																// forza a true
+					workTime = workTime - breakTimeDiff;
+				}
+
+				// caso in cui non sia stata effettuata una pausa pranzo
+				if (breakTimeDiff == breakTicketTime) {
+
+					pd.getValue().stampModificationType = stampingDao
+							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+				}
+
+				// Caso in cui la pausa pranzo fatta è inferiore a quella minima
+				else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
+
+					pd.getValue().stampModificationType = stampingDao
+							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+				}
+			}
+
+			setIsTickeAvailable(pd, false);
+
+		}
+
+		return workTime;
 	}
 
 	/**
@@ -1220,6 +1310,15 @@ public class PersonDayManager {
 		}
 
 		return ticketTorender;
+	}
+	
+	public boolean isOnMission(PersonDay personDay){
+		return !FluentIterable.from(personDay.absences).filter(
+				new Predicate<Absence>() {
+					@Override
+					public boolean apply(Absence absence) {
+						return absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE);
+					}}).isEmpty();
 	}
 
 }
