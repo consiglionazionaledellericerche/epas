@@ -5,8 +5,8 @@
 <style type="text/css">
 
 legend{
-	margin-top: 1em;
-	margin-top: 1em;
+	margin-top: 2em;
+	margin-bottom: 2em;
 }
 
 </style>
@@ -29,33 +29,43 @@ legend{
 
 <legend> Eliminazione timbrature disaccoppiate </legend>
 
-#{form @Administration.deleteUncoupledStampings()}
-<fieldset>
-<div class="col-sm-2">
+#{form @Administration.deleteUncoupledStampings(),class:'form-horizontal'}
+<div class="col-sm-4">
 #{field 'peopleId'}
-    #{select field.name, id:field.id,class:'form-control', multiple:'',size:'6'}
-   	  	#{list personList}
-		  #{option _.id}${_.fullname}#{/option}
-		#{/list}
+<div class="form-group">
+    #{select field.name, id:field.id,class:'form-control', multiple:'',size:'8'}
+   	  #{list personList}
+		#{option _.id}${_.fullname}#{/option}
+	  #{/list}
     #{/select}
+</div>
 #{/field}
 </div>
+
+<div class="col-sm-4">
 #{field 'begin'}
-	<label for="${field.id}">Dal</label>
-		<input datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
-	#{if field.error}<span class="help-block">${field.error}</span>#{/if}
+<div class="form-group">
+  <label for="${field.id}" class="col-sm-1 control-label">Dal</label>
+  <div class="col-sm-6">
+  	<input class="form-control" datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
+  </div>
+  #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+</div>
 #{/field}
 
 #{field 'end'}
-	<label for="${field.id}">Al</label>
-		<input datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
-	#{if field.error}<span class="help-block">${field.error}</span>#{/if}
+<div class="form-group">
+  <label for="${field.id}" class="col-sm-1 control-label">Al</label>
+  <div class="col-sm-6">
+  	<input class="form-control" datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
+  </div>
+  #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+</div>
 #{/field}
 
-<input type="submit" value="Elimina timbrature disaccoppiate"/>
-</fieldset>
+<button type="submit" class="btn btn-default col-sm-offset-1">Elimina timbrature disaccoppiate</button>
 #{/form}
-
+</div>
 
 <legend> Calcolo straordinari </legend>
 

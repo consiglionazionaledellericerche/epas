@@ -25,6 +25,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -34,6 +35,7 @@ import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
+import dto.DayRecap;
 
 public class PersonDayManager {
 
@@ -47,7 +49,7 @@ public class PersonDayManager {
 	
 	@Inject
 	public IWrapperFactory wrapperFactory;
-
+	
 	/**
 	 *
 	 * @param abt
