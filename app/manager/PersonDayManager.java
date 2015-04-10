@@ -1317,7 +1317,7 @@ public class PersonDayManager {
 				new Predicate<Absence>() {
 					@Override
 					public boolean apply(Absence absence) {
-						return absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE);
+						return absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE.getCode());
 					}}).isEmpty();
 	}
 
