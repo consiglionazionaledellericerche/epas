@@ -17,6 +17,7 @@ import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
+import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -27,7 +28,7 @@ import models.Qualification;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
@@ -577,9 +578,9 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		LocalDate initUse = new LocalDate(
-				ConfGeneralManager.getFieldValue(ConfigurationFields.InitUseProgram.description,
-						Security.getUser().get().person.office));
+		LocalDate initUse = ConfGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+				Security.getUser().get().person.office);
+				
 		render(contract, initUse);
 	}
 

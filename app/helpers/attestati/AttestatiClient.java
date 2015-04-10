@@ -17,8 +17,10 @@ import java.util.Map;
 import manager.ConfGeneralManager;
 import models.Absence;
 import models.Competence;
+import models.ConfGeneral;
 import models.Office;
 import models.PersonMonthRecap;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.jsoup.Connection;
@@ -121,7 +123,7 @@ public class AttestatiClient {
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
 		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneralManager.getFieldValue("url_to_presence", office);
+		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
 		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
 		
@@ -169,10 +171,10 @@ public class AttestatiClient {
 	 */
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
-//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneralManager.getFieldValue("url_to_presence", office);
-		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue("seat_code", office));
+		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+						
 		URI baseUri = new URI(urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
 		Connection connection = Jsoup.connect(listaDipendentiUrl.toString());
@@ -180,7 +182,7 @@ public class AttestatiClient {
 		
 		try {
 			listaDipendentiResponse = connection
-					.data("sede_id", seatCode.toString())
+					.data("sede_id", office.code.toString())
 					.data("anno", year.toString())
 					.data("mese", month.toString())
 					.userAgent(CLIENT_USER_AGENT)
@@ -244,8 +246,8 @@ public class AttestatiClient {
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneralManager.getFieldValue("url_to_presence", office);
-		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue("seat_code", office));
+		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+			
 		URI baseUri = new URI(urlToPresence);
 		final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 
@@ -265,7 +267,7 @@ public class AttestatiClient {
 			.data("matr", dipendente.getMatricola())
 			.data("anno", year.toString())
 			.data("mese", month.toString())
-			.data("sede_id", seatCode.toString())
+			.data("sede_id", office.code.toString())
 			.method(Method.POST);
 
 		int codAssAssoCounter = 0;

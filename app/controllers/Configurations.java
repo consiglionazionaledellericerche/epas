@@ -16,6 +16,7 @@ import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -25,6 +26,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.ConfGeneralDao;
 import dao.ConfYearDao;
@@ -39,248 +41,130 @@ public class Configurations extends Controller{
 	@Inject
 	static OfficeDao officeDao;
 
-	public static void showConfGeneral(Long officeId){
+	/**
+	 * Visualizza la pagina di configurazione generale dell'office.
+	 * 
+	 * @param officeId
+	 */
+	public static void showConfGeneral(Long officeId) {
+		
 		Office office = null;
 
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
-		if(officeId != null){
+		if(officeId != null) {
 			office = officeDao.getOfficeById(officeId);			
 		}
 		else{
 			office = Security.getUser().get().person.office;
 		}
 
-		ConfGeneral initUseProgram = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, office);
+		ConfGeneral initUseProgram = ConfGeneralManager.getByField(Parameter.INIT_USE_PROGRAM,  office);
 
-		ConfGeneral dayOfPatron = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.DayOfPatron.description, office);
-		ConfGeneral monthOfPatron = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.MonthOfPatron.description, office);
-		ConfGeneral webStampingAllowed = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.WebStampingAllowed.description, office);
-		ConfGeneral addressesAllowed = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.AddressesAllowed.description, office);
-		ConfGeneral urlToPresence = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.UrlToPresence.description, office);
+		ConfGeneral dayOfPatron = ConfGeneralManager.getByField(Parameter.DAY_OF_PATRON, office);
+		ConfGeneral monthOfPatron = ConfGeneralManager.getByField(Parameter.MONTH_OF_PATRON, office);
+		
+		ConfGeneral webStampingAllowed = ConfGeneralManager.getByField(Parameter.WEB_STAMPING_ALLOWED, office);
+		ConfGeneral addressesAllowed = ConfGeneralManager.getByField(Parameter.ADDRESSES_ALLOWED, office);
+		
+		ConfGeneral urlToPresence = ConfGeneralManager.getByField(Parameter.URL_TO_PRESENCE, office);
+		ConfGeneral userToPresence = ConfGeneralManager.getByField(Parameter.USER_TO_PRESENCE, office);
+		ConfGeneral passwordToPresence = ConfGeneralManager.getByField(Parameter.PASSWORD_TO_PRESENCE, office);
+		
+		ConfGeneral numberOfViewingCouple = ConfGeneralManager.getByField(Parameter.NUMBER_OF_VIEWING_COUPLE, office);
 
-		ConfGeneral userToPresence = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.UserToPresence.description, office);
-		ConfGeneral passwordToPresence = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.PasswordToPresence.description, office);
-		ConfGeneral numberOfViewingCouple = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.NumberOfViewingCouple.description, office);
-
-		ConfGeneral dateStartMealTicket = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.DateStartMealTicket.description, office);
-		ConfGeneral sendEmail = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.SendEMail.description, office);
+		ConfGeneral dateStartMealTicket = ConfGeneralManager.getByField(Parameter.DATE_START_MEAL_TICKET, office);
+		ConfGeneral sendEmail = ConfGeneralManager.getByField(Parameter.SEND_EMAIL, office);
 
 		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, addressesAllowed, urlToPresence, userToPresence,
 				passwordToPresence, numberOfViewingCouple, dateStartMealTicket,sendEmail, offices, office);
 
-
+	}
+	
+	/**
+	 * Salva il nuovo valore per il field name. (Chiamata via ajax tramite X-editable)
+	 * 
+	 * @param pk
+	 * @param name
+	 * @param value
+	 */
+	public static void saveConfGeneral(Long pk, String name, String value){
+		
+		Office office = officeDao.getOfficeById(pk);
+		
+		rules.checkIfPermitted(office);
+		
+		ConfGeneral conf =  ConfGeneralDao.getByFieldName(name, office)
+								.or(new ConfGeneral(office, name, value));
+		
+		conf.fieldValue = value;
+		conf.save();
+		
+		Cache.set(conf.field+conf.office.name, conf.fieldValue);
 	}
 
+	/**
+	 * Visualizza la pagina di configurazione annuale dell'office.
+	 * 
+	 * @param officeId
+	 */
 	public static void showConfYear(Long officeId){
 
 		Office office = null;
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 		if(officeId != null){
 			office = officeDao.getOfficeById(officeId);
-
 		}
 		else{
 			office = Security.getUser().get().person.office;
 		}
-		LocalDate date = new LocalDate();
-		Integer lastYearDayExpiryVacationPastYear = null;
-		Integer lastYearMonthExpiryVacationPastYear = null;
-		Integer lastYearMonthExpireRecoveryDaysOneThree = null;
-		Integer lastYearMonthExpireRecoveryDaysFourNine = null;
-		Integer lastYearMaxRecoveryDaysOneThree = null;
-		Integer lastYearMaxRecoveryDaysFourNine = null;
-		Integer lastYearHourMaxToCalculateWorkTime = null;
-		List<ConfYear> confLastYear = ConfYearDao.getConfByYear(Optional.fromNullable(office), date.getYear()-1);
-
-		if(confLastYear.size()==0){
-			/**
-			 * controllo se esiste una configurazione dell'anno passato, nel caso non ci sia ne creo una con valori piuttosto
-			 * arbitrari di default di modo che non ci siano problemi nei successivi calcoli di inserimento e visualizzazione dati
-			 */
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.DayExpiryVacationPastYear.description, "31", office, date.getYear()-1);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpiryVacationPastYear.description, "8", office, date.getYear()-1);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpireRecoveryDays13.description, "0", office, date.getYear()-1);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpireRecoveryDays49.description, "4", office, date.getYear()-1);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MaxRecoveryDays13.description, "22", office, date.getYear()-1);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MaxRecoveryDays49.description, "0", office, date.getYear()-1);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.HourMaxToCalculateWorkTime.description, "5", office, date.getYear()-1);
-		}
-
-		lastYearDayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear()-1, office));
-		lastYearMonthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear()-1, office));
-		lastYearMonthExpireRecoveryDaysOneThree = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear()-1, office));
-		lastYearMonthExpireRecoveryDaysFourNine = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays49.description, date.getYear()-1, office));
-		lastYearMaxRecoveryDaysOneThree = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, date.getYear()-1, office));
-		lastYearMaxRecoveryDaysFourNine = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.MaxRecoveryDays49.description, date.getYear()-1, office));
-		lastYearHourMaxToCalculateWorkTime = Integer.parseInt(ConfYearManager.getFieldValue(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear()-1, office));
 		
-		ConfYear dayExpiryVacationPastYear = null;
-		ConfYear monthExpiryVacationPastYear = null;
-		ConfYear monthExpireRecoveryDaysOneThree = null;
-		ConfYear monthExpireRecoveryDaysFourNine = null;
-		ConfYear maxRecoveryDaysOneThree = null;
-		ConfYear maxRecoveryDaysFourNine = null;
-		ConfYear hourMaxToCalculateWorkTime = null;
-		List<ConfYear> confYear = ConfYearDao.getConfByYear(Optional.fromNullable(office), date.getYear());
-		//List<ConfYear> confYear = ConfYear.find("Select c from ConfYear c where c.year = ? and c.office = ?", date.getYear(), office).fetch();
-		if(confYear.size()==0){
-			/**
-			 * se non esiste una configurazione annuale dell'anno in corso per l'ufficio office, ne creo una di default 
-			 * con valori fittizi
-			 */
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.DayExpiryVacationPastYear.description, "1", office, date.getYear());
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpiryVacationPastYear.description, "1", office, date.getYear());
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpireRecoveryDays13.description, "1", office, date.getYear());
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpireRecoveryDays49.description, "1", office, date.getYear());
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MaxRecoveryDays13.description, "1", office, date.getYear());
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MaxRecoveryDays49.description, "1", office, date.getYear());
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.HourMaxToCalculateWorkTime.description, "1", office, date.getYear());
-		}
-		else{
-			dayExpiryVacationPastYear = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear(), office);
-			monthExpiryVacationPastYear = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear(), office);
-			monthExpireRecoveryDaysOneThree = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear(), office);
-			monthExpireRecoveryDaysFourNine = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.MonthExpireRecoveryDays49.description, date.getYear(), office);
-			maxRecoveryDaysOneThree = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.MaxRecoveryDays13.description, date.getYear(), office);
-			maxRecoveryDaysFourNine = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.MaxRecoveryDays49.description, date.getYear(), office);
-			hourMaxToCalculateWorkTime = ConfYearManager.getConfGeneralByFieldAndYear(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear(), office);
+		Integer currentYear = LocalDate.now().getYear();
+		Integer previousYear = currentYear - 1;
 
-		}
+		//Parametri configurazione anno passato
+		ConfYear lastYearDayExpiryVacationPastYear = ConfYearManager.getByField(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, previousYear);
+		ConfYear lastYearMonthExpiryVacationPastYear = ConfYearManager.getByField(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, previousYear);
+		ConfYear lastYearMonthExpireRecoveryDaysOneThree = ConfYearManager.getByField(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13, office, previousYear);
+		ConfYear lastYearMonthExpireRecoveryDaysFourNine = ConfYearManager.getByField(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49, office, previousYear);
+		ConfYear lastYearMaxRecoveryDaysOneThree = ConfYearManager.getByField(Parameter.MAX_RECOVERY_DAYS_13, office, previousYear);
+		ConfYear lastYearMaxRecoveryDaysFourNine = ConfYearManager.getByField(Parameter.MAX_RECOVERY_DAYS_49, office, previousYear);
+		ConfYear lastYearHourMaxToCalculateWorkTime = ConfYearManager.getByField(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, office, previousYear);
 
-		Integer year = new LocalDate().getYear();
-		Integer nextYear = new LocalDate().getYear()+1;
+		//Parametri configurazione anno corrente
+		ConfYear dayExpiryVacationPastYear = ConfYearManager.getByField(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, currentYear);
+		ConfYear monthExpiryVacationPastYear = ConfYearManager.getByField(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, currentYear);
+		ConfYear monthExpireRecoveryDaysOneThree = ConfYearManager.getByField(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13, office, currentYear);
+		ConfYear monthExpireRecoveryDaysFourNine = ConfYearManager.getByField(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49, office, currentYear);
+		ConfYear maxRecoveryDaysOneThree = ConfYearManager.getByField(Parameter.MAX_RECOVERY_DAYS_13, office, currentYear);
+		ConfYear maxRecoveryDaysFourNine = ConfYearManager.getByField(Parameter.MAX_RECOVERY_DAYS_49, office, currentYear);
+		ConfYear hourMaxToCalculateWorkTime = ConfYearManager.getByField(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, office, currentYear);
 
-		render(lastYearDayExpiryVacationPastYear, lastYearMonthExpiryVacationPastYear, lastYearMonthExpireRecoveryDaysOneThree,
+		render(currentYear, previousYear, lastYearDayExpiryVacationPastYear, lastYearMonthExpiryVacationPastYear, lastYearMonthExpireRecoveryDaysOneThree,
 				lastYearMonthExpireRecoveryDaysFourNine, lastYearMaxRecoveryDaysOneThree, lastYearMaxRecoveryDaysFourNine,
 				lastYearHourMaxToCalculateWorkTime, dayExpiryVacationPastYear, monthExpiryVacationPastYear,
 				monthExpireRecoveryDaysOneThree, monthExpireRecoveryDaysFourNine, monthExpireRecoveryDaysFourNine, maxRecoveryDaysOneThree,
-				maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, nextYear, offices, office, year);
+				maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, offices, office);
 
 	}
 
-
-	public static void saveConfGeneral(Long pk,String name, String value){
-		
-		Office office = officeDao.getOfficeById(pk);
-		
-		rules.checkIfPermitted(office);
-		
-		ConfGeneral conf =  ConfGeneralDao.getConfGeneralByField(name, office).or(
-				new ConfGeneral(office, name, value));
-		
-		conf.fieldValue = value;
-		conf.save();
-		Cache.set(conf.field+conf.office.name, conf.fieldValue);
-	}
-
-
+	/**
+	 *  Salva il nuovo valore per il field name. (Chiamata via ajax tramite X-editable)
+	 * 
+	 * @param pk
+	 * @param value
+	 */
 	public static void saveConfYear(String pk, String value){
-		Integer year = new LocalDate().getYear();
-		ConfYear conf = ConfYearDao.getConfYearById(Long.parseLong(pk));
-		MessageResult message = ConfigurationsManager.persistConfYear(conf, year, value);
+		
+		ConfYear conf = ConfYearDao.getById(Long.parseLong(pk));
+		
+		Preconditions.checkNotNull(conf);
+		
+		MessageResult message = ConfigurationsManager.persistConfYear(conf, value);
+		
 		if(message.result == false){
 			response.status = 500;
 			renderText(message.message);
 		}
-
-
 	}
-
-
-	public static void insertNewConfYear(Long id){
-		Office office = null;
-
-		if(id != null){
-			office = officeDao.getOfficeById(id);
-		}
-		else{
-			office = Security.getUser().get().person.office;
-		}
-		rules.checkIfPermitted(office);		
-
-		int year = LocalDate.now().getYear()+1;
-		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(office), year);
-		Optional<ConfYear> conf = null;
-		ConfYear dayExpiryVacationPastYear = new ConfYear();
-		ConfYear monthExpiryVacationPastYear = new ConfYear();
-		ConfYear monthExpireRecoveryDaysOneThree = new ConfYear();
-		ConfYear monthExpireRecoveryDaysFourNine = new ConfYear();
-		ConfYear maxRecoveryDaysOneThree = new ConfYear();
-		ConfYear maxRecoveryDaysFourNine = new ConfYear();
-		ConfYear hourMaxToCalculateWorkTime = new ConfYear(); 
-		String message = "";
-		if(confList.size() > 0){
-			message="Attenzione! attualmente il database contiene già una configurazione per l'anno richiesto. Continuando si sovrascriverà tale configurazione.";
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.DayExpiryVacationPastYear.description);
-			if(conf.isPresent())
-				dayExpiryVacationPastYear = conf.get();
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpiryVacationPastYear.description);
-			if(conf.isPresent())
-				monthExpiryVacationPastYear = conf.get();
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays13.description);
-			if(conf.isPresent())
-				monthExpireRecoveryDaysOneThree = conf.get(); 
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays49.description);
-			if(conf.isPresent())
-				monthExpireRecoveryDaysFourNine = conf.get();
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays13.description);
-			if(conf.isPresent())
-				maxRecoveryDaysOneThree = conf.get(); 
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays49.description);
-			if(conf.isPresent())
-				maxRecoveryDaysFourNine = conf.get(); 
-			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.HourMaxToCalculateWorkTime.description);
-			if(conf.isPresent())
-				hourMaxToCalculateWorkTime = conf.get(); 
-		}		
-
-		List<String> mesi = ConfigurationsManager.populateMonths();
-
-		render(year, office, dayExpiryVacationPastYear, monthExpiryVacationPastYear, monthExpireRecoveryDaysOneThree,
-				monthExpireRecoveryDaysFourNine,maxRecoveryDaysOneThree, maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, mesi, message);
-	}
-
-	public static void saveNewConfYear(String giornoMassimoFerieAnnoPrecedente, String residuiAnnoPrecedente13, String residuiAnnoPrecedente49,
-			String giorniRecupero13, String giorniRecupero49, String oreTimbraturaNotturna, int year, Long id){
-
-		Office office = null;
-
-		if(id != null){
-			office = officeDao.getOfficeById(id);			
-		}
-		else{
-			office = Security.getUser().get().person.office;
-		}
-		rules.checkIfPermitted(office);		
-
-
-		if(validation.hasErrors()) {
-			if(request.isAjax()) error("Parametri incompleti");
-			Configurations.showConfYear(office.id);
-		}
-
-		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(office), year);
-		if(confList.size() > 0){
-			ConfigurationsManager.saveConfigurationNextYear(confList, giornoMassimoFerieAnnoPrecedente, 
-					residuiAnnoPrecedente13, residuiAnnoPrecedente49, giorniRecupero13, giorniRecupero49, 
-					oreTimbraturaNotturna, year, office);
-
-			flash.success("Modificati i valori precedentemente impostati per la configurazione dell'anno %s", year);
-			Configurations.showConfYear(office.id);
-		}
-		else{
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.DayExpiryVacationPastYear.description, new Integer(DateUtility.dayMonth(giornoMassimoFerieAnnoPrecedente, Optional.<String>absent()).getDayOfMonth()).toString(), office, year);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpiryVacationPastYear.description, new Integer(DateUtility.dayMonth(giornoMassimoFerieAnnoPrecedente, Optional.<String>absent()).getMonthOfYear()).toString(), office, year);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpireRecoveryDays13.description, (new Integer(DateUtility.fromStringToIntMonth(residuiAnnoPrecedente13))).toString(), office, year);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MonthExpireRecoveryDays49.description, (new Integer(DateUtility.fromStringToIntMonth(residuiAnnoPrecedente49))).toString(), office, year);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MaxRecoveryDays13.description, giorniRecupero13, office, year);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.MaxRecoveryDays49.description, giorniRecupero49, office, year);
-			ConfigurationsManager.saveNewValueField(ConfigurationFields.HourMaxToCalculateWorkTime.description, oreTimbraturaNotturna, office, year);
-
-
-			flash.success("Aggiunta nuova configurazione per l'anno %s", year);
-			Configurations.showConfYear(office.id);
-		}
-
-	}
+	
 }
