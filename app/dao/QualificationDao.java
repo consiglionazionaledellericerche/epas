@@ -4,14 +4,14 @@ import helpers.ModelQuery;
 
 import java.util.List;
 
+import models.AbsenceType;
+import models.Qualification;
+import models.query.QQualification;
+
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
-
-import models.AbsenceType;
-import models.Qualification;
-import models.query.QQualification;
 
 /**
  * 

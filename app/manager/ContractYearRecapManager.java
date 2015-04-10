@@ -15,9 +15,9 @@ import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
 import models.AbsenceType;
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractYearRecap;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -218,10 +218,10 @@ public class ContractYearRecapManager {
 			return LocalDate.now().getYear();
 		
 		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
-		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode("31");
-		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode("32");
-		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode("37"); 
-		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode("94"); 
+		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
+		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
+		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
+		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
 		DateInterval yearInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInYear);
 		List<Absence> abs32 = absenceDao.getAbsenceDays(yearInterSource, contract, ab32);
 		List<Absence> abs31 = absenceDao.getAbsenceDays(yearInterSource, contract, ab31);

@@ -2,10 +2,10 @@ package manager.recaps.personStamping;
 
 import javax.inject.Inject;
 
-import dao.StampingDao;
 import manager.PersonDayManager;
 import models.PersonDay;
 import models.Stamping;
+import dao.StampingDao;
 
 public class StampingTemplateFactory {
 
