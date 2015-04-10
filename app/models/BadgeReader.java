@@ -10,10 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
 import models.base.BaseModel;
 import net.sf.oval.constraint.NotNull;
+
+import org.hibernate.envers.Audited;
 
 
 

@@ -2,6 +2,7 @@ package it.cnr.iit.epas;
 
 import java.io.PrintWriter;
 import java.util.List;
+
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -12,7 +13,6 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
 import models.Qualification;
-
 import models.Stamping;
 import models.VacationCode;
 

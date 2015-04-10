@@ -17,13 +17,13 @@ import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
+import models.PersonDay;
 import models.Qualification;
 import models.User;
 import models.VacationPeriod;
@@ -46,6 +46,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -63,6 +64,7 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import dto.DayRecap;
 import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -92,7 +94,7 @@ public class Persons extends Controller {
 	static PersonDayManager personDayManager;
 
 	private final static Logger log = LoggerFactory.getLogger(Persons.class);
-	
+		
 	@NoCheck
 	public static void list(String name){
 
@@ -1008,5 +1010,26 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name, person.surname);
 		Persons.edit(person.id);
+	}
+	
+	@NoCheck
+	public static void days(String email,LocalDate start,LocalDate end){
+		
+		Person person = personDao.getPersonByEmail(email);
+		List<DayRecap> personDays = Lists.newArrayList();
+		if(person != null){
+		 personDays = FluentIterable.from(
+				personDao.getPersonDayIntoInterval(person, new DateInterval(start, end), false))
+				.transform(	new	Function<PersonDay, DayRecap>(){
+			@Override
+			public DayRecap apply(PersonDay personday){
+				DayRecap dayRecap = new DayRecap();
+				dayRecap.workingMinutes = personDayManager.workingMinutes(wrapperFactory.create(personday));
+				dayRecap.date = personday.date.toString();
+				dayRecap.mission = personDayManager.isOnMission(personday);
+				return dayRecap;
+			}}).toList();
+		}
+		renderJSON(personDays);
 	}
 }

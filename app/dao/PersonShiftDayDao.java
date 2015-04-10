@@ -1,12 +1,8 @@
 package dao;
 
-import java.util.List;
-
 import helpers.ModelQuery;
 
-import org.joda.time.LocalDate;
-
-import com.mysema.query.jpa.JPQLQuery;
+import java.util.List;
 
 import models.Person;
 import models.PersonShift;
@@ -15,6 +11,10 @@ import models.ShiftType;
 import models.enumerate.ShiftSlot;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
+
+import org.joda.time.LocalDate;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

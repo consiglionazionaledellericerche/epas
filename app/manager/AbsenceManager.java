@@ -1,7 +1,6 @@
 package manager;
 
 import it.cnr.iit.epas.CheckMessage;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,14 +124,14 @@ public class AbsenceManager {
 				contract, date, true);
 		
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
 
 		if(vr.persmissionNotYetUsed > 0)
 
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
 
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
 
 
 		return null;

@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import manager.ConsistencyManager;
 import models.Person;
-import models.User;
 
 import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
@@ -20,7 +19,6 @@ import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.UserDao;
 
 //@On("0 34 15 ? * *")
 @SuppressWarnings("rawtypes")

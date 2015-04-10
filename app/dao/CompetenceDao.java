@@ -16,8 +16,6 @@ import models.TotalOvertime;
 import models.query.QCompetence;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
-import models.query.QPersonReperibility;
-
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 

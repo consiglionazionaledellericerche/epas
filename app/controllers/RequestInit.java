@@ -11,8 +11,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
-
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
@@ -23,6 +21,9 @@ import models.enumerate.Parameter;
 import models.query.QPermission;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -32,7 +33,6 @@ import play.mvc.Http;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
