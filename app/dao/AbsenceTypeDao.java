@@ -127,12 +127,12 @@ public class AbsenceTypeDao {
 	 * @param string
 	 * @return l'absenceType relativo al codice passato come parametro
 	 */
-	public static AbsenceType getAbsenceTypeByCode(String string) {
+	public static Optional<AbsenceType> getAbsenceTypeByCode(String string) {
 //		QAbsenceType absenceType = QAbsenceType.absenceType;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.code.eq(string));
 		
-		return query.singleResult(absenceType);
+		return Optional.fromNullable(query.singleResult(absenceType));
 		
 	}
 	
@@ -164,7 +164,10 @@ public class AbsenceTypeDao {
 		
 		JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.code.startsWith("24")
-						.or(absenceType.code.startsWith("25").or(absenceType.code.startsWith("17C"))));
+						.or(absenceType.code.startsWith("25")
+								.or(absenceType.code.startsWith("17C")
+										.or(absenceType.code.startsWith("C17")
+												.or(absenceType.code.startsWith("C18"))))));
 		return query.list(absenceType);
 		
 	}

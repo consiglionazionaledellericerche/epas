@@ -1,12 +1,12 @@
 package manager;
 
+import models.ConfYear;
+import models.Office;
 import play.cache.Cache;
 
 import com.google.common.base.Optional;
 
 import dao.ConfYearDao;
-import models.ConfYear;
-import models.Office;
 
 public class ConfYearManager {
 

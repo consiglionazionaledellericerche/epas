@@ -100,7 +100,7 @@ appRun () {
   echo ".... evoluzioni terminate"
   
   echo "Avvio ePAS..."
-  sudo -u epas -H play run --%prod
+  sudo -u epas -H play run --%prod -Dprecompiled=true
   echo "....ePAS avviato"
 }
 

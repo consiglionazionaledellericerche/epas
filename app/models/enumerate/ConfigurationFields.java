@@ -1,6 +1,7 @@
 package models.enumerate;
 
 import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -13,6 +14,7 @@ public enum ConfigurationFields {
 	InitUseProgram("init_use_program"),
 	InstituteName("institute_name"),
 	JobsEmailAlias("email_from_jobs"),  //%prod.mail.replyTo.alias=segreteria@iit.cnr.it
+	SendEMail("send_email"),				// attiva/disattiva l'invio delle mail dai job
 	EmailToContact("email_to_contact"),	//%prod.mail.from.alias=situazione.presenze@cnr.it
 	SeatCode("seat_code"),
 	UrlToPresence("url_to_presence"),
@@ -101,22 +103,24 @@ public enum ConfigurationFields {
 	public static List<String> getConfGeneralFields(){
 		 		 
 		return ImmutableList.of(
-		   InitUseProgram.description,
-		   InstituteName.description,
-		   EmailToContact.description,
-		   SeatCode.description,
-		   UrlToPresence.description,
-		   UserToPresence.description,
-		   PasswordToPresence.description,
-		   NumberOfViewingCouple.description,
-		   MonthOfPatron.description,
-		   DayOfPatron.description,
-		   MealTimeStartHour.description,
-		   MealTimeStartMinute.description,
-		   MealTimeEndHour.description,
-		   MealTimeEndMinute.description,
-		   WebStampingAllowed.description,
-		   DateStartMealTicket.description);
+				InitUseProgram.description,
+				InstituteName.description,
+				JobsEmailAlias.description,  
+				SendEMail.description,				
+				EmailToContact.description,	
+				SeatCode.description,
+				UrlToPresence.description,
+				UserToPresence.description,
+				PasswordToPresence.description,
+				NumberOfViewingCouple.description,
+				MonthOfPatron.description,
+				DayOfPatron.description,
+				WebStampingAllowed.description,
+				MealTimeStartHour.description,
+				MealTimeStartMinute.description,
+				MealTimeEndHour.description,
+				MealTimeEndMinute.description,
+				DateStartMealTicket.description);
 	}
 	
 	

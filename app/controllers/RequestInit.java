@@ -15,6 +15,7 @@ import models.ConfGeneral;
 import models.Office;
 import models.Permission;
 import models.Qualification;
+import models.User;
 import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
 import models.query.QRole;
@@ -53,7 +54,15 @@ public class RequestInit extends Controller {
 	@Inject
 	static OfficeDao officeDao;
 	
+	/**
+	 * Oggetto che modella i permessi abilitati per l'user
+	 * //FIXME spostare la query in un DAO.
+	 * 
+	 * @param user
+	 */
 	public static class ItemsPermitted {
+		
+		public boolean isPerson = false;
 		
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
@@ -68,9 +77,14 @@ public class RequestInit extends Controller {
 		public boolean viewCompetenceCode = false;
 		public boolean editCompetenceCode = false;
 		
-		
-		public ItemsPermitted() {
+		public ItemsPermitted(Optional<User> user) {
 			
+			if(!user.isPresent())
+				return;
+			
+			if(user.get().person != null)
+				this.isPerson = true;
+
 			final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
 			final QRole qr = QRole.role;
 			final QPermission qp = QPermission.permission;
@@ -81,19 +95,7 @@ public class RequestInit extends Controller {
 					.distinct();
 					
 			final BooleanBuilder condition = new BooleanBuilder();
-			if(Security.getUser().isPresent())
-				condition.and(quro.user.eq(Security.getUser().get()));
-			else{
-				Logger.info("Si tenta di accedere a una risorsa senza essere correttamente loggati");
-				
-				flash.error("Bisogna autenticarsi prima di accedere a una risorsa");
-				try {
-					Secure.login();
-				} catch (Throwable e) {
-					
-					Application.index();
-				}
-			}
+			condition.and(quro.user.eq(user.get()));
 			
 			query.where(condition);
 			
@@ -104,7 +106,7 @@ public class RequestInit extends Controller {
 				
 				if(p.description.equals("viewPerson"))
 					this.viewPerson = true;
-				
+
 				if(p.description.equals("viewPersonDay"))
 					this.viewPersonDay = true;
 				
@@ -138,18 +140,32 @@ public class RequestInit extends Controller {
 				if(p.description.equals("editAbsenceType"))
 					this.editAbsenceType = true;
 				
-				
-				
 			}
-						
-
 		}
 		
+		/**
+		 * Se l'user può vedere il menu del dipendente.
+		 * 
+		 * @return
+		 */
+		public boolean isPersonMenuVisible() {
+			return isPerson;
+		}
+		
+		/**
+		 * Se l'user ha i permessi per vedere Amministrazione.
+		 * 
+		 * @return
+		 */
 		public boolean isDropDownVisible() {
 			
 			return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
 		}
 		
+		/**
+		 * Se l'user ha i permessi per vedere Configurazione.
+		 * @return
+		 */
 		public boolean isDropDown2Visible() {
 			
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
@@ -158,6 +174,7 @@ public class RequestInit extends Controller {
 	
 	/**
 	 * Contiene i dati di sessione raccolti per il template.
+	 * 
 	 * @author alessandro
 	 *
 	 */
@@ -278,11 +295,26 @@ public class RequestInit extends Controller {
 	@NoCheck
 	static void injectMenu() { 
 		
-		ItemsPermitted ip = new ItemsPermitted();
+		/*
+			Logger.info("Si tenta di accedere a una risorsa senza essere correttamente loggati");
+			flash.error("Bisogna autenticarsi prima di accedere a una risorsa");
+			try {
+				Secure.login();
+			} catch (Throwable e) {
+				Application.index();
+			}
+		}
+		*/
+		
+		Optional<User> user = Security.getUser();
+		
+		ItemsPermitted ip = new ItemsPermitted(user);
 		renderArgs.put("ip", ip);
-	
 
 		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
+		
+		if(!user.isPresent())
+			return;
 
 		// year init /////////////////////////////////////////////////////////////////
 		Integer year;
@@ -346,9 +378,9 @@ public class RequestInit extends Controller {
 
 			personId = Integer.valueOf(session.get("personSelected"));
 		}
-		else if( Security.getUser().get().person != null ){
+		else if( user.get().person != null ){
 
-			session.put("personSelected", Security.getUser().get().person.id);
+			session.put("personSelected", user.get().person.id);
 		}
 		else {
 
@@ -358,8 +390,8 @@ public class RequestInit extends Controller {
 		renderArgs.put("currentData", new CurrentData(year, month, day, 
 				Long.valueOf(session.get("personSelected"))));
 
-		if(Security.getUser().get().person != null) {
-			Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
+		if(user.get().person != null) {
+			Set<Office> officeList = officeDao.getOfficeAllowed(user.get());
 			if(!officeList.isEmpty()) {
 				List<PersonLiteDto> persons = PersonDao.liteList(officeList, year, month); 	
 				renderArgs.put("navPersons", persons);
@@ -391,7 +423,7 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 
 		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
-				officeDao.getOfficeAllowed(Security.getUser().get()).iterator().next());
+				officeDao.getOfficeAllowed(user.get()).iterator().next());
 		
 		Integer yearBeginProgram;
 		if(yearInitUseProgram.isPresent()){

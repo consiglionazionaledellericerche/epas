@@ -1,4 +1,4 @@
-FROM criluc/play1:1.2.7
+FROM criluc/play1:1.3.0
 
 USER root
 
@@ -23,6 +23,7 @@ WORKDIR epas
 #prod o dev da parametrizzare
 USER epas
 RUN play deps
+RUN play precompile
 
 USER root
 VOLUME ["/home/epas/epas/logs", "/home/epas/epas/data/attachments", "/home/epas/epas/backups"]

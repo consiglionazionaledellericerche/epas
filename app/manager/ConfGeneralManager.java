@@ -1,9 +1,10 @@
 package manager;
 
-import org.joda.time.LocalDate;
-
 import models.ConfGeneral;
 import models.Office;
+
+import org.joda.time.LocalDate;
+
 import play.cache.Cache;
 
 import com.google.common.base.Optional;
@@ -65,6 +66,9 @@ public class ConfGeneralManager {
 		confGeneral.save();
 		
 		confGeneral = new ConfGeneral(office, ConfGeneral.DATE_START_MEAL_TICKET,null);
+		confGeneral.save();
+		
+		confGeneral = new ConfGeneral(office, ConfGeneral.SEND_EMAIL,"false");
 		confGeneral.save();
 
 		confGeneral = new ConfGeneral(office, ConfGeneral.DAY_OF_PATRON, "1");

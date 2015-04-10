@@ -4,17 +4,17 @@ import helpers.ModelQuery;
 
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.CertificatedData;
 import models.Person;
 import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
+
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

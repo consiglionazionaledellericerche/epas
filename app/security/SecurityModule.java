@@ -47,7 +47,7 @@ public class SecurityModule implements Module {
 		Optional<User> user = Security.getUser();
 		log.debug("SecurityModule: currentOperator = " 
 				+ (user.isPresent() ? user.get() : "non presente"));
-		return Security.getUser();
+		return user;
 	}
 
 	@Override

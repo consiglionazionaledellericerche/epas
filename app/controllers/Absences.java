@@ -173,7 +173,7 @@ public class Absences extends Controller{
 			absenceTypeGroup.accumulationType = AccumulationType.getByDescription(accType);
 
 			if(accBehaviour.equals(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation.description)){
-				absenceTypeGroup.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione);
+				absenceTypeGroup.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione).orNull();
 			}
 			absenceType.absenceTypeGroup = absenceTypeGroup;
 			absenceTypeGroup.save();
@@ -211,17 +211,24 @@ public class Absences extends Controller{
 			@Required String absenceCode, 
 			Blob file){
 
-		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+		Optional<AbsenceType> absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
 		
-		Verify.verify(person.isPersistent(),"Persona specificata non esistente!");
-		Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
+		if(!absenceType.isPresent()){
+			flash.error("Codice di assenza %s inesistente!", absenceCode);
+			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
+		}
+		
+		if(!person.isPersistent()){
+			flash.error("Persona specificata inesistente!");
+			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
+		}
 	
 		rules.checkIfPermitted(person.office);
 		
 		try {
 			
 			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
-					absenceType, Optional.fromNullable(file), Optional.<String>absent());
+					absenceType.get(), Optional.fromNullable(file), Optional.<String>absent());
 			
 			//Verifica errori generali nel periodo specificato
 			if(air.hasWarningOrDaysInTrouble()){
@@ -253,8 +260,7 @@ public class Absences extends Controller{
 			}
 			
 		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-    				+ person.fullName());
+			flash.error("Mancano i dati di inizializzazione per %s" , person.fullName());
 		}
 		
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
@@ -370,13 +376,15 @@ public class Absences extends Controller{
 			//Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
 			if(!absenceCode.isEmpty()){
 
-				AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-				Verify.verifyNotNull(absenceType, "Codice di assenza %s inesistente!", absenceCode);
-
-
-
+				Optional<AbsenceType> absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+				
+				if(!absenceType.isPresent()){
+					flash.error("Codice di assenza %s inesistente!", absenceCode);
+					Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+				}
+	
 				AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-						absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
+						absenceType.get(),Optional.fromNullable(file), Optional.fromNullable(mealTicket));
 
 				//Verifica errori generali nel periodo specificato
 				if(air.hasWarningOrDaysInTrouble()){

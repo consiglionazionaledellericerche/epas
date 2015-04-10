@@ -3,10 +3,10 @@
  */
 package models.exports;
 
-import org.joda.time.LocalDateTime;
-
 import models.BadgeReader;
 import models.StampType;
+
+import org.joda.time.LocalDateTime;
 
 /**
  * @author cristian

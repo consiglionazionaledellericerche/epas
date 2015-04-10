@@ -5,8 +5,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
 import manager.recaps.residual.PersonResidualMonthRecap;
@@ -14,6 +12,8 @@ import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.MealTicket;
+
+import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;

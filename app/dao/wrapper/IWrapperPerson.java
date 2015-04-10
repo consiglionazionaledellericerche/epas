@@ -1,13 +1,13 @@
 package dao.wrapper;
 
-import com.google.common.base.Optional;
-
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+
+import com.google.common.base.Optional;
 
 /**
  * @author marco

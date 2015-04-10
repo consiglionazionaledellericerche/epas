@@ -2,10 +2,10 @@ package manager;
 
 import java.util.Iterator;
 
-import org.joda.time.LocalDate;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
+
+import org.joda.time.LocalDate;
 
 public class ContractWorkingTimeTypeManager {
 
