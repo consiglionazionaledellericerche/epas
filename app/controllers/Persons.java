@@ -1014,11 +1014,12 @@ public class Persons extends Controller {
 	}
 	
 	@NoCheck
-	public static void personDays(long personId,LocalDate start,LocalDate end){
+	public static void days(String email,LocalDate start,LocalDate end){
 		
-		Person person = personDao.getPersonById(personId);
-
-		List<DayRecap> personDays = FluentIterable.from(
+		Person person = personDao.getPersonByEmail(email);
+		List<DayRecap> personDays = Lists.newArrayList();
+		if(person != null){
+		 personDays = FluentIterable.from(
 				personDao.getPersonDayIntoInterval(person, new DateInterval(start, end), false))
 				.transform(	new	Function<PersonDay, DayRecap>(){
 			@Override
@@ -1029,7 +1030,7 @@ public class Persons extends Controller {
 				dayRecap.mission = personDayManager.isOnMission(personday);
 				return dayRecap;
 			}}).toList();
-		
+		}
 		renderJSON(personDays);
 	}
 }
