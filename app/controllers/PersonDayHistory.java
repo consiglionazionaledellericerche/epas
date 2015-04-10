@@ -6,13 +6,14 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import models.Absence;
 import models.PersonDay;
 import models.Stamping;
 import play.mvc.Controller;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;

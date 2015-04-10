@@ -1,8 +1,8 @@
 package manager;
 
 import it.cnr.iit.epas.CheckMessage;
-import it.cnr.iit.epas.PersonUtility;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -122,14 +122,14 @@ public class AbsenceManager {
 				contract, date, true);
 		
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
 
 		if(vr.persmissionNotYetUsed > 0)
 
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
 
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
 
 
 		return null;
@@ -390,11 +390,11 @@ public class AbsenceManager {
 				ar.setDayInReperibilityOrShift(true);				
 			}
 
-			List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false);
-			PersonDay pd = 	FluentIterable.from(personDays).first().or(new PersonDay(person, date));
-
-			if(personDays.isEmpty()){
-				pd.create();
+			PersonDay pd = 	personDayDao.getSinglePersonDay(person, date).orNull();
+			
+			if(pd == null){
+				pd = new PersonDay(person, date);
+				pd.save();
 			}
 
 			//creo l'assenza e l'aggiungo
@@ -402,7 +402,6 @@ public class AbsenceManager {
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
 			absence.absenceFile = file.orNull();
-			absence.save();
 
 			ar.setAbsenceCode(absenceType.code);
 			ar.setInsertSucceeded(true);
@@ -411,6 +410,7 @@ public class AbsenceManager {
 					absence.absenceType.code, absence.personDay.person.getFullname(),absence.personDay.date});
 
 			pd.absences.add(absence);
+			pd.save();
 		}
 		return ar;
 	}
@@ -819,4 +819,22 @@ public class AbsenceManager {
 		
 	}
 
+	
+	/*
+	 * @author arianna
+	 * @param absencePersonDays	- lista di giorni di assenza effettuati
+	 * @return absentPersons	- lista delle persone assenti coinvolte nelle assenze 
+	 * 							passate come parametro
+	 */
+	public static List<Person> getPersonsFromAbsentDays(List<Absence> absencePersonDays) {
+		List<Person> absentPersons = new ArrayList<Person>();
+		for (Absence abs : absencePersonDays) {
+			if (!absentPersons.contains(abs.personDay.person)) {
+				absentPersons.add(abs.personDay.person);
+			}
+		}
+		
+		return absentPersons;
+	}
+		
 }

@@ -1,7 +1,7 @@
 package controllers;
 
-import helpers.PersonTags;
 import helpers.ModelQuery.SimpleResults;
+import helpers.PersonTags;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
@@ -165,15 +165,11 @@ public class Stampings extends Controller {
 			Stampings.personStamping(personId, year, month);
 		}
 		
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
-
-		if(!pd.isPresent()){
+		PersonDay personDay = 	personDayDao.getSinglePersonDay(person, date).orNull();
+		
+		if(personDay == null){
 			personDay = new PersonDay(person, date);
-			personDay.create();
-		}
-		else{
-			personDay = pd.get();
+			personDay.save();
 		}
 		
 		stampingManager.addStamping(personDay, time, note, service, type, true);
@@ -191,7 +187,6 @@ public class Stampings extends Controller {
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
 		Stampings.personStamping(personId, year, month);
-
 
 	}
 	

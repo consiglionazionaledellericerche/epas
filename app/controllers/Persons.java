@@ -110,7 +110,7 @@ public class Persons extends Controller {
 	}
 
 	@NoCheck
-	public static void insertPerson() throws InstantiationException, IllegalAccessException {
+	public static void insertPerson() {
 
 		rules.checkIfPermitted();
 

@@ -1,12 +1,8 @@
 package dao;
 
-import java.util.List;
-
 import helpers.ModelQuery;
 
-import org.joda.time.LocalDate;
-
-import com.mysema.query.jpa.JPQLQuery;
+import java.util.List;
 
 import models.Person;
 import models.PersonShift;
@@ -15,6 +11,10 @@ import models.ShiftType;
 import models.enumerate.ShiftSlot;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
+
+import org.joda.time.LocalDate;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 
@@ -47,6 +47,8 @@ public class PersonShiftDayDao {
 	 * @param to
 	 * @param type
 	 * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo shiftType 'type'
+	 * 
+	 * PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch();
 	 */
 	public static List<PersonShiftDay> getPersonShiftDayByTypeAndPeriod(LocalDate from, LocalDate to, ShiftType type){
 		JPQLQuery query = ModelQuery.queryFactory().from(personShiftDay).where(personShiftDay.date.between(from, to)

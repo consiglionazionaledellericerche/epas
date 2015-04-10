@@ -19,15 +19,16 @@ import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
 
+import play.cache.Cache;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
+
 import com.google.common.base.Optional;
 
 import dao.ConfGeneralDao;
 import dao.ConfYearDao;
 import dao.OfficeDao;
-import play.cache.Cache;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Configurations extends Controller{
@@ -48,6 +49,7 @@ public class Configurations extends Controller{
 		else{
 			office = Security.getUser().get().person.office;
 		}
+
 		ConfGeneral initUseProgram = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, office);
 
 		ConfGeneral dayOfPatron = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.DayOfPatron.description, office);
@@ -60,9 +62,11 @@ public class Configurations extends Controller{
 		ConfGeneral numberOfViewingCouple = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.NumberOfViewingCouple.description, office);
 
 		ConfGeneral dateStartMealTicket = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.DateStartMealTicket.description, office);
+		ConfGeneral sendEmail = ConfGeneralManager.getConfGeneralByField(ConfigurationFields.SendEMail.description, office);
 
 		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, urlToPresence, userToPresence,
-				passwordToPresence, numberOfViewingCouple, dateStartMealTicket, offices, office);
+				passwordToPresence, numberOfViewingCouple, dateStartMealTicket,sendEmail, offices, office);
+
 
 	}
 
@@ -154,24 +158,18 @@ public class Configurations extends Controller{
 	}
 
 
-	public static void saveConfGeneral(String pk, String value){
-
-		try  {
-
-			ConfGeneral conf = ConfGeneralDao.getConfGeneralById(Long.parseLong(pk));
-
-			rules.checkIfPermitted(conf.office);
-
-			conf.fieldValue = value;
-			conf.save();
-			Cache.set(conf.field+conf.office.name, conf.fieldValue);
-		}		
-		catch(Exception e)
-		{
-			response.status = 500;
-			renderText("Bad request");
-		}
-
+	public static void saveConfGeneral(Long pk,String name, String value){
+		
+		Office office = officeDao.getOfficeById(pk);
+		
+		rules.checkIfPermitted(office);
+		
+		ConfGeneral conf =  ConfGeneralDao.getConfGeneralByField(name, office).or(
+				new ConfGeneral(office, name, value));
+		
+		conf.fieldValue = value;
+		conf.save();
+		Cache.set(conf.field+conf.office.name, conf.fieldValue);
 	}
 
 

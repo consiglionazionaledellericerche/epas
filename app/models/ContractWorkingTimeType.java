@@ -11,7 +11,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;

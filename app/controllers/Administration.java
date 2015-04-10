@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
 
 import java.io.IOException;
@@ -7,7 +8,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
+import manager.PersonDayManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
@@ -19,6 +22,7 @@ import models.PersonDayInTrouble;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -26,9 +30,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -42,6 +46,12 @@ public class Administration extends Controller {
 	
 	@Inject
 	static PersonDao personDao;
+	
+	@Inject
+	static PersonDayDao personDayDao;
+	
+	@Inject
+	static PersonDayManager personDayManager;
 	
 	@Inject
 	static ConsistencyManager consistencyManager;
@@ -189,6 +199,37 @@ public class Administration extends Controller {
 		person.save();
 		
 		renderText(person.name);
+	}
+	
+	public static void updateExceedeMinInCompetenceTable() {
+		CompetenceUtility.updateExceedeMinInCompetenceTable();
+		renderText("OK");
+	}
+	
+	public static void deleteUncoupledStampings(@Required List<Long> peopleId,
+		@Required LocalDate begin,LocalDate end){
+				
+    	if (validation.hasErrors()){
+    	    params.flash(); 
+    		utilities();
+    	}
+		
+		if(end == null){
+			end = begin;
+		}
+		
+		List<Person> people = Lists.newArrayList();
+		
+		for(Long id : peopleId){
+			people.add(PersonDao.getPersonById(id));
+		}
+		
+		for(Person person : people){
+			new RemoveInvalidStampingsJob(person, begin, end).afterRequest();
+		}
+		
+		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
+		utilities();
 	}
    
 }

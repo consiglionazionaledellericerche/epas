@@ -9,6 +9,7 @@ import models.Office;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -407,4 +408,22 @@ public class DateUtility {
 		return dateToMinute;
 	}
 	
+	/*
+	 * @param begin: orario di ingresso
+	 * @param end: orario di uscita
+	 * @return minuti lavorati
+	 */
+	 public static Integer getDifferenceBetweenLocalTime(LocalTime begin, LocalTime end) {
+		int timeToMinute = 0;
+		if (end != null && begin != null)
+		{
+			int hourBegin = begin.getHourOfDay();
+			int minuteBegin = begin.getMinuteOfHour();
+			int hourEnd = end.getHourOfDay();
+			int minuteEnd = end.getMinuteOfHour();
+			timeToMinute = ((60 * hourEnd + minuteEnd) - (60 * hourBegin + minuteBegin));
+		} 
+		
+		return timeToMinute;
+	}
 }

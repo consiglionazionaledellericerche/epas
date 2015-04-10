@@ -30,10 +30,8 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
-import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
@@ -582,11 +580,12 @@ public class PersonDayManager {
 	 * @param date
 	 */
 	public void updatePersonDaysFromDate(Person person, LocalDate date){
-
+		
 		Preconditions.checkNotNull(person);
-		Preconditions.checkState(person.isPersistent());
 		Preconditions.checkNotNull(date);
-
+		
+		person.merge();
+		
 		//Verifico se la data è passata, in caso contrario non è necessario ricalcolare nulla
 		if(date.isAfter(LocalDate.now())){
 			return;
