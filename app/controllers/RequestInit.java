@@ -19,6 +19,7 @@ import models.Permission;
 import models.Qualification;
 import models.User;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import models.query.QPermission;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
@@ -417,12 +418,14 @@ public class RequestInit extends Controller {
 		}		
 		
 		/**
-		 *  years per la gestione dinamica degli anni(provvisorio)
+		 *  years per la gestione dinamica degli anni(provvisorio) 
+		 *  //FIXME la lista degli anni andrebbe presa in funzione della persona selezionata 
+		 *  // e della action richiesta, non in funzione del primo office allowed (??).
 		 */
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
 
-		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
+		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description,
 				officeDao.getOfficeAllowed(user.get()).iterator().next());
 		
 		Integer yearBeginProgram;

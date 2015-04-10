@@ -1,9 +1,11 @@
 package manager;
 
 import manager.recaps.vacation.VacationsRecap;
+import models.ConfYear;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -62,11 +64,11 @@ public class VacationManager {
 	 * @return
 	 */
 	public LocalDate vacationsLastYearExpireDate(int year, Office office) {
-		Integer monthExpiryVacationPastYear = 
-				Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, office));
-		Integer dayExpiryVacationPastYear = 
-				Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, office));
 		
+		Integer monthExpiryVacationPastYear = ConfYearManager.getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
+				
+		Integer dayExpiryVacationPastYear = ConfYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year); 
+						
 		LocalDate expireDate = LocalDate.now()
 				.withMonthOfYear(monthExpiryVacationPastYear)
 				.withDayOfMonth(dayExpiryVacationPastYear);
