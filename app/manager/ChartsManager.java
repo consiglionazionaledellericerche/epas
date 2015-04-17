@@ -27,6 +27,7 @@ import models.Office;
 import models.Person;
 import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
@@ -149,7 +150,7 @@ public class ChartsManager {
 		List<Year> annoList = Lists.newArrayList();
 		Integer yearBegin = null;
 		int counter = 0;
-		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, office);
+		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description, office);
 		if(yearInitUseProgram.isPresent()){
 			counter++;			
 			LocalDate date = new LocalDate(yearInitUseProgram.get().fieldValue);
