@@ -30,6 +30,7 @@ import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.JustifiedTimeAtWork;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
@@ -55,6 +56,7 @@ import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
+import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
@@ -84,6 +86,9 @@ public class Persons extends Controller {
 	
 	@Inject
 	static PersonDao personDao;
+	
+	@Inject
+	static AbsenceDao absenceDao;
 	
 	@Inject
 	static OfficeDao officeDao;
@@ -1032,5 +1037,31 @@ public class Persons extends Controller {
 			}}).toList();
 		}
 		renderJSON(personDays);
+	}
+	
+	@NoCheck
+	public static void missions(String email, LocalDate start, LocalDate end, boolean forAttachment){
+		Person person = personDao.getPersonByEmail(email);
+		List<DayRecap> personDays = Lists.newArrayList();
+		if(person != null){
+			
+			personDays = FluentIterable.from(
+					absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
+					.transform(	new	Function<Absence, DayRecap>(){
+				@Override
+				public DayRecap apply(Absence absence){
+					DayRecap dayRecap = new DayRecap();
+					dayRecap.workingMinutes = 0;
+					dayRecap.date = absence.personDay.date.toString();
+					if(personDayManager.isOnMission(absence.personDay)){						
+						dayRecap.mission = true;						
+					}				
+					else{						
+						dayRecap.mission = false;
+					}
+					return dayRecap;
+				}}).toList();
+			}
+			renderJSON(personDays);
 	}
 }
