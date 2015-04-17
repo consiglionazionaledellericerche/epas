@@ -6,9 +6,11 @@ import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
 import manager.PersonManager;
+import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -74,7 +76,7 @@ public class ControlAbsenceStamping extends Job{
 				email.setSmtpPort(port.intValue());
 				email.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
 				
-				email.setFrom(ConfGeneralManager.getConfGeneralByField(ConfigurationFields.JobsEmailAlias.description, person.office).fieldValue);
+				email.setFrom( ConfGeneralManager.getFieldValue(Parameter.EMAIL_FROM_JOBS, person.office) );
 //				if(p != null)
 //					email.addCc(p.contactData.email);
 				email.setSubject("controllo giorni del mese");

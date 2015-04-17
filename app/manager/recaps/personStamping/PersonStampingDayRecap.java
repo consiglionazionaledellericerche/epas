@@ -9,6 +9,7 @@ import java.util.Set;
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import models.Absence;
+import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
@@ -17,6 +18,7 @@ import models.StampType;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -107,11 +109,10 @@ public class PersonStampingDayRecap {
 		
 		}
 		
-		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", person.office));
-		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", person.office));
-		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", person.office));
-		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", person.office));
+		Integer mealTimeStartHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
+		Integer mealTimeStartMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
+		Integer mealTimeEndHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.person.office);
+		Integer mealTimeEndMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.person.office);
 		
 		this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
 		this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
