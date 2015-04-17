@@ -8,8 +8,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import models.base.BaseModel;
+import models.enumerate.Parameter;
 
 import org.hibernate.envers.Audited;
+
+import com.google.common.base.Preconditions;
 
 
 
@@ -18,30 +21,8 @@ import org.hibernate.envers.Audited;
 @Table(name="conf_year")
 public class ConfYear extends BaseModel{
 	
-	/*
-	  1 | month_expiry_vacation_past_year | 8           | 2014 |         1
-	  2 | day_expiry_vacation_past_year   | 31          | 2014 |         1
-	  3 | month_expire_recovery_days_13   | 0           | 2014 |         1
-	  4 | month_expire_recovery_days_49   | 4           | 2014 |         1
-	  5 | max_recovery_days_13            | 22          | 2014 |         1
-	  6 | max_recovery_days_49            | 0           | 2014 |         1
-	  7 | hour_max_to_calculate_worktime  | 5           | 2014 |         1
-	*/
-	
 	private static final long serialVersionUID = -3157754270960969163L;
 	
-	public final static String MONTH_EXPIRY_VACATION_PAST_YEAR = "month_expiry_vacation_past_year";
-	public final static String DAY_EXPIRY_VACATION_PAST_YEAR = "day_expiry_vacation_past_year";
-	public final static String MONTH_EXPIRY_RECOVERY_DAYS_13 = "month_expire_recovery_days_13";
-	public final static String MONTH_EXPIRY_RECOVERY_DAYS_49 = "month_expire_recovery_days_49";
-	public final static String MAX_RECOVERY_DAYS_13 = "max_recovery_days_13";
-	public final static String MAX_RECOVERY_DAYS_49 = "max_recovery_days_49";
-	public final static String HOUR_MAX_TO_CALCULATE_WORKTIME = "hour_max_to_calculate_worktime";
-	
-	
-	
-	
-	/* nuova configurazione della tabella*/
 	@ManyToOne( fetch=FetchType.LAZY)
 	@JoinColumn(name="office_id")
 	public Office office;
@@ -70,41 +51,46 @@ public class ConfYear extends BaseModel{
 	}
 	
 
-
-	public String getIntelligibleMonthValue(Integer i)
+	public String getIntelligibleMonthValue()
 	{
+		
+		Integer i = Integer.parseInt(this.fieldValue);
+		
 		if(i==0)
 			return "nessun limite";
 		if(i==1)
-			return "entro gennaio";
+			return "entro fine gennaio";
 		if(i==2)
-			return "entro febbraio";
+			return "entro fine febbraio";
 		if(i==3)
-			return "entro marzo";
+			return "entro fine marzo";
 		if(i==4)
-			return "entro aprile";
+			return "entro fine aprile";
 		if(i==5)
-			return "entro maggio";
+			return "entro fine maggio";
 		if(i==6)
-			return "entro giugno";
+			return "entro fine giugno";
 		if(i==7)
-			return "entro luglio";
+			return "entro fine luglio";
 		if(i==8)
-			return "entro agosto";
+			return "entro fine agosto";
 		if(i==9)
-			return "entro settembre";
+			return "entro fine settembre";
 		if(i==10)
-			return "entro ottobre";
+			return "entro fine ottobre";
 		if(i==11)
-			return "entro novembre";
+			return "entro fine novembre";
 		if(i==12)
-			return "entro dicembre";
+			return "entro fine dicembre";
 		return null;
 		
 	}
 	
-	public String getIntelligibleNumberValue(Integer i)
+	
+	public String getIntelligibleNumberValue()
 	{
+		Integer i = Integer.parseInt(this.fieldValue);
+		
 		if(i==0)
 			return "nessun limite";
 		else

@@ -25,11 +25,13 @@ import manager.PersonDayManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
+import models.ConfGeneral;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -96,8 +98,8 @@ public class UploadSituation extends Controller{
 		Office office = Security.getUser().get().person.office;
 		rules.checkIfPermitted(office);
 		
-		String urlToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
-		String userToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UserToPresence.description, office);
+		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+		String userToPresence = ConfGeneralManager.getFieldValue(Parameter.USER_TO_PRESENCE, office);
 		
 		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
@@ -119,11 +121,13 @@ public class UploadSituation extends Controller{
 			flash.error("Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
 			Application.indexAdmin();
 		}
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-//		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
+		
+		User user = Security.getUser().get();
+		
+		rules.checkIfPermitted(user.person.office);
+
 		List<Person> personList = PersonDao.getPersonsByNumber();
-		//List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
+
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
 		List<Competence> competenceList = null;
@@ -135,7 +139,7 @@ public class UploadSituation extends Controller{
 		FileWriter writer = new FileWriter(tempFile, true);
 		try {
 			BufferedWriter out = new BufferedWriter(writer);
-			out.write(seatCode.toString());
+			out.write(user.person.office.code);
 			out.write(' ');
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();
@@ -216,7 +220,7 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UrlToPresence.description, user.person.office);
+			String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, user.person.office); 
 			
 			try {
 				//1) LOGIN

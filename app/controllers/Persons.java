@@ -31,6 +31,7 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
@@ -586,9 +587,9 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		LocalDate initUse = new LocalDate(
-				ConfGeneralManager.getFieldValue(ConfigurationFields.InitUseProgram.description,
-						Security.getUser().get().person.office));
+		LocalDate initUse = ConfGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+				Security.getUser().get().person.office);
+				
 		render(contract, initUse);
 	}
 
@@ -1047,7 +1048,7 @@ public class Persons extends Controller {
 			
 			personDays = FluentIterable.from(
 					absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
-					.transform(	new	Function<Absence, DayRecap>(){
+					.transform(new	Function<Absence, DayRecap>(){
 				@Override
 				public DayRecap apply(Absence absence){
 					DayRecap dayRecap = new DayRecap();

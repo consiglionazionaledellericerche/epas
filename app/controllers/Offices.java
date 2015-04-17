@@ -19,6 +19,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import dao.OfficeDao;
@@ -141,10 +142,10 @@ public class Offices extends Controller {
 		seat.save();
 
 		if(newSeat){
-			ConfGeneralManager.buildDefaultConfGeneral(seat);
+			ConfGeneralManager.buildOfficeConfGeneral(seat, false);
 
-			ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear());
-			ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);		
+			ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
+			ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
 
 			officeManager.setPermissionAfterCreation(seat);
 		}

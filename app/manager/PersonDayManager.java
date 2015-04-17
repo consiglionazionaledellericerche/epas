@@ -9,6 +9,8 @@ import java.util.List;
 
 import models.Absence;
 import models.AbsenceType;
+import models.ConfGeneral;
+import models.ConfYear;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -20,6 +22,7 @@ import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -381,10 +384,10 @@ public class PersonDayManager {
 	private List<PairStamping> getGapLunchPairs(PersonDay pd, List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
-		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", pd.person.office));
-		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", pd.person.office));
-		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", pd.person.office));
-		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", pd.person.office));
+		Integer mealTimeStartHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
+		Integer mealTimeStartMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
+		Integer mealTimeEndHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.person.office);
+		Integer mealTimeEndMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.person.office);
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(pd.date.getYear())
 		.withMonthOfYear(pd.date.getMonthOfYear())
@@ -1094,9 +1097,10 @@ public class PersonDayManager {
 
 		if( lastStampingPreviousDay != null && lastStampingPreviousDay.isIn() ) {
 			
-			String hourMaxToCalculateWorkTime = 
-					ConfYearManager.getFieldValue("hour_max_to_calculate_worktime", 
-							pd.getValue().date.getYear(), pd.getValue().person.office);
+			String hourMaxToCalculateWorkTime = ConfYearManager
+					.getFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, 
+							pd.getValue().person.office, pd.getValue().date.getYear());
+			
 			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
 			
 			orderStampings( pd.getValue() );

@@ -34,42 +34,45 @@
 
   <section id="results">
 
-	#{if lastConfYear != null }
-	  <div class="container">
-		<h3>${lastConfYear.year}</h3>
-		<table class="table table-bordered table-striped span7">
+	 <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Parametri ${previousYear}</h3>
+      </div>
+      <div class="panel-body">
+		 <table class="table table-condensed table-hover table-xeditable">
 		  <tr>
 		    <td class="span5">Giorno massimo utilizzo ferie dell'anno precedente</td>
-		    <td class="span2">${lastYearDayExpiryVacationPastYear} / ${lastYearMonthExpiryVacationPastYear}</td>
+		    <td class="span2">${lastYearDayExpiryVacationPastYear.fieldValue} / ${lastYearMonthExpiryVacationPastYear.fieldValue}</td>
 		  </tr>						
 		  <tr>
 		    <td class="span5">Limite utilizzo residui dell'anno precedente per i livelli da 1 a 3</td>
-		    <td class="span2">${lastConfYear.getIntelligibleMonthValue(lastYearMonthExpireRecoveryDaysOneThree)}</td>
+		    <td class="span2">${lastYearMonthExpireRecoveryDaysOneThree.getIntelligibleMonthValue()}</td>
 		  </tr>						
 		  <tr>
 		    <td class="span5">Limite utilizzo residui dell'anno precedente per i livelli da 4 a 9</td>
-		    <td class="span2">${lastConfYear.getIntelligibleMonthValue(lastYearMonthExpireRecoveryDaysFourNine)}</td>
+		    <td class="span2">${lastYearMonthExpireRecoveryDaysFourNine.getIntelligibleMonthValue()}</td>
 		  </tr>						
 		  <tr>	
 		    <td class="span5">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3</td>
-		    <td class="span2">${lastConfYear.getIntelligibleNumberValue(lastYearMaxRecoveryDaysOneThree)}</td>
+		    <td class="span2">${lastYearMaxRecoveryDaysOneThree.getIntelligibleNumberValue()}</td>
 		  </tr>						
 		  <tr>
 		    <td class="span5">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9</td>
-		    <td class="span2">${lastConfYear.getIntelligibleNumberValue(lastYearMaxRecoveryDaysFourNine)}</td>
+		    <td class="span2">${lastYearMaxRecoveryDaysFourNine.getIntelligibleNumberValue()}</td>
 		  </tr>	
 		  <tr>
 		    <td class="span5">Limite orario massimo per timbratura notturna</td>
-		    <td class="span2">${lastYearHourMaxToCalculateWorkTime}:00</td>
+		    <td class="span2">${lastYearHourMaxToCalculateWorkTime.fieldValue}:00</td>
 		  </tr>					
 		
 		</table>
+	
 	  </div>
-	#{/if}
+    </div>
 
 	<div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">Parametri ${year}</h3>
+        <h3 class="panel-title">Parametri ${currentYear}</h3>
       </div>
       <div class="panel-body">
 		 <table class="table table-condensed table-hover table-xeditable">
@@ -102,7 +105,7 @@
 		          data-type="select" 
 		          data-pk="${monthExpireRecoveryDaysOneThree.id}" 
 		          data-value="[${monthExpireRecoveryDaysOneThree.fieldValue}]"
-		          data-source="[{ 1 : 'entro gennaio'}, { 2 : 'entro febbraio'}, { 3 : 'entro marzo'}, { 4 : 'entro aprile'}, { 5 : 'entro maggio'}, { 6 : 'entro giugno'}, { 7 : 'entro luglio'}, { 8 : 'entro agosto'}, { 9 : 'entro settembre'}, { 10 : 'entro ottobre'}, { 11 : 'entro novembre'}, { 12 : 'entro dicembre'}, { 0 : 'nessun limite'}]" 
+		          data-source="[{ 1 : 'entro fine gennaio'}, { 2 : 'entro fine febbraio'}, { 3 : 'entro fine marzo'}, { 4 : 'entro fine aprile'}, { 5 : 'entro fine maggio'}, { 6 : 'entro fine giugno'}, { 7 : 'entro fine luglio'}, { 8 : 'entro fine agosto'}, { 9 : 'entro fine settembre'}, { 10 : 'entro fine ottobre'}, { 11 : 'entro fine novembre'}, { 12 : 'entro fine dicembre'}, { 0 : 'nessun limite'}]" 
 		          data-url="@{saveConfYear()}" 
 		          class="editable editable-click"></a>
 		    </td>
@@ -115,7 +118,7 @@
 		          data-type="select" 
 		          data-pk="${monthExpireRecoveryDaysFourNine.id}" 
 		          data-value="[${monthExpireRecoveryDaysFourNine.fieldValue}]"
-		          data-source="[{ 1 : 'entro gennaio'}, { 2 : 'entro febbraio'}, { 3 : 'entro marzo'}, { 4 : 'entro aprile'}, { 5 : 'entro maggio'}, { 6 : 'entro giugno'}, { 7 : 'entro luglio'}, { 8 : 'entro agosto'}, { 9 : 'entro settembre'}, { 10 : 'entro ottobre'}, { 11 : 'entro novembre'}, { 12 : 'entro dicembre'}, { 0 : 'nessun limite'}]" 
+		          data-source="[{ 1 : 'entro fine gennaio'}, { 2 : 'entro fine febbraio'}, { 3 : 'entro fine marzo'}, { 4 : 'entro fine aprile'}, { 5 : 'entro fine maggio'}, { 6 : 'entro fine giugno'}, { 7 : 'entro fine luglio'}, { 8 : 'entro fine agosto'}, { 9 : 'entro fine settembre'}, { 10 : 'entro fine ottobre'}, { 11 : 'entro fine novembre'}, { 12 : 'entro fine dicembre'}, { 0 : 'nessun limite'}]" 
 		          data-url="@{saveConfYear()}" 
 		          class="editable editable-click"></a>
 		    </td>
@@ -161,11 +164,6 @@
   </div>
   
   </section>
-<input type="hidden" name="id" value="${office.id}"/>
- <a data-toggle="modal" href="@{Configurations.insertNewConfYear(office.id)}" data-modal=".my-modal">
- Inserisci configurazione ${nextYear}
- </a>
-
 
 </div>
 
