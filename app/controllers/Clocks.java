@@ -12,6 +12,7 @@ import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import models.ConfGeneral;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -19,6 +20,7 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -93,7 +95,7 @@ public class Clocks extends Controller{
 		else{
 			personDay = pd.get();
 		}				
-		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, user.person.office));
+		int minInOutColumn = ConfGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
 		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
@@ -193,7 +195,7 @@ public class Clocks extends Controller{
 			personDay = pd.get();
 		}
 				
-		int minInOutColumn = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		int minInOutColumn = ConfGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
 		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	

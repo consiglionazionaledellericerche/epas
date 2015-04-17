@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ConfGeneralManager;
+import models.ConfGeneral;
 import models.Office;
+import models.enumerate.Parameter;
 
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
@@ -64,8 +67,8 @@ public class DateUtility {
 		/*TODO: da riverificare*/
 		if(office == null)
 			office = Security.getUser().get().person.office;
-		Integer monthOfPatron = Integer.parseInt(ConfGeneralManager.getFieldValue("month_of_patron", office));
-		Integer dayOfPatron = Integer.parseInt(ConfGeneralManager.getFieldValue("day_of_patron", office));
+		Integer monthOfPatron = ConfGeneralManager.getIntegerFieldValue(Parameter.MONTH_OF_PATRON, office);
+		Integer dayOfPatron = ConfGeneralManager.getIntegerFieldValue(Parameter.DAY_OF_PATRON, office);
 		/*fine pezzo da verificare*/
 		
 		LocalDate easter = findEaster(date.getYear());

@@ -18,6 +18,7 @@ import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -111,7 +112,7 @@ public class ContractYearRecapManager {
 		
 		//Controllo se ho sufficienti dati
 		
-		String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
+		String dateInitUse = ConfGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate.plusDays(1);
