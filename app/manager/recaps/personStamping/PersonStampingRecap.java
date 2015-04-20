@@ -51,6 +51,7 @@ public class PersonStampingRecap {
 	public int numberOfMealTicketToRender = 0;
 	public int numberOfMealTicketToUse = 0;
 	public int basedWorkingDays = 0;
+	public int totalWorkingTime = 0;
 	
 	//I riepiloghi di ogni giorno
 	public List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
@@ -128,6 +129,9 @@ public class PersonStampingRecap {
 		}
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
+		
+		for(PersonDay pd : totalPersonDays)
+			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
 		
 	}
 	
