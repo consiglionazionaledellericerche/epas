@@ -16,6 +16,8 @@ import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import manager.recaps.personStamping.PersonStampingRecap;
+import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Person;
@@ -52,122 +54,61 @@ public class PrintTags extends Controller{
 	@Inject
 	static PersonDayManager personDayManager;
 	
-	public static void showTag(Long personId){
-		if(personId == null){
+	@Inject 
+	static PersonStampingRecapFactory stampingsRecapFactory;
+	
+	public static void showTag(Long personId, int month, int year){
+
+		if(personId == null) {
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
 			Application.indexAdmin();
 		}
 
-		if(personId == -1){
-			/**
-			 * è il caso in cui ho chiesto la stampa cartellino di tutti...vediamo come gestirla in un secondo momento
-			 */
-		}
 		Person person = PersonDao.getPersonById(personId);
 		
 		rules.checkIfPermitted(person.office);
-		int month = params.get("month", Integer.class);
-		int year = params.get("year", Integer.class);
 	
-		int minInOutColumn = ConfGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
-		int numberOfInOut = Math.max(minInOutColumn, personDayManager.getMaximumCoupleOfStampings(person, year, month));
-		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
-		//Costruzione dati da renderizzare
-		for(PersonDay pd : totalPersonDays)
-		{
-			personDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
-		}
-		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
-		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
-
-		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-		for(PersonDay pd : totalPersonDays )
-		{
-			PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd,numberOfInOut);
-			daysRecap.add(dayRecap);
-		}
-		Set<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeSet;
-		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
+		String titolo = "Situazione presenze mensile " +  
+				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
+				person.surname + " " + person.name;
 		
-		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
-		int numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
-		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
-		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
-
-		//RTODO il contratto attivo nel mese (quello più recente)
-		/*
-		Contract contract = person.getCurrentContract();
-		PersonResidualYearRecap c = PersonResidualYearRecap.build(contract, year, null);
-		PersonResidualMonthRecap mese = c.getMese(month);
-		*/
-		
-		String titolo = "Situazione presenze mensile " +  DateUtility.fromIntToStringMonth(month) + " " + year + " di " + person.surname + " " + person.name;
-		
-		//Render
-		renderPDF(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, titolo);
-		
+		renderPDF(psDto, titolo) ;		
 	}
 	
-	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void listPersonForPrintTags(int year, int month){
+		
 		rules.checkIfPermitted(Security.getUser().get().person.office);
+	
 		LocalDate date = new LocalDate(year, month,1);
+		
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
+				date, date.dayOfMonth().withMaximumValue(), true).list();
+		
 		render(personList, date, year, month);
 	}
 	
 	public static void showPersonTag(Integer year, Integer month){
 		
 		Person person = Security.getUser().get().person;
-		if(!PersonManager.isActiveInMonth(person, month, year, false))
-		{
+		
+		if(!PersonManager.isActiveInMonth(person, month, year, false)) {
+			
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
 			render("@redirectToIndex");
 		}
 	
-		int minInOutColumn = ConfGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
-		int numberOfInOut = Math.max(minInOutColumn, personDayManager.getMaximumCoupleOfStampings(person, year, month));
-
-		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
+		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 		
-		//Costruzione dati da renderizzare
-		for(PersonDay pd : totalPersonDays)
-		{
-			personDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
-		}
-		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
-		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();							
-
-		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-		for(PersonDay pd : totalPersonDays )
-		{
-			PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd,numberOfInOut);
-			daysRecap.add(dayRecap);
-		}
-		Set<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeSet;
-		Set<StampType> stampTypeList = PersonStampingDayRecap.stampTypeSet;
+		String titolo = "Situazione presenze mensile " +  
+				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
+				person.surname + " " + person.name;
 		
-		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
-		int numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
-		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
-		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
-
-		String titolo = "Situazione presenze mensile " +  DateUtility.fromIntToStringMonth(month) + " " + year + " di " + person.surname + " " + person.name;
-		
-		//Render
-		renderPDF(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, titolo);
-		//renderPDF(person, year, month, numberOfInOut, daysRecap,stampModificationTypeList, stampTypeList);
-		
-		
+		renderPDF(psDto, titolo) ;
+								
 	}
 
 }
