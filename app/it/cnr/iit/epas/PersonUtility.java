@@ -271,21 +271,6 @@ public class PersonUtility {
 		return query.getResultList().size();
 	}
 
-	/**
-	 * 
-	 * @return la lista dei codici competenza attivi per le persone nell'anno in corso
-	 */
-	public static List<CompetenceCode> activeCompetence(){
-		List<CompetenceCode> competenceCodeList = new ArrayList<CompetenceCode>();
-		List<Competence> competenceList = CompetenceDao.getCompetenceInYear(new LocalDate().getYear());
-		//List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ? order by comp.competenceCode.code", new LocalDate().getYear()).fetch();
-		for(Competence comp : competenceList){
-			if(!competenceCodeList.contains(comp.competenceCode))
-				competenceCodeList.add(comp.competenceCode);
-		}
-		return competenceCodeList;
-	}
-
 }
 
 

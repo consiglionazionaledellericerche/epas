@@ -58,5 +58,15 @@ public class WrapperContract implements IWrapperContract {
 		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(this.value);
 		return vpList;
 	}
+	
+	/**
+	 * True se il contratto è a tempo determinato.
+	 * 
+	 * @return
+	 */
+	public boolean isDefined() {
+		
+		return this.value.expireContract != null;
+	}
 
 }

@@ -1,5 +1,7 @@
 package dao.wrapper;
 
+import java.util.List;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -60,8 +62,23 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
 	 * @return
 	 */
 	Optional<Contract> getLastContractInMonth(int year, int month);
-
-
-
 	
+	/**
+	 * Il primo contratto attivo della persona nel mese. 
+	 * 
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	Optional<Contract> getFirstContractInMonth(int year, int month);
+	
+	/**
+	 * True se la persona è passata da determinato a indeterminato durante l'anno.
+	 * 
+	 * @param year
+	 * @return
+	 */
+	public boolean hasPassToIndefiniteInYear(int year);
+	
+
 }
