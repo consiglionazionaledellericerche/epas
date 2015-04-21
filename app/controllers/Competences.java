@@ -450,8 +450,6 @@ public class Competences extends Controller{
 				
 		for (Competence competence: competenceInYear) {
 			
-			System.out.println("year "+competence.year);
-			
 			//Filtro tipologia del primo contratto nel mese della competenza
 			if (onlyDefined) {
 				IWrapperPerson wperson = wrapperFactory.create(competence.person);
