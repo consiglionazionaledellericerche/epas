@@ -301,7 +301,7 @@ public final class PersonDao {
 				contract.endContract.isNotNull().and(contract.endContract.goe(fromDate))
 				);
 
-		return ModelQuery.queryFactory().from(contract).where(conditions).list(contract);
+		return ModelQuery.queryFactory().from(contract).where(conditions).orderBy(contract.beginContract.asc()).list(contract);
 	}
 
 	/**
