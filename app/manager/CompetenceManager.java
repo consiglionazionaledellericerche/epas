@@ -383,4 +383,24 @@ public class CompetenceManager {
 		}
 		return 0;
 	}
+	
+	/**
+	 * La lista dei codici competenza attivi per le persone nell'anno
+	 * 
+	 * @param year
+	 * @return
+	 */
+	public List<CompetenceCode> activeCompetence(int year){
+		
+		List<CompetenceCode> competenceCodeList = Lists.newArrayList();
+		
+		List<Competence> competenceList = 
+				CompetenceDao.getCompetenceInYear(year, Optional.<Office>absent());
+		
+		for(Competence comp : competenceList){
+			if(!competenceCodeList.contains(comp.competenceCode))
+				competenceCodeList.add(comp.competenceCode);
+		}
+		return competenceCodeList;
+	}
 }

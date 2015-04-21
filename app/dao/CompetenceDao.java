@@ -154,18 +154,28 @@ public class CompetenceDao {
 								.and(competence.person.office.eq(office)))));
 		return query.list(competence);
 	}
-	
-	
+
 	/**
+	 * Le competenze nell'anno year. Se office è present filtra sulle sole competenze
+	 * assegnate alle persone nell'office.
 	 * 
 	 * @param year
-	 * @return la lista delle competenze presenti nell'anno
+	 * @param office
+	 * @return
 	 */
-	public static List<Competence> getCompetenceInYear(Integer year){
+	public static List<Competence> getCompetenceInYear(Integer year, Optional<Office> office){
+		
 		QCompetence competence = QCompetence.competence;
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		condition.and(competence.year.eq(year));
+		if(office.isPresent())
+			condition.and(competence.person.office.eq(office.get()));
+		
 		JPQLQuery query = ModelQuery.queryFactory().from(competence)
-				.where(competence.year.eq(year));
+				.where(condition);
 		query.orderBy(competence.competenceCode.code.asc());
+		
 		return query.list(competence);
 	}
 	
