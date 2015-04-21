@@ -68,6 +68,12 @@ GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/
 
 GET 	/version								Version.showVersion
 
+
+# EndPoints Rest
+
+GET		/rest/persons/{email}/days				Persons.days
+GET		/rest/persons/{email}/days				Persons.missions
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
 

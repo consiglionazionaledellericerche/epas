@@ -44,6 +44,22 @@ then
  $c.grant();
 end
 
+/*
+ * 		Permission: rest
+ */
+rule rest
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "rest") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Persons.days",
+        "Persons.missions"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
 /*  
  *	Azioni eseguibili solo per le persone fisiche
  */
