@@ -36,6 +36,8 @@ import security.SecurityRules;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -45,8 +47,10 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperCompetenceCode;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import dao.wrapper.WrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -54,19 +58,14 @@ public class Competences extends Controller{
 
 	@Inject
 	static SecurityRules rules;
-	
 	@Inject
 	static IWrapperFactory wrapperFactory;
-	
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
-	
 	@Inject
 	static OfficeDao officeDao;
-	
 	@Inject
 	static CompetenceManager competenceManager;
-	
 	@Inject 
 	static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
 	
@@ -117,7 +116,7 @@ public class Competences extends Controller{
 		if(page==null)
 			page = 0;
 				
-		List<CompetenceCode> activeCompetenceCodes = PersonUtility.activeCompetence();
+		List<CompetenceCode> activeCompetenceCodes = competenceManager.activeCompetence(year);
 		
 		IWrapperCompetenceCode competenceCode = null;
 		
@@ -424,5 +423,96 @@ public class Competences extends Controller{
 		renderBinary(inputStream, "straordinari"+year+".csv");
 	}
 	
-
+	/**
+	 * TODO: implementare un metodo nel manager nel quale spostare la business logic
+	 * di questa azione.
+	 * 
+	 * @param officeId
+	 * @param year
+	 * @param onlyDefined true se si vuole applicare il calcolo ai soli tempi determinati
+	 */
+	public static void approvedCompetenceInYear(Long officeId, int year, boolean onlyDefined) {
+		
+		Office office = officeDao.getOfficeById(officeId);
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
+		Set<Person> personSet = Sets.newHashSet();
+		
+		Map<CompetenceCode, Integer> totalValueAssigned = Maps.newHashMap();
+		
+		Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newHashMap();
+		
+		List<Competence> competenceInYear = CompetenceDao
+				.getCompetenceInYear(year, Optional.fromNullable(office));
+				
+		for (Competence competence: competenceInYear) {
+			
+			System.out.println("year "+competence.year);
+			
+			//Filtro tipologia del primo contratto nel mese della competenza
+			if (onlyDefined) {
+				IWrapperPerson wperson = wrapperFactory.create(competence.person);
+				Optional<Contract> firstContract = wperson.getFirstContractInMonth(year, competence.month);
+				if (!firstContract.isPresent())
+					continue;	//questo errore andrebbe segnalato, competenza senza che esista contratto
+				
+				IWrapperContract wcontract = wrapperFactory.create(firstContract.get());
+				
+				if (!wcontract.isDefined()) {
+					continue;	//scarto la competence.
+				}
+					
+			}
+			
+			//Filtro competenza non approvata
+			if (competence.valueApproved == 0)
+				continue;
+			
+			personSet.add(competence.person);
+			
+			//aggiungo la competenza alla mappa della persona
+			Person person = competence.person;
+			Map<CompetenceCode, Integer> personCompetences = mapPersonCompetenceRecap.get(person);
+			
+			if (personCompetences == null) 
+				personCompetences = Maps.newHashMap();
+			
+			Integer value = personCompetences.get(competence.competenceCode);
+			if (value != null) 
+				value = value + competence.valueApproved;
+			else
+				value = competence.valueApproved;
+			
+			personCompetences.put(competence.competenceCode, value);
+			
+			mapPersonCompetenceRecap.put( person, personCompetences);
+			
+			//aggiungo la competenza al valore totale per la competenza
+			value = totalValueAssigned.get(competence.competenceCode);
+			
+			if (value != null)
+				value = value + competence.valueApproved;
+			else
+				value = competence.valueApproved;
+			
+			totalValueAssigned.put(competence.competenceCode, value);
+			
+		}
+		
+		List<IWrapperPerson> personList = FluentIterable
+				.from(personSet)
+				.transform(wrapperFunctionFactory.person()).toList();
+		
+		//FIXME inserisco il month per la navigazione delle tab competenze.
+		// andrebbe un pò rifattorizzata questa parte...
+		
+		int month = LocalDate.now().getMonthOfYear();
+		
+		render(personList, totalValueAssigned, mapPersonCompetenceRecap, office, offices, year, month);
+		
+	}
+	
 }
