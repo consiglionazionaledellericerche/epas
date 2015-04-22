@@ -23,10 +23,18 @@ import dao.PersonDayDao;
 
 public class MonthRecapManager {
 	
-	@Inject
-	public PersonDayDao personDayDao;
+	private final PersonDayDao personDayDao;
+	private final CompetenceDao competenceDao;
 	
 	private final static Logger log = LoggerFactory.getLogger(MonthRecapManager.class);
+	
+	@Inject
+	public MonthRecapManager(PersonDayDao personDayDao,
+			CompetenceDao competenceDao) {
+
+		this.personDayDao = personDayDao;
+		this.competenceDao = competenceDao;
+	}
 	
 	/**
 	 * Riepilogo mensile per la Persona. Contiene le seguenti informazioni
@@ -41,7 +49,7 @@ public class MonthRecapManager {
 	 * @author alessandro
 	 *
 	 */
-	protected static class PersonMonthRecapFieldSet
+	protected class PersonMonthRecapFieldSet
 	{
 		protected List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
 		protected List<PersonDay> justifiedAbsences = new ArrayList<PersonDay>();
@@ -115,7 +123,7 @@ public class MonthRecapManager {
 			}
 			//straordinari s1/s2/s3
 			List<String> code = CompetenceManager.populateListWithOvertimeCodes();			
-			List<Competence> competenceList = CompetenceDao.getCompetences(Optional.fromNullable(person),year, month, code, person.office, false);
+			List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person),year, month, code, person.office, false);
 			valueApproved = 0;
 			for(Competence comp : competenceList)
 			{

@@ -6,10 +6,8 @@ import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
 import manager.PersonManager;
-import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;

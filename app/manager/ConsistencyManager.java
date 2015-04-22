@@ -8,7 +8,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
@@ -16,7 +15,6 @@ import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.User;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;
@@ -36,7 +34,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
-import dao.ConfGeneralDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;

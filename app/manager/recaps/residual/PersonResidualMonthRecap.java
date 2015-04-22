@@ -30,8 +30,9 @@ public class PersonResidualMonthRecap {
 	
 	private final IWrapperFactory wrapperFactory; 
 	private final AbsenceDao absenceDao;
-	private MealTicketDao mealTicketDao;
+	private final MealTicketDao mealTicketDao;
 	private final PersonDayDao personDayDao;
+	private final CompetenceDao competenceDao;
 
 	public final IWrapperContract contract;
 	
@@ -84,7 +85,7 @@ public class PersonResidualMonthRecap {
 
 	
 	public PersonResidualMonthRecap(AbsenceDao absenceDao, PersonDayDao personDayDao,
-			MealTicketDao mealTicketDao,
+			MealTicketDao mealTicketDao,CompetenceDao competenceDao,
 			IWrapperFactory wrapperFactory,	PersonResidualMonthRecap mesePrecedente,
 			Contract contract, int anno, int mese, int initMonteOreAnnoPassato,
 			int initMonteOreAnnoCorrente, int initMealTickets,
@@ -95,6 +96,7 @@ public class PersonResidualMonthRecap {
 		this.absenceDao = absenceDao;
 		this.personDayDao = personDayDao;
 		this.mealTicketDao = mealTicketDao;
+		this.competenceDao = competenceDao;
 		this.wrapperFactory = wrapperFactory;
 		this.mesePrecedente = mesePrecedente;
 		this.contract = this.wrapperFactory.create(contract);
@@ -270,14 +272,14 @@ public class PersonResidualMonthRecap {
 		if(this.contract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
-			Optional<Competence> competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
+			Optional<Competence> competenceS1 = competenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
 
 			if(competenceS1.isPresent())
 				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS1Print = 0;
 			//straordinari s2
-			Optional<Competence> competenceS2 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
+			Optional<Competence> competenceS2 = competenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
 			
 
 			if(competenceS2.isPresent())
@@ -285,7 +287,7 @@ public class PersonResidualMonthRecap {
 			else
 				monthRecap.straordinariMinutiS2Print = 0;
 			//straordinari s3
-			Optional<Competence> competenceS3 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s3);
+			Optional<Competence> competenceS3 = competenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s3);
 			if(competenceS3.isPresent())
 				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.get().valueApproved * 60);
 			else

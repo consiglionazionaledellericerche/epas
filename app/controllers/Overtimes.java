@@ -50,6 +50,12 @@ public class Overtimes extends Controller {
 	@Inject
 	static IWrapperFactory wrapperFactory;
 	
+	@Inject
+	static CompetenceDao competenceDao;
+	
+	@Inject
+	static OvertimesManager overtimesManager;
+	
 	/*
 	 * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario)
 	 * 
@@ -106,7 +112,7 @@ public class Overtimes extends Controller {
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
 
-		PersonHourForOvertime personHourForOvertime = CompetenceDao.getPersonHourForOvertime(person);
+		PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
 		if(personHourForOvertime == null)
 			personHourForOvertime = new PersonHourForOvertime(person, 0);
 		
@@ -127,7 +133,7 @@ public class Overtimes extends Controller {
 			badRequest();	
 		}
 		
-		OvertimesManager.setRequestedOvertime(body, year, month);
+		overtimesManager.setRequestedOvertime(body, year, month);
 	}
 	
 	/*
@@ -143,7 +149,7 @@ public class Overtimes extends Controller {
 			}
 			Logger.debug("Find persons %s with email %s", person.name, email);
 			
-			OvertimesManager.setSupervisorOvertime(person, hours);
+			overtimesManager.setSupervisorOvertime(person, hours);
 		} catch (Exception e) {
 			Logger.error(e, "Problem during findjing person with email.");
 			throw e;
@@ -172,7 +178,7 @@ public class Overtimes extends Controller {
 		CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode("S1");
 		Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);	
 		
-		overtimesMonth = OvertimesManager.buildMonthForExport(body, competenceCode, year, month);
+		overtimesMonth = overtimesManager.buildMonthForExport(body, competenceCode, year, month);
 		
 		LocalDate today = new LocalDate();
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
