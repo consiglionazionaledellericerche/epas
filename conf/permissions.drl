@@ -366,7 +366,7 @@ when
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
         "MonthRecaps.show"
-        ), target != null, granted == false)
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -444,8 +444,9 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "Competences.exportCompetences",
-        "Competences.getOvertimeInYear"
-        ), target != null, granted == false)
+        "Competences.getOvertimeInYear",
+        "Competences.approvedCompetenceInYear"
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -460,7 +461,8 @@ when
         "Competences.showCompetences",
         "Competences.overtime",
         "Competences.totalOvertimeHours",
-        "Competences.enabledCompetences"
+        "Competences.enabledCompetences",
+        "Competences.approvedCompetenceInYear"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -595,7 +597,7 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "WorkingTimes.manageWorkingTime"
-        ), target != null, granted == false)
+        ), target == null, granted == false)
 then
  $c.grant();
 end

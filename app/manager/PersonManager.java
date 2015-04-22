@@ -236,7 +236,6 @@ public class PersonManager {
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
-		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
 		if(contractList == null){
 			return monthContracts;
 		}
