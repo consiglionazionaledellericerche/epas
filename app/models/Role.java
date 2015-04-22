@@ -31,6 +31,7 @@ public class Role extends BaseModel{
 	public final static String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
 	public final static String BADGE_READER = "badgeReader";
 	public final static String SUPER_ADMIN = "superAdmin";
+	public final static String REST_CLIENT = "restClient";
 	
 	public String name;
 	

@@ -18,6 +18,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import play.libs.WS.HttpResponse;
 import play.mvc.Controller;
 import play.mvc.With;
 import controllers.RequestInit;
@@ -29,7 +30,7 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dto.DayRecap;
 
-@With( {Resecure.class, RequestInit.class} )
+@With(Resecure.class)
 public class Persons extends Controller{
 	
 	@Inject
@@ -43,12 +44,19 @@ public class Persons extends Controller{
 	
 	@BasicAuth
 	public static void days(String email,LocalDate start,LocalDate end){
-		
+
 		Person person = personDao.getPersonByEmail(email);
+		if(person == null){
+//			TODO return not found
+		}
+		if(start == null || end == null){
+//			TODO return Bad request
+		}
+
 		List<DayRecap> personDays = Lists.newArrayList();
-		if(person != null){
-		 personDays = FluentIterable.from(
-				personDao.getPersonDayIntoInterval(person, new DateInterval(start, end), false))
+
+		personDays = FluentIterable.from(personDao.getPersonDayIntoInterval(
+				 person,new DateInterval(start, end) , false))
 				.transform(	new	Function<PersonDay, DayRecap>(){
 			@Override
 			public DayRecap apply(PersonDay personday){
@@ -58,7 +66,7 @@ public class Persons extends Controller{
 				dayRecap.mission = personDayManager.isOnMission(personday);
 				return dayRecap;
 			}}).toList();
-		}
+
 		renderJSON(personDays);
 	}
 	
