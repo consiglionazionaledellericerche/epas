@@ -71,8 +71,8 @@ GET 	/version								Version.showVersion
 
 # EndPoints Rest
 
-GET		/rest/persons/{email}/days				Persons.days
-GET		/rest/persons/{email}/days				Persons.missions
+GET		/rest/persons/{email}/days				rest.Persons.days
+GET		/rest/persons/{email}/missions			rest.Persons.missions
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
