@@ -17,20 +17,16 @@ import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.Absence;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
-import models.PersonDay;
 import models.Qualification;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import models.enumerate.ConfigurationFields;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
@@ -49,7 +45,6 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -58,6 +53,7 @@ import com.google.gdata.util.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
+import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
@@ -68,7 +64,6 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-import dto.DayRecap;
 import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -99,6 +94,12 @@ public class Persons extends Controller {
 	
 	@Inject 
 	static PersonDayManager personDayManager;
+	
+	@Inject 
+	static CompetenceDao competenceDao;
+	
+	@Inject 
+	static CompetenceManager competenceManager;
 
 	private final static Logger log = LoggerFactory.getLogger(Persons.class);
 		
@@ -318,7 +319,7 @@ public class Persons extends Controller {
 		JPAPlugin.startTx(false);
 
 		// Eliminazione competenze
-		CompetenceManager.deletePersonCompetence(person);
+		competenceManager.deletePersonCompetence(person);
 		JPAPlugin.closeTx(false);
 
 		// Eliminazione contratti

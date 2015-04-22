@@ -1,5 +1,7 @@
 package manager;
 
+import javax.inject.Inject;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -17,8 +19,16 @@ import com.google.common.collect.TreeBasedTable;
 import dao.CompetenceDao;
 
 public class OvertimesManager {
+	
+	private final CompetenceDao competenceDao;
 
 	private final static Logger log = LoggerFactory.getLogger(OvertimesManager.class);
+	
+	@Inject
+	public OvertimesManager(CompetenceDao competenceDao) {
+		super();
+		this.competenceDao = competenceDao;
+	}
 	/**
 	 * 
 	 * @param body
@@ -27,11 +37,11 @@ public class OvertimesManager {
 	 * @param month
 	 * @return la tabella contenente la struttura di persona-reason della competenza-codice competenza
 	 */
-	public static Table<String, String, Integer> buildMonthForExport(PersonsList body, CompetenceCode code, int year, int month){
+	public Table<String, String, Integer> buildMonthForExport(PersonsList body, CompetenceCode code, int year, int month){
 		Table<String, String, Integer> overtimesMonth = TreeBasedTable.<String, String, Integer>create();
 		
 		for (Person person : body.persons) {
-			Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, code);
+			Optional<Competence> competence = competenceDao.getCompetence(person, year, month, code);
 			log.debug("find  Competence {} per person={}, year={}, month={}, competenceCode={}",
 					new Object[]{competence, person, year, month, code});	
 
@@ -53,9 +63,9 @@ public class OvertimesManager {
 	 * @param year
 	 * @param month
 	 */
-	public static void setRequestedOvertime(PersonsCompetences body, int year, int month){
+	public void setRequestedOvertime(PersonsCompetences body, int year, int month){
 		for (Competence competence : body.competences) {
-			Optional<Competence> oldCompetence = CompetenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
+			Optional<Competence> oldCompetence = competenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
 			if (oldCompetence.isPresent()) {
 				// update the requested hours
 				oldCompetence.get().setValueApproved(competence.getValueApproved(), competence.getReason());
@@ -78,8 +88,8 @@ public class OvertimesManager {
 	 * @param person
 	 * @param hours
 	 */
-	public static void setSupervisorOvertime(Person person, Integer hours){
-		PersonHourForOvertime personHourForOvertime = CompetenceDao.getPersonHourForOvertime(person);
+	public void setSupervisorOvertime(Person person, Integer hours){
+		PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
 		if (personHourForOvertime == null) {
 			personHourForOvertime = new PersonHourForOvertime(person, hours);
 			log.debug("Created  PersonHourForOvertime with persons {} and  hours={}", person.getFullname(), hours);

@@ -1,7 +1,6 @@
 package manager;
 
 import manager.recaps.vacation.VacationsRecap;
-import models.ConfYear;
 import models.Contract;
 import models.Office;
 import models.Person;

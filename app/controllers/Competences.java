@@ -1,7 +1,6 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +35,6 @@ import security.SecurityRules;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -50,7 +48,6 @@ import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import dao.wrapper.WrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -68,6 +65,8 @@ public class Competences extends Controller{
 	static CompetenceManager competenceManager;
 	@Inject 
 	static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
+	@Inject
+	static CompetenceDao competenceDao;
 	
 	private final static Logger log = LoggerFactory.getLogger(Competences.class);
 	
@@ -161,7 +160,7 @@ public class Competences extends Controller{
 		for(IWrapperPerson p : activePersons){
 			Competence competence = null;
 			for(CompetenceCode c : p.getValue().competenceCode){
-				Optional<Competence> comp = CompetenceDao.getCompetence(p.getValue(), year, month, c);
+				Optional<Competence> comp = competenceDao.getCompetence(p.getValue(), year, month, c);
 				if(!comp.isPresent()){
 					competence = new Competence(p.getValue(), c, year, month);
 					competence.valueApproved = 0;
@@ -172,13 +171,13 @@ public class Competences extends Controller{
 		}
 		List<String> code = CompetenceManager.populateListWithOvertimeCodes();		
 				
-		List<Competence> competenceList = CompetenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
+		List<Competence> competenceList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
 		int totaleOreStraordinarioMensile = CompetenceManager.getTotalMonthlyOvertime(competenceList);
 		
-		List<Competence> competenceYearList = CompetenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, true);		
+		List<Competence> competenceYearList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, true);		
 		int totaleOreStraordinarioAnnuale = CompetenceManager.getTotalYearlyOvertime(competenceYearList);
 		
-		List<TotalOvertime> total = CompetenceDao.getTotalOvertime(year, office);				
+		List<TotalOvertime> total = competenceDao.getTotalOvertime(year, office);				
 		int totaleMonteOre = CompetenceManager.getTotalOvertime(total);		
 		
 		render(year, month, office, offices, activePersons, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, 
@@ -188,7 +187,7 @@ public class Competences extends Controller{
 	
 
 	public static void updateCompetence(long pk, String name, Integer value){
-		final Competence competence = CompetenceDao.getCompetenceById(pk);
+		final Competence competence = competenceDao.getCompetenceById(pk);
 				
 		notFoundIfNull(competence);
 		if (validation.hasErrors()) {
@@ -270,7 +269,7 @@ public class Competences extends Controller{
 		
 		rules.checkIfPermitted(office);
 		
-		List<TotalOvertime> totalList = CompetenceDao.getTotalOvertime(year, office);
+		List<TotalOvertime> totalList = competenceDao.getTotalOvertime(year, office);
 		int totale = CompetenceManager.getTotalOvertime(totalList);		
 		
 		render(totalList, totale, year, office, offices);
@@ -419,7 +418,7 @@ public class Competences extends Controller{
 				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue());
 		
 		List<Person> personList = simpleResults.list();
-		FileInputStream inputStream = CompetenceManager.getOvertimeInYear(year, personList);
+		FileInputStream inputStream = competenceManager.getOvertimeInYear(year, personList);
 		renderBinary(inputStream, "straordinari"+year+".csv");
 	}
 	
@@ -445,7 +444,7 @@ public class Competences extends Controller{
 		
 		Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newHashMap();
 		
-		List<Competence> competenceInYear = CompetenceDao
+		List<Competence> competenceInYear = competenceDao
 				.getCompetenceInYear(year, Optional.fromNullable(office));
 				
 		for (Competence competence: competenceInYear) {

@@ -2,7 +2,6 @@ package dao;
 
 import helpers.ModelQuery;
 import models.ConfGeneral;
-import models.ConfYear;
 import models.Office;
 import models.query.QConfGeneral;
 

@@ -8,11 +8,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import models.base.BaseModel;
-import models.enumerate.Parameter;
 
 import org.hibernate.envers.Audited;
-
-import com.google.common.base.Preconditions;
 
 
 

@@ -73,6 +73,7 @@ GET 	/version								Version.showVersion
 
 GET		/rest/persons/{email}/days				rest.Persons.days
 GET		/rest/persons/{email}/missions			rest.Persons.missions
+GET		/rest/persons/{email}/competences		rest.Persons.competences
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

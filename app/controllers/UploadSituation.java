@@ -25,12 +25,10 @@ import manager.PersonDayManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
-import models.ConfGeneral;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -72,6 +70,9 @@ public class UploadSituation extends Controller{
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static CompetenceDao competenceDao;
 	
 	@Inject
 	static PersonDayManager personDayManager;
@@ -157,7 +158,7 @@ public class UploadSituation extends Controller{
 				}
 
 				//competenceList = pm.getCompetenceInMonthForUploadSituation();
-				competenceList = CompetenceDao.getCompetenceInMonthForUploadSituation(p, year, month);
+				competenceList = competenceDao.getCompetenceInMonthForUploadSituation(p, year, month);
 
 				for(Competence comp : competenceList){
 					Logger.trace(
@@ -433,7 +434,7 @@ public class UploadSituation extends Controller{
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
 					AbsenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
-					CompetenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
+					competenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
 					pmList, mealTicket);
 			if(rispostaElaboraDati.isOk()){
 				for(PersonMonthRecap personMonth : pmList){

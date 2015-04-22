@@ -6,7 +6,6 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;

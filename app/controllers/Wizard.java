@@ -14,7 +14,6 @@ import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ContractManager;
 import manager.OfficeManager;
-import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -23,7 +22,6 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -47,7 +45,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
-import dao.ConfGeneralDao;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.UserDao;

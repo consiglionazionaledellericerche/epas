@@ -8,26 +8,27 @@ import javax.inject.Inject;
 
 import manager.PersonDayManager;
 import models.Absence;
+import models.Competence;
 import models.Person;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
+
+import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import play.libs.WS.HttpResponse;
-import play.mvc.Controller;
-import play.mvc.With;
-import controllers.RequestInit;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
+import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
+import dto.CompetenceDTO;
 import dto.DayRecap;
 
 @With(Resecure.class)
@@ -41,6 +42,8 @@ public class Persons extends Controller{
 	static IWrapperFactory wrapperFactory;
 	@Inject
 	static AbsenceDao absenceDao;
+	@Inject
+	static CompetenceDao competenceDao;
 	
 	@BasicAuth
 	public static void days(String email,LocalDate start,LocalDate end){
@@ -49,13 +52,11 @@ public class Persons extends Controller{
 		if(person == null){
 //			TODO return not found
 		}
-		if(start == null || end == null){
+		if(start.isAfter(end) || start == null || end == null){
 //			TODO return Bad request
 		}
 
-		List<DayRecap> personDays = Lists.newArrayList();
-
-		personDays = FluentIterable.from(personDao.getPersonDayIntoInterval(
+		List<DayRecap> personDays = FluentIterable.from(personDao.getPersonDayIntoInterval(
 				 person,new DateInterval(start, end) , false))
 				.transform(	new	Function<PersonDay, DayRecap>(){
 			@Override
@@ -66,7 +67,7 @@ public class Persons extends Controller{
 				dayRecap.mission = personDayManager.isOnMission(personday);
 				return dayRecap;
 			}}).toList();
-
+		
 		renderJSON(personDays);
 	}
 	
@@ -94,5 +95,37 @@ public class Persons extends Controller{
 				}}).toList();
 			}
 			renderJSON(personDays);
+	}
+	
+	@BasicAuth
+	public static void competences(String email,LocalDate start,LocalDate end,List<String> code){
+
+		Person person = personDao.getPersonByEmail(email);
+		if(person == null){
+//			TODO return not found
+		}
+		if(start.isAfter(end) || start == null || end == null){
+//			TODO return Bad request
+		}
+		
+		List<Competence> competences = Lists.newArrayList();
+
+		while(!start.isAfter(end)){
+			
+			competences.addAll(competenceDao.competenceInMonth(person, start.getYear(),
+					start.getMonthOfYear(), Optional.fromNullable(code)));
+			
+			start.plusMonths(1);
+//			Il caso in cui non vengano specificate delle date che coincidono con l'inizio e la fine di un mese
+			if(start.isAfter(end) && start.getMonthOfYear() == end.getMonthOfYear()){
+				competences.addAll(competenceDao.competenceInMonth(person, start.getYear(),
+						start.getMonthOfYear(), Optional.fromNullable(code)));
+			}
+		}
+
+		List<CompetenceDTO> competencesList = FluentIterable.from(competences)
+				.transform(CompetenceDTO.fromCompetence.ISTANCE).toList();
+			
+		renderJSON(competencesList);
 	}
 }
