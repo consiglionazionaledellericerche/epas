@@ -1,5 +1,6 @@
 package controllers.rest;
 
+import helpers.JsonResponse;
 import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
@@ -15,7 +16,9 @@ import models.PersonDay;
 import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.With;
+import play.mvc.results.BadRequest;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -50,10 +53,10 @@ public class Persons extends Controller{
 
 		Person person = personDao.getPersonByEmail(email);
 		if(person == null){
-//			TODO return not found
+			JsonResponse.notFound("Indirizzo email incorretto");
 		}
-		if(start.isAfter(end) || start == null || end == null){
-//			TODO return Bad request
+		if(start == null || end == null || start.isAfter(end)){
+			JsonResponse.badRequest("Date non valide");
 		}
 
 		List<DayRecap> personDays = FluentIterable.from(personDao.getPersonDayIntoInterval(
@@ -99,13 +102,13 @@ public class Persons extends Controller{
 	
 	@BasicAuth
 	public static void competences(String email,LocalDate start,LocalDate end,List<String> code){
-
+				
 		Person person = personDao.getPersonByEmail(email);
 		if(person == null){
-//			TODO return not found
+			JsonResponse.notFound("Indirizzo email incorretto");
 		}
-		if(start.isAfter(end) || start == null || end == null){
-//			TODO return Bad request
+		if(start == null || end == null || start.isAfter(end)){
+			JsonResponse.badRequest("Date non valide");
 		}
 		
 		List<Competence> competences = Lists.newArrayList();
