@@ -8,7 +8,7 @@ public class CompetenceDTO {
 	public int year;
 	public int month;
 	public String code;
-	public int approvedHours;
+	public int valueApproved;
 	
 	public enum fromCompetence implements Function<Competence,CompetenceDTO>{
 		ISTANCE;
@@ -19,7 +19,7 @@ public class CompetenceDTO {
 				competenceDTO.year = competence.year;
 				competenceDTO.month = competence.month;
 				competenceDTO.code = competence.competenceCode.code;
-				competenceDTO.approvedHours = competence.valueApproved;
+				competenceDTO.valueApproved = competence.valueApproved;
 				return competenceDTO;
 		}
 	}
