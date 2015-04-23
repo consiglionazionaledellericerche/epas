@@ -54,7 +54,8 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "rest.Persons.days",
-        "rest.Persons.missions"
+        "rest.Persons.missions",
+        "rest.Persons.competences"
        ), target == null, granted == false)
 then
  $c.grant();
