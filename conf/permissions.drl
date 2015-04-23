@@ -737,6 +737,15 @@ then
  $c.grant();
 end 
 
+rule unprotected_methods
+when
+ $c: PermissionCheck(action in (
+    "Version.showVersion"
+    ), target == null, granted == false)
+then
+ $c.grant();
+end 
+
 
 /*
  *		Schema da implementare per ogni permesso
