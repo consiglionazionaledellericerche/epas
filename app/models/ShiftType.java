@@ -32,11 +32,11 @@ public class ShiftType extends BaseModel{
 	public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<PersonShiftShiftType>();
 	
 	@NotAudited
-	@OneToMany(mappedBy="shiftType", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="shiftType")
 	public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 	
 	@NotAudited
-	@OneToMany(mappedBy="type", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="type")
 	public List<ShiftCancelled> shiftCancelled = new ArrayList<ShiftCancelled>();
 	
 	@NotAudited
@@ -44,7 +44,7 @@ public class ShiftType extends BaseModel{
 	@JoinColumn(name="shift_time_table_id")
 	public ShiftTimeTable shiftTimeTable;
 	
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = true)
 	@JoinColumn(name = "shift_categories_id")
 	public ShiftCategories shiftCategories;
 }

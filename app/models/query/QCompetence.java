@@ -1,19 +1,15 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
-
-import javax.annotation.Generated;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.Competence;
 
-import com.mysema.query.types.Path;
+
+import com.mysema.query.types.path.*;
+
 import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.NumberPath;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
 
 
 /**
@@ -34,6 +30,8 @@ public class QCompetence extends EntityPathBase<Competence> {
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final NumberPath<Integer> exceededMins = createNumber("exceededMins", Integer.class);
 
     //inherited
     public final NumberPath<Long> id = _super.id;
