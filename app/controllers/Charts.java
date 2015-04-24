@@ -46,6 +46,9 @@ public class Charts extends Controller{
 	
 	@Inject
 	static ChartsManager chartsManager;
+	
+	@Inject
+	static CompetenceDao competenceDao;
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
@@ -96,7 +99,7 @@ public class Charts extends Controller{
 		
 		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
 		Long val = null;
-		Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
+		Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
 		if(result.isPresent())
 			val = result.get().longValue();
 

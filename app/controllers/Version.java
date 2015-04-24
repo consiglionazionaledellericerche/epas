@@ -10,7 +10,7 @@ import play.mvc.With;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class} )
 public class Version extends Controller {
 
     public static void showVersion() {

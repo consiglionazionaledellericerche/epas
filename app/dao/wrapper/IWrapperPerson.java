@@ -1,7 +1,5 @@
 package dao.wrapper;
 
-import java.util.List;
-
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;

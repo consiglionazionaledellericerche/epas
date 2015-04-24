@@ -64,9 +64,11 @@ POST	/absenceFromJson/absenceInPeriod/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/
 #Ricezione richiesta codici frequenti di assenza
 GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}		AbsenceFromJson.frequentAbsence
 
-# Visualizzazione Versione
+# EndPoints Rest
 
-GET 	/version								Version.showVersion
+GET		/rest/persons/{email}/days				rest.Persons.days
+GET		/rest/persons/{email}/missions			rest.Persons.missions
+GET		/rest/persons/{email}/competences		rest.Persons.competences
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

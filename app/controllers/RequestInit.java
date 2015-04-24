@@ -16,7 +16,6 @@ import models.Office;
 import models.Permission;
 import models.Qualification;
 import models.User;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 import models.query.QPermission;
 import models.query.QRole;

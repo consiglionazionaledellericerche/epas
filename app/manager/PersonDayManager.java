@@ -9,8 +9,6 @@ import java.util.List;
 
 import models.Absence;
 import models.AbsenceType;
-import models.ConfGeneral;
-import models.ConfYear;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;

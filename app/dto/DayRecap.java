@@ -1,6 +1,5 @@
 package dto;
 
-import org.joda.time.LocalDate;
 
 public class DayRecap {
         public int workingMinutes;

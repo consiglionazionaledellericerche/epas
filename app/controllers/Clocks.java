@@ -12,14 +12,12 @@ import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
-import models.ConfGeneral;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;

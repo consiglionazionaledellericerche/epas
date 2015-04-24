@@ -1,3 +1,19 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo:'Version  ' + version /}
+#{extends 'main3.html' /}
+#{set header:'banner' /}
+#{set title: 'Version  ' + version /}
+
+#{set 'moreStyles'}
+<style type="text/css">
+#content{
+  margin-top: 5em;
+}
+</style>
+#{/set}
+
+<div class="panel panel-default col-sm-4 col-sm-offset-4" id="content" >
+  <div class="panel-heading">
+      <h1>ePas Version ${version} </h1>
+  </div>
+</div>
+
 

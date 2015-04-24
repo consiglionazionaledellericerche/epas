@@ -11,8 +11,11 @@ import models.ShiftType;
 import models.enumerate.ShiftSlot;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
+import models.query.QShiftType;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mysema.query.jpa.JPQLQuery;
 
@@ -23,6 +26,7 @@ import com.mysema.query.jpa.JPQLQuery;
  */
 public class PersonShiftDayDao {
 
+	private final static Logger log = LoggerFactory.getLogger(PersonShiftDayDao.class);
 	public final static QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 	public final static QPersonShift personShift = QPersonShift.personShift;
 	/**
@@ -33,12 +37,15 @@ public class PersonShiftDayDao {
 	 * Null altrimenti 
 	 */
 	public static PersonShiftDay getPersonShiftDay(Person person, LocalDate date){
+		QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
+		QPersonShift personShift = QPersonShift.personShift;
 		
 		JPQLQuery query = ModelQuery.queryFactory().from(personShiftDay)
-				.where(personShiftDay.personShift.person.eq(person).and(personShiftDay.date.eq(date)));
+				.join(personShiftDay.personShift, personShift)
+				.where(personShift.person.eq(person).and(personShiftDay.date.eq(date)));
+		PersonShiftDay psd = query.singleResult(personShiftDay);
 		
-		return query.singleResult(personShiftDay);
-		
+		return psd;
 	}
 	
 	/**

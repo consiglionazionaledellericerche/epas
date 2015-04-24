@@ -50,8 +50,6 @@ public class VacationsAdmin extends Controller{
 		
 		if(page==null)
 			page = 0;
-
-		rules.checkIfPermitted("");
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
 				officeDao.getOfficeAllowed(Security.getUser().get()),
