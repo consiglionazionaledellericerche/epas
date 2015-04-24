@@ -2,30 +2,17 @@ package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
-import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
-import models.AbsenceType;
-import models.ConfGeneral;
 import models.Person;
-import models.PersonDay;
-import models.StampModificationType;
-import models.StampType;
-import models.enumerate.ConfigurationFields;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -34,7 +21,6 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;

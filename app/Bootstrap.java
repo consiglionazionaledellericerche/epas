@@ -29,10 +29,13 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.libs.Codec;
 
+import com.google.common.base.Optional;
 import com.google.common.io.Resources;
 
 import controllers.Security;
 import dao.OfficeDao;
+import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
@@ -47,7 +50,10 @@ public class Bootstrap extends Job<Void> {
 	
 	@Inject
 	static OfficeDao officeDao;
-	
+	@Inject
+	static UsersRolesOfficesDao usersRolesOfficesDao;
+	@Inject
+	static UserDao userDao;
 	@Inject
 	static IWrapperFactory wrapperFactory;
 
@@ -123,8 +129,9 @@ public class Bootstrap extends Job<Void> {
 		bootstrapPermissionsHandler();
 		
 		bootstrapSuperAdminCreation();
-				
-
+		
+		restUsersCreation();
+	
 	}
 	
 	/**
@@ -428,5 +435,41 @@ public class Bootstrap extends Job<Void> {
 	
 	}
 	
+	private void restUsersCreation(){
+		
+		Role restRole = Role.find("byName", Role.REST_CLIENT).first();
+		if(restRole == null){
+			restRole = new Role();
+			restRole.name = Role.REST_CLIENT;
+			restRole.save();
+			Permission permission = new Permission();
+			permission.description = Security.REST;
+			permission.save();
+			restRole.permissions.add(permission);
+			restRole.save();
+		}
+		
+		String protimeUser = Play.configuration.getProperty("rest.protime.user");
+		User protime = userDao.getUserByUsernameAndPassword(protimeUser, Optional.<String>absent());
+		
+		if(protime == null){
+				protime = new User();
+				protime.username = protimeUser;
+				protime.password = Codec.hexMD5(Play.configuration.getProperty("rest.protime.password"));
+				protime.save();
+		}
+
+		List<Office> areas = officeDao.getAreas();
+		
+		for(Office area : areas){
+			if(!usersRolesOfficesDao.getUsersRolesOffices(protime, restRole, area).isPresent()){
+				UsersRolesOffices uro = new UsersRolesOffices();
+				uro.user = protime;
+				uro.office = area;
+				uro.role = restRole;
+				uro.save();
+			}
+		}	
+	}
 	
 }

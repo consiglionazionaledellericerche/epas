@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.ShiftManager;
 import models.Absence;
 import models.Competence;
@@ -48,6 +50,9 @@ import dao.ShiftDao;
  *
  */
 public class Shift extends Controller {
+	
+	@Inject
+	static ShiftManager shiftManager;
 	
 	/*
 	 * @author arianna
@@ -281,7 +286,7 @@ public class Shift extends Controller {
 		
 		// save the total requested Shift Hours in the DB
 		Logger.debug("AGGIORNA IL DATABASE");
-		List<Competence> savedCompetences = ShiftManager.updateDBShiftCompetences(totalPersonShiftWorkedTime, year, month);
+		List<Competence> savedCompetences = shiftManager.updateDBShiftCompetences(totalPersonShiftWorkedTime, year, month);
 		
 		// crea la tabella con le informazioni per il report PDF mensile
 		totalShiftInfo = ShiftManager.getPersonsReportShiftInfo (totalPersonShiftWorkedTime, savedCompetences);

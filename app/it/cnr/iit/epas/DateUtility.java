@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ConfGeneralManager;
-import models.ConfGeneral;
 import models.Office;
 import models.enumerate.Parameter;
 
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;

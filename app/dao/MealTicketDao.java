@@ -7,11 +7,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import manager.ConfGeneralManager;
-import models.ConfGeneral;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.Parameter;
 import models.query.QContract;
 import models.query.QMealTicket;

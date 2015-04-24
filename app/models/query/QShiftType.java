@@ -1,20 +1,15 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
-
-import javax.annotation.Generated;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.ShiftType;
 
-import com.mysema.query.types.Path;
+
+import com.mysema.query.types.path.*;
+
 import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.ListPath;
-import com.mysema.query.types.path.NumberPath;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
 
 
 /**
@@ -48,9 +43,9 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final ListPath<models.ShiftCancelled, QShiftCancelled> shiftCancelled = this.<models.ShiftCancelled, QShiftCancelled>createList("shiftCancelled", models.ShiftCancelled.class, QShiftCancelled.class, PathInits.DIRECT2);
 
-    public final QShiftTimeTable shiftTimeTable;
+    public final QShiftCategories shiftCategories;
 
-    public final QPerson supervisor;
+    public final QShiftTimeTable shiftTimeTable;
 
     public final StringPath type = createString("type");
 
@@ -72,8 +67,8 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public QShiftType(Class<? extends ShiftType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.shiftCategories = inits.isInitialized("shiftCategories") ? new QShiftCategories(forProperty("shiftCategories"), inits.get("shiftCategories")) : null;
         this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable")) : null;
-        this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
     }
 
 }

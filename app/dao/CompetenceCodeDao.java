@@ -22,7 +22,9 @@ public class CompetenceCodeDao {
 	 * @return il competenceCode relativo al codice passato come parametro
 	 */
 	public static CompetenceCode getCompetenceCodeByCode(String code){
-		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
+		final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode)
 				.where(competenceCode.code.eq(code));
 		
@@ -36,7 +38,9 @@ public class CompetenceCodeDao {
 	 * @return il codice competenza relativo alla descrizione passata come parametro
 	 */
 	public static CompetenceCode getCompetenceCodeByDescription(String description){
-		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
+		final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode)
 				.where(competenceCode.description.eq(description));
 		
@@ -50,7 +54,9 @@ public class CompetenceCodeDao {
 	 * @return il codice di competenza relativo all'id passato come parametro
 	 */
 	public static CompetenceCode getCompetenceCodeById(Long id){
-		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
+		final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode)
 				.where(competenceCode.id.eq(id));
 		
@@ -63,7 +69,9 @@ public class CompetenceCodeDao {
 	 * @return la lista di tutti i codici di competenza presenti nel database
 	 */
 	public static List<CompetenceCode> getAllCompetenceCode(){
-		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
+		final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode);
 		return query.orderBy(competenceCode.id.asc()).list(competenceCode);
 	}

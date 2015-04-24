@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -48,6 +50,15 @@ import dao.PersonReperibilityDayDao;
  *
  */
 public class ReperibilityManager {
+	
+	private final CompetenceDao competenceDao;
+	
+	@Inject
+	public ReperibilityManager(CompetenceDao competenceDao) {
+		super();
+		this.competenceDao = competenceDao;
+	}
+	
 	
 	public static String codFr = "207";    						// codice dei turni feriali
 	public static String codFs = "208";							// codice dei turni festivi
@@ -437,7 +448,7 @@ public class ReperibilityManager {
 	 * @param month						- mese di riferimento dei giorni di  reperibilità passati come parametro
 	 * @return							- numero di competenze salvate nel DB
 	 */
-	public static int updateDBReperibilityCompetences(List<PersonReperibilityDay> personReperibilityDays, int year, int month) {
+	public int updateDBReperibilityCompetences(List<PersonReperibilityDay> personReperibilityDays, int year, int month) {
 		
 		// single person reperibility period in a month
 		class PRP {
@@ -562,7 +573,7 @@ public class ReperibilityManager {
 			
 			Logger.debug("Cerca Competence FS per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFS.id);
 			// save the FS reperibility competences in the DB
-			Optional<Competence> FsCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFS);
+			Optional<Competence> FsCompetence = competenceDao.getCompetence(person, year, month, competenceCodeFS);
 //			Competence FsCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCodeFS).first();
 			
@@ -586,7 +597,7 @@ public class ReperibilityManager {
 			
 			Logger.debug("Cerca Competence FR per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFR.id);
 			// save the FR reperibility competences in the DB
-			Optional<Competence> FrCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFR);
+			Optional<Competence> FrCompetence = competenceDao.getCompetence(person, year, month, competenceCodeFR);
 //			Competence FrCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCodeFR).first();
 			

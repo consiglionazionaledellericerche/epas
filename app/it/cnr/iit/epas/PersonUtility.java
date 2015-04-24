@@ -10,8 +10,6 @@ import javax.persistence.Query;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.AbsenceType;
-import models.Competence;
-import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
@@ -19,7 +17,6 @@ import models.Stamping;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-import dao.CompetenceDao;
 import dao.PersonDao;
 
 public class PersonUtility {

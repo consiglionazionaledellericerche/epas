@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import manager.AbsenceManager;
 import manager.ReperibilityManager;
 import models.Absence;
@@ -59,6 +61,11 @@ import dao.PersonReperibilityDayDao;
  *
  */
 public class Reperibility extends Controller {
+	
+	@Inject
+	static CompetenceDao competenceDao;
+	@Inject
+	static ReperibilityManager reperibilityManager;
 
 	public static String codFr = "207";
 	public static String codFs = "208";
@@ -441,13 +448,13 @@ public class Reperibility extends Controller {
 		Logger.debug("dimensione personReperibilityDays = %s", personReperibilityDays.size());
 		
 		// update the reperibility days in the DB
-		int updatedCompetences = ReperibilityManager.updateDBReperibilityCompetences(personReperibilityDays, year, month);
+		int updatedCompetences = reperibilityManager.updateDBReperibilityCompetences(personReperibilityDays, year, month);
 		Logger.debug("Salvate o aggiornate %d competences", updatedCompetences);
 
 		// builds the table with the summary of days and reperibility periods description
 		// reading data from the Competence table in the DB
 		//List<Competence> frCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFR).fetch();
-		List<Competence> frCompetences = CompetenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFR);
+		List<Competence> frCompetences = competenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFR);
 		Logger.debug("Trovate %d competences di tipo %s nel mese %d/%d", frCompetences.size(), reperibilityType,  month, year);
 		
 		// update  reports for the approved days and reasons for the working days
@@ -458,7 +465,7 @@ public class Reperibility extends Controller {
 		// builds the table with the summary of days and reperibility periods description
 		// reading data from the Competence table in the DB
 		//List<Competence> fsCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFS).fetch();
-		List<Competence> fsCompetences = CompetenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFS);
+		List<Competence> fsCompetences = competenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFS);
 		Logger.debug("Trovate %d competences di tipo %s nel mese %d/%d", fsCompetences.size(), reperibilityType,  month, year);
 		
 		// update  reports for the approved days and reasons for the holidays 

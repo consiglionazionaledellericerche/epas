@@ -29,6 +29,10 @@ import dao.UserDao;
 
 public class Security extends Secure.Security {
 	
+	/* Client rest */
+	
+	public final static String REST = "rest";
+	
 	/* lettore badge */
 	
 	public final static String STAMPINGS_CREATE = "stampingsCreate";

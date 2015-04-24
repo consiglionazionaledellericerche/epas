@@ -9,7 +9,6 @@ import java.util.Set;
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import models.Absence;
-import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
