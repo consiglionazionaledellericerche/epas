@@ -402,13 +402,11 @@ public class Competences extends Controller{
 	
 	
 	public static void exportCompetences(){
-		rules.checkIfPermitted("");
 		render();
 	}	
 	
 	public static void getOvertimeInYear(int year) throws IOException{
 		
-		rules.checkIfPermitted("");
 		Office office = Security.getUser().get().person.office;
 		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(CompetenceCodeDao.getCompetenceCodeByCode("S1"), 
 				Optional.fromNullable(""), 
