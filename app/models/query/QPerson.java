@@ -1,22 +1,15 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
-
-import javax.annotation.Generated;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.Person;
 
-import com.mysema.query.types.Path;
+
+import com.mysema.query.types.path.*;
+
 import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.DatePath;
-import com.mysema.query.types.path.DateTimePath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.ListPath;
-import com.mysema.query.types.path.NumberPath;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
 
 
 /**
@@ -102,7 +95,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath room = createString("room");
 
-    public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
+    public final ListPath<models.ShiftCategories, QShiftCategories> shiftCategories = this.<models.ShiftCategories, QShiftCategories>createList("shiftCategories", models.ShiftCategories.class, QShiftCategories.class, PathInits.DIRECT2);
 
     public final StringPath surname = createString("surname");
 
