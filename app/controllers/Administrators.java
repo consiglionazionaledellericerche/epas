@@ -14,10 +14,13 @@ import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
 
 import play.Play;
+import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
@@ -34,17 +37,10 @@ public class Administrators extends Controller {
 	private static final String SUDO_USERNAME = "sudo.username";
 	private static final String USERNAME = "username";
 
-	@Inject
-	static UsersRolesOfficesDao usersRolesOfficesDao;
-	
-	@Inject
-	static OfficeManager officeManager;
-	
-	@Inject
-	static OfficeDao officeDao;
-	
-	@Inject
-	static IWrapperFactory wrapperFactory;
+	@Inject static UsersRolesOfficesDao usersRolesOfficesDao;
+	@Inject static OfficeManager officeManager;
+	@Inject	static OfficeDao officeDao;
+	@Inject	static IWrapperFactory wrapperFactory;
 	
 	public static void insertNewAdministrator(Long officeId, Long roleId) {
 		
@@ -164,6 +160,88 @@ public class Administrators extends Controller {
 		render(office, person);
 	
 	}
+	
+	@NoCheck
+	public static void insertAccountSystem(Long officeId) {
+	
+		Office office = officeDao.getOfficeById(officeId);
+		if(office==null) {
+			flash.error("La sede per la quale si vuole definire l'account di sistema "
+					+ "è inesistente. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
+		}
+		
+		List<Role> systemRoles = usersRolesOfficesDao.getSystemRolesOffices();
+		
+		// TODO: riportare nella select una lista di user già presente in ePAS.
+		// esempio l'accaunto del lettore d'area dovrebbe essere dispobile per essere
+		// assegnato anche agli altri istituti d'area e non essere duplicato.
+		
+		IWrapperOffice wrapperOffice = wrapperFactory.create(office);
+		
+		render(wrapperOffice, systemRoles);
+		
+	}
+	
+	@NoCheck
+	public static void saveAccountSystem(Office office, User user, Role role) {
+		
+		Preconditions.checkNotNull(office);
+		Preconditions.checkState(office.isPersistent());
+		Preconditions.checkNotNull(role);
+		Preconditions.checkState(role.isPersistent());
+		
+		Preconditions.checkState(user.username != null && user.username != "");
+		Preconditions.checkState(user.password != null && user.password != "");
+		
+		// TODO: effettuare ulteriori controlli sul nome dell'utente
+		
+		user.password = Codec.hexMD5(user.password);
+		
+		user.save();
+		
+		UsersRolesOffices uro = new UsersRolesOffices();
+		uro.user = user;
+		uro.office = office;
+		uro.role = role;
+		uro.save();
+		
+		flash.success("Account creato con successo.");
+	
+		Offices.showOffices();
+		
+	}
+	
+	@NoCheck
+	public static void deleteAccountSystem(Long systemUroId) {
+		
+		UsersRolesOffices systemUro = usersRolesOfficesDao.getById(systemUroId);
+		
+		Preconditions.checkNotNull(systemUro);
+		
+		//Check Account di sistema
+		List<Role> systemRoles = usersRolesOfficesDao.getSystemRolesOffices();
+		
+		boolean isSystemRole = false;
+		for(Role role : systemRoles) 
+			if(role.name.equals(systemUro.role.name))
+				isSystemRole = true;
+		
+		Preconditions.checkState(isSystemRole);
+		
+		// TODO: se l'user di sistema è presente in altri uro non andrebbe eliminato.
+		User user = systemUro.user;
+		
+		systemUro.delete();
+		
+		user.delete();
+		
+		flash.success("Account rimosso con successo.");
+		
+		Offices.showOffices();
+		
+	}
+			
 		
 	/**
 	 * Switch in un'altra persona

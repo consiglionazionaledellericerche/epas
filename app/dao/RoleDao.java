@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.List;
+
 import helpers.ModelQuery;
 import models.Permission;
 import models.Role;

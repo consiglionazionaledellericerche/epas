@@ -46,12 +46,10 @@
 				    <table class="table table-hover">
 				      <tr class="warning center">
 				        <th>Sede</th>
-				        <th>Indirizzo</th>
-				        <th>Codice</th>
-				        <th>Data<br>Affiliazione</th>
-				        <th>Numero<br>Dipendenti</th>
+				        <th>Informazioni</th>
 				        <th>Amministratori</th>
 				        <th>Amministratori<br>sola lettura</th>
+				        <th>Account <br>di Sistema</th>
 				      </tr>
 				      
 				      #{list items:istituto.getWrapperSeats(), as:'sede'}
@@ -68,15 +66,19 @@
 				          #{/else}
 				          </td>
 				          <td>
-				            ${sede.value.address}<br><br>
+				            <strong>Indirizzo:</strong> ${sede.value.address}<br>
+				            <strong>Codice:</strong> ${sede.value.code}<br>
+				            #{if sede.value.joiningDate != null}
+				              <strong>Data affiliazione a ${istituto.value.contraction}:</strong> ${sede.value.joiningDate}<br>
+				            #{/if}
+				            <strong>Numero Dipendenti:</strong> ${sede.activePersonsInOffice().size()}<br>
+				            
+				            <br>
 				            <strong>Lettori sede abilitati</strong><br>
 				            #{list items:sede.getActiveBadgeReaders(), as:'badgeReader'}
 				              <h4><span class="label label-success">${badgeReader}</span></h4>
 				            #{/list}
 				          </td>
-				          <td class="center">${sede.value.code}</td>
-				          <td class="center">${sede.value.joiningDate}</td>
-				          <td class="center">${sede.activePersonsInOffice().size()}</td>
 				          <!-- End Seat Data -->
 				          
 				          <!-- Seat administrator -->
@@ -133,6 +135,36 @@
 								#{/if}
 				            #{/list}
 					      </td>
+					      
+					      <td class="center">
+					      <a class="btn btn-primary btn-xs"
+				                 data-modal=".my-modal"
+				                 href="@{Administrators.insertAccountSystem(sede.value.id)}">
+				                 <span class="glyphicon glyphicon-plus" 
+				                    data-toggle="tooltip" data-placement="left" 
+				                    title="Aggiungi Amministratore per ${sede.value.name}">
+				                  </span>
+				          </a>  
+				          <br>
+				          <br>
+					      #{if sede.isEditable }
+					        #{list items:sede.getSeatSystemUsersRolesOffices(), as:'systemUro'}
+					          
+					          <strong>${systemUro.role.name}</strong> ${systemUro.user.username} 
+					          
+					          <a href="@{Administrators.deleteAccountSystem(systemUro.id)}">
+				                    <span class="glyphicon glyphicon-trash" 
+				                      data-toggle="tooltip" data-placement="left" 
+				                      title="Rimuovi dagli account di sistema.">
+				                    </span>
+				              </a>
+					          
+					          <br>
+					        #{/list}
+					      #{/if}
+					     
+					      </td>
+					      
 					      <!-- End Seat administrator -->
 				        </tr>
 				      #{/if}  
