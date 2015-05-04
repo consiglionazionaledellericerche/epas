@@ -105,18 +105,6 @@
 			
 		    <table class="table table-condensed table-form table-hover">
 				<tr>
-					<td class="lab">Dipartimento</td>
-					<td><input name="person.department" type="text" value="${person.department}"/></td>
-				</tr>
-				<tr>
-					<td class="lab">Sede</td>
-					<td><input name="person.headOffice" type="text" value="${person.headOffice}"/></td>
-				</tr>
-				<tr>
-					<td class="lab">Stanza</td>
-					<td><input name="person.room" type="text" value="${person.room}"/></td>
-				</tr>
-				<tr>
 					<td class="lab">Telefono</td>
 					#{if person.telephone != null || !person.telephone.equals('No phone number') }
 						<td><input name="person.telephone" type="text" value="${person.telephone}"/></td>
