@@ -16,9 +16,7 @@ import models.PersonDay;
 import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.With;
-import play.mvc.results.BadRequest;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -38,15 +36,15 @@ import dto.DayRecap;
 public class Persons extends Controller{
 	
 	@Inject
-	static PersonDao personDao;
-	@Inject 
-	static PersonDayManager personDayManager;
+	private static PersonDao personDao;
 	@Inject
-	static IWrapperFactory wrapperFactory;
+	private static PersonDayManager personDayManager;
 	@Inject
-	static AbsenceDao absenceDao;
+	private static IWrapperFactory wrapperFactory;
 	@Inject
-	static CompetenceDao competenceDao;
+	private static AbsenceDao absenceDao;
+	@Inject
+	private static CompetenceDao competenceDao;
 	
 	@BasicAuth
 	public static void days(String email,LocalDate start,LocalDate end){
