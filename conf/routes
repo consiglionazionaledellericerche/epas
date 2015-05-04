@@ -66,9 +66,11 @@ GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/
 
 # EndPoints Rest
 
-GET		/rest/persons/{email}/days				rest.Persons.days
-GET		/rest/persons/{email}/missions			rest.Persons.missions
-GET		/rest/persons/{email}/competences		rest.Persons.competences
+GET     /rest/persons/{email}/{action}          rest.Persons.{action}
+
+
+*       /rest/{controller}/{action}/{<[a-z0-9]+>id} rest.{controller}.{action}
+*       /rest/{controller}/{action}             rest.{controller}.{action}
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

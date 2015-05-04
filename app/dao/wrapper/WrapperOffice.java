@@ -8,18 +8,21 @@ import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
 
+import org.drools.rule.constraint.ConditionAnalyzer.ListAccessInvocation;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 /**
@@ -31,17 +34,20 @@ public class WrapperOffice implements IWrapperOffice {
 	private final Office value;
 	private final OfficeManager officeManager;
 	private final OfficeDao officeDao;
+	private final UsersRolesOfficesDao uroDao; 
 	private final WrapperModelFunctionFactory wrapperFunctionFactory;
 	
 	private Boolean isEditable = null;
 		
 	@Inject
 	WrapperOffice(@Assisted Office office, OfficeManager officeManager,
-			WrapperModelFunctionFactory wrapperFuncionFactory, OfficeDao officeDao) {
+			WrapperModelFunctionFactory wrapperFuncionFactory, OfficeDao officeDao,
+			UsersRolesOfficesDao uroDao) {
 		value = office;
 		this.officeManager = officeManager;
 		this.wrapperFunctionFactory = wrapperFuncionFactory;
 		this.officeDao = officeDao;
+		this.uroDao = uroDao;
 	}
 
 	@Override
@@ -226,8 +232,37 @@ public class WrapperOffice implements IWrapperOffice {
 		}
 		return personList;
 	}
-  	
+	
+	
+	/**
+	 * Le regole circa gli account di sistema.
+	 * Da chiamare al livello di Sede.
+	 * 
+	 * @return
+	 */
+	public List<UsersRolesOffices> getSeatSystemUsersRolesOffices() {
+		
+		Preconditions.checkState(this.isSeat());
+		
+		List<Role> roleList = uroDao.getSystemRolesOffices();
+		
+		List<UsersRolesOffices> uroList = Lists.newArrayList();
+		
+		for(UsersRolesOffices uro : this.value.usersRolesOffices) {
 
+			for(Role role : roleList) {
+
+				if( uro.role.name.equals(role.name) ) {
+					uroList.add(uro);
+					break;
+				}
+			}
+
+		}
+		
+		return uroList;
+
+	}
     
 
 }

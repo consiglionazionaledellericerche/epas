@@ -40,6 +40,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.binding.As;
+import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 
@@ -47,7 +48,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-import com.mysql.jdbc.Messages;
+
 
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
@@ -479,8 +480,8 @@ public class Reperibility extends Controller {
 		
 		String cFr = codFr;
 		String cFs = codFs;
-		String thNoStamp = Messages.getString("PDFReport.thNoStampings");
-		String thAbs = Messages.getString("PDFReport.thAbsences");
+		String thNoStamp = Messages.get("PDFReport.thNoStampings");
+		String thAbs = Messages.get("PDFReport.thAbsences");
 		
 		renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays, inconsistentAbsence, cFs, cFr, thNoStamp, thAbs);
 		

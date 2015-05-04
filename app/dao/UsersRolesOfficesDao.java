@@ -1,14 +1,20 @@
 package dao;
 
+import helpers.ModelQuery;
+
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.query.QRole;
 import models.query.QUsersRolesOffices;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
@@ -23,6 +29,18 @@ public class UsersRolesOfficesDao extends DaoBase {
 	}
 
 	private final static QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public UsersRolesOffices getById(Long id) {
+		QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+		final JPQLQuery query = getQueryFactory().from(uro)
+				.where(uro.id.eq(id));
+		return query.singleResult(uro);
+	}
 	
 	/**
 	 * 
@@ -55,5 +73,20 @@ public class UsersRolesOfficesDao extends DaoBase {
 				.and(uro.office.eq(office)));
 		
 		return Optional.fromNullable(query.singleResult(uro));
+	}
+	
+	/**
+	 * La lista dei ruoli di sistema.
+	 * 
+	 * @return
+	 */
+	public List<Role> getSystemRolesOffices() {
+		
+		List<Role> roleList = Lists.newArrayList();
+		roleList.add(RoleDao.getRoleByName(Role.BADGE_READER));
+		roleList.add(RoleDao.getRoleByName(Role.REST_CLIENT));
+		
+		return roleList;
+		
 	}
 }
