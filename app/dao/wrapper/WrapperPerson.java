@@ -27,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.ContractDao;
+import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 
 /**
@@ -95,7 +96,50 @@ public class WrapperPerson implements IWrapperPerson {
 		
 		return Optional.fromNullable(contractInMonth.get(contractInMonth.size()-1));
 	}
-
+	
+	/**
+	 * @param year
+	 * @param month
+	 * @return il primo contratto attivo nel mese.
+	 */
+	public Optional<Contract> getFirstContractInMonth(int year, int month) {
+		
+		List<Contract> contractInMonth = personManager.getMonthContracts(
+				this.value, month, year);
+		
+		if ( contractInMonth.size() == 0) {
+			return Optional.absent();
+		}
+		
+		return Optional.fromNullable(contractInMonth.get(0));
+	}
+	
+	/**
+	 * True se la persona è passata da determinato a indeterminato durante l'anno.
+	 * 
+	 * @param year
+	 * @return
+	 */
+	public boolean hasPassToIndefiniteInYear(int year) {
+		
+		List<Contract> orderedContractInYear = PersonDao.getContractList(this.value,
+				new LocalDate(year,1,1), new LocalDate(year,12,31));
+		
+		
+		boolean hasDefinite = false;
+		boolean hasPassToIndefinite = false;
+		
+		for (Contract contract : orderedContractInYear) {
+			if(contract.expireContract != null) 
+				hasDefinite = true;
+				
+			if (hasDefinite && contract.expireContract == null)
+				hasPassToIndefinite = true;
+		}
+		
+		return hasPassToIndefinite;
+	}
+	
 	/**
 	 * 
 	 * @return
@@ -253,6 +297,5 @@ public class WrapperPerson implements IWrapperPerson {
 				.getCertificatedDataByPersonMonthAndYear(this.value, month, year);
 		return cd;
 	}
-
 	
 }

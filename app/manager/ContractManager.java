@@ -16,6 +16,7 @@ import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -168,7 +169,7 @@ public class ContractManager {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
-		String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
+		String dateInitUse = ConfGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		LocalDate date = contract.beginContract;
 		if(date.isBefore(initUse))

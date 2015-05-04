@@ -17,6 +17,8 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
+import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -110,7 +112,7 @@ public class ContractYearRecapManager {
 		
 		//Controllo se ho sufficienti dati
 		
-		String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
+		String dateInitUse = ConfGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate.plusDays(1);
@@ -216,10 +218,10 @@ public class ContractYearRecapManager {
 			return LocalDate.now().getYear();
 		
 		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
-		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode("31");
-		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode("32");
-		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode("37"); 
-		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode("94"); 
+		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
+		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
+		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
+		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
 		DateInterval yearInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInYear);
 		List<Absence> abs32 = absenceDao.getAbsenceDays(yearInterSource, contract, ab32);
 		List<Absence> abs31 = absenceDao.getAbsenceDays(yearInterSource, contract, ab31);

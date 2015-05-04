@@ -19,6 +19,12 @@ import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
+import play.db.jpa.Blob;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -28,11 +34,6 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import exceptions.EpasExceptionNoSourceData;
-import play.Logger;
-import play.db.jpa.Blob;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
 
 @With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{
@@ -45,6 +46,9 @@ public class Charts extends Controller{
 	
 	@Inject
 	static ChartsManager chartsManager;
+	
+	@Inject
+	static CompetenceDao competenceDao;
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
@@ -95,7 +99,7 @@ public class Charts extends Controller{
 		
 		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
 		Long val = null;
-		Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
+		Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
 		if(result.isPresent())
 			val = result.get().longValue();
 

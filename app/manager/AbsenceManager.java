@@ -1,7 +1,6 @@
 package manager;
 
 import it.cnr.iit.epas.CheckMessage;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +24,8 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
 
 import org.apache.commons.mail.EmailException;
@@ -123,14 +122,14 @@ public class AbsenceManager {
 				contract, date, true);
 		
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
 
 		if(vr.persmissionNotYetUsed > 0)
 
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
 
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
 
 
 		return null;
@@ -443,8 +442,9 @@ public class AbsenceManager {
 	private AbsencesResponse handlerCompensatoryRest(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-		Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYearManager.getFieldValue(
-				ConfigurationFields.MaxRecoveryDays13.description, date.getYear(), person.office));
+		Integer maxRecoveryDaysOneThree = ConfYearManager
+				.getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
+		
 //		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
 //		Bisogna considerare anche eventuali inizializzazioni
 		int alreadyUsed = 0;

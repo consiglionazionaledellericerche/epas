@@ -27,7 +27,7 @@ import models.Qualification;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
@@ -52,6 +52,8 @@ import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
+import dao.AbsenceDao;
+import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
@@ -82,6 +84,9 @@ public class Persons extends Controller {
 	static PersonDao personDao;
 	
 	@Inject
+	static AbsenceDao absenceDao;
+	
+	@Inject
 	static OfficeDao officeDao;
 
 	@Inject
@@ -89,9 +94,15 @@ public class Persons extends Controller {
 	
 	@Inject 
 	static PersonDayManager personDayManager;
+	
+	@Inject 
+	static CompetenceDao competenceDao;
+	
+	@Inject 
+	static CompetenceManager competenceManager;
 
 	private final static Logger log = LoggerFactory.getLogger(Persons.class);
-	
+		
 	@NoCheck
 	public static void list(String name){
 
@@ -308,7 +319,7 @@ public class Persons extends Controller {
 		JPAPlugin.startTx(false);
 
 		// Eliminazione competenze
-		CompetenceManager.deletePersonCompetence(person);
+		competenceManager.deletePersonCompetence(person);
 		JPAPlugin.closeTx(false);
 
 		// Eliminazione contratti
@@ -577,9 +588,9 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		LocalDate initUse = new LocalDate(
-				ConfGeneralManager.getFieldValue(ConfigurationFields.InitUseProgram.description,
-						Security.getUser().get().person.office));
+		LocalDate initUse = ConfGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+				Security.getUser().get().person.office);
+				
 		render(contract, initUse);
 	}
 
@@ -1008,4 +1019,5 @@ public class Persons extends Controller {
 		flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name, person.surname);
 		Persons.edit(person.id);
 	}
+
 }

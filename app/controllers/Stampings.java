@@ -271,7 +271,6 @@ public class Stampings extends Controller {
 	 */
 	public static void missingStamping(int year, int month) {
 
-		rules.checkIfPermitted("");
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
@@ -298,8 +297,6 @@ public class Stampings extends Controller {
 	 */
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
-		rules.checkIfPermitted("");
-		
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
 		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
@@ -324,7 +321,6 @@ public class Stampings extends Controller {
 		if(page == null)
 			page = 0;
 		
-		rules.checkIfPermitted("");
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		

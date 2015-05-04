@@ -1,0 +1,89 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Competenze pagate'  /}
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month, office.id)}">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
+  <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
+  <li class="active"><a href="@{Competences.approvedCompetenceInYear(office.id, year, true)}">Competenza Assegnate nell'anno</a></li>
+</ul>
+
+</div>
+
+<div class="container">
+
+  <div class="container-fluid">
+  <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@Competences.approvedCompetenceInYear(), role:'form', class:'form-inline', 
+	    method:'GET'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	      
+	      <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="c">Solo Determinati </label>
+	        <input type="checkbox" name="onlyDefined" value="true" checked/> 
+	      </div>
+	      
+	      <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="y">Anno </label>
+	        <input class="form-control" type="text" name="year" value="${year}" id="y"/>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+  </div>
+  </div>
+
+  <table class="table">
+    <tr>
+      <th></th>
+      #{list items:totalValueAssigned.keySet(), as:'code'}
+      <th>${code.code}</th>
+      #{/list}
+    </tr>
+    
+    <tr class="warning">
+      <td><strong>Totale</strong></td>
+      #{list items:totalValueAssigned.keySet(), as:'code'}
+      <td><strong>${totalValueAssigned.get(code)}</strong></td>
+      #{/list}  
+    </tr>
+    
+    #{list personList, as:'person'}
+    <tr>
+      <td>${person.value.fullname}
+          #{if person.hasPassToIndefiniteInYear(year)} (*)#{/if}
+      </td>
+      
+      #{list items:totalValueAssigned.keySet(), as:'code'}
+      
+      #{if mapPersonCompetenceRecap.get(person.value) != null && mapPersonCompetenceRecap.get(person.value).get(code) != null}
+        <td>${mapPersonCompetenceRecap.get(person.value).get(code)}</td>
+	  #{/if}
+	  #{else}
+	    <td>0</td>
+	  #{/else}
+      
+      #{/list}
+    </tr>
+    #{/list}
+    
+  </table>
+  
+  <p>(*) La persona è passata a tempo indeterminato durante l'anno selezionato.</p>
+
+</div>

@@ -1,10 +1,10 @@
 package dao;
 
 import helpers.ModelQuery;
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.BadgeReader;
 import models.query.QBadgeReader;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 
@@ -19,7 +19,9 @@ public class BadgeReaderDao {
 	 * @return il badgereader associato al codice passato come parametro
 	 */
 	public static BadgeReader getBadgeReaderByCode(String code){
-		QBadgeReader badge = QBadgeReader.badgeReader;
+		
+		final QBadgeReader badge = QBadgeReader.badgeReader;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(badge)
 				.where(badge.code.eq(code));
 		return query.singleResult(badge);

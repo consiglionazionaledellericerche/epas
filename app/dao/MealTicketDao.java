@@ -10,7 +10,7 @@ import manager.ConfGeneralManager;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
@@ -117,8 +117,7 @@ public class MealTicketDao extends DaoBase {
 	 */
 	public LocalDate getMealTicketStartDate(Office office) {
 		
-		String confParam = ConfGeneralManager.getFieldValue(
-				ConfigurationFields.DateStartMealTicket.description, office);
+		String confParam = ConfGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
 		
 		if(confParam == null)
 			return null;

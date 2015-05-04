@@ -35,13 +35,13 @@ public class Offices extends Controller {
 
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory;
-	
+
 	@Inject
 	static IWrapperFactory wrapperFactory;
-	
+
 	@Inject
 	static OfficeDao officeDao;
-	
+
 	@Inject
 	static OfficeManager officeManager;
 
@@ -64,24 +64,24 @@ public class Offices extends Controller {
 	public static void insertInstitute(Long areaId) {
 
 		Office area = officeDao.getOfficeById(areaId);
-		
+
 		IWrapperOffice wArea = wrapperFactory.create(area);
-		
+
 		if(area==null || !wArea.isArea()) {
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
-		render(area);
+
+		render("@editInstitute",area);
 	}
 
 	public static void saveInstitute(Office area,@Valid Office institute,@Required String contraction) {
-				
+
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente i campi, operazione annullata.");
 			Offices.showOffices();
 		}
-		
+
 		IWrapperOffice wArea = wrapperFactory.create(area);
 
 		if(!area.isPersistent() || !wArea.isArea()) {
@@ -91,12 +91,12 @@ public class Offices extends Controller {
 
 		institute.contraction = contraction;
 		institute.office = area;
-		
+
 		if(officeDao.checkForDuplicate(institute)){
 			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
 			Offices.showOffices();
 		}
-		
+
 		institute.save();
 
 		officeManager.setPermissionAfterCreation(institute);
@@ -111,91 +111,72 @@ public class Offices extends Controller {
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
-		render(institute);
+
+		render("@editSeat",institute);
 	}
 
 	public static void saveSeat(Office institute,@Valid Office seat,@Required int code) {
-		
+
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente tutti i campi! operazione annullata.");
 			Offices.showOffices();
 		}
-				
+
 		if(!institute.isPersistent()) {
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		
+
 		seat.code = code;
-		
+
 		if(officeDao.checkForDuplicate(seat)){
 			flash.error("Parametri già utilizzati in un'altra sede,verificare.");
 			Offices.showOffices();
 		}
-		
+
 		seat.office = institute;
+		
+		final boolean newSeat = !seat.isPersistent();
+		
 		seat.save();
 
-		ConfGeneralManager.buildDefaultConfGeneral(seat);
+		if(newSeat){
+			ConfGeneralManager.buildOfficeConfGeneral(seat, false);
 
-		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear());
-		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);		
+			ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
+			ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
 
-		officeManager.setPermissionAfterCreation(seat);
+			officeManager.setPermissionAfterCreation(seat);
+		}
 
 		flash.success("Sede correttamente inserita: %s",seat.name);
 		Offices.showOffices();
 	}
 
-	public static void editSeat(Long officeId){
+	public static void editSeat(Long seatId){
 
-		Office seat = officeDao.getOfficeById(officeId);
+		Office seat = officeDao.getOfficeById(seatId);
 
 		if(seat==null) {
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
+		Office institute = seat.office;
 
-		render(seat);
+		render(seat,institute);
 	}
 
-//	public static void updateSeat(@Valid Office office) {
-//
-//		Office office = officeDao.getOfficeById(officeId);
-//		if(office==null) {
-//
-//			flash.error("La sede selezionata non esiste. Operazione annullata.");
-//			Offices.showOffices();
-//		}
-//
-//		//Parametri null
-//		if( isNullOrEmpty(name) || isNullOrEmpty(address) || isNullOrEmpty(code) || isNullOrEmpty(date) ){
-//			flash.error("Valorizzare correttamente tutti i parametri. Operazione annullata.");
-//			Offices.showOffices();
-//		}
-//
-//		//errore campo data
-//		String message = OfficeManager.checkIfExistsSeat(code, date);
-//		if(!message.equals("")){
-//			flash.error(message);
-//			Offices.showOffices();
-//		}
-//
-//		//codice uguale a sedi diverse da remoteOffice
-//		List<Office> officeList = officeDao.getOfficesByCode(OfficeManager.getInteger(code));
-//		for(Office off : officeList) {
-//
-//			if( !off.id.equals(office.id) ) {
-//
-//				flash.error("Il codice sede risulta gia' presente. Valorizzare correttamente tutti i parametri.");
-//				Offices.showOffices();
-//			}
-//		}
-//		officeManager.updateSeat(office, name, address, code, date);
-//		
-//		flash.success("Sede correttamente modificata");
-//		Offices.showOffices();
-//	}
+	public static void editInstitute(Long instituteId){
 
+		Office institute = officeDao.getOfficeById(instituteId);
+
+		if(institute==null) {
+			flash.error("L'istituto selezionato non esiste. Operazione annullata.");
+			Offices.showOffices();
+		}
+
+		Office area = institute.office;
+
+		render(area,institute);
+	}
 }

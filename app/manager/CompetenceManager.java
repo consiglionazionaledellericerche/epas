@@ -42,22 +42,30 @@ import dao.wrapper.IWrapperFactory;
 
 public class CompetenceManager {
 	
-	@Inject
-	public OfficeDao officeDao;
-	
-	@Inject
-	public IWrapperFactory wrapperFactory;
-	
-	@Inject
-	public PersonResidualYearRecapFactory yearFactory;
-	
-	@Inject
-	public PersonManager personManager;
-	
-	@Inject
-	public PersonDayDao personDayDao;
+	private final  OfficeDao officeDao;
+	private final  IWrapperFactory wrapperFactory;
+	private final  PersonResidualYearRecapFactory yearFactory;
+	private final  PersonManager personManager;
+	private final  PersonDayDao personDayDao;
+	private final  CompetenceDao competenceDao;
 	
 	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
+	
+	@Inject
+	public CompetenceManager(OfficeDao officeDao,
+			IWrapperFactory wrapperFactory,
+			PersonResidualYearRecapFactory yearFactory,
+			PersonManager personManager, PersonDayDao personDayDao,
+			CompetenceDao competenceDao) {
+		super();
+		this.officeDao = officeDao;
+		this.wrapperFactory = wrapperFactory;
+		this.yearFactory = yearFactory;
+		this.personManager = personManager;
+		this.personDayDao = personDayDao;
+		this.competenceDao = competenceDao;
+	}
+	
 	/**
 	 * 
 	 * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili
@@ -223,7 +231,7 @@ public class CompetenceManager {
 						recoveryDays = recoveryDays+1;
 				}
 			}			
-			Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, code);
+			Optional<Competence> comp = competenceDao.getCompetence(p, year, month, code);
 			if(comp.isPresent())
 				overtime = comp.get().valueApproved;
 			else
@@ -317,7 +325,7 @@ public class CompetenceManager {
 	 * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista personList nell'anno year
 	 * @throws IOException
 	 */
-	public static FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException{
+	public FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException{
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		inputStream = new FileInputStream( tempFile );
@@ -329,7 +337,7 @@ public class CompetenceManager {
 		codeList.add(CompetenceCodeDao.getCompetenceCodeByCode("S1"));
 		for(Person p : personList){
 			Long totale = null;
-			Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList);
+			Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList);
 			if(result.isPresent())
 				totale = result.get().longValue();
 		
@@ -349,10 +357,10 @@ public class CompetenceManager {
 	 * Viene utilizzata nella delete della persona nel controller Persons
 	 * @param person
 	 */
-	public static void deletePersonCompetence(Person person){
+	public void deletePersonCompetence(Person person){
 		for(Competence c : person.competences){
 			long id = c.id;
-			c = CompetenceDao.getCompetenceById(id);
+			c = competenceDao.getCompetenceById(id);
 			c.delete();
 		}
 	}
@@ -382,5 +390,25 @@ public class CompetenceManager {
 			}
 		}
 		return 0;
+	}
+	
+	/**
+	 * La lista dei codici competenza attivi per le persone nell'anno
+	 * 
+	 * @param year
+	 * @return
+	 */
+	public List<CompetenceCode> activeCompetence(int year){
+		
+		List<CompetenceCode> competenceCodeList = Lists.newArrayList();
+		
+		List<Competence> competenceList = 
+				competenceDao.getCompetenceInYear(year, Optional.<Office>absent());
+		
+		for(Competence comp : competenceList){
+			if(!competenceCodeList.contains(comp.competenceCode))
+				competenceCodeList.add(comp.competenceCode);
+		}
+		return competenceCodeList;
 	}
 }

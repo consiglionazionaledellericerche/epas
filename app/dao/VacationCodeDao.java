@@ -1,13 +1,13 @@
 package dao;
 
-import java.util.List;
-
 import helpers.ModelQuery;
 
-import com.mysema.query.jpa.JPQLQuery;
+import java.util.List;
 
 import models.VacationCode;
 import models.query.QVacationCode;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

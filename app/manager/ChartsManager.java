@@ -26,7 +26,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.WorkingTimeType;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
@@ -127,18 +127,28 @@ public class ChartsManager {
 	}
 
 	/**Inizio parte di business logic**/
+
+	private final  PersonResidualYearRecapFactory yearFactory;
+	private final  CompetenceManager competenceManager;
+	private final  VacationsRecapFactory vacationsFactory;
+	private final  IWrapperFactory wrapperFactory;
 	
 	@Inject
-	public PersonResidualYearRecapFactory yearFactory;
-	
-	@Inject
-	public CompetenceManager competenceManager;
-	
-	@Inject
-	public VacationsRecapFactory vacationsFactory;
-	
-	@Inject
-	public IWrapperFactory wrapperFactory;
+	public ChartsManager(PersonResidualYearRecapFactory yearFactory,
+			CompetenceManager competenceManager,
+			VacationsRecapFactory vacationsFactory,
+			IWrapperFactory wrapperFactory, CompetenceDao competenceDao) {
+		super();
+		this.yearFactory = yearFactory;
+		this.competenceManager = competenceManager;
+		this.vacationsFactory = vacationsFactory;
+		this.wrapperFactory = wrapperFactory;
+		this.competenceDao = competenceDao;
+	}
+
+
+
+	private final CompetenceDao competenceDao;
 	
 	/**
 	 * 
@@ -149,7 +159,7 @@ public class ChartsManager {
 		List<Year> annoList = Lists.newArrayList();
 		Integer yearBegin = null;
 		int counter = 0;
-		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, office);
+		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description, office);
 		if(yearInitUseProgram.isPresent()){
 			counter++;			
 			LocalDate date = new LocalDate(yearInitUseProgram.get().fieldValue);
@@ -218,7 +228,7 @@ public class ChartsManager {
 			if(p.office.equals(Security.getUser().get().person.office)){
 				PersonOvertime po = new PersonOvertime();
 				Long val = null;				
-				Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
+				Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
 				if (result.isPresent())
 					val = result.get().longValue();
 
@@ -328,7 +338,7 @@ public class ChartsManager {
 				log.debug("Inserito in lista render result per {} in data {}", renderResult.cognome, renderResult.data);
 
 			}
-			System.out.print("Qui");
+			
 			return new RenderList(listNull, listTrueFalse);
 		}
 		catch(Exception e)

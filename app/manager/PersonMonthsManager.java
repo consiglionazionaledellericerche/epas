@@ -2,13 +2,14 @@ package manager;
 
 import java.util.List;
 
+import models.Person;
+import models.PersonMonthRecap;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 
 import dao.PersonMonthRecapDao;
-import models.Person;
-import models.PersonMonthRecap;
 
 public class PersonMonthsManager {
 

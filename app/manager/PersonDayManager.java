@@ -18,7 +18,9 @@ import models.StampModificationTypeValue;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -27,13 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
-import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
@@ -49,7 +51,7 @@ public class PersonDayManager {
 	
 	@Inject
 	public IWrapperFactory wrapperFactory;
-
+	
 	/**
 	 *
 	 * @param abt
@@ -118,7 +120,6 @@ public class PersonDayManager {
 		return false;
 	}
 
-	
 	/**
 	 * Calcola i minuti lavorati nel person day. Assegna il campo isTicketAvailable.
 	 *
@@ -252,6 +253,96 @@ public class PersonDayManager {
 		return workTime + justifiedTimeAtWork;
 
 	}
+	
+	
+	/**
+	 * Calcola i minuti lavorati nel person day. Assegna il campo
+	 * isTicketAvailable.
+	 *
+	 * @return il numero di minuti trascorsi a lavoro
+	 */
+	public int workingMinutes(IWrapperPersonDay pd) {
+
+		Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
+
+		int workTime = 0;
+
+		// Se hanno il tempo di lavoro fissato non calcolo niente
+		if (pd.isFixedTimeAtWork()) {
+			return pd.getWorkingTimeTypeDay().get().workingTime;
+		}
+
+		if (!pd.isHoliday() && pd.getValue().stampings.size() >= 2) {
+
+			orderStampings(pd.getValue());
+			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
+
+			for (PairStamping validPair : validPairs) {
+
+				workTime = workTime - DateUtility.toMinute(validPair.in.date);
+				workTime = workTime + DateUtility.toMinute(validPair.out.date);
+			}
+
+			// Il pranzo e' servito??
+			WorkingTimeTypeDay wttd = pd.getWorkingTimeTypeDay().get();
+
+			// se mealTicketTime è zero significa che il dipendente nel giorno
+			// non ha diritto al calcolo del buono pasto
+			if (!wttd.mealTicketEnabled()) {
+
+				setIsTickeAvailable(pd, false);
+				return workTime;
+			}
+
+			int mealTicketTime = wttd.mealTicketTime; // 6 ore
+			int breakTicketTime = wttd.breakTicketTime; // 30 minuti
+			int breakTimeDiff = breakTicketTime;
+			pd.getValue().stampModificationType = null;
+			List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(),
+					validPairs);
+
+			if (gapLunchPairs.size() > 0) {
+				// recupero la durata della pausa pranzo fatta
+				int minTimeForLunch = gapLunchPairs.get(0).timeInPair;
+				// Calcolo l'eventuale differenza tra la pausa fatta e la pausa
+				// minima
+				breakTimeDiff = (breakTicketTime - minTimeForLunch <= 0) ? 0
+						: (breakTicketTime - minTimeForLunch);
+			}
+
+			if (workTime - breakTimeDiff >= mealTicketTime) {
+
+				if (!pd.getValue().isTicketForcedByAdmin
+						|| pd.getValue().isTicketForcedByAdmin
+						&& pd.getValue().isTicketAvailable) {// TODO decidere la
+																// situazione
+																// intricata se
+																// l'amministratore
+																// forza a true
+					workTime = workTime - breakTimeDiff;
+				}
+
+				// caso in cui non sia stata effettuata una pausa pranzo
+				if (breakTimeDiff == breakTicketTime) {
+
+					pd.getValue().stampModificationType = stampingDao
+							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+				}
+
+				// Caso in cui la pausa pranzo fatta è inferiore a quella minima
+				else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
+
+					pd.getValue().stampModificationType = stampingDao
+							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+				}
+			}
+
+			setIsTickeAvailable(pd, false);
+
+		}
+
+		return workTime;
+	}
 
 	/**
 	 *
@@ -291,10 +382,10 @@ public class PersonDayManager {
 	private List<PairStamping> getGapLunchPairs(PersonDay pd, List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
-		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", pd.person.office));
-		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", pd.person.office));
-		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", pd.person.office));
-		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", pd.person.office));
+		Integer mealTimeStartHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
+		Integer mealTimeStartMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
+		Integer mealTimeEndHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.person.office);
+		Integer mealTimeEndMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.person.office);
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(pd.date.getYear())
 		.withMonthOfYear(pd.date.getMonthOfYear())
@@ -1004,9 +1095,10 @@ public class PersonDayManager {
 
 		if( lastStampingPreviousDay != null && lastStampingPreviousDay.isIn() ) {
 			
-			String hourMaxToCalculateWorkTime = 
-					ConfYearManager.getFieldValue("hour_max_to_calculate_worktime", 
-							pd.getValue().date.getYear(), pd.getValue().person.office);
+			String hourMaxToCalculateWorkTime = ConfYearManager
+					.getFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, 
+							pd.getValue().person.office, pd.getValue().date.getYear());
+			
 			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
 			
 			orderStampings( pd.getValue() );
@@ -1220,6 +1312,15 @@ public class PersonDayManager {
 		}
 
 		return ticketTorender;
+	}
+	
+	public boolean isOnMission(PersonDay personDay){
+		return !FluentIterable.from(personDay.absences).filter(
+				new Predicate<Absence>() {
+					@Override
+					public boolean apply(Absence absence) {
+						return absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE.getCode());
+					}}).isEmpty();
 	}
 
 }

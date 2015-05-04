@@ -1,21 +1,20 @@
 package dao;
 
+import helpers.ModelQuery;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
-
-import org.joda.time.LocalDate;
-
-import helpers.ModelQuery;
-
-import com.mysema.query.jpa.JPQLQuery;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
 import models.query.QWorkingTimeType;
+
+import org.joda.time.LocalDate;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

@@ -1,12 +1,13 @@
 package dao;
 
+import java.util.List;
+
 import helpers.ModelQuery;
 import models.Permission;
 import models.Role;
 import models.query.QPermission;
 import models.query.QRole;
 
-import com.google.common.base.Optional;
 import com.mysema.query.jpa.JPQLQuery;
 
 /**

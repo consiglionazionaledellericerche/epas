@@ -19,8 +19,8 @@ import play.utils.Java;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
+import com.google.common.hash.Hashing;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -28,6 +28,10 @@ import dao.RoleDao;
 import dao.UserDao;
 
 public class Security extends Secure.Security {
+	
+	/* Client rest */
+	
+	public final static String REST = "rest";
 	
 	/* lettore badge */
 	

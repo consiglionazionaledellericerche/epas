@@ -43,9 +43,9 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final ListPath<models.ShiftCancelled, QShiftCancelled> shiftCancelled = this.<models.ShiftCancelled, QShiftCancelled>createList("shiftCancelled", models.ShiftCancelled.class, QShiftCancelled.class, PathInits.DIRECT2);
 
-    public final QShiftTimeTable shiftTimeTable;
+    public final QShiftCategories shiftCategories;
 
-    public final QPerson supervisor;
+    public final QShiftTimeTable shiftTimeTable;
 
     public final StringPath type = createString("type");
 
@@ -67,8 +67,8 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public QShiftType(Class<? extends ShiftType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.shiftCategories = inits.isInitialized("shiftCategories") ? new QShiftCategories(forProperty("shiftCategories"), inits.get("shiftCategories")) : null;
         this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable")) : null;
-        this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
     }
 
 }
