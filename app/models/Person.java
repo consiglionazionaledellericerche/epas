@@ -55,11 +55,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public String othersSurnames;
 
 	@Column(name = "birthday")
-
 	public LocalDate birthday;
-
-	@Column(name = "born_date")
-	public Date bornDate;
 
 	@Email
 	public String email;
@@ -85,6 +81,11 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public Long oldId;
 
 	/**
+	 * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con Perseo (Person.id di Perseo)
+	 */
+	public Integer iId;
+	
+	/**
 	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
 	 */
 	@Email
@@ -98,16 +99,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public String fax;
 
 	public String mobile;
-
-	/**
-	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da locations così da eliminare quella tabella
-	 */
-	public String department;
-
-	@Column(name="head_office")
-	public String headOffice;
-
-	public String room;
 
 	@Column(name="want_email")
 	public boolean wantEmail;
