@@ -301,7 +301,7 @@ public final class PersonDao {
 				contract.endContract.isNotNull().and(contract.endContract.goe(fromDate))
 				);
 
-		return ModelQuery.queryFactory().from(contract).where(conditions).list(contract);
+		return ModelQuery.queryFactory().from(contract).where(conditions).orderBy(contract.beginContract.asc()).list(contract);
 	}
 
 	/**
@@ -380,7 +380,8 @@ public final class PersonDao {
 	 */
 	public static Person getPersonByEmail(String email){
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.email.eq(email));
+		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+				.where(person.email.eq(email).or(person.cnr_email.eq(email)));
 
 		return query.singleResult(person);
 	}

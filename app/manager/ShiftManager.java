@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -52,6 +54,14 @@ import dao.ShiftDao;
  */
 public class ShiftManager {
 	
+	private final CompetenceDao competenceDao;
+	
+	@Inject
+	public ShiftManager(CompetenceDao competenceDao) {
+		super();
+		this.competenceDao = competenceDao;
+	}
+
 	public static String codShift = "T1";						// codice dei turni
 	
 	// shift day
@@ -375,7 +385,7 @@ public class ShiftManager {
 	 * @param month					- mese di riferimento dei turni
 	 * @return 						- la lista delle competenze corrispondenti ai turni lavorati 
 	 */
-	public static List<Competence> updateDBShiftCompetences(Table<Person, String, Integer> personsShiftHours, int year, int month) {
+	public List<Competence> updateDBShiftCompetences(Table<Person, String, Integer> personsShiftHours, int year, int month) {
 
 		List<Competence> savedCompetences = new ArrayList<Competence>();
 		int[] apprHoursAndExcMins; 
@@ -412,7 +422,7 @@ public class ShiftManager {
 			
 			
 			// save the FS reperibility competences in the DB
-			Optional<Competence> shiftCompetence = CompetenceDao.getCompetence(person, year, month, competenceCode);
+			Optional<Competence> shiftCompetence = competenceDao.getCompetence(person, year, month, competenceCode);
 //			Competence shiftCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCode).first();
 			

@@ -35,9 +35,27 @@ when
         /* inserire le action interessate */
         "Administration.utilities",
         "Administration.fixPersonSituation",
+        "Administration.deleteUncoupledStampings",
         "Administration.updateExceedeMinInCompetenceTable",
         "Administrators.switchUserTo",
         "Administrators.restoreUser"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ * 		Permission: rest
+ */
+rule rest
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "rest") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "rest.Persons.days",
+        "rest.Persons.missions",
+        "rest.Persons.competences"
        ), target == null, granted == false)
 then
  $c.grant();
@@ -282,10 +300,11 @@ when
      	"Persons.insertUsername",
      	"Persons.updateUsername",
      	"Persons.childrenList",
+     	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
+     	"Persons.removeChild",
      	"Persons.deleteChild",
-     	"Persons.childrenList",
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
@@ -324,10 +343,11 @@ when
      	"Persons.insertUsername",
      	"Persons.updateUsername",
      	"Persons.childrenList",
+     	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
+     	"Persons.removeChild",
      	"Persons.deleteChild",
-     	"Persons.childrenList",
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
@@ -363,7 +383,7 @@ when
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
         "MonthRecaps.show"
-        ), target != null, granted == false)
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -441,8 +461,9 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "Competences.exportCompetences",
-        "Competences.getOvertimeInYear"
-        ), target != null, granted == false)
+        "Competences.getOvertimeInYear",
+        "Competences.approvedCompetenceInYear"
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -457,7 +478,8 @@ when
         "Competences.showCompetences",
         "Competences.overtime",
         "Competences.totalOvertimeHours",
-        "Competences.enabledCompetences"
+        "Competences.enabledCompetences",
+        "Competences.approvedCompetenceInYear"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -552,6 +574,7 @@ when
         "Offices.saveSeat",
         "Offices.insertSeat",
         "Offices.saveInstitute",
+        "Offices.editInstitute",
         "Offices.insertInstitute",
         "Offices.insertArea",
         "Administrators.insertNewAdministrator",
@@ -591,7 +614,7 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "WorkingTimes.manageWorkingTime"
-        ), target != null, granted == false)
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -709,6 +732,15 @@ when
     "Wizard.setGenConf",
     "Wizard.setOffice",
     "Wizard.summary"  
+    ), target == null, granted == false)
+then
+ $c.grant();
+end 
+
+rule unprotected_methods
+when
+ $c: PermissionCheck(action in (
+    "Version.showVersion"
     ), target == null, granted == false)
 then
  $c.grant();

@@ -4,11 +4,11 @@ import helpers.ModelQuery;
 
 import java.util.List;
 
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.Contract;
 import models.VacationPeriod;
 import models.query.QVacationPeriod;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

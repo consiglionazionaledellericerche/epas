@@ -1,109 +1,168 @@
 package manager;
 
-import org.joda.time.LocalDate;
-
 import models.ConfGeneral;
 import models.Office;
+import models.enumerate.Parameter;
+
+import org.joda.time.LocalDate;
+
 import play.cache.Cache;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.ConfGeneralDao;
 
 public class ConfGeneralManager {
 
 	/**
+	 * Produce la configurazione generale di default. 
+	 * 
+	 * Se overwrite è false mantiene senza sovrascrivere eventuali parametri generali preesitenti.
+	 * 
+	 * @param office
+	 * @param overwrite
+	 */
+	public static void buildOfficeConfGeneral(Office office, boolean overwrite) {
+
+		for( Parameter param: Parameter.values() ) {
+			
+			if(param.isGeneral()) {
+				
+				Optional<ConfGeneral> confGeneral = ConfGeneralDao.getByFieldName(param.description, office);
+				
+				if( !confGeneral.isPresent() || overwrite ) {
+					saveConfGeneral(param, office, Optional.<String>absent());
+				}
+				
+			}
+			
+		}
+	}
+	
+	/**
+	 * Aggiorna il parametro di configurazione relativo all'office.
+	 * Se value non è presente viene persistito il valore di default.
+	 * 
+	 * Il valore precedente se presente viene sovrascritto.
+	 * 
+	 * @param param
+	 * @param office
+	 * @param value
+	 * @return
+	 */
+	public static Optional<ConfGeneral> saveConfGeneral(Parameter param, Office office, Optional<String> value) {
+		
+		String newValue = param.getDefaultValue();
+		
+		if(value.isPresent()) {
+			newValue = value.get();
+		}
+		
+		//Prelevo quella esistente
+		Optional<ConfGeneral> confGeneral = ConfGeneralDao.getByFieldName(param.description, office);
+		
+		if(confGeneral.isPresent()) {
+			
+			confGeneral.get().fieldValue = newValue;
+			confGeneral.get().save();
+			return confGeneral;
+		}
+		
+		ConfGeneral newConfGeneral = new ConfGeneral(office, param.description, newValue);
+		newConfGeneral.save();
+		
+		return Optional.fromNullable(newConfGeneral);
+		
+	}
+	
+	/**
+	 * Si recupera l'oggetto quando si vuole modificare il parametro.
+	 *  
+	 * Se serve il valore utilizzare getFieldValue (utilizzo della cache).
 	 * 
 	 * @param field
 	 * @param office
-	 * @return il valore del campo field relativo all'ufficio office passati come parametro
+	 * @return
 	 */
-	public static String getFieldValue(String field, Office office){
-		String value = (String)Cache.get(field+office.name);
-		if(value == null || value.equals("")){
-			Optional<ConfGeneral> conf = ConfGeneralDao.getConfGeneralByField(field, office);
-//			ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
-//					field, office).first();
-			if(conf.isPresent())
-				value = conf.get().fieldValue;
-			Cache.set(field+office.name, value);
+	public static ConfGeneral getByField(Parameter param, Office office) {
+		
+		Preconditions.checkState(param.isGeneral());
+		
+		Optional<ConfGeneral> confGeneral = ConfGeneralDao.getByFieldName(param.description, office);
+		
+		if(!confGeneral.isPresent()) {
+
+			confGeneral = saveConfGeneral(param, office, Optional.<String>absent());
 		}
+		
+		return confGeneral.get();
+		
+		//saveConfGeneral non dovrebbe fallire mai 
+		//perchè è sempre definito un default (speriamo)
+		
+	}
+
+	/**
+	 * Preleva dalla cache il valore del campo di configurazione generale.
+	 * Se non presente lo crea a partire dal valore di default.
+	 * 
+	 * @param field
+	 * @param office
+	 * @return
+	 */
+	public static String getFieldValue(Parameter param, Office office) {
+		
+		Preconditions.checkState(param.isGeneral());
+		
+		String key = param.description + office.code;
+		
+		String value = (String)Cache.get(key);
+		
+		if(value == null){
+			
+			Optional<ConfGeneral> conf = ConfGeneralDao.getByFieldName(param.description, office);
+			
+			if(!conf.isPresent()){
+				
+				conf = saveConfGeneral(param, office, Optional.<String>absent());
+			}
+			
+			value = conf.get().fieldValue;
+			Cache.set(key, value);
+		}
+		
 		return value;
 	}
+
+	/**
+	 * 
+	 * @param param
+	 * @param office
+	 * @return
+	 */
+	public static Integer getIntegerFieldValue(Parameter param, Office office) {
+		return new Integer(getFieldValue(param,office));
+	}
+
+	/**
+	 * 
+	 * @param param
+	 * @param office
+	 * @return
+	 */
+	public static LocalDate getLocalDateFieldValue(Parameter param, Office office) {
+		return new LocalDate(getFieldValue(param,office));
+	}
 	
 	/**
 	 * 
-	 * @param field
+	 * @param param
 	 * @param office
-	 * @return l'oggetto conf_general individuato a partire dalla stringa field e dall'ufficio office passati come parametro
+	 * @return
 	 */
-	public static ConfGeneral getConfGeneralByField(String field, Office office){
-		
-		Optional<ConfGeneral> conf = ConfGeneralDao.getConfGeneralByField(field, office);
-//		ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
-//				field, office).first();
-				
-		if(conf.isPresent())
-			return conf.get();
-		return null;
+	public static boolean getBooleanFieldValue(Parameter param, Office office){
+		return new Boolean(getFieldValue(param,office));
 	}
-	
-	
-	
-	/**
-	 * Produce la configurazione generale di default al momento della creazione di una nuova sede
-	 * @param office
-	 */
-	public static void buildDefaultConfGeneral(Office office) {
 
-		//TODO inserire i dati di default in un file di configurazione
-		
-		ConfGeneral confGeneral;
-
-		LocalDate beginYear = new LocalDate(LocalDate.now().getYear(), 1, 1);
-		confGeneral = new ConfGeneral(office, ConfGeneral.INIT_USE_PROGRAM, beginYear.toString());
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.DATE_START_MEAL_TICKET,null);
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.SEND_EMAIL,"false");
-		confGeneral.save();
-
-		confGeneral = new ConfGeneral(office, ConfGeneral.DAY_OF_PATRON, "1");
-		confGeneral.save();
-
-		confGeneral = new ConfGeneral(office, ConfGeneral.MONTH_OF_PATRON, "1");
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.USER_TO_PRESENCE, null);
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.PASSWORD_TO_PRESENCE, null);
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.URL_TO_PRESENCE, "https://attestati.rm.cnr.it/attestati/" );
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.NUMBER_OF_VIEWING_COUPLE, "2");
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.WEB_STAMPING_ALLOWED, "false");
-		confGeneral.save();
-		
-		
-		//TODO SPORTARLI NELLA CONFIGURAZIONE PERIODICA QUANDO CI SARA'
-		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_START_HOUR, "1");
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_START_MINUTE, "0");
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_END_HOUR, "23");
-		confGeneral.save();
-		
-		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_END_MINUTE, "0");
-		confGeneral.save();
-	}
-	
 }

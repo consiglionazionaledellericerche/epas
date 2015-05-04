@@ -108,10 +108,10 @@ public class VacationsRecap {
 		DateInterval yearInter = new DateInterval(startYear, endYear);
 		DateInterval yearActualDateInter = new DateInterval(startYear, actualDate);
 		
-		AbsenceType ab32  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
-		AbsenceType ab31  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
-		AbsenceType ab37  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode());
-		AbsenceType ab94  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
+		AbsenceType ab32  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
+		AbsenceType ab31  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
+		AbsenceType ab37  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull();
+		AbsenceType ab94  = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull();
 
 		//Expire Last Year
 		LocalDate expireVacation = vacationManager.vacationsLastYearExpireDate(year, this.person.office);

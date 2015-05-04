@@ -11,17 +11,18 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
-
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
 import models.Qualification;
 import models.User;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 import models.query.QPermission;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -31,7 +32,6 @@ import play.mvc.Http;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
@@ -417,12 +417,14 @@ public class RequestInit extends Controller {
 		}		
 		
 		/**
-		 *  years per la gestione dinamica degli anni(provvisorio)
+		 *  years per la gestione dinamica degli anni(provvisorio) 
+		 *  //FIXME la lista degli anni andrebbe presa in funzione della persona selezionata 
+		 *  // e della action richiesta, non in funzione del primo office allowed (??).
 		 */
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
 
-		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
+		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description,
 				officeDao.getOfficeAllowed(user.get()).iterator().next());
 		
 		Integer yearBeginProgram;

@@ -41,13 +41,12 @@ public class AbsenceTypeDao {
 		}
 	}
 	
-	private final static QAbsenceType absenceType = QAbsenceType.absenceType;
-	private final static QAbsence absence = QAbsence.absence;
-
 	
 	public static List<AbsenceTypeDto> countersDto() {
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
-//		QAbsence absence = QAbsence.absence;
+		
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+		final QAbsence absence = QAbsence.absence;
+		
 		return ModelQuery.queryFactory().from(absenceType)
 				.join(absenceType.absences, absence)
 				.groupBy(absenceType)
@@ -57,8 +56,10 @@ public class AbsenceTypeDao {
 	}
 
 	public static Map<AbsenceType, Long> counters() {
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
-//		QAbsence absence = QAbsence.absence;
+		
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+		final QAbsence absence = QAbsence.absence;
+		
 		return ModelQuery.queryFactory().from(absenceType)
 				.join(absenceType.absences, absence)
 				.groupBy(absenceType)
@@ -67,8 +68,10 @@ public class AbsenceTypeDao {
 	}
 
 	public static List<AbsenceType> getFrequentTypes() {
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
-//		QAbsence absence = QAbsence.absence;
+		
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+		final QAbsence absence = QAbsence.absence;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
 			.join(absence.absenceType, absenceType)
 			.groupBy(absenceType)
@@ -81,8 +84,9 @@ public class AbsenceTypeDao {
 	
 	public static SimpleResults<AbsenceType> getAbsences(Optional<String> name){
 		
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
 		final BooleanBuilder condition = new BooleanBuilder();
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.orderBy(absenceType.code.asc());
 		if (name.isPresent() && !name.get().trim().isEmpty()) {
@@ -100,7 +104,9 @@ public class AbsenceTypeDao {
 	 * @return l'absenceType relativo all'id passato come parametro
 	 */
 	public static AbsenceType getAbsenceTypeById(Long long1) {
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
+		
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.id.eq(long1));
 		
@@ -115,7 +121,9 @@ public class AbsenceTypeDao {
 	 */
 	public static List<AbsenceType> getAbsenceTypeFromEffectiveDate(
 			LocalDate date) {
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
+		
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.validTo.after(date)).orderBy(absenceType.code.asc());
 		
@@ -127,12 +135,14 @@ public class AbsenceTypeDao {
 	 * @param string
 	 * @return l'absenceType relativo al codice passato come parametro
 	 */
-	public static AbsenceType getAbsenceTypeByCode(String string) {
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
+	public static Optional<AbsenceType> getAbsenceTypeByCode(String string) {
+		
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.code.eq(string));
 		
-		return query.singleResult(absenceType);
+		return Optional.fromNullable(query.singleResult(absenceType));
 		
 	}
 	
@@ -147,6 +157,9 @@ public class AbsenceTypeDao {
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
 
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		QAbsence absence = QAbsence.absence;
+		
 		return ModelQuery.queryFactory().from(absenceType)
 				.join(absenceType.absences, absence).where(absence.personDay.person.eq(person).and(
 						absence.personDay.date.between(fromDate, toDate.or(fromDate))))
@@ -162,9 +175,15 @@ public class AbsenceTypeDao {
 	 */
 	public static List<AbsenceType> getReducingAccruingDaysForVacations(){
 		
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		QAbsence absence = QAbsence.absence;
+		
 		JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.code.startsWith("24")
-						.or(absenceType.code.startsWith("25").or(absenceType.code.startsWith("17C"))));
+						.or(absenceType.code.startsWith("25")
+								.or(absenceType.code.startsWith("17C")
+										.or(absenceType.code.startsWith("C17")
+												.or(absenceType.code.startsWith("C18"))))));
 		return query.list(absenceType);
 		
 	}

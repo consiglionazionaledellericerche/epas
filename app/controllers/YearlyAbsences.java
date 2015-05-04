@@ -48,7 +48,6 @@ public class YearlyAbsences extends Controller{
 		else
 			person = PersonDao.getPersonById(personId);
 					
-		rules.checkIfPermitted("");
 		Integer anno = params.get("year", Integer.class);
 		Logger.debug("L'id della persona è: %s", personId);
 		Logger.debug("La persona è: %s %s", person.name, person.surname);
@@ -68,8 +67,6 @@ public class YearlyAbsences extends Controller{
 	}
 
 	public static void showGeneralMonthlyAbsences(int year, int month, String name, Integer page) {
-
-		rules.checkIfPermitted("");
 		
 		if(page==null)
 			page=0;

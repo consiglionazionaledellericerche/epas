@@ -31,6 +31,8 @@ public class QCompetence extends EntityPathBase<Competence> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final NumberPath<Integer> exceededMins = createNumber("exceededMins", Integer.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 

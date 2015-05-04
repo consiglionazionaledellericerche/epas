@@ -8,7 +8,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
@@ -16,7 +15,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.User;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -35,7 +34,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
-import dao.ConfGeneralDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -223,9 +221,9 @@ public class ConsistencyManager {
 		
 			log.debug("Chiamato controllo sul giorni {}-{}", fromDate, toDate);
 			
-			ConfGeneral officeMail = ConfGeneralDao.getConfGeneralByField(ConfGeneral.SEND_EMAIL, p.office).orNull();
+			boolean officeMail = ConfGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, p.office);
 			
-			if(p.wantEmail && officeMail != null && officeMail.fieldValue.equals("true")) {
+			if(p.wantEmail && officeMail) {
 				checkPersonDayForSendingEmail(p, fromDate, toDate, cause);
 			}
 			else {
@@ -310,9 +308,7 @@ public class ConsistencyManager {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
-			simpleEmail.addReplyTo(ConfGeneralManager.getConfGeneralByField(
-							ConfigurationFields.EmailToContact.description, 
-							person.office).fieldValue);
+			simpleEmail.addReplyTo( ConfGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office) );
 		} catch (EmailException e1) {
 
 			e1.printStackTrace();

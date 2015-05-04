@@ -14,7 +14,6 @@ import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ContractManager;
 import manager.OfficeManager;
-import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -23,7 +22,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-import models.enumerate.ConfigurationFields;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -488,63 +487,39 @@ public class Wizard extends Controller {
 		seat.office = institute;
 		seat.save();
 		
-		ConfGeneralManager.buildDefaultConfGeneral(seat);
-		
-		//ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear());
-		//ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
-		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear());
-		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
-		
 		
 		officeManager.setPermissionAfterCreation(seat);
 		
-		ConfGeneral confGeneral;
-		
-//		INIT_USE_PROGRAM
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.INIT_USE_PROGRAM, seat);
-		confGeneral.fieldValue = LocalDate.now().toString();
-		confGeneral.save();
-//		DAY_OF_PATRON
+		ConfGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, seat, 
+				Optional.fromNullable(LocalDate.now().toString()));
+
 		LocalDate dayMonth = DateUtility.dayMonth(properties.getProperty("date_of_patron"),Optional.<String>absent());
+		ConfGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, seat, 
+				Optional.fromNullable(dayMonth.dayOfMonth().getAsString()));
+		ConfGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, seat, 
+				Optional.fromNullable(dayMonth.monthOfYear().getAsString()));
 
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.DAY_OF_PATRON, seat);
-		confGeneral.fieldValue = dayMonth.dayOfMonth().getAsString();
-		confGeneral.save();
-//		MONTH_OF_PATRON
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MONTH_OF_PATRON, seat);
-		confGeneral.fieldValue = dayMonth.monthOfYear().getAsString();
-		confGeneral.save();
-//		MEAL_TIME_START_HOUR
 		List<String> lunchStart = Splitter.on(":").trimResults().splitToList(properties.getProperty("lunch_pause_start"));    
+		ConfGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_HOUR, seat, 
+				Optional.fromNullable(lunchStart.get(0)));
+		ConfGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_MINUTE, seat, 
+				Optional.fromNullable(lunchStart.get(1)));
 
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_HOUR, seat);
-		confGeneral.fieldValue = lunchStart.get(0);
-		confGeneral.save();
-//		MEAL_TIME_START_MINUTE
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_MINUTE, seat);
-		confGeneral.fieldValue = lunchStart.get(1);
-		confGeneral.save();	
-//		MEAL_TIME_END_HOUR
 		List<String> lunchStop = Splitter.on(":").trimResults().splitToList(properties.getProperty("lunch_pause_end"));
+		ConfGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_HOUR, seat, 
+				Optional.fromNullable(lunchStop.get(0)));
+		ConfGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_MINUTE, seat, 
+				Optional.fromNullable(lunchStop.get(1)));
 
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_HOUR, seat);
-		confGeneral.fieldValue = lunchStop.get(0);
-		confGeneral.save();
-//		MEAL_TIME_END_MINUTE
-		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_MINUTE, seat);
-		confGeneral.fieldValue = lunchStop.get(1);
-		confGeneral.save();
-//		EMAIL_TO_CONTACT
-		confGeneral = new ConfGeneral(seat, ConfGeneral.EMAIL_TO_CONTACT, properties.getProperty("email_to_contact"));
-		confGeneral.save();
-//		institute_name
-		confGeneral = new ConfGeneral(seat, ConfigurationFields.InstituteName.description, seat.contraction);
-		confGeneral.save();
-//		seat_code
-		confGeneral = new ConfGeneral(seat, ConfigurationFields.SeatCode.description, seat.code.toString());
-		confGeneral.save();
+		ConfGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, seat, 
+				Optional.fromNullable(properties.getProperty("email_to_contact")));
 		
-//		Creazione Profilo Amministratore
+		ConfGeneralManager.buildOfficeConfGeneral(seat, false);
+		
+		ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
+		ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
+		
+		//Creazione Profilo Amministratore
 		
 		Person p = new Person();
 		p.name = properties.getProperty("manager_name");

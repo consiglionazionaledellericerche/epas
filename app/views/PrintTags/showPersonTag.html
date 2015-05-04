@@ -41,7 +41,7 @@ tr:nth-child(even) {
     
     <body>
     
-    <h3>Situazione presenze mensile di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} per ${person.name} ${person.surname} matr.: ${person.number}</h3>
+    <h3>${titolo}</h3>
     
 
 <table class="cartellino">
@@ -49,7 +49,7 @@ tr:nth-child(even) {
 		<th><font size="0.5">Buono mensa</font></th>
 		<th><font size="0.5">Giorno</font></th>
 		<th><font size="0.5">Codice di assenza</font></th>
-		%{ for(int i = 1; i <= numberOfInOut; i++){
+		%{ for(int i = 1; i <= psDto.numberOfInOut; i++){
 		}%
 		<th><font size="0.5">${i}° entrata</font></th>
 		<th><font size="0.5">${i}° uscita</font></th>
@@ -62,7 +62,7 @@ tr:nth-child(even) {
 	</tr>
 	
 	%{
-     for(dayRecap in daysRecap) {
+     for(dayRecap in psDto.daysRecap) {
      		
 			
 	}%
@@ -177,15 +177,16 @@ tr:nth-child(even) {
 	
 <p id="spiegazioneTabellaTimbrature">
 <font size="2">
-Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
-<br>Il numero di giorni lavorativi in sede è di: <strong>${basedWorkingDays}</strong> 
+Il numero di buoni mensa usabili per questo mese e': <strong>${psDto.numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${psDto.numberOfMealTicketToRender}</strong>. 
+<br>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong>
+<br>Il numero di ore di lavoro effettuate nel mese è di: <strong>${psDto.totalWorkingTime.toHourTime()}</strong> 
 </font>
 </p>
 
 <p id="spiegazioneTabellaTimbrature"/>
 
 <div id="tabelleRiassuntive">
-%{if(!stampModificationTypeList.isEmpty()) { }%
+%{if(!psDto.stampModificationTypeSet.isEmpty()) { }%
 
 	<strong style="margin-top: 2em">Note:</strong>
 	<br>
@@ -196,7 +197,7 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicke
 				
 		</tr>
 		%{
-	     for(smt in stampModificationTypeList) {
+	     for(smt in psDto.stampModificationTypeSet) {
 		}%
 			<tr>
 				<td><font size="2">${smt.code}</font></td>     
@@ -208,7 +209,7 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicke
 	     
 		}%
 		%{
-		for(type in stampTypeList) 
+		for(type in psDto.stampTypeSet) 
 		{
 		}%
 			<tr>
@@ -235,7 +236,7 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicke
 			
 	</tr>
 	%{
-	for(entry in absenceCodeMap.entrySet()) 
+	for(entry in psDto.absenceCodeMap.entrySet()) 
 	{
 	}%
 	<tr>
