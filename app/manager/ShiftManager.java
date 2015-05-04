@@ -30,12 +30,12 @@ import org.joda.time.LocalTime;
 
 import play.Logger;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import com.mysema.query.jpa.JPQLQuery;
-import com.mysql.jdbc.Messages;
 
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
@@ -380,8 +380,8 @@ public class ShiftManager {
 		List<Competence> savedCompetences = new ArrayList<Competence>();
 		int[] apprHoursAndExcMins; 
 		
-		String thDays = Messages.getString("PDFReport.thDays");
-		String thLackTime = Messages.getString("PDFReport.thLackTime");
+		String thDays = Messages.get("PDFReport.thDays");
+		String thLackTime = Messages.get("PDFReport.thLackTime");
 		
 		// get the Competence code for the ordinary shift  
 		CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode(codShift);
@@ -479,8 +479,8 @@ public class ShiftManager {
 		for (Competence competence: competenceList) {
 			
 			// Prende i giorni di turno lavorati e le eventuali ora mancanti 
-			int numOfDays = totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.getString("PDFReport.thDays"));
-			int lackOfMin = (totalPersonShiftWorkedTime.contains(competence.getPerson(), Messages.getString("PDFReport.thLackTime"))) ? totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.getString("PDFReport.thLackTime")) : 0;
+			int numOfDays = totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thDays"));
+			int lackOfMin = (totalPersonShiftWorkedTime.contains(competence.getPerson(), Messages.get("PDFReport.thLackTime"))) ? totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thLackTime")) : 0;
 			
 			// prende le ore richieste, quelle approvate e i minuti in eccesso
 			// che dovranno far parte del calcolo delle ore del mese successivo
@@ -489,13 +489,13 @@ public class ShiftManager {
 			int exceededMins = competence.getExceededMin();
 			
 			Logger.debug("In totalShiftInfo memorizzo (person %s) giorni=%s, ore richieste=%s, ore approvate=%s, min accumulati=%s", competence.person, numOfDays, reqHours, numOfApprovedHours, exceededMins);
-			totalShiftInfo.put(competence.person, Messages.getString("PDFReport.thDays"), Integer.toString(numOfDays));
-			totalShiftInfo.put(competence.person, Messages.getString("PDFReport.thLackTime"), CompetenceUtility.calcStringShiftHoursFromMinutes(lackOfMin)); 
+			totalShiftInfo.put(competence.person, Messages.get("PDFReport.thDays"), Integer.toString(numOfDays));
+			totalShiftInfo.put(competence.person, Messages.get("PDFReport.thLackTime"), CompetenceUtility.calcStringShiftHoursFromMinutes(lackOfMin)); 
 			
-			totalShiftInfo.put(competence.person, Messages.getString("PDFReport.thReqHour"), reqHours.toString());
-			totalShiftInfo.put(competence.person, Messages.getString("PDFReport.thAppHour"), Integer.toString(numOfApprovedHours));
+			totalShiftInfo.put(competence.person, Messages.get("PDFReport.thReqHour"), reqHours.toString());
+			totalShiftInfo.put(competence.person, Messages.get("PDFReport.thAppHour"), Integer.toString(numOfApprovedHours));
 			
-			totalShiftInfo.put(competence.person, Messages.getString("PDFReport.thExceededMin"), Integer.toString(exceededMins));
+			totalShiftInfo.put(competence.person, Messages.get("PDFReport.thExceededMin"), Integer.toString(exceededMins));
 	
 		}
 		
@@ -519,7 +519,7 @@ public class ShiftManager {
 		// Contains the number of the effective hours of worked shifts 
 		Table<Person, String, Integer> totalPersonShiftWorkedTime = TreeBasedTable.<Person, String, Integer>create();
 		
-		String thLackTime = Messages.getString("PDFReport.thLackTime");
+		String thLackTime = Messages.get("PDFReport.thLackTime");
 		
 		// Subcract the lack of time from the Requested Hours
 		for (Person person: personsShiftsWorkedDays.rowKeySet()) {
@@ -533,27 +533,31 @@ public class ShiftManager {
 				totalShiftDays += (personsShiftsWorkedDays.contains(person, shiftType)) ? personsShiftsWorkedDays.get(person, shiftType) : 0;
 			}
 			
-			totalPersonShiftWorkedTime.put(person, Messages.getString("PDFReport.thDays"), totalShiftDays);
+			totalPersonShiftWorkedTime.put(person, Messages.get("PDFReport.thDays"), totalShiftDays);
+			
+			Logger.debug("Somma i minuti mancanti prendendoli da totalInconsistentAbsences(%s, %s)", person.surname, thLackTime);
+			
 			
 			// check for lack of worked time and summarize the minutes
 			if (totalInconsistentAbsences.contains(person, thLackTime)) {
-		
+				Logger.debug("non è vuoto");
 				String[] timeStr;	
 				for (String time: totalInconsistentAbsences.get(person, thLackTime)) {
 		
 					timeStr = time.split(".");
 					Logger.debug("time = '%s' valori di timeStr = %s", time, timeStr.length);
 				
-					lackMin = Integer.parseInt(time);
+					lackMin += Integer.parseInt(time);
 				}
 			}
 			
-			Logger.debug("memorizza in personsShiftsWorkedTimes(%s, thLackTime) %s", person, lackMin);
+			Logger.debug("memorizza in totalPersonsShiftsWorkedTimes(%s, thLackTime) %s", person, lackMin);
 			totalPersonShiftWorkedTime.put(person, thLackTime, lackMin);
 		}
 		
 		return totalPersonShiftWorkedTime;
 	}
+	
 	
 	/*
 	 * Costruisce na calendario di un turno in un certo mese in una tabella del tipo (tipoTurno, giorno_del_mese) -> SD(Person, Person)
