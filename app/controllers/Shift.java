@@ -29,13 +29,13 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-import com.mysql.jdbc.Messages;
 
 import dao.AbsenceDao;
 import dao.PersonDao;
@@ -275,7 +275,7 @@ public class Shift extends Controller {
 			
 	
 			// Memorizzo le inconsistenze del turno
-			Logger.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE del turno e memorizzarle");
+			Logger.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE del turno %s e memorizzarle", type);
 			CompetenceUtility.getShiftInconsistencyTimestampTable(personsShiftDays, personsShiftInconsistentAbsences);
 			
 		}
@@ -294,8 +294,8 @@ public class Shift extends Controller {
 		Options options = new Options();
 		options.pageSize = IHtmlToPdfTransformer.A4L;
 		
-		ArrayList<String> thInconsistence = new ArrayList<String>(Arrays.asList(Messages.getString("thAbsences"), Messages.getString("thNoStampings"), Messages.getString("thMissingTime"), Messages.getString("thBadStampings"), Messages.getString("thMissions"), Messages.getString("thWarnStampings")));
-		ArrayList<String> thShift = new ArrayList<String>(Arrays.asList(Messages.getString("thDays"), Messages.getString("thLackTime"), Messages.getString("thReqHour"), Messages.getString("thAppHour"), Messages.getString("thExceededMin")));
+		ArrayList<String> thInconsistence = new ArrayList<String>(Arrays.asList(Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thNoStampings"), Messages.get("PDFReport.thMissingTime"), Messages.get("PDFReport.thBadStampings"), Messages.get("PDFReport.thMissions"), Messages.get("PDFReport.thIncompleteTime"), Messages.get("PDFReport.thWarnStampings")));
+		ArrayList<String> thShift = new ArrayList<String>(Arrays.asList(Messages.get("PDFReport.thDays"), Messages.get("PDFReport.thLackTime"), Messages.get("PDFReport.thReqHour"), Messages.get("PDFReport.thAppHour"), Messages.get("PDFReport.thExceededMin")));
 		
 		Logger.debug("thInconsistence=%s - thShift=%s", thInconsistence, thShift);
 		
