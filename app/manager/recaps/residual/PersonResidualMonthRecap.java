@@ -8,10 +8,12 @@ import java.util.List;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.ConfYear;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
@@ -20,6 +22,7 @@ import com.google.common.base.Optional;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.ConfYearDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.WorkingTimeTypeDayDao;
@@ -120,6 +123,20 @@ public class PersonResidualMonthRecap {
 		
 		//Inizializzazione residui
 		//Gennaio
+		ConfYear confYear = null;
+		Optional<ConfYear> conf = null;
+		String description = qualifica > 3 ? 
+				Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49.description : 
+					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13.description;
+		conf = ConfYearDao.getByFieldName(description, anno, person.office);
+		
+		if(conf.isPresent()){
+			confYear = conf.get();
+		}
+		else{
+			confYear = ConfYearDao.getByFieldName(
+					description, anno-1, person.office).get();
+		}
 		if(mese==1)
 		{
 			mesePrecedente = null;
@@ -135,12 +152,12 @@ public class PersonResidualMonthRecap {
 		}
 		
 		//Febbraio / Marzo
-		else if(mese==2 || mese==3)
-		{
-			this.mesePrecedente = mesePrecedente;
-			monteOreAnnoPassato = initMonteOreAnnoPassato;
-			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
-		}
+//		else if(mese==2 || mese==3)
+//		{
+//			this.mesePrecedente = mesePrecedente;
+//			monteOreAnnoPassato = initMonteOreAnnoPassato;
+//			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
+//		}
 		
 		// Aprile -> Dicembre
 		else
@@ -149,7 +166,7 @@ public class PersonResidualMonthRecap {
 			monteOreAnnoPassato = initMonteOreAnnoPassato;
 			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
 			
-			if(qualifica>3)
+			if(new Integer(confYear.fieldValue) != 0 && mese > new Integer(confYear.fieldValue))
 			{
 				possibileUtilizzareResiduoAnnoPrecedente = false;
 				monteOreAnnoPassato = 0;
