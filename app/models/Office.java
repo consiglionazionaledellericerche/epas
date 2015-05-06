@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -54,6 +55,9 @@ public class Office extends BaseModel{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="office_id")
     public Office office;
+    
+    //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    //public List<User> restUsers = new ArrayList<User>();
      
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<Person> persons = new ArrayList<Person>();
