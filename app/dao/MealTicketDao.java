@@ -17,6 +17,8 @@ import models.query.QPerson;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
@@ -115,15 +117,14 @@ public class MealTicketDao extends DaoBase {
 	 * @param office
 	 * @return
 	 */
-	public LocalDate getMealTicketStartDate(Office office) {
+	public Optional<LocalDate> getMealTicketStartDate(Office office) {
 		
 		String confParam = ConfGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
 		
-		if(confParam == null)
-			return null;
+		if(Strings.isNullOrEmpty(confParam))
+			return Optional.absent();
 		
-		return new LocalDate(confParam);
-		
+		return Optional.fromNullable(LocalDate.parse(confParam));	
 	}
 	
 	/**
