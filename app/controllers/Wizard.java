@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 
 import java.io.FileInputStream;
@@ -36,7 +37,6 @@ import play.data.validation.Valid;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-import validators.StringIsTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;

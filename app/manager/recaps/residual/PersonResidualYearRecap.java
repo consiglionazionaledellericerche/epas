@@ -11,6 +11,7 @@ import models.ContractYearRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 import dao.MealTicketDao;
@@ -28,13 +29,13 @@ public class PersonResidualYearRecap {
 			Contract contract, int year, LocalDate calcolaFinoA,
 			PersonResidualMonthRecapFactory factory) {
 		
-		LocalDate dateStartMealTicket = mealTicketDao.getMealTicketStartDate(contract.person.office);
+		Optional<LocalDate> dateStartMealTicket = mealTicketDao.getMealTicketStartDate(contract.person.office);
 		
 		int firstMonthToCompute = 1;
 		LocalDate firstDayInDatabase = new LocalDate(year,1,1);
 		DateInterval contractInterval = contract.getContractDateInterval();
 		DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
-		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket, calcolaFinoA);
+		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket.orNull(), calcolaFinoA);
 		int initMonteOreAnnoPassato = 0;
 		int initMonteOreAnnoCorrente = 0;
 		int initMealTicket = 0;
