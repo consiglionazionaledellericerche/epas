@@ -15,6 +15,7 @@ import models.MealTicket;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -117,15 +118,15 @@ public class MealTicketManager {
 		
 		DateInterval contractDataBaseInterval = ContractManager.getContractDatabaseDateInterval(contract);
 		
-		LocalDate officeStartDate = mealTicketDao.getMealTicketStartDate(contract.person.office);
-		if(officeStartDate == null)
+		Optional<LocalDate> officeStartDate = mealTicketDao.getMealTicketStartDate(contract.person.office);
+		if(!officeStartDate.isPresent())
 			return null;
 		
-		if(officeStartDate.isBefore(contractDataBaseInterval.getBegin()))
+		if(officeStartDate.get().isBefore(contractDataBaseInterval.getBegin()))
 			return contractDataBaseInterval;
 		
-		if(DateUtility.isDateIntoInterval(officeStartDate, contractDataBaseInterval))
-			return new DateInterval(officeStartDate, contractDataBaseInterval.getEnd());
+		if(DateUtility.isDateIntoInterval(officeStartDate.get(), contractDataBaseInterval))
+			return new DateInterval(officeStartDate.get(), contractDataBaseInterval.getEnd());
 		
 		return null;
 	}
