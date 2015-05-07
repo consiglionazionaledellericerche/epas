@@ -103,10 +103,7 @@ public class Persons extends Controller {
 
 	private final static Logger log = LoggerFactory.getLogger(Persons.class);
 		
-	@NoCheck
 	public static void list(String name){
-
-		rules.checkIfPermitted();
 
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
@@ -120,10 +117,7 @@ public class Persons extends Controller {
 		render(personList);
 	}
 
-	@NoCheck
 	public static void insertPerson() {
-
-		rules.checkIfPermitted();
 
 		Person person = new Person();
 		Contract contract = new Contract();
@@ -132,7 +126,6 @@ public class Persons extends Controller {
 
 	}
 
-	@NoCheck
 	public static void save(@Valid @Required Person person,
 			@Valid @Required Qualification qualification, @Valid @Required Office office,
 			@Valid @Required Contract contract) {
@@ -172,7 +165,6 @@ public class Persons extends Controller {
 	}
 
 
-	@NoCheck
 	public static void insertUsername(Long personId){
 		Person person = PersonDao.getPersonById(personId);
 		if(person==null) {
@@ -189,7 +181,6 @@ public class Persons extends Controller {
 	}
 
 
-	@NoCheck
 	public static void updateUsername(Long personId, String username){
 
 		Person person = PersonDao.getPersonById(personId);
@@ -219,7 +210,6 @@ public class Persons extends Controller {
 
 	}
 
-	@NoCheck
 	public static void edit(Long personId){
 
 		Person person = PersonDao.getPersonById(personId);

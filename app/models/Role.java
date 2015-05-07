@@ -27,6 +27,7 @@ public class Role extends BaseModel{
 
 	private static final long serialVersionUID = 6717202212924325368L;
 	
+	public final static String EMPLOYEE = "employee";
 	public final static String PERSONNEL_ADMIN = "personnelAdmin";
 	public final static String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
 	public final static String BADGE_READER = "badgeReader";
