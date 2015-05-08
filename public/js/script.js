@@ -223,6 +223,27 @@ function Change2(){
 	absenceCode.value = tuttiCodici.value;
 }
 
+function generateUserName(){
+ var name = $('#manager_name').val().replace(/\W/g, '').toLowerCase();
+ var surname = $('#manager_surname').val().replace(/\W/g, '').toLowerCase();
+
+ var $el = $("#manager_username");
+   $el.empty(); // remove old options
+
+   var options = [
+   {text: name+'.'+surname, value: name+'.'+surname},
+   {text: name.charAt(0)+'.'+surname, value: name.charAt(0)+'.'+surname},
+   {text: name+'_'+surname, value: name+'_'+surname}
+   ];
+
+   $.each(options, function(index, option) {
+    $option = $("<option></option>")
+    .attr("value", option.value)
+    .text(option.text);
+    $el.append($option);
+  });
+ }
+
 
 
 
