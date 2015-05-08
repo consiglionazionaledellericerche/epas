@@ -212,9 +212,8 @@ public class Competences extends Controller{
 		renderText("ok");
 	}
 		
-	@NoCheck
 	public static void manageCompetenceCode(){
-		rules.checkIfPermitted();
+
 		List<CompetenceCode> compCodeList = CompetenceCodeDao.getAllCompetenceCode();
 		render(compCodeList);
 	}
