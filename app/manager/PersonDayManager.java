@@ -684,6 +684,11 @@ public class PersonDayManager {
 			return;
 		}
 
+		//FIXME: i personDay potrebbero essere mancanti. 
+		// Questo è il caso in cui il job che chiude il giorno sia inattivo per più
+		// giorni. La procedura di fix risolve questo problema.
+		// In questo caso andrebbe fatto un controllo all'application Start??
+		
 		//Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, Optional.of(LocalDate.now()), true);
 
