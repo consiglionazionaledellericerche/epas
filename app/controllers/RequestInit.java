@@ -41,6 +41,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDao.PersonLiteDto;
 import dao.QualificationDao;
+import dao.UsersRolesOfficesDao;
 
 /**
  * @author cristian
@@ -48,21 +49,20 @@ import dao.QualificationDao;
  */
 public class RequestInit extends Controller {
 	
-	//@Inject
-	//static SecurityRules rules;
-	
 	@Inject
 	static OfficeDao officeDao;
 	
+	@Inject
+	static UsersRolesOfficesDao uroDao;
+	
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
-	 * //FIXME spostare la query in un DAO.
-	 * 
+	 * TODO: esportare questa classe in un nuovo file che modella la view.
 	 * @param user
 	 */
 	public static class ItemsPermitted {
 		
-		public boolean isPerson = false;
+		public boolean isEmployee = false;
 		
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
@@ -82,27 +82,12 @@ public class RequestInit extends Controller {
 			if(!user.isPresent())
 				return;
 			
-			if(user.get().person != null)
-				this.isPerson = true;
-
-			final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
-			final QRole qr = QRole.role;
-			final QPermission qp = QPermission.permission;
-						
-			final JPQLQuery query = ModelQuery.queryFactory().from(qp)
-					.leftJoin(qp.roles, qr).fetch()
-					.leftJoin(qr.usersRolesOffices, quro).fetch()
-					.distinct();
-					
-			final BooleanBuilder condition = new BooleanBuilder();
-			condition.and(quro.user.eq(user.get()));
+			List<Permission> pList = uroDao.getUserPermission(user.get());
 			
-			query.where(condition);
-			
-			List<Permission> pList = ModelQuery.simpleResults(query, qp).list();
-			
-
 			for(Permission p : pList) {
+				
+				if(p.description.equals("employee"))
+					this.isEmployee = true;
 				
 				if(p.description.equals("viewPerson"))
 					this.viewPerson = true;
@@ -139,17 +124,16 @@ public class RequestInit extends Controller {
 				
 				if(p.description.equals("editAbsenceType"))
 					this.editAbsenceType = true;
-				
 			}
 		}
 		
 		/**
-		 * Se l'user può vedere il menu del dipendente.
+		 * Se l'user può vedere il menu del Employee.
 		 * 
 		 * @return
 		 */
-		public boolean isPersonMenuVisible() {
-			return isPerson;
+		public boolean isEmployeeVisible() {
+			return isEmployee;
 		}
 		
 		/**
@@ -157,7 +141,7 @@ public class RequestInit extends Controller {
 		 * 
 		 * @return
 		 */
-		public boolean isDropDownVisible() {
+		public boolean isAdministrationVisible() {
 			
 			return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
 		}
@@ -166,7 +150,7 @@ public class RequestInit extends Controller {
 		 * Se l'user ha i permessi per vedere Configurazione.
 		 * @return
 		 */
-		public boolean isDropDown2Visible() {
+		public boolean isConfigurationVisible() {
 			
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
 		}
@@ -294,17 +278,6 @@ public class RequestInit extends Controller {
 	@Before (priority = 1)
 	@NoCheck
 	static void injectMenu() { 
-		
-		/*
-			Logger.info("Si tenta di accedere a una risorsa senza essere correttamente loggati");
-			flash.error("Bisogna autenticarsi prima di accedere a una risorsa");
-			try {
-				Secure.login();
-			} catch (Throwable e) {
-				Application.index();
-			}
-		}
-		*/
 		
 		Optional<User> user = Security.getUser();
 		
@@ -457,7 +430,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "Stampings.stampings";
 			}
 			
@@ -466,7 +439,7 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("switchPerson", true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.personStamping";
 			}
 			
@@ -474,7 +447,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.missingStamping";
 			}
 			
@@ -483,7 +456,7 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchDay", true);
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.dailyPresence";
 			}
 			
@@ -491,7 +464,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.mealTicketSituation";
 			}
 
@@ -503,14 +476,14 @@ public class RequestInit extends Controller {
 				
 				
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "PersonMonths.trainingHours";
 			}
 			
 			if(action.equals("PersonMonths.hourRecap")) {
 				
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "PersonMonths.hourRecap";
 			}
 		}
@@ -520,7 +493,7 @@ public class RequestInit extends Controller {
 			if(action.equals("Vacations.show")) {
 				
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "Vacations.show";
 			}
 		}
@@ -529,18 +502,18 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("Persons.changePassword")) {
 				
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "Persons.changePassword";
 			}
 			if(action.equals("Persons.list")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Persons.list";
 			}
 			
 			if(action.equals("Persons.edit")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Persons.edit";
 			}
 		}
@@ -551,7 +524,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "Absences.absences";
 			}
 			
@@ -559,7 +532,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Absences.manageAttachmentsPerCode";
 			}
 			
@@ -568,13 +541,13 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("switchPerson", true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Absences.manageAttachmentsPerPerson";
 			}
 			
 			if(action.equals("Absences.absenceInPeriod")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Absences.absenceInPeriod";
 			}
 		}
@@ -584,7 +557,7 @@ public class RequestInit extends Controller {
 			if(action.equals("YearlyAbsences.absencesPerPerson")) {
 				
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "YearlyAbsences.absencesPerPerson";
 			}
 			
@@ -592,7 +565,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "YearlyAbsences.showGeneralMonthlyAbsences";
 			}
 			
@@ -600,7 +573,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("switchPerson", true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "YearlyAbsences.yearlyAbsences";
 			}
 		}
@@ -611,7 +584,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown1");
+				renderArgs.put("dropDown", "dropDownEmployee");
 				return "Competences.competences";
 			}
 			
@@ -619,7 +592,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.showCompetences";
 			}
 			
@@ -627,26 +600,26 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.overtime";
 			}
 			
 			if(action.equals("Competences.totalOvertimeHours")) {
 				
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.totalOvertimeHours";
 			}
 			
 			if(action.equals("Competences.enabledCompetences")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.enabledCompetences";
 			}
 			
 			if(action.equals("Competences.exportCompetences")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.exportCompetences";
 			}
 
@@ -658,7 +631,7 @@ public class RequestInit extends Controller {
 				
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "MonthRecaps.show";
 			}
 		}
@@ -667,19 +640,19 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("UploadSituation.show")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "UploadSituation.show";
 			}
 			
 			if(action.equals("UploadSituation.loginAttestati")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "UploadSituation.loginAttestati";
 			}
 			
 			if(action.equals("UploadSituation.processAttestati")) {
 				
-				renderArgs.put("dropDown", "dropDown2");
+				renderArgs.put("dropDown", "dropDownAdministration");
 				return "UploadSituation.processAttestati";
 			}
 		}
@@ -688,7 +661,7 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("WorkingTimes.manageWorkingTime")) {
 				
-				renderArgs.put("dropDown", "dropDown3");
+				renderArgs.put("dropDown", "dropDownConfiguration");
 				return "WorkingTimes.manageWorkingTime";
 			}
 		}
