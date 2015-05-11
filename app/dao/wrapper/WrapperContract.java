@@ -18,20 +18,22 @@ import dao.VacationPeriodDao;
 public class WrapperContract implements IWrapperContract {
 
 	private final PersonManager personManager;
-	
 	private final Contract value;
+	private final VacationPeriodDao vacationPeriodDao;
 
 	@Inject
-	WrapperContract(@Assisted Contract contract, PersonManager personManager) {
+	WrapperContract(@Assisted Contract contract, PersonManager personManager
+			,VacationPeriodDao vacationPeriodDao) {
 		value = contract;
 		this.personManager = personManager;
+		this.vacationPeriodDao = vacationPeriodDao;
 	}
 
 	@Override
 	public Contract getValue() {
 		return value;
 	}
-	
+
 	/**
 	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
 	 * @param month
@@ -47,25 +49,25 @@ public class WrapperContract implements IWrapperContract {
 		else
 			return false;
 	}
-	
+
 	/**
 	 * La lista dei VacationPeriod associati al contratto in ordine crescente per data di inizio periodo.
 	 * @param contract
 	 * @return
 	 */
 	public List<VacationPeriod> getContractVacationPeriods() {
-	
-		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(this.value);
+
+		List<VacationPeriod> vpList = vacationPeriodDao.getVacationPeriodByContract(this.value);
 		return vpList;
 	}
-	
+
 	/**
 	 * True se il contratto è a tempo determinato.
 	 * 
 	 * @return
 	 */
 	public boolean isDefined() {
-		
+
 		return this.value.expireContract != null;
 	}
 

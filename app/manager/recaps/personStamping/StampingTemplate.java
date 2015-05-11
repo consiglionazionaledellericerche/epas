@@ -19,10 +19,7 @@ import dao.StampingDao;
  *
  */
 public class StampingTemplate {
-	
-	//private final PersonDayManager personDayManager;
-	//private final StampingDao stampingDao;
-	
+
 	public Long stampingId;
 	public String colour;
 	public int pairId;
@@ -35,14 +32,11 @@ public class StampingTemplate {
 	public String identifier;
 	public String missingExitStampBeforeMidnightCode;
 	public boolean valid;
-	
+
 	public StampingTemplate(PersonDayManager personDayManager,
 			StampingDao stampingDao, Stamping stamping,
-			int index, PersonDay pd, int pairId, String pairPosition)
-	{
-		//this.stampingDao = stampingDao;
-		//this.personDayManager = personDayManager;
-		
+			int index, PersonDay pd, int pairId, String pairPosition){
+
 		this.stampingId = stamping.id;
 		this.pairId = pairId;
 		this.pairPosition = pairPosition;
@@ -59,49 +53,46 @@ public class StampingTemplate {
 			setColor(stamping);
 			return;
 		}
-		
+
 		this.date = stamping.date;
-		
+
 		this.way = stamping.way.description;
-		
+
 		setHour(stamping.date);
-		
+
 		this.insertStampingClass = "insertStamping" + stamping.date.getDayOfMonth() + "-" + index;
-		
-		
+
+
 		//----------------------------------------- timbratura di servizio ---------------------------------------------------
 		if(stamping.stampType!=null && stamping.stampType.identifier!=null)
 		{
 			this.identifier = stamping.stampType.identifier;
-			PersonStampingDayRecap.stampTypeSet.add(stamping.stampType);
 		}
 		else
 			this.identifier = "";
-		
+
 		//----------------------------------------- timbratura modificata dall'amministatore ---------------------------------
 		if(stamping.markedByAdmin) 
 		{
 			StampModificationType smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
 			this.markedByAdminCode = smt.code;
-			PersonStampingDayRecap.stampModificationTypeSet.add(smt);
 		}
 		else
 		{
 			this.markedByAdminCode = "";
 		}
-		
+
 		//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
 		Optional<StampModificationType> smtMidnight = 
 				personDayManager.checkMissingExitStampBeforeMidnight(stamping);
-		
+
 		this.missingExitStampBeforeMidnightCode = "";
-		
+
 		if( smtMidnight.isPresent() ) {
-			
-				this.missingExitStampBeforeMidnightCode = smtMidnight.get().code;
-				PersonStampingDayRecap.stampModificationTypeSet.add(smtMidnight.get());
+
+			this.missingExitStampBeforeMidnightCode = smtMidnight.get().code;
 		}
-		
+
 		//------------------------------------------- timbratura valida (colore cella) -----------------------------------------
 		LocalDate today = new LocalDate();
 		LocalDate stampingDate = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth());
@@ -116,7 +107,7 @@ public class StampingTemplate {
 		setColor(stamping);
 		//-----------------------------------------------------------------------------------------------------------------------
 	}
-	
+
 	protected void setColor(Stamping stamping)
 	{
 		this.colour = stamping.way.description;
@@ -125,7 +116,7 @@ public class StampingTemplate {
 			this.colour = "warn";
 		}
 	}
-	
+
 	protected void setHour(LocalDateTime date)
 	{
 		String hour = date.getHourOfDay() + "";

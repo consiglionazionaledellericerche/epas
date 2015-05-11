@@ -5,11 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
-import manager.PersonDayManager;
 import manager.PersonManager;
-import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.Person;
@@ -27,22 +23,13 @@ import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
-	
-	@Inject
-	static SecurityRules rules;
-	
-	@Inject
-	static OfficeDao officeDao;
-	
-	@Inject
-	static PersonStampingDayRecapFactory stampingDayRecapFactory;
-	
-	@Inject
-	static PersonDayManager personDayManager;
-	
-	@Inject 
-	static PersonStampingRecapFactory stampingsRecapFactory;
-	
+
+	private static PersonDao personDao;
+	private static SecurityRules rules;
+	private static PersonStampingRecapFactory stampingsRecapFactory;
+	private static OfficeDao officeDao;
+	private static PersonManager personManager;
+
 	public static void showTag(Long personId, int month, int year){
 
 		if(personId == null) {
@@ -50,51 +37,51 @@ public class PrintTags extends Controller{
 			Application.indexAdmin();
 		}
 
-		Person person = PersonDao.getPersonById(personId);
-		
+		Person person = personDao.getPersonById(personId);
+
 		rules.checkIfPermitted(person.office);
-	
+
 		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
-		
+
 		String titolo = "Situazione presenze mensile " +  
 				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
 				person.surname + " " + person.name;
-		
+
 		renderPDF(psDto, titolo) ;		
 	}
-	
+
 	public static void listPersonForPrintTags(int year, int month){
-		
+
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-	
+
 		LocalDate date = new LocalDate(year, month,1);
-		
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
+
+		List<Person> personList = personDao.list(Optional.<String>absent(), 
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
 				date, date.dayOfMonth().withMaximumValue(), true).list();
-		
+
 		render(personList, date, year, month);
 	}
-	
+
 	public static void showPersonTag(Integer year, Integer month){
-		
+
 		Person person = Security.getUser().get().person;
-		
-		if(!PersonManager.isActiveInMonth(person, month, year, false)) {
-			
+
+		if(!personManager.isActiveInMonth(person, month, year, false)) {
+
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
 			render("@redirectToIndex");
 		}
-	
+
 		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
-		
+
 		String titolo = "Situazione presenze mensile " +  
 				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
 				person.surname + " " + person.name;
-		
+
 		renderPDF(psDto, titolo) ;
-								
+
 	}
 
 }

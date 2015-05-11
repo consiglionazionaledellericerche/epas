@@ -5,14 +5,13 @@ import models.WorkingTimeTypeDay;
 
 public class WorkingTimeTypeManager {
 
-
 	/**
 	 * 
 	 * @param wttd
 	 * @param wtt
 	 * @param dayOfWeek
 	 */
-	public static void saveWorkingTimeType(WorkingTimeTypeDay wttd,
+	public void saveWorkingTimeType(WorkingTimeTypeDay wttd,
 			WorkingTimeType wtt, int dayOfWeek){
 		
 		wttd.dayOfWeek = dayOfWeek;

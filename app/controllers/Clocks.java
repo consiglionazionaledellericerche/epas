@@ -1,7 +1,6 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +9,7 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.PersonManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Office;
@@ -30,7 +30,6 @@ import play.mvc.With;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
 import dao.OfficeDao;
@@ -42,29 +41,34 @@ import dao.UserDao;
 public class Clocks extends Controller{
 	
 	@Inject
-	static OfficeDao officeDao;
-	
+	private static OfficeDao officeDao;
 	@Inject
-	static PersonStampingDayRecapFactory stampingDayRecapFactory;
-	
+	private static PersonDao personDao;
 	@Inject
-	static PersonDayManager personDayManager;
-	
+	private static UserDao userDao;
 	@Inject
-	static PersonDayDao personDayDao;
+	private static PersonDayDao personDayDao;
+	@Inject
+	private static ConfGeneralManager confGeneralManager;
+	@Inject
+	private static PersonManager personManager;
+	@Inject
+	private static PersonDayManager personDayManager;
+	@Inject
+	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
 
 	public static void show(){
-		
+
 		LocalDate data = new LocalDate();
-		
+
 		//TODO Capire quali office saranno visibili a questo livello
 		List<Office> officeAllowed = officeDao.getAllOffices();
 
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, data, data, true).list();
+		List<Person> personList = personDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, data, data, true).list();
 		render(data, personList);
 	}
-	
-	
+
+
 	public static void clockLogin(Long userId, String password)
 	{
 		LocalDate today = new LocalDate();
@@ -73,8 +77,8 @@ public class Clocks extends Controller{
 			flash.error("Utente non selezionato");
 			Clocks.show();
 		}
-		
-		User user = UserDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
+
+		User user = userDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
 		//User user = User.find("select u from User u where id = ? and password = md5(?)", userId, password).first();
 
 		if(user == null)
@@ -84,7 +88,7 @@ public class Clocks extends Controller{
 		}	
 		PersonDay personDay = null;			
 		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
-		
+
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
 			personDay = new PersonDay(user.person, today);
@@ -93,31 +97,29 @@ public class Clocks extends Controller{
 		else{
 			personDay = pd.get();
 		}				
-		int minInOutColumn = ConfGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
-		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
-		
-		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
-		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
+		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
+		int numberOfInOut = Math.max(minInOutColumn, personManager.numberOfInOutInPersonDay(personDay));
+
 		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
-		
+
 		render(user, dayRecap, numberOfInOut);
 	}
-	
-	
+
+
 
 	/**
 	 * 
 	 * @param personId. Con questo metodo si permette l'inserimento della timbratura per la persona contrassegnata da id personId.
 	 */
 	public static void insertStamping(Long personId){
-		Person person = PersonDao.getPersonById(personId);
+		Person person = personDao.getPersonById(personId);
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		LocalDateTime ldt = new LocalDateTime();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, ldt.toLocalDate());
-		
+
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			personDay = new PersonDay(person, ldt.toLocalDate());
@@ -135,16 +137,16 @@ public class Clocks extends Controller{
 			int minMinusOne = s.date.plusMinutes(1).getMinuteOfHour();
 			if( hour==hourNew && (minNew==min || minNew==minMinusOne) )
 			{
-				
+
 				flash.error("Timbratura ore %s gia' inserita, prossima timbratura accettata a partire da %s",
 						DateUtility.fromLocalDateTimeHourTime(s.date),
 						DateUtility.fromLocalDateTimeHourTime(s.date.plusMinutes(2)));
-				
+
 				Clocks.showRecap(personId);
 			}
 		}
 
-		
+
 		//Altrimenti la inserisco
 		Stamping stamp = new Stamping();
 		stamp.date = time;
@@ -158,9 +160,9 @@ public class Clocks extends Controller{
 		stamp.save();
 		personDay.stampings.add(stamp);
 		personDay.save();
-		
+
 		final PersonDay day = personDay;
-		
+
 		new Job() {
 			@Override
 			public void doJob() {
@@ -170,17 +172,17 @@ public class Clocks extends Controller{
 		}.afterRequest();
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
-		
+
 		Clocks.showRecap(personId);
 	}
-	
+
 	public static void showRecap(Long personId)
 	{
-		Person person = PersonDao.getPersonById(personId);
-		
+		Person person = personDao.getPersonById(personId);
+
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-		
+
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, today);
@@ -192,16 +194,16 @@ public class Clocks extends Controller{
 		else{
 			personDay = pd.get();
 		}
-				
-		int minInOutColumn = ConfGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
-		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
-		
-		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
-		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
+
+		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
+		int numberOfInOut = Math.max(minInOutColumn,  personManager.numberOfInOutInPersonDay(personDay));
+
+		//		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
+		//		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
 		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
-		
+
 		render(person, dayRecap, numberOfInOut);
-		
+
 	}
 
 }

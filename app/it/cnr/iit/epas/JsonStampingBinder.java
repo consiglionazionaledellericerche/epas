@@ -3,8 +3,12 @@
  */
 package it.cnr.iit.epas;
 
+import injection.StaticInject;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+
+import javax.inject.Inject;
 
 import models.BadgeReader;
 import models.Person;
@@ -32,7 +36,15 @@ import dao.StampingDao;
  *
  */
 @Global
+@StaticInject
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
+
+	@Inject
+	private BadgeReaderDao badgeReaderDao;
+	@Inject
+	private StampingDao stampingDao;
+	@Inject
+	private PersonDao personDao;
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
@@ -52,7 +64,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			
 			String badgeReaderCode = jsonObject.get("lettore").getAsString();
 			if (!badgeReaderCode.isEmpty()) {
-				BadgeReader badgeReader = BadgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
+				BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
 				//BadgeReader badgeReader = BadgeReader.find("byCode", badgeReaderCode).first();
 				if (badgeReader == null) {
 					//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
@@ -71,7 +83,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				String stampTypeCode = jsel.getAsString();
 				//Logger.info("Arrivata causale: %s", stampTypeCode);
 				if (!stampTypeCode.isEmpty()) {					
-					StampType stampType = StampingDao.getStampTypeByCode(stampTypeCode);
+					StampType stampType = stampingDao.getStampTypeByCode(stampTypeCode);
 					//StampType stampType = StampType.find("Select st from StampType st where st.code = ?", stampTypeCode).first();
 					
 					if (stampType == null) {
@@ -111,7 +123,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					}
 					try {
 						int firma = Integer.parseInt(matricolaFirma);
-						person = PersonDao.getPersonByNumber(firma);
+						person = personDao.getPersonByNumber(firma);
 						//person = Person.find("Select p from Person p where p.number = ?", firma).first();
 					} catch (NumberFormatException nfe) {
 						Logger.debug("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
@@ -142,7 +154,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					
 										
 					//Controlla sul campo person oldId
-					person = PersonDao.getPersonByOldID(intMatricolaFirmaAsLong);
+					person = personDao.getPersonByOldID(intMatricolaFirmaAsLong);
 					//person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
 					if(person != null){
 						stamping.personId = person.id;
@@ -154,7 +166,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					//e lo stesso valore dell'id esista già come oldId, altrimenti questa parte di codice non
 					//funzionerebbe
 					
-					person = PersonDao.getPersonById(intMatricolaFirmaAsLong);
+					person = personDao.getPersonById(intMatricolaFirmaAsLong);
 					//person = Person.find("Select p from Person p where p.id = ?", intMatricolaFirmaAsLong).first();
 					if(person != null){
 						Logger.debug("La persona corrispondente è: %s %s", person.name, person.surname);
@@ -172,7 +184,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					// http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
 					String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
 					
-					person = PersonDao.getPersonByBadgeNumber(badgeNumber);
+					person = personDao.getPersonByBadgeNumber(badgeNumber);
 					//person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
 					if(person != null){
 						stamping.personId = person.id;

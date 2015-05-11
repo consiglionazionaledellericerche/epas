@@ -1,7 +1,6 @@
 package manager.recaps.personStamping;
 
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
+import models.Stamping;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -37,11 +37,6 @@ public class PersonStampingRecap {
 
 	private static final int MIN_IN_OUT_COLUMN = 2;
 
-	//private final PersonDayManager personDayManager;
-	private final PersonManager personManager;
-	private final PersonResidualYearRecapFactory yearFactory;
-	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
-	
 	public Person person;
 	public int year;
 	public int month;
@@ -52,10 +47,10 @@ public class PersonStampingRecap {
 	public int numberOfMealTicketToUse = 0;
 	public int basedWorkingDays = 0;
 	public int totalWorkingTime = 0;
-	
+
 	//I riepiloghi di ogni giorno
 	public List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
-	
+
 	//I riepiloghi codici sul mese
 	public Set<StampModificationType> stampModificationTypeSet = Sets.newHashSet();
 	public Set<StampType> stampTypeSet = Sets.newHashSet();
@@ -63,7 +58,7 @@ public class PersonStampingRecap {
 
 	//I riepiloghi mensili (uno per ogni contratto attivo nel mese)
 	public List<PersonResidualMonthRecap> contractMonths = Lists.newArrayList();
-	
+
 	//Template
 	public String month_capitalized;	//FIXME toglierlo e metterlo nel messages
 	public int numberOfInOut = 0;
@@ -80,59 +75,64 @@ public class PersonStampingRecap {
 			PersonManager personManager,
 			PersonResidualYearRecapFactory yearFactory,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
-			
 			int year, int month, Person person) {
-		
-		//this.personDayManager = personDayManager;
-		this.personManager = personManager;
-		this.yearFactory = yearFactory;
-		this.stampingDayRecapFactory = stampingDayRecapFactory;
-		
+
+
 		this.month = month;
 		this.year = year;
-		
+
 		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 
 		//Costruzione dati da renderizzare
-		
+
 		//Lista person day contente tutti i giorni fisici del mese
 		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
-		
+
 		//calcolo del valore valid per le stamping del mese (persistere??)
 		for(PersonDay pd : totalPersonDays) {
 			personDayManager.computeValidStampings(pd);
 		}
-		
-		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet(); 
-		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();
+
 		for(PersonDay pd : totalPersonDays ) {
-			PersonStampingDayRecap dayRecap = this.stampingDayRecapFactory.create(pd, this.numberOfInOut);
+			PersonStampingDayRecap dayRecap = stampingDayRecapFactory
+					.create(pd, this.numberOfInOut);
 			this.daysRecap.add(dayRecap);
 		}
-		this.stampModificationTypeSet = PersonStampingDayRecap.stampModificationTypeSet;
-		this.stampTypeSet = PersonStampingDayRecap.stampTypeSet;
 
-		this.numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
+		this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
 		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
 		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
-		this.basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
-		this.absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
+		this.basedWorkingDays = personManager.basedWorkingDays(totalPersonDays);
+		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		List<Contract> monthContracts = this.personManager.getMonthContracts(person,month, year);
-		
+		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+
 		for(Contract contract : monthContracts)
 		{
-			PersonResidualYearRecap c = this.yearFactory.create(contract, year, null);
+			PersonResidualYearRecap c = yearFactory.create(contract, year, null);
 			if(c.getMese(month)!=null) {
 				this.contractMonths.add(c.getMese(month));
 			}
 		}
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
-		
+
 		for(PersonDay pd : totalPersonDays)
 			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
-		
+
+		calculateStampAndModificationTypeUsed(totalPersonDays);
+
 	}
-	
+
+	private void calculateStampAndModificationTypeUsed(List<PersonDay> personDays){
+		for(PersonDay day : personDays){
+			this.stampModificationTypeSet.add(day.stampModificationType);
+			for(Stamping stamp : day.stampings){
+				this.stampTypeSet.add(stamp.stampType);
+				this.stampModificationTypeSet.add(stamp.stampModificationType);
+			}
+		}
+
+	}
+
 }
