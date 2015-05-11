@@ -77,6 +77,11 @@ when
         "Administration.fixPersonSituation",
         "Administration.deleteUncoupledStampings",
         "Administration.updateExceedeMinInCompetenceTable",
+        
+        "Administration.buildActualContractMonthRecap",
+        "Administration.showResidualSituation",
+    	"Administration.showPersonResidualSituation",
+    	
         "Administrators.switchUserTo",
         "Administrators.restoreUser"
         
