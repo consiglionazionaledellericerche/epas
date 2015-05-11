@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.ContractYearRecap;
@@ -19,6 +20,7 @@ import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -434,11 +436,27 @@ public class ContractManager {
 	 * @param year
 	 * @return
 	 */
+	@Deprecated
 	public static ContractYearRecap getContractYearRecap(Contract contract, int year)	{
 		for(ContractYearRecap cyr : contract.recapPeriods) {
 			
 			if(cyr.year==year)
 				return cyr;
+		}
+		return null;
+	}
+	
+	/**
+	 * Ritorna il riepilogo mensile del contatto.
+	 * @param year
+	 * @return
+	 */
+	public static ContractMonthRecap getContractMonthRecap(Contract contract, YearMonth yearMonth)	{
+		
+		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
+			
+			if ( cmr.year == yearMonth.getYear() && cmr.month == yearMonth.getMonthOfYear() )
+				return cmr;
 		}
 		return null;
 	}

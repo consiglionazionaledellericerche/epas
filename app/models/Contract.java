@@ -71,6 +71,9 @@ public class Contract extends BaseModel {
 
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractYearRecap> recapPeriods;
+	
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	public List<ContractMonthRecap> contractMonthRecaps;
 
 	@Required @NotNull
 
