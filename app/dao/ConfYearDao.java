@@ -1,16 +1,19 @@
 package dao;
 
-import helpers.ModelQuery;
-
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.ConfYear;
 import models.Office;
 import models.query.QConfYear;
 
 import com.google.common.base.Optional;
+import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 
 /**
@@ -19,39 +22,44 @@ import com.mysema.query.jpa.JPQLQuery;
  *
  */
 
-public class ConfYearDao {
+public class ConfYearDao extends DaoBase{
+
+	@Inject
+	ConfYearDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
 
 	/**
 	 * 
 	 * @param id
 	 * @return la confYear relativa all'id passato come parametro
 	 */
-	public static ConfYear getById(Long id){
+	public ConfYear getById(Long id){
 		QConfYear confYear = QConfYear.confYear;
-		final JPQLQuery query = ModelQuery.queryFactory().from(confYear)
+		final JPQLQuery query = getQueryFactory().from(confYear)
 				.where(confYear.id.eq(id));
 		return query.singleResult(confYear);
 	}
-	
+
 	/**
 	 * 
 	 * @param office
 	 * @param year
 	 * @return la lista dei conf year relativi a un certo ufficio in un certo anno
 	 */
-	public static List<ConfYear> getOfficeConfByYear(Optional<Office> office, Integer year){
-		
+	public List<ConfYear> getOfficeConfByYear(Optional<Office> office, Integer year){
+
 		final BooleanBuilder condition = new BooleanBuilder();
 		QConfYear confYear = QConfYear.confYear;
-		
+
 		if(office.isPresent()){
 			condition.and(confYear.office.eq(office.get()));
 		}
 		condition.and(confYear.year.eq(year));
-		return  ModelQuery.queryFactory().from(confYear).where(condition).list(confYear);
-		 
+		return  getQueryFactory().from(confYear).where(condition).list(confYear);
+
 	}
-	
+
 	/**
 	 * 
 	 * @param office
@@ -59,16 +67,16 @@ public class ConfYearDao {
 	 * @param field
 	 * @return il conf year di un certo ufficio in un certo anno rispondente al parametro field
 	 */
-	public static Optional<ConfYear> getByFieldName(String field, Integer year, Office office) {
-		
+	public Optional<ConfYear> getByFieldName(String field, Integer year, Office office) {
+
 		final BooleanBuilder condition = new BooleanBuilder();
-		
+
 		QConfYear confYear = QConfYear.confYear;
-		final JPQLQuery query = ModelQuery.queryFactory().from(confYear);
+		final JPQLQuery query = getQueryFactory().from(confYear);
 		condition.and(confYear.year.eq(year));
 		condition.and(confYear.field.eq(field));
 		query.where(condition);
-		
+
 		return Optional.fromNullable(query.singleResult(confYear));
 	}
 }

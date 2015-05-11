@@ -6,7 +6,6 @@ package models;
 
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -29,7 +28,6 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Email;
 import play.data.validation.Required;
-import dao.PersonMonthRecapDao;
 
 /**
  * @author cristian
@@ -84,7 +82,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con Perseo (Person.id di Perseo)
 	 */
 	public Integer iId;
-	
+
 	/**
 	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
 	 */
@@ -222,24 +220,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 		int res = (this.surname.compareTo(person.surname) == 0) ?  this.name.compareTo(person.name) :  this.surname.compareTo(person.surname);
 		return res;
-	}
-
-
-
-	/**
-	 * //FIXME Questo metodo deve sparire una volta rifattorizzata UploadSituation....
-	 * Adesso viene reintrodotto per far funzionare la procedura dell'invio attestati.
-	 *
-	 * L'esito dell'invio attestati per la persona (null se non è ancora stato effettuato).
-	 * @param year
-	 * @param month
-	 * @return
-	 */
-	public CertificatedData getCertificatedData(int year, int month) {
-
-		CertificatedData cd = PersonMonthRecapDao
-				.getCertificatedDataByPersonMonthAndYear(this, month, year);
-		return cd;
 	}
 
 }

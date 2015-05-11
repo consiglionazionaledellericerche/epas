@@ -20,22 +20,34 @@ import com.google.inject.Inject;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPersonDay;
 
 public class MonthRecapManager {
-	
-	private final PersonDayDao personDayDao;
-	private final CompetenceDao competenceDao;
-	
-	private final static Logger log = LoggerFactory.getLogger(MonthRecapManager.class);
-	
+
 	@Inject
 	public MonthRecapManager(PersonDayDao personDayDao,
-			CompetenceDao competenceDao) {
-
+			CompetenceDao competenceDao, IWrapperFactory wrapperFactory,
+			PersonDayManager personDayManager,
+			CompetenceManager competenceManager, PersonDao personDao) {
+		super();
 		this.personDayDao = personDayDao;
 		this.competenceDao = competenceDao;
+		this.wrapperFactory = wrapperFactory;
+		this.personDayManager = personDayManager;
+		this.competenceManager = competenceManager;
+		this.personDao = personDao;
 	}
-	
+
+	private final PersonDayDao personDayDao;
+	private final CompetenceDao competenceDao;
+	private final IWrapperFactory wrapperFactory;
+	private final PersonDayManager personDayManager;
+	private final CompetenceManager competenceManager;
+	private final PersonDao personDao;
+
+	private final static Logger log = LoggerFactory.getLogger(MonthRecapManager.class);
+
 	/**
 	 * Riepilogo mensile per la Persona. Contiene le seguenti informazioni
 	 * Assenze non giustificate
@@ -60,7 +72,8 @@ public class MonthRecapManager {
 		protected int mealTicketToRender = 0;
 		protected int mealTicketToUse = 0;
 		protected int valueApproved = 0;
-		
+
+
 		/**
 		 * Algoritmo per il calcolo del riepilogo mensile per la persona.
 		 * @param person
@@ -72,19 +85,20 @@ public class MonthRecapManager {
 		{
 			for(PersonDay pd : pdList)
 			{
-				//pd.getStampProfile();
+				IWrapperPersonDay day = wrapperFactory.create(pd);
+
 				totalTimeAtWork = totalTimeAtWork + pd.timeAtWork;
 				difference = difference + pd.difference;
-				
+
 				//meal ticket to render --------------------------------------------------------------------------------------------------
 				if(pd.isTicketAvailable)
 					mealTicketToUse++;
-				
-				if(!pd.isTicketAvailable && !pd.isHoliday())
+
+				if(!pd.isTicketAvailable && !day.isHoliday())
 					mealTicketToRender++;
-				
+
 				//holiday at work ---------------------------------------------------------------------------------------------------------
-				if(pd.isHoliday())
+				if(day.isHoliday())
 				{
 					if (pd.timeAtWork>0)		
 					{
@@ -93,9 +107,9 @@ public class MonthRecapManager {
 				}
 				//not holiday at work -----------------------------------------------------------------------------------------------------
 				//persone fixed
-				else if(pd.isFixedTimeAtWork())
+				else if(day.isHoliday())
 				{
-					if(!PersonDayManager.isAllDayAbsences(pd))
+					if(!personDayManager.isAllDayAbsences(pd))
 					{	
 						workingDayNotHoliday.add(pd);
 					}
@@ -105,13 +119,13 @@ public class MonthRecapManager {
 					}
 				}
 				//persone non fixed
-				else if(!pd.isFixedTimeAtWork())
+				else if(!day.isFixedTimeAtWork())
 				{
-					if(PersonDayManager.isInTrouble(pd)) 
+					if(personDayManager.isInTrouble(pd)) 
 					{
 						notJustifiedAbsences.add(pd);
 					}
-					else if(!PersonDayManager.isAllDayAbsences(pd))
+					else if(!personDayManager.isAllDayAbsences(pd))
 					{
 						workingDayNotHoliday.add(pd);
 					}
@@ -122,7 +136,7 @@ public class MonthRecapManager {
 				}
 			}
 			//straordinari s1/s2/s3
-			List<String> code = CompetenceManager.populateListWithOvertimeCodes();			
+			List<String> code = competenceManager.populateListWithOvertimeCodes();			
 			List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person),year, month, code, person.office, false);
 			valueApproved = 0;
 			for(Competence comp : competenceList)
@@ -132,7 +146,7 @@ public class MonthRecapManager {
 
 		}
 	}
-	
+
 	public static Comparator<Person> PersonNameComparator = new Comparator<Person>() {
 
 		public int compare(Person person1, Person person2) {
@@ -155,7 +169,7 @@ public class MonthRecapManager {
 
 	};
 
-	
+
 	/**
 	 * Calcola il riepilogo mensile per la persona con identificativo id e ritorna la lista specificamente richiesta 
 	 * @param id
@@ -166,10 +180,10 @@ public class MonthRecapManager {
 	 */
 	public List<PersonDay> getPersonDayListRecap(Long id, int year, int month, String listType)
 	{
-		
-		Person person = PersonDao.getPersonById(id);
+
+		Person person = personDao.getPersonById(id);
 		//Person person = Person.findById(id);
-				
+
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
@@ -183,17 +197,17 @@ public class MonthRecapManager {
 				List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
 				return(notJustifiedAbsences);
 			}
-			
+
 			//Considero il riepilogo fino a ieri
 			monthEnd = today.minusDays(1);
 
 		}
-		
+
 		List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
-		
+
 		PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 		mr.populatePersonMonthRecap(person, pdList, year, month);
-	
+
 		if(listType.equals("notJustifiedAbsences"))
 			return mr.notJustifiedAbsences;
 		if(listType.equals("justifiedAbsences"))
@@ -202,7 +216,7 @@ public class MonthRecapManager {
 			return mr.workingDayHoliday;
 		if(listType.equals("workingDayNotHoliday"))
 			return mr.workingDayNotHoliday;
-		
+
 		return null;
 	}
 	/**
@@ -225,7 +239,7 @@ public class MonthRecapManager {
 		}
 		return tableMonthRecap;
 	}
-	
+
 	/**
 	 * 
 	 * @param personList
@@ -241,10 +255,10 @@ public class MonthRecapManager {
 		{
 			//person day list
 			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
-						
+
 			log.debug("populateRealValueTable -> costruisco riepilogo mensile per {} {} {}",
 					new Object[] { person.id, person.name, person.surname });
-			
+
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 			mr.populatePersonMonthRecap(person, pdList, year, month);
 

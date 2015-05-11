@@ -1,6 +1,6 @@
 package manager;
 
-import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -19,42 +19,14 @@ import exceptions.EpasExceptionNoSourceData;
 
 public class VacationManager {
 
-	@Inject 
-	public IWrapperFactory wrapperFactory;
-	
 	@Inject
-	public AbsenceDao absenceDao;
-	
-	@Inject 
-	public AbsenceTypeDao absenceTypeDao;
-	
-	@Inject
-	public ConfYearManager confYearManager;
-	
-	
-	/**
-	 * Il numero di giorni di ferie dell'anno passato non ancora utilizzati (senza considerare l'expire limit di utilizzo)
-	 * Il valore ritornato contiene i giorni ferie maturati previsti dal contratto nell'anno passato meno 
-	 * i 32 utilizzati in past year
-	 * i 31 utilizzati in current year
-	 * i 37 utilizzati in current year
-	 * @param year
-	 * @param person
-	 * @param abt
-	 * @return
-	 * @throws EpasExceptionNoSourceData 
-	 */
-	public int remainingPastVacationsAs37(int year, Person person) throws EpasExceptionNoSourceData{
-
-		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-		Preconditions.checkState(contract.isPresent());
-		
-		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
-				confYearManager, this, year, contract.get(), new LocalDate(), false)
-					.vacationDaysLastYearNotYetUsed;
-		
+	public VacationManager(AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao,
+			ConfYearManager confYearManager) {
+		this.confYearManager = confYearManager;
 	}
-	
+
+	private final ConfYearManager confYearManager;
+
 	/**
 	 * La data di scadenza delle ferie anno passato per l'office passato come argomento, 
 	 * nell'anno year.
@@ -63,17 +35,17 @@ public class VacationManager {
 	 * @return
 	 */
 	public LocalDate vacationsLastYearExpireDate(int year, Office office) {
-		
-		Integer monthExpiryVacationPastYear = ConfYearManager.getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
-				
-		Integer dayExpiryVacationPastYear = ConfYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year); 
-						
+
+		Integer monthExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
+
+		Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year); 
+
 		LocalDate expireDate = LocalDate.now()
 				.withMonthOfYear(monthExpiryVacationPastYear)
 				.withDayOfMonth(dayExpiryVacationPastYear);
 		return expireDate;
 	}
-	
+
 	/**
 	 * 
 	 * @param year l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono scadute
@@ -83,7 +55,7 @@ public class VacationManager {
 	public boolean isVacationsLastYearExpired(int year, LocalDate expireDate)
 	{
 		LocalDate today = LocalDate.now();
-		
+
 		if( year < today.getYear() ) {		//query anni passati 
 			return true;
 		}
@@ -92,5 +64,5 @@ public class VacationManager {
 		}
 		return false;
 	}
-	
+
 }

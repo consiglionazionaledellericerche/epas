@@ -17,7 +17,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 import com.google.common.collect.FluentIterable;
 
@@ -29,29 +28,29 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class})
 public class Offices extends Controller {
-
+	
 	@Inject
-	static SecurityRules rules;
-
+	private static OfficeDao officeDao;
 	@Inject
-	static WrapperModelFunctionFactory wrapperFunctionFactory;
-
+	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
-	static IWrapperFactory wrapperFactory;
-
+	private static RoleDao roleDao;
 	@Inject
-	static OfficeDao officeDao;
-
+	private static IWrapperFactory wrapperFactory;
 	@Inject
-	static OfficeManager officeManager;
+	private static OfficeManager officeManager;
+	@Inject
+	private static ConfGeneralManager confGeneralManager;
+	@Inject
+	private static ConfYearManager confYearManager;
 
 	public static void showOffices(){
 
 		List<IWrapperOffice> allAreas = FluentIterable
 				.from(officeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
 
-		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
 
 		render(allAreas, roleAdmin, roleAdminMini);
 	}
@@ -135,16 +134,16 @@ public class Offices extends Controller {
 		}
 
 		seat.office = institute;
-		
+
 		final boolean newSeat = !seat.isPersistent();
-		
+
 		seat.save();
 
 		if(newSeat){
-			ConfGeneralManager.buildOfficeConfGeneral(seat, false);
+			confGeneralManager.buildOfficeConfGeneral(seat, false);
 
-			ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
-			ConfYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
+			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
+			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
 
 			officeManager.setPermissionAfterCreation(seat);
 		}

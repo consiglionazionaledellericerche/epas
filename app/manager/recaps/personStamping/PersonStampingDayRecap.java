@@ -4,7 +4,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
@@ -13,7 +12,6 @@ import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeValue;
-import models.StampType;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -31,16 +29,11 @@ import dao.wrapper.IWrapperFactory;
  *
  */
 public class PersonStampingDayRecap {
-	
-	//private final PersonDayManager personDayManager;	
-	
+
 	private final StampingTemplateFactory stampingTemplateFactory;
 
-	public static Set<StampModificationType> stampModificationTypeSet;
-	public static Set<StampType> stampTypeSet;
-	
 	private static StampModificationType fixedStampModificationType = null;
-	
+
 	public Long personDayId;
 	public Person person;
 	public WorkingTimeTypeDay wttd = null;
@@ -50,76 +43,75 @@ public class PersonStampingDayRecap {
 	public String timeMealFrom = "";
 	public String timeMealTo = "";
 	public String breakTicketTime = "";
-	
+
 	public String mealTicket;
-	
+
 	public LocalDate date;
 	public boolean holiday;
 	public boolean past;
 	public boolean today;
 	public boolean future;
-	
+
 	public List<Absence> absences;
-	
+
 	public List<StampingTemplate> stampingsTemplate;
-	
+
 	public String workTime = "";
 	public String todayLunchTimeCode = "";
 	public String fixedWorkingTimeCode = "";
 	public String exitingNowCode = "";
-	
+
 	public String difference = "";
 	public boolean differenceNegative;
 	public String progressive = "";
 	public boolean progressiveNegative;
 	public String workingTimeTypeDescription = "";
-	
+
 	public List<String> note = new ArrayList<String>();
-		
+
 	public PersonStampingDayRecap(PersonDayManager personDayManager, 
 			StampingTemplateFactory stampingTemplateFactory,
 			StampingDao stampingDao, IWrapperFactory wrapperFactory,
-			
-			PersonDay pd, int numberOfInOut) {			
-		
-		//this.personDayManager = personDayManager;
+			WorkingTimeTypeDao workingTimeTypeDao,
+			PersonDay pd, int numberOfInOut,ConfGeneralManager confGeneralManager) {			
+
 		this.stampingTemplateFactory = stampingTemplateFactory;
-		
+
 		this.personDayId = pd.id;
-		this.holiday = pd.isHoliday();
+		this.holiday = wrapperFactory.create(pd).isHoliday();
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
 
 		List<Stamping> stampingsForTemplate = personDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
 
-		
+
 		this.setStampingTemplate( stampingsForTemplate, pd );
 
-		if(WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person) != null){
+		if(workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
 
-			this.wtt = WorkingTimeTypeDao.getWorkingTimeTypeStatic(pd.date, pd.person);
-			
+			this.wtt = workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person).get();
+
 			this.wttd = this.wtt.workingTimeTypeDays.get(pd.date.getDayOfWeek()-1);
-			
+
 			this.setWorkingTime(this.wttd.workingTime);
 			this.setMealTicketTime(this.wttd.mealTicketTime);
 			this.setBreakTicketTime(this.wttd.breakTicketTime);
-		
+
 		}
-		
-		Integer mealTimeStartHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
-		Integer mealTimeStartMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
-		Integer mealTimeEndHour = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.person.office);
-		Integer mealTimeEndMinute = ConfGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.person.office);
-		
+
+		Integer mealTimeStartHour = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
+		Integer mealTimeStartMinute = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
+		Integer mealTimeEndHour = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.person.office);
+		Integer mealTimeEndMinute = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.person.office);
+
 		this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
 		this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
-		
-		
+
+
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------
-		
-		if(pd.isFixedTimeAtWork())
+
+		if(wrapperFactory.create(pd).isFixedTimeAtWork())
 		{
 			if(this.future)
 			{
@@ -130,16 +122,14 @@ public class PersonStampingDayRecap {
 				this.setWorkTime( pd.timeAtWork );
 				this.setDifference( pd.difference );
 				this.setProgressive( pd.progressive );
-				if(pd.timeAtWork!=0)
-				{
+				if(pd.timeAtWork!=0){
+
 					if(fixedStampModificationType==null)							//DEVE ANDARE NELLA CACHE
 						fixedStampModificationType = personDayManager.getFixedWorkingTime();
 					this.fixedWorkingTimeCode = fixedStampModificationType.code;
-					
-					stampModificationTypeSet.add(fixedStampModificationType);
-					//addStampModificationTypeToList(fixedStampModificationType);
+
 				}
-				
+
 			}
 		}
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
@@ -166,15 +156,15 @@ public class PersonStampingDayRecap {
 		}
 
 		//----------------------------------------------- meal ticket (NO)--------------------------------------------------------------
-		if(this.today && !PersonDayManager.isAllDayAbsences(pd))
+		if(this.today && !personDayManager.isAllDayAbsences(pd))
 			this.setMealTicket(pd.isTicketAvailable, true);
-		
-		else if(this.today && PersonDayManager.isAllDayAbsences(pd))
+
+		else if(this.today && personDayManager.isAllDayAbsences(pd))
 			this.setMealTicket(pd.isTicketAvailable, false);	//c'è una assenza giornaliera, la decisione è già presa
-		
+
 		else if(!this.holiday)
 			this.setMealTicket(pd.isTicketAvailable, false);	
-	
+
 		else
 			this.setMealTicket(true, false);
 
@@ -182,30 +172,26 @@ public class PersonStampingDayRecap {
 		if(pd.stampModificationType!=null && !this.future)
 		{
 			this.todayLunchTimeCode = pd.stampModificationType.code;
-			stampModificationTypeSet.add(pd.stampModificationType);
-			//addStampModificationTypeToList(pd.stampModificationType);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
-		if(this.today && !this.holiday && !PersonDayManager.isAllDayAbsences(pd)) 
+		if(this.today && !this.holiday && !personDayManager.isAllDayAbsences(pd)) 
 		{
 			StampModificationType smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
-			stampModificationTypeSet.add(smt);
-			//addStampModificationTypeToList(smt);
 		}
 		//------------------------------------------------description work time type ----------------------------------------------------
-		
+
 		if(wtt!=null)
 		{
 			this.workingTimeTypeDescription = wtt.description; 
 		}
 		//--------------------------------------------------------------------------------------------------------------------------------
 	}
-	
-	
+
+
 
 	private void setMealTicket(boolean mealTicket, boolean todayInProgress) {
-		
+
 		//Caso di oggi
 		if(todayInProgress)
 		{
@@ -219,27 +205,27 @@ public class PersonStampingDayRecap {
 			}
 			return;
 		}
-			
+
 		//Casi assenze future (create o cancellate)
 		if(this.future && !mealTicket && !this.absences.isEmpty()) {
 			this.mealTicket = "NO";
 			return;
 		}
-		
+
 		if(this.future && !mealTicket && this.absences.isEmpty()) {
 			this.mealTicket = "";
 			return;
 		}
-		
+
 		//Casi generali
 		if(!mealTicket){
 			this.mealTicket = "NO";
 			return;
 		}
-		
+
 		this.mealTicket = "";
 	}
-	
+
 	private void setDate(LocalDate date)
 	{
 		LocalDate today = new LocalDate();
@@ -266,7 +252,7 @@ public class PersonStampingDayRecap {
 			return;
 		}
 	}
-	
+
 	private void setStampingTemplate(List<Stamping> stampings, PersonDay pd)
 	{
 		StampingTemplate st;
@@ -275,8 +261,8 @@ public class PersonStampingDayRecap {
 		for(int i = 0; i<stampings.size(); i++)
 		{
 			Stamping stamping = stampings.get(i);
-			
-			
+
+
 			//Setto pairId e type
 			if(stamping.pairId!=0 && stamping.isIn())
 			{
@@ -296,18 +282,18 @@ public class PersonStampingDayRecap {
 			{
 				st = stampingTemplateFactory.create(stamping, i, pd, 0, "none");
 			}
-			
-			
+
+
 			//nuova stamping for template
 			//st = new StampingTemplate(stamping, i, pd, actualPair, actualPosition);
 			this.stampingsTemplate.add(st);
 			if(stamping.note!=null && !stamping.note.equals("")){
 				note.add(st.hour + ": " + stamping.note);
 			}
-			
+
 		}
 	}
-	
+
 	private void setWorkingTime(int workingTime)
 	{
 		if(workingTime==0)
@@ -315,7 +301,7 @@ public class PersonStampingDayRecap {
 		else
 			this.workingTime = DateUtility.fromMinuteToHourMinute(workingTime);
 	}
-	
+
 	private void setMealTicketTime(int mealTicketTime)
 	{
 		if(mealTicketTime==0)
@@ -323,7 +309,7 @@ public class PersonStampingDayRecap {
 		else
 			this.mealTicketTime = DateUtility.fromMinuteToHourMinute(mealTicketTime);
 	}
-	
+
 	private void setBreakTicketTime(int breakTicketTime)
 	{
 		if(breakTicketTime==0)
@@ -331,7 +317,7 @@ public class PersonStampingDayRecap {
 		else
 			this.breakTicketTime = DateUtility.fromMinuteToHourMinute(breakTicketTime);
 	}
-	
+
 	private void setTimeMealFrom(int timeMealFromHour, int timeMealFromMinute)
 	{
 		String hour = timeMealFromHour + "";
@@ -342,7 +328,7 @@ public class PersonStampingDayRecap {
 			minute="0"+minute;
 		this.timeMealFrom = hour + ":" + minute;
 	}
-	
+
 	private void setTimeMealTo(int timeMealToHour, int timeMealToMinute)
 	{
 		String hour = timeMealToHour + "";
@@ -353,12 +339,12 @@ public class PersonStampingDayRecap {
 			minute="0"+minute;
 		this.timeMealTo = hour + ":" + minute;
 	}
-	
+
 	private void setWorkTime(int workTime)
 	{
 		this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
 	}
-	
+
 	private void setDifference(int difference)
 	{
 		if(difference<0)
@@ -372,7 +358,7 @@ public class PersonStampingDayRecap {
 		}
 		this.difference = DateUtility.fromMinuteToHourMinute(difference);
 	}
-	
+
 	private void setProgressive(int progressive)
 	{
 		if(progressive<0)

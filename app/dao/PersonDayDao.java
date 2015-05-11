@@ -147,9 +147,9 @@ public class PersonDayDao extends DaoBase {
 	 * @return il personDay relativo al giorno e alla persona passati come parametro. E' optional perchè potrebbe non esistere
 	 */
 	@Deprecated
-	public static Optional<PersonDay> getSinglePersonDayStatic(Person person, LocalDate date){
+	public Optional<PersonDay> getSinglePersonDayStatic(Person person, LocalDate date){
 		final QPersonDay personDay = QPersonDay.personDay;
-		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
+		final JPQLQuery query = getQueryFactory().from(personDay)
 				.where(personDay.person.eq(person).and(personDay.date.eq(date)));
 		return Optional.fromNullable(query.singleResult(personDay));
 	}

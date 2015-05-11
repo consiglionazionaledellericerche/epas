@@ -30,7 +30,6 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import dao.ContractDao;
-import dao.WorkingTimeTypeDao;
 
 
 /**
@@ -53,28 +52,24 @@ public class PersonDay extends BaseModel {
 	public Person person;
 
 	@Required
-//	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 
 	@Column(name = "time_at_work")
 	public Integer timeAtWork;
-	
+
 	public Integer difference;
 
 	public Integer progressive;
-	
+
 	@Column(name = "is_ticket_available")
 	public boolean isTicketAvailable = true;
 
 	@Column(name = "is_ticket_forced_by_admin")
 	public boolean isTicketForcedByAdmin = false;
 
-	//@Column(name = "is_time_at_work_auto_certificated")
-	//public boolean isTimeAtWorkAutoCertificated = false;
-		
-	//@Column(name = "is_holiday")
-	//public boolean isHoliday = false;	rmHoliday
-	
+	@Column(name = "accepted_holiday_working_time")
+	public boolean acceptedHolidayWorkingTime = false;
+
 	@Column(name = "is_working_in_another_place")
 	public boolean isWorkingInAnotherPlace = false;
 
@@ -88,27 +83,27 @@ public class PersonDay extends BaseModel {
 	@ManyToOne
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
-	
+
 	@NotAudited
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
-	
+
 	@Transient
 	public PersonDay previousPersonDayInMonth = null;
-		
+
 	@Transient
 	public Contract personDayContract = null;
-	
+
 	@Transient
 	private Boolean isHolidayy = null;
-	
+
 	@Transient
 	private Boolean isFixedTimeAtWorkk = null;
-	
+
 	@Transient
 	public MealTicket mealTicketAssigned = null;
-	
-	
+
+
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
 		this.person = person;
 		this.date = date;
@@ -120,33 +115,7 @@ public class PersonDay extends BaseModel {
 	public PersonDay(Person person, LocalDate date){
 		this(person, date, 0, 0, 0);
 	}
-	
-	@Transient
-	@Deprecated
-	public Contract getPersonDayContract() {
 
-		if(this.personDayContract != null)
-			return this.personDayContract;
-		
-		//this.personDayContract = this.person.getContract(date);
-		this.personDayContract = ContractDao.getContract(date, person);
-		
-		return this.personDayContract;
-	}
-	
-	/**
-	 * Controlla che il personDay cada in un giorno festivo
-	 * @param data
-	 * @return
-	 */
-	public boolean isHoliday(){
-		if(isHolidayy!=null)	//già calcolato
-			return isHolidayy;
-		//isHolidayy = this.person.isHoliday(this.date);
-		isHolidayy = PersonManager.isHoliday(person, date);
-		return isHolidayy;
-	}
-	
 	/**
 	 * Controlla che il personDay cada nel giorno attuale
 	 * @return
@@ -155,52 +124,6 @@ public class PersonDay extends BaseModel {
 		return this.date.isEqual(new LocalDate());
 	}
 
-	/** 
-	 * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true;
-	 * @return
-	 */
-	public boolean isFixedTimeAtWork()
-	{
-		if(this.isFixedTimeAtWorkk!=null)	//già calcolato
-			return this.isFixedTimeAtWorkk;
-		
-		this.isFixedTimeAtWorkk = false;
-		
-		//Contract contract = this.person.getContract(this.date);
-		Contract contract = ContractDao.getContract(this.date, this.person);
-		if(contract == null)
-			return false;
-		
-		for(ContractStampProfile csp : contract.contractStampProfile){
-			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(csp.startFrom, csp.endTo))){
-				this.isFixedTimeAtWorkk = csp.fixedworkingtime;
-			}
-		}
-
-		return this.isFixedTimeAtWorkk;
-	}
-
-	/**
-	 * FIXME il modello non deve usare i Dao. Spostare nel Dao o nel WrapperPersonDay
-	 * Il piano giornaliero di lavoro previsto dal contratto per quella data
-	 * @return 
-	 */
-	public WorkingTimeTypeDay getWorkingTimeTypeDay(){
-		
-		//return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
-		//WorkingTimeType wtt = person.getWorkingTimeType(date);
-		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeStatic(date, person);
-		if(wtt == null)
-			return null;
-		
-		WorkingTimeTypeDay wttd = wtt.workingTimeTypeDays.get(date.getDayOfWeek()-1);
-		if(wttd == null)
-			return null;
-		
-		return wttd;
-	}
-	
-	
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",

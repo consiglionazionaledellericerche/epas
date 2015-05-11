@@ -51,12 +51,42 @@ import dao.wrapper.IWrapperPerson;
 import exceptions.EpasExceptionNoSourceData;
 
 public class ChartsManager {
-	
+
+	@Inject
+	public ChartsManager(ConfGeneralDao confGeneralDao,
+			CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao,
+			CompetenceManager competenceManager, PersonDao personDao,
+			AbsenceDao absenceDao, PersonResidualYearRecapFactory yearFactory,
+			VacationsRecapFactory vacationsFactory, ContractDao contractDao,
+			IWrapperFactory wrapperFactory) {
+		this.confGeneralDao = confGeneralDao;
+		this.competenceCodeDao = competenceCodeDao;
+		this.competenceDao = competenceDao;
+		this.competenceManager = competenceManager;
+		this.personDao = personDao;
+		this.absenceDao = absenceDao;
+		this.yearFactory = yearFactory;
+		this.vacationsFactory = vacationsFactory;
+		this.contractDao = contractDao;
+		this.wrapperFactory = wrapperFactory;
+	}
+
 	private final static Logger log = LoggerFactory.getLogger(ChartsManager.class);
-	
-	
+
+	private final ConfGeneralDao confGeneralDao;
+	private final CompetenceCodeDao competenceCodeDao;
+	private final CompetenceDao competenceDao;
+	private final CompetenceManager competenceManager;
+	private final PersonDao personDao;
+	private final AbsenceDao absenceDao;
+	private final PersonResidualYearRecapFactory yearFactory;
+	private final VacationsRecapFactory vacationsFactory;
+	private final ContractDao contractDao;
+	private final IWrapperFactory wrapperFactory;
+
+
 	/**Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici**/
-	
+
 	public final static class Month{
 		public int id;
 		public String mese;
@@ -76,32 +106,32 @@ public class ChartsManager {
 			this.anno = anno;
 		}
 	}
-	
-	
+
+
 	/**Classe per la restituzione di un oggetto al controller che contenga le liste per la verifica di quanto trovato all'interno
 	del file dello schedone**/
-	
+
 	public final static class RenderList{
 		private List<RenderResult> listNull;
 		private List<RenderResult> listTrueFalse;
-		
+
 		private RenderList(List<RenderResult> listNull, List<RenderResult> listTrueFalse){
 			this.listNull = listNull;
 			this.listTrueFalse = listTrueFalse;
 		}
-		
+
 		public List<RenderResult> getListNull(){
 			return this.listNull;
 		}
 		public List<RenderResult> getListTrueFalse(){
 			return this.listTrueFalse;
-			
+
 		}
 	}
-	
+
 	/**classe privata per la restituzione del risultato relativo al processo di controllo sulle assenze dell'anno passato**/
-	
-	public static class RenderResult{
+
+	public class RenderResult{
 		public String line;
 		public Integer matricola;
 		public String nome;
@@ -126,46 +156,25 @@ public class ChartsManager {
 		}
 	}
 
+
 	/**Inizio parte di business logic**/
 
-	private final  PersonResidualYearRecapFactory yearFactory;
-	private final  CompetenceManager competenceManager;
-	private final  VacationsRecapFactory vacationsFactory;
-	private final  IWrapperFactory wrapperFactory;
-	
-	@Inject
-	public ChartsManager(PersonResidualYearRecapFactory yearFactory,
-			CompetenceManager competenceManager,
-			VacationsRecapFactory vacationsFactory,
-			IWrapperFactory wrapperFactory, CompetenceDao competenceDao) {
-		super();
-		this.yearFactory = yearFactory;
-		this.competenceManager = competenceManager;
-		this.vacationsFactory = vacationsFactory;
-		this.wrapperFactory = wrapperFactory;
-		this.competenceDao = competenceDao;
-	}
-
-
-
-	private final CompetenceDao competenceDao;
-	
 	/**
 	 * 
 	 * @param office
 	 * @return la lista di oggetti Year a partire dall'inizio di utilizzo del programma a oggi
 	 */
-	public static List<Year> populateYearList(Office office){
+	public List<Year> populateYearList(Office office){
 		List<Year> annoList = Lists.newArrayList();
 		Integer yearBegin = null;
 		int counter = 0;
-		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description, office);
+		Optional<ConfGeneral> yearInitUseProgram = confGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description, office);
 		if(yearInitUseProgram.isPresent()){
 			counter++;			
 			LocalDate date = new LocalDate(yearInitUseProgram.get().fieldValue);
 			yearBegin =  date.getYear();
 			annoList.add(new Year(counter, yearBegin));
-			
+
 		}
 		if(yearBegin != null){			
 			for(int i = yearBegin; i <= LocalDate.now().getYear(); i++){
@@ -173,15 +182,15 @@ public class ChartsManager {
 				annoList.add(new Year(counter,i));
 			}
 		}
-		
+
 		return annoList;
 	}
-	
+
 	/**
 	 * 
 	 * @return la lista degli oggetti Month
 	 */
-	public static List<Month> populateMonthList(){
+	public List<Month> populateMonthList(){
 		List<Month> meseList = Lists.newArrayList();
 		meseList.add(new Month(1,"Gennaio"));
 		meseList.add(new Month(2,"Febbraio"));
@@ -197,22 +206,22 @@ public class ChartsManager {
 		meseList.add(new Month(12,"Dicembre"));
 		return meseList;
 	}
-	
+
 	/**
 	 * 
 	 * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in anagrafica
 	 */
-	public static List<CompetenceCode> populateOvertimeCodeList(){
+	public List<CompetenceCode> populateOvertimeCodeList(){
 		List<CompetenceCode> codeList = Lists.newArrayList();
-		CompetenceCode c1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
-		CompetenceCode c2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
-		CompetenceCode c3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
+		CompetenceCode c1 = competenceCodeDao.getCompetenceCodeByCode("S1");
+		CompetenceCode c2 = competenceCodeDao.getCompetenceCodeByCode("S2");
+		CompetenceCode c3 = competenceCodeDao.getCompetenceCodeByCode("S3");
 		codeList.add(c1);
 		codeList.add(c2);
 		codeList.add(c3);
 		return codeList;
 	}
-	
+
 	/**
 	 * 
 	 * @param personList
@@ -244,7 +253,7 @@ public class ChartsManager {
 		}
 		return poList;
 	}
-	
+
 	/**
 	 * 
 	 * @param personeProva
@@ -265,9 +274,9 @@ public class ChartsManager {
 		}
 		return totaleOreResidue;
 	}
-	
-	
-	public static RenderList checkSituationPastYear(Blob file){
+
+
+	public RenderList checkSituationPastYear(Blob file){
 		if(file == null){
 			log.error("file nullo nella chiamata della checkSituationPastYear");
 		}
@@ -282,7 +291,7 @@ public class ChartsManager {
 			int indexMatricola = 0;
 			int indexAssenza = 0;
 			int indexDataAssenza = 0;
-			
+
 			while((line = in.readLine()) != null) {
 
 				if(line.contains("Query 3")){
@@ -304,28 +313,33 @@ public class ChartsManager {
 					continue;
 				}
 				RenderResult renderResult = null;				
-				List<String> tokenList = ChartsManager.splitter(line);
-	
+				List<String> tokenList = splitter(line);
+
 				try{
 					int matricola = Integer.parseInt(removeApice(tokenList.get(indexMatricola)));
 					String assenza = removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
-					Person p = PersonDao.getPersonByNumber(matricola);
-					Absence abs = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).size() > 0 ? AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).get(0) : null;
-					
-					if(abs == null){
-						if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
-							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
-					}
-					else{
-						if(abs.absenceType.certificateCode.equalsIgnoreCase(assenza)){
-							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, true, "", null);							
-						}
-						else{
-							if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
-								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica", abs.absenceType.code);
-						}
-					}
+					Person p = personDao.getPersonByNumber(matricola);
+					Absence abs = absenceDao.getAbsencesInPeriod(
+							Optional.fromNullable(p), dataAssenza
+							,Optional.<LocalDate>absent(), false).size() > 0 ? 
+									absenceDao.getAbsencesInPeriod(
+											Optional.fromNullable(p), dataAssenza
+											, Optional.<LocalDate>absent(), false).get(0) : null;
+
+											if(abs == null){
+												if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
+													renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
+											}
+											else{
+												if(abs.absenceType.certificateCode.equalsIgnoreCase(assenza)){
+													renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, true, "", null);							
+												}
+												else{
+													if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
+														renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica", abs.absenceType.code);
+												}
+											}
 
 				}
 				catch(Exception e){
@@ -338,7 +352,7 @@ public class ChartsManager {
 				log.debug("Inserito in lista render result per {} in data {}", renderResult.cognome, renderResult.data);
 
 			}
-			
+
 			return new RenderList(listNull, listTrueFalse);
 		}
 		catch(Exception e)
@@ -376,7 +390,9 @@ public class ChartsManager {
 		}
 		out.write("Cognome Nome,");
 		for(int i = 1; i <= month; i++){
-			out.append("ore straordinari "+DateUtility.fromIntToStringMonth(i)+','+"ore riposi compensativi "+DateUtility.fromIntToStringMonth(i)+','+"ore in più "+DateUtility.fromIntToStringMonth(i)+',');
+			out.append("ore straordinari "+DateUtility.fromIntToStringMonth(i)+
+					','+"ore riposi compensativi "+DateUtility.fromIntToStringMonth(i)+
+					','+"ore in più "+DateUtility.fromIntToStringMonth(i)+',');
 		}
 
 		out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -385,18 +401,18 @@ public class ChartsManager {
 		int totalOvertime = 0;
 		int totalCompensatoryRest = 0;
 		int totalPlusHours = 0;
-		
+
 		for(Person p : personList){
 			log.debug("Scrivo i dati per {}", p.getFullname());
 
 			out.append(p.surname+' '+p.name+',');
 			String situazione = "";
-			List<Contract> contractList = PersonDao.getContractList(p, beginDate, endDate);
+			List<Contract> contractList = personDao.getContractList(p, beginDate, endDate);
 
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
 				contractList = p.contracts;
-			
+
 			for(Contract contract : contractList){
 				if(beginContract != null && beginContract.equals(contract.beginContract)){
 					log.error("Due contratti uguali nella stessa lista di contratti per {} : come è possibile!?!?", p.getFullname());
@@ -413,11 +429,11 @@ public class ChartsManager {
 							if(m != null){
 
 								situazione = situazione+(new Integer(m.straordinariMinuti/60).toString())+','+(new Integer(m.riposiCompensativiMinuti/60).toString())+','+(new Integer((m.progressivoFinalePositivoMese+m.straordinariMinuti)/60).toString())+',';
-															
+
 								totalOvertime = totalOvertime+new Integer(m.straordinariMinuti/60);
 								totalCompensatoryRest = totalCompensatoryRest+new Integer(m.riposiCompensativiMinuti/60);
 								totalPlusHours = totalPlusHours+new Integer((m.progressivoFinalePositivoMese+m.straordinariMinuti)/60);
-								
+
 							}
 
 							else
@@ -442,7 +458,7 @@ public class ChartsManager {
 		out.close();
 		return inputStream;
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -458,24 +474,25 @@ public class ChartsManager {
 
 		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
 		out.newLine();
-		
+
 		IWrapperPerson wPerson = wrapperFactory.create(person);
-		
+
 		Optional<Contract> contract = wPerson.getCurrentContract();
-		
+
 		Preconditions.checkState(contract.isPresent());
-				
+
 		VacationsRecap vr = vacationsFactory.create(LocalDate.now().getYear(),
 				contract.get(), LocalDate.now(), false);
-		
+
 		PersonResidualYearRecap pryr = 
-				yearFactory.create(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
+				yearFactory.create(contractDao.getContract(LocalDate.now(), person)
+						, LocalDate.now().getYear(), LocalDate.now());
 		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
-		
+
 		Optional<WorkingTimeType> wtt = wPerson.getCurrentWorkingTimeType();
-		
+
 		Preconditions.checkState(wtt.isPresent());
-		
+
 		int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
 		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
@@ -494,11 +511,11 @@ public class ChartsManager {
 		out.close();
 		return inputStream;
 	}
-	
-	
+
+
 	/**Metodi privati per il calcolo da utilizzare per la restituzione al controller del dato richiesto**/
-	
-	private static String removeApice(String token)
+
+	private String removeApice(String token)
 	{
 		if(token.startsWith("\""))
 			token = token.substring(1);
@@ -507,7 +524,7 @@ public class ChartsManager {
 		return token;
 	}
 
-	private static LocalDate buildDate(String token)
+	private LocalDate buildDate(String token)
 	{
 		token = removeApice(token);
 		token = token.substring(0, 10);
@@ -516,9 +533,9 @@ public class ChartsManager {
 		return date;
 	}
 
-	
-	
-	private static List<String> splitter(String line)
+
+
+	private List<String> splitter(String line)
 	{
 		line = removeApice(line);
 		List<String> list = new ArrayList<String>();
@@ -541,5 +558,5 @@ public class ChartsManager {
 	}
 
 	/***********************************************************************************************************/
-	
+
 }

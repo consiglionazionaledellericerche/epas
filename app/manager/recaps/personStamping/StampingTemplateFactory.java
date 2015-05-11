@@ -1,9 +1,13 @@
 package manager.recaps.personStamping;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import manager.PersonDayManager;
 import models.PersonDay;
+import models.StampModificationType;
+import models.StampType;
 import models.Stamping;
 import dao.StampingDao;
 

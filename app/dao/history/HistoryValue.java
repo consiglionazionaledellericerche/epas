@@ -19,6 +19,7 @@ public class HistoryValue<T extends BaseModel> {
 	public final Revision revision;
 	public final RevisionType type;
 	
+	
 	HistoryValue(T value, Revision revision, RevisionType type) {
 		this.value = value;
 		this.revision = revision;
@@ -43,14 +44,8 @@ public class HistoryValue<T extends BaseModel> {
 		
 		if(time == null)
 			return "";
-		
-		//data
-		String day = time.getYear() + "-" + time.getMonthOfYear() + "-" + time.getDayOfMonth() + " ";
-		
-		//ora
-		String hour = DateUtility.fromLocalDateTimeHourTime(time); 
-	
-		return day + " - " + hour;
+
+		return time.toString("yyyy-MM-dd - HH:mm");
 	}
 	
 	public String formattedOwner() {

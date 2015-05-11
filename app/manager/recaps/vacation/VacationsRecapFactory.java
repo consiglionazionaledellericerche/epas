@@ -3,6 +3,7 @@ package manager.recaps.vacation;
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
+import manager.ContractManager;
 import manager.VacationManager;
 import models.Contract;
 
@@ -15,22 +16,25 @@ import exceptions.EpasExceptionNoSourceData;
 
 public class VacationsRecapFactory {
 
-	private AbsenceDao absenceDao;
-	private AbsenceTypeDao absenceTypeDao;
-	private ConfYearManager confYearManager;
-	private VacationManager vacationManager;
-	private IWrapperFactory wrapperFactory;
+	private final AbsenceDao absenceDao;
+	private final AbsenceTypeDao absenceTypeDao;
+	private final ConfYearManager confYearManager;
+	private final VacationManager vacationManager;
+	private final IWrapperFactory wrapperFactory;
+	private final ContractManager contractManager;
 
 	@Inject
 	VacationsRecapFactory(IWrapperFactory wrapperFactory, AbsenceDao absenceDao, 
-			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, VacationManager vacationManager) {
-				this.wrapperFactory = wrapperFactory;
-				this.absenceDao = absenceDao;
-				this.absenceTypeDao = absenceTypeDao;
-				this.confYearManager = confYearManager;
-				this.vacationManager = vacationManager;
+			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager,
+			VacationManager vacationManager,ContractManager contractManager) {
+		this.wrapperFactory = wrapperFactory;
+		this.absenceDao = absenceDao;
+		this.absenceTypeDao = absenceTypeDao;
+		this.confYearManager = confYearManager;
+		this.vacationManager = vacationManager;
+		this.contractManager = contractManager;
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -42,10 +46,11 @@ public class VacationsRecapFactory {
 	public VacationsRecap create(int year, Contract contract,
 			LocalDate actualDate, boolean considerExpireLastYear) 
 					throws EpasExceptionNoSourceData {
-		
-		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
-				confYearManager, vacationManager, year, contract,
-				actualDate, considerExpireLastYear);
+
+		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao, 
+				confYearManager, vacationManager, contractManager, 
+				year, contract, actualDate, considerExpireLastYear);
+
 	}
-	
+
 }

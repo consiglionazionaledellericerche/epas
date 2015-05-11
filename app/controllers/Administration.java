@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
-import manager.PersonDayManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
@@ -32,50 +31,39 @@ import com.google.common.collect.Lists;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
-	
+
 	@Inject
-	static OfficeDao officeDao;
-	
+	private static OfficeDao officeDao;
 	@Inject
-	static PersonDao personDao;
-	
+	private static PersonDao personDao;
 	@Inject
-	static PersonDayDao personDayDao;
-	
+	private static ConsistencyManager consistencyManager;
 	@Inject
-	static PersonDayManager personDayManager;
-	
+	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
-	static ConsistencyManager consistencyManager;
-	
+	private static PersonResidualYearRecapFactory yearFactory;
 	@Inject
-	static PersonResidualYearRecapFactory yearFactory;
-	
+	private static ExportToYaml exportToYaml;
 	@Inject
-	static WrapperModelFunctionFactory wrapperFunctionFactory; 
-	
-	@Inject
-	static IWrapperFactory wrapperFactory;
-	
+	private static CompetenceUtility competenceUtility;
+
 	public static void utilities(){
 
-		final List<Person> personList = PersonDao.list(
+		final List<Person> personList = personDao.list(
 				Optional.<String>absent(),officeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 
 		render(personList);
 	}
-	
-	
+
+
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
@@ -84,80 +72,64 @@ public class Administration extends Controller {
 	 */
 	public static void fixPersonSituation(Long personId, int year, int month){	
 		LocalDate date = new LocalDate(year,month,1);
-		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(PersonDao.getPersonById(personId));
+		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(personDao.getPersonById(personId));
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
 	}
-	
+
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void createOvertimeFile(int year) throws IOException{
 		Logger.debug("Chiamo overtime in year...");
 		Competences.getOvertimeInYear(year);
-		
+
 	}
-	
+
 	public static void showResidualSituation() {
-		
+
 		String name = null;
 		//Prendo la lista delle persone attive oggi
 		List<Person> personList = personDao.list(Optional.fromNullable(name),
-					officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(),
-					LocalDate.now(), false).list();
-		
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(),
+				LocalDate.now(), false).list();
+
 		//Calcolo i riepiloghi
-		
+
 		List<IWrapperPerson> wrapperPersonList = FluentIterable
 				.from(personList)
 				.transform(wrapperFunctionFactory.person()).toList();
-		
+
 		List<PersonResidualMonthRecap> monthRecapList = Lists.newArrayList();
-		
+
 		for(IWrapperPerson person : wrapperPersonList){
-			
+
 			Logger.debug("Persona %s", person.getValue().getFullname());
 			PersonResidualYearRecap residual = 
 					yearFactory.create(person.getCurrentContract().get(), LocalDate.now().getYear(), null);
-			
+
 			//monthRecapList.add(residual.getMese(LocalDate.now().getMonthOfYear()));
 			monthRecapList.add(residual.getMese(2));
-			
+
 		}
-		
+
 		//Render
 		render(monthRecapList);
-		
+
 	}
-	
-	public static void buildYaml()
-	{
+
+	public static void buildYaml(){
 		//general
-		ExportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
-		
-		ExportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
-		
-		ExportToYaml.buildVacationCodes("conf/vacationCodes.yml");
-		
-		
-		//person
-		/*
-		Person person = Person.findById(146l);
-		ExportToYaml.buildPerson(person, "test/dataTest/persons/lucchesi.yml");
-		
-		//test stampings
-		ExportToYaml.buildPersonMonth(person, 2013,  9, "test/dataTest/stampings/lucchesiStampingsSettembre2013.yml");
-		ExportToYaml.buildPersonMonth(person, 2013, 10, "test/dataTest/stampings/lucchesiStampingsOttobre2013.yml");
-		
-		//test vacations
-		ExportToYaml.buildYearlyAbsences(person, 2012, "test/dataTest/absences/lucchesiAbsences2012.yml");
-		ExportToYaml.buildYearlyAbsences(person, 2013, "test/dataTest/absences/lucchesiAbsences2013.yml");
-		*/
-		
+		exportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
+
+		exportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
+
+		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
+
 	}
-	
+
 	public static void killclock()
 	{
 		Person person = Person.find("byName", "epas").first();
-		
-		
+
+
 		//destroy person day in trouble
 		List<PersonDay> pdList = PersonDay.find("select pd from PersonDay pd where pd.person = ?", person).fetch();
 		for(PersonDay pd : pdList)
@@ -170,7 +142,7 @@ public class Administration extends Controller {
 				pd.save();
 			}
 		}
-		
+
 		//destroy person day
 		while(pdList.size()>0)
 		{
@@ -178,7 +150,7 @@ public class Administration extends Controller {
 			pdList.remove(pd);
 			pd.delete();
 		}
-		
+
 		//destroy contracts
 		while(person.contracts.size()>0)
 		{
@@ -187,49 +159,41 @@ public class Administration extends Controller {
 			c.delete();
 			person.save();
 		}
-		
-		//destroy contact_data
-//		if(person.contactData!=null)
-//			person.contactData.delete();
-		
-		//destroy locations
-//		if(person.location!=null)
-//			person.location.delete();
-//		
+
 		person.save();
-		
+
 		renderText(person.name);
 	}
-	
+
 	public static void updateExceedeMinInCompetenceTable() {
-		CompetenceUtility.updateExceedeMinInCompetenceTable();
+		competenceUtility.updateExceedeMinInCompetenceTable();
 		renderText("OK");
 	}
-	
+
 	public static void deleteUncoupledStampings(@Required List<Long> peopleId,
-		@Required LocalDate begin,LocalDate end){
-				
-    	if (validation.hasErrors()){
-    	    params.flash(); 
-    		utilities();
-    	}
-		
+			@Required LocalDate begin,LocalDate end){
+
+		if (validation.hasErrors()){
+			params.flash(); 
+			utilities();
+		}
+
 		if(end == null){
 			end = begin;
 		}
-		
+
 		List<Person> people = Lists.newArrayList();
-		
+
 		for(Long id : peopleId){
-			people.add(PersonDao.getPersonById(id));
+			people.add(personDao.getPersonById(id));
 		}
-		
+
 		for(Person person : people){
 			new RemoveInvalidStampingsJob(person, begin, end).afterRequest();
 		}
-		
+
 		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
 	}
-   
+
 }

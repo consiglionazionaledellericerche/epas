@@ -47,9 +47,9 @@ public class StampingDao extends DaoBase {
 	 * @param description
 	 * @return lo stampType corrispondente alla descrizione passata come parametro
 	 */
-	public static StampType getStampTypeByCode(String code){
+	public StampType getStampTypeByCode(String code){
 		QStampType stampType = QStampType.stampType;
-		final JPQLQuery query = ModelQuery.queryFactory().from(stampType)
+		final JPQLQuery query = getQueryFactory().from(stampType)
 				.where(stampType.code.eq(code));
 		return query.singleResult(stampType);
 	}

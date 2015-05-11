@@ -64,36 +64,62 @@ import exceptions.EpasExceptionNoSourceData;
  *
  */
 public class AbsenceManager {
-	
-	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
 
 	@Inject
-	public PersonResidualYearRecapFactory yearFactory;
-	
-	@Inject
-	public ContractYearRecapManager contractYearRecapManager;
-	
-	@Inject
-	public WorkingTimeTypeDao workingTimeTypeDao;
-	
-	@Inject
-	public PersonDayManager personDayManager;
-	
-	@Inject
-	public PersonDayDao personDayDao;
-	
-	@Inject
-	public VacationManager vacationManager;
-	
-	@Inject
-	public VacationsRecapFactory vacationsFactory;
-	
-	@Inject
-	public AbsenceGroupManager absenceGroupManager;
-	
-	@Inject
-	public IWrapperFactory wrapperFactory; 
-	
+	public AbsenceManager(PersonResidualYearRecapFactory yearFactory,
+			ContractYearRecapManager contractYearRecapManager,
+			WorkingTimeTypeDao workingTimeTypeDao,
+			PersonDayManager personDayManager, PersonDayDao personDayDao,
+			VacationsRecapFactory vacationsFactory,
+			AbsenceGroupManager absenceGroupManager,
+			IWrapperFactory wrapperFactory, ContractDao contractDao,
+			AbsenceTypeDao absenceTypeDao, AbsenceDao absenceDao,
+			PersonDao personDao, PersonManager personManager,
+			PersonReperibilityDayDao personReperibilityDayDao,
+			PersonShiftDayDao personShiftDayDao,
+			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao) {
+		this.yearFactory = yearFactory;
+		this.contractYearRecapManager = contractYearRecapManager;
+		this.workingTimeTypeDao = workingTimeTypeDao;
+		this.personDayManager = personDayManager;
+		this.personDayDao = personDayDao;
+		this.vacationsFactory = vacationsFactory;
+		this.absenceGroupManager = absenceGroupManager;
+		this.wrapperFactory = wrapperFactory;
+		this.contractDao = contractDao;
+		this.absenceTypeDao = absenceTypeDao;
+		this.absenceDao = absenceDao;
+		this.personDao = personDao;
+		this.personManager = personManager;
+		this.personReperibilityDayDao = personReperibilityDayDao;
+		this.personShiftDayDao = personShiftDayDao;
+		this.confYearManager = confYearManager;
+		this.personChildrenDao = personChildrenDao;
+	}
+
+
+	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
+
+	private final PersonResidualYearRecapFactory yearFactory;
+	private final ContractYearRecapManager contractYearRecapManager;
+	private final WorkingTimeTypeDao workingTimeTypeDao;
+	private final PersonDayManager personDayManager;
+	private final PersonDayDao personDayDao;
+	private final VacationsRecapFactory vacationsFactory;
+	private final AbsenceGroupManager absenceGroupManager;
+	private final IWrapperFactory wrapperFactory;
+	private final ContractDao contractDao;
+	private final AbsenceTypeDao absenceTypeDao;
+	private final AbsenceDao absenceDao;
+	private final PersonDao personDao;
+	private final PersonManager personManager;
+	private final PersonReperibilityDayDao personReperibilityDayDao;
+	private final PersonShiftDayDao personShiftDayDao;
+	private final ConfYearManager confYearManager;
+	private final PersonChildrenDao personChildrenDao;
+
+	private VacationsRecapFactory vacationRecapFactory; 
+
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
@@ -114,22 +140,25 @@ public class AbsenceManager {
 	 */
 	private AbsenceType whichVacationCode(Person person, LocalDate date) throws EpasExceptionNoSourceData{
 
-		Contract contract = ContractDao.getContract(date, person);
-		
+		Contract contract = contractDao.getContract(date, person);
+
 		Preconditions.checkNotNull(contract);
-		
+
 		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
-		
+
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
+			return absenceTypeDao.getAbsenceTypeByCode(
+					AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
 
 		if(vr.persmissionNotYetUsed > 0)
 
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
+			return absenceTypeDao.getAbsenceTypeByCode(
+					AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
 
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
+			return absenceTypeDao.getAbsenceTypeByCode(
+					AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
 
 
 		return null;
@@ -145,10 +174,10 @@ public class AbsenceManager {
 	 */
 	private boolean canTake32(Person person, LocalDate date) throws EpasExceptionNoSourceData {
 
-		Contract contract = ContractDao.getContract(date, person);
-		
+		Contract contract = contractDao.getContract(date, person);
+
 		Preconditions.checkNotNull(contract);
-		
+
 		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
 
@@ -166,13 +195,13 @@ public class AbsenceManager {
 	 */
 	private boolean canTake31(Person person, LocalDate date) throws EpasExceptionNoSourceData {
 
-		Contract contract = ContractDao.getContract(date, person);
-		
+		Contract contract = contractDao.getContract(date, person);
+
 		Preconditions.checkNotNull(contract);
-		
+
 		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
-		
+
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
 	}
 
@@ -186,10 +215,10 @@ public class AbsenceManager {
 	 */
 	private boolean canTake94(Person person, LocalDate date) throws EpasExceptionNoSourceData {
 
-		Contract contract = ContractDao.getContract(date, person);
-		
+		Contract contract = contractDao.getContract(date, person);
+
 		Preconditions.checkNotNull(contract);
-		
+
 		VacationsRecap vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
 
@@ -197,7 +226,7 @@ public class AbsenceManager {
 
 	}
 
-	
+
 	/**
 	 * Verifica la possibilità che la persona possa usufruire di un riposo compensativo nella data specificata.
 	 * Se voglio inserire un riposo compensativo per il mese successivo a oggi considero il residuo a ieri.
@@ -226,8 +255,7 @@ public class AbsenceManager {
 		if(dateToCheck.getDayOfMonth()>1)
 			dateToCheck = dateToCheck.minusDays(1);
 
-		//Contract contract = person.getContract(dateToCheck);
-		Contract contract = ContractDao.getContract(dateToCheck, person);
+		Contract contract = contractDao.getContract(dateToCheck, person);
 
 		PersonResidualYearRecap c = 
 				yearFactory.create(contract, dateToCheck.getYear(), dateToCheck);
@@ -238,10 +266,9 @@ public class AbsenceManager {
 
 		PersonResidualMonthRecap mese = c.getMese(dateToCheck.getMonthOfYear());
 
-		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato 
-				> //mese.person.getWorkingTimeType(dateToCheck).getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
-			workingTimeTypeDao.getWorkingTimeType(dateToCheck, person)
-				.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
+		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato >
+		workingTimeTypeDao.getWorkingTimeType(dateToCheck, person).get()
+		.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
 			return true;
 		} 
 		return false;	
@@ -287,7 +314,7 @@ public class AbsenceManager {
 			return air;
 		}
 
-		List<Absence> allDayAbsenceAlreadyExisting = AbsenceDao.allDayAbsenceAlreadyExisting(person, dateFrom, dateTo);
+		List<Absence> allDayAbsenceAlreadyExisting = absenceDao.allDayAbsenceAlreadyExisting(person, dateFrom, dateTo);
 		if (allDayAbsenceAlreadyExisting.size() > 0) {
 			air.getWarnings().add(AbsencesResponse.CODICE_GIORNALIERO_GIA_PRESENTE);
 			air.getDatesInTrouble().addAll(Collections2.transform(allDayAbsenceAlreadyExisting, AbsenceToDate.INSTANCE));
@@ -338,20 +365,20 @@ public class AbsenceManager {
 
 			actualDate = actualDate.plusDays(1);
 		}
-		
+
 		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
-		
+
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
 		if(dateFrom.getYear() < LocalDate.now().getYear()){
-			for(Contract c : PersonDao.getContractList(person, 
+			for(Contract c : personDao.getContractList(person, 
 					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
 					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
 				contractYearRecapManager.buildContractYearRecap(c);
 			}
 		}
-		
+
 		if(air.getAbsenceInReperibilityOrShift() > 0){
 			sendEmail(person, air);
 		}					
@@ -381,7 +408,7 @@ public class AbsenceManager {
 		AbsencesResponse ar = new AbsencesResponse(date,absenceType.code);
 
 		//se non devo considerare festa ed è festa non inserisco l'assenza
-		if(!absenceType.consideredWeekEnd && PersonManager.isHoliday(person, date)){
+		if(!absenceType.consideredWeekEnd && personManager.isHoliday(person, date)){
 			ar.setHoliday(true);
 			ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
 		}
@@ -391,7 +418,7 @@ public class AbsenceManager {
 			}
 
 			PersonDay pd = 	personDayDao.getSinglePersonDay(person, date).orNull();
-			
+
 			if(pd == null){
 				pd = new PersonDay(person, date);
 				pd.save();
@@ -423,10 +450,10 @@ public class AbsenceManager {
 	 * @param absenceType
 	 * @return
 	 */
-	private static List<Absence> absenceTypeAlreadyExist(Person person,LocalDate dateFrom,
+	private List<Absence> absenceTypeAlreadyExist(Person person,LocalDate dateFrom,
 			LocalDate dateTo, AbsenceType absenceType){
 
-		return AbsenceDao.findByPersonAndDate
+		return absenceDao.findByPersonAndDate
 				(person, dateFrom, Optional.of(dateTo),
 						Optional.of(absenceType)).list();
 	}
@@ -442,13 +469,13 @@ public class AbsenceManager {
 	private AbsencesResponse handlerCompensatoryRest(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-		Integer maxRecoveryDaysOneThree = ConfYearManager
+		Integer maxRecoveryDaysOneThree = confYearManager
 				.getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
-		
-//		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
-//		Bisogna considerare anche eventuali inizializzazioni
+
+		//		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
+		//		Bisogna considerare anche eventuali inizializzazioni
 		int alreadyUsed = 0;
-		List<Absence> absences91 = AbsenceDao.getAbsenceByCodeInPeriod(
+		List<Absence> absences91 = absenceDao.getAbsenceByCodeInPeriod(
 				Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
 				date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(),
 				date, Optional.<JustifiedTimeAtWork>absent(), false, false);
@@ -456,12 +483,12 @@ public class AbsenceManager {
 			alreadyUsed = absences91.size();
 		}
 
-// 			verifica se ha esaurito il bonus per l'anno
+		// 			verifica se ha esaurito il bonus per l'anno
 		if(person.qualification.qualification > 0 && 
 				person.qualification.qualification < 4 && 
 				alreadyUsed >= maxRecoveryDaysOneThree){
-//			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
-//					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
+			//			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
+			//					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
 			return new AbsencesResponse(date,absenceType.code,
 					String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI +
 							" - Usati %s", alreadyUsed));
@@ -481,13 +508,13 @@ public class AbsenceManager {
 	 * @param cai
 	 * @throws EmailException
 	 */
-	private static void sendEmail(Person person, AbsenceInsertReport airl) {
+	private void sendEmail(Person person, AbsenceInsertReport airl) {
 		MultiPartEmail email = new MultiPartEmail();
 
 		try {
 			email.addTo(person.email);
 			//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
-//			email.addTo("daniele.murgia@iit.cnr.it");
+			//			email.addTo("daniele.murgia@iit.cnr.it");
 			email.setFrom("epas@iit.cnr.it");
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
@@ -512,12 +539,12 @@ public class AbsenceManager {
 	 * controlla se si sta prendendo un codice di assenza in un giorno in cui si è reperibili
 	 * @return true se si sta prendendo assenza per un giorno in cui si è reperibili, false altrimenti
 	 */
-	private static boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date){
+	private boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date){
 
 		//controllo se la persona è in reperibilità
-		PersonReperibilityDay prd = PersonReperibilityDayDao.getPersonReperibilityDay(person, date);
+		PersonReperibilityDay prd = personReperibilityDayDao.getPersonReperibilityDay(person, date);
 		//controllo se la persona è in turno
-		PersonShiftDay psd = PersonShiftDayDao.getPersonShiftDay(person, date);
+		PersonShiftDay psd = personShiftDayDao.getPersonShiftDay(person, date);
 
 		return !(psd == null && prd == null);	
 	}
@@ -563,8 +590,10 @@ public class AbsenceManager {
 
 		//FIXME Verificare i controlli d'inserimento
 		if(date.getYear() == LocalDate.now().getYear()){
-
-			int remaining37 = vacationManager.remainingPastVacationsAs37(date.getYear(), person);
+			;
+			int remaining37 = vacationRecapFactory.create(date.getYear(), 
+					contractDao.getContract(LocalDate.now(),person), 
+					LocalDate.now(), false).vacationDaysLastYearNotYetUsed; 
 			if(remaining37 > 0){
 				return insert(person, date,absenceType, file);
 			}
@@ -680,7 +709,7 @@ public class AbsenceManager {
 			pd = new PersonDay(person, date);
 
 		IWrapperPersonDay wPd = wrapperFactory.create(pd);
-		
+
 		if(abt == null || !abt.code.equals("92")){
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
 			personDayManager.populatePersonDay(wPd);
@@ -727,7 +756,9 @@ public class AbsenceManager {
 				continue;
 			}
 
-			List<Absence> absenceList = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
+			List<Absence> absenceList = absenceDao
+					.getAbsencesInPeriod(Optional.fromNullable(person), actualDate
+							, Optional.<LocalDate>absent(), false);
 
 			for(Absence absence : absenceList){
 				if(absence.absenceType.code.equals(absenceType.code))
@@ -751,7 +782,7 @@ public class AbsenceManager {
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
 		if(dateFrom.getYear() < LocalDate.now().getYear()){
-			for(Contract c : PersonDao.getContractList(person, 
+			for(Contract c : personDao.getContractList(person, 
 					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
 					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
 				contractYearRecapManager.buildContractYearRecap(c);
@@ -760,43 +791,43 @@ public class AbsenceManager {
 		return deleted;
 	}
 
-	public static boolean AbsenceTypeIsTecnologo(Qualification qualification){
-			return QualificationMapping.TECNOLOGI.getRange().contains(qualification.qualification);
+	public boolean AbsenceTypeIsTecnologo(Qualification qualification){
+		return QualificationMapping.TECNOLOGI.getRange().contains(qualification.qualification);
 	}
-	
-	public static boolean istechnician(List<Qualification> list){
+
+	public boolean isTechnician(List<Qualification> list){
 		for(Qualification q : list){
 			return QualificationMapping.TECNICI.getRange().contains(q.qualification);
 		}
 		return false;
 	}
-	
+
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
 	 */
-	private static boolean canTakePermissionIllnessChild(Person person, LocalDate date, AbsenceType abt){
-	
+	private boolean canTakePermissionIllnessChild(Person person, LocalDate date, AbsenceType abt){
+
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(abt);
 		Preconditions.checkNotNull(date);
 		Preconditions.checkState(person.isPersistent());
 		Preconditions.checkState(abt.isPersistent());
 
-		List<PersonChildren> childList = PersonChildrenDao.getAllPersonChildren(person);
-			
-//      1.Si verifica come prima cosa che la persona abbia il numero di figli adatto all'utilizzo del codice richiesto
-		
+		List<PersonChildren> childList = personChildrenDao.getAllPersonChildren(person);
+
+		//      1.Si verifica come prima cosa che la persona abbia il numero di figli adatto all'utilizzo del codice richiesto
+
 		int childNumber = 1;
 		if (abt.code.length() >= 3){
-//		Se il codice è richiesto per i successivi figli lo recupero dal codice
+			//		Se il codice è richiesto per i successivi figli lo recupero dal codice
 			childNumber = Integer.parseInt(abt.code.substring(2));
 		}
 		if(childList.size() < childNumber){
 			return false;
 		}
-		
-//		2. Si verifica che il figlio sia in età per l'utilizzo del codice d'assenza
-		
+
+		//		2. Si verifica che il figlio sia in età per l'utilizzo del codice d'assenza
+
 		LocalDate limitDate = null; 
 		PersonChildren child = childList.get(childNumber-1);
 		int yearAbsences = 0;
@@ -811,31 +842,31 @@ public class AbsenceManager {
 		if(limitDate.isBefore(date)){
 			return false;
 		}
-		
-//		3.  Verifica del numero di assenze prese con quel codice nell'ultimo anno permesso
-		
-		return AbsenceDao.getAbsenceByCodeInPeriod(Optional.of(person), 
+
+		//		3.  Verifica del numero di assenze prese con quel codice nell'ultimo anno permesso
+
+		return absenceDao.getAbsenceByCodeInPeriod(Optional.of(person), 
 				Optional.of(abt.code),limitDate.minusYears(1), limitDate, 
 				Optional.<JustifiedTimeAtWork>absent(), false, false).size() < yearAbsences;
-		
+
 	}
 
-	
+
 	/*
 	 * @author arianna
 	 * @param absencePersonDays	- lista di giorni di assenza effettuati
 	 * @return absentPersons	- lista delle persone assenti coinvolte nelle assenze 
 	 * 							passate come parametro
 	 */
-	public static List<Person> getPersonsFromAbsentDays(List<Absence> absencePersonDays) {
+	public List<Person> getPersonsFromAbsentDays(List<Absence> absencePersonDays) {
 		List<Person> absentPersons = new ArrayList<Person>();
 		for (Absence abs : absencePersonDays) {
 			if (!absentPersons.contains(abs.personDay.person)) {
 				absentPersons.add(abs.personDay.person);
 			}
 		}
-		
+
 		return absentPersons;
 	}
-		
+
 }

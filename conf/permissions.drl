@@ -564,13 +564,14 @@ when
         "Administrators.saveNewAdministrator",
         "Administrators.deleteAdministrator",
         "Administrators.deleteSelfAsAdministrator",
-        
-        /* duplicate */
+
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear"
-        
+        "Configurations.saveNewConfYear",
+
+        "Import.officeList"
+
         ), target == null, granted == false)
 then
  $c.grant();
