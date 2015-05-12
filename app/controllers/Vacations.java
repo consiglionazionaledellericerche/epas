@@ -24,10 +24,9 @@ import exceptions.EpasExceptionNoSourceData;
 public class Vacations extends Controller{
 		
 	@Inject
-	static VacationsRecapFactory vacationsFactory;
-	
+	private	static VacationsRecapFactory vacationsFactory;
 	@Inject
-	static IWrapperFactory wrapperFactory;
+	private static IWrapperFactory wrapperFactory;
 	
 	public static void show(Integer year) {
 		

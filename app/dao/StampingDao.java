@@ -1,7 +1,5 @@
 package dao;
 
-import helpers.ModelQuery;
-
 import javax.persistence.EntityManager;
 
 import models.StampModificationType;

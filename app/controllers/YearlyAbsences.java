@@ -61,11 +61,13 @@ public class YearlyAbsences extends Controller{
 		//rendering 
 		if(anno==null){
 			LocalDate now = new LocalDate();
-			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)now.getYear());
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					person, now.getYear(),absenceDao.getYearlyAbsence(person, now.getYear()));
 			render(yearlyAbsencesRecap, year);
 		}
 		else{
-			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)anno.intValue());
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					person, anno.intValue(),absenceDao.getYearlyAbsence(person, anno.intValue()));
 			render(yearlyAbsencesRecap, year, personId, person);
 		}		
 
@@ -120,11 +122,13 @@ public class YearlyAbsences extends Controller{
 		//rendering 
 		if(year==null){
 			LocalDate now = new LocalDate();
-			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(user.person, (short)now.getYear());
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					user.person, now.getYear(),absenceDao.getYearlyAbsence(user.person, now.getYear()));
 			render(yearlyAbsencesRecap);
 		}
 		else{
-			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(user.person, (short)year.intValue());
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					user.person, year.intValue(),absenceDao.getYearlyAbsence(user.person, year.intValue()));
 			render(yearlyAbsencesRecap);
 		}
 	}

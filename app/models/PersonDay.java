@@ -3,9 +3,6 @@
  */
 package models;
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +18,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import manager.PersonManager;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -29,7 +25,6 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import dao.ContractDao;
 
 
 /**

@@ -270,6 +270,7 @@ public class Absences extends Controller{
 	}
 	
 	public static void editCode(@Required Long absenceCodeId){
+//		FIXME decidere se permetterlo all'admin, ed eventualmente sistemare il controllo, o il permesso
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
 		AbsenceType abt = absenceTypeDao.getAbsenceTypeById(absenceCodeId);

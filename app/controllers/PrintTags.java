@@ -5,6 +5,8 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.PersonManager;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
@@ -23,11 +25,16 @@ import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
-
+	
+	@Inject
 	private static PersonDao personDao;
+	@Inject
 	private static SecurityRules rules;
+	@Inject
 	private static PersonStampingRecapFactory stampingsRecapFactory;
+	@Inject
 	private static OfficeDao officeDao;
+	@Inject
 	private static PersonManager personManager;
 
 	public static void showTag(Long personId, int month, int year){

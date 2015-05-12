@@ -116,7 +116,8 @@ public final class PersonDao extends DaoBase{
 
 		if(onlyOnCertificate)
 			condition.and(contract.onCertificate.isTrue());
-
+		
+		if(start != null && end!= null){
 		condition.andAnyOf(
 
 				//contratto terminato
@@ -135,9 +136,9 @@ public final class PersonDao extends DaoBase{
 
 						)
 					)
-
 				);
-
+		}
+		
 		return query.where(condition);
 		
 	}
@@ -161,15 +162,6 @@ public final class PersonDao extends DaoBase{
 		return queryList(Optional.<String>absent(), offices, false, beginMonth, endMonth, true)
 				.list((Projections.bean(PersonLiteDto.class, person.id, person.name, person.surname)));
 	}
-	
-	/**
-	 * La liste 
-	 * 
-	 * @param name
-	 * @param offices obbligatorio
-	 * @param onlyTechnician
-	 * @return la lista delle person corrispondenti
-	 */
 	
 	/**
 	 * La lista di persone una volta applicati i filtri dei parametri. 
@@ -417,7 +409,6 @@ public final class PersonDao extends DaoBase{
 
 		return query.singleResult(person);
 	}
-
 
 	/**
 	 * 

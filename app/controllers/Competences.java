@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import manager.CompetenceManager;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
@@ -52,22 +54,23 @@ public class Competences extends Controller{
 
 	private final static Logger log = LoggerFactory.getLogger(Competences.class);
 
+	@Inject
 	private static IWrapperFactory wrapperFactory;
-
+	@Inject
 	private static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
-
+	@Inject
 	private static OfficeDao officeDao;
-
+	@Inject
 	private static CompetenceManager competenceManager;
-
+	@Inject
 	private static SecurityRules rules;
-
+	@Inject
 	private static PersonDao personDao;
-
+	@Inject
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
-
+	@Inject
 	private static CompetenceDao competenceDao;
-
+	@Inject
 	private static CompetenceCodeDao competenceCodeDao;
 
 	public static void competences(int year, int month) {
@@ -95,7 +98,6 @@ public class Competences extends Controller{
 		render(personMonthCompetenceRecap, person, year, month);
 
 	}
-
 
 	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
 
@@ -185,7 +187,6 @@ public class Competences extends Controller{
 
 	}
 
-
 	public static void updateCompetence(long pk, String name, Integer value){
 		final Competence competence = competenceDao.getCompetenceById(pk);
 
@@ -224,13 +225,12 @@ public class Competences extends Controller{
 		render(code);
 	}
 
-
 	public static void edit(Long competenceCodeId){
+		//		FIXME decidere se permetterlo all'admin, ed eventualmente sistemare il controllo, o il permesso
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
 		render(code);
 	}
-
 
 	public static void save(Long competenceCodeId){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -245,12 +245,6 @@ public class Competences extends Controller{
 		}
 		Application.indexAdmin();
 	}
-
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void discard(){
-		manageCompetenceCode();
-	}
-
 
 	public static void totalOvertimeHours(int year, Long officeId){
 
@@ -379,7 +373,7 @@ public class Competences extends Controller{
 		}		
 		Person person = personDao.getPersonById(personId);
 		rules.checkIfPermitted(person.office);
-		PersonCompetenceRecap pcr = new PersonCompetenceRecap(person);
+		PersonCompetenceRecap pcr = new PersonCompetenceRecap(person,competenceCodeDao.getAllCompetenceCode());
 
 		render(pcr,person);
 	}

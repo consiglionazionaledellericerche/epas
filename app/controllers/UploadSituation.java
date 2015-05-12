@@ -87,7 +87,6 @@ public class UploadSituation extends Controller{
 	@Inject
 	private static PersonMonthRecapDao personMonthRecapDao;
 
-	@Check(Security.UPLOAD_SITUATION)
 	public static void show(){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -99,7 +98,6 @@ public class UploadSituation extends Controller{
 		render(year, month);
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
 
 		Office office = Security.getUser().get().person.office;
@@ -192,12 +190,8 @@ public class UploadSituation extends Controller{
 	}
 
 
-
-
-
 	public static void processAttestati(final String attestatiLogin, final String attestatiPassword, Integer year, Integer month) throws MalformedURLException, URISyntaxException
 	{
-
 
 		LoginResponse loginResponse = null;
 		List<Dipendente> listaDipendenti = null;
@@ -281,7 +275,6 @@ public class UploadSituation extends Controller{
 
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void processAllPersons(int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if (params.get("back") != null) {
@@ -326,7 +319,6 @@ public class UploadSituation extends Controller{
 
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void processSinglePerson(String matricola, int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if(matricola==null)
@@ -392,7 +384,6 @@ public class UploadSituation extends Controller{
 
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void showProblems(Long certificatedDataId)
 	{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -405,7 +396,6 @@ public class UploadSituation extends Controller{
 		render(cd);
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void showCertificatedData(Long certificatedDataId)
 	{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -537,6 +527,5 @@ public class UploadSituation extends Controller{
 
 		return activeDipendenti;
 	}
-
 
 }

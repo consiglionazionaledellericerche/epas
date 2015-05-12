@@ -98,7 +98,6 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_STAMPING = "insertAndUpdateStamping";
 	public final static String INSERT_AND_UPDATE_ABSENCE = "insertAndUpdateAbsence";
 
-
 	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
 	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
@@ -114,7 +113,6 @@ public class Security extends Secure.Security {
 	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
 
 	public final static String CACHE_DURATION = "30mn";
-
 
 	/**
 	 * @param username

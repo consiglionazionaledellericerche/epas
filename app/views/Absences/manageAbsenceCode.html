@@ -67,13 +67,12 @@
 			<td>${absenceCode.validFrom}</td>
 			<td>${absenceCode.validTo}</td>
 			<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
-			<td>%{for(qualification in absenceCode.qualifications){
-				}%
-					${qualification.qualification},
-				%{ } }%
+			<td>
+				#{list absenceCode.qualifications}
+					${_.qualification}#{if !_isLast},#{/if}
+				#{/list}
 			</td> 
 			
-	
 			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
 			<td>${}</td> <!-- cos'è??? -->
 			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>

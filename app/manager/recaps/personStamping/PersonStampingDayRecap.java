@@ -85,7 +85,6 @@ public class PersonStampingDayRecap {
 
 		List<Stamping> stampingsForTemplate = personDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
 
-
 		this.setStampingTemplate( stampingsForTemplate, pd );
 
 		if(workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
@@ -125,7 +124,7 @@ public class PersonStampingDayRecap {
 				if(pd.timeAtWork!=0){
 
 					if(fixedStampModificationType==null)							//DEVE ANDARE NELLA CACHE
-						fixedStampModificationType = personDayManager.getFixedWorkingTime();
+						fixedStampModificationType = stampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 					this.fixedWorkingTimeCode = fixedStampModificationType.code;
 
 				}

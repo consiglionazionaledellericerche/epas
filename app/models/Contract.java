@@ -24,6 +24,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -73,10 +74,8 @@ public class Contract extends BaseModel {
 	public List<ContractYearRecap> recapPeriods;
 
 	@Required @NotNull
-
 	@Column(name="begin_contract")
 	public LocalDate beginContract;
-
 
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
@@ -99,7 +98,6 @@ public class Contract extends BaseModel {
 	@NotAudited
 	@OneToMany(mappedBy="contract", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTickets;
-
 
 	@Transient
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
@@ -129,8 +127,7 @@ public class Contract extends BaseModel {
 	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
 	 * @return
 	 */
-	public DateInterval getContractDateInterval()
-	{
+	public DateInterval getContractDateInterval(){
 		DateInterval contractInterval;
 		if(this.endContract!=null)
 			contractInterval = new DateInterval(this.beginContract, this.endContract);
@@ -140,16 +137,34 @@ public class Contract extends BaseModel {
 	}
 
 	/**
-	 * FIXME variabile transiente richiamata nel template. Spostare nel wrapper.
-	 * Conversione della lista dei contractWorkingtimeType da Set a List
-	 * @param contract
-	 * * @return
+	 * Ritorna il riepilogo annule del contatto.
+	 * @param year
+	 * @return
 	 */
-	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
+	public ContractYearRecap yearRecap(int year)	{
+		for(ContractYearRecap cyr : recapPeriods) {
 
-		return Lists.newArrayList(this.contractWorkingTimeType);
+			if(cyr.year==year)
+				return cyr;
+		}
+		return null;
 	}
 
+	/**
+	 * Ritorna il ContractStampProfile attivo alla data.
+	 * @param contract
+	 * @param date
+	 * @return
+	 */
+	public Optional<ContractStampProfile> getContractStampProfileFromDate(LocalDate date) {
+
+		for(ContractStampProfile csp : contractStampProfile) {
+			if(csp.dateRange().contains(date)){
+				return Optional.fromNullable(csp);
+			}
+		}
+		return Optional.absent();
+	}
 
 }
 

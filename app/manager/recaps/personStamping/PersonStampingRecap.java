@@ -17,9 +17,13 @@ import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
+import models.StampModificationTypeValue;
 import models.StampType;
 import models.Stamping;
 
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -88,15 +92,63 @@ public class PersonStampingRecap {
 		//Lista person day contente tutti i giorni fisici del mese
 		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
 
+		LocalDate today = LocalDate.now();
 		//calcolo del valore valid per le stamping del mese (persistere??)
 		for(PersonDay pd : totalPersonDays) {
 			personDayManager.computeValidStampings(pd);
-		}
 
-		for(PersonDay pd : totalPersonDays ) {
 			PersonStampingDayRecap dayRecap = stampingDayRecapFactory
 					.create(pd, this.numberOfInOut);
 			this.daysRecap.add(dayRecap);
+
+			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
+
+			{
+				if(stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()){
+					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(
+							StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+
+					stampModificationTypeSet.add(smt);
+				}
+
+				if(pd.date.equals(today) && !stampingDayRecapFactory.wrapperFactory.create(pd).isHoliday() && !personDayManager.isAllDayAbsences(pd)){
+
+					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+					stampModificationTypeSet.add(smt);
+				}
+				if(pd.stampModificationType!=null && !pd.date.isAfter(today)){
+
+					stampModificationTypeSet.add(pd.stampModificationType);
+				}
+
+				//				this.stampModificationTypeSet.add(day.stampModificationType);
+
+				for(Stamping stamp : pd.stampings){
+
+					if(stamp.stampType!=null && stamp.stampType.identifier!=null){
+
+						stampTypeSet.add(stamp.stampType);
+					}
+
+					if(stamp.markedByAdmin){
+
+						StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+						stampModificationTypeSet.add(smt);
+					}
+
+					Optional<StampModificationType> smtMidnight = 
+							personDayManager.checkMissingExitStampBeforeMidnight(stamp);
+
+					if( smtMidnight.isPresent() ) {
+
+						stampModificationTypeSet.add(smtMidnight.get());
+					}
+
+					//					this.stampTypeSet.add(stamp.stampType);
+					//					this.stampModificationTypeSet.add(stamp.stampModificationType);
+				}
+			}
+
 		}
 
 		this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
@@ -117,22 +169,17 @@ public class PersonStampingRecap {
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
 
-		for(PersonDay pd : totalPersonDays)
-			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
-
-		calculateStampAndModificationTypeUsed(totalPersonDays);
-
 	}
 
-	private void calculateStampAndModificationTypeUsed(List<PersonDay> personDays){
-		for(PersonDay day : personDays){
-			this.stampModificationTypeSet.add(day.stampModificationType);
-			for(Stamping stamp : day.stampings){
-				this.stampTypeSet.add(stamp.stampType);
-				this.stampModificationTypeSet.add(stamp.stampModificationType);
-			}
-		}
-
-	}
+	//	private void calculateStampAndModificationTypeUsed(List<PersonDay> personDays){
+	//
+	//		LocalDate today = LocalDate.now();
+	//
+	//		for(PersonDay day : personDays){
+	//
+	//
+	//		}
+	//
+	//	}
 
 }

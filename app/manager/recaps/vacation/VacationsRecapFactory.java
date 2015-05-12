@@ -3,7 +3,6 @@ package manager.recaps.vacation;
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
-import manager.ContractManager;
 import manager.VacationManager;
 import models.Contract;
 
@@ -21,18 +20,16 @@ public class VacationsRecapFactory {
 	private final ConfYearManager confYearManager;
 	private final VacationManager vacationManager;
 	private final IWrapperFactory wrapperFactory;
-	private final ContractManager contractManager;
 
 	@Inject
 	VacationsRecapFactory(IWrapperFactory wrapperFactory, AbsenceDao absenceDao, 
 			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager,
-			VacationManager vacationManager,ContractManager contractManager) {
+			VacationManager vacationManager) {
 		this.wrapperFactory = wrapperFactory;
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.confYearManager = confYearManager;
 		this.vacationManager = vacationManager;
-		this.contractManager = contractManager;
 	}
 
 	/**
@@ -48,7 +45,7 @@ public class VacationsRecapFactory {
 					throws EpasExceptionNoSourceData {
 
 		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao, 
-				confYearManager, vacationManager, contractManager, 
+				confYearManager, vacationManager, 
 				year, contract, actualDate, considerExpireLastYear);
 
 	}

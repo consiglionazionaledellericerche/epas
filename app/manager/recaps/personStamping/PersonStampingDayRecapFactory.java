@@ -1,7 +1,5 @@
 package manager.recaps.personStamping;
 
-import it.cnr.iit.epas.DateUtility;
-
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
@@ -15,10 +13,10 @@ import dao.wrapper.IWrapperFactory;
 public class PersonStampingDayRecapFactory {
 
 	private final WorkingTimeTypeDao workingTimeTypeDao;	
-	private final IWrapperFactory wrapperFactory;
+	public final IWrapperFactory wrapperFactory;
 	private final PersonDayManager personDayManager;
 	private final StampingTemplateFactory stampingTemplateFactory;
-	private final StampingDao stampingDao;
+	public final StampingDao stampingDao;
 	private final ConfGeneralManager confGeneralManager;
 
 	@Inject

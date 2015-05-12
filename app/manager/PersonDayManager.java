@@ -42,13 +42,14 @@ public class PersonDayManager {
 
 	@Inject
 	public PersonDayManager(PersonDayDao personDayDao,
-			PersonManager personManager, StampingDao stampingDao,
-			IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
+			StampingDao stampingDao,
+			IWrapperFactory wrapperFactory,
+			AbsenceDao absenceDao,
 			ConfGeneralManager confGeneralManager,
 			PersonDayInTroubleManager personDayInTroubleManager,
 			ConfYearManager confYearManager) {
+
 		this.personDayDao = personDayDao;
-		this.personManager = personManager;
 		this.stampingDao = stampingDao;
 		this.wrapperFactory = wrapperFactory;
 		this.absenceDao = absenceDao;
@@ -60,7 +61,6 @@ public class PersonDayManager {
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
 
 	private final PersonDayDao personDayDao;
-	private final PersonManager personManager;
 	private final StampingDao stampingDao;
 	private final IWrapperFactory wrapperFactory;
 	private final AbsenceDao absenceDao;
@@ -189,10 +189,10 @@ public class PersonDayManager {
 			return justifiedTimeAtWork;
 		}
 
+		Collections.sort(pd.getValue().stampings);
 		//TODO se è festa si dovrà capire se il tempo di lavoro deve essere assegnato oppure no
 		if(pd.isHoliday()){
 
-			orderStampings(pd.getValue());
 			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
 
 			int holidayWorkTime=0;
@@ -206,7 +206,6 @@ public class PersonDayManager {
 			return justifiedTimeAtWork + holidayWorkTime;
 		}
 
-		orderStampings(pd.getValue());
 		List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
 
 		int workTime=0;
@@ -290,7 +289,8 @@ public class PersonDayManager {
 
 		if (!pd.isHoliday() && pd.getValue().stampings.size() >= 2) {
 
-			orderStampings(pd.getValue());
+			Collections.sort(pd.getValue().stampings);
+
 			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
 
 			for (PairStamping validPair : validPairs) {
@@ -360,23 +360,15 @@ public class PersonDayManager {
 		return workTime;
 	}
 
-	/**
-	 *
-	 * @return lo stamp modification type relativo al tempo di lavoro fisso
-	 */
-	public StampModificationType getFixedWorkingTime() {
-
-		//TODO usato solo in PersonStampingDayRecap bisogna metterlo nella cache
-		return stampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
-	}
-
-	/**
-	 * Ordina per orario la lista delle stamping nel person day
-	 */
-	public void orderStampings(PersonDay pd) {
-
-		Collections.sort(pd.stampings);
-	}
+//	/**
+//	 *
+//	 * @return lo stamp modification type relativo al tempo di lavoro fisso
+//	 */
+//	public StampModificationType getFixedWorkingTime() {
+//
+//		//TODO usato solo in PersonStampingDayRecap bisogna metterlo nella cache
+//		return stampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+//	}
 
 	/**
 	 * Setta il campo valid per ciascuna stamping contenuta in orderedStampings
@@ -835,7 +827,9 @@ public class PersonDayManager {
 		{
 			//aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio
 			boolean lastStampingIsIn = false;
-			orderStampings(pd);
+
+			Collections.sort(pd.stampings);
+
 			for(Stamping stamping : pd.stampings)
 			{
 				if(stamping.stampType!= null && stamping.stampType.identifier.equals("s"))
@@ -1104,7 +1098,7 @@ public class PersonDayManager {
 
 			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
 
-			orderStampings( pd.getValue() );
+			Collections.sort(pd.getValue().stampings);
 
 			if( pd.getValue().stampings.size() > 0 
 					&& pd.getValue().stampings.get(0).way == WayType.out 
@@ -1209,7 +1203,7 @@ public class PersonDayManager {
 		int max = 0;
 		for(PersonDay pd : pdList)
 		{
-			int coupleOfStampings = personManager.numberOfInOutInPersonDay(pd);
+			int coupleOfStampings = numberOfInOutInPersonDay(pd);
 
 			if(max<coupleOfStampings)
 				max = coupleOfStampings;
@@ -1325,5 +1319,64 @@ public class PersonDayManager {
 						return absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE.getCode());
 					}}).isEmpty();
 	}
+
+	/**
+	 * Il numero di coppie ingresso/uscita da stampare per il personday
+	 * @param pd
+	 * @return
+	 */
+	public int numberOfInOutInPersonDay(PersonDay pd)
+	{
+		if(pd == null)
+			return 0;
+		Collections.sort(pd.stampings);
+
+		int coupleOfStampings = 0;
+
+		String lastWay = null;
+		for(Stamping s : pd.stampings)
+		{
+			if(lastWay==null)
+			{
+				//trovo out chiudo una coppia
+				if(s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = null;
+					continue;
+				}
+				//trovo in lastWay diventa in
+				if(s.way.description.equals("in"))
+				{
+					lastWay = s.way.description;
+					continue;
+				}
+
+			}
+			//lastWay in
+			if(lastWay.equals("in"))
+			{
+				//trovo out chiudo una coppia
+				if(s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = null;
+					continue;
+				}
+				//trovo in chiudo una coppia e lastWay resta in
+				if(s.way.description.equals("in"))
+				{
+					coupleOfStampings++;
+					continue;
+				}
+			}
+		}
+		//l'ultima stampings e' in chiudo una coppia
+		if(lastWay!=null)
+			coupleOfStampings++;
+
+		return coupleOfStampings;
+	}
+
 
 }

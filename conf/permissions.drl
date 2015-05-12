@@ -117,8 +117,8 @@ when
        "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
        
-       "MealTickets.quickBlocksInsert"
-       
+       "MealTickets.recapMealTickets"
+              
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -176,7 +176,8 @@ when
      	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
-        "MealTickets.mealTicketsLegacy"
+        "MealTickets.mealTicketsLegacy",
+        "MealTickets.quickBlocksInsert"
         
         ), target == null, granted == false)
 then
@@ -234,7 +235,8 @@ when
      	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
-        "MealTickets.mealTicketsLegacy"
+        "MealTickets.mealTicketsLegacy",
+        "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
  $c.grant();

@@ -6,7 +6,6 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 
 import manager.ConfGeneralManager;
-import manager.ContractManager;
 import models.Contract;
 import models.ContractYearRecap;
 import models.enumerate.Parameter;
@@ -32,7 +31,6 @@ public class PersonResidualYearRecap {
 			Contract contract, int year, LocalDate calcolaFinoA,
 			PersonResidualMonthRecapFactory factory,
 			ConfGeneralManager confGeneralManager,
-			ContractManager contractManager,
 			DateUtility dateUtility) {
 
 		String confParam = confGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, contract.person.office);
@@ -53,7 +51,7 @@ public class PersonResidualYearRecap {
 		int initMealTicket = 0;
 
 		//Recupero situazione iniziale dell'anno richiesto
-		ContractYearRecap recapPreviousYear = contractManager.getContractYearRecap(contract, year-1);
+		ContractYearRecap recapPreviousYear = contract.yearRecap(year-1);
 		if(recapPreviousYear!=null)	
 		{
 			initMonteOreAnnoPassato = recapPreviousYear.remainingMinutesCurrentYear + recapPreviousYear.remainingMinutesLastYear;
