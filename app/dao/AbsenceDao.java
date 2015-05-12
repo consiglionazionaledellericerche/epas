@@ -434,4 +434,16 @@ public class AbsenceDao extends DaoBase {
 		//		log.info("Lista di codici trovati: {}", frequentAbsenceCodeList);
 		return frequentAbsenceCodeList;
 	}
+
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @return la lista delle assenze effettuate dalla persona nell'anno
+	 */
+	public List<Absence> getYearlyAbsence(Person person, int year){
+
+		return getAbsencesInPeriod(Optional.fromNullable(person),new LocalDate(year,1,1), Optional.of(new LocalDate(year,12,31)), false);
+	}
+
 }

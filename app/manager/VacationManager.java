@@ -1,21 +1,14 @@
 package manager;
 
-import manager.recaps.vacation.VacationsRecapFactory;
-import models.Contract;
 import models.Office;
-import models.Person;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 public class VacationManager {
 

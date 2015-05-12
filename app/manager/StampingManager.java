@@ -31,13 +31,15 @@ import dao.wrapper.IWrapperFactory;
 public class StampingManager {
 
 	@Inject
-	public StampingManager(StampingDao stampingDao, PersonDayDao personDayDao,
-			PersonManager personManager, PersonDao personDao,
-			PersonDayManager personDayManager, IWrapperFactory wrapperFactory,
+	public StampingManager(StampingDao stampingDao, 
+			PersonDayDao personDayDao,
+			PersonDao personDao,
+			PersonDayManager personDayManager, 
+			IWrapperFactory wrapperFactory,
 			PersonStampingDayRecapFactory stampingDayRecapFactory) {
+
 		this.stampingDao = stampingDao;
 		this.personDayDao = personDayDao;
-		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
 		this.wrapperFactory = wrapperFactory;
@@ -48,7 +50,6 @@ public class StampingManager {
 
 	private final StampingDao stampingDao;
 	private final PersonDayDao personDayDao;
-	private final PersonManager personManager;
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
 	private final IWrapperFactory wrapperFactory;
@@ -150,8 +151,8 @@ public class StampingManager {
 			{
 				personDay = pd.get();
 
-				if(max < personManager.numberOfInOutInPersonDay(personDay))
-					max = personManager.numberOfInOutInPersonDay(personDay);
+				if(max < personDayManager.numberOfInOutInPersonDay(personDay))
+					max = personDayManager.numberOfInOutInPersonDay(personDay);
 			}
 		}
 		return max;

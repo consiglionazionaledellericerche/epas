@@ -5,7 +5,6 @@ import it.cnr.iit.epas.DateUtility;
 import javax.annotation.Nullable;
 
 import manager.ConfGeneralManager;
-import manager.ContractManager;
 import models.Contract;
 
 import org.joda.time.LocalDate;
@@ -20,17 +19,15 @@ public class PersonResidualYearRecapFactory {
 	private final PersonResidualMonthRecapFactory personResidualMonthRecapFactory;
 	private final MealTicketDao mealTicketDao;
 	private final ConfGeneralManager confGeneralManager;
-	private final ContractManager contractManager;
 	private final DateUtility dateUtility;
 
 	@Inject
 	public PersonResidualYearRecapFactory(PersonResidualMonthRecapFactory monthFactory,
 			MealTicketDao mealTicketDao,ConfGeneralManager confGeneralManager,
-			ContractManager contractManager,DateUtility dateUtility) {
+			DateUtility dateUtility) {
 		personResidualMonthRecapFactory = monthFactory;
 		this.mealTicketDao = mealTicketDao;
 		this.confGeneralManager = confGeneralManager;
-		this.contractManager = contractManager;
 		this.dateUtility = dateUtility;
 	}
 
@@ -50,6 +47,6 @@ public class PersonResidualYearRecapFactory {
 
 		return new PersonResidualYearRecap(mealTicketDao, 
 				contract, year, finoA, personResidualMonthRecapFactory,
-				confGeneralManager,contractManager,dateUtility);
+				confGeneralManager,dateUtility);
 	}
 }

@@ -28,10 +28,8 @@ public class PersonDayHistory extends Controller {
 
 	@Inject
 	static PersonDayHistoryDao personDayHistoryDao;
-
 	@Inject
 	static StampingHistoryDao stampingHistoryDao;
-
 	@Inject
 	static AbsenceHistoryDao absenceHistoryDao;
 

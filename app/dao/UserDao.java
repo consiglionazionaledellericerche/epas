@@ -1,7 +1,5 @@
 package dao;
 
-import helpers.ModelQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 

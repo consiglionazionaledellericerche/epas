@@ -16,6 +16,7 @@ import models.Person;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -114,7 +115,7 @@ public class MonthRecaps extends Controller{
 				lastDayOfMonth = lastDayOfMonth.plusDays(1);
 				continue;
 			}
-			if( ! DateUtility.isGeneralHoliday(null, lastDayOfMonth) )
+			if(!DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), lastDayOfMonth) )
 			{
 				generalWorkingDaysOfMonth++;
 			}

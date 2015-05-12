@@ -6,7 +6,6 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 
 import manager.CompetenceManager;
-import manager.ContractManager;
 import manager.PersonManager;
 import models.CertificatedData;
 import models.Competence;
@@ -37,7 +36,6 @@ import dao.PersonMonthRecapDao;
 public class WrapperPerson implements IWrapperPerson {
 
 	private final Person value;
-	private final ContractManager contractManager;
 	private final ContractDao contractDao;
 	private final CompetenceManager competenceManager;
 	private final PersonManager personManager;
@@ -51,12 +49,10 @@ public class WrapperPerson implements IWrapperPerson {
 	private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
 
 	@Inject
-	WrapperPerson(@Assisted Person person,	ContractManager contractManager,
-			ContractDao contractDao, CompetenceManager competenceManager, 
-			PersonManager personManager,PersonDao personDao,
-			PersonMonthRecapDao personMonthRecapDao) {
+	WrapperPerson(@Assisted Person person,ContractDao contractDao,
+			CompetenceManager competenceManager, PersonManager personManager,
+			PersonDao personDao,PersonMonthRecapDao personMonthRecapDao) {
 		this.value = person;
-		this.contractManager = contractManager;
 		this.contractDao = contractDao;
 		this.competenceManager = competenceManager;
 		this.personManager = personManager;
@@ -163,8 +159,8 @@ public class WrapperPerson implements IWrapperPerson {
 			return Optional.absent();
 		}
 
-		this.currentContractStampProfile = contractManager.getContractStampProfileFromDate( 
-				this.currentContract.get(), LocalDate.now());
+		this.currentContractStampProfile = this.currentContract.get()
+				.getContractStampProfileFromDate(LocalDate.now());
 
 		return this.currentContractStampProfile; 
 	}

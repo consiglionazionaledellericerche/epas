@@ -28,40 +28,19 @@ import dao.AbsenceDao;
  */
 public class YearlyAbsencesRecap {
 
-	@Inject
-	private AbsenceDao absenceDao;
-
 	public Person person;
-	public short year;
+	public int year;
 	Table<Integer, Integer, String> absenceTable;
 	public Map<AbsenceType,Integer> absenceSummary = new HashMap<AbsenceType,Integer>();
 	public int totalAbsence = 0;
 
-	public YearlyAbsencesRecap(Person person, short year)
-	{
+	public YearlyAbsencesRecap(Person person, int year,List<Absence> yearlyAbsence){
 		this.person = person;
 		this.year = year;
-
-		List<Absence> yearlyAbsence = getYearlyAbsence(this.person,this.year);
 
 		this.totalAbsence = yearlyAbsence.size();
 		this.absenceTable = buildYearlyAbsenceTable(yearlyAbsence);
 		this.absenceSummary = buildYearlyAbsenceSummary(yearlyAbsence);		
-
-	}
-
-	/**
-	 * 
-	 * @param person
-	 * @param year
-	 * @return la lista delle assenze effettuate dalla persona nell'anno
-	 */
-	public List<Absence> getYearlyAbsence(Person person, int year){
-
-		List<Absence> yearlyAbsence = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.<String>absent(), 
-				new LocalDate(year,1,1), new LocalDate(year,12,31), Optional.<JustifiedTimeAtWork>absent(), false, true);
-
-		return yearlyAbsence;
 	}
 
 	/**

@@ -52,13 +52,17 @@ import exceptions.EpasExceptionNoSourceData;
 public class ConsistencyManager {
 
 	@Inject
-	public ConsistencyManager(OfficeDao officeDao, PersonManager personManager,
-			PersonDao personDao, PersonDayManager personDayManager,
+	public ConsistencyManager(OfficeDao officeDao, 
+			PersonManager personManager,
+			PersonDao personDao, 
+			PersonDayManager personDayManager,
 			ContractDao contractDao,
 			ContractYearRecapManager contractYearRecapManager,
 			PersonDayInTroubleDao personDayInTroubleDao,
-			ContractManager contractManager, IWrapperFactory wrapperFactory,
-			ConfGeneralManager confGeneralManager, PersonDayDao personDayDao) {
+			IWrapperFactory wrapperFactory,
+			ConfGeneralManager confGeneralManager, 
+			PersonDayDao personDayDao) {
+
 		this.officeDao = officeDao;
 		this.personManager = personManager;
 		this.personDao = personDao;
@@ -66,7 +70,6 @@ public class ConsistencyManager {
 		this.contractDao = contractDao;
 		this.contractYearRecapManager = contractYearRecapManager;
 		this.personDayInTroubleDao = personDayInTroubleDao;
-		this.contractManager = contractManager;
 		this.wrapperFactory = wrapperFactory;
 		this.confGeneralManager = confGeneralManager;
 		this.personDayDao = personDayDao;
@@ -81,7 +84,6 @@ public class ConsistencyManager {
 	private final ContractDao contractDao;
 	private final ContractYearRecapManager contractYearRecapManager;
 	private final PersonDayInTroubleDao personDayInTroubleDao;
-	private final ContractManager contractManager;
 	private final IWrapperFactory wrapperFactory;
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayDao personDayDao;
@@ -182,8 +184,7 @@ public class ConsistencyManager {
 				continue;
 			}
 
-			Optional<ContractStampProfile> csp = contractManager
-					.getContractStampProfileFromDate(contract, pdt.personDay.date);
+			Optional<ContractStampProfile> csp = contract.getContractStampProfileFromDate(pdt.personDay.date);
 
 			Preconditions.checkState(csp.isPresent());
 

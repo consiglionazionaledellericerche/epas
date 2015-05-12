@@ -1,6 +1,5 @@
 package dao.history;
 
-import it.cnr.iit.epas.DateUtility;
 import models.base.BaseModel;
 import models.base.Revision;
 

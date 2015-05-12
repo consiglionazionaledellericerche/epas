@@ -9,7 +9,6 @@ import java.util.List;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.ContractYearRecap;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
@@ -43,14 +42,16 @@ import exceptions.EpasExceptionNoSourceData;
 public class ContractManager {
 
 	@Inject
-	public ContractManager(ContractManager contractManager,
-			ConfGeneralManager confGeneralManager,
-			ConsistencyManager consistencyManager, PersonDayDao personDayDao,
+	public ContractManager(ConfGeneralManager confGeneralManager,
+			ConsistencyManager consistencyManager, 
+			PersonDayDao personDayDao,
 			PersonDayManager personDayManager,
 			ContractYearRecapManager contractYearRecapManager,
-			IWrapperFactory wrapperFactory, VacationCodeDao vacationCodeDao,
-			ContractDao contractDao, PersonDao personDao) {
-		this.contractManager = contractManager;
+			IWrapperFactory wrapperFactory, 
+			VacationCodeDao vacationCodeDao,
+			ContractDao contractDao, 
+			PersonDao personDao) {
+
 		this.confGeneralManager = confGeneralManager;
 		this.consistencyManager = consistencyManager;
 		this.personDayDao = personDayDao;
@@ -64,7 +65,6 @@ public class ContractManager {
 
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 
-	private final ContractManager contractManager;
 	private final ConfGeneralManager confGeneralManager;
 	private final ConsistencyManager consistencyManager;
 	private final PersonDayDao personDayDao;
@@ -94,7 +94,7 @@ public class ContractManager {
 				&& contract.expireContract.isBefore(contract.endContract))
 			return false;
 
-		if(! contractManager.isProperContract(contract) ) 
+		if(!isProperContract(contract) ) 
 			return false;
 
 		return true;
@@ -111,7 +111,7 @@ public class ContractManager {
 	 */
 	public void properContractCreate(Contract contract, WorkingTimeType wtt) {
 
-		contractManager.buildVacationPeriods(contract);
+		buildVacationPeriods(contract);
 
 		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
 		cwtt.beginDate = contract.beginContract;
@@ -140,9 +140,9 @@ public class ContractManager {
 	 */
 	public void properContractUpdate(Contract contract) {
 
-		contractManager.buildVacationPeriods(contract);
-		contractManager.updateContractWorkingTimeType(contract);
-		contractManager.updateContractStampProfile(contract);
+		buildVacationPeriods(contract);
+		updateContractWorkingTimeType(contract);
+		updateContractStampProfile(contract);
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class ContractManager {
 		LocalDate date = contract.beginContract;
 		if(date.isBefore(initUse))
 			date = initUse;
-		DateInterval contractInterval = contractManager.getContractDatabaseDateInterval(contract);
+		DateInterval contractInterval = getContractDatabaseDateInterval(contract);
 		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
 			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
 		}
@@ -421,40 +421,6 @@ public class ContractManager {
 	public List<ContractStampProfile> getContractStampProfileAsList(Contract contract) {
 
 		return Lists.newArrayList(contract.contractStampProfile);
-	}
-
-	/**
-	 * Ritorna il ContractStampProfile attivo alla data.
-	 * @param contract
-	 * @param date
-	 * @return
-	 */
-	public Optional<ContractStampProfile> getContractStampProfileFromDate(
-			Contract contract, LocalDate date) {
-
-		for(ContractStampProfile csp : contract.contractStampProfile) {
-
-			DateInterval interval = new DateInterval(csp.startFrom, csp.endTo);
-
-			if(DateUtility.isDateIntoInterval(date, interval))
-				return Optional.fromNullable(csp);
-
-		}
-		return Optional.absent();
-	}
-
-	/**
-	 * Ritorna il riepilogo annule del contatto.
-	 * @param year
-	 * @return
-	 */
-	public ContractYearRecap getContractYearRecap(Contract contract, int year)	{
-		for(ContractYearRecap cyr : contract.recapPeriods) {
-
-			if(cyr.year==year)
-				return cyr;
-		}
-		return null;
 	}
 
 	/**

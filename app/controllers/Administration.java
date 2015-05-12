@@ -63,7 +63,6 @@ public class Administration extends Controller {
 		render(personList);
 	}
 
-
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
@@ -80,7 +79,6 @@ public class Administration extends Controller {
 	public static void createOvertimeFile(int year) throws IOException{
 		Logger.debug("Chiamo overtime in year...");
 		Competences.getOvertimeInYear(year);
-
 	}
 
 	public static void showResidualSituation() {

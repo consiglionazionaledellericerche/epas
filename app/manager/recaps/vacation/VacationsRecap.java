@@ -82,7 +82,7 @@ public class VacationsRecap {
 	 */
 	public VacationsRecap(IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
 			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, 
-			VacationManager vacationManager, ContractManager contractManager,int year, Contract contract, LocalDate actualDate, 
+			VacationManager vacationManager,int year, Contract contract, LocalDate actualDate, 
 			boolean considerExpireLastYear) throws EpasExceptionNoSourceData {
 
 		Preconditions.checkNotNull(year);
@@ -167,14 +167,14 @@ public class VacationsRecap {
 		{
 			//Caso in cui voglio inserire ferie per l'anno prossimo
 			VacationsRecap vrPastYear = new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
-					confYearManager, vacationManager,contractManager, this.year-1, this.contract, endLastYear, true);
+					confYearManager, vacationManager, this.year-1, this.contract, endLastYear, true);
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
 			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);		
 			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
 		}
 		else{
 			//Popolare da contractYearRecap
-			ContractYearRecap recapPastYear = contractManager.getContractYearRecap(this.contract, year-1);
+			ContractYearRecap recapPastYear = this.contract.yearRecap(year-1);
 			if(recapPastYear==null) {
 				log.error("Per {} manca il riepilogo anno {}, definire l'inizializzazione.", 
 						new Object[]{this.contract.person.getFullname() , year-1});

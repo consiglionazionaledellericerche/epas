@@ -7,6 +7,8 @@ import models.ContractWorkingTimeType;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Lists;
+
 public class ContractWorkingTimeTypeManager {
 
 	/**
@@ -33,7 +35,7 @@ public class ContractWorkingTimeTypeManager {
 	 * @param cwtt
 	 */
 	public void deleteContractWorkingTimeType(Contract contract, int index, ContractWorkingTimeType cwtt){
-		ContractWorkingTimeType previous = contract.getContractWorkingTimeTypeAsList().get(index-1);
+		ContractWorkingTimeType previous = Lists.newArrayList(contract.contractWorkingTimeType).get(index-1);
 		previous.endDate = cwtt.endDate;
 		previous.save();
 

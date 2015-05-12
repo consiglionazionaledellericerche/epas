@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
-import manager.PersonManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Office;
@@ -39,7 +38,7 @@ import dao.UserDao;
 
 @With( RequestInit.class )
 public class Clocks extends Controller{
-	
+
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
@@ -50,8 +49,6 @@ public class Clocks extends Controller{
 	private static PersonDayDao personDayDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
-	@Inject
-	private static PersonManager personManager;
 	@Inject
 	private static PersonDayManager personDayManager;
 	@Inject
@@ -98,7 +95,7 @@ public class Clocks extends Controller{
 			personDay = pd.get();
 		}				
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
-		int numberOfInOut = Math.max(minInOutColumn, personManager.numberOfInOutInPersonDay(personDay));
+		int numberOfInOut = Math.max(minInOutColumn, personDayManager.numberOfInOutInPersonDay(personDay));
 
 		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
 
@@ -196,7 +193,7 @@ public class Clocks extends Controller{
 		}
 
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
-		int numberOfInOut = Math.max(minInOutColumn,  personManager.numberOfInOutInPersonDay(personDay));
+		int numberOfInOut = Math.max(minInOutColumn,  personDayManager.numberOfInOutInPersonDay(personDay));
 
 		//		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
 		//		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				

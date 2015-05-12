@@ -147,6 +147,9 @@ public class Bootstrap extends Job<Void> {
 	 */
 	private static void bootstrapEmployeeRoleCreation() {
 		
+		if (Office.count() == 0 || Person.count() == 0)
+			return;
+		
 		Role role = Role.find("byName",  Role.EMPLOYEE).first();
 		if(role == null) {
 			role = new Role();

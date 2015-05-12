@@ -178,8 +178,7 @@ public class ConfGeneralManager {
 		
 		String monthOfPatron = getFieldValue(Parameter.MONTH_OF_PATRON, office);
 		String dayOfPatron = getFieldValue(Parameter.DAY_OF_PATRON, office);
-		
-		return Optional.of(MonthDay.parse(monthOfPatron+"-"+dayOfPatron));
+		return Optional.of(MonthDay.parse("--"+monthOfPatron+"-"+dayOfPatron));
 	}
 
 }

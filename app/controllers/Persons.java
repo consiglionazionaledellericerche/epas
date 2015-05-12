@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import manager.CompetenceManager;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
@@ -63,34 +65,49 @@ import exceptions.EpasExceptionNoSourceData;
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
 
-//	private final static String USERNAME_SESSION_KEY = "username";
+	//	private final static String USERNAME_SESSION_KEY = "username";
 	private final static Logger log = LoggerFactory.getLogger(Persons.class);
 
+	@Inject
 	private static OfficeDao officeDao;
+	@Inject
 	private static PersonDao personDao;
+	@Inject
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
+	@Inject
 	private static ContractManager contractManager;
+	@Inject
 	private static SecurityRules rules;
+	@Inject
 	private static WorkingTimeTypeDao workingTimeTypeDao;
+	@Inject
 	private static PersonManager personManager;
+	@Inject
 	private static ContractDao contractDao;
+	@Inject
 	private static QualificationDao qualificationDao;
+	@Inject
 	private static CompetenceManager competenceManager;
+	@Inject
 	private static ContractStampProfileManager contractStampProfileManager;
+	@Inject
 	private static PersonDayManager personDayManager;
+	@Inject
 	private static UserDao userDao;
+	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
 	private static ConfGeneralManager confGeneralManager;
+	@Inject
 	private static ContractWorkingTimeTypeManager contractWorkingTimeTypeManager;
+	@Inject
 	private static PersonChildrenDao personChildrenDao;
 
 	public static void list(String name){
 
-		LocalDate startEra = new LocalDate(1900,1,1);
-		LocalDate endEra = new LocalDate(9999,1,1);
 		List<Person> simplePersonList = personDao.list(Optional.fromNullable(name),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, startEra,
-				endEra, false).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
+				null, false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
@@ -666,13 +683,15 @@ public class Persons extends Controller {
 
 		Contract contract = cwtt.contract;
 
-		int index = contract.getContractWorkingTimeTypeAsList().indexOf(cwtt);
-		if(contract.getContractWorkingTimeTypeAsList().size()<index){
+		List<ContractWorkingTimeType> contractsWtt = Lists.newArrayList(contract.contractWorkingTimeType);
+
+		int index = contractsWtt.indexOf(cwtt);
+		if(contractsWtt.size()<index){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Persons.edit(cwtt.contract.person.id);
 		}
-		ContractWorkingTimeType previous = contract.getContractWorkingTimeTypeAsList().get(index-1);
+		ContractWorkingTimeType previous = contractsWtt.get(index-1);
 		contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
 
 		//Ricalcolo valori

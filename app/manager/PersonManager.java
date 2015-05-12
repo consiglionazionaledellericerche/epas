@@ -20,7 +20,6 @@ import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonYear;
-import models.Stamping;
 import models.User;
 
 import org.joda.time.LocalDate;
@@ -40,13 +39,12 @@ public class PersonManager {
 	@Inject
 	public PersonManager(ContractDao contractDao, OfficeDao officeDao,
 			PersonChildrenDao personChildrenDao, PersonDao personDao,
-			PersonManager personManager, PersonDayManager personDayManager,
+			PersonDayManager personDayManager,
 			IWrapperFactory wrapperFactory,ConfGeneralManager confGeneralManager) {
 		this.contractDao = contractDao;
 		this.officeDao = officeDao;
 		this.personChildrenDao = personChildrenDao;
 		this.personDao = personDao;
-		this.personManager = personManager;
 		this.personDayManager = personDayManager;
 		this.wrapperFactory = wrapperFactory;
 		this.confGeneralManager = confGeneralManager;
@@ -58,7 +56,6 @@ public class PersonManager {
 	private final OfficeDao officeDao;
 	private final PersonChildrenDao personChildrenDao;
 	private final PersonDao personDao;
-	private final PersonManager personManager;
 	private final PersonDayManager personDayManager;
 	private final IWrapperFactory wrapperFactory;
 	private final ConfGeneralManager confGeneralManager;
@@ -127,18 +124,6 @@ public class PersonManager {
 		Set<Office> officeAllowed = officeDao.getOfficeAllowed(person.user);
 
 		return adminOffices.contains(officeAllowed.iterator().next());
-
-		/*
-		//List<Office> officeAllowed = administrator.getOfficeAllowed();
-		Set<Office> officeAllowed = officeDao.getOfficeAllowed(Optional.of(person.user));
-		for(Office office : officeAllowed)
-		{
-			if(office.id.equals(administrator.office.id))
-				return true;
-		}
-		return false;
-		 */
-
 	}
 
 	/**
@@ -154,7 +139,6 @@ public class PersonManager {
 		else
 			return true;
 	}
-
 
 	/**
 	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
@@ -258,7 +242,6 @@ public class PersonManager {
 
 	}
 
-
 	/**
 	 * 
 	 * @param month
@@ -318,7 +301,6 @@ public class PersonManager {
 		}
 	}
 
-
 	/**
 	 * 
 	 * @return false se l'id passato alla funzione non trova tra le persone presenti in anagrafica, una che avesse nella vecchia applicazione un id
@@ -365,7 +347,7 @@ public class PersonManager {
 	 */
 	public PersonDay createPersonDayFromDate(Person person, LocalDate date){
 		//if(person.isHoliday(date))
-		if(personManager.isHoliday(person, date))
+		if(isHoliday(person, date))
 			return null;
 		return new PersonDay(person, date);
 	}
@@ -424,69 +406,6 @@ public class PersonManager {
 		}
 		return position;
 	}
-
-
-	/**
-	 * Il numero di coppie ingresso/uscita da stampare per il personday
-	 * @param pd
-	 * @return
-	 */
-	public int numberOfInOutInPersonDay(PersonDay pd)
-	{
-		if(pd == null)
-			return 0;
-		personDayManager.orderStampings(pd);
-
-		int coupleOfStampings = 0;
-
-		String lastWay = null;
-		for(Stamping s : pd.stampings)
-		{
-			if(lastWay==null)
-			{
-				//trovo out chiudo una coppia
-				if(s.way.description.equals("out"))
-				{
-					coupleOfStampings++;
-					lastWay = null;
-					continue;
-				}
-				//trovo in lastWay diventa in
-				if(s.way.description.equals("in"))
-				{
-					lastWay = s.way.description;
-					continue;
-				}
-
-			}
-			//lastWay in
-			if(lastWay.equals("in"))
-			{
-				//trovo out chiudo una coppia
-				if(s.way.description.equals("out"))
-				{
-					coupleOfStampings++;
-					lastWay = null;
-					continue;
-				}
-				//trovo in chiudo una coppia e lastWay resta in
-				if(s.way.description.equals("in"))
-				{
-					coupleOfStampings++;
-					continue;
-				}
-			}
-		}
-		//l'ultima stampings e' in chiudo una coppia
-		if(lastWay!=null)
-			coupleOfStampings++;
-
-		return coupleOfStampings;
-	}
-
-
-
-
 
 	/**
 	 * //TODO utilizzare jpa per prendere direttamente i codici (e migrare ad una lista)

@@ -3,6 +3,7 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
 import manager.PersonMonthsManager;
@@ -29,9 +30,13 @@ import dao.wrapper.IWrapperFactory;
 @With( {Resecure.class, RequestInit.class} )
 public class PersonMonths extends Controller{
 
+	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
 	private static PersonResidualYearRecapFactory yearFactory;
+	@Inject
 	private static PersonMonthRecapDao personMonthRecapDao;
+	@Inject
 	private static PersonMonthsManager personMonthsManager;
 
 

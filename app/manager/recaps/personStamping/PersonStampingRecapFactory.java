@@ -36,8 +36,7 @@ public class PersonStampingRecapFactory {
 	 */
 	public PersonStampingRecap create(Person person, int year, int month) {
 		return new PersonStampingRecap(personDayManager, personManager,
-				yearFactory, dayRecapFactory,
-				year, month, person);
+				yearFactory, dayRecapFactory,year, month, person);
 	}
 
 }
