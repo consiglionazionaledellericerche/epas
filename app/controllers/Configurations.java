@@ -50,7 +50,8 @@ public class Configurations extends Controller{
 			office = officeDao.getOfficeById(officeId);			
 		}
 		else{
-			office = Security.getUser().get().person.office;
+			//TODO se offices è vuota capire come comportarsi
+			office = offices.iterator().next();
 		}
 
 		ConfGeneral initUseProgram = ConfGeneralManager.getByField(Parameter.INIT_USE_PROGRAM,  office);
@@ -110,7 +111,7 @@ public class Configurations extends Controller{
 			office = officeDao.getOfficeById(officeId);
 		}
 		else{
-			office = Security.getUser().get().person.office;
+			office = offices.iterator().next();
 		}
 		
 		Integer currentYear = LocalDate.now().getYear();
