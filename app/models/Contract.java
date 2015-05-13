@@ -1,7 +1,5 @@
 package models;
 
-import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +23,6 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -119,21 +116,6 @@ public class Contract extends BaseModel {
 	public String toString() {
 		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
 				id, person.id, beginContract, expireContract, endContract);
-	}
-
-
-	/**
-	 * FIXME ha una dipendenza con DateUtility, capire se può rimanere nel modello.
-	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
-	 * @return
-	 */
-	public DateInterval getContractDateInterval(){
-		DateInterval contractInterval;
-		if(this.endContract!=null)
-			contractInterval = new DateInterval(this.beginContract, this.endContract);
-		else
-			contractInterval = new DateInterval(this.beginContract, this.expireContract);
-		return contractInterval;
 	}
 
 	/**

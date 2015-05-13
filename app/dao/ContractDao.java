@@ -28,6 +28,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import dao.wrapper.IWrapperFactory;
+
 /**
  * 
  * @author dario
@@ -35,9 +37,13 @@ import com.mysema.query.jpa.JPQLQueryFactory;
  */
 public class ContractDao extends DaoBase{
 
+	private final IWrapperFactory factory;
+
 	@Inject
-	ContractDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+	ContractDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
+			IWrapperFactory factory) {
 		super(queryFactory, emp);
+		this.factory = factory;
 	}
 
 	/**
@@ -113,14 +119,14 @@ public class ContractDao extends DaoBase{
 	public Contract getContract(LocalDate date, Person person){
 
 		for(Contract c : person.contracts)		{
-			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+			if(DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval()))
 				return c;
 		}
 
 		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
 		List<Contract> contractList = getPersonContractList(person);
 		for(Contract c : contractList){
-			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+			if(DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval()))
 				return c;
 		}
 		//-----------------------

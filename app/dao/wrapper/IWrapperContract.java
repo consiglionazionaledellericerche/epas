@@ -1,8 +1,11 @@
 package dao.wrapper;
 
+import it.cnr.iit.epas.DateInterval;
+
 import java.util.List;
 
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 
 public interface IWrapperContract extends IWrapperModel<Contract> {
@@ -17,5 +20,9 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 * @return
 	 */
 	boolean isDefined();
+	
+	public DateInterval getContractDateInterval();
+	
+	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList();
 
 }

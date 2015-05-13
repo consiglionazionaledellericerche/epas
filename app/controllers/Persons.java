@@ -512,7 +512,7 @@ public class Persons extends Controller {
 		contractManager.properContractUpdate(contract);
 
 		//Ricalcolo valori
-		DateInterval contractDateInterval = contract.getContractDateInterval();
+		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
 		try {
 			contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
@@ -597,7 +597,7 @@ public class Persons extends Controller {
 
 		//Ricalcolo valori
 		try {
-			DateInterval contractDateInterval = contract.getContractDateInterval();
+			DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
 			contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 
@@ -660,7 +660,7 @@ public class Persons extends Controller {
 		}
 
 		DateInterval first = new DateInterval(cwtt.beginDate, splitDate.minusDays(1));
-		if(! DateUtility.isIntervalIntoAnother(first, cwtt.contract.getContractDateInterval())) {
+		if(! DateUtility.isIntervalIntoAnother(first, wrapperFactory.create(cwtt.contract).getContractDateInterval())) {
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
 			Persons.edit(cwtt.contract.person.id);
 		}
@@ -942,7 +942,7 @@ public class Persons extends Controller {
 			Persons.edit(contract.contract.person.id);
 		}
 		DateInterval first = new DateInterval(contract.startFrom, splitDate.minusDays(1));
-		if(! DateUtility.isIntervalIntoAnother(first, contract.contract.getContractDateInterval())) {
+		if(! DateUtility.isIntervalIntoAnother(first,  wrapperFactory.create(contract.contract).getContractDateInterval())) {
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
 			Persons.edit(contract.contract.person.id);
 		}

@@ -29,6 +29,7 @@ import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import exceptions.EpasExceptionNoSourceData;
 
@@ -162,7 +163,7 @@ public class ContractManager {
 			return contractInterval;
 		}
 
-		return contract.getContractDateInterval();
+		return wrapperFactory.create(contract).getContractDateInterval();
 
 	}
 
@@ -321,10 +322,11 @@ public class ContractManager {
 		//Aggiornare i periodi workingTimeType
 		//1) Cancello quelli che non appartengono più a contract
 		List<ContractWorkingTimeType> toDelete = new ArrayList<ContractWorkingTimeType>();
+		IWrapperContract wrappedContract = wrapperFactory.create(contract);
 		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
 		{
 			DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-			if(DateUtility.intervalIntersection(contract.getContractDateInterval(), cwttInterval) == null)
+			if(DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(), cwttInterval) == null)
 			{
 				toDelete.add(cwtt);
 			}
@@ -341,12 +343,12 @@ public class ContractManager {
 
 		//Sistemo il primo		
 		ContractWorkingTimeType first = cwttList.get(0);
-		first.beginDate = contract.getContractDateInterval().getBegin();
+		first.beginDate = wrappedContract.getContractDateInterval().getBegin();
 		first.save();
 		//Sistemo l'ultimo
 		ContractWorkingTimeType last = 
 				cwttList.get(contract.contractWorkingTimeType.size()-1);
-		last.endDate = contract.getContractDateInterval().getEnd();
+		last.endDate = wrappedContract.getContractDateInterval().getEnd();
 		if(DateUtility.isInfinity(last.endDate))
 			last.endDate = null;
 		last.save();
@@ -365,10 +367,11 @@ public class ContractManager {
 		//Aggiornare i periodi stampProfile
 		//1) Cancello quelli che non appartengono più a contract
 		List<ContractStampProfile> toDelete = new ArrayList<ContractStampProfile>();
+		IWrapperContract wrappedContract = wrapperFactory.create(contract);
 		for(ContractStampProfile csp : contract.contractStampProfile)
 		{
 			DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
-			if(DateUtility.intervalIntersection(contract.getContractDateInterval(), cspInterval) == null)
+			if(DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(), cspInterval) == null)
 			{
 				toDelete.add(csp);
 			}
@@ -385,12 +388,12 @@ public class ContractManager {
 
 		//Sistemo il primo		
 		ContractStampProfile first = cspList.get(0);
-		first.startFrom = contract.getContractDateInterval().getBegin();
+		first.startFrom = wrappedContract.getContractDateInterval().getBegin();
 		first.save();
 		//Sistemo l'ultimo
 		ContractStampProfile last = 
 				cspList.get(contract.contractStampProfile.size()-1);
-		last.endTo = contract.getContractDateInterval().getEnd();
+		last.endTo = wrappedContract.getContractDateInterval().getEnd();
 		if(DateUtility.isInfinity(last.endTo))
 			last.endTo = null;
 		last.save();
@@ -444,14 +447,14 @@ public class ContractManager {
 	 */
 	public boolean isProperContract(Contract contract) {
 
-		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
 		for(Contract c : contract.person.contracts) {
 
 			if(contract.id != null && c.id.equals(contract.id)) {
 				continue;
 			}
 
-			if(DateUtility.intervalIntersection(contractInterval, c.getContractDateInterval()) != null) {
+			if(DateUtility.intervalIntersection(contractInterval, wrapperFactory.create(c).getContractDateInterval()) != null) {
 				return false;
 			}
 		}

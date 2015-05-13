@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 
 import dao.MealTicketDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Manager per MealTicket
@@ -35,13 +36,16 @@ public class MealTicketManager {
 	@Inject
 	public MealTicketManager(PersonDao personDao,
 			PersonResidualYearRecapFactory yearFactory,
-			MealTicketDao mealTicketDao, ContractManager contractManager,
-			ConfGeneralManager confGeneralManager) {
+			MealTicketDao mealTicketDao, 
+			ContractManager contractManager,
+			ConfGeneralManager confGeneralManager,
+			IWrapperFactory factory) {
 		this.personDao = personDao;
 		this.yearFactory = yearFactory;
 		this.mealTicketDao = mealTicketDao;
 		this.contractManager = contractManager;
 		this.confGeneralManager = confGeneralManager;
+		this.factory = factory;
 	}
 
 	private final PersonDao personDao;
@@ -49,6 +53,7 @@ public class MealTicketManager {
 	private final MealTicketDao mealTicketDao;
 	private final ContractManager contractManager;
 	private final ConfGeneralManager confGeneralManager;
+	private final IWrapperFactory factory;
 
 	/**
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
@@ -95,7 +100,7 @@ public class MealTicketManager {
 		if(previousContract == null)
 			return 0;
 
-		DateInterval previousContractInterval = previousContract.getContractDateInterval();
+		DateInterval previousContractInterval = factory.create(previousContract).getContractDateInterval();
 
 		//Data inizio utilizzo mealticket
 		PersonResidualYearRecap c = 

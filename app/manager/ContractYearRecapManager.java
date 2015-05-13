@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.wrapper.IWrapperFactory;
 import exceptions.EpasExceptionNoSourceData;
 
 /**
@@ -41,13 +42,16 @@ public class ContractYearRecapManager {
 	public ContractYearRecapManager(ConfGeneralManager confGeneralManager,
 			VacationsRecapFactory vacationsFactory,
 			PersonResidualYearRecapFactory yearFactory,
-			AbsenceTypeDao absenceTypeDao, AbsenceDao absenceDao) {
-		super();
+			AbsenceTypeDao absenceTypeDao, 
+			AbsenceDao absenceDao,
+			IWrapperFactory factory) {
+
 		this.confGeneralManager = confGeneralManager;
 		this.vacationsFactory = vacationsFactory;
 		this.yearFactory = yearFactory;
 		this.absenceTypeDao = absenceTypeDao;
 		this.absenceDao = absenceDao;
+		this.factory = factory;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(ContractYearRecapManager.class);
@@ -57,6 +61,7 @@ public class ContractYearRecapManager {
 	private final PersonResidualYearRecapFactory yearFactory;
 	private final AbsenceTypeDao absenceTypeDao;
 	private final AbsenceDao absenceDao;
+	private final IWrapperFactory factory;
 
 	/**
 	 * NB !!!
@@ -127,7 +132,7 @@ public class ContractYearRecapManager {
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate.plusDays(1);
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
-		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval contractInterval = factory.create(contract).getContractDateInterval();
 
 		//Se intersezione fra contratto e dati utili database vuota non costruisco alcun contractYearRecap
 		if(DateUtility.intervalIntersection(contractInterval, personDatabaseInterval)==null)

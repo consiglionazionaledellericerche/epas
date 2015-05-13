@@ -2,6 +2,7 @@ package dao.wrapper;
 
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -19,4 +20,5 @@ public interface IWrapperFactory {
 	IWrapperCompetenceCode create(CompetenceCode cc);
 	IWrapperOffice create(Office office);
 	IWrapperPersonDay create(PersonDay pd);
+	IWrapperContractWorkingTimeType create(ContractWorkingTimeType cwtt);
 }

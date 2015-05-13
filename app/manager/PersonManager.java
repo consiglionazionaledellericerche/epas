@@ -262,7 +262,7 @@ public class PersonManager {
 		{
 			if(!contract.onCertificate)
 				continue;
-			DateInterval contractInterval = contract.getContractDateInterval();
+			DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
 			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
 			{
 				monthContracts.add(contract);

@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 import dao.MealTicketDao;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * 
@@ -31,7 +32,7 @@ public class PersonResidualYearRecap {
 			Contract contract, int year, LocalDate calcolaFinoA,
 			PersonResidualMonthRecapFactory factory,
 			ConfGeneralManager confGeneralManager,
-			DateUtility dateUtility) {
+			DateUtility dateUtility,IWrapperFactory wrapperFactory) {
 
 		String confParam = confGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, contract.person.office);
 		Optional<LocalDate> dateStartMealTicket;
@@ -43,7 +44,7 @@ public class PersonResidualYearRecap {
 
 		int firstMonthToCompute = 1;
 		LocalDate firstDayInDatabase = new LocalDate(year,1,1);
-		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
 		DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket.orNull(), calcolaFinoA);
 		int initMonteOreAnnoPassato = 0;

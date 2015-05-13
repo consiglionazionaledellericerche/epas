@@ -68,6 +68,7 @@ public class VacationsRecap {
 
 	private final AbsenceDao absenceDao;
 	private final AbsenceTypeDao absenceTypeDao;
+	private final IWrapperFactory wrapperFactory;
 
 	/**
 	 * @param person
@@ -91,6 +92,7 @@ public class VacationsRecap {
 
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
+		this.wrapperFactory = wrapperFactory;
 
 		this.person = contract.person;
 		this.year = year;
@@ -103,7 +105,7 @@ public class VacationsRecap {
 		Preconditions.checkNotNull(vacationPeriodList);
 		Preconditions.checkState( ! vacationPeriodList.isEmpty() );
 
-		this.activeContractInterval = this.contract.getContractDateInterval();
+		this.activeContractInterval = wrapperFactory.create(this.contract).getContractDateInterval();
 		this.vacationPeriodList = vacationPeriodList;
 
 		LocalDate today = LocalDate.now();
@@ -389,7 +391,7 @@ public class VacationsRecap {
 
 		List<AbsenceType> postPartumCodeList = absenceTypeDao.getReducingAccruingDaysForVacations();
 
-		DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, wrapperFactory.create(contract).getContractDateInterval());
 		if(contractInterInterval==null)
 			return new ArrayList<Absence>();
 
