@@ -41,14 +41,17 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 	private final ContractDao contractDao;
 	private final PersonManager personManager;
 	private final PersonDayDao personDayDao;
+	private final IWrapperFactory factory;
 
 	@Inject
 	WrapperPersonDay(@Assisted PersonDay pd,ContractDao contractDao,
-			PersonManager personManager,PersonDayDao personDayDao) {
+			PersonManager personManager,PersonDayDao personDayDao,
+			IWrapperFactory factory) {
 		this.value = pd;
 		this.contractDao = contractDao;
 		this.personManager = personManager;
 		this.personDayDao = personDayDao;
+		this.factory = factory;
 	}
 
 	@Override
@@ -101,7 +104,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 		if( this.previousForProgressive.isPresent() ) {
 
 			if( !DateUtility.isDateIntoInterval(this.previousForProgressive.get().date,
-					this.getPersonDayContract().get().getContractDateInterval() )) {
+					factory.create(this.getPersonDayContract().get()).getContractDateInterval() )) {
 				this.previousForProgressive = Optional.absent();
 			}
 		}
@@ -234,7 +237,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 			for(ContractWorkingTimeType cwtt : 
 				this.getPersonDayContract().get().contractWorkingTimeType ) {
 
-				if(DateUtility.isDateIntoInterval(this.value.date, cwtt.getDateInverval())) {
+				if(DateUtility.isDateIntoInterval(this.value.date, factory.create(cwtt).getDateInverval())) {
 
 					return Optional.fromNullable(
 							cwtt.workingTimeType.workingTimeTypeDays

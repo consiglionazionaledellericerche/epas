@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
+import manager.recaps.PersonCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import models.Competence;
@@ -21,7 +22,6 @@ import models.Office;
 import models.Person;
 import models.TotalOvertime;
 import models.User;
-import models.rendering.PersonCompetenceRecap;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;

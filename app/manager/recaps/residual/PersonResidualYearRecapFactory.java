@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.MealTicketDao;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonResidualYearRecapFactory {
 
@@ -20,15 +21,18 @@ public class PersonResidualYearRecapFactory {
 	private final MealTicketDao mealTicketDao;
 	private final ConfGeneralManager confGeneralManager;
 	private final DateUtility dateUtility;
+	private final IWrapperFactory factory;
 
 	@Inject
 	public PersonResidualYearRecapFactory(PersonResidualMonthRecapFactory monthFactory,
 			MealTicketDao mealTicketDao,ConfGeneralManager confGeneralManager,
-			DateUtility dateUtility) {
+			DateUtility dateUtility,IWrapperFactory factory) {
 		personResidualMonthRecapFactory = monthFactory;
 		this.mealTicketDao = mealTicketDao;
 		this.confGeneralManager = confGeneralManager;
 		this.dateUtility = dateUtility;
+		this.factory = factory;
+		
 	}
 
 	/**
@@ -47,6 +51,6 @@ public class PersonResidualYearRecapFactory {
 
 		return new PersonResidualYearRecap(mealTicketDao, 
 				contract, year, finoA, personResidualMonthRecapFactory,
-				confGeneralManager,dateUtility);
+				confGeneralManager,dateUtility,factory);
 	}
 }

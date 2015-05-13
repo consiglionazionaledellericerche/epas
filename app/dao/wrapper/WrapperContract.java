@@ -1,5 +1,7 @@
 package dao.wrapper;
 
+import it.cnr.iit.epas.DateInterval;
+
 import java.util.List;
 
 import manager.PersonManager;
@@ -80,6 +82,20 @@ public class WrapperContract implements IWrapperContract {
 	 */
 	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
 		return Lists.newArrayList(this.value.contractWorkingTimeType);
+	}
+
+	/**
+	 * FIXME ha una dipendenza con DateUtility, capire se può rimanere nel modello.
+	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
+	 * @return
+	 */
+	public DateInterval getContractDateInterval(){
+		DateInterval contractInterval;
+		if(value.endContract!=null)
+			contractInterval = new DateInterval(value.beginContract, value.endContract);
+		else
+			contractInterval = new DateInterval(value.beginContract, value.expireContract);
+		return contractInterval;
 	}
 
 }

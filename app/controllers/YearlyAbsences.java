@@ -8,12 +8,12 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.YearlyAbsencesManager;
+import manager.recaps.YearlyAbsencesRecap;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.User;
 import models.enumerate.JustifiedTimeAtWork;
-import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;
 

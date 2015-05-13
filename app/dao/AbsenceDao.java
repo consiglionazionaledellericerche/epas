@@ -33,6 +33,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import dao.wrapper.IWrapperFactory;
+
 /**
  *
  * @author dario
@@ -40,9 +42,13 @@ import com.mysema.query.jpa.JPQLQueryFactory;
  */
 public class AbsenceDao extends DaoBase {
 
+	private final IWrapperFactory factory;
+
 	@Inject
-	AbsenceDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+	AbsenceDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
+			IWrapperFactory factory) {
 		super(queryFactory, emp);
+		this.factory = factory;
 	}
 
 	public Absence getAbsenceById(Long id){
@@ -381,7 +387,7 @@ public class AbsenceDao extends DaoBase {
 	 */
 	public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab){
 
-		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, factory.create(contract).getContractDateInterval());
 		if(contractInterInterval==null)
 			return new ArrayList<Absence>();
 
