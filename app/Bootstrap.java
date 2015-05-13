@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import models.Office;
 import models.Permission;
+import models.Person;
 import models.Qualification;
 import models.Role;
 import models.User;
@@ -21,6 +22,7 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.Play;
@@ -30,10 +32,12 @@ import play.jobs.OnApplicationStart;
 import play.libs.Codec;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
 import controllers.Security;
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
@@ -50,6 +54,8 @@ public class Bootstrap extends Job<Void> {
 	
 	@Inject
 	static OfficeDao officeDao;
+	@Inject
+	static PersonDao personDao;
 	@Inject
 	static UsersRolesOfficesDao usersRolesOfficesDao;
 	@Inject
@@ -123,6 +129,8 @@ public class Bootstrap extends Job<Void> {
 			admin.password = Codec.hexMD5("personnelEpasNewVersion");
 			admin.save();
 		}
+		
+		bootstrapEmployeeRoleCreation();
 
 		bootstrapStampingCreateHandler();
 				
@@ -132,6 +140,59 @@ public class Bootstrap extends Job<Void> {
 		
 		restUsersCreation();
 	
+	}
+	
+	/**
+	 * Crea il ruolo Employee che deve essere associato al dipendente nell'ufficio di appartenenza
+	 */
+	private static void bootstrapEmployeeRoleCreation() {
+		
+		Role role = Role.find("byName",  Role.EMPLOYEE).first();
+		if(role == null) {
+			role = new Role();
+			role.name = Role.EMPLOYEE;
+			role.save();
+			
+			Permission permission = Permission.find("byDescription", Security.EMPLOYEE).first();
+			if(permission == null) {
+				permission = new Permission();
+				permission.description = Security.EMPLOYEE;
+				permission.save();
+			}
+			
+			role.permissions.add(permission);
+			role.save();
+		}
+		
+		//Creo il ruolo per i dipendenti se non esiste
+		List<Person> personList = personDao.list(Optional.<String>absent(),
+				Sets.newHashSet(officeDao.getAllOffices()), false, LocalDate.now(),
+				LocalDate.now(), false).list();
+		for(Person person : personList) {
+			
+			boolean exist = false;
+			//Cerco se esiste già e controllo che sia relativo all'office di appartentenza
+			
+			for(UsersRolesOffices uro : person.user.usersRolesOffices ) {
+				//Rimuovo ruolo role se non appartiene più all'office
+				if(uro.role.name.equals(role.name)){
+					if(uro.office.code.equals(person.office.code)) {
+						exist = true;
+					}
+					else {
+						uro.delete();
+					}
+				}
+			}
+			
+			if(!exist) {
+				UsersRolesOffices uro = new UsersRolesOffices();
+				uro.user = person.user;
+				uro.office = person.office;
+				uro.role = role;
+				uro.save();
+			}
+		}
 	}
 	
 	/**
