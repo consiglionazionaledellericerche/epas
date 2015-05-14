@@ -59,6 +59,9 @@ public class ContractManager {
 	@Inject
 	public IWrapperFactory wrapperFactory;
 	
+	@Inject
+	public ContractMonthRecapManager contractMonthRecapManager;
+	
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	/**
 	 * Validatore per il contratto. Controlla la consistenza delle date all'interno del contratto
@@ -451,14 +454,15 @@ public class ContractManager {
 	 * @param year
 	 * @return
 	 */
-	public static ContractMonthRecap getContractMonthRecap(Contract contract, YearMonth yearMonth)	{
+	public Optional<ContractMonthRecap> getContractMonthRecap(Contract contract, YearMonth yearMonth)	{
 		
 		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
 			
 			if ( cmr.year == yearMonth.getYear() && cmr.month == yearMonth.getMonthOfYear() )
-				return cmr;
+				return Optional.fromNullable(cmr);
 		}
-		return null;
+		
+		return Optional.absent();
 	}
 	
 	/**

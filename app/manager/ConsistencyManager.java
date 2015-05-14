@@ -21,6 +21,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -60,6 +61,9 @@ public class ConsistencyManager {
 	public ContractYearRecapManager contractYearRecapManager;
 	
 	@Inject
+	public ContractMonthRecapManager contractMonthRecapManager;
+	
+	@Inject
 	public PersonDayManager personDayManager;
 	
 	@Inject
@@ -82,6 +86,7 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
+	@SuppressWarnings("deprecation")
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendMail){
 		
@@ -107,18 +112,20 @@ public class ConsistencyManager {
 				checkHistoryError(p, fromDate);
 			// (2) Ricalcolo i valori dei person day	
 				log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-				personDayManager.updatePersonDaysFromDate(p,fromDate);
-			// (3) Ricalcolo dei residui
-				log.info("Update residui {} dal {} a oggi", p.getFullname(), fromDate);
+				personDayManager.updatePersonDaysFromDate(p, fromDate);
+			// (3a) Ricalcolo dei residui per mese
+				log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
+				try {contractMonthRecapManager.populateContractMonthRecapByPerson(p, Optional.<YearMonth>absent());}
+				catch(Exception e) {}
+			// (3b) Ricalcolo dei residui per anno
+				log.info("Update residui annuali {} dal {} a oggi", p.getFullname(), fromDate);
 				List<Contract> contractList = ContractDao.getPersonContractList(p);
-
 				for(Contract contract : contractList) {
 					try {
 						contractYearRecapManager.buildContractYearRecap(contract);
 					} catch (EpasExceptionNoSourceData e) {
 							log.warn("Manca l'inizializzazione per il contratto {} di {}",
 									new Object[]{contract.id, contract.person.getFullname()});
-						
 					}
 				}
 				
