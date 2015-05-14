@@ -69,17 +69,16 @@ public class Clocks extends Controller{
 	public static void clockLogin(Long userId, String password)
 	{
 		LocalDate today = new LocalDate();
-		if(userId==0)
-		{
+		if(userId == null || userId == 0){
+			
 			flash.error("Utente non selezionato");
 			Clocks.show();
 		}
 
 		User user = userDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
-		//User user = User.find("select u from User u where id = ? and password = md5(?)", userId, password).first();
 
-		if(user == null)
-		{
+		if(user == null){
+			
 			flash.error("Password non corretta");
 			Clocks.show();
 		}	

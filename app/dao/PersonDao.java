@@ -176,8 +176,6 @@ public final class PersonDao extends DaoBase{
 	 */
 	public SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
-
-		Preconditions.checkState(!offices.isEmpty());
 		
 		return ModelQuery.simpleResults(queryList(name, offices, onlyTechnician, start, end, onlyOnCertificate), 
 				person);
