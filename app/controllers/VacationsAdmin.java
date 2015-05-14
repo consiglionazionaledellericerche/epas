@@ -44,7 +44,6 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	private static SecurityRules rules;
 
-
 	public static void list(Integer year, String name, Integer page){
 
 		if(page==null)

@@ -53,15 +53,15 @@ import dao.wrapper.IWrapperOffice;
 public class Bootstrap extends Job<Void> {
 	
 	@Inject
-	static OfficeDao officeDao;
+	private static OfficeDao officeDao;
 	@Inject
-	static PersonDao personDao;
+	private static PersonDao personDao;
 	@Inject
-	static UsersRolesOfficesDao usersRolesOfficesDao;
+	private static UsersRolesOfficesDao usersRolesOfficesDao;
 	@Inject
-	static UserDao userDao;
+	private static UserDao userDao;
 	@Inject
-	static IWrapperFactory wrapperFactory;
+	private static IWrapperFactory wrapperFactory;
 
 	public static class DatasetImport implements Work {
 
