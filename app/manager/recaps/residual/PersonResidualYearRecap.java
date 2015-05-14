@@ -53,6 +53,7 @@ public class PersonResidualYearRecap {
 			initMonteOreAnnoCorrente = contract.sourceRemainingMinutesCurrentYear;
 			firstDayInDatabase = contract.sourceDate.plusDays(1);
 			firstMonthToCompute = contract.sourceDate.getMonthOfYear();
+			requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 			//TODO initMealTickets da source contract
 		}
 

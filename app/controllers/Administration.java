@@ -12,6 +12,7 @@ import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.ContractMonthRecapManager;
+import manager.ContractYearRecapManager;
 import manager.PersonDayManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
@@ -78,7 +79,13 @@ public class Administration extends Controller {
 	static IWrapperFactory wrapperFactory;
 	
 	@Inject
+	static ContractManager contractManager;
+	
+	@Inject
 	static ContractMonthRecapManager contractMonthRecapManager;
+	
+	@Inject
+	static ContractYearRecapManager contractYearRecapManager;
 	
 	private final static Logger log = LoggerFactory.getLogger(Administration.class);
 	
@@ -131,13 +138,26 @@ public class Administration extends Controller {
 					LocalDate.now(), false).list();
 		}
 		
-		for(Person person : personList) {
+		//Sampling
+		List<Person> sampling = Lists.newArrayList();
+		if(personList.size() == 1) {
+			sampling = personList;
+		}
+		else {
+			for ( int i = 0; i<personList.size(); i++) {
+				if ( i%20 == 0) {
+					sampling.add(personList.get(i));
+				}
+			}
+		}
+
+		for(Person person : sampling) {
 
 			IWrapperPerson wperson = wrapperFactory.create(person);
 			Contract contract = wperson.getCurrentContract().get();
 
 			//lista ContractMonthRecap
-			contractMonthRecapManager.buildContractMonthRecap(contract);
+			contractMonthRecapManager.populateContractMonthRecap(contract, Optional.<YearMonth>absent());
 
 			List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
@@ -150,13 +170,12 @@ public class Administration extends Controller {
 				int month = 1;
 				while (month <= 12) {
 					YearMonth yearMonth = new YearMonth(actualYear, month);
-					// TODO: usare l'injection
-					ContractMonthRecap cmr = ContractManager.getContractMonthRecap(contract, yearMonth);
-					if (cmr != null) {
+					Optional<ContractMonthRecap> cmr = contractManager.getContractMonthRecap(contract, yearMonth);
+					if (cmr.isPresent()) {
 						if( first == null ) {
 							first = yearMonth;
 						}
-						contractMonthRecaps.add(cmr);
+						contractMonthRecaps.add(cmr.get());
 						last = yearMonth;
 					}
 					month++;
@@ -167,6 +186,17 @@ public class Administration extends Controller {
 
 			//lista PersonResidualMonthRecap
 			List<PersonResidualMonthRecap> personResidualMonthRecaps = Lists.newArrayList();
+			
+			//Ricalcolo dei residui per anno
+			List<Contract> contractList = ContractDao.getPersonContractList(person);
+			for(Contract c : contractList) {
+				try {
+					contractYearRecapManager.buildContractYearRecap(c);
+				} catch (EpasExceptionNoSourceData e) {
+						log.warn("Manca l'inizializzazione per il contratto {} di {}",
+								new Object[]{contract.id, contract.person.getFullname()});
+				}
+			}
 
 			actualYear = first.getYear();
 
@@ -196,11 +226,23 @@ public class Administration extends Controller {
 
 			int maxArrayIndex = contractMonthRecaps.size() - 1;
 			
-			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoCorrente 
+			boolean error = false;
+			
+			if(personResidualMonthRecaps.get(maxArrayIndex).buoniPastoResidui 
+					== contractMonthRecaps.get(maxArrayIndex).remainingMealTickets)
+				error = true;
+			
+			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoCorrente
 					== contractMonthRecaps.get(maxArrayIndex).remainingMinutesCurrentYear)
-				log.info("Check Persona={} id={}, Esito={}", person.fullName(), person.id, "OK");
-			else 
+				error = true;
+			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoPassato 
+						== contractMonthRecaps.get(maxArrayIndex).remainingMinutesLastYear)
+				error = true;
+			
+			if(error)
 				log.info("Check Persona={} id={}, Esito={}", person.fullName(), person.id, "NOK");
+			else 
+				log.info("Check Persona={} id={}, Esito={}", person.fullName(), person.id, "OK");
 			
 			if(personList.size() == 1) {
 				render(contractMonthRecaps, personResidualMonthRecaps, maxArrayIndex);
@@ -233,7 +275,7 @@ public class Administration extends Controller {
 			
 			log.debug("Costruzione Persona={} id={}", person.fullName(), person.id);
 			
-			contractMonthRecapManager.buildContractMonthRecap(c);
+			contractMonthRecapManager.populateContractMonthRecap(c, Optional.<YearMonth>absent());
 			JPAPlugin.closeTx(false);
 		}
 		renderText("Concluso Job");

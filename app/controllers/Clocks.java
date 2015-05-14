@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
@@ -22,6 +23,7 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.jobs.Job;
@@ -37,6 +39,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
+import exceptions.EpasExceptionNoSourceData;
 
 @With( RequestInit.class )
 public class Clocks extends Controller{
@@ -52,6 +55,9 @@ public class Clocks extends Controller{
 	
 	@Inject
 	static PersonDayDao personDayDao;
+	
+	@Inject
+	static ContractMonthRecapManager contractMonthRecapManager;
 
 	public static void show(){
 		
@@ -160,14 +166,11 @@ public class Clocks extends Controller{
 		personDay.save();
 		
 		final PersonDay day = personDay;
-		
-		new Job() {
-			@Override
-			public void doJob() {
-				personDayManager.updatePersonDaysFromDate(day.person, day.date);
 
-			}
-		}.afterRequest();
+		personDayManager.updatePersonDaysFromDate(day.person, day.date);
+		try {contractMonthRecapManager
+			.populateContractMonthRecapByPerson(person, Optional.fromNullable(new YearMonth(day.date)));}
+		catch(Exception e) {}
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		

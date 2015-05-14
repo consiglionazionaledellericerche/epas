@@ -18,6 +18,8 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
+import com.google.common.base.Optional;
+
 import dao.wrapper.IWrapperContract;
 import play.data.validation.Required;
 
@@ -153,9 +155,8 @@ public class ContractMonthRecap extends BaseModel {
 	
 	@Transient public Person person;
 	@Transient public String contractDescription;
-	@Transient public ContractMonthRecap mesePrecedente;
+	@Transient public Optional<ContractMonthRecap> mesePrecedente;
 	@Transient public int qualifica;
 	@Transient public IWrapperContract wcontract;
-	
 	
 }

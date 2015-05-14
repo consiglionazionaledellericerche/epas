@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.joda.time.YearMonth;
+
+import manager.ContractManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
@@ -15,13 +18,19 @@ import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.AbsenceType;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import dao.wrapper.IRecapWrapperFactory;
+import dao.wrapper.IWrapperContractMonthRecap;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Oggetto che modella il contenuto della vista contenente il tabellone timbrature.
@@ -37,9 +46,7 @@ public class PersonStampingRecap {
 
 	private static final int MIN_IN_OUT_COLUMN = 2;
 
-	//private final PersonDayManager personDayManager;
 	private final PersonManager personManager;
-	private final PersonResidualYearRecapFactory yearFactory;
 	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
 	
 	public Person person;
@@ -62,7 +69,7 @@ public class PersonStampingRecap {
 	public Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
 	//I riepiloghi mensili (uno per ogni contratto attivo nel mese)
-	public List<PersonResidualMonthRecap> contractMonths = Lists.newArrayList();
+	public List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
 	
 	//Template
 	public String month_capitalized;	//FIXME toglierlo e metterlo nel messages
@@ -79,13 +86,14 @@ public class PersonStampingRecap {
 	public PersonStampingRecap(PersonDayManager personDayManager,
 			PersonManager personManager,
 			PersonResidualYearRecapFactory yearFactory,
+			ContractManager contractManager,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
+			IWrapperFactory wrapperFactory,
 			
 			int year, int month, Person person) {
 		
 		//this.personDayManager = personDayManager;
 		this.personManager = personManager;
-		this.yearFactory = yearFactory;
 		this.stampingDayRecapFactory = stampingDayRecapFactory;
 		
 		this.month = month;
@@ -122,10 +130,9 @@ public class PersonStampingRecap {
 		
 		for(Contract contract : monthContracts)
 		{
-			PersonResidualYearRecap c = this.yearFactory.create(contract, year, null);
-			if(c.getMese(month)!=null) {
-				this.contractMonths.add(c.getMese(month));
-			}
+			Optional<ContractMonthRecap> cmr = contractManager.getContractMonthRecap(contract, new YearMonth(year, month));
+			if (cmr.isPresent())
+				this.contractMonths.add(wrapperFactory.create(cmr.get()));
 		}
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);

@@ -38,14 +38,18 @@ public class WrapperContract implements IWrapperContract {
 	 * @param year
 	 * @return
 	 */
+	@Override
 	public boolean isLastInMonth(int month, int year) {
+		
 		List<Contract> contractInMonth = personManager.getMonthContracts(this.value.person, month, year);
-		if (contractInMonth.size() == 0)
+		if (contractInMonth.size() == 0) {
 			return false;
-		if (contractInMonth.get(contractInMonth.size()-1).id.equals(this.value.id))
+		}
+		if (contractInMonth.get(contractInMonth.size()-1).id.equals(this.value.id)){
 			return true;
-		else
+		} else {
 			return false;
+		}
 	}
 	
 	/**
