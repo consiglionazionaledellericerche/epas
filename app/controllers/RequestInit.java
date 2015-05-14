@@ -20,7 +20,6 @@ import models.enumerate.Parameter;
 import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -35,6 +34,7 @@ import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDao.PersonLiteDto;
+import dao.QualificationDao;
 import dao.UsersRolesOfficesDao;
 
 /**
@@ -51,6 +51,8 @@ public class RequestInit extends Controller {
 	private static ConfGeneralDao confGeneralDao;
 	@Inject
 	private static UsersRolesOfficesDao uroDao;
+	@Inject
+	private static QualificationDao qualificationDao;
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
 	 * TODO: esportare questa classe in un nuovo file che modella la view.
@@ -182,9 +184,6 @@ public class RequestInit extends Controller {
 	 *
 	 */
 	public static class TemplateUtility {
-
-		private GenericModel qualificationDao;
-		private OfficeDao officeDao;
 
 		///////////////////////////////////////////////////////////////////////////7
 		//Convertitori mese
