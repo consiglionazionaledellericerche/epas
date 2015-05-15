@@ -94,7 +94,21 @@ public class Clocks extends Controller{
 
 			flash.error("Password non corretta");
 			Clocks.show();
-		}	
+		}
+		
+		String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+
+		if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
+			
+			flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+					"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			try {
+				Secure.login();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
 		PersonDay personDay = null;			
 		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
 
