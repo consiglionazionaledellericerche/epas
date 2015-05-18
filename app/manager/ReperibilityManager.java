@@ -306,13 +306,15 @@ public class ReperibilityManager {
 	 * @param requestor			- persona che ha richiesto il cambio reperibilità
 	 * @param substitute		- persona che va a sostituire il richiedente nei giorni di reperibilità
 	 */
+
 	public void changePersonInReperibilityPeriod(PersonReperibilityType reperibilityType,  LocalDate startDay, LocalDate endDay, Person requestor, Person substitute) {
 
 		LocalDate start = startDay;
 
 		// Esegue il cambio sui giorni del richiedente
-		while (startDay.isBefore(endDay.plusDays(1))) {
 
+		while (start.isBefore(endDay.plusDays(1))) {
+			
 			//Se il sostituto è in ferie questo giorno non può essere reperibile 
 			//if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", reqStartDay, substitute).fetch().size() > 0) {
 			if(absenceDao.getAbsencesInPeriod(Optional.fromNullable(substitute), start, Optional.<LocalDate>absent(), false).size() > 0){

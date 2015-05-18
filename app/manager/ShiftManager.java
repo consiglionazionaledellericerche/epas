@@ -248,12 +248,13 @@ public class ShiftManager {
 		for (int dayToRemove : daysOfMonthForCancelled) {
 			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
 			Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
+			
+			/*int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
+				.setParameter("shiftType", shiftType)
+				.setParameter("dateToRemove", dateToRemove)
+				.executeUpdate(); */
+			long cancelled = shiftDao.deleteShiftCancelled(shiftType, dateToRemove);
 
-			//			int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
-			//				.setParameter("shiftType", shiftType)
-			//				.setParameter("dateToRemove", dateToRemove)
-			//				.executeUpdate();
-			long cancelled = shiftDao.deleteShiftCancelled(shiftType, day);
 			if (cancelled == 1) {
 				Logger.info("Rimosso turno cancellato di tipo %s del giorno %s", shiftType.description, dateToRemove);
 			}
