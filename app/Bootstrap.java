@@ -101,35 +101,41 @@ public class Bootstrap extends Job<Void> {
 			return;
 		}
 
-
 		Session session = (Session) JPA.em().getDelegate();
 
 		if(Qualification.count() == 0 ) {
-
+			
 			//qualification absenceType absenceTypeQualification absenceTypeGroup
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase1.xml")));
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase2.xml")));
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT,Resources
+					.getResource("../db/import/absence-type-and-qualification-phase1.xml")));
+
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+					.getResource("../db/import/absence-type-and-qualification-phase2.xml")));
 
 			//competenceCode
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "competence-codes.xml")));
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+					.getResource("../db/import/competence-codes.xml")));
 
 			//stampModificationType
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "stamp-modification-types.xml")));
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+					.getResource("../db/import/stamp-modification-types.xml")));
 
 			//stampType
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "stamp-types.xml")));
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+					.getResource("../db/import/stamp-types.xml")));
 
 			//vacationCode
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "vacation-codes.xml")));
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+					.getResource("../db/import/vacation-codes.xml")));
 
 			//workingTimeType workingTimeTypeDay
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "working-time-types.xml")));
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+					.getResource("../db/import/working-time-types.xml")));
 
 			// riallinea le sequenze con i valori presenti sul db.
 			for (String sql : Files.readLines(new File(Play.applicationPath,
-					"db/fix_sequences.sql"), Charsets.UTF_8)) {
-
-				JPA.em().createNativeQuery(sql).executeUpdate();
+					"db/import/fix_sequences.sql"), Charsets.UTF_8)) {
+				JPA.em().createNativeQuery(sql).getSingleResult();
 			}
 		}
 
@@ -312,52 +318,52 @@ public class Bootstrap extends Job<Void> {
 		}
 
 
-//		//4)TEST PISA E COSENZA
-//		Office pisa = Office.find("byCode", 223400).first();
-//		Office cosenza = Office.find("byCode", 223410).first();
-//		User pisaBadge = User.find("byUsername", "pisaBadge").first();
-//		if(pisaBadge == null){
-//			pisaBadge = new User();
-//			pisaBadge.username = "pisaBadge";
-//			pisaBadge.password = Codec.hexMD5("pisaBadge");
-//			pisaBadge.save();
-//		}
-//		User cosenzaBadge = User.find("byUsername", "cosenzaBadge").first();
-//		if(cosenzaBadge == null){
-//			cosenzaBadge = new User();
-//			cosenzaBadge.username = "cosenzaBadge";
-//			cosenzaBadge.password = Codec.hexMD5("cosenzaBadge");
-//			cosenzaBadge.save();
-//		}
-//
-//		for(UsersRolesOffices uro : pisa.usersRolesOffices) {
-//			if(uro.role.name.equals(Role.BADGE_READER)) {
-//				uro.delete();
-//			}
-//		}
-//		for(UsersRolesOffices uro : cosenza.usersRolesOffices) {
-//			if(uro.role.name.equals(Role.BADGE_READER)) {
-//				uro.delete();
-//			}
-//		}
-//
-//		UsersRolesOffices uro = new UsersRolesOffices();
-//		uro.office = pisa;
-//		uro.user = pisaBadge;
-//		uro.role = role;
-//		uro.save();
-//
-//		uro = new UsersRolesOffices();
-//		uro.office = cosenza;
-//		uro.user = cosenzaBadge;
-//		uro.role = role;
-//		uro.save();
-//
-//		uro = new UsersRolesOffices();
-//		uro.office = pisa;
-//		uro.user = cosenzaBadge;
-//		uro.role = role;
-//		uro.save();
+		//		//4)TEST PISA E COSENZA
+		//		Office pisa = Office.find("byCode", 223400).first();
+		//		Office cosenza = Office.find("byCode", 223410).first();
+		//		User pisaBadge = User.find("byUsername", "pisaBadge").first();
+		//		if(pisaBadge == null){
+		//			pisaBadge = new User();
+		//			pisaBadge.username = "pisaBadge";
+		//			pisaBadge.password = Codec.hexMD5("pisaBadge");
+		//			pisaBadge.save();
+		//		}
+		//		User cosenzaBadge = User.find("byUsername", "cosenzaBadge").first();
+		//		if(cosenzaBadge == null){
+		//			cosenzaBadge = new User();
+		//			cosenzaBadge.username = "cosenzaBadge";
+		//			cosenzaBadge.password = Codec.hexMD5("cosenzaBadge");
+		//			cosenzaBadge.save();
+		//		}
+		//
+		//		for(UsersRolesOffices uro : pisa.usersRolesOffices) {
+		//			if(uro.role.name.equals(Role.BADGE_READER)) {
+		//				uro.delete();
+		//			}
+		//		}
+		//		for(UsersRolesOffices uro : cosenza.usersRolesOffices) {
+		//			if(uro.role.name.equals(Role.BADGE_READER)) {
+		//				uro.delete();
+		//			}
+		//		}
+		//
+		//		UsersRolesOffices uro = new UsersRolesOffices();
+		//		uro.office = pisa;
+		//		uro.user = pisaBadge;
+		//		uro.role = role;
+		//		uro.save();
+		//
+		//		uro = new UsersRolesOffices();
+		//		uro.office = cosenza;
+		//		uro.user = cosenzaBadge;
+		//		uro.role = role;
+		//		uro.save();
+		//
+		//		uro = new UsersRolesOffices();
+		//		uro.office = pisa;
+		//		uro.user = cosenzaBadge;
+		//		uro.role = role;
+		//		uro.save();
 	}
 
 
@@ -527,10 +533,10 @@ public class Bootstrap extends Job<Void> {
 		User protime = userDao.getUserByUsernameAndPassword(protimeUser, Optional.<String>absent());
 
 		if(protime == null){
-				protime = new User();
-				protime.username = protimeUser;
-				protime.password = Codec.hexMD5(Play.configuration.getProperty("rest.protime.password"));
-				protime.save();
+			protime = new User();
+			protime.username = protimeUser;
+			protime.password = Codec.hexMD5(Play.configuration.getProperty("rest.protime.password"));
+			protime.save();
 		}
 
 		List<Office> areas = officeDao.getAreas();
