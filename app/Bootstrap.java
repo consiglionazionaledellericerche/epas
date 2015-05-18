@@ -132,6 +132,16 @@ public class Bootstrap extends Job<Void> {
 			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
 					.getResource("../db/import/working-time-types.xml")));
 
+			// History
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class,
+					"../db/import/history/part1_history.xml")));
+			// History
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class,
+					"../db/import/history/part2_history.xml")));
+			
+			
+						
+			
 			// riallinea le sequenze con i valori presenti sul db.
 			for (String sql : Files.readLines(new File(Play.applicationPath,
 					"db/import/fix_sequences.sql"), Charsets.UTF_8)) {
