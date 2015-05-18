@@ -1,7 +1,5 @@
 package models;
 
-import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +22,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 
@@ -73,10 +71,8 @@ public class Contract extends BaseModel {
 	public List<ContractYearRecap> recapPeriods;
 
 	@Required @NotNull
-
 	@Column(name="begin_contract")
 	public LocalDate beginContract;
-
 
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
@@ -100,7 +96,6 @@ public class Contract extends BaseModel {
 	@OneToMany(mappedBy="contract", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTickets;
 
-
 	@Transient
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
@@ -123,33 +118,35 @@ public class Contract extends BaseModel {
 				id, person.id, beginContract, expireContract, endContract);
 	}
 
-
 	/**
-	 * FIXME ha una dipendenza con DateUtility, capire se può rimanere nel modello.
-	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
+	 * Ritorna il riepilogo annule del contatto.
+	 * @param year
 	 * @return
 	 */
-	public DateInterval getContractDateInterval()
-	{
-		DateInterval contractInterval;
-		if(this.endContract!=null)
-			contractInterval = new DateInterval(this.beginContract, this.endContract);
-		else
-			contractInterval = new DateInterval(this.beginContract, this.expireContract);
-		return contractInterval;
+	public ContractYearRecap yearRecap(int year)	{
+		for(ContractYearRecap cyr : recapPeriods) {
+
+			if(cyr.year==year)
+				return cyr;
+		}
+		return null;
 	}
 
 	/**
-	 * FIXME variabile transiente richiamata nel template. Spostare nel wrapper.
-	 * Conversione della lista dei contractWorkingtimeType da Set a List
+	 * Ritorna il ContractStampProfile attivo alla data.
 	 * @param contract
-	 * * @return
+	 * @param date
+	 * @return
 	 */
-	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
+	public Optional<ContractStampProfile> getContractStampProfileFromDate(LocalDate date) {
 
-		return Lists.newArrayList(this.contractWorkingTimeType);
+		for(ContractStampProfile csp : contractStampProfile) {
+			if(csp.dateRange().contains(date)){
+				return Optional.fromNullable(csp);
+			}
+		}
+		return Optional.absent();
 	}
-
 
 }
 

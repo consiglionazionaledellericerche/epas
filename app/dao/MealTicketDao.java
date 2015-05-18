@@ -6,19 +6,15 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import manager.ConfGeneralManager;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
-import models.enumerate.Parameter;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
@@ -109,22 +105,6 @@ public class MealTicketDao extends DaoBase {
 		return query.list(mealTicket);
 		
 		
-	}
-
-	/**
-	 * Ritorna la data di inizio di utilizzo dei ticket restaurant per l'office passato
-	 * come parametro. 
-	 * @param office
-	 * @return
-	 */
-	public Optional<LocalDate> getMealTicketStartDate(Office office) {
-		
-		String confParam = ConfGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-		
-		if(Strings.isNullOrEmpty(confParam))
-			return Optional.absent();
-		
-		return Optional.fromNullable(LocalDate.parse(confParam));	
 	}
 	
 	/**

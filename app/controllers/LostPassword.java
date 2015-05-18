@@ -3,6 +3,8 @@ package controllers;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import javax.inject.Inject;
+
 import models.Person;
 import models.User;
 
@@ -18,9 +20,15 @@ import dao.UserDao;
 
 public class LostPassword extends Controller{
 	
-	private static final String RECOVERY_PATH = "lostpassword/lostpasswordrecovery?token=";
+	@Inject
+	private static PersonDao personDao;
+	@Inject
+	private static UserDao userDao;
 	
+	
+	private static final String RECOVERY_PATH = "lostpassword/lostpasswordrecovery?token=";
 	private static final String USERNAME = "username";
+
 	
 	private static String getRecoveryBaseUrl() {
 		String baseUrl = Play.configuration.getProperty("application.baseUrl");
@@ -38,8 +46,7 @@ public class LostPassword extends Controller{
 			LostPassword.lostPassword();
 		}
 
-		Person person = PersonDao.getPersonByEmail(email);
-		//Person person = Person.find("byEmail", email).first();
+		Person person = personDao.getPersonByEmail(email);
 		if(person==null)
 		{
 			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
@@ -94,8 +101,7 @@ public class LostPassword extends Controller{
 			Secure.login();
 		}
 		
-		User user = UserDao.getUserByRecoveryToken(token);
-		//User user = User.find("byRecoveryToken", token).first();
+		User user = userDao.getUserByRecoveryToken(token);
 		if(user==null)
 		{
 			flash.error("Accesso non autorizzato. Operazione annullata.");

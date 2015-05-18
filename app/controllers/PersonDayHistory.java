@@ -27,13 +27,11 @@ import dao.history.StampingHistoryDao;
 public class PersonDayHistory extends Controller {
 
 	@Inject
-	static PersonDayHistoryDao personDayHistoryDao;
-
+	private static PersonDayHistoryDao personDayHistoryDao;
 	@Inject
-	static StampingHistoryDao stampingHistoryDao;
-
+	private static StampingHistoryDao stampingHistoryDao;
 	@Inject
-	static AbsenceHistoryDao absenceHistoryDao;
+	private static AbsenceHistoryDao absenceHistoryDao;
 
 
 	public static void personDayHistory(long personDayId) {

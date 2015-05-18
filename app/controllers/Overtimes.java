@@ -45,17 +45,18 @@ import dao.wrapper.IWrapperFactory;
 public class Overtimes extends Controller {
 
 	@Inject
-	static PersonResidualYearRecapFactory yearFactory;
-	
+	private static PersonDao personDao;
 	@Inject
-	static IWrapperFactory wrapperFactory;
-	
+	private static IWrapperFactory wrapperFactory;
 	@Inject
-	static CompetenceDao competenceDao;
-	
+	private static PersonResidualYearRecapFactory yearFactory;
 	@Inject
-	static OvertimesManager overtimesManager;
-	
+	private static CompetenceDao competenceDao;
+	@Inject
+	private static OvertimesManager overtimesManager;
+	@Inject
+	private static CompetenceCodeDao competenceCodeDao;
+
 	/*
 	 * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario)
 	 * 
@@ -63,79 +64,79 @@ public class Overtimes extends Controller {
 
 	public static void getPersonOvertimes() {
 		response.accessControl("*");
-				
+
 		String email = params.get("email");
 		int year = Integer.parseInt(params.get("year"));
 		int month = Integer.parseInt(params.get("month"));
-		
+
 		Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", email, year, month);
-		
+
 		// get the person with the given email
-		Person person = PersonDao.getPersonByEmail(email);
-		
+		Person person = personDao.getPersonByEmail(email);
+
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
-		
+
 		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-		
+
 		Preconditions.checkState(contract.isPresent());
-		
+
 		PersonResidualYearRecap c =	yearFactory.create(contract.get(), year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
-		
+
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;
 		int residuoDelMese = mese.progressivoFinaleMese;
 		int tempoDisponibilePerStraordinari = mese.progressivoFinalePositivoMese;
 		OvertimesData personOvertimesData = new OvertimesData(totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
 
 		render(personOvertimesData);
-		
+
 	}
-	
+
 	/*
 	 * Get the amount of overtimes the supervisor has for personel distribution
 	 */
 	public static void getSupervisorTotalOvertimes() {
 		response.accessControl("*");
-				
+
 		String email = params.get("email");
-		
+
 		Logger.debug("chiamata la getSupervisorTotalOvertimes() con email=%s", email);
-		
+
 		// get the person with the given email
-		Person person = PersonDao.getPersonByEmail(email);
+		Person person = personDao.getPersonByEmail(email);
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
-		
+
 
 		PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
 		if(personHourForOvertime == null)
 			personHourForOvertime = new PersonHourForOvertime(person, 0);
-		
+
 		Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s", personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
-		
+
 		render(personHourForOvertime);
 	}
-	
+
 	/*
 	 * Set the overtimes requested by the responsible
 	 */
 	public static void setRequestOvertime(Integer year, Integer month, @As(binder=JsonRequestedOvertimeBinder.class) PersonsCompetences body) {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
-		
+
 		Logger.debug("update: Received PersonsCompetences %s", body);	
 		if (body == null) {
 			badRequest();	
 		}
-		
+
 		overtimesManager.setRequestedOvertime(body, year, month);
 	}
-	
+
 	/*
 	 * Set personnel overtimes requested by the supervisor
 	 */
@@ -143,19 +144,19 @@ public class Overtimes extends Controller {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		try {
-			Person person = PersonDao.getPersonByEmail(email);
+			Person person = personDao.getPersonByEmail(email);
 			if (person == null) {
 				throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", email));			
 			}
 			Logger.debug("Find persons %s with email %s", person.name, email);
-			
+
 			overtimesManager.setSupervisorOvertime(person, hours);
 		} catch (Exception e) {
 			Logger.error(e, "Problem during findjing person with email.");
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * @author arianna
 	 * crea il file PDF con il resoconto mensile delle ore di straordinario
@@ -167,22 +168,22 @@ public class Overtimes extends Controller {
 	public static void exportMonthAsPDF(Integer year, Integer month, @As(binder=JsonRequestedPersonsBinder.class) PersonsList body) {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
-		
+
 		Logger.debug("update: Received PersonsCompetences %s", body);	
 		if (body == null) {
 			badRequest();	
 		}
-			
+
 		Table<String, String, Integer> overtimesMonth = TreeBasedTable.<String, String, Integer>create();
-		
-		CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+
+		CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
 		Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);	
-		
+
 		overtimesMonth = overtimesManager.buildMonthForExport(body, competenceCode, year, month);
-		
+
 		LocalDate today = new LocalDate();
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
-		
+
 		renderPDF(today, firstOfMonth, overtimesMonth);
 	}
 

@@ -49,7 +49,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -62,16 +61,27 @@ import dao.PersonReperibilityDayDao;
  *
  */
 public class Reperibility extends Controller {
-	
-	@Inject
-	static CompetenceDao competenceDao;
-	@Inject
-	static ReperibilityManager reperibilityManager;
 
-	public static String codFr = "207";
-	public static String codFs = "208";
-	
-	
+	private static String codFr = "207";
+	private static String codFs = "208";
+
+	@Inject
+	private static PersonDao personDao;
+	@Inject
+	private static PersonReperibilityDayDao personReperibilityDayDao;
+	@Inject
+	private static ReperibilityManager reperibilityManager;
+	@Inject
+	private static AbsenceDao absenceDao;
+	@Inject
+	private static AbsenceManager absenceManager;
+	@Inject
+	private static CompetenceUtility competenceUtility;
+	@Inject
+	private static CompetenceCodeDao competenceCodeDao;
+	@Inject
+	private static CompetenceDao competenceDao;
+
 	/*
 	 * @author arianna
 	 * Restituisce la lista dei reperibili attivi al momento di un determinato tipo
@@ -79,12 +89,11 @@ public class Reperibility extends Controller {
 	public static void personList() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.devel.iit.cnr.it");
-		
+
 		Long type = Long.parseLong(params.get("type"));
 		Logger.debug("Esegue la personList con type=%s", type);
-		
-	//	List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
-		List<Person> personList = PersonDao.getPersonForReperibility(type);
+
+		List<Person> personList = personDao.getPersonForReperibility(type);
 		Logger.debug("Reperibility personList called, found %s reperible person", personList.size());
 		render(personList);
 	}
@@ -106,25 +115,25 @@ public class Reperibility extends Controller {
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
-		
-		PersonReperibilityType prt = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
-		
+
+		PersonReperibilityType prt = personReperibilityDayDao.getPersonReperibilityTypeById(type);
+
 		// date interval construction
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
-		List<PersonReperibilityDay> reperibilityDays = PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, reperibilityType, Optional.<PersonReperibility>absent());
+		List<PersonReperibilityDay> reperibilityDays = personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, reperibilityType, Optional.<PersonReperibility>absent());
 		//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
 
 		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
 		// Manager ReperibilityManager called to find out the reperibilityPeriods
-		List<ReperibilityPeriod> reperibilityPeriods = ReperibilityManager.getPersonReperibilityPeriods(reperibilityDays, prt);
+		List<ReperibilityPeriod> reperibilityPeriods = reperibilityManager.getPersonReperibilityPeriods(reperibilityDays, prt);
 		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", reperibilityPeriods.size(), reperibilityPeriods);
-		
+
 		render(reperibilityPeriods);
 	}
-	
-	
+
+
 	/**
 	 * @author arianna
 	 * Fornisce la lista del personale reperibile di tipo 'type' 
@@ -136,30 +145,31 @@ public class Reperibility extends Controller {
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		List<Person> personList = new ArrayList<Person>();
-		
+
 		// reperibility type validation
 		Long type = Long.parseLong(params.get("type"));
 		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
-		
+
 		// date interval construction
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
-		List<PersonReperibilityDay> reperibilityDays = PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, reperibilityType, Optional.<PersonReperibility>absent());
-		//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
+		List<PersonReperibilityDay> reperibilityDays = 
+				personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
+						from, to, reperibilityType, Optional.<PersonReperibility>absent());
 
 		Logger.debug("Reperibility who called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
 
-		personList = ReperibilityManager.getPersonsFromReperibilityDays(reperibilityDays);
+		personList = reperibilityManager.getPersonsFromReperibilityDays(reperibilityDays);
 		Logger.debug("trovati %s reperibili: %s", personList.size(), personList);
-		
+
 		render(personList);
 	}
-	
-	
+
+
 	/**
 	 * @author arianna
 	 * Legge le assenze dei reperibili di una determinata tipologia in un dato intervallo di tempo
@@ -170,25 +180,24 @@ public class Reperibility extends Controller {
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		Logger.debug("Sono nella absebce");
-		
+
 		Long type = Long.parseLong(params.get("type"));
-		
+
 		PersonReperibilityType repType = PersonReperibilityType.findById(type);
 		if (repType == null) {
 			notFound(String.format("PersonReperibilityType type = %s doesn't exist", type));			
 		}
-	
+
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
 		// read the reperibility person list 
-		//List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
-		List<Person> personList = PersonDao.getPersonForReperibility(type);
+		List<Person> personList = personDao.getPersonForReperibility(type);
 		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
-		
+
 		// Lists of absence for a single reperibility person and for all persons
 		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
-		
+
 		// List of absence periods
 		List<AbsenceReperibilityPeriod> absenceReperibilityPeriods = new ArrayList<AbsenceReperibilityPeriod>();
 
@@ -196,25 +205,19 @@ public class Reperibility extends Controller {
 			render(absenceReperibilityPeriods);
 			return;
 		}
-				
-		
-//		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
-//			.setParameter("from", from)
-//			.setParameter("to", to)
-//			.setParameter("personList", personList)
-//			.getResultList();
-		absencePersonReperibilityDays = AbsenceDao.getAbsenceForPersonListInPeriod(personList, from, to);
-		
+
+		absencePersonReperibilityDays = absenceDao.getAbsenceForPersonListInPeriod(personList, from, to);
+
 		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
-		
+
 		// get the absent reperibility periods from the absent days
-		absenceReperibilityPeriods = ReperibilityManager.getAbsentReperibilityPeriodsFromAbsentReperibilityDays(absencePersonReperibilityDays, repType);
-		
+		absenceReperibilityPeriods = reperibilityManager.getAbsentReperibilityPeriodsFromAbsentReperibilityDays(absencePersonReperibilityDays, repType);
+
 		Logger.debug("Find %s absenceReperibilityPeriod. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
 		render(absenceReperibilityPeriods);
 	}
-	
-	
+
+
 	/**
 	 * @author arianna
 	 * Restituisce la lista delle persone reperibili assenti di una determinata tipologia in un dato intervallo di tempo
@@ -223,43 +226,42 @@ public class Reperibility extends Controller {
 	public static void whoIsAbsent() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
-		
+
 		List<Person> absentPersonsList = new ArrayList<Person>();
 
 		Long type = Long.parseLong(params.get("type"));
-		
+
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
 		// read the reperibility person list 
-		//List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
-		List<Person> personList = PersonDao.getPersonForReperibility(type);
+		List<Person> personList = personDao.getPersonForReperibility(type);
 		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
-		
+
 		// Lists of absence for a single reperibility person and for all persons
 		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
-		
+
 		if (personList.size() == 0) {
 			render(personList);
 			return;
 		}
-		
-//		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
-//			.setParameter("from", from)
-//			.setParameter("to", to)
-//			.setParameter("personList", personList)
-//			.getResultList();
 
-		absencePersonReperibilityDays = AbsenceDao.getAbsenceForPersonListInPeriod(personList, from, to);		
+		//		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+		//			.setParameter("from", from)
+		//			.setParameter("to", to)
+		//			.setParameter("personList", personList)
+		//			.getResultList();
+
+		absencePersonReperibilityDays = absenceDao.getAbsenceForPersonListInPeriod(personList, from, to);		
 		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
-		
-		absentPersonsList = AbsenceManager.getPersonsFromAbsentDays(absencePersonReperibilityDays);
-		
+
+		absentPersonsList = absenceManager.getPersonsFromAbsentDays(absencePersonReperibilityDays);
+
 		Logger.debug("Find %s person. absentPersonsList = %s", absentPersonsList.size(), absentPersonsList.toString());
 		render(absentPersonsList);
 	}
-	
-	
+
+
 	/**
 	 * @author cristian, arianna
 	 * Aggiorna le informazioni relative alla Reperibilità del personale
@@ -277,26 +279,26 @@ public class Reperibility extends Controller {
 		if (body == null) {
 			badRequest();	
 		}
-		
+
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
 		if (reperibilityType == null) {
 			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
-		
+
 		//Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile 
 		Set<Integer> repDaysOfMonthToRemove = new HashSet<Integer>();	
-		
-		
-		repDaysOfMonthToRemove = ReperibilityManager.savePersonReperibilityDaysFromReperibilityPeriods(reperibilityType, year, month, body.periods);
-		
+
+
+		repDaysOfMonthToRemove = reperibilityManager.savePersonReperibilityDaysFromReperibilityPeriods(reperibilityType, year, month, body.periods);
+
 		Logger.debug("Giorni di reperibilità da rimuovere = %s", repDaysOfMonthToRemove);
-		
-		int deletedRep = ReperibilityManager.deleteReperibilityDaysFromMonth(reperibilityType, year, month, repDaysOfMonthToRemove);
-		
+
+		int deletedRep = reperibilityManager.deleteReperibilityDaysFromMonth(reperibilityType, year, month, repDaysOfMonthToRemove);
+
 	}
-	
-	
+
+
 	/**
 	 * @author arianna
 	 * Scambia due periodi di reperibilità di due persone reperibili diverse
@@ -314,25 +316,24 @@ public class Reperibility extends Controller {
 		if (body == null) {
 			badRequest();	
 		}
-		
+
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
 		if (reperibilityType == null) {
 			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
-		
-		
-		Boolean changed = ReperibilityManager.changeTwoReperibilityPeriods(reperibilityType, body.periods);
-		
+
+		Boolean changed = reperibilityManager.changeTwoReperibilityPeriods(reperibilityType, body.periods);
+
 		if (changed) {
 			Logger.info("Periodo di reperibilità cambiato con successo!");
 		} else {
 			Logger.info("Il cambio di reperibilità non è stato effettuato");
 		}
-		
+
 	}
-	
-	
+
+
 	/**
 	 * @author arianna, cristian
 	 * crea il file PDF con il calendario annuale delle reperibilità di tipi 'type' per l'anno 'year'
@@ -341,30 +342,30 @@ public class Reperibility extends Controller {
 	public static void exportYearAsPDF() {
 		int year = params.get("year", Integer.class);
 		Long reperibilityId = params.get("type", Long.class);
-		
+
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
-		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
-		
+
 		// build the reperibility calendar 
 		List<Table<Person, Integer, String>> reperibilityMonths = new ArrayList<Table<Person, Integer, String>>();
-		reperibilityMonths = ReperibilityManager.buildYearlyReperibilityCalendar(year, reperibilityType);
-		
+		reperibilityMonths = reperibilityManager.buildYearlyReperibilityCalendar(year, reperibilityType);
+
 		// build the reperibility summary report
 		Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
-		reperibilitySumDays = ReperibilityManager.buildYearlyReperibilityReport(reperibilityMonths);
+		reperibilitySumDays = reperibilityManager.buildYearlyReperibilityReport(reperibilityMonths);
 		Logger.info("Creazione del documento PDF con il calendario annuale delle reperibilità per l'anno %s", year);
 
-		
+
 		LocalDate firstOfYear = new LocalDate(year, 1, 1);
 		Options options = new Options();
 		options.pageSize = IHtmlToPdfTransformer.A4L;
 		renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays);
 	}
 
-    
+
 	/**
 	 * @author arianna
 	 * restituisce una tabella con le eventuali inconsistenze tra le timbrature dei reperibili di un certo tipo e i
@@ -374,29 +375,24 @@ public class Reperibility extends Controller {
 	public static Table<Person, String, List<String>> getInconsistencyTimestamps2Reperibilities (Long reperibilityId, LocalDate startDate, LocalDate endDate) {
 		// for each person contains days with absences and no-stamping  matching the reperibility days 
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
-		
-		
+
+
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
-		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
-		
-		
+
+
 		List<PersonReperibilityDay> personReperibilityDays = 
-				PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(startDate, endDate, reperibilityType, Optional.<PersonReperibility>absent());
-//				JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :startDate AND :endDate AND reperibilityType = :reperibilityType ORDER by date")
-//				.setParameter("firstOfMonth", startDate)
-//				.setParameter("endOfMonth", endDate)
-//				.setParameter("reperibilityType", reperibilityType)
-//				.getResultList();
-		
-		inconsistentAbsence = CompetenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
-			
+				personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(startDate, endDate, reperibilityType, Optional.<PersonReperibility>absent());
+
+		inconsistentAbsence = competenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
+
 		return inconsistentAbsence;
 	}
-	
-	
+
+
 	/*
 	 * @author arianna
 	 * crea il file PDF con il resoconto mensile delle reperibilità di tipo 'type' per
@@ -408,46 +404,41 @@ public class Reperibility extends Controller {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
 		Long reperibilityId = params.get("type", Long.class);
-		
+
 		LocalDate today = new LocalDate();
-				
+
 		// for each person contains the number of rep days fr o fs (feriali o festivi)
 		Table<Person, String, Integer> reperibilitySumDays = TreeBasedTable.<Person, String, Integer>create();
-		
+
 		// for each person contains the list of the rep periods divided by fr o fs
 		Table<Person, String, List<String>> reperibilityDateDays = TreeBasedTable.<Person, String, List<String>>create();
-		
+
 		// for each person contains days with absences and no-stamping  matching the reperibility days 
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
-		
+
 		// get the Competence code for the reperibility working or non-working days  
 		//CompetenceCode competenceCodeFS = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFs).first();
-		CompetenceCode competenceCodeFS = CompetenceCodeDao.getCompetenceCodeByCode(codFs); 
-		
+		CompetenceCode competenceCodeFS = competenceCodeDao.getCompetenceCodeByCode(codFs); 
+
 		//CompetenceCode competenceCodeFR = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFr).first();
-		CompetenceCode competenceCodeFR = CompetenceCodeDao.getCompetenceCodeByCode(codFr);
-		
+		CompetenceCode competenceCodeFR = competenceCodeDao.getCompetenceCodeByCode(codFr);
+
 		Logger.debug("Creazione dei  competenceCodeFS competenceCodeFR %s/%s", competenceCodeFS, competenceCodeFR);
-			
+
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
-		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
-			
+
 		// get all the reperibility of a certain type in a certain month
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
-			
+
 		List<PersonReperibilityDay> personReperibilityDays = 
-				PersonReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), reperibilityType, Optional.<PersonReperibility>absent());
-//				JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
-//				.setParameter("firstOfMonth", firstOfMonth)
-//				.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
-//				.setParameter("reperibilityType", reperibilityType)
-//				.getResultList();
-		
+				personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), reperibilityType, Optional.<PersonReperibility>absent());
+
 		Logger.debug("dimensione personReperibilityDays = %s", personReperibilityDays.size());
-		
+
 		// update the reperibility days in the DB
 		int updatedCompetences = reperibilityManager.updateDBReperibilityCompetences(personReperibilityDays, year, month);
 		Logger.debug("Salvate o aggiornate %d competences", updatedCompetences);
@@ -457,37 +448,37 @@ public class Reperibility extends Controller {
 		//List<Competence> frCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFR).fetch();
 		List<Competence> frCompetences = competenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFR);
 		Logger.debug("Trovate %d competences di tipo %s nel mese %d/%d", frCompetences.size(), reperibilityType,  month, year);
-		
+
 		// update  reports for the approved days and reasons for the working days
-		ReperibilityManager.updateReperibilityDaysReportFromCompetences(reperibilitySumDays, frCompetences);
-		ReperibilityManager.updateReperibilityDatesReportFromCompetences(reperibilityDateDays, frCompetences);
-		
-		
+		reperibilityManager.updateReperibilityDaysReportFromCompetences(reperibilitySumDays, frCompetences);
+		reperibilityManager.updateReperibilityDatesReportFromCompetences(reperibilityDateDays, frCompetences);
+
+
 		// builds the table with the summary of days and reperibility periods description
 		// reading data from the Competence table in the DB
 		//List<Competence> fsCompetences = Competence.find("SELECT com FROM Competence com JOIN com.person p WHERE p.reperibility.personReperibilityType = ? AND com.year = ? AND com.month = ? AND com.competenceCode = ? ORDER by p.surname", reperibilityType, year, month, competenceCodeFS).fetch();
 		List<Competence> fsCompetences = competenceDao.getCompetenceInReperibility(reperibilityType, year, month, competenceCodeFS);
 		Logger.debug("Trovate %d competences di tipo %s nel mese %d/%d", fsCompetences.size(), reperibilityType,  month, year);
-		
+
 		// update  reports for the approved days and reasons for the holidays 
-		ReperibilityManager.updateReperibilityDaysReportFromCompetences(reperibilitySumDays, fsCompetences);
-		ReperibilityManager.updateReperibilityDatesReportFromCompetences(reperibilityDateDays, fsCompetences);
-					
+		reperibilityManager.updateReperibilityDaysReportFromCompetences(reperibilitySumDays, fsCompetences);
+		reperibilityManager.updateReperibilityDatesReportFromCompetences(reperibilityDateDays, fsCompetences);
+
 		// get the table with the absence and no stampings inconsistency 
-		inconsistentAbsence = CompetenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue());
-				
+		inconsistentAbsence = competenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue());
+
 		Logger.info("Creazione del documento PDF con il resoconto delle reperibilità per il periodo %s/%s Fs=%s Fr=%s", firstOfMonth.plusMonths(0).monthOfYear().getAsText(), firstOfMonth.plusMonths(0).year().getAsText(), codFs, codFr);
-		
+
 		String cFr = codFr;
 		String cFs = codFs;
 		String thNoStamp = Messages.get("PDFReport.thNoStampings");
 		String thAbs = Messages.get("PDFReport.thAbsences");
-		
+
 		renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays, inconsistentAbsence, cFs, cFr, thNoStamp, thAbs);
-		
+
 	}
 
-	
+
 	/*
 	 * Export the reperibility calendar in iCal for the person with id = personId with reperibility 
 	 * of type 'type' for the 'year' year
@@ -495,22 +486,22 @@ public class Reperibility extends Controller {
 	 */
 	private static Calendar createCalendar(Long type, Long personId, int year) {
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-		
+
 		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
 		String eventLabel;
-		
+
 		// check for the parameter
 		//---------------------------
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-		PersonReperibilityType reperibilityType = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
-		
+
 		if (personId == 0) {
 			// read the reperibility person 
 			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
-			List<PersonReperibility> personsReperibility = PersonReperibilityDayDao.getPersonReperibilityByType(PersonReperibilityDayDao.getPersonReperibilityTypeById(type));
+			List<PersonReperibility> personsReperibility = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
 			if (personsReperibility.isEmpty()) {
 				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
 			}
@@ -518,44 +509,44 @@ public class Reperibility extends Controller {
 		} else {
 			// read the reperibility person 
 			//PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
-			PersonReperibility personReperibility = PersonReperibilityDayDao.getPersonReperibilityByPersonAndType(PersonDao.getPersonById(personId), PersonReperibilityDayDao.getPersonReperibilityTypeById(type));
+			PersonReperibility personReperibility = personReperibilityDayDao.getPersonReperibilityByPersonAndType(personDao.getPersonById(personId), personReperibilityDayDao.getPersonReperibilityTypeById(type));
 			if (personReperibility == null) {
 				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
 			}
 			personsInTheCalList.add(personReperibility);
 		}
 
-	
+
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
-		icsCalendar = ReperibilityManager.createicsReperibilityCalendar(Integer.parseInt(params.get("year")), personsInTheCalList);
-		
+		icsCalendar = reperibilityManager.createicsReperibilityCalendar(Integer.parseInt(params.get("year")), personsInTheCalList);
+
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-		
-        return icsCalendar;
+
+		return icsCalendar;
 	}
-	
-	
+
+
 	public static void iCal() {
 		Long type = params.get("type", Long.class);
 		Long personId = params.get("personId", Long.class);
 		int year = params.get("year", Integer.class);
-		
+
 		response.accessControl("*");
-		
+
 		//response.setHeader("Access-Control-Allow-Origin", "*");
-		
+
 		try {
 			Calendar calendar = createCalendar(type, personId, year);
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	        CalendarOutputter outputter = new CalendarOutputter();
-	        outputter.output(calendar, bos);
-	        response.setHeader("Content-Type", "application/ics");
-	        InputStream is = new ByteArrayInputStream(bos.toByteArray());
-	        renderBinary(is,"reperibilitaRegistro.ics");
-	        bos.close();
-	        is.close();
+			CalendarOutputter outputter = new CalendarOutputter();
+			outputter.output(calendar, bos);
+			response.setHeader("Content-Type", "application/ics");
+			InputStream is = new ByteArrayInputStream(bos.toByteArray());
+			renderBinary(is,"reperibilitaRegistro.ics");
+			bos.close();
+			is.close();
 		} catch (IOException e) {
 			Logger.error("Io exception building ical", e);
 		} catch (ValidationException e) {

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.wrapper.IWrapperFactory;
 import exceptions.EpasExceptionNoSourceData;
 
 /**
@@ -36,18 +37,32 @@ import exceptions.EpasExceptionNoSourceData;
  *
  */
 public class ContractYearRecapManager {
-	
-	private final static Logger log = LoggerFactory.getLogger(ContractYearRecapManager.class);
 
 	@Inject
-	public PersonResidualYearRecapFactory yearFactory;
-	
-	@Inject
-	public VacationsRecapFactory vacationsFactory;
-	
-	@Inject
-	public AbsenceDao absenceDao;
-	
+	public ContractYearRecapManager(ConfGeneralManager confGeneralManager,
+			VacationsRecapFactory vacationsFactory,
+			PersonResidualYearRecapFactory yearFactory,
+			AbsenceTypeDao absenceTypeDao, 
+			AbsenceDao absenceDao,
+			IWrapperFactory factory) {
+
+		this.confGeneralManager = confGeneralManager;
+		this.vacationsFactory = vacationsFactory;
+		this.yearFactory = yearFactory;
+		this.absenceTypeDao = absenceTypeDao;
+		this.absenceDao = absenceDao;
+		this.factory = factory;
+	}
+
+	private final static Logger log = LoggerFactory.getLogger(ContractYearRecapManager.class);
+
+	private final ConfGeneralManager confGeneralManager;
+	private final VacationsRecapFactory vacationsFactory;
+	private final PersonResidualYearRecapFactory yearFactory;
+	private final AbsenceTypeDao absenceTypeDao;
+	private final AbsenceDao absenceDao;
+	private final IWrapperFactory factory;
+
 	/**
 	 * NB !!!
 	 * 
@@ -96,35 +111,35 @@ public class ContractYearRecapManager {
 	{
 		log.info("PopulateContractYearRecap {} contract id = {}", contract.person.getFullname(), contract.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
-		
+
 		while(contract.recapPeriods.size()>0)
 		{
 			ContractYearRecap yearRecap = contract.recapPeriods.get(0);
 			contract.recapPeriods.remove(yearRecap);
 			yearRecap.delete();
 			contract.save();
-			
+
 		}
-		
+
 		contract.recapPeriods = new ArrayList<ContractYearRecap>();
 		contract.save();
-		
-		
+
+
 		//Controllo se ho sufficienti dati
-		
-		String dateInitUse = ConfGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
+
+		String dateInitUse = confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate.plusDays(1);
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
-		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval contractInterval = factory.create(contract).getContractDateInterval();
 
 		//Se intersezione fra contratto e dati utili database vuota non costruisco alcun contractYearRecap
 		if(DateUtility.intervalIntersection(contractInterval, personDatabaseInterval)==null)
 			return;
 
 		int yearToCompute = contract.beginContract.getYear();
-		
+
 		//verifico quanta informazione ho sul contratto
 		if(contractInterval.getBegin().isBefore(personDatabaseInterval.getBegin()))
 		{
@@ -133,7 +148,7 @@ public class ContractYearRecapManager {
 				return;
 			yearToCompute = populateContractYearFromSource(contract);
 		}
-		
+
 		int currentYear = new LocalDate().getYear();
 		if(currentYear>contractInterval.getEnd().getYear())
 			currentYear = contractInterval.getEnd().getYear();
@@ -143,13 +158,13 @@ public class ContractYearRecapManager {
 			ContractYearRecap cyr = new ContractYearRecap();
 			cyr.year = yearToCompute;
 			cyr.contract = contract;
-			
+
 			//FERIE E PERMESSI
 			VacationsRecap vacationRecap = vacationsFactory.create(yearToCompute, contract, new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();
-			
+
 			//RESIDUI
 			PersonResidualYearRecap csap = 
 					yearFactory.create(contract, yearToCompute, new LocalDate().minusDays(1));
@@ -158,25 +173,25 @@ public class ContractYearRecapManager {
 				lastComputedMonthInYear = csap.getMese(12);
 			else
 				lastComputedMonthInYear = csap.getMese(new LocalDate().getMonthOfYear());
-			
+
 			cyr.remainingMinutesLastYear = lastComputedMonthInYear.monteOreAnnoPassato;
 			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
 			cyr.remainingMealTickets = lastComputedMonthInYear.buoniPastoResidui;
-			
+
 			//RIPOSI COMPENSATIVI
 			//TODO la logica che persiste il dato sui riposi compensativi utilizzati deve essere ancora implementata in quanto non banale.
 			//I riposi compensativi utilizzati sono in funzione del contratto?
 			//cyr.recoveryDayUsed = PersonUtility.numberOfCompensatoryRestUntilToday(this.person, yearToCompute, 12);
-			
+
 			cyr.save();
 			contract.recapPeriods.add(cyr);
 			contract.save();
-			
+
 			yearToCompute++;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Costruisce il contractYearRecap da contract.SourceDate.
 	 * 1) Se sourceDate è l'ultimo giorno dell'anno costruisce il riepilogo 
@@ -192,7 +207,7 @@ public class ContractYearRecapManager {
 	private int populateContractYearFromSource(Contract contract)
 	{
 		//Caso semplice source riepilogo dell'anno
-		
+
 		LocalDate lastDayInYear = new LocalDate(contract.sourceDate.getYear(), 12, 31);
 		if(lastDayInYear.isEqual(contract.sourceDate))
 		{
@@ -216,12 +231,12 @@ public class ContractYearRecapManager {
 		//non devo calcolare alcun riepilogo
 		if(contract.sourceDate != null && contract.sourceDate.getYear() == LocalDate.now().getYear())
 			return LocalDate.now().getYear();
-		
+
 		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
-		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
-		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
-		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
-		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
+		AbsenceType ab31 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
+		AbsenceType ab32 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
+		AbsenceType ab37 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
+		AbsenceType ab94 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
 		DateInterval yearInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInYear);
 		List<Absence> abs32 = absenceDao.getAbsenceDays(yearInterSource, contract, ab32);
 		List<Absence> abs31 = absenceDao.getAbsenceDays(yearInterSource, contract, ab31);
@@ -243,7 +258,7 @@ public class ContractYearRecapManager {
 		contract.recapPeriods.add(cyr);
 		contract.save();
 		return contract.sourceDate.getYear()+1;
-		
+
 	}
 
 }

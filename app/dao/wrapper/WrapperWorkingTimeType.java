@@ -64,7 +64,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		return contractList;
 	}
-	
+
 	/**
 	 * Ritorna i periodi di orario associati ai contratti attualmente attivi.
 	 * @param officeId
@@ -94,7 +94,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		return cwttList;
 	}
-	
+
 	@Override
 	public List<Contract> getAssociatedContract() {
 

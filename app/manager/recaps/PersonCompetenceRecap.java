@@ -1,10 +1,9 @@
-package models.rendering;
+package manager.recaps;
 
 import java.util.List;
 
 import models.CompetenceCode;
 import models.Person;
-import dao.CompetenceCodeDao;
 
 /**
  * 
@@ -17,24 +16,23 @@ public class PersonCompetenceRecap {
 	public final List<CompetenceCode> personActiveCompetence;
 	public final List<CompetenceCode> totalCompetenceCode;
 
-	
-	
-	public PersonCompetenceRecap(Person person, List<CompetenceCode> personActiveCompetence){
+	public PersonCompetenceRecap(Person person, List<CompetenceCode> personActiveCompetence,
+			List<CompetenceCode> codes){
 		this.person = person;
 		this.personActiveCompetence = personActiveCompetence;
-		this.totalCompetenceCode = CompetenceCodeDao.getAllCompetenceCode();
+		this.totalCompetenceCode = codes;
 	}
-	
-	public PersonCompetenceRecap(Person person){
+
+	public PersonCompetenceRecap(Person person,List<CompetenceCode> codes){
 		this.person = person;
 		this.personActiveCompetence = person.competenceCode;
-		this.totalCompetenceCode = CompetenceCodeDao.getAllCompetenceCode();
+		this.totalCompetenceCode = codes;
 	}
-	
+
 	public List<CompetenceCode> getCompetenceCodeFromPersonList(){
 		return this.person.competenceCode;
 	}
-	
+
 	public void setCompetenceCodeToPersonList(CompetenceCode code){
 		this.personActiveCompetence.add(code);
 	}
