@@ -3,21 +3,16 @@ package it.cnr.iit.epas;
 import java.util.ArrayList;
 import java.util.List;
 
-import manager.ConfGeneralManager;
-import models.Office;
-import models.enumerate.Parameter;
-
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Optional;
-
-import controllers.Security;
 
 public class DateUtility {
 
@@ -57,18 +52,8 @@ public class DateUtility {
 	    }
 	}
 	
-	public static boolean isGeneralHoliday(Office office, LocalDate date){
-		
-		//Configuration config = Configuration.getConfiguration(date);
-		//ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
-		
-		/*TODO: da riverificare*/
-		if(office == null)
-			office = Security.getUser().get().person.office;
-		Integer monthOfPatron = ConfGeneralManager.getIntegerFieldValue(Parameter.MONTH_OF_PATRON, office);
-		Integer dayOfPatron = ConfGeneralManager.getIntegerFieldValue(Parameter.DAY_OF_PATRON, office);
-		/*fine pezzo da verificare*/
-		
+	public static boolean isGeneralHoliday(Optional<MonthDay> officePatron, LocalDate date){
+		 
 		LocalDate easter = findEaster(date.getYear());
 		LocalDate easterMonday = easter.plusDays(1);
 		if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
@@ -97,8 +82,12 @@ public class DateUtility {
 			return true;
 		if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
 			return true;
-		if((date.getMonthOfYear() == monthOfPatron && date.getDayOfMonth() == dayOfPatron))
-			return true;
+		
+		if(officePatron.isPresent()){
+			return (date.getMonthOfYear() == officePatron.get().MONTH_OF_YEAR && 
+					date.getDayOfMonth() == officePatron.get().DAY_OF_MONTH);
+		}
+
 		/**
 		 * ricorrenza centocinquantenario dell'unità d'Italia
 		 */
@@ -114,11 +103,10 @@ public class DateUtility {
 	 * @param day
 	 * @return
 	 */
-	public static boolean isFebruary29th(int month, int day)
-	{
+	public static boolean isFebruary29th(int month, int day){
+		
 		return (month==2 && day==29);
 	}
-
 
 	/**
 	 *  * La lista di tutti i giorni fisici contenuti nell'intervallo [begin,end] estremi compresi, escluse le general holiday
@@ -132,7 +120,7 @@ public class DateUtility {
 		List<LocalDate> generalWorkingDays = new ArrayList<LocalDate>();
 		while(!day.isAfter(end))
 		{
-			if( ! DateUtility.isGeneralHoliday(null, day) )
+			if( !DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), day) )
 				generalWorkingDays.add(day);
 			day = day.plusDays(1);
 		}
@@ -364,11 +352,8 @@ public class DateUtility {
 		return s;
 	}
 	
-	public static String fromLocalDateTimeHourTime(LocalDateTime time)
-	{
-		int min = time.getMinuteOfHour();
-		int hour = time.getHourOfDay();
-		return String.format("%02d:%02d", hour, min);    
+	public static String fromLocalDateTimeHourTime(LocalDateTime time){
+		return time.toString("HH:mm");
 	}
 	
 

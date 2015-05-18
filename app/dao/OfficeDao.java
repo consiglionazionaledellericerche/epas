@@ -6,9 +6,11 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import models.ConfGeneral;
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;
+import models.enumerate.Parameter;
 import models.query.QOffice;
 
 import com.google.common.base.Function;
@@ -34,14 +36,15 @@ import dao.wrapper.IWrapperOffice;
 public class OfficeDao extends DaoBase {
 
 	private final IWrapperFactory wrapperFactory;
+	private final ConfGeneralDao confGeneralDao;
 
 	@Inject
-	OfficeDao(IWrapperFactory wrapperFactory, JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+	OfficeDao(IWrapperFactory wrapperFactory,ConfGeneralDao confGeneralDao,
+			JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 		this.wrapperFactory = wrapperFactory;
+		this.confGeneralDao = confGeneralDao;
 	}
-
-	private final static QOffice office = QOffice.office1;
 	
 	/**
 	 * 
@@ -49,6 +52,8 @@ public class OfficeDao extends DaoBase {
 	 * @return l'ufficio identificato dall'id passato come parametro
 	 */
 	public Office getOfficeById(Long id){
+		
+		final QOffice office = QOffice.office1;
 		
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.id.eq(id));
@@ -60,6 +65,8 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista di tutti gli uffici presenti sul database
 	 */
 	public List<Office> getAllOffices(){
+		
+		final QOffice office = QOffice.office1;
 				
 		final JPQLQuery query = getQueryFactory().from(office);
 		
@@ -74,6 +81,8 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Optional<Office> getOfficeByContraction(String contraction){
 		
+		final QOffice office = QOffice.office1;
+		
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.contraction.eq(contraction));
 		
@@ -87,6 +96,8 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Optional<Office> getOfficeByName(String name){
 		
+		final QOffice office = QOffice.office1;
+		
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.name.eq(name));
 		
@@ -99,6 +110,8 @@ public class OfficeDao extends DaoBase {
 	 * @return l'ufficio associato al codice passato come parametro
 	 */
 	public Optional<Office> getOfficeByCode(Integer code){
+		
+		final QOffice office = QOffice.office1;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
@@ -112,6 +125,8 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
 	 */
 	public List<Office> getOfficesByCode(Integer code){
+		
+		final QOffice office = QOffice.office1;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
@@ -123,6 +138,8 @@ public class OfficeDao extends DaoBase {
 	 * @return la lista delle aree presenti in anagrafica
 	 */
 	public List<Office> getAreas(){
+		
+		final QOffice office = QOffice.office1;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.office.isNull());
@@ -222,6 +239,8 @@ public class OfficeDao extends DaoBase {
 	
 	public boolean checkForDuplicate(Office o){
 		
+		final QOffice office = QOffice.office1;
+		
 		final BooleanBuilder condition = new BooleanBuilder();
 		condition.or(office.name.equalsIgnoreCase(o.name));
 		
@@ -239,5 +258,20 @@ public class OfficeDao extends DaoBase {
 	
 		return getQueryFactory().from(office)
 				.where(condition).exists();
+	}
+	
+	public Set<Office> getOfficesWithAllowedIp(String ip){
+		
+		Preconditions.checkNotNull(ip);
+		
+		return FluentIterable.from(confGeneralDao.containsValue(
+				Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
+						new Function<ConfGeneral, Office>() {
+
+							@Override
+							public Office apply(ConfGeneral input) {
+								return input.office;
+							}
+						}).toSet();
 	}
 }

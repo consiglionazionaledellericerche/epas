@@ -16,6 +16,7 @@ import models.Person;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -29,7 +30,6 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -37,61 +37,56 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 public class MonthRecaps extends Controller{
 
 	@Inject
-	static SecurityRules rules;
-	
+	private static OfficeDao officeDao;
 	@Inject
-	static OfficeDao officeDao;
-	
+	private static PersonDao personDao;
 	@Inject
-	static MonthRecapManager monthRecapManager;
-	
+	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
-	static IWrapperFactory wrapperFactory;
-	
+	private static PersonResidualYearRecapFactory yearFactory;
 	@Inject
-	static WrapperModelFunctionFactory wrapperFunctionFactory;
-	
+	private static MonthRecapManager monthRecapManager;
 	@Inject
-	static PersonResidualYearRecapFactory yearFactory;
-	
+	private static SecurityRules rules;
+
 	/**
 	 * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
 	 * 
 	 * @param year
 	 */
 	public static void residualYearRecap(int year) {
-		
+
 		//FIXME per adesso senza paginazione
-		
+
 		//Prendo la lista delle persone attive in questo momento. 
 		//Secondo me si deve mettere le persone non attive in un elenco da poter
 		//Analizzare singolarmente.
-		
-		List<Person> simplePersonList = PersonDao.list(Optional.<String>absent(),
+
+		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
 				officeDao.getOfficeAllowed(Security.getUser().get()),
 				false, LocalDate.now(), LocalDate.now(), false).list();
-		
+
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
-		
+
 		List<PersonResidualMonthRecap> recaps = Lists.newArrayList();
-		
-		
+
+
 		for(IWrapperPerson person : personList) {
-			
+
 			PersonResidualYearRecap c = yearFactory.create(person.getCurrentContract().get(), year, null);
 			recaps.add(c.getMese(LocalDate.now().getMonthOfYear()));
-			
+
 			if(recaps.size() > 10 ) {
 				break;
 			}
 		}
-		
+
 
 		render(recaps);
 	}
-	
+
 	/**
 	 * Controller che gestisce il calcolo del Riepilogo Mensile.
 	 * @param year
@@ -103,7 +98,7 @@ public class MonthRecaps extends Controller{
 
 		if(page == null)
 			page = 0;
-		
+
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
@@ -120,21 +115,21 @@ public class MonthRecaps extends Controller{
 				lastDayOfMonth = lastDayOfMonth.plusDays(1);
 				continue;
 			}
-			if( ! DateUtility.isGeneralHoliday(null, lastDayOfMonth) )
+			if(!DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), lastDayOfMonth) )
 			{
 				generalWorkingDaysOfMonth++;
 			}
 			lastDayOfMonth = lastDayOfMonth.plusDays(1);
 		}
 		lastDayOfMonth = lastDayOfMonth.minusDays(1);
-		
+
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(MonthRecapManager.PersonNameComparator, MonthRecapManager.AbsenceCodeComparator);
 
-		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, monthBegin, monthEnd, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
-		
+
 		//logica mese attuale
 		if(today.getYear()==year && today.getMonthOfYear()==month)
 		{
@@ -148,13 +143,13 @@ public class MonthRecaps extends Controller{
 			//Considero il riepilogo fino a ieri
 			monthEnd = today.minusDays(1);			
 		}	
-		
+
 		tableMonthRecap = monthRecapManager.populateRealValueTable(activePersons, monthBegin, monthEnd, year, generalWorkingDaysOfMonth);
 
 		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth, year, month, simpleResults, name);
 
 	}
-	
+
 	/**
 	 * Controller che ritorna la lista dei Giorni di assenza non giustificati.
 	 * @param id
@@ -162,8 +157,8 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */	
 	public static void notJustifiedAbsences(Long personId, int year, int month){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -174,7 +169,7 @@ public class MonthRecaps extends Controller{
 
 		render(notJustifiedAbsences, person);
 	}
-	
+
 	/**
 	 * Controller che ritorna la lista dei Giorni di assenza giustificati.
 	 * @param id
@@ -182,8 +177,8 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */	
 	public static void justifiedAbsences(Long personId, int year, int month){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -202,8 +197,8 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */	
 	public static void workingDayHoliday(Long personId, int year, int month){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -214,7 +209,7 @@ public class MonthRecaps extends Controller{
 
 		render(workingDayHoliday, person);
 	}
-	
+
 	/**
 	 * Controller che ritorna la lista dei Giorni di presenza al lavoro nei giorni lavorativi.
 	 * @param id
@@ -222,8 +217,8 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */	
 	public static void workingDayNotHoliday(Long personId, int year, int month){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -234,5 +229,5 @@ public class MonthRecaps extends Controller{
 
 		render(workingDayNotHoliday, person);
 	}
-	
+
 }

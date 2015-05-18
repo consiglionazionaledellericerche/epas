@@ -4,6 +4,8 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.ConfYear;
 import models.enumerate.Parameter;
 
@@ -15,17 +17,20 @@ import com.google.common.collect.Lists;
 
 
 public class ConfigurationsManager {
-	
+
 
 	public final static class MessageResult{
 		public boolean result;
 		public String message;
-				
+
 		public MessageResult(boolean result, String message){
 			this.result = result;
 			this.message = message;
 		}
 	}
+	
+	@Inject
+	private ConfYearManager confYearManager;
 
 	/**
 	 * Validazione del valore di configurazione. Aggiorna la CACHE.
@@ -35,27 +40,29 @@ public class ConfigurationsManager {
 	 * @param value
 	 * @return 	
 	 */
-	public static MessageResult persistConfYear(ConfYear conf, String value){
-				
+	public MessageResult persistConfYear(ConfYear conf, String value){
+
 		Preconditions.checkNotNull(conf);
-		
+
 		Integer year = conf.year;
-		
+
 		if(conf.field.equals(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR.description)){
-			
-			Integer month = ConfYearManager.getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, conf.office, year);
+
+			Integer month = confYearManager.getIntegerFieldValue(
+					Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, conf.office, year);
 			try{
 				new LocalDate(year, month, Integer.parseInt(value));
 			}
 			catch(Exception e){
-				
+
 				return new MessageResult(false, Integer.parseInt(value) + "/" + month + "/" + year + " data non valida. Settare correttamente i parametri.");
 			}
 		}
 
 		if(conf.field.equals(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR.description)){
-			
-			Integer day  = ConfYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, conf.office, year);
+
+			Integer day  = confYearManager.getIntegerFieldValue(
+					Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, conf.office, year);
 			try{
 				new LocalDate(year, Integer.parseInt(value), day);
 			}
@@ -88,14 +95,13 @@ public class ConfigurationsManager {
 			}
 		}
 
-		
-		ConfYearManager.saveConfYear(ConfYearManager.getParameter(conf), 
+		confYearManager.saveConfYear(confYearManager.getParameter(conf), 
 				conf.office, conf.year, Optional.fromNullable(value) );
-		
+
 		return new MessageResult(true, "parametro di configurazione correttamente inserito");
 	}
-	
-	public static List<String> populateMonths(){
+
+	public List<String> populateMonths(){
 		List<String> mesi = Lists.newArrayList();
 		mesi.add("Nessuno");
 		for(int i = 1; i < 13; i++){

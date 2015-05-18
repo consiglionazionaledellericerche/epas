@@ -262,11 +262,11 @@
   generateUserName();
   $("#manager_username").val('${properties.getProperty('manager_username')}');
 
-  $('#manager_surname').change(function(){
+  $('#manager_surname').keyup(function(){
     generateUserName();
   });
 
-  $('#manager_name').change(function(){
+  $('#manager_name').keyup(function(){
     generateUserName();
   });
 

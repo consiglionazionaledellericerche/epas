@@ -3,6 +3,8 @@ package manager;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
@@ -19,9 +21,11 @@ import com.google.common.collect.TreeBasedTable;
 import dao.AbsenceDao;
 
 public class YearlyAbsencesManager {
-	
-    private final static Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
-	
+
+	private final static Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
+	@Inject
+	private AbsenceDao absenceDao;
+
 	/*Non è molto chiaro cosa facesse questa classe innestata all'interno di YearlyAbsences*/
 	public final static class AbsenceTypeDays{
 		public String absenceCode;
@@ -80,8 +84,8 @@ public class YearlyAbsencesManager {
 			this.date = date;
 		}
 	}
-	
-	public static Comparator<Person> PersonNameComparator = new Comparator<Person>() {
+
+	public Comparator<Person> PersonNameComparator = new Comparator<Person>() {
 
 		public int compare(Person person1, Person person2) {
 
@@ -96,7 +100,7 @@ public class YearlyAbsencesManager {
 
 	};	
 
-	public static Comparator<AbsenceType> AbsenceCodeComparator = new Comparator<AbsenceType>(){
+	public Comparator<AbsenceType> AbsenceCodeComparator = new Comparator<AbsenceType>(){
 
 		public int compare(AbsenceType absenceCode1, AbsenceType absenceCode2){
 			return absenceCode1.code.compareTo(absenceCode2.code);
@@ -105,7 +109,6 @@ public class YearlyAbsencesManager {
 
 	};
 
-	
 	/**
 	 * 
 	 * @param persons
@@ -114,10 +117,10 @@ public class YearlyAbsencesManager {
 	 * @param end
 	 * @return
 	 */
-	public static Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end){
+	public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end){
 		Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 		for(Person p : persons){
-			List<Absence> absenceInMonth = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<JustifiedTimeAtWork>absent(), false, false);
+			List<Absence> absenceInMonth = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<JustifiedTimeAtWork>absent(), false, false);
 
 			tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
 			for(Absence abs : absenceInMonth){

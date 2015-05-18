@@ -30,15 +30,19 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 public class PersonResidualMonthRecap {
-	
+
 	private final IWrapperFactory wrapperFactory; 
 	private final AbsenceDao absenceDao;
 	private final MealTicketDao mealTicketDao;
 	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
+	private final DateUtility dateUtility;
+	private final ConfYearDao confYearDao;
+	private final CompetenceCodeDao competenceCodeDao;
+	private final WorkingTimeTypeDayDao workingTimeTypeDayDao;
 
 	public final IWrapperContract contract;
-	
+
 	public Person person;
 	public String contractDescription;
 	public PersonResidualMonthRecap mesePrecedente;
@@ -46,47 +50,47 @@ public class PersonResidualMonthRecap {
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
 	public final int anno;
 	public final int mese;
-	
+
 	public int initMonteOreAnnoPassato;
 	public int initMonteOreAnnoCorrente;
-	
+
 	public int initResiduoAnnoCorrenteNelMese = 0;	//per il template (se sourceContract è del mese)
-	
+
 	public int progressivoFinaleMese		 = 0;	//person day
 	public int progressivoFinalePositivoMese = 0;	//person day
 	public int progressivoFinaleNegativoMese = 0;	//person day
-	
+
 	public int progressivoFinalePositivoMesePrint = 0;	//per il template
-	
+
 	public int straordinariMinuti 			 = 0;	//competences
 	public int straordinariMinutiS1Print	 = 0;	//per il template
 	public int straordinariMinutiS2Print	 = 0;	//per il template
 	public int straordinariMinutiS3Print	 = 0;	//per il template
-	
+
 	public int riposiCompensativiMinuti 	 = 0;	//absences 
 	public int riposiCompensativiMinutiPrint = 0;	//per il template
-	
-	
+
+
 	public int progressivoFinaleNegativoMeseImputatoAnnoPassato;
 	public int progressivoFinaleNegativoMeseImputatoAnnoCorrente;
 	public int progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-	
+
 	public int riposiCompensativiMinutiImputatoAnnoPassato;
 	public int riposiCompensativiMinutiImputatoAnnoCorrente;
 	public int riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-	
+
 	public int monteOreAnnoPassato;
 	public int monteOreAnnoCorrente;
 	public int numeroRiposiCompensativi;
-	
+
 	public int oreLavorate = 0;
-	
+
 	public int buoniPastoDalMesePrecedente = 0;
 	public int buoniPastoConsegnatiNelMese = 0;
 	public int buoniPastoUsatiNelMese = 0;
 	public int buoniPastoResidui = 0;
 
-	
+
 	public PersonResidualMonthRecap(AbsenceDao absenceDao, PersonDayDao personDayDao,
 			MealTicketDao mealTicketDao,CompetenceDao competenceDao,
 			IWrapperFactory wrapperFactory,	PersonResidualMonthRecap mesePrecedente,
@@ -94,8 +98,15 @@ public class PersonResidualMonthRecap {
 			int initMonteOreAnnoCorrente, int initMealTickets,
 			DateInterval validDataForPersonDay, 
 			DateInterval validDataForCompensatoryRest, 
-			DateInterval validDataForMealTickets) {
-		
+			DateInterval validDataForMealTickets,
+			ConfYearDao confYearDao,CompetenceCodeDao competenceCodeDao,
+			WorkingTimeTypeDayDao workingTimeTypeDayDao,
+			DateUtility dateUtility) {
+
+		this.dateUtility = dateUtility;
+		this.confYearDao = confYearDao;
+		this.competenceCodeDao = competenceCodeDao;
+		this.workingTimeTypeDayDao = workingTimeTypeDayDao;
 		this.absenceDao = absenceDao;
 		this.personDayDao = personDayDao;
 		this.mealTicketDao = mealTicketDao;
@@ -107,20 +118,20 @@ public class PersonResidualMonthRecap {
 		this.qualifica = this.person.qualification.qualification;
 		this.anno = anno;
 		this.mese = mese;
-		
+
 		this.initMonteOreAnnoCorrente = initMonteOreAnnoCorrente;
 		this.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
-		
-		
+
+
 		//Per stampare a video il residuo da inizializzazione se riferito al mese
 		if(contract.sourceDate != null && 
 				contract.sourceDate.getMonthOfYear() == mese && 
 				contract.sourceDate.getYear() == anno) {
 			initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
 		}
-		
+
 		setContractDescription(this);
-		
+
 		//Inizializzazione residui
 		//Gennaio
 		ConfYear confYear = null;
@@ -128,13 +139,13 @@ public class PersonResidualMonthRecap {
 		String description = qualifica > 3 ? 
 				Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49.description : 
 					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13.description;
-		conf = ConfYearDao.getByFieldName(description, anno, person.office);
-		
+		conf = confYearDao.getByFieldName(description, anno, person.office);
+
 		if(conf.isPresent()){
 			confYear = conf.get();
 		}
 		else{
-			confYear = ConfYearDao.getByFieldName(
+			confYear = confYearDao.getByFieldName(
 					description, anno-1, person.office).get();
 		}
 		if(mese==1)
@@ -142,7 +153,7 @@ public class PersonResidualMonthRecap {
 			mesePrecedente = null;
 			monteOreAnnoPassato = initMonteOreAnnoPassato;
 			monteOreAnnoCorrente = initMonteOreAnnoCorrente;
-			
+
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
 			if(monteOreAnnoPassato<0)
 			{
@@ -150,29 +161,29 @@ public class PersonResidualMonthRecap {
 				monteOreAnnoPassato = 0;
 			}
 		}
-		
+
 		//Febbraio / Marzo
-//		else if(mese==2 || mese==3)
-//		{
-//			this.mesePrecedente = mesePrecedente;
-//			monteOreAnnoPassato = initMonteOreAnnoPassato;
-//			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
-//		}
-		
+		//		else if(mese==2 || mese==3)
+		//		{
+		//			this.mesePrecedente = mesePrecedente;
+		//			monteOreAnnoPassato = initMonteOreAnnoPassato;
+		//			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
+		//		}
+
 		// Aprile -> Dicembre
 		else
 		{
 			this.mesePrecedente = mesePrecedente;
 			monteOreAnnoPassato = initMonteOreAnnoPassato;
 			monteOreAnnoCorrente= initMonteOreAnnoCorrente;
-			
+
 			if(new Integer(confYear.fieldValue) != 0 && mese > new Integer(confYear.fieldValue))
 			{
 				possibileUtilizzareResiduoAnnoPrecedente = false;
 				monteOreAnnoPassato = 0;
 			}
 		}
-		
+
 		//Inizializzazione buoni pasto
 		if(mese==1) 
 		{
@@ -186,26 +197,26 @@ public class PersonResidualMonthRecap {
 					+ mesePrecedente.buoniPastoConsegnatiNelMese
 					- mesePrecedente.buoniPastoUsatiNelMese;
 		}
-		
+
 		setMealTicketsInformation(this, validDataForMealTickets);
-		
+
 		setPersonDayInformation(this, validDataForPersonDay);
 		setPersonMonthInformation(this, validDataForCompensatoryRest);
-		
+
 
 		assegnaProgressivoFinaleNegativo(this);
 		assegnaStraordinari(this);
 		assegnaRiposiCompensativi(this);
-		
+
 		//All'anno corrente imputo sia ciò che ho imputato al residuo del mese precedente dell'anno corrente sia ciò che ho imputato al progressivo finale positivo del mese
 		//perchè non ho interesse a visualizzarli separati nel template. 
 		progressivoFinaleNegativoMeseImputatoAnnoCorrente = progressivoFinaleNegativoMeseImputatoAnnoCorrente + progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
 		riposiCompensativiMinutiImputatoAnnoCorrente = riposiCompensativiMinutiImputatoAnnoCorrente + riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-		
+
 		//Al monte ore dell'anno corrente aggiungo ciò che non ho utilizzato del progressivo finale positivo del mese
 		monteOreAnnoCorrente = monteOreAnnoCorrente + progressivoFinalePositivoMese;	
 	}
-	
+
 	/**
 	 * 
 	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
@@ -235,23 +246,23 @@ public class PersonResidualMonthRecap {
 					monthRecap.progressivoFinalePositivoMese += pd.difference;
 				else
 					monthRecap.progressivoFinaleNegativoMese += pd.difference;
-				
+
 				monthRecap.oreLavorate += pd.timeAtWork;
 			}
 			monthRecap.progressivoFinaleNegativoMese = monthRecap.progressivoFinaleNegativoMese*-1;
 
 			monthRecap.progressivoFinalePositivoMesePrint = monthRecap.progressivoFinalePositivoMese;
-			
+
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
 	 */
 	private void setMealTicketsInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForMealTickets)
 	{
-		
+
 		if(validDataForMealTickets!=null)
 		{
 			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(monthRecap.person,
@@ -263,29 +274,29 @@ public class PersonResidualMonthRecap {
 					monthRecap.buoniPastoUsatiNelMese++;
 				}
 			}
-			
+
 			//Numero ticket consegnati nel mese
 			monthRecap.buoniPastoConsegnatiNelMese = 
 					mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
 							monthRecap.contract.getValue(), validDataForMealTickets).size();
-			
+
 			//residuo
 			monthRecap.buoniPastoResidui = monthRecap.buoniPastoDalMesePrecedente 
 					+ monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
-						
+
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
 	 */
 	private void setPersonMonthInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForCompensatoryRest)
 	{
-		CompetenceCode s1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
-		CompetenceCode s2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
-		CompetenceCode s3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
-		
+		CompetenceCode s1 = competenceCodeDao.getCompetenceCodeByCode("S1");
+		CompetenceCode s2 = competenceCodeDao.getCompetenceCodeByCode("S2");
+		CompetenceCode s3 = competenceCodeDao.getCompetenceCodeByCode("S3");
+
 		if(this.contract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
@@ -297,7 +308,7 @@ public class PersonResidualMonthRecap {
 				monthRecap.straordinariMinutiS1Print = 0;
 			//straordinari s2
 			Optional<Competence> competenceS2 = competenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
-			
+
 
 			if(competenceS2.isPresent())
 				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.get().valueApproved * 60);
@@ -313,7 +324,7 @@ public class PersonResidualMonthRecap {
 
 			monthRecap.straordinariMinuti = monthRecap.straordinariMinutiS1Print + monthRecap.straordinariMinutiS2Print + monthRecap.straordinariMinutiS3Print;
 		}
-		
+
 		if(validDataForCompensatoryRest!=null)
 		{
 			List<Absence> riposiCompensativi = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("91"), 
@@ -323,18 +334,18 @@ public class PersonResidualMonthRecap {
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
 				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
-						WorkingTimeTypeDayDao.getWorkingTimeTypeDay(person, abs.personDay.date).workingTime;	//FIXME potrebbe essere null
+						workingTimeTypeDayDao.getWorkingTimeTypeDay(person, abs.personDay.date).workingTime;	//FIXME potrebbe essere null
 				monthRecap.numeroRiposiCompensativi++;
 			}
 			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;
-			
+
 		}		
 
 	}
-	
+
 	private void assegnaProgressivoFinaleNegativo(PersonResidualMonthRecap monthRecap)
 	{
-		
+
 		//quello che assegno al monte ore passato
 		if(monthRecap.progressivoFinaleNegativoMese < monthRecap.monteOreAnnoPassato)
 		{
@@ -348,7 +359,7 @@ public class PersonResidualMonthRecap {
 			monthRecap.monteOreAnnoPassato = 0;
 			monthRecap.progressivoFinaleNegativoMese = monthRecap.progressivoFinaleNegativoMese - monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato;
 		}
-		
+
 		//quello che assegno al monte ore corrente
 		if(monthRecap.progressivoFinaleNegativoMese < monthRecap.monteOreAnnoCorrente)
 		{
@@ -362,19 +373,19 @@ public class PersonResidualMonthRecap {
 			monthRecap.monteOreAnnoCorrente = 0;
 			monthRecap.progressivoFinaleNegativoMese = monthRecap.progressivoFinaleNegativoMese - monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente;
 		}
-		
+
 		//quello che assegno al progressivo positivo del mese
 		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.progressivoFinaleNegativoMese;
 		monthRecap.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = monthRecap.progressivoFinaleNegativoMese;
 		return;
-		
+
 	}
-	
+
 	private void assegnaStraordinari(PersonResidualMonthRecap monthRecap)
 	{
 		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.straordinariMinuti;
 	}
-	
+
 	private void assegnaRiposiCompensativi(PersonResidualMonthRecap monthRecap)
 	{
 		//quello che assegno al monte ore passato
@@ -390,7 +401,7 @@ public class PersonResidualMonthRecap {
 			monthRecap.monteOreAnnoPassato = 0;
 			monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti - monthRecap.riposiCompensativiMinutiImputatoAnnoPassato;
 		}
-		
+
 		//quello che assegno al monte ore corrente
 		if(monthRecap.riposiCompensativiMinuti < monthRecap.monteOreAnnoCorrente)
 		{
@@ -407,9 +418,9 @@ public class PersonResidualMonthRecap {
 		//quello che assegno al progressivo positivo del mese
 		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.riposiCompensativiMinuti;
 		monthRecap.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = monthRecap.riposiCompensativiMinuti;
-	
+
 	}	
-	
+
 	/**
 	 * Costruisce una stringa di descrizione per il contratto utilizzata in stampings.html e personStampings.html
 	 */
@@ -421,8 +432,8 @@ public class PersonResidualMonthRecap {
 		LocalDate endContract = monthRecap.contract.getValue().expireContract;
 		if(monthRecap.contract.getValue().endContract!=null)
 			endContract = monthRecap.contract.getValue().endContract;
-		
-		if(DateUtility.isDateIntoInterval(endContract, monthInterval))
+
+		if(dateUtility.isDateIntoInterval(endContract, monthInterval))
 			monthRecap.contractDescription = "(contratto scaduto in data " + endContract+")";
 		else
 			monthRecap.contractDescription = "";
