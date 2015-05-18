@@ -1,4 +1,6 @@
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,8 +33,10 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.libs.Codec;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
 import controllers.Security;
@@ -44,14 +48,14 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
 /**
- * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
- * 
+ * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti
+ *
  * @author cristian
  *
  */
 @OnApplicationStart
 public class Bootstrap extends Job<Void> {
-	
+
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
@@ -90,7 +94,7 @@ public class Bootstrap extends Job<Void> {
 		}
 	}
 
-	public void doJob() {
+	public void doJob() throws IOException {
 
 		if (Play.id.equals("test")) {
 			Logger.info("Application in test mode, default boostrap job not started");
@@ -99,15 +103,15 @@ public class Bootstrap extends Job<Void> {
 
 
 		Session session = (Session) JPA.em().getDelegate();
-		
+
 		if(Qualification.count() == 0 ) {
-			
+
 			//qualification absenceType absenceTypeQualification absenceTypeGroup
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase1.xml")));		
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase1.xml")));
 			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase2.xml")));
 
 			//competenceCode
-			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "competence-codes.xml")));	
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "competence-codes.xml")));
 
 			//stampModificationType
 			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "stamp-modification-types.xml")));
@@ -117,65 +121,71 @@ public class Bootstrap extends Job<Void> {
 
 			//vacationCode
 			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "vacation-codes.xml")));
-			
+
 			//workingTimeType workingTimeTypeDay
 			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "working-time-types.xml")));
 
+			// riallinea le sequenze con i valori presenti sul db.
+			for (String sql : Files.readLines(new File(Play.applicationPath,
+					"db/fix_sequences.sql"), Charsets.UTF_8)) {
+
+				JPA.em().createNativeQuery(sql).executeUpdate();
+			}
 		}
-		
+
 		if(User.count() == 0) {
 			User admin = new User();
 			admin.username = "admin";
 			admin.password = Codec.hexMD5("personnelEpasNewVersion");
 			admin.save();
 		}
-		
+
 		bootstrapEmployeeRoleCreation();
 
 		bootstrapStampingCreateHandler();
-				
+
 		bootstrapPermissionsHandler();
-		
+
 		bootstrapSuperAdminCreation();
-		
+
 		restUsersCreation();
-	
+
 	}
-	
+
 	/**
 	 * Crea il ruolo Employee che deve essere associato al dipendente nell'ufficio di appartenenza
 	 */
 	private static void bootstrapEmployeeRoleCreation() {
-		
+
 		if (Office.count() == 0 || Person.count() == 0)
 			return;
-		
+
 		Role role = Role.find("byName",  Role.EMPLOYEE).first();
 		if(role == null) {
 			role = new Role();
 			role.name = Role.EMPLOYEE;
 			role.save();
-			
+
 			Permission permission = Permission.find("byDescription", Security.EMPLOYEE).first();
 			if(permission == null) {
 				permission = new Permission();
 				permission.description = Security.EMPLOYEE;
 				permission.save();
 			}
-			
+
 			role.permissions.add(permission);
 			role.save();
 		}
-		
+
 		//Creo il ruolo per i dipendenti se non esiste
 		List<Person> personList = personDao.list(Optional.<String>absent(),
 				Sets.newHashSet(officeDao.getAllOffices()), false, LocalDate.now(),
 				LocalDate.now(), false).list();
 		for(Person person : personList) {
-			
+
 			boolean exist = false;
 			//Cerco se esiste già e controllo che sia relativo all'office di appartentenza
-			
+
 			for(UsersRolesOffices uro : person.user.usersRolesOffices ) {
 				//Rimuovo ruolo role se non appartiene più all'office
 				if(uro.role.name.equals(role.name)){
@@ -187,7 +197,7 @@ public class Bootstrap extends Job<Void> {
 					}
 				}
 			}
-			
+
 			if(!exist) {
 				UsersRolesOffices uro = new UsersRolesOffices();
 				uro.user = person.user;
@@ -197,13 +207,13 @@ public class Bootstrap extends Job<Void> {
 			}
 		}
 	}
-	
+
 	/**
-	 * Crea il ruolo SuperAdmin con il permesso Developer. 
+	 * Crea il ruolo SuperAdmin con il permesso Developer.
 	 * Per adesso viene assegnato ad ogni sede.
 	 */
 	private static void bootstrapSuperAdminCreation() {
-		
+
 		//1) Creazione Ruolo con permesso
 		Role role = Role.find("byName",  Role.SUPER_ADMIN).first();
 		if(role == null) {
@@ -216,9 +226,9 @@ public class Bootstrap extends Job<Void> {
 			role.permissions.add(permission);
 			role.save();
 		}
-		
+
 		User admin = User.find("byUsername", "admin").first();
-		
+
 		//2) Assegno il permesso ad admin ad ogni office
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
@@ -250,7 +260,7 @@ public class Bootstrap extends Job<Void> {
 	}
 
 	private static void bootstrapStampingCreateHandler() {
-		
+
 		//1) Creazione Ruolo con permesso
 		Role role = Role.find("byName",  Role.BADGE_READER).first();
 		if(role == null) {
@@ -263,7 +273,7 @@ public class Bootstrap extends Job<Void> {
 			role.permissions.add(permission);
 			role.save();
 		}
-		
+
 		//2) Creazione lettore badge di default da associare ad ogni ufficio
 		User defaultBadgeReader = User.find("byUsername", "defaultBadgeReader").first();
 		if(defaultBadgeReader == null){
@@ -272,18 +282,18 @@ public class Bootstrap extends Job<Void> {
 			defaultBadgeReader.password = Codec.hexMD5("defaultBadgeReader");
 			defaultBadgeReader.save();
 		}
-		
+
 		//3) Ogni ufficio sede senza alcun lettore badge è associato a lettore badge default
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
-			
+
 			IWrapperOffice wOffice = wrapperFactory.create(office);
-			
+
 			if( !wOffice.isSeat() )
 				continue;
-			
+
 			boolean hasBadgeReader = false;
-			
+
 			for(UsersRolesOffices uro : office.usersRolesOffices) {
 				if(uro.role.name.equals(Role.BADGE_READER)) {
 					hasBadgeReader = true;
@@ -293,15 +303,15 @@ public class Bootstrap extends Job<Void> {
 			if(hasBadgeReader) {
 				continue;
 			}
-			
+
 			UsersRolesOffices uro = new UsersRolesOffices();
 			uro.user = defaultBadgeReader;
 			uro.office = office;
 			uro.role = role;
 			uro.save();
 		}
-		
-		
+
+
 //		//4)TEST PISA E COSENZA
 //		Office pisa = Office.find("byCode", 223400).first();
 //		Office cosenza = Office.find("byCode", 223410).first();
@@ -319,7 +329,7 @@ public class Bootstrap extends Job<Void> {
 //			cosenzaBadge.password = Codec.hexMD5("cosenzaBadge");
 //			cosenzaBadge.save();
 //		}
-//		
+//
 //		for(UsersRolesOffices uro : pisa.usersRolesOffices) {
 //			if(uro.role.name.equals(Role.BADGE_READER)) {
 //				uro.delete();
@@ -330,19 +340,19 @@ public class Bootstrap extends Job<Void> {
 //				uro.delete();
 //			}
 //		}
-//		
+//
 //		UsersRolesOffices uro = new UsersRolesOffices();
 //		uro.office = pisa;
 //		uro.user = pisaBadge;
 //		uro.role = role;
 //		uro.save();
-//		
+//
 //		uro = new UsersRolesOffices();
 //		uro.office = cosenza;
 //		uro.user = cosenzaBadge;
 //		uro.role = role;
 //		uro.save();
-//		
+//
 //		uro = new UsersRolesOffices();
 //		uro.office = pisa;
 //		uro.user = cosenzaBadge;
@@ -350,136 +360,136 @@ public class Bootstrap extends Job<Void> {
 //		uro.save();
 	}
 
-	
+
 	private static void bootstrapPermissionsHandler() {
-		
+
 		/* Metodo provvisiorio per popolare la tabella Permissions con i nuovi permessi */
-		
+
 		Permission permission;
 
 		if (Permission.find("byDescription", Security.DEVELOPER).first() == null) {
-			
+
 			Role role = new Role();
 			role.name = Role.PERSONNEL_ADMIN;
 			role.save();
-			
+
 			Role roleMini = new Role();
 			roleMini.name = Role.PERSONNEL_ADMIN_MINI;
-			
+
 			permission = new Permission();
 			permission.description = Security.EMPLOYEE;
 			permission.save();
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_PERSON;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_PERSON;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_PERSON_DAY;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_PERSON_DAY;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_COMPETENCE;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_COMPETENCE;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.UPLOAD_SITUATION;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_ABSENCE_TYPE;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_ABSENCE_TYPE;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_CONFIGURATION;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_CONFIGURATION;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_OFFICE;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_OFFICE;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_WORKING_TIME_TYPE;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_WORKING_TIME_TYPE;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_COMPETENCE_CODE;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_COMPETENCE_CODE;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.VIEW_ADMINISTRATOR;
 			permission.save();
 			role.permissions.add(permission);
 			roleMini.permissions.add(permission);
-			
+
 			permission = new Permission();
 			permission.description = Security.EDIT_ADMINISTRATOR;
 			permission.save();
 			role.permissions.add(permission);
-			
+
 			role.save();
 			roleMini.save();
-			
-			
+
+
 		}
-				
+
 		//Ogni ufficio deve essere associato ad admin
 		User admin = User.find("byUsername", "admin").first();
 		Role role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
@@ -496,11 +506,11 @@ public class Bootstrap extends Job<Void> {
 				uro.save();
 			}
 		}
-	
+
 	}
-	
+
 	private void restUsersCreation(){
-		
+
 		Role restRole = Role.find("byName", Role.REST_CLIENT).first();
 		if(restRole == null){
 			restRole = new Role();
@@ -512,10 +522,10 @@ public class Bootstrap extends Job<Void> {
 			restRole.permissions.add(permission);
 			restRole.save();
 		}
-		
+
 		String protimeUser = Play.configuration.getProperty("rest.protime.user");
 		User protime = userDao.getUserByUsernameAndPassword(protimeUser, Optional.<String>absent());
-		
+
 		if(protime == null){
 				protime = new User();
 				protime.username = protimeUser;
@@ -524,7 +534,7 @@ public class Bootstrap extends Job<Void> {
 		}
 
 		List<Office> areas = officeDao.getAreas();
-		
+
 		for(Office area : areas){
 			if(!usersRolesOfficesDao.getUsersRolesOffices(protime, restRole, area).isPresent()){
 				UsersRolesOffices uro = new UsersRolesOffices();
@@ -533,7 +543,7 @@ public class Bootstrap extends Job<Void> {
 				uro.role = restRole;
 				uro.save();
 			}
-		}	
+		}
 	}
-	
+
 }
