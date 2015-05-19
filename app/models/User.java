@@ -10,12 +10,15 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import play.data.validation.Unique;
 
 import com.google.common.base.MoreObjects;
 
@@ -25,7 +28,10 @@ import com.google.common.base.MoreObjects;
 public class User extends BaseModel{
 
 	private static final long serialVersionUID = -6039180733038072891L;
-
+	
+	@Unique
+	@NotNull
+	@Column(nullable=false)
 	public String username;
 
 	public String password;
