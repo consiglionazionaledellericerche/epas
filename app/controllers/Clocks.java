@@ -2,8 +2,8 @@ package controllers;
 
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -25,6 +25,7 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.jobs.Job;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.With;
 
 import com.google.common.base.Charsets;
@@ -58,19 +59,31 @@ public class Clocks extends Controller{
 
 		LocalDate data = new LocalDate();
 
-		//TODO Capire quali office saranno visibili a questo livello
-		List<Office> officeAllowed = officeDao.getAllOffices();
+		String remoteAddress = Http.Request.current().remoteAddress;
 
-		List<Person> personList = personDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, data, data, true).list();
+		Set<Office> offices = officeDao.getOfficesWithAllowedIp(remoteAddress);
+
+		if(offices.isEmpty()){
+			flash.error("Le timbrature web non sono permesse da questo terminale! "
+					+ "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+
+			try {
+				Secure.login();
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		List<Person> personList = personDao.list(Optional.<String>absent(),offices, false, data, data, true).list();
 		render(data, personList);
 	}
 
 
-	public static void clockLogin(Long userId, String password)
-	{
+	public static void clockLogin(Long userId, String password){
 		LocalDate today = new LocalDate();
 		if(userId == null || userId == 0){
-			
+
 			flash.error("Utente non selezionato");
 			Clocks.show();
 		}
@@ -78,10 +91,24 @@ public class Clocks extends Controller{
 		User user = userDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
 
 		if(user == null){
-			
+
 			flash.error("Password non corretta");
 			Clocks.show();
-		}	
+		}
+		
+		String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+
+		if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
+			
+			flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+					"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			try {
+				Secure.login();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
 		PersonDay personDay = null;			
 		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
 

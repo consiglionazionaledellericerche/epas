@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -32,7 +34,7 @@ public class ConfGeneralDao extends DaoBase{
 	 */
 	public ConfGeneral getById(Long pk) {
 		
-		QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
 		
 		final JPQLQuery query = getQueryFactory().from(confGeneral)
 				.where(confGeneral.id.eq(pk));
@@ -49,12 +51,27 @@ public class ConfGeneralDao extends DaoBase{
 	 */
 	public Optional<ConfGeneral> getByFieldName(String field, Office office) {
 		
-		QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
 		
 		final JPQLQuery query = getQueryFactory().from(confGeneral)
 				.where(confGeneral.field.eq(field).and(confGeneral.office.eq(office)));
 		
 		return Optional.fromNullable(query.singleResult(confGeneral));
+	}
+	
+	/**
+	 * @param field
+	 * @param value
+	 * @return restituisce la lista di tutti i confGeneral che nel parametro field, contengono il valore value
+	 *  
+	 */
+	public List<ConfGeneral> containsValue(String field,String value){
+		
+		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		
+		return getQueryFactory().from(confGeneral).where(confGeneral.field.eq(field)
+				.and(confGeneral.fieldValue.contains(value))).list(confGeneral);
+		
 	}
 
 }
