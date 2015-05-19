@@ -6,4 +6,6 @@ public class DayRecap {
 //      Da trasformare in un localdate  
         public String date;
         public boolean mission;
+        public int workingTime;
+        
 }

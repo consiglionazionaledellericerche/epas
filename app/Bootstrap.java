@@ -2,6 +2,7 @@
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -30,10 +31,14 @@ import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.libs.Codec;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 
 import controllers.Security;
 import dao.OfficeDao;
@@ -42,6 +47,7 @@ import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
+
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
@@ -139,9 +145,12 @@ public class Bootstrap extends Job<Void> {
 		bootstrapSuperAdminCreation();
 		
 		restUsersCreation();
-	
+		
+		
 	}
 	
+	
+
 	/**
 	 * Crea il ruolo Employee che deve essere associato al dipendente nell'ufficio di appartenenza
 	 */
