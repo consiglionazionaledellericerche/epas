@@ -42,6 +42,7 @@
 		<th>Inizializzazione</th>
 		<th>Invio Email</th>
 		<th>Note</th>
+		#{if switchUser}<th></th>#{/if}
 	</tr>
 
 	#{list items:personList, as:'person'}
@@ -51,9 +52,6 @@
 
 		<td class="personName">
 			<a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
-			#{if switchUser} 
-  				<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserTo(person.value.user.id)}">Switch User</a>
-			#{/if}
 		</td>
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
@@ -115,6 +113,10 @@
 		#{else}
 			<td></td>
 		#{/else}
+		#{if switchUser}
+		<td>
+			<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserTo(person.value.user.id)}">Assumi identità</a>
+		</td>#{/if}
 	#{/if}
 	#{else}
 		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
@@ -131,6 +133,7 @@
 		<td></td>
 		<td></td>
 		<td></td>
+		#{if switchUser}<td></td>#{/if}
 	#{/else}
 	</tr>
 
