@@ -15,7 +15,7 @@ CREATE TABLE contract_month_recap
   -- modulo recap assenze
   abs_fap_usate INTEGER,
   abs_fac_usate INTEGER,
-  asb_p_usati INTEGER,
+  abs_p_usati INTEGER,
   abs_rc_usati INTEGER,
 
   -- modulo recap residui
@@ -55,8 +55,12 @@ CREATE TABLE contract_month_recap
       REFERENCES contracts (id) 
 );
 
+ALTER TABLE contracts ADD COLUMN source_required BOOLEAN;
+
 
 # ---!Downs
 
 DROP TABLE contract_month_recap;
 DROP SEQUENCE seq_contract_month_recap;
+
+ALTER TABLE contracts DROP COLUMN source_required;

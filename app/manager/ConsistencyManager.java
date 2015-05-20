@@ -41,7 +41,6 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 /**
  * Manager che gestisce la consistenza e la coerenza dei dati in Epas.
@@ -139,20 +138,14 @@ public class ConsistencyManager {
 			YearMonth yearMonthOfficeInitUse = new YearMonth(
 					new LocalDate(confGeneralManager.getFieldValue(
 							Parameter.INIT_USE_PROGRAM, p.office)));
-			try {contractMonthRecapManager.populateContractMonthRecapByPerson(p,
-					yearMonthOfficeInitUse);}
-			catch(Exception e) {}
+			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
+					yearMonthOfficeInitUse);
 			
 			// (3b) Ricalcolo dei residui per anno
 			log.info("Update residui annuali {} dal {} a oggi", p.getFullname(), fromDate);
 			List<Contract> contractList = contractDao.getPersonContractList(p);
 			for(Contract contract : contractList) {
-				try {
-					contractYearRecapManager.buildContractYearRecap(contract);
-				} catch (EpasExceptionNoSourceData e) {
-					log.warn("Manca l'inizializzazione per il contratto {} di {}",
-							new Object[]{contract.id, contract.person.getFullname()});
-				}
+				contractYearRecapManager.buildContractYearRecap(contract);
 			}
 
 		}

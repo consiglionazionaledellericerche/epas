@@ -33,7 +33,6 @@ import dao.PersonDayDao;
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 /**
  * 
@@ -181,9 +180,8 @@ public class ContractManager {
 	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
 	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
 	 *   modifica la data fine che potrebbe non essere persistita)
-	 * @throws EpasExceptionNoSourceData 
 	 */
-	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) throws EpasExceptionNoSourceData {
+	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio

@@ -58,6 +58,9 @@ public class Contract extends BaseModel {
 
 	@Column(name="source_remaining_minutes_current_year")
 	public Integer sourceRemainingMinutesCurrentYear = null;
+	
+	@Column(name="source_required")
+	public boolean sourcerequired = false;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
@@ -67,6 +70,7 @@ public class Contract extends BaseModel {
 	@OrderBy("beginFrom")
 	public Set<VacationPeriod> vacationPeriods = Sets.newHashSet();
 
+	@Deprecated
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractYearRecap> recapPeriods;
 	

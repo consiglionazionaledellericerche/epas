@@ -48,7 +48,6 @@ import dao.ContractDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import exceptions.EpasExceptionNoSourceData;
 
 public class ChartsManager {
 
@@ -464,9 +463,8 @@ public class ChartsManager {
 	 * @param person
 	 * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e residuo per la persona passata come parametro
 	 * @throws IOException
-	 * @throws EpasExceptionNoSourceData 
 	 */
-	public FileInputStream exportDataSituation(Person person) throws IOException, EpasExceptionNoSourceData{
+	public FileInputStream exportDataSituation(Person person) throws IOException {
 		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
 		FileInputStream inputStream = new FileInputStream( tempFile );
 		FileWriter writer = new FileWriter(tempFile, true);

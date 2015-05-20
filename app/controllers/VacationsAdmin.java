@@ -26,7 +26,6 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{
@@ -64,14 +63,9 @@ public class VacationsAdmin extends Controller{
 			Optional<Contract> contract = wrapperFactory
 					.create(person).getCurrentContract();
 
-			try {
-				VacationsRecap vr = vacationsFactory.create(
+			VacationsRecap vr = vacationsFactory.create(
 						year, contract.get(), LocalDate.now(), true);
-				vacationsList.add(vr);
-
-			} catch (EpasExceptionNoSourceData e) {
-				personsWithVacationsProblems.add(person);
-			}
+			vacationsList.add(vr);
 		}
 
 		Office office = Security.getUser().get().person.office;
@@ -106,18 +100,10 @@ public class VacationsAdmin extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		try { 
-			VacationsRecap vacationsRecap = vacationsFactory
-					.create(anno, contract.get(), LocalDate.now(), true);
+		VacationsRecap vacationsRecap = vacationsFactory
+				.create(anno, contract.get(), LocalDate.now(), true);
 
-			renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
-
-		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.get().person.fullName());
-			renderTemplate("Application/indexAdmin.html");
-		}
-
+		renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
 	}
 
 
@@ -136,18 +122,10 @@ public class VacationsAdmin extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		try { 
-			VacationsRecap vacationsRecap = vacationsFactory
-					.create(anno, contract.get(), LocalDate.now(), true);
+		VacationsRecap vacationsRecap = vacationsFactory
+				.create(anno, contract.get(), LocalDate.now(), true);
 
-			renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
-
-		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.get().person.fullName());
-			renderTemplate("Application/indexAdmin.html");
-		}
-
+		renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
 	}
 
 
@@ -164,18 +142,10 @@ public class VacationsAdmin extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		try { 
-			VacationsRecap vacationsRecap = vacationsFactory
-					.create(anno, contract.get(), LocalDate.now(), true);
+		VacationsRecap vacationsRecap = vacationsFactory
+				.create(anno, contract.get(), LocalDate.now(), true);
 
-			renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
-
-		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.get().person.fullName());
-			renderTemplate("Application/indexAdmin.html");
-		}
-
+		renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
 	}
 
 }

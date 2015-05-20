@@ -37,7 +37,6 @@ import dao.PersonDayDao;
 import dao.WorkingTimeTypeDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 /**
  * TODO: una volta mergiato il branch fare un unico manager che gestisca sia 
@@ -70,8 +69,6 @@ public class ContractMonthRecapManager {
 	private AbsenceTypeDao absenceTypeDao;
 	@Inject
 	private CompetenceCodeDao competenceCodeDao;
-	@Inject
-	private ConfGeneralManager confGeneralManager;
 		
 	/**
 	 * Costruisce i riepiloghi mensili per il contratto fornito.
@@ -81,10 +78,9 @@ public class ContractMonthRecapManager {
 	 * 
 	 * @param contract
 	 * @param yearMonthFrom
-	 * @throws EpasExceptionNoSourceData
 	 */
 	public void populateContractMonthRecap(Contract contract, 
-			Optional<YearMonth> yearMonthFrom) throws EpasExceptionNoSourceData  {
+			Optional<YearMonth> yearMonthFrom) {
 		
 		/*
 		if( !yearMonthFrom.isPresent() ) {
@@ -134,13 +130,16 @@ public class ContractMonthRecapManager {
 
 	/**
 	 * Costruisce i riepiloghi mensili inerenti la persona a partire da yeraMonthFrom.
-	 *  
-	 * @param person
+	 * 
+	 * Utilizzo: specificare il mese dal quale ricostruire i riepiloghi. 
+	 * FIXME: comportamento non verificato se si inserisce un mese precedente all'inizio
+	 * dell'utilizzo del software. (Per adesso non si verifica mai).
+	 * 
+ 	 * @param person
 	 * @param yearMonthFrom
-	 * @throws EpasExceptionNoSourceData
 	 */
 	public void populateContractMonthRecapByPerson( Person person, 
-			YearMonth yearMonthFrom) throws EpasExceptionNoSourceData {
+			YearMonth yearMonthFrom) {
 
 		for( Contract contract : person.contracts ){
 			
@@ -196,10 +195,9 @@ public class ContractMonthRecapManager {
 	 * @param contract
 	 * @param yearMonthToCompute il riepilogo che si vuole costruire
 	 * @return
-	 * @throws EpasExceptionNoSourceData
 	 */
-	private YearMonth populateContractMonthFromSource(Contract contract, YearMonth yearMonthToCompute) throws EpasExceptionNoSourceData
-	{
+	private YearMonth populateContractMonthFromSource(Contract contract, YearMonth yearMonthToCompute) {
+		
 		if(contract.sourceDate == null)
 			return yearMonthToCompute;
 		
@@ -281,9 +279,8 @@ public class ContractMonthRecapManager {
 	 * @param yearMonth
 	 * @param calcolaFinoA
 	 * @return
-	 * @throws EpasExceptionNoSourceData
 	 */
-	private ContractMonthRecap populateResidualModule(ContractMonthRecap cmr, YearMonth yearMonth, LocalDate calcolaFinoA) throws EpasExceptionNoSourceData {
+	private ContractMonthRecap populateResidualModule(ContractMonthRecap cmr, YearMonth yearMonth, LocalDate calcolaFinoA) {
 
 		IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
 		Contract contract = cmr.contract;
