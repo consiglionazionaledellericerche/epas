@@ -2,7 +2,6 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sedi'  /}
 
-
 <div class="container">
 	<!-- TODO 
 	<p>
@@ -13,7 +12,6 @@
 	 -->
 
 	#{list items:allAreas, as:'area'}
-	  #{if area.isPrintable() }
 		<div class="panel panel-info">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">${area.value.name}</h3>
@@ -21,21 +19,18 @@
 		  <div class="panel-body">
 		  
 		    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in quest area è <strong>${area.activePersonsInOffice().size()}</strong></p>
-		    
-		    #{if session.username.equals("admin") }
-		    <p>
+
+			<p>
 		      <a data-modal=".my-modal" href="@{Offices.insertInstitute(area.value.id)}">
 		        <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto per ${area.value.name}
 		      </a>
 		    </p>
-		  	#{/if}
-		  	
+
 		  	#{list items:area.getWrapperInstitutes(), as:'istituto'}
 		  	  
-		  	  #{if istituto.isPrintable() }
 			  	  <div class="well">
 			  	     <a data-modal=".my-modal" href="@{Offices.editInstitute(istituto.value.id)}"><p class="lead">${istituto.value.name}</p></a>
-			  	    
+
 			  	    <strong>Lettori istituto installati</strong> 
 		  	  	    #{list items:istituto.getActiveBadgeReaders(), as:'badgeReader'}
 			          <span class="label label-success">${badgeReader}</span>
@@ -53,17 +48,11 @@
 				      </tr>
 				      
 				      #{list items:istituto.getWrapperSeats(), as:'sede'}
-				      #{if sede.isPrintable() }
 				        <tr style="background-color: white;">
 				          
 				          <!-- Seat data -->
 				          <td>
-				          #{if sede.isEditable() }
 				            <a data-modal=".my-modal" href="@{Offices.editSeat(sede.value.id)}">${sede.value.name}</a>
-				          #{/if}
-				          #{else}
-				            ${sede.value.name}
-				          #{/else}
 				          </td>
 				          <td>
 				            <strong>Indirizzo:</strong> ${sede.value.address}<br>
@@ -83,7 +72,6 @@
 				          
 				          <!-- Seat administrator -->
 				          <td class="center">
-				            #{if sede.isEditable }
 				              <a class="btn btn-primary btn-xs"
 				                 data-modal=".my-modal"
 				                 href="@{Administrators.insertNewAdministrator(sede.value.id, roleAdmin.id)}">
@@ -93,10 +81,8 @@
 				                  </span>
 				              </a>  
 				              <br>
-				            #{/if}
 				            #{list items:sede.getPersonnelAdmin(), as:'person'}
 				                <br>${person.surname} ${person.name}
-								#{if sede.isEditable }
 								  #{if person.user.username.equals(session.username) }
 								  <a href="@{Administrators.deleteSelfAsAdministrator(sede.value.id)}" data-modal=".my-modal">
 								  #{/if}
@@ -108,11 +94,9 @@
 				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
 				                    </span>
 				                  </a>
-								#{/if}
 				            #{/list}
 				          </td>
 				          <td class="center">
-				            #{if sede.isEditable }
 				              <a class="btn btn-primary btn-xs"
 				                 data-modal=".my-modal"
 				                 href="@{Administrators.insertNewAdministrator(sede.value.id, roleAdminMini.id)}">
@@ -122,17 +106,14 @@
 				                  </span>
 				              </a>
 				              <br>
-				            #{/if}
 				            #{list items:sede.getPersonnelAdminMini(), as:'person'}
 				                <br>${person.surname} ${person.name}
-				                #{if sede.isEditable }
 								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id)}">
 				                    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
 				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
 				                    </span>
 				                  </a>
-								#{/if}
 				            #{/list}
 					      </td>
 					      
@@ -147,7 +128,6 @@
 				          </a>  
 				          <br>
 				          <br>
-					      #{if sede.isEditable }
 					        #{list items:sede.getSeatSystemUsersRolesOffices(), as:'systemUro'}
 					          
 					          <strong>${systemUro.role.name}</strong> ${systemUro.user.username} 
@@ -161,29 +141,22 @@
 					          
 					          <br>
 					        #{/list}
-					      #{/if}
-					     
 					      </td>
 					      
 					      <!-- End Seat administrator -->
 				        </tr>
-				      #{/if}  
 				  	  #{/list} 
 				    </table>
-				    #{if session.username.equals("admin") }
 				    <p>
 			          <a  data-modal=".my-modal" href="@{Offices.insertSeat(istituto.value.id)}">
 			            <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${istituto.value.name}
 			          </a>
 			        </p>
-			        #{/if}
-				  </div>
-			  #{/if}  
+				  </div> 
 			#{/list}
 
 		  </div>
 		</div>   
-	  #{/if}
 	#{/list}
 	
 </div>

@@ -21,13 +21,13 @@ import models.Person;
 import models.Qualification;
 import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.CheckWith;
 import play.data.validation.Email;
@@ -36,7 +36,6 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.libs.Codec;
 import play.mvc.Controller;
-import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -47,18 +46,15 @@ import com.google.common.collect.ImmutableList;
 
 import dao.QualificationDao;
 import dao.RoleDao;
-import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 
 /**
  * @author daniele
  *
  */
-@With( {Resecure.class})
+//@With( {Resecure.class})
 public class Wizard extends Controller {
 
-	@Inject
-	private static UserDao userDao;
 	@Inject
 	private static OfficeManager officeManager;
 	@Inject
@@ -76,7 +72,6 @@ public class Wizard extends Controller {
 
 	public static final String STEPS_KEY = "steps";
 	public static final String PROPERTIES_KEY = "properties";
-	public static final String OFFICE_COUNT = "officeCount";
 
 	public static class WizardStep {
 		public final int index;
@@ -109,19 +104,17 @@ public class Wizard extends Controller {
 						WizardStep.of("Riepilogo", "summary",4));
 	}
 
-
 	public static void wizard(int step) {
 		Preconditions.checkNotNull(step);
-
 
 		//    	Recupero dalla cache  	
 		List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
 		Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
-		Long officeCount = Cache.get(OFFICE_COUNT,Long.class);
+		Long officeCount = Cache.get(Resecure.OFFICE_COUNT,Long.class);
 
 		if(officeCount == null){
 			officeCount = Office.count();
-			Cache.add(OFFICE_COUNT, officeCount);
+			Cache.add(Resecure.OFFICE_COUNT, officeCount);
 		}
 
 		if(officeCount > 0){
@@ -462,12 +455,11 @@ public class Wizard extends Controller {
 			Logger.error("Impossibile caricare il file Wizard_Properties.conf per la procedura di Wizard");	
 		}
 
-		//      Cambio password user admin
-
-		User admin = userDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
-		//User admin = User.find("byUsername", "admin").first();
-		admin.password = Codec.hexMD5(properties.getProperty("admin_password"));
-		admin.save();
+		//      Creazione admin
+		User adminUser = new User();
+		adminUser.username = Role.ADMIN;  
+		adminUser.password = Codec.hexMD5(properties.getProperty("admin_password"));
+		adminUser.save();
 
 		//		 Creazione Area,Istituto e Sede
 
@@ -475,12 +467,14 @@ public class Wizard extends Controller {
 		Office area = new Office();
 		area.name = properties.getProperty("area");
 		area.save();
+
 		//		Istituto
 		Office institute = new Office();
 		institute.name = properties.getProperty("institute");
 		institute.contraction = properties.getProperty("institute_contraction");
 		institute.office = area;
 		institute.save();
+
 		//		Sede
 		Office seat = new Office();
 		seat.name = properties.getProperty("seat");
@@ -500,9 +494,13 @@ public class Wizard extends Controller {
 		}
 		seat.office = institute;
 		seat.save();
-
-
-		officeManager.setPermissionAfterCreation(seat);
+		
+//		Invalido la cache sul conteggio degli uffici
+		Cache.safeDelete(Resecure.OFFICE_COUNT);
+		
+		officeManager.setSystemUserPermission(area);
+		officeManager.setSystemUserPermission(institute);
+		officeManager.setSystemUserPermission(seat);
 
 		confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, seat, 
 				Optional.fromNullable(LocalDate.now().toString()));
@@ -581,21 +579,17 @@ public class Wizard extends Controller {
 		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 		contractManager.properContractCreate(contract, wtt);
 
-		User user = new User();
-		//user.id = person.id;
-		user.password = Codec.hexMD5(properties.getProperty("manager_password"));
-		user.person = p;
-		user.username = properties.getProperty("manager_username");
-		user.save();
-		p.user = user;
+		User manager = new User();
+		manager.password = Codec.hexMD5(properties.getProperty("manager_password"));
+		manager.person = p;
+		manager.username = properties.getProperty("manager_username");
+		manager.save();
+		p.user = manager;
 		p.save();
 
-		UsersRolesOffices uro = new UsersRolesOffices();
-		uro.office = seat;
-		uro.user = user;
-		uro.role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-
-		uro.save();
+		//		Assegnamento dei permessi all'utente creato
+		officeManager.setUro(manager, seat, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+		officeManager.setUro(manager, seat, roleDao.getRoleByName(Role.EMPLOYEE));
 
 		properties.remove("manager_password");
 		properties.remove("admin_password");
@@ -608,7 +602,7 @@ public class Wizard extends Controller {
 			flash.error(e.getMessage());    		
 		}
 
-		Application.index();
+		redirect(Play.ctxPath + "/");
 	}
 
 }

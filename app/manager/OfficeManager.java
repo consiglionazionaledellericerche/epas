@@ -1,42 +1,28 @@
 package manager;
 
-import java.util.List;
-
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import controllers.Security;
-import dao.OfficeDao;
 import dao.RoleDao;
-import dao.UserDao;
 import dao.UsersRolesOfficesDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
 
 public class OfficeManager {
 
 	@Inject
 	public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-			UserDao userDao, RoleDao roleDao, IWrapperFactory wrapperFactory,
-			OfficeDao officeDao) {
+			RoleDao roleDao) {
 		this.usersRolesOfficesDao = usersRolesOfficesDao;
-		this.userDao = userDao;
 		this.roleDao = roleDao;
-		this.wrapperFactory = wrapperFactory;
-		this.officeDao = officeDao;
 	}
 
 	private final UsersRolesOfficesDao usersRolesOfficesDao;
-	private final UserDao userDao;
 	private final RoleDao roleDao;
-	private final IWrapperFactory wrapperFactory;
-	private final OfficeDao officeDao;
 
 	/**
 	 * 
@@ -62,44 +48,16 @@ public class OfficeManager {
 	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
 	 * @param office
 	 */
-	public void setPermissionAfterCreation(Office office) {
+	public void setSystemUserPermission(Office office) {
+		
+		User admin = User.find("byUsername", Role.ADMIN).first();
+		User developer = User.find("byUsername", Role.DEVELOPER).first();
 
-		User userLogged = Security.getUser().get();
-		User admin = userDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
-
-		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+		Role roleAdmin = roleDao.getRoleByName(Role.ADMIN);
+		Role roleDeveloper = roleDao.getRoleByName(Role.DEVELOPER);
 
 		setUro(admin, office, roleAdmin);
-		setUro(userLogged, office, roleAdmin);
-
-		List<Office> officeList = Lists.newArrayList();
-
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(wOffice.isInstitute()) {
-			officeList.add(officeDao.getSuperArea(office));
-		}
-		if(wOffice.isSeat()) {
-			officeList.add(officeDao.getSuperArea(office));
-			officeList.add(officeDao.getSuperInstitute(office));
-		}
-
-		for(Office superOffice : officeList) {
-
-			//Attribuire roleAdminMini a coloro che hanno roleAdminMini su il super office
-			for(User user : userDao.getUserByOfficeAndRole(superOffice, roleAdminMini)) {
-
-				setUroIfImprove(user, office, roleAdminMini, true);
-			}
-
-			//Attribuire roleAdmin a coloro che hanno roleAdmin su area il super office
-			for(User user : userDao.getUserByOfficeAndRole(superOffice, roleAdmin)) {
-
-				setUroIfImprove(user, office, roleAdmin, true);
-			}
-
-		}
+		setUro(developer, office, roleDeveloper);
 
 	}
 
@@ -146,22 +104,16 @@ public class OfficeManager {
 	 */
 	public void setUro(User user, Office office, Role role){
 
-		UsersRolesOffices newUro = null;
-		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
+		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOffices(user,role, office);
 
 		if(!uro.isPresent()) {
 
-			newUro = new UsersRolesOffices();
+			UsersRolesOffices newUro = new UsersRolesOffices();
 			newUro.user = user;
 			newUro.office = office;
 			newUro.role = role;
 			newUro.save();
 		}
-		else{
-			newUro = uro.get();
-			newUro.role = role;
-			newUro.save();
-		}		
 
 	}
 }
