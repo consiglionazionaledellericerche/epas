@@ -26,32 +26,33 @@ import dao.PersonDao;
 public class ExpandableJob extends Job{
 
 	@Inject
-	static ConsistencyManager consistencyManager;
-	
+	private static ConsistencyManager consistencyManager;
 	@Inject
 	private static OfficeDao officeDao;
-	
+	@Inject
+	private static PersonDao personDao;
+
 	public void doJob(){
 		Logger.info("Start Job expandable");
-		
+
 		LocalDate fromDate = LocalDate.now().minusMonths(2);
 		LocalDate toDate = LocalDate.now().minusDays(1);
-		
-		List<Person> personList = PersonDao.list(
+
+		List<Person> personList = personDao.list(
 				Optional.<String>absent(),
 				Sets.newHashSet(officeDao.getAllOffices()), 
-						false, 
-						fromDate, 
-						toDate, 
-						true).list();
-		
+				false, 
+				fromDate, 
+				toDate, 
+				true).list();
+
 		try {
 			consistencyManager.sendMail(personList, fromDate, toDate, "no assenze");
 		}
 		catch(EmailException e){
 			e.printStackTrace();
 		}
-		
+
 		Logger.info("Concluso Job expandable");	
 	}
 }

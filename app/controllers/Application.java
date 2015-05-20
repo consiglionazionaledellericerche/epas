@@ -20,7 +20,6 @@ public class Application extends Controller {
     
 	@Inject
 	static OfficeDao officeDao;
-	
 	@Inject
 	static IWrapperFactory wrapperFactory;
 	

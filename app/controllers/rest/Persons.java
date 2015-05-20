@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.CompetenceManager;
 import manager.PersonDayManager;
 import models.Absence;
 import models.Competence;
@@ -45,7 +46,7 @@ public class Persons extends Controller{
 	private static AbsenceDao absenceDao;
 	@Inject
 	private static CompetenceDao competenceDao;
-	
+		
 	@BasicAuth
 	public static void days(String email,LocalDate start,LocalDate end){
 
@@ -66,6 +67,8 @@ public class Persons extends Controller{
 				dayRecap.workingMinutes = personDayManager.workingMinutes(wrapperFactory.create(personday));
 				dayRecap.date = personday.date.toString();
 				dayRecap.mission = personDayManager.isOnMission(personday);
+				dayRecap.workingTime = wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
+				
 				return dayRecap;
 			}}).toList();
 		

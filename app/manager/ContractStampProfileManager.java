@@ -1,5 +1,7 @@
 package manager;
 
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractStampProfile;
 
@@ -7,12 +9,15 @@ import org.joda.time.LocalDate;
 
 public class ContractStampProfileManager {
 
+	@Inject
+	private ContractManager contractManager;
+
 	/**
 	 * 
 	 * @param contract
 	 * @param splitDate
 	 */
-	public static void splitContractStampProfile(ContractStampProfile contract, LocalDate splitDate){
+	public void splitContractStampProfile(ContractStampProfile contract, LocalDate splitDate){
 		ContractStampProfile csp2 = new ContractStampProfile();
 		csp2.contract = contract.contract;
 		csp2.startFrom = splitDate;
@@ -23,15 +28,15 @@ public class ContractStampProfileManager {
 		contract.endTo = splitDate.minusDays(1);
 		contract.save();
 	}
-	
+
 	/**
 	 * 
 	 * @param contract
 	 * @param index
 	 * @param csp
 	 */
-	public static void deleteContractStampProfile(Contract contract, int index,ContractStampProfile csp){
-		ContractStampProfile previous = ContractManager.getContractStampProfileAsList(contract).get(index-1);
+	public void deleteContractStampProfile(Contract contract, int index,ContractStampProfile csp){
+		ContractStampProfile previous = contractManager.getContractStampProfileAsList(contract).get(index-1);
 		previous.endTo = csp.endTo;
 		previous.save();
 		csp.delete();

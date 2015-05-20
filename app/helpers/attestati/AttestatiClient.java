@@ -14,6 +14,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import manager.ConfGeneralManager;
 import models.Absence;
 import models.Competence;
@@ -45,12 +47,17 @@ import controllers.Security;
  */
 public class AttestatiClient {
 
+	@Inject
+	private ConfGeneralManager confGeneralManager;
+
 	private static String CLIENT_USER_AGENT = "ePAS"; 
 
 	private static String BASE_LOGIN_URL = "LoginLDAP";
 	private static String BASE_LISTA_DIPENDENTI_URL = "ListaDip";
 	private static String BASE_ELABORA_DATI_URL = "HostDip";
-	
+
+
+
 	/**
 	 * Contenitore dei dati necessari per l'invio dei periodi di assenza
 	 * del personale tramite il sistema degli attestati del CNR.
@@ -73,7 +80,7 @@ public class AttestatiClient {
 		public void setGgFine(Integer ggFine) { this.ggFine = ggFine; }
 
 	}
-	
+
 	@SuppressWarnings("serial")
 	public final static class LoginResponse implements Serializable {
 		private String usernameCnr;
@@ -81,6 +88,7 @@ public class AttestatiClient {
 		private Integer month;
 		private final boolean loggedIn;
 		private final Map<String, String> cookies;
+
 		public LoginResponse(String usernameCnr, boolean loggedIn, Map<String, String> cookies, Integer year, Integer month) {
 			this.usernameCnr = usernameCnr;
 			this.loggedIn = loggedIn;
@@ -102,8 +110,8 @@ public class AttestatiClient {
 		public Integer getMonth() {return this.month;}
 		public String getNamedMonth() {return DateUtility.getName(this.month);}
 	}
-	
-	
+
+
 	/**
 	 * Effettua la login sul sistema degli attestati facendo una post con i parametri passati.
 	 * 
@@ -117,15 +125,15 @@ public class AttestatiClient {
 	 * @throws MalformedURLException
 	 * @throws URISyntaxException
 	 */
-	public static LoginResponse login(String attestatiLogin, String attestatiPassword, Integer year, Integer month) throws AttestatiException, MalformedURLException, URISyntaxException {
-		
+	public LoginResponse login(String attestatiLogin, String attestatiPassword, Integer year, Integer month) throws AttestatiException, MalformedURLException, URISyntaxException {
+
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
 		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+		String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
 		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
-		
+
 		Connection connection = Jsoup.connect(loginUrl.toString());
 		Response loginResponse;
 		try {
@@ -144,7 +152,7 @@ public class AttestatiClient {
 
 
 			Elements loginMessages = loginDoc.select("h5[align=center]>font");
-			
+
 			if (loginResponse.statusCode() != 200 || 
 					loginMessages.isEmpty() || 
 					! loginMessages.first().ownText().contains("Login completata con successo.")) {
@@ -152,13 +160,13 @@ public class AttestatiClient {
 			} else {
 				return new LoginResponse(attestatiLogin, true, loginResponse.cookies(), year, month);
 			}
-			
+
 		} catch (IOException e) {
 			Logger.error("Errore durante la login sul sistema di invio degli attestati. Eccezione = %s", e);
 			return new LoginResponse(attestatiLogin, false, null, year, month, e);
 		}
 	}
-	
+
 	/**
 	 * @param cookies i cookies da utilizzare per inviare una richiesta "autenticata"
 	 * @param year
@@ -168,17 +176,17 @@ public class AttestatiClient {
 	 * @throws URISyntaxException
 	 * @throws MalformedURLException
 	 */
-	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
+	public List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
 
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
-						
+		String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+
 		URI baseUri = new URI(urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
 		Connection connection = Jsoup.connect(listaDipendentiUrl.toString());
 		connection.cookies(cookies);
-		
+
 		try {
 			listaDipendentiResponse = connection
 					.data("sede_id", office.code.toString())
@@ -236,17 +244,17 @@ public class AttestatiClient {
 					String.format("Errore durante il prelevamento della lista dei dipendneti. Eccezione = %s", e.getStackTrace().toString()));
 		}		
 	}
-	
-	public static RispostaElaboraDati elaboraDatiDipendente(
+
+	public RispostaElaboraDati elaboraDatiDipendente(
 			Map<String, String> cookies, Dipendente dipendente, Integer year, Integer month, 
 			List<Absence> absences, List<Competence> competences, List<PersonMonthRecap> pmList, Integer mealTicket) 
 					throws URISyntaxException, MalformedURLException {
-		
+
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
-			
+		String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+
 		URI baseUri = new URI(urlToPresence);
 		final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 
@@ -256,28 +264,28 @@ public class AttestatiClient {
 		StringBuffer trainingHoursSent = new StringBuffer();
 		StringBuffer mealTicketSent = new StringBuffer();
 		StringBuffer problems = new StringBuffer();
-		
+
 		boolean isOk = true;
-		
+
 		Connection connection = Jsoup.connect(elaboraDatiUrl.toString());
 		connection.cookies(cookies);
-		
+
 		connection.userAgent(CLIENT_USER_AGENT)
-			.data("matr", dipendente.getMatricola())
-			.data("anno", year.toString())
-			.data("mese", month.toString())
-			.data("sede_id", office.code.toString())
-			.method(Method.POST);
+		.data("matr", dipendente.getMatricola())
+		.data("anno", year.toString())
+		.data("mese", month.toString())
+		.data("sede_id", office.code.toString())
+		.method(Method.POST);
 
 		int codAssAssoCounter = 0;
 		for (AssenzaPerPost assenzaPerPost : getAssenzePerPost(absences)) {
-			
+
 			connection.data("codass" + codAssAssoCounter, assenzaPerPost.getCodice());
 			connection.data("gg_inizio" + codAssAssoCounter, assenzaPerPost.getGgInizio().toString());
 			connection.data("gg_fine" + codAssAssoCounter, assenzaPerPost.getGgFine().toString());
 			absencesSent.append(assenzaPerPost.getCodice()).append(",")
-								.append(assenzaPerPost.getGgInizio()).append(",")
-								.append(assenzaPerPost.getGgFine()).append("; ");
+			.append(assenzaPerPost.getGgInizio()).append(",")
+			.append(assenzaPerPost.getGgFine()).append("; ");
 			Logger.info("%s, sto spedendo l'assenza di tipo %s, gg inizio = %d, gg_fine = %d", 
 					dipendente.getCognomeNome(), assenzaPerPost.getCodice(),
 					assenzaPerPost.getGgInizio(), assenzaPerPost.getGgInizio());
@@ -289,12 +297,12 @@ public class AttestatiClient {
 			connection.data("codcom" + codComCounter, competence.competenceCode.code);
 			connection.data("oreatt" + codComCounter, String.valueOf(competence.valueApproved));
 			competencesSent.append(competence.competenceCode.code).append(",")
-							.append(competence.valueApproved).append("; ");			
+			.append(competence.valueApproved).append("; ");			
 			Logger.info("%s, sto spedendo la competenza di tipo %s, ore attribuite = %d", 
 					dipendente.getCognomeNome(), competence.competenceCode.code, competence.valueApproved);
 			codComCounter++;
 		}
-		
+
 		int codFormCounter = 0;
 		if(pmList != null){
 			for(PersonMonthRecap pm : pmList){
@@ -302,14 +310,14 @@ public class AttestatiClient {
 				connection.data("gg_fine_corso" + codFormCounter, String.valueOf(pm.toDate.getDayOfMonth()));
 				connection.data("ore_corso" + codFormCounter, String.valueOf(pm.trainingHours));
 				trainingHoursSent.append(String.valueOf(pm.fromDate.getDayOfMonth())).append(",")
-									.append(String.valueOf(pm.toDate.getDayOfMonth())).append(",")
-									.append(String.valueOf(pm.trainingHours)).append("; ");
+				.append(String.valueOf(pm.toDate.getDayOfMonth())).append(",")
+				.append(String.valueOf(pm.trainingHours)).append("; ");
 				Logger.info("%s, sto spedendo %d ore di formazione dal giorno %s al giorno %s", dipendente.getCognomeNome(), pm.trainingHours,
 						pm.fromDate, pm.toDate);
 				codFormCounter++;
 			}
 		}
-		
+
 		// Decommentato in virtù dell'aggiornamento dovuto all'utilizzo dei ticket restaurant
 		if(mealTicket != null){
 			connection.data("gg_buoni_pasto", String.valueOf(mealTicket));
@@ -317,8 +325,8 @@ public class AttestatiClient {
 			.append(String.valueOf(mealTicket));
 			Logger.info("Inviati %d buoni pasto per %s", mealTicket, dipendente.getCognomeNome());
 		}
-		
-		
+
+
 		Response elaboraDatiResponse;
 		try {
 			elaboraDatiResponse = connection.execute();
@@ -332,7 +340,7 @@ public class AttestatiClient {
 
 			Document elaboraDatiDoc = elaboraDatiResponse.parse();
 			Logger.info("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);
-			
+
 			/*
 			 * In caso di errore nella pagina restituita compaiono degli H5 come questi:
 			 *	<H5 align=center><FONT SIZE='4' FACE='Arial'>Errore in fase di controllo competenze <BR>7  ERRASSSOVRAPP<BR>Assenza  OA7 in periodi sovrapposti </FONT></H5>
@@ -372,7 +380,7 @@ public class AttestatiClient {
 		resp.setOk(isOk);
 		return resp;
 	}
-	
+
 	/**
 	 * La lista di assenze passate sono di tipo giornaliero ma al sistema degli attestati vanno
 	 * passate le assenze come intervallo di tempo.
@@ -392,24 +400,24 @@ public class AttestatiClient {
 		for (Absence absence : absences) {
 			String absenceCodeToSend = 
 					(absence.absenceType.certificateCode == null || absence.absenceType.certificateCode == "") 
-						? absence.absenceType.code.toUpperCase() : absence.absenceType.certificateCode.toUpperCase();	
-			
-			if (previousDate == null || previousAbsenceCode == null) { 
-				assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
-				assenze.add(assenza);
-				previousDate = absence.personDay.date;
-				previousAbsenceCode = absenceCodeToSend;
-				continue;
-			} 
+					? absence.absenceType.code.toUpperCase() : absence.absenceType.certificateCode.toUpperCase();	
 
-			if (previousDate.plusDays(1).equals(absence.personDay.date) && previousAbsenceCode.equals(absenceCodeToSend)) {
-				assenza.setGgFine(absence.personDay.date.getDayOfMonth());
-			} else {
-				assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
-				previousAbsenceCode = absenceCodeToSend;
-				assenze.add(assenza);
-			}
-			previousDate = absence.personDay.date;
+					if (previousDate == null || previousAbsenceCode == null) { 
+						assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
+						assenze.add(assenza);
+						previousDate = absence.personDay.date;
+						previousAbsenceCode = absenceCodeToSend;
+						continue;
+					} 
+
+					if (previousDate.plusDays(1).equals(absence.personDay.date) && previousAbsenceCode.equals(absenceCodeToSend)) {
+						assenza.setGgFine(absence.personDay.date.getDayOfMonth());
+					} else {
+						assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
+						previousAbsenceCode = absenceCodeToSend;
+						assenze.add(assenza);
+					}
+					previousDate = absence.personDay.date;
 
 		}
 

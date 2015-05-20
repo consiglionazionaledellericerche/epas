@@ -26,7 +26,7 @@ import dao.UserDao;
 public class ShibbolethSecurity extends controllers.shib.Security {
 
 	@Inject
-	static UserDao userDao;
+	private static UserDao userDao;
 	
 	/**
 	 * This method checks that a profile is allowed to view this page/method.

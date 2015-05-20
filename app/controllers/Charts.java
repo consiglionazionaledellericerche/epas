@@ -39,24 +39,24 @@ import exceptions.EpasExceptionNoSourceData;
 public class Charts extends Controller{
 
 	@Inject
-	static SecurityRules rules;
-	
+	private static SecurityRules rules;
 	@Inject
-	static OfficeDao officeDao;
-	
+	private static ChartsManager chartsManager;
 	@Inject
-	static ChartsManager chartsManager;
-	
+	private static OfficeDao officeDao;
 	@Inject
-	static CompetenceDao competenceDao;
+	private static PersonDao personDao;
+	@Inject
+	private static CompetenceDao competenceDao;
+	@Inject
+	private static AbsenceDao absenceDao;
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		
-		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
-		List<Month> meseList = ChartsManager.populateMonthList();	
+
+		List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
+		List<Month> meseList = chartsManager.populateMonthList();	
 
 		if(params.get("yearChart") == null || params.get("monthChart") == null){
 			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
@@ -66,28 +66,28 @@ public class Charts extends Controller{
 
 		year = params.get("yearChart", Integer.class);
 		month = params.get("monthChart", Integer.class);
-		
-		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
+
+		List<Person> personeProva = personDao.list(Optional.<String>absent(),
 				officeDao.getOfficeAllowed(Security.getUser().get()), true, 
 				new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
-		
-		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
+
+		List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
 		List<PersonOvertime> poList = chartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
-		
+
 		render(poList, year, month, annoList, meseList);
 	}
 
-	
+
 	public static void indexCharts(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		render();
 	}
 
-	
+
 	public static void overtimeOnPositiveResidualInYear(Integer year){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
+		List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
 		if(params.get("yearChart") == null && year == null){
 			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
@@ -96,14 +96,14 @@ public class Charts extends Controller{
 		}
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
-		
-		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
+
+		List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
 		Long val = null;
 		Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
 		if(result.isPresent())
 			val = result.get().longValue();
 
-		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
+		List<Person> personeProva = personDao.list(Optional.<String>absent(),
 				officeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
 		int totaleOreResidue = chartsManager.calculateTotalResidualHour(personeProva, year);
 
@@ -111,11 +111,11 @@ public class Charts extends Controller{
 
 	}
 
-	
+
 	public static void whichAbsenceInYear(Integer year){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
+		List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
 
 		if(params.get("yearChart") == null && year == null){
@@ -127,55 +127,55 @@ public class Charts extends Controller{
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
 
-		
+
 		List<String> absenceCode = Lists.newArrayList();
 		absenceCode.add("92");
 		absenceCode.add("91");
 		absenceCode.add("111");
 		LocalDate beginYear = new LocalDate(year, 1,1);
 		LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
-		Long missioniSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92");
-		Long riposiCompensativiSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
-		Long malattiaSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
-		Long altreSize = AbsenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
+		Long missioniSize = absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92");
+		Long riposiCompensativiSize = absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
+		Long malattiaSize = absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
+		Long altreSize = absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
 
 		render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
 
 	}
 
-	
+
 	public static void checkLastYearAbsences(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		render();
 	}
 
-	
+
 	public static void processLastYearAbsences(Blob file){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		
-		RenderList render = ChartsManager.checkSituationPastYear(file);
+
+		RenderList render = chartsManager.checkSituationPastYear(file);
 		List<RenderResult> listTrueFalse = render.getListTrueFalse();
 		List<RenderResult> listNull = render.getListNull();
-		
+
 		render(listTrueFalse, listNull);
 	}
 
 	public static void exportHourAndOvertime(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
+		List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
 		render(annoList);
 	}
 
 	public static void export(Integer year) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
+
+		List<Person> personList = personDao.list(Optional.<String>absent(), 
 				officeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
 		Logger.debug("Esporto dati per %s persone", personList.size());
 		FileInputStream inputStream = chartsManager.export(year, personList);
-		
+
 		renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi"+year+".csv");
 	}
 
@@ -184,27 +184,27 @@ public class Charts extends Controller{
 		Set<Office> offices = Sets.newHashSet();
 		offices.add(Security.getUser().get().person.office);
 		String name = null;
-		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
+		List<Person> personList = personDao.list(Optional.fromNullable(name), 
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(), LocalDate.now(), true).list();
 		render(personList);
 	}
 
 	public static void exportDataSituation(Long personId) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		
-		Person person = PersonDao.getPersonById(personId);
-		
+
+		Person person = personDao.getPersonById(personId);
+
 		try {
-			
+
 			FileInputStream inputStream = chartsManager.exportDataSituation(person);
 			renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
-			
+
 		} catch (EpasExceptionNoSourceData e) {
-    		flash.error("Mancano i dati di inizializzazione per " 
-    				+ person.fullName());
-    		renderTemplate("Application/indexAdmin.html");
+			flash.error("Mancano i dati di inizializzazione per " 
+					+ person.fullName());
+			renderTemplate("Application/indexAdmin.html");
 		}
-		
+
 
 	}
 }

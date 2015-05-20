@@ -64,50 +64,54 @@ import dao.PersonMonthRecapDao;
  */
 @With( {Resecure.class, RequestInit.class} )
 public class UploadSituation extends Controller{
-	
-	@Inject
-	static SecurityRules rules;
-	
-	@Inject
-	static OfficeDao officeDao;
-	
-	@Inject
-	static CompetenceDao competenceDao;
-	
-	@Inject
-	static PersonDayManager personDayManager;
-	
-	
+
 	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
 	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
-	
-	@Check(Security.UPLOAD_SITUATION)
+
+	@Inject
+	private static SecurityRules rules;
+	@Inject
+	private static ConfGeneralManager confGeneralManager;
+	@Inject
+	private static PersonDao personDao;
+	@Inject
+	private static OfficeDao officeDao;
+	@Inject
+	private static AbsenceDao absenceDao;
+	@Inject
+	private static CompetenceDao competenceDao;
+	@Inject
+	private static AttestatiClient attestatiClient;
+	@Inject
+	private static PersonDayManager personDayManager;
+	@Inject
+	private static PersonMonthRecapDao personMonthRecapDao;
+
 	public static void show(){
-		
+
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate lastMonth = LocalDate.now().minusMonths(1);
-		
+
 		int month = lastMonth.getMonthOfYear();
 		int year = lastMonth.getYear();
-			
+
 		render(year, month);
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
 
 		Office office = Security.getUser().get().person.office;
 		rules.checkIfPermitted(office);
-		
-		String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
-		String userToPresence = ConfGeneralManager.getFieldValue(Parameter.USER_TO_PRESENCE, office);
-		
+
+		String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+		String userToPresence = confGeneralManager.getFieldValue(Parameter.USER_TO_PRESENCE, office);
+
 		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
 		render(year, month, urlToPresence, attestatiLogin);
 	}
 
-	
+
 	public static void uploadSituation(Integer year, Integer month) throws IOException{
 		if (params.get("loginAttestati") != null) {
 			loginAttestati(year, month);
@@ -117,17 +121,17 @@ public class UploadSituation extends Controller{
 		if (params.get("back") != null) {
 			redirect("Application.indexAdmin");
 		}
-		
+
 		if(month == null || year == null){
 			flash.error("Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
 			Application.indexAdmin();
 		}
-		
+
 		User user = Security.getUser().get();
-		
+
 		rules.checkIfPermitted(user.person.office);
 
-		List<Person> personList = PersonDao.getPersonsByNumber();
+		List<Person> personList = personDao.getPersonsByNumber();
 
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
@@ -146,7 +150,7 @@ public class UploadSituation extends Controller{
 			out.newLine();
 			for(Person p : personList){
 
-				absenceList = AbsenceDao.getAbsencesNotInternalUseInMonth(p, year, month);
+				absenceList = absenceDao.getAbsencesNotInternalUseInMonth(p, year, month);
 				for(Absence abs : absenceList){
 					out.write(p.number.toString());
 					out.append(' ').append('A').append(' ')
@@ -186,13 +190,9 @@ public class UploadSituation extends Controller{
 	}
 
 
-	
-	
-	
 	public static void processAttestati(final String attestatiLogin, final String attestatiPassword, Integer year, Integer month) throws MalformedURLException, URISyntaxException
 	{
-		
-		
+
 		LoginResponse loginResponse = null;
 		List<Dipendente> listaDipendenti = null;
 
@@ -212,7 +212,7 @@ public class UploadSituation extends Controller{
 			rules.checkIfPermitted(user.person.office);
 			Cache.set(LOGIN_RESPONSE_CACHED + user.username, null);
 			Cache.set(LISTA_DIPENTENTI_CNR_CACHED + user.username, null);
-			
+
 			if (params.get("back") != null) {
 				show();
 			}
@@ -221,24 +221,24 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, user.person.office); 
-			
+			String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, user.person.office); 
+
 			try {
 				//1) LOGIN
-				
-				loginResponse = AttestatiClient.login(attestatiLogin, attestatiPassword, year, month); 
+
+				loginResponse = attestatiClient.login(attestatiLogin, attestatiPassword, year, month); 
 				if (!loginResponse.isLoggedIn()) {
 					flash.error("Errore durante il login sul sistema degli attestati.");
 					UploadSituation.loginAttestati(year, month);
 					return;
 				} 
-				
+
 				//2) CARICO LISTA DIPENDENTI CNR CENTRALE (ANNO-MESE)
 				Logger.debug("Prendo lista dipendenti da %s. Anno = %d, mese = %d", urlToPresence, year, month);
 
-				
-				listaDipendenti = AttestatiClient.listaDipendenti(loginResponse.getCookies(), year, month);
-				
+
+				listaDipendenti = attestatiClient.listaDipendenti(loginResponse.getCookies(), year, month);
+
 
 			} catch (AttestatiException e) {
 				flash.error(
@@ -251,10 +251,10 @@ public class UploadSituation extends Controller{
 				UploadSituation.loginAttestati(year, month);
 			}
 		}
-		
-		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(),
+
+		final List<Person> activePersons = personDao.list(Optional.<String>absent(),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
-		
+
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
 			public Dipendente apply(Person person) {
@@ -270,13 +270,11 @@ public class UploadSituation extends Controller{
 		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
 
 		memAttestatiIntoCache(loginResponse, listaDipendenti);
-		
 
 		render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR, loginResponse);
-		
+
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void processAllPersons(int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if (params.get("back") != null) {
@@ -285,20 +283,20 @@ public class UploadSituation extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LoginResponse loginResponse = loadAttestatiLoginCached();
 		List<Dipendente> listaDipendenti = loadAttestatiListaCached();
-		
+
 		if(loginResponse==null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size()==0)
 		{
 			flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
 			UploadSituation.loginAttestati(year, month);
 		}
-		
+
 		Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
 
 		List<RispostaElaboraDati> checks = elaboraDatiDipendenti( 
-						loginResponse.getCookies(), 
-						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
-						year, month);
-		
+				loginResponse.getCookies(), 
+				Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
+				year, month);
+
 		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
 			@Override
 			public boolean apply(RispostaElaboraDati risposta) {
@@ -307,7 +305,7 @@ public class UploadSituation extends Controller{
 		};
 
 		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
-		
+
 		if(risposteNotOk.isEmpty())
 			flash.success("Elaborazione dipendenti effettuata senza errori.");
 		else if(risposteNotOk.size()==1)
@@ -315,13 +313,12 @@ public class UploadSituation extends Controller{
 		else
 			flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per %s dipendenti. Controllare l'esito.",
 					risposteNotOk.size());
-			
+
 		UploadSituation.processAttestati(null, null, year, month);
 
 
 	}
-	
-	//@Check(Security.UPLOAD_SITUATION)
+
 	public static void processSinglePerson(String matricola, int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if(matricola==null)
@@ -332,7 +329,7 @@ public class UploadSituation extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LoginResponse loginResponse = loadAttestatiLoginCached();
 		List<Dipendente> listaDipendenti = loadAttestatiListaCached();
-		
+
 		if(loginResponse==null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size()==0)
 		{
 			flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
@@ -340,7 +337,7 @@ public class UploadSituation extends Controller{
 		}
 
 		Set<Dipendente> activeDipendentiCached = getActiveDipendenti(year, month);
-		
+
 		Dipendente dipendente = null;
 		for(Dipendente dip : activeDipendentiCached)
 		{
@@ -350,7 +347,7 @@ public class UploadSituation extends Controller{
 				break;
 			}
 		}
-		
+
 		if(dipendente==null)
 		{
 			flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
@@ -387,11 +384,10 @@ public class UploadSituation extends Controller{
 
 	}
 
-	//@Check(Security.UPLOAD_SITUATION)
 	public static void showProblems(Long certificatedDataId)
 	{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataById(certificatedDataId);
+		CertificatedData cd = personMonthRecapDao.getCertificatedDataById(certificatedDataId);
 		//CertificatedData cd = CertificatedData.findById(certificatedDataId);
 		if(cd==null)
 		{
@@ -399,12 +395,11 @@ public class UploadSituation extends Controller{
 		}
 		render(cd);
 	}
-	
-	//@Check(Security.UPLOAD_SITUATION)
+
 	public static void showCertificatedData(Long certificatedDataId)
 	{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataById(certificatedDataId);
+		CertificatedData cd = personMonthRecapDao.getCertificatedDataById(certificatedDataId);
 		//CertificatedData cd = CertificatedData.findById(certificatedDataId);
 		if(cd==null)
 		{
@@ -412,28 +407,28 @@ public class UploadSituation extends Controller{
 		}
 		render(cd);
 	}
-	
+
 	private static List<RispostaElaboraDati> elaboraDatiDipendenti(Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month) throws MalformedURLException, URISyntaxException {
 		List<RispostaElaboraDati> checks = Lists.newLinkedList();
 		Person person = null;
 
 		for (Dipendente dipendente : dipendenti) {
 
-			person = PersonDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
-						
-			List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
+			person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
+
+			List<PersonMonthRecap> pmList = personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
 
 			//Numero di buoni mensa da passare alla procedura di invio attestati
 			Integer mealTicket = personDayManager.numberOfMealTicketToUse(person, year, month);
-			
+
 			//vedere se l'ho gia' inviato con successo
-			CertificatedData cert = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
+			CertificatedData cert = personMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
 			//CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
-	
-			
-			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
+
+
+			RispostaElaboraDati rispostaElaboraDati = attestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
-					AbsenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
+					absenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
 					competenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
 					pmList, mealTicket);
 			if(rispostaElaboraDati.isOk()){
@@ -442,7 +437,7 @@ public class UploadSituation extends Controller{
 					personMonth.save();
 				}
 			}
-			
+
 			if(cert==null)
 			{
 				//FIXME
@@ -462,19 +457,19 @@ public class UploadSituation extends Controller{
 			cert.problems = rispostaElaboraDati.getProblems();
 			cert.isOk = rispostaElaboraDati.isOk();
 			cert.save();
-			
+
 			checks.add(rispostaElaboraDati);
 		}
-		
+
 		return checks;
 	}
-	
+
 	private static void memAttestatiIntoCache(LoginResponse loginResponse, List<Dipendente> listaDipendenti)
 	{
 		Cache.set(LOGIN_RESPONSE_CACHED+Security.getUser().get().username, loginResponse);
 		Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().get().username, listaDipendenti);
 	}
-	
+
 	/**
 	 * Carica in cache lo stato della connessione con attestati.cnr
 	 * @return
@@ -483,7 +478,7 @@ public class UploadSituation extends Controller{
 	{
 		return (LoginResponse)Cache.get(LOGIN_RESPONSE_CACHED+Security.getUser().get().username);
 	}
-	
+
 	/**
 	 * Carica in cache la lista dipendenti abilitati in attestati.cnr
 	 * @return
@@ -491,10 +486,10 @@ public class UploadSituation extends Controller{
 	@SuppressWarnings("unchecked")
 	private static List<Dipendente> loadAttestatiListaCached()
 	{
-		
+
 		return (List<Dipendente>)Cache.get(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().get().username);
 	}
-	
+
 	private static Set<Dipendente> getDipendenteNonInEpas(int year, int month, List<Dipendente> listaDipendenti,  Set<Dipendente> activeDipendenti)
 	{
 		Set<Dipendente> dipendentiNonInEpas = Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
@@ -512,14 +507,14 @@ public class UploadSituation extends Controller{
 
 		return dipendentiNonInCNR;
 	}
-	
+
 	private static Set<Dipendente> getActiveDipendenti(int year, int month)
 	{
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		final List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(),
+				personDao.list(Optional.<String>absent(),
 						officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
-		
+
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
 			public Dipendente apply(Person person) {
@@ -529,9 +524,8 @@ public class UploadSituation extends Controller{
 			}
 		}).toSet();
 		Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
-		
+
 		return activeDipendenti;
 	}
 
-	
 }

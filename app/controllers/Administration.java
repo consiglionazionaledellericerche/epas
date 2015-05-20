@@ -13,7 +13,6 @@ import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.ContractYearRecapManager;
-import manager.PersonDayManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
 import manager.recaps.residual.PersonResidualYearRecapFactory;
@@ -40,8 +39,6 @@ import com.google.common.collect.Lists;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -50,56 +47,44 @@ import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
-	
+
 	@Inject
-	static OfficeDao officeDao;
-	
+	private static OfficeDao officeDao;
 	@Inject
-	static PersonDao personDao;
-	
+	private static PersonDao personDao;
 	@Inject 
-	static ContractDao contractDao;
-	
+	private static ContractDao contractDao;
 	@Inject
-	static PersonDayDao personDayDao;
-	
+	private static ConsistencyManager consistencyManager;
 	@Inject
-	static PersonDayManager personDayManager;
-	
+	private static PersonResidualYearRecapFactory yearFactory;
 	@Inject
-	static ConsistencyManager consistencyManager;
-	
+	private static ExportToYaml exportToYaml;
 	@Inject
-	static PersonResidualYearRecapFactory yearFactory;
-	
+	private static ContractManager contractManager;
 	@Inject
-	static WrapperModelFunctionFactory wrapperFunctionFactory; 
-	
+	private static CompetenceUtility competenceUtility;
 	@Inject
-	static IWrapperFactory wrapperFactory;
-	
+	private static ContractMonthRecapManager contractMonthRecapManager;
 	@Inject
-	static ContractManager contractManager;
-	
+	private static ContractYearRecapManager contractYearRecapManager;
 	@Inject
-	static ContractMonthRecapManager contractMonthRecapManager;
-	
+	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
-	static ContractYearRecapManager contractYearRecapManager;
+	private static IWrapperFactory wrapperFactory;
 	
 	private final static Logger log = LoggerFactory.getLogger(Administration.class);
-	
+
 	public static void utilities(){
 
-		final List<Person> personList = PersonDao.list(
+		final List<Person> personList = personDao.list(
 				Optional.<String>absent(),officeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 
 		render(personList);
 	}
-	
-	
+
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
@@ -108,17 +93,10 @@ public class Administration extends Controller {
 	 */
 	public static void fixPersonSituation(Long personId, int year, int month){	
 		LocalDate date = new LocalDate(year,month,1);
-		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(PersonDao.getPersonById(personId));
+		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(personDao.getPersonById(personId));
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
 	}
-	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void createOvertimeFile(int year) throws IOException{
-		log.debug("Chiamo overtime in year...");
-		Competences.getOvertimeInYear(year);
-		
-	}
-	
+
 	/**
 	 * Metodo di sviluppo per testing nuova costruzione riepiloghi mensili.S
 	 * @param id
@@ -188,7 +166,7 @@ public class Administration extends Controller {
 			List<PersonResidualMonthRecap> personResidualMonthRecaps = Lists.newArrayList();
 			
 			//Ricalcolo dei residui per anno
-			List<Contract> contractList = ContractDao.getPersonContractList(person);
+			List<Contract> contractList = contractDao.getPersonContractList(person);
 			for(Contract c : contractList) {
 				try {
 					contractYearRecapManager.buildContractYearRecap(c);
@@ -327,37 +305,21 @@ public class Administration extends Controller {
 	}
 	
 
-	public static void buildYaml()
-	{
+	public static void buildYaml(){
 		//general
-		ExportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
-		
-		ExportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
-		
-		ExportToYaml.buildVacationCodes("conf/vacationCodes.yml");
-		
-		
-		//person
-		/*
-		Person person = Person.findById(146l);
-		ExportToYaml.buildPerson(person, "test/dataTest/persons/lucchesi.yml");
-		
-		//test stampings
-		ExportToYaml.buildPersonMonth(person, 2013,  9, "test/dataTest/stampings/lucchesiStampingsSettembre2013.yml");
-		ExportToYaml.buildPersonMonth(person, 2013, 10, "test/dataTest/stampings/lucchesiStampingsOttobre2013.yml");
-		
-		//test vacations
-		ExportToYaml.buildYearlyAbsences(person, 2012, "test/dataTest/absences/lucchesiAbsences2012.yml");
-		ExportToYaml.buildYearlyAbsences(person, 2013, "test/dataTest/absences/lucchesiAbsences2013.yml");
-		*/
-		
+		exportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
+	
+		exportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
+	
+		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
+	
 	}
 	
 	public static void killclock()
 	{
 		Person person = Person.find("byName", "epas").first();
-		
-		
+	
+	
 		//destroy person day in trouble
 		List<PersonDay> pdList = PersonDay.find("select pd from PersonDay pd where pd.person = ?", person).fetch();
 		for(PersonDay pd : pdList)
@@ -370,7 +332,7 @@ public class Administration extends Controller {
 				pd.save();
 			}
 		}
-		
+	
 		//destroy person day
 		while(pdList.size()>0)
 		{
@@ -378,7 +340,7 @@ public class Administration extends Controller {
 			pdList.remove(pd);
 			pd.delete();
 		}
-		
+	
 		//destroy contracts
 		while(person.contracts.size()>0)
 		{
@@ -387,49 +349,41 @@ public class Administration extends Controller {
 			c.delete();
 			person.save();
 		}
-		
-		//destroy contact_data
-//		if(person.contactData!=null)
-//			person.contactData.delete();
-		
-		//destroy locations
-//		if(person.location!=null)
-//			person.location.delete();
-//		
+	
 		person.save();
-		
+	
 		renderText(person.name);
 	}
 	
 	public static void updateExceedeMinInCompetenceTable() {
-		CompetenceUtility.updateExceedeMinInCompetenceTable();
+		competenceUtility.updateExceedeMinInCompetenceTable();
 		renderText("OK");
 	}
 	
 	public static void deleteUncoupledStampings(@Required List<Long> peopleId,
-		@Required LocalDate begin,LocalDate end){
-				
-    	if (validation.hasErrors()){
-    	    params.flash(); 
-    		utilities();
-    	}
-		
+			@Required LocalDate begin,LocalDate end){
+	
+		if (validation.hasErrors()){
+			params.flash(); 
+			utilities();
+		}
+	
 		if(end == null){
 			end = begin;
 		}
-		
+	
 		List<Person> people = Lists.newArrayList();
-		
+	
 		for(Long id : peopleId){
-			people.add(PersonDao.getPersonById(id));
+			people.add(personDao.getPersonById(id));
 		}
-		
+	
 		for(Person person : people){
 			new RemoveInvalidStampingsJob(person, begin, end).afterRequest();
 		}
-		
+	
 		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
 	}
-   
+
 }

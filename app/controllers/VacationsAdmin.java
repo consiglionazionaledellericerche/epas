@@ -32,67 +32,65 @@ import exceptions.EpasExceptionNoSourceData;
 public class VacationsAdmin extends Controller{
 
 	@Inject
-	static SecurityRules rules;
-	
+	private static OfficeDao officeDao;
 	@Inject
-	static OfficeDao officeDao;
-	
+	private static PersonDao personDao;
 	@Inject
-	static VacationsRecapFactory vacationsFactory;
-	
+	private static IWrapperFactory wrapperFactory;
 	@Inject
-	static VacationManager vacationManager;
-	
+	private static VacationsRecapFactory vacationsFactory;
 	@Inject
-	static IWrapperFactory wrapperFactory;
-	
+	private static VacationManager vacationManager;
+	@Inject
+	private static SecurityRules rules;
+
 	public static void list(Integer year, String name, Integer page){
-		
+
 		if(page==null)
 			page = 0;
-		
-		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+
+		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
 				officeDao.getOfficeAllowed(Security.getUser().get()),
 				false, LocalDate.now(), LocalDate.now(), true);
-		
+
 		List<Person> personList = simpleResults.paginated(page).getResults();
-		
+
 		List<VacationsRecap> vacationsList = new ArrayList<VacationsRecap>();
-		
+
 		List<Person> personsWithVacationsProblems = new ArrayList<Person>();
 
 		for(Person person: personList) {
-			
+
 			Optional<Contract> contract = wrapperFactory
 					.create(person).getCurrentContract();
-			
+
 			try {
 				VacationsRecap vr = vacationsFactory.create(
 						year, contract.get(), LocalDate.now(), true);
 				vacationsList.add(vr);
-				
+
 			} catch (EpasExceptionNoSourceData e) {
 				personsWithVacationsProblems.add(person);
 			}
 		}
-				
+
 		Office office = Security.getUser().get().person.office;
-		
+
 		LocalDate expireDate =  vacationManager
 				.vacationsLastYearExpireDate(year, office);
-		
+
 		boolean isVacationLastYearExpired = vacationManager
 				.isVacationsLastYearExpired(year, expireDate);
-		
+
 		render(vacationsList, isVacationLastYearExpired, 
 				personsWithVacationsProblems, year, simpleResults, name);
 	}
-	
-	
-	
+
+
+
 	public static void vacationsCurrentYear(Long personId, Integer anno){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
@@ -105,79 +103,79 @@ public class VacationsAdmin extends Controller{
 		//anno. 
 		Optional<Contract> contract = wrapperFactory
 				.create(person).getCurrentContract();
-		
-		Preconditions.checkState(contract.isPresent());
-		
-    	try { 
-    		VacationsRecap vacationsRecap = vacationsFactory
-    				.create(anno, contract.get(), LocalDate.now(), true);
-    		
-    		renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
-    		
-    	} catch(EpasExceptionNoSourceData e) {
-    		flash.error("Mancano i dati di inizializzazione per " 
-    				+ contract.get().person.fullName());
-    		renderTemplate("Application/indexAdmin.html");
-    	}
-    	
-	}
-	
 
-	
+		Preconditions.checkState(contract.isPresent());
+
+		try { 
+			VacationsRecap vacationsRecap = vacationsFactory
+					.create(anno, contract.get(), LocalDate.now(), true);
+
+			renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
+
+		} catch(EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+					+ contract.get().person.fullName());
+			renderTemplate("Application/indexAdmin.html");
+		}
+
+	}
+
+
+
 	public static void vacationsLastYear(Long personId, Integer anno){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
-    	
+
 		rules.checkIfPermitted(person.office);
-    	    	
+
 		Optional<Contract> contract = wrapperFactory
 				.create(person).getCurrentContract();
-		
+
 		Preconditions.checkState(contract.isPresent());
-		
-    	try { 
-    		VacationsRecap vacationsRecap = vacationsFactory
-    				.create(anno, contract.get(), LocalDate.now(), true);
-    		
-    		renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
-    		
-    	} catch(EpasExceptionNoSourceData e) {
-    		flash.error("Mancano i dati di inizializzazione per " 
-    				+ contract.get().person.fullName());
-    		renderTemplate("Application/indexAdmin.html");
-    	}
+
+		try { 
+			VacationsRecap vacationsRecap = vacationsFactory
+					.create(anno, contract.get(), LocalDate.now(), true);
+
+			renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
+
+		} catch(EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+					+ contract.get().person.fullName());
+			renderTemplate("Application/indexAdmin.html");
+		}
 
 	}
-	
-	
+
+
 	public static void permissionCurrentYear(Long personId, Integer anno){
-		
-		Person person = PersonDao.getPersonById(personId);
+
+		Person person = personDao.getPersonById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
 		rules.checkIfPermitted(person.office);
-    	
+
 		Optional<Contract> contract = wrapperFactory
 				.create(person).getCurrentContract();
-		
+
 		Preconditions.checkState(contract.isPresent());
-		
-    	try { 
-    		VacationsRecap vacationsRecap = vacationsFactory
-    				.create(anno, contract.get(), LocalDate.now(), true);
-    		
-    		renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
-    		
-    	} catch(EpasExceptionNoSourceData e) {
-    		flash.error("Mancano i dati di inizializzazione per " 
-    				+ contract.get().person.fullName());
-    		renderTemplate("Application/indexAdmin.html");
-    	}
+
+		try { 
+			VacationsRecap vacationsRecap = vacationsFactory
+					.create(anno, contract.get(), LocalDate.now(), true);
+
+			renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
+
+		} catch(EpasExceptionNoSourceData e) {
+			flash.error("Mancano i dati di inizializzazione per " 
+					+ contract.get().person.fullName());
+			renderTemplate("Application/indexAdmin.html");
+		}
 
 	}
-	
+
 }

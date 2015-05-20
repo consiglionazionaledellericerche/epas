@@ -32,14 +32,11 @@ import dao.PersonDao;
 @With(Secure.class)
 public class JsonExport extends Controller {
 
-	@Inject
-	static OfficeDao officeDao;
-	
 	final static class PersonInfo {
 		private final String nome;
 		private final String cognome;
 		private final String password;
-		
+
 		public PersonInfo(String nome, String cognome, String password) {
 			this.nome = nome;
 			this.cognome = cognome;
@@ -51,27 +48,32 @@ public class JsonExport extends Controller {
 		public String getPassword() { return password; }
 
 	}
-	
+
+	@Inject
+	private static OfficeDao officeDao;
+	@Inject
+	private static PersonDao personDao;
+
 	//TODO: serve un permesso più specifico?
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void activePersons() {
-		
+
 		List<Office> offices = officeDao.getAllOffices();
-		List<Person> activePersons = PersonDao.list(Optional.<String>absent(), 
+		List<Person> activePersons = personDao.list(Optional.<String>absent(), 
 				new HashSet<Office>(offices), false, LocalDate.now(), LocalDate.now(), true).list();
 		Logger.debug("activePersons.size() = %d", activePersons.size());
-		
+
 		List<PersonInfo> activePersonInfos = FluentIterable.from(activePersons).transform(new Function<Person, PersonInfo>() {
 			@Override
 			public PersonInfo apply(Person person) {
 				return new PersonInfo(
-					Joiner.on(" ").skipNulls().join(person.name, person.othersSurnames), 
-					Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames), 
-					person.user.password);
+						Joiner.on(" ").skipNulls().join(person.name, person.othersSurnames), 
+						Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames), 
+						person.user.password);
 			}
 		}).toList();
-		
+
 		renderJSON(activePersonInfos);
 	}
-	
+
 }

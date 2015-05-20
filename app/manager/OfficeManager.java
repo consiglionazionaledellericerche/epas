@@ -22,67 +22,22 @@ import dao.wrapper.IWrapperOffice;
 public class OfficeManager {
 
 	@Inject
-	public OfficeDao officeDao;
-	
-	@Inject
-	public UsersRolesOfficesDao usersRolesOfficesDao;
-	
-	@Inject
-	public UserDao userDao;
-	
-	@Inject
-	public IWrapperFactory wrapperFactory;
-	
-	/**
-	 * 
-	 * @param area
-	 * @param name
-	 * @param contraction
-	 */
-//	public void saveInstitute(Office office, Office area, String name, String contraction){
-//
-//		office.name = name;
-//		office.contraction = contraction;
-//		office.office = area;
-//		office.save();
-//	}	
+	public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
+			UserDao userDao, RoleDao roleDao, IWrapperFactory wrapperFactory,
+			OfficeDao officeDao) {
+		this.usersRolesOfficesDao = usersRolesOfficesDao;
+		this.userDao = userDao;
+		this.roleDao = roleDao;
+		this.wrapperFactory = wrapperFactory;
+		this.officeDao = officeDao;
+	}
 
-	/**
-	 * 
-	 * @param name
-	 * @param address
-	 * @param code
-	 * @param date
-	 * @param institute
-	 */
-//	public void saveSeat(Office office, String name, String address, String code, String date, Office institute){
-//
-//		office.name = name;
-//		office.address = address;
-//		office.code = getInteger(code);
-//		office.joiningDate = getLocalDate(date);
-//		office.office = institute;
-//		office.save();
-//	}
+	private final UsersRolesOfficesDao usersRolesOfficesDao;
+	private final UserDao userDao;
+	private final RoleDao roleDao;
+	private final IWrapperFactory wrapperFactory;
+	private final OfficeDao officeDao;
 
-	/**
-	 * 
-	 * @param office
-	 * @param name
-	 * @param address
-	 * @param code
-	 * @param date
-	 */
-//	public void updateSeat(Office office, String name, String address, String code, String date){
-//		office.name = name;
-//		office.address = address;
-//		office.code = getInteger(code);
-//		office.joiningDate = getLocalDate(date);
-//
-//		office.save();
-//
-//	}
-	
 	/**
 	 * 
 	 * @param permission
@@ -90,19 +45,19 @@ public class OfficeManager {
 	 * false altrimenti
 	 */
 	public boolean isRightPermittedOnOfficeTree(Office office, Role role) {
-		
+
 		if(usersRolesOfficesDao.getUsersRolesOffices(Security.getUser().get(), role, office).isPresent())
 			return true;
-		
+
 		for(Office subOff : office.subOffices) {
-			
+
 			if(isRightPermittedOnOfficeTree(subOff, role))
 				return true;
 		}
-		
+
 		return false;
 	}
-		
+
 	/**
 	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
 	 * @param office
@@ -110,18 +65,18 @@ public class OfficeManager {
 	public void setPermissionAfterCreation(Office office) {
 
 		User userLogged = Security.getUser().get();
-		User admin = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
+		User admin = userDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
 
-		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
 
 		setUro(admin, office, roleAdmin);
 		setUro(userLogged, office, roleAdmin);
 
 		List<Office> officeList = Lists.newArrayList();
-		
+
 		IWrapperOffice wOffice = wrapperFactory.create(office);
-		
+
 		if(wOffice.isInstitute()) {
 			officeList.add(officeDao.getSuperArea(office));
 		}
@@ -147,7 +102,7 @@ public class OfficeManager {
 		}
 
 	}
-	
+
 	/**
 	 * Setta il ruolo per la tripla <user,office,role>. Se non esiste viene creato.
 	 * Se ifImprove è false il precedente ruolo viene sovrascritto. Se ifImprove è true 
@@ -161,7 +116,7 @@ public class OfficeManager {
 	public Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
 
 		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
-			
+
 		if( !uro.isPresent() || !ifImprove ) {
 
 			setUro(user, office, role);
@@ -209,16 +164,4 @@ public class OfficeManager {
 		}		
 
 	}
-	
-//	/**
-//	 * @param office
-//	 * @return Restituisce true se uno dei parametri nome,sigla o codice sono già assegnati ad un altro ufficio
-//	 */
-//	public boolean isDuplicated(Office office){
-//		
-//		return officeDao.getOfficeByName(office.name).isPresent() ||  
-//				officeDao.getOfficeByContraction(office.contraction).isPresent() ||
-//				 office.code!=0 && officeDao.getOfficeByCode(office.code).isPresent();
-//	}
-
 }
