@@ -30,8 +30,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
-    public final DateTimePath<java.util.Date> bornDate = createDateTime("bornDate", java.util.Date.class);
-
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
 
     public final StringPath cnr_email = createString("cnr_email");
@@ -42,8 +40,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
 
-    public final StringPath department = createString("department");
-
     public final StringPath email = createString("email");
 
     //inherited
@@ -51,10 +47,10 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath fax = createString("fax");
 
-    public final StringPath headOffice = createString("headOffice");
-
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final NumberPath<Integer> iId = createNumber("iId", Integer.class);
 
     public final ListPath<models.InitializationAbsence, QInitializationAbsence> initializationAbsences = this.<models.InitializationAbsence, QInitializationAbsence>createList("initializationAbsences", models.InitializationAbsence.class, QInitializationAbsence.class, PathInits.DIRECT2);
 
@@ -92,8 +88,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final QQualification qualification;
 
     public final QPersonReperibility reperibility;
-
-    public final StringPath room = createString("room");
 
     public final ListPath<models.ShiftCategories, QShiftCategories> shiftCategories = this.<models.ShiftCategories, QShiftCategories>createList("shiftCategories", models.ShiftCategories.class, QShiftCategories.class, PathInits.DIRECT2);
 
