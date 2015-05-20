@@ -85,14 +85,16 @@ public class ContractMonthRecapManager {
 		
 		//Controllo se ho sufficienti dati
 		
-		String dateInitUse = ConfGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
+		String dateInitUse = ConfGeneralManager
+				.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate;
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
 		DateInterval contractInterval = contract.getContractDateInterval();
 
-		DateInterval personContractDatabaseInterval = DateUtility.intervalIntersection(contractInterval, personDatabaseInterval);
+		DateInterval personContractDatabaseInterval = 
+				DateUtility.intervalIntersection(contractInterval, personDatabaseInterval);
 		
 		//Se intersezione fra contratto e dati utili database vuota non costruisco alcun contractMonthRecap
 		if( personContractDatabaseInterval == null)
@@ -152,10 +154,11 @@ public class ContractMonthRecapManager {
 		for( Contract contract : person.contracts ){
 			
 			DateInterval contractDateInterval = contract.getContractDateInterval();
+			YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
 			
 			//Se yearMonthFrom non è successivo alla fine del contratto...
-			if ( yearMonthFrom.isPresent() && ! yearMonthFrom.get()
-					.isAfter( new YearMonth(contractDateInterval.getEnd() )) ) {
+			if ( yearMonthFrom.isPresent() 
+					&&	!yearMonthFrom.get().isAfter(endContractYearMonth) ) {
 				
 				populateContractMonthRecap(contract, yearMonthFrom);
 				
@@ -203,7 +206,10 @@ public class ContractMonthRecapManager {
 	 *    e nel database (a partire dal giorno successivo a sourceDate).
 	 *    
 	 * @return YearMonth di cui si deve costruire il prossimo contractMonthRecap
-	 * @throws EpasExceptionNoSourceData 
+	 * @param contract
+	 * @param yearMonthToCompute il riepilogo che si vuole costruire
+	 * @return
+	 * @throws EpasExceptionNoSourceData
 	 */
 	private YearMonth populateContractMonthFromSource(Contract contract, YearMonth yearMonthToCompute) throws EpasExceptionNoSourceData
 	{
@@ -269,17 +275,26 @@ public class ContractMonthRecapManager {
 		return yearMonthToCompute.plusMonths(1);
 		
 	}
-	
-
-	//private void buildPartialMonthRecap(Contract contract, YearMonth yearMonth) {
-		// Il parametro yearMonth potrebbe essere tolto in quanto è il mese attuale
-		// non ancora concluso.
-		// Da implementare
-	//}
 
 	/**
-	 * @throws EpasExceptionNoSourceData 
+	 * FIXME: questa versione nasce come copia adattate del vecchio algoritmo basato
+	 * sui riepiloghi annuali. Necessita di una rifattorizzazione per renderla meno complessa
+	 * e più leggibile.
 	 * 
+	 * Popola la parte residuale del riepilogo mensile fino alla data calcolaFinoA: 
+	 *  - minuti rimanenti dell'anno passato
+	 *  - minuti rimanenti dell'anno corrente
+	 *  - buoni pasto rimanenti
+	 *  
+	 *  Se il riepilogo mensile precedente necessario come input dell'algoritmo
+	 *  non esiste, esso viene costruito tramite una chiamata a populateContractMonthRecap
+	 *  con yearMonthToCompute absent() in modo che calcoli i riepiloghi per tutto il contratto.
+	 * 
+	 * @param cmr
+	 * @param yearMonth
+	 * @param calcolaFinoA
+	 * @return
+	 * @throws EpasExceptionNoSourceData
 	 */
 	private ContractMonthRecap populateResidualModule(ContractMonthRecap cmr, YearMonth yearMonth, LocalDate calcolaFinoA) throws EpasExceptionNoSourceData {
 
@@ -299,7 +314,6 @@ public class ContractMonthRecapManager {
 
 		int initMonteOreAnnoPassato = 0;
 		int initMonteOreAnnoCorrente = 0;
-		int initMealTicket = 0;
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//	Recupero situazione iniziale del mese richiesto
@@ -330,7 +344,6 @@ public class ContractMonthRecapManager {
 				initMonteOreAnnoCorrente = recapPreviousMonth.get().remainingMinutesCurrentYear; 
 				initMonteOreAnnoPassato = recapPreviousMonth.get().remainingMinutesLastYear;
 			}
-			initMealTicket = recapPreviousMonth.get().remainingMealTickets;
 		}
 		if ( contract.sourceDate != null 
 				&& contract.sourceDate.getYear() == yearMonth.getYear() 
