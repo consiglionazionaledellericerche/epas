@@ -385,6 +385,17 @@ public final class PersonDao extends DaoBase{
 	}
 
 	/**
+	 * 
+	 * @param perseoId
+	 * @return la persona identificata dall'id con cui è salvata sul db di perseo
+	 */
+	public Person getPersonByPerseoId(Integer perseoId){
+		final JPQLQuery query = getQueryFactory().from(person)
+				.where(person.iId.eq(perseoId));
+			
+		return query.singleResult(person);
+	}
+	/**
 	 *
 	 * @param oldId
 	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
@@ -435,6 +446,17 @@ public final class PersonDao extends DaoBase{
 						.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now()))
 								.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))));
 		return query.list(person);
+	}
+	
+	/**
+	 * 
+	 * @return quante sono le persone in anagrafica che hanno valorizzato il campo
+	 * email_cnr, campo utile per poter fare la sincronizzazione con gli altri sistemi
+	 */
+	public long checkCnrEmailForEmployee(){
+		final QPerson person = QPerson.person;
+		final JPQLQuery query = getQueryFactory().from(person).where(person.cnr_email.isNotNull());
+		return query.count();
 	}
 
 }
