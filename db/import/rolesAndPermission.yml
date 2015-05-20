@@ -68,7 +68,6 @@ Role(developer_role):
   name: developer
   permissions: !!set 
     ? developer
-    ? viewPerson
 
 Role(admin):
   name: admin
