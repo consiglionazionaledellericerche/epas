@@ -129,8 +129,14 @@ public class Administration extends Controller {
 			}
 		}
 
+		JPAPlugin.closeTx(false);
+		
 		for(Person person : sampling) {
 
+			JPAPlugin.startTx(false);
+			
+			person = Person.findById(person.id);
+			
 			IWrapperPerson wperson = wrapperFactory.create(person);
 			Contract contract = wperson.getCurrentContract().get();
 
@@ -207,14 +213,14 @@ public class Administration extends Controller {
 			boolean error = false;
 			
 			if(personResidualMonthRecaps.get(maxArrayIndex).buoniPastoResidui 
-					== contractMonthRecaps.get(maxArrayIndex).remainingMealTickets)
+					!= contractMonthRecaps.get(maxArrayIndex).remainingMealTickets.intValue())
 				error = true;
 			
 			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoCorrente
-					== contractMonthRecaps.get(maxArrayIndex).remainingMinutesCurrentYear)
+					!= contractMonthRecaps.get(maxArrayIndex).remainingMinutesCurrentYear.intValue())
 				error = true;
 			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoPassato 
-						== contractMonthRecaps.get(maxArrayIndex).remainingMinutesLastYear)
+						!= contractMonthRecaps.get(maxArrayIndex).remainingMinutesLastYear.intValue())
 				error = true;
 			
 			if(error)
@@ -222,9 +228,12 @@ public class Administration extends Controller {
 			else 
 				log.info("Check Persona={} id={}, Esito={}", person.fullName(), person.id, "OK");
 			
+			JPAPlugin.closeTx(false);
+			
 			if(personList.size() == 1) {
 				render(contractMonthRecaps, personResidualMonthRecaps, maxArrayIndex);
 			}
+			
 
 		}
 
