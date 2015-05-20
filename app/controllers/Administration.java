@@ -102,6 +102,8 @@ public class Administration extends Controller {
 	 * @param id
 	 * @throws EpasExceptionNoSourceData
 	 */
+	
+	@SuppressWarnings("deprecation")
 	public static void showPersonResidualSituation(Long id) throws EpasExceptionNoSourceData {
 
 		List<Person> personList = Lists.newArrayList();
