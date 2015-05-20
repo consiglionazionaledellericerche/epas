@@ -8,26 +8,28 @@ import java.util.List;
 
 import manager.ConfYearManager;
 import manager.ContractManager;
+import manager.ContractMonthRecapManager;
 import manager.VacationManager;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
-import models.ContractYearRecap;
+import models.ContractMonthRecap;
 import models.Person;
 import models.VacationPeriod;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 
 /**
@@ -79,12 +81,13 @@ public class VacationsRecap {
 	 * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza per l'utilizzo
 	 * @param contractManager 
 	 * @return
-	 * @throws EpasExceptionNoSourceData 
 	 */
 	public VacationsRecap(IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
 			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, 
-			VacationManager vacationManager,int year, Contract contract, LocalDate actualDate, 
-			boolean considerExpireLastYear) throws EpasExceptionNoSourceData {
+			ContractManager contractManager, VacationManager vacationManager,
+			ContractMonthRecapManager contractMonthRecapManager,
+			int year, Contract contract, LocalDate actualDate, 
+			boolean considerExpireLastYear) {
 
 		Preconditions.checkNotNull(year);
 		Preconditions.checkNotNull(contract);
@@ -169,20 +172,26 @@ public class VacationsRecap {
 		{
 			//Caso in cui voglio inserire ferie per l'anno prossimo
 			VacationsRecap vrPastYear = new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
-					confYearManager, vacationManager, this.year-1, this.contract, endLastYear, true);
+					confYearManager, contractManager, vacationManager, contractMonthRecapManager,
+					this.year-1, this.contract, endLastYear, true);
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
 			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);		
 			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
-		}
-		else{
-			//Popolare da contractYearRecap
-			ContractYearRecap recapPastYear = this.contract.yearRecap(year-1);
-			if(recapPastYear==null) {
-				log.error("Per {} manca il riepilogo anno {}, definire l'inizializzazione.", 
-						new Object[]{this.contract.person.getFullname() , year-1});
-				throw new EpasExceptionNoSourceData();
+		} else {
+			
+			//Popolare da riepilogo
+			Optional<ContractMonthRecap> monthRecap = contractManager
+					.getContractMonthRecap(contract, new YearMonth(year,12));
+			if ( !monthRecap.isPresent() ) {
+				contractMonthRecapManager.populateContractMonthRecap(contract,
+						Optional.fromNullable(new YearMonth(year,12)));
+
+				// TODO: controllare errore no source data
+				monthRecap = contractManager
+						.getContractMonthRecap(contract, new YearMonth(year,12));
 			}
-			vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
+			
+			vacationDaysPastYearUsedNew = monthRecap.get().vacationCurrentYearUsed;
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
 			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);						
 			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
@@ -411,9 +420,8 @@ public class VacationsRecap {
 	//	 * @param person
 	//	 * @param abt
 	//	 * @return
-	//	 * @throws EpasExceptionNoSourceData 
 	//	 */
-	//	public int remainingPastVacationsAs37(int year, Person person) throws EpasExceptionNoSourceData{
+	//	public int remainingPastVacationsAs37(int year, Person person) {
 	//
 	//		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 	//		Preconditions.checkState(contract.isPresent());

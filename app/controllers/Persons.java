@@ -60,7 +60,6 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
@@ -274,6 +273,8 @@ public class Persons extends Controller {
 		render(person);
 	}
 
+	
+	@SuppressWarnings("deprecation")
 	public static void deletePersonConfirmed(Long personId){
 		Person person = personDao.getPersonById(personId);
 		if(person == null) {
@@ -514,17 +515,11 @@ public class Persons extends Controller {
 		//Ricalcolo valori
 		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
-		try {
-			contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 
-			contract.save();
+		contract.save();
 
-			flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
-
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.person.fullName());
-		}
+		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
 
 		Persons.edit(contract.person.id);
 
@@ -596,17 +591,11 @@ public class Persons extends Controller {
 		contractManager.saveSourceContract(contract);
 
 		//Ricalcolo valori
-		try {
-			DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
+		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
-			contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 
-			flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
-
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.person.fullName());
-		}
+		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
 		Persons.edit(contract.person.id);
 
@@ -694,16 +683,9 @@ public class Persons extends Controller {
 		ContractWorkingTimeType previous = contractsWtt.get(index-1);
 		contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
 
-		//Ricalcolo valori
-		try {
-			contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
-			flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
-
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ cwtt.contract.person.fullName());
-		}
+		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 
 		Persons.edit(cwtt.contract.person.id);
 	}
@@ -723,15 +705,10 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		try {
-			contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
-			flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
+		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ cwtt.contract.person.fullName());
-		}
 		Persons.edit(cwtt.contract.person.id);
 	}
 
@@ -907,15 +884,9 @@ public class Persons extends Controller {
 
 		contract.save();
 
-		try {
-			contractManager.recomputeContract(contract.contract, contract.startFrom, null);
+		contractManager.recomputeContract(contract.contract, contract.startFrom, null);
 
-			flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
-
-		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.contract.person.fullName());
-		}
+		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 
 		Persons.edit(contract.contract.person.id);
 
@@ -975,15 +946,9 @@ public class Persons extends Controller {
 		contractStampProfileManager.deleteContractStampProfile(contract, index, csp);
 
 		//Ricalcolo i valori
-		try {
-			contractManager.recomputeContract(previous.contract, csp.startFrom, null);
+		contractManager.recomputeContract(previous.contract, csp.startFrom, null);
 
-			flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
-
-		} catch(EpasExceptionNoSourceData e) {	
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ previous.contract.person.fullName());
-		}
+		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 
 		Persons.edit(csp.contract.person.id);
 	}

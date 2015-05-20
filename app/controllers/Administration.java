@@ -42,8 +42,6 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-import exceptions.EpasExceptionNoSourceData;
-
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
@@ -100,11 +98,10 @@ public class Administration extends Controller {
 	/**
 	 * Metodo di sviluppo per testing nuova costruzione riepiloghi mensili.S
 	 * @param id
-	 * @throws EpasExceptionNoSourceData
 	 */
 	
 	@SuppressWarnings("deprecation")
-	public static void showPersonResidualSituation(Long id) throws EpasExceptionNoSourceData {
+	public static void showPersonResidualSituation(Long id) {
 
 		List<Person> personList = Lists.newArrayList();
 		
@@ -176,12 +173,7 @@ public class Administration extends Controller {
 			//Ricalcolo dei residui per anno
 			List<Contract> contractList = contractDao.getPersonContractList(person);
 			for(Contract c : contractList) {
-				try {
-					contractYearRecapManager.buildContractYearRecap(c);
-				} catch (EpasExceptionNoSourceData e) {
-						log.warn("Manca l'inizializzazione per il contratto {} di {}",
-								new Object[]{contract.id, contract.person.getFullname()});
-				}
+				contractYearRecapManager.buildContractYearRecap(c);
 			}
 
 			actualYear = first.getYear();
@@ -246,10 +238,9 @@ public class Administration extends Controller {
 	/**
 	 * Metodo di sviluppo per creare nuovi riepiloghi mensili.
 	 * 
-	 * @throws EpasExceptionNoSourceData
 	 */
 	@SuppressWarnings("deprecation")
-	public static void buildActualContractMonthRecap() throws EpasExceptionNoSourceData {
+	public static void buildActualContractMonthRecap() {
 
 		//Prendo la lista delle persone attive oggi
 		List<Person> personList = personDao.list(Optional.<String>absent(),

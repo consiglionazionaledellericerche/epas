@@ -56,7 +56,6 @@ import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-import exceptions.EpasExceptionNoSourceData;
 
 
 /**
@@ -138,9 +137,8 @@ public class AbsenceManager {
 	 * @param person
 	 * @param actualDate
 	 * @return
-	 * @throws EpasExceptionNoSourceData 
 	 */
-	private AbsenceType whichVacationCode(Person person, LocalDate date) throws EpasExceptionNoSourceData{
+	private AbsenceType whichVacationCode(Person person, LocalDate date) {
 
 		Contract contract = contractDao.getContract(date, person);
 
@@ -171,10 +169,9 @@ public class AbsenceManager {
 	 * @param person
 	 * @param date
 	 * @return l'absenceType 32 in caso affermativo. Null in caso di esaurimento bonus.
-	 * @throws EpasExceptionNoSourceData 
 	 * 
 	 */
-	private boolean canTake32(Person person, LocalDate date) throws EpasExceptionNoSourceData {
+	private boolean canTake32(Person person, LocalDate date) {
 
 		Contract contract = contractDao.getContract(date, person);
 
@@ -192,11 +189,10 @@ public class AbsenceManager {
 	 * @param person
 	 * @param date
 	 * @return true in caso affermativo, false altrimenti
-	 * @throws EpasExceptionNoSourceData 
 	 * 
 	 */
-	private boolean canTake31(Person person, LocalDate date) throws EpasExceptionNoSourceData {
-
+	private boolean canTake31(Person person, LocalDate date) {
+ 
 		Contract contract = contractDao.getContract(date, person);
 
 		Preconditions.checkNotNull(contract);
@@ -212,10 +208,9 @@ public class AbsenceManager {
 	 * @param person
 	 * @param date
 	 * @return l'absenceType 94 in caso affermativo. Null in caso di esaurimento bonus.
-	 * @throws EpasExceptionNoSourceData 
 	 * 
 	 */
-	private boolean canTake94(Person person, LocalDate date) throws EpasExceptionNoSourceData {
+	private boolean canTake94(Person person, LocalDate date) {
 
 		Contract contract = contractDao.getContract(date, person);
 
@@ -284,10 +279,9 @@ public class AbsenceManager {
 	 * @param file
 	 * @param mealTicket
 	 * @return
-	 * @throws EpasExceptionNoSourceData 
 	 */
 	public AbsenceInsertReport insertAbsence(Person person, LocalDate dateFrom,Optional<LocalDate> dateTo, 
-			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket) throws EpasExceptionNoSourceData{
+			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket) {
 
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(absenceType);
@@ -370,10 +364,7 @@ public class AbsenceManager {
 
 		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
-
-		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));}
-		catch(Exception e) {}
+		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));
 
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
@@ -562,10 +553,9 @@ public class AbsenceManager {
 	 * @param dateTo
 	 * @param absenceType
 	 * @param file
-	 * @throws EpasExceptionNoSourceData 
 	 */		
 	private AbsencesResponse handler31_32_94(Person person,
-			LocalDate date, AbsenceType absenceType,Optional<Blob> file) throws EpasExceptionNoSourceData{
+			LocalDate date, AbsenceType absenceType,Optional<Blob> file) {
 
 		if(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType) && canTake32(person, date)){
 			return insert(person, date,absenceType,file);
@@ -588,11 +578,10 @@ public class AbsenceManager {
 	 * @param dateTo
 	 * @param absenceType
 	 * @param file
-	 * @throws EpasExceptionNoSourceData 
 	 * @throws EmailException 
 	 */
 	private AbsencesResponse handler37(Person person,
-			LocalDate date, AbsenceType absenceType,Optional<Blob> file) throws EpasExceptionNoSourceData{
+			LocalDate date, AbsenceType absenceType,Optional<Blob> file) {
 
 		//FIXME Verificare i controlli d'inserimento
 		if(date.getYear() == LocalDate.now().getYear()){
@@ -674,11 +663,10 @@ public class AbsenceManager {
 	 * @param dateFrom
 	 * @param dateTo
 	 * @param absenceType
-	 * @throws EpasExceptionNoSourceData 
 	 * @throws EmailException 
 	 */
 	private AbsencesResponse handlerFER(Person person,LocalDate date,
-			AbsenceType absenceType, Optional<Blob> file) throws EpasExceptionNoSourceData{
+			AbsenceType absenceType, Optional<Blob> file) {
 
 		AbsenceType wichFer = whichVacationCode(person, date);
 
@@ -743,10 +731,9 @@ public class AbsenceManager {
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
-	 * @throws EpasExceptionNoSourceData 
 	 */
 	public int removeAbsencesInPeriod(Person person, LocalDate dateFrom, 
-			LocalDate dateTo, AbsenceType absenceType) throws EpasExceptionNoSourceData{
+			LocalDate dateTo, AbsenceType absenceType) {
 
 		LocalDate today = LocalDate.now();
 		LocalDate actualDate = dateFrom;
@@ -784,9 +771,7 @@ public class AbsenceManager {
 
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
-		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));}
-		catch(Exception e) {}
+		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));
 
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno

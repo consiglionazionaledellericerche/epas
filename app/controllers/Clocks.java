@@ -38,7 +38,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
-import exceptions.EpasExceptionNoSourceData;
 
 @With( RequestInit.class )
 public class Clocks extends Controller{

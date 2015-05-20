@@ -13,6 +13,7 @@ import play.data.validation.Required;
 
 @Entity
 @Table(name="contract_year_recap")
+@Deprecated
 public class ContractYearRecap extends BaseModel{
 
 	private static final long serialVersionUID = 7025943511706872182L;

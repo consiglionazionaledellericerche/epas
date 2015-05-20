@@ -48,7 +48,7 @@ public class ContractMonthRecap extends BaseModel {
 	@Column(name="abs_fac_usate")
 	public Integer vacationCurrentYearUsed = 0;
 	
-	@Column(name="asb_p_usati")
+	@Column(name="abs_p_usati")
 	public Integer permissionUsed = 0;
 	
 	@Column(name="abs_rc_usati")
