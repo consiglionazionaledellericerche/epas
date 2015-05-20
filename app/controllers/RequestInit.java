@@ -255,21 +255,10 @@ public class RequestInit extends Controller {
 		}
 	}
 
-	@Before
-	static void dbStateCheck(){
-
-		if(Office.count() == 0 && Security.getUser().get().username.equals("admin")){
-			Wizard.wizard(0);
-		}
-
-	}
-
 	@Before (priority = 1)
 	static void injectUtility() {
-
 		TemplateUtility templateUtility = new TemplateUtility();
 		renderArgs.put("templateUtility", templateUtility);
-
 	}
 
 

@@ -60,7 +60,6 @@ public class Security extends Secure.Security {
 	public final static String EDIT_PERSON = "editPerson"; //per adesso utilizzato anche per la nuova gestione dei ticket
 
 
-
 	public final static String VIEW_PERSON_DAY = "viewPersonDay";
 	public final static String EDIT_PERSON_DAY = "editPersonDay";
 
@@ -68,7 +67,6 @@ public class Security extends Secure.Security {
 	public final static String EDIT_COMPETENCE = "editCompetence";
 
 	public final static String UPLOAD_SITUATION = "uploadSituation";
-
 
 
 	/* Amministratore ePAS */
@@ -91,24 +89,8 @@ public class Security extends Secure.Security {
 	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
 	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
 
-
-	public final static String VIEW_PERSON_LIST = "viewPersonList";
-
-	public final static String INSERT_AND_UPDATE_PERSON = "insertAndUpdatePerson";
-	public final static String INSERT_AND_UPDATE_STAMPING = "insertAndUpdateStamping";
-	public final static String INSERT_AND_UPDATE_ABSENCE = "insertAndUpdateAbsence";
-
-	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
-	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
-	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
-	public final static String INSERT_AND_UPDATE_OFFICES = "insertAndUpdateOffices";
-	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
+//	FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
-
-	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";	
-
-	public final static String DELETE_PERSON = "deletePerson";
-
 
 	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
 

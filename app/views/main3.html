@@ -228,7 +228,7 @@
       		  
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"> admin </a>
+      	          <a style="color: red"><span class="glyphicon glyphicon-user"> ${session.username} </a>
       	        </li>
       		    #{/if}
       		    #{if loginResponse != null}

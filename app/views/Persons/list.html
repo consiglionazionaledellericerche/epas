@@ -8,6 +8,10 @@
   </style>
 #{/set}
 
+#{secure.checkAction 'Administrators.switchUserTo'} 
+  #{set switchUser:true /}
+#{/secure.checkAction}
+
 <p><a href="@{Persons.insertPerson}"><span class="glyphicon glyphicon-plus"></span> Inserisci una nuova persona</a></p>
 
 <p>
@@ -42,12 +46,15 @@
 
 	#{list items:personList, as:'person'}
 
-
-
 	<tr>
 	#{if person.currentContract.present}
 
-		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a></td>
+		<td class="personName">
+			<a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
+			#{if switchUser} 
+  				<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserTo(person.value.user.id)}">Switch User</a>
+			#{/if}
+		</td>
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
 		<td><font color="#000000">${person.currentContract.get().beginContract}</font></td>
