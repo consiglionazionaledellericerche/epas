@@ -124,17 +124,25 @@ public class ConsistencyManager {
 			
 			JPAPlugin.closeTx(false);
 			JPAPlugin.startTx(false);
-			
+
 			p = personDao.getPersonById(p.id);
+			
 			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-			checkHistoryError(p, fromDate);
+			//checkHistoryError(p, fromDate);
+			
 			// (2) Ricalcolo i valori dei person day	
 			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-			personDayManager.updatePersonDaysFromDate(p, fromDate);
+			//personDayManager.updatePersonDaysFromDate(p, fromDate);
+			
 			// (3a) Ricalcolo dei residui per mese
 			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
-			try {contractMonthRecapManager.populateContractMonthRecapByPerson(p, Optional.<YearMonth>absent());}
+			YearMonth yearMonthOfficeInitUse = new YearMonth(
+					new LocalDate(confGeneralManager.getFieldValue(
+							Parameter.INIT_USE_PROGRAM, p.office)));
+			try {contractMonthRecapManager.populateContractMonthRecapByPerson(p,
+					yearMonthOfficeInitUse);}
 			catch(Exception e) {}
+			
 			// (3b) Ricalcolo dei residui per anno
 			log.info("Update residui annuali {} dal {} a oggi", p.getFullname(), fromDate);
 			List<Contract> contractList = contractDao.getPersonContractList(p);

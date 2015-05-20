@@ -372,7 +372,7 @@ public class AbsenceManager {
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
 
 		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, Optional.fromNullable(new YearMonth(dateFrom)));}
+			.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));}
 		catch(Exception e) {}
 
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
@@ -785,7 +785,7 @@ public class AbsenceManager {
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
 		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person,Optional.fromNullable( new YearMonth(dateFrom)));}
+			.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));}
 		catch(Exception e) {}
 
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 

@@ -178,7 +178,7 @@ public class Stampings extends Controller {
 	
 		personDayManager.updatePersonDaysFromDate(giorno.person, giorno.date);
 		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, Optional.fromNullable(new YearMonth(giorno.date)));}
+			.populateContractMonthRecapByPerson(person, new YearMonth(giorno.date));}
 		catch(Exception e) {}
 
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
@@ -227,7 +227,7 @@ public class Stampings extends Controller {
 			
 			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 			try {contractMonthRecapManager
-				.populateContractMonthRecapByPerson(pd.person, Optional.fromNullable(new YearMonth(pd.date)));}
+				.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));}
 			catch(Exception e) {}
 
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
@@ -245,7 +245,7 @@ public class Stampings extends Controller {
 		
 		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(pd.person, Optional.fromNullable(new YearMonth(pd.date)));}
+			.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));}
 		catch(Exception e) {}
 		
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);

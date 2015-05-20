@@ -1,14 +1,20 @@
 package dao.wrapper;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import manager.PersonManager;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -47,7 +53,8 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean isLastInMonth(int month, int year) {
 		
-		List<Contract> contractInMonth = personManager.getMonthContracts(this.value.person, month, year);
+		List<Contract> contractInMonth = 
+				personManager.getMonthContracts(this.value.person, month, year);
 		if (contractInMonth.size() == 0) {
 			return false;
 		}
@@ -59,13 +66,17 @@ public class WrapperContract implements IWrapperContract {
 	}
 
 	/**
-	 * La lista dei VacationPeriod associati al contratto in ordine crescente per data di inizio periodo.
+	 * La lista dei VacationPeriod associati al contratto 
+	 * in ordine crescente per data di inizio periodo.
+	 * 
 	 * @param contract
 	 * @return
 	 */
+	@Override
 	public List<VacationPeriod> getContractVacationPeriods() {
 
-		List<VacationPeriod> vpList = vacationPeriodDao.getVacationPeriodByContract(this.value);
+		List<VacationPeriod> vpList = vacationPeriodDao
+				.getVacationPeriodByContract(this.value);
 		return vpList;
 	}
 
@@ -74,6 +85,7 @@ public class WrapperContract implements IWrapperContract {
 	 * 
 	 * @return
 	 */
+	@Override
 	public boolean isDefined() {
 
 		return this.value.expireContract != null;
@@ -84,22 +96,69 @@ public class WrapperContract implements IWrapperContract {
 	 * @param contract
 	 * * @return
 	 */
+	@Override
 	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
 		return Lists.newArrayList(this.value.contractWorkingTimeType);
 	}
 
 	/**
-	 * FIXME ha una dipendenza con DateUtility, capire se può rimanere nel modello.
-	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
+	 * L'intervallo attivo per il contratto.
+	 * 
 	 * @return
 	 */
-	public DateInterval getContractDateInterval(){
-		DateInterval contractInterval;
-		if(value.endContract!=null)
-			contractInterval = new DateInterval(value.beginContract, value.endContract);
+	@Override
+	public DateInterval getContractDateInterval() {
+		if (value.endContract != null)
+			return new DateInterval(value.beginContract, value.endContract);
 		else
-			contractInterval = new DateInterval(value.beginContract, value.expireContract);
+			return new DateInterval(value.beginContract, value.expireContract);
+	}
+	
+	/**
+	 * L'intervallo dei giorni da considerare per le computazioni nel database ePAS.
+	 * 
+	 */
+	@Override 
+	public DateInterval getContractDatabaseInterval() {
+		
+		// TODO: verificare il funzionamento.
+		// Assumo che initUse in configurazione sia ininfluente perchè se definita
+		// allora automaticamente deve essere definito sourceContract.
+		
+		DateInterval contractInterval = getContractDateInterval();
+		if (value.sourceDate != null) {
+			return new DateInterval(value.sourceDate.plusDays(1),
+					contractInterval.getEnd());
+		}
 		return contractInterval;
+	}
+	
+	/**
+	 * Il mese del primo riepilogo esistente per il contratto.
+	 * 
+	 */
+	@Override
+	public YearMonth getFirstMonthToRecap() {
+		if (value.sourceDate != null) {
+			return new YearMonth(value.sourceDate);
+		}
+		return new YearMonth(value.beginContract);
+	}
+	
+	/**
+	 * Il mese dell'ultimo riepilogo esistente per il contratto (al momento 
+	 * della chiamata).
+	 * 
+	 * @return
+	 */
+	@Override
+	public YearMonth getLastMonthToRecap() {
+		YearMonth currentMonth = new YearMonth(LocalDate.now());
+		YearMonth lastMonth = new YearMonth( getContractDateInterval().getEnd() );
+		if ( currentMonth.isAfter(lastMonth) ) {
+			return lastMonth;
+		}
+		return currentMonth;
 	}
 
 }
