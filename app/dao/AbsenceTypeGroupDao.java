@@ -1,22 +1,30 @@
 package dao;
 
-import helpers.ModelQuery;
-
 import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import models.AbsenceTypeGroup;
 import models.query.QAbsenceTypeGroup;
 
 import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 /**
  * 
  * @author dario
  *
  */
-public class AbsenceTypeGroupDao {
+public class AbsenceTypeGroupDao extends DaoBase{
+
+	@Inject
+	AbsenceTypeGroupDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
 
 	/**
 	 * 
@@ -25,10 +33,10 @@ public class AbsenceTypeGroupDao {
 	 * Nel caso in cui, invece, sia false e sia valorizzato il campo codeToReplace, verrà ritornata una lista con un solo elemento
 	 * contenente l'absenceTypeGroup che soddisfa il criterio di codeToReplace.
 	 */
-	public static List<AbsenceTypeGroup> getAbsenceTypeGroup(Optional<String> codeToReplace, boolean findAll){
+	public List<AbsenceTypeGroup> getAbsenceTypeGroup(Optional<String> codeToReplace, boolean findAll){
 		final BooleanBuilder condition = new BooleanBuilder();
 		QAbsenceTypeGroup absenceTypeGroup = QAbsenceTypeGroup.absenceTypeGroup;
-		final JPQLQuery query = ModelQuery.queryFactory().from(absenceTypeGroup);
+		final JPQLQuery query = getQueryFactory().from(absenceTypeGroup);
 		if(findAll)
 			return query.list(absenceTypeGroup);
 		if(codeToReplace.isPresent()){

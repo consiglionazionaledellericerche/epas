@@ -1,5 +1,7 @@
 package manager;
 
+import javax.inject.Inject;
+
 import models.ConfYear;
 import models.Office;
 import models.enumerate.Parameter;
@@ -15,6 +17,9 @@ import dao.ConfYearDao;
 
 public class ConfYearManager {
 
+	@Inject
+	private ConfYearDao confYearDao;
+
 	/**
 	 * Produce la configurazione annuale per l'office. 
 	 * I parametri vengono creati a partire dalla configurazione dell'anno precedente (se presente),
@@ -25,24 +30,24 @@ public class ConfYearManager {
 	 * @param office
 	 * @param overwrite
 	 */
-	public static void buildOfficeConfYear(Office office, Integer year, boolean overwrite) {
+	public void buildOfficeConfYear(Office office, Integer year, boolean overwrite) {
 
 		for( Parameter param: Parameter.values() ) {
-			
+
 			if(param.isYearly()) {
-				
-				Optional<ConfYear> confYear = ConfYearDao.getByFieldName(param.description, year, office);
-				
+
+				Optional<ConfYear> confYear = confYearDao.getByFieldName(param.description, year, office);
+
 				if( !confYear.isPresent() || overwrite ) {
-					
-					Optional<ConfYear> previousConfYear = ConfYearDao.getByFieldName(param.description, year - 1, office);
-					
+
+					Optional<ConfYear> previousConfYear = confYearDao.getByFieldName(param.description, year - 1, office);
+
 					String newValue = null;
-					
+
 					if(previousConfYear.isPresent()) {
 						newValue = previousConfYear.get().fieldValue;
 					}
-										
+
 					saveConfYear(param, office, year, Optional.fromNullable(newValue));
 				}
 			}
@@ -61,39 +66,39 @@ public class ConfYearManager {
 	 * @param value
 	 * @return
 	 */
-	public static Optional<ConfYear> saveConfYear(Parameter param, Office office, Integer year, Optional<String> value) {
-		
+	public Optional<ConfYear> saveConfYear(Parameter param, Office office, Integer year, Optional<String> value) {
+
 		//Decido il nuovo valore
-		
+
 		String newValue = param.getDefaultValue();
-		
-		Optional<ConfYear> previousConfYear = ConfYearDao.getByFieldName(param.description, year - 1 , office);
-		
+
+		Optional<ConfYear> previousConfYear = confYearDao.getByFieldName(param.description, year - 1 , office);
+
 		if(previousConfYear.isPresent()) {
 			newValue = previousConfYear.get().fieldValue;
 		}
-		
+
 		if(value.isPresent()) {
 			newValue = value.get();
 		}
-		
+
 		//Prelevo quella esistente
-		Optional<ConfYear> confYear = ConfYearDao.getByFieldName(param.description, year, office);
-		
+		Optional<ConfYear> confYear = confYearDao.getByFieldName(param.description, year, office);
+
 		if(confYear.isPresent()) {
-			
+
 			confYear.get().fieldValue = newValue;
 			confYear.get().save();
 			return confYear;
 		}
-		
+
 		ConfYear newConfYear = new ConfYear(office, year, param.description, newValue);
 		newConfYear.save();
-		
+
 		return Optional.fromNullable(newConfYear);
-		
+
 	}
-	
+
 	/**
 	 * Si recupera l'oggetto quando si vuole modificare il parametro.
 	 *  
@@ -103,19 +108,19 @@ public class ConfYearManager {
 	 * @param office
 	 * @return
 	 */
-	public static ConfYear getByField(Parameter param, Office office, Integer year) {
-		
+	public ConfYear getByField(Parameter param, Office office, Integer year) {
+
 		Preconditions.checkState(param.isYearly());
-		
-		Optional<ConfYear> confYear = ConfYearDao.getByFieldName(param.description, year, office);
-		
+
+		Optional<ConfYear> confYear = confYearDao.getByFieldName(param.description, year, office);
+
 		if(!confYear.isPresent()) {
 
 			confYear = saveConfYear(param, office, year, Optional.<String>absent());
 		}
-		
+
 		return confYear.get();
-		
+
 	}
 
 	/**
@@ -128,27 +133,27 @@ public class ConfYearManager {
 	 * @param year
 	 * @return
 	 */
-	public static String getFieldValue(Parameter param, Office office, Integer year) {
-		
+	public String getFieldValue(Parameter param, Office office, Integer year) {
+
 		Preconditions.checkState(param.isYearly());
-		
+
 		String key = param.description + office.code;
-		
+
 		String value = (String)Cache.get(key);
-		
+
 		if(value == null){
-			
-			Optional<ConfYear> conf = ConfYearDao.getByFieldName(param.description, year, office);
-			
+
+			Optional<ConfYear> conf = confYearDao.getByFieldName(param.description, year, office);
+
 			if(!conf.isPresent()){
-				
+
 				conf = saveConfYear(param, office, year, Optional.<String>absent());
 			}
-			
+
 			value = conf.get().fieldValue;
 			Cache.set(key, value);
 		}
-		
+
 		return value;
 	}
 
@@ -159,7 +164,7 @@ public class ConfYearManager {
 	 * @param year
 	 * @return
 	 */
-	public static Integer getIntegerFieldValue(Parameter param, Office office, Integer year) {
+	public Integer getIntegerFieldValue(Parameter param, Office office, Integer year) {
 		return new Integer(getFieldValue(param, office, year));
 	}
 
@@ -170,31 +175,31 @@ public class ConfYearManager {
 	 * @param year
 	 * @return
 	 */
-	public static LocalDate getLocalDateFieldValue(Parameter param, Office office, Integer year) {
+	public LocalDate getLocalDateFieldValue(Parameter param, Office office, Integer year) {
 		return new LocalDate(getFieldValue(param, office, year));
 	}
-	
+
 	/**
 	 * L'enumerato associato a ConfYear.
 	 * 
 	 * @return
 	 */
-	public static Parameter getParameter(ConfYear confYear) {
-		
+	public Parameter getParameter(ConfYear confYear) {
+
 		Parameter parameter = null;
-		
+
 		for(Parameter param : Parameter.values()) {
 			if(param.description.equals(confYear.field)) { 
 				parameter = param;
 				break;
 			}
-			
+
 		}
-		
+
 		Preconditions.checkNotNull(parameter);
-		
+
 		return parameter;
-		
+
 	}
-	
+
 }

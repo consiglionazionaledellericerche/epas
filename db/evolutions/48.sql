@@ -1,62 +1,14 @@
 # ---!Ups
 
-CREATE SEQUENCE seq_contract_month_recap
-  START WITH 1
-  INCREMENT BY 1
-  NO MINVALUE
-  NO MAXVALUE;
+ALTER TABLE person_days
+  ADD COLUMN accepted_holiday_working_time boolean;
+ALTER TABLE person_days_history
+  ADD COLUMN accepted_holiday_working_time boolean;
 
-CREATE TABLE contract_month_recap
-(
-  id bigint NOT NULL DEFAULT nextval('seq_contract_month_recap'::regclass),
-  year INTEGER,
-  month INTEGER,
-  
-  -- modulo recap assenze
-  abs_fap_usate INTEGER,
-  abs_fac_usate INTEGER,
-  asb_p_usati INTEGER,
-  abs_rc_usati INTEGER,
-
-  -- modulo recap residui
-  -- fonti dell'algoritmo
-  s_r_bp INTEGER,
-  s_bp_consegnati INTEGER,
-  s_bd_usati INTEGER,
-  s_r_ac_initmese INTEGER,
-  s_r_ap INTEGER,
-  s_r_ac INTEGER,
-  s_pf INTEGER,
-  s_pfp INTEGER,
-  s_r_ap_usabile BOOLEAN,
-  s_s1 INTEGER,
-  s_s2 INTEGER,
-  s_s3 INTEGER,
-  s_rc_min INTEGER,
-  s_ol INTEGER,
-  
-  -- decisioni dell'algoritmo imputazioni
-  d_pfn_ap INTEGER,
-  d_pfn_ac INTEGER,
-  d_pfn_pfp INTEGER,
-  d_rc_ap INTEGER,
-  d_rc_ac INTEGER,
-  d_rc_pfp INTEGER,
-  
-  -- decisioni dell'algoritmo residui finali
-  d_r_ap INTEGER,	
-  d_r_ac INTEGER,	
-  d_r_bp INTEGER,	
-
-  contract_id bigint NOT NULL,
-  
-  CONSTRAINT contract_month_recap_pkey PRIMARY KEY (id),
-  CONSTRAINT contract_contract_month_recap FOREIGN KEY (contract_id)
-      REFERENCES contracts (id) 
-);
-
+UPDATE person_days SET accepted_holiday_working_time = false;
+UPDATE person_days_history SET accepted_holiday_working_time = false;
 
 # ---!Downs
 
-DROP TABLE contract_month_recap;
-DROP SEQUENCE seq_contract_month_recap;
+ALTER TABLE person_days DROP COLUMN accepted_holiday_working_time;
+ALTER TABLE person_days_history DROP COLUMN accepted_holiday_working_time;

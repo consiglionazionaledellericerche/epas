@@ -3,7 +3,6 @@ package manager;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -17,7 +16,6 @@ import models.CompetenceCode;
 import models.ConfYear;
 import models.Contract;
 import models.ContractMonthRecap;
-import models.ContractYearRecap;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.AbsenceTypeMapping;
@@ -26,20 +24,15 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.ConfYearDao;
-import dao.ContractDao;
 import dao.MealTicketDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.WorkingTimeTypeDayDao;
 import dao.wrapper.IWrapperContract;
@@ -56,20 +49,30 @@ import exceptions.EpasExceptionNoSourceData;
 public class ContractMonthRecapManager {
 
 	@Inject
-	public VacationsRecapFactory vacationsFactory;
+	private VacationsRecapFactory vacationsFactory;
 	@Inject 
-	public MealTicketDao mealTicketDao;
+	private MealTicketManager mealTicketManager;
+	@Inject 
+	private MealTicketDao mealTicketDao;
 	@Inject
-	public PersonDayDao personDayDao;
+	private PersonDayDao personDayDao;
 	@Inject
-	public CompetenceDao competenceDao;
+	private CompetenceDao competenceDao;
 	@Inject
-	public AbsenceDao absenceDao;
+	private AbsenceDao absenceDao;
 	@Inject
-	public IWrapperFactory wrapperFactory;
+	private IWrapperFactory wrapperFactory;
 	@Inject
-	public ContractManager contractManager;
-	
+	private ContractManager contractManager;
+	@Inject
+	private ConfGeneralManager confGeneralManager;
+	@Inject
+	private ConfYearDao confYearDao;
+	@Inject
+	private AbsenceTypeDao absenceTypeDao;
+	@Inject
+	private CompetenceCodeDao competenceCodeDao;
+		
 	/**
 	 * Costruisce i riepiloghi mensili per il contratto fornito.
 	 * Se yearMonthFrom è present costruisce i riepiloghi a partire da quel mese.
@@ -85,13 +88,13 @@ public class ContractMonthRecapManager {
 		
 		//Controllo se ho sufficienti dati
 		
-		String dateInitUse = ConfGeneralManager
+		String dateInitUse = confGeneralManager
 				.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate;
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
-		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
 
 		DateInterval personContractDatabaseInterval = 
 				DateUtility.intervalIntersection(contractInterval, personDatabaseInterval);
@@ -153,7 +156,8 @@ public class ContractMonthRecapManager {
 
 		for( Contract contract : person.contracts ){
 			
-			DateInterval contractDateInterval = contract.getContractDateInterval();
+			DateInterval contractDateInterval = 
+					wrapperFactory.create(contract).getContractDateInterval();
 			YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
 			
 			//Se yearMonthFrom non è successivo alla fine del contratto...
@@ -247,10 +251,10 @@ public class ContractMonthRecapManager {
 		ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
 		
 		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
-		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
-		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
-		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
-		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
+		AbsenceType ab31 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
+		AbsenceType ab32 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
+		AbsenceType ab37 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
+		AbsenceType ab94 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
 				
 		DateInterval monthInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInSourceMonth);
 		List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract, ab32);
@@ -302,13 +306,13 @@ public class ContractMonthRecapManager {
 		Contract contract = cmr.contract;
 		boolean mealTicketToCompute = true;
 		
-		Optional<LocalDate> dateStartMealTicket = mealTicketDao.getMealTicketStartDate(contract.person.office);
+		Optional<LocalDate> dateStartMealTicket = mealTicketManager.getMealTicketStartDate(contract.person.office);
 		if(!dateStartMealTicket.isPresent() || dateStartMealTicket.get().isAfter(calcolaFinoA)) {
 			mealTicketToCompute = false;
 		}
 		
 		LocalDate firstDayInDatabase = new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
-		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
 		DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket.orNull(), calcolaFinoA);
 
@@ -493,13 +497,13 @@ public class ContractMonthRecapManager {
 		String description = cmr.qualifica > 3 ? 
 				Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49.description : 
 					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13.description;
-		conf = ConfYearDao.getByFieldName(description, cmr.year, cmr.person.office);
+		conf = confYearDao.getByFieldName(description, cmr.year, cmr.person.office);
 		
 		if(conf.isPresent()){
 			confYear = conf.get();
 		}
 		else{
-			confYear = ConfYearDao.getByFieldName(
+			confYear = confYearDao.getByFieldName(
 					description, cmr.year-1, cmr.person.office).get();
 		}
 		if(cmr.month==1)
@@ -631,9 +635,9 @@ public class ContractMonthRecapManager {
 	 */
 	private void setPersonMonthInformation(ContractMonthRecap monthRecap, DateInterval validDataForCompensatoryRest, IWrapperContract wcontract)
 	{
-		CompetenceCode s1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
-		CompetenceCode s2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
-		CompetenceCode s3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
+		CompetenceCode s1 = competenceCodeDao.getCompetenceCodeByCode("S1");
+		CompetenceCode s2 = competenceCodeDao.getCompetenceCodeByCode("S2");
+		CompetenceCode s3 = competenceCodeDao.getCompetenceCodeByCode("S3");
 		
 		if(wcontract.isLastInMonth(monthRecap.month, monthRecap.year))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
@@ -672,7 +676,8 @@ public class ContractMonthRecapManager {
 			monthRecap.recoveryDayUsed = 0;
 			for(Absence abs : riposiCompensativi){
 				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
-						WorkingTimeTypeDayDao.getWorkingTimeTypeDay(wcontract.getValue().person, abs.personDay.date).workingTime;	//FIXME potrebbe essere null
+						wrapperFactory.create(abs.personDay).getWorkingTimeTypeDay().get().workingTime;	
+				// FIXME: potrebbe essere absent() ??
 				monthRecap.recoveryDayUsed++;
 			}
 			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;

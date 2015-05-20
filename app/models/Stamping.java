@@ -3,8 +3,6 @@
  */
 package models;
 
-import it.cnr.iit.epas.DateUtility;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -38,47 +36,46 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	public enum WayType {
 		in("in"),
 		out("out");
-		
+
 		public String description;
-		
+
 		private WayType(String description){
 			this.description = description;
 		}
-		
+
 		public String getDescriptio(){
 			return this.description;
 		}
 	}
-	
+
 	@Required
 	@ManyToOne(optional = false)
-		
+
 	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
 	public PersonDay personDay;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
-	
+
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
-	
+
 	@Required
 	@InPast
-//	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
 	public LocalDateTime date;
-	
+
 	@Required
 	@Enumerated(EnumType.STRING)
 	public WayType way;
-	
+
 	@ManyToOne
 	@JoinColumn(name ="badge_reader_id")
 	public BadgeReader badgeReader;
-	
+
 	public String note;
-		
+
 	/**
 	 * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente all'apposita
 	 * macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di timbratura poichè la persona 
@@ -86,7 +83,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	 */
 	@Column(name = "marked_by_admin")
 	public Boolean markedByAdmin;	
-	
+
 	/**
 	 * true, cella bianca; false, cella gialla
 	 */
@@ -95,7 +92,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	@Transient
 	public int pairId = 0;
 
-	
+
 	/**
 	 * true, la cella fittizia di uscita adesso
 	 */
@@ -104,7 +101,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
 	//setter implementato per yaml parser TODO toglierlo configurando snakeyaml
 	public void setDate(String date){
-		
+
 		//2013-10-03T19:18:00.000
 		String data = date.split("T")[0];
 		String time = date.split("T")[1];
@@ -118,12 +115,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 		//int sec  = Integer.parseInt( (time.split(":")[2]).split(".")[0] );
 		this.date = new LocalDateTime(year,month,day,hour,min,0);
 	}
-	
+
 	@Transient
 	public boolean isValid() {
 		return this.valid;
 	}
-	
+
 	@Transient
 	public boolean isIn() {
 		return way.equals(WayType.in);
@@ -137,7 +134,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	@Override
 	public String toString() {
 		return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
-			id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
+				id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
 	}
 
 	/**
@@ -152,7 +149,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 		else
 			return 0; 
 	}
-	
+
 	@Transient
 	public boolean isServiceStamping() {
 		if(this.stampType!=null && this.stampType.identifier!=null && this.stampType.identifier.equals("s"))
@@ -161,15 +158,15 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 		}
 		return false;
 	}
-	
+
 	@Transient
 	public String formattedHour() {
 		if(this.date != null)
-			return DateUtility.fromLocalDateTimeHourTime(this.date);
+			return date.toString("HH:mm");
 		else
 			return "";
 	}
-	
+
 	@Transient
 	public String formattedMark() {
 		String mark = "";
@@ -179,9 +176,4 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 			mark = mark + " " + this.stampType.identifier;
 		return mark;
 	}
-	
-
-
-
-
 }

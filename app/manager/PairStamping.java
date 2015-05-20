@@ -7,8 +7,7 @@ import models.Stamping;
  * Classe che modella due stampings logicamente accoppiate nel personday
  *  (una di ingresso ed una di uscita)
  */
-public class PairStamping
-{
+public class PairStamping{
 
 	private static int SEQUENCE_ID = 1;
 	

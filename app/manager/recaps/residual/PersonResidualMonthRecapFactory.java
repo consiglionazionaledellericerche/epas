@@ -1,14 +1,18 @@
 package manager.recaps.residual;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import javax.inject.Inject;
 
 import models.Contract;
 import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.ConfYearDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
+import dao.WorkingTimeTypeDayDao;
 import dao.wrapper.IWrapperFactory;
 
 /**
@@ -26,17 +30,28 @@ public class PersonResidualMonthRecapFactory {
 	private final IWrapperFactory wrapperFactory;
 	private final MealTicketDao mealTicketDao;
 	private final CompetenceDao competenceDao;
+	private final ConfYearDao confYearDao;
+	private final CompetenceCodeDao competenceCodeDao;
+	private final WorkingTimeTypeDayDao workingTimeTypeDayDao;
+	private final DateUtility dateUtility;
 
 	@Inject
 	PersonResidualMonthRecapFactory(AbsenceDao ad, PersonDayDao pd, 
 			MealTicketDao mealTicketDao,CompetenceDao competenceDao,
-			IWrapperFactory wrapperFactory) {
+			IWrapperFactory wrapperFactory,
+			ConfYearDao confYearDao,CompetenceCodeDao competenceCodeDao,
+			WorkingTimeTypeDayDao workingTimeTypeDayDao,
+			DateUtility dateUtility) {
 		
 		this.competenceDao = competenceDao;
 		this.absenceDao = ad;
 		this.personDayDao = pd;
 		this.mealTicketDao = mealTicketDao;
 		this.wrapperFactory = wrapperFactory;
+		this.confYearDao = confYearDao;
+		this.competenceCodeDao = competenceCodeDao;
+		this.workingTimeTypeDayDao = workingTimeTypeDayDao;
+		this.dateUtility = dateUtility;
 	}
 	
 	/**
@@ -65,7 +80,8 @@ public class PersonResidualMonthRecapFactory {
 				contract, year, month, initMonteOreAnnoPassato,
 				initMonteOreAnnoCorrente, initMealTickets,
 				validDataForPersonDay, validDataForCompensatoryRest,
-				validDataForMealTickets);
+				validDataForMealTickets,confYearDao,competenceCodeDao,workingTimeTypeDayDao,
+				dateUtility);
 		
 	}
 }

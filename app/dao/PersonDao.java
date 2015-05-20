@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.CompetenceCode;
 import models.Contract;
@@ -28,8 +29,10 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
 
 /**
@@ -38,8 +41,13 @@ import com.mysema.query.types.Projections;
  * @author marco
  *
  */
-public final class PersonDao {
+public final class PersonDao extends DaoBase{
 	
+	@Inject
+	PersonDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
+
 	/**
 	 * Modella il Dto contenente le sole informazioni della persona
 	 * richieste dalla select nel template menu.
@@ -47,7 +55,7 @@ public final class PersonDao {
 	 * @author alessandro
 	 *
 	 */
-	public static class PersonLiteDto {
+	public class PersonLiteDto {
 		
 		public Long id;
 		public String name;
@@ -83,10 +91,10 @@ public final class PersonDao {
 	 * @param onlyOnCertificate
 	 * @return
 	 */
-	private static JPQLQuery queryList(Optional<String> name, Set<Office> offices,
+	private JPQLQuery queryList(Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 		
-		 final JPQLQuery query = ModelQuery.queryFactory().from(person)
+		 final JPQLQuery query = getQueryFactory().from(person)
 					.leftJoin(person.contracts, contract)
 					.orderBy(person.surname.asc(), person.name.asc())
 					
@@ -108,7 +116,8 @@ public final class PersonDao {
 
 		if(onlyOnCertificate)
 			condition.and(contract.onCertificate.isTrue());
-
+		
+		if(start != null && end!= null){
 		condition.andAnyOf(
 
 				//contratto terminato
@@ -127,9 +136,9 @@ public final class PersonDao {
 
 						)
 					)
-
 				);
-
+		}
+		
 		return query.where(condition);
 		
 	}
@@ -143,7 +152,7 @@ public final class PersonDao {
 	 * @param month
 	 * @return
 	 */
-	public static List<PersonLiteDto> liteList(Set<Office> offices, int year, int month) {
+	public List<PersonLiteDto> liteList(Set<Office> offices, int year, int month) {
 		
 		final QPerson person = QPerson.person;
 		
@@ -153,15 +162,6 @@ public final class PersonDao {
 		return queryList(Optional.<String>absent(), offices, false, beginMonth, endMonth, true)
 				.list((Projections.bean(PersonLiteDto.class, person.id, person.name, person.surname)));
 	}
-	
-	/**
-	 * La liste 
-	 * 
-	 * @param name
-	 * @param offices obbligatorio
-	 * @param onlyTechnician
-	 * @return la lista delle person corrispondenti
-	 */
 	
 	/**
 	 * La lista di persone una volta applicati i filtri dei parametri. 
@@ -174,10 +174,8 @@ public final class PersonDao {
 	 * @param onlyOnCertificate
 	 * @return
 	 */
-	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
+	public SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
-
-		Preconditions.checkState(!offices.isEmpty());
 		
 		return ModelQuery.simpleResults(queryList(name, offices, onlyTechnician, start, end, onlyOnCertificate), 
 				person);
@@ -195,7 +193,7 @@ public final class PersonDao {
 	 * @param end
 	 * @return
 	 */
-	public static SimpleResults<Person> listForCompetence(CompetenceCode compCode, Optional<String> name, Set<Office> offices,
+	public SimpleResults<Person> listForCompetence(CompetenceCode compCode, Optional<String> name, Set<Office> offices,
 			boolean onlyTechnician, LocalDate start, LocalDate end) {
 
 		Preconditions.checkState(!offices.isEmpty());
@@ -205,7 +203,7 @@ public final class PersonDao {
 		//final LocalDate start = new LocalDate();
 		//final LocalDate end = start;
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+		final JPQLQuery query = getQueryFactory().from(person)
 				.leftJoin(person.contracts, contract)
 				.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
 				//.leftJoin(qp.location, QLocation.location)
@@ -250,7 +248,7 @@ public final class PersonDao {
 	 */
 	public Contract getLastContract(Person person) {
 
-		final JPQLQuery query = ModelQuery.queryFactory()
+		final JPQLQuery query = getQueryFactory()
 				.from(contract)
 				.where(contract.person.eq(person))
 				.orderBy(contract.beginContract.desc());
@@ -268,9 +266,9 @@ public final class PersonDao {
 	 * @param c
 	 * @return
 	 */
-	public static Contract getPreviousPersonContract(Contract c) {
+	public Contract getPreviousPersonContract(Contract c) {
 
-		final JPQLQuery query = ModelQuery.queryFactory()
+		final JPQLQuery query = getQueryFactory()
 				.from(contract)
 				.where(contract.person.eq(c.person))
 				.orderBy(contract.beginContract.desc());
@@ -291,7 +289,7 @@ public final class PersonDao {
 	 * @param end
 	 * @return la lista di contratti che soddisfa le seguenti condizioni:
 	 */
-	public static List<Contract> getContractList(Person person,LocalDate fromDate,LocalDate toDate){
+	public List<Contract> getContractList(Person person,LocalDate fromDate,LocalDate toDate){
 
 		BooleanBuilder conditions = new BooleanBuilder(contract.person.eq(person).and(contract.beginContract.loe(toDate)));
 
@@ -301,7 +299,7 @@ public final class PersonDao {
 				contract.endContract.isNotNull().and(contract.endContract.goe(fromDate))
 				);
 
-		return ModelQuery.queryFactory().from(contract).where(conditions).orderBy(contract.beginContract.asc()).list(contract);
+		return getQueryFactory().from(contract).where(conditions).orderBy(contract.beginContract.asc()).list(contract);
 	}
 
 	/**
@@ -312,12 +310,12 @@ public final class PersonDao {
 	 * @param onlyWithMealTicket
 	 * @return
 	 */
-	public static List<PersonDay> getPersonDayIntoInterval(
+	public List<PersonDay> getPersonDayIntoInterval(
 			Person person, DateInterval interval, boolean onlyWithMealTicket) {
 
 		final QPersonDay qpd = QPersonDay.personDay;
 
-		final JPQLQuery query = ModelQuery.queryFactory()
+		final JPQLQuery query = getQueryFactory()
 				.from(qpd)
 				.orderBy(qpd.date.asc());
 
@@ -339,9 +337,9 @@ public final class PersonDao {
 	 * @param personId
 	 * @return la persona corrispondente all'id passato come parametro
 	 */
-	public static Person getPersonById(Long personId) {
+	public Person getPersonById(Long personId) {
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.id.eq(personId));
+		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
 
 		return query.singleResult(person);
 
@@ -353,9 +351,9 @@ public final class PersonDao {
 	 * @param number
 	 * @return la persona corrispondente alla matricola passata come parametro
 	 */
-	public static Person getPersonByNumber(Integer number){
+	public Person getPersonByNumber(Integer number){
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.number.eq(number));
+		final JPQLQuery query = getQueryFactory().from(person).where(person.number.eq(number));
 
 		return query.singleResult(person);
 
@@ -365,9 +363,9 @@ public final class PersonDao {
 	 *
 	 * @return la lista di persone che hanno una matricola associata
 	 */
-	public static List<Person> getPersonsByNumber(){
+	public List<Person> getPersonsByNumber(){
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.number.isNotNull().and(person.number.ne(0)));
 		query.orderBy(person.number.asc());
 		return query.list(person);
@@ -378,9 +376,9 @@ public final class PersonDao {
 	 * @param email
 	 * @return la persona che ha associata la mail email
 	 */
-	public static Person getPersonByEmail(String email){
+	public Person getPersonByEmail(String email){
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.email.eq(email).or(person.cnr_email.eq(email)));
 
 		return query.singleResult(person);
@@ -391,9 +389,9 @@ public final class PersonDao {
 	 * @param oldId
 	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
 	 */
-	public static Person getPersonByOldID(Long oldId){
+	public Person getPersonByOldID(Long oldId){
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.oldId.eq(oldId));
+		final JPQLQuery query = getQueryFactory().from(person).where(person.oldId.eq(oldId));
 
 		return query.singleResult(person);
 	}
@@ -403,21 +401,20 @@ public final class PersonDao {
 	 * @param badgeNumber
 	 * @return la persona associata al badgeNumber passato come parametro
 	 */
-	public static Person getPersonByBadgeNumber(String badgeNumber){
+	public Person getPersonByBadgeNumber(String badgeNumber){
 
-		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
+		final JPQLQuery query = getQueryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
 
 		return query.singleResult(person);
 	}
-
 
 	/**
 	 * 
 	 * @param type
 	 * @return la lista di persone in reperibilità con tipo type 
 	 */
-	public static List<Person> getPersonForReperibility(Long type){
-		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+	public List<Person> getPersonForReperibility(Long type){
+		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.reperibility.personReperibilityType.id.eq(type).and(person.reperibility.startDate.isNull().or(person.reperibility.startDate.loe(LocalDate.now())
 						.and(person.reperibility.endDate.isNull().or(person.reperibility.endDate.goe(LocalDate.now()))))));
 		return query.list(person);
@@ -429,10 +426,10 @@ public final class PersonDao {
 	 * @param type
 	 * @return la lista di persone che hanno come tipo turno quello passato come parametro
 	 */
-	public static List<Person> getPersonForShift(String type){
+	public List<Person> getPersonForShift(String type){
 		QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
 		QPersonShift ps = QPersonShift.personShift;
-		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+		final JPQLQuery query = getQueryFactory().from(person)
 				.leftJoin(person.personShift, ps)
 				.leftJoin(ps.personShiftShiftTypes, psst).where(psst.shiftType.type.eq(type)
 						.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now()))

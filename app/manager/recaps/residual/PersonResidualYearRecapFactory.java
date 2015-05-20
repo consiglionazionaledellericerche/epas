@@ -1,7 +1,10 @@
 package manager.recaps.residual;
 
+import it.cnr.iit.epas.DateUtility;
+
 import javax.annotation.Nullable;
 
+import manager.ConfGeneralManager;
 import models.Contract;
 
 import org.joda.time.LocalDate;
@@ -10,19 +13,28 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.MealTicketDao;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonResidualYearRecapFactory {
-	
+
 	private final PersonResidualMonthRecapFactory personResidualMonthRecapFactory;
 	private final MealTicketDao mealTicketDao;
-	
+	private final ConfGeneralManager confGeneralManager;
+	private final DateUtility dateUtility;
+	private final IWrapperFactory factory;
+
 	@Inject
 	public PersonResidualYearRecapFactory(PersonResidualMonthRecapFactory monthFactory,
-			MealTicketDao mealTicketDao) {
+			MealTicketDao mealTicketDao,ConfGeneralManager confGeneralManager,
+			DateUtility dateUtility,IWrapperFactory factory) {
 		personResidualMonthRecapFactory = monthFactory;
 		this.mealTicketDao = mealTicketDao;
+		this.confGeneralManager = confGeneralManager;
+		this.dateUtility = dateUtility;
+		this.factory = factory;
+		
 	}
-	
+
 	/**
 	 * Costruisce la situazione annuale residuale della persona.
 	 * @param contract
@@ -34,10 +46,11 @@ public class PersonResidualYearRecapFactory {
 	 * forniti.
 	 */
 	public PersonResidualYearRecap create(Contract contract, int year, @Nullable LocalDate finoA) {
-		
+
 		Preconditions.checkNotNull(contract, "è richiesto un contratto non nullo");
-		
+
 		return new PersonResidualYearRecap(mealTicketDao, 
-				contract, year, finoA, personResidualMonthRecapFactory);
+				contract, year, finoA, personResidualMonthRecapFactory,
+				confGeneralManager,dateUtility,factory);
 	}
 }

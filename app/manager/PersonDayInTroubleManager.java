@@ -14,7 +14,7 @@ public class PersonDayInTroubleManager {
 	 * @param pd
 	 * @param cause
 	 */
-	public static void insertPersonDayInTrouble(PersonDay pd, String cause)
+	public void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
 		if(pd.troubles==null || pd.troubles.size()==0)
 		{	

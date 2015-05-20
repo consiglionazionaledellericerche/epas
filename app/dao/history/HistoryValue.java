@@ -1,6 +1,5 @@
 package dao.history;
 
-import it.cnr.iit.epas.DateUtility;
 import models.base.BaseModel;
 import models.base.Revision;
 
@@ -18,6 +17,7 @@ public class HistoryValue<T extends BaseModel> {
 	public final T value;
 	public final Revision revision;
 	public final RevisionType type;
+	
 	
 	HistoryValue(T value, Revision revision, RevisionType type) {
 		this.value = value;
@@ -43,14 +43,8 @@ public class HistoryValue<T extends BaseModel> {
 		
 		if(time == null)
 			return "";
-		
-		//data
-		String day = time.getYear() + "-" + time.getMonthOfYear() + "-" + time.getDayOfMonth() + " ";
-		
-		//ora
-		String hour = DateUtility.fromLocalDateTimeHourTime(time); 
-	
-		return day + " - " + hour;
+
+		return time.toString("yyyy-MM-dd - HH:mm");
 	}
 	
 	public String formattedOwner() {
