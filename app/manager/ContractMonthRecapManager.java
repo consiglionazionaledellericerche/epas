@@ -24,6 +24,8 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
@@ -68,6 +70,8 @@ public class ContractMonthRecapManager {
 	@Inject
 	private CompetenceCodeDao competenceCodeDao;
 		
+	
+	private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
 	/**
 	 * Ritorna il riepilogo mensile del contatto.
 	 * Se needed effettua il tentativo di ricalcolarlo.
@@ -188,6 +192,11 @@ public class ContractMonthRecapManager {
 			
 			//Se yearMonthFrom non è successivo alla fine del contratto...
 			if ( !yearMonthFrom.isAfter(endContractYearMonth) ) {
+				
+				if( wrapperFactory.create(contract).getContractVacationPeriods().isEmpty()) {
+					log.info("No vacation period {}", contract.toString());
+					continue;
+				}
 				
 				populateContractMonthRecap(contract, Optional.fromNullable(yearMonthFrom));
 			} 

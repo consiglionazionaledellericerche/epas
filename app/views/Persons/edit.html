@@ -221,20 +221,29 @@
 		
 		<tr>
 			<td>
-			  <h4><span class="label label-default">${contract.beginContract}</span></h4>
+			  #{if contract.noRelevant() }
+			    irrilevante
+			  #{/if}
+			   #{if contract.initializationMissing() }
+			    mancainit
+			  #{/if}
+			   #{if contract.monthRecapMissing() }
+			    mancariep
+			  #{/if}
+			  <h4><span class="label label-default">${contract.value.beginContract}</span></h4>
 			</td>
 			
 			<td>
-			  <h4><span class="label label-default">${contract.expireContract}</span></h4>
+			  <h4><span class="label label-default">${contract.value.expireContract}</span></h4>
 			</td>
 			
 			<td>
-			  <h4><span class="label label-default">${contract.endContract}</span></h4>
+			  <h4><span class="label label-default">${contract.value.endContract}</span></h4>
 			</td>
 			
 			<td>
 			  
-			  #{list items:contract.contractWorkingTimeType, as:'wtt'}
+			  #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
 			  
 			    <a data-popover
 	    		data-trigger="hover" data-toggle="popover" 
@@ -253,11 +262,11 @@
 	    		
 			  #{/list}
 			  
-			  <a href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+			  <a href="@{Persons.updateContractWorkingTimeType(contract.value.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
 			</td>
 			
 			<td>
-			  #{if contract.onCertificate == true}
+			  #{if contract.value.onCertificate == true}
 				<i class="fa fa-check-square-o"></i>
 			  #{/if}
 			  #{else}
@@ -266,47 +275,47 @@
 			</td>
 			
 			<td>
-			  <a href="@{Persons.modifyContract(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+			  <a href="@{Persons.modifyContract(contract.value.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
 			</td>
 			
 			<td>
-			  <a href="@{Persons.deleteContract(contract.id)}" data-modal=".my-modal"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
+			  <a href="@{Persons.deleteContract(contract.value.id)}" data-modal=".my-modal"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
 			</td>
 			
 			 <td class="span4" style="text-align: center;">
-			 #{if contract.sourceDate!=null}
+			 #{if contract.value.sourceDate!=null}
 			     Situazione alla data
-			     <strong class="text-error">${contract.sourceDate}</strong><br>
-			   #{if contract.sourceRemainingMinutesLastYear>0 }
-			     Residuo ${contract.sourceDate.getYear()-1} 
-			     <strong class="text-error">${contract.sourceRemainingMinutesLastYear}</strong><br>
+			     <strong class="text-error">${contract.value.sourceDate}</strong><br>
+			   #{if contract.value.sourceRemainingMinutesLastYear>0 }
+			     Residuo ${contract.value.sourceDate.getYear()-1} 
+			     <strong class="text-error">${contract.value.sourceRemainingMinutesLastYear}</strong><br>
 			   #{/if}
-			   #{if contract.sourceRemainingMinutesCurrentYear>0}
-			     Residuo ${contract.sourceDate.getYear()} 
-			     <strong class="text-error">${contract.sourceRemainingMinutesCurrentYear}</strong><br>
+			   #{if contract.value.sourceRemainingMinutesCurrentYear>0}
+			     Residuo ${contract.value.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.value.sourceRemainingMinutesCurrentYear}</strong><br>
 			   #{/if}
-			   #{if contract.sourceVacationLastYearUsed>0}
-			     Ferie usate ${contract.sourceDate.getYear()-1}
-			     <strong class="text-error">${contract.sourceVacationLastYearUsed}</strong><br>
+			   #{if contract.value.sourceVacationLastYearUsed>0}
+			     Ferie usate ${contract.value.sourceDate.getYear()-1}
+			     <strong class="text-error">${contract.value.sourceVacationLastYearUsed}</strong><br>
 			   #{/if}
-			   #{if contract.sourceVacationCurrentYearUsed>0}
-			     Ferie usate ${contract.sourceDate.getYear()} 
-			     <strong class="text-error">${contract.sourceVacationCurrentYearUsed}</strong><br>
+			   #{if contract.value.sourceVacationCurrentYearUsed>0}
+			     Ferie usate ${contract.value.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.value.sourceVacationCurrentYearUsed}</strong><br>
 			   #{/if}
-			   #{if contract.sourcePermissionUsed>0}
-			     Permessi usati ${contract.sourceDate.getYear()} 
-			     <strong class="text-error">${contract.sourcePermissionUsed}</strong><br>
+			   #{if contract.value.sourcePermissionUsed>0}
+			     Permessi usati ${contract.value.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.value.sourcePermissionUsed}</strong><br>
 			   #{/if}
-			   #{if contract.sourceRecoveryDayUsed!=null && contract.sourceRecoveryDayUsed>0}
-			     Riposi compensativi usati ${contract.sourceDate.getYear()} 
-			     <strong class="text-error">${contract.sourceRecoveryDayUsed}</strong><br>
+			   #{if contract.value.sourceRecoveryDayUsed!=null && contract.value.sourceRecoveryDayUsed>0}
+			     Riposi compensativi usati ${contract.value.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.value.sourceRecoveryDayUsed}</strong><br>
 			   #{/if}
 			   
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal=".my-modal">Modifica</a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Modifica</a>
 			
 			 #{/if}
 			 #{else}
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal=".my-modal">Definisci Inizializzazione</a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Definisci Inizializzazione</a>
 			 #{/else}
 			</td>
 			

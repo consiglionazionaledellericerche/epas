@@ -4,6 +4,7 @@ import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
@@ -11,6 +12,7 @@ import com.google.common.base.Optional;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
+import models.enumerate.Parameter;
 
 public interface IWrapperContract extends IWrapperModel<Contract> {
 	
@@ -65,8 +67,14 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 */
 	List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList();
 	
-	
-	
+	/**
+	 * Diagnostiche sul contratto.
+	 * 
+	 * @return
+	 */
+	public boolean noRelevant();
+	public boolean initializationMissing();
+	public boolean monthRecapMissing();
 	
 
 }
