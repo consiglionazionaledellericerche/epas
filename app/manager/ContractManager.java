@@ -21,6 +21,7 @@ import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ public class ContractManager {
 			PersonDayDao personDayDao,
 			PersonDayManager personDayManager,
 			ContractYearRecapManager contractYearRecapManager,
+			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
 			ContractDao contractDao, 
@@ -59,6 +61,7 @@ public class ContractManager {
 		this.personDayDao = personDayDao;
 		this.personDayManager = personDayManager;
 		this.contractYearRecapManager = contractYearRecapManager;
+		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
 		this.contractDao = contractDao;
@@ -70,6 +73,7 @@ public class ContractManager {
 	private final PersonDayDao personDayDao;
 	private final PersonDayManager personDayManager;
 	private final ContractYearRecapManager contractYearRecapManager;
+	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final IWrapperFactory wrapperFactory;
 	private final VacationCodeDao vacationCodeDao;
 	private final ContractDao contractDao;
@@ -226,6 +230,8 @@ public class ContractManager {
 		//(3) Ricalcolo dei riepiloghi annuali
 		contractYearRecapManager.buildContractYearRecap(contract);
 
+		contractMonthRecapManager.populateContractMonthRecapByPerson(contract.person,
+				new YearMonth(contractInterval.getBegin()));
 
 	}
 
