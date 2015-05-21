@@ -1,10 +1,12 @@
 package jobs;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import models.CompetenceCode;
 import models.Qualification;
@@ -22,6 +24,7 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.yaml.snakeyaml.Yaml;
 
 import play.Logger;
 import play.Play;
@@ -30,6 +33,7 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.libs.Codec;
 import play.test.Fixtures;
+import play.vfs.VirtualFile;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -78,25 +82,6 @@ public class Bootstrap extends Job<Void> {
 			return;
 		}
 
-		if(User.find("byUsername", "developer").fetch().isEmpty()) {
-			Fixtures.loadModels("../db/import/developer.yml");
-		}
-		if(Role.count() == 0){
-			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
-		}
-		if(VacationCode.count() == 0){
-			Fixtures.loadModels("../db/import/vacationCode.yml");
-		}
-		if(StampType.count() == 0){
-			Fixtures.loadModels("../db/import/stampType.yml");
-		}
-		if(StampModificationType.count() == 0){
-			Fixtures.loadModels("../db/import/stampModificationType.yml");
-		}
-		if(CompetenceCode.count() == 0){
-			Fixtures.loadModels("../db/import/competenceCode.yml");
-		}
-
 		Session session = (Session) JPA.em().getDelegate();
 
 		if(Qualification.count() == 0 ) {
@@ -119,14 +104,31 @@ public class Bootstrap extends Job<Void> {
 //			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class,
 //					"../db/import/history/part2_history.xml")));
 
-			
-			// riallinea le sequenze con i valori presenti sul db.
-			for (String sql : Files.readLines(new File(Play.applicationPath,
-					"db/import/fix_sequences.sql"), Charsets.UTF_8)) {
-				JPA.em().createNativeQuery(sql).getSingleResult();
-			}
 		}
-
+		
+		if(User.find("byUsername", "developer").fetch().isEmpty()) {
+			Fixtures.loadModels("../db/import/developer.yml");
+		}
+//		if(Role.count() == 0){
+//			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
+//		}
+		if(VacationCode.count() == 0){
+			Fixtures.loadModels("../db/import/vacationCode.yml");
+		}
+		if(StampType.count() == 0){
+			Fixtures.loadModels("../db/import/stampType.yml");
+		}
+		if(StampModificationType.count() == 0){
+			Fixtures.loadModels("../db/import/stampModificationType.yml");
+		}
+		if(CompetenceCode.count() == 0){
+			Fixtures.loadModels("../db/import/competenceCode.yml");
+		}
+		
+//		Allinea tutte le sequenze del db
+		Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
+		
+		new FixUserPermission().now();
 	}
 
 }
