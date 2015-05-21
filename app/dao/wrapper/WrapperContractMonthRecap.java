@@ -54,21 +54,4 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 	public IWrapperContract getContract() {
 		return contract;
 	}
-	
-	@Override
-	public ContractMonthRecap getPreviousRecap() {
-		
-		if( this.previousRecap == null ) {
-			
-			this.previousRecap = contractManager.getContractMonthRecap(value.contract,
-				new YearMonth(value.year, value.month).minusMonths(1));
-		}
-		
-		if( this.previousRecap.isPresent()) {
-			return this.previousRecap.get();
-		}
-		
-		return null;
-	}
-	
 }

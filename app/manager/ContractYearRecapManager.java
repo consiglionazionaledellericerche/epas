@@ -24,6 +24,8 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperFactory;
@@ -158,10 +160,13 @@ public class ContractYearRecapManager {
 			cyr.contract = contract;
 
 			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = vacationsFactory.create(yearToCompute, contract, new LocalDate(), true);
-			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
-			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
-			cyr.permissionUsed = vacationRecap.permissionUsed.size();
+			Optional<VacationsRecap> vacationRecap = vacationsFactory.create(yearToCompute, contract, new LocalDate(), true);
+			if (!vacationRecap.isPresent()) {
+				return;
+			}
+			cyr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed.size();
+			cyr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed.size();
+			cyr.permissionUsed = vacationRecap.get().permissionUsed.size();
 
 			//RESIDUI
 			PersonResidualYearRecap csap = 

@@ -10,10 +10,4 @@ public interface IWrapperContractMonthRecap extends IWrapperModel<ContractMonthR
 	
 	public IWrapperContract getContract();
 	
-	/**
-	 * Riepilogo precedente. Inizializza una variabile lazy.
-	 * @return
-	 */
-	public ContractMonthRecap getPreviousRecap();
-	
 }

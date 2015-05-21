@@ -59,8 +59,6 @@ public class Administration extends Controller {
 	@Inject
 	private static ExportToYaml exportToYaml;
 	@Inject
-	private static ContractManager contractManager;
-	@Inject
 	private static CompetenceUtility competenceUtility;
 	@Inject
 	private static ContractMonthRecapManager contractMonthRecapManager;
@@ -153,7 +151,7 @@ public class Administration extends Controller {
 				int month = 1;
 				while (month <= 12) {
 					YearMonth yearMonth = new YearMonth(actualYear, month);
-					Optional<ContractMonthRecap> cmr = contractManager.getContractMonthRecap(contract, yearMonth);
+					Optional<ContractMonthRecap> cmr = contractMonthRecapManager.getContractMonthRecap(contract, yearMonth, false);
 					if (cmr.isPresent()) {
 						if( first == null ) {
 							first = yearMonth;

@@ -65,7 +65,7 @@ public class VacationsRecap {
 	public boolean isExpireBeforeEndYear = false;	/* true se il contratto termina prima della fine dell'anno richiesto */
 	public boolean isActiveAfterBeginYear = false;	/* true se il contratto inizia dopo l'inizio dell'anno richiesto */
 
-	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
+	//private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 
 
 	private final AbsenceDao absenceDao;
@@ -84,8 +84,7 @@ public class VacationsRecap {
 	 */
 	public VacationsRecap(IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
 			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager, 
-			ContractManager contractManager, VacationManager vacationManager,
-			ContractMonthRecapManager contractMonthRecapManager,
+			VacationManager vacationManager,
 			int year, Contract contract, LocalDate actualDate, 
 			boolean considerExpireLastYear) {
 
@@ -143,55 +142,66 @@ public class VacationsRecap {
 			this.isExpireBeforeEndYear = true;
 		if(this.activeContractInterval.getBegin().isAfter(startYear))
 			this.isActiveAfterBeginYear = true;
-
-		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
+		
+		////////////////////////////////////////////////////////////////////////
+		// (1) Calcolo ferie usate dell'anno passato 
+		////////////////////////////////////////////////////////////////////////
 		List<Absence> abs32Last = null;
-
 		List<Absence> abs31Last = null;
 		List<Absence> abs37Last = null;
 
-
 		int vacationDaysPastYearUsedNew = 0;
-		if(this.contract.sourceDate!=null && this.contract.sourceDate.getYear()==year)
-		{
-			//Popolare da source data
-			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + this.contract.sourceVacationLastYearUsed;
+		
+		//Popolare da source data 
+		if (this.contract.sourceDate != null 
+				&& this.contract.sourceDate.getYear() == year) {
+			vacationDaysPastYearUsedNew += this.contract.sourceVacationLastYearUsed;
 			DateInterval yearInterSource = new DateInterval(this.contract.sourceDate.plusDays(1), endYear);
 			abs31Last = absenceDao.getAbsenceDays(yearInterSource, this.contract, ab31);										
-			abs37Last = absenceDao.getAbsenceDays(yearInterSource, this.contract, ab37);		
-			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
+			abs37Last = absenceDao.getAbsenceDays(yearInterSource, this.contract, ab37);
+			vacationDaysPastYearUsedNew += abs31Last.size() + abs37Last.size();
 		}
-		else if(this.contract.beginContract.getYear() == this.year)
-		{
-			//Non esiste anno passato nel presente contratto
+		
+		//Non esiste anno passato nel presente contratto
+		else if (this.contract.beginContract.getYear() == this.year) {
 			vacationDaysPastYearUsedNew = 0;
 			abs31Last  = new ArrayList<Absence>();
 			abs37Last  = new ArrayList<Absence>();
 		}
-		else if(this.year > LocalDate.now().getYear()) 
-		{
-			//Caso in cui voglio inserire ferie per l'anno prossimo
-			VacationsRecap vrPastYear = new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao,
-					confYearManager, contractManager, vacationManager, contractMonthRecapManager,
-					this.year-1, this.contract, endLastYear, true);
+		
+		//Caso in cui voglio inserire ferie per l'anno prossimo
+		else if(this.year > LocalDate.now().getYear()) {
+			VacationsRecap vrPastYear = new VacationsRecap(wrapperFactory, 
+					absenceDao, absenceTypeDao, confYearManager,
+					vacationManager,
+					this.year - 1, this.contract, endLastYear, true);
+			
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
-			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);		
-			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
+			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);	
+			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() 
+					+ abs31Last.size() + abs37Last.size();
+		
+		//Caso generale: popolare da riepilogo fine anno.
 		} else {
 			
-			//Popolare da riepilogo
-			Optional<ContractMonthRecap> monthRecap = contractManager
-					.getContractMonthRecap(contract, new YearMonth(year,12));
-			if ( !monthRecap.isPresent() ) {
-				contractMonthRecapManager.populateContractMonthRecap(contract,
-						Optional.fromNullable(new YearMonth(year,12)));
-
-				// TODO: controllare errore no source data
-				monthRecap = contractManager
-						.getContractMonthRecap(contract, new YearMonth(year,12));
+			Optional<ContractMonthRecap> recapPastYear = Optional.absent();
+			// E' essenziale, se non riesco a procurarmelo salvo il flag nel contratto.
+			for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
+				if ( cmr.year == year - 1 && cmr.month == 12 ) {
+					recapPastYear = Optional.fromNullable(cmr);
+				}
+			}
+			if ( !recapPastYear.isPresent() ) {
+				contract.sourceRequired = true;
+				contract.save();
+				return;
+			} else {
+				contract.sourceRequired = false;
+				contract.save();
 			}
 			
-			vacationDaysPastYearUsedNew = monthRecap.get().vacationCurrentYearUsed;
+			
+			vacationDaysPastYearUsedNew = recapPastYear.get().vacationCurrentYearUsed;
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
 			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);						
 			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
@@ -207,7 +217,6 @@ public class VacationsRecap {
 			Absence nullAbsence = null;
 			this.vacationDaysLastYearUsed.add(nullAbsence);
 		}
-
 
 		//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
 		List<Absence> abs32Current  = null;

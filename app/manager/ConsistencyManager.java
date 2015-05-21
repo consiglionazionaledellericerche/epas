@@ -127,11 +127,11 @@ public class ConsistencyManager {
 			p = personDao.getPersonById(p.id);
 			
 			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-			//checkHistoryError(p, fromDate);
+			checkHistoryError(p, fromDate);
 			
 			// (2) Ricalcolo i valori dei person day	
 			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-			//personDayManager.updatePersonDaysFromDate(p, fromDate);
+			personDayManager.updatePersonDaysFromDate(p, fromDate);
 			
 			// (3a) Ricalcolo dei residui per mese
 			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);

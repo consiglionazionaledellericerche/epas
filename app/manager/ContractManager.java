@@ -6,8 +6,9 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Contract;
-import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.ContractYearRecap;
@@ -20,7 +21,6 @@ import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +43,7 @@ import dao.wrapper.IWrapperFactory;
  */
 public class ContractManager {
 
+	@Inject
 	public ContractManager(ConfGeneralManager confGeneralManager,
 			ConsistencyManager consistencyManager, 
 			PersonDayDao personDayDao,
@@ -147,27 +148,6 @@ public class ContractManager {
 	}
 
 	/**
-	 * Ritorna l'intervallo valido ePAS per il contratto. 
-	 * (scarto la parte precedente a source contract se definita)
-	 * @return
-	 */
-	public DateInterval getContractDatabaseDateInterval(Contract contract) {
-
-		if(contract.sourceDate != null && contract.sourceDate.isAfter(contract.beginContract)) {
-
-			DateInterval contractInterval;
-			if(contract.endContract!=null)
-				contractInterval = new DateInterval(contract.sourceDate, contract.endContract);
-			else
-				contractInterval = new DateInterval(contract.sourceDate, contract.expireContract);
-			return contractInterval;
-		}
-
-		return wrapperFactory.create(contract).getContractDateInterval();
-
-	}
-
-	/**
 	 * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
 	 *  
 	 * 1) CheckHistoryError 
@@ -190,7 +170,7 @@ public class ContractManager {
 		LocalDate date = contract.beginContract;
 		if(date.isBefore(initUse))
 			date = initUse;
-		DateInterval contractInterval = getContractDatabaseDateInterval(contract);
+		DateInterval contractInterval = wrapperFactory.create(contract).getContractDatabaseInterval();
 		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
 			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
 		}
@@ -440,22 +420,6 @@ public class ContractManager {
 		return null;
 	}
 
-	/**
-	 * Ritorna il riepilogo mensile del contatto.
-	 * @param year
-	 * @return
-	 */
-	public Optional<ContractMonthRecap> getContractMonthRecap(Contract contract, YearMonth yearMonth)	{
-		
-		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-			
-			if ( cmr.year == yearMonth.getYear() && cmr.month == yearMonth.getMonthOfYear() )
-				return Optional.fromNullable(cmr);
-		}
-		
-		return Optional.absent();
-	}
-	
 	/**
 	 * La lista con tutti i contratti attivi nel periodo selezionato.
 	 * @return

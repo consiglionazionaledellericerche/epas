@@ -37,13 +37,11 @@ public class MealTicketManager {
 	public MealTicketManager(PersonDao personDao,
 			PersonResidualYearRecapFactory yearFactory,
 			MealTicketDao mealTicketDao, 
-			ContractManager contractManager,
 			ConfGeneralManager confGeneralManager,
 			IWrapperFactory factory) {
 		this.personDao = personDao;
 		this.yearFactory = yearFactory;
 		this.mealTicketDao = mealTicketDao;
-		this.contractManager = contractManager;
 		this.confGeneralManager = confGeneralManager;
 		this.factory = factory;
 	}
@@ -51,7 +49,6 @@ public class MealTicketManager {
 	private final PersonDao personDao;
 	private final PersonResidualYearRecapFactory yearFactory;
 	private final MealTicketDao mealTicketDao;
-	private final ContractManager contractManager;
 	private final ConfGeneralManager confGeneralManager;
 	private final IWrapperFactory factory;
 
@@ -136,7 +133,8 @@ public class MealTicketManager {
 	 */
 	public DateInterval getContractMealTicketDateInterval(Contract contract) {
 
-		DateInterval contractDataBaseInterval = contractManager.getContractDatabaseDateInterval(contract);
+		DateInterval contractDataBaseInterval = factory.create(contract)
+				.getContractDatabaseInterval();
 
 		Optional<LocalDate> officeStartDate = getMealTicketStartDate(contract.person.office);
 		if(!officeStartDate.isPresent())
