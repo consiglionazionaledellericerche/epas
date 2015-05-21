@@ -10,6 +10,8 @@ import models.Contract;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperFactory;
@@ -21,21 +23,16 @@ public class VacationsRecapFactory {
 	private final ConfYearManager confYearManager;
 	private final VacationManager vacationManager;
 	private final IWrapperFactory wrapperFactory;
-	private final ContractManager contractManager;
-	private final ContractMonthRecapManager contractMonthRecapManager;
 
 	@Inject
 	VacationsRecapFactory(IWrapperFactory wrapperFactory, AbsenceDao absenceDao, 
 			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager,
-			ContractManager contractManager, VacationManager vacationManager,
-			ContractMonthRecapManager contractMonthRecapManager) {
+			VacationManager vacationManager) {
 		this.wrapperFactory = wrapperFactory;
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.confYearManager = confYearManager;
-		this.contractManager = contractManager;
 		this.vacationManager = vacationManager;
-		this.contractMonthRecapManager = contractMonthRecapManager;
 	}
 
 	/**
@@ -45,14 +42,20 @@ public class VacationsRecapFactory {
 	 * @param year
 	 * @return
 	 */
-	public VacationsRecap create(int year, Contract contract,
+	public Optional<VacationsRecap> create(int year, Contract contract,
 			LocalDate actualDate, boolean considerExpireLastYear) {
 
-		return new VacationsRecap(wrapperFactory, absenceDao, absenceTypeDao, 
-				confYearManager, contractManager, vacationManager,
-				contractMonthRecapManager,
+		VacationsRecap vacationRecap = new VacationsRecap(wrapperFactory, 
+				absenceDao, absenceTypeDao,	confYearManager, 
+				vacationManager,
 				year, contract, actualDate, considerExpireLastYear);
-
+		
+		if (contract.sourceRequired != null &&
+				contract.sourceRequired == true ) {
+			return Optional.<VacationsRecap>absent();
+		}
+		
+		return Optional.fromNullable(vacationRecap);
 	}
 
 }

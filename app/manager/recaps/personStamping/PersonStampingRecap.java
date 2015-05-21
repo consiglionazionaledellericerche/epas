@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import manager.ContractManager;
+import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
@@ -83,7 +84,7 @@ public class PersonStampingRecap {
 	 */
 	public PersonStampingRecap(PersonDayManager personDayManager,
 			PersonManager personManager,
-			ContractManager contractManager,
+			ContractMonthRecapManager contractMonthRecapManager,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
 			IWrapperFactory wrapperFactory,
 			DateUtility dateUtility,
@@ -169,7 +170,7 @@ public class PersonStampingRecap {
 		for(Contract contract : monthContracts)
 		{
 
-			Optional<ContractMonthRecap> cmr = contractManager.getContractMonthRecap(contract, new YearMonth(year, month));
+			Optional<ContractMonthRecap> cmr = contractMonthRecapManager.getContractMonthRecap(contract, new YearMonth(year, month), false);
 			if (cmr.isPresent())
 				this.contractMonths.add(wrapperFactory.create(cmr.get()));
 		}

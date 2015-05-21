@@ -479,8 +479,10 @@ public class ChartsManager {
 
 		Preconditions.checkState(contract.isPresent());
 
-		VacationsRecap vr = vacationsFactory.create(LocalDate.now().getYear(),
+		Optional<VacationsRecap> vr = vacationsFactory.create(LocalDate.now().getYear(),
 				contract.get(), LocalDate.now(), false);
+		
+		Preconditions.checkState(vr.isPresent());
 
 		PersonResidualYearRecap pryr = 
 				yearFactory.create(contractDao.getContract(LocalDate.now(), person)
@@ -493,9 +495,9 @@ public class ChartsManager {
 
 		int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
-		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
-				new Integer(vr.vacationDaysLastYearUsed.size()).toString()+','+
-				new Integer(vr.permissionUsed.size()).toString()+','+
+		out.append(new Integer(vr.get().vacationDaysCurrentYearUsed.size()).toString()+','+
+				new Integer(vr.get().vacationDaysLastYearUsed.size()).toString()+','+
+				new Integer(vr.get().permissionUsed.size()).toString()+','+
 				new Integer(prmr.monteOreAnnoCorrente).toString()+','+
 				new Integer(prmr.monteOreAnnoPassato).toString()+',');
 		int month = LocalDate.now().getMonthOfYear();

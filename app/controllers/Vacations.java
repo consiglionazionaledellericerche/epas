@@ -45,18 +45,19 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 		
-		VacationsRecap vacationsRecap;
+		Optional<VacationsRecap> vacationsRecap;
 		Optional<VacationsRecap> vacationsRecapPrevious;
 		
 		vacationsRecap = vacationsFactory.create(
 					year, contract.get(), LocalDate.now(), true);
 		
-		vacationsRecapPrevious = Optional.fromNullable(
-					vacationsFactory.create(year-1, contract.get(), 
-							new LocalDate(year-1,12,31), true));
+		Preconditions.checkState(vacationsRecap.isPresent());
+		
+		vacationsRecapPrevious = vacationsFactory.create(year-1, contract.get(), 
+							new LocalDate(year-1,12,31), true);
 		
 		VacationsShowDto vacationShowDto = VacationsShowDto
-				.build(year, vacationsRecap, vacationsRecapPrevious);
+				.build(year, vacationsRecap.get(), vacationsRecapPrevious);
 
 		render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
 	
@@ -76,8 +77,13 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 		
-		VacationsRecap vacationsRecap = vacationsFactory.create(
-					anno, contract.get(), LocalDate.now(), true);
+		Optional<VacationsRecap> vr = vacationsFactory.create(
+				anno, contract.get(), LocalDate.now(), true);
+	
+		Preconditions.checkState(vr.isPresent());
+
+		VacationsRecap vacationsRecap = vr.get();
+		
 		render(vacationsRecap);
 
 	}
@@ -97,8 +103,13 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 			
-		VacationsRecap vacationsRecap = vacationsFactory.create(
+		Optional<VacationsRecap> vr = vacationsFactory.create(
 					anno, contract.get(), LocalDate.now(), true);
+		
+		Preconditions.checkState(vr.isPresent());
+
+		VacationsRecap vacationsRecap = vr.get();
+		
 		render(vacationsRecap);
 	}
 	
@@ -116,8 +127,13 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 
-		VacationsRecap vacationsRecap = vacationsFactory.create(
-					anno, contract.get(), LocalDate.now(), true);
+		Optional<VacationsRecap> vr = vacationsFactory.create(
+				anno, contract.get(), LocalDate.now(), true);
+	
+		Preconditions.checkState(vr.isPresent());
+
+		VacationsRecap vacationsRecap = vr.get();
+		
 		render(vacationsRecap);
 	}
 	

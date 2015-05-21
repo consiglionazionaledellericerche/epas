@@ -76,8 +76,8 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
-			contractVacationRecap.add(vr);
+			Optional<VacationsRecap> vr = vacationsFactory.create(2014, contract, dateToTest, true);
+			contractVacationRecap.add(vr.get());
 		}
 		JPAPlugin.closeTx(false);
     	
@@ -138,8 +138,8 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
-			contractVacationRecap.add(vr);
+			Optional<VacationsRecap> vr = vacationsFactory.create(2014, contract, dateToTest, true);
+			contractVacationRecap.add(vr.get());
 		}
 		JPAPlugin.closeTx(false);
     	
@@ -200,8 +200,8 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
-			contractVacationRecap.add(vr);
+			Optional<VacationsRecap> vr = vacationsFactory.create(2014, contract, dateToTest, true);
+			contractVacationRecap.add(vr.get());
 		}
 		JPAPlugin.closeTx(false);
     	
@@ -262,8 +262,8 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
-			contractVacationRecap.add(vr);
+			Optional<VacationsRecap> vr = vacationsFactory.create(2014, contract, dateToTest, true);
+			contractVacationRecap.add(vr.get());
 		}
 		JPAPlugin.closeTx(false);
     	
@@ -324,8 +324,8 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = vacationsFactory.create(2014, contract, dateToTest, true);
-			contractVacationRecap.add(vr);
+			Optional<VacationsRecap> vr = vacationsFactory.create(2014, contract, dateToTest, true);
+			contractVacationRecap.add(vr.get());
 		}
 		JPAPlugin.closeTx(false);
     	

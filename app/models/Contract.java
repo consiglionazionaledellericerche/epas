@@ -60,7 +60,7 @@ public class Contract extends BaseModel {
 	public Integer sourceRemainingMinutesCurrentYear = null;
 	
 	@Column(name="source_required")
-	public boolean sourcerequired = false;
+	public Boolean sourceRequired = false;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")

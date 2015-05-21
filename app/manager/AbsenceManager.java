@@ -144,19 +144,21 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
+		
+		Preconditions.checkState(vr.isPresent());
 
-		if(vr.vacationDaysLastYearNotYetUsed > 0)
+		if(vr.get().vacationDaysLastYearNotYetUsed > 0)
 			return absenceTypeDao.getAbsenceTypeByCode(
 					AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
 
-		if(vr.persmissionNotYetUsed > 0)
+		if(vr.get().persmissionNotYetUsed > 0)
 
 			return absenceTypeDao.getAbsenceTypeByCode(
 					AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
 
-		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
+		if(vr.get().vacationDaysCurrentYearNotYetUsed > 0)
 			return absenceTypeDao.getAbsenceTypeByCode(
 					AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
 
@@ -177,10 +179,12 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
 
-		return (vr.vacationDaysCurrentYearNotYetUsed > 0);		
+		Preconditions.checkState(vr.isPresent());
+		
+		return (vr.get().vacationDaysCurrentYearNotYetUsed > 0);		
 
 	}
 
@@ -197,10 +201,12 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
+		
+		Preconditions.checkState(vr.isPresent());
 
-		return (vr.vacationDaysLastYearNotYetUsed > 0);
+		return (vr.get().vacationDaysLastYearNotYetUsed > 0);
 	}
 
 	/**
@@ -216,10 +222,12 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true);
+		
+		Preconditions.checkState(vr.isPresent());
 
-		return (vr.persmissionNotYetUsed > 0);
+		return (vr.get().persmissionNotYetUsed > 0);
 
 	}
 
@@ -584,12 +592,16 @@ public class AbsenceManager {
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file) {
 
 		//FIXME Verificare i controlli d'inserimento
-		if(date.getYear() == LocalDate.now().getYear()){
-			;
-			int remaining37 = vacationsFactory.create(date.getYear(), 
+		if (date.getYear() == LocalDate.now().getYear()) {
+
+			Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(), 
 					contractDao.getContract(LocalDate.now(),person), 
-					LocalDate.now(), false).vacationDaysLastYearNotYetUsed; 
-			if(remaining37 > 0){
+					LocalDate.now(), false);
+			
+			Preconditions.checkState(vr.isPresent());
+			
+			int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
+			if (remaining37 > 0) {
 				return insert(person, date,absenceType, file);
 			}
 		}

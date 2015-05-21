@@ -63,9 +63,16 @@ public class VacationsAdmin extends Controller{
 			Optional<Contract> contract = wrapperFactory
 					.create(person).getCurrentContract();
 
-			VacationsRecap vr = vacationsFactory.create(
+			Optional<VacationsRecap> vr = vacationsFactory.create(
 						year, contract.get(), LocalDate.now(), true);
-			vacationsList.add(vr);
+			
+			if(vr.isPresent()) {
+				vacationsList.add(vr.get());
+				
+			} else {
+				personsWithVacationsProblems.add(person);
+			}
+			
 		}
 
 		Office office = Security.getUser().get().person.office;
@@ -100,9 +107,13 @@ public class VacationsAdmin extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		VacationsRecap vacationsRecap = vacationsFactory
+		Optional<VacationsRecap> vr = vacationsFactory
 				.create(anno, contract.get(), LocalDate.now(), true);
 
+		Preconditions.checkState(vr.isPresent());
+		
+		VacationsRecap vacationsRecap = vr.get();
+		
 		renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
 	}
 
@@ -122,9 +133,13 @@ public class VacationsAdmin extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		VacationsRecap vacationsRecap = vacationsFactory
+		Optional<VacationsRecap> vr = vacationsFactory
 				.create(anno, contract.get(), LocalDate.now(), true);
 
+		Preconditions.checkState(vr.isPresent());
+		
+		VacationsRecap vacationsRecap = vr.get();
+		
 		renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
 	}
 
@@ -142,8 +157,12 @@ public class VacationsAdmin extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		VacationsRecap vacationsRecap = vacationsFactory
+		Optional<VacationsRecap> vr = vacationsFactory
 				.create(anno, contract.get(), LocalDate.now(), true);
+		
+		Preconditions.checkState(vr.isPresent());
+		
+		VacationsRecap vacationsRecap = vr.get();
 
 		renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
 	}
