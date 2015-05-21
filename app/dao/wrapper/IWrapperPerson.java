@@ -1,6 +1,8 @@
 package dao.wrapper;
 
 import models.CertificatedData;
+import models.Competence;
+import models.CompetenceCode;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -87,5 +89,27 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
 	 */
 	public CertificatedData getCertificatedData(int year, int month);
 	
+	/**
+	 * Getter per la competenza della persona <CompetenceCode, year, month>
+	 * @param code
+	 * @return 
+	 */
+	public Competence competence(final CompetenceCode code, final int year, final int month);
+	
+	/**
+	 * Il residuo positivo del mese fatto dalla person.
+	 * @param year
+	 * @param month
+	 * @return 
+	 */
+	public Integer getPositiveResidualInMonth(int year, int month);
+	
+	/**
+	 * Diagnostiche sui dati della persona.
+	 * 
+	 * @return
+	 */
+	public boolean currentContractInitializationMissing();
+	public boolean currentContractMonthRecapMissing();
 
 }

@@ -149,6 +149,8 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
         
+        "Persons.insertContract",
+        "Persons.saveContract",
         "Persons.modifyContract",
         "Persons.updateContract",
         "Persons.deleteContract",

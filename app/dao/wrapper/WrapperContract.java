@@ -8,11 +8,14 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import manager.ConfGeneralManager;
+import manager.ContractMonthRecapManager;
 import manager.PersonManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
+import models.enumerate.Parameter;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -30,13 +33,18 @@ public class WrapperContract implements IWrapperContract {
 	private final PersonManager personManager;
 	private final Contract value;
 	private final VacationPeriodDao vacationPeriodDao;
+	private final ContractMonthRecapManager contractMonthRecapManager;
+	private final ConfGeneralManager confGeneralManager;
 
 	@Inject
-	WrapperContract(@Assisted Contract contract, PersonManager personManager
-			,VacationPeriodDao vacationPeriodDao) {
+	WrapperContract(@Assisted Contract contract, PersonManager personManager,
+			VacationPeriodDao vacationPeriodDao,ConfGeneralManager confGeneralManager,
+			ContractMonthRecapManager contractMonthRecapManager) {
 		value = contract;
 		this.personManager = personManager;
 		this.vacationPeriodDao = vacationPeriodDao;
+		this.confGeneralManager = confGeneralManager;
+		this.contractMonthRecapManager = contractMonthRecapManager;
 	}
 
 	@Override
@@ -160,5 +168,60 @@ public class WrapperContract implements IWrapperContract {
 		}
 		return currentMonth;
 	}
+	
+	/**
+	 * Diagnostiche sul contratto.
+	 * 
+	 * @return
+	 */
+	@Override
+	public boolean initializationMissing() {
+		
+		// Se la data di inizio contratto è successiva alla data di utilizzo del 
+		// programma allora ci sono problemi di inizializzazione.
+		
+		LocalDate officeInstallation = 
+				new LocalDate(confGeneralManager.getFieldValue(
+						Parameter.INIT_USE_PROGRAM, value.person.office));
+		
+		if( value.beginContract.isBefore(officeInstallation) 
+				&& value.sourceDate == null) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public boolean monthRecapMissing() {
+		
+		// Se non ho tutti i riepiloghi mensili previsti
+		
+		YearMonth monthToCheck = getFirstMonthToRecap();
+		YearMonth nowMonth = YearMonth.now();
+		while( !monthToCheck.isAfter( nowMonth)) {
+			// FIXME: renderlo efficiente, un dao che li ordina.
+			if ( !contractMonthRecapManager.
+					getContractMonthRecap(value, monthToCheck, false).isPresent() ) {
+				return true;
+			}
+			monthToCheck = monthToCheck.plusMonths(1);
+		}
 
+		return false;
+	}
+	
+	@Override
+	public boolean noRelevant() {
+		
+		LocalDate officeInstallation = 
+				new LocalDate(confGeneralManager.getFieldValue(
+						Parameter.INIT_USE_PROGRAM, value.person.office));
+		
+		if (officeInstallation.isAfter( getContractDateInterval().getEnd() )) {
+			return true;
+		}
+		return false;
+	}
+	
 }

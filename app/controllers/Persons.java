@@ -57,6 +57,7 @@ import dao.PersonDao;
 import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -219,7 +220,10 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(person.office);
 
 
-		List<Contract> contractList = contractDao.getPersonContractList(person);
+		List<IWrapperContract> contractList = FluentIterable
+				.from(contractDao.getPersonContractList(person))
+				.transform(wrapperFunctionFactory.contract()).toList();
+		
 		Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		List<ContractStampProfile> contractStampProfileList =
