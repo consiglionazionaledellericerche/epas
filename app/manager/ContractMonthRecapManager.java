@@ -72,35 +72,34 @@ public class ContractMonthRecapManager {
 		
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
+	
+	
 	/**
-	 * Ritorna il riepilogo mensile del contatto.
-	 * Se needed effettua il tentativo di ricalcolarlo.
+	 * Metodo da utilizzare per calcolare i minuti di residuo disponibili per 
+	 * riposo compensativo. Per adesso è in questa classe per proteggere l'istanza
+	 * effettiva di ContractMonthRecap in modo che non si corra il rischio di 
+	 * sovrascriverla con quella provvisoria. Capire ...
 	 * 
 	 * @param contract
-	 * @param yearMonth
-	 * @param needed
+	 * @param date
 	 * @return
 	 */
-	private Optional<ContractMonthRecap> getContractMonthRecap(Contract contract,
-			YearMonth yearMonth, boolean needed) {
+	public int getMinutesForCompensatoryRest (
+			Contract contract, LocalDate date) {
 		
-		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-			
-			if ( cmr.year == yearMonth.getYear() && cmr.month == yearMonth.getMonthOfYear() )
-				return Optional.fromNullable(cmr);
+		ContractMonthRecap cmr = new ContractMonthRecap();
+		cmr.year = date.getYear();
+		cmr.month = date.getMonthOfYear();
+		cmr.contract = contract;
+		
+		Optional<ContractMonthRecap> recap = 
+				populateResidualModule(cmr, new YearMonth(date), date);
+		
+		if( recap.isPresent() ) {
+			return recap.get().remainingMinutesCurrentYear 
+					+ recap.get().remainingMinutesLastYear;
 		}
-		
-		if (needed) {
-			populateContractMonthRecap(contract,
-					Optional.fromNullable(yearMonth));
-			
-			Optional<ContractMonthRecap> recap = getContractMonthRecap(contract, 
-					yearMonth, false );
-			
-			return recap;
-		}
-		
-		return Optional.absent();
+		return 0;
 	}
 	
 	
@@ -117,14 +116,6 @@ public class ContractMonthRecapManager {
 	public void populateContractMonthRecap(Contract contract, 
 			Optional<YearMonth> yearMonthFrom) {
 
-		/*
-		if( !yearMonthFrom.isPresent() ) {
-			String dateInitUse = confGeneralManager
-					.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
-			yearMonthFrom = Optional.fromNullable( new YearMonth(new LocalDate(dateInitUse)));
-		}
-		*/
-		
 		YearMonth yearMonthToCompute = wrapperFactory.create(contract).getFirstMonthToRecap();
 		
 		if(yearMonthFrom.isPresent() && yearMonthFrom.get().isAfter(yearMonthToCompute)) {
@@ -203,6 +194,37 @@ public class ContractMonthRecapManager {
 				populateContractMonthRecap(contract, Optional.fromNullable(yearMonthFrom));
 			} 
 		}
+	}
+	
+	/**
+	 * Ritorna il riepilogo mensile del contatto.
+	 * Se needed effettua il tentativo di ricalcolarlo.
+	 * 
+	 * @param contract
+	 * @param yearMonth
+	 * @param needed
+	 * @return
+	 */
+	private Optional<ContractMonthRecap> getContractMonthRecap(Contract contract,
+			YearMonth yearMonth, boolean needed) {
+		
+		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
+			
+			if ( cmr.year == yearMonth.getYear() && cmr.month == yearMonth.getMonthOfYear() )
+				return Optional.fromNullable(cmr);
+		}
+		
+		if (needed) {
+			populateContractMonthRecap(contract,
+					Optional.fromNullable(yearMonth));
+			
+			Optional<ContractMonthRecap> recap = getContractMonthRecap(contract, 
+					yearMonth, false );
+			
+			return recap;
+		}
+		
+		return Optional.absent();
 	}
 	
 	/**
@@ -334,14 +356,18 @@ public class ContractMonthRecapManager {
 	 * @param calcolaFinoA
 	 * @return il riepilogo costruito.
 	 */
-	private Optional<ContractMonthRecap> populateResidualModule(ContractMonthRecap cmr, YearMonth yearMonth, LocalDate calcolaFinoA) {
+	private Optional<ContractMonthRecap> populateResidualModule(ContractMonthRecap cmr, 
+			YearMonth yearMonth, LocalDate calcolaFinoA) {
 
 		IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
 		Contract contract = cmr.contract;
 		boolean mealTicketToCompute = true;
 		
-		Optional<LocalDate> dateStartMealTicket = mealTicketManager.getMealTicketStartDate(contract.person.office);
-		if(!dateStartMealTicket.isPresent() || dateStartMealTicket.get().isAfter(calcolaFinoA)) {
+		Optional<LocalDate> dateStartMealTicket = 
+				mealTicketManager.getMealTicketStartDate(contract.person.office);
+		
+		if(!dateStartMealTicket.isPresent() 
+				|| dateStartMealTicket.get().isAfter(calcolaFinoA)) {
 			mealTicketToCompute = false;
 		}
 		
