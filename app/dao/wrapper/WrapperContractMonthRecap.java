@@ -32,11 +32,16 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 
 	private final ContractMonthRecap value;
 	private final IWrapperContract contract;
+	private final ContractManager contractManager;
+	private Optional<ContractMonthRecap> previousRecap = null;
+	private final IWrapperFactory wrapperFactory;  
 
 	@Inject
 	WrapperContractMonthRecap(@Assisted ContractMonthRecap cmr, ContractManager contractManager,
 			 IWrapperFactory wrapperFactory
 			) {
+		this.contractManager = contractManager;
+		this.wrapperFactory = wrapperFactory;
 		this.contract = wrapperFactory.create(cmr.contract);
 		this.value = cmr;
 	
@@ -51,4 +56,22 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 	public IWrapperContract getContract() {
 		return contract;
 	}
+	
+	@Override
+	public ContractMonthRecap getPreviousRecap() {
+		
+		if( this.previousRecap == null ) {
+			
+			this.previousRecap = wrapperFactory.create(value.contract)
+					.getContractMonthRecap(new YearMonth(value.year, value.month)
+					.minusMonths(1));
+		}
+		
+		if( this.previousRecap.isPresent()) {
+			return this.previousRecap.get();
+		}
+		
+		return null;
+	}
+	
 }

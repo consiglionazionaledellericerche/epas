@@ -63,7 +63,7 @@ public class VacationsRecapFactory {
 		}
 		
 		// Controllo della dipendenza con i riepiloghi
-		if ( c.hasMonthRecapForVacationsRecap( year )) {
+		if ( !c.hasMonthRecapForVacationsRecap( year )) {
 			return Optional.<VacationsRecap>absent();
 		}
 	

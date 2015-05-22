@@ -141,6 +141,14 @@ public class ContractMonthRecapManager {
 					.create(yearMonthToCompute.getYear(), contract, lastDayInYearMonth, true);
 			
 			if( !vacationRecap.isPresent() ) {
+				
+				//Siccome non ci sono i riepiloghi quando vado a fare l'update della
+				// timbratura schianta. Soluzioni? Se yeraMonthFrom.present() fare una
+				// missingRecap()??
+				if( yearMonthFrom.isPresent() ) {
+					//provvisorio.
+					populateContractMonthRecap(contract, Optional.<YearMonth>absent());
+				}
 				return;
 			}
 			
