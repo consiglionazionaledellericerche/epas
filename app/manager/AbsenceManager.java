@@ -248,21 +248,20 @@ public class AbsenceManager {
 		}
 
 		// (2) Calcolo il residuo alla data precedente di quella che voglio considerare.
-		if(dateToCheck.getDayOfMonth() > 1)
+		if(dateToCheck.getDayOfMonth() > 1) {
 			dateToCheck = dateToCheck.minusDays(1);
+		}
 
 		Contract contract = contractDao.getContract(dateToCheck, person);
 
-		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract)
-				.getContractMonthRecap(new YearMonth(dateToCheck));
-		
-		if( recap.isPresent() ) {
-			if (recap.get().remainingMinutesCurrentYear + recap.get().remainingMinutesLastYear >
-					workingTimeTypeDao.getWorkingTimeType(dateToCheck, person).get()
-						.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
-				return true;
-			} 
-		}
+		int minutesForCompensatoryRest = contractMonthRecapManager
+				.getMinutesForCompensatoryRest(contract, dateToCheck);
+
+		if (minutesForCompensatoryRest >
+				workingTimeTypeDao.getWorkingTimeType(dateToCheck, person).get()
+				.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
+			return true;
+		} 
 		return false;	
 	}
 
