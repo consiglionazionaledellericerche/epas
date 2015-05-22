@@ -335,7 +335,7 @@ public class WrapperPerson implements IWrapperPerson {
 		if ( currentContract.isPresent() ) {
 			YearMonth now = new YearMonth(LocalDate.now());
 			if( wrapperFactory.create(currentContract.get())
-					.monthRecapMissing(Optional.fromNullable(now))) {
+					.monthRecapMissing( now )) {
 				return true;
 			}
 		}

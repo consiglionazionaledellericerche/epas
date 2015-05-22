@@ -77,7 +77,8 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 */
 	public boolean noRelevant();
 	public boolean initializationMissing();
-	public boolean monthRecapMissing(Optional<YearMonth> yearMonth);
+	public boolean monthRecapMissing(YearMonth yearMonth);
+	public boolean monthRecapMissing();
 	public boolean hasMonthRecapForVacationsRecap(int yearToRecap);
 	
 

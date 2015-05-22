@@ -10,4 +10,6 @@ public interface IWrapperContractMonthRecap extends IWrapperModel<ContractMonthR
 	
 	public IWrapperContract getContract();
 	
+	public ContractMonthRecap getPreviousRecap();
+	
 }
