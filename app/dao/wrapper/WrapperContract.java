@@ -170,6 +170,23 @@ public class WrapperContract implements IWrapperContract {
 	}
 	
 	/**
+	 * 
+	 * @param yearMonth
+	 * @return
+	 */
+	@Override
+	public Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth) {
+		
+		for (ContractMonthRecap cmr : value.contractMonthRecaps) {
+			if ( cmr.year == yearMonth.getYear() 
+					&& cmr.month == yearMonth.getMonthOfYear() ) {
+				return Optional.fromNullable(cmr);
+			}
+		}
+		return Optional.absent();
+	}
+	
+	/**
 	 * Diagnostiche sul contratto.
 	 * 
 	 * @return
@@ -193,10 +210,19 @@ public class WrapperContract implements IWrapperContract {
 	}
 	
 	@Override
-	public boolean monthRecapMissing() {
+	public boolean monthRecapMissing(Optional<YearMonth> yearMonth) {
+
+		// Mese specifico
+		if( yearMonth.isPresent()) {
+			if ( contractMonthRecapManager.getContractMonthRecap(value,
+					yearMonth.get(), false).isPresent() ) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 		
 		// Se non ho tutti i riepiloghi mensili previsti
-		
 		YearMonth monthToCheck = getFirstMonthToRecap();
 		YearMonth nowMonth = YearMonth.now();
 		while( !monthToCheck.isAfter( nowMonth)) {
@@ -208,6 +234,23 @@ public class WrapperContract implements IWrapperContract {
 			monthToCheck = monthToCheck.plusMonths(1);
 		}
 
+		return false;
+	}
+	
+	@Override
+	public boolean hasMonthRecapForVacationsRecap(int yearToRecap) {
+		
+		// se source date cade nell'anno non ho bisogno del recap.
+		if( value.sourceDate != null 
+				&& value.sourceDate.getYear() == yearToRecap) {
+			return false;
+		}
+		// Altrimenti ho bisogno del riepilogo finale dell'anno precedente.
+		Optional<YearMonth> yearMonthToCheck = 
+				Optional.fromNullable( new YearMonth(yearToRecap-1, 12));
+		if( monthRecapMissing(yearMonthToCheck) ) {
+			return true;
+		}
 		return false;
 	}
 	

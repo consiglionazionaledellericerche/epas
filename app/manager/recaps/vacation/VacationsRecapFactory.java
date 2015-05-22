@@ -1,5 +1,7 @@
 package manager.recaps.vacation;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
@@ -7,13 +9,17 @@ import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.VacationManager;
 import models.Contract;
+import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 public class VacationsRecapFactory {
@@ -45,16 +51,27 @@ public class VacationsRecapFactory {
 	public Optional<VacationsRecap> create(int year, Contract contract,
 			LocalDate actualDate, boolean considerExpireLastYear) {
 
+		IWrapperContract c = wrapperFactory.create(contract);
+
+		if( contract == null || actualDate == null) {
+			return Optional.<VacationsRecap>absent();
+		}
+		
+		List<VacationPeriod> vacationPeriodList = c.getContractVacationPeriods();
+		if ( vacationPeriodList == null || vacationPeriodList.isEmpty() ) {
+			return Optional.<VacationsRecap>absent();
+		}
+		
+		// Controllo della dipendenza con i riepiloghi
+		if ( c.hasMonthRecapForVacationsRecap( year )) {
+			return Optional.<VacationsRecap>absent();
+		}
+	
 		VacationsRecap vacationRecap = new VacationsRecap(wrapperFactory, 
 				absenceDao, absenceTypeDao,	confYearManager, 
 				vacationManager,
 				year, contract, actualDate, considerExpireLastYear);
-		
-		if (contract.sourceRequired != null &&
-				contract.sourceRequired == true ) {
-			return Optional.<VacationsRecap>absent();
-		}
-		
+	
 		return Optional.fromNullable(vacationRecap);
 	}
 
