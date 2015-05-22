@@ -9,7 +9,6 @@ import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.ContractMonthRecap;
 import models.Person;
 
@@ -26,7 +25,6 @@ public class PersonStampingRecapFactory {
 	PersonStampingRecapFactory(PersonDayManager personDayManager,
 			PersonManager personManager,
 			ContractMonthRecapManager contractMonthRecapManager,
-			PersonResidualYearRecapFactory yearFactory,
 			IWrapperFactory wrapperFactory,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
 			DateUtility dateUtility) {

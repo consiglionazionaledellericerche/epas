@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import manager.recaps.residual.PersonResidualMonthRecap;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;

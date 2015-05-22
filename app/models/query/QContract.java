@@ -51,8 +51,6 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final QPerson person;
 
-    public final ListPath<models.ContractYearRecap, QContractYearRecap> recapPeriods = this.<models.ContractYearRecap, QContractYearRecap>createList("recapPeriods", models.ContractYearRecap.class, QContractYearRecap.class, PathInits.DIRECT2);
-
     public final DatePath<org.joda.time.LocalDate> sourceDate = createDate("sourceDate", org.joda.time.LocalDate.class);
 
     public final NumberPath<Integer> sourcePermissionUsed = createNumber("sourcePermissionUsed", Integer.class);

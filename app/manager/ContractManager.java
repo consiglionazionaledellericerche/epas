@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.ContractYearRecap;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
@@ -49,7 +48,6 @@ public class ContractManager {
 			ConsistencyManager consistencyManager, 
 			PersonDayDao personDayDao,
 			PersonDayManager personDayManager,
-			ContractYearRecapManager contractYearRecapManager,
 			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
@@ -60,7 +58,6 @@ public class ContractManager {
 		this.consistencyManager = consistencyManager;
 		this.personDayDao = personDayDao;
 		this.personDayManager = personDayManager;
-		this.contractYearRecapManager = contractYearRecapManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
@@ -72,7 +69,6 @@ public class ContractManager {
 	private final ConsistencyManager consistencyManager;
 	private final PersonDayDao personDayDao;
 	private final PersonDayManager personDayManager;
-	private final ContractYearRecapManager contractYearRecapManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final IWrapperFactory wrapperFactory;
 	private final VacationCodeDao vacationCodeDao;
@@ -227,9 +223,7 @@ public class ContractManager {
 
 		log.info("Calcolato il riepilogo per il contratto {}",contract);
 
-		//(3) Ricalcolo dei riepiloghi annuali
-		contractYearRecapManager.buildContractYearRecap(contract);
-
+		//(3) Ricalcolo dei riepiloghi mensili
 		contractMonthRecapManager.populateContractMonthRecapByPerson(contract.person,
 				new YearMonth(contractInterval.getBegin()));
 
@@ -409,21 +403,6 @@ public class ContractManager {
 	public List<ContractStampProfile> getContractStampProfileAsList(Contract contract) {
 
 		return Lists.newArrayList(contract.contractStampProfile);
-	}
-
-	/**
-	 * Ritorna il riepilogo annule del contatto.
-	 * @param year
-	 * @return
-	 */
-	@Deprecated
-	public static ContractYearRecap getContractYearRecap(Contract contract, int year)	{
-		for(ContractYearRecap cyr : contract.recapPeriods) {
-			
-			if(cyr.year==year)
-				return cyr;
-		}
-		return null;
 	}
 
 	/**

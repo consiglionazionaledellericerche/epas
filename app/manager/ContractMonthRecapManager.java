@@ -81,7 +81,7 @@ public class ContractMonthRecapManager {
 	 * @param needed
 	 * @return
 	 */
-	public Optional<ContractMonthRecap> getContractMonthRecap(Contract contract,
+	private Optional<ContractMonthRecap> getContractMonthRecap(Contract contract,
 			YearMonth yearMonth, boolean needed) {
 		
 		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
@@ -102,6 +102,8 @@ public class ContractMonthRecapManager {
 		
 		return Optional.absent();
 	}
+	
+	
 	
 	/**
 	 * Costruisce i riepiloghi mensili per il contratto fornito.

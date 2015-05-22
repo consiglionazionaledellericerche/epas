@@ -12,10 +12,6 @@ import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.ContractMonthRecapManager;
-import manager.ContractYearRecapManager;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -55,17 +51,11 @@ public class Administration extends Controller {
 	@Inject
 	private static ConsistencyManager consistencyManager;
 	@Inject
-	private static PersonResidualYearRecapFactory yearFactory;
-	@Inject
 	private static ExportToYaml exportToYaml;
 	@Inject
 	private static CompetenceUtility competenceUtility;
 	@Inject
 	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
-	private static ContractYearRecapManager contractYearRecapManager;
-	@Inject
-	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
 	
@@ -91,146 +81,6 @@ public class Administration extends Controller {
 		LocalDate date = new LocalDate(year,month,1);
 		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(personDao.getPersonById(personId));
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
-	}
-
-	/**
-	 * Metodo di sviluppo per testing nuova costruzione riepiloghi mensili.S
-	 * @param id
-	 */
-	
-	@SuppressWarnings("deprecation")
-	public static void showPersonResidualSituation(Long id) {
-
-		List<Person> personList = Lists.newArrayList();
-		
-		if (id != null) { 
-			Person person = personDao.getPersonById(id);
-			personList.add(person);
-		} else { 
-			//Prendo la lista delle persone attive oggi
-			personList = personDao.list(Optional.<String>absent(),
-					officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(),
-					LocalDate.now(), false).list();
-		}
-		
-		//Sampling
-		List<Person> sampling = Lists.newArrayList();
-		if(personList.size() == 1) {
-			sampling = personList;
-		}
-		else {
-			for ( int i = 0; i<personList.size(); i++) {
-				if ( i%20 == 0) {
-					sampling.add(personList.get(i));
-				}
-			}
-		}
-
-		JPAPlugin.closeTx(false);
-		
-		for(Person person : sampling) {
-
-			JPAPlugin.startTx(false);
-			
-			person = Person.findById(person.id);
-			
-			IWrapperPerson wperson = wrapperFactory.create(person);
-			Contract contract = wperson.getCurrentContract().get();
-
-			//lista ContractMonthRecap
-			contractMonthRecapManager.populateContractMonthRecap(contract, Optional.<YearMonth>absent());
-
-			List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
-
-			YearMonth first = null;
-			YearMonth last = null;
-
-			int actualYear = 2013;
-
-			while (actualYear <= 2015) {
-				int month = 1;
-				while (month <= 12) {
-					YearMonth yearMonth = new YearMonth(actualYear, month);
-					Optional<ContractMonthRecap> cmr = contractMonthRecapManager.getContractMonthRecap(contract, yearMonth, false);
-					if (cmr.isPresent()) {
-						if( first == null ) {
-							first = yearMonth;
-						}
-						contractMonthRecaps.add(cmr.get());
-						last = yearMonth;
-					}
-					month++;
-				}
-
-				actualYear++;
-			}
-
-			//lista PersonResidualMonthRecap
-			List<PersonResidualMonthRecap> personResidualMonthRecaps = Lists.newArrayList();
-			
-			//Ricalcolo dei residui per anno
-			List<Contract> contractList = contractDao.getPersonContractList(person);
-			for(Contract c : contractList) {
-				contractYearRecapManager.buildContractYearRecap(c);
-			}
-
-			actualYear = first.getYear();
-
-			while (actualYear <= 2015) {
-
-				PersonResidualYearRecap residual = 
-						yearFactory.create(contract, actualYear, null);
-
-				int month = 1;
-				while (month <= 12) {
-
-					YearMonth yearMonth = new YearMonth(actualYear, month);
-
-					if( ! (yearMonth.isBefore(first) || yearMonth.isAfter(last)) ) {
-
-						PersonResidualMonthRecap prmr = residual.getMese(month);
-						if (prmr != null) {
-							personResidualMonthRecaps.add(prmr);
-						}
-					}
-
-					month++;
-				}
-
-				actualYear++;
-			}
-
-			int maxArrayIndex = contractMonthRecaps.size() - 1;
-			
-			boolean error = false;
-			
-			if(personResidualMonthRecaps.get(maxArrayIndex).buoniPastoResidui 
-					!= contractMonthRecaps.get(maxArrayIndex).remainingMealTickets.intValue())
-				error = true;
-			
-			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoCorrente
-					!= contractMonthRecaps.get(maxArrayIndex).remainingMinutesCurrentYear.intValue())
-				error = true;
-			if(personResidualMonthRecaps.get(maxArrayIndex).monteOreAnnoPassato 
-						!= contractMonthRecaps.get(maxArrayIndex).remainingMinutesLastYear.intValue())
-				error = true;
-			
-			if(error)
-				log.info("Check Persona={} id={}, Esito={}", person.fullName(), person.id, "NOK");
-			else 
-				log.info("Check Persona={} id={}, Esito={}", person.fullName(), person.id, "OK");
-			
-			JPAPlugin.closeTx(false);
-			
-			if(personList.size() == 1) {
-				render(contractMonthRecaps, personResidualMonthRecaps, maxArrayIndex);
-			}
-			
-
-		}
-
-		renderText("Fine");
-
 	}
 	
 	/**
@@ -258,52 +108,6 @@ public class Administration extends Controller {
 		}
 		renderText("Concluso Job");
 	}
-
-
-	public static void showResidualSituation() {
-		
-		String name = null;
-		//Prendo la lista delle persone attive oggi
-		List<Person> personList = personDao.list(Optional.fromNullable(name),
-					officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(),
-					LocalDate.now(), false).list();
-		
-
-		//Sampling
-		List<Person> sampling = Lists.newArrayList();
-		for ( int i = 0; i<personList.size(); i++) {
-			
-			if ( i%20 == 0) {
-				sampling.add(personList.get(i));
-			}
-		}
-		
-		
-		//Calcolo i riepiloghi
-		
-		List<IWrapperPerson> wrapperPersonList = FluentIterable
-				.from(sampling)
-				.transform(wrapperFunctionFactory.person()).toList();
-		
-		List<PersonResidualMonthRecap> monthRecapList = Lists.newArrayList();
-		
-		for(IWrapperPerson person : wrapperPersonList){
-			
-			log.debug("Persona {}", person.getValue().getFullname());
-			
-			PersonResidualYearRecap residual = 
-					yearFactory.create(person.getCurrentContract().get(), LocalDate.now().getYear(), null);
-			
-			//monthRecapList.add(residual.getMese(LocalDate.now().getMonthOfYear()));
-			monthRecapList.add(residual.getMese(2));
-			
-		}
-		
-		//Render
-		render(monthRecapList);
-		
-	}
-	
 
 	public static void buildYaml(){
 		//general

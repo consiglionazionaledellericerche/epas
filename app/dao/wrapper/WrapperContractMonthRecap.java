@@ -32,14 +32,11 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 
 	private final ContractMonthRecap value;
 	private final IWrapperContract contract;
-	private final ContractManager contractManager;
-	private Optional<ContractMonthRecap> previousRecap = null;  
 
 	@Inject
 	WrapperContractMonthRecap(@Assisted ContractMonthRecap cmr, ContractManager contractManager,
 			 IWrapperFactory wrapperFactory
 			) {
-		this.contractManager = contractManager;
 		this.contract = wrapperFactory.create(cmr.contract);
 		this.value = cmr;
 	

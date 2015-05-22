@@ -11,9 +11,6 @@ import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -170,9 +167,11 @@ public class PersonStampingRecap {
 		for(Contract contract : monthContracts)
 		{
 
-			Optional<ContractMonthRecap> cmr = contractMonthRecapManager.getContractMonthRecap(contract, new YearMonth(year, month), false);
-			if (cmr.isPresent())
+			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
+					.getContractMonthRecap(new YearMonth(year, month));
+			if (cmr.isPresent()) {
 				this.contractMonths.add(wrapperFactory.create(cmr.get()));
+			}
 		}
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);

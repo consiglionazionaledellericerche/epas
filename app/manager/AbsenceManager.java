@@ -7,9 +7,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import manager.response.AbsenceInsertReport;
@@ -17,6 +14,7 @@ import manager.response.AbsencesResponse;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -66,8 +64,7 @@ import dao.wrapper.IWrapperPersonDay;
 public class AbsenceManager {
 
 	@Inject
-	public AbsenceManager(PersonResidualYearRecapFactory yearFactory,
-			ContractYearRecapManager contractYearRecapManager,
+	public AbsenceManager(
 			ContractMonthRecapManager contractMonthRecapManager,
 			WorkingTimeTypeDao workingTimeTypeDao,
 			PersonDayManager personDayManager, PersonDayDao personDayDao,
@@ -75,12 +72,10 @@ public class AbsenceManager {
 			AbsenceGroupManager absenceGroupManager,
 			IWrapperFactory wrapperFactory, ContractDao contractDao,
 			AbsenceTypeDao absenceTypeDao, AbsenceDao absenceDao,
-			PersonDao personDao, PersonManager personManager,
+			PersonManager personManager,
 			PersonReperibilityDayDao personReperibilityDayDao,
 			PersonShiftDayDao personShiftDayDao,
 			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao) {
-		this.yearFactory = yearFactory;
-		this.contractYearRecapManager = contractYearRecapManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.workingTimeTypeDao = workingTimeTypeDao;
 		this.personDayManager = personDayManager;
@@ -91,7 +86,6 @@ public class AbsenceManager {
 		this.contractDao = contractDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.absenceDao = absenceDao;
-		this.personDao = personDao;
 		this.personManager = personManager;
 		this.personReperibilityDayDao = personReperibilityDayDao;
 		this.personShiftDayDao = personShiftDayDao;
@@ -102,8 +96,6 @@ public class AbsenceManager {
 
 	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
 
-	private final PersonResidualYearRecapFactory yearFactory;
-	private final ContractYearRecapManager contractYearRecapManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final WorkingTimeTypeDao workingTimeTypeDao;
 	private final PersonDayManager personDayManager;
@@ -114,7 +106,6 @@ public class AbsenceManager {
 	private final ContractDao contractDao;
 	private final AbsenceTypeDao absenceTypeDao;
 	private final AbsenceDao absenceDao;
-	private final PersonDao personDao;
 	private final PersonManager personManager;
 	private final PersonReperibilityDayDao personReperibilityDayDao;
 	private final PersonShiftDayDao personShiftDayDao;
@@ -257,25 +248,21 @@ public class AbsenceManager {
 		}
 
 		// (2) Calcolo il residuo alla data precedente di quella che voglio considerare.
-		if(dateToCheck.getDayOfMonth()>1)
+		if(dateToCheck.getDayOfMonth() > 1)
 			dateToCheck = dateToCheck.minusDays(1);
 
 		Contract contract = contractDao.getContract(dateToCheck, person);
 
-		PersonResidualYearRecap c = 
-				yearFactory.create(contract, dateToCheck.getYear(), dateToCheck);
-
-		if(c == null){
-			return false;
+		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract)
+				.getContractMonthRecap(new YearMonth(dateToCheck));
+		
+		if( recap.isPresent() ) {
+			if (recap.get().remainingMinutesCurrentYear + recap.get().remainingMinutesLastYear >
+					workingTimeTypeDao.getWorkingTimeType(dateToCheck, person).get()
+						.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
+				return true;
+			} 
 		}
-
-		PersonResidualMonthRecap mese = c.getMese(dateToCheck.getMonthOfYear());
-
-		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato >
-		workingTimeTypeDao.getWorkingTimeType(dateToCheck, person).get()
-		.workingTimeTypeDays.get(dateToCheck.getDayOfWeek()-1).workingTime ) {
-			return true;
-		} 
 		return false;	
 	}
 
@@ -373,16 +360,6 @@ public class AbsenceManager {
 		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
 		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));
-
-		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
-		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
-		if(dateFrom.getYear() < LocalDate.now().getYear()){
-			for(Contract c : personDao.getContractList(person, 
-					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
-					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
-				contractYearRecapManager.buildContractYearRecap(c);
-			}
-		}
 
 		if(air.getAbsenceInReperibilityOrShift() > 0){
 			sendEmail(person, air);
@@ -785,15 +762,6 @@ public class AbsenceManager {
 		personDayManager.updatePersonDaysFromDate(person, dateFrom);
 		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));
 
-		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
-		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
-		if(dateFrom.getYear() < LocalDate.now().getYear()){
-			for(Contract c : personDao.getContractList(person, 
-					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
-					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
-				contractYearRecapManager.buildContractYearRecap(c);
-			}
-		}
 		return deleted;
 	}
 
