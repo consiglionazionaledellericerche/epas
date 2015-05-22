@@ -10,6 +10,7 @@ import org.joda.time.YearMonth;
 import com.google.common.base.Optional;
 
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 import models.enumerate.Parameter;
@@ -67,6 +68,8 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 */
 	List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList();
 	
+	Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth);
+	
 	/**
 	 * Diagnostiche sul contratto.
 	 * 
@@ -74,7 +77,8 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 */
 	public boolean noRelevant();
 	public boolean initializationMissing();
-	public boolean monthRecapMissing();
+	public boolean monthRecapMissing(Optional<YearMonth> yearMonth);
+	public boolean hasMonthRecapForVacationsRecap(int yearToRecap);
 	
 
 }

@@ -161,12 +161,12 @@ public class ContractYearRecapManager {
 
 			//FERIE E PERMESSI
 			Optional<VacationsRecap> vacationRecap = vacationsFactory.create(yearToCompute, contract, new LocalDate(), true);
-			if (!vacationRecap.isPresent()) {
-				return;
+			if (vacationRecap.isPresent()) {
+				cyr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed.size();
+				cyr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed.size();
+				cyr.permissionUsed = vacationRecap.get().permissionUsed.size();
 			}
-			cyr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed.size();
-			cyr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed.size();
-			cyr.permissionUsed = vacationRecap.get().permissionUsed.size();
+			
 
 			//RESIDUI
 			PersonResidualYearRecap csap = 

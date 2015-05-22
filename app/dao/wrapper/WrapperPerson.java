@@ -18,6 +18,7 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -332,7 +333,9 @@ public class WrapperPerson implements IWrapperPerson {
 	public boolean currentContractMonthRecapMissing() {
 		getCurrentContract();
 		if ( currentContract.isPresent() ) {
-			if( wrapperFactory.create(currentContract.get()).monthRecapMissing()) {
+			YearMonth now = new YearMonth(LocalDate.now());
+			if( wrapperFactory.create(currentContract.get())
+					.monthRecapMissing(Optional.fromNullable(now))) {
 				return true;
 			}
 		}

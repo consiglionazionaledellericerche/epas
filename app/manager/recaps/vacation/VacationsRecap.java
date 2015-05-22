@@ -88,10 +88,6 @@ public class VacationsRecap {
 			int year, Contract contract, LocalDate actualDate, 
 			boolean considerExpireLastYear) {
 
-		Preconditions.checkNotNull(year);
-		Preconditions.checkNotNull(contract);
-		Preconditions.checkNotNull(actualDate);
-
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.wrapperFactory = wrapperFactory;
@@ -100,15 +96,10 @@ public class VacationsRecap {
 		this.year = year;
 		this.contract = contract;
 
-		IWrapperContract wrapperContract = wrapperFactory.create(this.contract);
-
-		List<VacationPeriod> vacationPeriodList = wrapperContract.getContractVacationPeriods();
-
-		Preconditions.checkNotNull(vacationPeriodList);
-		Preconditions.checkState( ! vacationPeriodList.isEmpty() );
-
-		this.activeContractInterval = wrapperFactory.create(this.contract).getContractDateInterval();
-		this.vacationPeriodList = vacationPeriodList;
+		IWrapperContract c = wrapperFactory.create(contract);
+		
+		this.vacationPeriodList = c.getContractVacationPeriods();
+		this.activeContractInterval = c.getContractDateInterval();
 
 		LocalDate today = LocalDate.now();
 		LocalDate startLastYear = new LocalDate(this.year-1,1,1);	
@@ -181,81 +172,75 @@ public class VacationsRecap {
 			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() 
 					+ abs31Last.size() + abs37Last.size();
 		
-		//Caso generale: popolare da riepilogo fine anno.
+		//Caso generale: popolare da riepilogo fine anno 
 		} else {
 			
-			Optional<ContractMonthRecap> recapPastYear = Optional.absent();
-			// E' essenziale, se non riesco a procurarmelo salvo il flag nel contratto.
-			for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-				if ( cmr.year == year - 1 && cmr.month == 12 ) {
-					recapPastYear = Optional.fromNullable(cmr);
-				}
-			}
-			if ( !recapPastYear.isPresent() ) {
-				contract.sourceRequired = true;
-				contract.save();
-				return;
-			} else {
-				contract.sourceRequired = false;
-				contract.save();
-			}
+			//(TODO: l'esistenza dovrebbe essere garantita dal factory, verificare)
+			Optional<ContractMonthRecap> recapPastYear = c
+					.getContractMonthRecap( new YearMonth(year-1,12) );
 			
-			
+			Preconditions.checkState(recapPastYear.isPresent());
+
 			vacationDaysPastYearUsedNew = recapPastYear.get().vacationCurrentYearUsed;
 			abs31Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab31);						
 			abs37Last = absenceDao.getAbsenceDays(yearInter, this.contract, ab37);						
-			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
+			vacationDaysPastYearUsedNew += abs31Last.size() + abs37Last.size();
 		}
-		//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
+		//costruisco la lista delle ferie per stampare le date 
+		//(prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
 		abs32Last  = absenceDao.getAbsenceDays(lastYearInter, this.contract, ab32);
 
 		this.vacationDaysLastYearUsed.addAll(abs32Last);
 		this.vacationDaysLastYearUsed.addAll(abs31Last);
 		this.vacationDaysLastYearUsed.addAll(abs37Last);
-		while(this.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
+		while (this.vacationDaysLastYearUsed.size() < vacationDaysPastYearUsedNew)
 		{
 			Absence nullAbsence = null;
 			this.vacationDaysLastYearUsed.add(nullAbsence);
 		}
 
-		//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
+		////////////////////////////////////////////////////////////////////////
+		// (2) Calcolo ferie usate dell'anno corrente 
+		////////////////////////////////////////////////////////////////////////
 		List<Absence> abs32Current  = null;
 
 		int vacationDaysCurrentYearUsedNew = 0;
 		if(this.contract.sourceDate!=null && this.contract.sourceDate.getYear()==year)
 		{
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + this.contract.sourceVacationCurrentYearUsed;
+			vacationDaysCurrentYearUsedNew += this.contract.sourceVacationCurrentYearUsed;
 			DateInterval yearInterSource = new DateInterval(this.contract.sourceDate.plusDays(1), endYear);
 			abs32Current = absenceDao.getAbsenceDays(yearInterSource, this.contract, ab32);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
+			vacationDaysCurrentYearUsedNew += abs32Current.size();
 		}
 		else
 		{
 			abs32Current = absenceDao.getAbsenceDays(yearInter, this.contract, ab32);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
+			vacationDaysCurrentYearUsedNew += abs32Current.size();
 		}
 		this.vacationDaysCurrentYearUsed.addAll(abs32Current);
-		while(this.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
+		while(this.vacationDaysCurrentYearUsed.size() < vacationDaysCurrentYearUsedNew)
 		{
 			Absence nullAbsence = null;
 			this.vacationDaysCurrentYearUsed.add(nullAbsence);
 		}
 
-		//(3) Calcolo permessi usati dell'anno corrente
+		////////////////////////////////////////////////////////////////////////
+		// //(3) Calcolo permessi usati dell'anno corrente 
+		////////////////////////////////////////////////////////////////////////
 		List<Absence> abs94Current = null;
 		int permissionCurrentYearUsedNew = 0;
 
 		if(this.contract.sourceDate!=null && this.contract.sourceDate.getYear()==year)
 		{
-			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + this.contract.sourcePermissionUsed;
+			permissionCurrentYearUsedNew += this.contract.sourcePermissionUsed;
 			DateInterval yearInterSource = new DateInterval(this.contract.sourceDate.plusDays(1), endYear);
 			abs94Current = absenceDao.getAbsenceDays(yearInterSource, this.contract, ab94);
-			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
+			permissionCurrentYearUsedNew += abs94Current.size();
 		}
 		else
 		{
 			abs94Current = absenceDao.getAbsenceDays(yearInter, this.contract, ab94);
-			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
+			permissionCurrentYearUsedNew += abs94Current.size();
 		}
 		this.permissionUsed.addAll(abs94Current);
 		while(this.permissionUsed.size()<permissionCurrentYearUsedNew)
