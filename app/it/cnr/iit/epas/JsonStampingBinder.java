@@ -40,11 +40,11 @@ import dao.StampingDao;
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
 	@Inject
-	private BadgeReaderDao badgeReaderDao;
+	private static BadgeReaderDao badgeReaderDao;
 	@Inject
-	private StampingDao stampingDao;
+	private static StampingDao stampingDao;
 	@Inject
-	private PersonDao personDao;
+	private static PersonDao personDao;
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
