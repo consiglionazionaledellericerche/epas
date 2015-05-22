@@ -2,23 +2,23 @@ package manager.recaps.competence;
 
 import javax.inject.Inject;
 
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonMonthCompetenceRecapFactory {
 
 	private final CompetenceCodeDao competenceCodeDao;
 	private final CompetenceDao competenceDao;
-	private final PersonResidualYearRecapFactory yearFactory;
+	private final IWrapperFactory wrapperFactory;
 	
 	@Inject
 	PersonMonthCompetenceRecapFactory(CompetenceCodeDao competenceCodeDao,
-			CompetenceDao competenceDao, PersonResidualYearRecapFactory yearFactory) {
+			CompetenceDao competenceDao, IWrapperFactory wrapperFactory) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.competenceDao = competenceDao;
-		this.yearFactory = yearFactory;
+		this.wrapperFactory = wrapperFactory;
 	}
 	
 	/**
@@ -32,8 +32,7 @@ public class PersonMonthCompetenceRecapFactory {
 			int year) {
 		
 		return new PersonMonthCompetenceRecap(competenceCodeDao,
-				competenceDao, yearFactory,
-				contract, month, year);
+				competenceDao, wrapperFactory, contract, month, year);
 	}
 	
 }

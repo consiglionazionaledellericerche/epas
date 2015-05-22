@@ -7,23 +7,24 @@ import java.util.List;
 
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.MealTicketDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 /**
@@ -35,22 +36,19 @@ public class MealTicketManager {
 
 	@Inject
 	public MealTicketManager(PersonDao personDao,
-			PersonResidualYearRecapFactory yearFactory,
 			MealTicketDao mealTicketDao, 
 			ConfGeneralManager confGeneralManager,
-			IWrapperFactory factory) {
+			IWrapperFactory wrapperFactory) {
 		this.personDao = personDao;
-		this.yearFactory = yearFactory;
 		this.mealTicketDao = mealTicketDao;
 		this.confGeneralManager = confGeneralManager;
-		this.factory = factory;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	private final PersonDao personDao;
-	private final PersonResidualYearRecapFactory yearFactory;
 	private final MealTicketDao mealTicketDao;
 	private final ConfGeneralManager confGeneralManager;
-	private final IWrapperFactory factory;
+	private final IWrapperFactory wrapperFactory;
 
 	/**
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
@@ -97,23 +95,22 @@ public class MealTicketManager {
 		if(previousContract == null)
 			return 0;
 
-		DateInterval previousContractInterval = factory.create(previousContract).getContractDateInterval();
+		IWrapperContract c = wrapperFactory.create(previousContract);
+		DateInterval previousContractInterval = c.getContractDateInterval();
 
-		//Data inizio utilizzo mealticket
-		PersonResidualYearRecap c = 
-				yearFactory.create(previousContract, previousContractInterval.getEnd().getYear(), null);
-		PersonResidualMonthRecap monthRecap = c.getMese(previousContractInterval.getEnd().getMonthOfYear());
-
-		if(monthRecap == null)
+		Optional<ContractMonthRecap> recap = c.getContractMonthRecap( 
+				new YearMonth(previousContractInterval.getEnd()) );
+		
+		if( !recap.isPresent() || recap.get().remainingMealTickets == 0 ) {
 			return 0;
-
-		if(monthRecap.buoniPastoResidui == 0)
-			return 0;
-
+		}
+		
 		int mealTicketsTransfered = 0;
 
-		List<MealTicket> contractMealTicketsDesc = mealTicketDao.getOrderedMealTicketInContract(previousContract);
-		for(int i = 0; i<monthRecap.buoniPastoResidui; i++) {
+		List<MealTicket> contractMealTicketsDesc = mealTicketDao
+				.getOrderedMealTicketInContract(previousContract);
+		
+		for(int i = 0; i < recap.get().remainingMealTickets; i++) {
 
 			MealTicket ticketToChange = contractMealTicketsDesc.get(i);
 			ticketToChange.contract = contract;
@@ -133,7 +130,7 @@ public class MealTicketManager {
 	 */
 	public DateInterval getContractMealTicketDateInterval(Contract contract) {
 
-		DateInterval contractDataBaseInterval = factory.create(contract)
+		DateInterval contractDataBaseInterval = wrapperFactory.create(contract)
 				.getContractDatabaseInterval();
 
 		Optional<LocalDate> officeStartDate = getMealTicketStartDate(contract.person.office);

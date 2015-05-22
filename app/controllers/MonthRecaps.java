@@ -9,14 +9,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.MonthRecapManager;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
+import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -30,6 +29,8 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -43,7 +44,7 @@ public class MonthRecaps extends Controller{
 	@Inject
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
-	private static PersonResidualYearRecapFactory yearFactory;
+	private static IWrapperFactory wrapperFactory;
 	@Inject
 	private static MonthRecapManager monthRecapManager;
 	@Inject
@@ -70,14 +71,24 @@ public class MonthRecaps extends Controller{
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
 
-		List<PersonResidualMonthRecap> recaps = Lists.newArrayList();
-
-
+		List<ContractMonthRecap> recaps = Lists.newArrayList();
+		
 		for(IWrapperPerson person : personList) {
-
-			PersonResidualYearRecap c = yearFactory.create(person.getCurrentContract().get(), year, null);
-			recaps.add(c.getMese(LocalDate.now().getMonthOfYear()));
-
+			
+			IWrapperContract contract = wrapperFactory.create(person.getCurrentContract().get());
+			
+			YearMonth yearMonth;
+			if (year == LocalDate.now().getYear()) {
+				yearMonth = new YearMonth(LocalDate.now());
+			} else {
+				yearMonth = new YearMonth(year, 12);
+			}
+			
+			Optional<ContractMonthRecap> recap = contract.getContractMonthRecap( yearMonth );
+			if (recap.isPresent()) {
+				recaps.add(recap.get());
+			}
+			
 			if(recaps.size() > 10 ) {
 				break;
 			}

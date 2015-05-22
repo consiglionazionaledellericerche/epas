@@ -33,18 +33,16 @@ public class WrapperContract implements IWrapperContract {
 	private final PersonManager personManager;
 	private final Contract value;
 	private final VacationPeriodDao vacationPeriodDao;
-	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final ConfGeneralManager confGeneralManager;
 
 	@Inject
 	WrapperContract(@Assisted Contract contract, PersonManager personManager,
-			VacationPeriodDao vacationPeriodDao,ConfGeneralManager confGeneralManager,
-			ContractMonthRecapManager contractMonthRecapManager) {
+			VacationPeriodDao vacationPeriodDao,
+			ConfGeneralManager confGeneralManager) {
 		value = contract;
 		this.personManager = personManager;
 		this.vacationPeriodDao = vacationPeriodDao;
 		this.confGeneralManager = confGeneralManager;
-		this.contractMonthRecapManager = contractMonthRecapManager;
 	}
 
 	@Override
@@ -214,8 +212,7 @@ public class WrapperContract implements IWrapperContract {
 
 		// Mese specifico
 		if( yearMonth.isPresent()) {
-			if ( contractMonthRecapManager.getContractMonthRecap(value,
-					yearMonth.get(), false).isPresent() ) {
+			if ( getContractMonthRecap(yearMonth.get()).isPresent() ) {
 				return false;
 			} else {
 				return true;
@@ -227,8 +224,7 @@ public class WrapperContract implements IWrapperContract {
 		YearMonth nowMonth = YearMonth.now();
 		while( !monthToCheck.isAfter( nowMonth)) {
 			// FIXME: renderlo efficiente, un dao che li ordina.
-			if ( !contractMonthRecapManager.
-					getContractMonthRecap(value, monthToCheck, false).isPresent() ) {
+			if ( !getContractMonthRecap(monthToCheck).isPresent() ) {
 				return true;
 			}
 			monthToCheck = monthToCheck.plusMonths(1);

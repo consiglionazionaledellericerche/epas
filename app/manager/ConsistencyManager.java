@@ -57,7 +57,6 @@ public class ConsistencyManager {
 			PersonDao personDao, 
 			PersonDayManager personDayManager,
 			ContractDao contractDao,
-			ContractYearRecapManager contractYearRecapManager,
 			ContractMonthRecapManager contractMonthRecapManager,
 			PersonDayInTroubleDao personDayInTroubleDao,
 			IWrapperFactory wrapperFactory,
@@ -69,7 +68,6 @@ public class ConsistencyManager {
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
 		this.contractDao = contractDao;
-		this.contractYearRecapManager = contractYearRecapManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.personDayInTroubleDao = personDayInTroubleDao;
 		this.wrapperFactory = wrapperFactory;
@@ -84,7 +82,6 @@ public class ConsistencyManager {
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
 	private final ContractDao contractDao;
-	private final ContractYearRecapManager contractYearRecapManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final PersonDayInTroubleDao personDayInTroubleDao;
 	private final IWrapperFactory wrapperFactory;
@@ -133,21 +130,13 @@ public class ConsistencyManager {
 			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
 			personDayManager.updatePersonDaysFromDate(p, fromDate);
 			
-			// (3a) Ricalcolo dei residui per mese
+			// (3) Ricalcolo dei residui per mese
 			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
 			YearMonth yearMonthOfficeInitUse = new YearMonth(
 					new LocalDate(confGeneralManager.getFieldValue(
 							Parameter.INIT_USE_PROGRAM, p.office)));
 			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
 					yearMonthOfficeInitUse);
-			
-			// (3b) Ricalcolo dei residui per anno
-			log.info("Update residui annuali {} dal {} a oggi", p.getFullname(), fromDate);
-			List<Contract> contractList = contractDao.getPersonContractList(p);
-			for(Contract contract : contractList) {
-				contractYearRecapManager.buildContractYearRecap(contract);
-			}
-
 		}
 
 		if(sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
