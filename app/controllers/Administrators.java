@@ -170,7 +170,6 @@ public class Administrators extends Controller {
 
 	}
 
-	//@NoCheck
 	public static void insertAccountSystem(Long officeId) {
 
 		Office office = officeDao.getOfficeById(officeId);
@@ -192,7 +191,6 @@ public class Administrators extends Controller {
 
 	}
 
-	//@NoCheck
 	public static void saveAccountSystem(Office office, User user, Role role) {
 
 		Preconditions.checkNotNull(office);
@@ -208,12 +206,8 @@ public class Administrators extends Controller {
 		user.password = Codec.hexMD5(user.password);
 
 		user.save();
-
-		UsersRolesOffices uro = new UsersRolesOffices();
-		uro.user = user;
-		uro.office = office;
-		uro.role = role;
-		uro.save();
+		
+		officeManager.setUro(user, office, role);
 
 		flash.success("Account creato con successo.");
 
@@ -221,7 +215,6 @@ public class Administrators extends Controller {
 
 	}
 
-	//@NoCheck
 	public static void deleteAccountSystem(Long systemUroId) {
 
 		UsersRolesOffices systemUro = usersRolesOfficesDao.getById(systemUroId);
@@ -251,17 +244,13 @@ public class Administrators extends Controller {
 
 	}
 
-
 	/**
 	 * Switch in un'altra persona
 	 */ 
 	public static void switchUserTo(long id) {
+		
 		final User user = userDao.getUserById(id, Optional.<String>absent());
 		notFoundIfNull(user);
-
-		//Per adesso permettiamo questa funzionalità solo all'utente admin
-		User userLogged = Security.getUser().get();
-		if(userLogged != null && userLogged.username.equals("admin") ){
 
 			// salva il precedente
 			session.put(SUDO_USERNAME, session.get(USERNAME));
@@ -269,15 +258,11 @@ public class Administrators extends Controller {
 			session.put(USERNAME, user.username);
 			// redirect alla radice
 			redirect(Play.ctxPath + "/");
-		}
-
-		forbidden();
 	}
 
 	/**
 	 * ritorna alla precedente persona.
 	 */
-	@NoCheck
 	public static void restoreUser() {
 		if (session.contains(SUDO_USERNAME)) {
 			session.put(USERNAME, session.get(SUDO_USERNAME));
@@ -286,6 +271,5 @@ public class Administrators extends Controller {
 		// redirect alla radice
 		redirect(Play.ctxPath + "/");
 	}
-
 
 }

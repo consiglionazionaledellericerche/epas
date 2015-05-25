@@ -33,8 +33,7 @@ public class ExportToYaml {
 	 * Builder Yaml della tabella AbsenceType e AbsenceTypeGroup
 	 * @param fileName
 	 */
-	public void buildAbsenceTypesAndQualifications(String fileName)
-	{
+	public void buildAbsenceTypesAndQualifications(String fileName){
 
 		//Qualifiche relazionate anche ad absenceTypes
 		String qualificationsYaml = "";
@@ -275,8 +274,8 @@ public class ExportToYaml {
 		return out;
 	}
 
-	private String appendAbsenceType(AbsenceType abt)
-	{
+	private String appendAbsenceType(AbsenceType abt){
+		
 		String out = "";
 		out = out + getFormattedHeader("AbsenceType", "abt"+abt.id);
 		out = out + getFormattedProperty("certificateCode", abt.certificateCode);
@@ -466,7 +465,7 @@ public class ExportToYaml {
 	}
 
 
-	private void writeToYamlFile(String fileName, String out) 
+	public void writeToYamlFile(String fileName, String out) 
 	{
 		try
 		{

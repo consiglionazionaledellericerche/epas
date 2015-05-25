@@ -16,7 +16,7 @@
   #{list items:contract.contractWorkingTimeType, as:'cwtt'}
     <tr>
       <td>
-        #{if cwtt.beginDate.equals(contract.getContractDateInterval().begin)}
+        #{if cwtt.beginDate.equals(wrappedContract.getContractDateInterval().begin)}
           <span class="badge badge-success">${cwtt.beginDate}</span>
         #{/if}
         #{else}
@@ -24,7 +24,7 @@
         #{/else}
       </td>
       <td>
-        #{if cwtt.endDate.equals(contract.getContractDateInterval().end)}
+        #{if cwtt.endDate.equals(wrappedContract.getContractDateInterval().end)}
           <span class="badge badge-important">${cwtt.endDate}</span>
         #{/if}
         #{else}

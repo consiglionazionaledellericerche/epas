@@ -23,6 +23,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -134,7 +135,13 @@ public class Contract extends BaseModel {
 		return Optional.absent();
 	}
 
+	/**
+	 * Conversione della lista dei contractWorkingtimeType da Set a List
+	 * @param contract
+	 * * @return
+	 */
+	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
+		return Lists.newArrayList(contractWorkingTimeType);
+	}
+
 }
-
-
-
