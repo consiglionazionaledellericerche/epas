@@ -13,7 +13,7 @@ import models.User;
 import models.UsersRolesOffices;
 import play.Logger;
 import play.Play;
-import play.db.jpa.JPAPlugin;
+import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.test.Fixtures;
 
@@ -38,7 +38,10 @@ public class FixUserPermission extends Job{
 				this.role = role;
 			}
 		}
+		
 
+		
+		
 /*		Procedura un pò esagerata per la riassociazione dei ruoli e permessi corretti
  * 
  *		Crea una copia di tutte le triple degli userRoleOffice per poi
@@ -48,10 +51,19 @@ public class FixUserPermission extends Job{
  *		userRoleOffice in base alle informazioni precedentemente salvate
  *	
  */		
-		if(Permission.count() != 21 || Role.count() != 7){
+		int evolution = (Integer)JPA.em().
+				createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
+		
+		if(evolution <= 50){
 			List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 			List<Permesso> permessi = Lists.newArrayList();
-
+			
+			Role superAdmin = Role.find("byName", "superAdmin").first();
+			if(superAdmin!=null){
+				superAdmin.name = Role.ADMIN;
+				superAdmin.save();
+			}
+			
 			for(UsersRolesOffices uro : uros){
 				permessi.add(new Permesso(uro.user.id,uro.office.id,uro.role.name));
 			}
@@ -62,14 +74,13 @@ public class FixUserPermission extends Job{
 			Permission.deleteAll();
 			Role.deleteAll();
 
-			JPAPlugin.closeTx(false);
-			JPAPlugin.startTx(false);
-
-			//			Allinea tutte le sequenze del db
+			JPA.em().clear();
+			
+//			Allinea tutte le sequenze del db
 			Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
 			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
-
+			
 			for(Permesso p : permessi){
 				User user = User.findById(p.user);
 				Office office = Office.findById(p.office);
@@ -109,6 +120,5 @@ public class FixUserPermission extends Job{
 			}
 		}
 	}
-
 
 }
