@@ -3,9 +3,11 @@ package controllers;
 import helpers.PaginableList;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.ContractMonthRecapManager;
 import manager.MealTicketManager;
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
@@ -25,6 +27,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
@@ -51,6 +54,8 @@ public class MealTickets  extends Controller {
 	private static MealTicketManager mealTicketManager;
 	@Inject
 	private static ContractMonthRecapDao contractMonthRecapDao;
+	@Inject
+	private static ContractMonthRecapManager contractMonthRecapManager;
 	@Inject
 	private static ContractDao contractDao;
 
@@ -196,18 +201,22 @@ public class MealTickets  extends Controller {
 			}
 		}
 
+		Set<Contract> contractUpdated = Sets.newHashSet();
+		
 		//Persistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 			mealTicket.date = LocalDate.now();
 			mealTicket.contract = contractDao.getContract(mealTicket.date, person);
 			mealTicket.admin = admin.person; 
 			mealTicket.save();
+			
+			contractUpdated.add(mealTicket.contract);
 		}
-
-		// Questo flash success è sostituito dal riepilogo al momento della recap 
-		//flash.success("Inseriti %s buoni pasto per %s %s", ticketToAdd.size(),
-		//		person.name ,person.surname);
-
+		
+		for(Contract contract : contractUpdated) {
+			contractMonthRecapManager.populateContractMonthRecap(contract, 
+					Optional.<YearMonth>absent());
+		}
 
 		MealTickets.recapMealTickets(name, page, max, blockIdsToAdd, personId);
 
@@ -235,13 +244,22 @@ public class MealTickets  extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
+		Set<Contract> contractUpdated = Sets.newHashSet();
+		
 		int deleted = 0;
 		for(MealTicket mealTicket : mealTicketList) {
 
 			mealTicket.delete();
 			deleted++;
+			
+			contractUpdated.add(mealTicket.contract);
 		}
 
+		for(Contract contract : contractUpdated) {
+			contractMonthRecapManager.populateContractMonthRecap(contract, 
+					Optional.<YearMonth>absent());
+		}
+		
 		flash.success("Rimosso blocco %s con dimensione %s per %s %s", codeBlock, deleted,
 				person.name , person.surname);
 

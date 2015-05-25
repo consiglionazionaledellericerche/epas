@@ -34,20 +34,24 @@ import dao.wrapper.IWrapperFactory;
  */
 public class MealTicketManager {
 
+
 	@Inject
 	public MealTicketManager(PersonDao personDao,
 			MealTicketDao mealTicketDao, 
 			ConfGeneralManager confGeneralManager,
+			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory) {
 		this.personDao = personDao;
 		this.mealTicketDao = mealTicketDao;
 		this.confGeneralManager = confGeneralManager;
+		this.contractMonthRecapManag = contractMonthRecapManager;
 		this.wrapperFactory = wrapperFactory;
 	}
 
 	private final PersonDao personDao;
 	private final MealTicketDao mealTicketDao;
 	private final ConfGeneralManager confGeneralManager;
+	private final ContractMonthRecapManager contractMonthRecapManag;
 	private final IWrapperFactory wrapperFactory;
 
 	/**
@@ -117,6 +121,13 @@ public class MealTicketManager {
 			ticketToChange.date = contract.beginContract;
 			ticketToChange.save();
 			mealTicketsTransfered++;
+		}
+		
+		if (mealTicketsTransfered > 0) {
+			contractMonthRecapManag.populateContractMonthRecap(contract, 
+					Optional.<YearMonth>absent());
+			contractMonthRecapManag.populateContractMonthRecap(previousContract, 
+					Optional.<YearMonth>absent());
 		}
 
 		return mealTicketsTransfered;
