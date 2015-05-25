@@ -5,7 +5,6 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 
 import models.Contract;
-import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 
 public interface IWrapperContract extends IWrapperModel<Contract> {
@@ -22,7 +21,5 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	boolean isDefined();
 	
 	public DateInterval getContractDateInterval();
-	
-	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList();
 
 }

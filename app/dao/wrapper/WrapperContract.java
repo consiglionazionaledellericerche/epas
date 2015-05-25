@@ -6,10 +6,8 @@ import java.util.List;
 
 import manager.PersonManager;
 import models.Contract;
-import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -73,15 +71,6 @@ public class WrapperContract implements IWrapperContract {
 	public boolean isDefined() {
 
 		return this.value.expireContract != null;
-	}
-
-	/**
-	 * Conversione della lista dei contractWorkingtimeType da Set a List
-	 * @param contract
-	 * * @return
-	 */
-	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
-		return Lists.newArrayList(this.value.contractWorkingTimeType);
 	}
 
 	/**

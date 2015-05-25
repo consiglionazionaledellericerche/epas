@@ -48,7 +48,7 @@ public class Offices extends Controller {
 
 		List<IWrapperOffice> allAreas = FluentIterable
 				.from(officeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
-
+		
 		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
 		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
 
@@ -58,7 +58,6 @@ public class Offices extends Controller {
 	public static void insertArea() {
 		render();
 	}
-
 
 	public static void insertInstitute(Long areaId) {
 
@@ -98,7 +97,7 @@ public class Offices extends Controller {
 
 		institute.save();
 
-		officeManager.setPermissionAfterCreation(institute);
+		officeManager.setSystemUserPermission(institute);
 
 		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name, institute.contraction);
 		Offices.showOffices();
@@ -145,7 +144,7 @@ public class Offices extends Controller {
 			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
 			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
 
-			officeManager.setPermissionAfterCreation(seat);
+			officeManager.setSystemUserPermission(seat);
 		}
 
 		flash.success("Sede correttamente inserita: %s",seat.name);

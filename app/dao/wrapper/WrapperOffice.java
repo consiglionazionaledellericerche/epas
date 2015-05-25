@@ -105,6 +105,7 @@ public class WrapperOffice implements IWrapperOffice {
 	 * loggato)
 	 * @return
 	 */
+	@Deprecated
 	public boolean isPrintable() {
 
 		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
@@ -120,6 +121,7 @@ public class WrapperOffice implements IWrapperOffice {
 	 *  Gestisce una variabile LAZY.
 	 * @return
 	 */
+	@Deprecated
 	public boolean isEditable() {
 
 		if(isEditable != null)

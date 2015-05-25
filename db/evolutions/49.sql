@@ -11,6 +11,8 @@ DROP SEQUENCE seq_web_stamping_address;
 DROP SEQUENCE seq_year_recaps;
 DROP SEQUENCE seq_valuable_competences;
 
+UPDATE roles SET name = 'admin' WHERE name = 'superAdmin';
+
 -- riassegna le sequenze alla tabella proprietaria
 
 ALTER SEQUENCE seq_permissions OWNED BY permissions.id;
