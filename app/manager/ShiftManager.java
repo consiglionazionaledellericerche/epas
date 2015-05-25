@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -62,13 +64,19 @@ public class ShiftManager {
 		}
 	}
 
-
+	@Inject
 	private PersonShiftDayDao personShiftDayDao;
+	@Inject
 	private AbsenceDao absenceDao;
+	@Inject
 	private ShiftDao shiftDao;
+	@Inject
 	private CompetenceUtility competenceUtility;
+	@Inject
 	private CompetenceCodeDao competenceCodeDao;
+	@Inject
 	private CompetenceDao competenceDao;
+	@Inject
 	private PersonMonthRecapDao personMonthRecapDao;
 
 
@@ -162,6 +170,7 @@ public class ShiftManager {
 				if (!shiftPeriod.cancelled) {
 					//La persona deve essere tra i turnisti 
 					//PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE ps.person = ?", shiftPeriod.person).first();
+					Logger.debug("---Prende il personShift di %s", shiftPeriod.person);
 					PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(shiftPeriod.person);
 					if (personShift == null) {
 						throw new IllegalArgumentException(
@@ -318,11 +327,11 @@ public class ShiftManager {
 		// for each person
 		for (Person person: personsShiftHours.rowKeySet()) {
 
-			Logger.debug("Registro dati di = %s %s", person.surname, person.name);
+			Logger.debug("Registro dati di %s %s", person.surname, person.name);
 
 			BigDecimal sessanta = new BigDecimal("60");
 
-			Logger.debug("Calcolo le ore di turno dai giorni %s", personsShiftHours.get(person, thDays));
+			Logger.debug("Calcolo le ore di turno dai giorni = %s", personsShiftHours.get(person, thDays));
 			BigDecimal numOfHours = competenceUtility.calcShiftHoursFromDays(personsShiftHours.get(person, thDays));
 
 			// compute the worked time in minutes of the present month
@@ -353,7 +362,7 @@ public class ShiftManager {
 
 				//Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
 
-				//Logger.debug("certData=%s" certData);
+				Logger.debug("certData=%s certData.isOk=%s certData.competencesSent=%s", certData, certData.isOk, certData.competencesSent);
 
 				int apprHours = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().valueApproved : apprHoursAndExcMins[0];
 				int exceededMins = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().exceededMins : apprHoursAndExcMins[1];

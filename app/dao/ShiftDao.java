@@ -135,6 +135,8 @@ public class ShiftDao extends DaoBase{
 		CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
 		//CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
 
+		Logger.debug("month=%s", month);
+		
 		final QCompetence com = new QCompetence("competence");
 		final JPQLQuery query = getQueryFactory().query();
 		final Competence myCompetence = query
@@ -149,7 +151,7 @@ public class ShiftDao extends DaoBase{
 						.limit(1)
 						.uniqueResult(com);
 
-		Logger.debug("prendo i minuti in eccesso dal mese %s", myCompetence.getMonth());
+		//Logger.debug("prendo i minuti in eccesso dal mese %s", myCompetence.getMonth());
 
 		// get the old exceede mins in the DB
 		oldExceedMins = ((myCompetence == null) || ((myCompetence != null) && myCompetence.getExceededMin() == null)) ? 0 : myCompetence.getExceededMin();

@@ -15,6 +15,8 @@ import models.query.QPersonShiftDay;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
+
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -91,7 +93,6 @@ public class PersonShiftDayDao extends DaoBase{
 	 */
 	public PersonShift getPersonShiftByPerson(Person person){
 		final QPersonShift personShift = QPersonShift.personShift;
-
 		JPQLQuery query = getQueryFactory().from(personShift).where(personShift.person.eq(person));
 		return query.singleResult(personShift);
 	}

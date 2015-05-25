@@ -1,5 +1,7 @@
 package it.cnr.iit.epas;
 
+import injection.StaticInject;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import javax.inject.Inject;
 import models.Person;
 import models.exports.PersonEmailFromJson;
 import play.Logger;
+import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
 import com.google.gson.JsonArray;
@@ -19,11 +22,12 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
-
-public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
+@Global
+@StaticInject
+public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
 
 	@Inject
-	private PersonDao personDao;
+	private static PersonDao personDao;
 
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,
@@ -31,7 +35,6 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 
 		try{
 			List<Person> persons = new ArrayList<Person>();
-			Logger.debug("Aha!");
 
 			Person person = null;
 			JsonObject macroJsonObject = new JsonParser().parse(value).getAsJsonObject();
@@ -45,9 +48,11 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 				jsonObject = jsonElement.getAsJsonObject();
 				email = jsonObject.get("email").getAsString();
 
+				Logger.debug("email=%s personDao=%s", email, personDao);
 				person = personDao.getPersonByEmail(email);
+
 				
-				if(person != null)
+				if (person != null)
 					persons.add(person);
 			}
 			Logger.debug("Ritorno lista persone...%s", persons);
@@ -56,7 +61,7 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 			return pefjl;
 		}
 		catch(Exception e){
-			Logger.error("Ahia...");
+			Logger.error("Ahia...%s", e);
 			return null;
 		}
 	}
