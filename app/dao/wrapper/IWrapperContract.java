@@ -4,16 +4,14 @@ import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
 
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import com.google.common.base.Optional;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
-import models.enumerate.Parameter;
+
+import org.joda.time.YearMonth;
+
+import com.google.common.base.Optional;
 
 public interface IWrapperContract extends IWrapperModel<Contract> {
 	
@@ -80,6 +78,5 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	public boolean monthRecapMissing(YearMonth yearMonth);
 	public boolean monthRecapMissing();
 	public boolean hasMonthRecapForVacationsRecap(int yearToRecap);
-	
 
 }

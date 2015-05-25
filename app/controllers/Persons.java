@@ -14,6 +14,7 @@ import manager.ConfGeneralManager;
 import manager.ContractManager;
 import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
+import manager.OfficeManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Contract;
@@ -23,6 +24,7 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.Qualification;
+import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
@@ -60,6 +62,8 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperWorkingTimeType;
+import dao.wrapper.WrapperContract;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -70,6 +74,8 @@ public class Persons extends Controller {
 
 	@Inject
 	private static OfficeDao officeDao;
+	@Inject
+	private static OfficeManager officeManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -158,7 +164,7 @@ public class Persons extends Controller {
 
 		Long personId = person.id;
 
-		Persons.insertUsername(personId);
+		insertUsername(personId);
 
 	}
 
@@ -168,7 +174,7 @@ public class Persons extends Controller {
 		if(person==null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -185,7 +191,7 @@ public class Persons extends Controller {
 		if(person==null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 		rules.checkIfPermitted(person.office);
 
@@ -200,11 +206,13 @@ public class Persons extends Controller {
 			user.save();
 			person.user = user;
 			person.save();
-
 		}
 
+		Role employee = Role.find("byName", Role.EMPLOYEE).first();
+		officeManager.setUro(person.user, person.office, employee);
+
 		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
-		Persons.list(null);
+		list(null);
 
 	}
 
@@ -214,7 +222,7 @@ public class Persons extends Controller {
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -242,7 +250,7 @@ public class Persons extends Controller {
 		if(person==null) {
 
 			flash.error("La persona da modificare non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 		rules.checkIfPermitted(person.office);
 		rules.checkIfPermitted(office);
@@ -254,14 +262,14 @@ public class Persons extends Controller {
 		Optional<Qualification> q = qualificationDao.byQualification(qualification);
 		if( !q.isPresent() ) {
 			flash.error("La qualifica selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 
-		Persons.edit(person.id);
+		edit(person.id);
 	}
 
 	public static void deletePerson(Long personId){
@@ -269,7 +277,7 @@ public class Persons extends Controller {
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -284,7 +292,7 @@ public class Persons extends Controller {
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -295,13 +303,13 @@ public class Persons extends Controller {
 
 			if(person.user.usersRolesOffices.size() > 0) {
 				flash.error("Impossibile eliminare una persona che detiene diritti di amministrazione su almeno una sede. Rimuovere tali diritti e riprovare.");
-				Persons.list(null);
+				list(null);
 			}
 
 			if(person.user.username.equals(Security.getUser().get().username)) {
 
 				flash.error("Impossibile eliminare la persona loggata nella sessione corrente. Operazione annullata.");
-				Persons.list(null);
+				list(null);
 			}
 		}
 
@@ -363,7 +371,7 @@ public class Persons extends Controller {
 
 		flash.success("La persona %s %s eliminata dall'anagrafica insieme a tutti i suoi dati.",name, surname);
 
-		Persons.list(null);
+		list(null);
 
 	}
 
@@ -372,7 +380,7 @@ public class Persons extends Controller {
 		Person person = personDao.getPersonById(personId);
 		if(person == null) {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -391,7 +399,7 @@ public class Persons extends Controller {
 
 		if(person == null) {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -411,7 +419,7 @@ public class Persons extends Controller {
 		if(person == null) {
 
 			flash.error("Persona inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -427,7 +435,7 @@ public class Persons extends Controller {
 		if(person==null) {
 
 			flash.error("Persona inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -435,30 +443,30 @@ public class Persons extends Controller {
 		if(dataInizio==null) {
 
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(person.id);
+			edit(person.id);
 		}
 		if(Validation.hasErrors()) {
 
 			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(person.id);
+			edit(person.id);
 		}
 
 		//Tipo orario
 		if(wtt == null) {
 			flash.error("Errore nel fornire il parametro tipo orario. Operazione annullata.");
-			Persons.edit(person.id);
+			edit(person.id);
 		}
 
 		//Creazione nuovo contratto
 		if(!contractManager.saveContract(dataInizio, dataFine, onCertificate, person, wtt).equals("")){
 			flash.error(contractManager.saveContract(dataInizio, dataFine, onCertificate, person, wtt));
-			Persons.edit(person.id);
+			edit(person.id);
 
 		}	
 
 		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
 
-		Persons.edit(person.id);
+		edit(person.id);
 	}
 
 	public static void modifyContract(Long contractId){
@@ -466,7 +474,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -480,7 +488,7 @@ public class Persons extends Controller {
 		if(contract == null) {
 
 			flash.error("Contratto inesistente, operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -488,17 +496,17 @@ public class Persons extends Controller {
 		if(begin==null){
 
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(contract.person.id);
+			edit(contract.person.id);
 		}
 		if(validation.hasError("expire")) {
 
 			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(contract.person.id);
+			edit(contract.person.id);
 		}
 		if(validation.hasError("end")) {
 
 			flash.error("Errore nel fornire il parametro data terminazione contratto. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(contract.person.id);
+			edit(contract.person.id);
 		}
 
 		contract.beginContract = begin;
@@ -509,7 +517,7 @@ public class Persons extends Controller {
 		if( ! contractManager.isProperContract(contract) ) {
 
 			flash.error("Il contratto si interseca con altri contratti della persona. Controllare le date di inizio e fine. Operazione annulalta.");
-			Persons.edit(contract.person.id);
+			edit(contract.person.id);
 		}
 
 		contract.onCertificate = onCertificate;
@@ -525,7 +533,7 @@ public class Persons extends Controller {
 
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
 
-		Persons.edit(contract.person.id);
+		edit(contract.person.id);
 
 	}
 
@@ -535,7 +543,7 @@ public class Persons extends Controller {
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -549,7 +557,7 @@ public class Persons extends Controller {
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -561,7 +569,7 @@ public class Persons extends Controller {
 		contract.delete();
 
 		flash.error("Contratto eliminato con successo.");
-		Persons.edit(contract.person.id);
+		edit(contract.person.id);
 	}
 
 	public static void updateSourceContract(Long contractId){
@@ -570,7 +578,7 @@ public class Persons extends Controller {
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -587,7 +595,7 @@ public class Persons extends Controller {
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -601,19 +609,18 @@ public class Persons extends Controller {
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
-		Persons.edit(contract.person.id);
+		edit(contract.person.id);
 
 	}
 
 
-	public static void updateContractWorkingTimeType(Long id)
-	{
+	public static void updateContractWorkingTimeType(Long id){
 
 		Contract contract = contractDao.getContractById(id);
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.person.office);
@@ -624,13 +631,14 @@ public class Persons extends Controller {
 		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
 		wttList.addAll(wttDefault);
 		wttList.addAll(wttAllowed);
-
-
-		render(contract, wttList);
+		
+		IWrapperContract wrappedContract = wrapperFactory.create(contract);
+		
+		render(wrappedContract,contract, wttList);
 	}
 
-	public static void splitContractWorkingTimeType(ContractWorkingTimeType cwtt, LocalDate splitDate)
-	{
+	public static void splitContractWorkingTimeType(ContractWorkingTimeType cwtt, LocalDate splitDate){
+		
 		//Controllo integrità richiesta
 		if(cwtt==null) {
 
@@ -643,29 +651,28 @@ public class Persons extends Controller {
 		if(validation.hasError("splitDate")) {
 
 			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(cwtt.contract.person.id);
+			edit(cwtt.contract.person.id);
 		}
 
 		if(!DateUtility.isDateIntoInterval(splitDate, new DateInterval(cwtt.beginDate, cwtt.endDate))) {
 
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
-			Persons.edit(cwtt.contract.person.id);
+			edit(cwtt.contract.person.id);
 		}
 
 		DateInterval first = new DateInterval(cwtt.beginDate, splitDate.minusDays(1));
 		if(! DateUtility.isIntervalIntoAnother(first, wrapperFactory.create(cwtt.contract).getContractDateInterval())) {
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
-			Persons.edit(cwtt.contract.person.id);
+			edit(cwtt.contract.person.id);
 		}
 		//agire
 		contractWorkingTimeTypeManager.saveSplitContractWorkingTimeType(cwtt, splitDate);
 
 		flash.success("Orario di lavoro correttamente suddiviso in due sottoperiodi con tipo orario %s.", cwtt.workingTimeType.description);
-		Persons.edit(cwtt.contract.person.id);
+		edit(cwtt.contract.person.id);
 	}
 
-	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
-	{
+	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt){
 		if(cwtt==null){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
@@ -682,7 +689,7 @@ public class Persons extends Controller {
 		if(contractsWtt.size()<index){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
-			Persons.edit(cwtt.contract.person.id);
+			edit(cwtt.contract.person.id);
 		}
 		ContractWorkingTimeType previous = contractsWtt.get(index-1);
 		contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
@@ -691,7 +698,7 @@ public class Persons extends Controller {
 
 		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 
-		Persons.edit(cwtt.contract.person.id);
+		edit(cwtt.contract.person.id);
 	}
 
 	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
@@ -713,7 +720,8 @@ public class Persons extends Controller {
 
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 
-		Persons.edit(cwtt.contract.person.id);
+		edit(cwtt.contract.person.id);
+
 	}
 
 	public static void changePassword(){
@@ -729,13 +737,13 @@ public class Persons extends Controller {
 
 		if(user == null) {
 			flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
-			Persons.changePassword();
+			changePassword();
 		}
 
 		if(validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
 			flash.error("Tutti i campi devono essere valorizzati. "
 					+ "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
-			Persons.changePassword();
+			changePassword();
 		}
 
 		notFoundIfNull(user);
@@ -745,7 +753,7 @@ public class Persons extends Controller {
 		user.password = codec.hexMD5(nuovaPassword);
 		user.save();
 		flash.success(Messages.get("passwordSuccessfullyChanged"));
-		Persons.changePassword();
+		changePassword();
 	}
 
 	public static void resetPassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword) throws Throwable {
@@ -860,7 +868,7 @@ public class Persons extends Controller {
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(contract.contract.person.office);
@@ -892,7 +900,7 @@ public class Persons extends Controller {
 
 		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 
-		Persons.edit(contract.contract.person.id);
+		edit(contract.contract.person.id);
 
 	}
 
@@ -908,23 +916,23 @@ public class Persons extends Controller {
 		if(validation.hasError("splitDate")) {
 
 			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
-			Persons.edit(contract.contract.person.id);
+			edit(contract.contract.person.id);
 		}
 
 		if(!DateUtility.isDateIntoInterval(splitDate, new DateInterval(contract.startFrom, contract.endTo))) {
 
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
-			Persons.edit(contract.contract.person.id);
+			edit(contract.contract.person.id);
 		}
 		DateInterval first = new DateInterval(contract.startFrom, splitDate.minusDays(1));
 		if(! DateUtility.isIntervalIntoAnother(first,  wrapperFactory.create(contract.contract).getContractDateInterval())) {
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
-			Persons.edit(contract.contract.person.id);
+			edit(contract.contract.person.id);
 		}
 
 		contractStampProfileManager.splitContractStampProfile(contract, splitDate);
 		flash.success("Tipo timbratura suddivisa in due sottoperiodi con valore %s.", contract.fixedworkingtime);
-		Persons.edit(contract.contract.person.id);
+		edit(contract.contract.person.id);
 
 	}
 
@@ -944,7 +952,7 @@ public class Persons extends Controller {
 		if(contractManager.getContractStampProfileAsList(contract).size()<index){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
-			Persons.edit(csp.contract.person.id);
+			edit(csp.contract.person.id);
 		}
 		ContractStampProfile previous = contractManager.getContractStampProfileAsList(contract).get(index-1);
 		contractStampProfileManager.deleteContractStampProfile(contract, index, csp);
@@ -954,7 +962,7 @@ public class Persons extends Controller {
 
 		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 
-		Persons.edit(csp.contract.person.id);
+		edit(csp.contract.person.id);
 	}
 
 
@@ -969,14 +977,14 @@ public class Persons extends Controller {
 		if(person == null) {
 
 			flash.error("Persona inesistente, operazione annullata");
-			Persons.list(null);
+			list(null);
 		}
 
 		rules.checkIfPermitted(person.office);
 		person.wantEmail = wantEmail;
 		person.save();
 		flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name, person.surname);
-		Persons.edit(person.id);
+		edit(person.id);
 	}
 
 }

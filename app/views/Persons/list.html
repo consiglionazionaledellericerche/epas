@@ -8,6 +8,10 @@
   </style>
 #{/set}
 
+#{secure.checkAction 'Administrators.switchUserTo'} 
+  #{set switchUser:true /}
+#{/secure.checkAction}
+
 <p><a href="@{Persons.insertPerson}"><span class="glyphicon glyphicon-plus"></span> Inserisci una nuova persona</a></p>
 
 <p>
@@ -38,15 +42,13 @@
 		<th>Inizializzazione</th>
 		<th>Invio Email</th>
 		<th>Note</th>
+		#{if switchUser}<th></th>#{/if}
 	</tr>
 
 	#{list items:personList, as:'person'}
 
-
-
 	<tr>
 	#{if person.currentContract.present}
-		
 		<td class="personName 
 		#{if person.currentContractInitializationMissing()}
 		  danger
@@ -63,7 +65,6 @@
 		<span class="glyphicon glyphicon-wrench" aria-hidden="true" title="mancano i dati iniziali"></span>
 		#{/if}
 		</td>
-		
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
 		<td><font color="#000000">${person.currentContract.get().beginContract}</font></td>
@@ -124,6 +125,10 @@
 		#{else}
 			<td></td>
 		#{/else}
+		#{if switchUser}
+		<td>
+			<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserTo(person.value.user.id)}">Assumi identità</a>
+		</td>#{/if}
 	#{/if}
 	#{else}
 		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
@@ -140,6 +145,7 @@
 		<td></td>
 		<td></td>
 		<td></td>
+		#{if switchUser}<td></td>#{/if}
 	#{/else}
 	</tr>
 

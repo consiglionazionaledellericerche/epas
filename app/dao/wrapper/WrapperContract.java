@@ -1,21 +1,19 @@
 package dao.wrapper;
 
 import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import manager.ConfGeneralManager;
-import manager.ContractMonthRecapManager;
 import manager.PersonManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 import models.enumerate.Parameter;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

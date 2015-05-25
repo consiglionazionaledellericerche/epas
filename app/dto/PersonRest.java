@@ -2,9 +2,11 @@ package dto;
 
 public class PersonRest {
 
-	public String nome;
-	public String cognome;
-	public String email_comunicazioni;
-	public String uid;
-	public Integer matricola;
+	public Integer id;
+	public String firstname;
+	public String surname;
+	public String email;
+	public String uidCnr;
+	public Integer number;
+	public String taxCode;
 }

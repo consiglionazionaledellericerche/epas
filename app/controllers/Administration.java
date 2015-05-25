@@ -3,41 +3,31 @@ package controllers;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
-import manager.ContractManager;
-import manager.ContractMonthRecapManager;
 import models.Contract;
-import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.data.validation.Required;
-import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
@@ -46,20 +36,14 @@ public class Administration extends Controller {
 	private static OfficeDao officeDao;
 	@Inject
 	private static PersonDao personDao;
-	@Inject 
-	private static ContractDao contractDao;
 	@Inject
 	private static ConsistencyManager consistencyManager;
 	@Inject
 	private static ExportToYaml exportToYaml;
 	@Inject
 	private static CompetenceUtility competenceUtility;
-	@Inject
-	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
-	private static IWrapperFactory wrapperFactory;
 	
-	private final static Logger log = LoggerFactory.getLogger(Administration.class);
+	//private final static Logger log = LoggerFactory.getLogger(Administration.class);
 
 	public static void utilities(){
 
@@ -77,46 +61,30 @@ public class Administration extends Controller {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */
-	public static void fixPersonSituation(Long personId, int year, int month){	
+	public static void fixPersonSituation(Long personId, int year, int month) {	
 		LocalDate date = new LocalDate(year,month,1);
 		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(personDao.getPersonById(personId));
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
 	}
-	
-	/**
-	 * Metodo di sviluppo per creare nuovi riepiloghi mensili.
-	 * 
-	 */
-	@SuppressWarnings("deprecation")
-	public static void buildActualContractMonthRecap() {
-
-		//Prendo la lista delle persone attive oggi
-		List<Person> personList = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(),
-				LocalDate.now(), false).list();
-
-		for (Person person : personList) {
-			JPAPlugin.startTx(false);
-			Contract contract = wrapperFactory.create(person).getCurrentContract().get();
-			// detached
-			Contract c = contractDao.getContractById(contract.id);
-			
-			log.debug("Costruzione Persona={} id={}", person.fullName(), person.id);
-			
-			contractMonthRecapManager.populateContractMonthRecap(c, Optional.<YearMonth>absent());
-			JPAPlugin.closeTx(false);
-		}
-		renderText("Concluso Job");
-	}
 
 	public static void buildYaml(){
 		//general
-		exportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
-	
-		exportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
-	
-		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
-	
+		exportToYaml.buildAbsenceTypesAndQualifications(
+				"db/import/absenceTypesAndQualifications"+DateTime.now().toString("dd-MM-HH:mm")+".yml");
+
+		exportToYaml.buildCompetenceCodes(
+				"db/import/competenceCode"+DateTime.now().toString("dd-MM-HH:mm")+".yml");
+
+		exportToYaml.buildVacationCodes(
+				"db/import/vacationCode"+DateTime.now().toString("dd-MM-HH:mm")+".yml");
+
+		//		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
+		
+		//		Yaml yaml = new Yaml();
+
+		//		exportToYaml.writeToYamlFile("Users"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(User.findAll()));
+		//		exportToYaml.writeToYamlFile("Permission"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Permission.findAll()));
+		//		exportToYaml.writeToYamlFile("Roles"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Role.findAll()));
 	}
 	
 	public static void killclock()
