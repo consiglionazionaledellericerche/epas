@@ -34,8 +34,8 @@ legend{
 #{field 'peopleId'}
 <div class="form-group">
     #{select field.name, id:field.id,class:'form-control', multiple:'',size:'8'}
-   	  #{list personList}
-		#{option _.id}${_.fullname}#{/option}
+   	#{list personList}
+		  #{option _.id}${_.fullname}#{/option}
 	  #{/list}
     #{/select}
 </div>

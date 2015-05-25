@@ -1,5 +1,6 @@
 package dao.wrapper;
 
+import models.CertificatedData;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -77,6 +78,14 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
 	 * @return
 	 */
 	public boolean hasPassToIndefiniteInYear(int year);
+	
+	/**
+	 * L'esito dell'invio attestati per la persona (null se non è ancora stato effettuato).
+	 * @param year
+	 * @param month
+	 * @return 
+	 */
+	public CertificatedData getCertificatedData(int year, int month);
 	
 
 }

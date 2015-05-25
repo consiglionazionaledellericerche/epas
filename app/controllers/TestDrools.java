@@ -19,15 +19,16 @@ import dao.PersonDao;
 public class TestDrools extends Controller {
 
 	@Inject
-	static SecurityRules rules;
-	
+	private static PersonDao personDao;
+	@Inject
+	private static SecurityRules rules;
+
 	public static void youMustBeLoggedIn() {
 		renderText("You must be loggedIn to see this message");
 	}
 	
 	public static void youMustBe(int number) {
-		Person person = PersonDao.getPersonByNumber(number);
-		//Person person = Person.findByNumber(number);
+		Person person = personDao.getPersonByNumber(number);
 		notFoundIfNull(person);
 		
 		rules.checkIfPermitted(person.office);

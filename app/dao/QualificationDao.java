@@ -1,8 +1,9 @@
 package dao;
 
-import helpers.ModelQuery;
-
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.AbsenceType;
 import models.Qualification;
@@ -10,17 +11,23 @@ import models.query.QQualification;
 
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
+import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 
 /**
  * 
  * @author dario
  *
  */
-public class QualificationDao {
+public class QualificationDao extends DaoBase{
 
-	
+	@Inject
+	QualificationDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		super(queryFactory, emp);
+	}
+
 	/**
 	 * 
 	 * @param qualification
@@ -32,10 +39,10 @@ public class QualificationDao {
 	 * si controllerà il parametro idQualification, se presente, che determinerà una lista di un solo elemento corrispondente ai criteri
 	 * di ricerca. Ritorna null nel caso in cui non dovesse essere soddisfatta alcuna delle opzioni di chiamata
 	 */
-	public static List<Qualification> getQualification(Optional<Integer> qualification, Optional<Long> idQualification, boolean findAll){
+	public List<Qualification> getQualification(Optional<Integer> qualification, Optional<Long> idQualification, boolean findAll){
 		final BooleanBuilder condition = new BooleanBuilder();
 		QQualification qual = QQualification.qualification1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(qual);
+		final JPQLQuery query = getQueryFactory().from(qual);
 		if(findAll){
 			return query.list(qual);
 		}
@@ -50,57 +57,57 @@ public class QualificationDao {
 			return query.list(qual);
 		}
 		return null;
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @param qualification
 	 * @return
 	 */
-	public static Optional<Qualification> byQualification(Integer qualification) {
-		
+	public Optional<Qualification> byQualification(Integer qualification) {
+
 		Preconditions.checkNotNull(qualification);
 
 		QQualification qual = QQualification.qualification1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+		final JPQLQuery query = getQueryFactory().from(qual)
 				.where(qual.qualification.eq(qualification));
-		
+
 		return Optional.fromNullable(query.singleResult(qual));
 
 	}
-	
+
 	/**
 	 * 
 	 * @return
 	 */
-	public static List<Qualification> findAll() {
-		
+	public List<Qualification> findAll() {
+
 		QQualification qual = QQualification.qualification1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(qual);
+		final JPQLQuery query = getQueryFactory().from(qual);
 		return query.list(qual);
 	}
 
-	 /** @param abt
-	  * @return la lista di qualifiche che possono usufruire del codice di assenza abt
-	  */
-	public static List<Qualification> getQualificationByAbsenceTypeLinked(AbsenceType abt){
+	/** @param abt
+	 * @return la lista di qualifiche che possono usufruire del codice di assenza abt
+	 */
+	public List<Qualification> getQualificationByAbsenceTypeLinked(AbsenceType abt){
 		QQualification qual = QQualification.qualification1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+		final JPQLQuery query = getQueryFactory().from(qual)
 				.where(qual.absenceTypes.contains(abt));
 		return query.list(qual);
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @param limit
 	 * @return la lista di qualifiche superiori o uguali al limite passato come parametro (da usare, ad esempio, per ritornare la
 	 * lista delle qualifiche dei tecnici che hanno qualifica superiore a 3)
 	 */
-	public static List<Qualification> getQualificationGreaterThan(Integer limit){
+	public List<Qualification> getQualificationGreaterThan(Integer limit){
 		QQualification qual = QQualification.qualification1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+		final JPQLQuery query = getQueryFactory().from(qual)
 				.where(qual.qualification.goe(limit));
 
 		return query.list(qual);

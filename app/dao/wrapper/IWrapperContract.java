@@ -1,5 +1,7 @@
 package dao.wrapper;
 
+import it.cnr.iit.epas.DateInterval;
+
 import java.util.List;
 
 import models.Contract;
@@ -17,5 +19,7 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 * @return
 	 */
 	boolean isDefined();
+	
+	public DateInterval getContractDateInterval();
 
 }

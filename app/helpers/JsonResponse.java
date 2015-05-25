@@ -1,18 +1,7 @@
 package helpers;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSerializer;
-
-import play.exceptions.UnexpectedException;
 import play.mvc.Http;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
 import play.mvc.results.RenderJson;
-import play.mvc.results.Result;
 
 public class JsonResponse {
 	
