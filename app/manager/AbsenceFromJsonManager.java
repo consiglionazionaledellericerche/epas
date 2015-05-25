@@ -1,32 +1,28 @@
 package manager;
 
-import helpers.ModelQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.Person;
-import models.exports.FrequentAbsenceCode;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-import models.query.QAbsence;
-import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
 
 import dao.AbsenceDao;
 
 public class AbsenceFromJsonManager {
-	
+
 	private final static Logger log = LoggerFactory.getLogger(AbsenceFromJsonManager.class);
+	@Inject
+	private AbsenceDao absenceDao;
 
 	/**
 	 * 
@@ -36,10 +32,10 @@ public class AbsenceFromJsonManager {
 	 * @return la lista dei PersonPeriodAbsenceCode nel periodo compreso tra 'dateFrom' e 'dateTo' per le persone recuperate dal
 	 * 'body' contenente la lista delle persone ricavate dalle email arrivate via chiamata post json
 	 */
-	public static List<PersonPeriodAbsenceCode> getPersonForAbsenceFromJson(PersonEmailFromJson body, LocalDate dateFrom, LocalDate dateTo){
+	public List<PersonPeriodAbsenceCode> getPersonForAbsenceFromJson(PersonEmailFromJson body, LocalDate dateFrom, LocalDate dateTo){
 		List<PersonPeriodAbsenceCode> personsToRender = new ArrayList<PersonPeriodAbsenceCode>();
 		PersonPeriodAbsenceCode personPeriodAbsenceCode = null;
-		
+
 		String meseInizio = "";
 		String meseFine = "";
 		String giornoInizio = "";
@@ -49,7 +45,7 @@ public class AbsenceFromJsonManager {
 			if(person != null){
 				log.debug("Controllo {}", person.getFullname());
 
-				List<Absence> absences = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
+				List<Absence> absences = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
 
 				log.debug("Lista assenze per {}: {}", person.getFullname(), absences);
 
@@ -172,57 +168,5 @@ public class AbsenceFromJsonManager {
 			}
 		}
 		return personsToRender;
-	}
-	
-	
-	/**
-	 * 
-	 * @param dateFrom
-	 * @param dateTo
-	 * @return la lista dei frequentAbsenceCode, ovvero dei codici di assenza più frequentemente usati nel periodo compreso tra
-	 * 'dateFrom' e 'dateTo'
-	 */
-	public static List<FrequentAbsenceCode> getFrequentAbsenceCodeForAbsenceFromJson(LocalDate dateFrom, LocalDate dateTo){
-		List<FrequentAbsenceCode> frequentAbsenceCodeList = new ArrayList<FrequentAbsenceCode>();
-		QAbsence absence = QAbsence.absence;
-		QPersonDay personDay = QPersonDay.personDay;
-		
-		BooleanBuilder conditions = new BooleanBuilder(personDay.date.between(dateFrom, dateTo));
-		 
-		JPQLQuery queryRiposo = ModelQuery.queryFactory().from(absence).join(absence.personDay, personDay)
-				.where(
-						new BooleanBuilder(conditions)
-						.and(absence.absenceType.description.containsIgnoreCase("Riposo compensativo"))
-					);
-		List<String> listaRiposiCompensativi = queryRiposo.distinct().list(absence.absenceType.code);
-		
-		JPQLQuery queryferieOr94 = ModelQuery.queryFactory().from(absence).join(absence.personDay, personDay)
-				.where(
-						new BooleanBuilder(conditions)
-						.and(
-								absence.absenceType.description.containsIgnoreCase("ferie")
-								.or(absence.absenceType.code.eq("94"))
-							)
-					);
-		List<String> listaFerie = queryferieOr94.distinct().list(absence.absenceType.code);
-		 
-		JPQLQuery queryMissione = ModelQuery.queryFactory().from(absence).join(absence.personDay, personDay)
-				.where(
-						new BooleanBuilder(conditions)
-						.and(absence.absenceType.code.eq("92"))
-						);
-		List<String> listaMissioni = queryMissione.distinct().list(absence.absenceType.code);
-
-		log.debug("Liste di codici di assenza completate con dimensioni: {} {} {}", 
-				new Object[] {listaFerie.size(), listaMissioni.size(), listaRiposiCompensativi.size()});
-
-		Joiner joiner = Joiner.on("-").skipNulls();
-		
-		frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaFerie),"Ferie"));
-		frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaRiposiCompensativi),"Riposo compensativo"));
-		frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaMissioni),"Missione"));		
-		
-		log.info("Lista di codici trovati: {}", frequentAbsenceCodeList);
-		return frequentAbsenceCodeList;
 	}
 }

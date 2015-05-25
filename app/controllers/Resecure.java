@@ -7,7 +7,9 @@ import java.lang.annotation.Target;
 
 import javax.inject.Inject;
 
+import models.Office;
 import play.Play;
+import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
 import security.SecurityRules;
@@ -19,6 +21,8 @@ import security.SecurityRules;
 public class Resecure extends Controller {
 	
 	private static final String REALM = "E-PAS";
+	
+	public static final String OFFICE_COUNT = "officeCount";
 	  
 	@Inject
 	static SecurityRules rules;
@@ -45,7 +49,22 @@ public class Resecure extends Controller {
 	public @interface BasicAuth {
 	}
 	
-	@Before(unless={"login", "authenticate", "logout"})
+	@Before
+	static void dbStateCheck(){
+		
+		Long officeCount = Cache.get(OFFICE_COUNT,Long.class);
+
+		if(officeCount == null){
+			officeCount = Office.count();
+			Cache.add(OFFICE_COUNT, officeCount);
+		}
+
+		if(officeCount == 0){
+			Wizard.wizard(0);
+		}
+	}
+	
+	@Before(priority = 1,unless={"login", "authenticate", "logout"})
     static void checkAccess() throws Throwable {
 		if (getActionAnnotation(NoCheck.class) != null || 
 				getControllerInheritedAnnotation(NoCheck.class) != null) {
@@ -86,5 +105,9 @@ public class Resecure extends Controller {
 
     public static boolean check(String action, Object instance) {
 		return rules.check(action, instance);
+	}
+    
+    public static boolean checkAction(String action) {
+		return rules.checkAction(action);
 	}
 }

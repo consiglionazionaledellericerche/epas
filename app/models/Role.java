@@ -26,21 +26,22 @@ import com.google.common.collect.Sets;
 public class Role extends BaseModel{
 
 	private static final long serialVersionUID = 6717202212924325368L;
-	
-	public final static String EMPLOYEE = "employee";
+
+	public final static String DEVELOPER = "developer";
+	public final static String ADMIN = "admin";
 	public final static String PERSONNEL_ADMIN = "personnelAdmin";
 	public final static String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
+	public final static String EMPLOYEE = "employee";
 	public final static String BADGE_READER = "badgeReader";
-	public final static String SUPER_ADMIN = "superAdmin";
 	public final static String REST_CLIENT = "restClient";
-	
+
 	public String name;
-	
+
 	@ManyToMany(fetch = FetchType.EAGER)
 	public Set<Permission> permissions = Sets.newHashSet();
-	
-    @NotAudited
-    @OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
-    public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
-    
+
+	@NotAudited
+	@OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
+	public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+
 }

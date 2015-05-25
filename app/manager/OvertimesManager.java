@@ -19,14 +19,13 @@ import com.google.common.collect.TreeBasedTable;
 import dao.CompetenceDao;
 
 public class OvertimesManager {
-	
+
 	private final CompetenceDao competenceDao;
 
 	private final static Logger log = LoggerFactory.getLogger(OvertimesManager.class);
-	
+
 	@Inject
 	public OvertimesManager(CompetenceDao competenceDao) {
-		super();
 		this.competenceDao = competenceDao;
 	}
 	/**
@@ -39,24 +38,24 @@ public class OvertimesManager {
 	 */
 	public Table<String, String, Integer> buildMonthForExport(PersonsList body, CompetenceCode code, int year, int month){
 		Table<String, String, Integer> overtimesMonth = TreeBasedTable.<String, String, Integer>create();
-		
+
 		for (Person person : body.persons) {
 			Optional<Competence> competence = competenceDao.getCompetence(person, year, month, code);
 			log.debug("find  Competence {} per person={}, year={}, month={}, competenceCode={}",
 					new Object[]{competence, person, year, month, code});	
 
 			if ((competence.isPresent()) && (competence.get().valueApproved != 0)) {
-				
+
 				overtimesMonth.put(person.surname + " " + person.name, competence.get().reason != null ? competence.get().reason : "", competence.get().valueApproved);
 				log.debug("Inserita riga person={} reason={} and valueApproved={}",
 						new Object[]{person, competence.get().reason, competence.get().valueApproved});
 			} 
 		}		
-		
+
 		return overtimesMonth;
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @param body
@@ -70,19 +69,19 @@ public class OvertimesManager {
 				// update the requested hours
 				oldCompetence.get().setValueApproved(competence.getValueApproved(), competence.getReason());
 				oldCompetence.get().save();
-				
+
 				log.debug("Aggiornata competenza {}", oldCompetence);
 			} else {
 				// insert a new competence with the requested hours an reason
 				competence.setYear(year);
 				competence.setMonth(month);
 				competence.save();
-				
+
 				log.debug("Creata competenza {}", competence);
 			}
 		}
 	}
-	
+
 	/**
 	 * setta il quantitativo orario (hours) a disposizione del responsabile (person)
 	 * @param person

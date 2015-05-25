@@ -15,12 +15,11 @@ import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Application extends Controller {
     
 	@Inject
 	static OfficeDao officeDao;
-	
 	@Inject
 	static IWrapperFactory wrapperFactory;
 	
@@ -31,31 +30,9 @@ public class Application extends Controller {
     }
     
     public static void index() {
-    	    	
-    	List<Office> officeList = Office.findAll();
-    	boolean seatExist = false;
-    	for(Office office : officeList) {
-    		
-    		IWrapperOffice wOffice = wrapperFactory.create(office);
-    		
-    		if(wOffice.isSeat()) {
-    			seatExist = true;
-    			break;
-    		}
-    	}
     	
-    	if(!seatExist) {
-    		
-    		Offices.showOffices();
-    	}
-    	
-    	if( Security.getUser().get().username.equals("epas.clocks") ){
-    		
-    		Clocks.show();
-    		return;
-    	}
-    	
-    	if( Security.getUser().get().username.equals("admin") ){
+//    	Utenti di sistema (developer,admin)
+    	if( Security.getUser().get().person == null	){
     		
     		Persons.list(null);
     		return;
@@ -68,12 +45,9 @@ public class Application extends Controller {
     	
     	session.put("methodSelected", "stampingsAdmin");
 		session.put("actionSelected", "Stampings.stampings");
-    	Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
 		
-
+    	Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
     }
-    
-    
     
 }
 

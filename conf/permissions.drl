@@ -9,6 +9,24 @@ import models.Permission;
 global models.User currentOperator;
 
 
+/* Metodi senza regole
+*
+*  Administration.createOvertimeFile
+*  JsonExport.activePersons
+*
+*
+*
+*/
+
+rule AnyUser when
+  $c: PermissionCheck(action in (
+     	"Application.index",
+     	"Version.showVersion"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
 
 /*  
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
@@ -19,6 +37,9 @@ when
   $uro: UsersRolesOffices()
   $p: Permission(description == "employee") from $uro.role.permissions
   $c: PermissionCheck(action in (
+  		/* Ritorna allo user developer */
+     	"Administrators.restoreUser",
+     	
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	
@@ -78,7 +99,7 @@ when
         "Administration.deleteUncoupledStampings",
         "Administration.updateExceedeMinInCompetenceTable",
         "Administrators.switchUserTo",
-        "Administrators.restoreUser"
+        "Persons.list"
         
        ), target == null, granted == false)
 then
@@ -113,12 +134,12 @@ when
  $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
- 
+ 		
        "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
        
-       "MealTickets.quickBlocksInsert"
-       
+       "MealTickets.recapMealTickets"
+              
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -176,7 +197,8 @@ when
      	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
-        "MealTickets.mealTicketsLegacy"
+        "MealTickets.mealTicketsLegacy",
+        "MealTickets.quickBlocksInsert"
         
         ), target == null, granted == false)
 then
@@ -234,7 +256,8 @@ when
      	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
-        "MealTickets.mealTicketsLegacy"
+        "MealTickets.mealTicketsLegacy",
+        "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -564,13 +587,17 @@ when
         "Administrators.saveNewAdministrator",
         "Administrators.deleteAdministrator",
         "Administrators.deleteSelfAsAdministrator",
-        
-        /* duplicate */
+        "Administrators.insertAccountSystem",
+        "Administrators.saveAccountSystem",
+        "Administrators.deleteAccountSystem",
+
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear"
-        
+        "Configurations.saveNewConfYear",
+
+        "Import.officeList"
+
         ), target == null, granted == false)
 then
  $c.grant();
@@ -829,39 +856,3 @@ when
 then
  $c.grant();
 end
-
-/*******************************************************************************
- * WIZARD
- * FIXME: creare un permesso e associarlo al ruolo super admin.
- ******************************************************************************/
-
-rule wizard
-when
- $u: User( username == "admin")
- $c: PermissionCheck(action in (
-    "Wizard.wizard",
-    "Wizard.changeAdminPsw",
-    "Wizard.seatManagerRole",
-    "Wizard.setGenConf",
-    "Wizard.setOffice",
-    "Wizard.summary"  
-    ), target == null, granted == false)
-then
- $c.grant();
-end 
-
-/*******************************************************************************
- * VERSION
- ******************************************************************************/
-
-rule unprotected_methods
-when
- $c: PermissionCheck(action in (
- 
-    "Version.showVersion"
-    
-    ), target == null, granted == false)
-then
- $c.grant();
-end 
-

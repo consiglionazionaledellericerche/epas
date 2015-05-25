@@ -19,7 +19,6 @@ public class StampingsFromClient extends Controller{
 
 	@Inject
 	static SecurityRules rules;
-	
 	@Inject
 	static StampingManager stampingManager;
 	

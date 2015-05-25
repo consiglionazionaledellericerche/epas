@@ -1,7 +1,5 @@
 package manager;
 
-import it.cnr.iit.epas.PersonUtility;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,20 +30,31 @@ import dao.wrapper.IWrapperFactory;
 
 public class StampingManager {
 
+	@Inject
+	public StampingManager(StampingDao stampingDao, 
+			PersonDayDao personDayDao,
+			PersonDao personDao,
+			PersonDayManager personDayManager, 
+			IWrapperFactory wrapperFactory,
+			PersonStampingDayRecapFactory stampingDayRecapFactory) {
+
+		this.stampingDao = stampingDao;
+		this.personDayDao = personDayDao;
+		this.personDao = personDao;
+		this.personDayManager = personDayManager;
+		this.wrapperFactory = wrapperFactory;
+		this.stampingDayRecapFactory = stampingDayRecapFactory;
+	}
+
 	private final static Logger log = LoggerFactory.getLogger(StampingManager.class);
 
-	@Inject
-	public PersonStampingDayRecapFactory stampingDayRecapFactory;
-	
-	@Inject
-	public PersonDayManager personDayManager;
-	
-	@Inject
-	public PersonDayDao personDayDao;
-	
-	@Inject
-	public IWrapperFactory wrapperFactory;
-	
+	private final StampingDao stampingDao;
+	private final PersonDayDao personDayDao;
+	private final PersonDao personDao;
+	private final PersonDayManager personDayManager;
+	private final IWrapperFactory wrapperFactory;
+	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
+
 	/**
 	 * Versione per inserimento amministratore.
 	 * Costruisce la LocalDateTime della timbratura a partire dai parametri passati come argomento.
@@ -55,7 +64,7 @@ public class StampingManager {
 	 * @param hourStamping N.B formato HHMM
 	 * @return null in caso di formato ore non valido
 	 */
-	public static LocalDateTime buildStampingDateTime(int year, int month, int day, String hourStamping) {
+	public LocalDateTime buildStampingDateTime(int year, int month, int day, String hourStamping) {
 
 		Integer hourNumber;
 		Integer minNumber;
@@ -94,7 +103,7 @@ public class StampingManager {
 
 		if(service) {
 			stamp.note = "timbratura di servizio";
-			stamp.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
+			stamp.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
 		}
 		else {
 			if(!note.equals(""))
@@ -115,9 +124,9 @@ public class StampingManager {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
-		
-//		TODO implementare un ricalcolo asincrono, per il momento è stato spostato nel controlle utilizzando i job play
-//		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+
+		//		TODO implementare un ricalcolo asincrono, per il momento è stato spostato nel controlle utilizzando i job play
+		//		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	}
 
 	/**
@@ -142,8 +151,8 @@ public class StampingManager {
 			{
 				personDay = pd.get();
 
-				if(max < PersonUtility.numberOfInOutInPersonDay(personDay))
-					max = PersonUtility.numberOfInOutInPersonDay(personDay);
+				if(max < personDayManager.numberOfInOutInPersonDay(personDay))
+					max = personDayManager.numberOfInOutInPersonDay(personDay);
 			}
 		}
 		return max;
@@ -172,7 +181,7 @@ public class StampingManager {
 			return false;
 		}
 
-		Person person = PersonDao.getPersonById(id);
+		Person person = personDao.getPersonById(id);
 
 		if(person == null){
 			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = {}", id);
@@ -260,7 +269,7 @@ public class StampingManager {
 	 * @param stampingMinute
 	 * @param service
 	 */
-	public static void persistStampingForUpdate(Stamping stamping, String note, int stampingHour, int stampingMinute, boolean service){
+	public void persistStampingForUpdate(Stamping stamping, String note, int stampingHour, int stampingMinute, boolean service){
 		stamping.date = stamping.date.withHourOfDay(stampingHour);
 		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
 
@@ -270,7 +279,7 @@ public class StampingManager {
 		}
 		if(service == true && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
 			stamping.note = "timbratura di servizio";
-			stamping.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
+			stamping.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
 		}
 		if(service == false && (stamping.stampType != null)){
 			stamping.stampType = null;
@@ -296,12 +305,12 @@ public class StampingManager {
 	public List<PersonStampingDayRecap> populatePersonStampingDayRecapList(
 			List<Person> activePersonsInDay,
 			LocalDate dayPresence, int numberOfInOut) {
-		
+
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
 
 			PersonDay personDay = null;
-			person = PersonDao.getPersonById(person.id);
+			person = personDao.getPersonById(person.id);
 			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){

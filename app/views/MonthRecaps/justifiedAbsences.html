@@ -7,15 +7,16 @@
 		<th>Giorno</th>
 		<th>Codice di assenza</th>
 	</tr>
-	#{list items:0 .. justifiedAbsences.size()-1, as:'i'}
-      <tr>
-		<td>${justifiedAbsences.get(i).date}</td>
-		<td>${justifiedAbsences.get(i).absences.get(0).absenceType.code}</td>
-		
-	  </tr>
-
+	#{list justifiedAbsences}
+    <tr>
+		<td>${_.date}</td>
+		<td>
+		#{list _.absences}
+			${_.absenceType.code}#{if !_isLast},#{/if}
+		#{/list}
+		</td>
+	</tr>
 	#{/list}
 
 </table>
-
 </div>

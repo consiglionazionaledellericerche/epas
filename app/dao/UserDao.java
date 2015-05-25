@@ -1,7 +1,5 @@
 package dao;
 
-import helpers.ModelQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,12 +40,12 @@ public class UserDao extends DaoBase {
 	 * @param id
 	 * @return l'ufficio identificato dall'id passato come parametro
 	 */
-	public static User getUserById(Long id, Optional<String> password){
-		QUser user = QUser.user;
+	public User getUserById(Long id, Optional<String> password){
+		final QUser user = QUser.user;
 		final BooleanBuilder condition = new BooleanBuilder();
 		if(password.isPresent())
 			condition.and(user.password.eq(password.get()));
-		final JPQLQuery query = ModelQuery.queryFactory().from(user)
+		final JPQLQuery query = getQueryFactory().from(user)
 				.where(condition.and(user.id.eq(id)));
 		return query.singleResult(user);
 	}
@@ -57,9 +55,9 @@ public class UserDao extends DaoBase {
 	 * @param recoveryToken
 	 * @return l'user corrispondente al recoveryToken inviato per il recovery della password
 	 */
-	public static User getUserByRecoveryToken(String recoveryToken){
-		QUser user = QUser.user;
-		final JPQLQuery query = ModelQuery.queryFactory().from(user)
+	public User getUserByRecoveryToken(String recoveryToken){
+		final QUser user = QUser.user;
+		final JPQLQuery query = getQueryFactory().from(user)
 				.where(user.recoveryToken.eq(recoveryToken));
 		return query.singleResult(user);
 	}
@@ -70,18 +68,18 @@ public class UserDao extends DaoBase {
 	 * @param password
 	 * @return l'user corrispondente a username e password passati come parametro
 	 */
-	public static User getUserByUsernameAndPassword(String username, Optional<String> password){
-		QUser user = QUser.user;
+	public User getUserByUsernameAndPassword(String username, Optional<String> password){
+		final QUser user = QUser.user;
 		final BooleanBuilder condition = new BooleanBuilder();
 		if(password.isPresent())
 			condition.and(user.password.eq(password.get()));
-		final JPQLQuery query = ModelQuery.queryFactory().from(user)
+		final JPQLQuery query = getQueryFactory().from(user)
 				.where(condition.and(user.username.eq(username)));
 		return query.singleResult(user);
 	}
 	
 	
-	public static boolean isAdmin(User user)
+	public boolean isAdmin(User user)
 	{
 		if(user.username.equals("admin"))
 			return true;

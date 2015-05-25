@@ -28,16 +28,14 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final ListPath<models.Absence, QAbsence> absences = this.<models.Absence, QAbsence>createList("absences", models.Absence.class, QAbsence.class, PathInits.DIRECT2);
 
+    public final BooleanPath acceptedHolidayWorkingTime = createBoolean("acceptedHolidayWorkingTime");
+
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 
     public final NumberPath<Integer> difference = createNumber("difference", Integer.class);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
-
-    public final BooleanPath fixedTimeAtWork = createBoolean("fixedTimeAtWork");
-
-    public final BooleanPath holiday = createBoolean("holiday");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -61,11 +59,7 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final NumberPath<Integer> timeAtWork = createNumber("timeAtWork", Integer.class);
 
-    public final BooleanPath today = createBoolean("today");
-
     public final ListPath<models.PersonDayInTrouble, QPersonDayInTrouble> troubles = this.<models.PersonDayInTrouble, QPersonDayInTrouble>createList("troubles", models.PersonDayInTrouble.class, QPersonDayInTrouble.class, PathInits.DIRECT2);
-
-    public final QWorkingTimeTypeDay workingTimeTypeDay;
 
     public QPersonDay(String variable) {
         this(PersonDay.class, forVariable(variable), INITS);
@@ -87,7 +81,6 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
         this.stampModificationType = inits.isInitialized("stampModificationType") ? new QStampModificationType(forProperty("stampModificationType")) : null;
-        this.workingTimeTypeDay = inits.isInitialized("workingTimeTypeDay") ? new QWorkingTimeTypeDay(forProperty("workingTimeTypeDay"), inits.get("workingTimeTypeDay")) : null;
     }
 
 }

@@ -21,24 +21,26 @@ import dao.wrapper.IWrapperPerson;
 public final class Dipendente implements Comparable<Dipendente> {
 
 	@Inject
-	static IWrapperFactory wrapperFactory;
-	
+	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static PersonDao personDao;
+
 	private final String matricola, cognomeNome;
 	private final Person person;
-	
+
 	public Dipendente(final String matricola, final String nomeCognome) {
 		this.matricola = matricola;
 		this.cognomeNome = nomeCognome;
-		this.person = PersonDao.getPersonByNumber(Integer.parseInt(this.matricola));
+		this.person = personDao.getPersonByNumber(Integer.parseInt(this.matricola));
 		//this.person = Person.findByNumber(Integer.parseInt(this.matricola));
 	}
 
 	public String getMatricola() { return matricola; }
 	public String getCognomeNome() { return cognomeNome; }
 	public Person getPerson() {return person;}
-	
+
 	public IWrapperPerson getWrapperPerson() { return wrapperFactory.create(this.person); }
-	
+
 	/** 
 	 * Metodo necessario per i controlli di "contains" dei Set 
 	 * Se è presente una matricola si usa quella per i confronti, altrimeni si utilizza il nome e cognome
@@ -51,7 +53,7 @@ public final class Dipendente implements Comparable<Dipendente> {
 		int result = 1;
 		result = prime * result
 				+ ((cognomeNome == null) ? 0 : cognomeNome.toUpperCase().replace(" ",  "").hashCode());
-				//((cognomeNome == null) ? 0 : cognomeNome.hashCode());
+		//((cognomeNome == null) ? 0 : cognomeNome.hashCode());
 		result = prime * result
 				+ ((matricola == null || matricola.equals("0")) ? 0 : matricola.hashCode());
 		return result;
@@ -61,7 +63,7 @@ public final class Dipendente implements Comparable<Dipendente> {
 	 * Metodo necessario per i controlli di "contains" dei Set
 	 * Se per entrambi gli oggetti confrontati è presente una matricola 
 	 * si usa quella per i confronti, altrimeni si utilizza il nome e cognome
-	
+
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -77,7 +79,7 @@ public final class Dipendente implements Comparable<Dipendente> {
 			if (other.cognomeNome != null)
 				return false;
 		} else if (!cognomeNome.toUpperCase().replace(" ",  "").equals(other.cognomeNome.toUpperCase().replace(" ", "")))
-				 //!cognomeNome.equals(other.cognomeNome))
+			//!cognomeNome.equals(other.cognomeNome))
 			return false;
 		if (matricola == null) {
 			if (other.matricola != null)
