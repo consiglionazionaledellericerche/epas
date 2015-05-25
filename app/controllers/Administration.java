@@ -18,6 +18,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -75,7 +76,6 @@ public class Administration extends Controller {
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void createOvertimeFile(int year) throws IOException{
 		Logger.debug("Chiamo overtime in year...");
 		Competences.getOvertimeInYear(year);
@@ -112,14 +112,25 @@ public class Administration extends Controller {
 		render(monthRecapList);
 
 	}
-
+	
 	public static void buildYaml(){
 		//general
-		exportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
+		exportToYaml.buildAbsenceTypesAndQualifications(
+				"db/import/absenceTypesAndQualifications"+DateTime.now().toString("dd-MM-HH:mm")+".yml");
 
-		exportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
+		exportToYaml.buildCompetenceCodes(
+				"db/import/competenceCode"+DateTime.now().toString("dd-MM-HH:mm")+".yml");
 
-		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
+		exportToYaml.buildVacationCodes(
+				"db/import/vacationCode"+DateTime.now().toString("dd-MM-HH:mm")+".yml");
+
+		//		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
+		
+		//		Yaml yaml = new Yaml();
+
+		//		exportToYaml.writeToYamlFile("Users"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(User.findAll()));
+		//		exportToYaml.writeToYamlFile("Permission"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Permission.findAll()));
+		//		exportToYaml.writeToYamlFile("Roles"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Role.findAll()));
 
 	}
 

@@ -10,11 +10,10 @@
 		<th>Codice di assenza</th>
 	</tr>
 
-	#{list items:0 .. notJustifiedAbsences.size()-1, as:'i'}
+	#{list notJustifiedAbsences}
 	<tr>
-		<td>${notJustifiedAbsences.get(i).date}</td>
+		<td>${_.date}</td>
 		<td>NG</td>
-		
 	</tr>
 	#{/list}
 
