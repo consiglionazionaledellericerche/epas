@@ -362,8 +362,6 @@ public class ShiftManager {
 
 				//Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
 
-				Logger.debug("certData=%s certData.isOk=%s certData.competencesSent=%s", certData, certData.isOk, certData.competencesSent);
-
 				int apprHours = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().valueApproved : apprHoursAndExcMins[0];
 				int exceededMins = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().exceededMins : apprHoursAndExcMins[1];
 				//Logger.debug("competenza √® inviata = %s vecchia valueApproved=%d, calcolata=%d salvata=%d", certData.isOk, shiftCompetence.valueApproved, calcApproved, calcApproved1);
