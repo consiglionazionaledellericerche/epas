@@ -109,9 +109,9 @@ public class Bootstrap extends Job<Void> {
 		if(User.find("byUsername", "developer").fetch().isEmpty()) {
 			Fixtures.loadModels("../db/import/developer.yml");
 		}
-//		if(Role.count() == 0){
-//			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
-//		}
+		if(Role.count() == 0){
+			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
+		}
 		if(VacationCode.count() == 0){
 			Fixtures.loadModels("../db/import/vacationCode.yml");
 		}
