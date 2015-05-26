@@ -51,24 +51,22 @@ public class FixUserPermission extends Job{
  *		userRoleOffice in base alle informazioni precedentemente salvate
  *	
  */		
-		int evolution = (Integer)JPA.em().
-				createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
+//		int evolution = (Integer)JPA.em().
+//				createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
 		
-		if(evolution <= 50){
+		Role superAdmin = Role.find("byName", "superAdmin").first();
+		
+		if(superAdmin!=null){
+			
+			superAdmin.name = Role.ADMIN;
+			superAdmin.save();
+			
 			List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 			List<Permesso> permessi = Lists.newArrayList();
-			
-			Role superAdmin = Role.find("byName", "superAdmin").first();
-			if(superAdmin!=null){
-				superAdmin.name = Role.ADMIN;
-				superAdmin.save();
-			}
 			
 			for(UsersRolesOffices uro : uros){
 				permessi.add(new Permesso(uro.user.id,uro.office.id,uro.role.name));
 			}
-			
-			Logger.info("Archiviati %s permessi", uros.size());
 
 			UsersRolesOffices.deleteAll();
 			Permission.deleteAll();
@@ -87,6 +85,8 @@ public class FixUserPermission extends Job{
 				Role role = Role.find("byName", p.role).first();
 				officeManager.setUro(user, office, role);
 			}
+			
+			Logger.info("Ricreati %s permessi", uros.size());
 		}
 
 		//		Sistema i permessi per gli user admin e developer
