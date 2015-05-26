@@ -314,6 +314,7 @@ table#tabellonetimbrature td.capitalized {text-transform: capitalize;}
 table#tabellonetimbrature td.note {padding: 0;}
 table#tabellonetimbrature a.btn.note {padding: 0;}
 
+table#tabellonetimbrature tr.init_person > td {background-color: lightgray;}
 
 /* bordatura */
 

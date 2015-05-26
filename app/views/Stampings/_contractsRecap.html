@@ -33,7 +33,7 @@
 			  <tr>
 			    <td class="col-xs-10">Residuo da anno precedente disponibile all'inizio del mese</td>
 			        #{if mese.previousRecap == null}
-   					    <td class="col-xs-2 success">${mese.initMonteOreAnnoPassato.toHourTimeWithPlus()}</td>
+   					    <td class="col-xs-2 success">${mese.value.initMonteOreAnnoPassato.toHourTimeWithPlus()}</td>
 					#{/if}
 					#{else}
 						<td class="col-xs-2 success">${mese.previousRecap.remainingMinutesLastYear.toHourTimeWithPlus()}</td>
@@ -62,7 +62,7 @@
 		  <tr>
 		    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.value.sourceDate})</td>
 		       #{if mese.value.initResiduoAnnoCorrenteNelMese > 0}
-		    	<td class="col-xs-2 success">${mese..value.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
+		    	<td class="col-xs-2 success">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
 		    	#{/if}
 		    	#{else}
 		    	<td class="col-xs-2 danger">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithMinus()}</td>
