@@ -233,8 +233,13 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean hasMonthRecapForVacationsRecap(int yearToRecap) {
 		
+		// se il contratto inizia nell'anno non ho bisogno del recap.
+		if (value.beginContract.getYear() == yearToRecap) {
+			return true;
+		}
+		
 		// se source date cade nell'anno non ho bisogno del recap.
-		if( value.sourceDate != null 
+		if (value.sourceDate != null 
 				&& value.sourceDate.getYear() == yearToRecap) {
 			return true;
 		}
