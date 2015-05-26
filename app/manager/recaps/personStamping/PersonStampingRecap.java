@@ -93,6 +93,16 @@ public class PersonStampingRecap {
 		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 
 		//Costruzione dati da renderizzare
+		
+		//Contratti del mese
+		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		for(Contract contract : monthContracts) {
+			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
+					.getContractMonthRecap(new YearMonth(year, month));
+			if (cmr.isPresent()) {
+				this.contractMonths.add(wrapperFactory.create(cmr.get()));
+			}
+		}
 
 		//Lista person day contente tutti i giorni fisici del mese
 		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
@@ -103,56 +113,56 @@ public class PersonStampingRecap {
 			personDayManager.computeValidStampings(pd);
 
 			PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-					.create(pd, this.numberOfInOut);
+					.create(pd, this.numberOfInOut, monthContracts);
 			this.daysRecap.add(dayRecap);
 
 			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
 
-			{
-				if(stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()){
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(
-							StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 
-					stampModificationTypeSet.add(smt);
-				}
+			if(stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()){
+				StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(
+						StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 
-				if(pd.date.equals(today) && !stampingDayRecapFactory.wrapperFactory.create(pd).isHoliday() && !personDayManager.isAllDayAbsences(pd)){
-
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
-					stampModificationTypeSet.add(smt);
-				}
-				if(pd.stampModificationType!=null && !pd.date.isAfter(today)){
-
-					stampModificationTypeSet.add(pd.stampModificationType);
-				}
-
-				//				this.stampModificationTypeSet.add(day.stampModificationType);
-
-				for(Stamping stamp : pd.stampings){
-
-					if(stamp.stampType!=null && stamp.stampType.identifier!=null){
-
-						stampTypeSet.add(stamp.stampType);
-					}
-
-					if(stamp.markedByAdmin){
-
-						StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
-						stampModificationTypeSet.add(smt);
-					}
-
-					Optional<StampModificationType> smtMidnight = 
-							personDayManager.checkMissingExitStampBeforeMidnight(stamp);
-
-					if( smtMidnight.isPresent() ) {
-
-						stampModificationTypeSet.add(smtMidnight.get());
-					}
-
-					//					this.stampTypeSet.add(stamp.stampType);
-					//					this.stampModificationTypeSet.add(stamp.stampModificationType);
-				}
+				stampModificationTypeSet.add(smt);
 			}
+
+			if(pd.date.equals(today) && !stampingDayRecapFactory.wrapperFactory.create(pd).isHoliday() && !personDayManager.isAllDayAbsences(pd)){
+
+				StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+				stampModificationTypeSet.add(smt);
+			}
+			if(pd.stampModificationType!=null && !pd.date.isAfter(today)){
+
+				stampModificationTypeSet.add(pd.stampModificationType);
+			}
+
+			//this.stampModificationTypeSet.add(day.stampModificationType);
+
+			for(Stamping stamp : pd.stampings){
+
+				if(stamp.stampType!=null && stamp.stampType.identifier!=null){
+
+					stampTypeSet.add(stamp.stampType);
+				}
+
+				if(stamp.markedByAdmin){
+
+					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+					stampModificationTypeSet.add(smt);
+				}
+
+				Optional<StampModificationType> smtMidnight = 
+						personDayManager.checkMissingExitStampBeforeMidnight(stamp);
+
+				if( smtMidnight.isPresent() ) {
+
+					stampModificationTypeSet.add(smtMidnight.get());
+				}
+
+				//this.stampTypeSet.add(stamp.stampType);
+				//this.stampModificationTypeSet.add(stamp.stampModificationType);
+			}
+
 
 		}
 
@@ -162,17 +172,7 @@ public class PersonStampingRecap {
 		this.basedWorkingDays = personManager.basedWorkingDays(totalPersonDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
-
-		for(Contract contract : monthContracts)
-		{
-
-			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
-					.getContractMonthRecap(new YearMonth(year, month));
-			if (cmr.isPresent()) {
-				this.contractMonths.add(wrapperFactory.create(cmr.get()));
-			}
-		}
+		
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
 

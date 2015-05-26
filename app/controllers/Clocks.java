@@ -128,7 +128,7 @@ public class Clocks extends Controller{
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
 		int numberOfInOut = Math.max(minInOutColumn, personDayManager.numberOfInOutInPersonDay(personDay));
 
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut, null);
 
 		render(user, dayRecap, numberOfInOut);
 	}
@@ -225,7 +225,7 @@ public class Clocks extends Controller{
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
 		int numberOfInOut = Math.max(minInOutColumn,  personDayManager.numberOfInOutInPersonDay(personDay));
 
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut, null);
 
 		render(person, dayRecap, numberOfInOut);
 

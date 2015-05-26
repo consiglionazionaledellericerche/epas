@@ -236,7 +236,7 @@ public class WrapperContract implements IWrapperContract {
 		// se source date cade nell'anno non ho bisogno del recap.
 		if( value.sourceDate != null 
 				&& value.sourceDate.getYear() == yearToRecap) {
-			return false;
+			return true;
 		}
 		// Altrimenti ho bisogno del riepilogo finale dell'anno precedente.
 		Optional<ContractMonthRecap> yearMonthToCheck = 
