@@ -227,7 +227,6 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-
 		List<IWrapperContract> contractList = FluentIterable
 				.from(contractDao.getPersonContractList(person))
 				.transform(wrapperFunctionFactory.contract()).toList();
@@ -583,8 +582,10 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		LocalDate initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+		Optional<LocalDate> initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
 				Security.getUser().get().person.office);
+		
+		//Preconditions.checkState(initUse.isPresent());
 
 		render(contract, initUse);
 	}
