@@ -52,7 +52,7 @@ public class ContractMonthRecapManager {
 	@Inject
 	private VacationsRecapFactory vacationsFactory;
 	@Inject 
-	private MealTicketManager mealTicketManager;
+	private ConfGeneralManager confGeneralManager;
 	@Inject 
 	private MealTicketDao mealTicketDao;
 	@Inject
@@ -372,7 +372,9 @@ public class ContractMonthRecapManager {
 		boolean mealTicketToCompute = true;
 		
 		Optional<LocalDate> dateStartMealTicket = 
-				mealTicketManager.getMealTicketStartDate(contract.person.office);
+				confGeneralManager.getLocalDateFieldValue(
+						Parameter.DATE_START_MEAL_TICKET, contract.person.office); 
+				
 		
 		if(!dateStartMealTicket.isPresent() 
 				|| dateStartMealTicket.get().isAfter(calcolaFinoA)) {

@@ -139,23 +139,29 @@ public class MealTicketManager {
 	 * utilizzo per la sede della persona).
 	 * @return null in caso non vi siano giorni coperti dalla gestione dei buoni pasto.
 	 */
-	public DateInterval getContractMealTicketDateInterval(Contract contract) {
+	public Optional<DateInterval> getContractMealTicketDateInterval(Contract contract) {
 
 		DateInterval contractDataBaseInterval = wrapperFactory.create(contract)
 				.getContractDatabaseInterval();
 
-		Optional<LocalDate> officeStartDate = getMealTicketStartDate(contract.person.office);
-		if(!officeStartDate.isPresent())
-			return null;
+		Optional<LocalDate> officeStartDate = confGeneralManager
+				.getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, contract.person.office); 
 
-		if(officeStartDate.get().isBefore(contractDataBaseInterval.getBegin()))
-			return contractDataBaseInterval;
-
-		if(DateUtility.isDateIntoInterval(officeStartDate.get(), contractDataBaseInterval))
-			return new DateInterval(officeStartDate.get(), contractDataBaseInterval.getEnd());
-
-		return null;
+		if (officeStartDate.isPresent()) {
+			if (officeStartDate.get().isBefore(contractDataBaseInterval.getBegin())) {
+				return Optional.fromNullable(contractDataBaseInterval);
+			}
+			if (DateUtility
+					.isDateIntoInterval(officeStartDate.get(), contractDataBaseInterval)) {
+				return Optional.fromNullable(new DateInterval(officeStartDate.get(),
+						contractDataBaseInterval.getEnd()));
+			}
+		}
+		
+		return Optional.<DateInterval>absent();
 	}
+	
+
 
 	/**
 	 * Ritorna i blocchi inerenti la lista di buoni pasto recap.mealTicketsReceivedOrdered,
@@ -236,21 +242,4 @@ public class MealTicketManager {
 		return blockList;
 
 	}
-
-	/**
-	 * Ritorna la data di inizio di utilizzo dei ticket restaurant per l'office passato
-	 * come parametro. 
-	 * @param office
-	 * @return
-	 */
-	public Optional<LocalDate> getMealTicketStartDate(Office office) {
-
-		String confParam = confGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-
-		if(Strings.isNullOrEmpty(confParam))
-			return Optional.absent();
-
-		return Optional.fromNullable(LocalDate.parse(confParam));	
-	}
-
 }
