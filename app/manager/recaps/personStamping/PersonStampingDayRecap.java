@@ -20,6 +20,8 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
@@ -91,12 +93,16 @@ public class PersonStampingDayRecap {
 
 		this.setStampingTemplate( stampingsForTemplate, pd );
 
-		if(workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
+		Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person); 
+		
+		if (wtt.isPresent()){
 
-			this.wtt = workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person).get();
+			this.wtt = wtt.get();
 
 			this.wttd = this.wtt.workingTimeTypeDays.get(pd.date.getDayOfWeek()-1);
 
+			this.workingTimeTypeDescription = this.wtt.description;
+			
 			this.setWorkingTime(this.wttd.workingTime);
 			this.setMealTicketTime(this.wttd.mealTicketTime);
 			this.setBreakTicketTime(this.wttd.breakTicketTime);
@@ -182,10 +188,6 @@ public class PersonStampingDayRecap {
 			StampModificationType smt = stampingDao.getStampModificationTypeById( 
 					StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
-		}
-		// description work time type
-		if (wtt!=null) {
-			this.workingTimeTypeDescription = wtt.description; 
 		}
 		
 		// is sourceContract
