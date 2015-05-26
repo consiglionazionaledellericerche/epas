@@ -13,6 +13,7 @@ import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.Person;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -74,7 +75,7 @@ public class PrintTags extends Controller{
 
 		Person person = Security.getUser().get().person;
 
-		if(!personManager.isActiveInMonth(person, month, year, false)) {
+		if(!personManager.isActiveInMonth(person, new YearMonth(year,month), false)) {
 
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));

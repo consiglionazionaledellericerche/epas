@@ -55,7 +55,7 @@ public class PersonStampingDayRecap {
 	public boolean today;
 	public boolean future;
 	
-	public boolean sourceDate = false;
+	public boolean ignoreDay = false;
 
 	public List<Absence> absences;
 
@@ -192,8 +192,15 @@ public class PersonStampingDayRecap {
 		
 		// is sourceContract
 		for(Contract contract : monthContracts) {
-			if( contract.sourceDate != null && ( contract.sourceDate.equals(pd.date) || contract.sourceDate.isAfter(pd.date)) ) {
-				this.sourceDate = true;
+			// se è precedente all'inizio del contratto lo ignoro
+			if (contract.beginContract.isAfter(pd.date)) {
+				this.ignoreDay = true;
+			}
+			
+			// se è precedente a source lo ignoro
+			if (contract.sourceDate != null && ( contract.sourceDate.equals(pd.date) 
+					|| contract.sourceDate.isAfter(pd.date)) ) {
+				this.ignoreDay = true;
 			}
 		}
 	}

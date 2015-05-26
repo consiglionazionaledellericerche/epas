@@ -23,6 +23,7 @@ import org.joda.time.YearMonth;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -121,6 +122,42 @@ public class WrapperPerson implements IWrapperPerson {
 		return Optional.fromNullable(contractInMonth.get(0));
 	}
 
+	/**
+	 * L'ultimo mese con contratto attivo.
+	 * 
+	 * @return
+	 */
+	public YearMonth getLastActiveMonth() {
+		
+		Optional<Contract> lastContract =personDao.getLastContract(value);
+		
+		// Importante per sinc con Perseo:
+		// devo assumere che la persona abbia almeno un contratto
+		// attivo in ePAS. Altrimenti non dovrebbe essere in ePAS.
+		Preconditions.checkState( lastContract.isPresent() );
+		
+		YearMonth current = YearMonth.now();
+		YearMonth contractBegin = new YearMonth(lastContract.get().beginContract);
+		
+		if(contractBegin.isAfter(current)) {
+			//vado in avanti
+			while (true) {
+				if(personManager.isActiveInMonth(value, current, false)) {
+					return current;
+				}
+				current = current.plusMonths(1);
+			}
+		} else {
+			//vado indietro
+			while (true) {
+				if(personManager.isActiveInMonth(value, current, false)) {
+					return current;
+				}
+				current = current.minusMonths(1);
+			}
+		}
+	}
+	
 	/**
 	 * True se la persona è passata da determinato a indeterminato durante l'anno.
 	 * 
