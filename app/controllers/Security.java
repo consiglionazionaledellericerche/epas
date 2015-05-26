@@ -12,8 +12,10 @@ import models.Permission;
 import models.Person;
 import models.User;
 import models.UsersRolesOffices;
+import models.enumerate.Parameter;
 import play.Logger;
 import play.cache.Cache;
+import play.mvc.Http;
 import play.utils.Java;
 
 import com.google.common.base.Charsets;
@@ -22,6 +24,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
+import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -37,6 +40,8 @@ public class Security extends Secure.Security {
 	private static RoleDao roleDao;
 	@Inject
 	private static PersonDao personDao;
+	@Inject
+	private static ConfGeneralDao confGeneralDao;
 
 	/* Client rest */
 
@@ -105,17 +110,16 @@ public class Security extends Secure.Security {
 		Logger.trace("Richiesta autenticazione di %s",username);
 
 		User user = userDao.getUserByUsernameAndPassword(username, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
-		//		User user = 
-		//			User.find("SELECT u FROM User u where username = ? and password = ?", 
-		//					username, Hashing.md5().hashString(password,  Charsets.UTF_8).toString()).first();
 
 		if(user != null){
 			Cache.set(username, user, CACHE_DURATION);
 			Cache.set("userId", user.id, CACHE_DURATION);
 
-			//flash.success("Welcome, " + .name + ' ' + person.surname);
-			Logger.info("user %s successfully logged in", user.username);
-			//Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
+			Logger.info("user %s successfully logged in from ip %s", user.username,
+					Http.Request.current().remoteAddress);
+			
+			Logger.info("headers request %s", Http.Request.current().headers);
+		
 			return true;
 		}
 
@@ -313,5 +317,11 @@ public class Security extends Secure.Security {
 		} catch(InvocationTargetException e) {
 			throw e.getTargetException();
 		}
+	}
+	
+	public static boolean checkForWebstamping(){
+		String remoteAddress = Http.Request.current().remoteAddress;
+		return !confGeneralDao.containsValue(
+				Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
 	}
 }

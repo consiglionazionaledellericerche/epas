@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import play.Logger;
+
 import models.CompetenceCode;
 import models.query.QCompetenceCode;
 
@@ -30,7 +32,6 @@ public class CompetenceCodeDao extends DaoBase{
 	 * @return il competenceCode relativo al codice passato come parametro
 	 */
 	public CompetenceCode getCompetenceCodeByCode(String code){
-
 		final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 
 		final JPQLQuery query = getQueryFactory().from(competenceCode)

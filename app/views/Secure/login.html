@@ -46,7 +46,9 @@
 	
 	<a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
 
-	#{if webStamping}<a id="webStamping" class="btn btn-success btn-block" href="@{Clocks.show()}">Timbratura web</a>#{/if}
+	#{if controllers.Security.checkForWebstamping()}
+	<a id="webStamping" class="btn btn-success btn-block" href="@{Clocks.show()}">Timbratura web</a>
+	#{/if}
 
 	#{if play.Play.configuration.getProperty("shib.login").equals("true")}
 		<div class="center" style="margin-top: 1em">
