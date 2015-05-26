@@ -1,5 +1,7 @@
 package dao.wrapper;
 
+import org.joda.time.YearMonth;
+
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -72,6 +74,13 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
 	 * @return
 	 */
 	Optional<Contract> getFirstContractInMonth(int year, int month);
+	
+	/**
+	 * L'ultimo mese con contratto attivo.
+	 * 
+	 * @return
+	 */
+	YearMonth getLastActiveMonth();
 	
 	/**
 	 * True se la persona è passata da determinato a indeterminato durante l'anno.

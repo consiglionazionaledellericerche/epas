@@ -246,7 +246,7 @@ public final class PersonDao extends DaoBase{
 	 * @param person
 	 * @return
 	 */
-	public Contract getLastContract(Person person) {
+	public Optional<Contract> getLastContract(Person person) {
 
 		final JPQLQuery query = getQueryFactory()
 				.from(contract)
@@ -254,9 +254,10 @@ public final class PersonDao extends DaoBase{
 				.orderBy(contract.beginContract.desc());
 
 		List<Contract> contracts = query.list(contract);
-		if(contracts.size() == 0)
-			return null;
-		return contracts.get(0);
+		if(contracts.size() == 0) {
+			return Optional.<Contract>absent();
+		}
+		return Optional.fromNullable(contracts.get(0));
 
 	}
 
