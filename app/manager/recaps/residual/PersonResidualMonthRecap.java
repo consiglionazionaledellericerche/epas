@@ -37,7 +37,6 @@ public class PersonResidualMonthRecap {
 	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
 	private final DateUtility dateUtility;
-	private final ConfYearDao confYearDao;
 	private final CompetenceCodeDao competenceCodeDao;
 	private final WorkingTimeTypeDayDao workingTimeTypeDayDao;
 
@@ -104,7 +103,6 @@ public class PersonResidualMonthRecap {
 			DateUtility dateUtility) {
 
 		this.dateUtility = dateUtility;
-		this.confYearDao = confYearDao;
 		this.competenceCodeDao = competenceCodeDao;
 		this.workingTimeTypeDayDao = workingTimeTypeDayDao;
 		this.absenceDao = absenceDao;
