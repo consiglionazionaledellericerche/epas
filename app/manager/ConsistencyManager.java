@@ -26,6 +26,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
 import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
@@ -320,16 +321,13 @@ public class ConsistencyManager {
 		log.info("Preparo invio mail per {}", person.getFullname());
 		SimpleEmail simpleEmail = new SimpleEmail();
 		try {
-			simpleEmail.setFrom("epas@iit.cnr.it");
-			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
+			simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
 			simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office) );
 		} catch (EmailException e1) {
-
 			e1.printStackTrace();
 		}
 		try {
 			simpleEmail.addTo(person.email);
-			//simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
 		} catch (EmailException e) {
 
 			e.printStackTrace();
