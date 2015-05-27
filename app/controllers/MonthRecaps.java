@@ -84,10 +84,8 @@ public class MonthRecaps extends Controller{
 			Optional<ContractMonthRecap> recap = contract.getContractMonthRecap( yearMonth );
 			if (recap.isPresent()) {
 				recaps.add(recap.get());
-			}
-			
-			if(recaps.size() > 20 ) {
-				break;
+			} else { 
+				System.out.println(person.getValue().fullName());
 			}
 		}
 

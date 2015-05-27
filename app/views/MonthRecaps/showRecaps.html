@@ -10,17 +10,15 @@
 		  <th>Monte ore <br>anno passato</th>
 		  <th>Monte ore <br>anno corrente</th>
 		  <th>Buoni residui</th>
-		  <th>Riposi compensativi</th>
 		</tr>
 		
 		#{list items:recaps, as:'recap'}
 		
 		   <tr>
-		     <td>${recap.person.fullname}</td>
-		     <td>${recap.monteOreAnnoPassato.toHourTime()}</td>
-		     <td>${recap.monteOreAnnoCorrente.toHourTime()}</td>
-		     <td>${recap.buoniPastoResidui}</td>
-		     <td>${recap.numeroRiposiCompensativi}</td>
+		     <td>${recap.contract.person.fullname}</td>
+		     <td>${recap.remainingMinutesLastYear.toHourTime()}</td>
+		     <td>${recap.remainingMinutesCurrentYear.toHourTime()}</td>
+		     <td>${recap.remainingMealTickets}</td>
 		   </tr>
 		
 		#{/list}
