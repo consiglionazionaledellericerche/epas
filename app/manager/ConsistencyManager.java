@@ -97,6 +97,7 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
+	@SuppressWarnings("deprecation")
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendMail){
 
@@ -140,6 +141,7 @@ public class ConsistencyManager {
 			JPAPlugin.closeTx(false);
 		}
 
+		JPAPlugin.startTx(false);
 		if(sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
 				&& LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY){
 
@@ -153,6 +155,7 @@ public class ConsistencyManager {
 				e.printStackTrace();
 			}
 		}
+		JPAPlugin.closeTx(false);	
 	}
 
 	/**
