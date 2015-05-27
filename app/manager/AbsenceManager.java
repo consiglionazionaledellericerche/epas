@@ -33,6 +33,7 @@ import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
 import play.db.jpa.Blob;
 import play.libs.Mail;
 
@@ -75,7 +76,9 @@ public class AbsenceManager {
 			PersonManager personManager,
 			PersonReperibilityDayDao personReperibilityDayDao,
 			PersonShiftDayDao personShiftDayDao,
+			ConfGeneralManager confGeneralManager,
 			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao) {
+
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.workingTimeTypeDao = workingTimeTypeDao;
 		this.personDayManager = personDayManager;
@@ -91,8 +94,8 @@ public class AbsenceManager {
 		this.personShiftDayDao = personShiftDayDao;
 		this.confYearManager = confYearManager;
 		this.personChildrenDao = personChildrenDao;
+		this.confGeneralManager = confGeneralManager;
 	}
-
 
 	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
 
@@ -111,7 +114,8 @@ public class AbsenceManager {
 	private final PersonShiftDayDao personShiftDayDao;
 	private final ConfYearManager confYearManager;
 	private final PersonChildrenDao personChildrenDao;
-		
+	private final ConfGeneralManager confGeneralManager;
+	
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
@@ -494,9 +498,8 @@ public class AbsenceManager {
 
 		try {
 			email.addTo(person.email);
-			//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
-			//			email.addTo("daniele.murgia@iit.cnr.it");
-			email.setFrom("epas@iit.cnr.it");
+			email.setFrom(Play.configuration.getProperty("application.mail.address"));
+			email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_FROM_JOBS, person.office));
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
 			for(LocalDate data : airl.datesInReperibilityOrShift()){

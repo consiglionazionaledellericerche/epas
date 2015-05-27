@@ -39,9 +39,6 @@ public class FixUserPermission extends Job{
 			}
 		}
 		
-
-		
-		
 /*		Procedura un pò esagerata per la riassociazione dei ruoli e permessi corretti
  * 
  *		Crea una copia di tutte le triple degli userRoleOffice per poi
@@ -51,6 +48,7 @@ public class FixUserPermission extends Job{
  *		userRoleOffice in base alle informazioni precedentemente salvate
  *	
  */		
+		
 //		int evolution = (Integer)JPA.em().
 //				createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
 		

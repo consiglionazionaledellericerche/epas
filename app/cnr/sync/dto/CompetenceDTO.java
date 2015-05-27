@@ -1,4 +1,4 @@
-package dto;
+package cnr.sync.dto;
 
 import models.Competence;
 
