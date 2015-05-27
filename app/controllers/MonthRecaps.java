@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.AbsenceManager;
 import manager.MonthRecapManager;
 import manager.recaps.residual.PersonResidualMonthRecap;
 import manager.recaps.residual.PersonResidualYearRecap;
@@ -17,7 +18,11 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -30,6 +35,7 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -43,18 +49,22 @@ public class MonthRecaps extends Controller{
 	@Inject
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
+	private static IWrapperFactory wrapperFactory;
+	@Inject
 	private static PersonResidualYearRecapFactory yearFactory;
 	@Inject
 	private static MonthRecapManager monthRecapManager;
 	@Inject
 	private static SecurityRules rules;
 
+	private final static Logger log = LoggerFactory.getLogger(MonthRecaps.class);
+	
 	/**
 	 * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
 	 * 
 	 * @param year
 	 */
-	public static void residualYearRecap(int year) {
+	public static void showRecaps(int year, int month) {
 
 		//FIXME per adesso senza paginazione
 
@@ -72,13 +82,21 @@ public class MonthRecaps extends Controller{
 
 		List<PersonResidualMonthRecap> recaps = Lists.newArrayList();
 
-
+		JPAPlugin.closeTx(false);
+		
 		for(IWrapperPerson person : personList) {
 
+			JPAPlugin.startTx(false);
+			person = wrapperFactory.create(personDao.getPersonById(person.getValue().id));
 			PersonResidualYearRecap c = yearFactory.create(person.getCurrentContract().get(), year, null);
-			recaps.add(c.getMese(LocalDate.now().getMonthOfYear()));
-
-			if(recaps.size() > 10 ) {
+			PersonResidualMonthRecap recap = c.getMese(month);
+			if(recap != null) {
+				recaps.add(recap);
+			}
+			
+			JPAPlugin.closeTx(false);
+			
+			if(recaps.size() > 20 ) {
 				break;
 			}
 		}
