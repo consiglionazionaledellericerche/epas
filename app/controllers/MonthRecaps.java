@@ -16,6 +16,8 @@ import models.PersonDay;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -49,13 +51,13 @@ public class MonthRecaps extends Controller{
 	private static MonthRecapManager monthRecapManager;
 	@Inject
 	private static SecurityRules rules;
-
+	
 	/**
 	 * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
 	 * 
 	 * @param year
 	 */
-	public static void residualYearRecap(int year) {
+	public static void showRecaps(int year, int month) {
 
 		//FIXME per adesso senza paginazione
 
@@ -77,23 +79,17 @@ public class MonthRecaps extends Controller{
 			
 			IWrapperContract contract = wrapperFactory.create(person.getCurrentContract().get());
 			
-			YearMonth yearMonth;
-			if (year == LocalDate.now().getYear()) {
-				yearMonth = new YearMonth(LocalDate.now());
-			} else {
-				yearMonth = new YearMonth(year, 12);
-			}
+			YearMonth yearMonth = new YearMonth(year, month); 
 			
 			Optional<ContractMonthRecap> recap = contract.getContractMonthRecap( yearMonth );
 			if (recap.isPresent()) {
 				recaps.add(recap.get());
 			}
 			
-			if(recaps.size() > 10 ) {
+			if(recaps.size() > 20 ) {
 				break;
 			}
 		}
-
 
 		render(recaps);
 	}

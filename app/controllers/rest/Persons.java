@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import jobs.CheckCnrEmailJob;
 import manager.CompetenceManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -21,6 +20,10 @@ import org.joda.time.LocalDate;
 import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
+import cnr.sync.dto.CompetenceDTO;
+import cnr.sync.dto.DayRecap;
+import cnr.sync.jobs.CheckCnrEmailJob;
+import cnr.sync.manager.SyncManager;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -33,8 +36,6 @@ import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-import dto.CompetenceDTO;
-import dto.DayRecap;
 
 @With(Resecure.class)
 public class Persons extends Controller{
@@ -50,14 +51,14 @@ public class Persons extends Controller{
 	@Inject
 	private static CompetenceDao competenceDao;
 	@Inject
-	private static PersonManager personManager;
+	private static SyncManager syncManager;
 	
 	@BasicAuth
 	public static void days(Integer perseoId ,LocalDate start,LocalDate end){
 		long checkedPeople = personDao.checkCnrEmailForEmployee();
 		if(checkedPeople == 0){
 			
-			personManager.syncronizeCnrEmail();
+			syncManager.syncronizeCnrEmail();
 		}
 
 		//Person person = personDao.getPersonByEmail(email);
@@ -96,7 +97,7 @@ public class Persons extends Controller{
 			 * TODO: chiamare qui il metodo del personManager per sincronizzare
 			 * le email cnr
 			 */
-			personManager.syncronizeCnrEmail();
+			syncManager.syncronizeCnrEmail();
 		}
 		//Person person = personDao.getPersonByEmail(email);
 		Person person = personDao.getPersonByPerseoId(perseoId);
