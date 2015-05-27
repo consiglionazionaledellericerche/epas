@@ -21,7 +21,6 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 
-import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -91,7 +90,7 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 
-		if(!officeManager.setUroIfImprove(person.user, office, role, true) ) {
+		if(!officeManager.setUro(person.user, office, role)) {
 
 			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
 			Offices.showOffices();

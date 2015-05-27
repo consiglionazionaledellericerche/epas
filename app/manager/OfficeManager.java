@@ -49,7 +49,7 @@ public class OfficeManager {
 	 * @param office
 	 */
 	public void setSystemUserPermission(Office office) {
-		
+
 		User admin = User.find("byUsername", Role.ADMIN).first();
 		User developer = User.find("byUsername", Role.DEVELOPER).first();
 
@@ -62,47 +62,14 @@ public class OfficeManager {
 	}
 
 	/**
-	 * Setta il ruolo per la tripla <user,office,role>. Se non esiste viene creato.
-	 * Se ifImprove è false il precedente ruolo viene sovrascritto. Se ifImprove è true 
-	 * il ruolo viene sovrascritto solo se assegna maggiori diritti rispetto al precedente. 
-	 * @param user
-	 * @param office
-	 * @param role
-	 * @param ifImprove
-	 * @return true se il ruolo è stato assegnato, false se il ruolo non è stato assegnato (perchè peggiorativo)
-	 */
-	public Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
-
-		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
-
-		if( !uro.isPresent() || !ifImprove ) {
-
-			setUro(user, office, role);
-			return true;
-		}
-
-		if(ifImprove) {
-
-			/* implementare la logica di confronto fra ruolo */
-			Role previous = uro.get().role;
-
-			if(previous.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-
-				setUro(user, office, role);
-				return true;
-			}
-
-		}		
-		return false;		 
-	}
-
-	/**
 	 * 
 	 * @param user
 	 * @param office
 	 * @param role
+	 * 
+	 * @return true Se il permesso su quell'ufficio viene creato, false se è già esistente
 	 */
-	public void setUro(User user, Office office, Role role){
+	public boolean setUro(User user, Office office, Role role){
 
 		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOffices(user,role, office);
 
@@ -113,7 +80,9 @@ public class OfficeManager {
 			newUro.office = office;
 			newUro.role = role;
 			newUro.save();
+			return true;
 		}
 
+		return false;
 	}
 }
