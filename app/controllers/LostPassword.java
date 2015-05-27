@@ -63,7 +63,7 @@ public class LostPassword extends Controller{
 		person.user.save();
 		
 		SimpleEmail simpleEmail = new SimpleEmail();
-		simpleEmail.setFrom("epas@iit.cnr.it");
+		simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
 		simpleEmail.addTo(email);
 		if(Play.configuration.getProperty("mail.smtp.user")!=null && 
 				!Play.configuration.getProperty("mail.smtp.user").equals("") && 

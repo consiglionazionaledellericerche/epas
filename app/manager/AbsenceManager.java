@@ -34,6 +34,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
 import play.db.jpa.Blob;
 import play.libs.Mail;
 
@@ -77,13 +78,14 @@ public class AbsenceManager {
 			PersonDao personDao, PersonManager personManager,
 			PersonReperibilityDayDao personReperibilityDayDao,
 			PersonShiftDayDao personShiftDayDao,
-			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao) {
+			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao,
+			ConfGeneralManager confGeneralManager) {
 		this.yearFactory = yearFactory;
 		this.contractYearRecapManager = contractYearRecapManager;
 		this.workingTimeTypeDao = workingTimeTypeDao;
 		this.personDayManager = personDayManager;
 		this.personDayDao = personDayDao;
-		this.vacationsFactory = vacationsFactory;
+		this.vacationRecapFactory = vacationsFactory;
 		this.absenceGroupManager = absenceGroupManager;
 		this.wrapperFactory = wrapperFactory;
 		this.contractDao = contractDao;
@@ -95,8 +97,8 @@ public class AbsenceManager {
 		this.personShiftDayDao = personShiftDayDao;
 		this.confYearManager = confYearManager;
 		this.personChildrenDao = personChildrenDao;
+		this.confGeneralManager = confGeneralManager;
 	}
-
 
 	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
 
@@ -105,7 +107,7 @@ public class AbsenceManager {
 	private final WorkingTimeTypeDao workingTimeTypeDao;
 	private final PersonDayManager personDayManager;
 	private final PersonDayDao personDayDao;
-	private final VacationsRecapFactory vacationsFactory;
+	private final VacationsRecapFactory vacationRecapFactory;
 	private final AbsenceGroupManager absenceGroupManager;
 	private final IWrapperFactory wrapperFactory;
 	private final ContractDao contractDao;
@@ -117,8 +119,7 @@ public class AbsenceManager {
 	private final PersonShiftDayDao personShiftDayDao;
 	private final ConfYearManager confYearManager;
 	private final PersonChildrenDao personChildrenDao;
-
-	private VacationsRecapFactory vacationRecapFactory; 
+	private final ConfGeneralManager confGeneralManager; 
 
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
@@ -144,7 +145,7 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		VacationsRecap vr = vacationRecapFactory.create(date.getYear(),
 				contract, date, true);
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
@@ -178,7 +179,7 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		VacationsRecap vr = vacationRecapFactory.create(date.getYear(),
 				contract, date, true);
 
 		return (vr.vacationDaysCurrentYearNotYetUsed > 0);		
@@ -199,7 +200,7 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		VacationsRecap vr = vacationRecapFactory.create(date.getYear(),
 				contract, date, true);
 
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
@@ -219,7 +220,7 @@ public class AbsenceManager {
 
 		Preconditions.checkNotNull(contract);
 
-		VacationsRecap vr = vacationsFactory.create(date.getYear(),
+		VacationsRecap vr = vacationRecapFactory.create(date.getYear(),
 				contract, date, true);
 
 		return (vr.persmissionNotYetUsed > 0);
@@ -513,9 +514,8 @@ public class AbsenceManager {
 
 		try {
 			email.addTo(person.email);
-			//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
-			//			email.addTo("daniele.murgia@iit.cnr.it");
-			email.setFrom("epas@iit.cnr.it");
+			email.setFrom(Play.configuration.getProperty("application.mail.address"));
+			email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_FROM_JOBS, person.office));
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
 			for(LocalDate data : airl.datesInReperibilityOrShift()){
