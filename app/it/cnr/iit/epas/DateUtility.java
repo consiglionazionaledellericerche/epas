@@ -84,8 +84,9 @@ public class DateUtility {
 			return true;
 		
 		if(officePatron.isPresent()){
-			return (date.getMonthOfYear() == officePatron.get().MONTH_OF_YEAR && 
-					date.getDayOfMonth() == officePatron.get().DAY_OF_MONTH);
+			
+			return (date.getMonthOfYear() == officePatron.get().getMonthOfYear()  && 
+					date.getDayOfMonth() == officePatron.get().getDayOfMonth());
 		}
 
 		/**
