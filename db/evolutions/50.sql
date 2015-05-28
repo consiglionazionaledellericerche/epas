@@ -2,7 +2,7 @@
 
 CREATE TABLE contract_month_recap
 (
-  id SERIAL PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   year INTEGER,
   month INTEGER,
   

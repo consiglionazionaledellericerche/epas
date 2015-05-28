@@ -56,6 +56,7 @@ public class PersonStampingDayRecap {
 	public boolean future;
 	
 	public boolean ignoreDay = false;
+	public boolean firstDay = false;
 
 	public List<Absence> absences;
 
@@ -201,6 +202,10 @@ public class PersonStampingDayRecap {
 			if (contract.sourceDate != null && ( contract.sourceDate.equals(pd.date) 
 					|| contract.sourceDate.isAfter(pd.date)) ) {
 				this.ignoreDay = true;
+			}
+			
+			if(contract.beginContract.isEqual(pd.date)) {
+				this.firstDay = true;
 			}
 		}
 	}

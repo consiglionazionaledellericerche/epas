@@ -115,13 +115,13 @@ public class ConsistencyManager {
 					false, fromDate, LocalDate.now().minusDays(1), true).list();
 		}
 
-		
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
 		
 		for(Person p : personList) {
 			
 			JPAPlugin.closeTx(false);
 			JPAPlugin.startTx(false);
-
 			p = personDao.getPersonById(p.id);
 			
 			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
@@ -138,9 +138,12 @@ public class ConsistencyManager {
 							Parameter.INIT_USE_PROGRAM, p.office)));
 			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
 					yearMonthOfficeInitUse);
-		}
 
+		}
+		
+		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
+
 		if(sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
 				&& LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY){
 
