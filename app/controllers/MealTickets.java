@@ -77,8 +77,11 @@ public class MealTickets  extends Controller {
 		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
 		
 		for(ContractMonthRecap monthRecap : paginableList.getPaginatedItems() ) {
-			
-			mealTicketRecaps.add(mealTicketFactory.create(monthRecap.contract));
+			Optional<MealTicketRecap> recap = mealTicketFactory
+					.create(monthRecap.contract);
+			if(recap.isPresent()) {
+				mealTicketRecaps.add(recap.get());
+			}
 		}
 		
 		//Riepilogo buoni inseriti nella precedente action
@@ -101,27 +104,31 @@ public class MealTickets  extends Controller {
 	public static void quickBlocksInsert(Long personId, String name, Integer page, Integer max) {
 
 		Person person = personDao.getPersonById(personId);
-
 		Preconditions.checkArgument(person.isPersistent());
-
 		rules.checkIfPermitted(person.office);
+		
+		MealTicketRecap recap;
+		MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
 
 		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 		Preconditions.checkState(contract.isPresent());
-
-		MealTicketRecap recap = mealTicketFactory.create(contract.get());
-
+		
+		// riepilogo contratto corrente
+		Optional<MealTicketRecap> currentRecap = mealTicketFactory.create(contract.get());
+		Preconditions.checkState(currentRecap.isPresent());
+		recap = currentRecap.get();
+		
+		//riepilogo contratto precedente
 		Contract previousContract = personDao.getPreviousPersonContract(contract.get());
-
-		MealTicketRecap recapPrevious = null;
-
-		if(previousContract != null)
-			recapPrevious = mealTicketFactory.create(previousContract);
+		if(previousContract != null) {
+			Optional<MealTicketRecap> previousRecap = mealTicketFactory.create(previousContract);
+			if(previousRecap.isPresent()) {
+				recapPrevious = previousRecap.get();
+			}
+		}
 
 		LocalDate today = LocalDate.now();
-
 		LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
-
 		User admin = Security.getUser().get();
 
 		render(recap, recapPrevious, today, admin, expireDate, name, page, max);

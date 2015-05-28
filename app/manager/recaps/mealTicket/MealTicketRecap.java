@@ -51,17 +51,12 @@ public class MealTicketRecap {
 	 * @return 
 	 */
 	public MealTicketRecap(MealTicketManager mealTicketManager,PersonDao personDao,
-			MealTicketDao mealTicketDao, Contract contract) {
+			MealTicketDao mealTicketDao, Contract contract, DateInterval dateInterval) {
 
 		this.mealTicketManager = mealTicketManager;
 		this.contract = contract;
 		
-		Optional<DateInterval> dateInterval = mealTicketManager
-				.getContractMealTicketDateInterval(contract);
-		
-		Preconditions.checkState(dateInterval.isPresent());
-		
-		this.mealTicketInterval = dateInterval.get();
+		this.mealTicketInterval = dateInterval;
 		
 		this.personDaysMealTickets = personDao.getPersonDayIntoInterval(
 				contract.person, this.mealTicketInterval, true);
