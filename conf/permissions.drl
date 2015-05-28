@@ -595,8 +595,9 @@ when
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
-
-        "Import.officeList"
+        
+        "Import.officeList",
+        "Import.importOffices"
 
         ), target == null, granted == false)
 then
