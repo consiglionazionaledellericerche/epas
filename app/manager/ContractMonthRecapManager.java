@@ -560,8 +560,6 @@ public class ContractMonthRecapManager {
 			cmr.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
 		}
 		
-		setContractDescription(cmr);
-		
 		//Inizializzazione residui
 		//Gennaio
 		ConfYear confYear = null;
@@ -835,26 +833,6 @@ public class ContractMonthRecapManager {
 		monthRecap.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = monthRecap.riposiCompensativiMinuti;
 	
 	}	
-	
-	/**
-	 * Costruisce una stringa di descrizione per il contratto utilizzata in stampings.html e personStampings.html
-	 */
-	private void setContractDescription(ContractMonthRecap monthRecap)
-	{
-		LocalDate beginMonth = new LocalDate(monthRecap.year, monthRecap.month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(beginMonth, endMonth);	
-		LocalDate endContract = monthRecap.contract.expireContract;
-		if(monthRecap.contract.endContract!=null)
-			endContract = monthRecap.contract.endContract;
-		
-		if(DateUtility.isDateIntoInterval(endContract, monthInterval))
-			monthRecap.contractDescription = "(contratto scaduto in data " + endContract+")";
-		else
-			monthRecap.contractDescription = "";
-	}
-	
-	
 }
 
 

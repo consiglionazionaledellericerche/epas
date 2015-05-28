@@ -2,10 +2,11 @@
   
 #{list items:psDto.contractMonths, as:'mese'} 
   <div class="panel-group" id="accordion_contract_recap${mese.contract.value.id}">
+    
     <div class="panel panel-info">
       <div class="panel-heading">
         <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion_contract_recap${mese.value.id}" href="#contract_recap${mese.value.id}">
+          <a data-toggle="collapse" data-parent="#accordion_contract_recap${mese.contract.value.id}" href="#contract_recap${mese.contract.value.id}">
             Riepilogo ore  ${mese.value.contractDescription}</strong>
           </a>
         </h4>
@@ -146,28 +147,12 @@
 	      </tr>
 		
 		</table>
-		  
-		  
-		  
-		  
-
-
-
 			
         </div>
       </div>
     </div>
   </div>
-  
-  
-  
-  
-  
-  
-  
-  
-  
- 
+
   #{/list}
 
 

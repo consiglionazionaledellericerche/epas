@@ -1,5 +1,8 @@
 package models;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -16,6 +19,7 @@ import javax.persistence.UniqueConstraint;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 
@@ -153,7 +157,6 @@ public class ContractMonthRecap extends BaseModel {
 	 **************************************************************************/
 	
 	@Transient public Person person;
-	@Transient public String contractDescription;
 	@Transient public Optional<ContractMonthRecap> mesePrecedente;
 	@Transient public int qualifica;
 	@Transient public IWrapperContract wcontract;
@@ -163,6 +166,21 @@ public class ContractMonthRecap extends BaseModel {
 		return this.straordinariMinutiS1Print +
 				this.straordinariMinutiS2Print + 
 				this.straordinariMinutiS3Print;
+	}
+	
+	@Transient
+	public String getContractDescription() {
+		LocalDate beginMonth = new LocalDate(this.year,this.month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(beginMonth, endMonth);	
+		LocalDate endContract = this.contract.expireContract;
+		if(this.contract.endContract!=null){
+			endContract = this.contract.endContract;
+		}
+		if(DateUtility.isDateIntoInterval(endContract, monthInterval)){
+			return "(contratto scaduto in data " + endContract+")";
+		}
+		return "";
 	}
 	
 }
