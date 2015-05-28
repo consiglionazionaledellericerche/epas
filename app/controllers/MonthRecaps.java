@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.MonthRecapManager;
+import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
@@ -77,15 +78,17 @@ public class MonthRecaps extends Controller{
 		
 		for(IWrapperPerson person : personList) {
 			
-			IWrapperContract contract = wrapperFactory.create(person.getCurrentContract().get());
+			for(Contract c : person.getValue().contracts) {
+				IWrapperContract contract = wrapperFactory.create(c);
 			
-			YearMonth yearMonth = new YearMonth(year, month); 
+				YearMonth yearMonth = new YearMonth(year, month); 
 			
-			Optional<ContractMonthRecap> recap = contract.getContractMonthRecap( yearMonth );
-			if (recap.isPresent()) {
-				recaps.add(recap.get());
-			} else { 
-				System.out.println(person.getValue().fullName());
+				Optional<ContractMonthRecap> recap = contract.getContractMonthRecap( yearMonth );
+				if (recap.isPresent()) {
+					recaps.add(recap.get());
+				} else { 
+					//System.out.println(person.getValue().fullName());
+				}
 			}
 		}
 
