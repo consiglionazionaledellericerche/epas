@@ -158,4 +158,11 @@ public class ContractMonthRecap extends BaseModel {
 	@Transient public int qualifica;
 	@Transient public IWrapperContract wcontract;
 	
+	@Transient
+	public int getStraordinarioMinuti() {
+		return this.straordinariMinutiS1Print +
+				this.straordinariMinutiS2Print + 
+				this.straordinariMinutiS3Print;
+	}
+	
 }
