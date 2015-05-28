@@ -1,14 +1,8 @@
 # ---!Ups
 
-CREATE SEQUENCE seq_contract_month_recap
-  START WITH 1
-  INCREMENT BY 1
-  NO MINVALUE
-  NO MAXVALUE;
-
 CREATE TABLE contract_month_recap
 (
-  id bigint NOT NULL DEFAULT nextval('seq_contract_month_recap'::regclass),
+  id SERIAL PRIMARY KEY,
   year INTEGER,
   month INTEGER,
   
@@ -50,17 +44,11 @@ CREATE TABLE contract_month_recap
 
   contract_id bigint NOT NULL,
   
-  CONSTRAINT contract_month_recap_pkey PRIMARY KEY (id),
   CONSTRAINT contract_contract_month_recap FOREIGN KEY (contract_id)
       REFERENCES contracts (id) 
 );
 
-ALTER TABLE contracts ADD COLUMN source_required BOOLEAN;
-
-
 # ---!Downs
 
 DROP TABLE contract_month_recap;
-DROP SEQUENCE seq_contract_month_recap;
 
-ALTER TABLE contracts DROP COLUMN source_required;
