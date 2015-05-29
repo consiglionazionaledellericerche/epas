@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import manager.ContractManager;
+import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.AbsenceType;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
@@ -22,10 +22,14 @@ import models.StampType;
 import models.Stamping;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import dao.wrapper.IWrapperContractMonthRecap;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Oggetto che modella il contenuto della vista contenente il tabellone timbrature.
@@ -61,8 +65,8 @@ public class PersonStampingRecap {
 	public Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
 	//I riepiloghi mensili (uno per ogni contratto attivo nel mese)
-	public List<PersonResidualMonthRecap> contractMonths = Lists.newArrayList();
-
+	public List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
+	
 	//Template
 	public String month_capitalized;	//FIXME toglierlo e metterlo nel messages
 	public int numberOfInOut = 0;
@@ -77,17 +81,28 @@ public class PersonStampingRecap {
 	 */
 	public PersonStampingRecap(PersonDayManager personDayManager,
 			PersonManager personManager,
-			PersonResidualYearRecapFactory yearFactory,
+			ContractMonthRecapManager contractMonthRecapManager,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
+			IWrapperFactory wrapperFactory,
+			DateUtility dateUtility,
 			int year, int month, Person person) {
-
-
+		
 		this.month = month;
 		this.year = year;
 
 		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 
 		//Costruzione dati da renderizzare
+		
+		//Contratti del mese
+		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		for(Contract contract : monthContracts) {
+			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
+					.getContractMonthRecap(new YearMonth(year, month));
+			if (cmr.isPresent()) {
+				this.contractMonths.add(wrapperFactory.create(cmr.get()));
+			}
+		}
 
 		//Lista person day contente tutti i giorni fisici del mese
 		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
@@ -98,56 +113,56 @@ public class PersonStampingRecap {
 			personDayManager.computeValidStampings(pd);
 
 			PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-					.create(pd, this.numberOfInOut);
+					.create(pd, this.numberOfInOut, monthContracts);
 			this.daysRecap.add(dayRecap);
 
 			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
 
-			{
-				if(stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()){
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(
-							StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 
-					stampModificationTypeSet.add(smt);
-				}
+			if(stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()){
+				StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(
+						StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 
-				if(pd.date.equals(today) && !stampingDayRecapFactory.wrapperFactory.create(pd).isHoliday() && !personDayManager.isAllDayAbsences(pd)){
-
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
-					stampModificationTypeSet.add(smt);
-				}
-				if(pd.stampModificationType!=null && !pd.date.isAfter(today)){
-
-					stampModificationTypeSet.add(pd.stampModificationType);
-				}
-
-				//				this.stampModificationTypeSet.add(day.stampModificationType);
-
-				for(Stamping stamp : pd.stampings){
-
-					if(stamp.stampType!=null && stamp.stampType.identifier!=null){
-
-						stampTypeSet.add(stamp.stampType);
-					}
-
-					if(stamp.markedByAdmin){
-
-						StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
-						stampModificationTypeSet.add(smt);
-					}
-
-					Optional<StampModificationType> smtMidnight = 
-							personDayManager.checkMissingExitStampBeforeMidnight(stamp);
-
-					if( smtMidnight.isPresent() ) {
-
-						stampModificationTypeSet.add(smtMidnight.get());
-					}
-
-					//					this.stampTypeSet.add(stamp.stampType);
-					//					this.stampModificationTypeSet.add(stamp.stampModificationType);
-				}
+				stampModificationTypeSet.add(smt);
 			}
+
+			if(pd.date.equals(today) && !stampingDayRecapFactory.wrapperFactory.create(pd).isHoliday() && !personDayManager.isAllDayAbsences(pd)){
+
+				StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+				stampModificationTypeSet.add(smt);
+			}
+			if(pd.stampModificationType!=null && !pd.date.isAfter(today)){
+
+				stampModificationTypeSet.add(pd.stampModificationType);
+			}
+
+			//this.stampModificationTypeSet.add(day.stampModificationType);
+
+			for(Stamping stamp : pd.stampings){
+
+				if(stamp.stampType!=null && stamp.stampType.identifier!=null){
+
+					stampTypeSet.add(stamp.stampType);
+				}
+
+				if(stamp.markedByAdmin){
+
+					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+					stampModificationTypeSet.add(smt);
+				}
+
+				Optional<StampModificationType> smtMidnight = 
+						personDayManager.checkMissingExitStampBeforeMidnight(stamp);
+
+				if( smtMidnight.isPresent() ) {
+
+					stampModificationTypeSet.add(smtMidnight.get());
+				}
+
+				//this.stampTypeSet.add(stamp.stampType);
+				//this.stampModificationTypeSet.add(stamp.stampModificationType);
+			}
+
 
 		}
 
@@ -157,15 +172,7 @@ public class PersonStampingRecap {
 		this.basedWorkingDays = personManager.basedWorkingDays(totalPersonDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
-
-		for(Contract contract : monthContracts)
-		{
-			PersonResidualYearRecap c = yearFactory.create(contract, year, null);
-			if(c.getMese(month)!=null) {
-				this.contractMonths.add(c.getMese(month));
-			}
-		}
+		
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
 

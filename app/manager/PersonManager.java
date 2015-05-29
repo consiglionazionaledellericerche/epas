@@ -23,6 +23,7 @@ import models.PersonYear;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,10 +158,15 @@ public class PersonManager {
 	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
 	 * @return 
 	 */
-	public boolean isActiveInMonth(Person person, int month, int year, boolean onCertificateFilter)
-	{
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+	public boolean isActiveInMonth(Person person, YearMonth yearMonth, 
+			boolean onCertificateFilter) {
+		
+		LocalDate monthBegin = new LocalDate().withYear(yearMonth.getYear())
+				.withMonthOfYear(yearMonth.getMonthOfYear()).withDayOfMonth(1);
+		
+		LocalDate monthEnd = new LocalDate().withYear(yearMonth.getYear())
+				.withMonthOfYear(yearMonth.getMonthOfYear()).dayOfMonth().withMaximumValue();
+		
 		return isActiveInPeriod(person, monthBegin, monthEnd, onCertificateFilter);
 	}
 
