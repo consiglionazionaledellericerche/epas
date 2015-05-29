@@ -499,11 +499,11 @@ public class PersonDayManager {
 
 		//festivo
 		if( pd.isHoliday() ) {
-			if(pd.getValue().acceptedHolidayWorkingTime){
+//			if(pd.getValue().acceptedHolidayWorkingTime){
 				pd.getValue().difference = pd.getValue().timeAtWork;
-			}
-			else
-				pd.getValue().difference = 0;
+//			}
+//			else
+//				pd.getValue().difference = 0;
 			return;
 		}
 
