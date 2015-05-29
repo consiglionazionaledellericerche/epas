@@ -83,7 +83,7 @@ public class ContractMonthRecap extends BaseModel {
 	public int progressivoFinaleMese = 0;	//person day	
 	
 	@Column(name="s_pfp")
-	public int progressivoFinalePositivoMesePrint = 0;	//per il template
+	public int progressivoFinalePositivoMese = 0;	//per il template
 
 	@Column(name="s_r_ap_usabile")
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
@@ -149,7 +149,7 @@ public class ContractMonthRecap extends BaseModel {
 	 **************************************************************************/
 	
 	@Transient
-	public int progressivoFinalePositivoMese = 0;	//person day
+	public int progressivoFinalePositivoMeseAux = 0;	//person day
 													// forse è usato... capire cosa contiene alla fine e fixare
 
 	/**************************************************************************
@@ -181,6 +181,12 @@ public class ContractMonthRecap extends BaseModel {
 			return "(contratto scaduto in data " + endContract+")";
 		}
 		return "";
+	}
+	
+	@Transient
+	public int getPositiveResidualInMonth() {
+	
+		return this.progressivoFinalePositivoMese;
 	}
 	
 }

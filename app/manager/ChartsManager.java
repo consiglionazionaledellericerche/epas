@@ -422,11 +422,13 @@ public class ChartsManager {
 							situazione = situazione +
 									(new Integer(recap.get().straordinariMinuti/60).toString())
 									+','+(new Integer(recap.get().riposiCompensativiMinuti/60).toString())
-									+','+(new Integer((recap.get().progressivoFinalePositivoMese+recap.get().straordinariMinuti)/60).toString())
+									+','+(new Integer((recap.get().getPositiveResidualInMonth()
+											+recap.get().straordinariMinuti)/60).toString())
 									+',';
 							totalOvertime = totalOvertime+new Integer(recap.get().straordinariMinuti/60);
 							totalCompensatoryRest = totalCompensatoryRest+new Integer(recap.get().riposiCompensativiMinuti/60);
-							totalPlusHours = totalPlusHours+new Integer((recap.get().progressivoFinalePositivoMese+recap.get().straordinariMinuti)/60);
+							totalPlusHours = totalPlusHours+new Integer((recap.get().getPositiveResidualInMonth()
+									+recap.get().straordinariMinuti)/60);
 						}
 						else {
 							situazione = situazione +("0"+','+"0"+','+"0");

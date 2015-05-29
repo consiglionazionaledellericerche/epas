@@ -384,7 +384,7 @@ public class CompetenceManager {
 				Optional<ContractMonthRecap> recap = 
 						wContract.getContractMonthRecap( new YearMonth(year, month));
 				if(recap.isPresent()) {
-					return recap.get().progressivoFinalePositivoMese;
+					return recap.get().getPositiveResidualInMonth();
 				}
 			}
 		}
