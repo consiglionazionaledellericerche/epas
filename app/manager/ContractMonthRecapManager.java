@@ -53,6 +53,8 @@ public class ContractMonthRecapManager {
 	private VacationsRecapFactory vacationsFactory;
 	@Inject 
 	private ConfGeneralManager confGeneralManager;
+	@Inject
+	private ConfYearManager confYearManager;
 	@Inject 
 	private MealTicketDao mealTicketDao;
 	@Inject
@@ -63,8 +65,6 @@ public class ContractMonthRecapManager {
 	private AbsenceDao absenceDao;
 	@Inject
 	private IWrapperFactory wrapperFactory;
-	@Inject
-	private ConfYearDao confYearDao;
 	@Inject
 	private AbsenceTypeDao absenceTypeDao;
 	@Inject
@@ -562,49 +562,35 @@ public class ContractMonthRecapManager {
 		
 		//Inizializzazione residui
 		//Gennaio
-		ConfYear confYear = null;
-		Optional<ConfYear> conf = null;
-		String description = cmr.qualifica > 3 ? 
-				Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49.description : 
-					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13.description;
-		conf = confYearDao.getByFieldName(description, cmr.year, cmr.person.office);
-		
-		if(conf.isPresent()){
-			confYear = conf.get();
-		}
-		else{
-			confYear = confYearDao.getByFieldName(
-					description, cmr.year-1, cmr.person.office).get();
-		}
-		if(cmr.month==1)
-		{
+		if(cmr.month==1) {
 			cmr.mesePrecedente = null;
 			cmr.remainingMinutesLastYear = initMonteOreAnnoPassato;
 			cmr.remainingMinutesCurrentYear = initMonteOreAnnoCorrente;
 			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
-			if(cmr.remainingMinutesLastYear<0)
-			{
-				cmr.progressivoFinalePositivoMese = cmr.progressivoFinalePositivoMese + cmr.remainingMinutesLastYear;
+			if(cmr.remainingMinutesLastYear < 0) {
+				cmr.progressivoFinalePositivoMese = cmr.progressivoFinalePositivoMese 
+						+ cmr.remainingMinutesLastYear;
 				cmr.remainingMinutesLastYear = 0;
 			}
-		}
-		else
-		{
+		} else {
 			cmr.mesePrecedente = recapPreviousMonth;
 			cmr.remainingMinutesLastYear = initMonteOreAnnoPassato;
 			cmr.remainingMinutesCurrentYear = initMonteOreAnnoCorrente;
 			
-			if(new Integer(confYear.fieldValue) != 0 && cmr.month > new Integer(confYear.fieldValue))
-			{
+			Parameter param = cmr.qualifica > 3 ? 
+					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49: 
+						Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13;
+			Integer monthExpiryRecoveryDay = confYearManager.getIntegerFieldValue(param,
+					cmr.person.office.office, cmr.year);
+			if(monthExpiryRecoveryDay != 0 && cmr.month > monthExpiryRecoveryDay) {
 				cmr.possibileUtilizzareResiduoAnnoPrecedente = false;
 				cmr.remainingMinutesLastYear = 0;
 			}
 		}
 		
 		//Inizializzazione buoni pasto
-		if (recapPreviousMonth.isPresent())
-		{
+		if (recapPreviousMonth.isPresent()) {
 			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
 		}
 		
