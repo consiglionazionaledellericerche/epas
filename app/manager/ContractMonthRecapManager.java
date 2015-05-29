@@ -569,7 +569,7 @@ public class ContractMonthRecapManager {
 			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
 			if(cmr.remainingMinutesLastYear < 0) {
-				cmr.progressivoFinalePositivoMese = cmr.progressivoFinalePositivoMese 
+				cmr.progressivoFinalePositivoMeseAux = cmr.progressivoFinalePositivoMeseAux 
 						+ cmr.remainingMinutesLastYear;
 				cmr.remainingMinutesLastYear = 0;
 			}
@@ -610,7 +610,7 @@ public class ContractMonthRecapManager {
 		cmr.riposiCompensativiMinutiImputatoAnnoCorrente = cmr.riposiCompensativiMinutiImputatoAnnoCorrente + cmr.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
 		
 		//Al monte ore dell'anno corrente aggiungo ciò che non ho utilizzato del progressivo finale positivo del mese
-		cmr.remainingMinutesCurrentYear = cmr.remainingMinutesCurrentYear + cmr.progressivoFinalePositivoMese;	
+		cmr.remainingMinutesCurrentYear = cmr.remainingMinutesCurrentYear + cmr.progressivoFinalePositivoMeseAux;	
 		
 		return Optional.fromNullable( cmr );
 	}
@@ -641,7 +641,7 @@ public class ContractMonthRecapManager {
 			for(PersonDay pd : pdList)
 			{
 				if(pd.difference>=0)
-					monthRecap.progressivoFinalePositivoMese += pd.difference;
+					monthRecap.progressivoFinalePositivoMeseAux += pd.difference;
 				else
 					monthRecap.progressivoFinaleNegativoMese += pd.difference;
 				
@@ -649,7 +649,7 @@ public class ContractMonthRecapManager {
 			}
 			monthRecap.progressivoFinaleNegativoMese = monthRecap.progressivoFinaleNegativoMese*-1;
 
-			monthRecap.progressivoFinalePositivoMesePrint = monthRecap.progressivoFinalePositivoMese;
+			monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMeseAux;
 			
 		}
 	}
@@ -774,7 +774,7 @@ public class ContractMonthRecapManager {
 		}
 		
 		//quello che assegno al progressivo positivo del mese
-		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.progressivoFinaleNegativoMese;
+		monthRecap.progressivoFinalePositivoMeseAux = monthRecap.progressivoFinalePositivoMeseAux - monthRecap.progressivoFinaleNegativoMese;
 		monthRecap.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = monthRecap.progressivoFinaleNegativoMese;
 		return;
 		
@@ -782,7 +782,7 @@ public class ContractMonthRecapManager {
 	
 	private void assegnaStraordinari(ContractMonthRecap monthRecap)
 	{
-		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.straordinariMinuti;
+		monthRecap.progressivoFinalePositivoMeseAux = monthRecap.progressivoFinalePositivoMeseAux - monthRecap.straordinariMinuti;
 	}
 	
 	private void assegnaRiposiCompensativi(ContractMonthRecap monthRecap)
@@ -815,7 +815,7 @@ public class ContractMonthRecapManager {
 			monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti - monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente;
 		}
 		//quello che assegno al progressivo positivo del mese
-		monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMese - monthRecap.riposiCompensativiMinuti;
+		monthRecap.progressivoFinalePositivoMeseAux = monthRecap.progressivoFinalePositivoMeseAux - monthRecap.riposiCompensativiMinuti;
 		monthRecap.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = monthRecap.riposiCompensativiMinuti;
 	
 	}	

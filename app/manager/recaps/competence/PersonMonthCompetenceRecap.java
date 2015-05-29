@@ -60,10 +60,8 @@ public class PersonMonthCompetenceRecap {
 
 		Optional<ContractMonthRecap> recap = 
 				wrapperFactory.create(contract).getContractMonthRecap( new YearMonth(year,month));
-		
 		Preconditions.checkState(recap.isPresent());
-		
-		this.progressivoFinalePositivoMese = recap.get().progressivoFinalePositivoMese;
+		this.progressivoFinalePositivoMese = recap.get().getPositiveResidualInMonth();
 		
 	}
 	
