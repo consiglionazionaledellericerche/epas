@@ -113,7 +113,7 @@ public class Offices extends Controller {
 		render("@editSeat",institute);
 	}
 
-	public static void saveSeat(Office institute,@Valid Office seat,@Required int code) {
+	public static void saveSeat(Office institute,@Valid Office seat,@Required int codeId) {
 
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente tutti i campi! operazione annullata.");
@@ -125,7 +125,7 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 
-		seat.code = code;
+		seat.codeId = codeId;
 
 		if(officeDao.checkForDuplicate(seat)){
 			flash.error("Parametri già utilizzati in un'altra sede,verificare.");

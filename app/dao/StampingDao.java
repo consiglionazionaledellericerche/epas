@@ -67,7 +67,7 @@ public class StampingDao extends DaoBase {
 		
 	/**
 	 * 
-	 * @param code
+	 * @param codeId
 	 * @return lo stampModificationType relativo al codice code passato come parametro
 	 */
 	public StampModificationType getStampModificationTypeByCode(StampModificationTypeCode smtCode){

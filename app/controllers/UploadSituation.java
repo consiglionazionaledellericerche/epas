@@ -144,7 +144,7 @@ public class UploadSituation extends Controller{
 		FileWriter writer = new FileWriter(tempFile, true);
 		try {
 			BufferedWriter out = new BufferedWriter(writer);
-			out.write(user.person.office.code);
+			out.write(user.person.office.codeId);
 			out.write(' ');
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();

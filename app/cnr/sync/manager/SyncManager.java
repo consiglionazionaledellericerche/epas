@@ -69,7 +69,7 @@ public class SyncManager {
 		List<Office> helpList = officeDao.getAllOffices();
 		List<Office> officeList = Lists.newArrayList();
 		for(Office office : helpList){
-			if(office.code != null)
+			if(office.codeId != null)
 				officeList.add(office);
 		}
 		int contatore = 0;
@@ -77,7 +77,7 @@ public class SyncManager {
 	
 		String perseoUrl = Play.configuration.getProperty("perseo.department");
 		for(Office office : officeList){
-			perseoUrl = perseoUrl+office.code.toString();
+			perseoUrl = perseoUrl+office.codeId.toString();
 			HttpResponse perseoResponse = WS.url(perseoUrl).get();
 			Gson gson = new Gson();
 

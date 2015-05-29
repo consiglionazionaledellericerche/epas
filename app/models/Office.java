@@ -20,10 +20,9 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import com.google.common.collect.Lists;
-
- 
  
 @Entity
 @Audited
@@ -42,8 +41,8 @@ public class Office extends BaseModel{
     @Column(name = "address")
     public String address = "";
     
-    @Column(name = "code")
-    public Integer code;
+    @Column(name = "codeId")
+    public Integer codeId;
     
     @Column(name="joining_date")
     public LocalDate joiningDate;
@@ -54,6 +53,12 @@ public class Office extends BaseModel{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="office_id")
     public Office office;
+    
+    @Unique
+    public String cds;
+    
+	@Unique
+	public String code;
     
     //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     //public List<User> restUsers = new ArrayList<User>();

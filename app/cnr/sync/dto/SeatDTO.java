@@ -1,0 +1,34 @@
+package cnr.sync.dto;
+
+import models.Office;
+
+import com.google.common.base.Function;
+import com.google.common.base.MoreObjects;
+
+public class SeatDTO {
+	public int id;
+	public String name;
+	public String code;
+	public String codeId;
+	public InstituteDTO institute;
+    public String dismissionDate;
+    
+    public enum toOffice implements Function<SeatDTO,Office>{
+		ISTANCE;
+
+		@Override
+			public Office apply(SeatDTO seatDTO){
+				Office office = new Office();
+				office.name = seatDTO.institute.code +" - "+seatDTO.name;
+				office.codeId = Integer.parseInt(seatDTO.codeId);
+				office.code = seatDTO.code;
+				return office;
+		}
+	}
+		
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("id",id).add("name",name).add("code", code).toString();
+	}
+}

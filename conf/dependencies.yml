@@ -8,15 +8,12 @@ require:
           transitive: false
     - org.jadira.usertype -> usertype.core 3.2.0.GA
     - com.google.guava -> guava 18.0
-    - com.google.inject -> guice 4.0-beta5
-    - com.google.inject.extensions -> guice-assistedinject 4.0-beta5
+    - com.google.inject -> guice 4.0
+    - com.google.inject.extensions -> guice-assistedinject 4.0
     - play -> pdf 0.9
     - org.mnode.ical4j -> ical4j 1.0.5.2
     - org.jsoup -> jsoup 1.7.3
     - org.dbunit -> dbunit 2.4.9
-    - org.hamcrest -> hamcrest-library 1.2.1
-    - org.hamcrest -> hamcrest-integration 1.2.1
-    - org.mockito -> mockito-core 1.9.0
     - org.drools -> drools-core 5.5.0.Final
     - org.drools -> drools-compiler 5.5.0.Final
     - org.codehaus.janino -> janino 2.5.10
