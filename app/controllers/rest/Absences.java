@@ -11,14 +11,22 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import cnr.sync.dto.AbsenceAddedRest;
 import cnr.sync.dto.AbsenceRest;
+import manager.AbsenceManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
 import models.Absence;
 import models.Person;
 import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import dao.PersonDao;
+import exceptions.EpasExceptionNoSourceData;
+import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -29,6 +37,10 @@ public class Absences extends Controller{
 	static PersonDao personDao;
 	@Inject
 	static AbsenceDao absenceDao;
+	@Inject
+	static AbsenceManager absenceManager;
+	@Inject
+	static AbsenceTypeDao absenceTypeDao;
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
@@ -57,7 +69,36 @@ public class Absences extends Controller{
 		renderJSON(absences);
 	}
 	
-	
-	
+	@BasicAuth
+	public static void insertAbsence(String email, String absenceCode, LocalDate begin, LocalDate end){
+		Person person = personDao.getPersonByEmail(email);
+		if(person == null){
+			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
+					+ "mail cnr che serve per la ricerca.");
+		}
+		if(begin == null || end == null || begin.isAfter(end)){
+			JsonResponse.badRequest("Date non valide");
+		}
+		List<AbsenceAddedRest> list = Lists.newArrayList();
+		try{
+			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, Optional.fromNullable(end), 
+					absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(), 
+					Optional.<Blob>absent(), Optional.<String>absent());
+			for(AbsencesResponse ar : air.getAbsences()){
+				AbsenceAddedRest aar = new AbsenceAddedRest();
+				aar.absenceCode = ar.getAbsenceCode();
+				aar.date = ar.getDate().toString();
+				aar.isOK = ar.isInsertSucceeded();
+				aar.reason = ar.getWarning();
+				list.add(aar);
+			}
+			renderJSON(list);
+		}
+		catch(EpasExceptionNoSourceData e){
+			JsonResponse.badRequest("Errore nei parametri passati al server");
+		}
+		
+		
+	}
 
 }
