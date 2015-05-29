@@ -89,7 +89,7 @@ public class Overtimes extends Controller {
 		
 		int totaleResiduoAnnoCorrenteAFineMese = recap.get().remainingMinutesCurrentYear;
 		int residuoDelMese = recap.get().progressivoFinaleMese;
-		int tempoDisponibilePerStraordinari = recap.get().progressivoFinalePositivoMese;
+		int tempoDisponibilePerStraordinari = recap.get().getPositiveResidualInMonth();
 		OvertimesData personOvertimesData =
 				new OvertimesData(totaleResiduoAnnoCorrenteAFineMese, 
 				residuoDelMese, tempoDisponibilePerStraordinari);

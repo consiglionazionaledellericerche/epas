@@ -83,7 +83,7 @@
 	      </tr>
 	      <tr>
 		    <td class="col-xs-10">Residuo del mese positivo</td>
-		    <td class="col-xs-2 success">${mese.value.progressivoFinalePositivoMesePrint.toHourTimeWithPlus()}</td>
+		    <td class="col-xs-2 success">${mese.value.getPositiveResidualInMonth().toHourTimeWithPlus()}</td>
 	      </tr>
 
 		#{if mese.value.straordinariMinutiS1Print != 0}
