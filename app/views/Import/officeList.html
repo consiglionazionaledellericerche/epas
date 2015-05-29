@@ -5,17 +5,19 @@
 <div class="container">
 #{form @Import.importOffices(),class:'form-horizontal'}
 
-<input type="hidden" name="importedOffices" value="${importedOffices}"/>
-<div class="row">
-<button type="submit" class="btn btn-success col-xs-4 col-xs-offset-4">Importa Sedi</button>
-</div>
+  <div class="row">
+    <button type="submit" class="btn btn-success col-xs-4 col-xs-offset-4">Importa Sedi</button>
+  </div>
 
 	#{field 'offices'}
 	<div class='form-group'>
 		<label class="control-label col-sm-2" for="${field.id}">Uffici</label>
 
 		<div class="col-sm-8">
-			<div class="input-group"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span><input id="search"class="form-control" type="text"></div>
+			<div class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+        <input id="search"class="form-control" type="text">
+      </div>
 			<div id="all" class="btn btn-default" >Select All</div>
 			<div id="none" class="btn btn-default" >Deselect All</div>
 			#{select field.id,id:field.id,class:'list-group form-control',multiple:'multiple'}

@@ -189,7 +189,7 @@ public class AttestatiClient {
 
 		try {
 			listaDipendentiResponse = connection
-					.data("sede_id", office.code.toString())
+					.data("sede_id", office.codeId.toString())
 					.data("anno", year.toString())
 					.data("mese", month.toString())
 					.userAgent(CLIENT_USER_AGENT)
@@ -274,7 +274,7 @@ public class AttestatiClient {
 		.data("matr", dipendente.getMatricola())
 		.data("anno", year.toString())
 		.data("mese", month.toString())
-		.data("sede_id", office.code.toString())
+		.data("sede_id", office.codeId.toString())
 		.method(Method.POST);
 
 		int codAssAssoCounter = 0;

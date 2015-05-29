@@ -137,7 +137,7 @@ public class ConfYearManager {
 
 		Preconditions.checkState(param.isYearly());
 
-		String key = param.description + office.code;
+		String key = param.description + office.codeId;
 
 		String value = (String)Cache.get(key);
 

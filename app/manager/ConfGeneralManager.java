@@ -121,7 +121,7 @@ public class ConfGeneralManager {
 
 		Preconditions.checkState(param.isGeneral());
 
-		String key = param.description + office.code;
+		String key = param.description + office.codeId;
 
 		String value = (String)Cache.get(key);
 
