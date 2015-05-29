@@ -49,9 +49,21 @@
 
 	<tr>
 	#{if person.currentContract.present}
-
-		<td class="personName">
-			<a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
+		<td class="personName 
+		#{if person.currentContractInitializationMissing()}
+		  danger
+		#{/if}
+		#{else}
+		  success
+		#{/else}
+		">
+		<a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
+		#{if person.currentContractMonthRecapMissing()}
+		<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="mancano i riepiloghi"></span>
+		#{/if}
+		#{if person.currentContractInitializationMissing()}
+		<span class="glyphicon glyphicon-wrench" aria-hidden="true" title="mancano i dati iniziali"></span>
+		#{/if}
 		</td>
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>

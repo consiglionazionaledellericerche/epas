@@ -7,11 +7,9 @@ import it.cnr.iit.epas.JsonRequestedPersonsBinder;
 import javax.inject.Inject;
 
 import manager.OvertimesManager;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonHourForOvertime;
 import models.exports.OvertimesData;
@@ -19,6 +17,7 @@ import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.binding.As;
@@ -48,8 +47,6 @@ public class Overtimes extends Controller {
 	private static PersonDao personDao;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
-	@Inject
-	private static PersonResidualYearRecapFactory yearFactory;
 	@Inject
 	private static CompetenceDao competenceDao;
 	@Inject
@@ -83,13 +80,19 @@ public class Overtimes extends Controller {
 
 		Preconditions.checkState(contract.isPresent());
 
-		PersonResidualYearRecap c =	yearFactory.create(contract.get(), year, null);
-		PersonResidualMonthRecap mese = c.getMese(month);
-
-		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;
-		int residuoDelMese = mese.progressivoFinaleMese;
-		int tempoDisponibilePerStraordinari = mese.progressivoFinalePositivoMese;
-		OvertimesData personOvertimesData = new OvertimesData(totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
+		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
+				.getContractMonthRecap( new YearMonth(year, month));
+		
+		if( !recap.isPresent() ) {
+			// TODO:
+		}
+		
+		int totaleResiduoAnnoCorrenteAFineMese = recap.get().remainingMinutesCurrentYear;
+		int residuoDelMese = recap.get().progressivoFinaleMese;
+		int tempoDisponibilePerStraordinari = recap.get().progressivoFinalePositivoMese;
+		OvertimesData personOvertimesData =
+				new OvertimesData(totaleResiduoAnnoCorrenteAFineMese, 
+				residuoDelMese, tempoDisponibilePerStraordinari);
 
 		render(personOvertimesData);
 

@@ -23,8 +23,12 @@ import models.PersonYear;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cnr.sync.dto.DepartmentDTO;
+import cnr.sync.dto.PersonRest;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
@@ -40,8 +44,6 @@ import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-import dto.DepartmentDTO;
-import dto.PersonRest;
 
 public class PersonManager {
 
@@ -156,10 +158,15 @@ public class PersonManager {
 	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
 	 * @return 
 	 */
-	public boolean isActiveInMonth(Person person, int month, int year, boolean onCertificateFilter)
-	{
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+	public boolean isActiveInMonth(Person person, YearMonth yearMonth, 
+			boolean onCertificateFilter) {
+		
+		LocalDate monthBegin = new LocalDate().withYear(yearMonth.getYear())
+				.withMonthOfYear(yearMonth.getMonthOfYear()).withDayOfMonth(1);
+		
+		LocalDate monthEnd = new LocalDate().withYear(yearMonth.getYear())
+				.withMonthOfYear(yearMonth.getMonthOfYear()).dayOfMonth().withMaximumValue();
+		
 		return isActiveInPeriod(person, monthBegin, monthEnd, onCertificateFilter);
 	}
 
@@ -493,57 +500,4 @@ public class PersonManager {
 
 		return query.getResultList().size();
 	}
-	
-	/**
-	 * questo metodo può essere chiamato dal job settimanale che sincronizza 
-	 * le email cnr del personale oppure dalla chiamata rest per conoscere i 
-	 * tempi di lavoro e le missioni del personale per la rendicontazione dei
-	 * progetti
-	 */
-	public void syncronizeCnrEmail(){
-		List<Office> helpList = officeDao.getAllOffices();
-		List<Office> officeList = Lists.newArrayList();
-		for(Office office : helpList){
-			if(office.code != null)
-				officeList.add(office);
-		}
-		int contatore = 0;
-		String url = Play.configuration.getProperty("people.rest");
-	
-		String perseoUrl = Play.configuration.getProperty("perseo.department");
-		for(Office office : officeList){
-			perseoUrl = perseoUrl+office.code.toString();
-			HttpResponse perseoResponse = WS.url(perseoUrl).get();
-			Gson gson = new Gson();
-
-			DepartmentDTO dep = gson.fromJson(perseoResponse.getJson(),DepartmentDTO.class);
-			HttpResponse response = WS.url(url+dep.code).get();
-
-			List<PersonRest> people = gson.fromJson(response.getJson().toString(),
-					new TypeToken<ArrayList<PersonRest>>() {}.getType());
-			for(PersonRest pr : people){
-				if(pr.number == null){
-					log.info("Non esiste matricola per {} {}", pr.firstname, pr.surname);
-				}
-				else{
-					Person person = personDao.getPersonByNumber(pr.number);
-					if(person != null){
-						person.cnr_email = pr.email;
-						person.iId = new Integer(pr.id);
-						person.save();
-						log.info("Salvata la mail cnr per {} {}", person.name, person.surname);
-						contatore++;
-					}
-					else{
-						log.info("La persona {} {} non è presente in anagrafica", pr.firstname, pr.surname);
-					}
-				}
-				
-			}
-			perseoUrl = Play.configuration.getProperty("perseo.department");
-
-		}
-		log.info("Terminata sincronizzazione delle email cnr per {} dipendenti", contatore);
-	}
-
 }
