@@ -14,15 +14,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.WorkingTimeType;
@@ -30,6 +28,7 @@ import models.enumerate.Parameter;
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +45,9 @@ import dao.CompetenceDao;
 import dao.ConfGeneralDao;
 import dao.ContractDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import exceptions.EpasExceptionNoSourceData;
 
 public class ChartsManager {
 
@@ -56,18 +55,15 @@ public class ChartsManager {
 	public ChartsManager(ConfGeneralDao confGeneralDao,
 			CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao,
 			CompetenceManager competenceManager, PersonDao personDao,
-			AbsenceDao absenceDao, PersonResidualYearRecapFactory yearFactory,
-			VacationsRecapFactory vacationsFactory, ContractDao contractDao,
-			IWrapperFactory wrapperFactory) {
+			VacationsRecapFactory vacationsFactory,
+			AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
 		this.confGeneralDao = confGeneralDao;
 		this.competenceCodeDao = competenceCodeDao;
 		this.competenceDao = competenceDao;
 		this.competenceManager = competenceManager;
 		this.personDao = personDao;
 		this.absenceDao = absenceDao;
-		this.yearFactory = yearFactory;
 		this.vacationsFactory = vacationsFactory;
-		this.contractDao = contractDao;
 		this.wrapperFactory = wrapperFactory;
 	}
 
@@ -79,9 +75,7 @@ public class ChartsManager {
 	private final CompetenceManager competenceManager;
 	private final PersonDao personDao;
 	private final AbsenceDao absenceDao;
-	private final PersonResidualYearRecapFactory yearFactory;
 	private final VacationsRecapFactory vacationsFactory;
-	private final ContractDao contractDao;
 	private final IWrapperFactory wrapperFactory;
 
 
@@ -413,41 +407,38 @@ public class ChartsManager {
 			if(contractList.isEmpty())
 				contractList = p.contracts;
 
-			for(Contract contract : contractList){
-				if(beginContract != null && beginContract.equals(contract.beginContract)){
+			for (Contract contract : contractList){
+				if (beginContract != null && beginContract.equals(contract.beginContract)){
 					log.error("Due contratti uguali nella stessa lista di contratti per {} : come è possibile!?!?", p.getFullname());
-				}
-				else{
+				
+				} else {
+					IWrapperContract c = wrapperFactory.create(contract);
 					beginContract = contract.beginContract;
-					PersonResidualYearRecap c = 
-							yearFactory.create(contract, year, contract.endContract);
-					if(c != null){
-						int start = c.getMesi().get(0).mese;
-						for(int i = start; i <= c.getMesi().size(); i++){	
-
-							PersonResidualMonthRecap m = c.getMese(i);
-							if(m != null){
-
-								situazione = situazione+(new Integer(m.straordinariMinuti/60).toString())+','+(new Integer(m.riposiCompensativiMinuti/60).toString())+','+(new Integer((m.progressivoFinalePositivoMese+m.straordinariMinuti)/60).toString())+',';
-
-								totalOvertime = totalOvertime+new Integer(m.straordinariMinuti/60);
-								totalCompensatoryRest = totalCompensatoryRest+new Integer(m.riposiCompensativiMinuti/60);
-								totalPlusHours = totalPlusHours+new Integer((m.progressivoFinalePositivoMese+m.straordinariMinuti)/60);
-
-							}
-
-							else
-								situazione = situazione +("0"+','+"0"+','+"0");
-
+					YearMonth actual = new YearMonth(year,1);
+					YearMonth last = new YearMonth(year,12);
+					while (! actual.isAfter(last) ) {
+						Optional<ContractMonthRecap> recap = c.getContractMonthRecap(actual);
+						if(recap.isPresent()){
+							situazione = situazione +
+									(new Integer(recap.get().straordinariMinuti/60).toString())
+									+','+(new Integer(recap.get().riposiCompensativiMinuti/60).toString())
+									+','+(new Integer((recap.get().progressivoFinalePositivoMese+recap.get().straordinariMinuti)/60).toString())
+									+',';
+							totalOvertime = totalOvertime+new Integer(recap.get().straordinariMinuti/60);
+							totalCompensatoryRest = totalCompensatoryRest+new Integer(recap.get().riposiCompensativiMinuti/60);
+							totalPlusHours = totalPlusHours+new Integer((recap.get().progressivoFinalePositivoMese+recap.get().straordinariMinuti)/60);
 						}
-						out.append(situazione);
-						out.append(new Integer(totalOvertime).toString()+',');
-						out.append(new Integer(totalCompensatoryRest).toString()+',');
-						out.append(new Integer(totalPlusHours).toString()+',');				
-
-					}				
-
-				}
+						else {
+							situazione = situazione +("0"+','+"0"+','+"0");
+						}
+						actual = actual.plusMonths(1);
+					}
+					
+					out.append(situazione);
+					out.append(new Integer(totalOvertime).toString()+',');
+					out.append(new Integer(totalCompensatoryRest).toString()+',');
+					out.append(new Integer(totalPlusHours).toString()+',');				
+				}				
 
 			}		
 			totalCompensatoryRest = 0;
@@ -464,9 +455,8 @@ public class ChartsManager {
 	 * @param person
 	 * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e residuo per la persona passata come parametro
 	 * @throws IOException
-	 * @throws EpasExceptionNoSourceData 
 	 */
-	public FileInputStream exportDataSituation(Person person) throws IOException, EpasExceptionNoSourceData{
+	public FileInputStream exportDataSituation(Person person) throws IOException {
 		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
 		FileInputStream inputStream = new FileInputStream( tempFile );
 		FileWriter writer = new FileWriter(tempFile, true);
@@ -481,30 +471,38 @@ public class ChartsManager {
 
 		Preconditions.checkState(contract.isPresent());
 
-		VacationsRecap vr = vacationsFactory.create(LocalDate.now().getYear(),
+		Optional<VacationsRecap> vr = vacationsFactory.create(LocalDate.now().getYear(),
 				contract.get(), LocalDate.now(), false);
+		
+		Preconditions.checkState(vr.isPresent());
 
-		PersonResidualYearRecap pryr = 
-				yearFactory.create(contractDao.getContract(LocalDate.now(), person)
-						, LocalDate.now().getYear(), LocalDate.now());
-		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
+		Optional<ContractMonthRecap> recap = wrapperFactory.create(	contract.get())
+				.getContractMonthRecap( new YearMonth(LocalDate.now()));
 
+		if( !recap.isPresent() ) {
+			out.close();
+			return inputStream;
+		}
+		
 		Optional<WorkingTimeType> wtt = wPerson.getCurrentWorkingTimeType();
 
 		Preconditions.checkState(wtt.isPresent());
 
 		int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
-		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
-				new Integer(vr.vacationDaysLastYearUsed.size()).toString()+','+
-				new Integer(vr.permissionUsed.size()).toString()+','+
-				new Integer(prmr.monteOreAnnoCorrente).toString()+','+
-				new Integer(prmr.monteOreAnnoPassato).toString()+',');
+		out.append(new Integer(vr.get().vacationDaysCurrentYearUsed.size()).toString()+','+
+				new Integer(vr.get().vacationDaysLastYearUsed.size()).toString()+','+
+				new Integer(vr.get().permissionUsed.size()).toString()+','+
+				new Integer(recap.get().remainingMinutesCurrentYear).toString()+','+
+				new Integer(recap.get().remainingMinutesLastYear).toString()+',');
 		int month = LocalDate.now().getMonthOfYear();
 		int riposiCompensativiMinuti = 0;
 		for(int i = 1; i <= month; i++){
-			PersonResidualMonthRecap pm = pryr.getMese(i);
-			riposiCompensativiMinuti+=pm.riposiCompensativiMinuti;
+			recap = wrapperFactory.create(	contract.get())
+					.getContractMonthRecap( new YearMonth(LocalDate.now().getYear(), i));
+			if( recap.isPresent() ) {
+				riposiCompensativiMinuti+=recap.get().riposiCompensativiMinuti;
+			}
 		}
 		out.append(new Integer(riposiCompensativiMinuti/workingTime).toString());
 

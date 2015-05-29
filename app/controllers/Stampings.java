@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
@@ -23,6 +24,7 @@ import models.Stamping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -38,6 +40,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
+import dao.wrapper.IWrapperFactory;
 
 @With( {RequestInit.class, Resecure.class} )
 
@@ -54,34 +57,35 @@ public class Stampings extends Controller {
 	@Inject
 	private static StampingManager stampingManager;
 	@Inject
+	private static StampingDao stampingDao;
+	@Inject
+	private static ContractMonthRecapManager contractMonthRecapManager;
+	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
 	private static PersonDayManager personDayManager;
 	@Inject
-	private static StampingDao stampingDao;
-	@Inject
 	private static OfficeDao officeDao;
 	@Inject
 	private static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
-
+	@Inject
+	private static IWrapperFactory wrapperFactory;
 
 	public static void stampings(Integer year, Integer month) {
 
 		Person person = Security.getUser().get().person;
 
-		if(!personManager.isActiveInMonth(person, month, year, false)) {
-
+		if(!personManager.isActiveInMonth(person, new YearMonth(year,month), false)) {
 			flash.error("Non esiste situazione mensile per il mese di %s %s", 
 					DateUtility.fromIntToStringMonth(month), year);
 
-			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
-			return;
+			YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
+			stampings(last.getYear(), last.getMonthOfYear());
 		}
 
 		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
 		render(psDto) ;
-
 	}
 
 
@@ -109,11 +113,11 @@ public class Stampings extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		if(!personManager.isActiveInMonth(person, month, year, false))
-		{
-			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
-					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-			render("@redirectToIndex");
+		if(!personManager.isActiveInMonth(person, new YearMonth(year,month), false)) {
+			flash.error("Non esiste situazione mensile per il mese di %s", 
+					person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+			YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
+			personStamping(personId, last.getYear(), last.getMonthOfYear());
 		}
 
 		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
@@ -172,14 +176,9 @@ public class Stampings extends Controller {
 		stampingManager.addStamping(personDay, time, note, service, type, true);
 
 		final PersonDay giorno = personDay;
-
-		new Job() {
-			@Override
-			public void doJob() {
-				personDayManager.updatePersonDaysFromDate(giorno.person, giorno.date);
-
-			}
-		}.afterRequest();
+	
+		personDayManager.updatePersonDaysFromDate(giorno.person, giorno.date);
+		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(giorno.date));
 
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -224,14 +223,9 @@ public class Stampings extends Controller {
 
 			stamping.delete();
 			pd.stampings.remove(stamping);
-
-			new Job() {
-				@Override
-				public void doJob() {
-					personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
-
-				}
-			}.afterRequest();
+			
+			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+			contractMonthRecapManager.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));
 
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -245,15 +239,10 @@ public class Stampings extends Controller {
 		}
 
 		stampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
-
-		new Job() {
-			@Override
-			public void doJob() {
-				personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
-
-			}
-		}.afterRequest();
-
+		
+		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		contractMonthRecapManager.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));
+		
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());

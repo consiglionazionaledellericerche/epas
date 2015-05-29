@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
@@ -21,6 +22,7 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.jobs.Job;
@@ -49,11 +51,14 @@ public class Clocks extends Controller{
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
+	private static ContractMonthRecapManager contractMonthRecapManager;
+	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static PersonDayManager personDayManager;
 	@Inject
 	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
+
 
 	public static void show(){
 
@@ -80,7 +85,7 @@ public class Clocks extends Controller{
 	}
 
 
-	public static void clockLogin(Long userId, String password){
+	public static void clockLogin(Long userId, String password) {
 		LocalDate today = new LocalDate();
 		if(userId == null || userId == 0){
 
@@ -123,7 +128,7 @@ public class Clocks extends Controller{
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
 		int numberOfInOut = Math.max(minInOutColumn, personDayManager.numberOfInOutInPersonDay(personDay));
 
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut, null);
 
 		render(user, dayRecap, numberOfInOut);
 	}
@@ -188,13 +193,10 @@ public class Clocks extends Controller{
 
 		final PersonDay day = personDay;
 
-		new Job() {
-			@Override
-			public void doJob() {
-				personDayManager.updatePersonDaysFromDate(day.person, day.date);
-
-			}
-		}.afterRequest();
+		personDayManager.updatePersonDaysFromDate(day.person, day.date);
+		try {contractMonthRecapManager
+			.populateContractMonthRecapByPerson(person, new YearMonth(day.date));}
+		catch(Exception e) {}
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 
@@ -223,9 +225,7 @@ public class Clocks extends Controller{
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
 		int numberOfInOut = Math.max(minInOutColumn,  personDayManager.numberOfInOutInPersonDay(personDay));
 
-		//		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet();	
-		//		PersonStampingDayRecap.stampTypeSet = Sets.newHashSet();				
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut);
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut, null);
 
 		render(person, dayRecap, numberOfInOut);
 

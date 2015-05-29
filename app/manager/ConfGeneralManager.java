@@ -13,6 +13,7 @@ import play.cache.Cache;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 import dao.ConfGeneralDao;
 
@@ -157,8 +158,14 @@ public class ConfGeneralManager {
 	 * @param office
 	 * @return
 	 */
-	public LocalDate getLocalDateFieldValue(Parameter param, Office office) {
-		return new LocalDate(getFieldValue(param,office));
+	public Optional<LocalDate> getLocalDateFieldValue(Parameter param, Office office) {
+		try {
+			return Optional.fromNullable(new LocalDate(getFieldValue(param,office)));
+			
+		} catch(Exception e) {
+			return Optional.<LocalDate>absent(); 
+		}
+		
 	}
 
 	/**
