@@ -44,7 +44,6 @@
 		widht: 100%;
 	}
 	
-   
 @media (max-width: 767px) {
 
 	#tabellonetimbrature {
@@ -103,17 +102,20 @@
 		<th class="invisible"></th>
 		
 		<th class="group-single">Tempo<br>lavoro</th>
-		<th class="group-single">Diffe-</div><br/>renza</th>
+		<th class="group-single">Diffe-<br/>renza</th>
 		<th class="group-single">Progres-<br/>sivo</th>		
 		<th class="group-single">Tipo<br>Orario</th>
 		<th class="group-single">Note</th>
 	  </tr>
       
-      
+       
 	  
 	  #{list items:psDto.daysRecap, as:'dayRecap'}
-	  <tr>
-	    <td class="#{if dayRecap.holiday==false} capitalized #{/if} #{else} festivi #{/else} default-single">
+	    
+	  	<tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
+
+	  	<td class="#{if dayRecap.holiday==false} capitalized #{/if} #{else} festivi #{/else} default-single">
+	  	   #{if dayRecap.firstDay }F#{/if}
 	      <a data-toggle="modal" data-backdrop="true" href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-modal=".my-modal">
 		     ${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}
           </a>

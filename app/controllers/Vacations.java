@@ -18,7 +18,6 @@ import com.google.gdata.util.common.base.Preconditions;
 
 import dao.wrapper.IWrapperFactory;
 import dto.VacationsShowDto;
-import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{
@@ -46,32 +45,19 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 		
-		VacationsRecap vacationsRecap;
+		Optional<VacationsRecap> vacationsRecap;
 		Optional<VacationsRecap> vacationsRecapPrevious;
 		
-		try {
-			vacationsRecap = vacationsFactory.create(
+		vacationsRecap = vacationsFactory.create(
 					year, contract.get(), LocalDate.now(), true);
-	
-		} catch (EpasExceptionNoSourceData e) {
-			
-			flash.error("L'anno %s è al di fuori del contratto "
-					+ "oppure mancano i dati di inizializzazione.", year);
-			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
-			return;
-		}
 		
-		try {
-			vacationsRecapPrevious = Optional.fromNullable(
-					vacationsFactory.create(year-1, contract.get(), 
-							new LocalDate(year-1,12,31), true));
-		}
-		catch (EpasExceptionNoSourceData e) {
-			vacationsRecapPrevious = Optional.absent();
-		}
+		Preconditions.checkState(vacationsRecap.isPresent());
 		
-		VacationsShowDto vacationShowDto = 
-		VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
+		vacationsRecapPrevious = vacationsFactory.create(year-1, contract.get(), 
+							new LocalDate(year-1,12,31), true);
+		
+		VacationsShowDto vacationShowDto = VacationsShowDto
+				.build(year, vacationsRecap.get(), vacationsRecapPrevious);
 
 		render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
 	
@@ -91,17 +77,14 @@ public class Vacations extends Controller{
 		
 		Preconditions.checkState(contract.isPresent());
 		
-		try {
-			
-			VacationsRecap vacationsRecap = vacationsFactory.create(
-					anno, contract.get(), LocalDate.now(), true);
-			render(vacationsRecap);
-			
-		} catch (EpasExceptionNoSourceData e) {
+		Optional<VacationsRecap> vr = vacationsFactory.create(
+				anno, contract.get(), LocalDate.now(), true);
+	
+		Preconditions.checkState(vr.isPresent());
 
-			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
-			renderTemplate("Application/indexAdmin.html");
-		}
+		VacationsRecap vacationsRecap = vr.get();
+		
+		render(vacationsRecap);
 
 	}
 	
@@ -119,19 +102,15 @@ public class Vacations extends Controller{
 				.getCurrentContract();
 		
 		Preconditions.checkState(contract.isPresent());
-		
-		try {
 			
-			VacationsRecap vacationsRecap = vacationsFactory.create(
+		Optional<VacationsRecap> vr = vacationsFactory.create(
 					anno, contract.get(), LocalDate.now(), true);
-			render(vacationsRecap);
-			
-		} catch (EpasExceptionNoSourceData e) {
+		
+		Preconditions.checkState(vr.isPresent());
 
-			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
-			renderTemplate("Application/indexAdmin.html");
-		}
-
+		VacationsRecap vacationsRecap = vr.get();
+		
+		render(vacationsRecap);
 	}
 	
 	
@@ -147,18 +126,15 @@ public class Vacations extends Controller{
 				.getCurrentContract();
 		
 		Preconditions.checkState(contract.isPresent());
-		
-		try {
-			
-			VacationsRecap vacationsRecap = vacationsFactory.create(
-					anno, contract.get(), LocalDate.now(), true);
-			render(vacationsRecap);
-			
-		} catch (EpasExceptionNoSourceData e) {
 
-			flash.error("Mancano i dati di inizializzazione. Effettuare una segnalazione.");
-			renderTemplate("Application/indexAdmin.html");
-		}
+		Optional<VacationsRecap> vr = vacationsFactory.create(
+				anno, contract.get(), LocalDate.now(), true);
+	
+		Preconditions.checkState(vr.isPresent());
+
+		VacationsRecap vacationsRecap = vr.get();
+		
+		render(vacationsRecap);
 	}
 	
 }

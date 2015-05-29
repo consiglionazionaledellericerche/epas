@@ -18,6 +18,7 @@ public class WrapperConfigure extends AbstractModule {
      		.implement(IWrapperCompetenceCode.class, WrapperCompetenceCode.class)
      		.implement(IWrapperOffice.class, WrapperOffice.class)
      		.implement(IWrapperPersonDay.class, WrapperPersonDay.class)
+     		.implement(IWrapperContractMonthRecap.class, WrapperContractMonthRecap.class)
      		.implement(IWrapperContractWorkingTimeType.class, WrapperContractWorkingTimeType.class)
 	     	.build(IWrapperFactory.class));
 	}
