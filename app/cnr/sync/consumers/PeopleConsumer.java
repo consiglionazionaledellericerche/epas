@@ -15,13 +15,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class PeopleConsumer {
-	
+
+	private final String URL_BASE = Play.configuration.getProperty("perseo.base");
+	private final String PEOPLE_ENDPOINT = Play.configuration.getProperty("perseo.rest.people");
+
 	public ListenableFuture<PersonDTO> getPerson(int id) throws IllegalStateException{
-		String urlBase = Play.configuration.getProperty("perseo.base");
-		String endpointPeople = Play.configuration.getProperty("perseo.rest.people");
-		
+
 		ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
-				.listenInPoolThread(WS.url(urlBase+endpointPeople+id).getAsync());
+				.listenInPoolThread(WS.url(URL_BASE+PEOPLE_ENDPOINT+id).getAsync());
 		return Futures.transform(future, new Function<WS.HttpResponse, PersonDTO>() {
 			@Override
 			public PersonDTO apply(WS.HttpResponse response) {
@@ -32,14 +33,12 @@ public class PeopleConsumer {
 			}
 		});
 	}
-	
+
 	public ListenableFuture<List<SimplePersonDTO>> getPeople() throws IllegalStateException{
-		String urlBase = Play.configuration.getProperty("perseo.base");
-		String endpointPeople = Play.configuration.getProperty("perseo.rest.people");
-		
+
 		ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
-				.listenInPoolThread(WS.url(urlBase+endpointPeople+"list").getAsync());
-		
+				.listenInPoolThread(WS.url(URL_BASE+PEOPLE_ENDPOINT+"list").getAsync());
+
 		return Futures.transform(future, new Function<WS.HttpResponse, List<SimplePersonDTO>>() {
 			@Override
 			public List<SimplePersonDTO> apply(WS.HttpResponse response) {
@@ -48,6 +47,24 @@ public class PeopleConsumer {
 				}
 				return new Gson().fromJson(response.getJson(),
 						new TypeToken<List<SimplePersonDTO>>() {}.getType());
+			}
+		});
+	}
+	
+	public ListenableFuture<PersonDTO> departmentPeople(String codeId) throws IllegalStateException{
+		
+		final String url = URL_BASE+PEOPLE_ENDPOINT+
+				"peopleByDepartments?departmentCode="+codeId;
+				
+		ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+				.listenInPoolThread(WS.url(url).getAsync());
+		return Futures.transform(future, new Function<WS.HttpResponse, PersonDTO>() {
+			@Override
+			public PersonDTO apply(WS.HttpResponse response) {
+				if (!response.success()) {
+					throw new IllegalStateException("not found");
+				}
+				return new Gson().fromJson(response.getJson(), PersonDTO.class);
 			}
 		});
 	}

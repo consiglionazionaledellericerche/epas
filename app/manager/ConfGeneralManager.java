@@ -123,7 +123,7 @@ public class ConfGeneralManager {
 
 		String key = param.description + office.codeId;
 
-		String value = (String)Cache.get(key);
+		String value = Cache.get(key,String.class);
 
 		if(value == null){
 

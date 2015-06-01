@@ -86,22 +86,13 @@ then
 end
 
 /*
- * Azioni eseguibili da utente con permesso developer
+ * Azioni eseguibili da utente con permesso developer (tutto)
  */
 rule developer
 when
  $uro: UsersRolesOffices()
  $p: Permission(description == "developer") from $uro.role.permissions
- $c: PermissionCheck(action in (
-
-        "Administration.utilities",
-        "Administration.fixPersonSituation",
-        "Administration.deleteUncoupledStampings",
-        "Administration.updateExceedeMinInCompetenceTable",
-        "Administrators.switchUserTo",
-        "Persons.list"
-        
-       ), target == null, granted == false)
+ $c: PermissionCheck( granted == false)
 then
  $c.grant();
 end

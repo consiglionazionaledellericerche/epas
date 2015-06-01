@@ -62,8 +62,6 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import dao.wrapper.IWrapperWorkingTimeType;
-import dao.wrapper.WrapperContract;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import exceptions.EpasExceptionNoSourceData;
 

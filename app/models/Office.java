@@ -42,7 +42,7 @@ public class Office extends BaseModel{
     public String address = "";
     
     @Column(name = "codeId")
-    public Integer codeId;
+    public String codeId;
     
     @Column(name="joining_date")
     public LocalDate joiningDate;

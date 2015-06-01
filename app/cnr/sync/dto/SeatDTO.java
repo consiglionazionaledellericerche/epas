@@ -19,8 +19,10 @@ public class SeatDTO {
 		@Override
 			public Office apply(SeatDTO seatDTO){
 				Office office = new Office();
-				office.name = seatDTO.institute.code +" - "+seatDTO.name;
-				office.codeId = Integer.parseInt(seatDTO.codeId);
+				office.name = seatDTO.institute.code != null ? 
+						seatDTO.institute.code  +" - "+seatDTO.name
+						: seatDTO.name;
+				office.codeId = seatDTO.codeId;
 				office.code = seatDTO.code;
 				return office;
 		}

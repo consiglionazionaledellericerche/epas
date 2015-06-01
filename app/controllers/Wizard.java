@@ -483,7 +483,7 @@ public class Wizard extends Controller {
 			seat.address = properties.getProperty("seat_address");
 		}
 		try{
-			seat.codeId = Integer.decode(properties.getProperty("seat_code"));	
+			seat.codeId = properties.getProperty("seat_code");	
 		}
 		catch(Exception f){
 			Logger.error("Errore nel parsing dal Wizard_Properties.conf: %s", f);	

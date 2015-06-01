@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import play.Logger;
 import models.Office;
 import cnr.sync.dto.InstituteDTO;
 import cnr.sync.dto.SeatDTO;
@@ -20,7 +21,7 @@ public class RestOfficeManager {
 	
 	@Inject
 	private OfficeDao officeDao;
-
+	
 	public void saveImportedSeats(Collection<SeatDTO> seatsDTO){
 
 		Preconditions.checkNotNull(seatsDTO);
@@ -46,16 +47,20 @@ public class RestOfficeManager {
 		
 		for(Office institute : institutes){
 			institute.office = mainArea;
-			institute.save();
+//			institute.save();
+			Logger.info("Importato Istituto %s", institute.name);
 		}
 		
 		for(SeatDTO seatDTO : seatsDTO){
 			Office seat = new Office();
-			seat.name = seatDTO.institute.code +" - "+seatDTO.name;
-			seat.codeId = Integer.parseInt(seatDTO.codeId);
+			seat.name = seatDTO.institute.code != null ? 
+					seatDTO.institute.code  +" - "+seatDTO.name
+					: seatDTO.name;
+			seat.codeId = seatDTO.codeId;
 			seat.code = seatDTO.code;
 			seat.office = Office.find("byCds", seatDTO.institute.cds).first();
-			seat.save();			
+			Logger.info("Importata Sede %s", seat.name);
+//			seat.save();			
 		}
 		
 	}

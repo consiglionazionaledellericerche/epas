@@ -108,12 +108,12 @@ public class OfficeDao extends DaoBase {
 	 * @param code
 	 * @return l'ufficio associato al codice passato come parametro
 	 */
-	public Optional<Office> getOfficeByCode(Integer code){
+	public Optional<Office> getOfficeByCode(String codeId){
 
 		final QOffice office = QOffice.office1;
 
 		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.codeId.eq(code));
+				.where(office.codeId.eq(codeId));
 		return Optional.fromNullable(query.singleResult(office));
 
 	}
@@ -123,12 +123,12 @@ public class OfficeDao extends DaoBase {
 	 * @param code
 	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
 	 */
-	public List<Office> getOfficesByCode(Integer code){
+	public List<Office> getOfficesByCode(String codeId){
 
 		final QOffice office = QOffice.office1;
 
 		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.codeId.eq(code));
+				.where(office.codeId.eq(codeId));
 		return query.list(office);
 	}
 
