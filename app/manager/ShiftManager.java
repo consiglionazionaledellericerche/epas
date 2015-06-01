@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -16,15 +17,29 @@ import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
+import models.PersonReperibility;
+import models.PersonReperibilityDay;
+import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
+import models.ShiftCategories;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
+import models.query.QCompetence;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.Version;
 
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
@@ -35,6 +50,7 @@ import play.i18n.Messages;
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.mysema.query.jpa.JPQLQuery;
 
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
@@ -341,7 +357,7 @@ public class ShiftManager {
 
 			// compute the hours appproved and the exceede minutes on the basis of
 			// the current worked minutes and the exceeded mins of the previous month
-			apprHoursAndExcMins = shiftDao.calcShiftValueApproved(person, year, month, workedMins);
+			apprHoursAndExcMins = calcShiftValueApproved(person, year, month, workedMins);
 
 			// compute the value requested
 			BigDecimal reqHours = competenceUtility.calcDecimalShiftHoursFromMinutes(workedMins);
@@ -361,8 +377,6 @@ public class ShiftManager {
 				//CertificatedData certData = CertificatedData.find("SELECT cd FROM CertificatedData cd WHERE cd.person = ? AND cd.year = ? AND cd.month = ?", person, year, month).first();
 
 				//Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
-
-				Logger.debug("certData=%s certData.isOk=%s certData.competencesSent=%s", certData, certData.isOk, certData.competencesSent);
 
 				int apprHours = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().valueApproved : apprHoursAndExcMins[0];
 				int exceededMins = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().exceededMins : apprHoursAndExcMins[1];
@@ -547,4 +561,152 @@ public class ShiftManager {
 			//Logger.debug("trovato turno cancellato di tipo %s del %s", type, sc.date);
 		}
 	}
+	
+	/*
+	 * @author arianna
+	 * Calcola le ore di turno da approvare date quelle richieste.
+	 * Poich√® le ore approvate devono essere un numero intero e quelle
+	 * calcolate direttamente dai giorni di turno possono essere decimali,
+	 * le ore approvate devono essere arrotondate per eccesso o per difetto a seconda dell'ultimo
+	 * arrotondamento effettuato in modo che questi vengano alternati 
+	 */
+	public int[] calcShiftValueApproved(Person person, int year, int month, int requestedMins) {
+		int hoursApproved = 0;
+		int exceedMins = 0;
+		int oldExceedMins = 0;
+
+
+		Logger.debug("Nella calcShiftValueApproved person =%s, year=%s, month=%s, requestedMins=%s)", person, year, month, requestedMins);
+
+		String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(requestedMins);
+		int hoursOfWorkedTime = Integer.parseInt(workedTime.split("\\.")[0]);
+		int minsOfWorkedTime = Integer.parseInt(workedTime.split("\\.")[1]);
+
+		Logger.debug("hoursOfWorkedTime = %s minsOfWorkedTime = %s", hoursOfWorkedTime, minsOfWorkedTime);
+
+		// get the Competence code for the ordinary shift  
+		CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
+		//CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
+
+		Logger.debug("month=%s", month);
+		
+		/*final QCompetence com = new QCompetence("competence");
+		final JPQLQuery query = getQueryFactory().query();
+		final Competence myCompetence = query
+				.from(com)
+				.where(
+						com.person.eq(person)
+						.and(com.year.eq(year))
+						.and(com.month.lt(month))
+						.and(com.competenceCode.eq(competenceCode))		
+						)
+						.orderBy(com.month.desc())
+						.limit(1)
+						.uniqueResult(com);*/
+		Competence myCompetence = competenceDao.getLastPersonCompetenceInYear(person, year, month, competenceCode);
+
+		//Logger.debug("prendo i minuti in eccesso dal mese %s", myCompetence.getMonth());
+
+		// get the old exceede mins in the DB
+		oldExceedMins = ((myCompetence == null) || ((myCompetence != null) && myCompetence.getExceededMin() == null)) ? 0 : myCompetence.getExceededMin();
+
+		Logger.debug("oldExceedMins in the DB=%s", oldExceedMins);
+
+
+		// if there are no exceeded mins, the approved hours 
+		// match with the worked hours
+		if (minsOfWorkedTime == 0) {
+			hoursApproved = hoursOfWorkedTime;
+			exceedMins = oldExceedMins;
+
+			//Logger.debug("minsOfWorkedTime == 0 , hoursApproved=%s exceedMins=%s", hoursApproved, exceedMins);
+		} else {		
+			// check if the exceeded mins of this month plus those
+			// worked in the previous months make up an hour
+			exceedMins = oldExceedMins + minsOfWorkedTime;
+			if (exceedMins >= 60) {
+				hoursApproved = hoursOfWorkedTime + 1;
+				exceedMins -= 60; 
+			} else {
+				hoursApproved = hoursOfWorkedTime;
+			}
+
+			//Logger.debug("minsOfWorkedTime = %s , hoursApproved=%s exceedMins=%s", minsOfWorkedTime, hoursApproved, exceedMins);
+		}
+
+		Logger.debug("hoursApproved=%s exceedMins=%s", hoursApproved, exceedMins);
+
+		int[] result = {hoursApproved, exceedMins};
+
+		Logger.debug("La calcShiftValueApproved restituisce %s", result);
+
+		return result;
+	}
+	
+	
+	public Calendar createicsReperibilityCalendar(int year, String type, List<PersonShift> personsInTheCalList) {
+		List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
+		
+		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personsInTheCalList);
+		ShiftCategories shiftCategory = shiftDao.getShiftCategoryByType(type);
+		String eventLabel = "Turno ".concat(shiftCategory.description).concat(": ");
+
+		// Create a calendar
+		//---------------------------       
+		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+		icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
+		icsCalendar.getProperties().add(CalScale.GREGORIAN);
+		icsCalendar.getProperties().add(Version.VERSION_2_0);
+
+		// read the person(0) shift days for the year
+		//-------------------------------------------------
+		LocalDate from = new LocalDate(year, 1, 1);
+		LocalDate to = new LocalDate(year, 12, 31);
+
+		ShiftType shiftType = shiftDao.getShiftTypeByType(type);
+		
+		// if the listis empty, load the entire shift days
+		if (personsInTheCalList.isEmpty()) {
+			personShiftDays = shiftDao.getShiftDaysByPeriodAndType(from, to, shiftType);	
+			Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, type, personShiftDays.size());
+		}
+		else {
+		// load the shift days of the person in the list
+			personShiftDays = shiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType, personsInTheCalList.get(0).person);	
+			Logger.debug("Shift find called from %s to %s, type %s person %s - found %s shift days", from, to, type, personsInTheCalList.get(0).person.surname, personShiftDays.size());
+		}
+
+		Date startDate = null;
+		Date endDate = null;
+
+		for (PersonShiftDay psd : personShiftDays) {
+			
+					
+			LocalTime startShift = (psd.shiftSlot.equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.startMorning : psd.shiftType.shiftTimeTable.startAfternoon;
+			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
+			
+			//LocalDate startDate = psd.date;
+			
+			Date date = new Date(psd.date.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());			
+			
+					
+			Logger.trace("Data turno per %s, date=%s", psd.personShift.person.surname, date);
+
+			String label = eventLabel.concat(psd.personShift.person.surname);
+			startDate = endDate = date;
+			icsCalendar.getComponents().add(createICalEvent(startDate, endDate, label));
+			continue;
+		}	
+
+		return icsCalendar;
+	}
+
+
+	private VEvent createICalEvent(Date startDate, Date endDate, String eventLabel) {
+		VEvent shiftDay = new VEvent(startDate, endDate, eventLabel);
+		shiftDay.getProperties().add(new Uid(UUID.randomUUID().toString()));
+
+		return shiftDay;
+	}
+	
 }
