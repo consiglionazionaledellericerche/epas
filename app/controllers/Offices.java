@@ -113,7 +113,7 @@ public class Offices extends Controller {
 		render("@editSeat",institute);
 	}
 
-	public static void saveSeat(Office institute,@Valid Office seat,@Required int codeId) {
+	public static void saveSeat(Office institute,@Valid Office seat,@Required String codeId) {
 
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente tutti i campi! operazione annullata.");

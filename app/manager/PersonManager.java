@@ -26,17 +26,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cnr.sync.dto.DepartmentDTO;
-import cnr.sync.dto.PersonRest;
-
-import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-
-import play.Play;
 import play.db.jpa.JPA;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;

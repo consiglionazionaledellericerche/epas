@@ -6,19 +6,12 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
-import play.Logger;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
 import play.mvc.Controller;
 import cnr.sync.consumers.PeopleConsumer;
 import cnr.sync.dto.PersonDTO;
 import cnr.sync.dto.SimplePersonDTO;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 
 
 public class ConsumerTest extends Controller{

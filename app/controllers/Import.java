@@ -1,8 +1,7 @@
-package cnr.sync.controllers;
+package controllers;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -12,17 +11,12 @@ import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 import cnr.sync.consumers.OfficeConsumer;
-import cnr.sync.dto.InstituteDTO;
 import cnr.sync.dto.SeatDTO;
 import cnr.sync.manager.RestOfficeManager;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import controllers.RequestInit;
-import controllers.Resecure;
 
 
 @With( {Resecure.class, RequestInit.class} )
@@ -39,8 +33,6 @@ public class Import extends Controller{
 		
 		List<SeatDTO> importedOffices = Lists.newArrayList();
 		
-		Cache.add(IMPORTED_OFFICES, importedOffices);
-		
 		try {
 			importedOffices = officeConsumer.getOffices().get();
 		} catch (IllegalStateException | InterruptedException
@@ -48,6 +40,8 @@ public class Import extends Controller{
 			flash.error("Impossibile recuperare la lista degli istituti da Perseo");
 			e.printStackTrace();
 		}
+		
+		Cache.add(IMPORTED_OFFICES, importedOffices);
 		
 		render(importedOffices);
 	}		
@@ -79,8 +73,10 @@ public class Import extends Controller{
 					}
 				});
 		
+		Logger.info("id istituti: %s", filteredOffices);
 		restOfficeManager.saveImportedSeats(filteredOffices);
 		
+		Offices.showOffices();
 	
 	}
 

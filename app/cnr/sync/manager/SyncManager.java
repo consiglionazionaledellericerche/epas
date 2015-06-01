@@ -1,34 +1,19 @@
 package cnr.sync.manager;
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 
-import manager.ConfGeneralManager;
-import manager.PersonDayManager;
-import models.AbsenceType;
-import models.ConfGeneral;
-import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
-import models.PersonChildren;
-import models.PersonDay;
-import models.PersonYear;
-import models.User;
 
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
 import cnr.sync.dto.DepartmentDTO;
 import cnr.sync.dto.PersonRest;
 
@@ -36,16 +21,8 @@ import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
-import play.Play;
-import play.db.jpa.JPA;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
-import dao.ContractDao;
 import dao.OfficeDao;
-import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPersonDay;
 
 public class SyncManager {
 
