@@ -25,7 +25,6 @@ import models.Person;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
-import exceptions.EpasExceptionNoSourceData;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -94,7 +93,7 @@ public class Absences extends Controller{
 			}
 			renderJSON(list);
 		}
-		catch(EpasExceptionNoSourceData e){
+		catch(Exception e){
 			JsonResponse.badRequest("Errore nei parametri passati al server");
 		}
 		
