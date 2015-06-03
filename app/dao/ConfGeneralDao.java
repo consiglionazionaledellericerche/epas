@@ -62,10 +62,11 @@ public class ConfGeneralDao extends DaoBase{
 	/**
 	 * @param field
 	 * @param value
-	 * @return restituisce la lista di tutti i confGeneral che nel parametro field, contengono il valore value
+	 * @return restituisce la lista di tutti i confGeneral 
+	 * che nel parametro field, contengono il valore value
 	 *  
 	 */
-	public List<ConfGeneral> containsValue(String field,String value){
+	public List<ConfGeneral> containsValue(String field, String value){
 		
 		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
 		

@@ -6,6 +6,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -18,12 +20,12 @@ import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 
 import dao.ContractDao;
 import dao.PersonDao;
@@ -31,7 +33,6 @@ import dao.PersonDayDao;
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 /**
  * 
@@ -47,7 +48,7 @@ public class ContractManager {
 			ConsistencyManager consistencyManager, 
 			PersonDayDao personDayDao,
 			PersonDayManager personDayManager,
-			ContractYearRecapManager contractYearRecapManager,
+			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
 			ContractDao contractDao, 
@@ -57,27 +58,51 @@ public class ContractManager {
 		this.consistencyManager = consistencyManager;
 		this.personDayDao = personDayDao;
 		this.personDayManager = personDayManager;
-		this.contractYearRecapManager = contractYearRecapManager;
+		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
 		this.contractDao = contractDao;
 		this.personDao = personDao;
 	}
 
-	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
-
 	private final ConfGeneralManager confGeneralManager;
 	private final ConsistencyManager consistencyManager;
 	private final PersonDayDao personDayDao;
 	private final PersonDayManager personDayManager;
-	private final ContractYearRecapManager contractYearRecapManager;
+	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final IWrapperFactory wrapperFactory;
 	private final VacationCodeDao vacationCodeDao;
 	private final ContractDao contractDao;
 	private final PersonDao personDao;
+	
+	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
+	
 	/**
-	 * Validatore per il contratto. Controlla la consistenza delle date all'interno del contratto
-	 * e la coerenza con gli altri contratti della persona.
+	 * True se il contratto non si interseca con nessun 
+	 * altro contratto per la persona. False altrimenti
+	 * @return
+	 */
+	public boolean isProperContract(Contract contract) {
+
+		DateInterval contractInterval = wrapperFactory
+				.create(contract).getContractDateInterval();
+		for(Contract c : contract.person.contracts) {
+
+			if(contract.id != null && c.id.equals(contract.id)) {
+				continue;
+			}
+
+			if(DateUtility.intervalIntersection(contractInterval, 
+					wrapperFactory.create(c).getContractDateInterval()) != null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Validatore per il contratto. Controlla la consistenza delle date 
+	 * all'interno del contratto e la coerenza con gli altri contratti della persona.
 	 * @param contract
 	 * @return
 	 */
@@ -108,10 +133,22 @@ public class ContractManager {
 	 * (2) Il periodo con tipo orario Normale per la durata del contratto
 	 * (3) Il periodo con timbratura default impostata a false.
 	 * 
+	 * Effettua la recompute.
+	 * 
 	 * @param contract
 	 */
-	public void properContractCreate(Contract contract, WorkingTimeType wtt) {
+	public boolean properContractCreate(Contract contract, WorkingTimeType wtt) {
 
+		if ( !contractCrossFieldValidation(contract)) {
+			return false;
+		}
+		
+		if ( !isProperContract(contract) ) { 
+			return false;
+		}
+		
+		contract.save();
+		
 		buildVacationPeriods(contract);
 
 		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
@@ -120,6 +157,7 @@ public class ContractManager {
 		cwtt.workingTimeType = wtt;
 		cwtt.contract = contract;
 		cwtt.save();
+		contract.contractWorkingTimeType.add(cwtt);
 
 		ContractStampProfile csp = new ContractStampProfile();
 		csp.contract = contract;
@@ -127,7 +165,18 @@ public class ContractManager {
 		csp.endTo = contract.expireContract;
 		csp.fixedworkingtime = false;
 		csp.save();
+		contract.contractStampProfile.add(csp);
+		
 		contract.save();
+		
+		// FIXME: comando JPA per aggiornale la person
+		contract.person.contracts.add(contract);
+		
+		//Aggiornamento stato contratto
+		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
+		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		
+		return true;
 
 	}
 
@@ -137,6 +186,8 @@ public class ContractManager {
 	 * (2) Il periodo con tipo orario Normale per la durata del contratto
 	 * (3) Il periodo con timbratura default impostata a false.
 	 * 
+	 * Effettua la recomputeContract.
+	 * 
 	 * @param contract
 	 */
 	public void properContractUpdate(Contract contract) {
@@ -144,27 +195,10 @@ public class ContractManager {
 		buildVacationPeriods(contract);
 		updateContractWorkingTimeType(contract);
 		updateContractStampProfile(contract);
-	}
-
-	/**
-	 * Ritorna l'intervallo valido ePAS per il contratto. 
-	 * (scarto la parte precedente a source contract se definita)
-	 * @return
-	 */
-	public DateInterval getContractDatabaseDateInterval(Contract contract) {
-
-		if(contract.sourceDate != null && contract.sourceDate.isAfter(contract.beginContract)) {
-
-			DateInterval contractInterval;
-			if(contract.endContract!=null)
-				contractInterval = new DateInterval(contract.sourceDate, contract.endContract);
-			else
-				contractInterval = new DateInterval(contract.sourceDate, contract.expireContract);
-			return contractInterval;
-		}
-
-		return wrapperFactory.create(contract).getContractDateInterval();
-
+		
+		//Aggiornamento stato contratto
+		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
+		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 	}
 
 	/**
@@ -180,9 +214,8 @@ public class ContractManager {
 	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
 	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
 	 *   modifica la data fine che potrebbe non essere persistita)
-	 * @throws EpasExceptionNoSourceData 
 	 */
-	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) throws EpasExceptionNoSourceData {
+	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
@@ -191,7 +224,7 @@ public class ContractManager {
 		LocalDate date = contract.beginContract;
 		if(date.isBefore(initUse))
 			date = initUse;
-		DateInterval contractInterval = getContractDatabaseDateInterval(contract);
+		DateInterval contractInterval = wrapperFactory.create(contract).getContractDatabaseInterval();
 		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
 			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
 		}
@@ -244,9 +277,9 @@ public class ContractManager {
 
 		log.info("Calcolato il riepilogo per il contratto {}",contract);
 
-		//(3) Ricalcolo dei riepiloghi annuali
-		contractYearRecapManager.buildContractYearRecap(contract);
-
+		//(3) Ricalcolo dei riepiloghi mensili
+		contractMonthRecapManager.populateContractMonthRecapByPerson(contract.person,
+				new YearMonth(contractInterval.getBegin()));
 
 	}
 
@@ -258,44 +291,48 @@ public class ContractManager {
 	 */
 	private void buildVacationPeriods(Contract contract){
 
+		// FIXME: Distruggere o aggiornare quelli precedenti
+		
 		//Tempo indeterminato, creo due vacatio 3 anni più infinito
-		if(contract.expireContract == null)
-		{
+		if(contract.expireContract == null) {
 
 			VacationPeriod first = new VacationPeriod();
 			first.beginFrom = contract.beginContract;
 			first.endTo = contract.beginContract.plusYears(3).minusDays(1);
 			first.vacationCode = vacationCodeDao.getVacationCodeByDescription("26+4");
-			//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 			first.contract = contract;
 			first.save();
+			contract.vacationPeriods.add(first);
+			
 			VacationPeriod second = new VacationPeriod();
 			second.beginFrom = contract.beginContract.plusYears(3);
 			second.endTo = null;
 			second.vacationCode = vacationCodeDao.getVacationCodeByDescription("28+4");
-			//second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
 			second.contract = contract;
 			second.save();
+			contract.vacationPeriods.add(second);
 			contract.save();
 			return;
 		}
 
 		//Tempo determinato più lungo di 3 anni
 		if(contract.expireContract.isAfter(contract.beginContract.plusYears(3).minusDays(1))){
+			
 			VacationPeriod first = new VacationPeriod();
 			first.beginFrom = contract.beginContract;
 			first.endTo = contract.beginContract.plusYears(3).minusDays(1);
 			first.vacationCode = vacationCodeDao.getVacationCodeByDescription("26+4");
-			//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 			first.contract = contract;
 			first.save();
+			contract.vacationPeriods.add(first);
+			
 			VacationPeriod second = new VacationPeriod();
 			second.beginFrom = contract.beginContract.plusYears(3);
 			second.endTo = contract.expireContract;
 			second.vacationCode = vacationCodeDao.getVacationCodeByDescription("28+4");
-			//second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
 			second.contract = contract;
 			second.save();
+			contract.vacationPeriods.add(second);
 			contract.save();
 			return;
 		}
@@ -306,8 +343,8 @@ public class ContractManager {
 		first.endTo = contract.expireContract;
 		first.contract = contract;
 		first.vacationCode = vacationCodeDao.getVacationCodeByDescription("26+4");
-		//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 		first.save();
+		contract.vacationPeriods.add(first);
 		contract.save();
 	}
 
@@ -441,25 +478,7 @@ public class ContractManager {
 
 	}
 
-	/**
-	 * True se il contratto non si interseca con nessun altro contratto per la persona. False altrimenti
-	 * @return
-	 */
-	public boolean isProperContract(Contract contract) {
-
-		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
-		for(Contract c : contract.person.contracts) {
-
-			if(contract.id != null && c.id.equals(contract.id)) {
-				continue;
-			}
-
-			if(DateUtility.intervalIntersection(contractInterval, wrapperFactory.create(c).getContractDateInterval()) != null) {
-				return false;
-			}
-		}
-		return true;
-	}
+	
 
 	/**
 	 * 
@@ -476,37 +495,6 @@ public class ContractManager {
 		contract.save();
 
 	}
-
-	/**
-	 * 
-	 * @param dataInizio
-	 * @param dataFine
-	 * @param onCertificate
-	 * @param person
-	 * @param wtt
-	 * @return una stringa contenente il messaggio da passare al template nel caso di impossibilità a inserire un contratto nuovo.
-	 * Stringa vuota altrimenti che corrisponde al corretto inserimento del contratto
-	 */
-	public String saveContract(LocalDate dataInizio, LocalDate dataFine, boolean onCertificate, Person person, WorkingTimeType wtt){
-		String result = "";
-		Contract contract = new Contract();
-		contract.beginContract = dataInizio;
-		contract.expireContract = dataFine;
-		contract.onCertificate = onCertificate;
-		contract.person = person;
-
-		//Date non si sovrappongono con gli altri contratti della persona
-		if( !isProperContract(contract) ) {
-
-			result = "Il nuovo contratto si interseca con contratti precedenti. Controllare le date di inizio e fine. Operazione annullata.";
-			return result;
-		}
-
-		contract.save();
-		properContractCreate(contract, wtt);
-		return result;
-	}
-
 
 	/**
 	 * Utilizzata nel metodo delete del controller Persons, elimina contratti, orari di lavoro e stamp profile

@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import models.Person;
+import models.User;
 import models.exports.ReportFromJson;
 
 import org.apache.commons.mail.EmailAttachment;
@@ -15,6 +16,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 
 import play.Logger;
+import play.Play;
 import play.data.binding.As;
 import play.libs.Mail;
 import play.mvc.Controller;
@@ -30,7 +32,8 @@ public class ReportCentre extends Controller{
 		}
 
 		try {
-			Person person = Security.getUser().get().person;
+			User userLogged = Security.getUser().get();
+			Person person = userLogged.person;
 			File theDir = new File("/tmp/immagini-mail/");
 			if(!theDir.exists())
 			{	
@@ -44,15 +47,16 @@ public class ReportCentre extends Controller{
 			else{
 				Logger.debug("Cartella esistente");
 			}
+			String path = person != null ? "/tmp/immagini-mail/image"+person.id+".png"
+					: "/tmp/immagini-mail/image"+userLogged.username+".png";
 			
-			FileOutputStream imageOutFile = new FileOutputStream(
-					"/tmp/immagini-mail/image"+person.id+".png");
+			FileOutputStream imageOutFile = new FileOutputStream(path);
 			imageOutFile.write(body.image); 
 
 			imageOutFile.close();
 
 			EmailAttachment attachment = new EmailAttachment();
-			attachment.setPath("/tmp/immagini-mail/image"+person.id+".png");
+			attachment.setPath(path);
 			attachment.setDisposition(EmailAttachment.ATTACHMENT);
 			attachment.setDescription("Foto anomalia");
 			attachment.setName("Foto");
@@ -60,16 +64,19 @@ public class ReportCentre extends Controller{
 			MultiPartEmail email = new MultiPartEmail();
 
 			email.addTo("epas@iit.cnr.it");
-			email.setFrom("segnalazioni@epas.tools.iit.cnr.it");
-			if(!person.email.equals(""))
+//			FIXME rendere configurabile quest'indirizzo!!
+			
+			email.setFrom(Play.configuration.getProperty("application.mail.address"));
+			if(person != null && !person.email.equals(""))
 				email.addReplyTo(person.email);
 			email.attach(attachment);
 
 			email.setSubject("Segnalazione malfunzionamento ");
-			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+body.url+" visitata da: "+person.name+" "+person.surname+'\n'+"Con il seguente messaggio: "+body.note);
+			
+			String sender = person != null ? person.fullName() : userLogged.username;
+			
+			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+body.url+" visitata da: "+sender+'\n'+"Con il seguente messaggio: "+body.note);
 			Mail.send(email); 
-
-
 
 		} catch (EmailException e) {
 			Logger.error("Errore in invio mail. %s", e.toString());
@@ -82,8 +89,6 @@ public class ReportCentre extends Controller{
 
 		}		
 
-
 	}
-
 
 }

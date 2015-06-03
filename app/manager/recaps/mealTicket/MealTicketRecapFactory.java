@@ -1,6 +1,11 @@
 package manager.recaps.mealTicket;
 
+import it.cnr.iit.epas.DateInterval;
+
 import javax.inject.Inject;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import manager.MealTicketManager;
 import models.Contract;
@@ -32,10 +37,19 @@ public class MealTicketRecapFactory {
 	 * @param year
 	 * @return
 	 */
-	public MealTicketRecap create(Contract contract) {
+	public Optional<MealTicketRecap> create(Contract contract) {
 
-		return new MealTicketRecap(mealTicketManager,
-				personDao, mealTicketDao, contract);
+		Preconditions.checkNotNull(contract);
+		
+		Optional<DateInterval> dateInterval = mealTicketManager
+				.getContractMealTicketDateInterval(contract);
+		
+		if (!dateInterval.isPresent()) {
+			return Optional.<MealTicketRecap>absent();
+		}
+		
+		return Optional.fromNullable( new MealTicketRecap(mealTicketManager,
+				personDao, mealTicketDao, contract, dateInterval.get()) );
 	}
 
 }

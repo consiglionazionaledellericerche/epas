@@ -9,6 +9,8 @@ fi
 
 EPAS_HOST=${VIRTUAL_HOST}
 
+EMAIL_EPAS=${EMAIL_EPAS:-epas@cnr.it}
+
 chown -R epas:epas /home/epas
 
 HTTPS=${HTTPS:-false}
@@ -86,6 +88,7 @@ sudo -u epas -H sed 's/{{DB_PORT}}/'"${DB_PORT}"'/' -i /home/epas/epas/conf/prod
 sudo -u epas -H sed 's/{{DB_NAME}}/'"${DB_NAME}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{DB_USER_PASS}}/'"${DB_USER_PASS}"'/' -i /home/epas/epas/conf/prod.conf
 
+sudo -u epas -H sed 's/{{EMAIL_EPAS}}/'"${EMAIL_EPAS}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{SMTP_HOST}}/'"${SMTP_HOST}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{SMTP_PORT}}/'"${SMTP_PORT}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{SMTP_USER}}/'"${SMTP_USER}"'/' -i /home/epas/epas/conf/prod.conf

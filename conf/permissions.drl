@@ -98,6 +98,11 @@ when
         "Administration.fixPersonSituation",
         "Administration.deleteUncoupledStampings",
         "Administration.updateExceedeMinInCompetenceTable",
+        
+        "Administration.buildActualContractMonthRecap",
+        "Administration.showResidualSituation",
+    	"Administration.showPersonResidualSituation",
+    	
         "Administrators.switchUserTo",
         "Persons.list"
         
@@ -117,7 +122,7 @@ when
  
         "Persons.list",
         "MealTickets.recapMealTickets",
-        "MonthRecaps.residualYearRecap",
+        "MonthRecaps.showRecaps",
         
         /* duplicate */
         "Persons.showCurrentVacation",
@@ -165,6 +170,8 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
         
+        "Persons.insertContract",
+        "Persons.saveContract",
         "Persons.modifyContract",
         "Persons.updateContract",
         "Persons.deleteContract",
@@ -818,7 +825,9 @@ when
         
         "rest.Persons.days",
         "rest.Persons.missions",
-        "rest.Persons.competences"
+        "rest.Persons.competences",
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence"
         
        ), target == null, granted == false)
 then

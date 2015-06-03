@@ -499,11 +499,11 @@ public class PersonDayManager {
 
 		//festivo
 		if( pd.isHoliday() ) {
-			if(pd.getValue().acceptedHolidayWorkingTime){
+//			if(pd.getValue().acceptedHolidayWorkingTime){
 				pd.getValue().difference = pd.getValue().timeAtWork;
-			}
-			else
-				pd.getValue().difference = 0;
+//			}
+//			else
+//				pd.getValue().difference = 0;
 			return;
 		}
 
@@ -611,11 +611,11 @@ public class PersonDayManager {
 			return;
 		}
 
-		//Nel caso in cui il personDay sia precedente a sourceContract imposto i valori a 0
+		//Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
 		if(pd.getPersonDayContract().isPresent()
 				&& pd.getPersonDayContract().get().sourceDate != null
-				&& pd.getValue().date.isBefore(pd.getPersonDayContract().get().sourceDate)) {
-
+				&& ! pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDate) ) {
+						
 			pd.getValue().timeAtWork = 0;
 			pd.getValue().progressive = 0;
 			pd.getValue().difference = 0;

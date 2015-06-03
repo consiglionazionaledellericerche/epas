@@ -1,24 +1,25 @@
 
   
 #{list items:psDto.contractMonths, as:'mese'} 
-  <div class="panel-group" id="accordion_contract_recap${mese.contract.getValue().id}">
+  <div class="panel-group" id="accordion_contract_recap${mese.contract.value.id}">
+    
     <div class="panel panel-info">
       <div class="panel-heading">
         <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion_contract_recap${mese.contract.getValue().id}" href="#contract_recap${mese.contract.getValue().id}">
-            Riepilogo ore  ${mese.contractDescription}</strong>
+          <a data-toggle="collapse" data-parent="#accordion_contract_recap${mese.contract.value.id}" href="#contract_recap${mese.contract.value.id}">
+            Riepilogo ore  ${mese.value.contractDescription}</strong>
           </a>
         </h4>
       </div>
-      <div id="contract_recap${mese.contract.getValue().id}" class="panel-collapse collapse in">
+      <div id="contract_recap${mese.contract.value.id}" class="panel-collapse collapse in">
         <div class="panel-body">
    		  
    		  <!-- solo last in month -->
- 		  #{if mese.contract.isLastInMonth(psDto.month, psDto.year)}
+ 		  #{if mese.contract.isLastInMonth((int)psDto.month, (int)psDto.year)}
  		    <p>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong></p> 
-	        <p>Tempo disponibile per straordinari: <strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
+	        <p>Tempo disponibile per straordinari: <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong></p>
 	        <p>Il numero di riposi compensativi usati nell'anno è <strong>${psDto.numberOfCompensatoryRestUntilToday}</strong></p>
-            <p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${mese.possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
+            <p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${mese.value.possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
           #{/if}
           #{else}
             <p class="text-error" style="margin-top: 5px;"><em>Il contratto e' terminato nel corso di questo mese.</em></p>
@@ -26,30 +27,30 @@
           
 
 		  <!--  Anno passato -->
-		  #{if mese.possibileUtilizzareResiduoAnnoPrecedente }
+		  #{if mese.value.possibileUtilizzareResiduoAnnoPrecedente }
 		    <p><h4>Situazione residuo derivante dall'anno precedente</h4><p>
 		    <table class="table table-bordered table-condensed">
 				
 			  <tr>
 			    <td class="col-xs-10">Residuo da anno precedente disponibile all'inizio del mese</td>
-			        #{if mese.mesePrecedente==null}
-   					    <td class="col-xs-2 success">${mese.initMonteOreAnnoPassato.toHourTimeWithPlus()}</td>
+			        #{if mese.previousRecap == null}
+   					    <td class="col-xs-2 success">${mese.value.initMonteOreAnnoPassato.toHourTimeWithPlus()}</td>
 					#{/if}
 					#{else}
-						<td class="col-xs-2 success">${mese.mesePrecedente.monteOreAnnoPassato.toHourTimeWithPlus()}</td>
+						<td class="col-xs-2 success">${mese.previousRecap.remainingMinutesLastYear.toHourTimeWithPlus()}</td>
 					#{/else}
 			  </tr>
 			  <tr>
 					<td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
-					<td class="col-xs-2 danger">${mese.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+					<td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
 			  </tr>
 			  <tr>
 					<td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come recupero ore</td>
-					<td  class="col-xs-2 danger">${mese.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+					<td  class="col-xs-2 danger">${mese.value.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
 			  </tr>
 			  <tr class="warning">
 					<td class="col-xs-10">Residuo da anno precedente disponibile alla fine del mese</td>
-					<td  class="col-xs-2"><strong>${mese.monteOreAnnoPassato.toHourTime()}</strong></td>
+					<td  class="col-xs-2"><strong>${mese.value.remainingMinutesLastYear.toHourTime()}</strong></td>
 			  </tr>	
 		    </table>
 		  #{/if}
@@ -58,72 +59,72 @@
 		  <p><h4>Situazione residuo derivante dall'anno corrente</h4><p>
 		  <table class="table table-bordered table-condensed">
 		  
-		  #{if mese.initResiduoAnnoCorrenteNelMese != 0}
+		  #{if mese.value.initResiduoAnnoCorrenteNelMese != 0}
 		  <tr>
-		    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.getValue().sourceDate})</td>
-		       #{if mese.initResiduoAnnoCorrenteNelMese > 0}
-		    	<td class="col-xs-2 success">${mese.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
+		    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.value.sourceDate})</td>
+		       #{if mese.value.initResiduoAnnoCorrenteNelMese > 0}
+		    	<td class="col-xs-2 success">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
 		    	#{/if}
 		    	#{else}
-		    	<td class="col-xs-2 danger">${mese.initResiduoAnnoCorrenteNelMese.toHourTimeWithMinus()}</td>
+		    	<td class="col-xs-2 danger">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithMinus()}</td>
 		    	#{/else}
 	      </tr>
 	      #{/if}
 	      
 	      <tr>
 		    <td class="col-xs-10">Residuo dai mesi precedenti</td>
-		    #{if mese.mesePrecedente==null}
+		    #{if mese.previousRecap == null}
 		      <td class="col-xs-2 success">+00:00</td>
 		    #{/if}
 			#{else}
-		      <td class="col-xs-2 success">${mese.mesePrecedente.monteOreAnnoCorrente.toHourTimeWithPlus()}</td>
+		      <td class="col-xs-2 success">${mese.previousRecap.remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
 		    #{/else}
 		
 	      </tr>
 	      <tr>
 		    <td class="col-xs-10">Residuo del mese positivo</td>
-		    <td class="col-xs-2 success">${mese.progressivoFinalePositivoMesePrint.toHourTimeWithPlus()}</td>
+		    <td class="col-xs-2 success">${mese.value.getPositiveResidualInMonth().toHourTimeWithPlus()}</td>
 	      </tr>
 
-		#{if mese.straordinariMinutiS1Print != 0}
+		#{if mese.value.straordinariMinutiS1Print != 0}
 	    <tr>
 		  <td class="col-xs-10">Straordinario diurno nei giorni lavorativi</td>
-		  <td class="col-xs-2 danger">${mese.straordinariMinutiS1Print.toHourTimeWithMinus()}</td>
+		  <td class="col-xs-2 danger">${mese.value.straordinariMinutiS1Print.toHourTimeWithMinus()}</td>
 	    </tr>
 	    #{/if}
 	    
-	    #{if mese.straordinariMinutiS2Print != 0}
+	    #{if mese.value.straordinariMinutiS2Print != 0}
 	    <tr>
 		  <td class="col-xs-10">Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</td>
-		  <td class="col-xs-2 danger">${mese.straordinariMinutiS2Print.toHourTimeWithMinus()}</td>
+		  <td class="col-xs-2 danger">${mese.value.straordinariMinutiS2Print.toHourTimeWithMinus()}</td>
 	    </tr>
 	    #{/if}
 	    
-	    #{if mese.straordinariMinutiS3Print != 0}
+	    #{if mese.value.straordinariMinutiS3Print != 0}
 	    <tr>
 		  <td class="col-xs-10">Straordinario notturno nei giorni festivi</td>
-		  <td class="col-xs-2 danger">${mese.straordinariMinutiS3Print.toHourTimeWithMinus()}</td>
+		  <td class="col-xs-2 danger">${mese.value.straordinariMinutiS3Print.toHourTimeWithMinus()}</td>
 	    </tr>
 	    #{/if}
 	    
-	    #{if mese.riposiCompensativiMinutiImputatoAnnoCorrente != 0}
+	    #{if mese.value.riposiCompensativiMinutiImputatoAnnoCorrente != 0}
 	    <tr>
 		  <td class="col-xs-10">Residuo da anno corrente utilizzato come riposo compensativi</td>
-		  <td class="col-xs-2 danger">${mese.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+		  <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
 	    </tr>		
 	    #{/if}
 	
 
-		#{if mese.progressivoFinaleNegativoMeseImputatoAnnoCorrente != 0}
+		#{if mese.value.progressivoFinaleNegativoMeseImputatoAnnoCorrente != 0}
 	    <tr>
 		  <td class="col-xs-10">Residuo da anno corrente utilizzato come recupero ore</td>
-		  <td class="col-xs-2 danger">${mese.progressivoFinaleNegativoMeseImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+		  <td class="col-xs-2 danger">${mese.value.progressivoFinaleNegativoMeseImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
 	    </tr>		
 	   #{/if}
 	   
 	    <tr class="warning">
 		  <td class="col-xs-10">Residuo di questo anno a fine mese</td>
-		  <td class="col-xs-2"><strong>${mese.monteOreAnnoCorrente.toHourTime()}</strong></td>
+		  <td class="col-xs-2"><strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong></td>
 	    </tr>
         </table>
 		  
@@ -134,40 +135,24 @@
 		<table class="table table-bordered table-condensed">
 		  <tr>
 		    <td class="col-xs-10">Residuo da anno precedente</td>
-		    <td class="col-xs-2 warning"><strong>${mese.monteOreAnnoPassato.toHourTimeWithPlus()}</strong></td>
+		    <td class="col-xs-2 warning"><strong>${mese.value.remainingMinutesLastYear.toHourTimeWithPlus()}</strong></td>
 	      </tr>
 	      <tr>
 		    <td class="col-xs-10">Residuo di questo anno</td>
-		    <td class="col-xs-2 warning"><strong>${mese.monteOreAnnoCorrente.toHourTimeWithPlus()}</strong></td>
+		    <td class="col-xs-2 warning"><strong>${mese.value.remainingMinutesCurrentYear.toHourTimeWithPlus()}</strong></td>
 	      </tr>
 	      <tr class="warning">
 		    <td class="col-xs-10">Residuo ore ad oggi</td>
-		    <td class="col-xs-2"><strong>${(mese.monteOreAnnoPassato+mese.monteOreAnnoCorrente).toHourTime()}</strong></td>
+		    <td class="col-xs-2"><strong>${(mese.value.remainingMinutesLastYear+mese.value.remainingMinutesCurrentYear).toHourTime()}</strong></td>
 	      </tr>
 		
 		</table>
-		  
-		  
-		  
-		  
-
-
-
 			
         </div>
       </div>
     </div>
   </div>
-  
-  
-  
-  
-  
-  
-  
-  
-  
- 
+
   #{/list}
 
 

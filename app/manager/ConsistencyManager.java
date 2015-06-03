@@ -21,11 +21,13 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
 import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
@@ -40,7 +42,6 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 /**
  * Manager che gestisce la consistenza e la coerenza dei dati in Epas.
@@ -57,7 +58,7 @@ public class ConsistencyManager {
 			PersonDao personDao, 
 			PersonDayManager personDayManager,
 			ContractDao contractDao,
-			ContractYearRecapManager contractYearRecapManager,
+			ContractMonthRecapManager contractMonthRecapManager,
 			PersonDayInTroubleDao personDayInTroubleDao,
 			IWrapperFactory wrapperFactory,
 			ConfGeneralManager confGeneralManager, 
@@ -68,7 +69,7 @@ public class ConsistencyManager {
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
 		this.contractDao = contractDao;
-		this.contractYearRecapManager = contractYearRecapManager;
+		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.personDayInTroubleDao = personDayInTroubleDao;
 		this.wrapperFactory = wrapperFactory;
 		this.confGeneralManager = confGeneralManager;
@@ -82,7 +83,7 @@ public class ConsistencyManager {
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
 	private final ContractDao contractDao;
-	private final ContractYearRecapManager contractYearRecapManager;
+	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final PersonDayInTroubleDao personDayInTroubleDao;
 	private final IWrapperFactory wrapperFactory;
 	private final ConfGeneralManager confGeneralManager;
@@ -96,6 +97,7 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
+	@SuppressWarnings("deprecation")
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendMail){
 
@@ -113,31 +115,34 @@ public class ConsistencyManager {
 					false, fromDate, LocalDate.now().minusDays(1), true).list();
 		}
 
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		
 		for(Person p : personList) {
+			
+			JPAPlugin.closeTx(false);
 			JPAPlugin.startTx(false);
-
 			p = personDao.getPersonById(p.id);
+			
 			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 			checkHistoryError(p, fromDate);
+			
 			// (2) Ricalcolo i valori dei person day	
 			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-			personDayManager.updatePersonDaysFromDate(p,fromDate);
-			// (3) Ricalcolo dei residui
-			log.info("Update residui {} dal {} a oggi", p.getFullname(), fromDate);
-			List<Contract> contractList = contractDao.getPersonContractList(p);
+			personDayManager.updatePersonDaysFromDate(p, fromDate);
+			
+			// (3) Ricalcolo dei residui per mese
+			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
+			YearMonth yearMonthOfficeInitUse = new YearMonth(
+					new LocalDate(confGeneralManager.getFieldValue(
+							Parameter.INIT_USE_PROGRAM, p.office)));
+			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
+					yearMonthOfficeInitUse);
 
-			for(Contract contract : contractList) {
-				try {
-					contractYearRecapManager.buildContractYearRecap(contract);
-				} catch (EpasExceptionNoSourceData e) {
-					log.warn("Manca l'inizializzazione per il contratto {} di {}",
-							new Object[]{contract.id, contract.person.getFullname()});
-
-				}
-			}
-
-			JPAPlugin.closeTx(false);
 		}
+		
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
 
 		if(sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
 				&& LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY){
@@ -152,6 +157,7 @@ public class ConsistencyManager {
 				e.printStackTrace();
 			}
 		}
+		JPAPlugin.closeTx(false);	
 	}
 
 	/**
@@ -320,16 +326,13 @@ public class ConsistencyManager {
 		log.info("Preparo invio mail per {}", person.getFullname());
 		SimpleEmail simpleEmail = new SimpleEmail();
 		try {
-			simpleEmail.setFrom("epas@iit.cnr.it");
-			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
+			simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
 			simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office) );
 		} catch (EmailException e1) {
-
 			e1.printStackTrace();
 		}
 		try {
 			simpleEmail.addTo(person.email);
-			//simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
 		} catch (EmailException e) {
 
 			e.printStackTrace();

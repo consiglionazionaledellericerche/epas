@@ -39,12 +39,7 @@ public class ControlAbsenceStamping extends Job{
 	 */
 	@SuppressWarnings("unchecked")
 	public void doJob() throws EmailException{
-		//		Long id = new Long(Play.configuration.getProperty("mail.person.cc"));
-		//		Person p = null;
-		//		if(id != null)
-		//			p = Person.findById(id);
-		//List<Person> personList = Person.find("Select p from Person p where p.surname in (?,?) ", "Tagliaferri", "Del Soldato").fetch();
-		//	List<Person> personList = Person.getActivePersons(new LocalDate());
+
 		List<Person> personList = personManager.getPeopleForTest();
 		LocalDate date = new LocalDate();
 
@@ -64,10 +59,7 @@ public class ControlAbsenceStamping extends Job{
 			if(!daysInTrouble.equals("")){
 				Logger.debug("Inizio a preparare la mail per %s %s...", person.name, person.surname);
 				SimpleEmail email = new SimpleEmail();
-				//				if(person.contactData != null && (!person.contactData.email.trim().isEmpty())){
-				//					Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.contactData.email);
-				//					email.addTo(person.contactData.email);
-				//				}
+
 				if(person != null && (!person.email.trim().isEmpty())){
 					Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.email);
 					email.addTo(person.email);
@@ -79,10 +71,10 @@ public class ControlAbsenceStamping extends Job{
 				Integer port = new Integer(Play.configuration.getProperty("mail.smtp.port"));
 				email.setSmtpPort(port.intValue());
 				email.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
-
-				email.setFrom( confGeneralManager.getFieldValue(Parameter.EMAIL_FROM_JOBS, person.office) );
-				//				if(p != null)
-				//					email.addCc(p.contactData.email);
+				
+				email.setFrom(Play.configuration.getProperty("application.mail.address"));
+				email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_FROM_JOBS, person.office));
+				
 				email.setSubject("controllo giorni del mese");
 				email.setMsg("Salve, controllare i giorni: "+daysInTrouble+ " per "+person.name+' '+person.surname);
 				email.send();
