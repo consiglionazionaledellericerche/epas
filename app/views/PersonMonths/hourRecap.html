@@ -56,43 +56,37 @@
 		<th>Totale</th>
 	</tr>
 	
-	#{list items:csap.mesi, as:'mese'}
+	#{list items:recaps, as:'recap'}
 	  <tr>
-	    <td class="warning"> &{'views.tags.display.date.month.' +mese.mese}</td>
+	    <td class="warning"> &{'views.tags.display.date.month.' +recap.value.month}</td>
 	    
-	    <td>${mese.oreLavorate.toHourTime()}</td>
+	    <td>${recap.value.oreLavorate.toHourTime()}</td>
 	    
-	    #{if mese.mesePrecedente!=null}
-	      <td><em>${mese.mesePrecedente.monteOreAnnoPassato.toHourTime()}</em></td>
-	      <td><em>${mese.mesePrecedente.monteOreAnnoCorrente.toHourTime()}</em></td>
-	      <td style="color: darkblue">${(mese.mesePrecedente.monteOreAnnoPassato + mese.mesePrecedente.monteOreAnnoCorrente).toHourTime()}</td>
-	    #{/if}  
-	    #{else}
-	      <td><em>${mese.initMonteOreAnnoPassato.toHourTime()}</em></td>
-	      <td><em>${mese.initMonteOreAnnoCorrente.toHourTime()}</em></td>
-	      <td style="color: darkblue">${(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente).toHourTime()}</td>
-	    #{/else}  	    
-	    
-	   
+	    <td><em>${recap.getResidualLastYearInit().toHourTime()}</em></td>
+	    <td><em>${recap.value.initMonteOreAnnoCorrente.toHourTime()}</em></td>
+	    <td style="color: darkblue">${(recap.getResidualLastYearInit()
+	       + recap.value.initMonteOreAnnoCorrente).toHourTime()}</td>
+	    	   
 	    <!-- Progressivo -->
-	    #{if mese.progressivoFinaleMese > 0}
-	      <td style="color: darkblue">${mese.progressivoFinaleMese.toHourTime()}</td>
+	    #{if recap.value.progressivoFinaleMese > 0}
+	      <td style="color: darkblue">${recap.value.progressivoFinaleMese.toHourTime()}</td>
 	    #{/if}
 	    #{else}
-	      <td style="color: darkred">${mese.progressivoFinaleMese.toHourTime()}</td>
+	      <td style="color: darkred">${recap.value.progressivoFinaleMese.toHourTime()}</td>
 	    #{/else}  
 	    
 	    <!-- Straordinario -->
-	    <td style="color: darkred">${mese.straordinariMinuti.toHour()} </td>
+	    <td style="color: darkred">${recap.value.getStraordinarioMinuti().toHour()} </td>
 	    
 	    <!-- Riposo compensativo -->
-	    <td>(${mese.numeroRiposiCompensativi}) <div style="color: darkred; display: inline;">${mese.riposiCompensativiMinutiPrint.toHourTime()}</div></td>
+	    <td>(${recap.value.recoveryDayUsed}) <div style="color: darkred; display: inline;">
+	    ${recap.value.riposiCompensativiMinutiPrint.toHourTime()}</div></td>
 	    
-	    
-	    
-	    <td><em>${mese.monteOreAnnoPassato.toHourTime()}</em></td>
-	    <td><em>${mese.monteOreAnnoCorrente.toHourTime()}</em></td>
-	    <td style="color: darkblue">${(mese.monteOreAnnoPassato + mese.monteOreAnnoCorrente).toHourTime()}</td>
+
+	    <td><em>${recap.value.remainingMinutesLastYear.toHourTime()}</em></td>
+	    <td><em>${recap.value.remainingMinutesCurrentYear.toHourTime()}</em></td>
+	    <td style="color: darkblue">${(recap.value.remainingMinutesLastYear 
+	    + recap.value.remainingMinutesCurrentYear).toHourTime()}</td>
 	  </tr>
 	#{/list}
 	
