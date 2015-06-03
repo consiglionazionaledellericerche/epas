@@ -73,7 +73,6 @@ public class AbsenceManager {
 			AbsenceGroupManager absenceGroupManager,
 			IWrapperFactory wrapperFactory, ContractDao contractDao,
 			AbsenceTypeDao absenceTypeDao, AbsenceDao absenceDao,
-			PersonManager personManager,
 			PersonReperibilityDayDao personReperibilityDayDao,
 			PersonShiftDayDao personShiftDayDao,
 			ConfGeneralManager confGeneralManager,
@@ -89,7 +88,6 @@ public class AbsenceManager {
 		this.contractDao = contractDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.absenceDao = absenceDao;
-		this.personManager = personManager;
 		this.personReperibilityDayDao = personReperibilityDayDao;
 		this.personShiftDayDao = personShiftDayDao;
 		this.confYearManager = confYearManager;
@@ -109,7 +107,6 @@ public class AbsenceManager {
 	private final ContractDao contractDao;
 	private final AbsenceTypeDao absenceTypeDao;
 	private final AbsenceDao absenceDao;
-	private final PersonManager personManager;
 	private final PersonReperibilityDayDao personReperibilityDayDao;
 	private final PersonShiftDayDao personShiftDayDao;
 	private final ConfYearManager confYearManager;
@@ -393,7 +390,7 @@ public class AbsenceManager {
 		AbsencesResponse ar = new AbsencesResponse(date,absenceType.code);
 
 		//se non devo considerare festa ed è festa non inserisco l'assenza
-		if(!absenceType.consideredWeekEnd && personManager.isHoliday(person, date)){
+		if(!absenceType.consideredWeekEnd && personDayManager.isHoliday(person, date)){
 			ar.setHoliday(true);
 			ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
 		}

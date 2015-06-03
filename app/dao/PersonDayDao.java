@@ -189,4 +189,20 @@ public class PersonDayDao extends DaoBase {
 		
 		return query.singleResult(personDay);
 	}
+	
+	/**
+	 * I person day della persona festivi e con ore lavorate.
+	 * @param person
+	 * @return
+	 */
+	public List<PersonDay> getHolidayWorkingTime(Person person) {
+		QPersonDay personDay = QPersonDay.personDay;
+
+		final JPQLQuery query = getQueryFactory().from(personDay)
+				.where(personDay.person.eq(person)
+						.and(personDay.timeAtWork.goe(1)
+						.and(personDay.isHoliday.eq(true))));
+		return query.orderBy(personDay.person.surname.asc())
+				.orderBy(personDay.date.asc()).list(personDay);
+	}
 }

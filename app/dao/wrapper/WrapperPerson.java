@@ -14,6 +14,7 @@ import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
+import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 
@@ -29,6 +30,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import dao.ContractDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 
 /**
@@ -42,6 +44,7 @@ public class WrapperPerson implements IWrapperPerson {
 	private final CompetenceManager competenceManager;
 	private final PersonManager personManager;
 	private final PersonDao personDao;
+	private final PersonDayDao personDayDao;
 	private final PersonMonthRecapDao personMonthRecapDao;
 	private final IWrapperFactory wrapperFactory;
 
@@ -51,10 +54,15 @@ public class WrapperPerson implements IWrapperPerson {
 	private Optional<ContractStampProfile> currentContractStampProfile = null;
 	private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
 	
+	private List<PersonDay> holidayWorkingTimeDay = null;
+	private Integer totalHolidayWorkingTime = null;
+	private Integer totalHolidayWorkingTimeAccepted = null;
+
 	@Inject
 	WrapperPerson(@Assisted Person person,ContractDao contractDao,
 			CompetenceManager competenceManager, PersonManager personManager,
 			PersonDao personDao,PersonMonthRecapDao personMonthRecapDao,
+			PersonDayDao personDayDao,
 			IWrapperFactory wrapperFactory) {
 		this.value = person;
 		this.contractDao = contractDao;
@@ -62,6 +70,7 @@ public class WrapperPerson implements IWrapperPerson {
 		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personMonthRecapDao = personMonthRecapDao;
+		this.personDayDao = personDayDao;
 		this.wrapperFactory = wrapperFactory;
 	}
 
@@ -377,5 +386,49 @@ public class WrapperPerson implements IWrapperPerson {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * I tempo totale di ore lavorate dalla persona nei giorni festivi.
+	 * @return
+	 */
+	public int totalHolidayWorkingTime() {
+		
+		if( this.totalHolidayWorkingTime == null) {
+			this.totalHolidayWorkingTime = 0;
+			for(PersonDay pd : this.holidyWorkingTimeDay()) {
+				this.totalHolidayWorkingTime += pd.timeAtWork;
+			}
+		}
+		return this.totalHolidayWorkingTime;
+	}
+	
+	/**
+	 * I tempo totale di ore lavorate dalla persona nei giorni festivi e accettate.
+	 * @return
+	 */
+	public int totalHolidayWorkingTimeAccepted() {
+		
+		if( this.totalHolidayWorkingTimeAccepted == null) {
+			this.totalHolidayWorkingTimeAccepted = 0;
+			for(PersonDay pd : this.holidyWorkingTimeDay()) {
+				if( pd.acceptedHolidayWorkingTime ) {
+					this.totalHolidayWorkingTimeAccepted += pd.timeAtWork;
+				}
+			}
+		}
+		return this.totalHolidayWorkingTimeAccepted;
+	}
+
+	/**
+	 * I giorni festivi con ore lavorate.
+	 * @return
+	 */
+	public List<PersonDay> holidyWorkingTimeDay() {
+		
+		if (this.holidayWorkingTimeDay == null) {
+			this.holidayWorkingTimeDay = personDayDao.getHolidayWorkingTime(this.value);
+		}
+		return this.holidayWorkingTimeDay;
 	}
 }

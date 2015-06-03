@@ -94,11 +94,11 @@ public class MonthRecapManager {
 				if(pd.isTicketAvailable)
 					mealTicketToUse++;
 
-				if(!pd.isTicketAvailable && !day.isHoliday())
+				if(!pd.isTicketAvailable && !pd.isHoliday)
 					mealTicketToRender++;
 
 				//holiday at work ---------------------------------------------------------------------------------------------------------
-				if(day.isHoliday())
+				if(pd.isHoliday)
 				{
 					if (pd.timeAtWork>0)		
 					{
@@ -107,7 +107,7 @@ public class MonthRecapManager {
 				}
 				//not holiday at work -----------------------------------------------------------------------------------------------------
 				//persone fixed
-				else if(day.isHoliday())
+				else if(pd.isHoliday)
 				{
 					if(!personDayManager.isAllDayAbsences(pd))
 					{	

@@ -103,6 +103,8 @@ when
         "Administration.showResidualSituation",
     	"Administration.showPersonResidualSituation",
     	
+    	"Stampings.holidaySituation",
+    	
         "Administrators.switchUserTo",
         "Persons.list"
         
@@ -393,7 +395,8 @@ when
         "Stampings.createStamp",
        	"Stampings.insert",
        	"Stampings.edit",
-     	"Stampings.update"
+     	"Stampings.update",
+     	"Stampings.toggleWorkingHoliday"
      	
         ), target == null, granted == false)
 then
@@ -415,7 +418,8 @@ when
        	"Stampings.createStamp",
        	"Stampings.insert",
        	"Stampings.edit",
-     	"Stampings.update"
+     	"Stampings.update",
+     	"Stampings.toggleWorkingHoliday"
      	
        ), target == $o, granted == false)
 then
