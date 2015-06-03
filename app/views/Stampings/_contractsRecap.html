@@ -27,30 +27,24 @@
           
 
 		  <!--  Anno passato -->
-		  #{if mese.value.possibileUtilizzareResiduoAnnoPrecedente }
+		  #{if mese.hasResidualLastYear() }
 		    <p><h4>Situazione residuo derivante dall'anno precedente</h4><p>
 		    <table class="table table-bordered table-condensed">
-				
 			  <tr>
 			    <td class="col-xs-10">Residuo da anno precedente disponibile all'inizio del mese</td>
-			        #{if mese.previousRecap == null}
-   					    <td class="col-xs-2 success">${mese.value.initMonteOreAnnoPassato.toHourTimeWithPlus()}</td>
-					#{/if}
-					#{else}
-						<td class="col-xs-2 success">${mese.previousRecap.remainingMinutesLastYear.toHourTimeWithPlus()}</td>
-					#{/else}
+			    <td class="col-xs-2 success">${mese.getResidualLastYearInit().toHourTimeWithPlus()}</td>
 			  </tr>
 			  <tr>
-					<td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
-					<td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+				<td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
+				<td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
 			  </tr>
 			  <tr>
-					<td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come recupero ore</td>
-					<td  class="col-xs-2 danger">${mese.value.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+				<td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come recupero ore</td>
+				<td  class="col-xs-2 danger">${mese.value.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
 			  </tr>
 			  <tr class="warning">
-					<td class="col-xs-10">Residuo da anno precedente disponibile alla fine del mese</td>
-					<td  class="col-xs-2"><strong>${mese.value.remainingMinutesLastYear.toHourTime()}</strong></td>
+				<td class="col-xs-10">Residuo da anno precedente disponibile alla fine del mese</td>
+				<td  class="col-xs-2"><strong>${mese.value.remainingMinutesLastYear.toHourTime()}</strong></td>
 			  </tr>	
 		    </table>
 		  #{/if}
@@ -73,11 +67,11 @@
 	      
 	      <tr>
 		    <td class="col-xs-10">Residuo dai mesi precedenti</td>
-		    #{if mese.previousRecap == null}
-		      <td class="col-xs-2 success">+00:00</td>
+		    #{if mese.getPreviousRecap().present}
+		      <td class="col-xs-2 success">${mese.getPreviousRecap().get().remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
 		    #{/if}
 			#{else}
-		      <td class="col-xs-2 success">${mese.previousRecap.remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
+			  <td class="col-xs-2 success">+00:00</td>
 		    #{/else}
 		
 	      </tr>
