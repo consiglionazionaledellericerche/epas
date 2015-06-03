@@ -28,6 +28,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final DatePath<org.joda.time.LocalDate> beginContract = createDate("beginContract", org.joda.time.LocalDate.class);
 
+    public final ListPath<models.ContractMonthRecap, QContractMonthRecap> contractMonthRecaps = this.<models.ContractMonthRecap, QContractMonthRecap>createList("contractMonthRecaps", models.ContractMonthRecap.class, QContractMonthRecap.class, PathInits.DIRECT2);
+
     public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
 
     public final SetPath<models.ContractWorkingTimeType, QContractWorkingTimeType> contractWorkingTimeType = this.<models.ContractWorkingTimeType, QContractWorkingTimeType>createSet("contractWorkingTimeType", models.ContractWorkingTimeType.class, QContractWorkingTimeType.class, PathInits.DIRECT2);
@@ -50,8 +52,6 @@ public class QContract extends EntityPathBase<Contract> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
-
-    public final ListPath<models.ContractYearRecap, QContractYearRecap> recapPeriods = this.<models.ContractYearRecap, QContractYearRecap>createList("recapPeriods", models.ContractYearRecap.class, QContractYearRecap.class, PathInits.DIRECT2);
 
     public final DatePath<org.joda.time.LocalDate> sourceDate = createDate("sourceDate", org.joda.time.LocalDate.class);
 

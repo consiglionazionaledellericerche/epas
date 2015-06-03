@@ -7,23 +7,24 @@ import java.util.List;
 
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.MealTicketDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 /**
@@ -33,27 +34,25 @@ import dao.wrapper.IWrapperFactory;
  */
 public class MealTicketManager {
 
+
 	@Inject
 	public MealTicketManager(PersonDao personDao,
-			PersonResidualYearRecapFactory yearFactory,
 			MealTicketDao mealTicketDao, 
-			ContractManager contractManager,
 			ConfGeneralManager confGeneralManager,
-			IWrapperFactory factory) {
+			ContractMonthRecapManager contractMonthRecapManager,
+			IWrapperFactory wrapperFactory) {
 		this.personDao = personDao;
-		this.yearFactory = yearFactory;
 		this.mealTicketDao = mealTicketDao;
-		this.contractManager = contractManager;
 		this.confGeneralManager = confGeneralManager;
-		this.factory = factory;
+		this.contractMonthRecapManag = contractMonthRecapManager;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	private final PersonDao personDao;
-	private final PersonResidualYearRecapFactory yearFactory;
 	private final MealTicketDao mealTicketDao;
-	private final ContractManager contractManager;
 	private final ConfGeneralManager confGeneralManager;
-	private final IWrapperFactory factory;
+	private final ContractMonthRecapManager contractMonthRecapManag;
+	private final IWrapperFactory wrapperFactory;
 
 	/**
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
@@ -100,29 +99,35 @@ public class MealTicketManager {
 		if(previousContract == null)
 			return 0;
 
-		DateInterval previousContractInterval = factory.create(previousContract).getContractDateInterval();
+		IWrapperContract c = wrapperFactory.create(previousContract);
+		DateInterval previousContractInterval = c.getContractDateInterval();
 
-		//Data inizio utilizzo mealticket
-		PersonResidualYearRecap c = 
-				yearFactory.create(previousContract, previousContractInterval.getEnd().getYear(), null);
-		PersonResidualMonthRecap monthRecap = c.getMese(previousContractInterval.getEnd().getMonthOfYear());
-
-		if(monthRecap == null)
+		Optional<ContractMonthRecap> recap = c.getContractMonthRecap( 
+				new YearMonth(previousContractInterval.getEnd()) );
+		
+		if( !recap.isPresent() || recap.get().remainingMealTickets == 0 ) {
 			return 0;
-
-		if(monthRecap.buoniPastoResidui == 0)
-			return 0;
-
+		}
+		
 		int mealTicketsTransfered = 0;
 
-		List<MealTicket> contractMealTicketsDesc = mealTicketDao.getOrderedMealTicketInContract(previousContract);
-		for(int i = 0; i<monthRecap.buoniPastoResidui; i++) {
+		List<MealTicket> contractMealTicketsDesc = mealTicketDao
+				.getOrderedMealTicketInContract(previousContract);
+		
+		for(int i = 0; i < recap.get().remainingMealTickets; i++) {
 
 			MealTicket ticketToChange = contractMealTicketsDesc.get(i);
 			ticketToChange.contract = contract;
 			ticketToChange.date = contract.beginContract;
 			ticketToChange.save();
 			mealTicketsTransfered++;
+		}
+		
+		if (mealTicketsTransfered > 0) {
+			contractMonthRecapManag.populateContractMonthRecap(contract, 
+					Optional.<YearMonth>absent());
+			contractMonthRecapManag.populateContractMonthRecap(previousContract, 
+					Optional.<YearMonth>absent());
 		}
 
 		return mealTicketsTransfered;
@@ -134,22 +139,29 @@ public class MealTicketManager {
 	 * utilizzo per la sede della persona).
 	 * @return null in caso non vi siano giorni coperti dalla gestione dei buoni pasto.
 	 */
-	public DateInterval getContractMealTicketDateInterval(Contract contract) {
+	public Optional<DateInterval> getContractMealTicketDateInterval(Contract contract) {
 
-		DateInterval contractDataBaseInterval = contractManager.getContractDatabaseDateInterval(contract);
+		DateInterval contractDataBaseInterval = wrapperFactory.create(contract)
+				.getContractDatabaseInterval();
 
-		Optional<LocalDate> officeStartDate = getMealTicketStartDate(contract.person.office);
-		if(!officeStartDate.isPresent())
-			return null;
+		Optional<LocalDate> officeStartDate = confGeneralManager
+				.getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, contract.person.office); 
 
-		if(officeStartDate.get().isBefore(contractDataBaseInterval.getBegin()))
-			return contractDataBaseInterval;
-
-		if(DateUtility.isDateIntoInterval(officeStartDate.get(), contractDataBaseInterval))
-			return new DateInterval(officeStartDate.get(), contractDataBaseInterval.getEnd());
-
-		return null;
+		if (officeStartDate.isPresent()) {
+			if (officeStartDate.get().isBefore(contractDataBaseInterval.getBegin())) {
+				return Optional.fromNullable(contractDataBaseInterval);
+			}
+			if (DateUtility
+					.isDateIntoInterval(officeStartDate.get(), contractDataBaseInterval)) {
+				return Optional.fromNullable(new DateInterval(officeStartDate.get(),
+						contractDataBaseInterval.getEnd()));
+			}
+		}
+		
+		return Optional.<DateInterval>absent();
 	}
+	
+
 
 	/**
 	 * Ritorna i blocchi inerenti la lista di buoni pasto recap.mealTicketsReceivedOrdered,
@@ -230,21 +242,4 @@ public class MealTicketManager {
 		return blockList;
 
 	}
-
-	/**
-	 * Ritorna la data di inizio di utilizzo dei ticket restaurant per l'office passato
-	 * come parametro. 
-	 * @param office
-	 * @return
-	 */
-	public Optional<LocalDate> getMealTicketStartDate(Office office) {
-
-		String confParam = confGeneralManager.getFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-
-		if(Strings.isNullOrEmpty(confParam))
-			return Optional.absent();
-
-		return Optional.fromNullable(LocalDate.parse(confParam));	
-	}
-
 }

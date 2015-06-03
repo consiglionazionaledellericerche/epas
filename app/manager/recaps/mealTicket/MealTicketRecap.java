@@ -11,6 +11,8 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dao.MealTicketDao;
@@ -49,19 +51,18 @@ public class MealTicketRecap {
 	 * @return 
 	 */
 	public MealTicketRecap(MealTicketManager mealTicketManager,PersonDao personDao,
-			MealTicketDao mealTicketDao,Contract contract) {
+			MealTicketDao mealTicketDao, Contract contract, DateInterval dateInterval) {
 
 		this.mealTicketManager = mealTicketManager;
 		this.contract = contract;
-		this.mealTicketInterval = mealTicketManager.getContractMealTicketDateInterval(contract);
-		if(this.mealTicketInterval == null)
-			return; //FIXME mealTicketInterval deve essere Optional
+		
+		this.mealTicketInterval = dateInterval;
+		
+		this.personDaysMealTickets = personDao.getPersonDayIntoInterval(
+				contract.person, this.mealTicketInterval, true);
 
-		this.personDaysMealTickets = 
-				personDao.getPersonDayIntoInterval(contract.person, this.mealTicketInterval, true);
-
-		this.mealTicketsReceivedOrdered =
-				mealTicketDao.getMealTicketAssignedToPersonIntoInterval(contract, this.mealTicketInterval);
+		this.mealTicketsReceivedOrdered = mealTicketDao
+				.getMealTicketAssignedToPersonIntoInterval(contract, this.mealTicketInterval);
 
 		//MAPPING
 		//init lazy variable

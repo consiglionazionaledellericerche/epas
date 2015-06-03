@@ -3,19 +3,23 @@ package controllers;
 import helpers.PaginableList;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.ContractMonthRecapManager;
 import manager.MealTicketManager;
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
 import manager.recaps.mealTicket.MealTicketRecapFactory;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -23,9 +27,11 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
+import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -37,8 +43,6 @@ public class MealTickets  extends Controller {
 	@Inject
 	private static SecurityRules rules;
 	@Inject
-	private static OfficeDao officeDao;
-	@Inject
 	private static PersonDao personDao;
 	@Inject
 	private static MealTicketRecapFactory mealTicketFactory;
@@ -49,36 +53,37 @@ public class MealTickets  extends Controller {
 	@Inject
 	private static MealTicketManager mealTicketManager;
 	@Inject
+	private static ContractMonthRecapDao contractMonthRecapDao;
+	@Inject
+	private static ContractMonthRecapManager contractMonthRecapManager;
+	@Inject
 	private static ContractDao contractDao;
 
 	public static void recapMealTickets(String name, Integer page, Integer max, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
-		if(page == null)
+		// TODO: inserire il filtro degli office
+		
+		if(page == null) {
 			page = 0;
-
-		rules.checkIfPermitted();
-
-		//La lista di tutte le person con contratto attivo ad oggi.
-		final List<Person> personList = personDao.list( 
-				Optional.fromNullable(name), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), 
-				false, LocalDate.now(), LocalDate.now(), true).list();
-
-		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
-
-		for(Person person : personList) {
-
-			MealTicketRecap recap = mealTicketFactory.create(
-					wrapperFactory.create(person).getCurrentContract().get());
-
-			if( max == null || recap.getRemaining() <= max ) {
-				mealTicketRecaps.add(recap);
-			}
 		}
 
-		PaginableList<MealTicketRecap> paginableList = new PaginableList<MealTicketRecap>(mealTicketRecaps, page);
-
+		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
+				.getPersonMealticket(YearMonth.now(), Optional.fromNullable(max));
+		
+		PaginableList<ContractMonthRecap> paginableList = 
+				new PaginableList<ContractMonthRecap>(monthRecapList, page);
+		
+		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
+		
+		for(ContractMonthRecap monthRecap : paginableList.getPaginatedItems() ) {
+			Optional<MealTicketRecap> recap = mealTicketFactory
+					.create(monthRecap.contract);
+			if(recap.isPresent()) {
+				mealTicketRecaps.add(recap.get());
+			}
+		}
+		
 		//Riepilogo buoni inseriti nella precedente action
 		if(personIdAdded != null && blockIdsAdded != null) {
 			Person personAdded = personDao.getPersonById(personIdAdded);
@@ -89,37 +94,41 @@ public class MealTickets  extends Controller {
 			List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
 			blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
 
-			render(paginableList, page, max, name, blockAdded, personAdded);
+			render(paginableList, mealTicketRecaps, page, max, name, blockAdded, personAdded);
 		}
 
-		render(paginableList, page, max, name);
+		render(paginableList, mealTicketRecaps, page, max, name);
 
 	}
 
 	public static void quickBlocksInsert(Long personId, String name, Integer page, Integer max) {
 
 		Person person = personDao.getPersonById(personId);
-
 		Preconditions.checkArgument(person.isPersistent());
-
 		rules.checkIfPermitted(person.office);
+		
+		MealTicketRecap recap;
+		MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
 
 		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 		Preconditions.checkState(contract.isPresent());
-
-		MealTicketRecap recap = mealTicketFactory.create(contract.get());
-
+		
+		// riepilogo contratto corrente
+		Optional<MealTicketRecap> currentRecap = mealTicketFactory.create(contract.get());
+		Preconditions.checkState(currentRecap.isPresent());
+		recap = currentRecap.get();
+		
+		//riepilogo contratto precedente
 		Contract previousContract = personDao.getPreviousPersonContract(contract.get());
-
-		MealTicketRecap recapPrevious = null;
-
-		if(previousContract != null)
-			recapPrevious = mealTicketFactory.create(previousContract);
+		if(previousContract != null) {
+			Optional<MealTicketRecap> previousRecap = mealTicketFactory.create(previousContract);
+			if(previousRecap.isPresent()) {
+				recapPrevious = previousRecap.get();
+			}
+		}
 
 		LocalDate today = LocalDate.now();
-
 		LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
-
 		User admin = Security.getUser().get();
 
 		render(recap, recapPrevious, today, admin, expireDate, name, page, max);
@@ -199,18 +208,22 @@ public class MealTickets  extends Controller {
 			}
 		}
 
+		Set<Contract> contractUpdated = Sets.newHashSet();
+		
 		//Persistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 			mealTicket.date = LocalDate.now();
 			mealTicket.contract = contractDao.getContract(mealTicket.date, person);
 			mealTicket.admin = admin.person; 
 			mealTicket.save();
+			
+			contractUpdated.add(mealTicket.contract);
 		}
-
-		// Questo flash success è sostituito dal riepilogo al momento della recap 
-		//flash.success("Inseriti %s buoni pasto per %s %s", ticketToAdd.size(),
-		//		person.name ,person.surname);
-
+		
+		for(Contract contract : contractUpdated) {
+			contractMonthRecapManager.populateContractMonthRecap(contract, 
+					Optional.<YearMonth>absent());
+		}
 
 		MealTickets.recapMealTickets(name, page, max, blockIdsToAdd, personId);
 
@@ -238,13 +251,22 @@ public class MealTickets  extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
+		Set<Contract> contractUpdated = Sets.newHashSet();
+		
 		int deleted = 0;
 		for(MealTicket mealTicket : mealTicketList) {
 
 			mealTicket.delete();
 			deleted++;
+			
+			contractUpdated.add(mealTicket.contract);
 		}
 
+		for(Contract contract : contractUpdated) {
+			contractMonthRecapManager.populateContractMonthRecap(contract, 
+					Optional.<YearMonth>absent());
+		}
+		
 		flash.success("Rimosso blocco %s con dimensione %s per %s %s", codeBlock, deleted,
 				person.name , person.surname);
 

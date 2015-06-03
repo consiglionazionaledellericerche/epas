@@ -322,7 +322,7 @@ public class StampingManager {
 			}
 
 			personDayManager.computeValidStampings(personDay);
-			daysRecap.add( stampingDayRecapFactory.create(personDay, numberOfInOut) );
+			daysRecap.add( stampingDayRecapFactory.create(personDay, numberOfInOut, null) );
 
 		}
 		return daysRecap;

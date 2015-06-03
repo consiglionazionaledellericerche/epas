@@ -1,4 +1,4 @@
-package dto;
+package cnr.sync.dto;
 
 public class DepartmentDTO {
 
