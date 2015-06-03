@@ -126,9 +126,10 @@ public class PersonStampingRecap {
 				stampModificationTypeSet.add(smt);
 			}
 
-			if(pd.date.equals(today) && !stampingDayRecapFactory.wrapperFactory.create(pd).isHoliday() && !personDayManager.isAllDayAbsences(pd)){
+			if(pd.date.equals(today) && !pd.isHoliday && !personDayManager.isAllDayAbsences(pd)){
 
-				StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+				StampModificationType smt = stampingDayRecapFactory.stampingDao
+						.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 				stampModificationTypeSet.add(smt);
 			}
 			if(pd.stampModificationType!=null && !pd.date.isAfter(today)){

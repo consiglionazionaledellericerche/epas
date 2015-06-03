@@ -1,0 +1,67 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Timbrature mancanti'  /}
+
+#{set 'moreStyles'}
+<style>
+  span.badge.badge-danger {
+    background-color: rgb(192, 66, 66); /* rosso scuro */
+  }
+  
+  span.badge.badge-warning {
+    background-color: yellow;
+    color: black;
+  }
+</style>
+#{/set}
+
+<div class="container-fluid center">
+
+ #{list items:personList, as:'person'}
+      
+  #{if person.totalHolidayWorkingTime() > 0}
+	 
+  <div class="panel panel-info col-xs-12 col-sm-12 col-md-8 col-md-offset-2">
+   <div class="panel-heading">
+     <h3 class="panel-title">Presenze festive  ${person.value.fullname} </h3>
+   </div>
+   <div class="panel-body">    
+     <strong>Presenza festiva: ${person.totalHolidayWorkingTime().toHourTime()}</strong>
+     <strong>Approvata: ${person.totalHolidayWorkingTimeAccepted().toHourTime()}</strong>
+      <table class="table table-hover table-striped">
+	    <tr>
+		  <th>Giorno</th>
+		  <th>Orario</th>
+		  <th>Esito</th>
+		</tr>
+	   #{list items:person.holidyWorkingTimeDay(), as:'pd'}
+	   <tr>
+		 <td>
+		   ${pd.date} ${pd.date.getDayOfWeek()}
+	     </td>
+	     <td>
+	       ${pd.timeAtWork.toHourTime()}
+	     </td>
+	     <td>
+	     #{if pd.acceptedHolidayWorkingTime}
+	       
+	     #{/if}
+	     #{else}
+	      non accettatta
+	     #{/else}
+	     
+	     </td>
+	   </tr>     
+	   #{/list}
+	
+     </table>
+  </div>
+ </div>     
+ #{/if} 
+#{/list}      
+      
+  
+ 
+ 
+ 
+</div>

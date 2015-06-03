@@ -185,7 +185,9 @@ public class ContractMonthRecapManager {
 	public void populateContractMonthRecapByPerson( Person person, 
 			YearMonth yearMonthFrom) {
 
-		for( Contract contract : person.contracts ){
+		Person p = Person.findById(person.id);
+		
+		for( Contract contract : p.contracts ){
 			
 			DateInterval contractDateInterval = 
 					wrapperFactory.create(contract).getContractDateInterval();

@@ -37,6 +37,7 @@ public class PersonStampingDayRecap {
 
 	private static StampModificationType fixedStampModificationType = null;
 
+	public PersonDay personDay;
 	public Long personDayId;
 	public Person person;
 	public WorkingTimeTypeDay wttd = null;
@@ -82,9 +83,9 @@ public class PersonStampingDayRecap {
 			PersonDay pd, int numberOfInOut,List<Contract> monthContracts) {			
 
 		this.stampingTemplateFactory = stampingTemplateFactory;
-
+		this.personDay = pd;
 		this.personDayId = pd.id;
-		this.holiday = wrapperFactory.create(pd).isHoliday();
+		this.holiday = pd.isHoliday;
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
