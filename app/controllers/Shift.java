@@ -434,7 +434,7 @@ public class Shift extends Controller {
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 		
 		Logger.debug("chiama la createicsReperibilityCalendar(%s, %s, %s)", Integer.parseInt(params.get("year")), type, personsInTheCalList);
-		icsCalendar = shiftManager.createicsReperibilityCalendar(Integer.parseInt(params.get("year")), type, personsInTheCalList); /*?*/
+		icsCalendar = shiftManager.createicsShiftCalendar(Integer.parseInt(params.get("year")), type, personsInTheCalList); /*?*/
 
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
