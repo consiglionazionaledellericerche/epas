@@ -32,6 +32,7 @@ import models.exports.ShiftPeriods;
 import models.query.QCompetence;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.CalScale;
@@ -41,6 +42,7 @@ import net.fortuna.ical4j.model.property.Version;
 
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import play.Logger;
@@ -644,7 +646,7 @@ public class ShiftManager {
 	}
 	
 	
-	public Calendar createicsReperibilityCalendar(int year, String type, List<PersonShift> personsInTheCalList) {
+	public Calendar createicsShiftCalendar(int year, String type, List<PersonShift> personsInTheCalList) {
 		List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 		
 		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personsInTheCalList);
@@ -676,25 +678,27 @@ public class ShiftManager {
 			Logger.debug("Shift find called from %s to %s, type %s person %s - found %s shift days", from, to, type, personsInTheCalList.get(0).person.surname, personShiftDays.size());
 		}
 
-		Date startDate = null;
-		Date endDate = null;
-
 		for (PersonShiftDay psd : personShiftDays) {
 			
 					
 			LocalTime startShift = (psd.shiftSlot.equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.startMorning : psd.shiftType.shiftTimeTable.startAfternoon;
 			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
 			
-			//LocalDate startDate = psd.date;
-			
 			Date date = new Date(psd.date.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());			
+		
+			//set the start event
+			java.util.Calendar start = java.util.Calendar.getInstance();
+			start.set(psd.date.getYear(), psd.date.getMonthOfYear(), psd.date.getDayOfMonth(), startShift.getHourOfDay(), startShift.getMinuteOfHour());
 			
-					
+			//set the end event
+			java.util.Calendar end = java.util.Calendar.getInstance();
+			start.set(psd.date.getYear(), psd.date.getMonthOfYear(), psd.date.getDayOfMonth(), endShift.getHourOfDay(), endShift.getMinuteOfHour());
+			
 			Logger.trace("Data turno per %s, date=%s", psd.personShift.person.surname, date);
 
 			String label = eventLabel.concat(psd.personShift.person.surname);
-			startDate = endDate = date;
-			icsCalendar.getComponents().add(createICalEvent(startDate, endDate, label));
+			
+			icsCalendar.getComponents().add(createICalEvent(new DateTime(start.getTime()), new DateTime(end.getTime()), label));
 			continue;
 		}	
 
@@ -702,7 +706,7 @@ public class ShiftManager {
 	}
 
 
-	private VEvent createICalEvent(Date startDate, Date endDate, String eventLabel) {
+	private VEvent createICalEvent(DateTime startDate, DateTime endDate, String eventLabel) {
 		VEvent shiftDay = new VEvent(startDate, endDate, eventLabel);
 		shiftDay.getProperties().add(new Uid(UUID.randomUUID().toString()));
 
