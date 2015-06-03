@@ -18,6 +18,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -32,15 +33,13 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 
 	private final ContractMonthRecap value;
 	private final IWrapperContract contract;
-	private final ContractManager contractManager;
 	private Optional<ContractMonthRecap> previousRecap = null;
 	private final IWrapperFactory wrapperFactory;  
 
 	@Inject
-	WrapperContractMonthRecap(@Assisted ContractMonthRecap cmr, ContractManager contractManager,
+	WrapperContractMonthRecap(@Assisted ContractMonthRecap cmr, 
 			 IWrapperFactory wrapperFactory
 			) {
-		this.contractManager = contractManager;
 		this.wrapperFactory = wrapperFactory;
 		this.contract = wrapperFactory.create(cmr.contract);
 		this.value = cmr;
@@ -57,8 +56,14 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 		return contract;
 	}
 	
+	
+	/**
+	 * Il recap precedente se presente. Istanzia una variabile lazy.
+	 * 
+	 * @return
+	 */
 	@Override
-	public ContractMonthRecap getPreviousRecap() {
+	public Optional<ContractMonthRecap> getPreviousRecap() {
 		
 		if( this.previousRecap == null ) {
 			
@@ -66,12 +71,44 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 					.getContractMonthRecap(new YearMonth(value.year, value.month)
 					.minusMonths(1));
 		}
-		
-		if( this.previousRecap.isPresent()) {
-			return this.previousRecap.get();
-		}
-		
-		return null;
+		return this.previousRecap;
 	}
 	
+	/**
+	 * Se visualizzare il prospetto sul monte ore anno precedente.
+	 * 
+	 * @return
+	 */
+	@Override
+	public boolean hasResidualLastYear() {
+		
+		return value.possibileUtilizzareResiduoAnnoPrecedente;
+	}
+	
+	/**
+	 * Il valore iniziale del monte ore anno precedente.
+	 * 
+	 * @return
+	 */
+	@Override
+	public int getResidualLastYearInit() {
+		
+		if( ! hasResidualLastYear() ) {
+			return 0;
+		}
+		//Preconditions.checkState(hasResidualLastYear());
+		
+		if( getPreviousRecap().isPresent() ) {
+			
+			if( value.month == 1) {
+				return value.initMonteOreAnnoPassato;
+			} else {
+				return getPreviousRecap().get().remainingMinutesLastYear;
+			}
+			
+		} else {
+			return this.value.initMonteOreAnnoPassato;
+		}
+	}
+
 }

@@ -1,5 +1,7 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
+
 import models.ContractMonthRecap;
 
 /**
@@ -10,6 +12,21 @@ public interface IWrapperContractMonthRecap extends IWrapperModel<ContractMonthR
 	
 	public IWrapperContract getContract();
 	
-	public ContractMonthRecap getPreviousRecap();
+	public Optional<ContractMonthRecap> getPreviousRecap();
 	
+	/**
+	 * Se visualizzare il prospetto sul monte ore anno precedente.
+	 * 
+	 * @return
+	 */
+	public boolean hasResidualLastYear();
+	
+	/**
+	 * Il valore iniziale del monte ore anno precedente.
+	 * 
+	 * @return
+	 */
+	public int getResidualLastYearInit();
+		
+
 }

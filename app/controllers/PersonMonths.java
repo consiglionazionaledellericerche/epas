@@ -27,6 +27,7 @@ import com.google.gdata.util.common.base.Preconditions;
 
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -38,8 +39,7 @@ public class PersonMonths extends Controller{
 	private static PersonMonthRecapDao personMonthRecapDao;
 	@Inject
 	private static PersonMonthsManager personMonthsManager;
-
-
+	
 	public static void hourRecap(int year){
 
 		Optional<User> user = Security.getUser();
@@ -59,14 +59,14 @@ public class PersonMonths extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		List<ContractMonthRecap> recaps = Lists.newArrayList();
+		List<IWrapperContractMonthRecap> recaps = Lists.newArrayList();
 		YearMonth actual = new YearMonth(year, 1);
 		YearMonth last = new YearMonth(year, 12);
 		IWrapperContract c = wrapperFactory.create(contract.get());
 		while( !actual.isAfter(last) ) {
 			Optional<ContractMonthRecap> recap = c.getContractMonthRecap(actual);
 			if (recap.isPresent()) {
-				recaps.add(recap.get());
+				recaps.add(wrapperFactory.create(recap.get()));
 			}
 			actual = actual.plusMonths(1);
 		}
