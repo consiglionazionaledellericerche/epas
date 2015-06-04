@@ -1,14 +1,6 @@
-/**
- * 
- */
 package helpers.attestati;
 
-import javax.inject.Inject;
-
 import models.Person;
-import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
 
 /**
  * Contiene le informazioni essenziali prelevate dal sistema centrale del CNR
@@ -19,27 +11,19 @@ import dao.wrapper.IWrapperPerson;
  *
  */
 public final class Dipendente implements Comparable<Dipendente> {
-
-	@Inject
-	private static IWrapperFactory wrapperFactory;
-	@Inject
-	private static PersonDao personDao;
-
+	
 	private final String matricola, cognomeNome;
 	private final Person person;
 
-	public Dipendente(final String matricola, final String nomeCognome) {
-		this.matricola = matricola;
+	public Dipendente(final Person person, final String nomeCognome) {
+		this.matricola = person.number == null ? "" : person.number.toString();
 		this.cognomeNome = nomeCognome;
-		this.person = personDao.getPersonByNumber(Integer.parseInt(this.matricola));
-		//this.person = Person.findByNumber(Integer.parseInt(this.matricola));
+		this.person = person;
 	}
 
 	public String getMatricola() { return matricola; }
 	public String getCognomeNome() { return cognomeNome; }
 	public Person getPerson() {return person;}
-
-	public IWrapperPerson getWrapperPerson() { return wrapperFactory.create(this.person); }
 
 	/** 
 	 * Metodo necessario per i controlli di "contains" dei Set 

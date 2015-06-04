@@ -20,6 +20,7 @@ import manager.ConfGeneralManager;
 import models.Absence;
 import models.Competence;
 import models.Office;
+import models.Person;
 import models.PersonMonthRecap;
 import models.enumerate.Parameter;
 
@@ -37,6 +38,7 @@ import play.Logger;
 import com.google.common.collect.Lists;
 
 import controllers.Security;
+import dao.PersonDao;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST
@@ -49,6 +51,8 @@ public class AttestatiClient {
 
 	@Inject
 	private ConfGeneralManager confGeneralManager;
+	@Inject
+	private PersonDao persondao;
 
 	private static String CLIENT_USER_AGENT = "ePAS"; 
 
@@ -233,7 +237,8 @@ public class AttestatiClient {
 				//The HTML entity &nbsp; (Unicode character NO-BREAK SPACE U+00A0) can in Java be represented by the character \u00a0
 				String nomeCognome = tdMatricola.siblingElements().get(1).text().replace("\u00a0", "").trim();
 				Logger.debug("Nel html della lista delle persone individuato \"%s\", matricola=\"%s\"", nomeCognome, matricola);
-				listaDipendenti.add(new Dipendente(matricola, nomeCognome));
+				Person person = persondao.getPersonByNumber(Integer.parseInt(matricola));
+				listaDipendenti.add(new Dipendente(person, nomeCognome));
 			}
 
 			return listaDipendenti;
