@@ -94,8 +94,8 @@ public class PersonDayManager {
 	 * @param date
 	 * @return
 	 */
-	public boolean isHoliday(Person person, LocalDate date)
-	{
+	public boolean isHoliday(Person person, LocalDate date) {
+		
 		if(DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), date))
 			return true;
 

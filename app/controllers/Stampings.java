@@ -325,7 +325,7 @@ public class Stampings extends Controller {
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
 	
-	public static void holidaySituation() {
+	public static void holidaySituation(int year) {
 		
 		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
@@ -334,7 +334,16 @@ public class Stampings extends Controller {
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
-		render(personList);
+		render(personList, year);
+	}
+	
+	public static void personHolidaySituation(Long personId, int year) {
+		Person p = personDao.getPersonById(personId);
+		Preconditions.checkNotNull(p);
+		
+		IWrapperPerson person = wrapperFactory.create(p);
+		
+		render(person, year);
 	}
 	
 	public static void toggleWorkingHoliday(Long personDayId) {
