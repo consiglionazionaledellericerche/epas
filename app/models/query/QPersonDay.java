@@ -40,6 +40,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final BooleanPath isHoliday = createBoolean("isHoliday");
+
     public final BooleanPath isTicketAvailable = createBoolean("isTicketAvailable");
 
     public final BooleanPath isTicketForcedByAdmin = createBoolean("isTicketForcedByAdmin");

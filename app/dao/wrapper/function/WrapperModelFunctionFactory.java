@@ -3,6 +3,7 @@ package dao.wrapper.function;
 import javax.inject.Inject;
 
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.WorkingTimeType;
@@ -10,6 +11,7 @@ import models.WorkingTimeType;
 import com.google.common.base.Function;
 
 import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
@@ -59,6 +61,16 @@ public class WrapperModelFunctionFactory {
 
 			@Override
 			public IWrapperContract apply(Contract input) {
+				return factory.create(input);
+			}
+		};
+	}
+	
+	public Function<ContractMonthRecap, IWrapperContractMonthRecap> contractMonthRecap() {
+		return new Function<ContractMonthRecap, IWrapperContractMonthRecap>() {
+
+			@Override
+			public IWrapperContractMonthRecap apply(ContractMonthRecap input) {
 				return factory.create(input);
 			}
 		};

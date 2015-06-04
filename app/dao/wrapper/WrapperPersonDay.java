@@ -33,13 +33,10 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 	private Optional<PersonDay> previousForProgressive = null;
 	private Optional<PersonDay> previousForNightStamp = null;
 	private Optional<Contract> personDayContract = null;
-	private Boolean isHoliday = null;
 	private Boolean isFixedTimeAtWorkk = null;
-	//private MealTicket mealTicketAssigned = null;
 	private Optional<WorkingTimeTypeDay> workingTimeTypeDay = null;
 
 	private final ContractDao contractDao;
-	private final PersonManager personManager;
 	private final PersonDayDao personDayDao;
 	private final IWrapperFactory factory;
 
@@ -49,7 +46,6 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 			IWrapperFactory factory) {
 		this.value = pd;
 		this.contractDao = contractDao;
-		this.personManager = personManager;
 		this.personDayDao = personDayDao;
 		this.factory = factory;
 	}
@@ -173,20 +169,6 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 		this.personDayContract = Optional.fromNullable(contract);
 
 		return this.personDayContract;
-	}
-
-	/**
-	 * Controlla che il personDay cada in un giorno festivo
-	 * 
-	 * @param data
-	 * @return
-	 */
-	public boolean isHoliday(){
-		if(isHoliday != null)
-			return isHoliday;
-
-		isHoliday = personManager.isHoliday(this.value.person, this.value.date);
-		return isHoliday;
 	}
 
 	/** 

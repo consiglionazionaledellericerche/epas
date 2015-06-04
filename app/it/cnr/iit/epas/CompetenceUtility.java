@@ -45,18 +45,15 @@ public class CompetenceUtility {
 
 	@Inject
 	public CompetenceUtility(JPQLQueryFactory queryFactory,
-			PersonDayManager personDayManager, PersonManager personManager,
-			PersonDayDao personDayDao) {
+			PersonDayManager personDayManager, PersonDayDao personDayDao) {
 
 		this.queryFactory = queryFactory;
 		this.personDayManager = personDayManager;
-		this.personManager = personManager;
 		this.personDayDao = personDayDao;
 	}
 
 	private final JPQLQueryFactory queryFactory;
 	private final PersonDayManager personDayManager;
-	private final PersonManager personManager;
 	private final PersonDayDao personDayDao;
 
 	public static String codFr = "207";    						// codice dei turni feriali
@@ -327,7 +324,7 @@ public class CompetenceUtility {
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				//if (!person.isHoliday(personReperibilityDay.date)) {
-				if(!personManager.isHoliday(person, personReperibilityDay.date)){
+				if(!personDayManager.isHoliday(person, personReperibilityDay.date)){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 
 
@@ -338,7 +335,7 @@ public class CompetenceUtility {
 			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
 				// check for the stampings in working days
 				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
-				if (!personManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+				if (!personDayManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 
 
@@ -410,7 +407,7 @@ public class CompetenceUtility {
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
 
-				if (!personManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
+				if (!personDayManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
 					Logger.info("Il turno di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
@@ -422,7 +419,7 @@ public class CompetenceUtility {
 			} else {
 
 				// check for the stampings in working days
-				if (!personManager.isHoliday(person,personShiftDay.date) && LocalDate.now().isAfter(personShiftDay.date)) {
+				if (!personDayManager.isHoliday(person,personShiftDay.date) && LocalDate.now().isAfter(personShiftDay.date)) {
 
 					// check no stampings
 					//-----------------------------

@@ -65,7 +65,7 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
 
     public final NumberPath<Integer> progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = createNumber("progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese", Integer.class);
 
-    public final NumberPath<Integer> progressivoFinalePositivoMesePrint = createNumber("progressivoFinalePositivoMesePrint", Integer.class);
+    public final NumberPath<Integer> progressivoFinalePositivoMese = createNumber("progressivoFinalePositivoMese", Integer.class);
 
     public final NumberPath<Integer> recoveryDayUsed = createNumber("recoveryDayUsed", Integer.class);
 

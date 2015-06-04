@@ -1,5 +1,6 @@
 package manager;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
@@ -8,6 +9,8 @@ import java.util.List;
 
 import models.Absence;
 import models.AbsenceType;
+import models.Contract;
+import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -23,6 +26,7 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +37,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
+import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
@@ -43,6 +48,7 @@ public class PersonDayManager {
 	@Inject
 	public PersonDayManager(PersonDayDao personDayDao,
 			StampingDao stampingDao,
+			ContractDao contractDao,
 			IWrapperFactory wrapperFactory,
 			AbsenceDao absenceDao,
 			ConfGeneralManager confGeneralManager,
@@ -51,6 +57,7 @@ public class PersonDayManager {
 
 		this.personDayDao = personDayDao;
 		this.stampingDao = stampingDao;
+		this.contractDao = contractDao;
 		this.wrapperFactory = wrapperFactory;
 		this.absenceDao = absenceDao;
 		this.confGeneralManager = confGeneralManager;
@@ -62,11 +69,13 @@ public class PersonDayManager {
 
 	private final PersonDayDao personDayDao;
 	private final StampingDao stampingDao;
+	private final ContractDao contractDao;
 	private final IWrapperFactory wrapperFactory;
 	private final AbsenceDao absenceDao;
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final ConfYearManager confYearManager;
+
 
 	/**
 	 *
@@ -77,6 +86,36 @@ public class PersonDayManager {
 	private boolean checkHourlyAbsenceCodeSameGroup(AbsenceType abt, PersonDay pd) {
 
 		return absenceDao.getAbsenceWithReplacingAbsenceTypeNotNull(abt, pd);
+
+	}
+	
+	/**
+	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
+	 * @param date
+	 * @return
+	 */
+	public boolean isHoliday(Person person, LocalDate date) {
+		
+		if(DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), date))
+			return true;
+
+		//Contract contract = this.getContract(date);
+		Contract contract = contractDao.getContract(date, person);
+		if(contract == null)
+		{
+			//persona fuori contratto
+			return false;
+		}
+
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()-1).holiday;
+			}
+		}
+
+		return false;	//se il db è consistente non si verifica mai
 
 	}
 
@@ -150,7 +189,7 @@ public class PersonDayManager {
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		if ( pd.isFixedTimeAtWork() ) {
 
-			if( pd.isHoliday() ) 
+			if( pd.getValue().isHoliday ) 
 				return 0;
 
 			return pd.getWorkingTimeTypeDay().get().workingTime;
@@ -191,7 +230,7 @@ public class PersonDayManager {
 
 		Collections.sort(pd.getValue().stampings);
 		//TODO se è festa si dovrà capire se il tempo di lavoro deve essere assegnato oppure no
-		if(pd.isHoliday()){
+		if(pd.getValue().isHoliday){
 
 			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
 
@@ -287,7 +326,7 @@ public class PersonDayManager {
 			return pd.getWorkingTimeTypeDay().get().workingTime;
 		}
 
-		if (!pd.isHoliday() && pd.getValue().stampings.size() >= 2) {
+		if (!pd.getValue().isHoliday && pd.getValue().stampings.size() >= 2) {
 
 			Collections.sort(pd.getValue().stampings);
 
@@ -471,12 +510,13 @@ public class PersonDayManager {
 		return last;
 	}
 
-	/**
-	 *
-	 * importa il  numero di minuti in cui una persona è stata a lavoro in quella data
+	 /**
+	 * Assegna il numero di minuti in cui una persona è stata a lavoro in quella data
+	 * 
+	 * @param pd
 	 */
-	private void updateTimeAtWork(IWrapperPersonDay pd)
-	{
+	private void updateTimeAtWork(IWrapperPersonDay pd) {
+		
 		pd.getValue().timeAtWork = getCalculatedTimeAtWork(pd);
 	}
 
@@ -498,12 +538,12 @@ public class PersonDayManager {
 		}
 
 		//festivo
-		if( pd.isHoliday() ) {
-//			if(pd.getValue().acceptedHolidayWorkingTime){
+		if( pd.getValue().isHoliday ) {
+			if(pd.getValue().acceptedHolidayWorkingTime){
 				pd.getValue().difference = pd.getValue().timeAtWork;
-//			}
-//			else
-//				pd.getValue().difference = 0;
+			} else {
+				pd.getValue().difference = 0;
+			}
 			return;
 		}
 
@@ -551,17 +591,17 @@ public class PersonDayManager {
 		//caso persone fixed
 		if(pd.isFixedTimeAtWork())
 		{
-			if(pd.isHoliday()) {
+			if(pd.getValue().isHoliday) {
 
 				pd.getValue().isTicketAvailable = false;
 				if(persist) { pd.getValue().save(); }
 			}
-			else if(!pd.isHoliday() && !isAllDayAbsences(pd.getValue())) {
+			else if(!pd.getValue().isHoliday && !isAllDayAbsences(pd.getValue())) {
 
 				pd.getValue().isTicketAvailable = true;
 				if(persist) { pd.getValue().save(); }
 			}
-			else if(!pd.isHoliday() && isAllDayAbsences(pd.getValue()))
+			else if(!pd.getValue().isHoliday && isAllDayAbsences(pd.getValue()))
 			{
 				pd.getValue().isTicketAvailable = false;
 				if(persist) { pd.getValue().save(); }
@@ -599,9 +639,11 @@ public class PersonDayManager {
 	 */
 	public void populatePersonDay(IWrapperPersonDay pd) {
 
+		//isHoliday = personManager.isHoliday(this.value.person, this.value.date);
+		
 		//il contratto non esiste più nel giorno perchè è stata inserita data terminazione
 		if( !pd.getPersonDayContract().isPresent()) {
-
+			pd.getValue().isHoliday = false;
 			pd.getValue().timeAtWork = 0;
 			pd.getValue().progressive = 0;
 			pd.getValue().difference = 0;
@@ -615,7 +657,8 @@ public class PersonDayManager {
 		if(pd.getPersonDayContract().isPresent()
 				&& pd.getPersonDayContract().get().sourceDate != null
 				&& ! pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDate) ) {
-						
+			
+			pd.getValue().isHoliday = false;			
 			pd.getValue().timeAtWork = 0;
 			pd.getValue().progressive = 0;
 			pd.getValue().difference = 0;
@@ -624,7 +667,10 @@ public class PersonDayManager {
 			pd.getValue().save();
 			return;
 		}
-
+		
+		// decido festivo / lavorativo
+		pd.getValue().isHoliday = isHoliday(pd.getValue().person, pd.getValue().date);
+		pd.getValue().save();
 
 		//controllo problemi strutturali del person day
 		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
@@ -691,7 +737,27 @@ public class PersonDayManager {
 			populatePersonDay(wrapperFactory.create(pd));
 		}
 	}
+	
+	/**
+	 * Aggiorna i personDay limitatamente ad un mese. ATTENZIONE da usare unitamente
+	 * ad un job asincrono che completa la procedura per i rimanenti giorni.
+	 * @param person
+	 * @param date
+	 */
+	public void updatePersonDaysInMonth(Person person, LocalDate date) {
+		Preconditions.checkNotNull(person);
+		Preconditions.checkNotNull(date);
+		LocalDate endMonth = date.dayOfMonth().withMaximumValue();
+		
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
+				Optional.fromNullable(endMonth), true);
 
+		for(PersonDay pd : personDays){
+			populatePersonDay(wrapperFactory.create(pd));
+		}
+
+		
+	}
 
 	/**
 	 * Verifica che nel person day vi sia una situazione coerente di timbrature. 
@@ -750,7 +816,7 @@ public class PersonDayManager {
 
 			//caso no festa, no assenze, no timbrature
 			if(!isAllDayAbsences(pd.getValue()) && pd.getValue().stampings.size()==0 
-					&& !pd.isHoliday() && !isEnoughHourlyAbsences(pd.getValue())) {
+					&& !pd.getValue().isHoliday && !isEnoughHourlyAbsences(pd.getValue())) {
 
 				personDayInTroubleManager.insertPersonDayInTrouble(
 						pd.getValue(), PersonDayInTrouble.NO_ABS_NO_STAMP);
@@ -758,7 +824,7 @@ public class PersonDayManager {
 			}
 
 			//caso no festa, no assenze, timbrature disaccoppiate
-			if(!isAllDayAbsences(pd.getValue()) && !pd.isHoliday())
+			if(!isAllDayAbsences(pd.getValue()) && !pd.getValue().isHoliday)
 			{
 				computeValidStampings(pd.getValue());
 
@@ -774,7 +840,7 @@ public class PersonDayManager {
 			}
 
 			//caso festa, no assenze, timbrature disaccoppiate
-			else if( !isAllDayAbsences(pd.getValue()) && pd.isHoliday())
+			else if( !isAllDayAbsences(pd.getValue()) && pd.getValue().isHoliday)
 			{
 				computeValidStampings(pd.getValue());
 
@@ -1279,7 +1345,7 @@ public class PersonDayManager {
 		int number = 0;
 		for(PersonDay pd : workingDays)
 		{
-			if(!wrapperFactory.create(pd).isHoliday() )
+			if(!pd.isHoliday )
 				number++;
 		}
 		return number;
@@ -1302,7 +1368,7 @@ public class PersonDayManager {
 		for(PersonDay pd : pdListNoTicket) {
 
 			//tolgo da ticket da restituire i giorni festivi e oggi e i giorni futuri
-			if(wrapperFactory.create(pd).isHoliday() || pd.isToday() )
+			if(pd.isHoliday || pd.isToday() )
 			{
 				ticketTorender--;
 				continue;

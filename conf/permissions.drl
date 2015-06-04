@@ -102,7 +102,7 @@ when
         "Administration.buildActualContractMonthRecap",
         "Administration.showResidualSituation",
     	"Administration.showPersonResidualSituation",
-    	
+
         "Administrators.switchUserTo",
         "Persons.list"
         
@@ -126,7 +126,10 @@ when
         
         /* duplicate */
         "Persons.showCurrentVacation",
-        "Persons.showCurrentContractWorkingTimeType"
+        "Persons.showCurrentContractWorkingTimeType",
+        
+        "Stampings.holidaySituation",
+        "Stampings.personHolidaySituation"
         
         ), target == null, granted == false)
 then
@@ -143,7 +146,10 @@ when
        "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
        
-       "MealTickets.recapMealTickets"
+       "MealTickets.recapMealTickets",
+       
+       "Stampings.holidaySituation",
+       "Stampings.personHolidaySituation"
               
        ), target == $o, granted == false)
 then
@@ -393,7 +399,8 @@ when
         "Stampings.createStamp",
        	"Stampings.insert",
        	"Stampings.edit",
-     	"Stampings.update"
+     	"Stampings.update",
+     	"Stampings.toggleWorkingHoliday"
      	
         ), target == null, granted == false)
 then
@@ -415,7 +422,8 @@ when
        	"Stampings.createStamp",
        	"Stampings.insert",
        	"Stampings.edit",
-     	"Stampings.update"
+     	"Stampings.update",
+     	"Stampings.toggleWorkingHoliday"
      	
        ), target == $o, granted == false)
 then
@@ -826,7 +834,8 @@ when
         "rest.Persons.days",
         "rest.Persons.missions",
         "rest.Persons.competences",
-        "rest.Absences.absencesInPeriod"
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence"
         
        ), target == null, granted == false)
 then

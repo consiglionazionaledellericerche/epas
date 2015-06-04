@@ -34,6 +34,8 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Table;
 
 import dao.OfficeDao;
@@ -41,6 +43,8 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {RequestInit.class, Resecure.class} )
 
@@ -70,6 +74,8 @@ public class Stampings extends Controller {
 	private static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 
 	public static void stampings(Integer year, Integer month) {
 
@@ -317,5 +323,63 @@ public class Stampings extends Controller {
 		Table<Person, LocalDate, String> tablePersonTicket = 
 				stampingManager.populatePersonTicketTable(activePersons, beginMonth);
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
+	}
+	
+	public static void holidaySituation(int year) {
+		
+		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
+				new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
+		
+		List<IWrapperPerson> personList = FluentIterable
+				.from(simplePersonList)
+				.transform(wrapperFunctionFactory.person()).toList();
+		render(personList, year);
+	}
+	
+	public static void personHolidaySituation(Long personId, int year) {
+		
+		Person p = personDao.getPersonById(personId);
+		Preconditions.checkNotNull(p);
+		
+		rules.checkIfPermitted(p.office);
+		
+		IWrapperPerson person = wrapperFactory.create(p);
+		
+		render(person, year);
+	}
+	
+	public static void toggleWorkingHoliday(Long personDayId) {
+		
+		PersonDay pd = personDayDao.getPersonDayById(personDayId);
+		Preconditions.checkNotNull(pd);
+		Preconditions.checkNotNull(pd.isPersistent());
+		Preconditions.checkState(pd.isHoliday == true && pd.timeAtWork > 0);
+		
+		rules.checkIfPermitted(pd.person.office);
+		
+		pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
+		pd.save();
+		
+		final LocalDate date = pd.date;
+		final Person person = pd.person;
+		
+		personDayManager.updatePersonDaysInMonth(pd.person, pd.date);
+		
+		new Job() {
+			@Override
+			public void doJob() {
+				LocalDate dateFrom = date.plusMonths(1).dayOfMonth().withMinimumValue();
+				personDayManager.updatePersonDaysFromDate(person, dateFrom);
+				contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(date));
+			}
+		}.afterRequest();
+		
+		flash.success("Operazione completata. Per concludere l'operazione di ricalcolo "
+				+ "sui mesi successivi o sui riepiloghi mensili potrebbero occorrere alcuni secondi. "
+				+ "Ricaricare la pagina.");
+
+		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+
 	}
 }
