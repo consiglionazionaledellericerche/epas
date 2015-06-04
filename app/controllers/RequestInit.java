@@ -437,6 +437,12 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.missingStamping";
 			}
+			
+			if(action.equals("Stampings.holidaySituation")) {
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "Stampings.holidaySituation";
+			}
 
 			if(action.equals("Stampings.dailyPresence")) {
 

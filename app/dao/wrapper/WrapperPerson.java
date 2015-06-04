@@ -54,10 +54,6 @@ public class WrapperPerson implements IWrapperPerson {
 	private Optional<ContractStampProfile> currentContractStampProfile = null;
 	private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
 	
-	private List<PersonDay> holidayWorkingTimeDay = null;
-	private Integer totalHolidayWorkingTime = null;
-	private Integer totalHolidayWorkingTimeAccepted = null;
-
 	@Inject
 	WrapperPerson(@Assisted Person person,ContractDao contractDao,
 			CompetenceManager competenceManager, PersonManager personManager,
@@ -392,43 +388,38 @@ public class WrapperPerson implements IWrapperPerson {
 	 * I tempo totale di ore lavorate dalla persona nei giorni festivi.
 	 * @return
 	 */
-	public int totalHolidayWorkingTime() {
-		
-		if( this.totalHolidayWorkingTime == null) {
-			this.totalHolidayWorkingTime = 0;
-			for(PersonDay pd : this.holidyWorkingTimeDay()) {
-				this.totalHolidayWorkingTime += pd.timeAtWork;
-			}
+	public int totalHolidayWorkingTime(Integer year) {
+
+		int totalHolidayWorkingTime = 0;
+		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
+			totalHolidayWorkingTime += pd.timeAtWork;
 		}
-		return this.totalHolidayWorkingTime;
+		return totalHolidayWorkingTime;
+				
 	}
 	
 	/**
 	 * I tempo totale di ore lavorate dalla persona nei giorni festivi e accettate.
 	 * @return
 	 */
-	public int totalHolidayWorkingTimeAccepted() {
-		
-		if( this.totalHolidayWorkingTimeAccepted == null) {
-			this.totalHolidayWorkingTimeAccepted = 0;
-			for(PersonDay pd : this.holidyWorkingTimeDay()) {
-				if( pd.acceptedHolidayWorkingTime ) {
-					this.totalHolidayWorkingTimeAccepted += pd.timeAtWork;
-				}
+	public int totalHolidayWorkingTimeAccepted(Integer year) {
+
+		int totalHolidayWorkingTimeAccepted = 0;
+		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
+			if( pd.acceptedHolidayWorkingTime ) {
+				totalHolidayWorkingTimeAccepted += pd.timeAtWork;
 			}
 		}
-		return this.totalHolidayWorkingTimeAccepted;
+
+		return totalHolidayWorkingTimeAccepted;
 	}
 
 	/**
 	 * I giorni festivi con ore lavorate.
 	 * @return
 	 */
-	public List<PersonDay> holidyWorkingTimeDay() {
-		
-		if (this.holidayWorkingTimeDay == null) {
-			this.holidayWorkingTimeDay = personDayDao.getHolidayWorkingTime(this.value);
-		}
-		return this.holidayWorkingTimeDay;
+	public List<PersonDay> holidyWorkingTimeDay(Integer year) {
+		return personDayDao.getHolidayWorkingTime(this.value, 
+				Optional.fromNullable(year));
 	}
 }
