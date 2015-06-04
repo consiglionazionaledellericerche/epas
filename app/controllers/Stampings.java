@@ -328,8 +328,8 @@ public class Stampings extends Controller {
 	public static void holidaySituation(int year) {
 		
 		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
-				null, false).list();
+				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
+				new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
 		
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
@@ -338,8 +338,11 @@ public class Stampings extends Controller {
 	}
 	
 	public static void personHolidaySituation(Long personId, int year) {
+		
 		Person p = personDao.getPersonById(personId);
 		Preconditions.checkNotNull(p);
+		
+		rules.checkIfPermitted(p.office);
 		
 		IWrapperPerson person = wrapperFactory.create(p);
 		
@@ -352,6 +355,8 @@ public class Stampings extends Controller {
 		Preconditions.checkNotNull(pd);
 		Preconditions.checkNotNull(pd.isPersistent());
 		Preconditions.checkState(pd.isHoliday == true && pd.timeAtWork > 0);
+		
+		rules.checkIfPermitted(pd.person.office);
 		
 		pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
 		pd.save();
