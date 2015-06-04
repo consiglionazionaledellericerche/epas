@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
+import manager.PersonDayManager;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -157,5 +158,4 @@ public class Administration extends Controller {
 		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
 	}
-
 }

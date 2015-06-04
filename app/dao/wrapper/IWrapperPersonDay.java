@@ -19,15 +19,6 @@ public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
 	 */
 	Optional<Contract> getPersonDayContract();
 
-	
-	/**
-	 * True se il PersonDay cade in giorno festivo. Istanzia una variabile Lazy.
-	 * 
-	 * @return
-	 */
-	boolean isHoliday();
-	
-
 	/**
 	 * True se il PersonDay cade in un tipo tirmbratura fixed. Istanzia una 
 	 * variabile Lazy.

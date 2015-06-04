@@ -198,7 +198,7 @@ public class ConsistencyManager {
 				continue;
 			}
 
-			if(pdt.cause.contains(cause) && !wrapperFactory.create(pdt.personDay).isHoliday()
+			if(pdt.cause.contains(cause) && !pdt.personDay.isHoliday
 					&& pdt.fixed == false) { 
 				dateTroubleStampingList.add(pdt.personDay.date);
 			}
@@ -280,7 +280,7 @@ public class ConsistencyManager {
 		}
 		else {
 			personDay = new PersonDay(person, dayToCheck);
-			if(wrapperFactory.create(personDay).isHoliday()) {
+			if (personDay.isHoliday) {
 				return;
 			}
 			personDay.create();

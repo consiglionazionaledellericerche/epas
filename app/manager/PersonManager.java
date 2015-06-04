@@ -213,40 +213,6 @@ public class PersonManager {
 		return true;
 	}
 
-
-	/**
-	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
-	 * @param date
-	 * @return
-	 */
-	public boolean isHoliday(Person person, LocalDate date)
-	{
-		if(DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), date))
-			return true;
-
-		//Contract contract = this.getContract(date);
-		Contract contract = contractDao.getContract(date, person);
-		if(contract == null)
-		{
-			//persona fuori contratto
-			return false;
-		}
-
-		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()-1).holiday;
-			}
-		}
-
-		return false;	//se il db è consistente non si verifica mai
-
-	}
-
-
-
-
 	/**
 	 * 
 	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
@@ -363,8 +329,9 @@ public class PersonManager {
 	 */
 	public PersonDay createPersonDayFromDate(Person person, LocalDate date){
 		//if(person.isHoliday(date))
-		if(isHoliday(person, date))
+		if(personDayManager.isHoliday(person, date)) {
 			return null;
+		}
 		return new PersonDay(person, date);
 	}
 
@@ -468,7 +435,7 @@ public class PersonManager {
 			IWrapperPersonDay day = wrapperFactory.create(pd);
 			boolean fixed = day.isFixedTimeAtWork();
 
-			if(day.isHoliday())
+			if(pd.isHoliday)
 				continue;
 
 			if(fixed && !personDayManager.isAllDayAbsences(pd) ){
