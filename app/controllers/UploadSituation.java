@@ -54,6 +54,7 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e 
@@ -86,6 +87,8 @@ public class UploadSituation extends Controller{
 	private static PersonDayManager personDayManager;
 	@Inject
 	private static PersonMonthRecapDao personMonthRecapDao;
+	@Inject
+	private static IWrapperFactory factory;
 
 	public static void show(){
 
@@ -259,7 +262,7 @@ public class UploadSituation extends Controller{
 			@Override
 			public Dipendente apply(Person person) {
 				Dipendente dipendente = 
-						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
+						new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
 				return dipendente;
 			}
 		}).toSet();
@@ -270,8 +273,10 @@ public class UploadSituation extends Controller{
 		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
 
 		memAttestatiIntoCache(loginResponse, listaDipendenti);
-
-		render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR, loginResponse);
+		
+		final IWrapperFactory wrapper = factory;
+		
+		render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR, loginResponse,wrapper);
 
 	}
 
@@ -508,9 +513,8 @@ public class UploadSituation extends Controller{
 		return dipendentiNonInCNR;
 	}
 
-	private static Set<Dipendente> getActiveDipendenti(int year, int month)
-	{
-		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+	private static Set<Dipendente> getActiveDipendenti(int year, int month){
+		
 		final List<Person> activePersons = 
 				personDao.list(Optional.<String>absent(),
 						officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
@@ -519,7 +523,7 @@ public class UploadSituation extends Controller{
 			@Override
 			public Dipendente apply(Person person) {
 				Dipendente dipendente = 
-						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
+						new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
 				return dipendente;
 			}
 		}).toSet();
