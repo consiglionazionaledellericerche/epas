@@ -12,6 +12,7 @@ import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -128,7 +129,8 @@ public class Clocks extends Controller{
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
 		int numberOfInOut = Math.max(minInOutColumn, personDayManager.numberOfInOutInPersonDay(personDay));
 
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut, null);
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory
+				.create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
 
 		render(user, dayRecap, numberOfInOut);
 	}
@@ -225,7 +227,8 @@ public class Clocks extends Controller{
 		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
 		int numberOfInOut = Math.max(minInOutColumn,  personDayManager.numberOfInOutInPersonDay(personDay));
 
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(personDay,numberOfInOut, null);
+		PersonStampingDayRecap dayRecap = stampingDayRecapFactory
+				.create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
 
 		render(person, dayRecap, numberOfInOut);
 

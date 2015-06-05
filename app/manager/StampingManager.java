@@ -6,6 +6,7 @@ import java.util.List;
 
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
@@ -322,7 +323,8 @@ public class StampingManager {
 			}
 
 			personDayManager.computeValidStampings(personDay);
-			daysRecap.add( stampingDayRecapFactory.create(personDay, numberOfInOut, null) );
+			daysRecap.add( stampingDayRecapFactory
+					.create(personDay, numberOfInOut, Optional.<List<Contract>>absent()) );
 
 		}
 		return daysRecap;
