@@ -684,17 +684,21 @@ public class ShiftManager {
 			LocalTime startShift = (psd.shiftSlot.equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.startMorning : psd.shiftType.shiftTimeTable.startAfternoon;
 			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
 			
-			Date date = new Date(psd.date.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());			
+			Logger.debug("Turno di %s del %s dalle %s alle %s", psd.personShift.person.surname, psd.date, startShift, endShift);
+			
 		
 			//set the start event
 			java.util.Calendar start = java.util.Calendar.getInstance();
-			start.set(psd.date.getYear(), psd.date.getMonthOfYear(), psd.date.getDayOfMonth(), startShift.getHourOfDay(), startShift.getMinuteOfHour());
+			start.set(psd.date.getYear(), psd.date.getMonthOfYear() - 1, psd.date.getDayOfMonth(), startShift.getHourOfDay(), startShift.getMinuteOfHour());
+			
+			Logger.debug("start.set(%s, %s, %s, %s, %s)", psd.date.getYear(), psd.date.getMonthOfYear() - 1,psd.date.getDayOfMonth(), startShift.getHourOfDay(), startShift.getMinuteOfHour());
 			
 			//set the end event
 			java.util.Calendar end = java.util.Calendar.getInstance();
-			start.set(psd.date.getYear(), psd.date.getMonthOfYear(), psd.date.getDayOfMonth(), endShift.getHourOfDay(), endShift.getMinuteOfHour());
+			end.set(psd.date.getYear(), psd.date.getMonthOfYear() - 1, psd.date.getDayOfMonth(), endShift.getHourOfDay(), endShift.getMinuteOfHour());
+			Logger.debug("end.set(%s, %s, %s, %s, %s)", psd.date.getYear(), psd.date.getMonthOfYear(),psd.date.getDayOfMonth(), endShift.getHourOfDay(), endShift.getMinuteOfHour());
 			
-			Logger.trace("Data turno per %s, date=%s", psd.personShift.person.surname, date);
+			//Logger.debug("Per costriure evento --> start=%s, end=%s", start, end);
 
 			String label = eventLabel.concat(psd.personShift.person.surname);
 			
