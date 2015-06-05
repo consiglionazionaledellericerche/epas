@@ -113,7 +113,7 @@ public class PersonStampingRecap {
 			personDayManager.computeValidStampings(pd);
 
 			PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-					.create(pd, this.numberOfInOut, monthContracts);
+					.create(pd, this.numberOfInOut, Optional.fromNullable(monthContracts));
 			this.daysRecap.add(dayRecap);
 
 			this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
