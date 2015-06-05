@@ -55,9 +55,6 @@ public class ShiftDao extends DaoBase{
 		this.competenceUtility = competenceUtility;
 	}
 
-	private final static QShiftCategories sc = QShiftCategories.shiftCategories;
-	private final static QShiftType st = QShiftType.shiftType;
-	private final static QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
 	
 	private final static String codShift = "T1";
 
@@ -98,11 +95,10 @@ public class ShiftDao extends DaoBase{
 	 */
 	public List<PersonShiftDay> getPersonShiftDaysByPeriodAndType(LocalDate begin, LocalDate to, ShiftType type, Person person){
 		final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
-		final QPersonShift ps = QPersonShift.personShift;
-		JPQLQuery query = getQueryFactory().from(psd).join(ps)
+		JPQLQuery query = getQueryFactory().from(psd)
 				.where(psd.date.between(begin, to)
 						.and(psd.shiftType.eq(type))
-						.and(ps.person.eq(person))
+						.and(psd.personShift.person.eq(person))
 						)
 						.orderBy(psd.shiftSlot.asc(), psd.date.asc());
 		return query.list(psd);
@@ -155,17 +151,14 @@ public class ShiftDao extends DaoBase{
 	 */
 	public PersonShift getPersonShiftByPersonAndType(Long personId, String type) {	
 		final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
-		final QPersonShift ps = QPersonShift.personShift;
-		final QPerson p = QPerson.person;
 		
-		JPQLQuery query = getQueryFactory().from(psst).join(ps).join(p).where(
-				ps.person.id.eq(personId)
+		JPQLQuery query = getQueryFactory().from(psst).where(
+				psst.personShift.person.id.eq(personId)
 				.and(psst.shiftType.type.eq(type))
 				.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())))
 				.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))
 			);
-		return query.singleResult(ps);
-
+		return query.singleResult(psst.personShift);
 	}
 	
 	
@@ -195,11 +188,8 @@ public class ShiftDao extends DaoBase{
 	 * @return la categoria associata al tipo di turno
 	 */
 	public ShiftCategories getShiftCategoryByType(String type) {
-		Logger.debug("entrato!");
-		
-		final QShiftCategories sc = QShiftCategories.shiftCategories;
 		final QShiftType st = QShiftType.shiftType;
-		Logger.debug("nella getShiftCategoryByType Type=%s sc=%s st=%s", type, sc, st);
+
 		JPQLQuery query = getQueryFactory().from(st)
 				.where(st.type.eq(type));
 		return query.singleResult(st.shiftCategories);
