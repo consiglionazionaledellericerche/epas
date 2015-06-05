@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Optional;
+
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import models.Contract;
@@ -44,7 +46,7 @@ public class PersonStampingDayRecapFactory {
 	 * @return il riepilogo mensile delle timbrature. 
 	 */
 	public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut,
-			List<Contract> monthContracts) {
+			Optional<List<Contract>> monthContracts) {
 
 		return new PersonStampingDayRecap(personDayManager, 
 				stampingTemplateFactory, stampingDao, wrapperFactory,

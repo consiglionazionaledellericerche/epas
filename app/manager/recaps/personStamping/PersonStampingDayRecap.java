@@ -27,7 +27,13 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
 /**
- * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
+ * Oggetto che modella il giorno di una persona nelle viste 
+ * - personStamping
+ * - stampings
+ * - dailyPresence	
+ * - clocks			
+ * 
+ * 
  * @author alessandro
  *
  */
@@ -80,7 +86,7 @@ public class PersonStampingDayRecap {
 			StampingTemplateFactory stampingTemplateFactory,
 			StampingDao stampingDao, IWrapperFactory wrapperFactory,
 			WorkingTimeTypeDao workingTimeTypeDao, ConfGeneralManager confGeneralManager,
-			PersonDay pd, int numberOfInOut,List<Contract> monthContracts) {			
+			PersonDay pd, int numberOfInOut, Optional<List<Contract>> monthContracts) {			
 
 		this.stampingTemplateFactory = stampingTemplateFactory;
 		this.personDay = pd;
@@ -192,21 +198,24 @@ public class PersonStampingDayRecap {
 			this.exitingNowCode = smt.code;
 		}
 		
-		// is sourceContract
-		for(Contract contract : monthContracts) {
-			// se è precedente all'inizio del contratto lo ignoro
-			if (contract.beginContract.isAfter(pd.date)) {
-				this.ignoreDay = true;
-			}
-			
-			// se è precedente a source lo ignoro
-			if (contract.sourceDate != null && ( contract.sourceDate.equals(pd.date) 
-					|| contract.sourceDate.isAfter(pd.date)) ) {
-				this.ignoreDay = true;
-			}
-			
-			if(contract.beginContract.isEqual(pd.date)) {
-				this.firstDay = true;
+		// is sourceContract (solo se monthContracts presente)
+		if (monthContracts.isPresent()) {
+			for (Contract contract : monthContracts.get()) {
+				// se è precedente all'inizio del contratto lo ignoro
+				if (contract.beginContract.isAfter(pd.date)) {
+					this.ignoreDay = true;
+				}
+
+				// se è precedente a source lo ignoro
+				if (contract.sourceDate != null 
+						&& ( contract.sourceDate.equals(pd.date) || 
+								contract.sourceDate.isAfter(pd.date)) ) {
+					this.ignoreDay = true;
+				}
+
+				if(contract.beginContract.isEqual(pd.date)) {
+					this.firstDay = true;
+				}
 			}
 		}
 	}
