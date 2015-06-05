@@ -731,7 +731,9 @@ public class PersonDayManager {
 		// In questo caso andrebbe fatto un controllo all'application Start??
 		
 		//Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
-		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, Optional.of(LocalDate.now()), true);
+		LocalDate currentMonthEnd = LocalDate.now().dayOfMonth().withMaximumValue();
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
+				Optional.of(currentMonthEnd), true);
 
 		for(PersonDay pd : personDays){
 			populatePersonDay(wrapperFactory.create(pd));
@@ -1290,8 +1292,8 @@ public class PersonDayManager {
 	 * @param month
 	 * @return
 	 */
-	public List<PersonDay> getTotalPersonDayInMonth(Person person, int year, int month)
-	{
+	public List<PersonDay> getTotalPersonDayInMonth(Person person, int year, int month) {
+		
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
