@@ -196,9 +196,9 @@ public class Clocks extends Controller{
 		final PersonDay day = personDay;
 
 		personDayManager.updatePersonDaysFromDate(day.person, day.date);
-		try {contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, new YearMonth(day.date));}
-		catch(Exception e) {}
+		contractMonthRecapManager
+			.populateContractMonthRecapByPerson(person, new YearMonth(day.date));
+		
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 
