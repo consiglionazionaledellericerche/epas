@@ -91,7 +91,13 @@ public class PersonStampingDayRecap {
 		this.stampingTemplateFactory = stampingTemplateFactory;
 		this.personDay = pd;
 		this.personDayId = pd.id;
-		this.holiday = pd.isHoliday;
+		
+		if(pd.isPersistent()) {
+			this.holiday = pd.isHoliday;
+		} else {
+			this.holiday = personDayManager.isHoliday(pd.person, pd.date);
+		}
+
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
