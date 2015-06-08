@@ -132,8 +132,14 @@ public class ContractMonthRecapManager {
 		while ( !yearMonthToCompute.isAfter(lastMonthToCompute) ) {
 			
 			cmr = buildContractMonthRecap(contract, yearMonthToCompute);
+
+			// (1) FERIE E PERMESSI 
 			
-			//FERIE E PERMESSI
+			// TODO: per il calcolo delle ferie e permessi ho bisogno solo del
+			// riepilogo di dicembre. Una ottimizzazione è calcolare questi campi
+			// solo nel caso di dicembre. Però i dati dei mesi intermedi potrebbero 
+			// essere usati per report. Decidere. 
+			
 			LocalDate lastDayInYearMonth = new LocalDate(yearMonthToCompute.getYear(), 
 					yearMonthToCompute.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();
 
@@ -156,7 +162,7 @@ public class ContractMonthRecapManager {
 			cmr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed.size();
 			cmr.permissionUsed = vacationRecap.get().permissionUsed.size();
 			
-			//RESIDUI
+			// (2) RESIDUI
 			Optional<ContractMonthRecap> recap = 
 					populateResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
 
@@ -176,9 +182,7 @@ public class ContractMonthRecapManager {
 	 * Costruisce i riepiloghi mensili inerenti la persona a partire da yeraMonthFrom.
 	 * 
 	 * Utilizzo: specificare il mese dal quale ricostruire i riepiloghi. 
-	 * FIXME: comportamento non verificato se si inserisce un mese precedente all'inizio
-	 * dell'utilizzo del software. (Per adesso non si verifica mai).
-	 * 
+
  	 * @param person
 	 * @param yearMonthFrom
 	 */
