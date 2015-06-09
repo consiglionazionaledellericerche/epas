@@ -119,7 +119,6 @@ public class Security extends Secure.Security {
 					Http.Request.current().remoteAddress);
 			
 //			Logger.info("headers request %s", Http.Request.current().headers);
-			
 			return true;
 		}
 

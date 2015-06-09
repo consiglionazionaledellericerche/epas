@@ -11,18 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +46,11 @@ public class CompetenceManager {
 	public CompetenceManager(CompetenceCodeDao competenceCodeDao,
 			OfficeDao officeDao, PersonDayDao personDayDao,
 			CompetenceDao competenceDao,
-			PersonResidualYearRecapFactory yearFactory,
 			PersonManager personManager, IWrapperFactory wrapperFactory) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.officeDao = officeDao;
 		this.personDayDao = personDayDao;
 		this.competenceDao = competenceDao;
-		this.yearFactory = yearFactory;
 		this.personManager = personManager;
 		this.wrapperFactory = wrapperFactory;
 	}
@@ -63,7 +61,6 @@ public class CompetenceManager {
 	private final OfficeDao officeDao;
 	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
-	private final PersonResidualYearRecapFactory yearFactory;
 	private final PersonManager personManager;
 	private final IWrapperFactory wrapperFactory;
 
@@ -378,16 +375,17 @@ public class CompetenceManager {
 	public Integer positiveResidualInMonth(Person person, int year, int month){
 
 		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
-		for(Contract contract : monthContracts)
-		{
+		for(Contract contract : monthContracts) {
+			
 			IWrapperContract wContract = wrapperFactory.create(contract);
 
-			if(wContract.isLastInMonth(month, year))
-			{
-				PersonResidualYearRecap c = 
-						yearFactory.create(contract, year, null);
-				if(c.getMese(month)!=null)
-					return c.getMese(month).progressivoFinalePositivoMese;
+			if(wContract.isLastInMonth(month, year)) {
+				
+				Optional<ContractMonthRecap> recap = 
+						wContract.getContractMonthRecap( new YearMonth(year, month));
+				if(recap.isPresent()) {
+					return recap.get().getPositiveResidualInMonth();
+				}
 			}
 		}
 		return 0;

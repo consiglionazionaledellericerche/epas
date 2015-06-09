@@ -458,7 +458,8 @@ public class WorkingTimes extends Controller{
 
 	}
 
-	private static List<ContractWorkingTimeType> splitContractWorkingTimeType(ContractWorkingTimeType cwtt, DateInterval period, WorkingTimeType wttNew) {
+	private static List<ContractWorkingTimeType> splitContractWorkingTimeType(
+			ContractWorkingTimeType cwtt, DateInterval period, WorkingTimeType wttNew) {
 
 		List<ContractWorkingTimeType> newCwttList = new ArrayList<ContractWorkingTimeType>();
 
@@ -471,8 +472,10 @@ public class WorkingTimes extends Controller{
 
 		DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
 
-		//caso1 cwtt inizia dopo e finisce prima (interamente contenuto)	Risultato dello split: MIDDLE (new)
-		if(DateUtility.isIntervalIntoAnother(new DateInterval(cwtt.beginDate, cwtt.endDate), period)) {
+		//caso1 cwtt inizia dopo e finisce prima (interamente contenuto)	
+		// Risultato dello split: MIDDLE (new)
+		if(DateUtility.isIntervalIntoAnother(
+				new DateInterval(cwtt.beginDate, cwtt.endDate), period)) {
 
 			middle.beginDate = cwtt.beginDate;
 			middle.endDate = cwtt.endDate;
@@ -482,8 +485,10 @@ public class WorkingTimes extends Controller{
 			return newCwttList;
 		}
 
-		//caso 2 cwtt inizia prima e finisce prima (o uguale)				Risultato dello split: FIRST (old) MIDDLE (new)
-		if( cwttInterval.getBegin().isBefore(period.getBegin()) && !cwttInterval.getEnd().isAfter(period.getEnd()) ) {
+		//caso 2 cwtt inizia prima e finisce prima (o uguale)				
+		// Risultato dello split: FIRST (old) MIDDLE (new)
+		if( cwttInterval.getBegin().isBefore(period.getBegin()) 
+				&& !cwttInterval.getEnd().isAfter(period.getEnd()) ) {
 
 			first.beginDate = cwtt.beginDate;
 			first.endDate = period.getBegin().minusDays(1);
@@ -498,8 +503,10 @@ public class WorkingTimes extends Controller{
 		}
 
 
-		//caso 3 cwtt inizia dopo (o uguale) e finisce dopo 				Risultato dello split: MIDDLE (new) LAST (old)
-		if( !cwttInterval.getBegin().isBefore(period.getBegin()) && cwttInterval.getEnd().isAfter(period.getEnd()) ) {
+		//caso 3 cwtt inizia dopo (o uguale) e finisce dopo 				
+		// Risultato dello split: MIDDLE (new) LAST (old)
+		if( !cwttInterval.getBegin().isBefore(period.getBegin()) 
+				&& cwttInterval.getEnd().isAfter(period.getEnd()) ) {
 
 			middle.beginDate = cwtt.beginDate;
 			middle.endDate = period.getEnd();
@@ -515,8 +522,10 @@ public class WorkingTimes extends Controller{
 
 		}
 
-		//caso 4 cwtt inizia prima e finisce dopo							Risultato dello split: FIRST (old) MIDDLE (new) LAST (old)
-		if( cwttInterval.getBegin().isBefore(period.getBegin()) && cwttInterval.getEnd().isAfter(period.getEnd()) ) {
+		//caso 4 cwtt inizia prima e finisce dopo							
+		// Risultato dello split: FIRST (old) MIDDLE (new) LAST (old)
+		if( cwttInterval.getBegin().isBefore(period.getBegin()) 
+				&& cwttInterval.getEnd().isAfter(period.getEnd()) ) {
 
 			first.beginDate = cwtt.beginDate;
 			first.endDate = period.getBegin().minusDays(1);

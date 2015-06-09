@@ -52,18 +52,17 @@ public class FixUserPermission extends Job{
 //		int evolution = (Integer)JPA.em().
 //				createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
 		
-		Role superAdmin = Role.find("byName", "superAdmin").first();
+		Role developer = Role.find("byName", Role.DEVELOPER).first();
 		
-		if(superAdmin!=null){
-			
-			superAdmin.name = Role.ADMIN;
-			superAdmin.save();
+		if(developer == null){
 			
 			List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 			List<Permesso> permessi = Lists.newArrayList();
 			
 			for(UsersRolesOffices uro : uros){
-				permessi.add(new Permesso(uro.user.id,uro.office.id,uro.role.name));
+//				Il ruolo superAdmin e' stato rinominato in Admin
+				String ruolo = uro.role.name.equals("superAdmin") ? Role.ADMIN : uro.role.name;
+				permessi.add(new Permesso(uro.user.id,uro.office.id,ruolo));
 			}
 
 			UsersRolesOffices.deleteAll();

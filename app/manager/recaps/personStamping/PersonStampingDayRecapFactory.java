@@ -1,9 +1,14 @@
 package manager.recaps.personStamping;
 
+import java.util.List;
+
 import javax.inject.Inject;
+
+import com.google.common.base.Optional;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import models.Contract;
 import models.PersonDay;
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
@@ -40,11 +45,13 @@ public class PersonStampingDayRecapFactory {
 	 * @param month
 	 * @return il riepilogo mensile delle timbrature. 
 	 */
-	public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut) {
+	public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut,
+			Optional<List<Contract>> monthContracts) {
 
 		return new PersonStampingDayRecap(personDayManager, 
 				stampingTemplateFactory, stampingDao, wrapperFactory,
-				workingTimeTypeDao,personDay, numberOfInOut,confGeneralManager);
+				workingTimeTypeDao, confGeneralManager, 
+				personDay, numberOfInOut, monthContracts);
 	}
 
 }

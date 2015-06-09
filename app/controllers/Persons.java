@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
+import manager.ContractMonthRecapManager;
 import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.OfficeManager;
@@ -32,6 +33,7 @@ import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +65,6 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-import exceptions.EpasExceptionNoSourceData;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
@@ -145,21 +146,20 @@ public class Persons extends Controller {
 		person.qualification = qualification;
 		person.office = office;
 
+		person.save();
+		
 		contract.person = person;
 
-		if(!contractManager.contractCrossFieldValidation(contract)){
-
-			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
-			params.flash(); // add http parameters to the flash scope
-			render("@insertPerson", person, qualification, office);
-		}
-
-		person.save();
-
-		contract.save();
-
 		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
-		contractManager.properContractCreate(contract, wtt);
+		
+		if( !contractManager.properContractCreate(contract, wtt)) {
+			flash.error("Errore durante la creazione del contratto. "
+					+ "Assicurarsi di inserire date valide.");
+			params.flash(); // add http parameters to the flash scope
+			edit(person.id);
+		}
+		
+		person.save();
 
 		Long personId = person.id;
 
@@ -210,7 +210,8 @@ public class Persons extends Controller {
 		Role employee = Role.find("byName", Role.EMPLOYEE).first();
 		officeManager.setUro(person.user, person.office, employee);
 
-		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
+		flash.success("%s %s inserito in anagrafica con il valore %s come username", 
+				person.name, person.surname, person.user.username);
 		list(null);
 
 	}
@@ -226,12 +227,15 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-
-		List<Contract> contractList = contractDao.getPersonContractList(person);
+		List<IWrapperContract> contractList = FluentIterable
+				.from(contractDao.getPersonContractList(person))
+				.transform(wrapperFunctionFactory.contract()).toList();
+		
 		Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		List<ContractStampProfile> contractStampProfileList =
-				contractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
+				contractDao.getPersonContractStampProfile(Optional.fromNullable(person), 
+						Optional.<Contract>absent());
 
 		LocalDate actualDate = new LocalDate();
 		Integer month = actualDate.getMonthOfYear();
@@ -265,6 +269,9 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 
+		// FIXME: la modifica della persona dovrebbe far partire qualche ricalcolo??
+		// esempio qualifica, office possono far cambiare qualche decisione dell'alg.
+		
 		edit(person.id);
 	}
 
@@ -281,6 +288,8 @@ public class Persons extends Controller {
 		render(person);
 	}
 
+	
+	@SuppressWarnings("deprecation")
 	public static void deletePersonConfirmed(Long personId){
 		Person person = personDao.getPersonById(personId);
 		if(person == null) {
@@ -423,7 +432,9 @@ public class Persons extends Controller {
 		render(con, person, wttList);
 	}
 
-	public static void saveContract(@Required LocalDate dataInizio, @Valid LocalDate dataFine, Person person, WorkingTimeType wtt, boolean onCertificate){
+	public static void saveContract(@Required LocalDate dataInizio, 
+			@Valid LocalDate dataFine, Person person, WorkingTimeType wtt,
+			boolean onCertificate) {
 
 		//Controllo parametri
 		if(person==null) {
@@ -436,37 +447,48 @@ public class Persons extends Controller {
 
 		if(dataInizio==null) {
 
-			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			flash.error("Errore nel fornire il parametro data inizio contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
 			edit(person.id);
 		}
 		if(Validation.hasErrors()) {
 
-			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			flash.error("Errore nel fornire il parametro data fine contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
 			edit(person.id);
 		}
 
 		//Tipo orario
 		if(wtt == null) {
-			flash.error("Errore nel fornire il parametro tipo orario. Operazione annullata.");
+			flash.error("Errore nel fornire il parametro tipo orario. "
+					+ "Operazione annullata.");
 			edit(person.id);
 		}
 
 		//Creazione nuovo contratto
-		if(!contractManager.saveContract(dataInizio, dataFine, onCertificate, person, wtt).equals("")){
-			flash.error(contractManager.saveContract(dataInizio, dataFine, onCertificate, person, wtt));
+		Contract contract = new Contract();
+		contract.beginContract = dataInizio;
+		contract.expireContract = dataFine;
+		contract.onCertificate = onCertificate;
+		contract.person = person;
+		
+		if( !contractManager.properContractCreate(contract, wtt)) {
+			flash.error("Errore durante la creazione del contratto. "
+					+ "Assicurarsi di inserire date valide e che non si "
+					+ "sovrappongono con altri contratti della person");
+			params.flash(); // add http parameters to the flash scope
 			edit(person.id);
-
-		}	
-
-		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
+		}
+		
+		flash.success("Il contratto per %s %s è stato correttamente salvato", 
+				person.name, person.surname);
 
 		edit(person.id);
 	}
 
 	public static void modifyContract(Long contractId){
 		Contract contract = contractDao.getContractById(contractId);
-		if(contract == null)
-		{
+		if(contract == null) {
 			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
 			list(null);
 		}
@@ -476,7 +498,8 @@ public class Persons extends Controller {
 		render(contract);
 	}
 
-	public static void updateContract(Contract contract, @Required LocalDate begin, @Valid LocalDate expire, @Valid LocalDate end, boolean onCertificate){
+	public static void updateContract(Contract contract, @Required LocalDate begin, 
+			@Valid LocalDate expire, @Valid LocalDate end, boolean onCertificate){
 
 		//Controllo dei parametri
 		if(contract == null) {
@@ -489,17 +512,20 @@ public class Persons extends Controller {
 
 		if(begin==null){
 
-			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			flash.error("Errore nel fornire il parametro data inizio contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
 			edit(contract.person.id);
 		}
 		if(validation.hasError("expire")) {
 
-			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			flash.error("Errore nel fornire il parametro data fine contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
 			edit(contract.person.id);
 		}
 		if(validation.hasError("end")) {
 
-			flash.error("Errore nel fornire il parametro data terminazione contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			flash.error("Errore nel fornire il parametro data terminazione contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
 			edit(contract.person.id);
 		}
 
@@ -510,7 +536,8 @@ public class Persons extends Controller {
 		//Date non si sovrappongono con gli altri contratti della persona
 		if( ! contractManager.isProperContract(contract) ) {
 
-			flash.error("Il contratto si interseca con altri contratti della persona. Controllare le date di inizio e fine. Operazione annulalta.");
+			flash.error("Il contratto si interseca con altri contratti della persona. "
+					+ "Controllare le date di inizio e fine. Operazione annulalta.");
 			edit(contract.person.id);
 		}
 
@@ -518,20 +545,10 @@ public class Persons extends Controller {
 
 		contractManager.properContractUpdate(contract);
 
-		//Ricalcolo valori
-		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
+		contract.save();
 
-		try {
-			contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
-
-			contract.save();
-
-			flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
-
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.person.fullName());
-		}
+		flash.success("Aggiornato contratto per il dipendente %s %s", 
+				contract.person.name, contract.person.surname);
 
 		edit(contract.person.id);
 
@@ -583,8 +600,10 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		LocalDate initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+		Optional<LocalDate> initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
 				Security.getUser().get().person.office);
+		
+		//Preconditions.checkState(initUse.isPresent());
 
 		render(contract, initUse);
 	}
@@ -603,17 +622,11 @@ public class Persons extends Controller {
 		contractManager.saveSourceContract(contract);
 
 		//Ricalcolo valori
-		try {
-			DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
+		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
-			contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 
-			flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
-
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.person.fullName());
-		}
+		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
 		edit(contract.person.id);
 
@@ -700,16 +713,9 @@ public class Persons extends Controller {
 		ContractWorkingTimeType previous = contractsWtt.get(index-1);
 		contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
 
-		//Ricalcolo valori
-		try {
-			contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
-			flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
-
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ cwtt.contract.person.fullName());
-		}
+		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 
 		edit(cwtt.contract.person.id);
 	}
@@ -729,16 +735,12 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		try {
-			contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
-			flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
+		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 
-		} catch(EpasExceptionNoSourceData e) { 
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ cwtt.contract.person.fullName());
-		}
 		edit(cwtt.contract.person.id);
+
 	}
 
 	public static void changePassword(){
@@ -913,15 +915,9 @@ public class Persons extends Controller {
 
 		contract.save();
 
-		try {
-			contractManager.recomputeContract(contract.contract, contract.startFrom, null);
+		contractManager.recomputeContract(contract.contract, contract.startFrom, null);
 
-			flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
-
-		} catch(EpasExceptionNoSourceData e) {
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ contract.contract.person.fullName());
-		}
+		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 
 		edit(contract.contract.person.id);
 
@@ -981,15 +977,9 @@ public class Persons extends Controller {
 		contractStampProfileManager.deleteContractStampProfile(contract, index, csp);
 
 		//Ricalcolo i valori
-		try {
-			contractManager.recomputeContract(previous.contract, csp.startFrom, null);
+		contractManager.recomputeContract(previous.contract, csp.startFrom, null);
 
-			flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
-
-		} catch(EpasExceptionNoSourceData e) {	
-			flash.error("Mancano i dati di inizializzazione per " 
-					+ previous.contract.person.fullName());
-		}
+		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 
 		edit(csp.contract.person.id);
 	}

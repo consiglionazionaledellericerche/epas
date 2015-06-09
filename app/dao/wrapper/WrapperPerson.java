@@ -14,19 +14,23 @@ import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
+import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.ContractDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 
 /**
@@ -40,24 +44,30 @@ public class WrapperPerson implements IWrapperPerson {
 	private final CompetenceManager competenceManager;
 	private final PersonManager personManager;
 	private final PersonDao personDao;
+	private final PersonDayDao personDayDao;
 	private final PersonMonthRecapDao personMonthRecapDao;
+	private final IWrapperFactory wrapperFactory;
 
 	private Optional<Contract> currentContract = null;
 	private Optional<WorkingTimeType> currentWorkingTimeType = null;
 	private Optional<VacationPeriod> currentVacationPeriod = null;
 	private Optional<ContractStampProfile> currentContractStampProfile = null;
 	private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
-
+	
 	@Inject
 	WrapperPerson(@Assisted Person person,ContractDao contractDao,
 			CompetenceManager competenceManager, PersonManager personManager,
-			PersonDao personDao,PersonMonthRecapDao personMonthRecapDao) {
+			PersonDao personDao,PersonMonthRecapDao personMonthRecapDao,
+			PersonDayDao personDayDao,
+			IWrapperFactory wrapperFactory) {
 		this.value = person;
 		this.contractDao = contractDao;
 		this.competenceManager = competenceManager;
 		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personMonthRecapDao = personMonthRecapDao;
+		this.personDayDao = personDayDao;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	@Override
@@ -69,6 +79,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * 
 	 * @return il contratto attualmente attivo per quella persona
 	 */
+	@Override
 	public Optional<Contract> getCurrentContract() {
 
 		if( this.currentContract != null )
@@ -86,6 +97,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @param month
 	 * @return l'ultimo contratto attivo nel mese.
 	 */
+	@Override
 	public Optional<Contract> getLastContractInMonth(int year, int month) {
 
 		List<Contract> contractInMonth = personManager.getMonthContracts(
@@ -116,11 +128,48 @@ public class WrapperPerson implements IWrapperPerson {
 	}
 
 	/**
+	 * L'ultimo mese con contratto attivo.
+	 * 
+	 * @return
+	 */
+	public YearMonth getLastActiveMonth() {
+		
+		Optional<Contract> lastContract =personDao.getLastContract(value);
+		
+		// Importante per sinc con Perseo:
+		// devo assumere che la persona abbia almeno un contratto
+		// attivo in ePAS. Altrimenti non dovrebbe essere in ePAS.
+		Preconditions.checkState( lastContract.isPresent() );
+		
+		YearMonth current = YearMonth.now();
+		YearMonth contractBegin = new YearMonth(lastContract.get().beginContract);
+		
+		if(contractBegin.isAfter(current)) {
+			//vado in avanti
+			while (true) {
+				if(personManager.isActiveInMonth(value, current, false)) {
+					return current;
+				}
+				current = current.plusMonths(1);
+			}
+		} else {
+			//vado indietro
+			while (true) {
+				if(personManager.isActiveInMonth(value, current, false)) {
+					return current;
+				}
+				current = current.minusMonths(1);
+			}
+		}
+	}
+	
+	/**
 	 * True se la persona è passata da determinato a indeterminato durante l'anno.
 	 * 
 	 * @param year
 	 * @return
 	 */
+	@Override
 	public boolean hasPassToIndefiniteInYear(int year) {
 
 		List<Contract> orderedContractInYear = personDao.getContractList(this.value,
@@ -145,6 +194,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * 
 	 * @return
 	 */
+	@Override
 	public Optional<ContractStampProfile> getCurrentContractStampProfile() {
 
 		if( this.currentContractStampProfile != null ) {
@@ -169,6 +219,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * 
 	 * @return
 	 */
+	@Override
 	public Optional<WorkingTimeType> getCurrentWorkingTimeType(){
 
 		if( this.currentWorkingTimeType != null ) {
@@ -199,6 +250,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * 
 	 * @return
 	 */
+	@Override
 	public Optional<ContractWorkingTimeType> getCurrentContractWorkingTimeType() {
 
 		if( this.currentContractWorkingTimeType != null ) {
@@ -228,6 +280,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * 
 	 * @return
 	 */
+	@Override
 	public Optional<VacationPeriod> getCurrentVacationPeriod() {
 
 		if( this.currentVacationPeriod != null )
@@ -255,8 +308,9 @@ public class WrapperPerson implements IWrapperPerson {
 	/**
 	 * Getter per la competenza della persona <CompetenceCode, year, month>
 	 * @param code
-	 * @return la competenza della person nell'anno year e mese month con il codice competenza code
+	 * @return 
 	 */
+	@Override
 	public Competence competence(final CompetenceCode code, final int year, final int month) {
 		if (value.competenceCode.contains(code)) {
 			Optional<Competence> o = FluentIterable.from(value.competences)
@@ -281,6 +335,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @param month
 	 * @return 
 	 */
+	@Override
 	public Integer getPositiveResidualInMonth(int year, int month) {
 
 		return competenceManager.positiveResidualInMonth(this.value, year, month)/60;
@@ -292,6 +347,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @param month
 	 * @return 
 	 */
+	@Override
 	public CertificatedData getCertificatedData(int year, int month) {
 
 		CertificatedData cd = personMonthRecapDao
@@ -299,4 +355,71 @@ public class WrapperPerson implements IWrapperPerson {
 		return cd;
 	}
 
+	/**
+	 * Diagnostiche sui dati della persona.
+	 * 
+	 * @return
+	 */
+	@Override
+	public boolean currentContractInitializationMissing() {
+		getCurrentContract();
+		if ( currentContract.isPresent() ) {
+			if( wrapperFactory.create(currentContract.get()).initializationMissing()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean currentContractMonthRecapMissing() {
+		getCurrentContract();
+		if ( currentContract.isPresent() ) {
+			YearMonth now = new YearMonth(LocalDate.now());
+			if( wrapperFactory.create(currentContract.get())
+					.monthRecapMissing( now )) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * I tempo totale di ore lavorate dalla persona nei giorni festivi.
+	 * @return
+	 */
+	public int totalHolidayWorkingTime(Integer year) {
+
+		int totalHolidayWorkingTime = 0;
+		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
+			totalHolidayWorkingTime += pd.timeAtWork;
+		}
+		return totalHolidayWorkingTime;
+				
+	}
+	
+	/**
+	 * I tempo totale di ore lavorate dalla persona nei giorni festivi e accettate.
+	 * @return
+	 */
+	public int totalHolidayWorkingTimeAccepted(Integer year) {
+
+		int totalHolidayWorkingTimeAccepted = 0;
+		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
+			if( pd.acceptedHolidayWorkingTime ) {
+				totalHolidayWorkingTimeAccepted += pd.timeAtWork;
+			}
+		}
+
+		return totalHolidayWorkingTimeAccepted;
+	}
+
+	/**
+	 * I giorni festivi con ore lavorate.
+	 * @return
+	 */
+	public List<PersonDay> holidyWorkingTimeDay(Integer year) {
+		return personDayDao.getHolidayWorkingTime(this.value, 
+				Optional.fromNullable(year));
+	}
 }

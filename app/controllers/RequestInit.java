@@ -454,6 +454,12 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.missingStamping";
 			}
+			
+			if(action.equals("Stampings.holidaySituation")) {
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "Stampings.holidaySituation";
+			}
 
 			if(action.equals("Stampings.dailyPresence")) {
 
@@ -637,6 +643,14 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "MonthRecaps.show";
+			}
+			
+			if(action.equals("MonthRecaps.showRecaps")) {
+
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "MonthRecaps.showRecaps";
 			}
 		}
 

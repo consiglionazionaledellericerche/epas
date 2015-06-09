@@ -1,10 +1,12 @@
 package manager;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.ConfYear;
 import models.Office;
 import models.enumerate.Parameter;
+import models.query.QConfYear;
 
 import org.joda.time.LocalDate;
 
@@ -12,13 +14,29 @@ import play.cache.Cache;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+import com.mysema.query.jpa.impl.JPAQueryFactory;
 
 import dao.ConfYearDao;
+import dao.DaoBase;
 
 public class ConfYearManager {
 
+	/**
+	 * Questo manager utilizza direttamente JPQL perchè implementa un ulteriore 
+	 * strato di astrazione sulle configurazioni (le configurazioni richieste non
+	 * esistenti vengono create sulla base dei dati di default o degli anni precedenti)
+	 * @param queryFactory
+	 * @param emp
+	 */
 	@Inject
-	private ConfYearDao confYearDao;
+	ConfYearManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		this.queryFactory = new JPAQueryFactory(emp);
+	}
+	protected final JPQLQueryFactory queryFactory;
 
 	/**
 	 * Produce la configurazione annuale per l'office. 
@@ -36,11 +54,11 @@ public class ConfYearManager {
 
 			if(param.isYearly()) {
 
-				Optional<ConfYear> confYear = confYearDao.getByFieldName(param.description, year, office);
+				Optional<ConfYear> confYear = getByFieldName(param.description, year, office);
 
 				if( !confYear.isPresent() || overwrite ) {
 
-					Optional<ConfYear> previousConfYear = confYearDao.getByFieldName(param.description, year - 1, office);
+					Optional<ConfYear> previousConfYear = getByFieldName(param.description, year - 1, office);
 
 					String newValue = null;
 
@@ -72,7 +90,7 @@ public class ConfYearManager {
 
 		String newValue = param.getDefaultValue();
 
-		Optional<ConfYear> previousConfYear = confYearDao.getByFieldName(param.description, year - 1 , office);
+		Optional<ConfYear> previousConfYear = getByFieldName(param.description, year - 1 , office);
 
 		if(previousConfYear.isPresent()) {
 			newValue = previousConfYear.get().fieldValue;
@@ -83,7 +101,7 @@ public class ConfYearManager {
 		}
 
 		//Prelevo quella esistente
-		Optional<ConfYear> confYear = confYearDao.getByFieldName(param.description, year, office);
+		Optional<ConfYear> confYear = getByFieldName(param.description, year, office);
 
 		if(confYear.isPresent()) {
 
@@ -112,7 +130,7 @@ public class ConfYearManager {
 
 		Preconditions.checkState(param.isYearly());
 
-		Optional<ConfYear> confYear = confYearDao.getByFieldName(param.description, year, office);
+		Optional<ConfYear> confYear = getByFieldName(param.description, year, office);
 
 		if(!confYear.isPresent()) {
 
@@ -143,7 +161,7 @@ public class ConfYearManager {
 
 		if(value == null){
 
-			Optional<ConfYear> conf = confYearDao.getByFieldName(param.description, year, office);
+			Optional<ConfYear> conf = getByFieldName(param.description, year, office);
 
 			if(!conf.isPresent()){
 
@@ -200,6 +218,26 @@ public class ConfYearManager {
 
 		return parameter;
 
+	}
+	
+	/**
+	 * 
+	 * @param office
+	 * @param year
+	 * @param field
+	 * @return il conf year di un certo ufficio in un certo anno rispondente al parametro field
+	 */
+	private Optional<ConfYear> getByFieldName(String field, Integer year, Office office) {
+
+		final BooleanBuilder condition = new BooleanBuilder();
+
+		QConfYear confYear = QConfYear.confYear;
+		final JPQLQuery query = queryFactory.from(confYear);
+		condition.and(confYear.year.eq(year));
+		condition.and(confYear.field.eq(field));
+		query.where(condition);
+
+		return Optional.fromNullable(query.singleResult(confYear));
 	}
 
 }

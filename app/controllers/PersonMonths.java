@@ -8,23 +8,26 @@ import javax.validation.Valid;
 
 import manager.PersonMonthsManager;
 import manager.PersonMonthsManager.Insertable;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.PersonMonthRecapDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -33,13 +36,10 @@ public class PersonMonths extends Controller{
 	@Inject
 	private static IWrapperFactory wrapperFactory;
 	@Inject
-	private static PersonResidualYearRecapFactory yearFactory;
-	@Inject
 	private static PersonMonthRecapDao personMonthRecapDao;
 	@Inject
 	private static PersonMonthsManager personMonthsManager;
-
-
+	
 	public static void hourRecap(int year){
 
 		Optional<User> user = Security.getUser();
@@ -59,9 +59,19 @@ public class PersonMonths extends Controller{
 
 		Preconditions.checkState(contract.isPresent());
 
-		PersonResidualYearRecap csap = 
-				yearFactory.create(contract.get(), year, null);
-		render(csap, year);	
+		List<IWrapperContractMonthRecap> recaps = Lists.newArrayList();
+		YearMonth actual = new YearMonth(year, 1);
+		YearMonth last = new YearMonth(year, 12);
+		IWrapperContract c = wrapperFactory.create(contract.get());
+		while( !actual.isAfter(last) ) {
+			Optional<ContractMonthRecap> recap = c.getContractMonthRecap(actual);
+			if (recap.isPresent()) {
+				recaps.add(wrapperFactory.create(recap.get()));
+			}
+			actual = actual.plusMonths(1);
+		}
+		
+		render(recaps, year);	
 	}
 
 	public static void trainingHours(int year){

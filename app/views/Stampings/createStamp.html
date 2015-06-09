@@ -2,7 +2,7 @@
 #{set modalHeader:'Nuova timbratura ' + personDay.date + ' per ' + person.surname /}
 
 <div class="container-fluid text-center">
-#{form @Stampings.insert(), role:'form'}
+#{form @Stampings.insert(), role:'form', autocomplete:'off'}
 	
 	<input type="hidden" name="personId" value="${personDay.person.id}"/>
 	<input type="hidden" name="year" value="${personDay.date.year}"/>

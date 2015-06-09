@@ -67,6 +67,9 @@ public class PersonDay extends BaseModel {
 
 	@Column(name = "is_working_in_another_place")
 	public boolean isWorkingInAnotherPlace = false;
+	
+	@Column(name = "is_holiday")
+	public boolean isHoliday = false;
 
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	@OrderBy("date ASC")
@@ -88,12 +91,6 @@ public class PersonDay extends BaseModel {
 
 	@Transient
 	public Contract personDayContract = null;
-
-	@Transient
-	private Boolean isHolidayy = null;
-
-	@Transient
-	private Boolean isFixedTimeAtWorkk = null;
 
 	@Transient
 	public MealTicket mealTicketAssigned = null;
