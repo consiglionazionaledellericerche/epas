@@ -37,7 +37,7 @@ public final class Dipendente implements Comparable<Dipendente> {
 
 	public String getMatricola() { return matricola; }
 	public String getCognomeNome() { return cognomeNome; }
-	public Person getPerson() {return person;}
+	public Person getPerson() { return person; }
 
 	public IWrapperPerson getWrapperPerson() { return wrapperFactory.create(this.person); }
 

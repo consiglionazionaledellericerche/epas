@@ -5,6 +5,7 @@ package controllers;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
 
@@ -79,7 +80,23 @@ public class RequestInit extends Controller {
 
 			if(!user.isPresent())
 				return;
-
+			
+//			TODO Rifattorizzare in modo più intelligente
+			if(user.get().username.equals("developer")){
+				viewPerson = true;
+				viewPersonDay = true;
+				viewOffice = true;
+				viewCompetence = true;
+			    editCompetence = true;
+				uploadSituation = true;
+				viewWorkingTimeType = true;
+				editWorkingTimeType = true;
+				viewAbsenceType = true;
+				editAbsenceType = true;
+				viewCompetenceCode = true;
+				editCompetenceCode = true;
+				return;
+			}
 			List<Permission> pList = uroDao.getUserPermission(user.get());
 
 			for(Permission p : pList) {

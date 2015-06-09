@@ -103,7 +103,7 @@ public class FixUserPermission extends Job{
 
 			for(UsersRolesOffices uro : p.user.usersRolesOffices ) {
 				//Rimuovo ruolo role se non appartiene più all'office
-				if(uro.role.name.equals(employeeRole.name)){
+				if(uro.role.name.equals(Role.EMPLOYEE)){
 					if(uro.office.codeId.equals(p.office.codeId)) {
 						exist = true;
 					}
