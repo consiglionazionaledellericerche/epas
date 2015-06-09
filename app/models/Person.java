@@ -58,7 +58,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Email
 	public String email;
 
-	@OneToOne (optional = false)
+	@OneToOne (optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	public User user;
 
