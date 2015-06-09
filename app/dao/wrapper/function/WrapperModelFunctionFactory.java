@@ -11,7 +11,6 @@ import models.WorkingTimeType;
 import com.google.common.base.Function;
 
 import dao.PersonDao;
-import dao.PersonLite;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -22,12 +21,10 @@ import dao.wrapper.IWrapperWorkingTimeType;
 public class WrapperModelFunctionFactory {
 	
 	private final IWrapperFactory factory;
-	private final PersonDao personDao;
 
 	@Inject
-	WrapperModelFunctionFactory(IWrapperFactory factory, PersonDao personDao) {
+	WrapperModelFunctionFactory(IWrapperFactory factory) {
 		this.factory = factory;
-		this.personDao = personDao;
 	}
 	
 	public Function<WorkingTimeType, IWrapperWorkingTimeType> workingTimeType() {
@@ -46,17 +43,6 @@ public class WrapperModelFunctionFactory {
 			@Override
 			public IWrapperPerson apply(Person input) {
 				return factory.create(input);
-			}
-		};
-	}
-	
-	public Function<PersonLite, IWrapperPerson> personLite() {
-		return new Function<PersonLite, IWrapperPerson>() {
-
-			@Override
-			public IWrapperPerson apply(PersonLite input) {
-				
-				return factory.create(personDao.getPersonById(input.id));
 			}
 		};
 	}

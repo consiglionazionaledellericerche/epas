@@ -59,7 +59,6 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.PersonLite;
 import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;

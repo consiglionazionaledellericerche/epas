@@ -21,7 +21,7 @@ public class UsersRolesOffices extends BaseModel{
 	private static final long serialVersionUID = -1403683534643592790L;
 
 	@NotAudited
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="user_id")
 	public User user;
 

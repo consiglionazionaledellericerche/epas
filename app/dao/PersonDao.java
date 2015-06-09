@@ -56,40 +56,7 @@ public final class PersonDao extends DaoBase{
 		super(queryFactory, emp);
 	}
 
-	/**
-	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
-	 * appartenenti ad un office in offices.
-	 * 
-	 * @param offices
-	 * @param year
-	 * @param month
-	 * @return
-	 */
-	@Deprecated
-	public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
-		
-		final QPerson person = QPerson.person;
-		
-		Optional<LocalDate> beginMonth = 
-				Optional.fromNullable( new LocalDate(year, month, 1));
-		Optional<LocalDate> endMonth = 
-				Optional.fromNullable( beginMonth.get().dayOfMonth().withMaximumValue() );
-		
-		JPQLQuery lightQuery = getQueryFactory().from(person)
-				.leftJoin(person.contracts, QContract.contract)
-				.orderBy(person.surname.asc(), person.name.asc())
-				.distinct();
-		
-		JPQLQuery query = personQuery(Optional.fromNullable(lightQuery),
-				Optional.<String>absent(), offices, false, 
-				beginMonth, endMonth, true, Optional.<CompetenceCode>absent()); 
-		
-		QBean<PersonLite> bean = Projections.bean( PersonLite.class, person.id, 
-				person.name, person.surname);
-		
-		return ModelQuery.simpleResults( query, bean).list();
 	
-	}
 	
 	public List<Person> getActivePersonInMonth(Set<Office> offices, YearMonth yearMonth) {
 		
@@ -130,9 +97,12 @@ public final class PersonDao extends DaoBase{
 		final QPerson person = QPerson.person;
 	
 		return ModelQuery.simpleResults(
+				//JPQLQuery
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						onlyOnCertificate, Optional.<CompetenceCode>absent()), person);
+						onlyOnCertificate, Optional.<CompetenceCode>absent()),
+				//Expression
+				person);
 	}
 
 	/**
@@ -276,8 +246,6 @@ public final class PersonDao extends DaoBase{
 		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
 
 		return query.singleResult(person);
-
-
 	}
 
 	/**
@@ -292,7 +260,6 @@ public final class PersonDao extends DaoBase{
 		final JPQLQuery query = getQueryFactory().from(person).where(person.number.eq(number));
 
 		return query.singleResult(person);
-
 	}
 
 	/**
@@ -413,19 +380,56 @@ public final class PersonDao extends DaoBase{
 	}
 	
 	/**
-	 * La query effettiva per la ricerca delle persone. 
-	 * Da combinare con proiezioni se serve efficienza. 
-	 *
+	 * La query per la ricerca delle persone. 
+	 * Versione con JPQLQuery injettata per selezionare le fetch da utilizzare
+	 * con la proiezione desiderata.
+	 * 
+	 * @param injectedQuery
 	 * @param name
 	 * @param offices
 	 * @param onlyTechnician
 	 * @param start
 	 * @param end
 	 * @param onlyOnCertificate
+	 * @param compCode
 	 * @return
 	 */
 	private JPQLQuery personQuery(
-			Optional<JPQLQuery> injectedQuery,
+			JPQLQuery injectedQuery,
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			Optional<LocalDate> start, Optional<LocalDate> end,
+			boolean onlyOnCertificate, 
+			Optional<CompetenceCode> compCode) {
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		
+		filterOffices(condition, offices);
+		filterOnlyTechnician(condition, onlyTechnician);
+		filterName(condition, name);
+		filterOnlyOnCertificate(condition, onlyOnCertificate);
+		filterContract(condition, start, end);
+		filterCompetenceCodeEnabled(condition, compCode);
+		
+		return injectedQuery.where(condition);
+		
+	}
+	
+	/**
+	 * La query per la ricerca delle persone. 
+	 * Versione da utilizzare per proiezione esatta Person.
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @param compCode
+	 * @return
+	 */
+	private JPQLQuery personQuery(
 			Optional<String> name, 
 			Set<Office> offices,
 			boolean onlyTechnician, 
@@ -436,11 +440,7 @@ public final class PersonDao extends DaoBase{
 		final QPerson person = QPerson.person;
 		final QContract contract = QContract.contract;
 		
-		final JPQLQuery query;
-		
-		if ( !injectedQuery.isPresent() ) {
-			
-			 query = getQueryFactory().from(person)
+		final JPQLQuery query = getQueryFactory().from(person)
 				.leftJoin(person.contracts, contract)
 				.leftJoin(person.user, QUser.user)
 				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
@@ -449,20 +449,7 @@ public final class PersonDao extends DaoBase{
 				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
 				.orderBy(person.surname.asc(), person.name.asc())
 				.distinct();
-		} else {
-			query = injectedQuery.get();
-		}
-		/*
-		 * 				.leftJoin(person.contracts, contract)
-				//.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
-				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
-				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
-				.leftJoin(person.user, QUser.user)
-				.leftJoin(person.competenceCode, qcc)
-				.orderBy(person.surname.asc(), person.name.asc())
-				.distinct();
-		 */
-
+		
 		final BooleanBuilder condition = new BooleanBuilder();
 		
 		filterOffices(condition, offices);
@@ -473,19 +460,6 @@ public final class PersonDao extends DaoBase{
 		filterCompetenceCodeEnabled(condition, compCode);
 		
 		return query.where(condition);
-		
-	}
-	
-	private JPQLQuery personQuery(
-			Optional<String> name, 
-			Set<Office> offices,
-			boolean onlyTechnician, 
-			Optional<LocalDate> start, Optional<LocalDate> end,
-			boolean onlyOnCertificate, 
-			Optional<CompetenceCode> compCode) {
-		
-		return personQuery(Optional.<JPQLQuery>absent(), name, offices, 
-				onlyTechnician, start, end, onlyOnCertificate, compCode);
 	}
 	
 	/**
@@ -578,35 +552,61 @@ public final class PersonDao extends DaoBase{
 	}
 	
 	/**
-	 * La lista di persone una volta applicati i filtri dei parametri. 
+	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
+	 * appartenenti ad un office in offices. 
 	 * 
-	 * @param name
+	 * Deprecata. Ma Buon esempio di query dsl con proiezione del risultato
+	 * in DTO.
+	 * 
 	 * @param offices
-	 * @param onlyTechnician
-	 * @param start
-	 * @param end
-	 * @param onlyOnCertificate
+	 * @param year
+	 * @param month
 	 * @return
 	 */
-	public SimpleResults<PersonLite> listaLeggeraSemplice(
-			Optional<String> name, 
-			Set<Office> offices,
-			boolean onlyTechnician, 
-			LocalDate start, LocalDate end, 
-			boolean onlyOnCertificate) {
+	@Deprecated
+	public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
 		
 		final QPerson person = QPerson.person;
+		
+		Optional<LocalDate> beginMonth = 
+				Optional.fromNullable( new LocalDate(year, month, 1));
+		Optional<LocalDate> endMonth = 
+				Optional.fromNullable( beginMonth.get().dayOfMonth().withMaximumValue() );
+		
+		JPQLQuery lightQuery = getQueryFactory().from(person)
+				.leftJoin(person.contracts, QContract.contract)
+				.orderBy(person.surname.asc(), person.name.asc())
+				.distinct();
+		
+		lightQuery = personQuery(lightQuery,
+				Optional.<String>absent(), offices, false, 
+				beginMonth, endMonth, true, Optional.<CompetenceCode>absent()); 
 		
 		QBean<PersonLite> bean = Projections.bean( PersonLite.class, person.id, 
 				person.name, person.surname);
 		
-		JPQLQuery query = personQuery(
-				name, offices, onlyTechnician, 
-				Optional.fromNullable(start), Optional.fromNullable(end), 
-				onlyOnCertificate, Optional.<CompetenceCode>absent()); 
+		return ModelQuery.simpleResults( lightQuery, bean).list();
+	
+	}
+	
+	/**
+	 * Dto contenente le sole informazioni della persona
+	 * richieste dalla select nel template menu.
+	 */
+	@Deprecated
+	public static class PersonLite {
 		
-		return ModelQuery.simpleResults(query, bean);
-						
+		public Long id;
+		public String name;
+		public String surname;
+		
+		public Person person = null;
+
+		public PersonLite(Long id, String name, String surname) {
+			this.id = id;
+			this.name = name;
+			this.surname = surname;
+		}
 	}
 	
 }

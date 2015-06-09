@@ -37,9 +37,8 @@ public class User extends BaseModel{
 	public String password;
 
 	@NotAudited
-	@OneToOne(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
+	@OneToOne(mappedBy="user", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Person person;
-
 	
 	//@ManyToOne
 	//@JoinColumn(name="office_id")
