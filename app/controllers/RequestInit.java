@@ -33,7 +33,7 @@ import controllers.Resecure.NoCheck;
 import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDao.PersonLiteDto;
+import dao.PersonLite;
 import dao.QualificationDao;
 import dao.UsersRolesOfficesDao;
 
@@ -353,7 +353,7 @@ public class RequestInit extends Controller {
 		if(user.get().person != null) {
 			Set<Office> officeList = officeDao.getOfficeAllowed(user.get());
 			if(!officeList.isEmpty()) {
-				List<PersonLiteDto> persons = personDao.liteList(officeList, year, month); 	
+				List<PersonLite> persons = personDao.liteList(officeList, year, month); 	
 				renderArgs.put("navPersons", persons);
 			}
 		} 
@@ -361,7 +361,7 @@ public class RequestInit extends Controller {
 
 			List<Office> allOffices = officeDao.getAllOffices();
 			if (allOffices!=null && !allOffices.isEmpty()) {
-				List<PersonLiteDto> persons = personDao.liteList(Sets.newHashSet(allOffices), year, month);
+				List<PersonLite> persons = personDao.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
 			}
 		}
