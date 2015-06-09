@@ -19,7 +19,6 @@ import com.google.common.base.Optional;
 @SuppressWarnings("rawtypes")
 @On("0 1 5 * * ?") // Ore 5:01
 //@On("0 /1 * * * ?") // Ogni minuto
-
 public class DarkNightJob extends Job{
 	
 	@Inject

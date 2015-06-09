@@ -77,7 +77,6 @@ public class Import extends Controller{
 		restOfficeManager.saveImportedSeats(filteredOffices);
 		
 		Offices.showOffices();
-	
 	}
 
 }
