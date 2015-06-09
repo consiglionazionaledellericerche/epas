@@ -113,15 +113,6 @@ public class Persons extends Controller {
 	private static PersonChildrenDao personChildrenDao;
 
 	public static void list(String name){
-//
-//		List<PersonLite> simplePersonList = personDao.listaLeggeraSemplice(
-//				Optional.fromNullable(name),
-//				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
-//				null, false).list();
-//
-//		List<IWrapperPerson> personList = FluentIterable
-//				.from(simplePersonList)
-//				.transform(wrapperFunctionFactory.personLite()).toList();
 		
 		List<Person> simplePersonList = personDao.list(Optional.fromNullable(name),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
@@ -131,8 +122,7 @@ public class Persons extends Controller {
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
 		render(personList);
-		
-		render(personList);
+
 	}
 
 	public static void insertPerson() {
