@@ -55,18 +55,18 @@ public class ReperibilityManager {
 	public ReperibilityManager(CompetenceDao competenceDao,
 			AbsenceDao absenceDao,
 			PersonReperibilityDayDao personReperibilityDayDao,
-			PersonManager personManager, CompetenceCodeDao competenceCodeDao) {
+			PersonDayManager personDayManager, CompetenceCodeDao competenceCodeDao) {
 		this.competenceDao = competenceDao;
 		this.absenceDao = absenceDao;
 		this.personReperibilityDayDao = personReperibilityDayDao;
-		this.personManager = personManager;
+		this.personDayManager = personDayManager;
 		this.competenceCodeDao = competenceCodeDao;
 	}
 
 	private final CompetenceDao competenceDao;
 	private final AbsenceDao absenceDao;
 	private final PersonReperibilityDayDao personReperibilityDayDao;
-	private final PersonManager personManager;
+	private final PersonDayManager personDayManager;
 	private final CompetenceCodeDao competenceCodeDao;
 
 	private final static String codFr = "207";    						// codice dei turni feriali
@@ -398,7 +398,7 @@ public class ReperibilityManager {
 				Person person = personReperibilityDay.personReperibility.person;
 
 				//builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "FS" : "FR");
-				builder.put(person, personReperibilityDay.date.getDayOfMonth(), personManager.isHoliday(person, personReperibilityDay.date) ? "FS" : "FR");
+				builder.put(person, personReperibilityDay.date.getDayOfMonth(), personDayManager.isHoliday(person, personReperibilityDay.date) ? "FS" : "FR");
 			}
 			reperibilityMonth = builder.build();
 			reperibilityMonths.add(reperibilityMonth);
@@ -513,7 +513,7 @@ public class ReperibilityManager {
 
 			// record the reperibility day
 			//builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? codFs : codFr);
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), personManager.isHoliday(person, personReperibilityDay.date) ? codFs : codFr);
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), personDayManager.isHoliday(person, personReperibilityDay.date) ? codFs : codFr);
 
 		}
 		reperibilityMonth = builder.build();

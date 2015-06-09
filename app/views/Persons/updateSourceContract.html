@@ -74,6 +74,10 @@
   	 	  Una volta definiti i dati il software provvederà a ricalcolare i ripiloghi annuali della persona utilizzando i dati di inizializzazione e i dati presenti nel database 
   		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
   		  </p>
+  		  #{if initUse.isPresent() }
+  		  <p>Impostare una data di inizializzazione uguale o successiva a ${initUse.get().plusDays(1)}.</p>
+  		  #{/if}
+  		  
         </div>
       </div>
     </div>

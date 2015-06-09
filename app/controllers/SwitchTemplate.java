@@ -99,11 +99,6 @@ public class SwitchTemplate extends Controller{
 			Stampings.dailyPresence(year, month, day);
 		}
 
-		if(action.equals("MonthRecaps.show")) {
-
-			MonthRecaps.show(year, month, null, null);
-		}
-
 		if(action.equals("Stampings.mealTicketSituation")) {
 
 			Stampings.mealTicketSituation(year, month, null, null);

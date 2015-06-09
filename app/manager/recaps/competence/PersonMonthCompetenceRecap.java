@@ -1,11 +1,11 @@
 package manager.recaps.competence;
 
-import manager.recaps.residual.PersonResidualMonthRecap;
-import manager.recaps.residual.PersonResidualYearRecap;
-import manager.recaps.residual.PersonResidualYearRecapFactory;
+import org.joda.time.YearMonth;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import play.data.validation.Valid;
 
@@ -14,6 +14,7 @@ import com.google.gdata.util.common.base.Preconditions;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Riepilogo che popola la vista competenze del dipendente.
@@ -21,8 +22,8 @@ import dao.CompetenceDao;
  */
 public class PersonMonthCompetenceRecap {
 	
-	private CompetenceCodeDao competenceCodeDao;
-	private CompetenceDao competenceDao;	
+	private final CompetenceCodeDao competenceCodeDao;
+	private final CompetenceDao competenceDao;	
 	
 	public Contract contract;
 	public int year;
@@ -35,10 +36,9 @@ public class PersonMonthCompetenceRecap {
 	public int ordinaryShift = 0;
 	public int nightShift = 0;
 	public int progressivoFinalePositivoMese = 0;
-
-
+	
 	public PersonMonthCompetenceRecap(CompetenceCodeDao competenceCodeDao,
-			CompetenceDao competenceDao, PersonResidualYearRecapFactory yearFactory,
+			CompetenceDao competenceDao, IWrapperFactory wrapperFactory,
 			Contract contract, int month, int year) {
 		
 		this.competenceCodeDao = competenceCodeDao;
@@ -58,11 +58,10 @@ public class PersonMonthCompetenceRecap {
 		this.ordinaryShift = getOrdinaryShift(contract.person, year, month);
 		this.nightShift = getNightShift(contract.person, year, month);
 
-		PersonResidualYearRecap c = 
-				yearFactory.create(contract, year, null);
-		PersonResidualMonthRecap mese = c.getMese(month);
-		
-		this.progressivoFinalePositivoMese = mese.progressivoFinalePositivoMese;
+		Optional<ContractMonthRecap> recap = 
+				wrapperFactory.create(contract).getContractMonthRecap( new YearMonth(year,month));
+		Preconditions.checkState(recap.isPresent());
+		this.progressivoFinalePositivoMese = recap.get().getPositiveResidualInMonth();
 		
 	}
 	

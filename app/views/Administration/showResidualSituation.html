@@ -1,0 +1,16 @@
+<table>
+	<tr>
+	  <th>Nome cognome</th>
+	  <th>Monte ore anno corrente</th>
+	</tr>
+	
+	#{list items:monthRecapList, as:'monthRecap'}
+	
+	  <tr>
+	    <td>${monthRecap.person.fullname}</td>
+	    <td>${monthRecap.monteOreAnnoCorrente.toHourTime()}</td>
+	  
+	  </tr>
+	#{/list}
+	
+</table>

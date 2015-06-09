@@ -51,11 +51,11 @@ public class Persons extends Controller{
 	
 	@BasicAuth
 	public static void days(Integer perseoId ,LocalDate start,LocalDate end){
-		long checkedPeople = personDao.checkCnrEmailForEmployee();
-		if(checkedPeople == 0){
-			
-			syncManager.syncronizeCnrEmail();
-		}
+//		long checkedPeople = personDao.checkCnrEmailForEmployee();
+//		if(checkedPeople == 0){
+//			
+//			syncManager.syncronizeCnrEmail();
+//		}
 
 		//Person person = personDao.getPersonByEmail(email);
 		Person person = personDao.getPersonByPerseoId(perseoId);
@@ -87,14 +87,14 @@ public class Persons extends Controller{
 
 	@BasicAuth
 	public static void missions(Integer perseoId, LocalDate start, LocalDate end, boolean forAttachment){
-		long checkedPeople = personDao.checkCnrEmailForEmployee();
-		if(checkedPeople == 0){
-			/**
-			 * TODO: chiamare qui il metodo del personManager per sincronizzare
-			 * le email cnr
-			 */
-			syncManager.syncronizeCnrEmail();
-		}
+//		long checkedPeople = personDao.checkCnrEmailForEmployee();
+//		if(checkedPeople == 0){
+//			/**
+//			 * TODO: chiamare qui il metodo del personManager per sincronizzare
+//			 * le email cnr
+//			 */
+//			syncManager.syncronizeCnrEmail();
+//		}
 		//Person person = personDao.getPersonByEmail(email);
 		Person person = personDao.getPersonByPerseoId(perseoId);
 		List<DayRecap> personDays = Lists.newArrayList();

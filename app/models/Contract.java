@@ -67,9 +67,9 @@ public class Contract extends BaseModel {
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@OrderBy("beginFrom")
 	public Set<VacationPeriod> vacationPeriods = Sets.newHashSet();
-
+	
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
-	public List<ContractYearRecap> recapPeriods;
+	public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
 	@Required @NotNull
 	@Column(name="begin_contract")
@@ -117,20 +117,6 @@ public class Contract extends BaseModel {
 	public String toString() {
 		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
 				id, person.id, beginContract, expireContract, endContract);
-	}
-
-	/**
-	 * Ritorna il riepilogo annule del contatto.
-	 * @param year
-	 * @return
-	 */
-	public ContractYearRecap yearRecap(int year)	{
-		for(ContractYearRecap cyr : recapPeriods) {
-
-			if(cyr.year==year)
-				return cyr;
-		}
-		return null;
 	}
 
 	/**

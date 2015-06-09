@@ -8,7 +8,7 @@ import play.jobs.Job;
 import play.jobs.On;
 import cnr.sync.manager.SyncManager;
 
-@On("0 10 6 ? * MON")
+//@On("0 10 6 ? * MON")
 //@On("0 40 10 * * ?")
 public class CheckCnrEmailJob extends Job{
 	

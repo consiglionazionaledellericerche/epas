@@ -23,6 +23,7 @@ import models.PersonYear;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,10 +148,15 @@ public class PersonManager {
 	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
 	 * @return 
 	 */
-	public boolean isActiveInMonth(Person person, int month, int year, boolean onCertificateFilter)
-	{
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+	public boolean isActiveInMonth(Person person, YearMonth yearMonth, 
+			boolean onCertificateFilter) {
+		
+		LocalDate monthBegin = new LocalDate().withYear(yearMonth.getYear())
+				.withMonthOfYear(yearMonth.getMonthOfYear()).withDayOfMonth(1);
+		
+		LocalDate monthEnd = new LocalDate().withYear(yearMonth.getYear())
+				.withMonthOfYear(yearMonth.getMonthOfYear()).dayOfMonth().withMaximumValue();
+		
 		return isActiveInPeriod(person, monthBegin, monthEnd, onCertificateFilter);
 	}
 
@@ -196,40 +202,6 @@ public class PersonManager {
 
 		return true;
 	}
-
-
-	/**
-	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
-	 * @param date
-	 * @return
-	 */
-	public boolean isHoliday(Person person, LocalDate date)
-	{
-		if(DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), date))
-			return true;
-
-		//Contract contract = this.getContract(date);
-		Contract contract = contractDao.getContract(date, person);
-		if(contract == null)
-		{
-			//persona fuori contratto
-			return false;
-		}
-
-		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()-1).holiday;
-			}
-		}
-
-		return false;	//se il db è consistente non si verifica mai
-
-	}
-
-
-
 
 	/**
 	 * 
@@ -347,8 +319,9 @@ public class PersonManager {
 	 */
 	public PersonDay createPersonDayFromDate(Person person, LocalDate date){
 		//if(person.isHoliday(date))
-		if(isHoliday(person, date))
+		if(personDayManager.isHoliday(person, date)) {
 			return null;
+		}
 		return new PersonDay(person, date);
 	}
 
@@ -452,7 +425,7 @@ public class PersonManager {
 			IWrapperPersonDay day = wrapperFactory.create(pd);
 			boolean fixed = day.isFixedTimeAtWork();
 
-			if(day.isHoliday())
+			if(pd.isHoliday)
 				continue;
 
 			if(fixed && !personDayManager.isAllDayAbsences(pd) ){
