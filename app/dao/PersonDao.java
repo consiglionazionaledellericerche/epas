@@ -408,8 +408,20 @@ public final class PersonDao extends DaoBase{
 		
 		final JPQLQuery query = getQueryFactory().from(person)
 				.leftJoin(person.contracts, contract)
+				.leftJoin(person.reperibility, QPersonReperibility.personReperibility)
 				.orderBy(person.surname.asc(), person.name.asc())
 				.distinct();
+		
+		/*
+		 * 				.leftJoin(person.contracts, contract)
+				//.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
+				.leftJoin(person.user, QUser.user)
+				.leftJoin(person.competenceCode, qcc)
+				.orderBy(person.surname.asc(), person.name.asc())
+				.distinct();
+		 */
 
 		final BooleanBuilder condition = new BooleanBuilder();
 		
