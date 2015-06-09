@@ -33,6 +33,12 @@ import play.data.validation.Required;
  * @author cristian
  *
  */
+
+/**
+ * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le 
+ * informazioni della persona in fase di personDao.list.
+ * Necessaria comunque la join con le relazioni OneToOne. 
+ */
 @Entity
 @Audited
 @Table(name = "persons")
