@@ -226,13 +226,12 @@ public class Shift extends Controller {
 		List<PersonShiftDay> personShiftDays = personShiftDayDao.getPersonShiftDayByTypeAndPeriod(startDate, endDate, shiftType);
 
 		//inconsistentAbsence = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
-		competenceUtility.getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence);
+		shiftManager.getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence);
 
 		//return inconsistentAbsence;
 	}
 
-
-
+	
 	/**
 	 * @author arianna
 	 * crea il file PDF con il resoconto mensile dei turni dello IIT
@@ -274,7 +273,6 @@ public class Shift extends Controller {
 		// Legge i turni associati alla categoria (es: A, B)
 		List<ShiftType> shiftTypes = ShiftType.find("SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory).fetch();
 
-
 		// for each shift
 		for (ShiftType shiftType: shiftTypes)
 		{	
@@ -287,12 +285,12 @@ public class Shift extends Controller {
 
 			Logger.debug("CALCOLA IL NUM DI GIORNI EFFETTUATI NEL TURNO PER OGNI PERSONA");
 			// conta e memorizza i giorni di turno per ogni persona
-			competenceUtility.countPersonsShiftsDays(personsShiftDays, personsShiftsWorkedDays);
+			shiftManager.countPersonsShiftsDays(personsShiftDays, personsShiftsWorkedDays);
 
 
 			// Memorizzo le inconsistenze del turno
 			Logger.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE del turno %s e memorizzarle", type);
-			competenceUtility.getShiftInconsistencyTimestampTable(personsShiftDays, personsShiftInconsistentAbsences);
+			shiftManager.getShiftInconsistencyTimestampTable(personsShiftDays, personsShiftInconsistentAbsences);
 
 		}
 
