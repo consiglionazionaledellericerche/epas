@@ -125,13 +125,14 @@ public final class PersonDao extends DaoBase{
 			LocalDate start, LocalDate end) {
 
 		Preconditions.checkState(!offices.isEmpty());
+		Preconditions.checkNotNull(compCode);
 
 		final QPerson person = QPerson.person;
 		
 		return ModelQuery.simpleResults(
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						true, Optional.<CompetenceCode>absent()), person);
+						true, Optional.fromNullable(compCode) ), person);
 
 	}
 
