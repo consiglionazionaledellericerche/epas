@@ -58,7 +58,6 @@ public class PersonManager {
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
 		this.wrapperFactory = wrapperFactory;
-		this.confGeneralManager = confGeneralManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
@@ -69,7 +68,6 @@ public class PersonManager {
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
 	private final IWrapperFactory wrapperFactory;
-	private final ConfGeneralManager confGeneralManager;
 
 
 	/**
