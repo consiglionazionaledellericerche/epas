@@ -15,11 +15,9 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ShiftManager;
-
 import models.Absence;
 import models.Competence;
 import models.Person;
-import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftCategories;
@@ -28,8 +26,6 @@ import models.ShiftType;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
-import models.query.QPersonReperibilityDay;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
@@ -45,6 +41,7 @@ import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
@@ -422,37 +419,8 @@ public class Shift extends Controller {
 		render(absenceShiftPeriods);
 	}
 	
-	/*
-	 * Export the shift calendar in iCal for the person with id = personId with reperibility 
-	 * of type 'type' for the 'year' year
-	 * If the personId=0, it exports the calendar for all persons of the shift of type 'type'
-	 */
-	private static Calendar createCalendar(String type, Long personId, int year) {
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
 
-		List<PersonShift> personsInTheCalList = new ArrayList<PersonShift>();
-
-		if (personId != 0) {
-			// read the shift person 
-			PersonShift personShift = shiftDao.getPersonShiftByPersonAndType(personId, type);
-			if (personShift == null) {
-				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, type));
-			}
-			personsInTheCalList.add(personShift);
-		}
-
-
-		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
-		
-		Logger.debug("chiama la createicsReperibilityCalendar(%s, %s, %s)", Integer.parseInt(params.get("year")), type, personsInTheCalList);
-		icsCalendar = shiftManager.createicsShiftCalendar(Integer.parseInt(params.get("year")), type, personsInTheCalList); /*?*/
-
-		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-
-		return icsCalendar;
-	}
-	
+	@BasicAuth
 	public static void iCal() {
 		String type = params.get("type", String.class);
 		Long personId = params.get("personId", Long.class);
@@ -466,11 +434,14 @@ public class Shift extends Controller {
 		}
 
 		try {
-			Calendar calendar = createCalendar(type, personId, year);
+			Optional<Calendar> calendar = shiftManager.createCalendar(type, personId, year);
+			if (!calendar.isPresent()) {
+				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, type));
+			}
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			CalendarOutputter outputter = new CalendarOutputter();
-			outputter.output(calendar, bos);
+			outputter.output(calendar.get(), bos);
 			
 			response.setHeader("Content-Type", "application/ics");
 			InputStream is = new ByteArrayInputStream(bos.toByteArray());

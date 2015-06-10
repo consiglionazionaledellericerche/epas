@@ -77,7 +77,14 @@ when
      	"Persons.resetPassword",
      	
      	/* Stampa cartellino */
-     	"PrintTags.showPersonTag"
+     	"PrintTags.showPersonTag",
+     	
+     	/* 
+     	 * Visualizzazione eventuali turni via iCal
+     	 * dentro il metodo controllare il permesso di
+     	 * visualizzare il calendario specifico richiesto
+     	 */
+     	"Shift.iCal"
      	
        ), target == null, granted == false)
 then
@@ -860,7 +867,7 @@ then
 end
 
 /*******************************************************************************
- * Azioni via REST per Turni e Reperibilità
+ * Azioni via REST e iCal per Turni e Reperibilità
  ******************************************************************************/
  
 rule manageShift
@@ -875,7 +882,29 @@ when
         "Shift.update",
         "Shift.exportMonthAsPDF",
         "Shift.exportMonthCalAsPDF",
-        "Shift.absence"  
+        "Shift.absence",  
+        "Shift.iCal"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule manageReperibility
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "manageReperibility") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        
+        "Reperibility.personList",
+        "Reperibility.find",
+        "Reperibility.who",
+        "Reperibility.absence",
+        "Reperibility.whoIsAbsent",
+        "Reperibility.update",
+        "Reperibility.changePeriods",  
+        "Reperibility.exportYearAsPDF",    
+        "Reperibility.exportMonthAsPDF",
+        "Reperibility.iCal"
         
        ), target == null, granted == false)
 then

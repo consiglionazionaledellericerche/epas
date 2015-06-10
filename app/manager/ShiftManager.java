@@ -757,4 +757,34 @@ public class ShiftManager {
 		return shiftDay;
 	}
 	
+	/*
+	 * Export the shift calendar in iCal for the person with id = personId with reperibility 
+	 * of type 'type' for the 'year' year
+	 * If the personId=0, it exports the calendar for all persons of the shift of type 'type'
+	 */
+	public Optional<Calendar> createCalendar(String type, Long personId, int year) {
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
+
+		List<PersonShift> personsInTheCalList = new ArrayList<PersonShift>();
+
+		if (personId != 0) {
+			// read the shift person 
+			PersonShift personShift = shiftDao.getPersonShiftByPersonAndType(personId, type);
+			if (personShift == null) {
+				return Optional.<Calendar>absent();
+			}
+			personsInTheCalList.add(personShift);
+		}
+
+
+		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+		
+		Logger.debug("chiama la createicsReperibilityCalendar(%s, %s, %s)", year, type, personsInTheCalList);
+		icsCalendar = createicsShiftCalendar(year, type, personsInTheCalList); /*?*/
+
+		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+
+		return Optional.of(icsCalendar);
+	}
 }

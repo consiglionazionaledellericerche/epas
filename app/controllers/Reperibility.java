@@ -43,12 +43,14 @@ import play.data.binding.As;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -60,6 +62,7 @@ import dao.PersonReperibilityDayDao;
  * @author cristian
  *
  */
+@With(Resecure.class)
 public class Reperibility extends Controller {
 
 	private static String codFr = "207";
@@ -86,6 +89,7 @@ public class Reperibility extends Controller {
 	 * @author arianna
 	 * Restituisce la lista dei reperibili attivi al momento di un determinato tipo
 	 */
+	@BasicAuth
 	public static void personList() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.devel.iit.cnr.it");
@@ -105,6 +109,7 @@ public class Reperibility extends Controller {
 	 * 
 	 * per provarlo: curl -H "Accept: application/json" http://localhost:9001/reperibility/1/find/2012/11/26/2013/01/06
 	 */
+	@BasicAuth
 	public static void find() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -140,6 +145,7 @@ public class Reperibility extends Controller {
 	 * nell'intervallo di tempo da 'yearFrom/monthFrom/dayFrom'  a 'yearTo/monthTo/dayTo'
 	 * 
 	 */
+	@BasicAuth
 	public static void who() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -175,6 +181,7 @@ public class Reperibility extends Controller {
 	 * Legge le assenze dei reperibili di una determinata tipologia in un dato intervallo di tempo
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void absence() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -223,6 +230,7 @@ public class Reperibility extends Controller {
 	 * Restituisce la lista delle persone reperibili assenti di una determinata tipologia in un dato intervallo di tempo
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void whoIsAbsent() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -273,6 +281,7 @@ public class Reperibility extends Controller {
 	 * 
 	 * @param body
 	 */
+	@BasicAuth
 	public static void update(Long type, Integer year, Integer month, @As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
 
 		Logger.debug("update: Received reperebilityPeriods %s", body);	
@@ -310,6 +319,7 @@ public class Reperibility extends Controller {
 	 * 
 	 * @param body
 	 */
+	@BasicAuth
 	public static void changePeriods(Long type, @As(binder=JsonReperibilityChangePeriodsBinder.class) ReperibilityPeriods body) {
 
 		Logger.debug("update: Received reperebilityPeriods %s", body);	
@@ -339,6 +349,7 @@ public class Reperibility extends Controller {
 	 * crea il file PDF con il calendario annuale delle reperibilità di tipi 'type' per l'anno 'year'
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void exportYearAsPDF() {
 		int year = params.get("year", Integer.class);
 		Long reperibilityId = params.get("type", Long.class);
@@ -400,6 +411,7 @@ public class Reperibility extends Controller {
 	 * Segnala le eventuali inconsistenze con le assenze o le mancate timbrature
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void exportMonthAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
@@ -525,7 +537,7 @@ public class Reperibility extends Controller {
 		return icsCalendar;
 	}
 
-
+	@BasicAuth
 	public static void iCal() {
 		Long type = params.get("type", Long.class);
 		Long personId = params.get("personId", Long.class);
