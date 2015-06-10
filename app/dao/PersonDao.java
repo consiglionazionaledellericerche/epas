@@ -68,7 +68,7 @@ public final class PersonDao extends DaoBase{
 		}
 	}
 
-	private final static QPerson person = QPerson.person;
+	private final static QPerson person = QPerson.person1;
 	private final static QContract contract = QContract.contract;
 	
 	@Inject
@@ -154,7 +154,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public List<PersonLiteDto> liteList(Set<Office> offices, int year, int month) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		LocalDate beginMonth = new LocalDate(year,month,1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
@@ -455,9 +455,19 @@ public final class PersonDao extends DaoBase{
 	 * email_cnr, campo utile per poter fare la sincronizzazione con gli altri sistemi
 	 */
 	public long checkCnrEmailForEmployee(){
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		final JPQLQuery query = getQueryFactory().from(person).where(person.cnr_email.isNotNull());
 		return query.count();
+	}
+	
+	/**
+	 * 
+	 * @return il responsabile per la persona passata come parametro
+	 */
+	public Person getPersonInCharge(Person p){
+		final QPerson person = QPerson.person1;
+		final JPQLQuery query = getQueryFactory().from(person).where(person.people.contains(p));
+		return query.singleResult(person);
 	}
 
 }

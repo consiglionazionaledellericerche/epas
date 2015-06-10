@@ -152,6 +152,7 @@ public class RequestInit extends Controller {
 
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
 		}
+		
 	}
 
 	/**

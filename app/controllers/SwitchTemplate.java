@@ -99,6 +99,11 @@ public class SwitchTemplate extends Controller{
 			Stampings.dailyPresence(year, month, day);
 		}
 
+		if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
+
+			Stampings.dailyPresenceForPersonInCharge(year, month, day);
+		}
+
 		if(action.equals("Stampings.mealTicketSituation")) {
 
 			Stampings.mealTicketSituation(year, month, null, null);
@@ -155,8 +160,6 @@ public class SwitchTemplate extends Controller{
 
 			Application.index();	
 		}
-
-		session.put("daySelected", day);
 
 		executeAction(action);
 
