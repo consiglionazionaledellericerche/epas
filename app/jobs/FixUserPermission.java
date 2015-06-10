@@ -19,11 +19,16 @@ import play.test.Fixtures;
 
 import com.google.common.collect.Lists;
 
+import controllers.Security;
+import dao.RoleDao;
+
 public class FixUserPermission extends Job{
 
 	@Inject
 	private static OfficeManager officeManager;
 
+	private static RoleDao roleDao;
+	
 	public void doJob(){
 
 		final class Permesso{
@@ -115,6 +120,18 @@ public class FixUserPermission extends Job{
 			if(!exist) {
 				officeManager.setUro(p.user, p.office, employeeRole);
 			}
+		}
+		
+		//Ruoli e permessi per la gestione di turni e reperibilità 
+		//(principalmente via REST)
+		Role shiftManagerRole = Role.find("byName",  Role.SHIFT_MANAGER).first();
+		Role reperibilityManagerRole = Role.find("byName",  Role.REPEREBILITY_MANAGER).first();
+		
+		if (shiftManagerRole == null && reperibilityManagerRole == null) {
+			Fixtures.loadModels("../db/import/shiftReperibilityRolesAndPermissions.yml");
+			
+			employeeRole.permissions.add(roleDao.getPermissionByDescription(Security.VIEW_SHIFT));
+			employeeRole.permissions.add(roleDao.getPermissionByDescription(Security.VIEW_REPERIBILITY));
 		}
 	}
 

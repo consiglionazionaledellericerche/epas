@@ -858,3 +858,26 @@ when
 then
  $c.grant();
 end
+
+/*******************************************************************************
+ * Azioni via REST per Turni e Reperibilità
+ ******************************************************************************/
+ 
+rule manageShift
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "manageShift") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        
+        "Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence"  
+        
+       ), target == null, granted == false)
+then
+ $c.grant();
+end

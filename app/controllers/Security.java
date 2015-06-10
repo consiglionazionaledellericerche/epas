@@ -94,6 +94,12 @@ public class Security extends Secure.Security {
 	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
 	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
 
+	public final static String VIEW_SHIFT = "viewShift";
+	public final static String MANAGE_SHIFT = "manageShift";
+	
+	public final static String VIEW_REPERIBILITY = "viewReperibility";
+	public final static String MANAGE_REPERIBILITY = "manageReperibility";
+	 
 //	FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 
@@ -277,8 +283,9 @@ public class Security extends Secure.Security {
 		if (!user.isPresent()) {
 			return Lists.newArrayList();
 		}
-		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX +
-				username, List.class);
+		@SuppressWarnings("unchecked")
+		List<Permission> permissions = 
+			Cache.get(PERMISSION_CACHE_PREFIX +	username, List.class);
 
 		if (permissions == null) {
 			user.get().refresh();
