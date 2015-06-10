@@ -5,17 +5,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
-import manager.ContractManager;
-import manager.ContractMonthRecapManager;
 import manager.VacationManager;
 import models.Contract;
 import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
