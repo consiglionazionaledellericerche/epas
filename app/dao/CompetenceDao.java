@@ -15,6 +15,7 @@ import models.PersonHourForOvertime;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.query.QCompetence;
+import models.query.QCompetenceCode;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibilityType;
@@ -29,6 +30,7 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import com.mysema.query.types.path.ListPath;
 
 import dao.wrapper.IWrapperFactory;
 
@@ -58,6 +60,21 @@ public class CompetenceDao extends DaoBase{
 		
 		return getQueryFactory().from(competence)
 				.where(competence.id.eq(id)).singleResult(competence);		
+	}
+	
+	/**
+	 * La lista dei CompetenceCode abilitati ad almeno una persona appartenente
+	 * all'office.
+	 * @param office
+	 * @return
+	 */
+	public List<CompetenceCode> activeCompetenceCode(Office office) {
+		
+		final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+		
+		return getQueryFactory().from(competenceCode)
+				.where(competenceCode.persons.any().office.eq(office))
+				.distinct().list(competenceCode);
 	}
 	
 	/**
@@ -261,9 +278,8 @@ public class CompetenceDao extends DaoBase{
 	   }
 
 	
-	/** ************************************************************************************************************
-	 * Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc
-	 * 
+	
+	/**
 	 * @param year
 	 * @param office
 	 * @return dei quantitativi di straordinario assegnati per l'ufficio office nell'anno year
