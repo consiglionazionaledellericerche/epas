@@ -1,21 +1,12 @@
 package dao;
 
-import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import models.Contract;
 import models.ContractMonthRecap;
-import models.MealTicket;
-import models.Office;
-import models.query.QContract;
 import models.query.QContractMonthRecap;
-import models.query.QMealTicket;
-import models.query.QPerson;
 
-import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;

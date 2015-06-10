@@ -1,17 +1,12 @@
 package dao;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import models.ConfYear;
-import models.Office;
 import models.query.QConfYear;
 
-import com.google.common.base.Optional;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 

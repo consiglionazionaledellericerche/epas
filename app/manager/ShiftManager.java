@@ -19,9 +19,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-import models.PersonReperibility;
-import models.PersonReperibilityDay;
-import models.PersonReperibilityType;
+
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
@@ -32,20 +30,16 @@ import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
-import models.query.QCompetence;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import play.Logger;
@@ -56,7 +50,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-import com.mysema.query.jpa.JPQLQuery;
 
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
