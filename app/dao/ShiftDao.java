@@ -166,25 +166,6 @@ public class ShiftDao extends DaoBase{
 	 * @author arianna
 	 * 
 	 * @param type
-	 * @return i PersonShift del tipo passato come parametro
-	 */
-	public List<PersonShift> getPersonsShiftByType(String type) {	
-		final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
-		final QPersonShift ps = QPersonShift.personShift;
-		JPQLQuery query = getQueryFactory().from(ps).join(psst).where(
-				psst.shiftType.type.eq(type)
-				.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())))
-				.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))
-			);
-		return query.list(ps);
-
-	}
-	
-	
-	/**
-	 * @author arianna
-	 * 
-	 * @param type
 	 * @return la categoria associata al tipo di turno
 	 */
 	public ShiftCategories getShiftCategoryByType(String type) {
