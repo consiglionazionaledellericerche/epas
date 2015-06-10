@@ -266,15 +266,14 @@ public class Stampings extends Controller {
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
-		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = 
 				personDao.list(Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()), 
 						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 
-		for(Person person : activePersons)
-		{
+		for(Person person : activePersons) {
+			
 			PersonTroublesInMonthRecap pt = personTroubleRecapFactory.create(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}

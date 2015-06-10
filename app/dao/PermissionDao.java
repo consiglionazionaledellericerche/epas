@@ -1,20 +1,17 @@
 package dao;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import models.Office;
 import models.Permission;
-import models.Role;
 import models.User;
 import models.query.QPermission;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -56,7 +53,6 @@ public class PermissionDao extends DaoBase {
 		QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
 		QRole role = QRole.role;
 		QPermission permission = QPermission.permission;
-		
 		
 		return getQueryFactory().from(permission)
 				.leftJoin(permission.roles, role)

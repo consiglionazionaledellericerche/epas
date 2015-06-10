@@ -4,8 +4,8 @@
 <div class="container-fluid center">
   #{if person.totalHolidayWorkingTime(year) > 0}
   	  <p>
-        <strong>Presenza festiva: </strong><span class="label label-warning"> ${person.totalHolidayWorkingTime().toHourTime()}</span>
-        <strong>Approvata: </strong><span class="label label-primary"> ${person.totalHolidayWorkingTimeAccepted().toHourTime()}</span>
+        <strong>Presenza festiva: </strong><span class="label label-warning"> ${person.totalHolidayWorkingTime(year).toHourTime()}</span>
+        <strong>Approvata: </strong><span class="label label-primary"> ${person.totalHolidayWorkingTimeAccepted(year).toHourTime()}</span>
   	  </p>
       <table class="table table-hover table-striped">
 	    <tr>
