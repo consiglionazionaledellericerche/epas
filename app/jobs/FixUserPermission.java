@@ -129,9 +129,6 @@ public class FixUserPermission extends Job{
 		
 		if (shiftManagerRole == null && reperibilityManagerRole == null) {
 			Fixtures.loadModels("../db/import/shiftReperibilityRolesAndPermissions.yml");
-			
-			employeeRole.permissions.add(roleDao.getPermissionByDescription(Security.VIEW_SHIFT));
-			employeeRole.permissions.add(roleDao.getPermissionByDescription(Security.VIEW_REPERIBILITY));
 		}
 	}
 
