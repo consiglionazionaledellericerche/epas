@@ -26,7 +26,6 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
 import play.Logger;
-import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;

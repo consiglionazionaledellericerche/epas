@@ -47,7 +47,6 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {RequestInit.class, Resecure.class} )
-
 public class Stampings extends Controller {
 
 	@Inject
