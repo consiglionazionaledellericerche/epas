@@ -596,14 +596,6 @@ public class RequestInit extends Controller {
 				return "Competences.showCompetences";
 			}
 
-			if(action.equals("Competences.overtime")) {
-
-				renderArgs.put("switchMonth",  true);
-				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDownAdministration");
-				return "Competences.overtime";
-			}
-
 			if(action.equals("Competences.totalOvertimeHours")) {
 
 				renderArgs.put("switchYear",  true);

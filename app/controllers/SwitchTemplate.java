@@ -69,11 +69,6 @@ public class SwitchTemplate extends Controller{
 			Competences.showCompetences(year, month, null, null,  null,  null);
 		}
 
-		if(action.equals("Competences.overtime")) {
-
-			Competences.overtime(year, month, null, null,  null);
-		}
-
 		if(action.equals("Competences.totalOvertimeHours")) {
 
 			Competences.totalOvertimeHours(year, null);

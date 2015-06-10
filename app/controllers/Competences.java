@@ -19,6 +19,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.Office;
+import models.Permission;
 import models.Person;
 import models.TotalOvertime;
 import models.User;
@@ -44,6 +45,7 @@ import com.google.common.collect.Table;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
+import dao.PermissionDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
@@ -130,6 +132,9 @@ public class Competences extends Controller{
 		if (page==null) {
 			page = 0;
 		}
+		
+		boolean editCompetence = Security.hasPermissionOnOffice(office, Security.EDIT_COMPETENCE);
+		renderArgs.put("editCompetence", editCompetence);
 
 		////////////////////////////////////////////////////////////////////////
 		// La lista dei codici competenceCode da visualizzare nella select
@@ -294,51 +299,6 @@ public class Competences extends Controller{
 		Competences.totalOvertimeHours(year, officeId);
 	}
 
-	public static void overtime(int year, int month, Long officeId, String name, Integer page){
-
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
-
-		if(officeId == null) {
-			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
-				Application.indexAdmin();
-			}
-			officeId = offices.iterator().next().id;
-		}
-
-		Office office = officeDao.getOfficeById(officeId);
-		notFoundIfNull(office);
-
-		rules.checkIfPermitted(office);
-
-		if(page == null)
-			page = 0;
-		Table<Person, String, Integer> tableFeature = null;
-		LocalDate beginMonth = null;
-		if(year == 0 && month == 0){
-			int yearParams = params.get("year", Integer.class);
-			int monthParams = params.get("month", Integer.class);
-			beginMonth = new LocalDate(yearParams, monthParams, 1);
-		}
-		else{
-			beginMonth = new LocalDate(year, month, 1);
-		}
-		CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-		SimpleResults<Person> simpleResults = personDao.listForCompetence(code, Optional.fromNullable(name), 
-				Sets.newHashSet(office), 
-				false, 
-				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		tableFeature = competenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
-
-		if(year != 0 && month != 0)
-			render(tableFeature, year, month, simpleResults, name, office, offices);
-		else{
-			int yearParams = params.get("year", Integer.class);
-			int monthParams = params.get("month", Integer.class);
-			render(tableFeature,yearParams,monthParams,simpleResults, name, office, offices );
-		}
-	}
 
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
@@ -431,12 +391,19 @@ public class Competences extends Controller{
 	 * @param year
 	 * @param onlyDefined true se si vuole applicare il calcolo ai soli tempi determinati
 	 */
-	public static void approvedCompetenceInYear(Long officeId, int year, boolean onlyDefined) {
+	public static void approvedCompetenceInYear(int year, boolean onlyDefined, Long officeId) {
 
-		Office office = officeDao.getOfficeById(officeId);
+		
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Preconditions.checkState(!offices.isEmpty());
+		
+		Office office;
+		if(officeId != null) {
+			office = officeDao.getOfficeById(officeId);
+		} else {
+			office = offices.iterator().next();
+		}
 
-		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 
 		Set<Person> personSet = Sets.newHashSet();
