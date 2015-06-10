@@ -1,6 +1,5 @@
 package cnr.sync.dto;
 
-import org.joda.time.LocalDate;
 
 public class AbsenceRest {
 

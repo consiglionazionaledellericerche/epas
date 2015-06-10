@@ -3,7 +3,6 @@ package dao;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 import java.util.Set;
@@ -16,7 +15,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QPerson;
 import models.query.QPersonDay;
@@ -31,7 +29,6 @@ import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
