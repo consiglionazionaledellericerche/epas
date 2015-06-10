@@ -1,9 +1,9 @@
-#{ if switchYear && switchMonth}
+#{ if switchYear && switchMonth || session.isPersonInCharge.equals('true')}
 		  <ul class="nav navbar-nav">
         	<li><a href="?month=${templateUtility.computePreviousMonth(currentData.month)}&year=${templateUtility.computePreviousYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-left"></i></span></a></li>
       	  </ul>
 #{/if}
-#{if switchYear}
+#{if switchYear || session.isPersonInCharge.equals('true')}
 		
 		<ul id="nav-year" class="nav navbar-nav">
         	<li class="dropdown">
@@ -18,7 +18,7 @@
 
       	
 #{/if}
-#{if switchMonth}
+#{if switchMonth || session.isPersonInCharge.equals('true')}
       	  <ul id="nav-month" class="nav navbar-nav">
         	<li class="dropdown">
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span><b class="caret"></b></a>
@@ -30,12 +30,12 @@
         	</li>
       	  </ul>
 #{/if}
-#{ if switchYear && switchMonth}
+#{ if switchYear && switchMonth || session.isPersonInCharge.equals('true')}
       	  <ul class="nav navbar-nav">
         	<li><a href="?month=${templateUtility.computeNextMonth(currentData.month)}&year=${templateUtility.computeNextYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-right"></i></i></a></li>
       	  </ul>	
 #{/if}
-#{if switchDay}
+#{if switchDay || session.isPersonInCharge.equals('true')}
       	  	#{form @SwitchTemplate.updateDay(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
       	  	<div class="form-group">
       	  	<!-- Lista giorni -->

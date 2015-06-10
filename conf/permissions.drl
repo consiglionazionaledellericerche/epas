@@ -42,6 +42,7 @@ when
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
+     	"Stampings.dailyPresenceForPersonInCharge",
      	
      	/* Assenze mensili */
      	"Absences.absences",
@@ -184,6 +185,10 @@ when
      	"Persons.removeChild",
      	"Persons.deleteChild",
      	
+     	"Persons.workGroup",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
+     	
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
@@ -240,6 +245,10 @@ when
      	"Persons.insertChild",
      	"Persons.removeChild",
      	"Persons.deleteChild",
+     	
+     	"Persons.workGroup",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
    
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",

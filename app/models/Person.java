@@ -8,6 +8,7 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -100,6 +101,24 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@Column(name="want_email")
 	public boolean wantEmail;
+	
+	/**
+	 * i successivi due campi servono per la nuova relazione tra Person e Person 
+	 * relativa ai responsabili
+	 */
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    public List<Person> people = new ArrayList<Person>();
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="person_id")
+	@Nullable
+    public Person person;
+	
+	/**
+	 * questo campo booleano serve a stabilire se una persona è un responsabile o no
+	 */
+	@Column(name="is_person_in_charge")
+	public boolean isPersonInCharge;
 
 	/**
 	 * relazione con la tabella delle assenze iniziali

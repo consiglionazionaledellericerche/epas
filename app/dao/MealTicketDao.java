@@ -67,7 +67,7 @@ public class MealTicketDao extends DaoBase {
 	public LocalDate getFurtherExpireDateInOffice(Office office) {
 		
 		final QMealTicket qmt = QMealTicket.mealTicket;
-		final QPerson qp = QPerson.person;
+		final QPerson qp = QPerson.person1;
 		final QContract qc = QContract.contract;
 		
 		final JPQLQuery query = getQueryFactory()
