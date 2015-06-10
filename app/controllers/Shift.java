@@ -4,6 +4,10 @@ import static play.modules.pdf.PDF.renderPDF;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,9 +15,11 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ShiftManager;
+
 import models.Absence;
 import models.Competence;
 import models.Person;
+import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftCategories;
@@ -22,6 +28,11 @@ import models.ShiftType;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
+import models.query.QPersonReperibilityDay;
+
+import net.fortuna.ical4j.data.CalendarOutputter;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.ValidationException;
 
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
@@ -63,6 +74,7 @@ public class Shift extends Controller {
 	private static CompetenceUtility competenceUtility;
 	@Inject
 	private static AbsenceDao absenceDao;
+
 
 	/*
 	 * @author arianna
@@ -143,9 +155,8 @@ public class Shift extends Controller {
 		//				"ORDER BY psd.shiftSlot, psd.date",
 		//			//	"ORDER BY psd.shiftTimeTable.startShift, psd.date", 
 		//				from, to, shiftType).fetch();
-		List<PersonShiftDay> personShiftDays = shiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType);	
+		List<PersonShiftDay> personShiftDays = shiftDao.getShiftDaysByPeriodAndType(from, to, shiftType);	
 		Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, personShiftDays.size());
-
 
 		List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
 		List<ShiftPeriod> deletedShiftPeriods = new ArrayList<ShiftPeriod>();
@@ -398,5 +409,67 @@ public class Shift extends Controller {
 
 		Logger.debug("Find %s absenceShiftPeriod. AbsenceShiftPeriod = %s", absenceShiftPeriods.size(), absenceShiftPeriods.toString());
 		render(absenceShiftPeriods);
+	}
+	
+	/*
+	 * Export the shift calendar in iCal for the person with id = personId with reperibility 
+	 * of type 'type' for the 'year' year
+	 * If the personId=0, it exports the calendar for all persons of the shift of type 'type'
+	 */
+	private static Calendar createCalendar(String type, Long personId, int year) {
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
+
+		List<PersonShift> personsInTheCalList = new ArrayList<PersonShift>();
+
+		if (personId != 0) {
+			// read the shift person 
+			PersonShift personShift = shiftDao.getPersonShiftByPersonAndType(personId, type);
+			if (personShift == null) {
+				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, type));
+			}
+			personsInTheCalList.add(personShift);
+		}
+
+
+		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+		
+		Logger.debug("chiama la createicsReperibilityCalendar(%s, %s, %s)", Integer.parseInt(params.get("year")), type, personsInTheCalList);
+		icsCalendar = shiftManager.createicsShiftCalendar(Integer.parseInt(params.get("year")), type, personsInTheCalList); /*?*/
+
+		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+
+		return icsCalendar;
+	}
+	
+	public static void iCal() {
+		String type = params.get("type", String.class);
+		Long personId = params.get("personId", Long.class);
+		int year = params.get("year", Integer.class);
+
+		response.accessControl("*");
+		
+		ShiftType shiftType = shiftDao.getShiftTypeByType(type);
+		if (shiftType == null) {
+			notFound(String.format("ShiftType type = %s doesn't exist", type));			
+		}
+
+		try {
+			Calendar calendar = createCalendar(type, personId, year);
+
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			CalendarOutputter outputter = new CalendarOutputter();
+			outputter.output(calendar, bos);
+			
+			response.setHeader("Content-Type", "application/ics");
+			InputStream is = new ByteArrayInputStream(bos.toByteArray());
+			renderBinary(is,"reperibilitaRegistro.ics");
+			bos.close();
+			is.close();
+		} catch (IOException e) {
+			Logger.error("Io exception building ical", e);
+		} catch (ValidationException e) {
+			Logger.error("Validation exception generating ical", e);
+		}
 	}
 }

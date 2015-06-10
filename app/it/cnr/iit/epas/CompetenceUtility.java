@@ -549,19 +549,19 @@ public class CompetenceUtility {
 										// calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto dei 15 min di comporto
 										// se il turnista è andato a  pranzo prima
 										if (pairStamping.out.date.toLocalTime().isBefore(startLunchTime)) {
-											Logger.debug("vedo pranzo prima");
+											Logger.debug("vedo uscita per pranzo prima");
 											newLimit = (startLunchTime.minusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) ? startLunchTime.minusMinutes(15) : pairStamping.out.date.toLocalTime();
 											diffStartLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, startLunchTime);
 											if (startLunchTime.minusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) {inTolleranceLimit = false;}
 										} else if (pairStamping.out.date.toLocalTime().isBefore(endLunchTime)) {
 											// è andato a pranzo dopo
-											Logger.debug("vedo in pranzo dopo");
+											Logger.debug("vedo uscita per pranzo dopo");
 											newLimit = (startLunchTime.plusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) ? pairStamping.out.date.toLocalTime() : startLunchTime.plusMinutes(15);
 											if (startLunchTime.plusMinutes(15).isBefore(pairStamping.out.date.toLocalTime())) {inTolleranceLimit = false;}
-											diffStartLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, startLunchTime); /* ? */
+											diffStartLunchTime = DateUtility.getDifferenceBetweenLocalTime(startLunchTime, newLimit); /* ? */
 										}
 
-										Logger.debug("diffStartLunchTime=getDifferenceBetweenLocalTime(%s, %s)=%s", newLimit, startLunchTime, diffStartLunchTime);
+										Logger.debug("diffStartLunchTime=getDifferenceBetweenLocalTime(%s, %s)=%s", startLunchTime, newLimit, diffStartLunchTime);
 									}
 
 									// l'intervallo di tempo lavorato interseca la parte del turno dopo pranzo
@@ -586,7 +586,7 @@ public class CompetenceUtility {
 											Logger.debug("vedo rientro da pranzo dopo");
 											newLimit = (pairStamping.in.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15))) ? endLunchTime.plusMinutes(15) : pairStamping.in.date.toLocalTime();
 											if (pairStamping.in.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15))) {inTolleranceLimit = false;}
-											diffEndLunchTime = DateUtility.getDifferenceBetweenLocalTime(endLunchTime, newLimit);
+											diffEndLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
 											Logger.debug("diffEndLunchTime=getDifferenceBetweenLocalTime(%s, %s)=%s", endLunchTime, newLimit, diffEndLunchTime);
 										}
 
@@ -617,7 +617,7 @@ public class CompetenceUtility {
 
 
 								// controlla pausa pranzo:
-								// - se è uscito prima dell'inizio PP 
+								// - se è uscito prima dell'inizio PP (è andato a pranzo prima)
 								if (diffStartLunchTime < 0) {
 									Logger.debug("sono entrata in pausa pranzo prima! diffStartLunchTime=%s", diffStartLunchTime);
 									// controlla se è anche rientrato prima dalla PP e compensa
@@ -629,7 +629,9 @@ public class CompetenceUtility {
 										diffStartLunchTime = ((diffStartLunchTime + diffEndLunchTime) > 0) ? 0 : diffStartLunchTime + diffEndLunchTime;
 										diffEndLunchTime = ((diffStartLunchTime + diffEndLunchTime) > 0) ? diffStartLunchTime + diffEndLunchTime : 0;
 
-									} else if (diffStartShift > 0) {
+									} 
+									// se necessario e se è entrato prima, compensa con l'ingresso 
+									if ((diffStartLunchTime < 0) && (diffStartShift > 0)) {
 										Logger.debug("E entrato anche prima! diffStartShift=%s", diffStartShift);
 										// cerca di compensare con l'ingresso
 										restoredMin += Math.min(Math.abs(diffStartLunchTime), Math.abs(diffStartShift));
@@ -652,7 +654,9 @@ public class CompetenceUtility {
 										diffEndLunchTime = ((diffEndLunchTime + diffStartLunchTime) > 0) ? 0 : diffEndLunchTime + diffStartLunchTime;
 										diffStartLunchTime = ((diffEndLunchTime + diffStartLunchTime) > 0) ? diffEndLunchTime + diffStartLunchTime : 0;
 
-									} else if (diffEndShift > 0) {
+									} 
+									// se necessario e se è uscito dopo, compensa con l'uscita
+									if ((diffEndLunchTime < 0) && (diffEndShift > 0)) {
 										Logger.debug("e' uscito dopo! diffEndShift=%s", diffEndShift);
 										// cerca di conpensare con l'uscita (è uscito anche dopo)
 										restoredMin += Math.min(Math.abs(diffEndLunchTime), Math.abs(diffEndShift));
