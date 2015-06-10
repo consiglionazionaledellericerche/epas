@@ -38,7 +38,7 @@
 <h3>Orologio per firma nel mese di &{'views.tags.display.date.month.' + data.getMonthOfYear()} dell'anno ${data.getYear()}</h3>
 <br>
 <div class="col-sm-offset-2 col-sm-8">
-<form action="/clocks/clocklogin" method="post" class="form-horizontal" role="form">
+#{form action:@Clocks.clockLogin(), class:'form-horizontal', role:'form', method:'post'}
 
   <div class="form-group">
     <label class="col-sm-2 control-label" for="forUsername">Nome</label>
@@ -61,7 +61,7 @@
   <div >
     <input type="submit" class="btn btn-large btn-primary" name ="submit" value="Login" align="center"/>
   </div>
-</form>
+#{/form}
 </div>
 
 </div>

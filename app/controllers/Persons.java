@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
@@ -112,7 +113,7 @@ public class Persons extends Controller {
 	private static PersonChildrenDao personChildrenDao;
 
 	public static void list(String name){
-
+		
 		List<Person> simplePersonList = personDao.list(Optional.fromNullable(name),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
 				null, false).list();
@@ -121,6 +122,7 @@ public class Persons extends Controller {
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
 		render(personList);
+
 	}
 
 	public static void insertPerson() {

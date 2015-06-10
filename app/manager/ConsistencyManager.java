@@ -133,11 +133,8 @@ public class ConsistencyManager {
 			
 			// (3) Ricalcolo dei residui per mese
 			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
-			YearMonth yearMonthOfficeInitUse = new YearMonth(
-					new LocalDate(confGeneralManager.getFieldValue(
-							Parameter.INIT_USE_PROGRAM, p.office)));
 			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
-					yearMonthOfficeInitUse);
+					new YearMonth(fromDate));
 
 		}
 		

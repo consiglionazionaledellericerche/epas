@@ -34,7 +34,9 @@ import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -99,45 +101,61 @@ public class Competences extends Controller{
 
 	}
 
-	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
+	public static void showCompetences(Integer year, Integer month, Long officeId, 
+			String name, String codice, Integer page){
 
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
+			
 			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
+				flash.error("L'user non dispone di alcun diritto di visione "
+						+ "delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
 			officeId = offices.iterator().next().id;
+		}
+		
+		//Redirect in caso di mese futuro
+		LocalDate today = LocalDate.now();
+		if (today.getYear() == year && month > today.getMonthOfYear()) {
+			flash.error("Impossibile accedere a situazione futura, "
+					+ "redirect automatico a mese attuale");
+			showCompetences(year, today.getMonthOfYear(), officeId, name, codice, page);
 		}
 
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
-		if(page==null)
+		if (page==null) {
 			page = 0;
+		}
 
-		List<CompetenceCode> activeCompetenceCodes = competenceManager.activeCompetence(year);
-
-		IWrapperCompetenceCode competenceCode = null;
-
-		if(activeCompetenceCodes.size() == 0) {
-			flash.error("Per visualizzare la sezione Competenze è necessario abilitare almeno un codice competenza ad un dipendente.");
+		////////////////////////////////////////////////////////////////////////
+		// La lista dei codici competenceCode da visualizzare nella select
+		// Ovver: I codici attualmente attivi per almeno un dipendente di quell'office
+		Set<CompetenceCode> competenceCodeList = Sets.newHashSet();
+		competenceCodeList.addAll(competenceDao.activeCompetenceCode(office));
+		
+		if (competenceCodeList.size() == 0) {
+			flash.error("Per visualizzare la sezione Competenze è necessario "
+					+ "abilitare almeno un codice competenza ad un dipendente.");
 			Competences.enabledCompetences(officeId, null);
 		}
+		
+        ////////////////////////////////////////////////////////////////////////
+		// Il codice della richiesta ( check esistenza )
+		IWrapperCompetenceCode competenceCode = null;
+		if (codice == null || codice == "") {
+			competenceCode = wrapperFactory.create(competenceCodeList.iterator().next());
+		} else {
+			competenceCode = wrapperFactory.create(competenceCodeDao
+					.getCompetenceCodeByCode(codice));
+			Preconditions.checkNotNull(competenceCode.getValue());
+		}	
 
-		if(codice==null || codice=="") {
-			competenceCode = wrapperFactory.create(activeCompetenceCodes.get(0));
-		}
-		else
-		{
-			for(CompetenceCode compCode : activeCompetenceCodes)
-			{
-				if(compCode.code.equals(codice))
-					competenceCode = wrapperFactory.create(compCode);
-			}
-		}		
-
+        ////////////////////////////////////////////////////////////////////////
+        // Le persone che hanno quella competence attualmente abilitata
 		SimpleResults<Person> simpleResults = personDao.listForCompetence(competenceCode.getValue(),
 				Optional.fromNullable(name), Sets.newHashSet(office), false, 
 				new LocalDate(year, month, 1), 
@@ -146,18 +164,6 @@ public class Competences extends Controller{
 		List<IWrapperPerson> activePersons = FluentIterable
 				.from(simpleResults.paginated(page).getResults())
 				.transform(wrapperFunctionFactory.person()).toList();
-
-		if(activePersons == null)
-			activePersons = new ArrayList<IWrapperPerson>();
-
-		//Redirect in caso di mese futuro
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-			//FIXME impostare il redirect!!
-		}
 
 		for(IWrapperPerson p : activePersons){
 			Competence competence = null;
@@ -171,6 +177,10 @@ public class Competences extends Controller{
 
 			}
 		}
+		
+		// TODO: mancano da visualizzare le competence assegnate nel mese a quelle
+		// persone che non hanno più il relativo codice abilitato.
+		
 		List<String> code = competenceManager.populateListWithOvertimeCodes();		
 
 		List<Competence> competenceList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
@@ -183,7 +193,7 @@ public class Competences extends Controller{
 		int totaleMonteOre = competenceManager.getTotalOvertime(total);		
 
 		render(year, month, office, offices, activePersons, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, 
-				totaleMonteOre, simpleResults, name, codice, activeCompetenceCodes, competenceCode);
+				totaleMonteOre, simpleResults, name, codice, competenceCodeList, competenceCode);
 
 	}
 
@@ -499,7 +509,7 @@ public class Competences extends Controller{
 
 		int month = LocalDate.now().getMonthOfYear();
 
-		render(personList, totalValueAssigned, mapPersonCompetenceRecap, office, offices, year, month);
+		render(personList, totalValueAssigned, mapPersonCompetenceRecap, office, offices, year, month, onlyDefined);
 
 	}
 

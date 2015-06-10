@@ -60,7 +60,7 @@
           <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
     
           <select name="codice" class="input-medium">
-            #{list items:activeCompetenceCodes, as:'activeCode'}
+            #{list items:competenceCodeList, as:'activeCode'}
               <option value="${activeCode.code}" #{if activeCode.code.equals(codice) } selected="selected" #{/if} >${activeCode.code}</option>
             #{/list}
 	      </select>
@@ -100,16 +100,14 @@
 	        </tr>
 	
 	        #{list items:activePersons, as:'person'}
-	          #{if person.value.competenceCode.contains(competenceCode.value) }
+
 	          <tr>
 	            <td class="person">${person.value.name} ${person.value.surname}</td>
 	            <td>
-	            #{if person.value.competenceCode.contains(competenceCode.value)}
+	            
 	     	      #{if competenceCode.value.code.equals('S1')}
 	     	        (${person.getPositiveResidualInMonth(year,month) + person.competence(competenceCode.value,year,month).valueApproved})
 	              #{/if}
-	            #{/if}
-	            
 	            
 	              <a 
 	              #{secure.check 'Competences.updateCompetence', target:person.value.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
@@ -122,7 +120,7 @@
 
 	            </td>
 	          </tr>
-	          #{/if}
+
 	        #{/list}
 	      </table>
 	      

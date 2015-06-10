@@ -33,6 +33,12 @@ import play.data.validation.Required;
  * @author cristian
  *
  */
+
+/**
+ * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le 
+ * informazioni della persona in fase di personDao.list.
+ * Necessaria comunque la join con le relazioni OneToOne. 
+ */
 @Entity
 @Audited
 @Table(name = "persons")
@@ -58,7 +64,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Email
 	public String email;
 
-	@OneToOne (optional = false)
+	@OneToOne (optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	public User user;
 
@@ -116,8 +122,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
 
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
-	public PersonHourForOvertime personHourForOvertime;
+
 
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
@@ -169,16 +174,18 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<CompetenceCode> competenceCode;
 
+	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
+	public PersonHourForOvertime personHourForOvertime;
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonReperibility reperibility;
 
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
+	public PersonShift personShift;
+	
 	@ManyToOne
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
-
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
-	public PersonShift personShift;
 
 	@ManyToOne
 	@JoinColumn(name="office_id")
