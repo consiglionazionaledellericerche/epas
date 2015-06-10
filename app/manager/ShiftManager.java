@@ -645,7 +645,17 @@ public class ShiftManager {
 		return result;
 	}
 	
-	
+	/*
+	 * @author arianna
+	 * Crea il calendario con le reperibilita' di un determinato tipo in un dato anno completo o
+	 * relativo ad una sola persona
+	 * 
+	 * @param year 					- anno di riferimento del calendario
+	 * @param type					- tipo di turni da caricare
+	 * @param personsInTheCalList	- lista vuota o contenete la persona della quae caricare i turni:
+	 * 								  se è vuota carica tutto il turno
+	 * @return icsCalendar			- calendario
+	 */
 	public Calendar createicsShiftCalendar(int year, String type, List<PersonShift> personsInTheCalList) {
 		List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 		
@@ -667,7 +677,10 @@ public class ShiftManager {
 
 		ShiftType shiftType = shiftDao.getShiftTypeByType(type);
 		
-		// if the listis empty, load the entire shift days
+		// get the working shift days
+		//------------------------------
+		
+		// if the list is empty, load the entire shift days
 		if (personsInTheCalList.isEmpty()) {
 			personShiftDays = shiftDao.getShiftDaysByPeriodAndType(from, to, shiftType);	
 			Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, type, personShiftDays.size());
@@ -678,42 +691,69 @@ public class ShiftManager {
 			Logger.debug("Shift find called from %s to %s, type %s person %s - found %s shift days", from, to, type, personsInTheCalList.get(0).person.surname, personShiftDays.size());
 		}
 
+		// load the shift days in the calendar
 		for (PersonShiftDay psd : personShiftDays) {
-			
-					
+	
 			LocalTime startShift = (psd.shiftSlot.equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.startMorning : psd.shiftType.shiftTimeTable.startAfternoon;
 			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
 			
 			Logger.debug("Turno di %s del %s dalle %s alle %s", psd.personShift.person.surname, psd.date, startShift, endShift);
-			
-		
+
 			//set the start event
 			java.util.Calendar start = java.util.Calendar.getInstance();
 			start.set(psd.date.getYear(), psd.date.getMonthOfYear() - 1, psd.date.getDayOfMonth(), startShift.getHourOfDay(), startShift.getMinuteOfHour());
 			
-			Logger.debug("start.set(%s, %s, %s, %s, %s)", psd.date.getYear(), psd.date.getMonthOfYear() - 1,psd.date.getDayOfMonth(), startShift.getHourOfDay(), startShift.getMinuteOfHour());
-			
 			//set the end event
 			java.util.Calendar end = java.util.Calendar.getInstance();
 			end.set(psd.date.getYear(), psd.date.getMonthOfYear() - 1, psd.date.getDayOfMonth(), endShift.getHourOfDay(), endShift.getMinuteOfHour());
-			Logger.debug("end.set(%s, %s, %s, %s, %s)", psd.date.getYear(), psd.date.getMonthOfYear(),psd.date.getDayOfMonth(), endShift.getHourOfDay(), endShift.getMinuteOfHour());
-			
-			//Logger.debug("Per costriure evento --> start=%s, end=%s", start, end);
 
 			String label = eventLabel.concat(psd.personShift.person.surname);
 			
-			icsCalendar.getComponents().add(createICalEvent(new DateTime(start.getTime()), new DateTime(end.getTime()), label));
+			icsCalendar.getComponents().add(createDurationICalEvent(new DateTime(start.getTime()), new DateTime(end.getTime()), label));
 			continue;
 		}	
+		
+		// get the deleted shift days
+		//------------------------------
+		// get the deleted shifts of type shiftType
+		List<ShiftCancelled> shiftsCancelled = shiftDao.getShiftCancelledByPeriodAndType(from, to, shiftType);
+		Logger.debug("ShiftsCancelled find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, shiftsCancelled.size());
+		
+		// load the calcelled shift in the calendar
+		for (ShiftCancelled shiftCancelled: shiftsCancelled) {
+			Logger.debug("Trovato turno %s ANNULLATO nel giorno %s", shiftCancelled.type.type, shiftCancelled.date);
+			
+			// build the event day
+			java.util.Calendar shift = java.util.Calendar.getInstance();
+			shift.set(shiftCancelled.date.getYear(), shiftCancelled.date.getMonthOfYear() - 1, shiftCancelled.date.getDayOfMonth());
+			String label = eventLabel.concat("Annullato");
+			
+			icsCalendar.getComponents().add(createAllDayICalEvent(new Date(shift.getTime()), label));
+			continue;
+		}
 
 		return icsCalendar;
 	}
 
 
-	private VEvent createICalEvent(DateTime startDate, DateTime endDate, String eventLabel) {
+	/*
+	 * Create a VEvent width label 'label' that start at 'startDate' end end at 'endDate'
+	 */
+	private VEvent createDurationICalEvent(DateTime startDate, DateTime endDate, String eventLabel) {
 		VEvent shiftDay = new VEvent(startDate, endDate, eventLabel);
 		shiftDay.getProperties().add(new Uid(UUID.randomUUID().toString()));
 
+		return shiftDay;
+	}
+	
+	/*
+	 * Creat an all day VEvent whith label 'label' for the day 'date'
+	 */
+	private VEvent createAllDayICalEvent(Date date, String eventLabel) {
+		VEvent shiftDay = new VEvent(date, eventLabel);
+
+		shiftDay.getProperties().add(new Uid(UUID.randomUUID().toString()));
+		
 		return shiftDay;
 	}
 	
