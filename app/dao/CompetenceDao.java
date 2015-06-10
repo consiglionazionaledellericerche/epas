@@ -261,6 +261,34 @@ public class CompetenceDao extends DaoBase{
 	   }
 
 	
+	/*
+	 * @param person 
+	 * @param year
+	 * @param month
+	 * @param competenceCode
+	 * @return l'ultima competenza assegnata din un certo typo in un determinato anno
+	 */
+	public Competence getLastPersonCompetenceInYear(Person person, int year, int month, CompetenceCode competenceCode) {
+		final QCompetence com = new QCompetence("competence");
+		final JPQLQuery query = getQueryFactory().query();
+		final Competence myCompetence = query
+				.from(com)
+				.where(
+						com.person.eq(person)
+						.and(com.year.eq(year))
+						.and(com.month.lt(month))
+						.and(com.competenceCode.eq(competenceCode))		
+						)
+						.orderBy(com.month.desc())
+						.limit(1)
+						.uniqueResult(com);
+		
+		return myCompetence;
+	}
+	
+	
+	
+	
 	/** ************************************************************************************************************
 	 * Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc
 	 * 
