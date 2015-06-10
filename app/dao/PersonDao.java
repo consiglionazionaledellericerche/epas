@@ -194,7 +194,7 @@ public final class PersonDao extends DaoBase{
 	 * @return
 	 */
 	public SimpleResults<Person> listForCompetence(CompetenceCode compCode, Optional<String> name, Set<Office> offices,
-			boolean onlyTechnician, LocalDate start, LocalDate end) {
+			boolean onlyTechnician, LocalDate start, LocalDate end, Optional<Person> personInCharge) {
 
 		Preconditions.checkState(!offices.isEmpty());
 
@@ -222,6 +222,10 @@ public final class PersonDao extends DaoBase{
 		if (onlyTechnician) {
 			// i livelli sopra al 3 sono dei tecnici:
 			condition.and(person.qualification.qualification.gt(3));
+		}
+		
+		if(personInCharge.isPresent()){
+			condition.and(person.person.eq(personInCharge.get()));
 		}
 
 		if (name.isPresent() && !name.get().trim().isEmpty()) {
@@ -469,5 +473,6 @@ public final class PersonDao extends DaoBase{
 		final JPQLQuery query = getQueryFactory().from(person).where(person.people.contains(p));
 		return query.singleResult(person);
 	}
+	
 
 }

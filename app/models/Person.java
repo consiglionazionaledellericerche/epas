@@ -18,6 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -107,6 +108,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 * relativa ai responsabili
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OrderBy("surname")
     public List<Person> people = new ArrayList<Person>();
 	
 	@ManyToOne(fetch = FetchType.LAZY)

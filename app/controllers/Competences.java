@@ -141,7 +141,8 @@ public class Competences extends Controller{
 		SimpleResults<Person> simpleResults = personDao.listForCompetence(competenceCode.getValue(),
 				Optional.fromNullable(name), Sets.newHashSet(office), false, 
 				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+				Optional.<Person>absent());
 
 		List<IWrapperPerson> activePersons = FluentIterable
 				.from(simpleResults.paginated(page).getResults())
@@ -318,7 +319,8 @@ public class Competences extends Controller{
 				Sets.newHashSet(office), 
 				false, 
 				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+				Optional.<Person>absent());
 		tableFeature = competenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
 
 		if(year != 0 && month != 0)
@@ -406,7 +408,8 @@ public class Competences extends Controller{
 				Sets.newHashSet(office), 
 				false, 
 				new LocalDate(year, 1, 1), 
-				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue());
+				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
+				Optional.<Person>absent());
 
 		List<Person> personList = simpleResults.list();
 		FileInputStream inputStream = competenceManager.getOvertimeInYear(year, personList);
@@ -501,6 +504,45 @@ public class Competences extends Controller{
 
 		render(personList, totalValueAssigned, mapPersonCompetenceRecap, office, offices, year, month);
 
+	}
+	
+	
+	public static void monthlyOvertime(Integer year, Integer month, String name, Integer page){
+		
+		if(!Security.getUser().get().person.isPersonInCharge)
+			forbidden();
+		
+		User user = Security.getUser().get();
+		if(page == null)
+			page = 0;
+		Table<Person, String, Integer> tableFeature = null;
+		LocalDate beginMonth = null;
+		if(year == 0 && month == 0){
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			beginMonth = new LocalDate(yearParams, monthParams, 1);
+		}
+		else{
+			beginMonth = new LocalDate(year, month, 1);
+		}
+		CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+		SimpleResults<Person> simpleResults = personDao.listForCompetence(code, Optional.fromNullable(name), 
+				Sets.newHashSet(user.person.office), 
+				false, 
+				new LocalDate(year, month, 1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+				Optional.fromNullable(user.person));
+		tableFeature = competenceManager.composeTableForOvertime(year, month, 
+				page, name, user.person.office, beginMonth, simpleResults, code);
+		
+
+		if(year != 0 && month != 0)
+			render(tableFeature, year, month, simpleResults, name);
+		else{
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			render(tableFeature,yearParams,monthParams,simpleResults, name);
+		}
 	}
 
 }
