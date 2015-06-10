@@ -59,6 +59,7 @@ when
        	
        	/* Competenze */
      	"Competences.competences",
+     	"Competences.monthlyOvertime",
        	
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
