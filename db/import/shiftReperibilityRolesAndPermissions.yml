@@ -1,0 +1,26 @@
+# Permessi e ruolo per i turni e reperibilità
+Permission(viewShift):
+  description: viewShift
+
+Permission(manageShift):
+  description: manageShift
+
+Permission(viewReperibility):
+  description: viewReperibility
+
+Permission(manageReperibility):
+  description: manageReperibility
+
+# Ruolo per la gestione dei turni
+Role(shiftManager):
+  name: shiftManager
+  permissions: !!set 
+    ? viewShift
+    ? manageShift
+
+# Ruolo per la gestione delle reperibilità
+Role(reperibilityManager):
+  name: reperibilityManager
+  permissions: !!set 
+    ? viewReperibility
+    ? manageReperibility

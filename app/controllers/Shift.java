@@ -32,11 +32,13 @@ import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonShiftDayDao;
@@ -49,6 +51,7 @@ import dao.ShiftDao;
  * Implements work shifts
  *
  */
+@With(Resecure.class)
 public class Shift extends Controller {
 	
 	@Inject
@@ -69,6 +72,7 @@ public class Shift extends Controller {
 	 * Restituisce la lista delle persone in un determinato turno
 	 * 
 	 */
+	@BasicAuth
 	public static void personList(){
 		response.accessControl("*");
 
@@ -98,6 +102,7 @@ public class Shift extends Controller {
 	 * @author arianna
 	 * Get shifts from the DB and render to the sistorg portal calendar
 	 */
+	@BasicAuth
 	public static void timeTable(){
 		response.accessControl("*");
 
@@ -121,6 +126,7 @@ public class Shift extends Controller {
 	 * @author arianna, dario
 	 * Get shifts from the DB and render to the sistorg portal calendar
 	 */
+	@BasicAuth
 	public static void find(){
 		response.accessControl("*");
 
@@ -173,6 +179,7 @@ public class Shift extends Controller {
 	 * @author arianna
 	 * Update working shifts in the DB that have been red from the sistorg portal calendar
 	 */
+	@BasicAuth
 	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body) {
 		Logger.debug("update: Received shiftPeriods %s", body);
 
@@ -201,6 +208,7 @@ public class Shift extends Controller {
 	 * da rispettare per un determinato turno, in un dato periodo di tempo
 	 * (Person, [thNoStampings, thBadStampings, thAbsences], List<gg MMM>)
 	 */
+	@BasicAuth
 	public static void getInconsistencyTimestamps2Timetable (ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
 
 		// crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
@@ -224,6 +232,7 @@ public class Shift extends Controller {
 	 * (portale sistorg)
 	 * 
 	 */
+	@BasicAuth
 	public static void exportMonthAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
@@ -313,6 +322,7 @@ public class Shift extends Controller {
 	 * (portale sistorg)
 	 * 
 	 */
+	@BasicAuth
 	public static void exportMonthCalAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
@@ -356,6 +366,7 @@ public class Shift extends Controller {
 	 * Restituisce la lista delle assenze delle persone di un certo turno in un certo periodo di tempo
 	 * 
 	 */
+	@BasicAuth
 	public static void absence() {
 		response.accessControl("*");
 
