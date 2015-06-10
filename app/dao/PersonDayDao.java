@@ -191,11 +191,24 @@ public class PersonDayDao extends DaoBase {
 	}
 	
 	/**
-	 * I person day della persona festivi e con ore lavorate.
+	 * 
 	 * @param person
 	 * @return
 	 */
-	public List<PersonDay> getHolidayWorkingTime(Person person, Optional<Integer> year) {
+	
+	/**
+	 * I person day della persona festivi e con ore lavorate. Utilizzo:s
+	 * Nel mese year.present e month.present
+	 * Nell'anno year.present e month.absent
+	 * Sempre year.absent e month.absent
+	 * @param person
+	 * @param year	
+	 * @param month
+	 * @return
+	 */
+	public List<PersonDay> getHolidayWorkingTime(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		
 		QPersonDay personDay = QPersonDay.personDay;
 
 		final BooleanBuilder condition = new BooleanBuilder();
@@ -206,7 +219,12 @@ public class PersonDayDao extends DaoBase {
 		condition.and(personDay.timeAtWork.goe(1));
 		condition.and(personDay.isHoliday.eq(true));
 		
-		if(year.isPresent()) {
+		if(year.isPresent() && month.isPresent()) {
+			LocalDate monthBegin = new LocalDate(year.get(),month.get(),1);
+			LocalDate monthEnd = monthBegin.monthOfYear().withMaximumValue();
+			condition.and(personDay.date.between(monthBegin, monthEnd));
+		}
+		if(year.isPresent() || !month.isPresent()) {
 			LocalDate yearBegin = new LocalDate(year.get(),1,1);
 			LocalDate yearEnd = new LocalDate(year.get(), 12, 31);
 			condition.and(personDay.date.between(yearBegin, yearEnd));

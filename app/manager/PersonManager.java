@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import cnr.sync.dto.DepartmentDTO;
 import cnr.sync.dto.PersonRest;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -42,6 +43,7 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
@@ -50,12 +52,14 @@ public class PersonManager {
 	@Inject
 	public PersonManager(ContractDao contractDao, OfficeDao officeDao,
 			PersonChildrenDao personChildrenDao, PersonDao personDao,
+			PersonDayDao personDayDao,
 			PersonDayManager personDayManager,
 			IWrapperFactory wrapperFactory,ConfGeneralManager confGeneralManager) {
 		this.contractDao = contractDao;
 		this.officeDao = officeDao;
 		this.personChildrenDao = personChildrenDao;
 		this.personDao = personDao;
+		this.personDayDao = personDayDao;
 		this.personDayManager = personDayManager;
 		this.wrapperFactory = wrapperFactory;
 	}
@@ -66,6 +70,7 @@ public class PersonManager {
 	private final OfficeDao officeDao;
 	private final PersonChildrenDao personChildrenDao;
 	private final PersonDao personDao;
+	private final PersonDayDao personDayDao;
 	private final PersonDayManager personDayManager;
 	private final IWrapperFactory wrapperFactory;
 
@@ -465,4 +470,65 @@ public class PersonManager {
 
 		return query.getResultList().size();
 	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		
+		List<PersonDay> pdList = personDayDao
+				.getHolidayWorkingTime(person, year, month);
+		int value = 0;
+		for(PersonDay pd : pdList) {
+			if( !pd.acceptedHolidayWorkingTime ) {
+				value+= pd.timeAtWork; 
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public int holidayWorkingTimeAccepted(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		
+		List<PersonDay> pdList = personDayDao
+				.getHolidayWorkingTime(person, year, month);
+		int value = 0;
+		for(PersonDay pd : pdList) {
+			if( pd.acceptedHolidayWorkingTime ) {
+				value+= pd.timeAtWork; 
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public int holidayWorkingTimeTotal(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		List<PersonDay> pdList = personDayDao
+				.getHolidayWorkingTime(person, year, month);
+		int value = 0;
+		for(PersonDay pd : pdList) {
+			value+= pd.timeAtWork; 
+		}
+		return value;
+	}
+	
+	
 }
