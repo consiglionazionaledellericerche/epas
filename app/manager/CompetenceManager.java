@@ -225,7 +225,7 @@ public class CompetenceManager {
 				timeAtWork = timeAtWork + pd.timeAtWork;
 				difference = difference +pd.difference;
 				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals("94"))
+					if(abs.absenceType.code.equals("91"))
 						recoveryDays = recoveryDays+1;
 				}
 			}			

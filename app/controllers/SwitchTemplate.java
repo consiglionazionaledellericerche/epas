@@ -103,6 +103,11 @@ public class SwitchTemplate extends Controller{
 
 			Stampings.dailyPresenceForPersonInCharge(year, month, day);
 		}
+		
+		if(action.equals("Competences.monthlyOvertime")) {
+
+			Competences.monthlyOvertime(year, month, null, null);
+		}
 
 		if(action.equals("Stampings.mealTicketSituation")) {
 

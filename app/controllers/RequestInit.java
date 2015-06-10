@@ -462,7 +462,7 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchYear",  true);
 				return "Stampings.dailyPresenceForPersonInCharge";
 			}
-
+			
 			if(action.equals("Stampings.mealTicketSituation")) {
 
 				renderArgs.put("switchMonth",  true);
@@ -605,6 +605,13 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.overtime";
+			}
+			
+			if(action.equals("Competences.monthlyOvertime")) {
+
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				return "Competences.monthlyOvertime";
 			}
 
 			if(action.equals("Competences.totalOvertimeHours")) {

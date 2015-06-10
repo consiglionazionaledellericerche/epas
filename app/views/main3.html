@@ -214,6 +214,8 @@
           		<ul class="dropdown-menu">
           			<li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), 
 	                   session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
+	                <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"), 
+	                   session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
           		</ul>
           	</li>
           </ul>
