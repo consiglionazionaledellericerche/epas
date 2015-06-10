@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
-import manager.PersonDayManager;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -17,8 +16,6 @@ import models.PersonDayInTrouble;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.data.validation.Required;
 import play.mvc.Controller;
