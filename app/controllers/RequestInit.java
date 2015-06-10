@@ -13,11 +13,13 @@ import javax.inject.Inject;
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
+import models.Person;
 import models.Qualification;
 import models.User;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.i18n.Messages;
@@ -33,7 +35,6 @@ import controllers.Resecure.NoCheck;
 import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDao.PersonLiteDto;
 import dao.QualificationDao;
 import dao.UsersRolesOfficesDao;
 
@@ -351,17 +352,23 @@ public class RequestInit extends Controller {
 				Long.valueOf(session.get("personSelected"))));
 
 		if(user.get().person != null) {
+			
 			Set<Office> officeList = officeDao.getOfficeAllowed(user.get());
 			if(!officeList.isEmpty()) {
-				List<PersonLiteDto> persons = personDao.liteList(officeList, year, month); 	
+				List<Person> persons = personDao
+						.getActivePersonInMonth(officeList, new YearMonth(year, month)); 	
+//				List<PersonLite> persons = personDao
+//						.liteList(officeList, year, month);
 				renderArgs.put("navPersons", persons);
 			}
-		} 
-		else {
+		}  else {
 
 			List<Office> allOffices = officeDao.getAllOffices();
 			if (allOffices!=null && !allOffices.isEmpty()) {
-				List<PersonLiteDto> persons = personDao.liteList(Sets.newHashSet(allOffices), year, month);
+				List<Person> persons = personDao.getActivePersonInMonth(
+						Sets.newHashSet(allOffices), new YearMonth(year, month));
+//				List<PersonLite> persons = personDao
+//						.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
 			}
 		}
