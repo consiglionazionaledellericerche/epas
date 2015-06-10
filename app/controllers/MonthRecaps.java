@@ -1,9 +1,5 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.DateUtility;
-
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,23 +7,16 @@ import javax.inject.Inject;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
-import models.PersonDay;
 
 import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 
 import dao.OfficeDao;
 import dao.PersonDao;

@@ -43,7 +43,6 @@ import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.ConfGeneralDao;
-import dao.ContractDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
