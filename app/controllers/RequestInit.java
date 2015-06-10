@@ -271,7 +271,8 @@ public class RequestInit extends Controller {
 
 		ItemsPermitted ip = new ItemsPermitted(user);
 		renderArgs.put("ip", ip);
-
+		if(user.get().person != null)
+			renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
 		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
 
 		if(!user.isPresent())
