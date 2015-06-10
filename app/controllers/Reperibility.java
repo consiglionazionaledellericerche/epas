@@ -387,18 +387,16 @@ public class Reperibility extends Controller {
 		// for each person contains days with absences and no-stamping  matching the reperibility days 
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
 
-
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
 		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
 
-
 		List<PersonReperibilityDay> personReperibilityDays = 
 				personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(startDate, endDate, reperibilityType, Optional.<PersonReperibility>absent());
 
-		inconsistentAbsence = competenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
+		inconsistentAbsence = reperibilityManager.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
 
 		return inconsistentAbsence;
 	}
@@ -477,7 +475,7 @@ public class Reperibility extends Controller {
 		reperibilityManager.updateReperibilityDatesReportFromCompetences(reperibilityDateDays, fsCompetences);
 
 		// get the table with the absence and no stampings inconsistency 
-		inconsistentAbsence = competenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue());
+		inconsistentAbsence = reperibilityManager.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue());
 
 		Logger.info("Creazione del documento PDF con il resoconto delle reperibilità per il periodo %s/%s Fs=%s Fr=%s", firstOfMonth.plusMonths(0).monthOfYear().getAsText(), firstOfMonth.plusMonths(0).year().getAsText(), codFs, codFr);
 
@@ -490,53 +488,6 @@ public class Reperibility extends Controller {
 
 	}
 
-
-	/*
-	 * Export the reperibility calendar in iCal for the person with id = personId with reperibility 
-	 * of type 'type' for the 'year' year
-	 * If the personId=0, it exports the calendar for all  the reperibility persons of type 'type'
-	 */
-	private static Calendar createCalendar(Long type, Long personId, int year) {
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-
-		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
-
-		// check for the parameter
-		//---------------------------
-		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
-		if (reperibilityType == null) {
-			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
-		}
-
-		if (personId == 0) {
-			// read the reperibility person 
-			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
-			List<PersonReperibility> personsReperibility = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
-			if (personsReperibility.isEmpty()) {
-				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
-			}
-			personsInTheCalList = personsReperibility;
-		} else {
-			// read the reperibility person 
-			//PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
-			PersonReperibility personReperibility = personReperibilityDayDao.getPersonReperibilityByPersonAndType(personDao.getPersonById(personId), personReperibilityDayDao.getPersonReperibilityTypeById(type));
-			if (personReperibility == null) {
-				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
-			}
-			personsInTheCalList.add(personReperibility);
-		}
-
-
-		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
-		icsCalendar = reperibilityManager.createicsReperibilityCalendar(Integer.parseInt(params.get("year")), personsInTheCalList);
-
-		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-
-		return icsCalendar;
-	}
-
 	@BasicAuth
 	public static void iCal() {
 		Long type = params.get("type", Long.class);
@@ -544,15 +495,23 @@ public class Reperibility extends Controller {
 		int year = params.get("year", Integer.class);
 
 		response.accessControl("*");
-
-		//response.setHeader("Access-Control-Allow-Origin", "*");
-
+		
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
+		if (reperibilityType == null) {
+				notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
+		
 		try {
-			Calendar calendar = createCalendar(type, personId, year);
-
+			
+			Optional<Calendar> calendar = reperibilityManager.createCalendar(type, personId, year);
+			if (!calendar.isPresent()) {
+				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
+			}
+			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			CalendarOutputter outputter = new CalendarOutputter();
-			outputter.output(calendar, bos);
+			outputter.output(calendar.get(), bos);
+			
 			response.setHeader("Content-Type", "application/ics");
 			InputStream is = new ByteArrayInputStream(bos.toByteArray());
 			renderBinary(is,"reperibilitaRegistro.ics");

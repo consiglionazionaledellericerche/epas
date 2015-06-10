@@ -15,9 +15,11 @@ import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
+import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import net.fortuna.ical4j.model.Calendar;
@@ -33,15 +35,19 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.i18n.Messages;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 
 /**
@@ -53,21 +59,30 @@ public class ReperibilityManager {
 
 	@Inject
 	public ReperibilityManager(CompetenceDao competenceDao,
-			AbsenceDao absenceDao,
+			AbsenceDao absenceDao, PersonDao personDao,
 			PersonReperibilityDayDao personReperibilityDayDao,
-			PersonDayManager personDayManager, CompetenceCodeDao competenceCodeDao) {
+			PersonDayManager personDayManager, PersonDayDao personDayDao, CompetenceCodeDao competenceCodeDao) {
 		this.competenceDao = competenceDao;
 		this.absenceDao = absenceDao;
+		this.personDao = personDao;
 		this.personReperibilityDayDao = personReperibilityDayDao;
 		this.personDayManager = personDayManager;
+		this.personDayDao = personDayDao;
 		this.competenceCodeDao = competenceCodeDao;
 	}
 
 	private final CompetenceDao competenceDao;
 	private final AbsenceDao absenceDao;
+	private final PersonDao personDao;
 	private final PersonReperibilityDayDao personReperibilityDayDao;
 	private final PersonDayManager personDayManager;
+	private final PersonDayDao personDayDao;
 	private final CompetenceCodeDao competenceCodeDao;
+
+	// Label della tabella delle inconsistenze delle reperibilità con le timbrature
+	public static String thNoStampings = Messages.get("PDFReport.thNoStampings");  // nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
+	public static String thAbsences = Messages.get("PDFReport.thAbsences");				// nome della colonna per i giorni di assenza della tabella delle inconsistenze
+	
 
 	private final static String codFr = "207";    						// codice dei turni feriali
 	private final static String codFs = "208";							// codice dei turni festivi
@@ -661,6 +676,115 @@ public class ReperibilityManager {
 		}
 	}
 
+	
+	/**
+	 * @author arianna
+	 * crea una tabella con le eventuali inconsistenze tra le timbrature dei reperibili di un certo tipo e i
+	 * turni di reperibilit√† svolti in un determinato periodo di tempo
+	 * ritorna una tabella del tipo (Person, [thNoStamping, thAbsence], List<'gg/MMM '>)
+	 */
+	public Table<Person, String, List<String>> getReperibilityInconsistenceAbsenceTable(List<PersonReperibilityDay> personReperibilityDays, LocalDate startDate, LocalDate endDate) {
+		// for each person contains days with absences and no-stamping  matching the reperibility days 
+		Table<Person, String, List<String>> inconsistentAbsenceTable = TreeBasedTable.<Person, String, List<String>>create();
+
+		// lista dei giorni di assenza e mancata timbratura
+		List<String> noStampingDays = new ArrayList<String>();
+		List<String> absenceDays = new ArrayList<String>();
+
+		for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
+			Person person = personReperibilityDay.personReperibility.person;
+
+
+			//check for the absence inconsistencies
+			//------------------------------------------
+
+			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
+
+			// if there are no events and it is not an holiday -> error
+			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
+				//if (!person.isHoliday(personReperibilityDay.date)) {
+				if(!personDayManager.isHoliday(person, personReperibilityDay.date)){
+					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+
+
+					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
+					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
+					inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);	
+				}
+			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
+				// check for the stampings in working days
+				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
+				if (!personDayManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
+
+
+					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();	
+					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));			
+					inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);					
+				}
+
+				// check for absences
+				if (!personDay.get().absences.isEmpty()) {
+					for (Absence absence : personDay.get().absences) {
+						if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+							Logger.info("La reperibilit√† di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+
+							absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences)) ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();							
+							absenceDays.add(personReperibilityDay.date.toString("dd MMM"));							
+							inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
+						}
+					}
+				}	
+			}
+		}
+
+		return inconsistentAbsenceTable;
+	}
+	
+	
+	/*
+	 * Export the reperibility calendar in iCal for the person with id = personId with reperibility 
+	 * of type 'type' for the 'year' year
+	 * If the personId=0, it exports the calendar for all  the reperibility persons of type 'type'
+	 */
+	public Optional<Calendar> createCalendar(Long type, Long personId, int year) {
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+
+		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
+
+		// check for the parameter
+		//---------------------------
+
+		if (personId == 0) {
+			// read the reperibility person 
+			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
+			List<PersonReperibility> personsReperibility = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
+			if (personsReperibility.isEmpty()) {
+				return Optional.<Calendar>absent();
+			}
+			personsInTheCalList = personsReperibility;
+		} else {
+			// read the reperibility person 
+			//PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
+			PersonReperibility personReperibility = personReperibilityDayDao.getPersonReperibilityByPersonAndType(personDao.getPersonById(personId), personReperibilityDayDao.getPersonReperibilityTypeById(type));
+			if (personReperibility == null) {
+				return Optional.<Calendar>absent();
+			}
+			personsInTheCalList.add(personReperibility);
+		}
+
+
+		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+		icsCalendar = createicsReperibilityCalendar(year, personsInTheCalList);
+
+		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+
+		return Optional.of(icsCalendar);
+	}
+	
+	
 	public Calendar createicsReperibilityCalendar(int year, List<PersonReperibility> personsInTheCalList) {
 		String eventLabel;
 
