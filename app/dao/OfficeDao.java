@@ -17,6 +17,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -88,49 +89,6 @@ public class OfficeDao extends DaoBase {
 		return Optional.fromNullable(query.singleResult(office));
 	}
 
-	/**
-	 * 
-	 * @param name
-	 * @return  
-	 */
-	public Optional<Office> getOfficeByName(String name){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.name.eq(name));
-
-		return Optional.fromNullable(query.singleResult(office));
-	}
-
-	/**
-	 * 
-	 * @param code
-	 * @return l'ufficio associato al codice passato come parametro
-	 */
-	public Optional<Office> getOfficeByCode(String codeId){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.codeId.eq(codeId));
-		return Optional.fromNullable(query.singleResult(office));
-
-	}
-
-	/**
-	 * 
-	 * @param code
-	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
-	 */
-	public List<Office> getOfficesByCode(String codeId){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.codeId.eq(codeId));
-		return query.list(office);
-	}
 
 	/**
 	 *  La lista di tutte le Aree definite nel db ePAS (Area -> campo office = null)
@@ -227,6 +185,11 @@ public class OfficeDao extends DaoBase {
 
 	}
 
+	/**
+	 * @param o
+	 * @return true se esiste già un ufficio che utilizza lo stesso nome,sigla o codice,
+	 * false altrimenti
+	 */
 	public boolean checkForDuplicate(Office o){
 
 		final QOffice office = QOffice.office1;
@@ -263,5 +226,35 @@ public class OfficeDao extends DaoBase {
 								return input.office;
 							}
 						}).toSet();
+	}
+	
+	public Optional<Office> byCds(String cds){
+		Preconditions.checkState(!Strings.isNullOrEmpty(cds));
+		
+		final QOffice office = QOffice.office1;
+		
+		final JPQLQuery query = getQueryFactory().from(office).where(office.cds.eq(cds));
+		
+		return Optional.fromNullable(query.singleResult(office));
+	}
+	
+	public Optional<Office> byCode(String code){
+		Preconditions.checkState(!Strings.isNullOrEmpty(code));
+		
+		final QOffice office = QOffice.office1;
+		
+		final JPQLQuery query = getQueryFactory().from(office).where(office.code.eq(code));
+		
+		return Optional.fromNullable(query.singleResult(office));
+	}
+	
+	public Optional<Office> byCodeId(String codeId){
+		Preconditions.checkState(!Strings.isNullOrEmpty(codeId));
+		
+		final QOffice office = QOffice.office1;
+		
+		final JPQLQuery query = getQueryFactory().from(office).where(office.codeId.eq(codeId));
+		
+		return Optional.fromNullable(query.singleResult(office));
 	}
 }

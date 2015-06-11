@@ -31,13 +31,6 @@
 			  	  <div class="well">
 			  	     <a data-modal=".my-modal" href="@{Offices.editInstitute(istituto.value.id)}"><p class="lead">${istituto.value.name}</p></a>
 
-			  	    <strong>Lettori istituto installati</strong> 
-		  	  	    #{list items:istituto.getActiveBadgeReaders(), as:'badgeReader'}
-			          <span class="label label-success">${badgeReader}</span>
-			        #{/list}
-				    <br>
-				    <br>
-				    
 				    <table class="table table-hover">
 				      <tr class="warning center">
 				        <th>Sede</th>

@@ -1,12 +1,24 @@
 package controllers.rest;
 
-import java.util.List;
-
 import helpers.JsonResponse;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.AbsenceManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
+import models.Absence;
+import models.Person;
+
 import org.joda.time.LocalDate;
+
+import play.db.jpa.Blob;
+import play.mvc.Controller;
+import play.mvc.With;
+import cnr.sync.dto.AbsenceAddedRest;
+import cnr.sync.dto.AbsenceRest;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -15,19 +27,9 @@ import com.google.common.collect.Lists;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import cnr.sync.dto.AbsenceAddedRest;
-import cnr.sync.dto.AbsenceRest;
-import manager.AbsenceManager;
-import manager.response.AbsenceInsertReport;
-import manager.response.AbsencesResponse;
-import models.Absence;
-import models.Person;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
-import play.db.jpa.Blob;
-import play.mvc.Controller;
-import play.mvc.With;
 
 @With(Resecure.class)
 public class Absences extends Controller{
@@ -43,8 +45,8 @@ public class Absences extends Controller{
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
-		Person person = personDao.getPersonByEmail(email);
-		if(person == null){
+		Optional<Person> person = personDao.byEmail(email);
+		if(!person.isPresent()){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
 		}
@@ -52,7 +54,7 @@ public class Absences extends Controller{
 			JsonResponse.badRequest("Date non valide");
 		}
 		List<AbsenceRest> absences = FluentIterable.from(absenceDao.getAbsencesInPeriod(
-				Optional.fromNullable(person), begin, Optional.fromNullable(end), false))
+				Optional.fromNullable(person.get()), begin, Optional.fromNullable(end), false))
 				.transform(new Function<Absence, AbsenceRest>(){
 					@Override
 					public AbsenceRest apply(Absence absence){
@@ -70,8 +72,8 @@ public class Absences extends Controller{
 	
 	@BasicAuth
 	public static void insertAbsence(String email, String absenceCode, LocalDate begin, LocalDate end){
-		Person person = personDao.getPersonByEmail(email);
-		if(person == null){
+		Optional<Person> person = personDao.byEmail(email);
+		if(!person.isPresent()){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
 		}
@@ -80,7 +82,7 @@ public class Absences extends Controller{
 		}
 		List<AbsenceAddedRest> list = Lists.newArrayList();
 		try{
-			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, Optional.fromNullable(end), 
+			AbsenceInsertReport air = absenceManager.insertAbsence(person.get(), begin, Optional.fromNullable(end), 
 					absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(), 
 					Optional.<Blob>absent(), Optional.<String>absent());
 			for(AbsencesResponse ar : air.getAbsences()){

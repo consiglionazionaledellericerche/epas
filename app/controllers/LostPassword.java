@@ -15,6 +15,9 @@ import play.Logger;
 import play.Play;
 import play.libs.Mail;
 import play.mvc.Controller;
+
+import com.google.common.base.Optional;
+
 import dao.PersonDao;
 import dao.UserDao;
 
@@ -46,9 +49,8 @@ public class LostPassword extends Controller{
 			LostPassword.lostPassword();
 		}
 
-		Person person = personDao.getPersonByEmail(email);
-		if(person==null)
-		{
+		Optional<Person> p = personDao.byEmail(email);
+		if(!p.isPresent()){
 			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
 			LostPassword.lostPassword();
 		}
@@ -57,7 +59,7 @@ public class LostPassword extends Controller{
 		SecureRandom random = new SecureRandom();
 		String token = new BigInteger(130, random).toString(32);
 		
-		//Person person = contactData.person;
+		Person person = p.get();
 		person.user.recoveryToken = token;
 		person.user.expireRecoveryToken = new LocalDate();
 		person.user.save();

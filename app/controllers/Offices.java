@@ -4,14 +4,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.ConfGeneralManager;
-import manager.ConfYearManager;
 import manager.OfficeManager;
 import models.Office;
 import models.Role;
-
-import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -39,10 +34,6 @@ public class Offices extends Controller {
 	private static IWrapperFactory wrapperFactory;
 	@Inject
 	private static OfficeManager officeManager;
-	@Inject
-	private static ConfGeneralManager confGeneralManager;
-	@Inject
-	private static ConfYearManager confYearManager;
 
 	public static void showOffices(){
 
@@ -90,14 +81,10 @@ public class Offices extends Controller {
 		institute.contraction = contraction;
 		institute.office = area;
 
-		if(officeDao.checkForDuplicate(institute)){
+		if(!officeManager.saveOffice(institute)){
 			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
 			Offices.showOffices();
 		}
-
-		institute.save();
-
-		officeManager.setSystemUserPermission(institute);
 
 		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name, institute.contraction);
 		Offices.showOffices();
@@ -126,25 +113,11 @@ public class Offices extends Controller {
 		}
 
 		seat.codeId = codeId;
-
-		if(officeDao.checkForDuplicate(seat)){
+		seat.office = institute;
+		
+		if(!officeManager.saveOffice(seat)){
 			flash.error("Parametri già utilizzati in un'altra sede,verificare.");
 			Offices.showOffices();
-		}
-
-		seat.office = institute;
-
-		final boolean newSeat = !seat.isPersistent();
-
-		seat.save();
-
-		if(newSeat){
-			confGeneralManager.buildOfficeConfGeneral(seat, false);
-
-			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
-			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
-
-			officeManager.setSystemUserPermission(seat);
 		}
 
 		flash.success("Sede correttamente inserita: %s",seat.name);

@@ -5,10 +5,14 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import controllers.Security;
+import dao.OfficeDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 
@@ -16,13 +20,20 @@ public class OfficeManager {
 
 	@Inject
 	public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-			RoleDao roleDao) {
+			RoleDao roleDao,OfficeDao officeDao,ConfYearManager confYearManager
+			,ConfGeneralManager confGeneralManager) {
 		this.usersRolesOfficesDao = usersRolesOfficesDao;
 		this.roleDao = roleDao;
+		this.officeDao = officeDao;
+		this.confGeneralManager = confGeneralManager;
+		this.confYearManager = confYearManager;
 	}
 
 	private final UsersRolesOfficesDao usersRolesOfficesDao;
 	private final RoleDao roleDao;
+	private final OfficeDao officeDao;
+	private final ConfGeneralManager confGeneralManager;
+	private final ConfYearManager confYearManager;
 
 	/**
 	 * 
@@ -84,5 +95,30 @@ public class OfficeManager {
 		}
 
 		return false;
+	}
+	
+	public boolean saveOffice(Office office){
+		Preconditions.checkNotNull(office);
+		
+		if(officeDao.checkForDuplicate(office)){
+			return false;
+		}
+		else{
+//			Verifico se è un nuovo inserimento o è un aggiornamento di uno esistente
+			final boolean newOffice = !office.isPersistent();
+
+			office.save();
+			
+//			Verifico se si tratta dell'inserimento di una nuova sede
+			if(newOffice && office.office != null && office.office.office != null){
+				confGeneralManager.buildOfficeConfGeneral(office, false);
+
+				confYearManager.buildOfficeConfYear(office, LocalDate.now().getYear() - 1, false);
+				confYearManager.buildOfficeConfYear(office, LocalDate.now().getYear(), false);
+			}
+			
+			setSystemUserPermission(office);
+		}
+		return true;
 	}
 }
