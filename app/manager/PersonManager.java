@@ -431,10 +431,15 @@ public class PersonManager {
 	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
 	 * timbratura.
 	 */
-	public int basedWorkingDays(List<PersonDay> personDays){
-		int basedDays=0;
-		for(PersonDay pd : personDays){	
-
+	public int basedWorkingDays(Person person, LocalDate begin, LocalDate end){
+		
+		List<PersonDay> personDaysForAbsences = personDayDao
+				.getPersonDayInPeriodForAbsences(person, begin, 
+						Optional.fromNullable(end));
+ 		
+		int basedDays = 0;
+		for (PersonDay pd : personDaysForAbsences) {	
+ 
 			IWrapperPersonDay day = wrapperFactory.create(pd);
 			boolean fixed = day.isFixedTimeAtWork();
 

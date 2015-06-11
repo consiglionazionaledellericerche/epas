@@ -733,7 +733,7 @@ public class PersonDayManager {
 		//Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
 		LocalDate currentMonthEnd = LocalDate.now().dayOfMonth().withMaximumValue();
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
-				Optional.of(currentMonthEnd), true);
+				Optional.of(currentMonthEnd));
 
 		for(PersonDay pd : personDays){
 			populatePersonDay(wrapperFactory.create(pd));
@@ -752,7 +752,7 @@ public class PersonDayManager {
 		LocalDate endMonth = date.dayOfMonth().withMaximumValue();
 		
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
-				Optional.fromNullable(endMonth), true);
+				Optional.fromNullable(endMonth));
 
 		for(PersonDay pd : personDays){
 			populatePersonDay(wrapperFactory.create(pd));
@@ -1259,29 +1259,19 @@ public class PersonDayManager {
 	}
 
 	/**
-	 * Calcola il numero massimo di coppie di colonne ingresso/uscita da stampare nell'intero mese
-	 * @param person
-	 * @param year
-	 * @param month
+	 * Calcola il numero massimo di coppie di colonne ingresso/uscita.
+	 * 
+	 * @param personDays
 	 * @return
 	 */
-	public int getMaximumCoupleOfStampings(Person person, int year, int month){
-
-		LocalDate begin = new LocalDate(year, month, 1);
-		if(begin.isAfter(new LocalDate()))
-			return 0;
-		List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(begin.dayOfMonth().withMaximumValue()), false);
-		//List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
-
+	public int getMaximumCoupleOfStampings(List<PersonDay> personDays) {
 		int max = 0;
-		for(PersonDay pd : pdList)
-		{
+		for(PersonDay pd : personDays) {
 			int coupleOfStampings = numberOfInOutInPersonDay(pd);
-
-			if(max<coupleOfStampings)
+			if (max < coupleOfStampings) {
 				max = coupleOfStampings;
+			}
 		}
-
 		return max;
 	}
 
@@ -1298,7 +1288,10 @@ public class PersonDayManager {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
 		List<PersonDay> totalDays = new ArrayList<PersonDay>();
-		List<PersonDay> workingDays = personDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
+		
+		// Ottimizzazione: injettare la lista
+		List<PersonDay> workingDays = personDayDao
+				.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth));
 
 		int currentWorkingDays = 0;
 		LocalDate currentDate = beginMonth;
