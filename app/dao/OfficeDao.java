@@ -207,7 +207,7 @@ public class OfficeDao extends DaoBase {
 			condition.or(office.code.eq(o.code));
 		}
 		if(o.cds!=null){
-			condition.or(office.code.eq(o.cds));
+			condition.or(office.cds.eq(o.cds));
 		}
 		if(o.id!=null){
 			condition.and(office.id.ne(o.id));
