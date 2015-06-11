@@ -6,8 +6,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import play.Logger;
+import manager.OfficeManager;
 import models.Office;
+import play.Logger;
 import cnr.sync.dto.InstituteDTO;
 import cnr.sync.dto.SeatDTO;
 
@@ -21,6 +22,8 @@ public class RestOfficeManager {
 	
 	@Inject
 	private OfficeDao officeDao;
+	@Inject
+	private OfficeManager officeManager;
 	
 	public void saveImportedSeats(Collection<SeatDTO> seatsDTO){
 
@@ -42,13 +45,17 @@ public class RestOfficeManager {
 			mainArea = areas.iterator().next();
 		}
 		
-		List<Office> institutes = FluentIterable.from(institutesDTO)
-				.transform(InstituteDTO.toOffice.ISTANCE).toList();
+		Set<Office> institutes = FluentIterable.from(institutesDTO)
+				.transform(InstituteDTO.toOffice.ISTANCE).toSet();
 		
 		for(Office institute : institutes){
 			institute.office = mainArea;
-//			institute.save();
-			Logger.info("Importato Istituto %s", institute.name);
+			if(officeManager.saveOffice(institute)){
+				Logger.info("Importato Istituto %s", institute.name);
+			}
+			else{
+				Logger.warn("Trovato istituto duplicato durante l'import - %s", institute.name);
+			}
 		}
 		
 		for(SeatDTO seatDTO : seatsDTO){
@@ -58,9 +65,13 @@ public class RestOfficeManager {
 					: seatDTO.name;
 			seat.codeId = seatDTO.codeId;
 			seat.code = seatDTO.code;
-			seat.office = Office.find("byCds", seatDTO.institute.cds).first();
-			Logger.info("Importata Sede %s", seat.name);
-//			seat.save();			
+			seat.office = officeDao.byCds(seatDTO.institute.cds).orNull();
+			if(officeManager.saveOffice(seat)){
+				Logger.info("Importata Sede %s", seat.name);
+			}
+			else{
+				Logger.warn("Trovata sede duplicata durante l'import - %s", seat.name);
+			}
 		}
 		
 	}

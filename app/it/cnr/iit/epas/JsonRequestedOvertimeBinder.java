@@ -66,7 +66,7 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 
 				personEmail = jsonObject.get("email").getAsString();
 
-				person = personDao.getPersonByEmail(personEmail);
+				person = personDao.byEmail(personEmail).orNull();
 				//person = Person.find("SELECT p FROM Person p WHERE p.email = ?", personEmail).first();
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			

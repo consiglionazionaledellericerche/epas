@@ -33,7 +33,6 @@ import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
-
 /*
  * @autor arianna
  * 
@@ -69,14 +68,14 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", email, year, month);
 
 		// get the person with the given email
-		Person person = personDao.getPersonByEmail(email);
+		Optional<Person> person = personDao.byEmail(email);
 
-		if (person == null) {
+		if (!person.isPresent()) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
-		Logger.debug("Find persons %s with email %s", person.name, email);
+		Logger.debug("Find persons %s with email %s", person.get().name, email);
 
-		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+		Optional<Contract> contract = wrapperFactory.create(person.get()).getCurrentContract();
 
 		Preconditions.checkState(contract.isPresent());
 
@@ -109,16 +108,16 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getSupervisorTotalOvertimes() con email=%s", email);
 
 		// get the person with the given email
-		Person person = personDao.getPersonByEmail(email);
-		if (person == null) {
+		Optional<Person> person = personDao.byEmail(email);
+		if (!person.isPresent()) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
-		Logger.debug("Find persons %s with email %s", person.name, email);
+		Logger.debug("Find persons %s with email %s", person.get().name, email);
 
 
-		PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
+		PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person.get());
 		if(personHourForOvertime == null)
-			personHourForOvertime = new PersonHourForOvertime(person, 0);
+			personHourForOvertime = new PersonHourForOvertime(person.get(), 0);
 
 		Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s", personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
 
@@ -147,13 +146,13 @@ public class Overtimes extends Controller {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		try {
-			Person person = personDao.getPersonByEmail(email);
-			if (person == null) {
+			Optional<Person> person = personDao.byEmail(email);
+			if (!person.isPresent()) {
 				throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", email));			
 			}
-			Logger.debug("Find persons %s with email %s", person.name, email);
+			Logger.debug("Find persons %s with email %s", person.get().name, email);
 
-			overtimesManager.setSupervisorOvertime(person, hours);
+			overtimesManager.setSupervisorOvertime(person.get(), hours);
 		} catch (Exception e) {
 			Logger.error(e, "Problem during findjing person with email.");
 			throw e;

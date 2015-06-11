@@ -1,19 +1,17 @@
 package controllers;
 
 
-import helpers.ModelQuery;
-
 import java.util.HashMap;
 
 import javax.inject.Inject;
 
 import models.Person;
-import models.query.QPerson;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.cache.Cache;
 import play.mvc.Router;
+import dao.PersonDao;
 import dao.UserDao;
 
 /**
@@ -27,6 +25,8 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 
 	@Inject
 	private static UserDao userDao;
+	@Inject
+	private static PersonDao persondao;
 	
 	/**
 	 * This method checks that a profile is allowed to view this page/method.
@@ -66,9 +66,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 		String eppn = session.get("eppn");
 	    Logger.debug("Trasformazione dell'utente shibboleth in utente locale, email = %s", eppn);
 	    
-	    QPerson qPerson = QPerson.person;
-	    Person person = 
-	    	ModelQuery.queryFactory().from(qPerson).where(qPerson.email.eq(eppn).or(qPerson.cnr_email.eq(eppn))).singleResult(qPerson);
+	    Person person = persondao.byEmail(eppn).orNull();
 		
 		if(person != null){
 			Cache.set(person.user.username, person, Security.CACHE_DURATION);

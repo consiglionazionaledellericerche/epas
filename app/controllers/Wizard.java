@@ -12,7 +12,6 @@ import java.util.Properties;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
-import manager.ConfYearManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import models.Contract;
@@ -60,8 +59,6 @@ public class Wizard extends Controller {
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
-	private static ConfYearManager confYearManager;
-	@Inject
 	private static QualificationDao qualificationDao;
 	@Inject
 	private static WorkingTimeTypeDao workingTimeTypeDao;
@@ -92,7 +89,6 @@ public class Wizard extends Controller {
 		public static WizardStep of(String name, String template,int index) {
 			return new WizardStep(name, template,index);
 		}
-
 	}
 
 	public static List<WizardStep> createSteps() {
@@ -107,7 +103,7 @@ public class Wizard extends Controller {
 	public static void wizard(int step) {
 		Preconditions.checkNotNull(step);
 
-		//    	Recupero dalla cache  	
+//    	Recupero dalla cache  	
 		List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
 		Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
 		Long officeCount = Cache.get(Resecure.OFFICE_COUNT,Long.class);
@@ -305,7 +301,6 @@ public class Wizard extends Controller {
 	/**
 	 * STEP 4 Creazione Profilo per l'amministratore
 	 */
-
 	public static void seatManagerRole(
 			int stepIndex,
 			@Required String manager_surname,
@@ -466,14 +461,14 @@ public class Wizard extends Controller {
 		//		Area
 		Office area = new Office();
 		area.name = properties.getProperty("area");
-		area.save();
+		officeManager.saveOffice(area);
 
 		//		Istituto
 		Office institute = new Office();
 		institute.name = properties.getProperty("institute");
 		institute.contraction = properties.getProperty("institute_contraction");
 		institute.office = area;
-		institute.save();
+		officeManager.saveOffice(institute);
 
 		//		Sede
 		Office seat = new Office();
@@ -493,14 +488,11 @@ public class Wizard extends Controller {
 			seat.joiningDate = LocalDate.parse(properties.getProperty("seat_affiliation_date"));
 		}
 		seat.office = institute;
-		seat.save();
-		
-//		Invalido la cache sul conteggio degli uffici
+
+		officeManager.saveOffice(seat);
+
+		//		Invalido la cache sul conteggio degli uffici
 		Cache.safeDelete(Resecure.OFFICE_COUNT);
-		
-		officeManager.setSystemUserPermission(area);
-		officeManager.setSystemUserPermission(institute);
-		officeManager.setSystemUserPermission(seat);
 
 		confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, seat, 
 				Optional.fromNullable(LocalDate.now().toString()));
@@ -525,11 +517,6 @@ public class Wizard extends Controller {
 
 		confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, seat, 
 				Optional.fromNullable(properties.getProperty("email_to_contact")));
-
-		confGeneralManager.buildOfficeConfGeneral(seat, false);
-
-		confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
-		confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
 
 		//Creazione Profilo Amministratore
 

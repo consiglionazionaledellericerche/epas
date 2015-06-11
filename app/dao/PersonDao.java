@@ -377,12 +377,12 @@ public final class PersonDao extends DaoBase{
 	 * @param email
 	 * @return la persona che ha associata la mail email
 	 */
-	public Person getPersonByEmail(String email){
+	public Optional<Person> byEmail(String email){
 
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.email.eq(email).or(person.cnr_email.eq(email)));
 
-		return query.singleResult(person);
+		return Optional.fromNullable(query.singleResult(person));
 	}
 
 	/**
@@ -390,7 +390,7 @@ public final class PersonDao extends DaoBase{
 	 * @param perseoId
 	 * @return la persona identificata dall'id con cui è salvata sul db di perseo
 	 */
-	public Person getPersonByPerseoId(Integer perseoId){
+	public Person byPerseoId(Integer perseoId){
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.iId.eq(perseoId));
 			

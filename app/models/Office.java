@@ -41,6 +41,7 @@ public class Office extends BaseModel{
     @Column(name = "address")
     public String address = "";
     
+	//sedeId, serve per l'invio degli attestati, per esempio per la sede di Pisa è "223400"
     @Column(name = "codeId")
     public String codeId;
     
@@ -54,9 +55,13 @@ public class Office extends BaseModel{
     @JoinColumn(name="office_id")
     public Office office;
     
+	/**
+	 * Centro Di Spesa , per l'istituto di informatica è 044
+	 */
     @Unique
     public String cds;
     
+	//Codice della sede, per esempio per la sede di Pisa è "044000"
 	@Unique
 	public String code;
     
