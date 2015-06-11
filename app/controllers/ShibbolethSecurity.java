@@ -66,7 +66,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 		String eppn = session.get("eppn");
 	    Logger.debug("Trasformazione dell'utente shibboleth in utente locale, email = %s", eppn);
 	    
-	    QPerson qPerson = QPerson.person;
+	    QPerson qPerson = QPerson.person1;
 	    Person person = 
 	    	ModelQuery.queryFactory().from(qPerson).where(qPerson.email.eq(eppn).or(qPerson.cnr_email.eq(eppn))).singleResult(qPerson);
 		

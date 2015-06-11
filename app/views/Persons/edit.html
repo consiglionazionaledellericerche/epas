@@ -19,6 +19,9 @@
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
   <li><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
+  #{if person.isPersonInCharge}
+  	<li><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
+  #{/if}
 </ul>
 
 <div class="container">		<!-- Container dati personali e di contatto -->
@@ -134,6 +137,15 @@
 					#{/if}
 					#{else}
 						<td><a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal"><i class="fa fa-square-o"></i> Modifica</a></td>
+					#{/else}
+				</tr>
+				<tr>
+					<td class="lab">Responsabile gruppo di lavoro</td>
+					#{if person.isPersonInCharge}
+					<td><input name="isPersonInCharge" type="checkbox" checked="checked" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
+					#{/if}
+					#{else}
+					<td><input name="isPersonInCharge" type="checkbox" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
 					#{/else}
 				</tr>
 			</table>

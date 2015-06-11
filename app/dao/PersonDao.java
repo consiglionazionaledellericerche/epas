@@ -60,7 +60,7 @@ public final class PersonDao extends DaoBase{
 	
 	public List<Person> getActivePersonInMonth(Set<Office> offices, YearMonth yearMonth) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		int year = yearMonth.getYear();
 		int month = yearMonth.getMonthOfYear();
@@ -71,7 +71,8 @@ public final class PersonDao extends DaoBase{
 				Optional.fromNullable( beginMonth.get().dayOfMonth().withMaximumValue() );
 		
 		JPQLQuery query = personQuery( Optional.<String>absent(), offices, false, 
-				beginMonth, endMonth, true, Optional.<CompetenceCode>absent()); 
+				beginMonth, endMonth, true, Optional.<CompetenceCode>absent(),
+				Optional.<Person>absent()); 
 		
 		return ModelQuery.simpleResults( query, person ).list();
 	}
@@ -94,13 +95,14 @@ public final class PersonDao extends DaoBase{
 			LocalDate start, LocalDate end, 
 			boolean onlyOnCertificate) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 	
 		return ModelQuery.simpleResults(
 				//JPQLQuery
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						onlyOnCertificate, Optional.<CompetenceCode>absent()),
+						onlyOnCertificate, Optional.<CompetenceCode>absent(),
+						Optional.<Person>absent()),
 				//Expression
 				person);
 	}
@@ -122,17 +124,18 @@ public final class PersonDao extends DaoBase{
 			Optional<String> name, 
 			Set<Office> offices,
 			boolean onlyTechnician, 
-			LocalDate start, LocalDate end) {
+			LocalDate start, LocalDate end,
+			Optional<Person> personInCharge) {
 
 		Preconditions.checkState(!offices.isEmpty());
 		Preconditions.checkNotNull(compCode);
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		return ModelQuery.simpleResults(
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						true, Optional.fromNullable(compCode) ), person);
+						true, Optional.fromNullable(compCode), personInCharge), person);
 
 	}
 
@@ -242,7 +245,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonById(Long personId) {
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
 
@@ -256,7 +259,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByNumber(Integer number){
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		final JPQLQuery query = getQueryFactory().from(person).where(person.number.eq(number));
 
@@ -269,7 +272,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public List<Person> getPersonsByNumber(){
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.number.isNotNull().and(person.number.ne(0)));
@@ -284,7 +287,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByEmail(String email){
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.email.eq(email).or(person.cnr_email.eq(email)));
@@ -299,7 +302,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByPerseoId(Integer perseoId){
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.iId.eq(perseoId));
@@ -313,7 +316,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByOldID(Long oldId){
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 
 		final JPQLQuery query = getQueryFactory().from(person).where(person.oldId.eq(oldId));
 
@@ -327,7 +330,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByBadgeNumber(String badgeNumber){
 
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		final JPQLQuery query = getQueryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
 
@@ -341,7 +344,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public List<Person> getPersonForReperibility(Long type){
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 				
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.reperibility.personReperibilityType.id.eq(type).and(person.reperibility.startDate.isNull().or(person.reperibility.startDate.loe(LocalDate.now())
@@ -357,7 +360,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	public List<Person> getPersonForShift(String type){
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
 		final QPersonShift ps = QPersonShift.personShift;
 		
@@ -375,10 +378,22 @@ public final class PersonDao extends DaoBase{
 	 * email_cnr, campo utile per poter fare la sincronizzazione con gli altri sistemi
 	 */
 	public long checkCnrEmailForEmployee(){
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		final JPQLQuery query = getQueryFactory().from(person).where(person.cnr_email.isNotNull());
 		return query.count();
 	}
+	
+	
+	/**
+	 * 
+	 * @return il responsabile per la persona passata come parametro
+	 */
+	public Person getPersonInCharge(Person p){
+		final QPerson person = QPerson.person1;
+		final JPQLQuery query = getQueryFactory().from(person).where(person.people.contains(p));
+		return query.singleResult(person);
+	}
+	
 	
 	/**
 	 * La query per la ricerca delle persone. 
@@ -436,9 +451,10 @@ public final class PersonDao extends DaoBase{
 			boolean onlyTechnician, 
 			Optional<LocalDate> start, Optional<LocalDate> end,
 			boolean onlyOnCertificate, 
-			Optional<CompetenceCode> compCode) {
+			Optional<CompetenceCode> compCode,
+			Optional<Person> personInCharge) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		final QContract contract = QContract.contract;
 		
 		final JPQLQuery query = getQueryFactory().from(person)
@@ -453,6 +469,9 @@ public final class PersonDao extends DaoBase{
 		
 		final BooleanBuilder condition = new BooleanBuilder();
 		
+		if(personInCharge.isPresent()){
+			condition.and(person.person.eq(personInCharge.get()));
+		}
 		filterOffices(condition, offices);
 		filterOnlyTechnician(condition, onlyTechnician);
 		filterName(condition, name);
@@ -463,6 +482,8 @@ public final class PersonDao extends DaoBase{
 		return query.where(condition);
 	}
 	
+
+	
 	/**
 	 * Filtro sugli uffici.
 	 * 
@@ -471,7 +492,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	private void filterOffices(BooleanBuilder condition, Set<Office> offices) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		if(offices != null && !offices.isEmpty()) {
 			condition.and(person.office.in(offices));
@@ -486,7 +507,7 @@ public final class PersonDao extends DaoBase{
 	 */
 	private void filterName(BooleanBuilder condition, Optional<String> name) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		if (name.isPresent() && !name.get().trim().isEmpty()) {
 			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
@@ -524,7 +545,7 @@ public final class PersonDao extends DaoBase{
 	private void filterOnlyTechnician(BooleanBuilder condition, boolean value) {
 
 		if (value == true) {
-			final QPerson person = QPerson.person;
+			final QPerson person = QPerson.person1;
 			condition.and(person.qualification.qualification.gt(3));
 		}
 	}
@@ -547,7 +568,7 @@ public final class PersonDao extends DaoBase{
 			Optional<CompetenceCode> compCode) {
 		
 		if (compCode.isPresent()) {
-			final QPerson person = QPerson.person;
+			final QPerson person = QPerson.person1;
 			condition.and(person.competenceCode.contains(compCode.get()));
 		}
 	}
@@ -567,7 +588,7 @@ public final class PersonDao extends DaoBase{
 	@Deprecated
 	public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
 		
-		final QPerson person = QPerson.person;
+		final QPerson person = QPerson.person1;
 		
 		Optional<LocalDate> beginMonth = 
 				Optional.fromNullable( new LocalDate(year, month, 1));

@@ -1,0 +1,83 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Straordinari mensili Gruppo'  /}
+
+<div class="container-fluid">
+
+  <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} </h3>
+      </div>
+      <div class="panel-body">
+      
+        <div class="col-xs-5">
+          #{form action:@Competences.monthlyovertime(), class:'form-search',  
+          method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+    
+            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+            <i class="icon-search icon-large"></i>
+            <input type="hidden" name="year" value="${year}"/>
+	        <input type="hidden" name="month" value="${month}"/>
+	        #{/form}
+         </div>
+
+        <section id="results">
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+              #{if simpleResults.totalPage > 0}
+	  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+	  	            #{if simpleResults.page==indexPage}
+	  	              <li class="active"><a href="#">${indexPage+1}</a></li>
+	  	            #{/if}
+	  	            #{else}
+	  	              <li><a href="@{Competences.monthlyovertime(year, month, name, indexPage)}">${indexPage+1}</a></li>
+	  	            #{/else}
+	  	          #{/list}
+  	          #{/if}
+	          #{else}
+	            <br>
+	          #{/else}
+            </ul>
+		  </div>
+
+		 <div class="col-xs-12">
+		    <table class="table overtime-big table-hover">
+		    	<tr>
+			    	<th>Nome e cognome</th>
+			    	#{list items:tableFeature.columnKeySet(), as:'col' }
+			    	
+					<th>${col}</th>
+					#{/list}
+		    	</tr>
+		    	#{list items:tableFeature.rowMap().entrySet(), as:'entry' }
+		    	<tr>
+		    		<td class="warning">${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
+		    		#{list items:tableFeature.columnKeySet(), as:'col' }
+		    		
+					#{if col.equals('Giorni di Presenza') || col.equals('Ore straordinario pagate')}
+						<td>${entry.getValue().get(col)}</td>
+					#{/if}
+					#{else}
+						#{if entry.getValue().get(col) > 0}				
+							<td>${entry.getValue().get(col).toHourTime()}</td>
+						#{/if}
+						#{else}
+							<td class="danger">${entry.getValue().get(col).toHourTime()}</td>
+						#{/else}
+					#{/else}
+					
+					#{/list}
+		    	</tr> 
+		    	#{/list}
+		    </table>
+		  </div>        
+
+        </section>
+              
+        
+      </div>
+    </div>
+
+</div>
