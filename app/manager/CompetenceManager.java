@@ -42,13 +42,18 @@ import dao.wrapper.IWrapperFactory;
 
 public class CompetenceManager {
 
+	
+
 	@Inject
 	public CompetenceManager(CompetenceCodeDao competenceCodeDao,
 			OfficeDao officeDao, CompetenceDao competenceDao,
+			PersonDayDao personDayDao,
 			PersonManager personManager, IWrapperFactory wrapperFactory) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.officeDao = officeDao;
 		this.competenceDao = competenceDao;
+		this.personDayDao = personDayDao;
+		
 		this.personManager = personManager;
 		this.wrapperFactory = wrapperFactory;
 	}
@@ -57,6 +62,7 @@ public class CompetenceManager {
 
 	private final CompetenceCodeDao competenceCodeDao;
 	private final OfficeDao officeDao;
+	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
 	private final PersonManager personManager;
 	private final IWrapperFactory wrapperFactory;
@@ -186,6 +192,57 @@ public class CompetenceManager {
 		}		
 		total.save();
 		return true;
+
+	}
+
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @param page
+	 * @param name
+	 * @param office
+	 * @param beginMonth
+	 * @param simpleResults
+	 * @param code
+	 * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su orario di lavoro, straordinario,
+	 * riposi compensativi per l'anno year e il mese month per le persone dell'ufficio office
+	 */
+	public Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
+			String name, Office office, LocalDate beginMonth, SimpleResults<Person> simpleResults, CompetenceCode code){
+
+		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
+		Table<Person, String, Integer> tableFeature = null;	
+		List<Person> activePersons = simpleResults.paginated(page).getResults();		
+
+		for(Person p : activePersons){
+			Integer daysAtWork = 0;
+			Integer timeAtWork = 0;
+			Integer difference = 0;
+			Integer overtime = 0;
+
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
+			for(PersonDay pd : personDayList){
+				if(pd.stampings.size()>0)
+					daysAtWork = daysAtWork +1;
+				timeAtWork = timeAtWork + pd.timeAtWork;
+				difference = difference +pd.difference;
+			}			
+			Optional<Competence> comp = competenceDao.getCompetence(p, year, month, code);
+			if(comp.isPresent())
+				overtime = comp.get().valueApproved;
+			else
+				overtime = 0;
+			builder.put(p, "Giorni di Presenza", daysAtWork);
+			builder.put(p, "Tempo Lavorato (HH:MM)", timeAtWork);
+			builder.put(p, "Tempo di lavoro in eccesso (HH:MM)", difference);
+			builder.put(p, "Ore straordinario pagate", overtime);
+
+
+		}
+		tableFeature = builder.build();
+		return tableFeature;
+
 	}
 
 	/**

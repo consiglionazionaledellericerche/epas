@@ -42,7 +42,7 @@ public class Application extends Controller {
     	session.put("monthSelected", new LocalDate().getMonthOfYear());
     	session.put("yearSelected", new LocalDate().getYear());
     	session.put("personSelected", Security.getUser().get().person.id);
-    	
+
     	session.put("methodSelected", "stampingsAdmin");
 		session.put("actionSelected", "Stampings.stampings");
 		

@@ -21,6 +21,7 @@ import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
+import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -38,6 +39,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Table;
 
+import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -182,7 +184,7 @@ public class Stampings extends Controller {
 		stampingManager.addStamping(personDay, time, note, service, type, true);
 
 		final PersonDay giorno = personDay;
-	
+
 		personDayManager.updatePersonDaysFromDate(giorno.person, giorno.date);
 		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(giorno.date));
 
@@ -229,7 +231,7 @@ public class Stampings extends Controller {
 
 			stamping.delete();
 			pd.stampings.remove(stamping);
-			
+
 			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 			contractMonthRecapManager.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));
 
@@ -245,10 +247,10 @@ public class Stampings extends Controller {
 		}
 
 		stampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
-		
+
 		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 		contractMonthRecapManager.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));
-		
+
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
@@ -323,48 +325,48 @@ public class Stampings extends Controller {
 				stampingManager.populatePersonTicketTable(activePersons, beginMonth);
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
-	
+
 	public static void holidaySituation(int year) {
-		
+
 		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
 				new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
-		
+
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
 		render(personList, year);
 	}
-	
+
 	public static void personHolidaySituation(Long personId, int year) {
-		
+
 		Person p = personDao.getPersonById(personId);
 		Preconditions.checkNotNull(p);
-		
+
 		rules.checkIfPermitted(p.office);
-		
+
 		IWrapperPerson person = wrapperFactory.create(p);
-		
+
 		render(person, year);
 	}
-	
+
 	public static void toggleWorkingHoliday(Long personDayId) {
-		
+
 		PersonDay pd = personDayDao.getPersonDayById(personDayId);
 		Preconditions.checkNotNull(pd);
 		Preconditions.checkNotNull(pd.isPersistent());
 		Preconditions.checkState(pd.isHoliday == true && pd.timeAtWork > 0);
-		
+
 		rules.checkIfPermitted(pd.person.office);
-		
+
 		pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
 		pd.save();
-		
+
 		final LocalDate date = pd.date;
 		final Person person = pd.person;
-		
+
 		personDayManager.updatePersonDaysInMonth(pd.person, pd.date);
-		
+
 		new Job() {
 			@Override
 			public void doJob() {
@@ -373,7 +375,7 @@ public class Stampings extends Controller {
 				contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(date));
 			}
 		}.afterRequest();
-		
+
 		flash.success("Operazione completata. Per concludere l'operazione di ricalcolo "
 				+ "sui mesi successivi o sui riepiloghi mensili potrebbero occorrere alcuni secondi. "
 				+ "Ricaricare la pagina.");
@@ -381,4 +383,28 @@ public class Stampings extends Controller {
 		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
 	}
+
+
+	public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day){
+
+		if(!Security.getUser().get().person.isPersonInCharge)
+			forbidden();
+		LocalDate dayPresence = new LocalDate(year, month, day);
+
+		User user = Security.getUser().get();
+
+		List<Person> people = user.person.people;
+		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, people);
+
+		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(people, dayPresence, numberOfInOut);
+
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
+
+
+	}
+
 }
+

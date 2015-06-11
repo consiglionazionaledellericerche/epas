@@ -262,7 +262,7 @@ public class CompetenceDao extends DaoBase{
 	 */
 	public List<Competence> getCompetenceInReperibility(PersonReperibilityType type, int year, int month, CompetenceCode code){
 	       final QCompetence competence = QCompetence.competence;
-	       final QPerson person = QPerson.person;
+	       final QPerson person = QPerson.person1;
 	       final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
 	       
 	       JPQLQuery query = getQueryFactory().from(competence)
