@@ -12,6 +12,7 @@ import play.Logger;
 import cnr.sync.dto.InstituteDTO;
 import cnr.sync.dto.SeatDTO;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
@@ -34,6 +35,7 @@ public class RestOfficeManager {
 		for(SeatDTO seat : seatsDTO){
 			institutesDTO.add(seat.institute);
 		}
+		Logger.info("Istituti da importare %s", institutesDTO);
 		
 		List<Office> areas = officeDao.getAreas();
 		Office mainArea;
@@ -54,15 +56,18 @@ public class RestOfficeManager {
 				Logger.info("Importato Istituto %s", institute.name);
 			}
 			else{
+				Optional<Office> existentOffice = officeDao.byCds(institute.cds);
+				if(existentOffice.isPresent()){
+					existentOffice.get().copy(institute);
+					officeManager.saveOffice(existentOffice.get());
+				}
 				Logger.warn("Trovato istituto duplicato durante l'import - %s", institute.name);
 			}
 		}
 		
 		for(SeatDTO seatDTO : seatsDTO){
 			Office seat = new Office();
-			seat.name = seatDTO.institute.code != null ? 
-					seatDTO.institute.code  +" - "+seatDTO.name
-					: seatDTO.name;
+			seat.name = seatDTO.name;
 			seat.codeId = seatDTO.codeId;
 			seat.code = seatDTO.code;
 			seat.office = officeDao.byCds(seatDTO.institute.cds).orNull();
@@ -70,6 +75,11 @@ public class RestOfficeManager {
 				Logger.info("Importata Sede %s", seat.name);
 			}
 			else{
+				Optional<Office> existentSeat = officeDao.byCodeId(seat.codeId);
+				if(existentSeat.isPresent()){
+					existentSeat.get().copy(seat);
+					officeManager.saveOffice(existentSeat.get());
+				}
 				Logger.warn("Trovata sede duplicata durante l'import - %s", seat.name);
 			}
 		}

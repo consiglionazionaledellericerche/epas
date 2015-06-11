@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
  
 @Entity
@@ -35,6 +36,7 @@ public class Office extends BaseModel{
 	@Column(name = "name")
     public String name;
     
+	@Unique
     @Column(name = "contraction")
     public String contraction;
     
@@ -112,6 +114,17 @@ public class Office extends BaseModel{
 				enabledWttList.add(wtt);
 		}
 		return enabledWttList;
+	}
+	
+	@Transient
+	public void copy(Office office){
+		name = Strings.isNullOrEmpty(office.name) ? name : office.name;
+		contraction = Strings.isNullOrEmpty(office.contraction) ? contraction : office.contraction;
+		address = Strings.isNullOrEmpty(office.address) ? address : office.address;
+		codeId = Strings.isNullOrEmpty(office.codeId) ? codeId : office.codeId;
+		joiningDate = office.joiningDate == null ? joiningDate : office.joiningDate;
+		cds = Strings.isNullOrEmpty(office.cds) ? cds : office.cds;
+		code = Strings.isNullOrEmpty(office.code) ? code : office.code;
 	}
 	
 }

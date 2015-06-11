@@ -64,7 +64,7 @@ public class Offices extends Controller {
 		render("@editInstitute",area);
 	}
 
-	public static void saveInstitute(Office area,@Valid Office institute,@Required String contraction) {
+	public static void saveInstitute(Office area,@Valid Office institute) {
 
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente i campi, operazione annullata.");
@@ -78,7 +78,6 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 
-		institute.contraction = contraction;
 		institute.office = area;
 
 		if(!officeManager.saveOffice(institute)){
