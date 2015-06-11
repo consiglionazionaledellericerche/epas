@@ -48,7 +48,7 @@ public class Import extends Controller{
 	
 	public static void importOffices(final List<Integer> offices){
 		
-		if(offices == null | offices.isEmpty()){
+		if(offices == null ){
 			flash.error("Selezionare almeno una Sede da importare");
 			officeList();
 		}

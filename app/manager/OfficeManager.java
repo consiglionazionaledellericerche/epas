@@ -69,7 +69,6 @@ public class OfficeManager {
 
 		setUro(admin, office, roleAdmin);
 		setUro(developer, office, roleDeveloper);
-
 	}
 
 	/**

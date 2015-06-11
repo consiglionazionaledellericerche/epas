@@ -200,11 +200,15 @@ public class OfficeDao extends DaoBase {
 		if(o.contraction!=null){
 			condition.or(office.contraction.equalsIgnoreCase(o.contraction));
 		}
-
 		if(o.codeId!=null){
 			condition.or(office.codeId.eq(o.codeId));
 		}
-
+		if(o.code!=null){
+			condition.or(office.code.eq(o.code));
+		}
+		if(o.cds!=null){
+			condition.or(office.code.eq(o.cds));
+		}
 		if(o.id!=null){
 			condition.and(office.id.ne(o.id));
 		}
@@ -254,6 +258,16 @@ public class OfficeDao extends DaoBase {
 		final QOffice office = QOffice.office1;
 		
 		final JPQLQuery query = getQueryFactory().from(office).where(office.codeId.eq(codeId));
+		
+		return Optional.fromNullable(query.singleResult(office));
+	}
+	
+	public Optional<Office> byContraction(String contraction){
+		Preconditions.checkState(!Strings.isNullOrEmpty(contraction));
+		
+		final QOffice office = QOffice.office1;
+		
+		final JPQLQuery query = getQueryFactory().from(office).where(office.contraction.eq(contraction));
 		
 		return Optional.fromNullable(query.singleResult(office));
 	}
