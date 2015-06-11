@@ -269,7 +269,7 @@ public class ConsistencyManager {
 			return;
 		}
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayToCheck);
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayToCheck);
 
 		if(pd.isPresent()){
 			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(pd.get())); 

@@ -172,7 +172,7 @@ public class Stampings extends Controller {
 			Stampings.personStamping(personId, year, month);
 		}
 
-		PersonDay personDay = 	personDayDao.getSinglePersonDay(person, date).orNull();
+		PersonDay personDay = 	personDayDao.getPersonDay(person, date).orNull();
 
 		if(personDay == null){
 			personDay = new PersonDay(person, date);
