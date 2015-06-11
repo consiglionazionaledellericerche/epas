@@ -116,7 +116,7 @@ public class PersonStampingRecap {
 
 		//Lista person day contente tutti i giorni fisici del mese
 		List<PersonDay> totalPersonDays = personDayManager
-				.getTotalPersonDayInMonth(person, year, month);
+				.getTotalPersonDayInMonth(personDays, person, year, month);
 
 		LocalDate today = LocalDate.now();
 		//calcolo del valore valid per le stamping del mese (persistere??)
@@ -159,7 +159,8 @@ public class PersonStampingRecap {
 
 				if(stamp.markedByAdmin){
 
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+					StampModificationType smt = stampingDayRecapFactory
+							.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
 					stampModificationTypeSet.add(smt);
 				}
 
@@ -179,9 +180,9 @@ public class PersonStampingRecap {
 		}
 
 		this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
-		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
-		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
-		this.basedWorkingDays = personManager.basedWorkingDays(person, begin, end);
+		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
+		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
+		this.basedWorkingDays = personManager.basedWorkingDays(personDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		

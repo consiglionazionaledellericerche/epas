@@ -101,36 +101,49 @@ public class PersonDayDao extends DaoBase {
 	
 	/**
 	 * Supporto alla ricerca dei personday.
-	 * TODO: da documentare ordinamento e meccanismo di fetch.
+	 * Default: fetch delle timbrature e ordinamento crescente per data
 	 *  
 	 * @param person
 	 * @param begin
 	 * @param end
-	 * @param fetchAbsences
-	 * @param orderedDesc
-	 * @param isTicketAvailable
+	 * @param fetchAbsences true se fetch di absences anzichè stampings
+	 * @param orderedDesc true se si vuole ordinamento decrescente
+	 * @param onlyIsTicketAvailable
 	 * @return
 	 */
 	private List<PersonDay> getPersonDaysFetched(Person person, 
 			LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences, 
-			boolean orderedDesc, boolean isTicketAvailable) {
+			boolean orderedDesc, boolean onlyIsTicketAvailable) {
 		
 		final QPersonDay personDay = QPersonDay.personDay;
 		final QStamping stamping = QStamping.stamping;
 		final QAbsence absence = QAbsence.absence;
 		
+		build(person, begin, end, fetchAbsences, 
+				orderedDesc, onlyIsTicketAvailable)
+		.leftJoin(personDay.stampings, stamping).fetch()
+		.list(personDay);
+		
+		return build(person, begin, end, fetchAbsences, 
+				orderedDesc, onlyIsTicketAvailable)
+				.leftJoin(personDay.absences, absence).fetch()
+				.list(personDay);
+		
+	}
+	
+	private JPQLQuery build(Person person, 
+			LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences, 
+			boolean orderedDesc, boolean onlyIsTicketAvailable) {
+
+		final QPersonDay personDay = QPersonDay.personDay;
+		
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = getQueryFactory().from(personDay);
 
-		if (fetchAbsences) {
-			query.leftJoin(personDay.absences, absence).fetch();
-		} else {
-			query.leftJoin(personDay.stampings, stamping).fetch();
-		}
-
+	
 		condition.and(personDay.date.between(begin, end.or(begin)));
 		condition.and(personDay.person.eq(person));
-		if (isTicketAvailable) {
+		if (onlyIsTicketAvailable) {
 			condition.and(personDay.isTicketAvailable.eq(true));
 		}
 		query.where(condition);
@@ -142,8 +155,9 @@ public class PersonDayDao extends DaoBase {
 		}
 		
 		query.distinct();
+
+		return query;
 		
-		return query.list(personDay);
 	}
 
 
@@ -176,35 +190,20 @@ public class PersonDayDao extends DaoBase {
 				false, true, false);
 	}
 	
-	/**
-	 * 
-	 * @param person
-	 * @param begin
-	 * @param end
-	 * @param ordered
-	 * @return
-	 */
-	public List<PersonDay> getPersonDayInPeriodForAbsences(Person person, LocalDate begin, 
-			Optional<LocalDate> end){
-		
-		return getPersonDaysFetched(person, begin, end, 
-				true, false, false);
-	}
-	
-	/**
-	 * 
-	 * @param person
-	 * @param begin
-	 * @param end
-	 * @param isAvailable
-	 * @return la lista dei giorni in cui la persona person può usare i ticket 
-	 */
-	public List<PersonDay> getPersonDayForTicket(Person person, 
-			LocalDate begin, LocalDate end, boolean isAvailable){
-		
-		return getPersonDaysFetched(person, begin, Optional.fromNullable(end), 
-				false, false, true);
-	}
+//	/**
+//	 * 
+//	 * @param person
+//	 * @param begin
+//	 * @param end
+//	 * @param ordered
+//	 * @return
+//	 */
+//	public List<PersonDay> getPersonDayInPeriodForAbsences(Person person, LocalDate begin, 
+//			Optional<LocalDate> end){
+//		
+//		return getPersonDaysFetched(person, begin, end, 
+//				true, false, false);
+//	}
 	
 	/**
 	 * La lista dei PersonDay appartenenti al mese anno. 
@@ -220,33 +219,9 @@ public class PersonDayDao extends DaoBase {
 		LocalDate end = begin.dayOfMonth().withMaximumValue();
 		
 		return getPersonDaysFetched(person, begin, Optional.fromNullable(end), 
-				true, false, false);
+				false, false, false);
 	}
 
-//	/**
-//	 * 
-//	 * @param person
-//	 * @param date
-//	 * @return il personDay relativo al giorno e alla persona passati come parametro. E' optional perchè potrebbe non esistere
-//	 */
-//	@Deprecated
-//	public Optional<PersonDay> getSinglePersonDayStatic(Person person, LocalDate date){
-//		final QPersonDay personDay = QPersonDay.personDay;
-//		final JPQLQuery query = getQueryFactory().from(personDay)
-//				.where(personDay.person.eq(person).and(personDay.date.eq(date)));
-//		return Optional.fromNullable(query.singleResult(personDay));
-//	}
-//	
-	
-
-	
-	
-	/**
-	 * 
-	 * @param person
-	 * @return
-	 */
-	
 	/**
 	 * I person day della persona festivi e con ore lavorate. Utilizzo:s
 	 * Nel mese year.present e month.present
