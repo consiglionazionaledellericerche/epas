@@ -105,7 +105,7 @@
 	            <td>
 	            
 	     	      #{if competenceCode.value.code.equals('S1')}
-	     	        (${person.getPositiveResidualInMonth(year,month) + person.competence(competenceCode.value,year,month).valueApproved})
+	     	        (${person.getPositiveResidualInMonth(year,month)})
 	              #{/if}
 	            
 	              <a 
