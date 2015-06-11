@@ -1282,24 +1282,21 @@ public class PersonDayManager {
 	 * @param month
 	 * @return
 	 */
-	public List<PersonDay> getTotalPersonDayInMonth(Person person, int year, int month) {
+	public List<PersonDay> getTotalPersonDayInMonth(List<PersonDay> personDays, 
+			Person person, int year, int month) {
 		
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
 		List<PersonDay> totalDays = new ArrayList<PersonDay>();
-		
-		// Ottimizzazione: injettare la lista
-		List<PersonDay> workingDays = personDayDao
-				.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth));
 
 		int currentWorkingDays = 0;
 		LocalDate currentDate = beginMonth;
 		while(!currentDate.isAfter(endMonth))
 		{
-			if(currentWorkingDays<workingDays.size() && workingDays.get(currentWorkingDays).date.isEqual(currentDate))
+			if(currentWorkingDays<personDays.size() && personDays.get(currentWorkingDays).date.isEqual(currentDate))
 			{
-				totalDays.add(workingDays.get(currentWorkingDays));
+				totalDays.add(personDays.get(currentWorkingDays));
 				currentWorkingDays++;
 			}
 			else
@@ -1327,51 +1324,43 @@ public class PersonDayManager {
 	}
 
 	/**
-	 * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
+	 * Il numero di buoni pasto usabili all'interno della lista di 
+	 * person day passata come parametro
+	 * @param personDays
 	 * @return
 	 */
-	public int numberOfMealTicketToUse(Person person, int year, int month){
-
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
-		List<PersonDay> workingDays = personDayDao.getPersonDayForTicket(person, beginMonth, endMonth, true);
-
-		int number = 0;
-		for(PersonDay pd : workingDays)
-		{
-			if(!pd.isHoliday )
+	public int numberOfMealTicketToUse(List<PersonDay> personDays){
+		int number = 0;	
+		for(PersonDay pd : personDays) {
+			if(pd.isTicketAvailable && !pd.isHoliday ) {
 				number++;
+			}
 		}
 		return number;
 	}
 
 
-
 	/**
-	 * Il numero di buoni pasto da restituire all'interno della lista di person day passata come parametro
+	 * Il numero di buoni pasto da restituire all'interno della lista di 
+	 * person day passata come parametro 
+	 * @param personDays
 	 * @return
 	 */
-	public int numberOfMealTicketToRender(Person person, int year, int month){
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
-		List<PersonDay> pdListNoTicket = personDayDao.getPersonDayForTicket(person, beginMonth, endMonth, false);
-
-		int ticketTorender = pdListNoTicket.size();
-
-		for(PersonDay pd : pdListNoTicket) {
-
-			//tolgo da ticket da restituire i giorni festivi e oggi e i giorni futuri
-			if(pd.isHoliday || pd.isToday() )
-			{
-				ticketTorender--;
-				continue;
+	public int numberOfMealTicketToRender(List<PersonDay> personDays){
+		int ticketTorender = 0;
+		for(PersonDay pd : personDays) {
+			
+			if(!pd.isTicketAvailable) {
+				//i giorni festivi e oggi
+				if(pd.isHoliday || pd.isToday() ) {
+					continue;
+				}
+				//i giorni futuri in cui non ho assenze
+				if(pd.date.isAfter(LocalDate.now()) && pd.absences.isEmpty()) {
+					continue;
+				}
+				ticketTorender++;
 			}
-
-			//tolgo da ticket da restituire i giorni futuri in cui non ho assenze
-			if(pd.date.isAfter(LocalDate.now()) && pd.absences.isEmpty())
-				ticketTorender--;
 		}
 
 		return ticketTorender;
