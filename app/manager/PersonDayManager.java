@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
@@ -26,7 +25,6 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +57,6 @@ public class PersonDayManager {
 		this.stampingDao = stampingDao;
 		this.contractDao = contractDao;
 		this.wrapperFactory = wrapperFactory;
-		this.absenceDao = absenceDao;
 		this.confGeneralManager = confGeneralManager;
 		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.confYearManager = confYearManager;
@@ -71,65 +68,57 @@ public class PersonDayManager {
 	private final StampingDao stampingDao;
 	private final ContractDao contractDao;
 	private final IWrapperFactory wrapperFactory;
-	private final AbsenceDao absenceDao;
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final ConfYearManager confYearManager;
 
 
 	/**
-	 *
-	 * @param abt
-	 * @return true se nella lista assenze esiste un'assenza  che appartenga
-	 *  a un gruppo il cui codice di rimpiazzamento non sia nullo
-	 */
-	private boolean checkHourlyAbsenceCodeSameGroup(AbsenceType abt, PersonDay pd) {
-
-		return absenceDao.getAbsenceWithReplacingAbsenceTypeNotNull(abt, pd);
-
-	}
-	
-	/**
-	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
+	 * Se il giorno è festivo per la persona
 	 * @param date
 	 * @return
 	 */
 	public boolean isHoliday(Person person, LocalDate date) {
 		
-		if(DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), date))
+		if(DateUtility.isGeneralHoliday(confGeneralManager
+				.officePatron(person.office), date)) {
 			return true;
+		}
 
-		//Contract contract = this.getContract(date);
 		Contract contract = contractDao.getContract(date, person);
-		if(contract == null)
-		{
+		if(contract == null) { 
 			//persona fuori contratto
 			return false;
 		}
 
-		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()-1).holiday;
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+			if(DateUtility.isDateIntoInterval(date, 
+					new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+			
+				return cwtt.workingTimeType.workingTimeTypeDays
+						.get(date.getDayOfWeek()-1).holiday;
 			}
 		}
 
-		return false;	//se il db è consistente non si verifica mai
+		throw new IllegalStateException();
+		//return false;	//se il db è consistente non si verifica mai
 
 	}
 
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
 	 */
-	public boolean isAllDayAbsences(PersonDay pd)
-	{
-		for(Absence ab : pd.absences)
-		{
-			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) &&
-					!checkHourlyAbsenceCodeSameGroup(ab.absenceType, pd))
-				return true;
+	public boolean isAllDayAbsences(PersonDay pd) {
+		
+		if(pd.absences.size() == 0) {
+			return false;
 		}
+		
+		if(pd.absences.size() == 1) {
+			return pd.absences.get(0).absenceType
+					.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay);
+		}
+		
 		return false;
 	}
 
@@ -197,25 +186,22 @@ public class PersonDayManager {
 		}
 
 		//assenze all day piu' altri casi di assenze
+		if (isAllDayAbsences(pd.getValue())) {
+			setIsTickeAvailable(pd, false);
+			return 0;
+		}
 		for(Absence abs : pd.getValue().absences) {
+			if( !abs.absenceType.code.equals("89") && 
+					abs.absenceType.justifiedTimeAtWork.minutesJustified != null) {
 
-			if((abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay
-					&& !checkHourlyAbsenceCodeSameGroup(abs.absenceType, pd.getValue() ))) {
-
-				setIsTickeAvailable(pd, false);
-				return 0;
-			}
-
-			if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null) {
-
-				//TODO CASO STRANO qua il buono mensa non si capisce se ci deve essere o no
-				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				// TODO: CASO STRANO qua il buono mensa non si capisce se ci deve essere o no
+				justifiedTimeAtWork += abs.absenceType
+						.justifiedTimeAtWork.minutesJustified;
 				continue;
 			}
-
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
 
-				justifiedTimeAtWork = justifiedTimeAtWork + pd.getWorkingTimeTypeDay().get().workingTime / 2;
+				justifiedTimeAtWork +=pd.getWorkingTimeTypeDay().get().workingTime / 2;
 				continue;
 			}
 		}
@@ -729,7 +715,7 @@ public class PersonDayManager {
 		// Questo è il caso in cui il job che chiude il giorno sia inattivo per più
 		// giorni. La procedura di fix risolve questo problema.
 		// In questo caso andrebbe fatto un controllo all'application Start??
-		
+
 		//Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
 		LocalDate currentMonthEnd = LocalDate.now().dayOfMonth().withMaximumValue();
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 

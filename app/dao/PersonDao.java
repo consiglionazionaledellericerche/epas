@@ -3,7 +3,6 @@ package dao;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 import java.util.Set;
@@ -16,8 +15,8 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.query.QCompetenceCode;
 import models.query.QContract;
+import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
@@ -25,13 +24,14 @@ import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
 import models.query.QUser;
+import models.query.QWorkingTimeType;
+import models.query.QWorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -50,6 +50,8 @@ public final class PersonDao extends DaoBase{
 
 	@Inject
 	public OfficeDao officeDao;
+	@Inject
+	public PersonDayDao personDayDao;
 	
 	@Inject
 	PersonDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -571,6 +573,64 @@ public final class PersonDao extends DaoBase{
 			final QPerson person = QPerson.person1;
 			condition.and(person.competenceCode.contains(compCode.get()));
 		}
+	}
+	
+	/**
+	 * Importa tutte le informazioni della persona necessarie alla business logic 
+	 * ottimizzando il numero di accessi al db.
+	 * 
+	 * @param id
+	 * @param begin
+	 * @param end
+	 */
+	public Person fetchPersonForComputation(Long id, Optional<LocalDate> begin, Optional<LocalDate> end) {
+		
+		QPerson person = QPerson.person1;
+		
+		// Fetch della persona e dei suoi contratti
+		JPQLQuery query = getQueryFactory().from(person)
+				.leftJoin(person.contracts).fetch()
+				.where(person.id.eq(id))
+				.distinct();
+		
+		Person p = query.singleResult(person);
+		
+		//Fetch dei contratti appartenenti all'intervallo
+		QContract contract = QContract.contract;
+		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+		QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
+
+		
+		JPQLQuery query2 = getQueryFactory().from(contract)
+				.leftJoin(contract.contractMonthRecaps).fetch()
+				.leftJoin(contract.contractStampProfile).fetch()
+				.leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
+				.leftJoin(contract.vacationPeriods).fetch()
+				.distinct();
+		final BooleanBuilder condition = new BooleanBuilder().and(contract.person.eq(p));
+		filterContract(condition, begin, end);
+		List<Contract> contracts = query2.where(condition).list(contract);
+		
+		//Fetch dei tipi orario associati ai contratti
+		JPQLQuery query3 = getQueryFactory().from(cwtt)
+				.leftJoin(cwtt.workingTimeType, wtt).fetch()
+				.leftJoin(wtt.workingTimeTypeDays, wttd).fetch()
+				.where(cwtt.contract.in(contracts))
+				.distinct();
+		
+		/*List<ContractWorkingTimeType> cwttList = */query3.list(cwtt);
+				
+		//Fetch dei buoni pasto (non necessaria, una query)
+		
+		//Fetch dei personday
+
+		List<PersonDay> personDays = personDayDao
+				.getPersonDayInPeriod(p, begin.get(), end);
+		
+		
+		return p;
+		
 	}
 	
 	/**

@@ -4,12 +4,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Optional;
-
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import models.Contract;
 import models.PersonDay;
+
+import com.google.common.base.Optional;
+
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;

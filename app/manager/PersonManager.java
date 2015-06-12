@@ -14,7 +14,6 @@ import javax.persistence.Query;
 
 import models.AbsenceType;
 import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
@@ -27,18 +26,10 @@ import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cnr.sync.dto.DepartmentDTO;
-import cnr.sync.dto.PersonRest;
+import play.db.jpa.JPA;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 
-import play.Play;
-import play.db.jpa.JPA;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;

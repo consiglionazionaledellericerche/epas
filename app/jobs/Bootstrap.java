@@ -1,12 +1,9 @@
 package jobs;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 import models.CompetenceCode;
 import models.Qualification;
@@ -24,19 +21,14 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.yaml.snakeyaml.Yaml;
 
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-import play.libs.Codec;
 import play.test.Fixtures;
-import play.vfs.VirtualFile;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
 /**

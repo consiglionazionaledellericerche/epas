@@ -6,8 +6,9 @@ import javax.persistence.EntityManager;
 
 import models.Person;
 import models.PersonDay;
-import models.Stamping;
 import models.query.QAbsence;
+import models.query.QAbsenceType;
+import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
 import models.query.QStamping;
 
@@ -117,16 +118,21 @@ public class PersonDayDao extends DaoBase {
 		
 		final QPersonDay personDay = QPersonDay.personDay;
 		final QStamping stamping = QStamping.stamping;
-		final QAbsence absence = QAbsence.absence;
 		
 		build(person, begin, end, fetchAbsences, 
 				orderedDesc, onlyIsTicketAvailable)
 		.leftJoin(personDay.stampings, stamping).fetch()
 		.list(personDay);
 		
+		final QAbsence absence = QAbsence.absence;
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+		final QAbsenceTypeGroup absenceTypeGroup = QAbsenceTypeGroup.absenceTypeGroup;
+		
 		return build(person, begin, end, fetchAbsences, 
 				orderedDesc, onlyIsTicketAvailable)
 				.leftJoin(personDay.absences, absence).fetch()
+				.leftJoin(absence.absenceType, absenceType).fetch()
+				.leftJoin(absenceType.absenceTypeGroup, absenceTypeGroup).fetch()
 				.list(personDay);
 		
 	}

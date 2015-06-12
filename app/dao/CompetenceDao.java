@@ -30,7 +30,6 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.types.path.ListPath;
 
 import dao.wrapper.IWrapperFactory;
 

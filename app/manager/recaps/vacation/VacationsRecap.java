@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ConfYearManager;
-import manager.ContractManager;
-import manager.ContractMonthRecapManager;
 import manager.VacationManager;
 import models.Absence;
 import models.AbsenceType;
@@ -20,8 +18,6 @@ import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;

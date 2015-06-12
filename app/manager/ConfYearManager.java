@@ -20,9 +20,6 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
-import dao.ConfYearDao;
-import dao.DaoBase;
-
 public class ConfYearManager {
 
 	/**

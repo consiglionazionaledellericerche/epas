@@ -78,14 +78,14 @@ public class PersonDay extends BaseModel {
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
 
-	@ManyToOne
-	@JoinColumn(name = "stamp_modification_type_id")
-	public StampModificationType stampModificationType;
-
 	@NotAudited
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "stamp_modification_type_id")
+	public StampModificationType stampModificationType;
+	
 	@Transient
 	public PersonDay previousPersonDayInMonth = null;
 

@@ -7,30 +7,18 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import models.Competence;
-import models.CompetenceCode;
 import models.Person;
-import models.PersonReperibility;
-import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
-import models.query.QCompetence;
-import models.query.QPerson;
-import models.query.QPersonReperibilityDay;
-import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
-import models.query.QShiftCategories;
 import models.query.QShiftType;
 
 import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.db.jpa.JPA;
 
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;

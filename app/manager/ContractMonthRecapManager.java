@@ -13,7 +13,6 @@ import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
-import models.ConfYear;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -33,10 +32,8 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
-import dao.ConfYearDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
-import dao.WorkingTimeTypeDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
