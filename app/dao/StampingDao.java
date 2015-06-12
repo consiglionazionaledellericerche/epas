@@ -66,10 +66,12 @@ public class StampingDao extends DaoBase {
 	}
 		
 	/**
-	 * 
+	 * TODO: inserire un manager come per la configurazione che gestisca la cache
+	 * di queste entity.
 	 * @param code
 	 * @return lo stampModificationType relativo al codice code passato come parametro
 	 */
+	@Deprecated
 	public StampModificationType getStampModificationTypeByCode(StampModificationTypeCode smtCode){
 		
 		Preconditions.checkNotNull(smtCode);
