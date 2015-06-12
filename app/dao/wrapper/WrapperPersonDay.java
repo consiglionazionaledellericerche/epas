@@ -62,52 +62,15 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 	 */
 	public Optional<PersonDay> getPreviousForProgressive() {
 
-		if( ! getPersonDayContract().isPresent() ) {
-			this.previousForProgressive = Optional.absent();
+		if(this.previousForProgressive != null ) {
 			return this.previousForProgressive;
 		}
-
-		List<PersonDay> personDayInMonthAsc;
-
-		//Assegnare logicamente il previousForProgressive
-		if( this.value.date.getDayOfMonth() == 1) {
-			this.previousForProgressive = Optional.absent();
-			return this.previousForProgressive;
-		}
-
-		//if( ! optPersonDayInMonthAsc.isPresent() ) {
-
-		personDayInMonthAsc = personDayDao.getPersonDayInMonth(this.value.person, 
-				new YearMonth(this.value.date));
-		//}
-		//else {
-		//	personDayInMonthAsc = optPersonDayInMonthAsc.get();
-		//}
-
-		for(int i = 1; i < personDayInMonthAsc.size(); i++) {
-			PersonDay current = personDayInMonthAsc.get(i);
-			PersonDay previous = personDayInMonthAsc.get(i-1);
-			if(current.id.equals(this.value.id)) {
-				this.previousForProgressive = Optional.fromNullable(previous);
-			}
-		}
-		if(this.previousForProgressive == null) {
-			this.previousForProgressive = Optional.absent();
-		}
-
-		//Se il giorno precedente non appartiene allo stesso contratto non lo considero
-		//valido come progressivo e lo fisso come absent.
-		if( this.previousForProgressive.isPresent() ) {
-
-			if( !DateUtility.isDateIntoInterval(this.previousForProgressive.get().date,
-					factory.create(this.getPersonDayContract().get()).getContractDateInterval() )) {
-				this.previousForProgressive = Optional.absent();
-			}
-		}
-
+		
+		setPreviousForProgressive(Optional.<PersonDay>absent());
 		return this.previousForProgressive;
 	}
-
+	
+	
 	/**
 	 * Il personDay precedente solo se immediatamente consecutivo. Altrimenti
 	 * absent().
@@ -115,39 +78,93 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 	 * @return
 	 */
 	public Optional<PersonDay> getPreviousForNightStamp() {
-
-		if( this.previousForNightStamp != null ) {
+	
+		
+		if(this.previousForNightStamp != null ) {
 			return this.previousForNightStamp;
 		}
+		
+		setPreviousForNightStamp(Optional.<PersonDay>absent());
+		return this.previousForNightStamp;
 
-		LocalDate realPreviousDate = this.value.date.minusDays(1);
+	}
 
-		//caso semplice da previousForProgressive
-		if(this.getPreviousForProgressive().isPresent() ) {
-
-			if(this.previousForProgressive.get().date.isEqual(realPreviousDate)) {			
-				this.previousForNightStamp = this.previousForProgressive;
-				return this.previousForProgressive;
+	public void setPreviousForProgressive(Optional<PersonDay> potentialOnlyPrevious) {
+		
+		this.previousForProgressive = Optional.<PersonDay>absent();
+		
+		if( ! getPersonDayContract().isPresent() ) {
+			return;
+		}
+		
+		//Assegnare logicamente il previousForProgressive
+		if( this.value.date.getDayOfMonth() == 1) {
+			return;
+		}
+		
+		PersonDay candidate = null;
+		
+		if( potentialOnlyPrevious.isPresent() ) {
+			candidate = potentialOnlyPrevious.get();
+			
+		} else {
+			
+			List<PersonDay> personDayInMonthAsc = personDayDao
+					.getPersonDayInMonth(this.value.person, 
+					new YearMonth(this.value.date));
+			for(int i = 1; i < personDayInMonthAsc.size(); i++) {
+				PersonDay current = personDayInMonthAsc.get(i);
+				PersonDay previous = personDayInMonthAsc.get(i-1);
+				if(current.id.equals(this.value.id)) {
+					candidate = previous;
+				}
 			}
 		}
+		if( candidate == null ) {
+			return;
+		}
+		
+		//Non stesso contratto 
+		// TODO: (equivalente a caso this.value.equals(begincontract)
+		if( !DateUtility.isDateIntoInterval(candidate.date,
+				factory.create(this.getPersonDayContract().get()).getContractDateInterval() )) {
+			return;
+		}
+		this.previousForProgressive = Optional.fromNullable(candidate);
 
-		PersonDay firstPrevious = personDayDao
-				.getPreviousPersonDay(this.value.person, this.value.date);
-
+	}
+	
+	public void setPreviousForNightStamp(Optional<PersonDay> potentialOnlyPrevious) {
+		
+		this.previousForNightStamp = Optional.absent();
+		
+		if( ! getPersonDayContract().isPresent() ) {
+			return;
+		}
+		
+		LocalDate realPreviousDate = this.value.date.minusDays(1);
+		
+		PersonDay candidate = null;
+		
+		if(potentialOnlyPrevious.isPresent()) {
+			candidate = potentialOnlyPrevious.get();
+		} else {
+			
+			candidate = personDayDao
+					.getPreviousPersonDay(this.value.person, this.value.date);
+		}
+		
 		//primo giorno del contratto
-		if( firstPrevious == null ) { 
-			this.previousForNightStamp = Optional.absent();
-			return this.previousForNightStamp;
+		if( candidate == null ) { 
+			return;
 		}
-
+	
 		//giorni non consecutivi
-		if( ! firstPrevious.date.isEqual(realPreviousDate) ) {
-			this.previousForNightStamp = Optional.absent();
-			return this.previousForNightStamp;
+		if( ! candidate.date.isEqual(realPreviousDate) ) {
+			return;
 		}
-
-		this.previousForNightStamp = Optional.fromNullable(firstPrevious);
-		return this.previousForNightStamp;
+	
+		this.previousForNightStamp = Optional.fromNullable(candidate);
 	}
 
 	/**

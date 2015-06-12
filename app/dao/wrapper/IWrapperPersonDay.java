@@ -49,4 +49,7 @@ public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
 	 */
 	Optional<PersonDay> getPreviousForProgressive();
 
+	void setPreviousForProgressive(Optional<PersonDay> potentialOnlyPrevious);
+	void setPreviousForNightStamp(Optional<PersonDay> potentialOnlyPrevious);
+
 }

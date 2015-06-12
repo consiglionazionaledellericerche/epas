@@ -28,6 +28,8 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.cache.Cache;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -215,12 +217,12 @@ public class PersonDayManager {
 		}
 
 		Collections.sort(pd.getValue().stampings);
-		//TODO se è festa si dovrà capire se il tempo di lavoro deve essere assegnato oppure no
+
 		if(pd.getValue().isHoliday){
 
 			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
 
-			int holidayWorkTime=0;
+			int holidayWorkTime = 0;
 			for(PairStamping validPair : validPairs) {
 
 				holidayWorkTime = holidayWorkTime - DateUtility.toMinute(validPair.in.date);
@@ -273,16 +275,20 @@ public class PersonDayManager {
 
 			// caso in cui non sia stata effettuata una pausa pranzo
 			if(breakTimeDiff == breakTicketTime) {
-
-				pd.getValue().stampModificationType = stampingDao
-						.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+				StampModificationType smt = (StampModificationType)Cache.get("dailyLunch");
+				smt.merge();
+				pd.getValue().stampModificationType = smt;
+						//stampingDao.getStampModificationTypeByCode(
+						//		StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
 			}
 
 			// Caso in cui la pausa pranzo fatta è inferiore a quella minima
 			else if(breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
-
-				pd.getValue().stampModificationType = stampingDao
-						.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+				StampModificationType smt = (StampModificationType)Cache.get("dailyLunch");
+				smt.merge();
+				pd.getValue().stampModificationType = smt;
+						//stampingDao.getStampModificationTypeByCode(
+						//		StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
 			}
 		}
 
@@ -296,11 +302,16 @@ public class PersonDayManager {
 
 
 	/**
+	 * 
+	 * FIXME: metodo usato in days per protime. Rimuoverlo e trovare una 
+	 * soluzione furba perchè non è più mantenuto. 
+	 * 
 	 * Calcola i minuti lavorati nel person day. Assegna il campo
 	 * isTicketAvailable.
 	 *
 	 * @return il numero di minuti trascorsi a lavoro
 	 */
+	@Deprecated
 	public int workingMinutes(IWrapperPersonDay pd) {
 
 		Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
@@ -720,9 +731,33 @@ public class PersonDayManager {
 		LocalDate currentMonthEnd = LocalDate.now().dayOfMonth().withMaximumValue();
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
 				Optional.of(currentMonthEnd));
+		
+		//FIXME: popola la cache implemantare il manager con i getter
+		StampModificationType dailyLunch = 
+				stampingDao.getStampModificationTypeByCode(
+						StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+		StampModificationType minLunch = 
+				stampingDao.getStampModificationTypeByCode(
+						StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+		Cache.set("dailyLunch", dailyLunch);
+		Cache.set("minLunch", minLunch);
 
+		PersonDay previous = null;
 		for(PersonDay pd : personDays){
-			populatePersonDay(wrapperFactory.create(pd));
+			
+			IWrapperPersonDay wPersonDay = wrapperFactory.create(pd);
+			
+			//set previous for progressive
+			if(previous != null) {
+				wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
+			}
+			//set previous for night stamp
+			if(previous != null) {
+				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
+			}
+			
+			populatePersonDay(wPersonDay);
+			previous = pd;
 		}
 	}
 	
@@ -849,9 +884,11 @@ public class PersonDayManager {
 
 			//per adesso no storia, unico record
 			PersonDayInTrouble pdt = pd.getValue().troubles.get(0);
-			pdt.fixed = true;
-			pdt.save();
-			pd.getValue().save();
+			if (!pdt.fixed) {
+				pdt.fixed = true;
+				pdt.save();
+				//pd.getValue().save();
+			}
 		}
 
 	}

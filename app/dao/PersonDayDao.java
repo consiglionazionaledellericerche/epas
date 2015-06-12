@@ -10,6 +10,7 @@ import models.query.QAbsence;
 import models.query.QAbsenceType;
 import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
+import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
 
 import org.joda.time.LocalDate;
@@ -119,17 +120,23 @@ public class PersonDayDao extends DaoBase {
 		final QPersonDay personDay = QPersonDay.personDay;
 		final QStamping stamping = QStamping.stamping;
 		
-		build(person, begin, end, fetchAbsences, 
-				orderedDesc, onlyIsTicketAvailable)
+		
+		build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
 		.leftJoin(personDay.stampings, stamping).fetch()
+		.list(personDay);
+		
+		final QPersonDayInTrouble troubles = QPersonDayInTrouble.personDayInTrouble;
+		
+		build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
+		.leftJoin(personDay.troubles, troubles).fetch()
 		.list(personDay);
 		
 		final QAbsence absence = QAbsence.absence;
 		final QAbsenceType absenceType = QAbsenceType.absenceType;
 		final QAbsenceTypeGroup absenceTypeGroup = QAbsenceTypeGroup.absenceTypeGroup;
 		
-		return build(person, begin, end, fetchAbsences, 
-				orderedDesc, onlyIsTicketAvailable)
+		
+		return build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
 				.leftJoin(personDay.absences, absence).fetch()
 				.leftJoin(absence.absenceType, absenceType).fetch()
 				.leftJoin(absenceType.absenceTypeGroup, absenceTypeGroup).fetch()
@@ -138,7 +145,7 @@ public class PersonDayDao extends DaoBase {
 	}
 	
 	private JPQLQuery build(Person person, 
-			LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences, 
+			LocalDate begin, Optional<LocalDate> end, 
 			boolean orderedDesc, boolean onlyIsTicketAvailable) {
 
 		final QPersonDay personDay = QPersonDay.personDay;

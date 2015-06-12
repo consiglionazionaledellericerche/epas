@@ -169,7 +169,7 @@ public class Administration extends Controller {
 	@NoCheck
 	public static void experiments(Long id) {
 		
-		LocalDate begin = new LocalDate(2014,3,3);
+		LocalDate begin = new LocalDate(2014,5,3);
 		LocalDate end = LocalDate.now();
 		
 		Person person = personDao.fetchPersonForComputation(id, 
@@ -177,7 +177,7 @@ public class Administration extends Controller {
 				Optional.fromNullable(begin));
 		
 		personDayManager.updatePersonDaysFromDate(person, begin);
-		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(begin));
+		//contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(begin));
 
 		
 		renderText("OK");
