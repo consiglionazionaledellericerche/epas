@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
+import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import models.Contract;
 import models.Person;
@@ -17,8 +18,7 @@ import models.PersonDayInTrouble;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
 import play.mvc.Controller;
@@ -27,6 +27,7 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 
@@ -43,6 +44,12 @@ public class Administration extends Controller {
 	private static ExportToYaml exportToYaml;
 	@Inject
 	private static CompetenceUtility competenceUtility;
+	
+	@Inject
+	private static PersonDayManager personDayManager;
+	@Inject
+	private static ContractMonthRecapManager contractMonthRecapManager;
+	
 	
 	//private final static Logger log = LoggerFactory.getLogger(Administration.class);
 
@@ -157,5 +164,23 @@ public class Administration extends Controller {
 	
 		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
+	}
+	
+	@NoCheck
+	public static void experiments(Long id) {
+		
+		LocalDate begin = new LocalDate(2014,3,3);
+		LocalDate end = LocalDate.now();
+		
+		Person person = personDao.fetchPersonForComputation(id, 
+				Optional.fromNullable(begin), 
+				Optional.fromNullable(begin));
+		
+		personDayManager.updatePersonDaysFromDate(person, begin);
+		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(begin));
+
+		
+		renderText("OK");
+		
 	}
 }

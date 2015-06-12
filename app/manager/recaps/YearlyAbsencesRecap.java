@@ -6,20 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.enumerate.JustifiedTimeAtWork;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
-import dao.AbsenceDao;
 
 /**
  * 

@@ -7,9 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.CompetenceManager;
 import manager.PersonDayManager;
-import manager.PersonManager;
 import models.Absence;
 import models.Competence;
 import models.Person;
@@ -17,12 +15,10 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import cnr.sync.dto.CompetenceDTO;
 import cnr.sync.dto.DayRecap;
-import cnr.sync.jobs.CheckCnrEmailJob;
 import cnr.sync.manager.SyncManager;
 
 import com.google.common.base.Function;

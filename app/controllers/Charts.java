@@ -29,7 +29,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;

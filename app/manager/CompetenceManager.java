@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;

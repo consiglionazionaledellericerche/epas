@@ -4,14 +4,12 @@ import it.cnr.iit.epas.DateUtility;
 
 import javax.inject.Inject;
 
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
-import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.ContractMonthRecap;
 import models.Person;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonStampingRecapFactory {
 

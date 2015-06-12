@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import manager.PairStamping;
 import manager.PersonDayManager;
-import manager.PersonManager;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;

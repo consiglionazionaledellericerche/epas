@@ -14,12 +14,9 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
-import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.FrequentAbsenceCode;
 import models.query.QAbsence;
-import models.query.QAbsenceType;
-import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
@@ -317,33 +314,7 @@ public class AbsenceDao extends DaoBase {
 
 		return getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 	}
-
-	/**
-	 *
-	 * @param abt
-	 * @param pd
-	 * @return
-	 */
-	public boolean getAbsenceWithReplacingAbsenceTypeNotNull(AbsenceType abt, PersonDay pd){
-		final QAbsence qabs = QAbsence.absence;
-		final QAbsenceType qabt = QAbsenceType.absenceType;
-		final QAbsenceTypeGroup qabtg = QAbsenceTypeGroup.absenceTypeGroup;
-
-		final JPQLQuery query2 = getQueryFactory().from(qabs)
-				.leftJoin(qabs.absenceType, qabt).fetch()
-				.leftJoin(qabt.absenceTypeGroup, qabtg).fetch();
-
-
-		final BooleanBuilder condition = new BooleanBuilder();
-		condition.and(qabs.absenceType.eq(qabt));
-		condition.and(qabt.absenceTypeGroup.eq(qabtg));
-		condition.and(qabtg.replacingAbsenceType.eq(abt));
-		condition.and(qabs.personDay.eq(pd));
-		query2.where(condition);
-
-		return query2.count() > 0;
-	}
-
+	
 	/**
 	 * 
 	 * @param personList

@@ -7,9 +7,7 @@ import models.Person;
 
 import org.joda.time.LocalDate;
 
-import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
-import dao.wrapper.IWrapperFactory;
 
 public class PersonTroublesInMonthRecapFactory {
 

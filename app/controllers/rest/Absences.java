@@ -1,12 +1,24 @@
 package controllers.rest;
 
-import java.util.List;
-
 import helpers.JsonResponse;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.AbsenceManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
+import models.Absence;
+import models.Person;
+
 import org.joda.time.LocalDate;
+
+import play.db.jpa.Blob;
+import play.mvc.Controller;
+import play.mvc.With;
+import cnr.sync.dto.AbsenceAddedRest;
+import cnr.sync.dto.AbsenceRest;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -15,19 +27,9 @@ import com.google.common.collect.Lists;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import cnr.sync.dto.AbsenceAddedRest;
-import cnr.sync.dto.AbsenceRest;
-import manager.AbsenceManager;
-import manager.response.AbsenceInsertReport;
-import manager.response.AbsencesResponse;
-import models.Absence;
-import models.Person;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
-import play.db.jpa.Blob;
-import play.mvc.Controller;
-import play.mvc.With;
 
 @With(Resecure.class)
 public class Absences extends Controller{

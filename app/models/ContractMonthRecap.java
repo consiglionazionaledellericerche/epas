@@ -3,28 +3,23 @@ package models;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
-import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 import com.google.common.base.Optional;
 
 import dao.wrapper.IWrapperContract;
-import play.data.validation.Required;
 
 @Entity
 @Table(name="contract_month_recap")
