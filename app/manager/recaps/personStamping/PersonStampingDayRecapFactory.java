@@ -6,12 +6,12 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.StampTypeManager;
 import models.Contract;
 import models.PersonDay;
 
 import com.google.common.base.Optional;
 
-import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -22,18 +22,18 @@ public class PersonStampingDayRecapFactory {
 	public final IWrapperFactory wrapperFactory;
 	private final PersonDayManager personDayManager;
 	private final StampingTemplateFactory stampingTemplateFactory;
-	public final StampingDao stampingDao;
+	public final StampTypeManager stampTypeManager;
 	private final ConfGeneralManager confGeneralManager;
 
 	@Inject
 	PersonStampingDayRecapFactory(PersonDayManager personDayManager,
 			StampingTemplateFactory stampingTemplateFactory,
-			StampingDao stampingDao, IWrapperFactory wrapperFactory,
+			StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
 			WorkingTimeTypeDao workingTimeTypeDao,
 			ConfGeneralManager confGeneralManager) {
 		this.personDayManager = personDayManager;
 		this.stampingTemplateFactory = stampingTemplateFactory;
-		this.stampingDao = stampingDao;
+		this.stampTypeManager = stampTypeManager;
 		this.wrapperFactory = wrapperFactory;
 		this.workingTimeTypeDao = workingTimeTypeDao;
 		this.confGeneralManager = confGeneralManager;
@@ -50,7 +50,7 @@ public class PersonStampingDayRecapFactory {
 			Optional<List<Contract>> monthContracts) {
 
 		return new PersonStampingDayRecap(personDayManager, 
-				stampingTemplateFactory, stampingDao, wrapperFactory,
+				stampingTemplateFactory, stampTypeManager, wrapperFactory,
 				workingTimeTypeDao, confGeneralManager, 
 				personDay, numberOfInOut, monthContracts);
 	}

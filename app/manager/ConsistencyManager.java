@@ -352,7 +352,7 @@ public class ConsistencyManager {
 				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
 			}
 			
-			personDayManager.populatePersonDay(wrapperFactory.create(personDay));
+			personDayManager.populatePersonDay(wPersonDay);
 
 			previous = personDay;
 			date = date.plusDays(1);

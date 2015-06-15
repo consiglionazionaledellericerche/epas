@@ -1,17 +1,14 @@
 package manager.recaps.personStamping;
 
 import manager.PersonDayManager;
+import manager.StampTypeManager;
 import models.PersonDay;
 import models.StampModificationType;
-import models.StampModificationTypeValue;
+import models.StampModificationTypeCode;
 import models.Stamping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
-import com.google.common.base.Optional;
-
-import dao.StampingDao;
 
 /**
  * Oggetto che modella la singola timbratura nelle viste personStamping e stampings.
@@ -34,7 +31,7 @@ public class StampingTemplate {
 	public boolean valid;
 
 	public StampingTemplate(PersonDayManager personDayManager,
-			StampingDao stampingDao, Stamping stamping,
+			StampTypeManager stampTypeManager, Stamping stamping,
 			int index, PersonDay pd, int pairId, String pairPosition){
 
 		this.stampingId = stamping.id;
@@ -42,8 +39,7 @@ public class StampingTemplate {
 		this.pairPosition = pairPosition;
 
 		//stamping nulle o exiting now non sono visualizzate
-		if(stamping.date == null  || stamping.exitingNow)
-		{
+		if(stamping.date == null  || stamping.exitingNow) {
 			this.hour = ""; 
 			this.markedByAdminCode = "";
 			this.identifier = "";
@@ -60,65 +56,55 @@ public class StampingTemplate {
 
 		setHour(stamping.date);
 
-		this.insertStampingClass = "insertStamping" + stamping.date.getDayOfMonth() + "-" + index;
+		this.insertStampingClass = "insertStamping" + 
+				stamping.date.getDayOfMonth() + "-" + index;
 
-
-		//----------------------------------------- timbratura di servizio ---------------------------------------------------
-		if(stamping.stampType!=null && stamping.stampType.identifier!=null)
-		{
+		//timbratura di servizio
+		this.identifier = "";
+		if(stamping.stampType!=null && stamping.stampType.identifier!=null) {
 			this.identifier = stamping.stampType.identifier;
 		}
-		else
-			this.identifier = "";
 
-		//----------------------------------------- timbratura modificata dall'amministatore ---------------------------------
-		if(stamping.markedByAdmin) 
-		{
-			StampModificationType smt = stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+		//timbratura modificata dall'amministatore
+		this.markedByAdminCode = "";
+		if(stamping.markedByAdmin){
+			StampModificationType smt = stampTypeManager.getStampMofificationType(
+					StampModificationTypeCode.MARKED_BY_ADMIN);
 			this.markedByAdminCode = smt.code;
 		}
-		else
-		{
-			this.markedByAdminCode = "";
-		}
 
-		//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
-		Optional<StampModificationType> smtMidnight = 
-				personDayManager.checkMissingExitStampBeforeMidnight(stamping);
-
+		//timbratura di mezzanotte
 		this.missingExitStampBeforeMidnightCode = "";
-
-		if( smtMidnight.isPresent() ) {
-
-			this.missingExitStampBeforeMidnightCode = smtMidnight.get().code;
+		if(stamping.stampModificationType != null &&
+				stamping.stampModificationType.code.equals(
+						StampModificationTypeCode
+						.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode()) ) {
+			
+			this.missingExitStampBeforeMidnightCode = stamping
+					.stampModificationType.code;
 		}
-
-		//------------------------------------------- timbratura valida (colore cella) -----------------------------------------
+		
+		//timbratura valida (colore cella)
 		LocalDate today = new LocalDate();
-		LocalDate stampingDate = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth());
-		if(today.isEqual(stampingDate))
-		{
+		LocalDate stampingDate = new LocalDate(this.date.getYear(), 
+				this.date.getMonthOfYear(), this.date.getDayOfMonth());
+		if(today.isEqual(stampingDate)) {
 			this.valid = true;
-		}
-		else
-		{
+		} else {
 			this.valid = stamping.isValid();
 		}
+		
 		setColor(stamping);
-		//-----------------------------------------------------------------------------------------------------------------------
 	}
 
-	protected void setColor(Stamping stamping)
-	{
+	protected void setColor(Stamping stamping) {
 		this.colour = stamping.way.description;
-		if(this.valid==false)
-		{
+		if(this.valid == false) {
 			this.colour = "warn";
 		}
 	}
 
-	protected void setHour(LocalDateTime date)
-	{
+	protected void setHour(LocalDateTime date) {
 		String hour = date.getHourOfDay() + "";
 		if(hour.length() == 1)
 			hour="0"+hour;

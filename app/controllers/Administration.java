@@ -18,7 +18,6 @@ import models.PersonDayInTrouble;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
 import play.mvc.Controller;

@@ -24,6 +24,7 @@ import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
 import models.query.QUser;
+import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
 import models.query.QWorkingTimeTypeDay;
 
@@ -598,6 +599,7 @@ public final class PersonDao extends DaoBase{
 		//Fetch dei contratti appartenenti all'intervallo
 		QContract contract = QContract.contract;
 		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+		QVacationPeriod vp = QVacationPeriod.vacationPeriod;
 		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
 		QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
 
@@ -606,7 +608,9 @@ public final class PersonDao extends DaoBase{
 				.leftJoin(contract.contractMonthRecaps).fetch()
 				.leftJoin(contract.contractStampProfile).fetch()
 				.leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
-				.leftJoin(contract.vacationPeriods).fetch()
+				.leftJoin(contract.vacationPeriods, vp).fetch()
+				.orderBy(contract.beginContract.asc())
+				.orderBy(vp.beginFrom.asc())
 				.distinct();
 		final BooleanBuilder condition = new BooleanBuilder().and(contract.person.eq(p));
 		filterContract(condition, begin, end);

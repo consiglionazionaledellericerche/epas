@@ -3,20 +3,20 @@ package manager.recaps.personStamping;
 import javax.inject.Inject;
 
 import manager.PersonDayManager;
+import manager.StampTypeManager;
 import models.PersonDay;
 import models.Stamping;
-import dao.StampingDao;
 
 public class StampingTemplateFactory {
 
 	private final PersonDayManager personDayManager;
-	private final StampingDao stampingDao;
+	private final StampTypeManager stampTypeManager;
 
 	@Inject
 	StampingTemplateFactory(PersonDayManager personDayManager,
-			StampingDao stampingDao) {
+			StampTypeManager stampTypeManager) {
 		this.personDayManager = personDayManager;
-		this.stampingDao = stampingDao;
+		this.stampTypeManager = stampTypeManager;
 	}
 
 	/**
@@ -28,7 +28,7 @@ public class StampingTemplateFactory {
 	public StampingTemplate create(Stamping stamping, int index,
 			PersonDay pd, int pairId, String pairPosition) {
 
-		return new StampingTemplate(personDayManager, stampingDao,
+		return new StampingTemplate(personDayManager, stampTypeManager,
 				stamping, index, pd, pairId, pairPosition);
 	}
 
