@@ -184,4 +184,47 @@ public class ContractMonthRecap extends BaseModel {
 		return this.progressivoFinalePositivoMese;
 	}
 	
+	/**
+	 * Clean dell'oggetto persistito pre ricomputazione.
+	 */
+	public void clean() {
+
+		//MODULO RECAP ASSENZE
+		
+		this.vacationLastYearUsed = 0;
+		this.vacationCurrentYearUsed = 0;
+		this.permissionUsed = 0;
+		this.recoveryDayUsed = 0;		//numeroRiposiCompensativi
+		
+		//FONTI DELL'ALGORITMO RESIDUI
+
+		this.buoniPastoDalMesePrecedente = 0;
+		this.buoniPastoConsegnatiNelMese = 0;
+		this.buoniPastoUsatiNelMese = 0;
+		this.initResiduoAnnoCorrenteNelMese = 0;	
+		this.initMonteOreAnnoPassato = 0;		
+		this.initMonteOreAnnoCorrente = 0;	
+		this.progressivoFinaleMese = 0;		
+		this.progressivoFinalePositivoMese = 0;
+		this.possibileUtilizzareResiduoAnnoPrecedente = true;
+		this.straordinariMinutiS1Print	 = 0;	
+		this.straordinariMinutiS2Print	 = 0;	
+		this.straordinariMinutiS3Print	 = 0;	
+		this.riposiCompensativiMinutiPrint = 0;	
+		this.oreLavorate = 0;				
+		
+		//DECISIONI DELL'ALGORITMO
+
+		this.progressivoFinaleNegativoMeseImputatoAnnoPassato = 0;
+		this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = 0;
+		this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = 0;
+		this.riposiCompensativiMinutiImputatoAnnoPassato = 0;
+		this.riposiCompensativiMinutiImputatoAnnoCorrente = 0;
+		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = 0;
+		this.remainingMinutesLastYear = 0;
+		this.remainingMinutesCurrentYear = 0;
+		this.remainingMealTickets = 0; 
+	
+	}
+	
 }

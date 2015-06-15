@@ -9,7 +9,6 @@ import manager.PersonManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
-import models.VacationPeriod;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -20,8 +19,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import dao.VacationPeriodDao;
-
 /**
  * @author marco
  *
@@ -30,16 +27,13 @@ public class WrapperContract implements IWrapperContract {
 
 	private final PersonManager personManager;
 	private final Contract value;
-	private final VacationPeriodDao vacationPeriodDao;
 	private final ConfGeneralManager confGeneralManager;
 
 	@Inject
 	WrapperContract(@Assisted Contract contract, PersonManager personManager,
-			VacationPeriodDao vacationPeriodDao,
 			ConfGeneralManager confGeneralManager) {
 		value = contract;
 		this.personManager = personManager;
-		this.vacationPeriodDao = vacationPeriodDao;
 		this.confGeneralManager = confGeneralManager;
 	}
 
@@ -67,21 +61,6 @@ public class WrapperContract implements IWrapperContract {
 		} else {
 			return false;
 		}
-	}
-
-	/**
-	 * La lista dei VacationPeriod associati al contratto 
-	 * in ordine crescente per data di inizio periodo.
-	 * 
-	 * @param contract
-	 * @return
-	 */
-	@Override
-	public List<VacationPeriod> getContractVacationPeriods() {
-
-		List<VacationPeriod> vpList = vacationPeriodDao
-				.getVacationPeriodByContract(this.value);
-		return vpList;
 	}
 
 	/**

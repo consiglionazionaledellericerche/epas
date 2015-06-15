@@ -253,9 +253,8 @@ public class ContractMonthRecapManager {
 				getContractMonthRecap(contract, yearMonth, false);
 
 		if ( cmrOld.isPresent() ) {
-			cmrOld.get().delete();
-			contract.contractMonthRecaps.remove(cmrOld.get());
-			contract.save();
+			cmrOld.get().clean();
+			return cmrOld.get();
 		}
 		
 		ContractMonthRecap cmr = new ContractMonthRecap();
