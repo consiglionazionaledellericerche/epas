@@ -66,7 +66,7 @@ public class Contract extends BaseModel {
 
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@OrderBy("beginFrom")
-	public Set<VacationPeriod> vacationPeriods = Sets.newHashSet();
+	public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 	
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();

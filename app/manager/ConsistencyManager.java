@@ -134,10 +134,10 @@ public class ConsistencyManager {
 			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
 			//personDayManager.updatePersonDaysFromDate(p, fromDate);
 			
-			// (3) Ricalcolo dei residui per mese
-			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
-			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
-					new YearMonth(fromDate));
+//			// (3) Ricalcolo dei residui per mese
+//			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
+//			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
+//					new YearMonth(fromDate));
 
 		}
 		
@@ -358,6 +358,10 @@ public class ConsistencyManager {
 			date = date.plusDays(1);
 
 		}
+		
+		// (3) Ricalcolo dei residui per mese
+		contractMonthRecapManager.populateContractMonthRecapByPerson(person,
+							new YearMonth(from));
 	}
 
 	/**
