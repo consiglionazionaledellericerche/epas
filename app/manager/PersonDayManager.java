@@ -15,7 +15,6 @@ import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
-import models.StampModificationTypeValue;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
@@ -28,8 +27,6 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.cache.Cache;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -39,7 +36,6 @@ import com.google.inject.Inject;
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonDayDao;
-import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
@@ -47,7 +43,7 @@ public class PersonDayManager {
 
 	@Inject
 	public PersonDayManager(PersonDayDao personDayDao,
-			StampingDao stampingDao,
+			StampTypeManager stampTypeManager,
 			ContractDao contractDao,
 			IWrapperFactory wrapperFactory,
 			AbsenceDao absenceDao,
@@ -56,7 +52,7 @@ public class PersonDayManager {
 			ConfYearManager confYearManager) {
 
 		this.personDayDao = personDayDao;
-		this.stampingDao = stampingDao;
+		this.stampTypeManager = stampTypeManager;
 		this.contractDao = contractDao;
 		this.wrapperFactory = wrapperFactory;
 		this.confGeneralManager = confGeneralManager;
@@ -67,7 +63,7 @@ public class PersonDayManager {
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
 
 	private final PersonDayDao personDayDao;
-	private final StampingDao stampingDao;
+	private final StampTypeManager stampTypeManager;
 	private final ContractDao contractDao;
 	private final IWrapperFactory wrapperFactory;
 	private final ConfGeneralManager confGeneralManager;
@@ -275,20 +271,14 @@ public class PersonDayManager {
 
 			// caso in cui non sia stata effettuata una pausa pranzo
 			if(breakTimeDiff == breakTicketTime) {
-				StampModificationType smt = (StampModificationType)Cache.get("dailyLunch");
-				smt.merge();
-				pd.getValue().stampModificationType = smt;
-						//stampingDao.getStampModificationTypeByCode(
-						//		StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+				pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+						StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
 			}
 
 			// Caso in cui la pausa pranzo fatta è inferiore a quella minima
 			else if(breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
-				StampModificationType smt = (StampModificationType)Cache.get("dailyLunch");
-				smt.merge();
-				pd.getValue().stampModificationType = smt;
-						//stampingDao.getStampModificationTypeByCode(
-						//		StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+				pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+						StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
 			}
 		}
 
@@ -377,15 +367,17 @@ public class PersonDayManager {
 				// caso in cui non sia stata effettuata una pausa pranzo
 				if (breakTimeDiff == breakTicketTime) {
 
-					pd.getValue().stampModificationType = stampingDao
-							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+					pd.getValue().stampModificationType = 
+							stampTypeManager.getStampMofificationType(
+									StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
 				}
 
 				// Caso in cui la pausa pranzo fatta è inferiore a quella minima
 				else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
 
-					pd.getValue().stampModificationType = stampingDao
-							.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+					pd.getValue().stampModificationType =  
+							stampTypeManager.getStampMofificationType(
+									StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
 				}
 			}
 
@@ -731,16 +723,6 @@ public class PersonDayManager {
 		LocalDate currentMonthEnd = LocalDate.now().dayOfMonth().withMaximumValue();
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
 				Optional.of(currentMonthEnd));
-		
-		//FIXME: popola la cache implemantare il manager con i getter
-		StampModificationType dailyLunch = 
-				stampingDao.getStampModificationTypeByCode(
-						StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-		StampModificationType minLunch = 
-				stampingDao.getStampModificationTypeByCode(
-						StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-		Cache.set("dailyLunch", dailyLunch);
-		Cache.set("minLunch", minLunch);
 
 		PersonDay previous = null;
 		for(PersonDay pd : personDays){
@@ -1200,9 +1182,9 @@ public class PersonDayManager {
 					&& pd.getValue().stampings.get(0).way == WayType.out 
 					&& maxHour > pd.getValue().stampings.get(0).date.getHourOfDay()) {
 
-				StampModificationType smtMidnight = stampingDao
-						.getStampModificationTypeById(StampModificationTypeValue
-								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
+				StampModificationType smtMidnight = stampTypeManager
+						.getStampMofificationType(StampModificationTypeCode
+								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
 
 				//timbratura chiusura giorno precedente
 				Stamping correctStamp = new Stamping();
@@ -1243,28 +1225,6 @@ public class PersonDayManager {
 			}
 		}
 	}
-
-
-	/**
-	 * Lo stampModificationType relativo alla timbratura aggiunta dal
-	 * sistema nel caso di timbrature aggiunte automaticamente a cavallo della
-	 * mezzanotte.
-	 * 
-	 * @return 
-	 */
-	public Optional<StampModificationType> checkMissingExitStampBeforeMidnight(Stamping st) {
-
-		if(st.stampModificationType != null &&
-				st.stampModificationType.id
-				.equals(StampModificationTypeValue
-						.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId())) {
-
-			return Optional.fromNullable(st.stampModificationType);
-		}
-
-		return Optional.absent();
-	}
-
 
 	/**
 	 * Utilizzata nel metodo delete del controller Persons per cancellare tutti i personDays relativi alla persona person
