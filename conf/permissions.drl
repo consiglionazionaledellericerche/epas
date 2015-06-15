@@ -4,6 +4,7 @@ import security.PermissionCheck;
 import models.Office;
 import models.UsersRolesOffices;
 import models.Permission;
+import models.ShiftType;
 
 global models.User currentOperator;
 
@@ -869,7 +870,20 @@ end
 /*******************************************************************************
  * Azioni via REST e iCal per Turni e Reperibilità
  ******************************************************************************/
- 
+
+/**
+rule viewShiftICal
+when
+  $uro: UsersRolesOffices()
+  $st: ShiftType(shiftCategories.supervisor == $uro.user || )
+  $c: PermissionCheck(action in (
+        "Shift.iCal"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+*/
+
 rule manageShift
 when
  $uro: UsersRolesOffices()

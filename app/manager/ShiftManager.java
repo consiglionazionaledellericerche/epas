@@ -1243,7 +1243,7 @@ public class ShiftManager {
 
 		List<PersonShift> personsInTheCalList = new ArrayList<PersonShift>();
 
-		if (personId != 0) {
+		if (personId != null && personId.intValue() != 0) {
 			// read the shift person 
 			PersonShift personShift = shiftDao.getPersonShiftByPersonAndType(personId, type);
 			if (personShift == null) {
