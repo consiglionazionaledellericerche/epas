@@ -186,9 +186,9 @@ public class ContractMonthRecapManager {
 	public void populateContractMonthRecapByPerson( Person person, 
 			YearMonth yearMonthFrom) {
 
-		Person p = Person.findById(person.id);
+		//Person p = Person.findById(person.id);
 		
-		for( Contract contract : p.contracts ){
+		for( Contract contract : person.contracts ){
 			
 			DateInterval contractDateInterval = 
 					wrapperFactory.create(contract).getContractDateInterval();
@@ -197,7 +197,7 @@ public class ContractMonthRecapManager {
 			//Se yearMonthFrom non è successivo alla fine del contratto...
 			if ( !yearMonthFrom.isAfter(endContractYearMonth) ) {
 				
-				if( wrapperFactory.create(contract).getContractVacationPeriods().isEmpty()) {
+				if( contract.vacationPeriods.isEmpty() ) {
 					log.info("No vacation period {}", contract.toString());
 					continue;
 				}

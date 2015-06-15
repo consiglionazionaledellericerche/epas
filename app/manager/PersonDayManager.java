@@ -92,9 +92,13 @@ public class PersonDayManager {
 		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
 			if(DateUtility.isDateIntoInterval(date, 
 					new DateInterval(cwtt.beginDate, cwtt.endDate))) {
-			
-				return cwtt.workingTimeType.workingTimeTypeDays
-						.get(date.getDayOfWeek()-1).holiday;
+				
+				int dayOfWeekIndex = date.getDayOfWeek()-1;
+				WorkingTimeTypeDay wttd = cwtt.workingTimeType
+						.workingTimeTypeDays.get(dayOfWeekIndex);
+				Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+				return wttd.holiday;
+				
 			}
 		}
 
@@ -102,7 +106,7 @@ public class PersonDayManager {
 		//return false;	//se il db è consistente non si verifica mai
 
 	}
-
+	
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
 	 */
@@ -387,16 +391,6 @@ public class PersonDayManager {
 
 		return workTime;
 	}
-
-//	/**
-//	 *
-//	 * @return lo stamp modification type relativo al tempo di lavoro fisso
-//	 */
-//	public StampModificationType getFixedWorkingTime() {
-//
-//		//TODO usato solo in PersonStampingDayRecap bisogna metterlo nella cache
-//		return stampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
-//	}
 
 	/**
 	 * Setta il campo valid per ciascuna stamping contenuta in orderedStampings

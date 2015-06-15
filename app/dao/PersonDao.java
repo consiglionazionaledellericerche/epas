@@ -26,7 +26,6 @@ import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
-import models.query.QWorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -584,7 +583,8 @@ public final class PersonDao extends DaoBase{
 	 * @param begin
 	 * @param end
 	 */
-	public Person fetchPersonForComputation(Long id, Optional<LocalDate> begin, Optional<LocalDate> end) {
+	public Person fetchPersonForComputation(Long id, Optional<LocalDate> begin, 
+			Optional<LocalDate> end) {
 		
 		QPerson person = QPerson.person1;
 		
@@ -601,25 +601,31 @@ public final class PersonDao extends DaoBase{
 		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
 		QVacationPeriod vp = QVacationPeriod.vacationPeriod;
 		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-		QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
 
+		final BooleanBuilder condition = new BooleanBuilder().and(contract.person.eq(p));
+		filterContract(condition, begin, end);
 		
 		JPQLQuery query2 = getQueryFactory().from(contract)
 				.leftJoin(contract.contractMonthRecaps).fetch()
 				.leftJoin(contract.contractStampProfile).fetch()
 				.leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
+				.orderBy(contract.beginContract.asc())
+				.distinct();
+		List<Contract> contracts = query2.where(condition).list(contract);
+		
+		//fetch contract multiple bags (1) vacation periods
+		JPQLQuery query2b = getQueryFactory().from(contract)
 				.leftJoin(contract.vacationPeriods, vp).fetch()
 				.orderBy(contract.beginContract.asc())
 				.orderBy(vp.beginFrom.asc())
 				.distinct();
-		final BooleanBuilder condition = new BooleanBuilder().and(contract.person.eq(p));
-		filterContract(condition, begin, end);
-		List<Contract> contracts = query2.where(condition).list(contract);
-		
+		contracts = query2b.where(condition).list(contract);
+		// TODO: riportare a List tutte le relazioni uno a molti di contract
+		// e inserire singolarmente la fetch.
+		 
 		//Fetch dei tipi orario associati ai contratti
 		JPQLQuery query3 = getQueryFactory().from(cwtt)
 				.leftJoin(cwtt.workingTimeType, wtt).fetch()
-				.leftJoin(wtt.workingTimeTypeDays, wttd).fetch()
 				.where(cwtt.contract.in(contracts))
 				.distinct();
 		
@@ -629,8 +635,7 @@ public final class PersonDao extends DaoBase{
 		
 		//Fetch dei personday
 
-		List<PersonDay> personDays = personDayDao
-				.getPersonDayInPeriod(p, begin.get(), end);
+		personDayDao.getPersonDayInPeriod(p, begin.get(), end);
 		
 		
 		return p;

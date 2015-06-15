@@ -16,6 +16,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -236,11 +237,14 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 			for(ContractWorkingTimeType cwtt : 
 				this.getPersonDayContract().get().contractWorkingTimeType ) {
 
-				if(DateUtility.isDateIntoInterval(this.value.date, factory.create(cwtt).getDateInverval())) {
-
-					return Optional.fromNullable(
-							cwtt.workingTimeType.workingTimeTypeDays
-							.get(this.value.date.getDayOfWeek() - 1));
+				if(DateUtility.isDateIntoInterval(this.value.date, 
+						factory.create(cwtt).getDateInverval())) {
+					
+					WorkingTimeTypeDay wttd = cwtt.workingTimeType.workingTimeTypeDays
+							.get(this.value.date.getDayOfWeek() - 1);
+					
+					Preconditions.checkState(wttd.dayOfWeek == value.date.getDayOfWeek());
+					return Optional.fromNullable(wttd);
 				}
 
 			}
