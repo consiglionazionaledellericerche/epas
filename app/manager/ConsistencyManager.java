@@ -3,6 +3,7 @@ package manager;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import play.libs.Mail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
@@ -42,6 +44,7 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPersonDay;
 
 /**
  * Manager che gestisce la consistenza e la coerenza dei dati in Epas.
@@ -129,7 +132,7 @@ public class ConsistencyManager {
 			
 			// (2) Ricalcolo i valori dei person day	
 			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-			personDayManager.updatePersonDaysFromDate(p, fromDate);
+			//personDayManager.updatePersonDaysFromDate(p, fromDate);
 			
 			// (3) Ricalcolo dei residui per mese
 			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
@@ -288,7 +291,6 @@ public class ConsistencyManager {
 		}
 	}
 
-
 	/**
 	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
 	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
@@ -302,10 +304,57 @@ public class ConsistencyManager {
 
 		LocalDate date = from;
 		LocalDate today = LocalDate.now();
+		
+		person = personDao.fetchPersonForComputation(person.id, 
+				Optional.fromNullable(from), 
+				Optional.fromNullable(today));
+		
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, from, 
+				Optional.of(today));
 
+		//Costruire la tabella hash
+		HashMap<LocalDate, PersonDay> personDaysMap = Maps.newHashMap();
+		for(PersonDay personDay : personDays) {
+			personDaysMap.put(personDay.date, personDay);
+		}
+		
+		PersonDay previous = null;
+		
 		while(date.isBefore(today)) {
+			
+			if(!personManager.isActiveInDay(date, person)) {
+				date = date.plusDays(1);
+				previous = null;
+				continue;
+			}
+			
+			//Prendere da map
+			PersonDay personDay = personDaysMap.get(date);
+			if(personDay == null) {
+				personDay = new PersonDay(person, date);
+				
+//				if (!personDayInList.isHoliday) {
+//					date = date.plusDays(1);
+//					// populate??
+//			
+//					continue;
+//				}
+			}
+				
+			IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
+			
+			//set previous for progressive
+			if(previous != null) {
+				wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
+			}
+			//set previous for night stamp
+			if(previous != null) {
+				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
+			}
+			
+			personDayManager.populatePersonDay(wrapperFactory.create(personDay));
 
-			checkPersonDay(person, date);
+			previous = personDay;
 			date = date.plusDays(1);
 
 		}
