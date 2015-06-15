@@ -1,13 +1,10 @@
 package manager.recaps.vacation;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
 import manager.VacationManager;
 import models.Contract;
-import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
 
@@ -53,8 +50,8 @@ public class VacationsRecapFactory {
 			return Optional.<VacationsRecap>absent();
 		}
 		
-		List<VacationPeriod> vacationPeriodList = c.getContractVacationPeriods();
-		if ( vacationPeriodList == null || vacationPeriodList.isEmpty() ) {
+		if ( c.getValue().vacationPeriods == null || 
+				c.getValue().vacationPeriods.isEmpty() ) {
 			return Optional.<VacationsRecap>absent();
 		}
 		
