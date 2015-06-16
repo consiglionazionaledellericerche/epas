@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import manager.cache.StampTypeManager;
 import models.Absence;
 import models.Contract;
 import models.ContractWorkingTimeType;

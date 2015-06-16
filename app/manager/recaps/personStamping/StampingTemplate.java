@@ -1,7 +1,7 @@
 package manager.recaps.personStamping;
 
 import manager.PersonDayManager;
-import manager.StampTypeManager;
+import manager.cache.StampTypeManager;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;

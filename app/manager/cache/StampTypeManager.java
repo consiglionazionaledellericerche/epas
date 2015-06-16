@@ -1,4 +1,4 @@
-package manager;
+package manager.cache;
 
 import javax.persistence.EntityManager;
 

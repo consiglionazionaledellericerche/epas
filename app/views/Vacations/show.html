@@ -128,7 +128,7 @@
       <th>Data fine</th>
     </tr>
     
-    #{list items: vacationsRecap.get().vacationPeriodList, as: 'vp'}
+    #{list items: vacationsRecap.get().contract.vacationPeriods, as: 'vp'}
     <tr>
       <td>${vp.vacationCode.description}</td>
       <td>${vp.beginFrom}</td>
