@@ -177,23 +177,4 @@ public class AbsenceTypeDao extends DaoBase{
 						.map(absenceType, absence.count());
 	}
 
-	/**
-	 * 
-	 * @return la lista di tutti i codici di assenza che prevedono la riduzione
-	 * dei giorni dell'anno su cui computare la maturazione delle ferie
-	 */
-	public List<AbsenceType> getReducingAccruingDaysForVacations(){
-
-		QAbsenceType absenceType = QAbsenceType.absenceType;
-
-		JPQLQuery query = getQueryFactory().from(absenceType)
-				.where(absenceType.code.startsWith("24")
-						.or(absenceType.code.startsWith("25")
-								.or(absenceType.code.startsWith("17C")
-										.or(absenceType.code.startsWith("C17")
-												.or(absenceType.code.startsWith("C18"))))));
-		return query.list(absenceType);
-
-	}
-
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
-import manager.StampTypeManager;
+import manager.cache.StampTypeManager;
 import models.Absence;
 import models.Contract;
 import models.Person;

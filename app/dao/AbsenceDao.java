@@ -341,17 +341,25 @@ public class AbsenceDao extends DaoBase {
 	 * @param end
 	 * @param postPartumCodeList
 	 * @param ordered
-	 * @return la lista delle assenze effettuate nel period begin-end dalla persona person appartenenti al tipo 'post-partum' presenti
-	 * nella lista passata come parametro
+	 * @return il numero delle assenze effettuate nel period begin-end 
+	 * dalla persona con codice in codeList 
 	 */
-	public List<Absence> getAbsenceWithPostPartumCode(Person person, LocalDate begin, LocalDate end, List<AbsenceType> postPartumCodeList, boolean ordered){
+	public List<Absence> getAbsencesInCodeList(Person person, LocalDate begin, 
+			LocalDate end, List<AbsenceType> codeList, boolean ordered){
+		
 		final QAbsence absence = QAbsence.absence;
 
 		final JPQLQuery query = getQueryFactory().from(absence)
-				.where(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end).and(absence.absenceType.in(postPartumCodeList))));
-		if(ordered)
+				.where(absence.personDay.person.eq(person)
+				.and(absence.personDay.date.between(begin, end)
+				.and(absence.absenceType.in(codeList))));
+		
+		if(ordered) {
 			query.orderBy(absence.personDay.date.asc());
+		}
+		
 		return query.list(absence);
+		 
 	}
 
 	/**

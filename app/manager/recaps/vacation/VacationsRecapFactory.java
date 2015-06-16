@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import manager.ConfYearManager;
 import manager.VacationManager;
+import manager.cache.AbsenceTypeManager;
 import models.Contract;
 
 import org.joda.time.LocalDate;
@@ -19,17 +20,20 @@ public class VacationsRecapFactory {
 
 	private final AbsenceDao absenceDao;
 	private final AbsenceTypeDao absenceTypeDao;
+	private final AbsenceTypeManager absenceTypeManager;
 	private final ConfYearManager confYearManager;
 	private final VacationManager vacationManager;
 	private final IWrapperFactory wrapperFactory;
 
 	@Inject
 	VacationsRecapFactory(IWrapperFactory wrapperFactory, AbsenceDao absenceDao, 
-			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager,
+			AbsenceTypeDao absenceTypeDao, AbsenceTypeManager absenceTypeManager, 
+			ConfYearManager confYearManager,
 			VacationManager vacationManager) {
 		this.wrapperFactory = wrapperFactory;
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
+		this.absenceTypeManager = absenceTypeManager;
 		this.confYearManager = confYearManager;
 		this.vacationManager = vacationManager;
 	}
@@ -61,9 +65,9 @@ public class VacationsRecapFactory {
 		}
 	
 		VacationsRecap vacationRecap = new VacationsRecap(wrapperFactory, 
-				absenceDao, absenceTypeDao,	confYearManager, 
+				absenceDao, absenceTypeDao,	absenceTypeManager, confYearManager, 
 				vacationManager,
-				year, contract, actualDate, considerExpireLastYear);
+				year, contract, Optional.fromNullable(actualDate), considerExpireLastYear);
 	
 		return Optional.fromNullable(vacationRecap);
 	}
