@@ -14,12 +14,14 @@ import javax.persistence.Query;
 
 import models.AbsenceType;
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonYear;
 import models.User;
+import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import play.db.jpa.JPA;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.ContractDao;
@@ -55,6 +58,7 @@ public class PersonManager {
 		this.absenceDao = absenceDao;
 		this.personDayManager = personDayManager;
 		this.wrapperFactory = wrapperFactory;
+		this.confGeneralManager = confGeneralManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
@@ -67,6 +71,7 @@ public class PersonManager {
 	private final PersonDayManager personDayManager;
 	private final IWrapperFactory wrapperFactory;
 	private final AbsenceDao absenceDao;
+	private final ConfGeneralManager confGeneralManager;
 
 	/**
 	 * True se la persona ha almeno un contratto attivo in month
@@ -208,6 +213,42 @@ public class PersonManager {
 
 		return true;
 	}
+	
+	/**
+	 * Se il giorno è festivo per la persona
+	 * @param date
+	 * @return
+	 */
+	public boolean isHoliday(Person person, LocalDate date) {
+		
+		if(DateUtility.isGeneralHoliday(confGeneralManager
+				.officePatron(person.office), date)) {
+			return true;
+		}
+
+		Contract contract = contractDao.getContract(date, person);
+		if(contract == null) { 
+			//persona fuori contratto
+			return false;
+		}
+
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+			if(DateUtility.isDateIntoInterval(date, 
+					new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+				
+				int dayOfWeekIndex = date.getDayOfWeek()-1;
+				WorkingTimeTypeDay wttd = cwtt.workingTimeType
+						.workingTimeTypeDays.get(dayOfWeekIndex);
+				Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+				return wttd.holiday;
+				
+			}
+		}
+
+		throw new IllegalStateException();
+		//return false;	//se il db è consistente non si verifica mai
+
+	}
 
 	/**
 	 * 
@@ -325,7 +366,7 @@ public class PersonManager {
 	 */
 	public PersonDay createPersonDayFromDate(Person person, LocalDate date){
 		//if(person.isHoliday(date))
-		if(personDayManager.isHoliday(person, date)) {
+		if(isHoliday(person, date)) {
 			return null;
 		}
 		return new PersonDay(person, date);

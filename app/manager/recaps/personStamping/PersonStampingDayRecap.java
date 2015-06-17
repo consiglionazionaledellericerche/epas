@@ -7,6 +7,7 @@ import java.util.List;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.PersonManager;
 import manager.cache.StampTypeManager;
 import models.Absence;
 import models.Contract;
@@ -82,7 +83,8 @@ public class PersonStampingDayRecap {
 
 	public List<String> note = new ArrayList<String>();
 
-	public PersonStampingDayRecap(PersonDayManager personDayManager, 
+	public PersonStampingDayRecap(PersonDayManager personDayManager,
+			PersonManager personManager,
 			StampingTemplateFactory stampingTemplateFactory,
 			StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
 			WorkingTimeTypeDao workingTimeTypeDao, ConfGeneralManager confGeneralManager,
@@ -95,7 +97,7 @@ public class PersonStampingDayRecap {
 		if(pd.isPersistent()) {
 			this.holiday = pd.isHoliday;
 		} else {
-			this.holiday = personDayManager.isHoliday(pd.person, pd.date);
+			this.holiday = personManager.isHoliday(pd.person, pd.date);
 		}
 
 		this.person = pd.person;

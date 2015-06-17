@@ -3,25 +3,35 @@ package manager;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.cache.StampTypeManager;
+import models.Absence;
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
+import models.StampModificationType;
+import models.StampModificationTypeCode;
+import models.Stamping;
 import models.User;
+import models.WorkingTimeTypeDay;
+import models.Stamping.WayType;
+import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -55,28 +65,31 @@ import dao.wrapper.IWrapperPersonDay;
  */
 public class ConsistencyManager {
 
+	
+
+
+
 	@Inject
 	public ConsistencyManager(OfficeDao officeDao, 
 			PersonManager personManager,
 			PersonDao personDao, 
 			PersonDayManager personDayManager,
-			ContractDao contractDao,
 			ContractMonthRecapManager contractMonthRecapManager,
-			PersonDayInTroubleDao personDayInTroubleDao,
+			PersonDayInTroubleManager personDayInTroubleManager,
 			IWrapperFactory wrapperFactory,
-			ConfGeneralManager confGeneralManager, 
-			PersonDayDao personDayDao) {
+			PersonDayDao personDayDao, ConfYearManager confYearManager, 
+			StampTypeManager stampTypeManager) {
 
 		this.officeDao = officeDao;
 		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
-		this.contractDao = contractDao;
 		this.contractMonthRecapManager = contractMonthRecapManager;
-		this.personDayInTroubleDao = personDayInTroubleDao;
+		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.wrapperFactory = wrapperFactory;
-		this.confGeneralManager = confGeneralManager;
 		this.personDayDao = personDayDao;
+		this.confYearManager = confYearManager;
+		this.stampTypeManager = stampTypeManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
@@ -85,12 +98,12 @@ public class ConsistencyManager {
 	private final PersonManager personManager;
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
-	private final ContractDao contractDao;
 	private final ContractMonthRecapManager contractMonthRecapManager;
-	private final PersonDayInTroubleDao personDayInTroubleDao;
+	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final IWrapperFactory wrapperFactory;
-	private final ConfGeneralManager confGeneralManager;
+	private final ConfYearManager confYearManager;
 	private final PersonDayDao personDayDao;
+	private final StampTypeManager stampTypeManager;
 
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
@@ -104,7 +117,9 @@ public class ConsistencyManager {
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendMail){
 
-		Set<Office> offices = user.isPresent() ? officeDao.getOfficeAllowed(user.get()) : Sets.newHashSet(officeDao.getAllOffices());
+		Set<Office> offices = user.isPresent() ? 
+				officeDao.getOfficeAllowed(user.get()) 
+				: Sets.newHashSet(officeDao.getAllOffices());
 
 		//  (0) Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = Lists.newArrayList();
@@ -112,8 +127,7 @@ public class ConsistencyManager {
 		if(person.isPresent() && user.isPresent()){
 			if(personManager.isAllowedBy(user.get(), person.get()))
 				personList.add(person.get());
-		}
-		else {
+		} else {
 			personList = personDao.list(Optional.<String>absent(), offices,
 					false, fromDate, LocalDate.now().minusDays(1), true).list();
 		}
@@ -127,18 +141,7 @@ public class ConsistencyManager {
 			JPAPlugin.startTx(false);
 			p = personDao.getPersonById(p.id);
 			
-			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-			checkHistoryError(p, fromDate);
-			
-			// (2) Ricalcolo i valori dei person day	
-			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-			//personDayManager.updatePersonDaysFromDate(p, fromDate);
-			
-//			// (3) Ricalcolo dei residui per mese
-//			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
-//			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
-//					new YearMonth(fromDate));
-
+			updatePersonSituation(p, fromDate);
 		}
 		
 		JPAPlugin.closeTx(false);
@@ -151,7 +154,7 @@ public class ConsistencyManager {
 			LocalDate end = new LocalDate().minusDays(1);
 
 			try {
-				sendMail(personList, begin, end, "timbratura");
+				personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
 			}
 			catch(EmailException e){
 				e.printStackTrace();
@@ -160,146 +163,16 @@ public class ConsistencyManager {
 		JPAPlugin.closeTx(false);	
 	}
 
-	/**
-	 * Metodo che controlla i giorni con problemi dei dipendenti che non hanno timbratura fixed
-	 *  e invia mail nel caso in cui esistano timbrature disaccoppiate.
-	 * @param p
-	 * @param begin
-	 * @param end
-	 * @throws EmailException
-	 */
-	private void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
-
-		if(p.surname.equals("Conti") && p.name.equals("Marco")) {
-
-			log.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
-			return;
-		}
-
-		List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
-
-		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
-
-		for(PersonDayInTrouble pdt : pdList){
-
-			Contract contract = contractDao.getContract(pdt.personDay.date, pdt.personDay.person);
-			if(contract == null) {
-
-				log.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: {} - Data: {}",
-						p.getFullname(), pdt.personDay.date);
-				continue;
-			}
-
-			Optional<ContractStampProfile> csp = contract.getContractStampProfileFromDate(pdt.personDay.date);
-
-			Preconditions.checkState(csp.isPresent());
-
-			if(csp.get().fixedworkingtime == true) {
-				continue;
-			}
-
-			if(pdt.cause.contains(cause) && !pdt.personDay.isHoliday
-					&& pdt.fixed == false) { 
-				dateTroubleStampingList.add(pdt.personDay.date);
-			}
-		}
-
-		boolean flag;
-		try {
-
-			flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
-
-		} catch (Exception e) {
-
-			log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
-					new Object[] {dateTroubleStampingList, p, cause,p.getFullname()}); 
-			e.printStackTrace();
-			return;
-		}
-
-		//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
-		if(flag){
-			for(PersonDayInTrouble pd : pdList){
-				pd.emailSent = true;
-				pd.save();
-			}
-		}
-	}
+	
 
 	/**
-	 * Controlla ogni due giorni la presenza di giorni in cui non ci siano
-	 *  nè assenze nè timbrature per tutti i dipendenti (invocato nell'expandableJob)
-	 * @param personId
-	 * @param year
-	 * @param month
-	 * @param userLogged
-	 * @throws EmailException 
+	 * Controlla la presenza di errori nelle timbrature. 
+	 * Gestisce i giorni problematici nella tabella PersonDayInTrouble.
+	 * Effettua i ricalcoli giornialieri e mensili.
+	 * @param person
+	 * @param from
 	 */
-	public void sendMail(List<Person> personList, LocalDate fromDate,LocalDate toDate,String cause) throws EmailException{
-
-		for(Person p : personList){
-
-			log.debug("Chiamato controllo sul giorni {}-{}", fromDate, toDate);
-
-			boolean officeMail = confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, p.office);
-
-			if(p.wantEmail && officeMail) {
-				checkPersonDayForSendingEmail(p, fromDate, toDate, cause);
-			}
-			else {
-				log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
-			}
-		}
-	}
-
-	/**
-	 * Verifica per la persona (se attiva) che alla data 
-	 * 	(1) in caso di giorno lavorativo il person day esista. 
-	 * 		Altrimenti viene creato e persistito un personday vuoto e 
-	 *      inserito un record nella tabella PersonDayInTrouble.
-	 * 	(2) il person day presenti una situazione di timbrature corretta dal punto di vista logico. 
-	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. 
-	 *      Situazioni di timbrature errate si verificano nei casi 
-	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
-	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature.
-	 *  
-	 * @param personid la persona da controllare
-	 * @param dayToCheck il giorno da controllare
-	 */
-	public void checkPersonDay(Person person, LocalDate dayToCheck){
-
-		if(!personManager.isActiveInDay(dayToCheck, person)){
-			return;
-		}
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayToCheck);
-
-		if(pd.isPresent()){
-			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(pd.get())); 
-			return;
-		}
-		else {
-			personDay = new PersonDay(person, dayToCheck);
-			if (personDay.isHoliday) {
-				return;
-			}
-			personDay.create();
-			personDayManager.populatePersonDay(wrapperFactory.create(personDay));
-			personDay.save();
-			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(personDay));
-			return;
-		}
-	}
-
-	/**
-	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
-	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
-	 * e setta a fixed true quelli che in passato avevano problemi e che invece sono stati risolti.
-	 * @param personid la persona da controllare
-	 * @param year l'anno di partenza
-	 * @param month il mese di partenza
-	 */
-	private void checkHistoryError(Person person, LocalDate from){
+	public void updatePersonSituation(Person person, LocalDate from){
 		log.info("Check history error {} dal {} a oggi", person.getFullname(), from);
 
 		LocalDate date = from;
@@ -352,7 +225,7 @@ public class ConsistencyManager {
 				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
 			}
 			
-			personDayManager.populatePersonDay(wPersonDay);
+			populatePersonDay(wPersonDay);
 
 			previous = personDay;
 			date = date.plusDays(1);
@@ -363,73 +236,154 @@ public class ConsistencyManager {
 		contractMonthRecapManager.populateContractMonthRecapByPerson(person,
 							new YearMonth(from));
 	}
-
+	
 	/**
-	 * Invia la mail alla persona specificata in firma con la lista dei giorni in cui ha timbrature disaccoppiate
-	 * @param date, person
-	 * @throws EmailException 
+	 * (1) Controlla che il personDay sia ben formato 
+	 * 		(altrimenti lo inserisce nella tabella PersonDayInTrouble)
+	 * (2) Popola i valori aggiornati del person day e li persiste nel db.
+	 * 
+	 * @param pd 
 	 */
-	private boolean sendEmailToPerson(List<LocalDate> dateList, Person person, String cause) throws EmailException{
-		if(dateList.size() == 0){
-			return false;
-		}
-		log.info("Preparo invio mail per {}", person.getFullname());
-		SimpleEmail simpleEmail = new SimpleEmail();
-		try {
-			simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
-			simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office) );
-		} catch (EmailException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			simpleEmail.addTo(person.email);
-		} catch (EmailException e) {
+	private void populatePersonDay(IWrapperPersonDay pd) {
 
-			e.printStackTrace();
-		}
-		List<LocalDate> dateFormat = new ArrayList<LocalDate>();
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MM-YYYY");		
-		String date = "";
-		for(LocalDate d : dateList){
-			if(!DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), d)){
-				dateFormat.add(d);
-				String str = fmt.print(d);
-				date = date+str+", ";
-			}
-		}
-		String incipit = "";
-		if(dateFormat.size() == 0)
-			return false;
-		if(dateFormat.size() > 1)
-			incipit = "Nei giorni: ";
-		if(dateFormat.size() == 1)
-			incipit = "Nel giorno: ";	
-
-		simpleEmail.setSubject("ePas Controllo timbrature");
-		String message = "";
-		if(cause.equals("timbratura")){
-			message = "Gentile " +person.name+" "+person.surname+ 
-					"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di timbratura disaccoppiata. \r\n " +
-					"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-					"Saluti \r\n"+
-					"Il team di ePAS";
-
-		}
-		if(cause.equals("no assenze")){
-			message = "Gentile " +person.name+" "+person.surname+ 
-					"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di mancanza di timbrature e di codici di assenza. \r\n " +
-					"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-					"Saluti \r\n"+
-					"Il team di ePAS";
+		//isHoliday = personManager.isHoliday(this.value.person, this.value.date);
+		
+		//il contratto non esiste più nel giorno perchè è stata inserita data terminazione
+		if( !pd.getPersonDayContract().isPresent()) {
+			pd.getValue().isHoliday = false;
+			pd.getValue().timeAtWork = 0;
+			pd.getValue().progressive = 0;
+			pd.getValue().difference = 0;
+			personDayManager.setIsTickeAvailable(pd,false);
+			pd.getValue().stampModificationType = null;
+			pd.getValue().save();
+			return;
 		}
 
-		simpleEmail.setMsg(message);
+		//Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
+		if(pd.getPersonDayContract().isPresent()
+				&& pd.getPersonDayContract().get().sourceDate != null
+				&& ! pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDate) ) {
+			
+			pd.getValue().isHoliday = false;			
+			pd.getValue().timeAtWork = 0;
+			pd.getValue().progressive = 0;
+			pd.getValue().difference = 0;
+			personDayManager.setIsTickeAvailable(pd,false);
+			pd.getValue().stampModificationType = null;
+			pd.getValue().save();
+			return;
+		}
+		
+		// decido festivo / lavorativo
+		pd.getValue().isHoliday = personManager.isHoliday(pd.getValue().person,
+				pd.getValue().date);
+		pd.getValue().save();
 
-		Mail.send(simpleEmail);
+		//controllo problemi strutturali del person day
+		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
+			pd.getValue().save();
+			personDayManager.checkForPersonDayInTrouble(pd);
+		}
 
-		log.info("Inviata mail a {} contenente le date da controllare : {}", person.getFullname(), date);
-		return true;
+		//controllo uscita notturna
+		handlerNightStamp(pd);
+
+		personDayManager.updateTimeAtWork(pd);
+
+		personDayManager.updateDifference(pd);
+
+		personDayManager.updateProgressive(pd);
+
+		personDayManager.updateTicketAvailable(pd);
+
+		pd.getValue().save();
 
 	}
+	
+	/**
+	 * Se al giorno precedente l'ultima timbratura è una entrata disaccoppiata e nel
+	 * giorno attuale vi è una uscita nei limiti notturni in configurazione, allora 
+	 * vengono aggiunte le timbrature default a 00:00
+	 *
+	 * @param pd
+	 */
+	private void handlerNightStamp(IWrapperPersonDay pd){
+
+		if( pd.isFixedTimeAtWork() ) {
+			return;
+		}
+
+		if( ! pd.getPreviousForNightStamp().isPresent() ) {
+			return;
+		}
+
+		PersonDay previous = pd.getPreviousForNightStamp().get();
+
+		Stamping lastStampingPreviousDay = pd.getLastStamping();
+
+		if( lastStampingPreviousDay != null && lastStampingPreviousDay.isIn() ) {
+
+			String hourMaxToCalculateWorkTime = confYearManager
+					.getFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, 
+							pd.getValue().person.office, pd.getValue().date.getYear());
+
+			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
+
+			Collections.sort(pd.getValue().stampings);
+
+			if( pd.getValue().stampings.size() > 0 
+					&& pd.getValue().stampings.get(0).way == WayType.out 
+					&& maxHour > pd.getValue().stampings.get(0).date.getHourOfDay()) {
+
+				StampModificationType smtMidnight = stampTypeManager
+						.getStampMofificationType(StampModificationTypeCode
+								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
+
+				//timbratura chiusura giorno precedente
+				Stamping correctStamp = new Stamping();
+				correctStamp.date = new LocalDateTime(previous.date.getYear(), 
+						previous.date.getMonthOfYear(), previous.date.getDayOfMonth(), 23, 59);
+
+				correctStamp.way = WayType.out;
+				correctStamp.markedByAdmin = false;
+				correctStamp.stampModificationType = smtMidnight;
+				correctStamp.note = 
+						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+				correctStamp.personDay = previous;
+				correctStamp.save();
+				previous.stampings.add(correctStamp);
+				previous.save();
+
+				populatePersonDay(wrapperFactory.create(previous));
+
+				//timbratura apertura giorno attuale
+				Stamping newEntranceStamp = new Stamping();
+				newEntranceStamp.date = new LocalDateTime(pd.getValue().date.getYear(),
+						pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(),0,0);
+
+				newEntranceStamp.way = WayType.in;
+				newEntranceStamp.markedByAdmin = false;
+
+				newEntranceStamp.stampModificationType = smtMidnight;
+
+
+
+				newEntranceStamp.note = 
+						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+				newEntranceStamp.personDay = pd.getValue();
+				newEntranceStamp.save();
+
+				pd.getValue().stampings.add( newEntranceStamp );
+				pd.getValue().save();
+			}
+		}
+	}	
+	
+	
+	
+	
+
+	
 
 }

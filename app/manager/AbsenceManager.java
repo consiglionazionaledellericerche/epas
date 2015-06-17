@@ -28,7 +28,6 @@ import models.enumerate.QualificationMapping;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,6 @@ import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPersonDay;
 
 
 /**
@@ -66,7 +64,7 @@ public class AbsenceManager {
 	public AbsenceManager(
 			ContractMonthRecapManager contractMonthRecapManager,
 			WorkingTimeTypeDao workingTimeTypeDao,
-			PersonDayManager personDayManager, PersonDayDao personDayDao,
+			PersonManager personManager, PersonDayDao personDayDao,
 			VacationsRecapFactory vacationsFactory,
 			AbsenceGroupManager absenceGroupManager,
 			IWrapperFactory wrapperFactory, ContractDao contractDao,
@@ -74,15 +72,15 @@ public class AbsenceManager {
 			PersonReperibilityDayDao personReperibilityDayDao,
 			PersonShiftDayDao personShiftDayDao,
 			ConfGeneralManager confGeneralManager,
-			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao) {
+			ConfYearManager confYearManager, PersonChildrenDao personChildrenDao,
+			ConsistencyManager consistencyManager) {
 
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.workingTimeTypeDao = workingTimeTypeDao;
-		this.personDayManager = personDayManager;
+		this.personManager = personManager;
 		this.personDayDao = personDayDao;
 		this.vacationsFactory = vacationsFactory;
 		this.absenceGroupManager = absenceGroupManager;
-		this.wrapperFactory = wrapperFactory;
 		this.contractDao = contractDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.absenceDao = absenceDao;
@@ -91,17 +89,17 @@ public class AbsenceManager {
 		this.confYearManager = confYearManager;
 		this.personChildrenDao = personChildrenDao;
 		this.confGeneralManager = confGeneralManager;
+		this.consistencyManager = consistencyManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
 
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final WorkingTimeTypeDao workingTimeTypeDao;
-	private final PersonDayManager personDayManager;
+	private final PersonManager personManager;
 	private final PersonDayDao personDayDao;
 	private final VacationsRecapFactory vacationsFactory;
 	private final AbsenceGroupManager absenceGroupManager;
-	private final IWrapperFactory wrapperFactory;
 	private final ContractDao contractDao;
 	private final AbsenceTypeDao absenceTypeDao;
 	private final AbsenceDao absenceDao;
@@ -110,6 +108,7 @@ public class AbsenceManager {
 	private final ConfYearManager confYearManager;
 	private final PersonChildrenDao personChildrenDao;
 	private final ConfGeneralManager confGeneralManager;
+	private final ConsistencyManager consistencyManager;
 	
 	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
@@ -356,8 +355,7 @@ public class AbsenceManager {
 		}
 
 		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		personDayManager.updatePersonDaysFromDate(person, dateFrom);
-		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));
+		consistencyManager.updatePersonSituation(person, dateFrom);
 
 		if(air.getAbsenceInReperibilityOrShift() > 0){
 			sendEmail(person, air);
@@ -388,7 +386,7 @@ public class AbsenceManager {
 		AbsencesResponse ar = new AbsencesResponse(date,absenceType.code);
 
 		//se non devo considerare festa ed è festa non inserisco l'assenza
-		if(!absenceType.consideredWeekEnd && personDayManager.isHoliday(person, date)){
+		if(!absenceType.consideredWeekEnd && personManager.isHoliday(person, date)){
 			ar.setHoliday(true);
 			ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
 		}
@@ -691,27 +689,28 @@ public class AbsenceManager {
 			pd = new PersonDay(person, date);
 		}
 
-		IWrapperPersonDay wPd = wrapperFactory.create(pd);
-
 		if(abt == null || !abt.code.equals("92")){
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
-			personDayManager.populatePersonDay(wPd);
+			pd.save();
 			return;
 		}
 		if(mealTicket != null && mealTicket.equals("si")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = true;
-			personDayManager.populatePersonDay(wPd);
+			pd.save();
+			return;
 		}
 		if(mealTicket != null && mealTicket.equals("no")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = false;
-			personDayManager.populatePersonDay(wPd);
+			pd.save();
+			return;
 		}
 
 		if(mealTicket != null && mealTicket.equals("calcolato")){
 			pd.isTicketForcedByAdmin = false;
-			personDayManager.populatePersonDay(wPd);
+			pd.save();
+			return;
 		}
 	}
 
@@ -759,8 +758,7 @@ public class AbsenceManager {
 		}
 
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		personDayManager.updatePersonDaysFromDate(person, dateFrom);
-		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(dateFrom));
+		consistencyManager.updatePersonSituation(person, dateFrom);
 
 		return deleted;
 	}

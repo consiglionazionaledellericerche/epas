@@ -10,6 +10,7 @@ import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.PersonDay;
+import models.Stamping;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
@@ -251,6 +252,22 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 		}
 
 		return Optional.absent();
+	}
+	
+	/**
+	 * L'ultima timbratura in ordine di tempo nel giorno.
+	 * @return
+	 */
+	public Stamping getLastStamping() { 
+		Stamping last = null;
+		for(Stamping s : value.stampings) {
+			if(last == null) {
+				last = s;
+			} else if(last.date.isBefore(s.date)) {
+				last = s;
+			}
+		}
+		return last;
 	}
 
 }

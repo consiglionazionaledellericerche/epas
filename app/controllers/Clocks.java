@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.ConsistencyManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
@@ -51,13 +52,13 @@ public class Clocks extends Controller{
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
-	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static PersonDayManager personDayManager;
 	@Inject
 	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 
 	public static void show(){
@@ -194,10 +195,7 @@ public class Clocks extends Controller{
 
 		final PersonDay day = personDay;
 
-		personDayManager.updatePersonDaysFromDate(day.person, day.date);
-		contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, new YearMonth(day.date));
-		
+		consistencyManager.updatePersonSituation(person, day.date);
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 

@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.PersonManager;
 import manager.cache.StampTypeManager;
 import models.Contract;
 import models.PersonDay;
@@ -24,14 +25,17 @@ public class PersonStampingDayRecapFactory {
 	private final StampingTemplateFactory stampingTemplateFactory;
 	public final StampTypeManager stampTypeManager;
 	private final ConfGeneralManager confGeneralManager;
+	private PersonManager personManager;
 
 	@Inject
 	PersonStampingDayRecapFactory(PersonDayManager personDayManager,
+			PersonManager personManager,
 			StampingTemplateFactory stampingTemplateFactory,
 			StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
 			WorkingTimeTypeDao workingTimeTypeDao,
 			ConfGeneralManager confGeneralManager) {
 		this.personDayManager = personDayManager;
+		this.personManager = personManager;
 		this.stampingTemplateFactory = stampingTemplateFactory;
 		this.stampTypeManager = stampTypeManager;
 		this.wrapperFactory = wrapperFactory;
@@ -49,7 +53,7 @@ public class PersonStampingDayRecapFactory {
 	public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut,
 			Optional<List<Contract>> monthContracts) {
 
-		return new PersonStampingDayRecap(personDayManager, 
+		return new PersonStampingDayRecap(personDayManager, personManager,
 				stampingTemplateFactory, stampTypeManager, wrapperFactory,
 				workingTimeTypeDao, confGeneralManager, 
 				personDay, numberOfInOut, monthContracts);

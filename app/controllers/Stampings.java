@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ConsistencyManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -64,11 +65,7 @@ public class Stampings extends Controller {
 	@Inject
 	private static StampingDao stampingDao;
 	@Inject
-	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
 	private static PersonDayDao personDayDao;
-	@Inject
-	private static PersonDayManager personDayManager;
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
@@ -77,6 +74,8 @@ public class Stampings extends Controller {
 	private static IWrapperFactory wrapperFactory;
 	@Inject
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 	public static void stampings(Integer year, Integer month) {
 
@@ -182,12 +181,8 @@ public class Stampings extends Controller {
 
 		stampingManager.addStamping(personDay, time, note, service, type, true);
 
-		final PersonDay giorno = personDay;
-
-		personDayManager.updatePersonDaysFromDate(giorno.person, giorno.date);
-		contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(giorno.date));
-
-		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+		consistencyManager.updatePersonSituation(personDay.person, personDay.date);
+		
 
 		Stampings.personStamping(personId, year, month);
 
@@ -231,8 +226,7 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
-			contractMonthRecapManager.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));
+			consistencyManager.updatePersonSituation(pd.person, pd.date);
 
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -247,8 +241,7 @@ public class Stampings extends Controller {
 
 		stampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
 
-		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
-		contractMonthRecapManager.populateContractMonthRecapByPerson(pd.person, new YearMonth(pd.date));
+		consistencyManager.updatePersonSituation(pd.person, pd.date);
 
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
@@ -361,19 +354,7 @@ public class Stampings extends Controller {
 		pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
 		pd.save();
 
-		final LocalDate date = pd.date;
-		final Person person = pd.person;
-
-		personDayManager.updatePersonDaysInMonth(pd.person, pd.date);
-
-		new Job() {
-			@Override
-			public void doJob() {
-				LocalDate dateFrom = date.plusMonths(1).dayOfMonth().withMinimumValue();
-				personDayManager.updatePersonDaysFromDate(person, dateFrom);
-				contractMonthRecapManager.populateContractMonthRecapByPerson(person, new YearMonth(date));
-			}
-		}.afterRequest();
+		consistencyManager.updatePersonSituation(pd.person, pd.date);
 
 		flash.success("Operazione completata. Per concludere l'operazione di ricalcolo "
 				+ "sui mesi successivi o sui riepiloghi mensili potrebbero occorrere alcuni secondi. "
