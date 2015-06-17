@@ -185,10 +185,10 @@ public class Competences extends Controller{
 		
 		List<String> code = competenceManager.populateListWithOvertimeCodes();		
 
-		List<Competence> competenceList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
+		List<Competence> competenceList = competenceDao.getCompetencesInOffice(year, month, code, office, false);
 		int totaleOreStraordinarioMensile = competenceManager.getTotalMonthlyOvertime(competenceList);
 
-		List<Competence> competenceYearList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, true);		
+		List<Competence> competenceYearList = competenceDao.getCompetencesInOffice(year, month, code, office, true);		
 		int totaleOreStraordinarioAnnuale = competenceManager.getTotalYearlyOvertime(competenceYearList);
 
 		List<TotalOvertime> total = competenceDao.getTotalOvertime(year, office);				
