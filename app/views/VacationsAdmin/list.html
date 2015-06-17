@@ -95,21 +95,21 @@
 		        <td>
 		          <a data-toggle="modal" 
 		             href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
-					${vacationsRecap.vacationDaysLastYearUsed.size()}
+					${vacationsRecap.vacationDaysLastYearUsed}
 			      </a> 
 		        </td>
 		        
 		        <td>
 		          <a data-toggle="modal" 
 		             href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
-					${vacationsRecap.vacationDaysCurrentYearUsed.size()}
+					${vacationsRecap.vacationDaysCurrentYearUsed}
 				  </a>
 				</td>
 				
 				<td>
 		          <a data-toggle="modal" 
 		             href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
-					${vacationsRecap.permissionUsed.size()}
+					${vacationsRecap.permissionUsed}
 				  </a>
 		        </td>
 		        
@@ -121,12 +121,12 @@
 		        </td>
 		        
 		        <!-- ferie 2014 -->
-		        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
-		        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
+		        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed} </td>
+		        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed} </td>
 		        
 		        <!-- permessi 2014 -->
-		        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed.size()}</td>
-		        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
+		        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed}</td>
+		        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}</td>
 		        
 		        <td>
 		          #{if vacationsRecap.isActiveAfterBeginYear }

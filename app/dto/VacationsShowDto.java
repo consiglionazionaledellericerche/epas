@@ -23,17 +23,17 @@ public class VacationsShowDto {
 	
 	public int year;
 	
-	public int queryYearVacationTotal;
-	public int queryYearVacationAccrued;
-	public List<Absence> queryYearVacationUsed = Lists.newArrayList();
+	public int queryYearVacationTotal = 0;
+	public int queryYearVacationAccrued = 0;
+	public int queryYearVacationUsed = 0;
 	
 	public int previousYearVacationTotal = 0;
 	public int previousYearVacationAccrued = 0;
-	public List<Absence> previousYearVacationUsed = Lists.newArrayList();
+	public int previousYearVacationUsed = 0;
 	
-	public int queryYearPermissionTotal;
-	public int queryYearPermissionAccrued;
-	public List<Absence> queryYearPermissionUsed = Lists.newArrayList();
+	public int queryYearPermissionTotal = 0;
+	public int queryYearPermissionAccrued = 0;
+	public int queryYearPermissionUsed = 0;
 	
 	public Contract contract;
 

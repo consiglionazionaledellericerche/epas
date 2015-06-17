@@ -155,21 +155,21 @@ public class ContractMonthRecapManager {
 				return;
 			}
 			
-			cmr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed.size();
-			cmr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed.size();
-			cmr.permissionUsed = vacationRecap.get().permissionUsed.size();
+			cmr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed;
+			cmr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed;
+			cmr.permissionUsed = vacationRecap.get().permissionUsed;
 			
 			// (2) RESIDUI
-			Optional<ContractMonthRecap> recap = 
-					populateResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
-
-			if( !recap.isPresent() ) {
-				return;
-			}
-			
-			recap.get().save();
-			contract.contractMonthRecaps.add(recap.get());
-			contract.save();
+//			Optional<ContractMonthRecap> recap = 
+//					populateResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
+//
+//			if( !recap.isPresent() ) {
+//				return;
+//			}
+//			
+//			recap.get().save();
+//			contract.contractMonthRecaps.add(recap.get());
+//			contract.save();
 			
 			yearMonthToCompute = yearMonthToCompute.plusMonths(1);
 		}

@@ -200,7 +200,7 @@ public class ChartsManager {
 		return meseList;
 	}
 
-	/**
+	/**.size()
 	 * 
 	 * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in anagrafica
 	 */
@@ -491,9 +491,9 @@ public class ChartsManager {
 
 		int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
-		out.append(new Integer(vr.get().vacationDaysCurrentYearUsed.size()).toString()+','+
-				new Integer(vr.get().vacationDaysLastYearUsed.size()).toString()+','+
-				new Integer(vr.get().permissionUsed.size()).toString()+','+
+		out.append(new Integer(vr.get().vacationDaysCurrentYearUsed).toString()+','+
+				new Integer(vr.get().vacationDaysLastYearUsed).toString()+','+
+				new Integer(vr.get().permissionUsed).toString()+','+
 				new Integer(recap.get().remainingMinutesCurrentYear).toString()+','+
 				new Integer(recap.get().remainingMinutesLastYear).toString()+',');
 		int month = LocalDate.now().getMonthOfYear();

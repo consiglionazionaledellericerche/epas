@@ -34,22 +34,7 @@ public class AbsenceTypeManager {
 	protected final JPQLQueryFactory queryFactory;
 	
 
-	/**
-	 * @param code
-	 * @return lo AbsenceType relativo al codice code passato come parametro
-	 */
-	private AbsenceType getAbsenceTypeByCode(
-			String code){
-		
-		Preconditions.checkNotNull(code);
-		
-		final QAbsenceType absenceType = QAbsenceType.absenceType;
-		
-		JPQLQuery query = queryFactory.from(absenceType)
-				.where(absenceType.code.eq(code));
-		
-		return query.singleResult(absenceType);
-	}
+
 	
 	/**
 	 * Costruisce o se presente aggiorna l'AbsenceType.
@@ -117,6 +102,23 @@ public class AbsenceTypeManager {
 		}
 		
 		return value;
+	}
+	
+	/**
+	 * @param code
+	 * @return lo AbsenceType relativo al codice code passato come parametro
+	 */
+	private AbsenceType getAbsenceTypeByCode(
+			String code){
+		
+		Preconditions.checkNotNull(code);
+		
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+		
+		JPQLQuery query = queryFactory.from(absenceType)
+				.where(absenceType.code.eq(code));
+		
+		return query.singleResult(absenceType);
 	}
 	
 	/**
