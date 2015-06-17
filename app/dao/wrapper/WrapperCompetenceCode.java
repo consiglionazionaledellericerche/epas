@@ -51,8 +51,8 @@ public class WrapperCompetenceCode implements IWrapperCompetenceCode {
 		List<String> competenceCodeList = Lists.newArrayList();
 		competenceCodeList.add(this.value.code);
 		
-		List<Competence> compList = competenceDao.getCompetences(Optional.<Person>absent(),
-				year, month, competenceCodeList, office, false);
+		List<Competence> compList = competenceDao.getCompetencesInOffice(year, month, 
+				competenceCodeList, office, false);
 
 		for(Competence comp : compList){
 			totale = totale+comp.valueApproved;

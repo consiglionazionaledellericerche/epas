@@ -1,6 +1,7 @@
 package dao.wrapper;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
@@ -25,16 +26,16 @@ import com.google.inject.assistedinject.Assisted;
  */
 public class WrapperContract implements IWrapperContract {
 
-	private final PersonManager personManager;
 	private final Contract value;
 	private final ConfGeneralManager confGeneralManager;
+	private final IWrapperFactory wrapperFactory;
 
 	@Inject
-	WrapperContract(@Assisted Contract contract, PersonManager personManager,
-			ConfGeneralManager confGeneralManager) {
+	WrapperContract(@Assisted Contract contract,
+			ConfGeneralManager confGeneralManager, IWrapperFactory wrapperFactory) {
 		value = contract;
-		this.personManager = personManager;
 		this.confGeneralManager = confGeneralManager;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	@Override
@@ -51,16 +52,23 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean isLastInMonth(int month, int year) {
 		
-		List<Contract> contractInMonth = 
-				personManager.getMonthContracts(this.value.person, month, year);
-		if (contractInMonth.size() == 0) {
-			return false;
+		DateInterval monthInterval = new DateInterval(new LocalDate(year, month,1), 
+				new LocalDate(year, month,1).dayOfMonth().withMaximumValue());
+		
+		for(Contract contract : value.person.contracts) {
+			if(contract.id.equals(value.id)) {
+				continue;
+			}
+			DateInterval cInterval = wrapperFactory.create(contract)
+					.getContractDateInterval();
+			if (DateUtility.intervalIntersection(monthInterval,cInterval) != null) {
+				if(value.beginContract.isBefore(contract.beginContract)) {
+					return false; 
+				}
+			}
 		}
-		if (contractInMonth.get(contractInMonth.size()-1).id.equals(this.value.id)){
-			return true;
-		} else {
-			return false;
-		}
+		return true;
+		
 	}
 
 	/**

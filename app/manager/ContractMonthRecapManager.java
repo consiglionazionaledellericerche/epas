@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.cache.CompetenceCodeManager;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -59,13 +61,13 @@ public class ContractMonthRecapManager {
 	@Inject
 	private CompetenceDao competenceDao;
 	@Inject
+	private CompetenceCodeManager competenceCodeManager;
+	@Inject
 	private AbsenceDao absenceDao;
 	@Inject
 	private IWrapperFactory wrapperFactory;
 	@Inject
 	private AbsenceTypeDao absenceTypeDao;
-	@Inject
-	private CompetenceCodeDao competenceCodeDao;
 		
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
@@ -160,16 +162,16 @@ public class ContractMonthRecapManager {
 			cmr.permissionUsed = vacationRecap.get().permissionUsed;
 			
 			// (2) RESIDUI
-//			Optional<ContractMonthRecap> recap = 
-//					populateResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
-//
-//			if( !recap.isPresent() ) {
-//				return;
-//			}
-//			
-//			recap.get().save();
-//			contract.contractMonthRecaps.add(recap.get());
-//			contract.save();
+			Optional<ContractMonthRecap> recap = 
+					populateResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
+
+			if( !recap.isPresent() ) {
+				return;
+			}
+			
+			recap.get().save();
+			contract.contractMonthRecaps.add(recap.get());
+			contract.save();
 			
 			yearMonthToCompute = yearMonthToCompute.plusMonths(1);
 		}
@@ -596,10 +598,10 @@ public class ContractMonthRecapManager {
 			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
 		}
 		
-		setMealTicketsInformation(cmr, validDataForMealTickets);
 		
+		setMealTicketsInformation(cmr, validDataForMealTickets);
 		setPersonDayInformation(cmr, validDataForPersonDay);
-		setPersonMonthInformation(cmr, validDataForCompensatoryRest, wcontract);
+		setPersonMonthInformation(cmr, wcontract, validDataForCompensatoryRest);
 		
 
 		assegnaProgressivoFinaleNegativo(cmr);
@@ -696,57 +698,61 @@ public class ContractMonthRecapManager {
 	 * 
 	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
 	 */
-	private void setPersonMonthInformation(ContractMonthRecap monthRecap, DateInterval validDataForCompensatoryRest, IWrapperContract wcontract)
-	{
-		CompetenceCode s1 = competenceCodeDao.getCompetenceCodeByCode("S1");
-		CompetenceCode s2 = competenceCodeDao.getCompetenceCodeByCode("S2");
-		CompetenceCode s3 = competenceCodeDao.getCompetenceCodeByCode("S3");
+	private void setPersonMonthInformation(ContractMonthRecap cmr, 
+			IWrapperContract wcontract,	DateInterval validDataForCompensatoryRest) {
 		
-		if(wcontract.isLastInMonth(monthRecap.month, monthRecap.year))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
-		{
-			//straordinari s1
-			Optional<Competence> competenceS1 = competenceDao.getCompetence(monthRecap.person, monthRecap.year, monthRecap.month, s1);
-
-			if(competenceS1.isPresent())
-				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.get().valueApproved * 60);
-			else
-				monthRecap.straordinariMinutiS1Print = 0;
-			//straordinari s2
-			Optional<Competence> competenceS2 = competenceDao.getCompetence(monthRecap.person, monthRecap.year, monthRecap.month, s2);
+		//gli straordinari li assegno solo all'ultimo contratto attivo del mese
+		if (wcontract.isLastInMonth(cmr.month, cmr.year)) {
 			
+			CompetenceCode s1 = competenceCodeManager.getCompetenceCode("S1");
+			CompetenceCode s2 = competenceCodeManager.getCompetenceCode("S2");
+			CompetenceCode s3 = competenceCodeManager.getCompetenceCode("S3");
+			List<CompetenceCode> codes = Lists.newArrayList();
+			codes.add(s1);
+			codes.add(s2);
+			codes.add(s3);
+			
+			cmr.straordinariMinuti = 0;
+			cmr.straordinariMinutiS1Print = 0;
+			cmr.straordinariMinutiS2Print = 0;
+			cmr.straordinariMinutiS3Print = 0;
+			
+			List<Competence> competences = competenceDao
+					.getCompetences(cmr.person, cmr.year, cmr.month, codes);
+			
+			for (Competence competence : competences) {
+				
+				if(competence.competenceCode.id.equals(s1.id)) {
+					cmr.straordinariMinutiS1Print = (competence.valueApproved * 60);
+				} else if(competence.competenceCode.id.equals(s2.id)) {
+					cmr.straordinariMinutiS2Print = (competence.valueApproved * 60);
+				} else if(competence.competenceCode.id.equals(s3.id)) {
+					cmr.straordinariMinutiS3Print = (competence.valueApproved * 60);
+				}
+			}
 
-			if(competenceS2.isPresent())
-				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.get().valueApproved * 60);
-			else
-				monthRecap.straordinariMinutiS2Print = 0;
-			//straordinari s3
-			Optional<Competence> competenceS3 = competenceDao.getCompetence(monthRecap.person, monthRecap.year, monthRecap.month, s3);
-			if(competenceS3.isPresent())
-				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.get().valueApproved * 60);
-			else
-				monthRecap.straordinariMinutiS3Print = 0;
-
-
-			monthRecap.straordinariMinuti = monthRecap.straordinariMinutiS1Print + monthRecap.straordinariMinutiS2Print + monthRecap.straordinariMinutiS3Print;
+			cmr.straordinariMinuti = cmr.straordinariMinutiS1Print 
+					+ cmr.straordinariMinutiS2Print 
+					+ cmr.straordinariMinutiS3Print;
 		}
 		
-		if(validDataForCompensatoryRest!=null)
-		{
-			List<Absence> riposiCompensativi = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("91"), 
-					validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd(), 
-					Optional.<JustifiedTimeAtWork>absent(), false, false);
-			monthRecap.riposiCompensativiMinuti = 0;
-			monthRecap.recoveryDayUsed = 0;
-			for(Absence abs : riposiCompensativi){
-				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
-						wrapperFactory.create(abs.personDay).getWorkingTimeTypeDay().get().workingTime;	
-				// FIXME: potrebbe essere absent() ??
-				monthRecap.recoveryDayUsed++;
-			}
-			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;
+		if (validDataForCompensatoryRest != null) {
 			
+			LocalDate begin = validDataForCompensatoryRest.getBegin();
+			LocalDate end = validDataForCompensatoryRest.getEnd();
+			
+			List<Absence> riposi = absenceDao.absenceInPeriod(cmr.person, begin, end, "91");
+			
+			cmr.riposiCompensativiMinuti = 0;
+			cmr.recoveryDayUsed = 0;
+			
+			for (Absence abs : riposi){
+				cmr.riposiCompensativiMinuti += wrapperFactory.create(abs.personDay)
+						.getWorkingTimeTypeDay().get().workingTime;
+				cmr.recoveryDayUsed++;
+			}
+			cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
 		}		
-
 	}
 	
 	private void assegnaProgressivoFinaleNegativo(ContractMonthRecap monthRecap)
