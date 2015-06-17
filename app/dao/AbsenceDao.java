@@ -350,6 +350,7 @@ public class AbsenceDao extends DaoBase {
 		final QAbsence absence = QAbsence.absence;
 
 		final JPQLQuery query = getQueryFactory().from(absence)
+				.leftJoin(absence.personDay).fetch()
 				.where(absence.personDay.person.eq(person)
 				.and(absence.personDay.date.between(begin, end)
 				.and(absence.absenceType.in(codeList))));
