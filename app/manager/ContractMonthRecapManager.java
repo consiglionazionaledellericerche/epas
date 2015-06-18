@@ -19,7 +19,6 @@ import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -32,7 +31,6 @@ import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;

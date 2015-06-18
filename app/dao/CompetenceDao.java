@@ -1,8 +1,5 @@
 package dao;
 
-import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
-
 import java.util.List;
 
 import javax.persistence.EntityManager;

@@ -1,6 +1,5 @@
 package manager;
 
-import models.AbsenceType;
 import models.Office;
 import models.enumerate.Parameter;
 

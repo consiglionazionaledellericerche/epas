@@ -10,8 +10,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
-import manager.ContractMonthRecapManager;
-import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
@@ -30,7 +28,6 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
-import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;

@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
-import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
@@ -24,7 +23,6 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.mvc.Controller;

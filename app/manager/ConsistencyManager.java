@@ -1,8 +1,5 @@
 package manager;
 
-import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,48 +8,34 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.cache.StampTypeManager;
-import models.Absence;
-import models.Contract;
-import models.ContractStampProfile;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.PersonDayInTrouble;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
-import models.User;
-import models.WorkingTimeTypeDay;
 import models.Stamping.WayType;
-import models.enumerate.JustifiedTimeAtWork;
+import models.User;
 import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.Play;
 import play.db.jpa.JPAPlugin;
-import play.libs.Mail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
 
-import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 

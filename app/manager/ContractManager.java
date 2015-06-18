@@ -14,13 +14,11 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
-import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +27,6 @@ import com.google.common.collect.Lists;
 
 import dao.ContractDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;

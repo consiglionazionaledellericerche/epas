@@ -29,11 +29,8 @@ import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
-import dao.OfficeDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
-import dao.wrapper.IWrapperFactory;
 
 public class PersonDayInTroubleManager {
 

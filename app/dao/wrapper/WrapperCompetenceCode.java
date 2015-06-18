@@ -5,9 +5,7 @@ import java.util.List;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
-import models.Person;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;

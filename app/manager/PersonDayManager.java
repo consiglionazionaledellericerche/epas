@@ -1,6 +1,5 @@
 package manager;
 
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
@@ -9,12 +8,9 @@ import java.util.List;
 
 import manager.cache.StampTypeManager;
 import models.Absence;
-import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -28,16 +24,13 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
-import dao.ContractDao;
 import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
 public class PersonDayManager {

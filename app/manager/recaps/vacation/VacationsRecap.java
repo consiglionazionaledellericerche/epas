@@ -3,7 +3,6 @@ package manager.recaps.vacation;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import manager.ConfYearManager;
@@ -12,19 +11,16 @@ import manager.cache.AbsenceTypeManager;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
-import models.ContractMonthRecap;
 import models.Person;
 import models.VacationPeriod;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import controllers.Absences;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;

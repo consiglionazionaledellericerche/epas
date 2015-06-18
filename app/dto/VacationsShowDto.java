@@ -1,15 +1,11 @@
 package dto;
 
-import java.util.List;
-
 import manager.recaps.vacation.VacationsRecap;
-import models.Absence;
 import models.Contract;
 
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 
 /**
  * 
