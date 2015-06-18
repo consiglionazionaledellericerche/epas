@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -15,16 +14,13 @@ import javax.persistence.Query;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
-import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonYear;
-import models.User;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +31,6 @@ import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.ContractDao;
-import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -45,13 +40,12 @@ import dao.wrapper.IWrapperPersonDay;
 public class PersonManager {
 
 	@Inject
-	public PersonManager(ContractDao contractDao, OfficeDao officeDao,
+	public PersonManager(ContractDao contractDao,
 			PersonChildrenDao personChildrenDao, PersonDao personDao,
 			PersonDayDao personDayDao, AbsenceDao absenceDao,
 			PersonDayManager personDayManager,
 			IWrapperFactory wrapperFactory,ConfGeneralManager confGeneralManager) {
 		this.contractDao = contractDao;
-		this.officeDao = officeDao;
 		this.personChildrenDao = personChildrenDao;
 		this.personDao = personDao;
 		this.personDayDao = personDayDao;
@@ -64,7 +58,6 @@ public class PersonManager {
 	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
 
 	private final ContractDao contractDao;
-	private final OfficeDao officeDao;
 	private final PersonChildrenDao personChildrenDao;
 	private final PersonDao personDao;
 	private final PersonDayDao personDayDao;
@@ -73,147 +66,6 @@ public class PersonManager {
 	private final AbsenceDao absenceDao;
 	private final ConfGeneralManager confGeneralManager;
 
-	/**
-	 * True se la persona ha almeno un contratto attivo in month
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public boolean hasMonthContracts(Person person, Integer month, Integer year)
-	{
-		//TODO usare getMonthContracts e ritornare size>0
-		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = contractDao.getPersonContractList(person);
-		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
-		if(contractList == null){
-			return false;
-		}
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract);
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				monthContracts.add(contract);
-			}
-		}
-		if(monthContracts.size()==0)
-			return false;
-
-		return true;
-	}
-
-
-	/**
-	 * True se la persona ha almeno un contratto attivo in year
-	 * @param year
-	 * @return
-	 */
-	public boolean hasYearContracts(Person person, Integer year)
-	{
-		for(int month=1; month<=12; month++)
-		{
-			if(hasMonthContracts(person,month, year))
-				return true;
-		}
-		return false;
-	}
-
-
-	/**
-	 * 
-	 * @param administrator
-	 * @return true se la persona è visibile al parametro amministratore
-	 */
-	public boolean isAllowedBy(User admin, Person person)
-	{
-
-		Set<Office> adminOffices = officeDao.getOfficeAllowed(admin);
-		Set<Office> officeAllowed = officeDao.getOfficeAllowed(person.user);
-
-		return adminOffices.contains(officeAllowed.iterator().next());
-	}
-
-	/**
-	 * True se la persona alla data ha un contratto attivo, False altrimenti
-	 * @param date
-	 */
-	public boolean isActiveInDay(LocalDate date, Person person)
-	{
-		//Contract c = this.getContract(date);
-		Contract c = contractDao.getContract(date, person);
-		if(c==null)
-			return false;
-		else
-			return true;
-	}
-
-	/**
-	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
-	 * @param month
-	 * @param year
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return 
-	 */
-	public boolean isActiveInMonth(Person person, YearMonth yearMonth, 
-			boolean onCertificateFilter) {
-		
-		LocalDate monthBegin = new LocalDate().withYear(yearMonth.getYear())
-				.withMonthOfYear(yearMonth.getMonthOfYear()).withDayOfMonth(1);
-		
-		LocalDate monthEnd = new LocalDate().withYear(yearMonth.getYear())
-				.withMonthOfYear(yearMonth.getMonthOfYear()).dayOfMonth().withMaximumValue();
-		
-		return isActiveInPeriod(person, monthBegin, monthEnd, onCertificateFilter);
-	}
-
-
-	/**
-	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
-	 * @param year
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return
-	 */
-	public boolean isActiveInYear(Person person, int year, boolean onCertificateFilter)
-	{
-		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
-		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
-		return isActiveInPeriod(person, yearBegin, yearEnd, onCertificateFilter);
-	}
-
-
-
-	/**
-	 * 
-	 * @param startPeriod
-	 * @param endPeriod
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return
-	 */
-	private static boolean isActiveInPeriod(Person person, LocalDate startPeriod, LocalDate endPeriod, boolean onCertificateFilter)
-	{
-		List<Contract> periodContracts = new ArrayList<Contract>();
-		DateInterval periodInterval = new DateInterval(startPeriod, endPeriod);
-		for(Contract contract : person.contracts)
-		{
-			if(onCertificateFilter && !contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract); //TODO è sbagliato bisogna considerare anche endContract
-			if(DateUtility.intervalIntersection(periodInterval, contractInterval)!=null)
-			{
-				periodContracts.add(contract);
-			}
-		}
-		if(periodContracts.size()==0)
-			return false;
-
-		return true;
-	}
-	
 	/**
 	 * Se il giorno è festivo per la persona
 	 * @param date
@@ -259,35 +111,6 @@ public class PersonManager {
 				"Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato", "Sannicandro", "Ruberti", "Maurizio", "Martinelli").fetch();
 		return peopleForTest;
 
-	}
-
-	/**
-	 * 
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public List<Contract> getMonthContracts(Person person, Integer month, Integer year)
-	{
-		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = contractDao.getPersonContractList(person);
-		if(contractList == null){
-			return monthContracts;
-		}
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				monthContracts.add(contract);
-			}
-		}
-		return monthContracts;
 	}
 
 	/**
@@ -357,19 +180,6 @@ public class PersonManager {
 			return false;
 
 		return true;
-	}
-
-	/**
-	 * 
-	 * @param date
-	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
-	 */
-	public PersonDay createPersonDayFromDate(Person person, LocalDate date){
-		//if(person.isHoliday(date))
-		if(isHoliday(person, date)) {
-			return null;
-		}
-		return new PersonDay(person, date);
 	}
 
 	/**

@@ -1,23 +1,26 @@
 package controllers;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
-import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.wrapper.IWrapperFactory;
-import dto.VacationsShowDto;
+import dao.wrapper.IWrapperPerson;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{
@@ -30,36 +33,39 @@ public class Vacations extends Controller{
 	public static void show(Integer year) {
 		
 		Optional<User> currentUser = Security.getUser();
-		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
-			flash.error("Accesso negato.");
-			renderTemplate("Application/indexAdmin.html");
-		}
 		
-		Person person = currentUser.get().person;
+		Preconditions.checkState(currentUser.isPresent());
+		Preconditions.checkNotNull(currentUser.get().person);
 		
+		IWrapperPerson person = wrapperFactory.create(currentUser.get().person);
+
 		if(year == null) {
 			year = LocalDate.now().getYear(); 
 		}
+		
+		List<Contract> contractList = person.getYearContracts(year);
+		
+		if(contractList.isEmpty()) {
+			flash.error("Non ci sono contratti attivi nel %s", year);
+			YearMonth lastActiveMonth = person.getLastActiveMonth();
+			show(lastActiveMonth.getYear());
+		}
+		
+		List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
+		
+		for(Contract contract : contractList) {
+			
+			Optional<VacationsRecap> vacationsRecap;
 
-		Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-		
-		Preconditions.checkState(contract.isPresent());
-		
-		Optional<VacationsRecap> vacationsRecap;
-		Optional<VacationsRecap> vacationsRecapPrevious;
-		
-		vacationsRecap = vacationsFactory.create(
-					year, contract.get(), LocalDate.now(), true);
-		
-		Preconditions.checkState(vacationsRecap.isPresent());
-		
-		vacationsRecapPrevious = vacationsFactory.create(year-1, contract.get(), 
-							new LocalDate(year-1,12,31), true);
-		
-		VacationsShowDto vacationShowDto = VacationsShowDto
-				.build(year, vacationsRecap.get(), vacationsRecapPrevious);
+			vacationsRecap = vacationsFactory.create(
+					year, contract, LocalDate.now(), true);
 
-		render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
+			Preconditions.checkState(vacationsRecap.isPresent());
+			
+			vacationsRecapList.add(vacationsRecap.get());
+		}
+
+		render(vacationsRecapList);
 	
 		
 	}

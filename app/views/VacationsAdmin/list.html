@@ -94,21 +94,21 @@
 		        
 		        <td>
 		          <a data-toggle="modal" 
-		             href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
+		             href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
 					${vacationsRecap.vacationDaysLastYearUsed}
 			      </a> 
 		        </td>
 		        
 		        <td>
 		          <a data-toggle="modal" 
-		             href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
+		             href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
 					${vacationsRecap.vacationDaysCurrentYearUsed}
 				  </a>
 				</td>
 				
 				<td>
 		          <a data-toggle="modal" 
-		             href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
+		             href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
 					${vacationsRecap.permissionUsed}
 				  </a>
 		        </td>
@@ -164,7 +164,7 @@
 		    </p>
 		    <ul>
 		      #{list items:contractsWithVacationsProblems, as:'contract'}
-		        <li><a href="@{Persons.edit(person.id)}">Contratto di ${contract.person.surname} ${contract.person.name} iniziato il ${contract.beginContract}</a></li>
+		        <li><a href="@{Persons.edit(contract.person.id)}">Contratto di ${contract.person.surname} ${contract.person.name} iniziato il ${contract.beginContract}</a></li>
 		      #{/list}
 		    </ul>
 		    <p>

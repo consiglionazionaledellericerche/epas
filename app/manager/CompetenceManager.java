@@ -46,14 +46,11 @@ public class CompetenceManager {
 	@Inject
 	public CompetenceManager(CompetenceCodeDao competenceCodeDao,
 			OfficeDao officeDao, CompetenceDao competenceDao,
-			PersonDayDao personDayDao,
-			PersonManager personManager, IWrapperFactory wrapperFactory) {
+			PersonDayDao personDayDao, IWrapperFactory wrapperFactory) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.officeDao = officeDao;
 		this.competenceDao = competenceDao;
 		this.personDayDao = personDayDao;
-		
-		this.personManager = personManager;
 		this.wrapperFactory = wrapperFactory;
 	}
 
@@ -63,7 +60,6 @@ public class CompetenceManager {
 	private final OfficeDao officeDao;
 	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
-	private final PersonManager personManager;
 	private final IWrapperFactory wrapperFactory;
 
 	/**
@@ -371,7 +367,9 @@ public class CompetenceManager {
 	 */
 	public Integer positiveResidualInMonth(Person person, int year, int month){
 
-		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		List<Contract> monthContracts = wrapperFactory
+				.create(person).getMonthContracts(year, month);
+		
 		for(Contract contract : monthContracts) {
 			
 			IWrapperContract wContract = wrapperFactory.create(contract);
