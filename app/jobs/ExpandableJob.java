@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.ConsistencyManager;
 import manager.PersonDayInTroubleManager;
 import models.Person;
 

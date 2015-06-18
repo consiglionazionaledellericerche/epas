@@ -5,7 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
-import manager.PersonDayManager;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
@@ -18,7 +17,6 @@ import play.jobs.Job;
 import com.google.common.base.Optional;
 
 import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
 
 public class RemoveInvalidStampingsJob extends Job {
 	

@@ -27,7 +27,6 @@ import com.google.inject.Inject;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dao.wrapper.IWrapperFactory;
 
 public class StampingManager {
 

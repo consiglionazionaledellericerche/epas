@@ -6,7 +6,6 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 
 import manager.ConfGeneralManager;
-import manager.PersonManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
