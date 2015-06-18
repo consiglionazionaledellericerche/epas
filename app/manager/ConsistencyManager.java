@@ -156,7 +156,7 @@ public class ConsistencyManager {
 	 * @param from
 	 */
 	public void updatePersonSituation(Person person, LocalDate from){
-		log.info("Check history error {} dal {} a oggi", person.getFullname(), from);
+		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
 
 		LocalDate date = from;
 		LocalDate today = LocalDate.now();
@@ -173,6 +173,8 @@ public class ConsistencyManager {
 		for(PersonDay personDay : personDays) {
 			personDaysMap.put(personDay.date, personDay);
 		}
+		
+		log.info("Fetch dei dati conclusa.");
 		
 		PersonDay previous = null;
 		
@@ -215,9 +217,13 @@ public class ConsistencyManager {
 
 		}
 		
+		log.info("Update personDay conclusa.");
+		
 		// (3) Ricalcolo dei residui per mese
 		contractMonthRecapManager.populateContractMonthRecapByPerson(person,
 							new YearMonth(from));
+		
+		log.info("Update riepiloghi conclusa.");
 	}
 	
 	/**

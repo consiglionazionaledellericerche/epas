@@ -1,8 +1,9 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,10 +22,12 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 @With( {Secure.class, RequestInit.class} )
@@ -45,34 +48,48 @@ public class VacationsAdmin extends Controller{
 
 	public static void list(Integer year, String name, Integer page){
 
-		if(page==null)
+		if(page==null) {
 			page = 0;
+		}
+		
+		LocalDate beginYear = new LocalDate(year, 1, 1);
+		LocalDate endYear = new LocalDate(year, 12, 31);
+		DateInterval yearInterval = new DateInterval(beginYear, endYear);
+		
 
 		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
 				officeDao.getOfficeAllowed(Security.getUser().get()),
-				false, LocalDate.now(), LocalDate.now(), true);
+				false, beginYear, endYear, true);
 
 		List<Person> personList = simpleResults.paginated(page).getResults();
 
-		List<VacationsRecap> vacationsList = new ArrayList<VacationsRecap>();
+		List<VacationsRecap> vacationsList = Lists.newArrayList();
 
-		List<Person> personsWithVacationsProblems = new ArrayList<Person>();
+		List<Contract> contractsWithVacationsProblems = Lists.newArrayList();
 
-		for(Person person: personList) {
-
-			Optional<Contract> contract = wrapperFactory
-					.create(person).getCurrentContract();
-
-			Optional<VacationsRecap> vr = vacationsFactory.create(
-						year, contract.get(), LocalDate.now(), true);
+		for(Person person : personList) {
 			
-			if(vr.isPresent()) {
-				vacationsList.add(vr.get());
+			for(Contract contract : person.contracts) {
 				
-			} else {
-				personsWithVacationsProblems.add(person);
+				IWrapperContract c = wrapperFactory.create(contract);
+				if (DateUtility.intervalIntersection(c.getContractDateInterval(), 
+						yearInterval) == null) {
+					
+					//Questo evento andrebbe segnalato... la list dovrebbe caricare
+					// nello heap solo i contratti attivi nel periodo specificato.
+					continue;
+				}
+				
+				Optional<VacationsRecap> vr = vacationsFactory.create(year, 
+						contract, LocalDate.now(), true);
+				
+				if(vr.isPresent()) {
+					vacationsList.add(vr.get());
+					
+				} else {
+					contractsWithVacationsProblems.add(contract);
+				}
 			}
-			
 		}
 
 		Office office = Security.getUser().get().person.office;
@@ -84,7 +101,7 @@ public class VacationsAdmin extends Controller{
 				.isVacationsLastYearExpired(year, expireDate);
 
 		render(vacationsList, isVacationLastYearExpired, 
-				personsWithVacationsProblems, year, simpleResults, name);
+				contractsWithVacationsProblems, year, simpleResults, name);
 	}
 
 
