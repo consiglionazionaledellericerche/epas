@@ -153,6 +153,7 @@ public class RequestInit extends Controller {
 
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
 		}
+		
 	}
 
 	/**
@@ -271,7 +272,8 @@ public class RequestInit extends Controller {
 
 		ItemsPermitted ip = new ItemsPermitted(user);
 		renderArgs.put("ip", ip);
-
+		if(user.get().person != null)
+			renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
 		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
 
 		if(!user.isPresent())
@@ -459,7 +461,15 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.dailyPresence";
 			}
+			
+			if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
 
+				renderArgs.put("switchDay", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				return "Stampings.dailyPresenceForPersonInCharge";
+			}
+			
 			if(action.equals("Stampings.mealTicketSituation")) {
 
 				renderArgs.put("switchMonth",  true);
@@ -595,13 +605,12 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.showCompetences";
 			}
-
-			if(action.equals("Competences.overtime")) {
+			
+			if(action.equals("Competences.monthlyOvertime")) {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDownAdministration");
-				return "Competences.overtime";
+				return "Competences.monthlyOvertime";
 			}
 
 			if(action.equals("Competences.totalOvertimeHours")) {

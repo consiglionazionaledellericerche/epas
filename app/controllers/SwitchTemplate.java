@@ -69,11 +69,6 @@ public class SwitchTemplate extends Controller{
 			Competences.showCompetences(year, month, null, null,  null,  null);
 		}
 
-		if(action.equals("Competences.overtime")) {
-
-			Competences.overtime(year, month, null, null,  null);
-		}
-
 		if(action.equals("Competences.totalOvertimeHours")) {
 
 			Competences.totalOvertimeHours(year, null);
@@ -97,6 +92,16 @@ public class SwitchTemplate extends Controller{
 		if(action.equals("Stampings.dailyPresence")) {
 
 			Stampings.dailyPresence(year, month, day);
+		}
+
+		if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
+
+			Stampings.dailyPresenceForPersonInCharge(year, month, day);
+		}
+		
+		if(action.equals("Competences.monthlyOvertime")) {
+
+			Competences.monthlyOvertime(year, month, null, null);
 		}
 
 		if(action.equals("Stampings.mealTicketSituation")) {
@@ -155,8 +160,6 @@ public class SwitchTemplate extends Controller{
 
 			Application.index();	
 		}
-
-		session.put("daySelected", day);
 
 		executeAction(action);
 

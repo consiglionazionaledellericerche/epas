@@ -2,13 +2,17 @@ package manager.recaps.troubles;
 
 import java.util.List;
 
+import manager.PersonManager;
 import models.Person;
+import models.PersonDay;
 import models.PersonDayInTrouble;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 
 /**
@@ -25,6 +29,9 @@ public class PersonTroublesInMonthRecap {
 	public List<Integer> troublesNoAbsenceNoStampingsL = Lists.newArrayList();
 	public List<Integer> troublesNoAbsenceUncoupledStampingsNotHolidayL = Lists.newArrayList();
 	public List<Integer> troublesNoAbsenceUncoupledStampingsHolidayL = Lists.newArrayList();
+	
+	public int holidayWorkingTimeNotAccepted = 0;
+	public int holidayWorkingTimeAccepted = 0;
 
 	/**
 	 * @param person
@@ -32,38 +39,45 @@ public class PersonTroublesInMonthRecap {
 	 * @param monthEnd
 	 */
 	public PersonTroublesInMonthRecap(PersonDayInTroubleDao personDayInTroubleDao, 
-			Person person, LocalDate monthBegin, LocalDate monthEnd) {
+			PersonManager personManager, Person person, LocalDate monthBegin, LocalDate monthEnd) {
 		
 		this.person = person;
 		List<PersonDayInTrouble> troubles = personDayInTroubleDao
 				.getPersonDayInTroubleInPeriod(person, monthBegin, monthEnd, false);
 
 		
-		for(PersonDayInTrouble trouble : troubles)
-		{
-			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_FIXED))
-			{
+		for(PersonDayInTrouble trouble : troubles) {
+			
+			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_FIXED)) {
 				this.troublesAutoFixedL.add(trouble.personDay.date.getDayOfMonth());
 			}
 			
-			if(trouble.cause.equals(PersonDayInTrouble.NO_ABS_NO_STAMP))
-			{
+			if(trouble.cause.equals(PersonDayInTrouble.NO_ABS_NO_STAMP)) {
 				this.troublesNoAbsenceNoStampingsL
 					.add(trouble.personDay.date.getDayOfMonth());
 			}
 			
-			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_WORKING))
-			{
+			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_WORKING)) {
 				this.troublesNoAbsenceUncoupledStampingsNotHolidayL
 					.add(trouble.personDay.date.getDayOfMonth());
 			}
 			
-			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_HOLIDAY))
-			{
+			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_HOLIDAY)) {
 				this.troublesNoAbsenceUncoupledStampingsHolidayL
 					.add(trouble.personDay.date.getDayOfMonth());
 			}
 		}
+		
+		this.holidayWorkingTimeNotAccepted = personManager
+				.holidayWorkingTimeNotAccepted(person, 
+				Optional.fromNullable(monthBegin.getYear()),
+				Optional.fromNullable(monthBegin.getMonthOfYear()));
+		
+		this.holidayWorkingTimeAccepted = personManager
+				.holidayWorkingTimeAccepted(person, 
+				Optional.fromNullable(monthBegin.getYear()),
+				Optional.fromNullable(monthBegin.getMonthOfYear()));
+		
 	} 
 	
 	

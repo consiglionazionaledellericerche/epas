@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +53,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
@@ -249,7 +251,7 @@ public class Persons extends Controller {
 		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
 	}
 
-	public static void update(Person person, Office office, Integer qualification){
+	public static void update(Person person, Office office, Integer qualification, boolean isPersonInCharge){
 
 		if(person==null) {
 
@@ -268,7 +270,7 @@ public class Persons extends Controller {
 			flash.error("La qualifica selezionata non esiste. Operazione annullata");
 			list(null);
 		}
-
+		person.isPersonInCharge = isPersonInCharge;
 		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
@@ -1008,6 +1010,42 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name, person.surname);
 		edit(person.id);
+	}
+	
+	public static void workGroup(Long personId){
+		Person person = personDao.getPersonById(personId);
+		Set<Office> offices = Sets.newHashSet();
+		offices.add(person.office);
+		List<Person> people = personDao.list(Optional.<String>absent(), 
+				offices, false, LocalDate.now(), LocalDate.now(), true).list();
+		render(people, person);
+	}
+	
+	
+	public static void confirmGroup(@Required List<Long> peopleId, Long personId){
+		Person person = personDao.getPersonById(personId);
+		Person p = null;
+		for(Long id : peopleId){
+			p = personDao.getPersonById(id);
+			p.personInCharge = person;
+			p.save();
+			person.people.add(p);
+		}
+		person.save();
+		flash.success("Aggiunte persone al gruppo di %s %s", person.name, person.surname);
+		list(null);
+	}
+	
+	public static void removePersonFromGroup(Long pId){
+
+		Person person = personDao.getPersonById(pId);
+		Person supervisor = personDao.getPersonInCharge(person);
+		person.personInCharge = null;
+
+		supervisor.save();
+		person.save();
+		flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name, supervisor.surname);
+		workGroup(supervisor.id);
 	}
 
 }

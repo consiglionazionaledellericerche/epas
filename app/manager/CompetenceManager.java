@@ -42,15 +42,18 @@ import dao.wrapper.IWrapperFactory;
 
 public class CompetenceManager {
 
+	
+
 	@Inject
 	public CompetenceManager(CompetenceCodeDao competenceCodeDao,
-			OfficeDao officeDao, PersonDayDao personDayDao,
-			CompetenceDao competenceDao,
+			OfficeDao officeDao, CompetenceDao competenceDao,
+			PersonDayDao personDayDao,
 			PersonManager personManager, IWrapperFactory wrapperFactory) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.officeDao = officeDao;
-		this.personDayDao = personDayDao;
 		this.competenceDao = competenceDao;
+		this.personDayDao = personDayDao;
+		
 		this.personManager = personManager;
 		this.wrapperFactory = wrapperFactory;
 	}
@@ -189,6 +192,7 @@ public class CompetenceManager {
 		}		
 		total.save();
 		return true;
+
 	}
 
 	/**
@@ -213,21 +217,16 @@ public class CompetenceManager {
 
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
-			Integer recoveryDays = 0;
 			Integer timeAtWork = 0;
 			Integer difference = 0;
 			Integer overtime = 0;
 
-			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
 				timeAtWork = timeAtWork + pd.timeAtWork;
 				difference = difference +pd.difference;
-				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals("94"))
-						recoveryDays = recoveryDays+1;
-				}
 			}			
 			Optional<Competence> comp = competenceDao.getCompetence(p, year, month, code);
 			if(comp.isPresent())
@@ -237,14 +236,13 @@ public class CompetenceManager {
 			builder.put(p, "Giorni di Presenza", daysAtWork);
 			builder.put(p, "Tempo Lavorato (HH:MM)", timeAtWork);
 			builder.put(p, "Tempo di lavoro in eccesso (HH:MM)", difference);
-			builder.put(p, "Residuo - rip. compensativi", difference-(recoveryDays*60));
-			builder.put(p, "Residuo netto", difference-(overtime*60));
 			builder.put(p, "Ore straordinario pagate", overtime);
-			builder.put(p, "Riposi compens.", recoveryDays);
+
 
 		}
 		tableFeature = builder.build();
 		return tableFeature;
+
 	}
 
 	/**

@@ -21,6 +21,8 @@
     <link href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.css" rel="stylesheet"/>    
     <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
 	  <link href='//fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+	  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+
 	
 	#{get 'moreStyles' /}
 	
@@ -203,6 +205,21 @@
             </li>
           </ul>
           #{/if}
+          
+          #{if isPersonInCharge}
+          <ul class="nav navbar-nav">
+          	<li class="dropdown">
+          		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-users"></i>
+          		Gestione gruppo <b class="caret"></b></a>
+          		<ul class="dropdown-menu">
+          			<li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), 
+	                   session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
+	                <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"), 
+	                   session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
+          		</ul>
+          	</li>
+          </ul>
+          #{/if}
 
 		  #{include '/menu.html' /}          
       
@@ -360,6 +377,7 @@
     <script src="@{'/public/feedback-master/feedback.js'}"></script>
     
     <script src="@{'/public/js/script.js'}"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
      
     #{include './feedback.html' /}  
 	#{get 'moreScripts' /}

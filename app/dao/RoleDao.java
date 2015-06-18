@@ -52,19 +52,6 @@ public class RoleDao extends DaoBase {
 		return query.singleResult(role);
 	}
 
-
-	/**
-	 * 
-	 * @param description
-	 * @return il permesso associato alla descrizione passata come parametro
-	 */
-	public Permission getPermissionByDescription(String description){
-		QPermission permission = QPermission.permission;
-		final JPQLQuery query = getQueryFactory().from(permission)
-				.where(permission.description.eq(description));
-		return query.singleResult(permission);
-	}
-	
 	/**
 	 * La lista dei ruoli di sistema.
 	 * 

@@ -18,6 +18,9 @@
 <ul class="nav nav-tabs">
   <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
   <li class="active"><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
+  #{if person.isPersonInCharge}
+  	<li><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
+  #{/if}
 </ul>
 
 <div class="panel panel-default col-sm-6 col-sm-offset-3" id="content" >

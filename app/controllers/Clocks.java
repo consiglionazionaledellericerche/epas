@@ -116,7 +116,7 @@ public class Clocks extends Controller{
 		}
 
 		PersonDay personDay = null;			
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
+		Optional<PersonDay> pd = personDayDao.getPersonDay(user.person, today);
 
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
@@ -150,7 +150,7 @@ public class Clocks extends Controller{
 		LocalDateTime ldt = LocalDateTime.now();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, ldt.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, ldt.toLocalDate());
 
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
@@ -214,7 +214,7 @@ public class Clocks extends Controller{
 
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, today);
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, today);
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			personDay = new PersonDay(person, today);

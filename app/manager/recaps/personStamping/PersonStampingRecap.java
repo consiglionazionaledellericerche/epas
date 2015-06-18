@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
@@ -80,6 +81,7 @@ public class PersonStampingRecap {
 	 * @param person
 	 */
 	public PersonStampingRecap(PersonDayManager personDayManager,
+			PersonDayDao personDayDao,
 			PersonManager personManager,
 			ContractMonthRecapManager contractMonthRecapManager,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
@@ -90,12 +92,20 @@ public class PersonStampingRecap {
 		this.month = month;
 		this.year = year;
 
-		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager.getMaximumCoupleOfStampings(person, year, month));
+		LocalDate begin = new LocalDate(year, month, 1);
+		LocalDate end = begin.dayOfMonth().withMaximumValue();
+
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, begin, 
+				Optional.fromNullable(end));
+		
+		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager
+				.getMaximumCoupleOfStampings(personDays) );
 
 		//Costruzione dati da renderizzare
 		
 		//Contratti del mese
-		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		List<Contract> monthContracts = personManager
+				.getMonthContracts(person,month, year);
 		for(Contract contract : monthContracts) {
 			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
 					.getContractMonthRecap(new YearMonth(year, month));
@@ -105,7 +115,8 @@ public class PersonStampingRecap {
 		}
 
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager
+				.getTotalPersonDayInMonth(personDays, person, year, month);
 
 		LocalDate today = LocalDate.now();
 		//calcolo del valore valid per le stamping del mese (persistere??)
@@ -148,7 +159,8 @@ public class PersonStampingRecap {
 
 				if(stamp.markedByAdmin){
 
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+					StampModificationType smt = stampingDayRecapFactory
+							.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
 					stampModificationTypeSet.add(smt);
 				}
 
@@ -168,9 +180,9 @@ public class PersonStampingRecap {
 		}
 
 		this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
-		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
-		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
-		this.basedWorkingDays = personManager.basedWorkingDays(totalPersonDays);
+		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
+		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
+		this.basedWorkingDays = personManager.basedWorkingDays(personDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		
