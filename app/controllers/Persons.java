@@ -1021,7 +1021,7 @@ public class Persons extends Controller {
 		Person p = null;
 		for(Long id : peopleId){
 			p = personDao.getPersonById(id);
-			p.person = person;
+			p.personInCharge = person;
 			p.save();
 			person.people.add(p);
 		}
@@ -1034,7 +1034,7 @@ public class Persons extends Controller {
 
 		Person person = personDao.getPersonById(pId);
 		Person supervisor = personDao.getPersonInCharge(person);
-		person.person = null;
+		person.personInCharge = null;
 
 		supervisor.save();
 		person.save();

@@ -159,7 +159,7 @@ public class CompetenceUtility {
 		List<Person> personList;
 
 		QCompetence com = QCompetence.competence;
-		QPerson person = QPerson.person1;
+		QPerson person = QPerson.person;
 		QPersonShiftShiftType personShiftShiftType = QPersonShiftShiftType.personShiftShiftType;
 
 		personList = queryFactory.from(person)

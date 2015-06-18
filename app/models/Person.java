@@ -113,14 +113,14 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 * i successivi due campi servono per la nuova relazione tra Person e Person 
 	 * relativa ai responsabili
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="personInCharge", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("surname")
     public List<Person> people = new ArrayList<Person>();
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="person_id")
+    @JoinColumn(name="person_in_charge")
 	@Nullable
-    public Person person;
+    public Person personInCharge;
 	
 	/**
 	 * questo campo booleano serve a stabilire se una persona è un responsabile o no
