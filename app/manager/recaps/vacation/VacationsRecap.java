@@ -270,7 +270,7 @@ public class VacationsRecap {
 			if(intersection != null) {
 				days = DateUtility.daysInInterval(intersection);
 			}
-			if(vp.vacationCode.equals("21+3")){
+			if(vp.vacationCode.equals("21+3") || vp.vacationCode.description.equals("22+3")){
 				permissionDays = permissionDays + VacationsPermissionsDaysAccrued
 						.convertWorkDaysToPermissionDaysPartTime(days);
 				
@@ -324,7 +324,7 @@ public class VacationsRecap {
 						- filterAbsences(postPartum, intersection);
 				
 				//calcolo i giorni maturati col metodo di conversione
-				
+
 				if(vp.vacationCode.description.equals("26+4")) {
 					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
 							.convertWorkDaysToVacationDaysLessThreeYears(days);
@@ -336,6 +336,11 @@ public class VacationsRecap {
 				if(vp.vacationCode.description.equals("21+3")){
 					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
 							.converWorkDaysToVacationDaysPartTime(days);
+				}
+				if(vp.vacationCode.description.equals("22+3")){
+					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
+							.converWorkDaysToVacationDaysPartTimeMoreThanThreeYears(
+							days);
 				}
 			}
 		}
