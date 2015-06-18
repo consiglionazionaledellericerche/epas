@@ -158,17 +158,17 @@
 		     #{/else} 
 		  </p>
 		
-		  #{if personsWithVacationsProblems.size() > 0}
+		  #{if contractsWithVacationsProblems.size() > 0}
 		    <p>
 		      Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone: 
 		    </p>
 		    <ul>
-		      #{list items:personsWithVacationsProblems, as:'person'}
-		        <li><a href="@{Persons.edit(person.id)}">${person.surname} ${person.name}</a></li>
+		      #{list items:contractsWithVacationsProblems, as:'contract'}
+		        <li><a href="@{Persons.edit(person.id)}">Contratto di ${contract.person.surname} ${contract.person.name} iniziato il ${contract.beginContract}</a></li>
 		      #{/list}
 		    </ul>
 		    <p>
-		      Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto attuale.
+		      Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto.
 		    </p>
 		  #{/if}
 		  

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import play.Play;
 import play.db.jpa.Blob;
+import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
 import com.google.common.base.Function;
@@ -742,12 +743,12 @@ public class AbsenceManager {
 							, Optional.<LocalDate>absent(), false);
 
 			for(Absence absence : absenceList){
-				if(absence.absenceType.code.equals(absenceType.code))
-				{
+				if(absence.absenceType.code.equals(absenceType.code)) {
 					absence.delete();
 					pd.absences.remove(absence);
 					pd.isTicketForcedByAdmin = false;
 					deleted++;
+					pd.save();
 					log.info("Rimossa assenza del {} per {}", actualDate, person.getFullname());
 				}
 			}
@@ -757,6 +758,9 @@ public class AbsenceManager {
 			actualDate = actualDate.plusDays(1);
 		}
 
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		consistencyManager.updatePersonSituation(person, dateFrom);
 
