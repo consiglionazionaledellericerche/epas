@@ -318,7 +318,7 @@ public class CompetenceUtility {
 			//check for the absence inconsistencies
 			//------------------------------------------
 
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 
 			// if there are no events and it is not an holiday -> error
@@ -400,7 +400,7 @@ public class CompetenceUtility {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			Logger.debug("Prelevo il personDay %s per la persona %s", personShiftDay.date, person.surname);
 

@@ -315,13 +315,14 @@ public class VacationsRecap {
 			{
 				days = DateUtility.daysInInterval(intersection);
 			}
-			if(vp.vacationCode.equals("21+3")){
+			List<Absence> absences = accruedVacationDays(intersection, vr.contract);
+			if(vp.vacationCode.description.equals("21+3") || vp.vacationCode.description.equals("22+3")){
 				permissionDays = permissionDays + 
-						VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDaysPartTime(days);
+						VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDaysPartTime(days-absences.size());
 			}
 			else {
 				permissionDays = permissionDays + 
-						VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
+						VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days-absences.size());
 			}
 		}
 
@@ -373,6 +374,11 @@ public class VacationsRecap {
 				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.converWorkDaysToVacationDaysPartTime(
 						days-absences.size());
 			}
+			if(vp.vacationCode.description.equals("22+3")){
+				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.converWorkDaysToVacationDaysPartTimeMoreThanThreeYears(
+						days-absences.size());
+			}
+			
 
 		}
 

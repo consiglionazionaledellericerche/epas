@@ -389,13 +389,8 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @return
 	 */
 	public int totalHolidayWorkingTime(Integer year) {
-
-		int totalHolidayWorkingTime = 0;
-		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
-			totalHolidayWorkingTime += pd.timeAtWork;
-		}
-		return totalHolidayWorkingTime;
-				
+		return personManager.holidayWorkingTimeTotal(value, 
+				Optional.fromNullable(year), Optional.<Integer>absent());				
 	}
 	
 	/**
@@ -403,15 +398,8 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @return
 	 */
 	public int totalHolidayWorkingTimeAccepted(Integer year) {
-
-		int totalHolidayWorkingTimeAccepted = 0;
-		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
-			if( pd.acceptedHolidayWorkingTime ) {
-				totalHolidayWorkingTimeAccepted += pd.timeAtWork;
-			}
-		}
-
-		return totalHolidayWorkingTimeAccepted;
+		return personManager.holidayWorkingTimeAccepted(value, 
+				Optional.fromNullable(year), Optional.<Integer>absent());
 	}
 
 	/**
@@ -420,6 +408,6 @@ public class WrapperPerson implements IWrapperPerson {
 	 */
 	public List<PersonDay> holidyWorkingTimeDay(Integer year) {
 		return personDayDao.getHolidayWorkingTime(this.value, 
-				Optional.fromNullable(year));
+				Optional.fromNullable(year), Optional.<Integer>absent());
 	}
 }

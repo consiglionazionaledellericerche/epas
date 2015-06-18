@@ -71,7 +71,8 @@ public final class PersonDao extends DaoBase{
 				Optional.fromNullable( beginMonth.get().dayOfMonth().withMaximumValue() );
 		
 		JPQLQuery query = personQuery( Optional.<String>absent(), offices, false, 
-				beginMonth, endMonth, true, Optional.<CompetenceCode>absent()); 
+				beginMonth, endMonth, true, Optional.<CompetenceCode>absent(),
+				Optional.<Person>absent()); 
 		
 		return ModelQuery.simpleResults( query, person ).list();
 	}
@@ -100,7 +101,8 @@ public final class PersonDao extends DaoBase{
 				//JPQLQuery
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						onlyOnCertificate, Optional.<CompetenceCode>absent()),
+						onlyOnCertificate, Optional.<CompetenceCode>absent(),
+						Optional.<Person>absent()),
 				//Expression
 				person);
 	}
@@ -122,7 +124,8 @@ public final class PersonDao extends DaoBase{
 			Optional<String> name, 
 			Set<Office> offices,
 			boolean onlyTechnician, 
-			LocalDate start, LocalDate end) {
+			LocalDate start, LocalDate end,
+			Optional<Person> personInCharge) {
 
 		Preconditions.checkState(!offices.isEmpty());
 		Preconditions.checkNotNull(compCode);
@@ -132,7 +135,7 @@ public final class PersonDao extends DaoBase{
 		return ModelQuery.simpleResults(
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						true, Optional.fromNullable(compCode) ), person);
+						true, Optional.fromNullable(compCode), personInCharge), person);
 
 	}
 
@@ -380,6 +383,18 @@ public final class PersonDao extends DaoBase{
 		return query.count();
 	}
 	
+	
+	/**
+	 * 
+	 * @return il responsabile per la persona passata come parametro
+	 */
+	public Person getPersonInCharge(Person p){
+		final QPerson person = QPerson.person;
+		final JPQLQuery query = getQueryFactory().from(person).where(person.people.contains(p));
+		return query.singleResult(person);
+	}
+	
+	
 	/**
 	 * La query per la ricerca delle persone. 
 	 * Versione con JPQLQuery injettata per selezionare le fetch da utilizzare
@@ -436,7 +451,8 @@ public final class PersonDao extends DaoBase{
 			boolean onlyTechnician, 
 			Optional<LocalDate> start, Optional<LocalDate> end,
 			boolean onlyOnCertificate, 
-			Optional<CompetenceCode> compCode) {
+			Optional<CompetenceCode> compCode,
+			Optional<Person> personInCharge) {
 		
 		final QPerson person = QPerson.person;
 		final QContract contract = QContract.contract;
@@ -453,6 +469,9 @@ public final class PersonDao extends DaoBase{
 		
 		final BooleanBuilder condition = new BooleanBuilder();
 		
+		if(personInCharge.isPresent()){
+			condition.and(person.person.eq(personInCharge.get()));
+		}
 		filterOffices(condition, offices);
 		filterOnlyTechnician(condition, onlyTechnician);
 		filterName(condition, name);
@@ -462,6 +481,8 @@ public final class PersonDao extends DaoBase{
 		
 		return query.where(condition);
 	}
+	
+
 	
 	/**
 	 * Filtro sugli uffici.

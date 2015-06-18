@@ -261,7 +261,7 @@ public class ContractManager {
 
 		while( !actualMonth.isAfter(endMonth) )
 		{
-			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()));
 
 			for(PersonDay pd : pdList){
 

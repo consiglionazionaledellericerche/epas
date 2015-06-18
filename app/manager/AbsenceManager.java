@@ -399,7 +399,7 @@ public class AbsenceManager {
 				ar.setDayInReperibilityOrShift(true);				
 			}
 
-			PersonDay pd = 	personDayDao.getSinglePersonDay(person, date).orNull();
+			PersonDay pd = 	personDayDao.getPersonDay(person, date).orNull();
 
 			if(pd == null){
 				pd = new PersonDay(person, date);
@@ -685,10 +685,13 @@ public class AbsenceManager {
 	 */
 	private void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
 
-		PersonDay pd = personDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0);
-
-		if(pd == null)
+		Optional<PersonDay> option = personDayDao.getPersonDay(person, date);
+		PersonDay pd;
+		if ( option.isPresent() ) {
+			pd = option.get();
+		} else {
 			pd = new PersonDay(person, date);
+		}
 
 		IWrapperPersonDay wPd = wrapperFactory.create(pd);
 
@@ -728,7 +731,7 @@ public class AbsenceManager {
 		int deleted = 0;
 		while(!actualDate.isAfter(dateTo)){
 
-			List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
+			List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent());
 			PersonDay pd = FluentIterable.from(personDays).first().orNull();
 
 			//Costruisco se non esiste il person day

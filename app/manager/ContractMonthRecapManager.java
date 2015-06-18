@@ -627,10 +627,14 @@ public class ContractMonthRecapManager {
 	 */
 	private void setPersonDayInformation(ContractMonthRecap monthRecap, DateInterval validDataForPersonDay)
 	{
-		if(validDataForPersonDay!=null)
-		{
-			List<PersonDay> pdList = personDayDao.getPersonDayInPeriodDesc(monthRecap.person,
-					validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), true);
+		if(validDataForPersonDay!=null) {
+			
+			// TODO: implementare un metodo che no fa fetch di stampings... in 
+			// questo caso non servono.
+			
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriodDesc(
+					monthRecap.person, validDataForPersonDay.getBegin(), 
+					Optional.fromNullable(validDataForPersonDay.getEnd()));
 
 			//progressivo finale fine mese
 			for(PersonDay pd : pdList){
@@ -670,7 +674,8 @@ public class ContractMonthRecapManager {
 		if(validDataForMealTickets!=null)
 		{
 			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(monthRecap.person,
-					validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
+					validDataForMealTickets.getBegin(), 
+					Optional.fromNullable(validDataForMealTickets.getEnd()));
 
 			//buoni pasto utilizzati
 			for(PersonDay pd : pdList){

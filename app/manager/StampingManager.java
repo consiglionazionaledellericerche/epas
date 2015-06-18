@@ -146,7 +146,7 @@ public class StampingManager {
 
 		for(Person person : activePersonsInDay){
 			PersonDay personDay = null;
-			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
+			Optional<PersonDay> pd = personDayDao.getPersonDay(person, date);
 
 			if(pd.isPresent()) 
 			{
@@ -191,7 +191,7 @@ public class StampingManager {
 
 		log.debug("Sto per segnare la timbratura di {}", person.getFullname());
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, stamping.dateTime.toLocalDate());
 		if(!pd.isPresent()){
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
@@ -312,7 +312,7 @@ public class StampingManager {
 
 			PersonDay personDay = null;
 			person = personDao.getPersonById(person.id);
-			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayPresence); 
+			Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){
 				personDay = new PersonDay(person, dayPresence);
@@ -352,7 +352,7 @@ public class StampingManager {
 		for(Person p : activePersons)
 		{
 			List<PersonDay> pdList = personDayDao
-					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
 
 			for(PersonDay pd : pdList){
 				if(pd.isTicketForcedByAdmin) {

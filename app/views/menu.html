@@ -3,7 +3,7 @@
         	<li><a href="?month=${templateUtility.computePreviousMonth(currentData.month)}&year=${templateUtility.computePreviousYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-left"></i></span></a></li>
       	  </ul>
 #{/if}
-#{if switchYear}
+#{if switchYear }
 		
 		<ul id="nav-year" class="nav navbar-nav">
         	<li class="dropdown">
@@ -30,12 +30,12 @@
         	</li>
       	  </ul>
 #{/if}
-#{ if switchYear && switchMonth}
+#{ if switchYear && switchMonth }
       	  <ul class="nav navbar-nav">
         	<li><a href="?month=${templateUtility.computeNextMonth(currentData.month)}&year=${templateUtility.computeNextYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-right"></i></i></a></li>
       	  </ul>	
 #{/if}
-#{if switchDay}
+#{if switchDay }
       	  	#{form @SwitchTemplate.updateDay(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
       	  	<div class="form-group">
       	  	<!-- Lista giorni -->

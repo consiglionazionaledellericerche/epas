@@ -41,7 +41,7 @@ public class RemoveInvalidStampingsJob extends Job {
 	
 	public void doJob(){
 		Logger.info("Inizio Job RemoveInvalidStampingsJob per %s,Dal %s al %s",person,begin,end);
-		List<PersonDay> persondays = personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end), true);
+		List<PersonDay> persondays = personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end));
 		for(PersonDay pd : persondays){
 			personDayManager.populatePersonDay(wrapperFactory.create(pd));
 			for(Stamping stamping : pd.stampings){

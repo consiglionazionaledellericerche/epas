@@ -47,8 +47,6 @@ public class Charts extends Controller{
 	private static PersonDao personDao;
 	@Inject
 	private static CompetenceDao competenceDao;
-	@Inject
-	private static AbsenceDao absenceDao;
 
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
 
@@ -131,12 +129,13 @@ public class Charts extends Controller{
 		absenceCode.add("92");
 		absenceCode.add("91");
 		absenceCode.add("111");
-		LocalDate beginYear = new LocalDate(year, 1,1);
-		LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
-		Long missioniSize = absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92");
-		Long riposiCompensativiSize = absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
-		Long malattiaSize = absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
-		Long altreSize = absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
+//		LocalDate beginYear = new LocalDate(year, 1,1);
+//		LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
+		// FIXME da rifattorizzare tutta questa parte e renderla funzione dell'office
+		long missioniSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92");
+		long riposiCompensativiSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
+		long malattiaSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
+		long altreSize = 0; //absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
 
 		render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
 
