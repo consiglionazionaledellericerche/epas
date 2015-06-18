@@ -10,7 +10,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
-import manager.PersonManager;
 import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingRecap;
@@ -50,8 +49,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 public class Stampings extends Controller {
 
 	@Inject
-	private static PersonManager personManager;
-	@Inject
 	private static PersonStampingRecapFactory stampingsRecapFactory;
 	@Inject
 	private static PersonDao personDao;
@@ -76,17 +73,20 @@ public class Stampings extends Controller {
 
 	public static void stampings(Integer year, Integer month) {
 
-		Person person = Security.getUser().get().person;
+		
+		IWrapperPerson person = wrapperFactory
+				.create(Security.getUser().get().person);
 
-		if(!personManager.isActiveInMonth(person, new YearMonth(year,month), false)) {
+		if(! person.isActiveInMonth(new YearMonth(year, month))) {
 			flash.error("Non esiste situazione mensile per il mese di %s %s", 
 					DateUtility.fromIntToStringMonth(month), year);
 
-			YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
+			YearMonth last = person.getLastActiveMonth();
 			stampings(last.getYear(), last.getMonthOfYear());
 		}
 
-		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
+		PersonStampingRecap psDto = stampingsRecapFactory
+				.create(person.getValue(), year, month);
 
 		render(psDto) ;
 	}
@@ -95,30 +95,28 @@ public class Stampings extends Controller {
 	public static void personStamping(Long personId, int year, int month) {
 
 		if (personId == null) {
-
 			personId = Security.getUser().get().person.getId();
 			year = LocalDate.now().getYear();
 			month = LocalDate.now().getMonthOfYear();
 		}
-
 		if (year == 0 || month == 0) {
 
 			year = LocalDate.now().getYear();
 			month = LocalDate.now().getMonthOfYear();
 		}
-
+		
 		Person person = personDao.getPersonById(personId);
-
-		if(person == null){
-			flash.error("Persona inesistente in anagrafica");
-			Application.indexAdmin();
-		}
-
+		Preconditions.checkNotNull(person); 
+		
 		rules.checkIfPermitted(person.office);
-
-		if(!personManager.isActiveInMonth(person, new YearMonth(year,month), false)) {
+		
+		IWrapperPerson wPerson = wrapperFactory.create(person);
+		
+		if(! wPerson.isActiveInMonth(new YearMonth(year,month) )) {
+			
 			flash.error("Non esiste situazione mensile per il mese di %s", 
 					person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+			
 			YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
 			personStamping(personId, last.getYear(), last.getMonthOfYear());
 		}

@@ -37,6 +37,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 
 /**
@@ -108,7 +109,7 @@ public class ConsistencyManager {
 		List<Person> personList = Lists.newArrayList();
 
 		if(person.isPresent() && user.isPresent()){
-			if(personManager.isAllowedBy(user.get(), person.get()))
+			//if(personManager.isAllowedBy(user.get(), person.get()))
 				personList.add(person.get());
 		} else {
 			personList = personDao.list(Optional.<String>absent(), offices,
@@ -165,6 +166,8 @@ public class ConsistencyManager {
 				Optional.fromNullable(from), 
 				Optional.fromNullable(today));
 		
+		IWrapperPerson wPerson = wrapperFactory.create(person);
+		
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, from, 
 				Optional.of(today));
 
@@ -180,7 +183,7 @@ public class ConsistencyManager {
 		
 		while(date.isBefore(today)) {
 			
-			if(!personManager.isActiveInDay(date, person)) {
+			if(! wPerson.isActiveInDay(date) ) {
 				date = date.plusDays(1);
 				previous = null;
 				continue;

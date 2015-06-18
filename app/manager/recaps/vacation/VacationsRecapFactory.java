@@ -63,6 +63,12 @@ public class VacationsRecapFactory {
 		if ( !c.hasMonthRecapForVacationsRecap( year )) {
 			return Optional.<VacationsRecap>absent();
 		}
+		
+		if(actualDate.getYear() > year) {
+			// FIXME: deve essere il chiamante a non passare la data di oggi
+			// e qui la inizializzo in modo appropriato.
+			actualDate = new LocalDate(year, 12, 31);
+		}
 	
 		VacationsRecap vacationRecap = new VacationsRecap(wrapperFactory, 
 				absenceDao, absenceTypeDao,	absenceTypeManager, confYearManager, 

@@ -104,7 +104,7 @@ public class VacationsRecap {
 		this.absenceTypeManager = absenceTypeManager;
 		
 		if(accruedDate.isPresent()) {
-			Preconditions.checkArgument(year == accruedDate.get().getYear());
+			//Preconditions.checkArgument(year == accruedDate.get().getYear());
 		} else {
 			accruedDate = Optional.fromNullable(LocalDate.now());
 		}
@@ -183,6 +183,57 @@ public class VacationsRecap {
 					- this.permissionUsed;
 		}
 
+	}
+	
+	public List<Absence> listVacationCurrentYearUsed() {
+		List<Absence> absences = Lists.newArrayList();
+		absences.addAll(list32RequestYear);
+		absences.addAll(list31NextYear);
+		absences.addAll(list37NextYear);
+		if (this.contract.sourceDate != null && 
+				this.contract.sourceDate.getYear() == year) {
+			vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
+			vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
+			permissionUsed += this.contract.sourcePermissionUsed;
+		}
+		
+		return absences;
+	}
+	
+	public List<Absence> listVacationLastYearUsed() {
+		List<Absence> absences = Lists.newArrayList();
+		absences.addAll(list32PreviouYear);
+		absences.addAll(list31RequestYear);
+		absences.addAll(list37RequestYear);
+		return absences;
+	}
+
+	public List<Absence> listPermissionUsed() {
+		return list94RequestYear;
+	}
+	
+	public int sourceVacationCurrentYearUsed() {
+		if (this.contract.sourceDate != null && 
+				this.contract.sourceDate.getYear() == year) {
+			return this.contract.sourceVacationCurrentYearUsed;
+		}
+		return 0;
+	}
+	
+	public int sourceVacationLastYearUsed() {
+		if (this.contract.sourceDate != null && 
+				this.contract.sourceDate.getYear() == year) {
+			return this.contract.sourceVacationLastYearUsed;
+		}
+		return 0;
+	}
+	
+	public int sourcePermissionUsed() {
+		if (this.contract.sourceDate != null && 
+				this.contract.sourceDate.getYear() == year) {
+			return this.contract.sourcePermissionUsed;
+		}
+		return 0;
 	}
 
 	/**
@@ -327,7 +378,7 @@ public class VacationsRecap {
 		// Il contratto deve essere attivo nell'anno...
 		Preconditions.checkNotNull(requestYearInterval);
 		LocalDate dateFrom = requestYearInterval.getBegin();
-		LocalDate dateTo = requestYearInterval.getBegin();
+		LocalDate dateTo = requestYearInterval.getEnd();
 		if(previousYearInterval != null) {
 			dateFrom = previousYearInterval.getBegin();
 		}

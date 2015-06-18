@@ -103,8 +103,9 @@ public class PersonStampingRecap {
 		//Costruzione dati da renderizzare
 		
 		//Contratti del mese
-		List<Contract> monthContracts = personManager
-				.getMonthContracts(person,month, year);
+		List<Contract> monthContracts = wrapperFactory
+				.create(person).getMonthContracts(year, month);
+		
 		for(Contract contract : monthContracts) {
 			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
 					.getContractMonthRecap(new YearMonth(year, month));

@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
+import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
@@ -45,6 +46,8 @@ public class VacationsAdmin extends Controller{
 	private static VacationManager vacationManager;
 	@Inject
 	private static SecurityRules rules;
+	@Inject
+	private static ContractDao contractDao;
 
 	public static void list(Integer year, String name, Integer page){
 
@@ -104,28 +107,18 @@ public class VacationsAdmin extends Controller{
 				contractsWithVacationsProblems, year, simpleResults, name);
 	}
 
+	public static void vacationsCurrentYear(Long contractId, Integer anno){
 
-
-	public static void vacationsCurrentYear(Long personId, Integer anno){
-
-		Person person = personDao.getPersonById(personId);
-		if( person == null ) {
+		Contract contract = contractDao.getContractById(contractId);
+		if( contract == null ) {
 			error();	/* send a 500 error */
 		}
 
-		rules.checkIfPermitted(person.office);
-
-		//FIXME tutti questi metodi con parametro anno vanno applicati sul
-		//contratto lastContractInYear, e non sul currentContract. Inoltre 
-		//potrebbe essere necessario renderizzare tutti i contratti attivi nell
-		//anno. 
-		Optional<Contract> contract = wrapperFactory
-				.create(person).getCurrentContract();
-
-		Preconditions.checkState(contract.isPresent());
+		rules.checkIfPermitted(contract.person.office);
 
 		Optional<VacationsRecap> vr = vacationsFactory
-				.create(anno, contract.get(), LocalDate.now(), true);
+				.create(anno, contract, LocalDate.now(), true);
+
 
 		Preconditions.checkState(vr.isPresent());
 		
@@ -134,24 +127,17 @@ public class VacationsAdmin extends Controller{
 		renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
 	}
 
+	public static void vacationsLastYear(Long contractId, Integer anno){
 
-
-	public static void vacationsLastYear(Long personId, Integer anno){
-
-		Person person = personDao.getPersonById(personId);
-		if( person == null ) {
+		Contract contract = contractDao.getContractById(contractId);
+		if( contract == null ) {
 			error();	/* send a 500 error */
 		}
 
-		rules.checkIfPermitted(person.office);
-
-		Optional<Contract> contract = wrapperFactory
-				.create(person).getCurrentContract();
-
-		Preconditions.checkState(contract.isPresent());
+		rules.checkIfPermitted(contract.person.office);
 
 		Optional<VacationsRecap> vr = vacationsFactory
-				.create(anno, contract.get(), LocalDate.now(), true);
+				.create(anno, contract, LocalDate.now(), true);
 
 		Preconditions.checkState(vr.isPresent());
 		
@@ -161,21 +147,18 @@ public class VacationsAdmin extends Controller{
 	}
 
 
-	public static void permissionCurrentYear(Long personId, Integer anno){
+	public static void permissionCurrentYear(Long contractId, Integer anno){
 
-		Person person = personDao.getPersonById(personId);
-		if( person == null ) {
+		Contract contract = contractDao.getContractById(contractId);
+		if( contract == null ) {
 			error();	/* send a 500 error */
 		}
-		rules.checkIfPermitted(person.office);
 
-		Optional<Contract> contract = wrapperFactory
-				.create(person).getCurrentContract();
-
-		Preconditions.checkState(contract.isPresent());
+		rules.checkIfPermitted(contract.person.office);
 
 		Optional<VacationsRecap> vr = vacationsFactory
-				.create(anno, contract.get(), LocalDate.now(), true);
+				.create(anno, contract, LocalDate.now(), true);
+
 		
 		Preconditions.checkState(vr.isPresent());
 		
