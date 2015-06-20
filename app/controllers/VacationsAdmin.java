@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,6 +24,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
@@ -49,20 +51,32 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	private static ContractDao contractDao;
 
-	public static void list(Integer year, String name, Integer page){
+	public static void list(Integer year, String name, Integer page, Long officeId){
+
+		
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		if(officeId == null) {
+			if(offices.size() == 0) {
+				flash.error("L'user non dispone di alcun diritto di visione "
+						+ "delle sedi. Operazione annullata.");
+				Application.indexAdmin();
+			}
+			officeId = offices.iterator().next().id;
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
 
 		if(page==null) {
 			page = 0;
 		}
-		
+
 		LocalDate beginYear = new LocalDate(year, 1, 1);
 		LocalDate endYear = new LocalDate(year, 12, 31);
 		DateInterval yearInterval = new DateInterval(beginYear, endYear);
-		
 
 		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
-				officeDao.getOfficeAllowed(Security.getUser().get()),
-				false, beginYear, endYear, true);
+				Sets.newHashSet(office), false, beginYear, endYear, true);
 
 		List<Person> personList = simpleResults.paginated(page).getResults();
 
@@ -95,8 +109,6 @@ public class VacationsAdmin extends Controller{
 			}
 		}
 
-		Office office = Security.getUser().get().person.office;
-
 		LocalDate expireDate =  vacationManager
 				.vacationsLastYearExpireDate(year, office);
 
@@ -104,7 +116,7 @@ public class VacationsAdmin extends Controller{
 				.isVacationsLastYearExpired(year, expireDate);
 
 		render(vacationsList, isVacationLastYearExpired, 
-				contractsWithVacationsProblems, year, simpleResults, name);
+				contractsWithVacationsProblems, year, simpleResults, name, offices, office);
 	}
 
 	public static void vacationsCurrentYear(Long contractId, Integer anno){
