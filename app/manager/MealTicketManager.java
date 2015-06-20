@@ -11,6 +11,7 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.enumerate.Parameter;
+import net.sf.ehcache.config.TerracottaConfiguration.Consistency;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -31,25 +32,24 @@ import dao.wrapper.IWrapperFactory;
  */
 public class MealTicketManager {
 
-
 	@Inject
 	public MealTicketManager(PersonDao personDao,
 			MealTicketDao mealTicketDao, 
 			ConfGeneralManager confGeneralManager,
-			ContractMonthRecapManager contractMonthRecapManager,
+			ConsistencyManager consistencyManager,
 			IWrapperFactory wrapperFactory) {
 		this.personDao = personDao;
 		this.mealTicketDao = mealTicketDao;
 		this.confGeneralManager = confGeneralManager;
-		this.contractMonthRecapManag = contractMonthRecapManager;
+		this.consistencyManager = consistencyManager;
 		this.wrapperFactory = wrapperFactory;
 	}
 
 	private final PersonDao personDao;
 	private final MealTicketDao mealTicketDao;
 	private final ConfGeneralManager confGeneralManager;
-	private final ContractMonthRecapManager contractMonthRecapManag;
 	private final IWrapperFactory wrapperFactory;
+	private final ConsistencyManager consistencyManager;
 
 	/**
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
@@ -111,21 +111,20 @@ public class MealTicketManager {
 		List<MealTicket> contractMealTicketsDesc = mealTicketDao
 				.getOrderedMealTicketInContract(previousContract);
 		
+		LocalDate pastDate = LocalDate.now();
 		for(int i = 0; i < recap.get().remainingMealTickets; i++) {
 
 			MealTicket ticketToChange = contractMealTicketsDesc.get(i);
+			if(ticketToChange.date.isBefore(pastDate)) {
+				pastDate = ticketToChange.date;
+			}
 			ticketToChange.contract = contract;
 			ticketToChange.date = contract.beginContract;
 			ticketToChange.save();
 			mealTicketsTransfered++;
 		}
 		
-		if (mealTicketsTransfered > 0) {
-			contractMonthRecapManag.populateContractMonthRecap(contract, 
-					Optional.<YearMonth>absent());
-			contractMonthRecapManag.populateContractMonthRecap(previousContract, 
-					Optional.<YearMonth>absent());
-		}
+		consistencyManager.updatePersonSituation(contract.person, pastDate);
 
 		return mealTicketsTransfered;
 	}
