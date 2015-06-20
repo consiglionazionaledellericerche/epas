@@ -290,8 +290,6 @@ when
  		"Stampings.missingStamping",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
-      
-      	"VacationsAdmin.list",
         
         "YearlyAbsences.showGeneralMonthlyAbsences",
         "YearlyAbsences.yearlyAbsences",
@@ -322,7 +320,8 @@ when
         "PrintTags.showTag",
 		        
         "Stampings.personStamping",
-        
+
+		"VacationsAdmin.list",        
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
@@ -366,6 +365,7 @@ when
 		
         "Stampings.personStamping",
         
+        "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
