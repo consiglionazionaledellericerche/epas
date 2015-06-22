@@ -322,6 +322,10 @@
 			     Riposi compensativi usati ${contract.value.sourceDate.getYear()} 
 			     <strong class="text-error">${contract.value.sourceRecoveryDayUsed}</strong><br>
 			   #{/if}
+			   #{if contract.value.sourceRemainingMealTicket!=null && contract.value.sourceRemainingMealTicket>0}
+			     Buoni pasto residui
+			   <strong class="text-error">${contract.value.sourceRemainingMealTicket}</strong><br>
+			   #{/if}
 			   
 			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Modifica</a>
 			

@@ -567,6 +567,8 @@ public class ConsistencyManager {
 			cmr.vacationCurrentYearUsed = contract.getValue().sourceVacationCurrentYearUsed;
 			cmr.recoveryDayUsed = contract.getValue().sourceRecoveryDayUsed;
 			cmr.permissionUsed = contract.getValue().sourcePermissionUsed;
+			cmr.buoniPastoDaInizializzazione = contract.getValue().sourceRemainingMealTicket;
+			cmr.remainingMealTickets = contract.getValue().sourceRemainingMealTicket;
 			cmr.save();
 			contract.getValue().contractMonthRecaps.add(cmr);
 			contract.getValue().save();
@@ -597,7 +599,7 @@ public class ConsistencyManager {
 		cmr.save();
 		
 		// Informazioni relative ai residui		
-				 
+		
 		contractMonthRecapManager.computeResidualModule(cmr, yearMonthToCompute, 
 				new LocalDate().minusDays(1));
 		

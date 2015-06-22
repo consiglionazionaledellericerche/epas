@@ -171,6 +171,7 @@ public class ContractMonthRecapManager {
 			requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 
 			// TODO: initMealTickets da source contract
+			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		}
 
 		LocalDate today = LocalDate.now();
@@ -329,7 +330,7 @@ public class ContractMonthRecapManager {
 		}
 		
 		//Inizializzazione buoni pasto
-		if (recapPreviousMonth.isPresent()) {
+		if (cmr.buoniPastoDaInizializzazione == 0 && recapPreviousMonth.isPresent()) {
 			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
 		}
 		
@@ -425,7 +426,9 @@ public class ContractMonthRecapManager {
 			
 			//residuo
 			monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
-					+ monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
+					+ monthRecap.buoniPastoDaInizializzazione
+					+ monthRecap.buoniPastoConsegnatiNelMese 
+					- monthRecap.buoniPastoUsatiNelMese;
 						
 		}
 	}

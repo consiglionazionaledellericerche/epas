@@ -59,6 +59,9 @@ public class Contract extends BaseModel {
 
 	@Column(name="source_remaining_minutes_current_year")
 	public Integer sourceRemainingMinutesCurrentYear = null;
+	
+	@Column(name="source_remaining_meal_ticket")
+	public Integer sourceRemainingMealTicket = null;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")

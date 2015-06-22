@@ -56,6 +56,9 @@ public class ContractMonthRecap extends BaseModel {
 	 * FONTI DELL'ALGORITMO RESIDUI
 	 **************************************************************************/
 	
+	@Column(name="s_r_bp_init")
+	public int buoniPastoDaInizializzazione = 0;
+	
 	@Column(name="s_r_bp")
 	public int buoniPastoDalMesePrecedente = 0;
 	
@@ -198,6 +201,7 @@ public class ContractMonthRecap extends BaseModel {
 		
 		//FONTI DELL'ALGORITMO RESIDUI
 
+		this.buoniPastoDaInizializzazione = 0;
 		this.buoniPastoDalMesePrecedente = 0;
 		this.buoniPastoConsegnatiNelMese = 0;
 		this.buoniPastoUsatiNelMese = 0;
