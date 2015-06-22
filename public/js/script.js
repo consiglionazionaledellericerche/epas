@@ -7,6 +7,14 @@ $(function($){
 		
 		this.find('#datatable-test').dataTable();
 		
+		// Quando ridisegno la datatables devo rieseguire la initepas per inizializzare
+		// javascript sulle linee visualizzate per la prima volta. (esempio next page)
+		this.find('#datatable-test').on( 'draw.dt', function () {
+			var $this = $(this);
+		    /* alert( 'Table redrawn' ); */
+		    $this.initepas();
+		} );
+		
 		this.find('input[datepicker-year]').datepicker({
 			  format: "yyyy-mm-dd",
 			  startView: 2,
