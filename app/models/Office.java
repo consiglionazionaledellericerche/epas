@@ -126,5 +126,4 @@ public class Office extends BaseModel{
 		cds = Strings.isNullOrEmpty(office.cds) ? cds : office.cds;
 		code = Strings.isNullOrEmpty(office.code) ? code : office.code;
 	}
-	
 }

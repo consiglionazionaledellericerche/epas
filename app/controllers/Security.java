@@ -118,7 +118,7 @@ public class Security extends Secure.Security {
 			Logger.info("user %s successfully logged in from ip %s", user.username,
 					Http.Request.current().remoteAddress);
 			
-//			Logger.info("headers request %s", Http.Request.current().headers);
+			Logger.info("headers request %s", Http.Request.current().headers);
 			return true;
 		}
 

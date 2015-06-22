@@ -6,8 +6,10 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
+import models.Office;
 import play.Logger;
 import play.cache.Cache;
+import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 import cnr.sync.consumers.OfficeConsumer;
@@ -18,10 +20,14 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
+import dao.OfficeDao;
+
 
 @With( {Resecure.class, RequestInit.class} )
 public class Import extends Controller{
 	
+	@Inject
+	private static OfficeDao officeDao;
 	@Inject
 	private static OfficeConsumer officeConsumer;
 	@Inject
@@ -46,16 +52,16 @@ public class Import extends Controller{
 		render(importedOffices);
 	}		
 	
-	public static void importOffices(final List<Integer> offices){
+	public static void importOffices(@Required final List<Integer> offices){
 		
-		if(offices == null ){
+		if(validation.hasErrors()){
 			flash.error("Selezionare almeno una Sede da importare");
 			officeList();
 		}
 		
 		List<SeatDTO> importedOffices = Cache.get(IMPORTED_OFFICES, List.class);
 		
-		if(importedOffices == null){
+		if(importedOffices == null ){
 			
 			try {
 				importedOffices = officeConsumer.getOffices().get();
@@ -73,10 +79,19 @@ public class Import extends Controller{
 					}
 				});
 		
-		Logger.info("id istituti: %s", filteredOffices);
 		restOfficeManager.saveImportedSeats(filteredOffices);
 		
 		Offices.showOffices();
 	}
+	
+	public static void syncSeatPeople(@Required Long id){
+		if(validation.hasErrors()){
+			flash.error("Impossibile effettuare la sincronizzazione della sede");
+			Offices.showOffices();
+		}
+		Office seat = officeDao.getOfficeById(id);
+		
+	}
+	
 
 }
