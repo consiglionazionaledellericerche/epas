@@ -164,7 +164,8 @@ public class CompetenceManager {
 	 * @param year
 	 * @param numeroOre
 	 * @param officeId
-	 * @return true se è stato possibile inserire un aggiornamento per le ore di straordinario totali per l'ufficio office nell'anno year
+	 * @return true se è stato possibile inserire un aggiornamento per le ore 
+	 * di straordinario totali per l'ufficio office nell'anno year
 	 */
 	public boolean saveOvertime(Integer year, String numeroOre, Long officeId){
 		Office office = officeDao.getOfficeById(officeId);
@@ -208,8 +209,10 @@ public class CompetenceManager {
 	 * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su orario di lavoro, straordinario,
 	 * riposi compensativi per l'anno year e il mese month per le persone dell'ufficio office
 	 */
-	public Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
-			String name, Office office, LocalDate beginMonth, SimpleResults<Person> simpleResults, CompetenceCode code){
+	public Table<Person, String, Integer> composeTableForOvertime(int year, 
+			int month, Integer page, 
+			String name, Office office, LocalDate beginMonth, 
+			SimpleResults<Person> simpleResults, CompetenceCode code){
 
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;	
@@ -221,14 +224,16 @@ public class CompetenceManager {
 			Integer difference = 0;
 			Integer overtime = 0;
 
-			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, 
+					beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
 				timeAtWork = timeAtWork + pd.timeAtWork;
 				difference = difference +pd.difference;
 			}			
-			Optional<Competence> comp = competenceDao.getCompetence(p, year, month, code);
+			Optional<Competence> comp = competenceDao
+					.getCompetence(p, year, month, code);
 			if(comp.isPresent())
 				overtime = comp.get().valueApproved;
 			else
@@ -290,7 +295,8 @@ public class CompetenceManager {
 	 * @param competenceCode
 	 * @return true se avviene correttamente il cambiamento della lista di competenze attive per la persona Person passata come parametro
 	 */
-	public boolean saveNewCompetenceEnabledConfiguration(Map<String, Boolean> competence, List<CompetenceCode> competenceCode, Person person){
+	public boolean saveNewCompetenceEnabledConfiguration(Map<String, Boolean> competence,
+			List<CompetenceCode> competenceCode, Person person){
 		for(CompetenceCode code : competenceCode){
 			boolean value = false;
 			if (competence.containsKey(code.code)) {
@@ -298,15 +304,19 @@ public class CompetenceManager {
 				log.info("competence {} is {}",  code.code, value);
 			}
 			if (!value){
-				if(person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
-					person.competenceCode.remove(competenceCodeDao.getCompetenceCodeById(code.id));
+				if(person.competenceCode
+						.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
+					person.competenceCode
+					.remove(competenceCodeDao.getCompetenceCodeById(code.id));
 				else
 					continue;
 			} else { 
-				if(person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
+				if(person.competenceCode
+						.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
 					continue;
 				else
-					person.competenceCode.add(competenceCodeDao.getCompetenceCodeById(code.id));
+					person.competenceCode
+					.add(competenceCodeDao.getCompetenceCodeById(code.id));
 			}
 
 		}		
