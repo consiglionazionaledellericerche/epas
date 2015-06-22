@@ -17,6 +17,14 @@ global models.User currentOperator;
 *
 */
 
+/*
+* rule isPermitted
+* when:
+* $o: Office()
+* $uro: UserRoleOffice(office == $o) from currentUser.userRoleOffices
+* $p: Permission(description == "editPersonDay") from $uro.role.permissions
+*/
+
 rule AnyUser when
   $c: PermissionCheck(action in (
      	"Application.index",
