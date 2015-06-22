@@ -5,8 +5,13 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
-		this.find('#datatable-test').dataTable();
-		
+		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
+		//il plugin responsive abilitato sulla tabella(sono incompatibili)
+		this.find('#datatable-test').DataTable( {
+	        dom: 'Rlfrtip', //per drag drop colonne
+	        "scrollX": true 
+	    } );
+
 		// Quando ridisegno la datatables devo rieseguire la initepas per inizializzare
 		// javascript sulle linee visualizzate per la prima volta. (esempio next page)
 		this.find('#datatable-test').on( 'draw.dt', function () {
