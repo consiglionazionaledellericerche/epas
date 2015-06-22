@@ -94,23 +94,20 @@
 		        <!-- ferie e permessi fatti -->
 		        <td>${vacationsRecap.person.surname} ${vacationsRecap.person.name}</td>
 		        
-		        <td>
-		          <a data-toggle="modal" 
-		             href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
+		        <td data-order="${vacationsRecap.vacationDaysLastYearUsed}">
+		          <a href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
 					${vacationsRecap.vacationDaysLastYearUsed}
 			      </a> 
 		        </td>
 		        
-		        <td>
-		          <a data-toggle="modal" 
-		             href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
+		        <td data-order="${vacationsRecap.vacationDaysCurrentYearUsed}">
+		          <a href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
 					${vacationsRecap.vacationDaysCurrentYearUsed}
 				  </a>
 				</td>
 				
-				<td>
-		          <a data-toggle="modal" 
-		             href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
+				<td data-order="${vacationsRecap.permissionUsed}">
+		          <a href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
 					${vacationsRecap.permissionUsed}
 				  </a>
 		        </td>
