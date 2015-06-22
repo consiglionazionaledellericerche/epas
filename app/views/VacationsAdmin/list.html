@@ -13,6 +13,31 @@
 
 #{/set}
 
+<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
+<div class="container-fluid">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@VacationsAdmin.list(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <input type="hidden" name="year" value="${year}"/>
+			<input type="hidden" name="name" value="${name}">	        
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+      </div>
+</div>
+<!-- FINE FILTRO OFFICE -->
+
 <div class="container-fluid">
 
   <div class="panel panel-info">
@@ -21,73 +46,50 @@
     </div>
     <div class="panel-body">
 	
-        <div class="col-xs-5">
-          #{form action:@VacationsAdmin.list()	,  
-          method:'GET', autocomplete:'off',
-          'data-reload':'#results'}
-            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
-            <i class="icon-search icon-large"></i>
-            <input type="hidden" name="year" value="${year}"/>
-         #{/form}
-        </div>
- 
-        <section id="results">
-	      
-	      <div class="col-xs-7">
-	        <ul class="pagination">
 
-	        #{if simpleResults.totalPage > 0}
-  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	            #{if simpleResults.page==indexPage}
-  	             <li class="active"><a href="#">${indexPage+1}</a></li>
-  	            #{/if}
-  	            #{else}
-  	              <li><a href="@{VacationsAdmin.list(year, name, indexPage)}">${indexPage+1}</a></li>
-  	            #{/else}
-	          #{/list}
-	        #{/if}
-	        #{else}
-	          <br>
-	        #{/else}  
-
-            </ul>
-          </div>
-		  
-
- 
-		  <div class="col-xs-12">
-		  <table id="tabella-ferie" class="table table-condensed table-hover center">
-		    <thead>
-		      <tr>
-		        <th rowspan="2">Nome</th>
-		        <th colspan="2" class="warning">Ferie fatte</th>
-		        <th rowspan="2" class="warning">Permessi legge<br>937/77 fatti</th>
-		        <th colspan="5" class="success">Residuo</th>
-		        <th colspan="2" class="danger">Limiti utilizzo residui<br>per l'anno ${year}</th>
-		      </tr>
-		      <tr>
-		        <th>${year-1}<br>anno precedente</th>
-		        <th>${year}<br>anno richiesto</th>
-		        <th>
+	<table id="datatable-test" class="table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Ferie Fatte ${year-1}</th>
+                <th>Ferie Fatte ${year}</th>
+                <th>Permessi Fatti ${year}</th>
+                <th>
 		          Ferie ${year-1}<br>
-		          #{if isVacationLastYearExpired}
-		            <span class="glyphicon glyphicon-remove" style="color: red;"></span>
-		          #{/if}
-		          #{else}
-		            <span class="glyphicon glyphicon-ok" style="color: green;"></span>
-		          #{/else}
+		          #{if isVacationLastYearExpired}<span class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
+		          #{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
 		        </th>
-		        <th>Ferie ${year}<br>Residue Totali</th>
+                <th>Ferie ${year}<br>Residue Totali</th>
 		        <th>Ferie ${year}<br>Residue Maturate</th>
 		        <th>Permessi<br>Residui Totali</th>
 		        <th>Permessi<br>Residui Maturati</th>
-		        <th>Inizio</th>
-		        <th>Fine</th>
-		      </tr>
-		    </thead>
-		    
-		    <tbody>
-		      #{list items:vacationsList, as:'vacationsRecap'}
+		        <th>Limite <br>Iniziale</th>
+		        <th>Liminte <br>Finale</th>
+            </tr>
+        </thead>
+ 
+        <tfoot>
+             <tr>
+                <th>Nome</th>
+                <th>Ferie Fatte ${year-1}</th>
+                <th>Ferie Fatte ${year}</th>
+                <th>Permessi Fatti ${year}</th>
+                <th>
+		          Ferie ${year-1}<br>
+		          #{if isVacationLastYearExpired}<span class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
+		          #{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
+		        </th>
+                <th>Ferie ${year}<br>Residue Totali</th>
+		        <th>Ferie ${year}<br>Residue Maturate</th>
+		        <th>Permessi<br>Residui Totali</th>
+		        <th>Permessi<br>Residui Maturati</th>
+		        <th>Limite <br>Iniziale</th>
+		        <th>Liminte <br>Finale</th>
+            </tr>
+        </tfoot>
+ 
+        <tbody>
+        		      #{list items:vacationsList, as:'vacationsRecap'}
 		      <tr>
 		        <!-- ferie e permessi fatti -->
 		        <td>${vacationsRecap.person.surname} ${vacationsRecap.person.name}</td>
@@ -142,10 +144,12 @@
 		       
 		      </tr>
 		      #{/list}
-		    
-		    </tbody>
-		  
-		  </table>
+        
+        </tbody>
+    </table>
+          
+
+
 		  
 	  
 		  <p>
@@ -174,7 +178,7 @@
 		  
 		  </div>
 
-       </section> 
+
   
     </div> <!-- end panel body -->
   </div> <!-- end panel -->

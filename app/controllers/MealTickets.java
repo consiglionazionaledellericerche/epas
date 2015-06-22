@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.ConsistencyManager;
 import manager.ContractMonthRecapManager;
 import manager.MealTicketManager;
 import manager.recaps.mealTicket.BlockMealTicket;
@@ -54,9 +55,9 @@ public class MealTickets  extends Controller {
 	@Inject
 	private static ContractMonthRecapDao contractMonthRecapDao;
 	@Inject
-	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
 	private static ContractDao contractDao;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 	public static void recapMealTickets(String name, Integer page, Integer max, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
@@ -219,10 +220,7 @@ public class MealTickets  extends Controller {
 			contractUpdated.add(mealTicket.contract);
 		}
 		
-		for(Contract contract : contractUpdated) {
-			contractMonthRecapManager.populateContractMonthRecap(contract, 
-					Optional.<YearMonth>absent());
-		}
+		consistencyManager.updatePersonSituation(person, LocalDate.now());
 
 		MealTickets.recapMealTickets(name, page, max, blockIdsToAdd, personId);
 
@@ -250,21 +248,18 @@ public class MealTickets  extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		Set<Contract> contractUpdated = Sets.newHashSet();
-		
+		LocalDate pastDate = LocalDate.now();
 		int deleted = 0;
 		for(MealTicket mealTicket : mealTicketList) {
 
+			if(mealTicket.date.isBefore(pastDate)) {
+				pastDate = mealTicket.date;
+			}
 			mealTicket.delete();
 			deleted++;
-			
-			contractUpdated.add(mealTicket.contract);
 		}
 
-		for(Contract contract : contractUpdated) {
-			contractMonthRecapManager.populateContractMonthRecap(contract, 
-					Optional.<YearMonth>absent());
-		}
+		consistencyManager.updatePersonSituation(person, pastDate);
 		
 		flash.success("Rimosso blocco %s con dimensione %s per %s %s", codeBlock, deleted,
 				person.name , person.surname);

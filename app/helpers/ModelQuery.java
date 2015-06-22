@@ -53,7 +53,7 @@ public final class ModelQuery {
 		}
 	}
 	
-	public static final int PAGE_SIZE = 10;
+	public static final int PAGE_SIZE = 200;
 	
 	private static JPAQueryFactory factory = 
 			new JPAQueryFactory(new Provider<EntityManager>() {
