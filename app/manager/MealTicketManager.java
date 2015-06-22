@@ -11,7 +11,6 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.enumerate.Parameter;
-import net.sf.ehcache.config.TerracottaConfiguration.Consistency;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
