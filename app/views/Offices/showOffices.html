@@ -46,6 +46,12 @@
 				          <!-- Seat data -->
 				          <td>
 				            <a data-modal=".my-modal" href="@{Offices.editSeat(sede.value.id)}">${sede.value.name}</a>
+				            <span>
+
+				           <a style=""class="btn btn-success btn-xs" href="@{Import.syncSeatPeople(sede.value.id)}">
+				            	<i class="fa fa-user-plus"></i> Sincronizza Persone di questa Sede
+				            </a>
+				            </span>
 				          </td>
 				          <td>
 				            <strong>Indirizzo:</strong> ${sede.value.address}<br>
