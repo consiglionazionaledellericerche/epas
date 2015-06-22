@@ -8,29 +8,21 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.cache.CompetenceCodeManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
-import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
-import models.Person;
 import models.PersonDay;
-import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;

@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
-import manager.ContractMonthRecapManager;
 import manager.MealTicketManager;
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
