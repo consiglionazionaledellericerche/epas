@@ -5,6 +5,8 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		this.find('#datatable-test').dataTable();
+		
 		this.find('input[datepicker-year]').datepicker({
 			  format: "yyyy-mm-dd",
 			  startView: 2,
