@@ -503,7 +503,8 @@ public class Competences extends Controller{
 			beginMonth = new LocalDate(year, month, 1);
 		}
 		CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-		SimpleResults<Person> simpleResults = personDao.listForCompetence(code, Optional.fromNullable(name), 
+		SimpleResults<Person> simpleResults = personDao.listForCompetence(code, 
+				Optional.fromNullable(name), 
 				Sets.newHashSet(user.person.office), 
 				false, 
 				new LocalDate(year, month, 1), 
