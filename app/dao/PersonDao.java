@@ -470,7 +470,7 @@ public final class PersonDao extends DaoBase{
 		final BooleanBuilder condition = new BooleanBuilder();
 		
 		if(personInCharge.isPresent()){
-			condition.and(person.person.eq(personInCharge.get()));
+			condition.and(person.personInCharge.eq(personInCharge.get()));
 		}
 		filterOffices(condition, offices);
 		filterOnlyTechnician(condition, onlyTechnician);
