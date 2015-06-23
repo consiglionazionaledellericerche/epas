@@ -98,7 +98,7 @@ public final class PersonDao extends DaoBase{
 			boolean onlyOnCertificate) {
 		
 		final QPerson person = QPerson.person;
-	
+		
 		return ModelQuery.simpleResults(
 				//JPQLQuery
 				personQuery(name, offices, onlyTechnician, 
@@ -107,6 +107,48 @@ public final class PersonDao extends DaoBase{
 						Optional.<Person>absent()),
 				//Expression
 				person);
+	}
+	
+	/**
+	 * Permette la fetch automatica di tutte le informazioni delle persone filtrate.
+	 * 
+	 * TODO: e' usata solo in Persons.list ma se serve in altri metodi rendere parametrica
+	 * la funzione PersonDao.list.
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @return
+	 */
+	public SimpleResults<Person> listFetched(
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			LocalDate start, LocalDate end, 
+			boolean onlyOnCertificate) {
+
+		final QPerson person = QPerson.person;
+
+		JPQLQuery query = personQuery(name, offices, onlyTechnician, 
+				Optional.fromNullable(start), Optional.fromNullable(end), 
+				onlyOnCertificate, Optional.<CompetenceCode>absent(),
+				Optional.<Person>absent());
+		
+		SimpleResults<Person> result = ModelQuery.simpleResults( 
+				//JPQLQuery
+				query,
+				//Expression
+				person);
+
+		fetchContracts(Optional.<Person>absent(), 
+				Optional.fromNullable(start), Optional.fromNullable(end));
+		
+		return result;
+
+
 	}
 
 	/**
@@ -460,12 +502,13 @@ public final class PersonDao extends DaoBase{
 		final QContract contract = QContract.contract;
 		
 		final JPQLQuery query = getQueryFactory().from(person)
-				.leftJoin(person.contracts, contract)
+				.leftJoin(person.contracts, contract).fetch()
 				.leftJoin(person.user, QUser.user)
 				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
 				.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
 				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
 				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
+				.leftJoin(person.qualification).fetch()
 				.orderBy(person.surname.asc(), person.name.asc())
 				.distinct();
 		
@@ -596,40 +639,7 @@ public final class PersonDao extends DaoBase{
 		
 		Person p = query.singleResult(person);
 		
-		//Fetch dei contratti appartenenti all'intervallo
-		QContract contract = QContract.contract;
-		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
-		QVacationPeriod vp = QVacationPeriod.vacationPeriod;
-		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-
-		final BooleanBuilder condition = new BooleanBuilder().and(contract.person.eq(p));
-		filterContract(condition, begin, end);
-		
-		JPQLQuery query2 = getQueryFactory().from(contract)
-				.leftJoin(contract.contractMonthRecaps).fetch()
-				.leftJoin(contract.contractStampProfile).fetch()
-				.leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
-				.orderBy(contract.beginContract.asc())
-				.distinct();
-		List<Contract> contracts = query2.where(condition).list(contract);
-		
-		//fetch contract multiple bags (1) vacation periods
-		JPQLQuery query2b = getQueryFactory().from(contract)
-				.leftJoin(contract.vacationPeriods, vp).fetch()
-				.orderBy(contract.beginContract.asc())
-				.orderBy(vp.beginFrom.asc())
-				.distinct();
-		contracts = query2b.where(condition).list(contract);
-		// TODO: riportare a List tutte le relazioni uno a molti di contract
-		// e inserire singolarmente la fetch.
-		 
-		//Fetch dei tipi orario associati ai contratti
-		JPQLQuery query3 = getQueryFactory().from(cwtt)
-				.leftJoin(cwtt.workingTimeType, wtt).fetch()
-				.where(cwtt.contract.in(contracts))
-				.distinct();
-		
-		/*List<ContractWorkingTimeType> cwttList = */query3.list(cwtt);
+		fetchContracts(Optional.fromNullable(p), begin, end);
 				
 		//Fetch dei buoni pasto (non necessaria, una query)
 		
@@ -642,6 +652,57 @@ public final class PersonDao extends DaoBase{
 		
 	}
 	
+	/**
+	 * Fetch di tutti dati dei contratti attivi nella finestra temporale specificata.
+	 * Si può filtrare su una specifica persona.
+	 * 
+	 * @param person
+	 * @param start
+	 * @param end
+	 */
+	private void fetchContracts(Optional<Person> person, 
+			Optional<LocalDate> start, Optional<LocalDate> end) {
+		
+		//Fetch dei contratti appartenenti all'intervallo
+		QContract contract = QContract.contract;
+		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+		QVacationPeriod vp = QVacationPeriod.vacationPeriod;
+		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+
+		final BooleanBuilder condition = new BooleanBuilder();
+		if(person.isPresent()) {
+			condition.and(contract.person.eq(person.get()));
+		}
+		filterContract(condition, start, end);
+
+		JPQLQuery query2 = getQueryFactory().from(contract)
+				.leftJoin(contract.contractMonthRecaps).fetch()
+				.leftJoin(contract.contractStampProfile).fetch()
+				.leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
+				.orderBy(contract.beginContract.asc())
+				.distinct();
+		List<Contract> contracts = query2.where(condition).list(contract);
+
+		//fetch contract multiple bags (1) vacation periods
+		JPQLQuery query2b = getQueryFactory().from(contract)
+				.leftJoin(contract.vacationPeriods, vp).fetch()
+				.orderBy(contract.beginContract.asc())
+				.orderBy(vp.beginFrom.asc())
+				.distinct();
+		contracts = query2b.where(condition).list(contract);
+		// TODO: riportare a List tutte le relazioni uno a molti di contract
+		// e inserire singolarmente la fetch.
+
+		if(person.isPresent()) {
+		//Fetch dei tipi orario associati ai contratti (verificare l'utilità)
+			JPQLQuery query3 = getQueryFactory().from(cwtt)
+				.leftJoin(cwtt.workingTimeType, wtt).fetch()
+				.where(cwtt.contract.in(contracts))
+				.distinct();
+			query3.list(cwtt);
+		}
+	}
+
 	/**
 	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
 	 * appartenenti ad un office in offices. 
