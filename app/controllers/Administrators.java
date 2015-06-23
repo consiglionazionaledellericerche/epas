@@ -244,7 +244,7 @@ public class Administrators extends Controller {
 	}
 
 	/**
-	 * Switch in un'altra persona
+	 * Switch in un'altro user
 	 */ 
 	public static void switchUserTo(long id) {
 		
@@ -257,6 +257,18 @@ public class Administrators extends Controller {
 			session.put(USERNAME, user.username);
 			// redirect alla radice
 			redirect(Play.ctxPath + "/");
+	}
+	
+	/**
+	 * Switch nell'user di una persona.
+	 * @param id
+	 */
+	public static void switchUserToPersonUser(long id) {
+		
+		final Person person = personDao.getPersonById(id);
+		notFoundIfNull(person);
+		Preconditions.checkNotNull(person.user);
+		switchUserTo(person.user.id);
 	}
 
 	/**
