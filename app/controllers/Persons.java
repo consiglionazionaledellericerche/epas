@@ -110,7 +110,7 @@ public class Persons extends Controller {
 
 	public static void list(String name){
 		
-		List<Person> simplePersonList = personDao.list(Optional.fromNullable(name),
+		List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
 				null, false).list();
 
