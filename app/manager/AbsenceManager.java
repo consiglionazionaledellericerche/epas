@@ -333,7 +333,7 @@ public class AbsenceManager {
 			else if(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)){
 				aiList.add(handler37(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
 			}
-			//TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
+			// TODO: Inserire i codici di assenza necessari nell'AbsenceTypeMapping
 			else if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13"))){
 				aiList.add(handlerChildIllness(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
 			}
@@ -396,8 +396,9 @@ public class AbsenceManager {
 		if(!absenceType.consideredWeekEnd && personManager.isHoliday(person, date)){
 			ar.setHoliday(true);
 			ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
-		}
-		else {
+			
+		} else {
+			// check sulla reperibilità
 			if(checkIfAbsenceInReperibilityOrInShift(person, date)){
 				ar.setDayInReperibilityOrShift(true);				
 			}
@@ -434,8 +435,6 @@ public class AbsenceManager {
 			
 			ar.setAbsenceCode(absenceType.code);
 			ar.setInsertSucceeded(true);
-			
-			
 		}
 		return ar;
 	}
@@ -454,50 +453,6 @@ public class AbsenceManager {
 		return absenceDao.findByPersonAndDate
 				(person, dateFrom, Optional.of(dateTo),
 						Optional.of(absenceType)).list();
-	}
-
-	/**
-	 * Gestisce l'inserimento dei codici 91 (1 o più consecutivi)
-	 * @param person
-	 * @param dateFrom
-	 * @param dateTo
-	 * @param absenceType
-	 * @throws EmailException 
-	 */
-	private AbsencesResponse handlerCompensatoryRest(Person person,
-			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist){
-
-		Integer maxRecoveryDaysOneThree = confYearManager
-				.getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
-
-		//		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
-		//		Bisogna considerare anche eventuali inizializzazioni
-		int alreadyUsed = 0;
-		List<Absence> absences91 = absenceDao.getAbsenceByCodeInPeriod(
-				Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
-				date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(),
-				date, Optional.<JustifiedTimeAtWork>absent(), false, false);
-		if(absences91 != null){
-			alreadyUsed = absences91.size();
-		}
-
-		// 			verifica se ha esaurito il bonus per l'anno
-		if(person.qualification.qualification > 0 && 
-				person.qualification.qualification < 4 && 
-				alreadyUsed >= maxRecoveryDaysOneThree){
-			//			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
-			//					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
-			return new AbsencesResponse(date,absenceType.code,
-					String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI +
-							" - Usati %s", alreadyUsed));
-		}
-		//Controllo del residuo
-		if(canTakeCompensatoryRest(person, date, otherAbsences)){
-			return insert(person, date, absenceType, file, persist);
-		}
-
-		return new AbsencesResponse(date,absenceType.code,
-				AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
 	}
 
 	/**
@@ -547,6 +502,50 @@ public class AbsenceManager {
 	}
 
 	/**
+	 * Gestisce l'inserimento dei codici 91 (1 o più consecutivi)
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @throws EmailException 
+	 */
+	private AbsencesResponse handlerCompensatoryRest(Person person,
+			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist){
+	
+		Integer maxRecoveryDaysOneThree = confYearManager
+				.getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
+	
+		//		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
+		//		Bisogna considerare anche eventuali inizializzazioni
+		int alreadyUsed = 0;
+		List<Absence> absences91 = absenceDao.getAbsenceByCodeInPeriod(
+				Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
+				date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(),
+				date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+		if(absences91 != null){
+			alreadyUsed = absences91.size();
+		}
+	
+		// 			verifica se ha esaurito il bonus per l'anno
+		if(person.qualification.qualification > 0 && 
+				person.qualification.qualification < 4 && 
+				alreadyUsed >= maxRecoveryDaysOneThree){
+			//			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
+			//					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
+			return new AbsencesResponse(date,absenceType.code,
+					String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI +
+							" - Usati %s", alreadyUsed));
+		}
+		//Controllo del residuo
+		if(canTakeCompensatoryRest(person, date, otherAbsences)){
+			return insert(person, date, absenceType, file, persist);
+		}
+	
+		return new AbsencesResponse(date,absenceType.code,
+				AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
+	}
+
+	/**
 	 * Gestisce l'inserimento esplicito dei codici 31, 32 e 94.
 	 * @param person
 	 * @param dateFrom
@@ -583,7 +582,6 @@ public class AbsenceManager {
 	private AbsencesResponse handler37(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-		//FIXME Verificare i controlli d'inserimento
 		if (date.getYear() == LocalDate.now().getYear()) {
 
 			Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(), 
@@ -632,6 +630,7 @@ public class AbsenceManager {
 
 
 	/**
+	 * Handler inserimento assenza per malattia figli 12* 13*
 	 * 
 	 * @param person
 	 * @param dateFrom
@@ -641,12 +640,7 @@ public class AbsenceManager {
 	 */
 	private AbsencesResponse handlerChildIllness(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file, List<Absence> otherAbsences, boolean persist){
-		/**
-		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli,
-		 * guardo se il codice di assenza appartiene alla
-		 * lista dei codici di assenza da usare per le malattie dei figli
-		 */
-		// TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi		
+		
 		if(canTakePermissionIllnessChild(person, date, absenceType, otherAbsences)){
 			return insert(person, date,absenceType,file, persist);
 		}
@@ -838,9 +832,14 @@ public class AbsenceManager {
 			begin = begin.minusYears(1);
 		}
 		
-		int usate = absenceDao.getAbsenceByCodeInPeriod(Optional.of(person), 
+		List<Absence> usateDb = absenceDao.getAbsenceByCodeInPeriod(Optional.of(person), 
 				Optional.of(abt.code),begin, begin.plusYears(1), 
-				Optional.<JustifiedTimeAtWork>absent(), false, false).size() + otherAbsences.size();
+				Optional.<JustifiedTimeAtWork>absent(), false, false);
+		
+		// TODO: di otherAbsences devo conteggiare
+		// le sole assenze [begin, begin.plusYears(1)]
+		
+		int usate = usateDb.size() + otherAbsences.size();
 		
 		log.info("usate {}, di totali {}", usate, yearAbsences);
 		return  usate  < yearAbsences;
