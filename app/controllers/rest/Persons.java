@@ -57,7 +57,7 @@ public class Persons extends Controller{
 //			syncManager.syncronizeCnrEmail();
 //		}
 
-		//Person person = personDao.getPersonByEmail(email);
+		//Person person = personDao.byEmail(email);
 		Person person = personDao.getPersonByPerseoId(perseoId);
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
@@ -95,7 +95,7 @@ public class Persons extends Controller{
 //			 */
 //			syncManager.syncronizeCnrEmail();
 //		}
-		//Person person = personDao.getPersonByEmail(email);
+		//Person person = personDao.byEmail(email);
 		Person person = personDao.getPersonByPerseoId(perseoId);
 		List<DayRecap> personDays = Lists.newArrayList();
 		if(person != null){
@@ -123,7 +123,7 @@ public class Persons extends Controller{
 	@BasicAuth
 	public static void competences(String email,LocalDate start,LocalDate end,List<String> code){
 
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto");
 		}

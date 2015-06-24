@@ -245,13 +245,22 @@ public class Persons extends Controller {
 		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
 	}
 
-	public static void update(Person person, Office office, Integer qualification, boolean isPersonInCharge){
-
+	public static void update(@Valid Person person, Office office, Integer qualification, boolean isPersonInCharge){
+		
 		if(person==null) {
-
 			flash.error("La persona da modificare non esiste. Operazione annullata");
 			list(null);
 		}
+		
+		if (Validation.hasErrors()) {
+			log.warn("validation errors for {}: {}", person,
+					validation.errorsMap());
+			flash.error("Impossibile salvare la persona %s, verificare i parametri",person);
+			edit(person.id);
+		}
+		
+
+		
 		rules.checkIfPermitted(person.office);
 		rules.checkIfPermitted(office);
 

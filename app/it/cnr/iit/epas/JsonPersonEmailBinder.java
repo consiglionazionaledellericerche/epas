@@ -49,7 +49,7 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
 				email = jsonObject.get("email").getAsString();
 
 				Logger.debug("email=%s personDao=%s", email, personDao);
-				person = personDao.getPersonByEmail(email);
+				person = personDao.byEmail(email).orNull();
 
 				
 				if (person != null)

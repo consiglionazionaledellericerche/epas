@@ -1,21 +1,15 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
-
-import javax.annotation.Generated;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.Person;
 
-import com.mysema.query.types.Path;
+
+import com.mysema.query.types.path.*;
+
 import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.DatePath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.ListPath;
-import com.mysema.query.types.path.NumberPath;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
 
 
 /**
@@ -50,6 +44,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final StringPath eppn = createString("eppn");
 
     public final StringPath fax = createString("fax");
 

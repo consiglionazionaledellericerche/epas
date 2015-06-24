@@ -45,7 +45,7 @@ public class Absences extends Controller{
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
@@ -72,7 +72,7 @@ public class Absences extends Controller{
 	
 	@BasicAuth
 	public static void insertAbsence(String email, String absenceCode, LocalDate begin, LocalDate end){
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");

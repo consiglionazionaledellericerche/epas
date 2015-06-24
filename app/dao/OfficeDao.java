@@ -200,8 +200,6 @@ public class OfficeDao extends DaoBase {
 		return office.office;
 	}
 
-
-
 	/**
 	 * 
 	 * @param user
