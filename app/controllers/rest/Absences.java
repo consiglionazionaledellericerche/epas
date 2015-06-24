@@ -92,7 +92,7 @@ public class Absences extends Controller{
 		try{
 			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, Optional.fromNullable(end), 
 					absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(), 
-					Optional.<Blob>absent(), Optional.<String>absent());
+					Optional.<Blob>absent(), Optional.<String>absent(), true);
 			for(AbsencesResponse ar : air.getAbsences()){
 				AbsenceAddedRest aar = new AbsenceAddedRest();
 				aar.absenceCode = ar.getAbsenceCode();

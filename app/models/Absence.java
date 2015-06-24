@@ -6,10 +6,12 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 
 import play.db.jpa.Blob;
 
@@ -43,4 +45,7 @@ public class Absence extends BaseModel {
 		return String.format("Absence[%d] - personDay.id = %d, absenceType.id = %s", 
 			id, personDay.id, absenceType.id);
 	}
+	
+	@Transient
+	public LocalDate date;
 }

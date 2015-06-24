@@ -13,13 +13,16 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.ContractWorkingTimeType;
 import models.PersonDay;
+import models.WorkingTimeTypeDay;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
@@ -30,8 +33,6 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 /**
- * TODO: una volta mergiato il branch fare un unico manager che gestisca sia 
- * year che month recap.
  * 
  * @author alessandro
  *
@@ -55,6 +56,7 @@ public class ContractMonthRecapManager {
 	@Inject
 	private ConfYearManager confYearManager;
 	
+	
 	//private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
 	
 	/**
@@ -68,7 +70,7 @@ public class ContractMonthRecapManager {
 	 * @return
 	 */
 	public int getMinutesForCompensatoryRest (
-			Contract contract, LocalDate date) {
+			Contract contract, LocalDate date, List<Absence> otherAbsences) {
 		
 		ContractMonthRecap cmr = new ContractMonthRecap();
 		cmr.year = date.getYear();
@@ -76,7 +78,7 @@ public class ContractMonthRecapManager {
 		cmr.contract = contract;
 		
 		Optional<ContractMonthRecap> recap = 
-				computeResidualModule(cmr, new YearMonth(date), date);
+				computeResidualModule(cmr, new YearMonth(date), date, otherAbsences);
 		
 		if( recap.isPresent() ) {
 			return recap.get().remainingMinutesCurrentYear 
@@ -103,7 +105,7 @@ public class ContractMonthRecapManager {
 	 * @return il riepilogo costruito.
 	 */
 	public Optional<ContractMonthRecap> computeResidualModule(ContractMonthRecap cmr, 
-			YearMonth yearMonth, LocalDate calcolaFinoA) {
+			YearMonth yearMonth, LocalDate calcolaFinoA, List<Absence> otherAbsences) {
 
 		IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
 		Contract contract = cmr.contract;
@@ -170,7 +172,7 @@ public class ContractMonthRecapManager {
 			firstDayInDatabase = contract.sourceDate.plusDays(1);
 			requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 
-			// TODO: initMealTickets da source contract
+			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		}
 
 		LocalDate today = LocalDate.now();
@@ -329,13 +331,13 @@ public class ContractMonthRecapManager {
 		}
 		
 		//Inizializzazione buoni pasto
-		if (recapPreviousMonth.isPresent()) {
+		if (cmr.buoniPastoDaInizializzazione == 0 && recapPreviousMonth.isPresent()) {
 			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
 		}
 		
 		setMealTicketsInformation(cmr, validDataForMealTickets);
 		setPersonDayInformation(cmr, validDataForPersonDay);
-		setPersonMonthInformation(cmr, wcontract, validDataForCompensatoryRest);
+		setPersonMonthInformation(cmr, wcontract, validDataForCompensatoryRest, otherAbsences);
 		
 
 		assegnaProgressivoFinaleNegativo(cmr);
@@ -425,7 +427,9 @@ public class ContractMonthRecapManager {
 			
 			//residuo
 			monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
-					+ monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
+					+ monthRecap.buoniPastoDaInizializzazione
+					+ monthRecap.buoniPastoConsegnatiNelMese 
+					- monthRecap.buoniPastoUsatiNelMese;
 						
 		}
 	}
@@ -435,7 +439,7 @@ public class ContractMonthRecapManager {
 	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
 	 */
 	private void setPersonMonthInformation(ContractMonthRecap cmr, 
-			IWrapperContract wcontract,	DateInterval validDataForCompensatoryRest) {
+			IWrapperContract wcontract,	DateInterval validDataForCompensatoryRest, List<Absence> otherAbsences) {
 		
 		//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		if (wcontract.isLastInMonth(cmr.month, cmr.year)) {
@@ -479,16 +483,47 @@ public class ContractMonthRecapManager {
 			
 			List<Absence> riposi = absenceDao.absenceInPeriod(cmr.person, begin, end, "91");
 			
+			
 			cmr.riposiCompensativiMinuti = 0;
 			cmr.recoveryDayUsed = 0;
 			
+			for(Absence riposo : otherAbsences) {
+				if(DateUtility.isDateIntoInterval(riposo.date, validDataForCompensatoryRest)) {
+
+					// TODO: rifattorizzare questa parte. Serve un metodo 
+					// .getWorkingTimeTypeDay(date) in WrapperContract
+					
+					LocalDate date = riposo.date;
+					for(ContractWorkingTimeType cwtt : 
+						wcontract.getValue().contractWorkingTimeType ) {
+
+						if(DateUtility.isDateIntoInterval(date, 
+								wrapperFactory.create(cwtt).getDateInverval())) {
+
+							WorkingTimeTypeDay wttd = cwtt.workingTimeType.workingTimeTypeDays
+									.get(date.getDayOfWeek() - 1);
+
+							Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+							cmr.riposiCompensativiMinuti += wttd.workingTime;
+							cmr.recoveryDayUsed++;
+						}
+					}
+				} 
+			}
 			for (Absence abs : riposi){
 				cmr.riposiCompensativiMinuti += wrapperFactory.create(abs.personDay)
 						.getWorkingTimeTypeDay().get().workingTime;
 				cmr.recoveryDayUsed++;
-			}
+			}	
+			
 			cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
-		}		
+
+
+		}
+			
+		
+			
+	
 	}
 	
 	private void assegnaProgressivoFinaleNegativo(ContractMonthRecap monthRecap)

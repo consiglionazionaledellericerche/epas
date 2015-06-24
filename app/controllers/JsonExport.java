@@ -29,7 +29,7 @@ import dao.PersonDao;
  * @author cristian
  *
  */
-@With(Secure.class)
+@With(Resecure.class)
 public class JsonExport extends Controller {
 
 	final static class PersonInfo {
@@ -55,7 +55,7 @@ public class JsonExport extends Controller {
 	private static PersonDao personDao;
 
 	//TODO: serve un permesso più specifico?
-	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
+	//@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void activePersons() {
 
 		List<Office> offices = officeDao.getAllOffices();
