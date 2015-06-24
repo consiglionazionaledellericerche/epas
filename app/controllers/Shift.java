@@ -15,7 +15,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ShiftManager;
-
 import models.Absence;
 import models.Competence;
 import models.Person;
@@ -28,8 +27,6 @@ import models.ShiftType;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
-import models.query.QPersonReperibilityDay;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;

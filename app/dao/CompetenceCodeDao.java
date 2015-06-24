@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import play.Logger;
-
 import models.CompetenceCode;
 import models.query.QCompetenceCode;
 

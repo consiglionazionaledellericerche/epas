@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConsistencyManager;
-import manager.PersonDayManager;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -17,8 +16,6 @@ import models.PersonDayInTrouble;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.data.validation.Required;
 import play.mvc.Controller;
@@ -43,6 +40,7 @@ public class Administration extends Controller {
 	private static ExportToYaml exportToYaml;
 	@Inject
 	private static CompetenceUtility competenceUtility;
+	
 	
 	//private final static Logger log = LoggerFactory.getLogger(Administration.class);
 
@@ -158,4 +156,5 @@ public class Administration extends Controller {
 		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
 	}
+
 }

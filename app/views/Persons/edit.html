@@ -121,6 +121,14 @@
 					<td><input name="person.email" type="email" value="${person.email}"/></td>
 				</tr>
 				<tr>
+					<td class="lab">Email CNR</td>
+					<td><input name="person.cnr_email" type="text" value="${person.cnr_email}"/></td>
+				</tr>
+				<tr>
+					<td class="lab">Eppn </td>
+					<td><input name="person.eppn" type="email" value="${person.eppn}"/></td>
+				</tr>
+				<tr>
 					<td class="lab">Data di nascita </td>
 					#{if person.birthday != null }
 						<td><input datepicker name="person.birthday" type="text" value="${person.birthday}"/></td>
@@ -321,6 +329,10 @@
 			   #{if contract.value.sourceRecoveryDayUsed!=null && contract.value.sourceRecoveryDayUsed>0}
 			     Riposi compensativi usati ${contract.value.sourceDate.getYear()} 
 			     <strong class="text-error">${contract.value.sourceRecoveryDayUsed}</strong><br>
+			   #{/if}
+			   #{if contract.value.sourceRemainingMealTicket!=null && contract.value.sourceRemainingMealTicket>0}
+			     Buoni pasto residui
+			   <strong class="text-error">${contract.value.sourceRemainingMealTicket}</strong><br>
 			   #{/if}
 			   
 			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Modifica</a>

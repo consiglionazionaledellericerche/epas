@@ -5,9 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import models.Permission;
 import models.Role;
-import models.query.QPermission;
 import models.query.QRole;
 
 import com.google.common.collect.Lists;

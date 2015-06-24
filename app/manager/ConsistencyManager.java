@@ -1,47 +1,56 @@
 package manager;
 
-import it.cnr.iit.epas.DateUtility;
+import it.cnr.iit.epas.DateInterval;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.cache.StampTypeManager;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
+import models.Absence;
+import models.AbsenceType;
 import models.Contract;
-import models.ContractStampProfile;
+import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.PersonDayInTrouble;
+import models.StampModificationType;
+import models.StampModificationTypeCode;
+import models.Stamping;
+import models.Stamping.WayType;
 import models.User;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.Play;
 import play.db.jpa.JPAPlugin;
-import play.libs.Mail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
 
-import dao.ContractDao;
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.PersonDayInTroubleDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperPersonDay;
 
 /**
  * Manager che gestisce la consistenza e la coerenza dei dati in Epas.
@@ -57,23 +66,27 @@ public class ConsistencyManager {
 			PersonManager personManager,
 			PersonDao personDao, 
 			PersonDayManager personDayManager,
-			ContractDao contractDao,
 			ContractMonthRecapManager contractMonthRecapManager,
-			PersonDayInTroubleDao personDayInTroubleDao,
+			PersonDayInTroubleManager personDayInTroubleManager,
 			IWrapperFactory wrapperFactory,
-			ConfGeneralManager confGeneralManager, 
-			PersonDayDao personDayDao) {
+			PersonDayDao personDayDao, ConfYearManager confYearManager, 
+			StampTypeManager stampTypeManager,
+			AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, 
+			VacationsRecapFactory vacationsFactory) {
 
 		this.officeDao = officeDao;
 		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
-		this.contractDao = contractDao;
 		this.contractMonthRecapManager = contractMonthRecapManager;
-		this.personDayInTroubleDao = personDayInTroubleDao;
+		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.wrapperFactory = wrapperFactory;
-		this.confGeneralManager = confGeneralManager;
 		this.personDayDao = personDayDao;
+		this.confYearManager = confYearManager;
+		this.stampTypeManager = stampTypeManager;
+		this.absenceDao = absenceDao;
+		this.absenceTypeDao = absenceTypeDao;
+		this.vacationsFactory = vacationsFactory;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
@@ -82,12 +95,15 @@ public class ConsistencyManager {
 	private final PersonManager personManager;
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
-	private final ContractDao contractDao;
 	private final ContractMonthRecapManager contractMonthRecapManager;
-	private final PersonDayInTroubleDao personDayInTroubleDao;
+	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final IWrapperFactory wrapperFactory;
-	private final ConfGeneralManager confGeneralManager;
+	private final ConfYearManager confYearManager;
 	private final PersonDayDao personDayDao;
+	private final StampTypeManager stampTypeManager;
+	private final AbsenceDao absenceDao;
+	private final AbsenceTypeDao absenceTypeDao;
+	private final VacationsRecapFactory vacationsFactory;
 
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
@@ -101,16 +117,17 @@ public class ConsistencyManager {
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendMail){
 
-		Set<Office> offices = user.isPresent() ? officeDao.getOfficeAllowed(user.get()) : Sets.newHashSet(officeDao.getAllOffices());
+		Set<Office> offices = user.isPresent() ? 
+				officeDao.getOfficeAllowed(user.get()) 
+				: Sets.newHashSet(officeDao.getAllOffices());
 
 		//  (0) Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = Lists.newArrayList();
 
 		if(person.isPresent() && user.isPresent()){
-			if(personManager.isAllowedBy(user.get(), person.get()))
+			//if(personManager.isAllowedBy(user.get(), person.get()))
 				personList.add(person.get());
-		}
-		else {
+		} else {
 			personList = personDao.list(Optional.<String>absent(), offices,
 					false, fromDate, LocalDate.now().minusDays(1), true).list();
 		}
@@ -124,18 +141,7 @@ public class ConsistencyManager {
 			JPAPlugin.startTx(false);
 			p = personDao.getPersonById(p.id);
 			
-			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-			checkHistoryError(p, fromDate);
-			
-			// (2) Ricalcolo i valori dei person day	
-			log.info("Update person situation {} dal {} a oggi", p.getFullname(), fromDate);
-			personDayManager.updatePersonDaysFromDate(p, fromDate);
-			
-			// (3) Ricalcolo dei residui per mese
-			log.info("Update residui mensili {} dal {} a oggi", p.getFullname(), fromDate);
-			contractMonthRecapManager.populateContractMonthRecapByPerson(p,
-					new YearMonth(fromDate));
-
+			updatePersonSituation(p, fromDate);
 		}
 		
 		JPAPlugin.closeTx(false);
@@ -148,7 +154,7 @@ public class ConsistencyManager {
 			LocalDate end = new LocalDate().minusDays(1);
 
 			try {
-				sendMail(personList, begin, end, "timbratura");
+				personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
 			}
 			catch(EmailException e){
 				e.printStackTrace();
@@ -157,226 +163,460 @@ public class ConsistencyManager {
 		JPAPlugin.closeTx(false);	
 	}
 
-	/**
-	 * Metodo che controlla i giorni con problemi dei dipendenti che non hanno timbratura fixed
-	 *  e invia mail nel caso in cui esistano timbrature disaccoppiate.
-	 * @param p
-	 * @param begin
-	 * @param end
-	 * @throws EmailException
-	 */
-	private void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
-
-		if(p.surname.equals("Conti") && p.name.equals("Marco")) {
-
-			log.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
-			return;
-		}
-
-		List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
-
-		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
-
-		for(PersonDayInTrouble pdt : pdList){
-
-			Contract contract = contractDao.getContract(pdt.personDay.date, pdt.personDay.person);
-			if(contract == null) {
-
-				log.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: {} - Data: {}",
-						p.getFullname(), pdt.personDay.date);
-				continue;
-			}
-
-			Optional<ContractStampProfile> csp = contract.getContractStampProfileFromDate(pdt.personDay.date);
-
-			Preconditions.checkState(csp.isPresent());
-
-			if(csp.get().fixedworkingtime == true) {
-				continue;
-			}
-
-			if(pdt.cause.contains(cause) && !pdt.personDay.isHoliday
-					&& pdt.fixed == false) { 
-				dateTroubleStampingList.add(pdt.personDay.date);
-			}
-		}
-
-		boolean flag;
-		try {
-
-			flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
-
-		} catch (Exception e) {
-
-			log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
-					new Object[] {dateTroubleStampingList, p, cause,p.getFullname()}); 
-			e.printStackTrace();
-			return;
-		}
-
-		//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
-		if(flag){
-			for(PersonDayInTrouble pd : pdList){
-				pd.emailSent = true;
-				pd.save();
-			}
-		}
-	}
+	
 
 	/**
-	 * Controlla ogni due giorni la presenza di giorni in cui non ci siano
-	 *  nè assenze nè timbrature per tutti i dipendenti (invocato nell'expandableJob)
-	 * @param personId
-	 * @param year
-	 * @param month
-	 * @param userLogged
-	 * @throws EmailException 
+	 * Controlla la presenza di errori nelle timbrature. 
+	 * Gestisce i giorni problematici nella tabella PersonDayInTrouble.
+	 * Effettua i ricalcoli giornialieri e mensili.
+	 * @param person
+	 * @param from
 	 */
-	public void sendMail(List<Person> personList, LocalDate fromDate,LocalDate toDate,String cause) throws EmailException{
-
-		for(Person p : personList){
-
-			log.debug("Chiamato controllo sul giorni {}-{}", fromDate, toDate);
-
-			boolean officeMail = confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, p.office);
-
-			if(p.wantEmail && officeMail) {
-				checkPersonDayForSendingEmail(p, fromDate, toDate, cause);
-			}
-			else {
-				log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
-			}
-		}
-	}
-
-	/**
-	 * Verifica per la persona (se attiva) che alla data 
-	 * 	(1) in caso di giorno lavorativo il person day esista. 
-	 * 		Altrimenti viene creato e persistito un personday vuoto e 
-	 *      inserito un record nella tabella PersonDayInTrouble.
-	 * 	(2) il person day presenti una situazione di timbrature corretta dal punto di vista logico. 
-	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. 
-	 *      Situazioni di timbrature errate si verificano nei casi 
-	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
-	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature.
-	 *  
-	 * @param personid la persona da controllare
-	 * @param dayToCheck il giorno da controllare
-	 */
-	public void checkPersonDay(Person person, LocalDate dayToCheck){
-
-		if(!personManager.isActiveInDay(dayToCheck, person)){
-			return;
-		}
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayToCheck);
-
-		if(pd.isPresent()){
-			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(pd.get())); 
-			return;
-		}
-		else {
-			personDay = new PersonDay(person, dayToCheck);
-			if (personDay.isHoliday) {
-				return;
-			}
-			personDay.create();
-			personDayManager.populatePersonDay(wrapperFactory.create(personDay));
-			personDay.save();
-			personDayManager.checkForPersonDayInTrouble(wrapperFactory.create(personDay));
-			return;
-		}
-	}
-
-
-	/**
-	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
-	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
-	 * e setta a fixed true quelli che in passato avevano problemi e che invece sono stati risolti.
-	 * @param personid la persona da controllare
-	 * @param year l'anno di partenza
-	 * @param month il mese di partenza
-	 */
-	private void checkHistoryError(Person person, LocalDate from){
-		log.info("Check history error {} dal {} a oggi", person.getFullname(), from);
+	public void updatePersonSituation(Person person, LocalDate from){
+		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
 
 		LocalDate date = from;
 		LocalDate today = LocalDate.now();
+		
+		person = personDao.fetchPersonForComputation(person.id, 
+				Optional.fromNullable(from), 
+				Optional.fromNullable(today));
+		
+		IWrapperPerson wPerson = wrapperFactory.create(person);
+		
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, from, 
+				Optional.of(today));
 
+		//Costruire la tabella hash
+		HashMap<LocalDate, PersonDay> personDaysMap = Maps.newHashMap();
+		for(PersonDay personDay : personDays) {
+			personDaysMap.put(personDay.date, personDay);
+		}
+		
+		log.info("Fetch dei dati conclusa.");
+		
+		PersonDay previous = null;
+		
 		while(date.isBefore(today)) {
+			
+			if(! wPerson.isActiveInDay(date) ) {
+				date = date.plusDays(1);
+				previous = null;
+				continue;
+			}
+			
+			//Prendere da map
+			PersonDay personDay = personDaysMap.get(date);
+			if(personDay == null) {
+				personDay = new PersonDay(person, date);
+				
+//				if (!personDayInList.isHoliday) {
+//					date = date.plusDays(1);
+//					// populate??
+//			
+//					continue;
+//				}
+			}
+				
+			IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
+			
+			//set previous for progressive
+			if(previous != null) {
+				wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
+			}
+			//set previous for night stamp
+			if(previous != null) {
+				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
+			}
+			
+			populatePersonDay(wPersonDay);
 
-			checkPersonDay(person, date);
+			previous = personDay;
 			date = date.plusDays(1);
 
 		}
+		
+		log.info("Update personDay conclusa.");
+		
+		// (3) Ricalcolo dei residui per mese
+		populateContractMonthRecapByPerson(person,
+							new YearMonth(from));
+		
+		log.info("Update riepiloghi conclusa.");
 	}
-
+	
 	/**
-	 * Invia la mail alla persona specificata in firma con la lista dei giorni in cui ha timbrature disaccoppiate
-	 * @param date, person
-	 * @throws EmailException 
+	 * (1) Controlla che il personDay sia ben formato 
+	 * 		(altrimenti lo inserisce nella tabella PersonDayInTrouble)
+	 * (2) Popola i valori aggiornati del person day e li persiste nel db.
+	 * 
+	 * @param pd 
 	 */
-	private boolean sendEmailToPerson(List<LocalDate> dateList, Person person, String cause) throws EmailException{
-		if(dateList.size() == 0){
-			return false;
-		}
-		log.info("Preparo invio mail per {}", person.getFullname());
-		SimpleEmail simpleEmail = new SimpleEmail();
-		try {
-			simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
-			simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office) );
-		} catch (EmailException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			simpleEmail.addTo(person.email);
-		} catch (EmailException e) {
+	private void populatePersonDay(IWrapperPersonDay pd) {
 
-			e.printStackTrace();
+		//isHoliday = personManager.isHoliday(this.value.person, this.value.date);
+		
+		//il contratto non esiste più nel giorno perchè è stata inserita data terminazione
+		if( !pd.getPersonDayContract().isPresent()) {
+			pd.getValue().isHoliday = false;
+			pd.getValue().timeAtWork = 0;
+			pd.getValue().progressive = 0;
+			pd.getValue().difference = 0;
+			personDayManager.setIsTickeAvailable(pd,false);
+			pd.getValue().stampModificationType = null;
+			pd.getValue().save();
+			return;
 		}
-		List<LocalDate> dateFormat = new ArrayList<LocalDate>();
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MM-YYYY");		
-		String date = "";
-		for(LocalDate d : dateList){
-			if(!DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), d)){
-				dateFormat.add(d);
-				String str = fmt.print(d);
-				date = date+str+", ";
+
+		//Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
+		if(pd.getPersonDayContract().isPresent()
+				&& pd.getPersonDayContract().get().sourceDate != null
+				&& ! pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDate) ) {
+			
+			pd.getValue().isHoliday = false;			
+			pd.getValue().timeAtWork = 0;
+			pd.getValue().progressive = 0;
+			pd.getValue().difference = 0;
+			personDayManager.setIsTickeAvailable(pd,false);
+			pd.getValue().stampModificationType = null;
+			pd.getValue().save();
+			return;
+		}
+		
+		// decido festivo / lavorativo
+		pd.getValue().isHoliday = personManager.isHoliday(pd.getValue().person,
+				pd.getValue().date);
+		pd.getValue().save();
+
+		//controllo problemi strutturali del person day
+		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
+			pd.getValue().save();
+			personDayManager.checkForPersonDayInTrouble(pd);
+		}
+
+		//controllo uscita notturna
+		handlerNightStamp(pd);
+
+		personDayManager.updateTimeAtWork(pd);
+
+		personDayManager.updateDifference(pd);
+
+		personDayManager.updateProgressive(pd);
+
+		personDayManager.updateTicketAvailable(pd);
+
+		pd.getValue().save();
+
+	}
+	
+	/**
+	 * Se al giorno precedente l'ultima timbratura è una entrata disaccoppiata e nel
+	 * giorno attuale vi è una uscita nei limiti notturni in configurazione, allora 
+	 * vengono aggiunte le timbrature default a 00:00
+	 *
+	 * @param pd
+	 */
+	private void handlerNightStamp(IWrapperPersonDay pd){
+
+		if( pd.isFixedTimeAtWork() ) {
+			return;
+		}
+
+		if( ! pd.getPreviousForNightStamp().isPresent() ) {
+			return;
+		}
+
+		PersonDay previous = pd.getPreviousForNightStamp().get();
+
+		Stamping lastStampingPreviousDay = pd.getLastStamping();
+
+		if( lastStampingPreviousDay != null && lastStampingPreviousDay.isIn() ) {
+
+			String hourMaxToCalculateWorkTime = confYearManager
+					.getFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, 
+							pd.getValue().person.office, pd.getValue().date.getYear());
+
+			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
+
+			Collections.sort(pd.getValue().stampings);
+
+			if( pd.getValue().stampings.size() > 0 
+					&& pd.getValue().stampings.get(0).way == WayType.out 
+					&& maxHour > pd.getValue().stampings.get(0).date.getHourOfDay()) {
+
+				StampModificationType smtMidnight = stampTypeManager
+						.getStampMofificationType(StampModificationTypeCode
+								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
+
+				//timbratura chiusura giorno precedente
+				Stamping correctStamp = new Stamping();
+				correctStamp.date = new LocalDateTime(previous.date.getYear(), 
+						previous.date.getMonthOfYear(), previous.date.getDayOfMonth(), 23, 59);
+
+				correctStamp.way = WayType.out;
+				correctStamp.markedByAdmin = false;
+				correctStamp.stampModificationType = smtMidnight;
+				correctStamp.note = 
+						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+				correctStamp.personDay = previous;
+				correctStamp.save();
+				previous.stampings.add(correctStamp);
+				previous.save();
+
+				populatePersonDay(wrapperFactory.create(previous));
+
+				//timbratura apertura giorno attuale
+				Stamping newEntranceStamp = new Stamping();
+				newEntranceStamp.date = new LocalDateTime(pd.getValue().date.getYear(),
+						pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(),0,0);
+
+				newEntranceStamp.way = WayType.in;
+				newEntranceStamp.markedByAdmin = false;
+
+				newEntranceStamp.stampModificationType = smtMidnight;
+
+
+
+				newEntranceStamp.note = 
+						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+				newEntranceStamp.personDay = pd.getValue();
+				newEntranceStamp.save();
+
+				pd.getValue().stampings.add( newEntranceStamp );
+				pd.getValue().save();
 			}
 		}
-		String incipit = "";
-		if(dateFormat.size() == 0)
-			return false;
-		if(dateFormat.size() > 1)
-			incipit = "Nei giorni: ";
-		if(dateFormat.size() == 1)
-			incipit = "Nel giorno: ";	
+	}	
+	
+	/**
+	 * Costruisce i riepiloghi mensili inerenti la persona a partire da yeraMonthFrom.
+	 * 
+	 * Utilizzo: specificare il mese dal quale ricostruire i riepiloghi. 
 
-		simpleEmail.setSubject("ePas Controllo timbrature");
-		String message = "";
-		if(cause.equals("timbratura")){
-			message = "Gentile " +person.name+" "+person.surname+ 
-					"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di timbratura disaccoppiata. \r\n " +
-					"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-					"Saluti \r\n"+
-					"Il team di ePAS";
+ 	 * @param person
+	 * @param yearMonthFrom
+	 */
+	private void populateContractMonthRecapByPerson( Person person, 
+			YearMonth yearMonthFrom) {
 
+		//Person p = Person.findById(person.id);
+		
+		for( Contract contract : person.contracts ){
+			
+			IWrapperContract wcontract = wrapperFactory.create(contract);
+			DateInterval contractDateInterval = wcontract.getContractDateInterval();
+			YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
+			
+			//Se yearMonthFrom non è successivo alla fine del contratto...
+			if ( !yearMonthFrom.isAfter(endContractYearMonth) ) {
+				
+				if( contract.vacationPeriods.isEmpty() ) {
+					log.info("No vacation period {}", contract.toString());
+					continue;
+				}
+				
+				populateContractMonthRecap(wcontract, Optional.fromNullable(yearMonthFrom));
+			} 
 		}
-		if(cause.equals("no assenze")){
-			message = "Gentile " +person.name+" "+person.surname+ 
-					"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di mancanza di timbrature e di codici di assenza. \r\n " +
-					"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-					"Saluti \r\n"+
-					"Il team di ePAS";
-		}
-
-		simpleEmail.setMsg(message);
-
-		Mail.send(simpleEmail);
-
-		log.info("Inviata mail a {} contenente le date da controllare : {}", person.getFullname(), date);
-		return true;
-
 	}
+	
+	/**
+	 * Costruisce i riepiloghi mensili per il contratto fornito.
+	 * Se yearMonthFrom è present costruisce i riepiloghi a partire da quel mese.
+	 * Se non vi sono i riepiloghi mensili necessari precedenti a yearMonthFrom
+	 * vengono costruiti.
+	 * 
+	 * @param contract
+	 * @param yearMonthFrom
+	 */
+	private void populateContractMonthRecap(IWrapperContract contract, 
+			Optional<YearMonth> yearMonthFrom) {
+
+		YearMonth yearMonthToCompute = contract.getFirstMonthToRecap();
+		
+		if(yearMonthFrom.isPresent() && yearMonthFrom.get().isAfter(yearMonthToCompute)) {
+			yearMonthToCompute = yearMonthFrom.get();
+		}
+		
+		//Tentativo da sourceDate
+		yearMonthToCompute = populateContractMonthFromSource(contract, yearMonthToCompute);
+		
+		YearMonth lastMonthToCompute = contract.getLastMonthToRecap();
+		
+		ContractMonthRecap cmr = null;
+		
+		while ( !yearMonthToCompute.isAfter(lastMonthToCompute) ) {
+			
+			cmr = buildContractMonthRecap(contract, yearMonthToCompute);
+
+			// (1) FERIE E PERMESSI 
+			
+			// TODO: per il calcolo delle ferie e permessi ho bisogno solo del
+			// riepilogo di dicembre. Una ottimizzazione è calcolare questi campi
+			// solo nel caso di dicembre. Però i dati dei mesi intermedi potrebbero 
+			// essere usati per report. Decidere. 
+			
+			LocalDate lastDayInYearMonth = new LocalDate(yearMonthToCompute.getYear(), 
+					yearMonthToCompute.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();
+
+			Optional<VacationsRecap> vacationRecap = vacationsFactory
+					.create(yearMonthToCompute.getYear(), contract.getValue(), lastDayInYearMonth, true);
+			
+			if( !vacationRecap.isPresent() ) {
+				
+				//Siccome non ci sono i riepiloghi quando vado a fare l'update della
+				// timbratura schianta. Soluzioni? Se yeraMonthFrom.present() fare una
+				// missingRecap()??
+				if( yearMonthFrom.isPresent() ) {
+					//provvisorio.
+					populateContractMonthRecap(contract, Optional.<YearMonth>absent());
+				}
+				return;
+			}
+			
+			cmr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed;
+			cmr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed;
+			cmr.permissionUsed = vacationRecap.get().permissionUsed;
+			
+			// (2) RESIDUI
+			List<Absence> otherAbsences = Lists.newArrayList();
+			Optional<ContractMonthRecap> recap = contractMonthRecapManager
+					.computeResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth,otherAbsences);
+			if( !recap.isPresent() ) {
+
+				if( yearMonthFrom.isPresent() ) {
+					//provvisorio.
+					populateContractMonthRecap(contract, Optional.<YearMonth>absent());
+				}
+				return;
+			}
+			
+			recap.get().save();
+			contract.getValue().contractMonthRecaps.add(recap.get());
+			contract.getValue().save();
+			
+			yearMonthToCompute = yearMonthToCompute.plusMonths(1);
+		}
+	}
+	
+	/**
+	 * Costruzione di un ContractMonthRecap pulito. Il preesistente se presente
+	 * viene distrutto. Alternativa pulirlo (ma sono tanti campi!) 
+	 * 
+	 * @param contract
+	 * @param yearMonth
+	 * @return
+	 */
+	private ContractMonthRecap buildContractMonthRecap(IWrapperContract contract, 
+			YearMonth yearMonth ) {
+		
+		Optional<ContractMonthRecap> cmrOld = contract.getContractMonthRecap(yearMonth);
+
+		if ( cmrOld.isPresent() ) {
+			cmrOld.get().clean();
+			return cmrOld.get();
+		}
+		
+		ContractMonthRecap cmr = new ContractMonthRecap();
+		cmr.year = yearMonth.getYear();
+		cmr.month = yearMonth.getMonthOfYear();
+		cmr.contract = contract.getValue();
+		
+		return cmr;
+	}
+	
+	/**
+	 * Costruisce il contractMonthRecap da contract.SourceDate.
+	 * 1) Se sourceDate è l'ultimo giorno del mese costruisce il riepilogo 
+	 *    copiando le informazioni in esso contenute.
+	 * 2) Se sourceDate non è l'ultimo giorno del mese e si riferisce al mese corrente
+	 *    allora non si deve creare alcun riepilogo.
+	 * 3) Se sourceDate non è l'ultimo giorno del mese e si riferisce ad un mese passato
+	 *    costruisce il riepilogo andando a combinare le informazioni presenti in sourceContract
+	 *    e nel database (a partire dal giorno successivo a sourceDate).
+	 *    
+	 * @return YearMonth di cui si deve costruire il prossimo contractMonthRecap
+	 * @param contract
+	 * @param yearMonthToCompute il riepilogo che si vuole costruire
+	 * @return
+	 */
+	private YearMonth populateContractMonthFromSource(IWrapperContract contract, 
+			YearMonth yearMonthToCompute) {
+		
+		if(contract.getValue().sourceDate == null)
+			return yearMonthToCompute;
+		
+		// Mese da costruire con sourceDate
+		YearMonth yearMonthToComputeFromSource =
+				new YearMonth(contract.getValue().sourceDate);
+
+		//Mese da costruire di competenza si sourceDate?
+		if( yearMonthToCompute.isAfter(yearMonthToComputeFromSource ) ) {
+			return yearMonthToCompute;
+		}
+
+		//Caso semplice ultimo giorno del mese
+		LocalDate lastDayInSourceMonth = contract.getValue()
+				.sourceDate.dayOfMonth().withMaximumValue();
+		if(lastDayInSourceMonth.isEqual(contract.getValue().sourceDate))
+		{
+			ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
+
+			cmr.remainingMinutesCurrentYear = contract.getValue().sourceRemainingMinutesCurrentYear;
+			cmr.remainingMinutesLastYear = contract.getValue().sourceRemainingMinutesLastYear;
+			cmr.vacationLastYearUsed = contract.getValue().sourceVacationLastYearUsed;
+			cmr.vacationCurrentYearUsed = contract.getValue().sourceVacationCurrentYearUsed;
+			cmr.recoveryDayUsed = contract.getValue().sourceRecoveryDayUsed;
+			cmr.permissionUsed = contract.getValue().sourcePermissionUsed;
+			cmr.buoniPastoDaInizializzazione = contract.getValue().sourceRemainingMealTicket;
+			cmr.remainingMealTickets = contract.getValue().sourceRemainingMealTicket;
+			cmr.save();
+			contract.getValue().contractMonthRecaps.add(cmr);
+			contract.getValue().save();
+			return yearMonthToCompute.plusMonths(1);
+		}
+
+		//Nel caso in cui non sia l'ultimo giorno del mese e source cade nel mese_anno attuale 
+		
+		ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
+		
+		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
+		AbsenceType ab31 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
+		AbsenceType ab32 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
+		AbsenceType ab37 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
+		AbsenceType ab94 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
+				
+		DateInterval monthInterSource = new DateInterval(contract.getValue().sourceDate.plusDays(1), lastDayInSourceMonth);
+		List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab32);
+		List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab31);
+		List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab37);
+		List<Absence> abs94 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab94);
+				
+		cmr.vacationLastYearUsed = contract.getValue().sourceVacationLastYearUsed + abs31.size() + abs37.size();
+		cmr.vacationCurrentYearUsed = contract.getValue().sourceVacationCurrentYearUsed + abs32.size();
+		cmr.permissionUsed = contract.getValue().sourcePermissionUsed + abs94.size();
+		
+		contract.getValue().contractMonthRecaps.add(cmr);
+		cmr.save();
+		
+		// Informazioni relative ai residui		
+		List<Absence> otherAbsences = Lists.newArrayList();
+		contractMonthRecapManager.computeResidualModule(cmr, yearMonthToCompute, 
+				new LocalDate().minusDays(1), otherAbsences);
+		
+		cmr.save();
+		
+		contract.getValue().save();
+		return yearMonthToCompute.plusMonths(1);
+		
+	}
+
+	
+	
+	
+	
+	
+
+	
 
 }

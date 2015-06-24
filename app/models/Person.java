@@ -5,6 +5,8 @@ package models;
 
 
 
+import it.cnr.iit.epas.NullStringBinder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +30,10 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 /**
  * @author cristian
@@ -64,6 +68,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public LocalDate birthday;
 
 	@Email
+	@Unique @As(binder=NullStringBinder.class)
 	public String email;
 
 	@OneToOne (optional = false, fetch = FetchType.LAZY)
@@ -73,12 +78,13 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 * Numero di matricola
 	 */
+	@Unique
 	public Integer number;
 
 	/**
 	 * numero di matricola sul badge
 	 */
-
+	@Unique @As(binder=NullStringBinder.class)
 	public String badgeNumber;
 
 	/**
@@ -89,13 +95,20 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con Perseo (Person.id di Perseo)
 	 */
+	@Unique
 	public Integer iId;
 
 	/**
 	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
 	 */
+	@Unique
 	@Email
+	@As(binder=NullStringBinder.class)
 	public String cnr_email;
+	
+	@Unique
+	@As(binder=NullStringBinder.class)
+	public String eppn;
 
 	/**
 	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da contact_data così da eliminare quella tabella

@@ -46,7 +46,7 @@ public class LostPassword extends Controller{
 			LostPassword.lostPassword();
 		}
 
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person==null)
 		{
 			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");

@@ -4,7 +4,6 @@ import java.util.List;
 
 import manager.PersonManager;
 import models.Person;
-import models.PersonDay;
 import models.PersonDayInTrouble;
 
 import org.joda.time.LocalDate;
@@ -12,7 +11,6 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 
 /**

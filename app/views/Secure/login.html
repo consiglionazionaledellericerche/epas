@@ -51,12 +51,9 @@
 	#{/if}
 
 	#{if play.Play.configuration.getProperty("shib.login").equals("true")}
-		<div class="center" style="margin-top: 1em">
+		<div class="center" style="margin-top: 5em">
 			<a href="@{ShibbolethSecurity.login()}">
-				<div>
-					<img src="@{'/public/images/shibboleth-logo.jpg'}" />
-				</div>
-				Login via Shibboleth
+				<img class="col-xs-12" alt="Login via Shibboleth" src="@{'/public/images/shibboleth.png'}" />
 			</a>
 		</div>
 	#{/if}

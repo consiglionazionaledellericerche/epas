@@ -2,6 +2,7 @@ package dao.wrapper;
 
 import models.Contract;
 import models.PersonDay;
+import models.Stamping;
 import models.WorkingTimeTypeDay;
 
 import com.google.common.base.Optional;
@@ -48,5 +49,14 @@ public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
 	 * @return
 	 */
 	Optional<PersonDay> getPreviousForProgressive();
+
+	void setPreviousForProgressive(Optional<PersonDay> potentialOnlyPrevious);
+	void setPreviousForNightStamp(Optional<PersonDay> potentialOnlyPrevious);
+	
+	/**
+	 * L'ultima timbratura in ordine di tempo nel giorno
+	 * @return
+	 */
+	Stamping getLastStamping(); 
 
 }
