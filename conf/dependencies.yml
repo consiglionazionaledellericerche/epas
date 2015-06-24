@@ -39,6 +39,15 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
+    - org.projectlombok -> lombok 1.16.4
+    - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.1.0
+    - com.fasterxml.jackson.core -> jackson-core 2.4.5
+    - com.fasterxml.jackson.core -> jackson-annotations 2.4.5
+    - com.fasterxml.jackson.core -> jackson-databind 2.4.5
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.4.5
+    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.4.5
+    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.4.5
+    - com.github.fge -> jackson-coreutils 1.6
 
 # My custom repository
 

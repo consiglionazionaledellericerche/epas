@@ -838,7 +838,8 @@ when
         "rest.Persons.missions",
         "rest.Persons.competences",
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.insertAbsence"
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence"
         
        ), target == null, granted == false)
 then
