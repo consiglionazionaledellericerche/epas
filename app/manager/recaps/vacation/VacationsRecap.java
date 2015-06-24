@@ -97,7 +97,7 @@ public class VacationsRecap {
 			ConfYearManager confYearManager, 
 			VacationManager vacationManager,
 			int year, Contract contract, Optional<LocalDate> accruedDate, 
-			boolean considerExpireLastYear) {
+			boolean considerExpireLastYear, List<Absence> otherAbsences) {
 
 		this.absenceDao = absenceDao;
 		this.vacationManager = vacationManager;
@@ -117,7 +117,7 @@ public class VacationsRecap {
 		this.wcontract = wrapperFactory.create(contract);
 		this.activeContractInterval = wcontract.getContractDateInterval();
 		
-		initDataStructures();
+		initDataStructures(otherAbsences);
 
 		//(1) ferie fatte dell'anno precedente all'anno richiesto
 		vacationDaysLastYearUsed = list32PreviouYear.size() 
@@ -364,7 +364,7 @@ public class VacationsRecap {
 		return count;
 	}
 	
-	private void initDataStructures() {
+	private void initDataStructures(List<Absence> otherAbsences) {
 		
 		// Gli intervalli su cui predere le assenze nel db
 		this.previousYearInterval = DateUtility
@@ -396,6 +396,8 @@ public class VacationsRecap {
 				.getAbsencesInCodeList(person, dateFrom, dateTo,
 						absenceTypeManager.codesForVacations(), true);
 		
+		absencesForVacationsRecap.addAll(otherAbsences);
+		
 		AbsenceType ab32  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
 		AbsenceType ab31  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
 		AbsenceType ab37  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode());
@@ -404,7 +406,13 @@ public class VacationsRecap {
 		
 		for(Absence ab : absencesForVacationsRecap) {
 			
-			int abYear = ab.personDay.date.getYear();
+			int abYear;
+			
+			if(ab.personDay != null) {
+				 abYear = ab.personDay.date.getYear();
+			} else {
+				 abYear = ab.date.getYear();
+			}
 			
 			//32
 			if (ab.absenceType.id.equals(ab32.id)) {

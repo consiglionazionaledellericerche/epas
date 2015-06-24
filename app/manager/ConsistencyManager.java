@@ -479,8 +479,9 @@ public class ConsistencyManager {
 			cmr.permissionUsed = vacationRecap.get().permissionUsed;
 			
 			// (2) RESIDUI
+			List<Absence> otherAbsences = Lists.newArrayList();
 			Optional<ContractMonthRecap> recap = contractMonthRecapManager
-					.computeResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
+					.computeResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth,otherAbsences);
 			if( !recap.isPresent() ) {
 
 				if( yearMonthFrom.isPresent() ) {
@@ -599,9 +600,9 @@ public class ConsistencyManager {
 		cmr.save();
 		
 		// Informazioni relative ai residui		
-		
+		List<Absence> otherAbsences = Lists.newArrayList();
 		contractMonthRecapManager.computeResidualModule(cmr, yearMonthToCompute, 
-				new LocalDate().minusDays(1));
+				new LocalDate().minusDays(1), otherAbsences);
 		
 		cmr.save();
 		
