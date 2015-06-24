@@ -10,9 +10,13 @@ import manager.AbsenceManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.ContractWorkingTimeType;
 import models.Person;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -30,6 +34,8 @@ import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.WrapperContractMonthRecap;
 
 @With(Resecure.class)
 public class Absences extends Controller{
@@ -42,6 +48,8 @@ public class Absences extends Controller{
 	static AbsenceManager absenceManager;
 	@Inject
 	static AbsenceTypeDao absenceTypeDao;
+	@Inject
+	private static IWrapperFactory wrapperFactory;
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
@@ -100,6 +108,36 @@ public class Absences extends Controller{
 		}
 		
 		
+	}
+	
+	
+	public static void checkAbsence(String email, String absenceCode, 
+			LocalDate begin, LocalDate end){
+		Person person = personDao.getPersonByEmail(email);
+		if(person == null){
+			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
+					+ "mail cnr che serve per la ricerca.");
+		}
+		if(begin == null || end == null || begin.isAfter(end)){
+			JsonResponse.badRequest("Date non valide");
+		}
+		Optional<Contract> contract = wrapperFactory
+				.create(person).getCurrentContract();
+		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
+				.getContractMonthRecap( new YearMonth(end.getYear(), 
+						end.getMonthOfYear()));
+		List<AbsenceAddedRest> list = Lists.newArrayList();
+		if(!recap.isPresent()){
+			JsonResponse.notFound("Non esistono riepiloghi per"+person.name+" "
+					+person.surname+" da cui prender le informazioni per il calcolo");
+		}
+		else{
+			/**TODO: completare con i controlli per verificare quando vengono
+			 * chiesti inserimenti di codici di assenza 94, 91, 32, 31 
+			 */
+			
+			
+		}
 	}
 
 }
