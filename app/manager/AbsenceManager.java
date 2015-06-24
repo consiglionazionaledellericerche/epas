@@ -341,7 +341,7 @@ public class AbsenceManager {
 				aiList = handlerAbsenceTypeGroup(person, actualDate, absenceType, file, !onlySimulation);
 			}
 			else {
-				aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,mealTicket, !onlySimulation));
+				aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file, mealTicket, !onlySimulation));
 			}
 			
 			if(onlySimulation) {
@@ -361,12 +361,14 @@ public class AbsenceManager {
 			actualDate = actualDate.plusDays(1);
 		}
 
-		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		consistencyManager.updatePersonSituation(person, dateFrom);
+		if(!onlySimulation) {
+			//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
+			consistencyManager.updatePersonSituation(person, dateFrom);
 
-		if(air.getAbsenceInReperibilityOrShift() > 0){
-			sendEmail(person, air);
-		}					
+			if(air.getAbsenceInReperibilityOrShift() > 0){
+				sendEmail(person, air);
+			}			
+		}
 
 		return air;
 	}
@@ -674,8 +676,8 @@ public class AbsenceManager {
 			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket, boolean persist){
 
 		AbsencesResponse aim = insert(person, date, absenceType, file, persist);
-		if(mealTicket.isPresent()){
-			checkMealTicket(date, person, mealTicket.get(), absenceType);
+		if(mealTicket.isPresent() && aim.isInsertSucceeded()){
+			checkMealTicket(date, person, mealTicket.get(), absenceType, persist);
 		}
 		return aim;
 	}
@@ -687,8 +689,13 @@ public class AbsenceManager {
 	 * @param mealTicket
 	 * @param abt
 	 */
-	private void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
+	private void checkMealTicket(LocalDate date, Person person, String mealTicket, 
+			AbsenceType abt, boolean persist){
 
+		if(!persist) {
+			return;
+		}
+		
 		Optional<PersonDay> option = personDayDao.getPersonDay(person, date);
 		PersonDay pd;
 		if ( option.isPresent() ) {
