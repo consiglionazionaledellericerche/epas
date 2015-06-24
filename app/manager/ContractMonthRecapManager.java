@@ -33,8 +33,6 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 /**
- * TODO: una volta mergiato il branch fare un unico manager che gestisca sia 
- * year che month recap.
  * 
  * @author alessandro
  *
@@ -174,7 +172,6 @@ public class ContractMonthRecapManager {
 			firstDayInDatabase = contract.sourceDate.plusDays(1);
 			requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 
-			// TODO: initMealTickets da source contract
 			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		}
 
@@ -493,6 +490,9 @@ public class ContractMonthRecapManager {
 			for(Absence riposo : otherAbsences) {
 				if(DateUtility.isDateIntoInterval(riposo.date, validDataForCompensatoryRest)) {
 
+					// TODO: rifattorizzare questa parte. Serve un metodo 
+					// .getWorkingTimeTypeDay(date) in WrapperContract
+					
 					LocalDate date = riposo.date;
 					for(ContractWorkingTimeType cwtt : 
 						wcontract.getValue().contractWorkingTimeType ) {
