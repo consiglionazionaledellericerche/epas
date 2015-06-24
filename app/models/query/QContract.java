@@ -1,21 +1,15 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
-
-import javax.annotation.Generated;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.Contract;
 
-import com.mysema.query.types.Path;
+
+import com.mysema.query.types.path.*;
+
 import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.DatePath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.ListPath;
-import com.mysema.query.types.path.NumberPath;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SetPath;
-import com.mysema.query.types.path.SimplePath;
 
 
 /**
@@ -65,6 +59,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final NumberPath<Integer> sourceRecoveryDayUsed = createNumber("sourceRecoveryDayUsed", Integer.class);
 
+    public final NumberPath<Integer> sourceRemainingMealTicket = createNumber("sourceRemainingMealTicket", Integer.class);
+
     public final NumberPath<Integer> sourceRemainingMinutesCurrentYear = createNumber("sourceRemainingMinutesCurrentYear", Integer.class);
 
     public final NumberPath<Integer> sourceRemainingMinutesLastYear = createNumber("sourceRemainingMinutesLastYear", Integer.class);
@@ -73,7 +69,7 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final NumberPath<Integer> sourceVacationLastYearUsed = createNumber("sourceVacationLastYearUsed", Integer.class);
 
-    public final SetPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createSet("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
+    public final ListPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 
     public QContract(String variable) {
         this(Contract.class, forVariable(variable), INITS);

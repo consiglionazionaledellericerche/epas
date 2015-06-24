@@ -32,6 +32,7 @@ import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -287,14 +288,34 @@ public final class PersonDao extends DaoBase{
 	 * @param email
 	 * @return la persona che ha associata la mail email
 	 */
-	public Person getPersonByEmail(String email){
+	public Optional<Person> byEmail(String email){
 
 		final QPerson person = QPerson.person;
 		
 		final JPQLQuery query = getQueryFactory().from(person)
-				.where(person.email.eq(email).or(person.cnr_email.eq(email)));
+				.where(person.email.eq(email));
 
-		return query.singleResult(person);
+		return Optional.fromNullable(query.singleResult(person));
+	}
+	
+	public Optional<Person> byCnrEmail(String cnr_email){
+
+		final QPerson person = QPerson.person;
+		
+		final JPQLQuery query = getQueryFactory().from(person)
+				.where(person.cnr_email.eq(cnr_email));
+
+		return Optional.fromNullable(query.singleResult(person));
+	}
+	
+	public Optional<Person> byEppn(String eppn){
+
+		final QPerson person = QPerson.person;
+		
+		final JPQLQuery query = getQueryFactory().from(person)
+				.where(person.eppn.eq(eppn));
+
+		return Optional.fromNullable(query.singleResult(person));
 	}
 
 	/**
@@ -698,6 +719,37 @@ public final class PersonDao extends DaoBase{
 			this.name = name;
 			this.surname = surname;
 		}
+	}
+	
+	/**
+	 * @param La persona sulla quale verificare eventuali campi duplicati
+	 * @return true se è presente sul db almeno una persona con email,cnr_email 
+	 * o eppn uguali alla persona passata come parametro
+	 */
+	public boolean checkDuplicateFields(Person p){
+
+		final QPerson person = QPerson.person;
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		
+		if(p.id!=null){
+			condition.and(person.id.ne(p.id));
+		}
+		
+		if(!Strings.isNullOrEmpty(p.email)){
+			condition.or(person.email.eq(p.email));
+		}
+		
+		if(!Strings.isNullOrEmpty(p.cnr_email)){
+			condition.or(person.cnr_email.eq(p.cnr_email));
+		}
+		
+		if(!Strings.isNullOrEmpty(p.eppn)){
+			condition.or(person.cnr_email.eq(p.cnr_email));
+		}
+		
+		return getQueryFactory().from(person)
+				.where(condition).exists();
 	}
 	
 }
