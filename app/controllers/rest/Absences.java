@@ -1,18 +1,24 @@
 package controllers.rest;
 
 import helpers.JsonResponse;
+import helpers.rest.JacksonModule;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 import manager.AbsenceManager;
+import manager.cache.AbsenceTypeManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.ContractWorkingTimeType;
 import models.Person;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -20,6 +26,9 @@ import play.mvc.With;
 import cnr.sync.dto.AbsenceAddedRest;
 import cnr.sync.dto.AbsenceRest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
@@ -30,6 +39,8 @@ import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.WrapperContractMonthRecap;
 
 @With(Resecure.class)
 public class Absences extends Controller{
@@ -42,6 +53,13 @@ public class Absences extends Controller{
 	static AbsenceManager absenceManager;
 	@Inject
 	static AbsenceTypeDao absenceTypeDao;
+	@Inject
+	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static AbsenceTypeManager absenceTypeManager;
+	@Inject
+	static ObjectMapper mapper;
+	
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
@@ -84,7 +102,7 @@ public class Absences extends Controller{
 		try{
 			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, Optional.fromNullable(end), 
 					absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(), 
-					Optional.<Blob>absent(), Optional.<String>absent());
+					Optional.<Blob>absent(), Optional.<String>absent(), true);
 			for(AbsencesResponse ar : air.getAbsences()){
 				AbsenceAddedRest aar = new AbsenceAddedRest();
 				aar.absenceCode = ar.getAbsenceCode();
@@ -100,6 +118,43 @@ public class Absences extends Controller{
 		}
 		
 		
+	}
+	
+	@BasicAuth
+	public static void checkAbsence(String email, String absenceCode, 
+			LocalDate begin, LocalDate end) throws JsonProcessingException{
+		Person person = personDao.getPersonByEmail(email);
+		if(person == null){
+			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
+					+ "mail cnr che serve per la ricerca.");
+		}
+		if(begin == null || end == null || begin.isAfter(end)){
+			JsonResponse.badRequest("Date non valide");
+		}
+		Optional<Contract> contract = wrapperFactory
+				.create(person).getCurrentContract();
+		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
+				.getContractMonthRecap( new YearMonth(end.getYear(), 
+						end.getMonthOfYear()));
+		
+		if(!recap.isPresent()){
+			JsonResponse.notFound("Non esistono riepiloghi per"+person.name+" "
+					+person.surname+" da cui prender le informazioni per il calcolo");
+		}
+		else{
+						
+			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, 
+					Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
+					, Optional.<Blob>absent(), Optional.<String>absent(), true);
+			//renderJSON(air.getAbsences());
+			renderJSON(mapper.writer(JacksonModule
+					.filterProviderFor(SimpleBeanPropertyFilter
+							.filterOutAllExcept("date", "absenceCode", "warning", 
+									"insertSucceeded", "isHoliday", 
+									"isDayInReperibilityOrShift")))
+				.writeValueAsString(air.getAbsences()));
+			
+		}
 	}
 
 }
