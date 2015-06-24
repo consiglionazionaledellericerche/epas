@@ -123,8 +123,8 @@ public class Absences extends Controller{
 	@BasicAuth
 	public static void checkAbsence(String email, String absenceCode, 
 			LocalDate begin, LocalDate end) throws JsonProcessingException{
-		Person person = personDao.getPersonByEmail(email);
-		if(person == null){
+		Optional<Person> person = personDao.byEmail(email);
+		if(!person.isPresent()){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
 		}
@@ -132,18 +132,18 @@ public class Absences extends Controller{
 			JsonResponse.badRequest("Date non valide");
 		}
 		Optional<Contract> contract = wrapperFactory
-				.create(person).getCurrentContract();
+				.create(person.get()).getCurrentContract();
 		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
 				.getContractMonthRecap( new YearMonth(end.getYear(), 
 						end.getMonthOfYear()));
 		
 		if(!recap.isPresent()){
-			JsonResponse.notFound("Non esistono riepiloghi per"+person.name+" "
-					+person.surname+" da cui prender le informazioni per il calcolo");
+			JsonResponse.notFound("Non esistono riepiloghi per"+person.get().name+" "
+					+person.get().surname+" da cui prender le informazioni per il calcolo");
 		}
 		else{
 						
-			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, 
+			AbsenceInsertReport air = absenceManager.insertAbsence(person.get(), begin, 
 					Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
 					, Optional.<Blob>absent(), Optional.<String>absent(), true);
 			//renderJSON(air.getAbsences());
