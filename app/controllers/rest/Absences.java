@@ -1,12 +1,14 @@
 package controllers.rest;
 
 import helpers.JsonResponse;
+import helpers.rest.JacksonModule;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 import manager.AbsenceManager;
+import manager.cache.AbsenceTypeManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
@@ -24,6 +26,9 @@ import play.mvc.With;
 import cnr.sync.dto.AbsenceAddedRest;
 import cnr.sync.dto.AbsenceRest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
@@ -50,6 +55,11 @@ public class Absences extends Controller{
 	static AbsenceTypeDao absenceTypeDao;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static AbsenceTypeManager absenceTypeManager;
+	@Inject
+	static ObjectMapper mapper;
+	
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
@@ -110,9 +120,9 @@ public class Absences extends Controller{
 		
 	}
 	
-	
+	@BasicAuth
 	public static void checkAbsence(String email, String absenceCode, 
-			LocalDate begin, LocalDate end){
+			LocalDate begin, LocalDate end) throws JsonProcessingException{
 		Person person = personDao.getPersonByEmail(email);
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
@@ -126,16 +136,23 @@ public class Absences extends Controller{
 		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
 				.getContractMonthRecap( new YearMonth(end.getYear(), 
 						end.getMonthOfYear()));
-		List<AbsenceAddedRest> list = Lists.newArrayList();
+		
 		if(!recap.isPresent()){
 			JsonResponse.notFound("Non esistono riepiloghi per"+person.name+" "
 					+person.surname+" da cui prender le informazioni per il calcolo");
 		}
 		else{
-			/**TODO: completare con i controlli per verificare quando vengono
-			 * chiesti inserimenti di codici di assenza 94, 91, 32, 31 
-			 */
-			
+						
+			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, 
+					Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
+					, Optional.<Blob>absent(), Optional.<String>absent(), true);
+			//renderJSON(air.getAbsences());
+			renderJSON(mapper.writer(JacksonModule
+					.filterProviderFor(SimpleBeanPropertyFilter
+							.filterOutAllExcept("date", "absenceCode", "warning", 
+									"insertSucceeded", "isHoliday", 
+									"isDayInReperibilityOrShift")))
+				.writeValueAsString(air.getAbsences()));
 			
 		}
 	}
