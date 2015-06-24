@@ -1,186 +1,195 @@
-#{extends 'main3.html' /}
-#{set header:'navbar' /}
-#{set title: 'ePAS - Ferie e Permessi' /}
-
-#{set 'moreStyles'}
+#{extends 'main3.html' /} #{set header:'navbar' /} #{set title: 'ePAS -
+Ferie e Permessi' /} #{set 'moreStyles'}
 
 <style>
-	/* allineamento centrato dei th con rowspan e colspan */
-	#tabella-ferie th {
-		vertical-align: inherit;
-	}
+/* allineamento centrato dei th con rowspan e colspan */
+#tabella-ferie th {
+	vertical-align: inherit;
+}
 </style>
 
 #{/set}
 
 <!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
 <div class="container-fluid">
- <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@VacationsAdmin.list(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <input type="hidden" name="year" value="${year}"/>
-			<input type="hidden" name="name" value="${name}">	        
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-      </div>
+	<div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+		#{form action:@VacationsAdmin.list(), role:'form',
+		class:'form-inline', method:'GET', autocomplete:'off'}
+
+		<div class="form-group">
+			<label class="hidden-xs hidden-sm" for="dip">Sede </label> <input
+				type="hidden" name="year" value="${year}" /> <input type="hidden"
+				name="name" value="${name}"> <select name="officeId"
+				class="form-control" id="dip"
+				onChange="javascript:this.form.submit()"> #{list
+				items:offices, as:'officeItem'}
+				<option value="${officeItem.id}" #{if
+					officeItem.id.equals(office.id) } selected="selected"#{/if} >
+					${officeItem.name}</option> #{/list}
+			</select>
+		</div>
+
+		<button type="submit" class="btn btn-default">Invio</button>
+		#{/form}
+	</div>
 </div>
 <!-- FINE FILTRO OFFICE -->
 
 <div class="container-fluid">
 
-  <div class="panel panel-info">
-    <div class="panel-heading">
-      <h3 class="panel-title text-center">Situazione Ferie e Permessi per l'anno ${year}</h3>
-    </div>
-    <div class="panel-body">
-	
-
-	<table id="datatable-test" class="table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Ferie Fatte ${year-1}</th>
-                <th>Ferie Fatte ${year}</th>
-                <th>Permessi Fatti ${year}</th>
-                <th>
-		          Ferie ${year-1}<br>
-		          #{if isVacationLastYearExpired}<span class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
-		          #{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
-		        </th>
-                <th>Ferie ${year}<br>Residue Totali</th>
-		        <th>Ferie ${year}<br>Residue Maturate</th>
-		        <th>Permessi<br>Residui Totali</th>
-		        <th>Permessi<br>Residui Maturati</th>
-		        <th>Limite <br>Iniziale</th>
-		        <th>Liminte <br>Finale</th>
-            </tr>
-        </thead>
- 
-        <tfoot>
-             <tr>
-                <th>Nome</th>
-                <th>Ferie Fatte ${year-1}</th>
-                <th>Ferie Fatte ${year}</th>
-                <th>Permessi Fatti ${year}</th>
-                <th>
-		          Ferie ${year-1}<br>
-		          #{if isVacationLastYearExpired}<span class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
-		          #{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
-		        </th>
-                <th>Ferie ${year}<br>Residue Totali</th>
-		        <th>Ferie ${year}<br>Residue Maturate</th>
-		        <th>Permessi<br>Residui Totali</th>
-		        <th>Permessi<br>Residui Maturati</th>
-		        <th>Limite <br>Iniziale</th>
-		        <th>Liminte <br>Finale</th>
-            </tr>
-        </tfoot>
- 
-        <tbody>
-        		      #{list items:vacationsList, as:'vacationsRecap'}
-		      <tr>
-		        <!-- ferie e permessi fatti -->
-		        <td>${vacationsRecap.person.surname} ${vacationsRecap.person.name}</td>
-		        
-		        <td data-order="${vacationsRecap.vacationDaysLastYearUsed}">
-		          <a href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
-					${vacationsRecap.vacationDaysLastYearUsed}
-			      </a> 
-		        </td>
-		        
-		        <td data-order="${vacationsRecap.vacationDaysCurrentYearUsed}">
-		          <a href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
-					${vacationsRecap.vacationDaysCurrentYearUsed}
-				  </a>
-				</td>
-				
-				<td data-order="${vacationsRecap.permissionUsed}">
-		          <a href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}" data-modal=".my-modal">
-					${vacationsRecap.permissionUsed}
-				  </a>
-		        </td>
-		        
-		        <!-- residui -->
-		        
-		        <!-- ferie 2013 -->
-		        <td>
-		          ${vacationsRecap.vacationDaysLastYearNotYetUsed}
-		        </td>
-		        
-		        <!-- ferie 2014 -->
-		        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed} </td>
-		        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed} </td>
-		        
-		        <!-- permessi 2014 -->
-		        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed}</td>
-		        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}</td>
-		        
-		        <td>
-		          #{if vacationsRecap.isActiveAfterBeginYear }
-		            <span class="badge badge-success">${vacationsRecap.activeContractInterval.getBegin()}</span>
-		          #{/if}
-		        </td>
-		        
-		        <td>
-		          #{if vacationsRecap.isExpireBeforeEndYear }
-		            <span class="badge badge-important">${vacationsRecap.activeContractInterval.getEnd()}</span>
-		          #{/if}
-		        </td>
-		       
-		      </tr>
-		      #{/list}
-        
-        </tbody>
-    </table>
-          
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<h3 class="panel-title text-center">Situazione Ferie e Permessi
+				per l'anno ${year}</h3>
+		</div>
+		<div class="panel-body">
 
 
-		  
-	  
-		  <p>
-		     <br> 
-		     #{if isVacationLastYearExpired}
-		       <span class="glyphicon glyphicon-remove" style="color: red;"></span> Ferie anno precedente scadute.
-		     #{/if}
-		     #{else}
-		       <span class="glyphicon glyphicon-ok" style="color: green;"></span> Ferie anno precedente utilizzabili.
-		     #{/else} 
-		  </p>
-		
-		  #{if contractsWithVacationsProblems.size() > 0}
-		    <p>
-		      Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone: 
-		    </p>
-		    <ul>
-		      #{list items:contractsWithVacationsProblems, as:'contract'}
-		        <li><a href="@{Persons.edit(contract.person.id)}">Contratto di ${contract.person.surname} ${contract.person.name} iniziato il ${contract.beginContract}</a></li>
-		      #{/list}
-		    </ul>
-		    <p>
-		      Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto.
-		    </p>
-		  #{/if}
-		  
-		  </div>
+			<table 	class="datatable-test table table-striped table-bordered table-condensed"
+				cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th>Nome</th>
+						<th>Ferie Fatte ${year-1}</th>
+						<th>Ferie Fatte ${year}</th>
+						<th>Permessi Fatti ${year}</th>
+						<th>Ferie ${year-1}<br> #{if isVacationLastYearExpired}<span
+							class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
+							#{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
+						</th>
+						<th>Ferie ${year}<br>Residue Totali
+						</th>
+						<th>Ferie ${year}<br>Residue Maturate
+						</th>
+						<th>Permessi<br>Residui Totali
+						</th>
+						<th>Permessi<br>Residui Maturati
+						</th>
+						<th>Limite <br>Iniziale
+						</th>
+						<th>Limite <br>Finale
+						</th>
+					</tr>
+				</thead>
+
+				<tfoot>
+					<tr>
+						<th>Nome</th>
+						<th>Ferie Fatte ${year-1}</th>
+						<th>Ferie Fatte ${year}</th>
+						<th>Permessi Fatti ${year}</th>
+						<th>Ferie ${year-1}<br> #{if isVacationLastYearExpired}<span
+							class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
+							#{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
+						</th>
+						<th>Ferie ${year}<br>Residue Totali
+						</th>
+						<th>Ferie ${year}<br>Residue Maturate
+						</th>
+						<th>Permessi<br>Residui Totali
+						</th>
+						<th>Permessi<br>Residui Maturati
+						</th>
+						<th>Limite <br>Iniziale
+						</th>
+						<th>Limite <br>Finale
+						</th>
+					</tr>
+				</tfoot>
+
+				<tbody>
+					#{list items:vacationsList, as:'vacationsRecap'}
+					<tr>
+						<!-- ferie e permessi fatti -->
+						<td>${vacationsRecap.person.surname}
+							${vacationsRecap.person.name}</td>
+
+						<td data-order="${vacationsRecap.vacationDaysLastYearUsed}">
+							<a
+							href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.contract.id, vacationsRecap.year)}"
+							data-modal=".my-modal">
+								${vacationsRecap.vacationDaysLastYearUsed} </a>
+						</td>
+
+						<td data-order="${vacationsRecap.vacationDaysCurrentYearUsed}">
+							<a
+							href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}"
+							data-modal=".my-modal">
+								${vacationsRecap.vacationDaysCurrentYearUsed} </a>
+						</td>
+
+						<td data-order="${vacationsRecap.permissionUsed}"><a
+							href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}"
+							data-modal=".my-modal"> ${vacationsRecap.permissionUsed} </a></td>
+
+						<!-- residui -->
+
+						<!-- ferie 2013 -->
+						<td>${vacationsRecap.vacationDaysLastYearNotYetUsed}</td>
+
+						<!-- ferie 2014 -->
+						<td>${vacationsRecap.vacationDaysCurrentYearTotal -
+							vacationsRecap.vacationDaysCurrentYearUsed}</td>
+						<td>${vacationsRecap.vacationDaysCurrentYearAccrued -
+							vacationsRecap.vacationDaysCurrentYearUsed}</td>
+
+						<!-- permessi 2014 -->
+						<td>${vacationsRecap.permissionCurrentYearTotal -
+							vacationsRecap.permissionUsed}</td>
+						<td>${vacationsRecap.permissionCurrentYearAccrued -
+							vacationsRecap.permissionUsed}</td>
+
+						<td>#{if vacationsRecap.isActiveAfterBeginYear } <span
+							class="badge badge-success">${vacationsRecap.activeContractInterval.getBegin()}</span>
+							#{/if}
+						</td>
+
+						<td>#{if vacationsRecap.isExpireBeforeEndYear } <span
+							class="badge badge-important">${vacationsRecap.activeContractInterval.getEnd()}</span>
+							#{/if}
+						</td>
+
+					</tr>
+					#{/list}
+
+				</tbody>
+			</table>
 
 
-  
-    </div> <!-- end panel body -->
-  </div> <!-- end panel -->
-  
-</div>    
+
+
+
+			<p>
+				<br> #{if isVacationLastYearExpired} <span
+					class="glyphicon glyphicon-remove" style="color: red;"></span>
+				Ferie anno precedente scadute. #{/if} #{else} <span
+					class="glyphicon glyphicon-ok" style="color: green;"></span> Ferie
+				anno precedente utilizzabili. #{/else}
+			</p>
+
+			#{if contractsWithVacationsProblems.size() > 0}
+			<p>Sono stati riscontrati errori durante il calcolo dei piani
+				ferie per le seguenti persone:</p>
+			<ul>
+				#{list items:contractsWithVacationsProblems, as:'contract'}
+				<li><a href="@{Persons.edit(contract.person.id)}">Contratto
+						di ${contract.person.surname} ${contract.person.name} iniziato il
+						${contract.beginContract}</a></li> #{/list}
+			</ul>
+			<p>Tali errori potrebbero derivare dalla mancanza di dati di
+				inizializzazione inerenti il contratto.</p>
+			#{/if}
+
+		</div>
+
+
+
+	</div>
+	<!-- end panel body -->
+</div>
+<!-- end panel -->
+
+</div>
 
 
 #{include '_myModal.html' /}

@@ -1,18 +1,15 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
-
-import javax.annotation.Generated;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.ContractMonthRecap;
 
-import com.mysema.query.types.Path;
+
+import com.mysema.query.types.path.*;
+
 import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.NumberPath;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
 
 
 /**
@@ -30,6 +27,8 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final NumberPath<Integer> buoniPastoConsegnatiNelMese = createNumber("buoniPastoConsegnatiNelMese", Integer.class);
+
+    public final NumberPath<Integer> buoniPastoDaInizializzazione = createNumber("buoniPastoDaInizializzazione", Integer.class);
 
     public final NumberPath<Integer> buoniPastoDalMesePrecedente = createNumber("buoniPastoDalMesePrecedente", Integer.class);
 

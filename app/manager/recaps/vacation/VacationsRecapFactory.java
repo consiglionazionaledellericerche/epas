@@ -1,15 +1,19 @@
 package manager.recaps.vacation;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
 import manager.VacationManager;
 import manager.cache.AbsenceTypeManager;
+import models.Absence;
 import models.Contract;
 
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -46,7 +50,7 @@ public class VacationsRecapFactory {
 	 * @return
 	 */
 	public Optional<VacationsRecap> create(int year, Contract contract,
-			LocalDate actualDate, boolean considerExpireLastYear) {
+			LocalDate actualDate, boolean considerExpireLastYear, List<Absence> otherAbsences) {
 
 		IWrapperContract c = wrapperFactory.create(contract);
 
@@ -73,9 +77,23 @@ public class VacationsRecapFactory {
 		VacationsRecap vacationRecap = new VacationsRecap(wrapperFactory, 
 				absenceDao, absenceTypeDao,	absenceTypeManager, confYearManager, 
 				vacationManager,
-				year, contract, Optional.fromNullable(actualDate), considerExpireLastYear);
+				year, contract, Optional.fromNullable(actualDate), considerExpireLastYear, otherAbsences);
 	
 		return Optional.fromNullable(vacationRecap);
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public Optional<VacationsRecap> create(int year, Contract contract,
+			LocalDate actualDate, boolean considerExpireLastYear) {
+
+		List<Absence> otherAbsences = Lists.newArrayList();
+		return create(year, contract, actualDate, considerExpireLastYear, otherAbsences);
 	}
 
 }
