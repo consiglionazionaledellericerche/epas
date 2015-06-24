@@ -45,7 +45,16 @@ public class Absence extends BaseModel {
 		return String.format("Absence[%d] - personDay.id = %d, absenceType.id = %s", 
 			id, personDay.id, absenceType.id);
 	}
-	
+	/**
+	 * Questo campo serve nel caso in cui debba essere valorizzata la data
+	 * di inserimento di un'assenza senza che questa debba essere associata 
+	 * a un personDay. In particolare nel caso in cui venga richiesto via rest il 
+	 * controllo sulla possibilità di inserire un certo codice di assenza, senza
+	 * che questo debba essere persistito, questo campo viene valorizzato per 
+	 * tenere traccia di quale giorno debba contenere l'assenza in modo che, 
+	 * successivamente, possano essere eseguiti tutti i calcoli senza però 
+	 * impattare sul database
+	 */
 	@Transient
 	public LocalDate date;
 }
