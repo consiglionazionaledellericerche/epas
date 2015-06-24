@@ -273,14 +273,15 @@ public class RequestInit extends Controller {
 		ItemsPermitted ip = new ItemsPermitted(user);
 		renderArgs.put("ip", ip);
 		
-		if(user.isPresent() && user.get().person != null) {
+		if(!user.isPresent()) {
+			return;
+		}
+		
+		if(user.get().person != null) {
 			renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
 		}
 			
 		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
-
-		if(!user.isPresent())
-			return;
 
 		// year init /////////////////////////////////////////////////////////////////
 		Integer year;
