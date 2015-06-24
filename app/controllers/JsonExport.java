@@ -15,6 +15,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -28,6 +29,7 @@ import dao.PersonDao;
  * @author cristian
  *
  */
+@With( Resecure.class )
 public class JsonExport extends Controller {
 
 	final static class PersonInfo {
@@ -52,7 +54,7 @@ public class JsonExport extends Controller {
 	@Inject
 	private static PersonDao personDao;
 
-	// FIXME: come proteggere questo metodo?? A cosa serve??
+	// TODO per il momento il ruolo developer è l'unico a poter utilizzare questo metodo
 	public static void activePersons() {
 
 		List<Office> offices = officeDao.getAllOffices();
