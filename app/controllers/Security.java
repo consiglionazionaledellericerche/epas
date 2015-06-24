@@ -2,16 +2,11 @@ package controllers;
 
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import models.Office;
-import models.Permission;
-import models.Person;
 import models.User;
-import models.UsersRolesOffices;
 import models.enumerate.Parameter;
 import play.Logger;
 import play.cache.Cache;
@@ -20,15 +15,10 @@ import play.utils.Java;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
 import dao.ConfGeneralDao;
-import dao.OfficeDao;
 import dao.PermissionDao;
-import dao.PersonDao;
-import dao.RoleDao;
 import dao.UserDao;
 
 public class Security extends Secure.Security {

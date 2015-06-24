@@ -14,13 +14,11 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
-import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +27,6 @@ import com.google.common.collect.Lists;
 
 import dao.ContractDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -46,9 +43,6 @@ public class ContractManager {
 	@Inject
 	public ContractManager(ConfGeneralManager confGeneralManager,
 			ConsistencyManager consistencyManager, 
-			PersonDayDao personDayDao,
-			PersonDayManager personDayManager,
-			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
 			ContractDao contractDao, 
@@ -56,9 +50,6 @@ public class ContractManager {
 
 		this.confGeneralManager = confGeneralManager;
 		this.consistencyManager = consistencyManager;
-		this.personDayDao = personDayDao;
-		this.personDayManager = personDayManager;
-		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
 		this.contractDao = contractDao;
@@ -67,9 +58,6 @@ public class ContractManager {
 
 	private final ConfGeneralManager confGeneralManager;
 	private final ConsistencyManager consistencyManager;
-	private final PersonDayDao personDayDao;
-	private final PersonDayManager personDayManager;
-	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final IWrapperFactory wrapperFactory;
 	private final VacationCodeDao vacationCodeDao;
 	private final ContractDao contractDao;
@@ -203,17 +191,9 @@ public class ContractManager {
 
 	/**
 	 * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
-	 *  
-	 * 1) CheckHistoryError 
-	 * 2) Ricalcolo tempi lavoro
-	 * 3) Ricalcolo riepiloghi annuali 
 	 * 
 	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. 
 	 *   Se null ricalcola dall'inizio del contratto.
-	 *   
-	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
-	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
-	 *   modifica la data fine che potrebbe non essere persistita)
 	 */
 	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
 
@@ -233,53 +213,7 @@ public class ContractManager {
 			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
 		}
 
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		LocalDate today = new LocalDate();
-		log.info("CheckPersonDay (creazione ed history error) DA {} A {}", date, today);
-		while(true) {
-			log.debug("RecomputePopulate {}", date);
-
-			if(date.isEqual(today))
-				break;
-
-			if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
-				date = date.plusDays(1);
-				continue;
-			}
-
-			consistencyManager.checkPersonDay(contract.person, date);
-
-			date = date.plusDays(1);
-
-		}
-
-		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
-		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
-
-		log.debug("PopulatePersonDay (ricalcoli ed history error) DA {} A {}", actualMonth, endMonth);
-
-		while( !actualMonth.isAfter(endMonth) )
-		{
-			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()));
-
-			for(PersonDay pd : pdList){
-
-				PersonDay pd1 = personDayDao.getPersonDayById(pd.id);
-
-				log.debug("RecomputePopulate {}", pd1.date);	
-
-				personDayManager.populatePersonDay(wrapperFactory.create(pd1));
-			}
-
-			actualMonth = actualMonth.plusMonths(1);
-		}
-
-		log.info("Calcolato il riepilogo per il contratto {}",contract);
-
-		//(3) Ricalcolo dei riepiloghi mensili
-		contractMonthRecapManager.populateContractMonthRecapByPerson(contract.person,
-				new YearMonth(contractInterval.getBegin()));
+		consistencyManager.updatePersonSituation(contract.person, date);
 
 	}
 
@@ -485,15 +419,29 @@ public class ContractManager {
 	 * @param contract
 	 */
 	public void saveSourceContract(Contract contract){
-		if(contract.sourceVacationLastYearUsed==null) contract.sourceVacationLastYearUsed=0;
-		if(contract.sourceVacationCurrentYearUsed==null) contract.sourceVacationCurrentYearUsed=0;
-		if(contract.sourcePermissionUsed==null) contract.sourcePermissionUsed=0;
-		if(contract.sourceRemainingMinutesCurrentYear==null) contract.sourceRemainingMinutesCurrentYear=0;
-		if(contract.sourceRemainingMinutesLastYear==null) contract.sourceRemainingMinutesLastYear=0;
-		if(contract.sourceRecoveryDayUsed==null) contract.sourceRecoveryDayUsed=0;
+		if(contract.sourceVacationLastYearUsed == null){ 
+			contract.sourceVacationLastYearUsed = 0;
+		}
+		if(contract.sourceVacationCurrentYearUsed == null) {
+			contract.sourceVacationCurrentYearUsed = 0;
+		}
+		if(contract.sourcePermissionUsed == null) {
+			contract.sourcePermissionUsed = 0;
+		}
+		if(contract.sourceRemainingMinutesCurrentYear == null){ 
+			contract.sourceRemainingMinutesCurrentYear = 0;
+		}
+		if(contract.sourceRemainingMinutesLastYear == null){ 
+			contract.sourceRemainingMinutesLastYear = 0;
+		}
+		if(contract.sourceRecoveryDayUsed == null){ 
+			contract.sourceRecoveryDayUsed = 0;
+		}
+		if(contract.sourceRemainingMealTicket == null){ 
+			contract.sourceRemainingMealTicket = 0;
+		}
 
 		contract.save();
-
 	}
 
 	/**

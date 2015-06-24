@@ -45,6 +45,8 @@ public class QPerson extends EntityPathBase<Person> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath eppn = createString("eppn");
+
     public final StringPath fax = createString("fax");
 
     //inherited

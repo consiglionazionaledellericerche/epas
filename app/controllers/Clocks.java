@@ -8,7 +8,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
-import manager.ContractMonthRecapManager;
+import manager.ConsistencyManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
@@ -23,10 +23,8 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 
 import play.Logger;
-import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
@@ -52,13 +50,13 @@ public class Clocks extends Controller{
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
-	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static PersonDayManager personDayManager;
 	@Inject
 	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 
 	public static void show(){
@@ -195,10 +193,7 @@ public class Clocks extends Controller{
 
 		final PersonDay day = personDay;
 
-		personDayManager.updatePersonDaysFromDate(day.person, day.date);
-		contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, new YearMonth(day.date));
-		
+		consistencyManager.updatePersonSituation(person, day.date);
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 

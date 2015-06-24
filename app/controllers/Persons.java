@@ -1,11 +1,9 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +12,6 @@ import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
-import manager.ContractMonthRecapManager;
 import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.OfficeManager;
@@ -35,7 +32,6 @@ import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +63,6 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import dao.wrapper.IWrapperWorkingTimeType;
-import dao.wrapper.WrapperContract;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -116,7 +110,7 @@ public class Persons extends Controller {
 
 	public static void list(String name){
 		
-		List<Person> simplePersonList = personDao.list(Optional.fromNullable(name),
+		List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
 				null, false).list();
 
@@ -251,13 +245,22 @@ public class Persons extends Controller {
 		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
 	}
 
-	public static void update(Person person, Office office, Integer qualification, boolean isPersonInCharge){
-
+	public static void update(@Valid Person person, Office office, Integer qualification, boolean isPersonInCharge){
+		
 		if(person==null) {
-
 			flash.error("La persona da modificare non esiste. Operazione annullata");
 			list(null);
 		}
+		
+		if (Validation.hasErrors()) {
+			log.warn("validation errors for {}: {}", person,
+					validation.errorsMap());
+			flash.error("Impossibile salvare la persona %s, verificare i parametri",person);
+			edit(person.id);
+		}
+		
+
+		
 		rules.checkIfPermitted(person.office);
 		rules.checkIfPermitted(office);
 

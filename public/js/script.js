@@ -5,6 +5,24 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
+		//il plugin responsive abilitato sulla tabella(sono incompatibili)
+		this.find('.datatable-test').DataTable( {
+	        dom: 'Rlfrtip', //per drag drop colonne
+	        "scrollX": true,
+	        "columnDefs": [{ "width": "150px", "targets": 0 }],	// NB: serve per il Nome Cognome.
+	        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ]
+	    } );
+		
+		// Quando ridisegno la datatables devo rieseguire la initepas per inizializzare
+		// javascript sulle linee visualizzate per la prima volta. (esempio next page)
+		this.find('.datatable-test').on( 'draw.dt', function () {
+			var $this = $(this);
+		    /* alert( 'Table redrawn' ); */
+		    $this.initepas();
+		} );
+		
+		
 		this.find('input[datepicker-year]').datepicker({
 			  format: "yyyy-mm-dd",
 			  startView: 2,

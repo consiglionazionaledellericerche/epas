@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.ConsistencyManager;
+import manager.PersonDayInTroubleManager;
 import models.Person;
 
 import org.apache.commons.mail.EmailException;
@@ -26,7 +26,7 @@ import dao.PersonDao;
 public class ExpandableJob extends Job{
 
 	@Inject
-	private static ConsistencyManager consistencyManager;
+	private static PersonDayInTroubleManager personDayInTroubleManager;
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
@@ -47,7 +47,7 @@ public class ExpandableJob extends Job{
 				true).list();
 
 		try {
-			consistencyManager.sendMail(personList, fromDate, toDate, "no assenze");
+			personDayInTroubleManager.sendMail(personList, fromDate, toDate, "no assenze");
 		}
 		catch(EmailException e){
 			e.printStackTrace();

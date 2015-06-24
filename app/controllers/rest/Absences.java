@@ -1,33 +1,49 @@
 package controllers.rest;
 
-import java.util.List;
-
 import helpers.JsonResponse;
+import helpers.rest.JacksonModule;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
+import manager.AbsenceManager;
+import manager.cache.AbsenceTypeManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
+import models.Absence;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Person;
 
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import play.Logger;
+import play.db.jpa.Blob;
+import play.mvc.Controller;
+import play.mvc.With;
+import cnr.sync.dto.AbsenceAddedRest;
+import cnr.sync.dto.AbsenceRest;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import cnr.sync.dto.AbsenceAddedRest;
-import cnr.sync.dto.AbsenceRest;
-import manager.AbsenceManager;
-import manager.response.AbsenceInsertReport;
-import manager.response.AbsencesResponse;
-import models.Absence;
-import models.Person;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
-import play.db.jpa.Blob;
-import play.mvc.Controller;
-import play.mvc.With;
+import dao.wrapper.IWrapperFactory;
 
 @With(Resecure.class)
 public class Absences extends Controller{
@@ -40,10 +56,17 @@ public class Absences extends Controller{
 	static AbsenceManager absenceManager;
 	@Inject
 	static AbsenceTypeDao absenceTypeDao;
+	@Inject
+	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static AbsenceTypeManager absenceTypeManager;
+	@Inject
+	static ObjectMapper mapper;
+	
 	
 	@BasicAuth
 	public static void absencesInPeriod(String email, LocalDate begin, LocalDate end){
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
@@ -70,7 +93,7 @@ public class Absences extends Controller{
 	
 	@BasicAuth
 	public static void insertAbsence(String email, String absenceCode, LocalDate begin, LocalDate end){
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
@@ -82,7 +105,7 @@ public class Absences extends Controller{
 		try{
 			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, Optional.fromNullable(end), 
 					absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(), 
-					Optional.<Blob>absent(), Optional.<String>absent());
+					Optional.<Blob>absent(), Optional.<String>absent(), true);
 			for(AbsencesResponse ar : air.getAbsences()){
 				AbsenceAddedRest aar = new AbsenceAddedRest();
 				aar.absenceCode = ar.getAbsenceCode();
@@ -98,6 +121,40 @@ public class Absences extends Controller{
 		}
 		
 		
+	}
+	
+	@BasicAuth
+	public static void checkAbsence(String email, String absenceCode, 
+			LocalDate begin, LocalDate end) throws JsonProcessingException{
+		Optional<Person> person = personDao.byEmail(email);
+		if(!person.isPresent()){
+			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
+					+ "mail cnr che serve per la ricerca.");
+		}
+		if(begin == null || end == null || begin.isAfter(end)){
+			JsonResponse.badRequest("Date non valide");
+		}
+		Optional<Contract> contract = wrapperFactory
+				.create(person.get()).getCurrentContract();
+		Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
+				.getContractMonthRecap( new YearMonth(end.getYear(), 
+						end.getMonthOfYear()));
+		
+		if(!recap.isPresent()){
+			JsonResponse.notFound("Non esistono riepiloghi per"+person.get().name+" "
+					+person.get().surname+" da cui prender le informazioni per il calcolo");
+		}
+		else{
+						
+			AbsenceInsertReport air = absenceManager.insertAbsence(person.get(), begin, 
+					Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
+					, Optional.<Blob>absent(), Optional.<String>absent(), true);
+						
+			renderJSON(mapper.writer(JacksonModule
+					.filterProviderFor(SimpleBeanPropertyFilter
+							.serializeAllExcept("absenceAdded")))
+				.writeValueAsString(air.getAbsences())); 
+		}
 	}
 
 }

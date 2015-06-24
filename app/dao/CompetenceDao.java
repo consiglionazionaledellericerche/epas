@@ -1,8 +1,5 @@
 package dao;
 
-import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
-
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -30,7 +27,6 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.types.path.ListPath;
 
 import dao.wrapper.IWrapperFactory;
 
@@ -78,59 +74,25 @@ public class CompetenceDao extends DaoBase{
 	}
 	
 	/**
-	 * 
 	 * @param person
+	 * @param year
+	 * @param month
 	 * @param code
-	 * @param year
-	 * @param month
-	 * @return
+	 * @return 
 	 */
-	public SimpleResults<Competence> list(
-			Optional<Person> person, Optional<String> code, 
-			Optional<Integer> year, Optional<Integer> month) {
+	public List<Competence> getCompetences(Person person, Integer year,
+			Integer month, List<CompetenceCode> codes){
 		
 		final QCompetence competence = QCompetence.competence;
-		final BooleanBuilder condition = new BooleanBuilder();
 		
-		if (person.isPresent()) {
-			condition.and(competence.person.eq(person.get()));
-		}
-		if (code.isPresent()) {
-			condition.and(competence.competenceCode.code.eq(code.get()));
-		}
-		if (year.isPresent()) {
-			condition.and(competence.year.eq(year.get()));
-		}
-		if (month.isPresent()) {
-			condition.and(competence.month.eq(month.get()));
-		}
-		final JPQLQuery query = getQueryFactory().from(competence).where(condition);
-		return ModelQuery.simpleResults(query, competence);
-	}
-	
-	/**
-	 * 
-	 * @param year
-	 * @param month
-	 * @param person
-	 * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di straordinario
-	 * (sommando i codici S1 S2 e S3) 
-	 */
-	public Optional<Integer> valueOvertimeApprovedByMonthAndYear(Integer year, Optional<Integer> month, Optional<Person> person, 
-			List<CompetenceCode> codeList){
-		
-		final QCompetence competence = QCompetence.competence;
-		final BooleanBuilder condition = new BooleanBuilder();
-		
-		if(month.isPresent())
-			condition.and(competence.month.eq(month.get()));
-		if(person.isPresent())
-			condition.and(competence.person.eq(person.get()));
 		final JPQLQuery query = getQueryFactory().from(competence)
-				.where(condition.and(competence.year.eq(year).and(competence.competenceCode.in(codeList))));
+				.leftJoin(competence.competenceCode).fetch()
+				.where(competence.person.eq(person)
+				.and(competence.year.eq(year)
+				.and(competence.month.eq(month)
+				.and(competence.competenceCode.in(codes)))));
 		
-		return Optional.fromNullable(query.singleResult(competence.valueApproved.sum()));
-		
+		return query.list(competence);
 	}
 	
 	/**
@@ -138,45 +100,48 @@ public class CompetenceDao extends DaoBase{
 	 * @param year
 	 * @param month
 	 * @param code
-	 * @return la competenza relativa ai parametri passati alla funzione
+	 * @return 
 	 */
-	public Optional<Competence> getCompetence(Person person, Integer year
-			, Integer month, CompetenceCode code){
+	public Optional<Competence> getCompetence(Person person, Integer year,
+			Integer month, CompetenceCode code){
 		
 		final QCompetence competence = QCompetence.competence;
 		
 		final JPQLQuery query = getQueryFactory().from(competence)
-				.where(competence.person.eq(person).
-						and(competence.year.eq(year).and(competence.month.eq(month).and(competence.competenceCode.eq(code)))));
+				.where(competence.person.eq(person)
+				.and(competence.year.eq(year)
+				.and(competence.month.eq(month)
+				.and(competence.competenceCode.eq(code)))));
 		
 		return Optional.fromNullable(query.singleResult(competence));
 		
 	}
 	
 	/**
+	 * La lista delle competence assegnate nell'office.
+	 * 
+	 * Se untilThisMonth è true, viene presa la lista delle competenze 
+	 * dall'inizio dell'anno fino a quel mese compreso, se è false
+	 * solo quelle del mese specificato
 	 * 
 	 * @param year
 	 * @param month
-	 * @param code
-	 * @param office
-	 * @param untilThisMonth
-	 * @return la lista delle competenze che hanno come validità l'anno year, che sono di persone che appartengono
-	 * all'office office e che sono relative ai codici di competenza passati nella lista di stringhe code.
-	 * Se il booleano untilThisMonth è true, viene presa la lista delle competenze dall'inizio dell'anno fino a quel mese compreso, se è false
-	 * solo quelle del mese specificato
+	 * @param code filtra i codici di competenza 
+	 * @param office filtra per persone dell'office
+	 * @param untilThisMonth 
+	 * @return
+	 * 
 	 */
-	public List<Competence> getCompetences(Optional<Person> person, Integer year
-			, Integer month, List<String> code, Office office, boolean untilThisMonth){
+	public List<Competence> getCompetencesInOffice(Integer year, Integer month, 
+			List<String> codes, Office office, boolean untilThisMonth){
 		
 		final QCompetence competence = QCompetence.competence;
 		final BooleanBuilder condition = new BooleanBuilder();
 		
 		condition.and(competence.year.eq(year))
-				 .and(competence.competenceCode.code.in(code))
+				 .and(competence.competenceCode.code.in(codes))
 				 .and(competence.person.office.eq(office));
 		
-		if(person.isPresent())
-			condition.and(competence.person.eq(person.get()));
 		if(untilThisMonth)
 			condition.and(competence.month.loe(month));
 		else
@@ -208,6 +173,33 @@ public class CompetenceDao extends DaoBase{
 				.where(condition).orderBy(competence.competenceCode.code.asc())
 				.list(competence);
 	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @param person
+	 * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di straordinario
+	 * (sommando i codici S1 S2 e S3) 
+	 */
+	public Optional<Integer> valueOvertimeApprovedByMonthAndYear(Integer year, Optional<Integer> month, Optional<Person> person, 
+			List<CompetenceCode> codeList){
+		
+		final QCompetence competence = QCompetence.competence;
+		final BooleanBuilder condition = new BooleanBuilder();
+		
+		if(month.isPresent())
+			condition.and(competence.month.eq(month.get()));
+		if(person.isPresent())
+			condition.and(competence.person.eq(person.get()));
+		final JPQLQuery query = getQueryFactory().from(competence)
+				.where(condition.and(competence.year.eq(year).and(competence.competenceCode.in(codeList))));
+		
+		return Optional.fromNullable(query.singleResult(competence.valueApproved.sum()));
+		
+	}
+	
+
 	
 	/**
 	 * 
