@@ -147,15 +147,15 @@
 
  $(document).ready( function (){
 
-  generateUserName();
+   generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
   $("#manager_username").val('${properties.getProperty('manager_username')}');
 
   $('#manager_surname').keyup(function(){
-    generateUserName();
+    generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
   });
 
   $('#manager_name').keyup(function(){
-    generateUserName();
+     generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
   });
 
 });

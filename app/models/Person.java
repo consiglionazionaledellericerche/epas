@@ -69,6 +69,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@Email
 	@Unique @As(binder=NullStringBinder.class)
+	@Required
 	public String email;
 
 	@OneToOne (optional = false, fetch = FetchType.LAZY)
