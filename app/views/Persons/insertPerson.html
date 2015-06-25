@@ -100,6 +100,8 @@
 
  $(document).ready( function (){
 
+  generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
+  
   $('#person\\.surname').keyup(function(){
     generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
   });
