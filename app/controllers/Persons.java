@@ -153,7 +153,7 @@ public class Persons extends Controller {
 		
 		//generate random token
 		SecureRandom random = new SecureRandom();
-		user.password = new BigInteger(130, random).toString(32);;
+		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32)) ;
 		
 		user.save();
 		
