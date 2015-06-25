@@ -3,6 +3,8 @@ package controllers;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -148,7 +150,11 @@ public class Persons extends Controller {
 		
 		User user = new User();
 		user.username = userName;
-		user.password = null;
+		
+		//generate random token
+		SecureRandom random = new SecureRandom();
+		user.password = new BigInteger(130, random).toString(32);;
+		
 		user.save();
 		
 		person.user = user;
