@@ -17,6 +17,7 @@
 	 	#{f.input_table 'person.badgeNumber', type:'number'/}
 		#{f.select_table 'qualification', value: qualification, items:templateUtility.allQualifications, required:'true'/}
 		#{f.select_table 'office', value: office, items:templateUtility.allOfficesAllowed, required:'true'/}
+    #{f.input_table 'person.email', type:'email' , required:'true' /}
 		#{f.checkbox_table 'person.wantEmail'/}
 	</table>
     <p>
@@ -52,26 +53,62 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">1</span> Informazioni di ubicazione e contatti (opzionali)</h3>
+    <h3 class="panel-title"><span class="badge">3</span> Informazioni di ubicazione e contatti (opzionali)</h3>
   </div>
   <div class="panel-body">
 	
     <table class="table table-condensed table-form table-hover">
     	#{f.input_table 'person.telephone', type:'text' /}
-    	#{f.input_table 'person.email', type:'email' /}
+      #{f.input_table 'person.cnr_email', type:'email' /}
+      #{f.input_table 'person.eppn', type:'text' /}
     	#{f.datepicker_table 'person.birthday', type:'text' /}
     </table>
 
   </div>
 </div>
 
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">4</span>Username</h3>
+  </div>
+  <div class="panel-body">
+  
+    <table class="table table-condensed table-form table-hover">
+  #{field 'userName'}
+  <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}' >
+    <label class="control-label" for="${field.id}">Scelta Username</label>
+    #{select field.id, id:field.id,class:'form-control'}
+    #{/select}
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field}
+    </table>
+
+  </div>
+</div>
+
    <div class="container-fluid center">
-      <input class="btn btn-primary" type="submit" value="Avanti" />
+      <input class="btn btn-primary" type="submit" value="Salva" />
       <a href="@{ Persons.list() }" class="btn btn-default" role="button">Annulla</a>
    </div>
 
 #{/form}
 </div>    
-      
-    
+
+#{set 'moreScripts'}
+<script type="text/javascript">
+
+ $(document).ready( function (){
+
+  $('#person\\.surname').keyup(function(){
+    generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
+  });
+
+  $('#person\\.name').keyup(function(){
+     generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
+  });
+
+});
+</script>
+#{/set}
 
