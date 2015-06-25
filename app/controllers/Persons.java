@@ -273,8 +273,6 @@ public class Persons extends Controller {
 			edit(person.id);
 		}
 		
-
-		
 		rules.checkIfPermitted(person.office);
 		rules.checkIfPermitted(office);
 
