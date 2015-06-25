@@ -102,11 +102,11 @@
 
   generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
   
-  $('#person\\.surname').keyup(function(){
+  $('#person\\.surname').change(function(){
     generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
   });
 
-  $('#person\\.name').keyup(function(){
+  $('#person\\.name').change(function(){
      generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
   });
 
