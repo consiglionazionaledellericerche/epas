@@ -4,13 +4,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Optional;
-
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.PersonManager;
+import manager.cache.StampTypeManager;
 import models.Contract;
 import models.PersonDay;
-import dao.StampingDao;
+
+import com.google.common.base.Optional;
+
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -21,18 +23,21 @@ public class PersonStampingDayRecapFactory {
 	public final IWrapperFactory wrapperFactory;
 	private final PersonDayManager personDayManager;
 	private final StampingTemplateFactory stampingTemplateFactory;
-	public final StampingDao stampingDao;
+	public final StampTypeManager stampTypeManager;
 	private final ConfGeneralManager confGeneralManager;
+	private PersonManager personManager;
 
 	@Inject
 	PersonStampingDayRecapFactory(PersonDayManager personDayManager,
+			PersonManager personManager,
 			StampingTemplateFactory stampingTemplateFactory,
-			StampingDao stampingDao, IWrapperFactory wrapperFactory,
+			StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
 			WorkingTimeTypeDao workingTimeTypeDao,
 			ConfGeneralManager confGeneralManager) {
 		this.personDayManager = personDayManager;
+		this.personManager = personManager;
 		this.stampingTemplateFactory = stampingTemplateFactory;
-		this.stampingDao = stampingDao;
+		this.stampTypeManager = stampTypeManager;
 		this.wrapperFactory = wrapperFactory;
 		this.workingTimeTypeDao = workingTimeTypeDao;
 		this.confGeneralManager = confGeneralManager;
@@ -48,8 +53,8 @@ public class PersonStampingDayRecapFactory {
 	public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut,
 			Optional<List<Contract>> monthContracts) {
 
-		return new PersonStampingDayRecap(personDayManager, 
-				stampingTemplateFactory, stampingDao, wrapperFactory,
+		return new PersonStampingDayRecap(personDayManager, personManager,
+				stampingTemplateFactory, stampTypeManager, wrapperFactory,
 				workingTimeTypeDao, confGeneralManager, 
 				personDay, numberOfInOut, monthContracts);
 	}

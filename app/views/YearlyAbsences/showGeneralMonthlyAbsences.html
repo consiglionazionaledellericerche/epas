@@ -16,64 +16,42 @@
 
 <div class="container-fluid">
   
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title text-center">Situazione assenze &{'views.tags.display.date.month.' + month} ${year} </h3>
-      </div>
-      <div class="panel-body">
+    
       
-          <div class="col-xs-5">
-			#{form action:@YearlyAbsences.showGeneralMonthlyAbsences(), class:'form', 
-			    method:'GET', autocomplete:'off',
-			    'data-reload':'#results'}
-			    
-			    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"class="input-medium search-query"/>
-			    <input type="hidden" name="year" value="${year}"/>
-				<input type="hidden" name="month" value="${month}"/>
-			#{/form}
-         </div>
-
-
-		 <section id="results">
-
-          <div class="col-xs-7">
-            <ul class="pagination">
-              #{if simpleResults.totalPage > 0}
-	  	        #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-	  	          #{if simpleResults.page==indexPage}
-	  	            <li class="active"><a href="#">${indexPage+1}</a></li>
-	  	          #{/if}
-	  	          #{else}
-	  	            <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year, month, name, indexPage)}">${indexPage+1}</a></li>
-	  	          #{/else}
-		        #{/list}
-		      #{/if}
-	          #{else}
-	            <br>
-	          #{/else}   
-            </ul>
-		  </div>
-
-  		  <div class="col-xs-12 center">
-  		  <table class="table table-condensed table-hover">
+      <p>  <h3 class="panel-title text-center">Situazione assenze &{'views.tags.display.date.month.' + month} ${year} </h3></p>
+      
+    
+  		  <table class="datatable-test table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
+  		    <thead>
 				<tr>
-					<th rowspan="2" class="col-xs-2">Nome</th>
-					<th colspan="${numberOfDifferentAbsenceType-1}">Codici di assenza</th>
-					<th rowspan="2">Totale<br>giorni</th>
-				</tr>
-				<tr>
-				%{  
-				for(col in tableMonthlyAbsences.columnKeySet()){
-				}%
+					<th>Nome</th>
+					
+					%{ for(col in tableMonthlyAbsences.columnKeySet()){ }%
 				    #{if !col.code.equals("Totale") }
-					<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
+						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
 					#{/if}
 					
-				%{
-				}
-				}%
+				    %{ } }%
+				    
+					<th>Totale<br>giorni</th>
 				</tr>
-				
+			</thead>
+            <tfoot>
+            	<tr>
+					<th>Nome</th>
+					
+					%{ for(col in tableMonthlyAbsences.columnKeySet()){ }%
+				    #{if !col.code.equals("Totale") }
+						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
+					#{/if}
+					
+				    %{ } }%
+				    
+					<th>Totale<br>giorni</th>
+				</tr>
+            </tfoot>
+ 
+            <tbody>
 				%{  
 				for(entry in tableMonthlyAbsences.rowMap().entrySet()){
 				}%
@@ -82,7 +60,7 @@
 					%{ 
 					for(col in tableMonthlyAbsences.columnKeySet()){
 					}%
-						<td>
+						<td data-order="${entry.getValue().get(col)}">
 						 	<a href="@{YearlyAbsences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-modal=".my-modal">
 						 	${entry.getValue().get(col)}							
 							</a>
@@ -94,12 +72,9 @@
 				%{
 				}
 				}%
-			</table>
-		  </div>
-		  </section>
-	 </div>
-   </div>
-   
+			</tbody>	
+	      </table>
+
 </div>   
 
 #{include '_myModal.html' /}

@@ -59,6 +59,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final NumberPath<Integer> sourceRecoveryDayUsed = createNumber("sourceRecoveryDayUsed", Integer.class);
 
+    public final NumberPath<Integer> sourceRemainingMealTicket = createNumber("sourceRemainingMealTicket", Integer.class);
+
     public final NumberPath<Integer> sourceRemainingMinutesCurrentYear = createNumber("sourceRemainingMinutesCurrentYear", Integer.class);
 
     public final NumberPath<Integer> sourceRemainingMinutesLastYear = createNumber("sourceRemainingMinutesLastYear", Integer.class);
@@ -67,7 +69,7 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final NumberPath<Integer> sourceVacationLastYearUsed = createNumber("sourceVacationLastYearUsed", Integer.class);
 
-    public final SetPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createSet("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
+    public final ListPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 
     public QContract(String variable) {
         this(Contract.class, forVariable(variable), INITS);

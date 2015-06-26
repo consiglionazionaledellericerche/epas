@@ -123,6 +123,36 @@ public class VacationsPermissionsDaysAccrued {
 			return 21;
 	}
 
+	public static int converWorkDaysToVacationDaysPartTimeMoreThanThreeYears(int days){
+		if(days<=0)
+			return 0;
+		if(days >= 1 && days <= 15)
+			return 0;
+		if(days >= 16 && days <= 45)
+			return 2;
+		if(days >= 46 && days <= 75)
+			return 3;
+		if(days >= 76 && days <= 106)
+			return 6;
+		if(days >= 107 && days <= 136)
+			return 7;
+		if(days >= 137 && days <= 167)
+			return 9;
+		if(days >= 168 && days <= 197)
+			return 11;
+		if(days >= 198 && days <= 227)
+			return 13;
+		if(days >= 228 && days <= 258)
+			return 14;
+		if(days >= 259 && days <= 288)
+			return 17;
+		if(days >= 289 && days <= 319)
+			return 18;
+		if(days >= 320 && days <= 349)
+			return 20;			
+		else
+			return 22;
+	}
 	/**
 	 * 
 	 * @param days

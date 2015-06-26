@@ -38,7 +38,6 @@ import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.Blob;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -226,7 +225,7 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(person.office);
 
 		AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
-				absenceType.get(), Optional.fromNullable(file), Optional.<String>absent());
+				absenceType.get(), Optional.fromNullable(file), Optional.<String>absent(), false);
 
 		//Verifica errori generali nel periodo specificato
 		if(air.hasWarningOrDaysInTrouble()){
@@ -375,7 +374,7 @@ public class Absences extends Controller{
 			}
 
 			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-					absenceType.get(),Optional.fromNullable(file), Optional.fromNullable(mealTicket));
+					absenceType.get(),Optional.fromNullable(file), Optional.fromNullable(mealTicket), false);
 
 			//Verifica errori generali nel periodo specificato
 			if(air.hasWarningOrDaysInTrouble()){

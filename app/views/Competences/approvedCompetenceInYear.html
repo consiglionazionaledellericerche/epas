@@ -6,11 +6,10 @@
 
 <ul class="nav nav-tabs">
   <li><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month, office.id)}">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
   <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
   <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-  <li class="active"><a href="@{Competences.approvedCompetenceInYear(office.id, year, true)}">Competenza Assegnate nell'anno</a></li>
+  <li class="active"><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenze Assegnate nell'anno</a></li>
 </ul>
 
 </div>
@@ -35,7 +34,13 @@
 	      
 	      <div class="form-group">
 	        <label class="hidden-xs hidden-sm" for="c">Solo Determinati </label>
-	        <input type="checkbox" name="onlyDefined" value="true" checked/> 
+	        #{if onlyDefined}
+	          <input type="checkbox" name="onlyDefined" value="true" checked/>
+	        #{/if}
+	        #{else}
+	          <input type="checkbox" name="onlyDefined" value="true"/>
+	        #{/else}
+	         
 	      </div>
 	      
 	      <div class="form-group">

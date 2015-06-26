@@ -26,6 +26,7 @@ Contenuti:
    sendStampings
    variousRecap
    utility
+   externalService
    
 
    
@@ -33,7 +34,7 @@ Introduzione
 ============
 ePAS (Electronic Personnel Attendance System) è un software per la rilevazione e
 gestione delle presenze del personale sviluppato dall'Istituto di Informatica e 
-Telemacati (IIT-CNR) per essere utilizzato dagli istituti del Consiglio 
+Telematica (IIT-CNR) per essere utilizzato dagli istituti del Consiglio 
 Nazionale delle Ricerche (CNR) Italiano. 
 Questo documento descrive le principali funzionalità di ePAS  sia dal 
 punto di vista del dipendente che dell'ufficio del personale che gestisce 

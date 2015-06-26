@@ -5,6 +5,24 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
+		//il plugin responsive abilitato sulla tabella(sono incompatibili)
+		this.find('.datatable-test').DataTable( {
+	        dom: 'Rlfrtip', //per drag drop colonne
+	        "scrollX": true,
+	        "columnDefs": [{ "width": "150px", "targets": 0 }],	// NB: serve per il Nome Cognome.
+	        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ]
+	    } );
+		
+		// Quando ridisegno la datatables devo rieseguire la initepas per inizializzare
+		// javascript sulle linee visualizzate per la prima volta. (esempio next page)
+		this.find('.datatable-test').on( 'draw.dt', function () {
+			var $this = $(this);
+		    /* alert( 'Table redrawn' ); */
+		    $this.initepas();
+		} );
+		
+		
 		this.find('input[datepicker-year]').datepicker({
 			  format: "yyyy-mm-dd",
 			  startView: 2,
@@ -207,9 +225,6 @@ $(function($){
 	
 	$('body').initepas();
 	
-
-
-	
 });	/* fine on document load */
 
 function Change(){
@@ -223,12 +238,11 @@ function Change2(){
 	absenceCode.value = tuttiCodici.value;
 }
 
-function generateUserName(){
- var name = $('#manager_name').val().replace(/\W/g, '').toLowerCase();
- var surname = $('#manager_surname').val().replace(/\W/g, '').toLowerCase();
+function generateUserName(name,surname,username){
+ var name = name.val().replace(/\W/g, '').toLowerCase();
+ var surname = surname.val().replace(/\W/g, '').toLowerCase();
 
- var $el = $("#manager_username");
-   $el.empty(); // remove old options
+   username.empty(); // remove old options
 
    var options = [
    {text: name+'.'+surname, value: name+'.'+surname},
@@ -240,7 +254,7 @@ function generateUserName(){
     $option = $("<option></option>")
     .attr("value", option.value)
     .text(option.text);
-    $el.append($option);
+    username.append($option);
   });
  }
 

@@ -11,8 +11,6 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dao.MealTicketDao;

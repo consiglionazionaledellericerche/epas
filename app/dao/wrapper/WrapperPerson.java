@@ -24,6 +24,7 @@ import org.joda.time.YearMonth;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -74,6 +75,16 @@ public class WrapperPerson implements IWrapperPerson {
 	public Person getValue() {
 		return value;
 	}
+	
+	@Override
+	public boolean isActiveInDay(LocalDate date) {
+		return true;
+	}
+	
+	@Override
+	public boolean isActiveInMonth(YearMonth yearMonth) {
+		return true;
+	}
 
 	/**
 	 * 
@@ -91,6 +102,41 @@ public class WrapperPerson implements IWrapperPerson {
 
 		return this.currentContract;
 	}
+	
+	@Override
+	public List<Contract> getMonthContracts(int year, int month) {
+		
+		List<Contract> contracts = Lists.newArrayList();
+		
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		DateInterval monthInterval = new DateInterval(monthBegin,
+				monthBegin.dayOfMonth().withMaximumValue());
+		
+		for(Contract contract : value.contracts) {
+			if( DateUtility.intervalIntersection(monthInterval, wrapperFactory
+					.create(contract).getContractDateInterval()) != null) {
+				contracts.add(contract);
+			}
+		}
+		return contracts;
+	}
+	
+	@Override
+	public List<Contract> getYearContracts(int year) {
+		
+		List<Contract> contracts = Lists.newArrayList();
+		
+		DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1),
+				new LocalDate(year, 12, 31));
+		
+		for(Contract contract : value.contracts) {
+			if( DateUtility.intervalIntersection(yearInterval, wrapperFactory
+					.create(contract).getContractDateInterval()) != null) {
+				contracts.add(contract);
+			}
+		}
+		return contracts;
+	}
 
 	/**
 	 * @param year
@@ -100,8 +146,7 @@ public class WrapperPerson implements IWrapperPerson {
 	@Override
 	public Optional<Contract> getLastContractInMonth(int year, int month) {
 
-		List<Contract> contractInMonth = personManager.getMonthContracts(
-				this.value, month, year);
+		List<Contract> contractInMonth = this.getMonthContracts(year, month);
 
 		if ( contractInMonth.size() == 0) {
 			return Optional.absent();
@@ -117,8 +162,7 @@ public class WrapperPerson implements IWrapperPerson {
 	 */
 	public Optional<Contract> getFirstContractInMonth(int year, int month) {
 
-		List<Contract> contractInMonth = personManager.getMonthContracts(
-				this.value, month, year);
+		List<Contract> contractInMonth = this.getMonthContracts(year, month);
 
 		if ( contractInMonth.size() == 0) {
 			return Optional.absent();
@@ -147,7 +191,7 @@ public class WrapperPerson implements IWrapperPerson {
 		if(contractBegin.isAfter(current)) {
 			//vado in avanti
 			while (true) {
-				if(personManager.isActiveInMonth(value, current, false)) {
+				if (isActiveInMonth(current)) {
 					return current;
 				}
 				current = current.plusMonths(1);
@@ -155,7 +199,7 @@ public class WrapperPerson implements IWrapperPerson {
 		} else {
 			//vado indietro
 			while (true) {
-				if(personManager.isActiveInMonth(value, current, false)) {
+				if(isActiveInMonth(current)) {
 					return current;
 				}
 				current = current.minusMonths(1);
@@ -311,7 +355,8 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @return 
 	 */
 	@Override
-	public Competence competence(final CompetenceCode code, final int year, final int month) {
+	public Competence competence(final CompetenceCode code, 
+			final int year, final int month) {
 		if (value.competenceCode.contains(code)) {
 			Optional<Competence> o = FluentIterable.from(value.competences)
 					.firstMatch(new Predicate<Competence>() {
@@ -319,7 +364,8 @@ public class WrapperPerson implements IWrapperPerson {
 						@Override
 						public boolean apply(Competence input) {
 
-							return input.competenceCode.equals(code) && input.year == year && input.month == month;
+							return input.competenceCode.equals(code) 
+									&& input.year == year && input.month == month;
 						}
 
 					});
@@ -389,13 +435,8 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @return
 	 */
 	public int totalHolidayWorkingTime(Integer year) {
-
-		int totalHolidayWorkingTime = 0;
-		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
-			totalHolidayWorkingTime += pd.timeAtWork;
-		}
-		return totalHolidayWorkingTime;
-				
+		return personManager.holidayWorkingTimeTotal(value, 
+				Optional.fromNullable(year), Optional.<Integer>absent());				
 	}
 	
 	/**
@@ -403,15 +444,8 @@ public class WrapperPerson implements IWrapperPerson {
 	 * @return
 	 */
 	public int totalHolidayWorkingTimeAccepted(Integer year) {
-
-		int totalHolidayWorkingTimeAccepted = 0;
-		for(PersonDay pd : this.holidyWorkingTimeDay(year)) {
-			if( pd.acceptedHolidayWorkingTime ) {
-				totalHolidayWorkingTimeAccepted += pd.timeAtWork;
-			}
-		}
-
-		return totalHolidayWorkingTimeAccepted;
+		return personManager.holidayWorkingTimeAccepted(value, 
+				Optional.fromNullable(year), Optional.<Integer>absent());
 	}
 
 	/**
@@ -420,6 +454,6 @@ public class WrapperPerson implements IWrapperPerson {
 	 */
 	public List<PersonDay> holidyWorkingTimeDay(Integer year) {
 		return personDayDao.getHolidayWorkingTime(this.value, 
-				Optional.fromNullable(year));
+				Optional.fromNullable(year), Optional.<Integer>absent());
 	}
 }

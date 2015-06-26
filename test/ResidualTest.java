@@ -1,23 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import manager.ConsistencyManager;
-import manager.PersonManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
-import models.Contract;
-import models.Person;
-
-import org.apache.commons.mail.EmailException;
-import org.joda.time.LocalDate;
-import org.junit.Test;
-
-import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
-
-import com.google.common.base.Optional;
 
 public class ResidualTest extends UnitTest {
 	

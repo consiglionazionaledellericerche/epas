@@ -50,6 +50,7 @@ public class Persons extends Controller{
 	public static void days(Integer perseoId ,LocalDate start,LocalDate end){
 		
 		Person person = personDao.byPerseoId(perseoId);
+		
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca. Assicurarsi di aver"

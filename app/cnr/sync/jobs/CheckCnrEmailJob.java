@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import models.Office;
 import models.Person;
 import play.jobs.Job;
-import play.jobs.On;
 import cnr.sync.manager.SyncManager;
 
 //@On("0 10 6 ? * MON")

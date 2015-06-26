@@ -27,11 +27,13 @@ import models.CertificatedData;
 import models.Competence;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.cache.Cache;
@@ -53,6 +55,7 @@ import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -75,6 +78,8 @@ public class UploadSituation extends Controller{
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static PersonDao personDao;
+	@Inject
+	private static PersonDayDao personDayDao;
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
@@ -424,7 +429,9 @@ public class UploadSituation extends Controller{
 			List<PersonMonthRecap> pmList = personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
 
 			//Numero di buoni mensa da passare alla procedura di invio attestati
-			Integer mealTicket = personDayManager.numberOfMealTicketToUse(person, year, month);
+			List<PersonDay> personDays = personDayDao
+					.getPersonDayInMonth(person, new YearMonth(year, month));
+			Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDays);
 
 			//vedere se l'ho gia' inviato con successo
 			CertificatedData cert = personMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);

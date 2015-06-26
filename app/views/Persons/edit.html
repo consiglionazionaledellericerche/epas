@@ -19,6 +19,9 @@
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
   <li><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
+  #{if person.isPersonInCharge}
+  	<li><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
+  #{/if}
 </ul>
 
 <div class="container">		<!-- Container dati personali e di contatto -->
@@ -118,6 +121,14 @@
 					<td><input name="person.email" type="email" value="${person.email}"/></td>
 				</tr>
 				<tr>
+					<td class="lab">Email CNR</td>
+					<td><input name="person.cnr_email" type="text" value="${person.cnr_email}"/></td>
+				</tr>
+				<tr>
+					<td class="lab">Eppn </td>
+					<td><input name="person.eppn" type="email" value="${person.eppn}"/></td>
+				</tr>
+				<tr>
 					<td class="lab">Data di nascita </td>
 					#{if person.birthday != null }
 						<td><input datepicker name="person.birthday" type="text" value="${person.birthday}"/></td>
@@ -134,6 +145,15 @@
 					#{/if}
 					#{else}
 						<td><a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal"><i class="fa fa-square-o"></i> Modifica</a></td>
+					#{/else}
+				</tr>
+				<tr>
+					<td class="lab">Responsabile gruppo di lavoro</td>
+					#{if person.isPersonInCharge}
+					<td><input name="isPersonInCharge" type="checkbox" checked="checked" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
+					#{/if}
+					#{else}
+					<td><input name="isPersonInCharge" type="checkbox" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
 					#{/else}
 				</tr>
 			</table>
@@ -309,6 +329,10 @@
 			   #{if contract.value.sourceRecoveryDayUsed!=null && contract.value.sourceRecoveryDayUsed>0}
 			     Riposi compensativi usati ${contract.value.sourceDate.getYear()} 
 			     <strong class="text-error">${contract.value.sourceRecoveryDayUsed}</strong><br>
+			   #{/if}
+			   #{if contract.value.sourceRemainingMealTicket!=null && contract.value.sourceRemainingMealTicket>0}
+			     Buoni pasto residui
+			   <strong class="text-error">${contract.value.sourceRemainingMealTicket}</strong><br>
 			   #{/if}
 			   
 			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Modifica</a>

@@ -12,8 +12,13 @@ import org.hibernate.envers.NotAudited;
 
 import com.google.common.base.MoreObjects;
 
-
-
+/**
+ * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le 
+ * informazioni della persona durante la valutazione delle drools con target!=null.
+ * Avremmo potuto impostare a lazy la successiva relazione fra user e person 
+ * ma ciò non portava al risultato sperato (probabilmente a causa della natura 
+ * della relazione fra user e person OneToOne).
+ */
 @Entity
 @Table(name="users_roles_offices")
 public class UsersRolesOffices extends BaseModel{
@@ -21,7 +26,7 @@ public class UsersRolesOffices extends BaseModel{
 	private static final long serialVersionUID = -1403683534643592790L;
 
 	@NotAudited
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY) 
 	@JoinColumn(name="user_id")
 	public User user;
 

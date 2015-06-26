@@ -26,7 +26,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 	@Inject
 	private static UserDao userDao;
 	@Inject
-	private static PersonDao persondao;
+	private static PersonDao personDao;
 	
 	/**
 	 * This method checks that a profile is allowed to view this page/method.
@@ -66,7 +66,19 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 		String eppn = session.get("eppn");
 	    Logger.debug("Trasformazione dell'utente shibboleth in utente locale, email = %s", eppn);
 	    
-	    Person person = persondao.byEmail(eppn).orNull();
+	    String field = Play.configuration.getProperty("shib.login.field");
+	    
+	    Person person = null;
+	    
+	    if(field.equals("email")){
+	    	person = personDao.byEmail(eppn).orNull();
+	    }
+	    else if(field.equals("cnr_email")){
+	    	person = personDao.byCnrEmail(eppn).orNull();
+	    }
+	    else{
+	    	person = personDao.byEppn(eppn).orNull();
+	    }
 		
 		if(person != null){
 			Cache.set(person.user.username, person, Security.CACHE_DURATION);

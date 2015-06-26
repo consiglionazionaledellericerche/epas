@@ -1,12 +1,13 @@
 package manager.recaps.competence;
 
-import org.joda.time.YearMonth;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
+
+import org.joda.time.YearMonth;
+
 import play.data.validation.Valid;
 
 import com.google.common.base.Optional;

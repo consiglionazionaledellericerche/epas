@@ -27,7 +27,6 @@ import com.google.inject.Inject;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dao.wrapper.IWrapperFactory;
 
 public class StampingManager {
 
@@ -36,15 +35,15 @@ public class StampingManager {
 			PersonDayDao personDayDao,
 			PersonDao personDao,
 			PersonDayManager personDayManager, 
-			IWrapperFactory wrapperFactory,
-			PersonStampingDayRecapFactory stampingDayRecapFactory) {
+			PersonStampingDayRecapFactory stampingDayRecapFactory,
+			ConsistencyManager consistencyManager) {
 
 		this.stampingDao = stampingDao;
 		this.personDayDao = personDayDao;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
-		this.wrapperFactory = wrapperFactory;
 		this.stampingDayRecapFactory = stampingDayRecapFactory;
+		this.consistencyManager = consistencyManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(StampingManager.class);
@@ -53,8 +52,8 @@ public class StampingManager {
 	private final PersonDayDao personDayDao;
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
-	private final IWrapperFactory wrapperFactory;
 	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
+	private final ConsistencyManager consistencyManager;
 
 	/**
 	 * Versione per inserimento amministratore.
@@ -105,19 +104,18 @@ public class StampingManager {
 		if(service) {
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
-		}
-		else {
-			if(!note.equals(""))
+		} else {
+			if(!note.equals("")) {
 				stamp.note = note;
-			else
+			} else {
 				stamp.note = "timbratura inserita dall'amministratore";
+			}
 		}
 
 		//in out: true->in false->out
-		if(type){
+		if (type){
 			stamp.way = Stamping.WayType.in;
-		}
-		else{
+		} else {
 			stamp.way = Stamping.WayType.out;
 		}
 
@@ -125,9 +123,7 @@ public class StampingManager {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
-
-		//		TODO implementare un ricalcolo asincrono, per il momento è stato spostato nel controlle utilizzando i job play
-		//		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		
 	}
 
 	/**
@@ -146,7 +142,7 @@ public class StampingManager {
 
 		for(Person person : activePersonsInDay){
 			PersonDay personDay = null;
-			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
+			Optional<PersonDay> pd = personDayDao.getPersonDay(person, date);
 
 			if(pd.isPresent()) 
 			{
@@ -161,10 +157,9 @@ public class StampingManager {
 
 
 	/**
-	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
-	 * passato dal client python
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * metodo per la creazione di una timbratura a partire dall'oggetto 
+	 * che è stato costruito dal binder del Json passato dal client python
+	 * 
 	 */
 	public boolean createStamping(StampingFromClient stamping){
 
@@ -191,7 +186,7 @@ public class StampingManager {
 
 		log.debug("Sto per segnare la timbratura di {}", person.getFullname());
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, stamping.dateTime.toLocalDate());
 		if(!pd.isPresent()){
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
@@ -240,10 +235,8 @@ public class StampingManager {
 
 		}
 
-		log.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay {}", pd);
-		personDayManager.populatePersonDay(wrapperFactory.create(personDay));
-
-		personDay.save();
+		consistencyManager.updatePersonSituation(person, personDay.date);
+		
 		return true;
 	}
 
@@ -312,7 +305,7 @@ public class StampingManager {
 
 			PersonDay personDay = null;
 			person = personDao.getPersonById(person.id);
-			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayPresence); 
+			Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){
 				personDay = new PersonDay(person, dayPresence);
@@ -352,7 +345,7 @@ public class StampingManager {
 		for(Person p : activePersons)
 		{
 			List<PersonDay> pdList = personDayDao
-					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
 
 			for(PersonDay pd : pdList){
 				if(pd.isTicketForcedByAdmin) {

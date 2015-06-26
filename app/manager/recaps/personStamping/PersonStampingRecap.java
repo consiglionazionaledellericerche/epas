@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -17,7 +16,7 @@ import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
-import models.StampModificationTypeValue;
+import models.StampModificationTypeCode;
 import models.StampType;
 import models.Stamping;
 
@@ -28,6 +27,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
@@ -80,6 +80,7 @@ public class PersonStampingRecap {
 	 * @param person
 	 */
 	public PersonStampingRecap(PersonDayManager personDayManager,
+			PersonDayDao personDayDao,
 			PersonManager personManager,
 			ContractMonthRecapManager contractMonthRecapManager,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
@@ -90,12 +91,21 @@ public class PersonStampingRecap {
 		this.month = month;
 		this.year = year;
 
-		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager.getMaximumCoupleOfStampings(person, year, month));
+		LocalDate begin = new LocalDate(year, month, 1);
+		LocalDate end = begin.dayOfMonth().withMaximumValue();
+
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, begin, 
+				Optional.fromNullable(end));
+		
+		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager
+				.getMaximumCoupleOfStampings(personDays) );
 
 		//Costruzione dati da renderizzare
 		
 		//Contratti del mese
-		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		List<Contract> monthContracts = wrapperFactory
+				.create(person).getMonthContracts(year, month);
+		
 		for(Contract contract : monthContracts) {
 			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
 					.getContractMonthRecap(new YearMonth(year, month));
@@ -105,7 +115,8 @@ public class PersonStampingRecap {
 		}
 
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager
+				.getTotalPersonDayInMonth(personDays, person, year, month);
 
 		LocalDate today = LocalDate.now();
 		//calcolo del valore valid per le stamping del mese (persistere??)
@@ -120,16 +131,18 @@ public class PersonStampingRecap {
 
 
 			if(stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()){
-				StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(
-						StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+				StampModificationType smt = stampingDayRecapFactory
+						.stampTypeManager.getStampMofificationType(
+						StampModificationTypeCode.FIXED_WORKINGTIME);
 
 				stampModificationTypeSet.add(smt);
 			}
 
 			if(pd.date.equals(today) && !pd.isHoliday && !personDayManager.isAllDayAbsences(pd)){
 
-				StampModificationType smt = stampingDayRecapFactory.stampingDao
-						.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+				StampModificationType smt = stampingDayRecapFactory
+						.stampTypeManager.getStampMofificationType(
+								StampModificationTypeCode.ACTUAL_TIME_AT_WORK);
 				stampModificationTypeSet.add(smt);
 			}
 			if(pd.stampModificationType!=null && !pd.date.isAfter(today)){
@@ -137,57 +150,33 @@ public class PersonStampingRecap {
 				stampModificationTypeSet.add(pd.stampModificationType);
 			}
 
-			//this.stampModificationTypeSet.add(day.stampModificationType);
-
 			for(Stamping stamp : pd.stampings){
-
 				if(stamp.stampType!=null && stamp.stampType.identifier!=null){
-
 					stampTypeSet.add(stamp.stampType);
 				}
-
 				if(stamp.markedByAdmin){
-
-					StampModificationType smt = stampingDayRecapFactory.stampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+					StampModificationType smt = stampingDayRecapFactory
+							.stampTypeManager.getStampMofificationType(
+									StampModificationTypeCode.MARKED_BY_ADMIN);
 					stampModificationTypeSet.add(smt);
 				}
-
-				Optional<StampModificationType> smtMidnight = 
-						personDayManager.checkMissingExitStampBeforeMidnight(stamp);
-
-				if( smtMidnight.isPresent() ) {
-
-					stampModificationTypeSet.add(smtMidnight.get());
+				if(stamp.stampModificationType != null) {
+					if(stamp.stampModificationType.code.equals(
+							StampModificationTypeCode
+							.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode()) ) {
+						stampModificationTypeSet.add(stamp.stampModificationType);
+					}
 				}
-
-				//this.stampTypeSet.add(stamp.stampType);
-				//this.stampModificationTypeSet.add(stamp.stampModificationType);
 			}
-
-
 		}
 
 		this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
-		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(person, year, month);
-		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(person, year, month);
-		this.basedWorkingDays = personManager.basedWorkingDays(totalPersonDays);
+		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
+		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
+		this.basedWorkingDays = personManager.basedWorkingDays(personDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
-
-		
 
 		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
 
 	}
-
-	//	private void calculateStampAndModificationTypeUsed(List<PersonDay> personDays){
-	//
-	//		LocalDate today = LocalDate.now();
-	//
-	//		for(PersonDay day : personDays){
-	//
-	//
-	//		}
-	//
-	//	}
-
 }

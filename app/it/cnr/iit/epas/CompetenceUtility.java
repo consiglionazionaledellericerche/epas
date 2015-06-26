@@ -45,16 +45,19 @@ public class CompetenceUtility {
 
 	@Inject
 	public CompetenceUtility(JPQLQueryFactory queryFactory,
-			PersonDayManager personDayManager, PersonDayDao personDayDao) {
+			PersonDayDao personDayDao, PersonManager personManager, 
+			PersonDayManager personDayManager) {
 
 		this.queryFactory = queryFactory;
-		this.personDayManager = personDayManager;
+		this.personManager = personManager;
 		this.personDayDao = personDayDao;
+		this.personDayManager = personDayManager;
 	}
 
 	private final JPQLQueryFactory queryFactory;
-	private final PersonDayManager personDayManager;
+	private final PersonManager personManager;
 	private final PersonDayDao personDayDao;
+	private PersonDayManager personDayManager;
 
 	public static String codFr = "207";    						// codice dei turni feriali
 	public static String codFs = "208";							// codice dei turni festivi
@@ -318,13 +321,13 @@ public class CompetenceUtility {
 			//check for the absence inconsistencies
 			//------------------------------------------
 
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				//if (!person.isHoliday(personReperibilityDay.date)) {
-				if(!personDayManager.isHoliday(person, personReperibilityDay.date)){
+				if(!personManager.isHoliday(person, personReperibilityDay.date)){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 
 
@@ -335,7 +338,7 @@ public class CompetenceUtility {
 			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
 				// check for the stampings in working days
 				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
-				if (!personDayManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+				if (!personManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 
 
@@ -400,14 +403,14 @@ public class CompetenceUtility {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			Logger.debug("Prelevo il personDay %s per la persona %s", personShiftDay.date, person.surname);
 
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
 
-				if (!personDayManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
+				if (!personManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
 					Logger.info("Il turno di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
@@ -419,7 +422,7 @@ public class CompetenceUtility {
 			} else {
 
 				// check for the stampings in working days
-				if (!personDayManager.isHoliday(person,personShiftDay.date) && LocalDate.now().isAfter(personShiftDay.date)) {
+				if (!personManager.isHoliday(person,personShiftDay.date) && LocalDate.now().isAfter(personShiftDay.date)) {
 
 					// check no stampings
 					//-----------------------------
@@ -549,19 +552,19 @@ public class CompetenceUtility {
 										// calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto dei 15 min di comporto
 										// se il turnista è andato a  pranzo prima
 										if (pairStamping.out.date.toLocalTime().isBefore(startLunchTime)) {
-											Logger.debug("vedo pranzo prima");
+											Logger.debug("vedo uscita per pranzo prima");
 											newLimit = (startLunchTime.minusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) ? startLunchTime.minusMinutes(15) : pairStamping.out.date.toLocalTime();
 											diffStartLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, startLunchTime);
 											if (startLunchTime.minusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) {inTolleranceLimit = false;}
 										} else if (pairStamping.out.date.toLocalTime().isBefore(endLunchTime)) {
 											// è andato a pranzo dopo
-											Logger.debug("vedo in pranzo dopo");
+											Logger.debug("vedo uscita per pranzo dopo");
 											newLimit = (startLunchTime.plusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) ? pairStamping.out.date.toLocalTime() : startLunchTime.plusMinutes(15);
 											if (startLunchTime.plusMinutes(15).isBefore(pairStamping.out.date.toLocalTime())) {inTolleranceLimit = false;}
-											diffStartLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, startLunchTime); /* ? */
+											diffStartLunchTime = DateUtility.getDifferenceBetweenLocalTime(startLunchTime, newLimit); /* ? */
 										}
 
-										Logger.debug("diffStartLunchTime=getDifferenceBetweenLocalTime(%s, %s)=%s", newLimit, startLunchTime, diffStartLunchTime);
+										Logger.debug("diffStartLunchTime=getDifferenceBetweenLocalTime(%s, %s)=%s", startLunchTime, newLimit, diffStartLunchTime);
 									}
 
 									// l'intervallo di tempo lavorato interseca la parte del turno dopo pranzo
@@ -586,7 +589,7 @@ public class CompetenceUtility {
 											Logger.debug("vedo rientro da pranzo dopo");
 											newLimit = (pairStamping.in.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15))) ? endLunchTime.plusMinutes(15) : pairStamping.in.date.toLocalTime();
 											if (pairStamping.in.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15))) {inTolleranceLimit = false;}
-											diffEndLunchTime = DateUtility.getDifferenceBetweenLocalTime(endLunchTime, newLimit);
+											diffEndLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
 											Logger.debug("diffEndLunchTime=getDifferenceBetweenLocalTime(%s, %s)=%s", endLunchTime, newLimit, diffEndLunchTime);
 										}
 
@@ -617,7 +620,7 @@ public class CompetenceUtility {
 
 
 								// controlla pausa pranzo:
-								// - se è uscito prima dell'inizio PP 
+								// - se è uscito prima dell'inizio PP (è andato a pranzo prima)
 								if (diffStartLunchTime < 0) {
 									Logger.debug("sono entrata in pausa pranzo prima! diffStartLunchTime=%s", diffStartLunchTime);
 									// controlla se è anche rientrato prima dalla PP e compensa
@@ -629,7 +632,9 @@ public class CompetenceUtility {
 										diffStartLunchTime = ((diffStartLunchTime + diffEndLunchTime) > 0) ? 0 : diffStartLunchTime + diffEndLunchTime;
 										diffEndLunchTime = ((diffStartLunchTime + diffEndLunchTime) > 0) ? diffStartLunchTime + diffEndLunchTime : 0;
 
-									} else if (diffStartShift > 0) {
+									} 
+									// se necessario e se è entrato prima, compensa con l'ingresso 
+									if ((diffStartLunchTime < 0) && (diffStartShift > 0)) {
 										Logger.debug("E entrato anche prima! diffStartShift=%s", diffStartShift);
 										// cerca di compensare con l'ingresso
 										restoredMin += Math.min(Math.abs(diffStartLunchTime), Math.abs(diffStartShift));
@@ -652,7 +657,9 @@ public class CompetenceUtility {
 										diffEndLunchTime = ((diffEndLunchTime + diffStartLunchTime) > 0) ? 0 : diffEndLunchTime + diffStartLunchTime;
 										diffStartLunchTime = ((diffEndLunchTime + diffStartLunchTime) > 0) ? diffEndLunchTime + diffStartLunchTime : 0;
 
-									} else if (diffEndShift > 0) {
+									} 
+									// se necessario e se è uscito dopo, compensa con l'uscita
+									if ((diffEndLunchTime < 0) && (diffEndShift > 0)) {
 										Logger.debug("e' uscito dopo! diffEndShift=%s", diffEndShift);
 										// cerca di conpensare con l'uscita (è uscito anche dopo)
 										restoredMin += Math.min(Math.abs(diffEndLunchTime), Math.abs(diffEndShift));
