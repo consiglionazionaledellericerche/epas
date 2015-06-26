@@ -45,12 +45,22 @@
           </tr>
           <tr>
             <td class="col-sm-6">Festa del patrono</td>
-            <td class="col-sm-6"><strong>${dayOfPatron.fieldValue} / ${monthOfPatron.fieldValue}</strong></td>
+            <td class="col-sm-6">
+ 			<strong>
+		          <a href="#"
+		           data-x-editable 
+		           data-type="combodate"
+		           data-format="DD/MM"
+		           data-template="DD MM"
+		           data-pk="${office.id}"
+		           data-value="${dayOfPatron?.fieldValue} ${monthOfPatron?.fieldValue}"
+		           data-url="@{savePatron()}"></a>
+		    </strong>
+            <strong></strong></td>
           </tr>
         </table>  
   	  </div>
   	</div>
-
   <br>
 
     <div class="panel panel-default">
@@ -89,7 +99,6 @@
 		      	    data-title="Inserire un indirizzo IP per linea"
 		      	    data-url="@{saveConfGeneral()}" 
 		      	    class="editable editable-pre-wrapped editable-click">
-		      	    
 		      	  </a>  
 		        </strong>
 		      </td>

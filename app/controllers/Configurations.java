@@ -1,6 +1,8 @@
 package controllers;
 
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -21,6 +23,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import dao.ConfGeneralDao;
@@ -105,6 +108,21 @@ public class Configurations extends Controller{
 		conf.save();
 
 		Cache.set(conf.field+conf.office.name, conf.fieldValue);
+	}
+	
+	public static void savePatron(Long pk, String value){
+
+		Office office = officeDao.getOfficeById(pk);
+
+		rules.checkIfPermitted(office);
+		
+		LocalDate dayMonth = DateUtility.dayMonth(value,Optional.<String>absent());
+		
+		confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office, 
+				Optional.fromNullable(dayMonth.dayOfMonth().getAsString()));
+		
+		confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office, 
+				Optional.fromNullable(dayMonth.monthOfYear().getAsString()));
 	}
 
 	/**
