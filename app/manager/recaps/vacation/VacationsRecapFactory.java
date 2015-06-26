@@ -5,17 +5,15 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
-import manager.ContractManager;
-import manager.ContractMonthRecapManager;
 import manager.VacationManager;
+import manager.cache.AbsenceTypeManager;
+import models.Absence;
 import models.Contract;
-import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -26,17 +24,20 @@ public class VacationsRecapFactory {
 
 	private final AbsenceDao absenceDao;
 	private final AbsenceTypeDao absenceTypeDao;
+	private final AbsenceTypeManager absenceTypeManager;
 	private final ConfYearManager confYearManager;
 	private final VacationManager vacationManager;
 	private final IWrapperFactory wrapperFactory;
 
 	@Inject
 	VacationsRecapFactory(IWrapperFactory wrapperFactory, AbsenceDao absenceDao, 
-			AbsenceTypeDao absenceTypeDao, ConfYearManager confYearManager,
+			AbsenceTypeDao absenceTypeDao, AbsenceTypeManager absenceTypeManager, 
+			ConfYearManager confYearManager,
 			VacationManager vacationManager) {
 		this.wrapperFactory = wrapperFactory;
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
+		this.absenceTypeManager = absenceTypeManager;
 		this.confYearManager = confYearManager;
 		this.vacationManager = vacationManager;
 	}
@@ -49,7 +50,7 @@ public class VacationsRecapFactory {
 	 * @return
 	 */
 	public Optional<VacationsRecap> create(int year, Contract contract,
-			LocalDate actualDate, boolean considerExpireLastYear) {
+			LocalDate actualDate, boolean considerExpireLastYear, List<Absence> otherAbsences) {
 
 		IWrapperContract c = wrapperFactory.create(contract);
 
@@ -57,8 +58,8 @@ public class VacationsRecapFactory {
 			return Optional.<VacationsRecap>absent();
 		}
 		
-		List<VacationPeriod> vacationPeriodList = c.getContractVacationPeriods();
-		if ( vacationPeriodList == null || vacationPeriodList.isEmpty() ) {
+		if ( c.getValue().vacationPeriods == null || 
+				c.getValue().vacationPeriods.isEmpty() ) {
 			return Optional.<VacationsRecap>absent();
 		}
 		
@@ -66,13 +67,33 @@ public class VacationsRecapFactory {
 		if ( !c.hasMonthRecapForVacationsRecap( year )) {
 			return Optional.<VacationsRecap>absent();
 		}
+		
+		if(actualDate.getYear() > year) {
+			// FIXME: deve essere il chiamante a non passare la data di oggi
+			// e qui la inizializzo in modo appropriato.
+			actualDate = new LocalDate(year, 12, 31);
+		}
 	
 		VacationsRecap vacationRecap = new VacationsRecap(wrapperFactory, 
-				absenceDao, absenceTypeDao,	confYearManager, 
+				absenceDao, absenceTypeDao,	absenceTypeManager, confYearManager, 
 				vacationManager,
-				year, contract, actualDate, considerExpireLastYear);
+				year, contract, Optional.fromNullable(actualDate), considerExpireLastYear, otherAbsences);
 	
 		return Optional.fromNullable(vacationRecap);
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public Optional<VacationsRecap> create(int year, Contract contract,
+			LocalDate actualDate, boolean considerExpireLastYear) {
+
+		List<Absence> otherAbsences = Lists.newArrayList();
+		return create(year, contract, actualDate, considerExpireLastYear, otherAbsences);
 	}
 
 }

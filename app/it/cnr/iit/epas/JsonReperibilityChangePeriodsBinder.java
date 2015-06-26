@@ -96,7 +96,7 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
 
 				// get the reperibility period for the subtitute
 				subPerson = personDao.byEmail(subPersonEmail).orNull();
-				//subPerson = Person.find("SELECT p FROM Person p WHERE p.email = ?", subPersonEmail).first();
+				
 				if (subPerson == null) {
 					throw new IllegalArgumentException(
 							String.format("Person with email %s not exist in the ePAS database", subPersonEmail));

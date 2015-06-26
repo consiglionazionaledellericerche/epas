@@ -488,7 +488,6 @@ public class Reperibility extends Controller {
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
 
 		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
-		String eventLabel;
 
 		// check for the parameter
 		//---------------------------

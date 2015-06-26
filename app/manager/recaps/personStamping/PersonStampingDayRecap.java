@@ -7,12 +7,14 @@ import java.util.List;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.PersonManager;
+import manager.cache.StampTypeManager;
 import models.Absence;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
-import models.StampModificationTypeValue;
+import models.StampModificationTypeCode;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -22,7 +24,6 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 
-import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -82,9 +83,10 @@ public class PersonStampingDayRecap {
 
 	public List<String> note = new ArrayList<String>();
 
-	public PersonStampingDayRecap(PersonDayManager personDayManager, 
+	public PersonStampingDayRecap(PersonDayManager personDayManager,
+			PersonManager personManager,
 			StampingTemplateFactory stampingTemplateFactory,
-			StampingDao stampingDao, IWrapperFactory wrapperFactory,
+			StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
 			WorkingTimeTypeDao workingTimeTypeDao, ConfGeneralManager confGeneralManager,
 			PersonDay pd, int numberOfInOut, Optional<List<Contract>> monthContracts) {			
 
@@ -95,7 +97,7 @@ public class PersonStampingDayRecap {
 		if(pd.isPersistent()) {
 			this.holiday = pd.isHoliday;
 		} else {
-			this.holiday = personDayManager.isHoliday(pd.person, pd.date);
+			this.holiday = personManager.isHoliday(pd.person, pd.date);
 		}
 
 		this.person = pd.person;
@@ -146,10 +148,9 @@ public class PersonStampingDayRecap {
 				this.setProgressive( pd.progressive );
 				if (pd.timeAtWork != 0){
 					if(fixedStampModificationType == null) {
-						// TODO: in cache
-						fixedStampModificationType = stampingDao
-						.getStampModificationTypeById(
-								StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+						fixedStampModificationType = 
+								stampTypeManager.getStampMofificationType(
+								StampModificationTypeCode.FIXED_WORKINGTIME);
 					}
 					this.fixedWorkingTimeCode = fixedStampModificationType.code;
 				}
@@ -199,8 +200,9 @@ public class PersonStampingDayRecap {
 		}
 		// uscita adesso f 
 		if (this.today && !this.holiday && !personDayManager.isAllDayAbsences(pd)) {
-			StampModificationType smt = stampingDao.getStampModificationTypeById( 
-					StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+			StampModificationType smt = 
+					stampTypeManager.getStampMofificationType( 
+					StampModificationTypeCode.ACTUAL_TIME_AT_WORK);
 			this.exitingNowCode = smt.code;
 		}
 		

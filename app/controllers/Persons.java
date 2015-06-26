@@ -3,6 +3,8 @@ package controllers;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +14,6 @@ import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
-import manager.ContractMonthRecapManager;
 import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.OfficeManager;
@@ -33,7 +34,6 @@ import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +51,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
@@ -110,8 +111,8 @@ public class Persons extends Controller {
 	private static PersonChildrenDao personChildrenDao;
 
 	public static void list(String name){
-
-		List<Person> simplePersonList = personDao.list(Optional.fromNullable(name),
+		
+		List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
 				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
 				null, false).list();
 
@@ -119,6 +120,7 @@ public class Persons extends Controller {
 				.from(simplePersonList)
 				.transform(wrapperFunctionFactory.person()).toList();
 		render(personList);
+
 	}
 
 	public static void insertPerson() {
@@ -132,7 +134,7 @@ public class Persons extends Controller {
 
 	public static void save(@Valid @Required Person person,
 			@Valid @Required Qualification qualification, @Valid @Required Office office,
-			@Valid @Required Contract contract) {
+			@Valid @Required Contract contract,@Required String userName) {
 
 		if(Validation.hasErrors()) {
 
@@ -145,8 +147,21 @@ public class Persons extends Controller {
 
 		person.qualification = qualification;
 		person.office = office;
-
+		
+		User user = new User();
+		user.username = userName;
+		
+		//generate random token
+		SecureRandom random = new SecureRandom();
+		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32)) ;
+		
+		user.save();
+		
+		person.user = user;
 		person.save();
+		
+		Role employee = Role.find("byName", Role.EMPLOYEE).first();
+		officeManager.setUro(person.user, person.office, employee);
 		
 		contract.person = person;
 
@@ -160,14 +175,13 @@ public class Persons extends Controller {
 		}
 		
 		person.save();
-
-		Long personId = person.id;
-
-		insertUsername(personId);
-
+		
+		flash.success("Persona inserita correttamente in anagrafica - %s", person.fullName());
+		
+		list(null);
 	}
 
-
+	@Deprecated
 	public static void insertUsername(Long personId){
 		Person person = personDao.getPersonById(personId);
 		if(person==null) {
@@ -183,7 +197,7 @@ public class Persons extends Controller {
 		render(person, usernameList);
 	}
 
-
+	@Deprecated
 	public static void updateUsername(Long personId, String username){
 
 		Person person = personDao.getPersonById(personId);
@@ -245,13 +259,20 @@ public class Persons extends Controller {
 		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
 	}
 
-	public static void update(Person person, Office office, Integer qualification){
-
+	public static void update(@Valid Person person, Office office, Integer qualification, boolean isPersonInCharge){
+		
 		if(person==null) {
-
 			flash.error("La persona da modificare non esiste. Operazione annullata");
 			list(null);
 		}
+		
+		if (Validation.hasErrors()) {
+			log.warn("validation errors for {}: {}", person,
+					validation.errorsMap());
+			flash.error("Impossibile salvare la persona %s, verificare i parametri",person);
+			edit(person.id);
+		}
+		
 		rules.checkIfPermitted(person.office);
 		rules.checkIfPermitted(office);
 
@@ -264,7 +285,7 @@ public class Persons extends Controller {
 			flash.error("La qualifica selezionata non esiste. Operazione annullata");
 			list(null);
 		}
-
+		person.isPersonInCharge = isPersonInCharge;
 		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
@@ -1004,6 +1025,42 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name, person.surname);
 		edit(person.id);
+	}
+	
+	public static void workGroup(Long personId){
+		Person person = personDao.getPersonById(personId);
+		Set<Office> offices = Sets.newHashSet();
+		offices.add(person.office);
+		List<Person> people = personDao.list(Optional.<String>absent(), 
+				offices, false, LocalDate.now(), LocalDate.now(), true).list();
+		render(people, person);
+	}
+	
+	
+	public static void confirmGroup(@Required List<Long> peopleId, Long personId){
+		Person person = personDao.getPersonById(personId);
+		Person p = null;
+		for(Long id : peopleId){
+			p = personDao.getPersonById(id);
+			p.personInCharge = person;
+			p.save();
+			person.people.add(p);
+		}
+		person.save();
+		flash.success("Aggiunte persone al gruppo di %s %s", person.name, person.surname);
+		list(null);
+	}
+	
+	public static void removePersonFromGroup(Long pId){
+
+		Person person = personDao.getPersonById(pId);
+		Person supervisor = personDao.getPersonInCharge(person);
+		person.personInCharge = null;
+
+		supervisor.save();
+		person.save();
+		flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name, supervisor.surname);
+		workGroup(supervisor.id);
 	}
 
 }

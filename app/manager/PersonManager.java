@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -15,37 +14,42 @@ import javax.persistence.Query;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
-import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonYear;
-import models.User;
+import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.db.jpa.JPA;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
+import dao.AbsenceDao;
 import dao.ContractDao;
-import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
 public class PersonManager {
 
 	@Inject
-	public PersonManager(ContractDao contractDao, OfficeDao officeDao,
+	public PersonManager(ContractDao contractDao,
 			PersonChildrenDao personChildrenDao, PersonDao personDao,
+			PersonDayDao personDayDao, AbsenceDao absenceDao,
 			PersonDayManager personDayManager,
 			IWrapperFactory wrapperFactory,ConfGeneralManager confGeneralManager) {
 		this.contractDao = contractDao;
-		this.officeDao = officeDao;
 		this.personChildrenDao = personChildrenDao;
 		this.personDao = personDao;
+		this.personDayDao = personDayDao;
+		this.absenceDao = absenceDao;
 		this.personDayManager = personDayManager;
 		this.wrapperFactory = wrapperFactory;
 		this.confGeneralManager = confGeneralManager;
@@ -54,153 +58,48 @@ public class PersonManager {
 	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
 
 	private final ContractDao contractDao;
-	private final OfficeDao officeDao;
 	private final PersonChildrenDao personChildrenDao;
 	private final PersonDao personDao;
+	private final PersonDayDao personDayDao;
 	private final PersonDayManager personDayManager;
 	private final IWrapperFactory wrapperFactory;
+	private final AbsenceDao absenceDao;
 	private final ConfGeneralManager confGeneralManager;
 
-
 	/**
-	 * True se la persona ha almeno un contratto attivo in month
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public boolean hasMonthContracts(Person person, Integer month, Integer year)
-	{
-		//TODO usare getMonthContracts e ritornare size>0
-		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = contractDao.getPersonContractList(person);
-		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
-		if(contractList == null){
-			return false;
-		}
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract);
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				monthContracts.add(contract);
-			}
-		}
-		if(monthContracts.size()==0)
-			return false;
-
-		return true;
-	}
-
-
-	/**
-	 * True se la persona ha almeno un contratto attivo in year
-	 * @param year
-	 * @return
-	 */
-	public boolean hasYearContracts(Person person, Integer year)
-	{
-		for(int month=1; month<=12; month++)
-		{
-			if(hasMonthContracts(person,month, year))
-				return true;
-		}
-		return false;
-	}
-
-
-	/**
-	 * 
-	 * @param administrator
-	 * @return true se la persona è visibile al parametro amministratore
-	 */
-	public boolean isAllowedBy(User admin, Person person)
-	{
-
-		Set<Office> adminOffices = officeDao.getOfficeAllowed(admin);
-		Set<Office> officeAllowed = officeDao.getOfficeAllowed(person.user);
-
-		return adminOffices.contains(officeAllowed.iterator().next());
-	}
-
-	/**
-	 * True se la persona alla data ha un contratto attivo, False altrimenti
+	 * Se il giorno è festivo per la persona
 	 * @param date
+	 * @return
 	 */
-	public boolean isActiveInDay(LocalDate date, Person person)
-	{
-		//Contract c = this.getContract(date);
-		Contract c = contractDao.getContract(date, person);
-		if(c==null)
-			return false;
-		else
+	public boolean isHoliday(Person person, LocalDate date) {
+		
+		if(DateUtility.isGeneralHoliday(confGeneralManager
+				.officePatron(person.office), date)) {
 			return true;
-	}
+		}
 
-	/**
-	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
-	 * @param month
-	 * @param year
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return 
-	 */
-	public boolean isActiveInMonth(Person person, YearMonth yearMonth, 
-			boolean onCertificateFilter) {
-		
-		LocalDate monthBegin = new LocalDate().withYear(yearMonth.getYear())
-				.withMonthOfYear(yearMonth.getMonthOfYear()).withDayOfMonth(1);
-		
-		LocalDate monthEnd = new LocalDate().withYear(yearMonth.getYear())
-				.withMonthOfYear(yearMonth.getMonthOfYear()).dayOfMonth().withMaximumValue();
-		
-		return isActiveInPeriod(person, monthBegin, monthEnd, onCertificateFilter);
-	}
+		Contract contract = contractDao.getContract(date, person);
+		if(contract == null) { 
+			//persona fuori contratto
+			return false;
+		}
 
-
-	/**
-	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
-	 * @param year
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return
-	 */
-	public boolean isActiveInYear(Person person, int year, boolean onCertificateFilter)
-	{
-		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
-		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
-		return isActiveInPeriod(person, yearBegin, yearEnd, onCertificateFilter);
-	}
-
-
-
-	/**
-	 * 
-	 * @param startPeriod
-	 * @param endPeriod
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return
-	 */
-	private static boolean isActiveInPeriod(Person person, LocalDate startPeriod, LocalDate endPeriod, boolean onCertificateFilter)
-	{
-		List<Contract> periodContracts = new ArrayList<Contract>();
-		DateInterval periodInterval = new DateInterval(startPeriod, endPeriod);
-		for(Contract contract : person.contracts)
-		{
-			if(onCertificateFilter && !contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract); //TODO è sbagliato bisogna considerare anche endContract
-			if(DateUtility.intervalIntersection(periodInterval, contractInterval)!=null)
-			{
-				periodContracts.add(contract);
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+			if(DateUtility.isDateIntoInterval(date, 
+					new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+				
+				int dayOfWeekIndex = date.getDayOfWeek()-1;
+				WorkingTimeTypeDay wttd = cwtt.workingTimeType
+						.workingTimeTypeDays.get(dayOfWeekIndex);
+				Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+				return wttd.holiday;
+				
 			}
 		}
-		if(periodContracts.size()==0)
-			return false;
 
-		return true;
+		throw new IllegalStateException();
+		//return false;	//se il db è consistente non si verifica mai
+
 	}
 
 	/**
@@ -212,35 +111,6 @@ public class PersonManager {
 				"Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato", "Sannicandro", "Ruberti", "Maurizio", "Martinelli").fetch();
 		return peopleForTest;
 
-	}
-
-	/**
-	 * 
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public List<Contract> getMonthContracts(Person person, Integer month, Integer year)
-	{
-		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = contractDao.getPersonContractList(person);
-		if(contractList == null){
-			return monthContracts;
-		}
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				monthContracts.add(contract);
-			}
-		}
-		return monthContracts;
 	}
 
 	/**
@@ -310,19 +180,6 @@ public class PersonManager {
 			return false;
 
 		return true;
-	}
-
-	/**
-	 * 
-	 * @param date
-	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
-	 */
-	public PersonDay createPersonDayFromDate(Person person, LocalDate date){
-		//if(person.isHoliday(date))
-		if(personDayManager.isHoliday(person, date)) {
-			return null;
-		}
-		return new PersonDay(person, date);
 	}
 
 	/**
@@ -415,23 +272,25 @@ public class PersonManager {
 
 	/**
 	 * 
-	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
-	 * timbratura.
+	 * @return il numero di giorni lavorati in sede. 
 	 */
 	public int basedWorkingDays(List<PersonDay> personDays){
-		int basedDays=0;
-		for(PersonDay pd : personDays){	
-
+ 		
+		int basedDays = 0;
+		for (PersonDay pd : personDays) {	
+ 
 			IWrapperPersonDay day = wrapperFactory.create(pd);
 			boolean fixed = day.isFixedTimeAtWork();
 
-			if(pd.isHoliday)
+			if(pd.isHoliday) {
 				continue;
+			}
 
-			if(fixed && !personDayManager.isAllDayAbsences(pd) ){
+			if (fixed && !personDayManager.isAllDayAbsences(pd) ){
 				basedDays++;
 			}
-			else if(!fixed && pd.stampings.size()>0 && !personDayManager.isAllDayAbsences(pd) )	{
+			else if( !fixed && pd.stampings.size() > 0 
+					&& !personDayManager.isAllDayAbsences(pd) )	{
 				basedDays++;
 			}
 		}
@@ -445,16 +304,74 @@ public class PersonManager {
 	 * @param month
 	 * @return
 	 */
-	public int numberOfCompensatoryRestUntilToday(Person person, int year, int month){
-		//TODO questo metodo è delicato. Prendere comunque il numero di riposi nell'anno solare. Ciclare a ritroso sui 
-		//Contratti per cercare se esiste un sourceContract
-		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.absenceType.code = :code " +
-				"and abs.personDay.date between :begin and :end");
-		query.setParameter("person", person)
-		.setParameter("code", "91")
-		.setParameter("begin", new LocalDate(year,1,1))
-		.setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-
-		return query.getResultList().size();
+	public int numberOfCompensatoryRestUntilToday(Person person, int year, int month) {
+		
+		// TODO: andare a fare bound con sourceDate e considerare quelli da
+		// inizializzazione
+		
+		LocalDate begin = new LocalDate(year,1,1);
+		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+		return absenceDao.absenceInPeriod(person, begin, end, "91").size();
 	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		
+		List<PersonDay> pdList = personDayDao
+				.getHolidayWorkingTime(person, year, month);
+		int value = 0;
+		for(PersonDay pd : pdList) {
+			if( !pd.acceptedHolidayWorkingTime ) {
+				value+= pd.timeAtWork; 
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public int holidayWorkingTimeAccepted(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		
+		List<PersonDay> pdList = personDayDao
+				.getHolidayWorkingTime(person, year, month);
+		int value = 0;
+		for(PersonDay pd : pdList) {
+			if( pd.acceptedHolidayWorkingTime ) {
+				value+= pd.timeAtWork; 
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public int holidayWorkingTimeTotal(Person person, Optional<Integer> year, 
+			Optional<Integer> month) {
+		List<PersonDay> pdList = personDayDao
+				.getHolidayWorkingTime(person, year, month);
+		int value = 0;
+		for(PersonDay pd : pdList) {
+			value+= pd.timeAtWork; 
+		}
+		return value;
+	}
+	
+	
 }

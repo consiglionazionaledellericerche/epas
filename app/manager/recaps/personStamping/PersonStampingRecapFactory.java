@@ -4,17 +4,17 @@ import it.cnr.iit.epas.DateUtility;
 
 import javax.inject.Inject;
 
-import dao.wrapper.IWrapperFactory;
-import manager.ContractManager;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.ContractMonthRecap;
 import models.Person;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonStampingRecapFactory {
 
 	private final PersonDayManager personDayManager;
+	private final PersonDayDao personDayDao;
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final PersonManager personManager;
 	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
@@ -23,6 +23,7 @@ public class PersonStampingRecapFactory {
 	
 	@Inject
 	PersonStampingRecapFactory(PersonDayManager personDayManager,
+			PersonDayDao personDayDao,
 			PersonManager personManager,
 			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory,
@@ -30,6 +31,7 @@ public class PersonStampingRecapFactory {
 			DateUtility dateUtility) {
 
 		this.personDayManager = personDayManager;
+		this.personDayDao = personDayDao;
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.personManager = personManager;
 		this.stampingDayRecapFactory = stampingDayRecapFactory;
@@ -46,7 +48,7 @@ public class PersonStampingRecapFactory {
 	 */
 	public PersonStampingRecap create(Person person, int year, int month) {
 
-		return new PersonStampingRecap(personDayManager,  personManager,
+		return new PersonStampingRecap(personDayManager, personDayDao, personManager,
 				contractMonthRecapManager, stampingDayRecapFactory, wrapperFactory, dateUtility,
 				year, month, person);
 	}

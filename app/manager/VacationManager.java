@@ -45,8 +45,7 @@ public class VacationManager {
 	 * @param expireDate l'ultimo giorno utile per usufruire delle ferie dell'anno precedente
 	 * @return
 	 */
-	public boolean isVacationsLastYearExpired(int year, LocalDate expireDate)
-	{
+	public boolean isVacationsLastYearExpired(int year, LocalDate expireDate) {
 		LocalDate today = LocalDate.now();
 
 		if( year < today.getYear() ) {		//query anni passati 
@@ -57,5 +56,7 @@ public class VacationManager {
 		}
 		return false;
 	}
+	
+	
 
 }

@@ -2,6 +2,7 @@ package manager.recaps.troubles;
 
 import javax.inject.Inject;
 
+import manager.PersonManager;
 import models.Person;
 
 import org.joda.time.LocalDate;
@@ -11,10 +12,13 @@ import dao.PersonDayInTroubleDao;
 public class PersonTroublesInMonthRecapFactory {
 
 	private final PersonDayInTroubleDao personDayInTroubleDao;
+	private final PersonManager personManager;
 
 	@Inject
-	PersonTroublesInMonthRecapFactory(PersonDayInTroubleDao personDayInTroubleDao) {
+	PersonTroublesInMonthRecapFactory(PersonDayInTroubleDao personDayInTroubleDao,
+			PersonManager personManager) {
 		this.personDayInTroubleDao = personDayInTroubleDao;
+		this.personManager = personManager;
 		
 	}
 	
@@ -29,7 +33,7 @@ public class PersonTroublesInMonthRecapFactory {
 			LocalDate monthBegin, LocalDate monthEnd) {
 		
 		return new PersonTroublesInMonthRecap(personDayInTroubleDao, 
-				person, monthBegin, monthEnd);
+				personManager, person, monthBegin, monthEnd);
 	}
 	
 }

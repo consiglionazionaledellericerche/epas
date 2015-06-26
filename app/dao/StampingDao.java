@@ -45,6 +45,7 @@ public class StampingDao extends DaoBase {
 	 * @param description
 	 * @return lo stampType corrispondente alla descrizione passata come parametro
 	 */
+	@Deprecated
 	public StampType getStampTypeByCode(String code){
 		QStampType stampType = QStampType.stampType;
 		final JPQLQuery query = getQueryFactory().from(stampType)
@@ -57,6 +58,7 @@ public class StampingDao extends DaoBase {
 	 * @param id
 	 * @return lo stampModificationType relativo all'id passato come parametro
 	 */
+	@Deprecated
 	public StampModificationType getStampModificationTypeById(Long id){
 		final QStampModificationType smt = QStampModificationType.stampModificationType;
 		

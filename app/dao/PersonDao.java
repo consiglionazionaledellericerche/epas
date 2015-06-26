@@ -15,8 +15,8 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.query.QCompetenceCode;
 import models.query.QContract;
+import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
@@ -24,16 +24,21 @@ import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
 import models.query.QUser;
+import models.query.QVacationPeriod;
+import models.query.QWorkingTimeType;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
+import com.mysema.query.types.QBean;
 
 /**
  * DAO per le person.
@@ -42,125 +47,37 @@ import com.mysema.query.types.Projections;
  *
  */
 public final class PersonDao extends DaoBase{
+
+
+	@Inject
+	public OfficeDao officeDao;
+	@Inject
+	public PersonDayDao personDayDao;
 	
 	@Inject
 	PersonDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 	}
 
-	/**
-	 * Modella il Dto contenente le sole informazioni della persona
-	 * richieste dalla select nel template menu.
-	 * 
-	 * @author alessandro
-	 *
-	 */
-	public class PersonLiteDto {
-		
-		public Long id;
-		public String name;
-		public String surname;
-
-		public PersonLiteDto(Long id, String name, String surname) {
-			this.id = id;
-			this.name = name;
-			this.surname = surname;
-		}
-	}
-
-	private final static QPerson person = QPerson.person;
-	private final static QContract contract = QContract.contract;
 	
-	@Inject
-	public OfficeDao officeDao;
-
-	/**
-	 * La query effettiva per la ricerca delle persone.
-	 * FIXME Renderla parametrica ed applicarla all'interno di:
-	 *  PersonDao.listForCompetence
-	 *  PersonDao.list
-	 *  PersonDao.liteList
-	 * 
-	 * FIXME Sistemare JPA adesso effettua una successiva query per ogni persona trovata.
-	 * 
-	 * @param name
-	 * @param offices
-	 * @param onlyTechnician
-	 * @param start
-	 * @param end
-	 * @param onlyOnCertificate
-	 * @return
-	 */
-	private JPQLQuery queryList(Optional<String> name, Set<Office> offices,
-			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
-		
-		 final JPQLQuery query = getQueryFactory().from(person)
-					.leftJoin(person.contracts, contract)
-					.orderBy(person.surname.asc(), person.name.asc())
-					
-					.distinct();
-
-
-		final BooleanBuilder condition = new BooleanBuilder();
-		condition.and(person.office.in(offices));
-
-		if (onlyTechnician) {
-			// i livelli sopra al 3 sono dei tecnici:
-			condition.and(person.qualification.qualification.gt(3));
-		}
-
-		if (name.isPresent() && !name.get().trim().isEmpty()) {
-			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
-					person.surname.startsWithIgnoreCase(name.get()));
-		}
-
-		if(onlyOnCertificate)
-			condition.and(contract.onCertificate.isTrue());
-		
-		if(start != null && end!= null){
-		condition.andAnyOf(
-
-				//contratto terminato
-				contract.endContract.isNotNull().and(contract.beginContract.loe(end)).and(contract.endContract.goe(start)),
-
-				//contratto non terminato
-				contract.endContract.isNull().and(
-
-						//contratto tempo indeterminato
-						contract.expireContract.isNull().and(contract.beginContract.loe(end))
-
-						.or(
-
-						//contratto tempo determinato
-						contract.expireContract.isNotNull().and(contract.beginContract.loe(end)).and(contract.expireContract.goe(start))
-
-						)
-					)
-				);
-		}
-		
-		return query.where(condition);
-		
-	}
 	
-	/**
-	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
-	 * appartenenti ad un office in offices.
-	 * 
-	 * @param offices
-	 * @param year
-	 * @param month
-	 * @return
-	 */
-	public List<PersonLiteDto> liteList(Set<Office> offices, int year, int month) {
+	public List<Person> getActivePersonInMonth(Set<Office> offices, YearMonth yearMonth) {
 		
 		final QPerson person = QPerson.person;
 		
-		LocalDate beginMonth = new LocalDate(year,month,1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		int year = yearMonth.getYear();
+		int month = yearMonth.getMonthOfYear();
 		
-		return queryList(Optional.<String>absent(), offices, false, beginMonth, endMonth, true)
-				.list((Projections.bean(PersonLiteDto.class, person.id, person.name, person.surname)));
+		Optional<LocalDate> beginMonth = 
+				Optional.fromNullable( new LocalDate(year, month, 1));
+		Optional<LocalDate> endMonth = 
+				Optional.fromNullable( beginMonth.get().dayOfMonth().withMaximumValue() );
+		
+		JPQLQuery query = personQuery( Optional.<String>absent(), offices, false, 
+				beginMonth, endMonth, true, Optional.<CompetenceCode>absent(),
+				Optional.<Person>absent()); 
+		
+		return ModelQuery.simpleResults( query, person ).list();
 	}
 	
 	/**
@@ -174,11 +91,65 @@ public final class PersonDao extends DaoBase{
 	 * @param onlyOnCertificate
 	 * @return
 	 */
-	public SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
-			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
+	public SimpleResults<Person> list(
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			LocalDate start, LocalDate end, 
+			boolean onlyOnCertificate) {
 		
-		return ModelQuery.simpleResults(queryList(name, offices, onlyTechnician, start, end, onlyOnCertificate), 
+		final QPerson person = QPerson.person;
+		
+		return ModelQuery.simpleResults(
+				//JPQLQuery
+				personQuery(name, offices, onlyTechnician, 
+						Optional.fromNullable(start), Optional.fromNullable(end), 
+						onlyOnCertificate, Optional.<CompetenceCode>absent(),
+						Optional.<Person>absent()),
+				//Expression
 				person);
+	}
+	
+	/**
+	 * Permette la fetch automatica di tutte le informazioni delle persone filtrate.
+	 * 
+	 * TODO: e' usata solo in Persons.list ma se serve in altri metodi rendere parametrica
+	 * la funzione PersonDao.list.
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @return
+	 */
+	public SimpleResults<Person> listFetched(
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			LocalDate start, LocalDate end, 
+			boolean onlyOnCertificate) {
+
+		final QPerson person = QPerson.person;
+
+		JPQLQuery query = personQuery(name, offices, onlyTechnician, 
+				Optional.fromNullable(start), Optional.fromNullable(end), 
+				onlyOnCertificate, Optional.<CompetenceCode>absent(),
+				Optional.<Person>absent());
+		
+		SimpleResults<Person> result = ModelQuery.simpleResults( 
+				//JPQLQuery
+				query,
+				//Expression
+				person);
+
+		fetchContracts(Optional.<Person>absent(), 
+				Optional.fromNullable(start), Optional.fromNullable(end));
+		
+		return result;
+
+
 	}
 
 	/**
@@ -193,51 +164,24 @@ public final class PersonDao extends DaoBase{
 	 * @param end
 	 * @return
 	 */
-	public SimpleResults<Person> listForCompetence(CompetenceCode compCode, Optional<String> name, Set<Office> offices,
-			boolean onlyTechnician, LocalDate start, LocalDate end) {
+	public SimpleResults<Person> listForCompetence(
+			CompetenceCode compCode, 
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			LocalDate start, LocalDate end,
+			Optional<Person> personInCharge) {
 
 		Preconditions.checkState(!offices.isEmpty());
+		Preconditions.checkNotNull(compCode);
 
-		final QCompetenceCode qcc = QCompetenceCode.competenceCode;
-		// TODO: completare con l'intervallo
-		//final LocalDate start = new LocalDate();
-		//final LocalDate end = start;
+		final QPerson person = QPerson.person;
+		
+		return ModelQuery.simpleResults(
+				personQuery(name, offices, onlyTechnician, 
+						Optional.fromNullable(start), Optional.fromNullable(end), 
+						true, Optional.fromNullable(compCode), personInCharge), person);
 
-		final JPQLQuery query = getQueryFactory().from(person)
-				.leftJoin(person.contracts, contract)
-				.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
-				//.leftJoin(qp.location, QLocation.location)
-				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
-				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
-				.leftJoin(person.user, QUser.user)
-				.leftJoin(person.competenceCode, qcc)
-				.orderBy(person.surname.asc(), person.name.asc())
-				.distinct();
-
-
-
-		final BooleanBuilder condition = new BooleanBuilder();
-		condition.and(person.office.in(offices));
-
-		if (onlyTechnician) {
-			// i livelli sopra al 3 sono dei tecnici:
-			condition.and(person.qualification.qualification.gt(3));
-		}
-
-		if (name.isPresent() && !name.get().trim().isEmpty()) {
-			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
-					person.surname.startsWithIgnoreCase(name.get()));
-		}
-		condition.and(person.competenceCode.contains(compCode));
-		condition.and(contract.onCertificate.isTrue());
-		condition.and(contract.beginContract.before(end));
-		condition.andAnyOf(contract.endContract.isNull().and(contract.expireContract.isNull()),
-				contract.expireContract.isNotNull().and(contract.expireContract.goe(start)),
-				contract.endContract.isNotNull().and(contract.endContract.goe(start)));
-
-		query.where(condition);
-
-		return ModelQuery.simpleResults(query, person);
 	}
 
 	/**
@@ -247,6 +191,8 @@ public final class PersonDao extends DaoBase{
 	 * @return
 	 */
 	public Optional<Contract> getLastContract(Person person) {
+
+		final QContract contract = QContract.contract;
 
 		final JPQLQuery query = getQueryFactory()
 				.from(contract)
@@ -268,6 +214,8 @@ public final class PersonDao extends DaoBase{
 	 * @return
 	 */
 	public Contract getPreviousPersonContract(Contract c) {
+
+		final QContract contract = QContract.contract;
 
 		final JPQLQuery query = getQueryFactory()
 				.from(contract)
@@ -291,6 +239,8 @@ public final class PersonDao extends DaoBase{
 	 * @return la lista di contratti che soddisfa le seguenti condizioni:
 	 */
 	public List<Contract> getContractList(Person person,LocalDate fromDate,LocalDate toDate){
+
+		final QContract contract = QContract.contract;
 
 		BooleanBuilder conditions = new BooleanBuilder(contract.person.eq(person).and(contract.beginContract.loe(toDate)));
 
@@ -340,11 +290,11 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonById(Long personId) {
 
+		final QPerson person = QPerson.person;
+		
 		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
 
 		return query.singleResult(person);
-
-
 	}
 
 	/**
@@ -354,10 +304,11 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByNumber(Integer number){
 
+		final QPerson person = QPerson.person;
+		
 		final JPQLQuery query = getQueryFactory().from(person).where(person.number.eq(number));
 
 		return query.singleResult(person);
-
 	}
 
 	/**
@@ -366,6 +317,8 @@ public final class PersonDao extends DaoBase{
 	 */
 	public List<Person> getPersonsByNumber(){
 
+		final QPerson person = QPerson.person;
+		
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.number.isNotNull().and(person.number.ne(0)));
 		query.orderBy(person.number.asc());
@@ -379,8 +332,30 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Optional<Person> byEmail(String email){
 
+		final QPerson person = QPerson.person;
+		
 		final JPQLQuery query = getQueryFactory().from(person)
-				.where(person.email.eq(email).or(person.cnr_email.eq(email)));
+				.where(person.email.eq(email));
+
+		return Optional.fromNullable(query.singleResult(person));
+	}
+	
+	public Optional<Person> byCnrEmail(String cnr_email){
+
+		final QPerson person = QPerson.person;
+		
+		final JPQLQuery query = getQueryFactory().from(person)
+				.where(person.cnr_email.eq(cnr_email));
+
+		return Optional.fromNullable(query.singleResult(person));
+	}
+	
+	public Optional<Person> byEppn(String eppn){
+
+		final QPerson person = QPerson.person;
+		
+		final JPQLQuery query = getQueryFactory().from(person)
+				.where(person.eppn.eq(eppn));
 
 		return Optional.fromNullable(query.singleResult(person));
 	}
@@ -391,9 +366,12 @@ public final class PersonDao extends DaoBase{
 	 * @return la persona identificata dall'id con cui è salvata sul db di perseo
 	 */
 	public Person byPerseoId(Integer perseoId){
+		
+		final QPerson person = QPerson.person;
+
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.iId.eq(perseoId));
-			
+		
 		return query.singleResult(person);
 	}
 	/**
@@ -402,6 +380,8 @@ public final class PersonDao extends DaoBase{
 	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
 	 */
 	public Person getPersonByOldID(Long oldId){
+
+		final QPerson person = QPerson.person;
 
 		final JPQLQuery query = getQueryFactory().from(person).where(person.oldId.eq(oldId));
 
@@ -415,6 +395,8 @@ public final class PersonDao extends DaoBase{
 	 */
 	public Person getPersonByBadgeNumber(String badgeNumber){
 
+		final QPerson person = QPerson.person;
+		
 		final JPQLQuery query = getQueryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
 
 		return query.singleResult(person);
@@ -426,6 +408,9 @@ public final class PersonDao extends DaoBase{
 	 * @return la lista di persone in reperibilità con tipo type 
 	 */
 	public List<Person> getPersonForReperibility(Long type){
+		
+		final QPerson person = QPerson.person;
+				
 		final JPQLQuery query = getQueryFactory().from(person)
 				.where(person.reperibility.personReperibilityType.id.eq(type).and(person.reperibility.startDate.isNull().or(person.reperibility.startDate.loe(LocalDate.now())
 						.and(person.reperibility.endDate.isNull().or(person.reperibility.endDate.goe(LocalDate.now()))))));
@@ -439,8 +424,11 @@ public final class PersonDao extends DaoBase{
 	 * @return la lista di persone che hanno come tipo turno quello passato come parametro
 	 */
 	public List<Person> getPersonForShift(String type){
-		QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
-		QPersonShift ps = QPersonShift.personShift;
+		
+		final QPerson person = QPerson.person;
+		final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+		final QPersonShift ps = QPersonShift.personShift;
+		
 		final JPQLQuery query = getQueryFactory().from(person)
 				.leftJoin(person.personShift, ps)
 				.leftJoin(ps.personShiftShiftTypes, psst).where(psst.shiftType.type.eq(type)
@@ -459,5 +447,370 @@ public final class PersonDao extends DaoBase{
 		final JPQLQuery query = getQueryFactory().from(person).where(person.cnr_email.isNotNull());
 		return query.count();
 	}
+	
+	
+	/**
+	 * 
+	 * @return il responsabile per la persona passata come parametro
+	 */
+	public Person getPersonInCharge(Person p){
+		final QPerson person = QPerson.person;
+		final JPQLQuery query = getQueryFactory().from(person).where(person.people.contains(p));
+		return query.singleResult(person);
+	}
+	
+	
+	/**
+	 * La query per la ricerca delle persone. 
+	 * Versione con JPQLQuery injettata per selezionare le fetch da utilizzare
+	 * con la proiezione desiderata.
+	 * 
+	 * @param injectedQuery
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @param compCode
+	 * @return
+	 */
+	private JPQLQuery personQuery(
+			JPQLQuery injectedQuery,
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			Optional<LocalDate> start, Optional<LocalDate> end,
+			boolean onlyOnCertificate, 
+			Optional<CompetenceCode> compCode) {
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		
+		filterOffices(condition, offices);
+		filterOnlyTechnician(condition, onlyTechnician);
+		filterName(condition, name);
+		filterOnlyOnCertificate(condition, onlyOnCertificate);
+		filterContract(condition, start, end);
+		filterCompetenceCodeEnabled(condition, compCode);
+		
+		return injectedQuery.where(condition);
+		
+	}
+	
+	/**
+	 * La query per la ricerca delle persone. 
+	 * Versione da utilizzare per proiezione esatta Person.
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @param compCode
+	 * @return
+	 */
+	private JPQLQuery personQuery(
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			Optional<LocalDate> start, Optional<LocalDate> end,
+			boolean onlyOnCertificate, 
+			Optional<CompetenceCode> compCode,
+			Optional<Person> personInCharge) {
+		
+		final QPerson person = QPerson.person;
+		final QContract contract = QContract.contract;
+		
+		final JPQLQuery query = getQueryFactory().from(person)
+				.leftJoin(person.contracts, contract).fetch()
+				.leftJoin(person.user, QUser.user)
+				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
+				.leftJoin(person.qualification).fetch()
+				.orderBy(person.surname.asc(), person.name.asc())
+				.distinct();
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		
+		if(personInCharge.isPresent()){
+			condition.and(person.personInCharge.eq(personInCharge.get()));
+		}
+		filterOffices(condition, offices);
+		filterOnlyTechnician(condition, onlyTechnician);
+		filterName(condition, name);
+		filterOnlyOnCertificate(condition, onlyOnCertificate);
+		filterContract(condition, start, end);
+		filterCompetenceCodeEnabled(condition, compCode);
+		
+		return query.where(condition);
+	}
+	
 
+	
+	/**
+	 * Filtro sugli uffici.
+	 * 
+	 * @param condition
+	 * @param offices
+	 */
+	private void filterOffices(BooleanBuilder condition, Set<Office> offices) {
+		
+		final QPerson person = QPerson.person;
+		
+		if(offices != null && !offices.isEmpty()) {
+			condition.and(person.office.in(offices));
+		}
+	}
+	
+	/**
+	 * Filtro sul nome.
+	 * 
+	 * @param condition
+	 * @param name
+	 */
+	private void filterName(BooleanBuilder condition, Optional<String> name) {
+		
+		final QPerson person = QPerson.person;
+		
+		if (name.isPresent() && !name.get().trim().isEmpty()) {
+			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
+					person.surname.startsWithIgnoreCase(name.get()));
+		}
+	}
+	 
+	/**
+	 * Filtro sulle date contrattuali.
+	 * 
+	 * @param condition
+	 * @param start absent() no limit
+	 * @param end absent() no limit
+	 */
+	private void filterContract(BooleanBuilder condition, Optional<LocalDate> start, 
+			Optional<LocalDate> end) {
+		
+		final QContract contract = QContract.contract;
+		
+		if( end.isPresent() ) {
+			
+			condition.and(contract.beginContract.loe(end.get()));
+		}
+		
+		if( start.isPresent() ) {
+			
+			condition.andAnyOf(
+					contract.endContract.isNull().and(contract.expireContract.isNull() ),
+					contract.expireContract.isNotNull().and(contract.expireContract.goe(start.get()) ),
+					contract.endContract.isNotNull().and(contract.endContract.goe(start.get()) ) 
+					);
+		} 
+	}
+	
+	private void filterOnlyTechnician(BooleanBuilder condition, boolean value) {
+
+		if (value == true) {
+			final QPerson person = QPerson.person;
+			condition.and(person.qualification.qualification.gt(3));
+		}
+	}
+	
+	private void filterOnlyOnCertificate(BooleanBuilder condition, boolean value) {
+		
+		if( value ) {
+			final QContract contract = QContract.contract;
+			condition.and(contract.onCertificate.isTrue());
+		}
+	}
+	
+	/**
+	 * Filtro su competenza abilitata. 
+	 * 
+	 * @param condition
+	 * @param compCode
+	 */
+	private void filterCompetenceCodeEnabled(BooleanBuilder condition, 
+			Optional<CompetenceCode> compCode) {
+		
+		if (compCode.isPresent()) {
+			final QPerson person = QPerson.person;
+			condition.and(person.competenceCode.contains(compCode.get()));
+		}
+	}
+	
+	/**
+	 * Importa tutte le informazioni della persona necessarie alla business logic 
+	 * ottimizzando il numero di accessi al db.
+	 * 
+	 * @param id
+	 * @param begin
+	 * @param end
+	 */
+	public Person fetchPersonForComputation(Long id, Optional<LocalDate> begin, 
+			Optional<LocalDate> end) {
+		
+		QPerson person = QPerson.person;
+		
+		// Fetch della persona e dei suoi contratti
+		JPQLQuery query = getQueryFactory().from(person)
+				.leftJoin(person.contracts).fetch()
+				.where(person.id.eq(id))
+				.distinct();
+		
+		Person p = query.singleResult(person);
+		
+		fetchContracts(Optional.fromNullable(p), begin, end);
+				
+		//Fetch dei buoni pasto (non necessaria, una query)
+		
+		//Fetch dei personday
+
+		personDayDao.getPersonDayInPeriod(p, begin.get(), end);
+		
+		
+		return p;
+		
+	}
+	
+	/**
+	 * Fetch di tutti dati dei contratti attivi nella finestra temporale specificata.
+	 * Si può filtrare su una specifica persona.
+	 * 
+	 * @param person
+	 * @param start
+	 * @param end
+	 */
+	private void fetchContracts(Optional<Person> person, 
+			Optional<LocalDate> start, Optional<LocalDate> end) {
+		
+		//Fetch dei contratti appartenenti all'intervallo
+		QContract contract = QContract.contract;
+		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+		QVacationPeriod vp = QVacationPeriod.vacationPeriod;
+		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+
+		final BooleanBuilder condition = new BooleanBuilder();
+		if(person.isPresent()) {
+			condition.and(contract.person.eq(person.get()));
+		}
+		filterContract(condition, start, end);
+
+		JPQLQuery query2 = getQueryFactory().from(contract)
+				.leftJoin(contract.contractMonthRecaps).fetch()
+				.leftJoin(contract.contractStampProfile).fetch()
+				.leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
+				.orderBy(contract.beginContract.asc())
+				.distinct();
+		List<Contract> contracts = query2.where(condition).list(contract);
+
+		//fetch contract multiple bags (1) vacation periods
+		JPQLQuery query2b = getQueryFactory().from(contract)
+				.leftJoin(contract.vacationPeriods, vp).fetch()
+				.orderBy(contract.beginContract.asc())
+				.orderBy(vp.beginFrom.asc())
+				.distinct();
+		contracts = query2b.where(condition).list(contract);
+		// TODO: riportare a List tutte le relazioni uno a molti di contract
+		// e inserire singolarmente la fetch.
+
+		if(person.isPresent()) {
+		//Fetch dei tipi orario associati ai contratti (verificare l'utilità)
+			JPQLQuery query3 = getQueryFactory().from(cwtt)
+				.leftJoin(cwtt.workingTimeType, wtt).fetch()
+				.where(cwtt.contract.in(contracts))
+				.distinct();
+			query3.list(cwtt);
+		}
+	}
+
+	/**
+	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
+	 * appartenenti ad un office in offices. 
+	 * 
+	 * Deprecata. Ma Buon esempio di query dsl con proiezione del risultato
+	 * in DTO.
+	 * 
+	 * @param offices
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	@Deprecated
+	public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
+		
+		final QPerson person = QPerson.person;
+		
+		Optional<LocalDate> beginMonth = 
+				Optional.fromNullable( new LocalDate(year, month, 1));
+		Optional<LocalDate> endMonth = 
+				Optional.fromNullable( beginMonth.get().dayOfMonth().withMaximumValue() );
+		
+		JPQLQuery lightQuery = getQueryFactory().from(person)
+				.leftJoin(person.contracts, QContract.contract)
+				.orderBy(person.surname.asc(), person.name.asc())
+				.distinct();
+		
+		lightQuery = personQuery(lightQuery,
+				Optional.<String>absent(), offices, false, 
+				beginMonth, endMonth, true, Optional.<CompetenceCode>absent()); 
+		
+		QBean<PersonLite> bean = Projections.bean( PersonLite.class, person.id, 
+				person.name, person.surname);
+		
+		return ModelQuery.simpleResults( lightQuery, bean).list();
+	
+	}
+	
+	/**
+	 * Dto contenente le sole informazioni della persona
+	 * richieste dalla select nel template menu.
+	 */
+	@Deprecated
+	public static class PersonLite {
+		
+		public Long id;
+		public String name;
+		public String surname;
+		
+		public Person person = null;
+
+		public PersonLite(Long id, String name, String surname) {
+			this.id = id;
+			this.name = name;
+			this.surname = surname;
+		}
+	}
+	
+	/**
+	 * @param La persona sulla quale verificare eventuali campi duplicati
+	 * @return true se è presente sul db almeno una persona con email,cnr_email 
+	 * o eppn uguali alla persona passata come parametro
+	 */
+	public boolean checkDuplicateFields(Person p){
+
+		final QPerson person = QPerson.person;
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		
+		if(p.id!=null){
+			condition.and(person.id.ne(p.id));
+		}
+		
+		if(!Strings.isNullOrEmpty(p.email)){
+			condition.or(person.email.eq(p.email));
+		}
+		
+		if(!Strings.isNullOrEmpty(p.cnr_email)){
+			condition.or(person.cnr_email.eq(p.cnr_email));
+		}
+		
+		if(!Strings.isNullOrEmpty(p.eppn)){
+			condition.or(person.cnr_email.eq(p.cnr_email));
+		}
+		
+		return getQueryFactory().from(person)
+				.where(condition).exists();
+	}
+	
 }

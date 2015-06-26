@@ -17,6 +17,14 @@ global models.User currentOperator;
 *
 */
 
+/*
+* rule isPermitted
+* when:
+* $o: Office()
+* $uro: UserRoleOffice(office == $o) from currentUser.userRoleOffices
+* $p: Permission(description == "editPersonDay") from $uro.role.permissions
+*/
+
 rule AnyUser when
   $c: PermissionCheck(action in (
      	"Application.index",
@@ -41,6 +49,7 @@ when
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
+     	"Stampings.dailyPresenceForPersonInCharge",
      	
      	/* Assenze mensili */
      	"Absences.absences",
@@ -57,6 +66,7 @@ when
        	
        	/* Competenze */
      	"Competences.competences",
+     	"Competences.monthlyOvertime",
        	
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
@@ -183,6 +193,10 @@ when
      	"Persons.removeChild",
      	"Persons.deleteChild",
      	
+     	"Persons.workGroup",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
+     	
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
@@ -239,6 +253,10 @@ when
      	"Persons.insertChild",
      	"Persons.removeChild",
      	"Persons.deleteChild",
+     	
+     	"Persons.workGroup",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
    
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
@@ -280,8 +298,6 @@ when
  		"Stampings.missingStamping",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
-      
-      	"VacationsAdmin.list",
         
         "YearlyAbsences.showGeneralMonthlyAbsences",
         "YearlyAbsences.yearlyAbsences",
@@ -312,7 +328,8 @@ when
         "PrintTags.showTag",
 		        
         "Stampings.personStamping",
-        
+
+		"VacationsAdmin.list",        
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
@@ -356,6 +373,7 @@ when
 		
         "Stampings.personStamping",
         
+        "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
@@ -821,7 +839,8 @@ when
         "rest.Persons.missions",
         "rest.Persons.competences",
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.insertAbsence"
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence"
         
        ), target == null, granted == false)
 then

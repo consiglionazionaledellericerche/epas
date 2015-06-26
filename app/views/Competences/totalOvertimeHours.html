@@ -5,10 +5,10 @@
 <div id="container-fluid-nav-tabs" class="container-fluid">
   <ul class="nav nav-tabs">
     <li><a href="@{Competences.showCompetences(year, session.get("monthSelected"), office.id )}">Assegna Competenze</a></li>
-    <li><a href="@{Competences.overtime(year, session.get("monthSelected"), office.id )}">Straordinari</a></li>
-    <li class="active"><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
     <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
+    <li class="active"><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
     <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
+    <li><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenza Assegnate nell'anno</a></li>
   </ul>
 </div>
 
