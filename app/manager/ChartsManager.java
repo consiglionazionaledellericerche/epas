@@ -321,18 +321,37 @@ public class ChartsManager {
 											, Optional.<LocalDate>absent(), false).get(0) : null;
 
 											if(abs == null){
-												if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
-													renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
+												if(!dataAssenza.isBefore
+														(new LocalDate(LocalDate.now().getYear()-1,1,1)))
+													renderResult = 
+													new RenderResult(null, matricola, 
+															p.name, p.surname, assenza, 
+															dataAssenza, false, "nessuna assenza trovata",
+															null);
+												log.info("Nessuna assenza trovata in data {} per {}", dataAssenza, p.surname);
 											}
 											else{
-												if(abs.absenceType.certificateCode.equalsIgnoreCase(assenza)){
-													renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, true, "", null);							
+												if(abs.absenceType.certificateCode
+														.equalsIgnoreCase(assenza)){
+													renderResult = new RenderResult(null, 
+															matricola, p.name, p.surname, 
+															assenza, dataAssenza, true, "", 
+															null);
+													log.info("Assenza riscontrata in data {} per {} con codice {}", dataAssenza, p.surname, assenza);
 												}
 												else{
-													if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
-														renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica", abs.absenceType.code);
+													if(!abs.personDay.date.isBefore
+															(new LocalDate(LocalDate.now().getYear()-1,1,1)))
+														renderResult = new RenderResult(null, 
+																matricola, p.name, p.surname, 
+																assenza, dataAssenza, false, 
+																"assenza diversa da quella in anagrafica", 
+																abs.absenceType.code);
+													log.info("Riscontrata assenza diversa da quella in anagrafica in data {} per {}", 
+															dataAssenza, p.surname);
 												}
 											}
+											
 
 				}
 				catch(Exception e){
@@ -342,7 +361,9 @@ public class ChartsManager {
 					continue;
 				}
 				listTrueFalse.add(renderResult);
-				log.debug("Inserito in lista render result per {} in data {}", renderResult.cognome, renderResult.data);
+				log.info("Inserito in lista render result per {} in data {} "
+						+ "il codice {}", renderResult.cognome, renderResult.data, 
+						renderResult.codice);
 
 			}
 
