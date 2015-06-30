@@ -225,9 +225,6 @@ $(function($){
 	
 	$('body').initepas();
 	
-
-
-	
 });	/* fine on document load */
 
 function Change(){
@@ -241,12 +238,11 @@ function Change2(){
 	absenceCode.value = tuttiCodici.value;
 }
 
-function generateUserName(){
- var name = $('#manager_name').val().replace(/\W/g, '').toLowerCase();
- var surname = $('#manager_surname').val().replace(/\W/g, '').toLowerCase();
+function generateUserName(name,surname,username){
+ var name = name.val().replace(/\W/g, '').toLowerCase();
+ var surname = surname.val().replace(/\W/g, '').toLowerCase();
 
- var $el = $("#manager_username");
-   $el.empty(); // remove old options
+   username.empty(); // remove old options
 
    var options = [
    {text: name+'.'+surname, value: name+'.'+surname},
@@ -258,7 +254,7 @@ function generateUserName(){
     $option = $("<option></option>")
     .attr("value", option.value)
     .text(option.text);
-    $el.append($option);
+    username.append($option);
   });
  }
 

@@ -45,6 +45,8 @@ person.number=Matricola
 person.badgeNumber=Numero Badge
 person.telephone=Telefono
 person.email=Email
+person.cnr_email=Email CNR
+person.eppn=Eppn
 person.birthday=Data di nascita
 person.wantEmail=Invio mail
 
