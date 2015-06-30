@@ -16,7 +16,8 @@
 </tr>
 #{list items:listTrueFalse, as:'result'}
 #{if result != null}
-<tr>
+#{if result.check}
+<tr class="success">
 	<td>${result.matricola}</td>
 	<td>${result.nome} ${result.cognome}</td>
 	<td>${result.data}</td>
@@ -42,6 +43,36 @@
 	#{/if}
 	</td>
 </tr>
+#{/if}
+#{else}
+<tr class="danger">
+	<td>${result.matricola}</td>
+	<td>${result.nome} ${result.cognome}</td>
+	<td>${result.data}</td>
+	<td>${result.codice}</td>
+	<td>
+	  #{if result.check}
+	    <i style="color: green"class="fa fa-check"></i>
+<!-- 	    <i style="color: green" class="icon-ok"></i> -->
+	  #{/if}
+	  #{else}
+	    <i style="color: red" class="fa fa-times"></i>
+<!-- 	    <i style="color: red" class="icon-remove"></i> -->
+	  #{/else}	
+	</td>
+	<td>
+		#{if result.message != null}
+		${result.message}
+		#{/if}
+	</td>
+	<td>
+	#{if result.codiceInAnagrafica != null}
+		${result.codiceInAnagrafica}
+	#{/if}
+	</td>
+</tr>
+#{/else}
+
 #{/if}
 #{/list}
 </table>
