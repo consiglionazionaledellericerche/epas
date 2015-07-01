@@ -94,25 +94,22 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public Long oldId;
 
 	/**
-	 * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con Perseo (Person.id di Perseo)
+	 * Internal ID: server per l'identificazione univoca della persona nella 
+	 * sincronizzazione con Perseo (Person.id di Perseo)
 	 */
 	@Unique
 	public Integer iId;
 
 	/**
-	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
+	 * Campo da usarsi in caso di autenticazione via shibboleth.
 	 */
-	@Unique
-	@Email
-	@As(binder=NullStringBinder.class)
-	public String cnr_email;
-	
 	@Unique
 	@As(binder=NullStringBinder.class)
 	public String eppn;
 
 	/**
-	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da contact_data così da eliminare quella tabella
+	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli 
+	 * da contact_data così da eliminare quella tabella
 	 */
 	public String telephone;
 

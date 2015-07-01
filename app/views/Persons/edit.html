@@ -90,9 +90,38 @@
 					    #{/select}
 					</td>
 				</tr>
+				<tr>
+					<td class="lab">Responsabile <br>gruppo di lavoro</td>
+					#{if person.isPersonInCharge}
+					<td><input name="isPersonInCharge" type="checkbox" checked="checked" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
+					#{/if}
+					#{else}
+					<td><input name="isPersonInCharge" type="checkbox" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
+					#{/else}
+				</tr>
+				<tr>
+					<td class="lab"><strong>Email</strong></td>
+					<td><input name="person.email" type="email" value="${person.email}"/></td>
+				</tr>
+				<tr>
+					<td class="lab">Invio email</td>
+					<td>
+					  <a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal">
+					  #{if person.wantEmail}<i class="fa fa-check-square-o"></i>#{/if}
+					  #{else}<i class="fa fa-square-o"></i>#{/else}
+					  Modifica</a>
+					</td>
+				</tr>
 			
 			
 			</table>
+			
+			<p>
+  	   			Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
+  	   			<strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
+  	   			<strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
+      			al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
+  			</p>
 		
 		  </div>
 		</div>  <!-- Fine pannello 1 -->
@@ -102,7 +131,7 @@
 		<!-- Pannello 2 Contatti -->
 		<div class="panel panel-default">
 		  <div class="panel-heading">
-		    <h3 class="panel-title"><span class="badge">2</span> Informazioni di ubicazione e contatti</h3>
+		    <h3 class="panel-title"><span class="badge">2</span> Altre informazioni</h3>
 		  </div>
 		  <div class="panel-body">
 			
@@ -117,18 +146,6 @@
 					#{/else}
 				</tr>
 				<tr>
-					<td class="lab">Email</td>
-					<td><input name="person.email" type="email" value="${person.email}"/></td>
-				</tr>
-				<tr>
-					<td class="lab">Email CNR</td>
-					<td><input name="person.cnr_email" type="text" value="${person.cnr_email}"/></td>
-				</tr>
-				<tr>
-					<td class="lab">Eppn </td>
-					<td><input name="person.eppn" type="email" value="${person.eppn}"/></td>
-				</tr>
-				<tr>
 					<td class="lab">Data di nascita </td>
 					#{if person.birthday != null }
 						<td><input datepicker name="person.birthday" type="text" value="${person.birthday}"/></td>
@@ -139,24 +156,14 @@
 					
 				</tr>
 				<tr>
-					<td class="lab">Email per controllo dati</td>
-					#{if person.wantEmail}
-						<td><a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal"><i class="fa fa-check-square-o"></i> Modifica</a></td>
-					#{/if}
-					#{else}
-						<td><a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal"><i class="fa fa-square-o"></i> Modifica</a></td>
-					#{/else}
-				</tr>
-				<tr>
-					<td class="lab">Responsabile gruppo di lavoro</td>
-					#{if person.isPersonInCharge}
-					<td><input name="isPersonInCharge" type="checkbox" checked="checked" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
-					#{/if}
-					#{else}
-					<td><input name="isPersonInCharge" type="checkbox" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
-					#{/else}
+					<td class="lab">Eppn (Per login Shibboleth)</td>
+					<td><input name="person.eppn" type="text" value="${person.eppn}"/></td>
 				</tr>
 			</table>
+			
+			<p>
+  	   			Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo. 
+  			</p>
 		  
 		  </div>
 		</div>	<!-- Fine pannello 2 -->
