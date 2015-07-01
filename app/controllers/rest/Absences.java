@@ -14,12 +14,12 @@ import manager.response.AbsencesResponse;
 import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
-import models.ContractWorkingTimeType;
 import models.Person;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -28,11 +28,15 @@ import cnr.sync.dto.AbsenceRest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -40,7 +44,6 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.WrapperContractMonthRecap;
 
 @With(Resecure.class)
 public class Absences extends Controller{
@@ -146,14 +149,11 @@ public class Absences extends Controller{
 			AbsenceInsertReport air = absenceManager.insertAbsence(person.get(), begin, 
 					Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
 					, Optional.<Blob>absent(), Optional.<String>absent(), true);
-			//renderJSON(air.getAbsences());
+						
 			renderJSON(mapper.writer(JacksonModule
 					.filterProviderFor(SimpleBeanPropertyFilter
-							.filterOutAllExcept("date", "absenceCode", "warning", 
-									"insertSucceeded", "isHoliday", 
-									"isDayInReperibilityOrShift")))
-				.writeValueAsString(air.getAbsences()));
-			
+							.serializeAllExcept("absenceAdded")))
+				.writeValueAsString(air.getAbsences())); 
 		}
 	}
 
