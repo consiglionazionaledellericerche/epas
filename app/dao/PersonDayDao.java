@@ -140,6 +140,7 @@ public class PersonDayDao extends DaoBase {
 				.leftJoin(personDay.absences, absence).fetch()
 				.leftJoin(absence.absenceType, absenceType).fetch()
 				.leftJoin(absenceType.absenceTypeGroup, absenceTypeGroup).fetch()
+				.orderBy(personDay.date.asc())
 				.list(personDay);
 		
 	}
