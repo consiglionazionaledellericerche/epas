@@ -21,6 +21,7 @@ import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -47,10 +48,12 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	private static PersonDao personDao;
 
 	/**
-	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
+	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], 
+	 * java.lang.String, java.lang.Class, java.lang.reflect.Type)
 	 */
 	@Override
-	public Object bind(String name, Annotation[] annotations, String value,	Class actualClass, Type genericType) throws Exception {
+	public Object bind(String name, Annotation[] annotations, String value,	
+			Class actualClass, Type genericType) throws Exception {
 		
 		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
@@ -62,14 +65,15 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
 			StampingFromClient stamping = new StampingFromClient();
 			
-			String badgeReaderCode = jsonObject.get("lettore").getAsString();
-			if (!badgeReaderCode.isEmpty()) {
-				BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
-				//BadgeReader badgeReader = BadgeReader.find("byCode", badgeReaderCode).first();
-				if (badgeReader == null) {
-					//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
+			if(jsonObject.has("lettore")) {
+				String badgeReaderCode = jsonObject.get("lettore").getAsString();
+				if (! Strings.isNullOrEmpty(badgeReaderCode) ) {
+					BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
+					if (badgeReader == null) {
+						//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
+					}
+					stamping.badgeReader = badgeReader;
 				}
-				stamping.badgeReader = badgeReader;
 			}
 			
 			Integer inOut = jsonObject.get("operazione").getAsInt();
@@ -77,21 +81,14 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				stamping.inOut = inOut;
 			}
 			
-			
-			JsonElement jsel = jsonObject.get("causale");
-			if(!jsel.isJsonNull()){
-				String stampTypeCode = jsel.getAsString();
-				//Logger.info("Arrivata causale: %s", stampTypeCode);
-				if (!stampTypeCode.isEmpty()) {					
-					StampType stampType = stampingDao.getStampTypeByCode(stampTypeCode);
-					//StampType stampType = StampType.find("Select st from StampType st where st.code = ?", stampTypeCode).first();
-					
+			if( jsonObject.has("causale")) {
+				String causale = jsonObject.get("causale").getAsString();
+				if(!Strings.isNullOrEmpty(causale)){
+					StampType stampType = stampingDao.getStampTypeByCode(causale);
 					if (stampType == null) {
-						throw new IllegalArgumentException(
-								
-							String.format("Causale con codice %s sconosciuta.", stampTypeCode));
+						throw new IllegalArgumentException(String
+								.format("Causale con codice %s sconosciuta.", causale));
 					}
-					//Logger.info("StampType con codice: %s", stampType.code);
 					stamping.stampType = stampType;
 				}
 			}
