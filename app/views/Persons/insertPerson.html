@@ -14,7 +14,7 @@
     #{f.input_table 'person.surname', required:'true', type:'text' /}
 		#{f.input_table 'person.name', required:'true', type:'text'/}
 	 	#{f.input_table 'person.number', type:'number'/}
-	 	#{f.input_table 'person.badgeNumber', type:'number'/}
+	 	#{f.input_table 'person.badgeNumber', type:'text'/}
 		#{f.select_table 'qualification', value: qualification, items:templateUtility.allQualifications, required:'true'/}
 		#{f.select_table 'office', value: office, items:templateUtility.allOfficesAllowed, required:'true'/}
     #{f.input_table 'person.email', type:'email' , required:'true' /}
@@ -53,17 +53,19 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">3</span> Informazioni di ubicazione e contatti (opzionali)</h3>
+    <h3 class="panel-title"><span class="badge">3</span> Altre informazioni (opzionali)</h3>
   </div>
   <div class="panel-body">
 	
     <table class="table table-condensed table-form table-hover">
-    	#{f.input_table 'person.telephone', type:'text' /}
-      #{f.input_table 'person.cnr_email', type:'email' /}
+      #{f.input_table 'person.telephone', type:'text' /}
+      #{f.datepicker_table 'person.birthday', type:'text' /}
       #{f.input_table 'person.eppn', type:'text' /}
-    	#{f.datepicker_table 'person.birthday', type:'text' /}
     </table>
 
+    <p>
+      Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo. 
+     </p>
   </div>
 </div>
 

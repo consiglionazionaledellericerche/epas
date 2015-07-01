@@ -340,15 +340,6 @@ public final class PersonDao extends DaoBase{
 		return Optional.fromNullable(query.singleResult(person));
 	}
 	
-	public Optional<Person> byCnrEmail(String cnr_email){
-
-		final QPerson person = QPerson.person;
-		
-		final JPQLQuery query = getQueryFactory().from(person)
-				.where(person.cnr_email.eq(cnr_email));
-
-		return Optional.fromNullable(query.singleResult(person));
-	}
 	
 	public Optional<Person> byEppn(String eppn){
 
@@ -436,18 +427,6 @@ public final class PersonDao extends DaoBase{
 								.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))));
 		return query.list(person);
 	}
-	
-	/**
-	 * 
-	 * @return quante sono le persone in anagrafica che hanno valorizzato il campo
-	 * email_cnr, campo utile per poter fare la sincronizzazione con gli altri sistemi
-	 */
-	public long checkCnrEmailForEmployee(){
-		final QPerson person = QPerson.person;
-		final JPQLQuery query = getQueryFactory().from(person).where(person.cnr_email.isNotNull());
-		return query.count();
-	}
-	
 	
 	/**
 	 * 
@@ -780,37 +759,6 @@ public final class PersonDao extends DaoBase{
 			this.name = name;
 			this.surname = surname;
 		}
-	}
-	
-	/**
-	 * @param La persona sulla quale verificare eventuali campi duplicati
-	 * @return true se è presente sul db almeno una persona con email,cnr_email 
-	 * o eppn uguali alla persona passata come parametro
-	 */
-	public boolean checkDuplicateFields(Person p){
-
-		final QPerson person = QPerson.person;
-		
-		final BooleanBuilder condition = new BooleanBuilder();
-		
-		if(p.id!=null){
-			condition.and(person.id.ne(p.id));
-		}
-		
-		if(!Strings.isNullOrEmpty(p.email)){
-			condition.or(person.email.eq(p.email));
-		}
-		
-		if(!Strings.isNullOrEmpty(p.cnr_email)){
-			condition.or(person.cnr_email.eq(p.cnr_email));
-		}
-		
-		if(!Strings.isNullOrEmpty(p.eppn)){
-			condition.or(person.cnr_email.eq(p.cnr_email));
-		}
-		
-		return getQueryFactory().from(person)
-				.where(condition).exists();
 	}
 	
 }
