@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.db.jpa.Blob;
+import play.db.jpa.JPAPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -312,6 +313,10 @@ public class ChartsManager {
 					int matricola = Integer.parseInt(removeApice(tokenList.get(indexMatricola)));
 					String assenza = removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
+					
+					JPAPlugin.closeTx(false);
+					JPAPlugin.startTx(false);
+					
 					Person p = personDao.getPersonByNumber(matricola);
 					Absence abs = absenceDao.getAbsencesInPeriod(
 							Optional.fromNullable(p), dataAssenza
@@ -355,15 +360,18 @@ public class ChartsManager {
 
 				}
 				catch(Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 					renderResult = new RenderResult(line, null, null, null, null, null, true, null, null);
 					listNull.add(renderResult);
 					continue;
 				}
-				listTrueFalse.add(renderResult);
-				log.info("Inserito in lista render result per {} in data {} "
-						+ "il codice {}", renderResult.cognome, renderResult.data, 
-						renderResult.codice);
+				if(renderResult.check == false) {
+					listTrueFalse.add(renderResult);
+					log.info("Inserito in lista render result per {} in data {} "
+							+ "il codice {}", renderResult.cognome, renderResult.data, 
+							renderResult.codice);
+				}
+				
 
 			}
 

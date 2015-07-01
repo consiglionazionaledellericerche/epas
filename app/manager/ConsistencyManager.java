@@ -176,17 +176,21 @@ public class ConsistencyManager {
 		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
 
 		LocalDate date = from;
-		LocalDate today = LocalDate.now();
-		
+
 		person = personDao.fetchPersonForComputation(person.id, 
 				Optional.fromNullable(from), 
-				Optional.fromNullable(today));
+				Optional.<LocalDate>absent());
 		
 		IWrapperPerson wPerson = wrapperFactory.create(person);
 		
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, from, 
-				Optional.of(today));
+				Optional.<LocalDate>absent());
 
+		LocalDate lastPersonDayToCompute = LocalDate.now();
+		if(personDays.size() > 0) {
+			lastPersonDayToCompute = personDays.get(personDays.size()-1).date;
+		}
+		
 		//Costruire la tabella hash
 		HashMap<LocalDate, PersonDay> personDaysMap = Maps.newHashMap();
 		for(PersonDay personDay : personDays) {
@@ -197,7 +201,7 @@ public class ConsistencyManager {
 		
 		PersonDay previous = null;
 		
-		while(date.isBefore(today)) {
+		while ( !date.isAfter(lastPersonDayToCompute) ) {
 			
 			if(! wPerson.isActiveInDay(date) ) {
 				date = date.plusDays(1);
@@ -239,8 +243,7 @@ public class ConsistencyManager {
 		log.info("Update personDay conclusa.");
 		
 		// (3) Ricalcolo dei residui per mese
-		populateContractMonthRecapByPerson(person,
-							new YearMonth(from));
+		populateContractMonthRecapByPerson(person, new YearMonth(from));
 		
 		log.info("Update riepiloghi conclusa.");
 	}
