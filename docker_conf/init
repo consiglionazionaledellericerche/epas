@@ -16,7 +16,6 @@ chown -R epas:epas /home/epas
 HTTPS=${HTTPS:-false}
 
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
-EPAS_SHIB_LOGIN_FIELD=${EPAS_SHIB_LOGIN_FIELD:-eppn}
 
 # use default port number if it is still not set
 case "${HTTPS}" in
@@ -97,7 +96,6 @@ sudo -u epas -H sed 's/{{SMTP_PASS}}/'"${SMTP_PASS}"'/' -i /home/epas/epas/conf/
 sudo -u epas -H sed 's/{{SMTP_CHANNEL}}/'"${SMTP_CHANNEL}"'/' -i /home/epas/epas/conf/prod.conf
 
 sudo -u epas -H sed 's/{{EPAS_SHIB_LOGIN}}/'"${EPAS_SHIB_LOGIN}"'/' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's/{{EPAS_SHIB_LOGIN_FIELD}}/'"${EPAS_SHIB_LOGIN_FIELD}"'/' -i /home/epas/epas/conf/prod.conf
 
 appRun () {
   echo "Applico eventuali evoluzioni al database..."
