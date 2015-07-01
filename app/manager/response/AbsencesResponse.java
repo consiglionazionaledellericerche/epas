@@ -1,11 +1,14 @@
 package manager.response;
 
+import helpers.rest.JacksonModule;
 import models.Absence;
 
 import org.joda.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.google.common.base.Function;
 
+@JsonFilter(JacksonModule.FILTER)
 public class AbsencesResponse {
 	
 	public final static String CODICE_FERIE_GIA_PRESENTE = "Il codice di assenza é già presente in almeno uno dei giorni in cui lo si voleva inserire";

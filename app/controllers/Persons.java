@@ -3,6 +3,8 @@ package controllers;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -132,7 +134,7 @@ public class Persons extends Controller {
 
 	public static void save(@Valid @Required Person person,
 			@Valid @Required Qualification qualification, @Valid @Required Office office,
-			@Valid @Required Contract contract) {
+			@Valid @Required Contract contract,@Required String userName) {
 
 		if(Validation.hasErrors()) {
 
@@ -145,8 +147,21 @@ public class Persons extends Controller {
 
 		person.qualification = qualification;
 		person.office = office;
-
+		
+		User user = new User();
+		user.username = userName;
+		
+		//generate random token
+		SecureRandom random = new SecureRandom();
+		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32)) ;
+		
+		user.save();
+		
+		person.user = user;
 		person.save();
+		
+		Role employee = Role.find("byName", Role.EMPLOYEE).first();
+		officeManager.setUro(person.user, person.office, employee);
 		
 		contract.person = person;
 
@@ -160,14 +175,13 @@ public class Persons extends Controller {
 		}
 		
 		person.save();
-
-		Long personId = person.id;
-
-		insertUsername(personId);
-
+		
+		flash.success("Persona inserita correttamente in anagrafica - %s", person.fullName());
+		
+		list(null);
 	}
 
-
+	@Deprecated
 	public static void insertUsername(Long personId){
 		Person person = personDao.getPersonById(personId);
 		if(person==null) {
@@ -183,7 +197,7 @@ public class Persons extends Controller {
 		render(person, usernameList);
 	}
 
-
+	@Deprecated
 	public static void updateUsername(Long personId, String username){
 
 		Person person = personDao.getPersonById(personId);
@@ -258,8 +272,6 @@ public class Persons extends Controller {
 			flash.error("Impossibile salvare la persona %s, verificare i parametri",person);
 			edit(person.id);
 		}
-		
-
 		
 		rules.checkIfPermitted(person.office);
 		rules.checkIfPermitted(office);

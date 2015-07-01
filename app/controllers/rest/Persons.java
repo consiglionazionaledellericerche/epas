@@ -19,7 +19,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import cnr.sync.dto.CompetenceDTO;
 import cnr.sync.dto.DayRecap;
-import cnr.sync.manager.SyncManager;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -46,18 +45,9 @@ public class Persons extends Controller{
 	private static AbsenceDao absenceDao;
 	@Inject
 	private static CompetenceDao competenceDao;
-	@Inject
-	private static SyncManager syncManager;
-	
 	@BasicAuth
 	public static void days(Integer perseoId ,LocalDate start,LocalDate end){
-//		long checkedPeople = personDao.checkCnrEmailForEmployee();
-//		if(checkedPeople == 0){
-//			
-//			syncManager.syncronizeCnrEmail();
-//		}
 
-		//Person person = personDao.byEmail(email);
 		Person person = personDao.getPersonByPerseoId(perseoId);
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
@@ -87,15 +77,7 @@ public class Persons extends Controller{
 
 	@BasicAuth
 	public static void missions(Integer perseoId, LocalDate start, LocalDate end, boolean forAttachment){
-//		long checkedPeople = personDao.checkCnrEmailForEmployee();
-//		if(checkedPeople == 0){
-//			/**
-//			 * TODO: chiamare qui il metodo del personManager per sincronizzare
-//			 * le email cnr
-//			 */
-//			syncManager.syncronizeCnrEmail();
-//		}
-		//Person person = personDao.byEmail(email);
+
 		Person person = personDao.getPersonByPerseoId(perseoId);
 		List<DayRecap> personDays = Lists.newArrayList();
 		if(person != null){
