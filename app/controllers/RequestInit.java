@@ -687,7 +687,16 @@ public class RequestInit extends Controller {
 			}
 		}
 
+		if(action.startsWith("MealTickets.")) {
 
+			if(action.equals("MealTickets.recapMealTickets")) {
+
+				renderArgs.put("dropDown", "dropDownAdministration");
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				return "MealTickets.recapMealTickets";
+			}
+		}
 
 		return session.get("actionSelected");
 	}

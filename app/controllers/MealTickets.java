@@ -58,12 +58,13 @@ public class MealTickets  extends Controller {
 	@Inject
 	private static ConsistencyManager consistencyManager;
 
-	public static void recapMealTickets(List<Integer> blockIdsAdded, Long personIdAdded) {
+	public static void recapMealTickets(int year, int month, 
+			List<Integer> blockIdsAdded, Long personIdAdded) {
 
 		// TODO: inserire il filtro degli office
 		
 		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
-				.getPersonMealticket(YearMonth.now(), Optional.<Integer>absent(),
+				.getPersonMealticket(new YearMonth(year,month), Optional.<Integer>absent(),
 						Optional.<String>absent());
 		
 		//Riepilogo buoni inseriti nella precedente action
@@ -80,7 +81,13 @@ public class MealTickets  extends Controller {
 		}
 
 		render(monthRecapList);
-
+	}
+	
+	private static void recapMealTickets(List<Integer> blockIdsAdded, 
+			Long personIdAdded) {
+		
+		recapMealTickets(LocalDate.now().getYear(), 
+				LocalDate.now().getMonthOfYear(), blockIdsAdded, personIdAdded);
 	}
 
 	public static void quickBlocksInsert(Long personId) {
@@ -117,7 +124,7 @@ public class MealTickets  extends Controller {
 	}
 
 
-	public static void mealTicketsLegacy(Long contractId, String name, Integer page, Integer max) {
+	public static void mealTicketsLegacy(Long contractId) {
 
 		Contract contract = contractDao.getContractById(contractId);
 		Preconditions.checkNotNull(contract);
