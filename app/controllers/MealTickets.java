@@ -68,7 +68,8 @@ public class MealTickets  extends Controller {
 		}
 
 		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
-				.getPersonMealticket(YearMonth.now(), Optional.fromNullable(max));
+				.getPersonMealticket(YearMonth.now(), Optional.fromNullable(max), 
+						Optional.fromNullable(name));
 		
 		PaginableList<ContractMonthRecap> paginableList = 
 				new PaginableList<ContractMonthRecap>(monthRecapList, page);
