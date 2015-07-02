@@ -293,26 +293,6 @@ public class Stampings extends Controller {
 		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
 	}
 
-
-	public static void mealTicketSituation(Integer year, Integer month, String name, Integer page){
-
-		if(page == null)
-			page = 0;
-
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
-		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, beginMonth, endMonth, true);
-
-		List<Person> activePersons = simpleResults.paginated(page).getResults();		
-
-		int numberOfDays = endMonth.getDayOfMonth();
-		Table<Person, LocalDate, String> tablePersonTicket = 
-				stampingManager.populatePersonTicketTable(activePersons, beginMonth);
-		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
-	}
-
 	public static void holidaySituation(int year) {
 
 		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
