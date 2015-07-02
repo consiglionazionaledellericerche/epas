@@ -172,7 +172,8 @@
 	                
 	                <li class="divider"></li>
 	                #{if ip.viewPerson }
-	                  <li><a href="@{MealTickets.recapMealTickets()}">Gestione Buoni Pasto</a></li>
+	                  <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"), 
+	                   session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
 	        		#{/if}
         		
         		#{/if}

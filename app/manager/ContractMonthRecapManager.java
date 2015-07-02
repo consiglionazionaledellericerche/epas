@@ -424,14 +424,13 @@ public class ContractMonthRecapManager {
 			monthRecap.buoniPastoConsegnatiNelMese = 
 					mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
 							monthRecap.contract, validDataForMealTickets).size();
-			
-			//residuo
-			monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
-					+ monthRecap.buoniPastoDaInizializzazione
-					+ monthRecap.buoniPastoConsegnatiNelMese 
-					- monthRecap.buoniPastoUsatiNelMese;
-						
 		}
+		
+		//residuo
+		monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
+				+ monthRecap.buoniPastoDaInizializzazione
+				+ monthRecap.buoniPastoConsegnatiNelMese 
+				- monthRecap.buoniPastoUsatiNelMese;
 	}
 	
 	/**
