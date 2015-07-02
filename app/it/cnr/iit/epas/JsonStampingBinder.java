@@ -81,7 +81,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				stamping.inOut = inOut;
 			}
 			
-			if( jsonObject.has("causale")) {
+			if( jsonObject.has("causale") && !jsonObject.get("causale").isJsonNull() ) {
 				String causale = jsonObject.get("causale").getAsString();
 				if(!Strings.isNullOrEmpty(causale)){
 					StampType stampType = stampingDao.getStampTypeByCode(causale);
