@@ -58,31 +58,13 @@ public class MealTickets  extends Controller {
 	@Inject
 	private static ConsistencyManager consistencyManager;
 
-	public static void recapMealTickets(String name, Integer page, Integer max, 
-			List<Integer> blockIdsAdded, Long personIdAdded) {
+	public static void recapMealTickets(List<Integer> blockIdsAdded, Long personIdAdded) {
 
 		// TODO: inserire il filtro degli office
 		
-		if(page == null) {
-			page = 0;
-		}
-
 		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
-				.getPersonMealticket(YearMonth.now(), Optional.fromNullable(max), 
-						Optional.fromNullable(name));
-		
-		PaginableList<ContractMonthRecap> paginableList = 
-				new PaginableList<ContractMonthRecap>(monthRecapList, page);
-		
-		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
-		
-		for(ContractMonthRecap monthRecap : paginableList.getPaginatedItems() ) {
-			Optional<MealTicketRecap> recap = mealTicketFactory
-					.create(monthRecap.contract);
-			if(recap.isPresent()) {
-				mealTicketRecaps.add(recap.get());
-			}
-		}
+				.getPersonMealticket(YearMonth.now(), Optional.<Integer>absent(),
+						Optional.<String>absent());
 		
 		//Riepilogo buoni inseriti nella precedente action
 		if(personIdAdded != null && blockIdsAdded != null) {
@@ -94,14 +76,14 @@ public class MealTickets  extends Controller {
 			List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
 			blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
 
-			render(paginableList, mealTicketRecaps, page, max, name, blockAdded, personAdded);
+			render(monthRecapList, blockAdded, personAdded);
 		}
 
-		render(paginableList, mealTicketRecaps, page, max, name);
+		render(monthRecapList);
 
 	}
 
-	public static void quickBlocksInsert(Long personId, String name, Integer page, Integer max) {
+	public static void quickBlocksInsert(Long personId) {
 
 		Person person = personDao.getPersonById(personId);
 		Preconditions.checkArgument(person.isPersistent());
@@ -131,7 +113,7 @@ public class MealTickets  extends Controller {
 		LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
 		User admin = Security.getUser().get();
 
-		render(recap, recapPrevious, today, admin, expireDate, name, page, max);
+		render(recap, recapPrevious, today, admin, expireDate);
 	}
 
 
@@ -153,7 +135,7 @@ public class MealTickets  extends Controller {
 					mealTicketsTransfered, contract.person.name, contract.person.surname);
 		}
 
-		MealTickets.recapMealTickets(name, page, max, null, null);
+		MealTickets.recapMealTickets(null, null);
 	}
 
 
@@ -168,7 +150,7 @@ public class MealTickets  extends Controller {
 		if(person == null) {
 
 			flash.error("Impossibile trovare la persona specificata. Operazione annullata");
-			MealTickets.recapMealTickets(name, page, max, null, null);
+			MealTickets.recapMealTickets(null, null);
 		}
 
 		rules.checkIfPermitted(person.office);
@@ -204,7 +186,7 @@ public class MealTickets  extends Controller {
 
 				flash.error("Il buono pasto con codice %s risulta già essere assegnato alla persona %s %s in data %s."
 						+ " L'Operazione è annullata", mealTicket.code, exist.contract.person.name, exist.contract.person.surname, exist.date);
-				MealTickets.recapMealTickets(name, page, max, null, null);
+				MealTickets.recapMealTickets(null, null);
 			}
 		}
 
@@ -222,7 +204,7 @@ public class MealTickets  extends Controller {
 		
 		consistencyManager.updatePersonSituation(person, LocalDate.now());
 
-		MealTickets.recapMealTickets(name, page, max, blockIdsToAdd, personId);
+		MealTickets.recapMealTickets(blockIdsToAdd, personId);
 
 	}
 
@@ -233,7 +215,7 @@ public class MealTickets  extends Controller {
 
 		if(codeBlock == null){
 			flash.error("Impossibile trovare il codice blocco specificato. Operazione annullata");
-			MealTickets.recapMealTickets(name, page, max, null, null);
+			MealTickets.recapMealTickets(null, null);
 		}
 		List<Integer> codeBlockIds = Lists.newArrayList();
 		codeBlockIds.add(codeBlock);
@@ -241,7 +223,7 @@ public class MealTickets  extends Controller {
 
 		if(mealTicketList == null || mealTicketList.size() == 0) {
 			flash.error("Il blocco selezionato è inesistente. Operazione annullata");
-			MealTickets.recapMealTickets(name, page, max, null, null);
+			MealTickets.recapMealTickets(null, null);
 		}
 
 		Person person = mealTicketList.get(0).contract.person;
@@ -264,7 +246,7 @@ public class MealTickets  extends Controller {
 		flash.success("Rimosso blocco %s con dimensione %s per %s %s", codeBlock, deleted,
 				person.name , person.surname);
 
-		MealTickets.recapMealTickets(name, page, max, null, null);
+		MealTickets.recapMealTickets(null, null);
 	}
 
 
