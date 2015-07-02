@@ -74,7 +74,7 @@ public class MealTicketRecap {
 			if(this.mealTicketsReceivedOrdered.size() == i )
 			{
 				this.dateRunOut = currentPersonDay.date;
-				continue;
+				return;
 			}
 
 			MealTicket currentMealTicket = this.mealTicketsReceivedOrdered.get(i);
