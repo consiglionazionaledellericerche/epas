@@ -473,15 +473,6 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchYear",  true);
 				return "Stampings.dailyPresenceForPersonInCharge";
 			}
-			
-			if(action.equals("Stampings.mealTicketSituation")) {
-
-				renderArgs.put("switchMonth",  true);
-				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDownAdministration");
-				return "Stampings.mealTicketSituation";
-			}
-
 		}
 
 		if( action.startsWith("PersonMonths.")) {
