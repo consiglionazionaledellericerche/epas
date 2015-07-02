@@ -57,7 +57,7 @@ public class ContractMonthRecapDao extends DaoBase {
 		final JPQLQuery query = getQueryFactory().from(recap)
 				.where(recap.year.eq(yearMonth.getYear())
 				.and(recap.month.eq(yearMonth.getMonthOfYear())
-				.and(condition)) );
+				.and(condition)) ).orderBy(recap.contract.person.surname.asc());
 						
 		return query.list(recap);
 	}
