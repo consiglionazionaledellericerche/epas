@@ -10,8 +10,9 @@
     </div>
     <div id="meal" class="panel-collapse collapse in">
       <div class="panel-body">
-   	   Il numero di buoni mensa usabili per questo mese è <strong>${psDto.numberOfMealTicketToUse}</strong> <br>
-       Il numero di buoni mensa da restituire per questo mese è <strong>${psDto.numberOfMealTicketToRender}</strong> <br>
+       #{if psDto.currentMonth}
+	   	   <p><em>Il giorno attuale non è considerato nel conteggio dei buoni pasto utilizzati.</em></p>
+   	   #{/if}
    	   <table class="table table-bordered table-condensed">
    	      #{if mese.value.buoniPastoDaInizializzazione > 0}
    	       <tr>
@@ -39,6 +40,12 @@
 				<td  class="col-xs-2"><strong>${mese.value.remainingMealTickets}</strong></td>
 		  </tr>	
 	    </table>
+	  <!-- Vecchia gestione dei buoni pasto: capire cosa farne -->  
+	  <!-- Il numero di buoni mensa usabili per questo mese è 
+	  		<strong>${psDto.numberOfMealTicketToUse}</strong> <br> 
+	  <p>Il numero di buoni mensa da restituire per questo mese è 
+	  	<strong>${psDto.numberOfMealTicketToRender}</strong>
+	   <p> -->
 	   
 	  #{if !psDto.stampModificationTypeSet.isEmpty() }
       <table class="table table-condensed table-bordered">
@@ -49,7 +56,7 @@
 		</tr>
 	    <tr>
 		  <td><span class="glyphicon glyphicon-ban-circle"></span></td>
-		  <td>Buono mensa da restituire</td>
+		  <td>Buono mensa non ottenuto</td>
 		</tr>
 		<tr>
 		  <td><span class="glyphicon glyphicon-remove"></span></td>
