@@ -417,7 +417,7 @@ public class ConsistencyManager {
 					log.info("No vacation period {}", contract.toString());
 					continue;
 				}
-				
+			
 				populateContractMonthRecap(wcontract, Optional.fromNullable(yearMonthFrom));
 			} 
 		}

@@ -10,7 +10,8 @@
   
   <div id="container-fluid-nav-tabs" class="container-fluid">
 
-  </div>
+  
+  
     <!-- Ultimi inseriti -->
     #{if blockAdded != null }
     <div class="col-md-12 center">
@@ -92,6 +93,25 @@
 	  	</tbody>	
 	  </table>
     </div>
+  </div>    
+  
+  <!-- Lista degli istituti che non hanno attiva la data inizio utilizzo -->
+  <div id="container-fluid-nav-tabs" class="container-fluid">
+	  <div class="alert alert-danger">
+	    #{if officesNoMealTicketConf.size() > 0}
+	    	<p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per le seguenti sedi di
+	    	cui si detengono i diritti di amministrazione:</p>
+	    	#{list items:officesNoMealTicketConf, as:'office'}
+	    		<ul>
+	    		  <li>${office.name}</li>
+	    		</ul>
+	    	#{/list}
+	    	
+	    #{/if} 
+	  </div>
+  </div>
+    
+  
 </div>
 
 #{include '_myModal_large.html' /}

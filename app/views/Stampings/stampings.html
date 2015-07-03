@@ -105,7 +105,7 @@
 	</thead>
 	<tbody>
 	#{list items:psDto.daysRecap, as:'dayRecap'}
-	<tr>
+	<tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
      		#{if dayRecap.holiday==false}
 				<td class="capitalized default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 			#{/if}

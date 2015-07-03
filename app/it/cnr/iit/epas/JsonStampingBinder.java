@@ -92,6 +92,13 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					stamping.stampType = stampType;
 				}
 			}
+			
+			if( jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull() ) {
+				String admin = jsonObject.get("admin").getAsString();
+				if(admin.equals("true")) { 
+					stamping.markedByAdmin = true;
+				}
+			}
 								
 			/**
 			 * Cercare la persona in funzione del tipo di matricolaFirma.
