@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
@@ -21,6 +22,8 @@ import models.enumerate.Parameter;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.db.jpa.JPAPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -212,9 +215,24 @@ public class ContractManager {
 		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
 			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
 		}
-
+		
+		//Distruggere i riepiloghi
+		// TODO: anche quelli sulle ferie quando ci saranno
+		destroyContractMonthRecap(contract);
+		
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		
 		consistencyManager.updatePersonSituation(contract.person, date);
 
+	}
+	
+	private void destroyContractMonthRecap(Contract contract) {
+		for(ContractMonthRecap cmr : contract.contractMonthRecaps) {
+			cmr.delete();
+		}
+		//contract = contractDao.getContractById(contract.id);
+		contract.save();
 	}
 
 	/**
