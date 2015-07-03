@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import models.CompetenceCode;
 import models.Qualification;
@@ -95,7 +96,6 @@ public class Bootstrap extends Job<Void> {
 //			// History
 //			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class,
 //					"../db/import/history/part2_history.xml")));
-
 		}
 		
 		if(User.find("byUsername", "developer").fetch().isEmpty()) {
@@ -121,6 +121,16 @@ public class Bootstrap extends Job<Void> {
 		Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 		
 		new FixUserPermission().now();
+		
+		//StampType pausa pranzo
+		StampType st = StampType.find("byCode", "pausaPranzo").first();
+		if(st == null) {
+			st = new StampType();
+			st.code = "pausaPranzo";
+			st.description = "Pausa pranzo";
+			st.identifier = "pr";
+			st.save();
+		}
 	}
 
 }

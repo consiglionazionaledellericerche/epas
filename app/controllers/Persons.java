@@ -645,7 +645,8 @@ public class Persons extends Controller {
 		//Ricalcolo valori
 		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
-		contractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		contractManager.recomputeContract(contract, contractDateInterval.getBegin(),
+				contractDateInterval.getEnd());
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 

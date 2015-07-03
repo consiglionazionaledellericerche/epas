@@ -163,80 +163,76 @@ public class StampingManager {
 	 */
 	public boolean createStamping(StampingFromClient stamping){
 
-		if(stamping == null)
+		// Check della richiesta
+		
+		if(stamping == null) {
 			return false;
+		}
 
 		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
-			log.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
-			return false;
-		}
-		Long id = stamping.personId;
-
-		if(id == null){
-			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = null");
+			log.warn("La timbratura che si cerca di inserire è troppo "
+					+ "precedente rispetto alla data odierna. Controllare il server!");
 			return false;
 		}
 
-		Person person = personDao.getPersonById(id);
+		if(stamping.personId == null){
+			log.warn("L'id della persona passata tramite json non ha trovato "
+					+ "corrispondenza nell'anagrafica del personale. Controllare id = null");
+			return false;
+		}
 
+		Person person = personDao.getPersonById(stamping.personId);
 		if(person == null){
-			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = {}", id);
+			log.warn("L'id della persona passata tramite json non ha trovato "
+					+ "corrispondenza nell'anagrafica del personale. "
+					+ "Controllare id = {}", stamping.personId);
 			return false;
 		}
-
-		log.debug("Sto per segnare la timbratura di {}", person.getFullname());
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, stamping.dateTime.toLocalDate());
-		if(!pd.isPresent()){
-			/**
-			 * non esiste un personDay per quella data, va creato e quindi salvato
-			 */
-			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
+		
+		// Recuperare il personDay
+		PersonDay personDay;
+		Optional<PersonDay> pd = personDayDao
+				.getPersonDay(person, stamping.dateTime.toLocalDate());
+		if(!pd.isPresent()) {
 			personDay = new PersonDay(person, stamping.dateTime.toLocalDate());
 			personDay.save();		
-			log.debug("Salvato il nuovo personDay {}", personDay);
-			Stamping stamp = new Stamping();
-			stamp.date = stamping.dateTime;
-			stamp.markedByAdmin = false;
-			if(stamping.inOut == 0)
-				stamp.way = WayType.in;
-			else
-				stamp.way = WayType.out;
-			stamp.stampType = stamping.stampType;
-			stamp.badgeReader = stamping.badgeReader;
-			stamp.personDay = personDay;
-			stamp.save();
-			personDay.stampings.add(stamp);
-			personDay.save();
-
-		}
-		else{
+		} else {
 			personDay = pd.get();
-			if(checkDuplicateStamping(personDay, stamping) == false){
-				Stamping stamp = new Stamping();
-				stamp.date = stamping.dateTime;
-				stamp.markedByAdmin = false;
-				if(stamping.inOut == 0)
-					stamp.way = WayType.in;
-				else
-					stamp.way = WayType.out;
-				stamp.stampType = stamping.stampType;
-				stamp.badgeReader = stamping.badgeReader;
-				stamp.personDay = personDay;
-				stamp.save();
-				personDay.stampings.add(stamp);
-				personDay.save();
-			}
-			else{
-				log.info("All'interno della lista di timbrature di {} nel giorno {} c'è una timbratura uguale a quella passata dallo" +
-						"stampingsFromClient: {}", new Object[]{person.getFullname(), personDay.date, stamping.dateTime});
-			}
-
-
+		}
+		
+		// Check stamping duplicata
+		if(checkDuplicateStamping(personDay, stamping)){
+			log.info("All'interno della lista di timbrature di {} nel giorno {} "
+					+ "c'è una timbratura uguale a quella passata dallo" +
+					"stampingsFromClient: {}", 
+					new Object[]{person.getFullname(), personDay.date, stamping.dateTime});
+			return true;
 		}
 
-		consistencyManager.updatePersonSituation(person, personDay.date);
+		//Creazione stamping e inserimento
+		Stamping stamp = new Stamping();
+		stamp.date = stamping.dateTime;
+		if(stamping.markedByAdmin) {
+			stamp.markedByAdmin = true;
+		} else {
+			stamp.markedByAdmin = false;
+		}
+
+		if(stamping.inOut == 0) {
+			stamp.way = WayType.in;
+		} else {
+			stamp.way = WayType.out;
+		}
+		stamp.stampType = stamping.stampType;
+		stamp.badgeReader = stamping.badgeReader;
+		stamp.personDay = personDay;
+		stamp.save();
+		personDay.stampings.add(stamp);
+		personDay.save();
 		
+		// Ricalcolo
+		consistencyManager.updatePersonSituation(person, personDay.date);
+
 		return true;
 	}
 
@@ -252,7 +248,8 @@ public class StampingManager {
 			if(s.date.isEqual(stamping.dateTime)){
 				return true;
 			}
-		}return false;
+		}
+		return false;
 	}
 
 	/**
@@ -321,56 +318,5 @@ public class StampingManager {
 
 		}
 		return daysRecap;
-	}
-
-
-	/**
-	 * 
-	 * @param activePersons
-	 * @param beginMonth
-	 * @return la tabella contenente la struttura persona-data-buonopasto per tutte le persone attive
-	 */
-	public Table<Person, LocalDate, String> populatePersonTicketTable(List<Person> activePersons, LocalDate beginMonth){
-		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
-			public int compare(LocalDate date1, LocalDate date2) {
-				return date1.compareTo(date2);
-			}
-		}).orderRowsBy(new Comparator<Person>(){
-			public int compare(Person p1, Person p2) {
-
-				return p1.surname.compareTo(p2.surname);
-			}
-
-		});
-		for(Person p : activePersons)
-		{
-			List<PersonDay> pdList = personDayDao
-					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
-
-			for(PersonDay pd : pdList){
-				if(pd.isTicketForcedByAdmin) {
-
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "siAd");
-					}
-					else {
-						builder.put(p, pd.date, "noAd");
-					}
-				}
-				else {
-
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "si");
-					}
-					else {
-						builder.put(p, pd.date, "");
-					}
-				}    			
-
-			}
-
-		}
-		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
-		return tablePersonTicket;
 	}
 }

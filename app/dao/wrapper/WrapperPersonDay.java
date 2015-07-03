@@ -101,6 +101,15 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 		
 		//Assegnare logicamente il previousForProgressive
 		if( this.value.date.getDayOfMonth() == 1) {
+			//Primo giorno del mese
+			return;
+		}
+		
+		
+		if( this.getPersonDayContract().get().sourceDate != null &&
+				this.getPersonDayContract().get().sourceDate
+				.isEqual(this.value.date.minusDays(1)) ) {
+			//Giorno successivo all'inizializzazione
 			return;
 		}
 		

@@ -298,6 +298,23 @@ public final class PersonDao extends DaoBase{
 
 		return query.singleResult(person);
 	}
+	
+	/**
+	 *
+	 * @param personId
+	 * @return la persona corrispondente alla email
+	 */
+	@Deprecated //email non è un campo univoco... decidere
+	public Person getPersonByEmail(String email) {
+
+		final QPerson person = QPerson.person;
+		
+		final JPQLQuery query = getQueryFactory()
+				.from(person)
+				.where(person.email.eq(email));
+
+		return query.singleResult(person);
+	}
 
 	/**
 	 *
