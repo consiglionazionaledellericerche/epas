@@ -1,5 +1,6 @@
 package manager.recaps.personStamping;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -48,6 +50,8 @@ public class PersonStampingRecap {
 	public Person person;
 	public int year;
 	public int month;
+	
+	public boolean currentMonth = false;
 
 	//Informazioni sul mese
 	public int numberOfCompensatoryRestUntilToday = 0;
@@ -80,7 +84,7 @@ public class PersonStampingRecap {
 	 * @param person
 	 */
 	public PersonStampingRecap(PersonDayManager personDayManager,
-			PersonDayDao personDayDao,
+			PersonDayDao personDayDao,	MealTicketDao mealTicketDao,
 			PersonManager personManager,
 			ContractMonthRecapManager contractMonthRecapManager,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
@@ -90,6 +94,10 @@ public class PersonStampingRecap {
 		
 		this.month = month;
 		this.year = year;
+		
+		if(new YearMonth(year,month).equals( new YearMonth(LocalDate.now()) ))  {
+			this.currentMonth = true;
+		}
 
 		LocalDate begin = new LocalDate(year, month, 1);
 		LocalDate end = begin.dayOfMonth().withMaximumValue();
@@ -106,10 +114,32 @@ public class PersonStampingRecap {
 		List<Contract> monthContracts = wrapperFactory
 				.create(person).getMonthContracts(year, month);
 		
+		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
+		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
+		
 		for(Contract contract : monthContracts) {
 			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
 					.getContractMonthRecap(new YearMonth(year, month));
+			
 			if (cmr.isPresent()) {
+				
+				//Sistemo i riepilogo dei buoni pasto nel caso di mese e contratto attuale
+				if(this.currentMonth && DateUtility.isDateIntoInterval(LocalDate.now(), 
+						wrapperFactory.create(contract).getContractDateInterval())) {
+
+					// Considero i buoni pasto consegnati oggi (che non sono nel recap)
+					int assignedToday = mealTicketDao
+							.getMealTicketAssignedToPersonIntoInterval(contract, 
+							new DateInterval(LocalDate.now(), LocalDate.now())).size();
+					cmr.get().buoniPastoConsegnatiNelMese += assignedToday;
+					cmr.get().remainingMealTickets += assignedToday;
+					
+					if(LocalDate.now().equals(begin)) {
+						// Oggi essendo il primo giorno del mese aggiungo i buoni pasto dal mese precedente
+						cmr.get().remainingMealTickets += cmr.get().buoniPastoDalMesePrecedente; 
+					}
+				}
+				
 				this.contractMonths.add(wrapperFactory.create(cmr.get()));
 			}
 		}
@@ -171,8 +201,7 @@ public class PersonStampingRecap {
 		}
 
 		this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
-		this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
-		this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
+		
 		this.basedWorkingDays = personManager.basedWorkingDays(personDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 

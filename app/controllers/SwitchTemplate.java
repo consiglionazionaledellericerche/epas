@@ -143,6 +143,10 @@ public class SwitchTemplate extends Controller{
 
 			WorkingTimes.manageWorkingTime(null);
 		}
+		if(action.equals("MealTickets.recapMealTickets")) {
+			
+			MealTickets.recapMealTickets(year, month, null, null);
+		}
 
 
 	}

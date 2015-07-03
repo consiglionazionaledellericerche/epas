@@ -26,6 +26,17 @@
 	 Buoni pasto consumati <strong>${recap.getPersonDayMapped().size()}</strong>
 	 <br>
 	 
+	 #{if recap.isMealTicketRunOut() }
+	    La persona ha esaurito i buoni pasto in data ${recap.getDateRunOut()}<br>
+	 #{/if}
+	 #{if recap.isMealTicketExpired() }
+	   <!-- Implementare meglio prima di renderizzare questo alert 
+	   <strong>ATTENZIONE:</strong> La persona ha usufruito di 
+	   buonipasto scaduti in data ${recap.getDateExpire()}
+	   --> 
+	 #{/if}
+	 
+	 
 	 #{if recapPrevious != null && recapPrevious.getRemaining() > 0}
 	   <br>
 	   <h2><i class="fa fa-exclamation-triangle text-danger"></i></h2>

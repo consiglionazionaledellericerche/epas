@@ -40,6 +40,8 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
 import com.mysema.query.types.QBean;
 
+import dao.filter.QFilters;
+
 /**
  * DAO per le person.
  *
@@ -467,7 +469,7 @@ public final class PersonDao extends DaoBase{
 		
 		filterOffices(condition, offices);
 		filterOnlyTechnician(condition, onlyTechnician);
-		filterName(condition, name);
+		condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
 		filterOnlyOnCertificate(condition, onlyOnCertificate);
 		filterContract(condition, start, end);
 		filterCompetenceCodeEnabled(condition, compCode);
@@ -519,7 +521,7 @@ public final class PersonDao extends DaoBase{
 		}
 		filterOffices(condition, offices);
 		filterOnlyTechnician(condition, onlyTechnician);
-		filterName(condition, name);
+		condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
 		filterOnlyOnCertificate(condition, onlyOnCertificate);
 		filterContract(condition, start, end);
 		filterCompetenceCodeEnabled(condition, compCode);
@@ -544,22 +546,6 @@ public final class PersonDao extends DaoBase{
 		}
 	}
 	
-	/**
-	 * Filtro sul nome.
-	 * 
-	 * @param condition
-	 * @param name
-	 */
-	private void filterName(BooleanBuilder condition, Optional<String> name) {
-		
-		final QPerson person = QPerson.person;
-		
-		if (name.isPresent() && !name.get().trim().isEmpty()) {
-			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
-					person.surname.startsWithIgnoreCase(name.get()));
-		}
-	}
-	 
 	/**
 	 * Filtro sulle date contrattuali.
 	 * 

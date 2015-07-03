@@ -8,6 +8,7 @@ import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Person;
+import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -15,6 +16,7 @@ public class PersonStampingRecapFactory {
 
 	private final PersonDayManager personDayManager;
 	private final PersonDayDao personDayDao;
+	private final MealTicketDao mealTicketDao;
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final PersonManager personManager;
 	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
@@ -25,6 +27,7 @@ public class PersonStampingRecapFactory {
 	PersonStampingRecapFactory(PersonDayManager personDayManager,
 			PersonDayDao personDayDao,
 			PersonManager personManager,
+			MealTicketDao mealTicketDao,
 			ContractMonthRecapManager contractMonthRecapManager,
 			IWrapperFactory wrapperFactory,
 			PersonStampingDayRecapFactory stampingDayRecapFactory,
@@ -32,6 +35,7 @@ public class PersonStampingRecapFactory {
 
 		this.personDayManager = personDayManager;
 		this.personDayDao = personDayDao;
+		this.mealTicketDao = mealTicketDao;
 		this.contractMonthRecapManager = contractMonthRecapManager;
 		this.personManager = personManager;
 		this.stampingDayRecapFactory = stampingDayRecapFactory;
@@ -48,9 +52,9 @@ public class PersonStampingRecapFactory {
 	 */
 	public PersonStampingRecap create(Person person, int year, int month) {
 
-		return new PersonStampingRecap(personDayManager, personDayDao, personManager,
-				contractMonthRecapManager, stampingDayRecapFactory, wrapperFactory, dateUtility,
-				year, month, person);
+		return new PersonStampingRecap(personDayManager, personDayDao, mealTicketDao,
+				personManager, contractMonthRecapManager, stampingDayRecapFactory, 
+				wrapperFactory, dateUtility, year, month, person);
 	}
 
 }

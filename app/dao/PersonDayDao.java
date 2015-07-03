@@ -140,6 +140,7 @@ public class PersonDayDao extends DaoBase {
 				.leftJoin(personDay.absences, absence).fetch()
 				.leftJoin(absence.absenceType, absenceType).fetch()
 				.leftJoin(absenceType.absenceTypeGroup, absenceTypeGroup).fetch()
+				.orderBy(personDay.date.asc())
 				.list(personDay);
 		
 	}
@@ -153,8 +154,11 @@ public class PersonDayDao extends DaoBase {
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = getQueryFactory().from(personDay);
 
-	
-		condition.and(personDay.date.between(begin, end.or(begin)));
+		
+		condition.and(personDay.date.goe(begin));
+		if(end.isPresent()) {
+			condition.and(personDay.date.loe(end.get()));
+		}
 		condition.and(personDay.person.eq(person));
 		if (onlyIsTicketAvailable) {
 			condition.and(personDay.isTicketAvailable.eq(true));
