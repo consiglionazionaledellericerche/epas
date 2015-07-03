@@ -42,7 +42,12 @@
 		</tr>
 	    #{/list}
 	  </table>
-
+	   <div class="alert alert-info" role="alert">
+	   <p>Nella tabella sottostante vengono conteggiate solo le assenze <strong>giornaliere</strong>.<br>
+	   Quelle orarie, visibili nel calendario annuale qui sopra, vengono omesse poichè non sono veri e proprio giorni di
+	   totale assenza dal lavoro.</p>
+	   
+	   </div>
        <div class="col-md-8 col-md-offset-2">
 	   <table class="table table-hover table-condensed table-striped">
 		<tr class="info">
@@ -52,15 +57,17 @@
 		</tr>
 		#{list items:yearlyAbsencesRecap.absenceSummary.entrySet(), as: 'entry'}
 		<tr>
-			<td>${entry.getKey().code}</td>     
-			<td>${entry.getKey().description}</td>	
-			<td>${entry.getValue()}</td>
+			#{if entry.getKey().justifiedTimeAtWork.minutesJustified == null}
+				<td>${entry.getKey().code}</td>     
+				<td>${entry.getKey().description}</td>	
+				<td>${entry.getValue()}</td>
+			#{/if}
 		</tr>
 	    #{/list}
 		<tr>
 			<td>TOTALE</td>
 			<td></td>
-			<td>${yearlyAbsencesRecap.totalAbsence}</td>
+			<td>${yearlyAbsencesRecap.totalAbsence - yearlyAbsencesRecap.totalHourlyAbsence}</td>
 		</tr>
 	  </table>
 	  </div>
