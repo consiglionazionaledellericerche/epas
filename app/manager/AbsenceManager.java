@@ -772,9 +772,6 @@ public class AbsenceManager {
 			actualDate = actualDate.plusDays(1);
 		}
 
-		JPAPlugin.closeTx(false);
-		JPAPlugin.startTx(false);
-		
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		consistencyManager.updatePersonSituation(person, dateFrom);
 

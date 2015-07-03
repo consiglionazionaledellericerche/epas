@@ -21,7 +21,7 @@
 
 <p><h3>Lista del Personale Attivo</h3></p>
 
-<table class="datatable-test table table-striped table-hover table-condensed center" cellspacing="0" width="100%">
+<table class="datatable-test table table-striped table-hover table-condensed center">
     <thead>
 	  <tr>
 		<th>Nome</th>
@@ -46,22 +46,11 @@
 	 
 	 #{if person.currentContract.present}
 	   <tr>
-	 	<td class="personName 
-		#{if person.currentContractInitializationMissing()}
-		  danger
-		#{/if}
-		#{else}
-		  success
-		#{/else}
-		">
+	 	<td class="personName success">
 		<a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
 		#{if person.currentContractMonthRecapMissing()}
 		<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="mancano i riepiloghi"></span>
 		#{/if}
-		#{if person.currentContractInitializationMissing()}
-		<span class="glyphicon glyphicon-wrench" aria-hidden="true" title="mancano i dati iniziali"></span>
-		#{/if}
-
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
 		<td><font color="#000000">${person.currentContract.get().beginContract}</font></td>
@@ -101,10 +90,17 @@
 		</td>
 
 		<!-- Inizializzazione ePAS -->
-		<td>
-		  #{if person.currentContract.get().sourceDate != null}
-		    <i class="fa fa-check-square-o"></i>
-		  #{/if}
+		<td class=" 
+		#{if person.currentContractInitializationMissing()}
+		  danger
+		#{/if}
+		">
+		 #{if person.currentContract.get().sourceDate != null}
+		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Modifica</a>
+    	 #{/if}
+		 #{else}
+	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Definisci</a>
+		 #{/else}
 		</td>
 
 		<!-- Invio email -->
