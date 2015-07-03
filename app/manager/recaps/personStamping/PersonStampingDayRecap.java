@@ -225,6 +225,12 @@ public class PersonStampingDayRecap {
 					this.firstDay = true;
 				}
 			}
+			if(ignoreDay) {
+				this.setWorkTime(0);
+				this.setDifference(0);
+				this.setProgressive(0);
+				this.setMealTicket(true, false);
+			}
 		}
 	}
 

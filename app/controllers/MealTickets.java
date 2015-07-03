@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.MealTicketManager;
 import manager.recaps.mealTicket.BlockMealTicket;
@@ -15,8 +16,10 @@ import manager.recaps.mealTicket.MealTicketRecapFactory;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
+import models.Office;
 import models.Person;
 import models.User;
+import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -33,6 +36,7 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -57,6 +61,10 @@ public class MealTickets  extends Controller {
 	private static ContractDao contractDao;
 	@Inject
 	private static ConsistencyManager consistencyManager;
+	@Inject
+	private static OfficeDao officeDao;
+	@Inject
+	private static ConfGeneralManager confGeneralManager;
 
 	public static void recapMealTickets(int year, int month, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
@@ -66,6 +74,16 @@ public class MealTickets  extends Controller {
 		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
 				.getPersonMealticket(new YearMonth(year,month), Optional.<Integer>absent(),
 						Optional.<String>absent());
+		
+		// Lista degli istituti allowed che non hanno data inizio mealTicket
+		List<Office> officesNoMealTicketConf = Lists.newArrayList();
+		for(Office office : officeDao.getOfficeAllowed(Security.getUser().get())) {
+			Optional<LocalDate> officeStartDate = confGeneralManager
+					.getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office); 
+			if(!officeStartDate.isPresent()) {
+				officesNoMealTicketConf.add(office);
+			}
+		}
 		
 		//Riepilogo buoni inseriti nella precedente action
 		if(personIdAdded != null && blockIdsAdded != null) {
@@ -77,10 +95,10 @@ public class MealTickets  extends Controller {
 			List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
 			blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
 
-			render(monthRecapList, blockAdded, personAdded);
+			render(monthRecapList, blockAdded, personAdded, officesNoMealTicketConf);
 		}
 
-		render(monthRecapList);
+		render(monthRecapList, officesNoMealTicketConf);
 	}
 	
 	private static void recapMealTickets(List<Integer> blockIdsAdded, 
