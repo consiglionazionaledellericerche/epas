@@ -18,6 +18,8 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.db.jpa.JPAPlugin;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ImmutableTable.Builder;
@@ -299,7 +301,10 @@ public class StampingManager {
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-
+			
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
+			
 			PersonDay personDay = null;
 			person = personDao.getPersonById(person.id);
 			Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence); 
