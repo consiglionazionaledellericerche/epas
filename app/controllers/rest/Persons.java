@@ -46,9 +46,10 @@ public class Persons extends Controller{
 	@Inject
 	private static CompetenceDao competenceDao;
 	@BasicAuth
-	public static void days(Integer perseoId ,LocalDate start,LocalDate end){
+	public static void days(String email ,LocalDate start,LocalDate end){
 
-		Person person = personDao.getPersonByPerseoId(perseoId);
+		//Person person = personDao.getPersonByPerseoId(perseoId);
+		Person person = personDao.getPersonByEmail(email);
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca. Assicurarsi di aver"
@@ -76,9 +77,10 @@ public class Persons extends Controller{
 	}
 
 	@BasicAuth
-	public static void missions(Integer perseoId, LocalDate start, LocalDate end, boolean forAttachment){
+	public static void missions(String email, LocalDate start, LocalDate end, boolean forAttachment){
 
-		Person person = personDao.getPersonByPerseoId(perseoId);
+		//Person person = personDao.getPersonByPerseoId(perseoId);
+		Person person = personDao.getPersonByEmail(email);
 		List<DayRecap> personDays = Lists.newArrayList();
 		if(person != null){
 
