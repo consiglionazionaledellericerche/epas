@@ -226,13 +226,11 @@ public class ConfYearManager {
 	 */
 	private Optional<ConfYear> getByFieldName(String field, Integer year, Office office) {
 
-		final BooleanBuilder condition = new BooleanBuilder();
-
-		QConfYear confYear = QConfYear.confYear;
+		final QConfYear confYear = QConfYear.confYear;
 		final JPQLQuery query = queryFactory.from(confYear);
-		condition.and(confYear.year.eq(year));
-		condition.and(confYear.field.eq(field));
-		query.where(condition);
+		
+		query.where(confYear.year.eq(year)
+				.and(confYear.field.eq(field)).and(confYear.office.eq(office)));
 
 		return Optional.fromNullable(query.singleResult(confYear));
 	}
