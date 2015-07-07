@@ -1,10 +1,12 @@
 package dao;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import models.ContractMonthRecap;
+import models.Office;
 import models.query.QContract;
 import models.query.QContractMonthRecap;
 import models.query.QPerson;
@@ -50,7 +52,7 @@ public class ContractMonthRecapDao extends DaoBase {
 	 * @return
 	 */
 	public List<ContractMonthRecap> getPersonMealticket(YearMonth yearMonth,
-			Optional<Integer> max, Optional<String> name) {
+			Optional<Integer> max, Optional<String> name, Set<Office> offices) {
 		
 		final QContractMonthRecap recap = QContractMonthRecap.contractMonthRecap;
 		final QContract contract = QContract.contract;
@@ -67,6 +69,7 @@ public class ContractMonthRecapDao extends DaoBase {
 				.leftJoin(contract.person, person)
 				.where(recap.year.eq(yearMonth.getYear())
 				.and(recap.month.eq(yearMonth.getMonthOfYear())
+				.and(person.office.in(offices))
 				.and(condition)) ).orderBy(recap.contract.person.surname.asc());
 						
 		return query.list(recap);
