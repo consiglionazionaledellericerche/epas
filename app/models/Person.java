@@ -9,6 +9,7 @@ import it.cnr.iit.epas.NullStringBinder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -29,6 +30,8 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 import play.data.binding.As;
 import play.data.validation.Email;
@@ -82,11 +85,14 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Unique
 	public Integer number;
 
-	/**
-	 * numero di matricola sul badge
-	 */
-	@Unique @As(binder=NullStringBinder.class)
-	public String badgeNumber;
+//	/**
+//	 * numero di matricola sul badge
+//	 */
+//	@Unique @As(binder=NullStringBinder.class)
+//	public Set<Badge> badges;
+	
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public Set<Badge> badges = Sets.newHashSet();
 
 	/**
 	 * id che questa persona aveva nel vecchio database

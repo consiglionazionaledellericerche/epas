@@ -4,42 +4,42 @@
 <input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
 
-    #{field 'date_of_patron'}
-    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data del Patrono</label>
-      <div class="input-group">
-        <input datepicker-month class="form-control" placeholder="dd/mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-      </div>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  #{field 'date_of_patron'}
+  <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Data del Patrono</label>
+    <div class="input-group">
+      <input datepicker-month class="form-control" placeholder="dd/mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+      <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
     </div>
-    #{/field} 
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field} 
 
 
 
-    #{field 'lunch_pause_start'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Inizio pausa pranzo</label>
-      <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
+  #{field 'lunch_pause_start'}
+  <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Inizio pausa pranzo</label>
+    <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field}
 
-    #{field 'lunch_pause_end'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Fine pausa pranzo</label>
-      <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
+  #{field 'lunch_pause_end'}
+  <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Fine pausa pranzo</label>
+    <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field}
 
-    #{field 'email_to_contact'}
-    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Indirizzo email dell'amministrazione</label>
-      <input class="form-control" placeholder="segreteria@cnr.it" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
+  #{field 'email_to_contact'}
+  <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Indirizzo email dell'amministrazione</label>
+    <input class="form-control" placeholder="segreteria@cnr.it" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field}
 
 
   <legend id="bottom_line" class="col-sm-12"></legend>

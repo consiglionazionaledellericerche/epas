@@ -2,23 +2,27 @@ package controllers;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
 import models.Office;
+import models.Person;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 import cnr.sync.consumers.OfficeConsumer;
+import cnr.sync.consumers.PeopleConsumer;
 import cnr.sync.dto.SeatDTO;
 import cnr.sync.manager.RestOfficeManager;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 
@@ -30,6 +34,8 @@ public class Import extends Controller{
 	private static OfficeDao officeDao;
 	@Inject
 	private static OfficeConsumer officeConsumer;
+	@Inject
+	private static PeopleConsumer peopleConsumer;
 	@Inject
 	private static RestOfficeManager restOfficeManager;
 	
@@ -79,8 +85,13 @@ public class Import extends Controller{
 					}
 				});
 		
-		restOfficeManager.saveImportedSeats(filteredOffices);
-		
+		int synced = restOfficeManager.saveImportedSeats(filteredOffices);
+		if(synced == 0){
+			flash.error("Non è stato possibile importare/sincronizzare alcuna sede, controllare i log");
+		}
+		else{
+			flash.success("Importate/sincronizzate correttamente %s Sedi",synced);
+		}
 		Offices.showOffices();
 	}
 	
@@ -91,6 +102,20 @@ public class Import extends Controller{
 		}
 		Office seat = officeDao.getOfficeById(id);
 		
+		Set<Person> importedPeople = Sets.newHashSet();
+				
+		try {
+			importedPeople = peopleConsumer.seatPeople(seat.code).get();
+		} catch (IllegalStateException | InterruptedException
+				| ExecutionException e) {
+			flash.error("Impossibile recuperare la lista degli istituti da Perseo");
+			e.printStackTrace();
+		}
+//		
+//		for(Person p : importedPeople ){
+//			Logger.info("Persone Importata: %s-%s-%s-%s-%s-%s",p.fullName(),p.birthday,p.email,p.cnr_email,p.number,p.badgeNumber);
+//		}
+
 	}
 	
 

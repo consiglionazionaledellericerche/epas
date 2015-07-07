@@ -40,9 +40,7 @@ public class ConfGeneralManager {
 				if( !confGeneral.isPresent() || overwrite ) {
 					saveConfGeneral(param, office, Optional.<String>absent());
 				}
-
 			}
-
 		}
 	}
 
@@ -59,11 +57,7 @@ public class ConfGeneralManager {
 	 */
 	public Optional<ConfGeneral> saveConfGeneral(Parameter param, Office office, Optional<String> value) {
 
-		String newValue = param.getDefaultValue();
-
-		if(value.isPresent()) {
-			newValue = value.get();
-		}
+		String newValue = value.isPresent() ? value.get() : param.getDefaultValue();
 
 		//Prelevo quella esistente
 		Optional<ConfGeneral> confGeneral = confGeneralDao.getByFieldName(param.description, office);
@@ -79,7 +73,6 @@ public class ConfGeneralManager {
 		newConfGeneral.save();
 
 		return Optional.fromNullable(newConfGeneral);
-
 	}
 
 	/**

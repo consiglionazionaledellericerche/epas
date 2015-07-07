@@ -528,10 +528,10 @@ public class Wizard extends Controller {
 				Optional.fromNullable(Integer.parseInt(properties.getProperty("manager_qualification"))), Optional.<Long>absent(), false).get(0);
 		p.qualification = qualification;
 
-		if(!properties.getProperty("manager_badge_number").isEmpty()){
-			p.badgeNumber = properties.getProperty("manager_badge_number");
-
-		}
+//		if(!properties.getProperty("manager_badge_number").isEmpty()){
+//			p.badgeNumber = properties.getProperty("manager_badge_number");
+//
+//		}
 		if(!properties.getProperty("manager_registration_number").isEmpty()){
 			p.number = Integer.parseInt(properties.getProperty("manager_registration_number"));
 		}
