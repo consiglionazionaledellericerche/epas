@@ -1,5 +1,7 @@
 package models;
 
+import it.cnr.iit.epas.NullStringBinder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -36,14 +39,16 @@ public class Office extends BaseModel{
 	@Column(name = "name")
     public String name;
     
-	@Unique
+	@Unique @As(binder=NullStringBinder.class)
     @Column(name = "contraction")
     public String contraction;
     
     @Column(name = "address")
-    public String address = "";
+    @As(binder=NullStringBinder.class)
+    public String address;
     
-	//sedeId, serve per l'invio degli attestati, per esempio per la sede di Pisa è "223400"
+    @Unique //sedeId, serve per l'invio degli attestati, per esempio per la sede di Pisa è "223400"
+    @As(binder=NullStringBinder.class)
     @Column(name = "codeId")
     public String codeId;
     
@@ -60,11 +65,11 @@ public class Office extends BaseModel{
 	/**
 	 * Centro Di Spesa , per l'istituto di informatica è 044
 	 */
-    @Unique
+    @Unique @As(binder=NullStringBinder.class)
     public String cds;
     
 	//Codice della sede, per esempio per la sede di Pisa è "044000"
-	@Unique
+	@Unique @As(binder=NullStringBinder.class)
 	public String code;
     
     //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
@@ -90,7 +95,6 @@ public class Office extends BaseModel{
     @NotAudited
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
 	public List<TotalOvertime> totalOvertimes = new ArrayList<TotalOvertime>();
-    
     
     @Transient
     private Boolean isEditable = null;

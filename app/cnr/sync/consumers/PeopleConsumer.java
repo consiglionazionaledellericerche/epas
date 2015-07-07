@@ -1,20 +1,31 @@
 package cnr.sync.consumers;
 
 import java.util.List;
+import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import models.Person;
 import play.Play;
 import play.libs.WS;
+import cnr.sync.Deserializers.PersonDeserializer;
 import cnr.sync.dto.PersonDTO;
 import cnr.sync.dto.SimplePersonDTO;
+import cnr.sync.manager.RestOfficeManager;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 public class PeopleConsumer {
+	
+	private final static Logger log = LoggerFactory.getLogger(PeopleConsumer.class);
 
 	private final String URL_BASE = Play.configuration.getProperty("perseo.base");
 	private final String PEOPLE_ENDPOINT = Play.configuration.getProperty("perseo.rest.people");
@@ -51,20 +62,24 @@ public class PeopleConsumer {
 		});
 	}
 	
-	public ListenableFuture<PersonDTO> departmentPeople(String codeId) throws IllegalStateException{
+	public ListenableFuture<Set<Person>> seatPeople(String code) throws IllegalStateException{
 		
 		final String url = URL_BASE+PEOPLE_ENDPOINT+
-				"peopleByDepartments?departmentCode="+codeId;
+				Play.configuration.getProperty("perseo.rest.seatPeople")+code;
 				
 		ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
 				.listenInPoolThread(WS.url(url).getAsync());
-		return Futures.transform(future, new Function<WS.HttpResponse, PersonDTO>() {
+		return Futures.transform(future, new Function<WS.HttpResponse,Set<Person>>() {
 			@Override
-			public PersonDTO apply(WS.HttpResponse response) {
+			public Set<Person> apply(WS.HttpResponse response) {
 				if (!response.success()) {
 					throw new IllegalStateException("not found");
 				}
-				return new Gson().fromJson(response.getJson(), PersonDTO.class);
+//				TODO spostare in una classe di configurazione globale
+				GsonBuilder gson = new GsonBuilder();
+				gson.registerTypeAdapter(Person.class, new PersonDeserializer());
+				
+				return gson.create().fromJson(response.getJson(),new TypeToken<Set<Person>>() {}.getType());
 			}
 		});
 	}

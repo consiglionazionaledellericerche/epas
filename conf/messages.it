@@ -71,3 +71,11 @@ PDFReport.thIncompleteTime=Orario incompleto
 qualification=Livello
 
 office=Sede
+
+seat.codeId= Codice
+
+institute.cds= CDS
+institute.contraction= Sigla
+
+validation.required= &{%s} - campo obbligatorio
+validation.unique= &{%s} gia' utilizzato

@@ -1,5 +1,7 @@
 package controllers;
 
+import helpers.ValidationHelper;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -7,7 +9,6 @@ import javax.inject.Inject;
 import manager.OfficeManager;
 import models.Office;
 import models.Role;
-import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -67,7 +68,7 @@ public class Offices extends Controller {
 	public static void saveInstitute(Office area,@Valid Office institute) {
 
 		if(Validation.hasErrors()){
-			flash.error("Valorizzare correttamente i campi, operazione annullata.");
+			flash.error(ValidationHelper.errorsMessages(validation.errors()));
 			Offices.showOffices();
 		}
 
@@ -79,11 +80,12 @@ public class Offices extends Controller {
 		}
 
 		institute.office = area;
-
-		if(!officeManager.saveOffice(institute)){
-			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
-			Offices.showOffices();
-		}
+		
+		officeManager.saveOffice(institute);
+//		if(!){
+//			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
+//			Offices.showOffices();
+//		}
 
 		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name, institute.contraction);
 		Offices.showOffices();
@@ -102,7 +104,7 @@ public class Offices extends Controller {
 	public static void saveSeat(Office institute,@Valid Office seat) {
 
 		if(Validation.hasErrors()){
-			flash.error("Valorizzare correttamente tutti i campi! operazione annullata.");
+			flash.error(ValidationHelper.errorsMessages(validation.errors()));
 			Offices.showOffices();
 		}
 
@@ -112,11 +114,7 @@ public class Offices extends Controller {
 		}
 
 		seat.office = institute;
-		
-		if(!officeManager.saveOffice(seat)){
-			flash.error("Parametri già utilizzati in un'altra sede,verificare.");
-			Offices.showOffices();
-		}
+		officeManager.saveOffice(seat);
 
 		flash.success("Sede correttamente inserita: %s",seat.name);
 		Offices.showOffices();

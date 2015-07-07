@@ -12,6 +12,7 @@ import models.Office;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.data.validation.Validation;
 import cnr.sync.dto.InstituteDTO;
 import cnr.sync.dto.SeatDTO;
 
@@ -31,7 +32,7 @@ public class RestOfficeManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RestOfficeManager.class);
 
-	public void saveImportedSeats(Collection<SeatDTO> seatsDTO){
+	public int saveImportedSeats(Collection<SeatDTO> seatsDTO){
 
 		Preconditions.checkNotNull(seatsDTO);
 
@@ -56,7 +57,8 @@ public class RestOfficeManager {
 
 		for(Office institute : institutes){
 			institute.office = mainArea;
-			if(officeManager.saveOffice(institute)){
+			institute. validateAndCreate();
+			if(!Validation.hasErrors()){
 				log.info("Importato nuovo Istituto {}", institute.name);
 			}
 			else{
@@ -73,14 +75,18 @@ public class RestOfficeManager {
 				}
 			}
 		}
-
+		
+		int syncedSeats = 0;
+		
 		for(SeatDTO seatDTO : seatsDTO){
 			Office seat = new Office();
 			seat.name = seatDTO.name;
 			seat.codeId = seatDTO.codeId;
 			seat.code = seatDTO.code;
 			seat.office = officeDao.byCds(seatDTO.institute.cds).orNull();
-			if(officeManager.saveOffice(seat)){
+			seat.validateAndCreate();
+			if(!Validation.hasErrors()){
+				syncedSeats++;
 				log.info("Importata Sede {}", seat.name);
 			}
 			else{
@@ -88,6 +94,7 @@ public class RestOfficeManager {
 				if(existentSeat.isPresent()){
 					existentSeat.get().copy(seat);
 					officeManager.saveOffice(existentSeat.get());
+					syncedSeats++;
 					log.info("Sincronizzata sede esistente durante l'import - {}", seat.name);
 				}
 				else{
@@ -97,6 +104,7 @@ public class RestOfficeManager {
 				}
 			}
 		}
+		return syncedSeats;
 	}
 
 }
