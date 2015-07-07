@@ -69,11 +69,9 @@ public class MealTickets  extends Controller {
 	public static void recapMealTickets(int year, int month, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
-		// TODO: inserire il filtro degli office
-		
 		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
 				.getPersonMealticket(new YearMonth(year,month), Optional.<Integer>absent(),
-						Optional.<String>absent());
+						Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()));
 		
 		// Lista degli istituti allowed che non hanno data inizio mealTicket
 		List<Office> officesNoMealTicketConf = Lists.newArrayList();
