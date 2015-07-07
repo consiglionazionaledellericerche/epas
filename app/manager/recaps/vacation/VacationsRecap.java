@@ -156,9 +156,10 @@ public class VacationsRecap {
 		// (sono funzione di quanto calcolato precedentemente)
 		
 		//Anno passato
-		if(this.accruedDate.isBefore(dateExpireLastYear) || !considerExpireLastYear){
+		if(!this.accruedDate.isAfter(dateExpireLastYear) || !considerExpireLastYear){
 			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued
 					- this.vacationDaysLastYearUsed;
+//			FIXME Questo non dovrebbe essere fatto prima del calcolo dei rimanenti????
 			if(this.vacationDaysLastYearAccrued == 25)
 				this.vacationDaysLastYearNotYetUsed++; 
 		}
