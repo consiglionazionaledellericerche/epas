@@ -159,11 +159,7 @@ public class VacationsRecap {
 		if(!this.accruedDate.isAfter(dateExpireLastYear) || !considerExpireLastYear){
 			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued
 					- this.vacationDaysLastYearUsed;
-//			FIXME Questo non dovrebbe essere fatto prima del calcolo dei rimanenti????
-			if(this.vacationDaysLastYearAccrued == 25)
-				this.vacationDaysLastYearNotYetUsed++; 
-		}
-		else {
+		} else {
 			this.vacationDaysLastYearNotYetUsed = 0;
 		}
 		
@@ -294,9 +290,12 @@ public class VacationsRecap {
 	 */
 	private int getVacationAccruedYear(int year, Optional<LocalDate> accruedDate) {
 
+		LocalDate beginYear = new LocalDate(year,1,1);
+		LocalDate endYear = new LocalDate(year,12,31);
+		
 		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		DateInterval yearInterval = new DateInterval(new LocalDate(year,1,1), 
-				new LocalDate(year,12,31));
+		DateInterval yearInterval = new DateInterval(beginYear, endYear);
+		
 		if(accruedDate.isPresent()) {
 			yearInterval = new DateInterval(new LocalDate(year,1,1), 
 					accruedDate.get());
@@ -308,9 +307,14 @@ public class VacationsRecap {
 			return 0;
 		}
 
-		int vacationDays = 0;
 		//per ogni piano ferie conto i giorni trascorsi in yearInterval 
-		// e applico la funzione di conversione
+		//e applico la funzione di conversione		
+		int vacationDays = 0;
+
+		//Variabili di supporto
+		int totalYearPostPartum = 0;
+		int minVacationPeriod = 28;
+		
 		for(VacationPeriod vp : this.wcontract.getValue().vacationPeriods) {
 			
 			int days = 0;
@@ -321,8 +325,17 @@ public class VacationsRecap {
 			
 			if(intersection != null) {
 				
+				// il piano ferie col minor numero di ferie è un potenziale limite
+				// inferiore (issue tarveniti)
+				if (vp.vacationCode.vacationDays < minVacationPeriod) {
+					minVacationPeriod = vp.vacationCode.vacationDays;
+				}
+				
+				int postPartumInIntersection = filterAbsences(postPartum, intersection);
 				days = DateUtility.daysInInterval(intersection) 
-						- filterAbsences(postPartum, intersection);
+						- postPartumInIntersection;
+				
+				totalYearPostPartum += postPartumInIntersection;
 				
 				//calcolo i giorni maturati col metodo di conversione
 
@@ -346,11 +359,23 @@ public class VacationsRecap {
 			}
 		}
 
-		//FIXME decidere se deve essere un parametro di configurazione
+		// FIXME: decidere se deve essere un parametro di configurazione
 		if (vacationDays > 28) {
 			vacationDays = 28;
 		}
-
+		
+		// (issue tarveniti)
+		// passare da 26 a 28 ed avere 25... aggiusto il calcolo se 
+		// il contratto copre tutto l'anno richiesto e se non ho avuto assenze
+		// postPartum che abbassano i giorno per ferie maturate.
+		if(totalYearPostPartum == 0 && yearInterval.getBegin().equals(beginYear) 
+				&& yearInterval.getEnd().equals(endYear)) {
+			if(DateUtility.isIntervalIntoAnother(yearInterval,	this.wcontract
+					.getContractDateInterval())	&& minVacationPeriod > vacationDays) {
+				vacationDays = minVacationPeriod;
+			}
+		}
+		
 		return vacationDays;
 
 	}
