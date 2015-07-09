@@ -613,7 +613,8 @@ when
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
-
+		"Configurations.savePastYearVacationLimit",
+		
         "Import.officeList"
 
         ), target == null, granted == false)
@@ -631,7 +632,8 @@ when
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear"
+        "Configurations.saveNewConfYear",
+        "Configurations.savePastYearVacationLimit"
         
        ), target == $o, granted == false)
 then
