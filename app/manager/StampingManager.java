@@ -171,11 +171,11 @@ public class StampingManager {
 			return false;
 		}
 
-		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
-			log.warn("La timbratura che si cerca di inserire è troppo "
-					+ "precedente rispetto alla data odierna. Controllare il server!");
-			return false;
-		}
+//		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
+//			log.warn("La timbratura che si cerca di inserire è troppo "
+//					+ "precedente rispetto alla data odierna. Controllare il server!");
+//			return false;
+//		}
 
 		if(stamping.personId == null){
 			log.warn("L'id della persona passata tramite json non ha trovato "
@@ -233,7 +233,7 @@ public class StampingManager {
 		personDay.save();
 		
 		// Ricalcolo
-		consistencyManager.updatePersonSituation(person, personDay.date);
+		//consistencyManager.updatePersonSituation(person, personDay.date);
 
 		return true;
 	}

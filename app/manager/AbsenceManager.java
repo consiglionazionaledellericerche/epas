@@ -363,7 +363,7 @@ public class AbsenceManager {
 
 		if(!onlySimulation) {
 			//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-			consistencyManager.updatePersonSituation(person, dateFrom);
+			//consistencyManager.updatePersonSituation(person, dateFrom);
 
 			if(air.getAbsenceInReperibilityOrShift() > 0){
 				sendEmail(person, air);
@@ -389,7 +389,7 @@ public class AbsenceManager {
 		Preconditions.checkState(person.isPersistent());
 		Preconditions.checkNotNull(date);
 		Preconditions.checkNotNull(absenceType);
-		Preconditions.checkState(absenceType.isPersistent());
+		//Preconditions.checkState(absenceType.isPersistent());
 		Preconditions.checkNotNull(file);
 
 		AbsencesResponse ar = new AbsencesResponse(date,absenceType.code);
