@@ -3,6 +3,7 @@
  */
 package it.cnr.iit.epas;
 
+import helpers.deserializers.AbsenceFromClientDeserializer;
 import injection.StaticInject;
 
 import java.lang.annotation.Annotation;
@@ -25,6 +26,7 @@ import play.data.binding.TypeBinder;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -51,6 +53,8 @@ public class JsonAbsenceBinder implements TypeBinder<AbsenceFromClient> {
 	public Object bind(String name, Annotation[] annotations, String value,	
 			Class actualClass, Type genericType) throws Exception {
 		
-		return new Gson().fromJson(value, AbsenceFromClient.class);
+		return new GsonBuilder().registerTypeAdapter(AbsenceFromClient.class, 
+				new AbsenceFromClientDeserializer()).create()
+				.fromJson(value, AbsenceFromClient.class);
 	}
 }
