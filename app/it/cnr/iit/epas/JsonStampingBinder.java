@@ -4,6 +4,7 @@
 package it.cnr.iit.epas;
 
 import injection.StaticInject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -36,6 +37,7 @@ import dao.StampingDao;
  * @author cristian
  *
  */
+@Slf4j
 @Global
 @StaticInject
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
@@ -201,7 +203,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			}
 	
 			if(stamping.personId == null){
-				Logger.warn("Non è stato possibile recuperare l'id della persona a cui si riferisce la timbratura. Controllare il database");
+				log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
+						+ " matricolaFirma={}. Controllare il database.", matricolaFirma);
 				return null;
 			}
 						
