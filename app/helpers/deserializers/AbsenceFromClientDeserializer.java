@@ -7,10 +7,12 @@ import javax.inject.Inject;
 import models.Person;
 import models.exports.AbsenceFromClient;
 
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -34,7 +36,9 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
 		
 		JsonObject jAbsence =  json.getAsJsonObject();
 		
-		AbsenceFromClient afc = new Gson().fromJson(json, AbsenceFromClient.class);
+		AbsenceFromClient afc = new GsonBuilder()
+			.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer())
+			.create().fromJson(json, AbsenceFromClient.class);
 
 		/**
 		 * Cercare la persona in funzione del tipo di matricolaFirma.

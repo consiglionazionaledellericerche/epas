@@ -67,9 +67,9 @@ public class StampingsFromClient extends Controller{
 			badRequest();
 		}
 		
-		AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
-		absenceManager.insertAbsence(body.person, body.date, Optional.fromNullable(body.date), 
-				abt, Optional.<Blob>absent(), Optional.<String>absent(), false);
+//		AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
+//		absenceManager.insertAbsence(body.person, body.date, Optional.fromNullable(body.date), 
+//				abt, Optional.<Blob>absent(), Optional.<String>absent(), false);
 		
 		
 		renderText("ok");
