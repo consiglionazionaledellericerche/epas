@@ -61,15 +61,14 @@ public class StampingsFromClient extends Controller{
 	}
 	
 	@BasicAuth
-	public static void absence(@As(binder=JsonAbsenceBinder.class) AbsenceFromClient body) {
+	public static void absence(AbsenceFromClient body) {
 		
 		if (body == null) {
-			badRequest();	
+			badRequest();
 		}
 		
-		Person person = personDao.getPersonById(body.personId);
 		AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
-		absenceManager.insertAbsence(person, body.date, Optional.fromNullable(body.date), 
+		absenceManager.insertAbsence(body.person, body.date, Optional.fromNullable(body.date), 
 				abt, Optional.<Blob>absent(), Optional.<String>absent(), false);
 		
 		
