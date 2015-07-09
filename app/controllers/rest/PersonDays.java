@@ -32,7 +32,7 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 
-//@With(Resecure.class)
+@With(Resecure.class)
 public class PersonDays extends Controller{
 
 	@Inject
@@ -73,7 +73,7 @@ public class PersonDays extends Controller{
 		renderJSON(pdDTO);
 	}
 	
-	
+	@BasicAuth
 	public static void getMonthSituation(String email, int month, int year){
 		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
