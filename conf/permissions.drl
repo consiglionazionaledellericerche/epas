@@ -87,7 +87,11 @@ when
      	"Persons.resetPassword",
      	
      	/* Stampa cartellino */
-     	"PrintTags.showPersonTag"
+     	"PrintTags.showPersonTag",
+     	
+     	/* Azioni eseguibili via rest*/
+     	"rest.PersonDays.getDaySituation",
+     	"rest.PersonDays.getMonthSituation"
      	
        ), target == null, granted == false)
 then
