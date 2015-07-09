@@ -1,6 +1,8 @@
 package controllers;
 
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -21,6 +23,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import dao.ConfGeneralDao;
@@ -170,6 +173,26 @@ public class Configurations extends Controller{
 			response.status = 500;
 			renderText(message.message);
 		}
+	}
+	
+//	FIXME al momento uso il campo name passato dall'x-editable per specificare l'anno da cambiare
+//  Ma quando il giorno e mese saranno in un unico parametro, conviene passare direttamente l'id del confyear
+	public static void savePastYearVacationLimit(Long pk, String value, String name){
+
+		Office office = officeDao.getOfficeById(pk);
+		
+		rules.checkIfPermitted(office);
+		
+		Integer year =  Integer.parseInt(name); 
+		
+		LocalDate dayMonth = DateUtility.dayMonth(value,Optional.<String>absent());
+		
+		confYearManager.saveConfYear(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, 
+				office, year, Optional.of(dayMonth.dayOfMonth().getAsString()));
+
+		confYearManager.saveConfYear(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, 
+				office, year, Optional.of(dayMonth.monthOfYear().getAsString()));
+
 	}
 
 }

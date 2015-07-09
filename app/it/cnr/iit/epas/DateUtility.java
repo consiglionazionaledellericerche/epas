@@ -368,7 +368,7 @@ public class DateUtility {
 		DateTimeFormatter dtf = DateTimeFormat.forPattern(pattern.isPresent() ? pattern.get() : "dd/MM");
 
 		return LocalDate.parse(date,dtf);
-	};
+	}
 	
 	public static LocalDate getMonthFirstDay(YearMonth yearMonth){
 		return yearMonth.toInterval().getStart().toLocalDate();
