@@ -43,13 +43,15 @@ public class PersonDayManager {
 			AbsenceDao absenceDao,
 			ConfGeneralManager confGeneralManager,
 			PersonDayInTroubleManager personDayInTroubleManager,
-			ContractMonthRecapManager contractMonthRecapManager) {
+			ContractMonthRecapManager contractMonthRecapManager,
+			VacationManager vacationManager) {
 
 		this.personDayDao = personDayDao;
 		this.stampTypeManager = stampTypeManager;
 		this.confGeneralManager = confGeneralManager;
 		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
+		this.vacationManager = vacationManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
@@ -58,7 +60,8 @@ public class PersonDayManager {
 	private final StampTypeManager stampTypeManager;
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
-	private ContractMonthRecapManager contractMonthRecapManager;
+	private final ContractMonthRecapManager contractMonthRecapManager;
+	private final VacationManager vacationManager;
 	
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
@@ -143,13 +146,22 @@ public class PersonDayManager {
 			}
 			return pd.getWorkingTimeTypeDay().get().workingTime;
 		}
-
-		//assenze all day piu' altri casi di assenze
-		if (isAllDayAbsences(pd.getValue())) {
-			setIsTickeAvailable(pd, false);
-			return 0;
-		}
+		
 		for(Absence abs : pd.getValue().absences) {
+
+			if(abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+				// TODO: capire bene la logica del telelavoro.
+				return pd.getWorkingTimeTypeDay().get().workingTime;
+			}
+			
+			// Caso di assenza giornaliera. 
+			if(abs.justifiedMinutes == null &&
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+				
+				// TODO: attenzione a quei codici romani AllDay tipo PEPE.
+				setIsTickeAvailable(pd, false);
+				return 0;
+			}
 			
 			// Giustificativi grana minuti (priorità sugli altri casi)
 			if( abs.justifiedMinutes != null) {
@@ -165,7 +177,7 @@ public class PersonDayManager {
 			}
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
 
-				justifiedTimeAtWork +=pd.getWorkingTimeTypeDay().get().workingTime / 2;
+				justifiedTimeAtWork += pd.getWorkingTimeTypeDay().get().workingTime / 2;
 				continue;
 			}
 		}
@@ -507,7 +519,8 @@ public class PersonDayManager {
 	 * Questo metodo ritorna una lista di coppie di timbrature (uscita/entrata) che rappresentano le potenziali uscite per pranzo.
 	 * L'algoritmo filtra le coppie che appartengono alla fascia pranzo in configurazione.
 	 * Nel caso in cui una sola timbratura appartenga alla fascia pranzo, l'algoritmo provvede a ricomputare il timeInPair della coppia
-	 * assumendo la timbratura al di fuori della fascia uguale al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali
+	 * assumendo la timbratura al di fuori della fascia uguale al limite di tale fascia. 
+	 * (Le timbrature vengono tuttavia mantenute originali
 	 * per garantire l'usabilità anche ai controller che gestiscono reperibilità e turni)
 	 * @param validPairs le coppie di timbrature ritenute valide all'interno del giorno
 	 * @return
