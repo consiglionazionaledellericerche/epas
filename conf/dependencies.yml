@@ -39,6 +39,7 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
+    - asufana -> play-lombok 1.2.3
     - org.projectlombok -> lombok 1.16.4
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.1.0
     - com.fasterxml.jackson.core -> jackson-core 2.4.5
@@ -57,3 +58,8 @@ repositories:
          artifact:   "https://github.com/jackmoore/colorbox"
          contains:
                   -com.github -> *
+    - asufana_zip_repo:
+        type: http
+        artifact: https://github.com/asufana/[module]/raw/master/dist/[module]-[revision].zip
+        contains:
+            - asufana -> play-lombok
