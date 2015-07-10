@@ -1,9 +1,0 @@
-ShiftTimeTable(mattina):
-   # startShift: 1970-01-01 07:00:00
-    #endShift: '13:30'
-    description: 'turno della mattina'
-
-ShiftTimeTable(pomeriggio):
-#    startShift: '13:30'
-#    endShift: '19:00'
-    description: 'turno del pomeriggio'
