@@ -8,6 +8,7 @@ import java.util.List;
 
 import manager.cache.StampTypeManager;
 import models.Absence;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
@@ -40,12 +42,14 @@ public class PersonDayManager {
 			StampTypeManager stampTypeManager,
 			AbsenceDao absenceDao,
 			ConfGeneralManager confGeneralManager,
-			PersonDayInTroubleManager personDayInTroubleManager) {
+			PersonDayInTroubleManager personDayInTroubleManager,
+			ContractMonthRecapManager contractMonthRecapManager) {
 
 		this.personDayDao = personDayDao;
 		this.stampTypeManager = stampTypeManager;
 		this.confGeneralManager = confGeneralManager;
 		this.personDayInTroubleManager = personDayInTroubleManager;
+		this.contractMonthRecapManager = contractMonthRecapManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
@@ -54,6 +58,7 @@ public class PersonDayManager {
 	private final StampTypeManager stampTypeManager;
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
+	private ContractMonthRecapManager contractMonthRecapManager;
 	
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
@@ -212,8 +217,7 @@ public class PersonDayManager {
 		
 		int mealTicketTime = wttd.mealTicketTime;					//6 ore
 		int minBreakTicketTime = wttd.breakTicketTime;				//30 minuti
-		int missingTime = minBreakTicketTime;						//30 minuti
-		
+	
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(), validPairs);
 		int effectiveTimeSpent = 0;
 		
@@ -242,34 +246,159 @@ public class PersonDayManager {
 		///////////////////////////////////////////////////////////////////////
 		
 		//2) Calcolo l'eventuale differenza tra la pausa fatta e la pausa minima
-		missingTime = minBreakTicketTime - effectiveTimeSpent;
+		int missingTime = minBreakTicketTime - effectiveTimeSpent;
 		if(missingTime < 0) {
 			missingTime = 0;
 		}
 		
 		//3) Decisioni
-		if(workTime - missingTime >= mealTicketTime) {
-			setIsTickeAvailable(pd,true);
-
-			if(missingTime > 0) {
-
-				workTime = workTime - missingTime;
-				pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-						StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-			}
-			
-			// caso in cui non sia stata effettuata una pausa pranzo
-			if(effectiveTimeSpent == 0) {
-				pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-						StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-			}
-//		} else if ( condizione romana metà mattina più timbratura pomeriggio){
-//			setIsTickeAvailable(pd, false);
-		} else {
+		
+		// Non ho eseguito il tempo minimo per buono pasto.
+		if (workTime - missingTime < mealTicketTime) {
 			setIsTickeAvailable(pd, false);
+			return workTime + justifiedTimeAtWork;
 		}
 
-		return workTime + justifiedTimeAtWork;
+		// Calcolo tempo decurtato per pausa troppo breve.
+		int workingTimeDecurted = workTime;
+		if(missingTime > 0) {
+			workingTimeDecurted = workTime - missingTime;
+		}
+		
+		// Controllo pausa pomeridiana (solo se la soglia è definita)
+		if( !isAfternoonThresholdConditionSatisfied(validPairs, 
+				pd.getWorkingTimeTypeDay().get()) ) {
+			
+			setIsTickeAvailable(pd, false);
+			return workTime + justifiedTimeAtWork;
+		}
+		
+		// Decidere quando verrà il momento di fare i conti con gianvito...
+//		if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork, 
+//				pd.getValue().date, pd.getPersonDayContract().get(), 
+//				pd.getWorkingTimeTypeDay().get()) ){
+//			
+//			setIsTickeAvailable(pd, false);
+//			return workTime + justifiedTimeAtWork;
+//		}
+	
+		
+		// IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
+		setIsTickeAvailable(pd,true);
+
+		// marcatori: 
+		//e
+		if(workingTimeDecurted < workTime) {
+			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+					StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+		}
+		//p
+		else if(effectiveTimeSpent == 0) {
+			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+					StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+		}
+			
+		return workingTimeDecurted + justifiedTimeAtWork;
+
+		
+	}
+	
+	/**
+	 * La condizione del lavoro minimo pomeridiano è soddisfatta?
+	 * @param validPairs
+	 * @param wttd
+	 * @return
+	 */
+	private boolean isAfternoonThresholdConditionSatisfied(List<PairStamping> validPairs, 
+			WorkingTimeTypeDay wttd) {
+		
+		if(wttd.ticketAfternoonThreshold == null) {
+			return true;
+		}
+		
+		int threshold = wttd.ticketAfternoonThreshold;
+		int workingTimeInThreshold = 0;
+		
+		for(PairStamping pair : validPairs) {
+			
+			int inMinute = DateUtility.toMinute(pair.in.date);
+			int outMinute = DateUtility.toMinute(pair.out.date);
+			
+			if( inMinute <= threshold && outMinute >= threshold) {
+				workingTimeInThreshold += outMinute - threshold;
+			}
+			
+			if( inMinute >= threshold) {
+				workingTimeInThreshold += outMinute - inMinute;
+			}
+		}
+		if(workingTimeInThreshold >= wttd.ticketAfternoonWorkingTime) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * La condizione Gianvito è una condizione che deteriorerà l'efficienza!
+	 * Per attribuire il buono pasto oltre a soddisfare le soglie di tempo di lavoro
+	 * minimo per buono pasto e il tempo di lavoro minimo pomeridiano, devo anche
+	 * avere giustificativi e/o flessibilità sufficiente a raggiungere il tempo 
+	 * di orario giornaliero.
+	 * 
+	 * Per fare questo conteggio devo calcolarmi la situazione residua al giorno 
+	 * precedente che non è persistita. Per tornare ad essere efficienti si deve 
+	 * injettare nella populate person day la situazione calcolata al giorno precedente.
+	 *
+	 * Secondo me nascono delle problematiche significative nel caso in cui volessi 
+	 * inserire dei riposi compensativi nel passato. Questo comporterebbe il ricalcolo
+	 * dei giorni e potrebbe risultare cambiata in negativo una decisione passata 
+	 * di attribuzione del buono pasto. Per ovviare a questa evenienza si dovrebbe
+	 * effettuare un check di ogni giorno successivo al riposo compensativo da inserire
+	 * e verificare che con tale assenza inserita non si va mai in negativo.
+	 * Ma questo fatto potrebbe essere intercettato dal dipendente che si vede attribuire
+	 * il riposo compensativo e cancellare il buono pasto e quindi potrebbe contattare
+	 * la segreteria.
+	 * 
+	 * Una soluzione a ogni problema potrebbe essere quella di persistere nel db
+	 * in ogni personDay la situazione di flessibilità raggiunta
+	 * - residui anno passato, anno corrente e buoni pasto.
+	 * In questo modo l'utente anche visivamente avrebbe la percezione di quello 
+	 * che sta succedendo nel giorno.
+	 * 
+	 * @param workingTimeDecurted
+	 * @param justifiedTimeAtWork
+	 * @param wttd
+	 * @return
+	 */
+	private boolean isGianvitoConditionSatisfied(int workingTimeDecurted, 
+			int justifiedTimeAtWork, LocalDate date, Contract contract, WorkingTimeTypeDay wttd) {
+		
+		// - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro giornaliero.
+		// 		ok buono pasto
+		if( workingTimeDecurted >= wttd.workingTime) {
+			return true;
+		}
+		
+		// - Ho il tempo di lavoro (eventualmente decurtato) che non raggiunge il tempo di lavoro giornaliero.
+		//	 - Aggiungo PEPE 
+		//     - livello raggiunto ok buono pasto
+		//TODO: capire se in justifiedTimeAtWork posso considerare tutte le assenze
+		// orarie o solo PEPE e gravi motivi personali.
+		if( workingTimeDecurted + justifiedTimeAtWork >= wttd.workingTime) {
+			return true;
+		}
+		
+		log.info(contract.person.toString() + date);
+		//Ultimo tentativo con flessibilità
+		int flexibility = contractMonthRecapManager
+				.getMinutesForCompensatoryRest(contract, date.minusDays(1), new ArrayList<Absence>());
+		if( workingTimeDecurted + justifiedTimeAtWork + flexibility >= wttd.workingTime )  {
+			return true;
+		}
+
+		return false;
 	}
 
 
