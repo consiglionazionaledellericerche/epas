@@ -464,6 +464,7 @@ public class VacationsRecap {
 				if(abYear == year) {
 					list94RequestYear.add(ab);
 				}
+				continue;
 			}
 			//37
 			if (ab.absenceType.id.equals(ab37.id)) {
