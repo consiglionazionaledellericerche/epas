@@ -876,7 +876,9 @@ when
  
  		/* duplicate */
  		"StampingsFromClient.create",
- 		"StampingsFromClient.absence"
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
  		
  		), target == null, granted == false)
  then
@@ -891,7 +893,9 @@ when
  $c: PermissionCheck(action in (
  
  		"StampingsFromClient.create",
- 		"StampingsFromClient.create"
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
  	
  		), target == $o, granted == false)
 then

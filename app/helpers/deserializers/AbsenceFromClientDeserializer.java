@@ -1,5 +1,7 @@
 package helpers.deserializers;
 
+import injection.StaticInject;
+
 import java.lang.reflect.Type;
 
 import javax.inject.Inject;
@@ -22,7 +24,7 @@ import com.google.gson.JsonParseException;
 
 import dao.PersonDao;
 
-
+@StaticInject
 public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFromClient>{
 	
 	@Inject
