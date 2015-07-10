@@ -3,6 +3,7 @@
  */
 package models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -60,15 +61,8 @@ public class WorkingTimeTypeDay extends BaseModel {
 	 */
 	public boolean holiday = false;
 	
-	/**
-	 * tempo di inizio finestra di entrata
-	 */
-	
+
 	public Integer timeSlotEntranceFrom;
-	
-	/**
-	 * tempo di fine finestra di entrata
-	 */
 	public Integer timeSlotEntranceTo;
 	public Integer timeSlotExitFrom;
 	public Integer timeSlotExitTo;
@@ -83,6 +77,19 @@ public class WorkingTimeTypeDay extends BaseModel {
 	 */
 	public Integer timeMealTo;	
 
+	/**
+	 * La soglia pomeridiana dopo la quale è necessario effettuare lavoro 
+	 * per avere diritto al buono pasto.
+	 */
+	@Column(name="ticket_afternoon_threshold")
+	public Integer ticketAfternoonThreshold;
+	
+	/**
+	 * La quantità di lavoro dopo la soglia pomeridiana necessaria per avere diritto
+	 * al buono pasto.
+	 */
+	@Column(name="ticket_afternoon_working_time")
+	public Integer ticketAfternoonWorkingTime;
 	
 	/**
 	 * Setter per tempo di lavoro.
@@ -90,54 +97,56 @@ public class WorkingTimeTypeDay extends BaseModel {
 	 * @param wttd
 	 * 
 	 */
-	public void setWorkingTime(Integer workingTime)
-	{
-		if(workingTime==null)
+	public void setWorkingTime(Integer workingTime) {
+		
+		if (workingTime == null) {
 			this.workingTime = 0;
-		else
+		} else {
 			this.workingTime = workingTime;
+		}
 	}
 	
 	/**
 	 * Setter per tempo di pausa pranzo.
 	 * @param breakTicketTime
 	 */
-	public void setBreakTicketTime(Integer breakTicketTime)
-	{
-		if(breakTicketTime==null)
-			this.breakTicketTime = 0;
-		else
-			this.breakTicketTime = breakTicketTime;
+	public void setBreakTicketTime(Integer breakTicketTime) {
 		
-		if(this.breakTicketTime < 30)
+		if (breakTicketTime == null) {
+			this.breakTicketTime = 0;
+		} else {
+			this.breakTicketTime = breakTicketTime;
+		}
+		
+		if (this.breakTicketTime < 30) {
 			this.breakTicketTime = 30;
+		}
 	}
 	
 	/**
 	 * Setter per tempo per avere il buono pasto.
 	 * @param mealTicketTime
 	 */
-	public void setMealTicketTime(Integer mealTicketTime)
-	{
-		if(mealTicketTime==null)
+	public void setMealTicketTime(Integer mealTicketTime) {
+		
+		if (mealTicketTime == null) {
 			this.mealTicketTime = 0;
-		else
+		} else {
 			this.mealTicketTime = mealTicketTime;
+		}
 	}
 	
 	/**
 	 * Setter per giorno festivo.
 	 * @param holiday
 	 */
-	public void setHoliday(String holiday)
-	{
-		if(holiday != null && holiday.equals("true"))
+	public void setHoliday(String holiday) {
+		if (holiday != null && holiday.equals("true")) {
 			this.holiday = true;
-		else
+		} else {
 			this.holiday = false;
+		}
 	}
-	
-	
 	
 	/**
 	 * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo mealTicketTime
