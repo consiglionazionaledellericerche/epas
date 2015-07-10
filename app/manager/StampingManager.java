@@ -170,20 +170,14 @@ public class StampingManager {
 		if(stamping == null) {
 			return false;
 		}
-
+		
 		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
 			log.warn("La timbratura che si cerca di inserire è troppo "
 					+ "precedente rispetto alla data odierna. Controllare il server!");
 			return false;
 		}
 
-		if(stamping.personId == null){
-			log.warn("L'id della persona passata tramite json non ha trovato "
-					+ "corrispondenza nell'anagrafica del personale. Controllare id = null");
-			return false;
-		}
-
-		Person person = personDao.getPersonById(stamping.personId);
+ 		Person person = personDao.getPersonById(stamping.personId);
 		if(person == null){
 			log.warn("L'id della persona passata tramite json non ha trovato "
 					+ "corrispondenza nell'anagrafica del personale. "
