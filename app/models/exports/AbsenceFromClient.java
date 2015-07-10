@@ -10,9 +10,9 @@ public class AbsenceFromClient {
 	public LocalDate date;
 	public String code;
 	
-	public int inizio;
-	public int fine;
-	public int durata;
+	public String inizio;
+	public String fine;
+	public String durata;
 	
 	public String tipog;
 }

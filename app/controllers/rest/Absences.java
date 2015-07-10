@@ -103,9 +103,9 @@ public class Absences extends Controller{
 		}
 		List<AbsenceAddedRest> list = Lists.newArrayList();
 		try{
-			AbsenceInsertReport air = absenceManager.insertAbsence(person, begin, Optional.fromNullable(end), 
+			AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(person, begin, Optional.fromNullable(end), 
 					absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(), 
-					Optional.<Blob>absent(), Optional.<String>absent(), true);
+					Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
 			for(AbsencesResponse ar : air.getAbsences()){
 				AbsenceAddedRest aar = new AbsenceAddedRest();
 				aar.absenceCode = ar.getAbsenceCode();
@@ -146,9 +146,9 @@ public class Absences extends Controller{
 		}
 		else{
 						
-			AbsenceInsertReport air = absenceManager.insertAbsence(person.get(), begin, 
+			AbsenceInsertReport air = absenceManager.insertAbsenceSimulation(person.get(), begin, 
 					Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
-					, Optional.<Blob>absent(), Optional.<String>absent(), true);
+					, Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
 						
 			renderJSON(mapper.writer(JacksonModule
 					.filterProviderFor(SimpleBeanPropertyFilter
