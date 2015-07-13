@@ -153,7 +153,7 @@ public class Persons extends Controller {
 		
 		//generate random token
 		SecureRandom random = new SecureRandom();
-		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32)) ;
+		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32));
 		
 		user.save();
 		
@@ -646,7 +646,7 @@ public class Persons extends Controller {
 		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
 
 		contractManager.recomputeContract(contract, contractDateInterval.getBegin(),
-				contractDateInterval.getEnd());
+				contractDateInterval.getEnd(),false);
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
@@ -735,7 +735,7 @@ public class Persons extends Controller {
 		ContractWorkingTimeType previous = contractsWtt.get(index-1);
 		contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
 
-		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null,false);
 
 		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 
@@ -757,7 +757,7 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
+		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null,false);
 
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 
@@ -937,7 +937,7 @@ public class Persons extends Controller {
 
 		contract.save();
 
-		contractManager.recomputeContract(contract.contract, contract.startFrom, null);
+		contractManager.recomputeContract(contract.contract, contract.startFrom, null,false);
 
 		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 
@@ -999,7 +999,7 @@ public class Persons extends Controller {
 		contractStampProfileManager.deleteContractStampProfile(contract, index, csp);
 
 		//Ricalcolo i valori
-		contractManager.recomputeContract(previous.contract, csp.startFrom, null);
+		contractManager.recomputeContract(previous.contract, csp.startFrom, null,false);
 
 		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 
