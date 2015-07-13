@@ -259,6 +259,7 @@ function generateUserName(name,surname,username){
  }
 
 
+moment.locale('it_IT');
 
 
 
