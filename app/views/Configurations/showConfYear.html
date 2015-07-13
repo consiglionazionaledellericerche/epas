@@ -82,12 +82,14 @@
 		     <a href="#"
 		           data-x-editable 
 		           data-type="combodate"
-		           data-name="${currentYear}"  
+		           data-name="${currentYear}"
+		           data-viewformat="DD MMMM"  
 		           data-format="DD/MM"
-		           data-template="DD MM"
+		           data-template="DD MMMM"
 		           data-pk="${office.id}"
 		           data-value="${dayExpiryVacationPastYear?.fieldValue} ${monthExpiryVacationPastYear?.fieldValue}"
-		           data-url="@{savePastYearVacationLimit()}"></a>
+		           data-url="@{savePastYearVacationLimit()}">
+		     </a>
 		    </td>
 		  </tr>					
 		  <tr>
