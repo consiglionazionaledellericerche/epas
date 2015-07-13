@@ -620,12 +620,10 @@ public class Persons extends Controller {
 		}
 
 		rules.checkIfPermitted(contract.person.office);
-
-		Optional<LocalDate> initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
-				Security.getUser().get().person.office);
 		
-		//Preconditions.checkState(initUse.isPresent());
-
+		Optional<LocalDate> initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+				contract.person.office);
+		
 		render(contract, initUse);
 	}
 
