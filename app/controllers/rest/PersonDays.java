@@ -24,7 +24,9 @@ import cnr.sync.dto.PersonDayDTO;
 import cnr.sync.dto.PersonMonthDTO;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 import controllers.Resecure;
+import controllers.Security;
 import controllers.Stampings;
 import controllers.Resecure.BasicAuth;
 import dao.ContractMonthRecapDao;
@@ -41,15 +43,30 @@ public class PersonDays extends Controller{
 	static PersonDayDao personDayDao;
 	@Inject
 	static IWrapperFactory wrapperFactory;
+	@Inject
+	private static SecurityRules rules;
 	
 
 	@BasicAuth
 	public static void getDaySituation(String email, LocalDate date){
 		Person person = personDao.byEmail(email).orNull();
+		
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
 		}
+		
+		if(Security.getUser().get().person.id != person.id){
+			JsonResponse.badRequest("Le informazioni richieste non sono relative"
+					+ " alla persona loggata");
+		}
+		/**
+		 * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante 
+		 * la drools (probabilmente scritta male, da capire meglio).
+		 * Adesso viene bypassato col controllo sopra...però è veramente orrendo
+		 */
+		rules.checkIfPermitted(person);
+		
 		PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
 		if(pd == null){
 			JsonResponse.notFound("Non sono presenti informazioni per "
@@ -80,6 +97,16 @@ public class PersonDays extends Controller{
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
 		}
+		if(Security.getUser().get().person.id != person.id){
+			JsonResponse.badRequest("Le informazioni richieste non sono relative"
+					+ " alla persona loggata");
+		}
+		/**
+		 * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante 
+		 * la drools (probabilmente scritta male, da capire meglio).
+		 * Adesso viene bypassato col controllo sopra...però è veramente orrendo
+		 */
+		rules.checkIfPermitted(person);
 		List<Contract> monthContracts = wrapperFactory
 				.create(person).getMonthContracts(year, month);
 		PersonMonthDTO pmDTO = new PersonMonthDTO();
@@ -104,5 +131,16 @@ public class PersonDays extends Controller{
 		renderJSON(pmDTO);
 		
 	}
+	
+	@BasicAuth
+	public static void getDailyEmployeeSituation(String email, LocalDate date){
+		Person person = personDao.byEmail(email).orNull();
+		if(person == null){
+			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
+					+ "mail cnr che serve per la ricerca.");
+		}
+		
+	}
+	
 
 }

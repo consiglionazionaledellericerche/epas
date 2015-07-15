@@ -87,16 +87,31 @@ when
      	"Persons.resetPassword",
      	
      	/* Stampa cartellino */
-     	"PrintTags.showPersonTag",
-     	
-     	/* Azioni eseguibili via rest*/
-     	"rest.PersonDays.getDaySituation",
-     	"rest.PersonDays.getMonthSituation"
+     	"PrintTags.showPersonTag"    	
      	
        ), target == null, granted == false)
 then
  $c.grant();
 end
+
+/*  
+ *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
+ *  Metodi rest per se stessi
+ */
+rule IsEmployeeRest
+when
+  $uro: UsersRolesOffices()
+  $o: User(this == currentOperator)
+  $p: Permission(description == "employee") from $uro.role.permissions
+  $c: PermissionCheck(action in (
+ 		/* Azioni eseguibili via rest*/
+     	"rest.PersonDays.getDaySituation",
+     	"rest.PersonDays.getMonthSituation"
+ 		), target == $o, granted == false)
+then
+ $c.grant();
+end
+
 
 /*
  * Azioni eseguibili da utente con permesso developer (tutto)
