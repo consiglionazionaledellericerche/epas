@@ -32,10 +32,12 @@ public class Absence extends BaseModel {
 	@JoinColumn(name = "absence_type_id")
 	public AbsenceType absenceType;
 	
-	
 	@ManyToOne(optional=false, fetch = FetchType.LAZY)
 	@JoinColumn(name="personDay_id", nullable=false)
 	public PersonDay personDay;
+	
+	@Column (name = "justified_minutes", nullable = true )
+	public Integer justifiedMinutes;
 	
 	@Column (name = "absence_file", nullable = true )
 	public Blob absenceFile;

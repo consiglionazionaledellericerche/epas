@@ -8,11 +8,17 @@ import java.util.List;
 import javax.inject.Inject;
 
 import jobs.RemoveInvalidStampingsJob;
+import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
+import models.AbsenceType;
+import models.ConfGeneral;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
+import models.StampType;
+import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -24,8 +30,10 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
@@ -40,8 +48,132 @@ public class Administration extends Controller {
 	private static ExportToYaml exportToYaml;
 	@Inject
 	private static CompetenceUtility competenceUtility;
+	@Inject
+	private static ConfGeneralManager confGeneralManager;
+	@Inject
+	private static IWrapperFactory wrapperFactory;
+
 	
+	public static void initializeRomanAbsences() {
+
+		//StampType pausa pranzo
+		StampType st = StampType.find("byCode", "pausaPranzo").first();
+		if(st == null) {
+			st = new StampType();
+			st.code = "pausaPranzo";
+			st.description = "Pausa pranzo";
+			st.identifier = "pr";
+			st.save();
+		}
+
+		AbsenceType absenceType = AbsenceType.find("byCode", "PEPE").first();
+		if(absenceType==null) {
+			// creare le assenze romane
+			absenceType = new AbsenceType();
+			absenceType.code = "PEPE";
+			absenceType.description = "Permesso Personale";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+
+		absenceType = AbsenceType.find("byCode", "RITING").first();
+		if(absenceType==null) {
+			absenceType = new AbsenceType();
+			absenceType.code = "RITING";
+			absenceType.description = "AUTORIZ.DIRIG.RITARDO.INGR.TUR";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+
+		absenceType = AbsenceType.find("byCode", "661h").first();
+		if(absenceType==null) {	
+			absenceType = new AbsenceType();
+			absenceType.code = "661h";
+			absenceType.description = "PERM.ORARIO GRAVI MOTIVI";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+		absenceType = AbsenceType.find("byCode", "09B").first();
+		if(absenceType==null) {
+			absenceType = new AbsenceType();
+			absenceType.code = "09B";
+			absenceType.description = "ORE DI  MALAT. O VIS.ME";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+		absenceType = AbsenceType.find("byCode", "103").first();
+		if(absenceType==null) {
+			absenceType = new AbsenceType();
+			absenceType.code = "103";
+			absenceType.description = "Telelavoro";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+		absenceType = AbsenceType.find("byCode", "91.").first();
+		if(absenceType==null) {	
+			absenceType = new AbsenceType();
+			absenceType.code = "91.";
+			absenceType.description = "RIPOSO COMPENSATIVO 1/3 L";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+		absenceType = AbsenceType.find("byCode", "91CE").first();
+		if(absenceType==null) {	
+			absenceType = new AbsenceType();
+			absenceType.code = "91CE";
+			absenceType.description = "RIP. COMP.CHIUSURA ENTE";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+		absenceType = AbsenceType.find("byCode", "182").first();
+		if(absenceType==null) {
+			absenceType = new AbsenceType();
+			absenceType.code = "182";
+			absenceType.description = "PERM ASSIST.PARENTI 2";
+			absenceType.internalUse = true;
+			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+			absenceType.save();
+		}
+
+	}
 	
+	public static void initializePersons() {
+		
+		//Tutte le persone con contratto iniziato dopo alla data di inizializzazione
+		// devono avere la inizializzazione al giorno prima.
+		List<Person> persons = Person.findAll();
+		for(Person person : persons) {
+			
+			//Configurazione office
+			String dateInitUse = confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, person.office);
+			LocalDate initUse = new LocalDate(dateInitUse);
+			
+			//Contratto attuale
+			Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+			
+			if(contract.isPresent()) {
+				if(contract.get().sourceDate == null && contract.get().beginContract.isBefore(initUse)) {
+					Contract c = contract.get();
+					c.sourceDate = initUse.minusDays(1);
+					c.sourcePermissionUsed = 0;
+					c.sourceRecoveryDayUsed = 0;
+					c.sourceRemainingMealTicket = 0;
+					c.sourceRemainingMinutesCurrentYear = 6000;
+					c.sourceRemainingMinutesLastYear = 0;
+					c.sourceVacationCurrentYearUsed = 0;
+					c.sourceVacationLastYearUsed = 0;
+					c.save();
+				}
+			}
+		}
+	}
 	//private final static Logger log = LoggerFactory.getLogger(Administration.class);
 
 	public static void utilities(){

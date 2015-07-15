@@ -139,9 +139,15 @@
 		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.toString())}" data-modal=".my-modal">
 		  ___
 		  </a>
+		  
 		  #{list items:dayRecap.absences, as:'absence'}
 		    <a href="@{Absences.edit(absence.id)}" data-modal=".my-modal">
-			  ${absence.absenceType.code}
+			  <span>
+				     ${absence.absenceType.code} 
+				     #{if absence.justifiedMinutes}
+				    	${absence.justifiedMinutes}min
+				  	 #{/if}
+				  </span>
 			</a>
 		  #{/list}	
 		</td>

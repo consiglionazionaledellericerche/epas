@@ -224,8 +224,8 @@ public class Absences extends Controller{
 
 		rules.checkIfPermitted(person.office);
 
-		AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
-				absenceType.get(), Optional.fromNullable(file), Optional.<String>absent(), false);
+		AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(person, dateFrom,Optional.fromNullable(dateTo), 
+				absenceType.get(), Optional.fromNullable(file), Optional.<String>absent(), Optional.<Integer>absent());
 
 		//Verifica errori generali nel periodo specificato
 		if(air.hasWarningOrDaysInTrouble()){
@@ -373,8 +373,8 @@ public class Absences extends Controller{
 				Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 			}
 
-			AbsenceInsertReport air = absenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-					absenceType.get(),Optional.fromNullable(file), Optional.fromNullable(mealTicket), false);
+			AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(person, dateFrom, Optional.fromNullable(dateTo),
+					absenceType.get(),Optional.fromNullable(file), Optional.fromNullable(mealTicket), Optional.<Integer>absent());
 
 			//Verifica errori generali nel periodo specificato
 			if(air.hasWarningOrDaysInTrouble()){

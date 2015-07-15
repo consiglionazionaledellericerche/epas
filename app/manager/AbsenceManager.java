@@ -263,6 +263,81 @@ public class AbsenceManager {
 		} 
 		return false;	
 	}
+	
+	/**
+	 * Se si vuole solo simulare l'inserimento di una assenza.
+	 * - no persistenza assenza
+	 * - no ricalcoli person situation
+	 * - no invio email per conflitto reperibilità
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 * @param mealTicket
+	 * @return
+	 */
+	public AbsenceInsertReport insertAbsenceSimulation(Person person, 
+			LocalDate dateFrom,Optional<LocalDate> dateTo, 
+			AbsenceType absenceType, 
+			Optional<Blob> file, 
+			Optional<String> mealTicket,
+			Optional<Integer> justifiedMinutes) {
+		
+		return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket,  justifiedMinutes,
+				true, false);
+	
+	}
+	
+	/**
+	 * Metodo full per inserimento assenza. 
+	 * - persistenza assenza
+	 * - ricalcoli person situation
+	 * - invio email per conflitto reperibilità
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 * @param mealTicket
+	 * @return
+	 */
+	public AbsenceInsertReport insertAbsenceRecompute(Person person, 
+			LocalDate dateFrom,Optional<LocalDate> dateTo, 
+			AbsenceType absenceType, 
+			Optional<Blob> file, 
+			Optional<String> mealTicket,
+			Optional<Integer> justifiedMinutes) {
+		
+		return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes, 
+				false, true);
+	}
+	
+	/**
+	 * Metodo per inserimento assenza senza ricalcoli. 
+	 * (Per adesso utilizzato solo da solari roma per import iniziale di assenze 
+	 * molto indietro nel tempo. Non ritengo ci siano ulteriori utilità future).
+	 * - persistenza assenza
+	 * - no ricalcoli person situation
+	 * - no invio email per conflitto reperibilità
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 * @param mealTicket
+	 * @return
+	 */
+	public AbsenceInsertReport insertAbsenceNotRecompute(Person person, 
+			LocalDate dateFrom,Optional<LocalDate> dateTo, 
+			AbsenceType absenceType, 
+			Optional<Blob> file, 
+			Optional<String> mealTicket, 
+			Optional<Integer> justifiedMinutes) {
+		
+		return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes, 
+				false, false);
+	}
 
 	/**
 	 * @param person
@@ -273,8 +348,9 @@ public class AbsenceManager {
 	 * @param mealTicket
 	 * @return
 	 */
-	public AbsenceInsertReport insertAbsence(Person person, LocalDate dateFrom,Optional<LocalDate> dateTo, 
-			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket, boolean onlySimulation) {
+	private AbsenceInsertReport insertAbsence(Person person, LocalDate dateFrom,Optional<LocalDate> dateTo, 
+			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket, Optional<Integer> justifiedMinutes, 
+			boolean onlySimulation, boolean recompute) {
 
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(absenceType);
@@ -341,7 +417,8 @@ public class AbsenceManager {
 				aiList = handlerAbsenceTypeGroup(person, actualDate, absenceType, file, !onlySimulation);
 			}
 			else {
-				aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file, mealTicket, !onlySimulation));
+				aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file, 
+						mealTicket, justifiedMinutes, !onlySimulation));
 			}
 			
 			if(onlySimulation) {
@@ -361,10 +438,11 @@ public class AbsenceManager {
 			actualDate = actualDate.plusDays(1);
 		}
 
-		if(!onlySimulation) {
+		if(!onlySimulation && recompute) {
+			
 			//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 			consistencyManager.updatePersonSituation(person, dateFrom);
-
+			
 			if(air.getAbsenceInReperibilityOrShift() > 0){
 				sendEmail(person, air);
 			}			
@@ -383,13 +461,13 @@ public class AbsenceManager {
 	 * @return	un resoconto dell'inserimento tramite la classe AbsenceInsertModel
 	 */
 	private AbsencesResponse insert(Person person, LocalDate date, 
-			AbsenceType absenceType, Optional<Blob> file, boolean persist){
+			AbsenceType absenceType, Optional<Blob> file, Optional<Integer> justifiedMinutes, boolean persist){
 
 		Preconditions.checkNotNull(person);
 		Preconditions.checkState(person.isPersistent());
 		Preconditions.checkNotNull(date);
 		Preconditions.checkNotNull(absenceType);
-		Preconditions.checkState(absenceType.isPersistent());
+		//Preconditions.checkState(absenceType.isPersistent());
 		Preconditions.checkNotNull(file);
 
 		AbsencesResponse ar = new AbsencesResponse(date,absenceType.code);
@@ -414,6 +492,9 @@ public class AbsenceManager {
 
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
+			if(justifiedMinutes.isPresent()) {
+				absence.justifiedMinutes = justifiedMinutes.get();
+			}
 			
 			if(persist) {
 				//creo l'assenza e l'aggiungo
@@ -512,7 +593,7 @@ public class AbsenceManager {
 	 * @throws EmailException 
 	 */
 	private AbsencesResponse handlerCompensatoryRest(Person person,
-			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist){
+			LocalDate date, AbsenceType absenceType, Optional<Blob> file, List<Absence> otherAbsences, boolean persist){
 	
 		Integer maxRecoveryDaysOneThree = confYearManager
 				.getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
@@ -540,7 +621,7 @@ public class AbsenceManager {
 		}
 		//Controllo del residuo
 		if(canTakeCompensatoryRest(person, date, otherAbsences)){
-			return insert(person, date, absenceType, file, persist);
+			return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
 		}
 	
 		return new AbsencesResponse(date,absenceType.code,
@@ -559,13 +640,13 @@ public class AbsenceManager {
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
 		if(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType) && canTake32(person, date, otherAbsences)){
-			return insert(person, date,absenceType,file, persist);
+			return insert(person, date,absenceType,file, Optional.<Integer>absent(), persist);
 		}
 		if(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType) && canTake31(person, date, otherAbsences)){
-			return insert(person, date,absenceType, file, persist);
+			return insert(person, date,absenceType, file, Optional.<Integer>absent(), persist);
 		}
 		if(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType) && canTake94(person, date, otherAbsences)){
-			return insert(person, date,absenceType, file, persist);
+			return insert(person, date,absenceType, file, Optional.<Integer>absent(), persist);
 		}
 		//		CODICE FERIE NON DISPONIBILE
 		return new AbsencesResponse(date,absenceType.code,
@@ -594,7 +675,7 @@ public class AbsenceManager {
 			
 			int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
 			if (remaining37 > 0) {
-				return insert(person, date,absenceType, file, persist);
+				return insert(person, date,absenceType, file, Optional.<Integer>absent(), persist);
 			}
 		}
 
@@ -622,10 +703,10 @@ public class AbsenceManager {
 			return result;
 		}
 
-		result.add(insert(person, date,absenceType,file, persist));
+		result.add(insert(person, date,absenceType,file, Optional.<Integer>absent(), persist));
 
 		if(checkMessage.absenceType != null){
-			result.add(insert(person, date,checkMessage.absenceType,file, persist));
+			result.add(insert(person, date,checkMessage.absenceType,file, Optional.<Integer>absent(), persist));
 		}
 		return result;
 	}
@@ -644,7 +725,7 @@ public class AbsenceManager {
 			AbsenceType absenceType, Optional<Blob> file, List<Absence> otherAbsences, boolean persist){
 		
 		if(canTakePermissionIllnessChild(person, date, absenceType, otherAbsences)){
-			return insert(person, date,absenceType,file, persist);
+			return insert(person, date,absenceType,file, Optional.<Integer>absent(), persist);
 		}
 
 		return new AbsencesResponse(date,absenceType.code,
@@ -669,16 +750,19 @@ public class AbsenceManager {
 			return new AbsencesResponse(date,absenceType.code,
 					AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
 		}
-		return insert(person, date, wichFer, file, persist);
+		return insert(person, date, wichFer, file, Optional.<Integer>absent(), persist);
 	}
 
 	private AbsencesResponse handlerGenericAbsenceType(Person person,LocalDate date,
-			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket, boolean persist){
+			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket, 
+			Optional<Integer> justifiedMinutes, 
+			boolean persist){
 
-		AbsencesResponse aim = insert(person, date, absenceType, file, persist);
+		AbsencesResponse aim = insert(person, date, absenceType, file, justifiedMinutes, persist);
 		if(mealTicket.isPresent() && aim.isInsertSucceeded()){
 			checkMealTicket(date, person, mealTicket.get(), absenceType, persist);
 		}
+
 		return aim;
 	}
 
