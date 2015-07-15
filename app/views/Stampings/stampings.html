@@ -129,7 +129,12 @@
 
 			<td class="assenza default-single">
 				#{list items:dayRecap.absences, as:'absence'}
-				 	${absence.absenceType.code}
+				  <span>
+				     ${absence.absenceType.code} 
+				     #{if absence.justifiedMinutes}
+				    	${absence.justifiedMinutes} min
+				  	 #{/if}
+				  </span>
 				 #{/list}	
 			</td>
 			

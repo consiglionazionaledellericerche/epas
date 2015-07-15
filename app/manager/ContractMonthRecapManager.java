@@ -87,8 +87,6 @@ public class ContractMonthRecapManager {
 		return 0;
 	}
 	
-	
-	
 	/**
 	 * Aggiorna i campi inerenti la situazione residuale del riepilogo mensile.
 	 *  
