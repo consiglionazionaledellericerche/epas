@@ -163,19 +163,19 @@ public class StampingManager {
 	 * che è stato costruito dal binder del Json passato dal client python
 	 * 
 	 */
-	public boolean createStamping(StampingFromClient stamping){
+	public boolean createStamping(StampingFromClient stamping, boolean recompute){
 
 		// Check della richiesta
 		
 		if(stamping == null) {
 			return false;
 		}
-		
-		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
-			log.warn("La timbratura che si cerca di inserire è troppo "
-					+ "precedente rispetto alla data odierna. Controllare il server!");
-			return false;
-		}
+
+//		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
+//			log.warn("La timbratura che si cerca di inserire è troppo "
+//					+ "precedente rispetto alla data odierna. Controllare il server!");
+//			return false;
+//		}
 
  		Person person = personDao.getPersonById(stamping.personId);
 		if(person == null){
@@ -227,7 +227,9 @@ public class StampingManager {
 		personDay.save();
 		
 		// Ricalcolo
-		consistencyManager.updatePersonSituation(person, personDay.date);
+		if(recompute) {
+			consistencyManager.updatePersonSituation(person, personDay.date);
+		}
 
 		return true;
 	}
@@ -296,16 +298,14 @@ public class StampingManager {
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
 			
-			JPAPlugin.closeTx(false);
-			JPAPlugin.startTx(false);
-			
 			PersonDay personDay = null;
 			person = personDao.getPersonById(person.id);
 			Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){
-				personDay = new PersonDay(person, dayPresence);
-				personDay.create();
+//				personDay = new PersonDay(person, dayPresence);
+//				personDay.create();
+				continue;
 			}
 			else{
 				personDay = pd.get();

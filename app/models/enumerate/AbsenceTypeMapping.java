@@ -17,7 +17,8 @@ public enum AbsenceTypeMapping {
 	RIPOSO_COMPENSATIVO("91"),
 	MISSIONE("92"),
 	FESTIVITA_SOPPRESSE("94"),
-	FER("FER");
+	FER("FER"),
+	TELELAVORO("103");
 
 	private String code;
 

@@ -875,7 +875,10 @@ when
  $c: PermissionCheck(action in (
  
  		/* duplicate */
- 		"StampingsFromClient.create"
+ 		"StampingsFromClient.create",
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
  		
  		), target == null, granted == false)
  then
@@ -889,7 +892,10 @@ when
  $p: Permission(description == "stampingsCreate") from $uro.role.permissions
  $c: PermissionCheck(action in (
  
- 		"StampingsFromClient.create"
+ 		"StampingsFromClient.create",
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
  	
  		), target == $o, granted == false)
 then
