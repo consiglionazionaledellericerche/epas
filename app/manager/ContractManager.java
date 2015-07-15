@@ -165,7 +165,7 @@ public class ContractManager {
 		
 		//Aggiornamento stato contratto
 		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd(),true);
 		
 		return true;
 
@@ -189,7 +189,7 @@ public class ContractManager {
 		
 		//Aggiornamento stato contratto
 		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd(),true);
 	}
 
 	/**
@@ -197,8 +197,9 @@ public class ContractManager {
 	 * 
 	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. 
 	 *   Se null ricalcola dall'inizio del contratto.
+	 *   newContract: indica se il ricalcolo è relativo ad un nuvo contratto o ad uno già esistente
 	 */
-	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo,boolean newContract) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
@@ -215,16 +216,16 @@ public class ContractManager {
 		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
 			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
 		}
-		
-		//Distruggere i riepiloghi
-		// TODO: anche quelli sulle ferie quando ci saranno
-		destroyContractMonthRecap(contract);
-		
-		JPAPlugin.closeTx(false);
-		JPAPlugin.startTx(false);
+		if(!newContract){
+			//Distruggere i riepiloghi
+			// TODO: anche quelli sulle ferie quando ci saranno
+			destroyContractMonthRecap(contract);
+			
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
+		}
 		
 		consistencyManager.updatePersonSituation(contract.person, date);
-
 	}
 	
 	private void destroyContractMonthRecap(Contract contract) {
