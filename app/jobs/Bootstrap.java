@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import models.AbsenceType;
 import models.CompetenceCode;
 import models.Qualification;
 import models.Role;
@@ -13,6 +14,8 @@ import models.StampModificationType;
 import models.StampType;
 import models.User;
 import models.VacationCode;
+import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -121,16 +124,9 @@ public class Bootstrap extends Job<Void> {
 		Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 		
 		new FixUserPermission().now();
-		
-		//StampType pausa pranzo
-		StampType st = StampType.find("byCode", "pausaPranzo").first();
-		if(st == null) {
-			st = new StampType();
-			st.code = "pausaPranzo";
-			st.description = "Pausa pranzo";
-			st.identifier = "pr";
-			st.save();
-		}
+
 	}
+	
+	
 
 }

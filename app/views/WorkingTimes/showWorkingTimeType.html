@@ -45,6 +45,27 @@
 		  </td>
 		#{/list}
 	</tr>
+		<tr>
+		<td class="item warning">Soglia pomeridiana per buono pasto</td>
+		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
+		  <td>
+		    #{if wttd.ticketAfternoonThreshold && wttd.mealTicketEnabled() }
+		      ${ wttd.ticketAfternoonThreshold.toHourTime() }  
+		    #{/if}
+		  </td>
+		#{/list}
+	</tr>
+		<tr>
+		<td class="item warning">Lavoro minimo per buono pasto dopo soglia pomeridiana<br>(in minuti)</td>
+		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
+		  <td>
+		    #{if wttd.ticketAfternoonWorkingTime && wttd.mealTicketEnabled() }
+		      ${ wttd.ticketAfternoonWorkingTime }  
+		    #{/if}
+		  </td>
+		#{/list}
+	</tr>
+	
 	<tr>
 		<td class="item warning">Giorno festivo</td>
 		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
