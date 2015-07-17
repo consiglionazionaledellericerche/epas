@@ -18,9 +18,10 @@ import models.Person;
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+
+
+import play.Logger;
 //import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -38,7 +39,7 @@ import dao.PersonDao;
 @With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{
 
-	private final static Logger log = LoggerFactory.getLogger(Charts.class);
+	//private final static Logger log = LoggerFactory.getLogger(Charts.class);
 	
 	@Inject
 	private static SecurityRules rules;
@@ -59,8 +60,9 @@ public class Charts extends Controller{
 		List<Month> meseList = chartsManager.populateMonthList();	
 
 		if(params.get("yearChart") == null || params.get("monthChart") == null){
-			log.info("Params year: %s", params.get("yearChart", Integer.class));
-			log.info("Chiamato metodo con anno e mese nulli");
+			
+			Logger.info("Params year: %s", params.get("yearChart", Integer.class));
+			Logger.info("Chiamato metodo con anno e mese nulli");
 			render(annoList, meseList);
 		}
 
@@ -90,12 +92,12 @@ public class Charts extends Controller{
 		List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
 		if(params.get("yearChart") == null && year == null){
-			log.debug("Params year: %s", params.get("yearChart", Integer.class));
-			log.debug("Chiamato metodo con anno e mese nulli");
+			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
+			Logger.debug("Chiamato metodo con anno e mese nulli");
 			render(annoList);
 		}
 		year = params.get("yearChart", Integer.class);
-		log.debug("Anno preso dai params: %d", year);
+		Logger.debug("Anno preso dai params: %d", year);
 
 		List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
 		Long val = null;
@@ -119,13 +121,13 @@ public class Charts extends Controller{
 
 
 		if(params.get("yearChart") == null && year == null){
-			log.debug("Params year: %s", params.get("yearChart", Integer.class));
-			log.debug("Chiamato metodo con anno e mese nulli");
+			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
+			Logger.debug("Chiamato metodo con anno e mese nulli");
 			render(annoList);
 		}
 
 		year = params.get("yearChart", Integer.class);
-		log.debug("Anno preso dai params: %d", year);
+		Logger.debug("Anno preso dai params: %d", year);
 
 
 		List<String> absenceCode = Lists.newArrayList();
@@ -174,7 +176,7 @@ public class Charts extends Controller{
 
 		List<Person> personList = personDao.list(Optional.<String>absent(), 
 				officeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
-		log.debug("Esporto dati per %s persone", personList.size());
+		Logger.debug("Esporto dati per %s persone", personList.size());
 		FileInputStream inputStream = chartsManager.export(year, personList);
 
 		renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi"+year+".csv");
