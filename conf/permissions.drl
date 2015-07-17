@@ -4,6 +4,8 @@ import security.PermissionCheck;
 import models.Office;
 import models.UsersRolesOffices;
 import models.Permission;
+import models.Person;
+import models.Role;
 
 global models.User currentOperator;
 
@@ -17,13 +19,7 @@ global models.User currentOperator;
 *
 */
 
-/*
-* rule isPermitted
-* when:
-* $o: Office()
-* $uro: UserRoleOffice(office == $o) from currentUser.userRoleOffices
-* $p: Permission(description == "editPersonDay") from $uro.role.permissions
-*/
+
 
 rule AnyUser when
   $c: PermissionCheck(action in (
@@ -87,12 +83,54 @@ when
      	"Persons.resetPassword",
      	
      	/* Stampa cartellino */
-     	"PrintTags.showPersonTag"
+     	"PrintTags.showPersonTag",
+     	
+     	/* Metodi rest */
+     	"rest.PersonDays.getDaySituation",
+     	"rest.PersonDays.getMonthSituation"    	
      	
        ), target == null, granted == false)
 then
  $c.grant();
 end
+
+/*  
+ *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
+ *  Metodi rest per se stessi
+ *
+rule IsEmployeeRest
+*/
+
+
+/* Azioni eseguibili da qualsiasi utente che abbiano come destinatario 
+ * dell'azione se stesso
+ */
+ 
+rule HasRightOnHimself
+when
+  $p: Person(this == currentOperator.person)
+  $c: PermissionCheck(target == $p, granted == false)
+then
+ $c.grant();
+end
+
+
+/* Consente agli amministratori e agli amministratori in sola lettura di avere
+ * diritti di visualizzazione su situazioni relative a una specifica persona che
+ * appartiene allo stesso ufficio dell'amministratore 
+ */
+ 
+rule HasRightOnPerson
+when
+  $uro: UsersRolesOffices(role.name in("personnelAdmin","personnelAdminMini"))
+  $o: Office() from $uro.office
+  $c: PermissionCheck($o.persons contains target, granted == false)
+then
+ $c.grant();
+end
+  
+
+
 
 /*
  * Azioni eseguibili da utente con permesso developer (tutto)

@@ -19,7 +19,10 @@ import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
 
+
+
 import play.Logger;
+//import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -36,6 +39,8 @@ import dao.PersonDao;
 @With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{
 
+	//private final static Logger log = LoggerFactory.getLogger(Charts.class);
+	
 	@Inject
 	private static SecurityRules rules;
 	@Inject
@@ -55,8 +60,9 @@ public class Charts extends Controller{
 		List<Month> meseList = chartsManager.populateMonthList();	
 
 		if(params.get("yearChart") == null || params.get("monthChart") == null){
-			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
-			Logger.debug("Chiamato metodo con anno e mese nulli");
+			
+			Logger.info("Params year: %s", params.get("yearChart", Integer.class));
+			Logger.info("Chiamato metodo con anno e mese nulli");
 			render(annoList, meseList);
 		}
 
