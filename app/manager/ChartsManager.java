@@ -242,6 +242,7 @@ public class ChartsManager {
 				po.surname = p.surname;
 				po.positiveHourForOvertime = competenceManager.positiveResidualInMonth(p, year, month)/60;
 				poList.add(po);
+				log.info("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
 			}
 
 		}
