@@ -46,6 +46,12 @@ public class PersonDays extends Controller{
 	@Inject
 	private static SecurityRules rules;
 	
+	/**
+	 * metodo rest che ritorna la situazione della persona (passata per email)
+	 * in un giorno specifico (date) 
+	 * @param email
+	 * @param date
+	 */
 
 	@BasicAuth
 	public static void getDaySituation(String email, LocalDate date){
@@ -55,16 +61,7 @@ public class PersonDays extends Controller{
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca.");
 		}
-		
-		if(Security.getUser().get().person.id != person.id){
-			JsonResponse.badRequest("Le informazioni richieste non sono relative"
-					+ " alla persona loggata");
-		}
-		/**
-		 * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante 
-		 * la drools (probabilmente scritta male, da capire meglio).
-		 * Adesso viene bypassato col controllo sopra...però è veramente orrendo
-		 */
+
 		rules.checkIfPermitted(person);
 		
 		PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
@@ -72,24 +69,18 @@ public class PersonDays extends Controller{
 			JsonResponse.notFound("Non sono presenti informazioni per "
 					+person.name+" "+person.surname+ " nel giorno "+date);
 		}
-		PersonDayDTO pdDTO = new PersonDayDTO();
-		pdDTO.buonopasto = pd.isTicketAvailable;
-		pdDTO.differenza = pd.difference;
-		pdDTO.progressivo = pd.progressive;
-		pdDTO.tempolavoro = pd.timeAtWork;
-		if(pd.absences != null && pd.absences.size() > 0){
-			for(Absence abs : pd.absences){
-				pdDTO.codiceassenza.add(abs.absenceType.code);
-			}	
-		}
-		if(pd.stampings != null && pd.stampings.size() > 0){
-			for(Stamping s : pd.stampings){
-				pdDTO.timbrature.add(s.date.toString());
-			}
-		}
+		PersonDayDTO pdDTO = generateDayDTO(pd);
 		renderJSON(pdDTO);
 	}
 	
+	
+	/**
+	 * metodo rest che ritorna la situazione di una persona relativa al mese e
+	 * all'anno passati come parametro
+	 * @param email
+	 * @param month
+	 * @param year
+	 */
 	@BasicAuth
 	public static void getMonthSituation(String email, int month, int year){
 		Person person = personDao.byEmail(email).orNull();
@@ -113,15 +104,8 @@ public class PersonDays extends Controller{
 		for(Contract contract : monthContracts) {
 			Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
 					.getContractMonthRecap(new YearMonth(year, month));
-			if(cmr.isPresent()){
-				
-				//TODO: continuare a prendere i valori da restituire
-				pmDTO.buoniMensa = cmr.get().remainingMealTickets;
-				pmDTO.possibileUtilizzareResiduoAnnoPrecedente = cmr.get().possibileUtilizzareResiduoAnnoPrecedente;
-				pmDTO.progressivoFinaleMese = cmr.get().progressivoFinaleMese;
-				pmDTO.straordinari = cmr.get().straordinariMinuti;
-				pmDTO.residuoTotaleAnnoCorrente = cmr.get().remainingMinutesCurrentYear;
-				pmDTO.residuoTotaleAnnoPassato = cmr.get().remainingMinutesLastYear;
+			if(cmr.isPresent()){							
+				pmDTO = generateMonthDTO(cmr.get());				
 			}
 			else{
 				JsonResponse.notFound("Non sono presenti informazioni per "
@@ -132,15 +116,48 @@ public class PersonDays extends Controller{
 		
 	}
 	
-	@BasicAuth
-	public static void getDailyEmployeeSituation(String email, LocalDate date){
-		Person person = personDao.byEmail(email).orNull();
-		if(person == null){
-			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
-					+ "mail cnr che serve per la ricerca.");
+	
+	
+	/**
+	 * 
+	 * @param pd
+	 * @return il personDayDTO costruito sulla base del personDay passato come
+	 * parametro da ritornare alle funzioni rest
+	 */
+	private static PersonDayDTO generateDayDTO(PersonDay pd){
+		PersonDayDTO pdDTO = new PersonDayDTO();
+		pdDTO.buonopasto = pd.isTicketAvailable;
+		pdDTO.differenza = pd.difference;
+		pdDTO.progressivo = pd.progressive;
+		pdDTO.tempolavoro = pd.timeAtWork;
+		if(pd.absences != null && pd.absences.size() > 0){
+			for(Absence abs : pd.absences){
+				pdDTO.codiceassenza.add(abs.absenceType.code);
+			}	
 		}
-		
+		if(pd.stampings != null && pd.stampings.size() > 0){
+			for(Stamping s : pd.stampings){
+				pdDTO.timbrature.add(s.date.toString());
+			}
+		}
+		return pdDTO;
 	}
 	
+	/**
+	 * 
+	 * @param cmr
+	 * @return il personMonthDTO costruito sulla base del COntractMonthRecap 
+	 * opzionale passato come parametro da ritornare alle funzioni rest
+	 */
+	private static PersonMonthDTO generateMonthDTO(ContractMonthRecap cmr){
+		PersonMonthDTO pmDTO = new PersonMonthDTO();
+		pmDTO.buoniMensa = cmr.remainingMealTickets;
+		pmDTO.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;
+		pmDTO.progressivoFinaleMese = cmr.progressivoFinaleMese;
+		pmDTO.straordinari = cmr.straordinariMinuti;
+		pmDTO.residuoTotaleAnnoCorrente = cmr.remainingMinutesCurrentYear;
+		pmDTO.residuoTotaleAnnoPassato = cmr.remainingMinutesLastYear;
+		return pmDTO;
+	}
 
 }
