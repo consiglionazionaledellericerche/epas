@@ -175,6 +175,17 @@
 	       			
 			<td class="tempoLavoro default-single">
 				${dayRecap.workTime}
+				
+				#{if dayRecap.personDay.decurted}
+				  <a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="${(
+	    		'Tempo lavorato rimosso per raggiungere la pausa pranzo minima: <strong>'+dayRecap.personDay.decurted+'</strong>').escape()}"
+	    		title="e">e</a>
+				#{/if}
+				
 				#{ifnot dayRecap.todayLunchTimeCode.equals("")}
 					<strong>${dayRecap.todayLunchTimeCode}</strong>
 				#{/ifnot}

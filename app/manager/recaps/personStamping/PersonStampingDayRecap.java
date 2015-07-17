@@ -49,6 +49,7 @@ public class PersonStampingDayRecap {
 	public Person person;
 	public WorkingTimeTypeDay wttd = null;
 	public WorkingTimeType wtt = null;
+	public String stampingWorkingTime = "";
 	public String workingTime = "";
 	public String mealTicketTime = "";
 	public String timeMealFrom = "";
@@ -408,6 +409,10 @@ public class PersonStampingDayRecap {
 	 */
 	private void setWorkTime(int workTime) {
 		this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
+		if(personDay.decurted != null) {
+			this.stampingWorkingTime = 
+					DateUtility.fromMinuteToHourMinute(workTime + personDay.decurted);
+		}
 	}
 
 	/**
