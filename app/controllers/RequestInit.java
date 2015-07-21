@@ -10,7 +10,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import models.ConfGeneral;
+import manager.ConfGeneralManager;
 import models.Office;
 import models.Permission;
 import models.Person;
@@ -32,7 +32,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import controllers.Resecure.NoCheck;
-import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -49,7 +48,7 @@ public class RequestInit extends Controller {
 	@Inject
 	private static PersonDao personDao;
 	@Inject
-	private static ConfGeneralDao confGeneralDao;
+	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static UsersRolesOfficesDao uroDao;
 	@Inject
@@ -397,17 +396,10 @@ public class RequestInit extends Controller {
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
 
-		Optional<ConfGeneral> yearInitUseProgram = confGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description,
+		Optional<LocalDate> dateBeginProgram = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
 				officeDao.getOfficeAllowed(user.get()).iterator().next());
 
-		Integer yearBeginProgram;
-		if(yearInitUseProgram.isPresent()){
-			yearBeginProgram = new Integer(yearInitUseProgram.get().fieldValue.substring(0, 4));
-		}
-		else{
-			yearBeginProgram = new LocalDate().getYear();
-		}
-
+		Integer yearBeginProgram = dateBeginProgram.get().getYear();
 		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
 
 		while(yearBeginProgram <= actualYear+1){
@@ -417,7 +409,6 @@ public class RequestInit extends Controller {
 		}
 
 		renderArgs.put("navYears", years);
-
 
 	}
 

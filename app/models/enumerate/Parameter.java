@@ -21,10 +21,12 @@ public enum Parameter {
 	URL_TO_PRESENCE("general", "url_to_presence", "https://attestati.rm.cnr.it/attestati/"),
 	
 	DATE_START_MEAL_TICKET("general", "date_start_meal_ticket", ""),
+
+	EMAIL_TO_CONTACT("general", "email_to_contact", ""),	
+//	EMAIL_TO_CONTACT viene utilizzato per popolare il campo replyTo delle
+//	mail inviate dal sistema in base al destinatario
 	
-	EMAIL_TO_CONTACT("general", "email_to_contact", ""),	// %prod.mail.from.alias=situazione.presenze@cnr.it
 	SEND_EMAIL("general", "send_email", "false"),			// attiva/disattiva l'invio delle mail dai job
-	EMAIL_FROM_JOBS("general", "email_from_jobs", ""),		// %prod.mail.replyTo.alias=segreteria@iit.cnr.it
 	
 	MEAL_TIME_START_HOUR("general", "meal_time_start_hour", "1"),
 	MEAL_TIME_START_MINUTE("general", "meal_time_start_minute", "0"),
@@ -66,6 +68,15 @@ public enum Parameter {
 		//mettere qui i valori del file configurazioni quando ci sarà...
 		
 		return this.defaultValue;
+	}
+	
+	public static Parameter getByDescription(String description){
+		for( Parameter param: values() ) {
+			if(param.description.equalsIgnoreCase(description)){
+				return param;
+			}
+		}
+		return null;
 	}
 	
 }
