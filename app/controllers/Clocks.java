@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
+import manager.OfficeManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
@@ -33,7 +34,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
@@ -42,7 +42,7 @@ import dao.UserDao;
 public class Clocks extends Controller{
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static OfficeManager officeManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -65,7 +65,7 @@ public class Clocks extends Controller{
 
 		String remoteAddress = Http.Request.current().remoteAddress;
 
-		Set<Office> offices = officeDao.getOfficesWithAllowedIp(remoteAddress);
+		Set<Office> offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
 
 		if(offices.isEmpty()){
 			flash.error("Le timbrature web non sono permesse da questo terminale! "
