@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import play.Play;
 import play.db.jpa.Blob;
-import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
 import com.google.common.base.Function;
@@ -550,7 +549,7 @@ public class AbsenceManager {
 		try {
 			email.addTo(person.email);
 			email.setFrom(Play.configuration.getProperty("application.mail.address"));
-			email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_FROM_JOBS, person.office));
+			email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
 			for(LocalDate data : airl.datesInReperibilityOrShift()){

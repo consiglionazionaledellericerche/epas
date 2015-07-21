@@ -18,7 +18,6 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
-import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -26,7 +25,6 @@ import security.SecurityRules;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import dao.ConfGeneralDao;
 import dao.ConfYearDao;
 import dao.OfficeDao;
 
@@ -37,8 +35,6 @@ public class Configurations extends Controller{
 	private static OfficeDao officeDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
-	@Inject
-	private static ConfGeneralDao confGeneralDao;
 	@Inject
 	private static SecurityRules rules;
 	@Inject
@@ -66,22 +62,22 @@ public class Configurations extends Controller{
 			office = offices.iterator().next();
 		}
 
-		ConfGeneral initUseProgram = confGeneralManager.getByField(Parameter.INIT_USE_PROGRAM,  office);
+		ConfGeneral initUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM,  office);
 
-		ConfGeneral dayOfPatron = confGeneralManager.getByField(Parameter.DAY_OF_PATRON, office);
-		ConfGeneral monthOfPatron = confGeneralManager.getByField(Parameter.MONTH_OF_PATRON, office);
+		ConfGeneral dayOfPatron = confGeneralManager.getConfGeneral(Parameter.DAY_OF_PATRON, office);
+		ConfGeneral monthOfPatron = confGeneralManager.getConfGeneral(Parameter.MONTH_OF_PATRON, office);
 
-		ConfGeneral webStampingAllowed = confGeneralManager.getByField(Parameter.WEB_STAMPING_ALLOWED, office);
-		ConfGeneral addressesAllowed = confGeneralManager.getByField(Parameter.ADDRESSES_ALLOWED, office);
+		ConfGeneral webStampingAllowed = confGeneralManager.getConfGeneral(Parameter.WEB_STAMPING_ALLOWED, office);
+		ConfGeneral addressesAllowed = confGeneralManager.getConfGeneral(Parameter.ADDRESSES_ALLOWED, office);
 
-		ConfGeneral urlToPresence = confGeneralManager.getByField(Parameter.URL_TO_PRESENCE, office);
-		ConfGeneral userToPresence = confGeneralManager.getByField(Parameter.USER_TO_PRESENCE, office);
-		ConfGeneral passwordToPresence = confGeneralManager.getByField(Parameter.PASSWORD_TO_PRESENCE, office);
+		ConfGeneral urlToPresence = confGeneralManager.getConfGeneral(Parameter.URL_TO_PRESENCE, office);
+		ConfGeneral userToPresence = confGeneralManager.getConfGeneral(Parameter.USER_TO_PRESENCE, office);
+		ConfGeneral passwordToPresence = confGeneralManager.getConfGeneral(Parameter.PASSWORD_TO_PRESENCE, office);
 
-		ConfGeneral numberOfViewingCouple = confGeneralManager.getByField(Parameter.NUMBER_OF_VIEWING_COUPLE, office);
+		ConfGeneral numberOfViewingCouple = confGeneralManager.getConfGeneral(Parameter.NUMBER_OF_VIEWING_COUPLE, office);
 
-		ConfGeneral dateStartMealTicket = confGeneralManager.getByField(Parameter.DATE_START_MEAL_TICKET, office);
-		ConfGeneral sendEmail = confGeneralManager.getByField(Parameter.SEND_EMAIL, office);
+		ConfGeneral dateStartMealTicket = confGeneralManager.getConfGeneral(Parameter.DATE_START_MEAL_TICKET, office);
+		ConfGeneral sendEmail = confGeneralManager.getConfGeneral(Parameter.SEND_EMAIL, office);
 
 		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, addressesAllowed, urlToPresence, userToPresence,
 				passwordToPresence, numberOfViewingCouple, dateStartMealTicket,sendEmail, offices, office);
@@ -95,19 +91,31 @@ public class Configurations extends Controller{
 	 * @param name
 	 * @param value
 	 */
-	public static void saveConfGeneral(Long pk, String name, String value){
+	public static void saveConfGeneral(Long pk, String value){
+
+		ConfGeneral conf = confGeneralManager.getById(pk).orNull();
+		
+		if(conf != null){
+			rules.checkIfPermitted(conf.office);
+			
+			Parameter param = Parameter.getByDescription(conf.field);
+			confGeneralManager.saveConfGeneral(param, conf.office, Optional.fromNullable(value));
+		}
+	}
+	
+	public static void savePatron(Long pk, String value){
 
 		Office office = officeDao.getOfficeById(pk);
 
 		rules.checkIfPermitted(office);
-
-		ConfGeneral conf =  confGeneralDao.getByFieldName(name, office)
-				.or(new ConfGeneral(office, name, value));
-
-		conf.fieldValue = value;
-		conf.save();
-
-		Cache.set(conf.field+conf.office.name, conf.fieldValue);
+		
+		LocalDate dayMonth = DateUtility.dayMonth(value,Optional.<String>absent());
+		
+		confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office, 
+				Optional.fromNullable(dayMonth.dayOfMonth().getAsString()));
+		
+		confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office, 
+				Optional.fromNullable(dayMonth.monthOfYear().getAsString()));
 	}
 
 	/**
