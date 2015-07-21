@@ -321,13 +321,23 @@ public final class PersonDao extends DaoBase{
 	 * @param number
 	 * @return la persona corrispondente alla matricola passata come parametro
 	 */
-	public Person getPersonByNumber(Integer number){
+	public Person getPersonByNumber(Integer number, Optional<Set<Office>> officeList){
 
+		final BooleanBuilder condition = new BooleanBuilder();
 		final QPerson person = QPerson.person;
+		if(officeList.isPresent()){
+			condition.and(person.office.in(officeList.get()));
+		}
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.number.eq(number));
+		condition.and(person.number.eq(number));
+		
+		final JPQLQuery query = getQueryFactory().from(person).where(condition);
 
 		return query.singleResult(person);
+	}
+	
+	public Person getPersonByNumber(Integer number){
+		return getPersonByNumber(number, Optional.<Set<Office>>absent());
 	}
 
 	/**
@@ -389,13 +399,24 @@ public final class PersonDao extends DaoBase{
 	 * @param oldId
 	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
 	 */
-	public Person getPersonByOldID(Long oldId){
+	public Person getPersonByOldID(Long oldId, Optional<Set<Office>> offices){
 
+		final BooleanBuilder condition = new BooleanBuilder();
 		final QPerson person = QPerson.person;
+		if(offices.isPresent()){
+			condition.and(person.office.in(offices.get()));
+		}
+		
+		condition.and(person.oldId.eq(oldId));
+		
 
-		final JPQLQuery query = getQueryFactory().from(person).where(person.oldId.eq(oldId));
+		final JPQLQuery query = getQueryFactory().from(person).where(condition);
 
 		return query.singleResult(person);
+	}
+	
+	public Person getPersonByOldID(Long oldId){
+		return getPersonByOldID(oldId, Optional.<Set<Office>>absent());
 	}
 
 	/**
@@ -403,15 +424,26 @@ public final class PersonDao extends DaoBase{
 	 * @param badgeNumber
 	 * @return la persona associata al badgeNumber passato come parametro
 	 */
-	public Person getPersonByBadgeNumber(String badgeNumber){
+	public Person getPersonByBadgeNumber(String badgeNumber, Optional<Set<Office>> offices){
 
+		final BooleanBuilder condition = new BooleanBuilder();
 		final QPerson person = QPerson.person;
+		if(offices.isPresent()){
+			condition.and(person.office.in(offices.get()));
+		}
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
+		condition.and(person.badgeNumber.eq(badgeNumber));
+		
+		final JPQLQuery query = getQueryFactory().from(person).where(condition);
 
 		return query.singleResult(person);
 	}
 
+	
+	public Person getPersonByBadgeNumber(String badgeNumber){
+		return getPersonByBadgeNumber(badgeNumber, Optional.<Set<Office>>absent());
+	}
+	
 	/**
 	 * 
 	 * @param type

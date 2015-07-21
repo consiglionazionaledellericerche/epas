@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import models.base.BaseModel;
@@ -47,7 +48,8 @@ import play.data.validation.Unique;
  */
 @Entity
 @Audited
-@Table(name = "persons")
+@Table(name = "persons", uniqueConstraints={@UniqueConstraint(columnNames={"badgenumber", "office_id"})})
+
 public class Person extends BaseModel implements Comparable<Person>{
 
 	private static final long serialVersionUID = -2293369685203872207L;
@@ -85,7 +87,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 * numero di matricola sul badge
 	 */
-	@Unique @As(binder=NullStringBinder.class)
+//	@Unique
+	@As(binder=NullStringBinder.class)
 	public String badgeNumber;
 
 	/**
