@@ -61,7 +61,10 @@ $(function($){
 			/* $(this).removeData('bs.modal'); per bootstrap precedente al 3*/
 			/* $(this).find('.modal-content').empty(); nuovo metodo che però non funziona */
 		});
-		
+
+		this.find('a[data-x-editable][data-type="textarea"]').editable({
+		    showbuttons: 'bottom'
+		});	
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
 		
@@ -131,23 +134,6 @@ $(function($){
 		this.find('#modal-absencetype-month').on('hidden', function(){
 		    $(this).data('modal', null);
 		});
-
-		this.find('#select1').editable(); 
-		this.find('#select2').editable(); 
-		this.find('#select3').editable(); 
-		this.find('#select4').editable(); 
-		this.find('#select5').editable(); 
-		this.find('#select6').editable(); 
-		this.find('#simpleText1').editable(); 
-		this.find('#simpleText2').editable();
-		this.find('#simpleText3').editable(); 
-		
-
-		this.find('#textComments1').editable({
-		    showbuttons: 'bottom'
-		});
-		
-		this.find('#dob1').editable();
 		
 		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
 			var $form = $(this).closest("form");

@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.inject.Inject;
 
+import manager.ConfGeneralManager;
 import models.Office;
 import models.User;
 import models.enumerate.Parameter;
@@ -17,7 +18,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
-import dao.ConfGeneralDao;
 import dao.PermissionDao;
 import dao.UserDao;
 
@@ -28,7 +28,7 @@ public class Security extends Secure.Security {
 	@Inject
 	private static PermissionDao permissionDao;
 	@Inject
-	private static ConfGeneralDao confGeneralDao;
+	private static ConfGeneralManager confGeneralManager;
 
 	/* Client rest */
 
@@ -182,7 +182,7 @@ public class Security extends Secure.Security {
 	
 	public static boolean checkForWebstamping(){
 		String remoteAddress = Http.Request.current().remoteAddress;
-		return !confGeneralDao.containsValue(
+		return !confGeneralManager.containsValue(
 				Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
 	}
 }
