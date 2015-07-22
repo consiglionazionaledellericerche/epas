@@ -47,11 +47,16 @@ person.telephone=Telefono
 person.email=Email
 person.eppn=Eppn (Per login Shibboleth)
 person.birthday=Data di nascita
-person.wantEmail=Invio mail
+person.wantEmail=Invio Email
+person.currentWorkingTimeType= Tipo Orario
+person.currentVacationPeriod= Ferie
+person.qualification= Livello
 
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
 contract.onCertificate=In attestati
+
+contractStampProfile.fixedworkingtime= Timbratura Default
 
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti
