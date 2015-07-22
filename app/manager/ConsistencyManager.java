@@ -441,6 +441,14 @@ public class ConsistencyManager {
 			yearMonthToCompute = yearMonthFrom.get();
 		}
 		
+		//Se provo a costruire un riepilogo precedente a contractDatabaseInterval
+		// ovvero intersezione fra contratto e installazione software per l'office
+		// della persona allora return
+		YearMonth contractDatabaseBegin = new YearMonth(contract.getContractDatabaseInterval().getBegin());
+		if( contractDatabaseBegin.isAfter(yearMonthToCompute) ) {
+			return;
+		}
+		
 		//Tentativo da sourceDate
 		yearMonthToCompute = populateContractMonthFromSource(contract, yearMonthToCompute);
 		
