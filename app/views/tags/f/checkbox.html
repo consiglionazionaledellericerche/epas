@@ -1,0 +1,9 @@
+<div class='form-group #{if _arg.error}has-error has-feedback#{/if}'>
+	<div class="col-sm-offset-3 col-sm-8">
+		<div class="checkbox">
+			<label>
+				<input name="${_arg.name}" type="checkbox" title="${_title == null ? '' : _title}" #{if _arg.value}checked#{/if}/> &{_arg.name}
+			</label>
+		</div>
+	</div>
+</div>

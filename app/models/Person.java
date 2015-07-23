@@ -220,10 +220,12 @@ public class Person extends BaseModel implements Comparable<Person>{
 	
 	@ManyToOne
 	@JoinColumn(name="qualification_id")
+	@Required
 	public Qualification qualification;
 
 	@ManyToOne
 	@JoinColumn(name="office_id")
+	@Required
 	public Office office;
 
 

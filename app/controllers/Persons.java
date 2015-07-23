@@ -129,32 +129,21 @@ public class Persons extends Controller {
 		Contract contract = new Contract();
 
 		render(person, contract);
-
 	}
 
 	public static void save(@Valid @Required Person person,
-			@Valid @Required Qualification qualification, @Valid @Required Office office,
-			@Valid @Required Contract contract,@Required String userName) {
-
+			@Valid Contract contract,@Valid User user) {
+		
 		if(Validation.hasErrors()) {
-
-			flash.error("Inserire correttamente tutti i parametri");
-			params.flash(); // add http parameters to the flash scope
-			render("@insertPerson", person, qualification, office);
+			flash.error("Correggere gli errori indicati");
+			render("@insertPerson", person,contract,user);
 		}
 
-		rules.checkIfPermitted(office);
-
-		person.qualification = qualification;
-		person.office = office;
-		
-		User user = new User();
-		user.username = userName;
-		
+		rules.checkIfPermitted(person.office);
+				
 		//generate random token
 		SecureRandom random = new SecureRandom();
 		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32));
-		
 		user.save();
 		
 		person.user = user;
@@ -244,22 +233,15 @@ public class Persons extends Controller {
 		List<IWrapperContract> contractList = FluentIterable
 				.from(contractDao.getPersonContractList(person))
 				.transform(wrapperFunctionFactory.contract()).toList();
-		
-		Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		List<ContractStampProfile> contractStampProfileList =
 				contractDao.getPersonContractStampProfile(Optional.fromNullable(person), 
 						Optional.<Contract>absent());
 
-		LocalDate actualDate = new LocalDate();
-		Integer month = actualDate.getMonthOfYear();
-		Integer year = actualDate.getYear();
-
-		Long id = person.id;
-		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
+		render(person, contractList, contractStampProfileList);
 	}
 
-	public static void update(@Valid Person person, Office office, Integer qualification, boolean isPersonInCharge){
+	public static void update(@Valid Person person){
 		
 		if(person==null) {
 			flash.error("La persona da modificare non esiste. Operazione annullata");
@@ -269,24 +251,13 @@ public class Persons extends Controller {
 		if (Validation.hasErrors()) {
 			log.warn("validation errors for {}: {}", person,
 					validation.errorsMap());
-			flash.error("Impossibile salvare la persona %s, verificare i parametri",person);
+			flash.error("Correggere gli errori indicati.");
+			Validation.keep();
 			edit(person.id);
 		}
 		
 		rules.checkIfPermitted(person.office);
-		rules.checkIfPermitted(office);
 
-		if(office!=null) {
-			person.office = office;
-		}
-
-		Optional<Qualification> q = qualificationDao.byQualification(qualification);
-		if( !q.isPresent() ) {
-			flash.error("La qualifica selezionata non esiste. Operazione annullata");
-			list(null);
-		}
-		person.isPersonInCharge = isPersonInCharge;
-		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 

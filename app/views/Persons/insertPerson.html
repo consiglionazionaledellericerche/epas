@@ -2,24 +2,25 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Inserimento nuova persona' /}
 <div class="container">
-#{form @Persons.save()}
+#{form @Persons.save(),class:'form-horizontal'}
 
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
   </div>
   <div class="panel-body">
+    
+    #{field 'person.surname'}#{f.input field,required:'true'/}#{/field}
+    #{field 'person.name'}#{f.input field,required:'true'/}#{/field}
+    #{field 'person.number'}#{f.input field,type:'number'/}#{/field}
+    #{field 'person.badgeNumber'}#{f.input field/}#{/field}
+    #{field 'person.email'}#{f.input field,required:'true'/}#{/field}
 
-    <table class="table table-condensed table-form table-hover">
-    #{f.input_table 'person.surname', required:'true', type:'text' /}
-		#{f.input_table 'person.name', required:'true', type:'text'/}
-	 	#{f.input_table 'person.number', type:'number'/}
-	 	#{f.input_table 'person.badgeNumber', type:'text'/}
-		#{f.select_table 'qualification', value: qualification, items:templateUtility.allQualifications, required:'true'/}
-		#{f.select_table 'office', value: office, items:templateUtility.allOfficesAllowed, required:'true'/}
-    #{f.input_table 'person.email', type:'email' , required:'true' /}
-		#{f.checkbox_table 'person.wantEmail'/}
-	</table>
+    #{field 'person.qualification'}#{f.select field, items:templateUtility.allQualifications, required:'true'/}#{/field} 
+    #{field 'person.office'}#{f.select field, items:templateUtility.allOfficesAllowed, required:'true'/}#{/field} 
+
+    #{field 'person.wantEmail'}#{f.checkbox field/}#{/field} 
+    
     <p>
   	   Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
   	   <strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
@@ -34,13 +35,9 @@
     <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
   </div>
   <div class="panel-body">
-	
-   <table class="table table-condensed table-form table-hover">
-		
-     #{f.datepicker_table 'contract.beginContract', required:'true' /}
-   	 #{f.datepicker_table 'contract.expireContract' /}
-	 #{f.checkbox_table 'contract.onCertificate', required:'true' /}				
-   </table>
+  #{field 'contract.beginContract'}#{f.date field,required:'true'/}#{/field} 
+  #{field 'contract.expireContract'}#{f.date field/}#{/field} 
+  #{field 'contract.onCertificate'}#{f.checkbox field/}#{/field}
   	  
   	  <p>
   	    Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
@@ -56,16 +53,12 @@
     <h3 class="panel-title"><span class="badge">3</span> Altre informazioni (opzionali)</h3>
   </div>
   <div class="panel-body">
-	
-    <table class="table table-condensed table-form table-hover">
-      #{f.input_table 'person.telephone', type:'text' /}
-      #{f.datepicker_table 'person.birthday', type:'text' /}
-      #{f.input_table 'person.eppn', type:'text' /}
-    </table>
 
-    <p>
-      Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo. 
-     </p>
+	  #{field 'person.telephone'}#{f.input field/}#{/field}
+    #{field 'person.birthday'}#{f.date field/}#{/field} 
+    #{field 'person.eppn'}#{f.input field/}#{/field}
+
+    <p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
   </div>
 </div>
 
@@ -74,17 +67,20 @@
     <h3 class="panel-title"><span class="badge">4</span>Username</h3>
   </div>
   <div class="panel-body">
-  
-    <table class="table table-condensed table-form table-hover">
-  #{field 'userName'}
-  <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}' >
-    <label class="control-label" for="${field.id}">Scelta Username</label>
-    #{select field.id, id:field.id,class:'form-control'}
+
+ #{field 'user.username'}
+  <div class='form-group #{if field.error}has-error#{/if}' >
+    <label class="col-sm-3 control-label" for="${field.id}">Scelta Username*</label>
+    <div class="col-sm-6">
+    #{select field.name, id:field.id,value:field.value,class:'form-control'} 
     #{/select}
-    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+    </div>
+    #{if field.error}
+     <span class="help-block col-sm-3">&{field.error}</span>
+    #{/if}
   </div>
   #{/field}
-    </table>
+
 
   </div>
 </div>
@@ -102,14 +98,14 @@
 
  $(document).ready( function (){
 
-  generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
+  generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
   
-  $('#person\\.surname').change(function(){
-    generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
+  $('#person\\_surname').change(function(){
+    generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
   });
 
-  $('#person\\.name').change(function(){
-     generateUserName($("#person\\.name"),$("#person\\.surname"),$("#userName"));
+  $('#person\\_name').change(function(){
+     generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
   });
 
 });

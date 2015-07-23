@@ -51,6 +51,8 @@ person.wantEmail=Invio Email
 person.currentWorkingTimeType= Tipo Orario
 person.currentVacationPeriod= Ferie
 person.qualification= Livello
+person.office= Sede
+person.isPersonInCharge= Responsabile gruppo di lavoro
 
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
@@ -75,3 +77,11 @@ PDFReport.thIncompleteTime=Orario incompleto
 qualification=Livello
 
 office=Sede
+
+
+########################
+# Messaggi di validazione
+########################
+
+Required= Campo obbligatorio
+Invalid email address= Indirizzo email non valido
