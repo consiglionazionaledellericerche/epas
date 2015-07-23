@@ -18,6 +18,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
 import play.data.validation.Unique;
 
 import com.google.common.base.MoreObjects;
@@ -32,6 +33,7 @@ public class User extends BaseModel{
 	@Unique
 	@NotNull
 	@Column(nullable=false)
+	@Required
 	public String username;
 
 	public String password;

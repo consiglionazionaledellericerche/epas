@@ -1,0 +1,14 @@
+<div class='form-group #{if _arg.error}has-error has-feedback#{/if}'>
+	<label for="${_arg.id}" class="col-sm-3 control-label">&{_arg.name}#{if _required?:false}*#{/if}</label>
+	<div class="col-sm-6">
+      #{select _arg.name + '.id', value:_arg.value?.id, id:_arg.id,class:'form-control'}
+      	#{option}#{/option}
+		#{list _items}
+			#{option _.id}${_.label}#{/option}
+		#{/list}
+	  #{/select}
+    </div>
+    #{if _arg.error}
+     <span class="help-block col-sm-3">&{_arg.error}</span>
+    #{/if}
+</div>

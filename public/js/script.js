@@ -24,7 +24,7 @@ $(function($){
 		
 		
 		this.find('input[datepicker-year]').datepicker({
-			  format: "yyyy-mm-dd",
+			  format: "dd/mm/yyyy",
 			  startView: 2,
 			  todayBtn: "linked",
 			  language: "it",
@@ -42,11 +42,12 @@ $(function($){
 			});
 
 		this.find('input[datepicker]').datepicker({
-			  format: "yyyy-mm-dd",
+			  format: "dd/mm/yyyy",
 			  todayBtn: "linked",
 			  language: "it",
 			  autoclose: true,
-			  todayHighlight: true
+			  startDate: '-100y',
+			  endDate: '+100y'
 			});
 		
 		this.find('data-tooltip').tooltip();
@@ -231,6 +232,7 @@ function generateUserName(name,surname,username){
    username.empty(); // remove old options
 
    var options = [
+   {text: null,value:null},
    {text: name+'.'+surname, value: name+'.'+surname},
    {text: name.charAt(0)+'.'+surname, value: name.charAt(0)+'.'+surname},
    {text: name+'_'+surname, value: name+'_'+surname}
