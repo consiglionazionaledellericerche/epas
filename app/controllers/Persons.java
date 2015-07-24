@@ -35,8 +35,6 @@ import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -60,7 +58,6 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
@@ -73,7 +70,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 public class Persons extends Controller {
 
 	//	private final static String USERNAME_SESSION_KEY = "username";
-	private final static Logger log = LoggerFactory.getLogger(Persons.class);
 
 	@Inject
 	private static OfficeDao officeDao;
@@ -93,8 +89,6 @@ public class Persons extends Controller {
 	private static PersonManager personManager;
 	@Inject
 	private static ContractDao contractDao;
-	@Inject
-	private static QualificationDao qualificationDao;
 	@Inject
 	private static CompetenceManager competenceManager;
 	@Inject
@@ -244,7 +238,7 @@ public class Persons extends Controller {
 	}
 
 	public static void update(@Valid Person person){
-		
+		log.info("PERSON IN CHARGE {}",person.isPersonInCharge);
 		if(person==null) {
 			flash.error("La persona da modificare non esiste. Operazione annullata");
 			list(null);

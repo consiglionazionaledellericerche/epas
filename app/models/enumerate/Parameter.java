@@ -24,7 +24,7 @@ public enum Parameter {
 
 	EMAIL_TO_CONTACT("general", "email_to_contact", ""),	
 //	EMAIL_TO_CONTACT viene utilizzato per popolare il campo replyTo delle
-//	mail inviate dal sistema in base al destinatario
+//	mail inviate dal sistema in base all'ufficio del destinatario
 	
 	SEND_EMAIL("general", "send_email", "false"),			// attiva/disattiva l'invio delle mail dai job
 	
