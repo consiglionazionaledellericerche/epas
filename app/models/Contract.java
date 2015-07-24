@@ -66,7 +66,7 @@ public class Contract extends BaseModel {
 	@Column(name="source_remaining_meal_ticket")
 	public Integer sourceRemainingMealTicket = null;
 
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne()
 	@JoinColumn(name="person_id")
 	public Person person;
 
@@ -95,7 +95,7 @@ public class Contract extends BaseModel {
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
 	@NotAudited
-	@OneToMany(mappedBy="contract")
+	@OneToMany(mappedBy="contract", cascade = {CascadeType.REMOVE})
 	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 

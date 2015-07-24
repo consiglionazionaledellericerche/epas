@@ -293,8 +293,13 @@ public final class PersonDao extends DaoBase{
 	public Person getPersonById(Long personId) {
 
 		final QPerson person = QPerson.person;
+		final QContract contract = QContract.contract;
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
+		final JPQLQuery query = getQueryFactory()
+				.from(person)
+				.leftJoin(person.contracts, contract).fetchAll()
+				.where(person.id.eq(personId))
+				.distinct();
 
 		return query.singleResult(person);
 	}

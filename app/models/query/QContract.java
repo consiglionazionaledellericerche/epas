@@ -53,6 +53,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final QPerson person;
 
+    public final BooleanPath sourceByAdmin = createBoolean("sourceByAdmin");
+
     public final DatePath<org.joda.time.LocalDate> sourceDate = createDate("sourceDate", org.joda.time.LocalDate.class);
 
     public final NumberPath<Integer> sourcePermissionUsed = createNumber("sourcePermissionUsed", Integer.class);

@@ -36,7 +36,6 @@ public class MealTicket extends BaseModel{
 	public Integer quarter;
 
 	@Required
-
 	public LocalDate date;
 
 	@Required

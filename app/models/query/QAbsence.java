@@ -36,6 +36,8 @@ public class QAbsence extends EntityPathBase<Absence> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final NumberPath<Integer> justifiedMinutes = createNumber("justifiedMinutes", Integer.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
