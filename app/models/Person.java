@@ -9,6 +9,7 @@ import it.cnr.iit.epas.NullStringBinder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -127,7 +128,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 * i successivi due campi servono per la nuova relazione tra Person e Person 
 	 * relativa ai responsabili
 	 */
-	@OneToMany(mappedBy="personInCharge", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="personInCharge", fetch = FetchType.LAZY)
 	@OrderBy("surname")
     public List<Person> people = new ArrayList<Person>();
 	
@@ -154,19 +155,19 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 *  relazione con i turni
 	 */
-	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY)
 	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
 
 
 
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Contract> contracts = new ArrayList<Contract>();
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<Contract> contracts;
 
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<PersonChildren> personChildren;
 
 	/**
@@ -178,7 +179,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
-	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY)
 	public List<MealTicket> mealTicketsAdmin;
 
 	/**
@@ -212,7 +213,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
 	public PersonHourForOvertime personHourForOvertime;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public PersonReperibility reperibility;
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
