@@ -28,6 +28,7 @@ import models.Person;
 import models.PersonChildren;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
@@ -297,16 +298,16 @@ public class Persons extends Controller {
 
 		if(person.user != null) {
 
-			if(person.user.usersRolesOffices.size() > 0) {
-				flash.error("Impossibile eliminare una persona che detiene diritti di amministrazione su almeno una sede. Rimuovere tali diritti e riprovare.");
-				list(null);
-			}
-
 			if(person.user.username.equals(Security.getUser().get().username)) {
 
-				flash.error("Impossibile eliminare la persona loggata nella sessione corrente. Operazione annullata.");
+				flash.error("Impossibile eliminare la persona loggata "
+						+ "nella sessione corrente. Operazione annullata.");
 				list(null);
 			}
+		}
+		
+		for(UsersRolesOffices uro : person.user.usersRolesOffices) {
+			uro.delete();
 		}
 
 		String name = person.name;
@@ -365,7 +366,8 @@ public class Persons extends Controller {
 		}
 		JPAPlugin.closeTx(false);
 
-		flash.success("La persona %s %s eliminata dall'anagrafica insieme a tutti i suoi dati.",name, surname);
+		flash.success("La persona %s %s eliminata dall'anagrafica"
+				+ " insieme a tutti i suoi dati.",name, surname);
 
 		list(null);
 
