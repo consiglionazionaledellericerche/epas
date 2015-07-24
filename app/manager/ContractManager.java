@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
+import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -46,15 +49,17 @@ public class ContractManager {
 	@Inject
 	public ContractManager(ConfGeneralManager confGeneralManager,
 			ConsistencyManager consistencyManager, 
-			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
+			VacationManager vacationManager,
+			IWrapperFactory wrapperFactory, 
 			ContractDao contractDao, 
 			PersonDao personDao) {
 
 		this.confGeneralManager = confGeneralManager;
 		this.consistencyManager = consistencyManager;
-		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
+		this.vacationManager = vacationManager;
+		this.wrapperFactory = wrapperFactory;
 		this.contractDao = contractDao;
 		this.personDao = personDao;
 	}
@@ -62,9 +67,10 @@ public class ContractManager {
 	private final ConfGeneralManager confGeneralManager;
 	private final ConsistencyManager consistencyManager;
 	private final IWrapperFactory wrapperFactory;
-	private final VacationCodeDao vacationCodeDao;
 	private final ContractDao contractDao;
 	private final PersonDao personDao;
+	private final VacationCodeDao vacationCodeDao;
+	private final VacationManager vacationManager;
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	
@@ -157,6 +163,32 @@ public class ContractManager {
 		csp.fixedworkingtime = false;
 		csp.save();
 		contract.contractStampProfile.add(csp);
+		
+		//Se il contratto inizia prima di today inserisco un source fittizio alla
+		// data attuale che mi imposta tutti i residui a zero.
+		
+		IWrapperContract wcontract = wrapperFactory.create(contract);
+		
+		contract.sourceDate = LocalDate.now().minusDays(1);
+		
+		contract.sourceRemainingMealTicket = 0;
+		contract.sourceRemainingMinutesCurrentYear = 0;
+		contract.sourceRemainingMinutesLastYear = 0;
+
+		List<Absence> postPartum = Lists.newArrayList();
+		
+		contract.sourcePermissionUsed = vacationManager.getPermissionAccruedYear(wcontract, 
+				contract.sourceDate.getYear() , Optional.<LocalDate>absent());
+		
+		contract.sourceVacationLastYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+				contract.sourceDate.getYear() -1, Optional.<LocalDate>absent(), postPartum);
+				
+		contract.sourceVacationCurrentYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+				contract.sourceDate.getYear(), Optional.<LocalDate>absent(), postPartum);
+		
+		contract.sourceRecoveryDayUsed = 0;		
+		
+		contract.sourceByAdmin = false;
 		
 		contract.save();
 		
@@ -484,7 +516,13 @@ public class ContractManager {
 			for(ContractStampProfile csp : cspList){
 				csp.delete();
 			}
-
+			
+			// Eliminazione riepiloghi
+			List<ContractMonthRecap> cmrList = c.contractMonthRecaps;
+			for(ContractMonthRecap cmr : cmrList){
+				cmr.delete();
+			}
+			
 			c.delete();
 			person = personDao.getPersonById(person.id);
 			person.contracts.remove(c);

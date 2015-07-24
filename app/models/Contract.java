@@ -42,6 +42,9 @@ public class Contract extends BaseModel {
 	@Column(name="source_date")
 	public LocalDate sourceDate = null;
 
+	@Column(name="source_by_admin")
+	public boolean sourceByAdmin = false;
+	
 	@Column(name="source_vacation_last_year_used")
 	public Integer sourceVacationLastYearUsed = null;
 
