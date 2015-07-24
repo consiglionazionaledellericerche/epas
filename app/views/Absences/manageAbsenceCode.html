@@ -64,8 +64,8 @@
 			<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
 	
 			<td>${absenceCode.consideredWeekEnd == true ? 'Sì' : 'No'}</td>
-			<td>${absenceCode.validFrom}</td>
-			<td>${absenceCode.validTo}</td>
+			<td>${absenceCode.validFrom?.value()}</td>
+			<td>${absenceCode.validTo?.value()}</td>
 			<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
 			<td>
 				#{list absenceCode.qualifications}

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
@@ -25,7 +26,6 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
-import models.Qualification;
 import models.Role;
 import models.User;
 import models.VacationPeriod;
@@ -67,6 +67,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+@Slf4j
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
 
@@ -842,6 +843,7 @@ public class Persons extends Controller {
 		Preconditions.checkState(person.isPersistent());
 
 		if(Validation.hasErrors()) {
+			flash.error("Correggere gli errori riportati.");
 			render("@insertChild", person, child);
 		}
 
@@ -866,7 +868,7 @@ public class Persons extends Controller {
 		child.save();
 
 		log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}",
-				new Object[]{child.name, child.surname, person});
+				child.name, child.surname, person);
 		flash.success("Salvato figlio nell'anagrafica dei figli di %s", person.getFullname());
 
 		childrenList(person.id);

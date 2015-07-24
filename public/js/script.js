@@ -29,7 +29,9 @@ $(function($){
 			  todayBtn: "linked",
 			  language: "it",
 			  autoclose: true,
-			  todayHighlight: true
+			  todayHighlight: true,
+			  startDate: '-100y',
+			  endDate: '+100y'
 			});
 
 		this.find('input[datepicker-month]').datepicker({
@@ -68,12 +70,7 @@ $(function($){
 		});	
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
-		
 		this.find("a[data-popover]").popover();
-		this.find("input[data-datepicker]").datepicker();
-		this.find("#datepicker1" ).datepicker();
-		this.find(".datepicker" ).datepicker();
-		this.find("#datepicker3" ).datepicker();
 		
 		this.find('#myModal1').on('show', function () {
 			$('#myModal2').modal('hide');
