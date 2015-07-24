@@ -35,8 +35,8 @@
     <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
   </div>
   <div class="panel-body">
-  #{field 'contract.beginContract'}#{f.date field,required:'true'/}#{/field} 
-  #{field 'contract.expireContract'}#{f.date field/}#{/field} 
+  #{field 'contract.beginContract'}#{f.date field,view:'year',required:'true'/}#{/field} 
+  #{field 'contract.expireContract'}#{f.date field,view:'year'/}#{/field} 
   #{field 'contract.onCertificate'}#{f.checkbox field/}#{/field}
   	  
   	  <p>

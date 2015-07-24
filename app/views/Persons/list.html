@@ -52,8 +52,8 @@
 		#{/if}
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
-		<td><font color="#000000">${person.currentContract.get().beginContract}</font></td>
-		<td><font color="#000000">${person.currentContract.get().expireContract}</font></td>
+		<td><font color="#000000">${person.currentContract.get().beginContract?.value()}</font></td>
+		<td><font color="#000000">${person.currentContract.get().expireContract?.value()}</font></td>
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}

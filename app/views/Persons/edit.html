@@ -11,7 +11,6 @@
   #table-list-contract {
   	margin-top: 30px;
   	margin-bottom: 10px;
-  
   }
 </style>
 #{/set}
@@ -74,7 +73,7 @@
 			<div class="panel-body">
 
 				#{field 'person.telephone'}#{f.input field/}#{/field}
-				#{field 'person.birthday'}#{f.date field/}#{/field} 
+				#{field 'person.birthday'}#{f.date field,view:'year'/}#{/field} 
 				#{field 'person.eppn'}#{f.input field/}#{/field}
 
 				<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
@@ -279,8 +278,6 @@
   </div>  <!-- Fine pannello dati contrattuli -->
   
   
-  
-  
    <!-- Pannello 4 Elimina -->
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -293,8 +290,6 @@
    </div>
   </div>	<!-- Fine pannello 2 -->
   
-  
- 
 </div>
 
 #{include '_myModal.html' /}

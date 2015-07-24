@@ -39,6 +39,10 @@ Month.10=Ottobre
 Month.11=Novembre
 Month.12=Dicembre
 
+child.name= Nome
+child.surname= Cognome
+child.bornDate= Data di Nascita
+
 person.surname=Cognome
 person.name=Nome
 person.number=Matricola
