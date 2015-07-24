@@ -2,7 +2,8 @@
 	<div class="col-sm-offset-3 col-sm-8">
 		<div class="checkbox">
 			<label>
-				<input name="${_arg.name}" type="checkbox" title="${_title == null ? '' : _title}" #{if _arg.value}checked#{/if}/> &{_arg.name}
+				<input name="${_arg.name}" type="checkbox" 	${_arg.value ? 'checked' : ''} #{if _title}title='${_title}'#{/if}/> &{_arg.name}
+				<input name="${_arg.name}" type="hidden"  />
 			</label>
 		</div>
 	</div>
