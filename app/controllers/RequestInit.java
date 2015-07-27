@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDao.PersonLite;
 import dao.QualificationDao;
 import dao.UsersRolesOfficesDao;
 
@@ -360,20 +361,20 @@ public class RequestInit extends Controller {
 			
 			Set<Office> officeList = officeDao.getOfficeAllowed(user.get());
 			if(!officeList.isEmpty()) {
-				List<Person> persons = personDao
-						.getActivePersonInMonth(officeList, new YearMonth(year, month)); 	
-//				List<PersonLite> persons = personDao
-//						.liteList(officeList, year, month);
+				//List<Person> persons = personDao
+				//		.getActivePersonInMonth(officeList, new YearMonth(year, month)); 	
+				List<PersonLite> persons = personDao
+						.liteList(officeList, year, month);
 				renderArgs.put("navPersons", persons);
 			}
 		}  else {
 
 			List<Office> allOffices = officeDao.getAllOffices();
 			if (allOffices!=null && !allOffices.isEmpty()) {
-				List<Person> persons = personDao.getActivePersonInMonth(
-						Sets.newHashSet(allOffices), new YearMonth(year, month));
-//				List<PersonLite> persons = personDao
-//						.liteList(Sets.newHashSet(allOffices), year, month);
+				//List<Person> persons = personDao.getActivePersonInMonth(
+				//		Sets.newHashSet(allOffices), new YearMonth(year, month));
+				List<PersonLite> persons = personDao
+						.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
 			}
 		}

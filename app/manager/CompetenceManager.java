@@ -355,18 +355,6 @@ public class CompetenceManager {
 	}
 
 	/**
-	 * Viene utilizzata nella delete della persona nel controller Persons
-	 * @param person
-	 */
-	public void deletePersonCompetence(Person person){
-		for(Competence c : person.competences){
-			long id = c.id;
-			c = competenceDao.getCompetenceById(id);
-			c.delete();
-		}
-	}
-
-	/**
 	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
 	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
 	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.

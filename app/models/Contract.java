@@ -95,7 +95,7 @@ public class Contract extends BaseModel {
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
 	@NotAudited
-	@OneToMany(mappedBy="contract")
+	@OneToMany(mappedBy="contract", cascade = {CascadeType.REMOVE})
 	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 

@@ -26,6 +26,9 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
+import models.PersonDay;
+import models.PersonReperibility;
+import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -90,11 +93,7 @@ public class Persons extends Controller {
 	@Inject
 	private static ContractDao contractDao;
 	@Inject
-	private static CompetenceManager competenceManager;
-	@Inject
 	private static ContractStampProfileManager contractStampProfileManager;
-	@Inject
-	private static PersonDayManager personDayManager;
 	@Inject
 	private static UserDao userDao;
 	@Inject
@@ -238,7 +237,7 @@ public class Persons extends Controller {
 	}
 
 	public static void update(@Valid Person person){
-		log.info("PERSON IN CHARGE {}",person.isPersonInCharge);
+		
 		if(person==null) {
 			flash.error("La persona da modificare non esiste. Operazione annullata");
 			list(null);
@@ -265,6 +264,7 @@ public class Persons extends Controller {
 
 	public static void deletePerson(Long personId){
 		Person person = personDao.getPersonById(personId);
+
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -279,89 +279,43 @@ public class Persons extends Controller {
 	
 	@SuppressWarnings("deprecation")
 	public static void deletePersonConfirmed(Long personId){
+		
 		Person person = personDao.getPersonById(personId);
+		
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			list(null);
 		}
-
+		// FIX per oggetto in entityManager monco.
+		person.refresh();
+		
 		rules.checkIfPermitted(person.office);
-
-		/***** person.delete(); ******/
-
-		if(person.user != null) {
-
-			if(person.user.username.equals(Security.getUser().get().username)) {
-
-				flash.error("Impossibile eliminare la persona loggata "
-						+ "nella sessione corrente. Operazione annullata.");
-				list(null);
-			}
+		
+		// FIXME: se non spezzo in transazioni errore HashMap.
+		// Per adesso spezzo l'eliminazione della persona in tre fasi.
+		// person.delete() senza errore HashMap dovrebbe però essere sufficiente.
+		
+		for(Contract c : person.contracts) {
+			c.delete();
 		}
 		
-		for(UsersRolesOffices uro : person.user.usersRolesOffices) {
-			uro.delete();
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		person = personDao.getPersonById(personId);
+		
+		for(PersonDay pd : person.personDays) {
+			pd.delete();
 		}
-
-		String name = person.name;
-		String surname = person.surname;
-
-		log.debug("Elimino competenze...");
-		JPAPlugin.startTx(false);
-
-		// Eliminazione competenze
-		competenceManager.deletePersonCompetence(person);
-		JPAPlugin.closeTx(false);
-
-		// Eliminazione contratti
-		log.debug("Elimino contratti...");
-		JPAPlugin.startTx(false);
-		contractManager.deletePersonContracts(person);
-
-		// Eliminazione assenze e tempi da inizializzazione
-		contractManager.deleteInitializations(person);
-
-		JPAPlugin.closeTx(false);
-		log.debug("Elimino timbrature e dati mensili e annuali...");
-		JPAPlugin.startTx(false);
-		person = personDao.getPersonById(personId);
-		// Eliminazione figli in anagrafica
-		personManager.deletePersonChildren(person);
-
-		// Eliminazione person day
-		personDayManager.deletePersonDays(person);
-
+		
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
 		person = personDao.getPersonById(personId);
-		//Eliminazione riepiloghi annuali
-
-		// Eliminazione reperibilità turni e ore di formazione e riepiloghi annuali
-		personManager.deleteShiftReperibilityTrainingHoursAndYearRecap(person);
-
-		JPAPlugin.closeTx(false);
-
-		// Eliminazione persona e user
-		JPAPlugin.startTx(false);
-		person = personDao.getPersonById(personId);
-
-		Long userId = null;
-		if(person.user != null) {
-			userId = person.user.id;
-		}
+		
 		person.delete();
-		JPAPlugin.closeTx(false);
-
-		JPAPlugin.startTx(false);
-		if(userId != null) {
-			User user = userDao.getUserById(userId, Optional.<String>absent());
-			user.delete();
-		}
-		JPAPlugin.closeTx(false);
 
 		flash.success("La persona %s %s eliminata dall'anagrafica"
-				+ " insieme a tutti i suoi dati.",name, surname);
+				+ " insieme a tutti i suoi dati.",person.name, person.surname);
 
 		list(null);
 

@@ -293,8 +293,13 @@ public final class PersonDao extends DaoBase{
 	public Person getPersonById(Long personId) {
 
 		final QPerson person = QPerson.person;
+		final QContract contract = QContract.contract;
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
+		final JPQLQuery query = getQueryFactory()
+				.from(person)
+				.leftJoin(person.contracts, contract).fetchAll()
+				.where(person.id.eq(personId))
+				.distinct();
 
 		return query.singleResult(person);
 	}
@@ -726,7 +731,9 @@ public final class PersonDao extends DaoBase{
 				.distinct();
 		contracts = query2b.where(condition).list(contract);
 		// TODO: riportare a List tutte le relazioni uno a molti di contract
-		// e inserire singolarmente la fetch.
+		// e inserire singolarmente la fetch. 
+		// TODO 2: in realtà questo è opinabile. Anche i Set 
+		// sono semanticamente corretti. Decidere. 
 
 		if(person.isPresent()) {
 		//Fetch dei tipi orario associati ai contratti (verificare l'utilità)
@@ -740,17 +747,15 @@ public final class PersonDao extends DaoBase{
 
 	/**
 	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
-	 * appartenenti ad un office in offices. 
+	 * appartenenti ad un office in offices.
 	 * 
-	 * Deprecata. Ma Buon esempio di query dsl con proiezione del risultato
-	 * in DTO.
+	 * Importante: utile perchè non sporca l'entity manager con oggetti parziali.
 	 * 
 	 * @param offices
 	 * @param year
 	 * @param month
 	 * @return
 	 */
-	@Deprecated
 	public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
 		
 		final QPerson person = QPerson.person;
@@ -780,7 +785,6 @@ public final class PersonDao extends DaoBase{
 	 * Dto contenente le sole informazioni della persona
 	 * richieste dalla select nel template menu.
 	 */
-	@Deprecated
 	public static class PersonLite {
 		
 		public Long id;
