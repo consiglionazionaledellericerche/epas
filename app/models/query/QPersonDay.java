@@ -32,6 +32,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 
+    public final NumberPath<Integer> decurted = createNumber("decurted", Integer.class);
+
     public final NumberPath<Integer> difference = createNumber("difference", Integer.class);
 
     //inherited

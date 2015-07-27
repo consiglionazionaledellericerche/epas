@@ -36,7 +36,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
 
-    public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
+    public final SetPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createSet("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
 
     public final StringPath email = createString("email");
 
@@ -51,10 +51,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final NumberPath<Long> id = _super.id;
 
     public final NumberPath<Integer> iId = createNumber("iId", Integer.class);
-
-    public final ListPath<models.InitializationAbsence, QInitializationAbsence> initializationAbsences = this.<models.InitializationAbsence, QInitializationAbsence>createList("initializationAbsences", models.InitializationAbsence.class, QInitializationAbsence.class, PathInits.DIRECT2);
-
-    public final ListPath<models.InitializationTime, QInitializationTime> initializationTimes = this.<models.InitializationTime, QInitializationTime>createList("initializationTimes", models.InitializationTime.class, QInitializationTime.class, PathInits.DIRECT2);
 
     public final BooleanPath isPersonInCharge = createBoolean("isPersonInCharge");
 
@@ -77,7 +73,7 @@ public class QPerson extends EntityPathBase<Person> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createList("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
+    public final SetPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createSet("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
 
     public final ListPath<models.PersonDay, QPersonDay> personDays = this.<models.PersonDay, QPersonDay>createList("personDays", models.PersonDay.class, QPersonDay.class, PathInits.DIRECT2);
 

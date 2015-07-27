@@ -216,46 +216,6 @@ public class Administration extends Controller {
 		//		exportToYaml.writeToYamlFile("Roles"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Role.findAll()));
 	}
 	
-	public static void killclock()
-	{
-		Person person = Person.find("byName", "epas").first();
-	
-	
-		//destroy person day in trouble
-		List<PersonDay> pdList = PersonDay.find("select pd from PersonDay pd where pd.person = ?", person).fetch();
-		for(PersonDay pd : pdList)
-		{
-			while(pd.troubles.size()>0)
-			{
-				PersonDayInTrouble pdt = pd.troubles.get(0);
-				pd.troubles.remove(pdt);
-				pdt.delete();
-				pd.save();
-			}
-		}
-	
-		//destroy person day
-		while(pdList.size()>0)
-		{
-			PersonDay pd = pdList.get(0);
-			pdList.remove(pd);
-			pd.delete();
-		}
-	
-		//destroy contracts
-		while(person.contracts.size()>0)
-		{
-			Contract c = person.contracts.get(0);
-			person.contracts.remove(c);
-			c.delete();
-			person.save();
-		}
-	
-		person.save();
-	
-		renderText(person.name);
-	}
-	
 	public static void updateExceedeMinInCompetenceTable() {
 		competenceUtility.updateExceedeMinInCompetenceTable();
 		renderText("OK");
