@@ -44,8 +44,6 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final ListPath<models.InitializationAbsence, QInitializationAbsence> initializationAbsences = this.<models.InitializationAbsence, QInitializationAbsence>createList("initializationAbsences", models.InitializationAbsence.class, QInitializationAbsence.class, PathInits.DIRECT2);
-
     public final BooleanPath internalUse = createBoolean("internalUse");
 
     public final EnumPath<models.enumerate.JustifiedTimeAtWork> justifiedTimeAtWork = createEnum("justifiedTimeAtWork", models.enumerate.JustifiedTimeAtWork.class);
