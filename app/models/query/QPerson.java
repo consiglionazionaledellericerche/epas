@@ -36,7 +36,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
 
-    public final SetPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createSet("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
+    public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
 
     public final StringPath email = createString("email");
 

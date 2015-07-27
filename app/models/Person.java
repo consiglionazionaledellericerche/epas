@@ -151,7 +151,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@NotAudited
 	@OneToMany(mappedBy="person",fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public Set<Contract> contracts;
+	public List<Contract> contracts;
 
 	/**
 	 * relazione con la tabella dei figli del personale
