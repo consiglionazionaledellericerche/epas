@@ -8,16 +8,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.InitializationAbsence;
-import models.InitializationTime;
-import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;

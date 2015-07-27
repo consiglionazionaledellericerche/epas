@@ -10,15 +10,11 @@ import javax.persistence.EntityManager;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.InitializationAbsence;
-import models.InitializationTime;
 import models.Person;
 import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
-import models.query.QInitializationAbsence;
-import models.query.QInitializationTime;
 
 import org.joda.time.LocalDate;
 
@@ -169,55 +165,6 @@ public class ContractDao extends DaoBase{
 		return query.singleResult(csp);
 	}
 
-
-
-	/******************************************************************************************************************************************/
-	/*Inserisco in questa parte del Dao le query relative agli InitializationTime per evitare di creare una classe specifica che contenga     */
-	/*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
-	/******************************************************************************************************************************************/
-
-	/**
-	 * 
-	 * @param person
-	 * @return l'initializationTime relativo alla persona passata come parametro
-	 */
-	public InitializationTime getInitializationTime(Person person){
-		QInitializationTime init = QInitializationTime.initializationTime;
-		final JPQLQuery query = getQueryFactory().from(init)
-				.where(init.person.eq(person));
-		return query.singleResult(init);
-
-	}
-
-	/**
-	 * 
-	 * @param id
-	 * @return l'initializationTime relativo all'id passato come parametro
-	 */
-	public InitializationTime getInitializationTimeById(Long id){
-		QInitializationTime init = QInitializationTime.initializationTime;
-		final JPQLQuery query = getQueryFactory().from(init)
-				.where(init.id.eq(id));
-		return query.singleResult(init);
-	}
-
-
-	/******************************************************************************************************************************************/
-	/*Inserisco in questa parte del Dao le query relative agli InitializationAbsence per evitare di creare una classe specifica che contenga  */
-	/*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
-	/******************************************************************************************************************************************/
-
-	/**
-	 * 
-	 * @param id
-	 * @return l'initializationTime relativo all'id passato come parametro
-	 */
-	public InitializationAbsence getInitializationAbsenceById(Long id){
-		QInitializationAbsence init = QInitializationAbsence.initializationAbsence;
-		final JPQLQuery query = getQueryFactory().from(init)
-				.where(init.id.eq(id));
-		return query.singleResult(init);
-	}
 
 	/******************************************************************************************************************************************/
 	/*Inserisco in questa parte del Dao le query relative ai ContractWorkingTimeType per evitare di creare una classe specifica che contenga  */
