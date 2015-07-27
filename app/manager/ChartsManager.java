@@ -432,7 +432,7 @@ public class ChartsManager {
 
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
-				contractList = p.contracts;
+				contractList.addAll(p.contracts);
 
 			for (Contract contract : contractList){
 				if (beginContract != null && beginContract.equals(contract.beginContract)){
