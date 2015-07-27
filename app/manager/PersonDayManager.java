@@ -66,24 +66,17 @@ public class PersonDayManager {
 	 */
 	public boolean isAllDayAbsences(PersonDay pd) {
 		
-		if(pd.absences.size() == 0) {
-			return false;
-		}
-		
-		if(pd.absences.size() == 1) {
-
-			Absence abs = pd.absences.get(0);
-			
+		for (Absence abs : pd.absences){
 			// TODO: per adesso il telelavoro lo considero come giorno lavorativo
 			// normale. Chiedere ai romani.
 			if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
 				return false;
 			}
-			
-			return abs.justifiedMinutes == null //eludo PIPE, RITING etc...
-					&& abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay);
+			else if(abs.justifiedMinutes == null //eludo PIPE, RITING etc...
+					&& abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)){
+				return true;
+			}
 		}
-		
 		return false;
 	}
 
@@ -161,6 +154,7 @@ public class PersonDayManager {
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
 			
+//			FIXME BUG IN ALCUNI CODICI (VEDI 09B 13 LUGLIO SANNICANDRO)
 			// Caso di assenza giornaliera.  
 			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
 					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
@@ -796,7 +790,7 @@ public class PersonDayManager {
 			}
 
 			//caso no festa, no assenze, timbrature disaccoppiate
-			if(!isAllDayAbsences(pd.getValue()) && !pd.getValue().isHoliday)
+			if(!pd.getValue().isHoliday && !isAllDayAbsences(pd.getValue()))
 			{
 				computeValidStampings(pd.getValue());
 

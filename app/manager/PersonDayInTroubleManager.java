@@ -1,5 +1,6 @@
 package manager;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
+import dao.wrapper.IWrapperFactory;
 
 public class PersonDayInTroubleManager {
 
@@ -38,14 +40,16 @@ public class PersonDayInTroubleManager {
 	public PersonDayInTroubleManager(
 			PersonDayInTroubleDao personDayInTroubleDao,
 			ConfGeneralManager confGeneralManager, 
-			PersonDayDao personDayDao, ContractDao contractDao) {
+			PersonDayDao personDayDao, ContractDao contractDao,
+			IWrapperFactory factory) {
 
 		this.contractDao = contractDao;
 		this.personDayInTroubleDao = personDayInTroubleDao;
 		this.confGeneralManager = confGeneralManager;
+		this.factory = factory;
 	}
 
-	
+	private final IWrapperFactory factory;
 	private final ContractDao contractDao;
 	private final PersonDayInTroubleDao personDayInTroubleDao;
 	private final ConfGeneralManager confGeneralManager;
@@ -96,26 +100,30 @@ public class PersonDayInTroubleManager {
 			log.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
 			return;
 		}
-
-		List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
+		
+		Contract currentActiveContract = factory.create(p).getCurrentContract().orNull();
+//		Se la persona e' fuori contratto non si prosegue con i controlli
+		if(currentActiveContract == null){
+			return;
+		}
+		
+		DateInterval intervalToCheck = DateUtility.intervalIntersection(
+				factory.create(currentActiveContract).getContractDateInterval(),
+				new DateInterval(begin, end));
+		
+		List<PersonDayInTrouble> pdList = personDayInTroubleDao
+				.getPersonDayInTroubleInPeriod(p, intervalToCheck.getBegin(),
+						intervalToCheck.getEnd(), false);
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
+		
 
 		for(PersonDayInTrouble pdt : pdList){
 
-			Contract contract = contractDao.getContract(pdt.personDay.date, pdt.personDay.person);
-			if(contract == null) {
+			Optional<ContractStampProfile> csp = currentActiveContract
+					.getContractStampProfileFromDate(pdt.personDay.date);
 
-				log.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: {} - Data: {}",
-						p.getFullname(), pdt.personDay.date);
-				continue;
-			}
-
-			Optional<ContractStampProfile> csp = contract.getContractStampProfileFromDate(pdt.personDay.date);
-
-			Preconditions.checkState(csp.isPresent());
-
-			if(csp.get().fixedworkingtime == true) {
+			if(csp.isPresent() && csp.get().fixedworkingtime == true) {
 				continue;
 			}
 
