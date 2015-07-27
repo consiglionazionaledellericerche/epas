@@ -144,31 +144,20 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public boolean isPersonInCharge;
 
 	/**
-	 * relazione con la tabella delle assenze iniziali
-	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
-
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
-
-	/**
 	 *  relazione con i turni
 	 */
 	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY)
 	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
 
-
-
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-	public List<Contract> contracts;
+	@OneToMany(mappedBy="person",fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public Set<Contract> contracts;
 
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-	public List<PersonChildren> personChildren;
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public Set<PersonChildren> personChildren;
 
 	/**
 	 * relazione con la nuova tabella dei person day

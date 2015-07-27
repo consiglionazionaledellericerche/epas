@@ -301,6 +301,7 @@ public class Persons extends Controller {
 
 	public static void deletePerson(Long personId){
 		Person person = personDao.getPersonById(personId);
+
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -318,116 +319,41 @@ public class Persons extends Controller {
 		
 		Person person = personDao.getPersonById(personId);
 		
-		List<Contract> contracts = person.contracts;
+		if(person == null) {
+
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			list(null);
+		}
+		// FIX per oggetto in entityManager monco.
+		person.refresh();
 		
-		List<Contract> contractssss = contractDao.getPersonContractList(person);
+		rules.checkIfPermitted(person.office);
+		
+		// FIXME: se non spezzo in transazioni errore HashMap.
+		// Per adesso spezzo l'eliminazione della persona in tre fasi.
+		// person.delete() senza errore HashMap dovrebbe però essere sufficiente.
 		
 		for(Contract c : person.contracts) {
 			c.delete();
 		}
 		
-		//JPAPlugin.closeTx(false);
-		//JPAPlugin.startTx(false);
-		//person = personDao.getPersonById(personId);
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		person = personDao.getPersonById(personId);
 		
-		//for(PersonDay pd : person.personDays) {
-			//pd.delete();
-		//}
+		for(PersonDay pd : person.personDays) {
+			pd.delete();
+		}
 		
-//		JPAPlugin.closeTx(false);
-//		JPAPlugin.startTx(false);
-//		person = personDao.getPersonById(personId);
-		
-		//person.reperibility.delete();
-		
-//		JPAPlugin.closeTx(false);
-//		JPAPlugin.startTx(false);
-//		person = personDao.getPersonById(personId);
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		person = personDao.getPersonById(personId);
 		
 		person.delete();
-//		if(person == null) {
-//
-//			flash.error("La persona selezionata non esiste. Operazione annullata");
-//			list(null);
-//		}
-//
-//		rules.checkIfPermitted(person.office);
-//
-//		/***** person.delete(); ******/
-//
-//		if(person.user != null) {
-//
-//			if(person.user.username.equals(Security.getUser().get().username)) {
-//
-//				flash.error("Impossibile eliminare la persona loggata "
-//						+ "nella sessione corrente. Operazione annullata.");
-//				list(null);
-//			}
-//		}
-//		
-//		for(UsersRolesOffices uro : person.user.usersRolesOffices) {
-//			uro.delete();
-//		}
-//
-//		String name = person.name;
-//		String surname = person.surname;
-//
-//		log.debug("Elimino competenze...");
-//		JPAPlugin.startTx(false);
-//
-//		// Eliminazione competenze
-//		competenceManager.deletePersonCompetence(person);
-//		JPAPlugin.closeTx(false);
-//
-//		// Eliminazione contratti
-//		log.debug("Elimino contratti...");
-//		JPAPlugin.startTx(false);
-//		contractManager.deletePersonContracts(person);
-//
-//		// Eliminazione assenze e tempi da inizializzazione
-//		contractManager.deleteInitializations(person);
-//
-//		JPAPlugin.closeTx(false);
-//		log.debug("Elimino timbrature e dati mensili e annuali...");
-//		JPAPlugin.startTx(false);
-//		person = personDao.getPersonById(personId);
-//		// Eliminazione figli in anagrafica
-//		personManager.deletePersonChildren(person);
-//
-//		// Eliminazione person day
-//		personDayManager.deletePersonDays(person);
-//
-//		JPAPlugin.closeTx(false);
-//		JPAPlugin.startTx(false);
-//		person = personDao.getPersonById(personId);
-//		//Eliminazione riepiloghi annuali
-//
-//		// Eliminazione reperibilità turni e ore di formazione e riepiloghi annuali
-//		personManager.deleteShiftReperibilityTrainingHoursAndYearRecap(person);
-//
-//		JPAPlugin.closeTx(false);
-//
-//		// Eliminazione persona e user
-//		JPAPlugin.startTx(false);
-//		person = personDao.getPersonById(personId);
-//
-//		Long userId = null;
-//		if(person.user != null) {
-//			userId = person.user.id;
-//		}
-//		person.delete();
-//		JPAPlugin.closeTx(false);
-//
-//		JPAPlugin.startTx(false);
-//		if(userId != null) {
-//			User user = userDao.getUserById(userId, Optional.<String>absent());
-//			user.delete();
-//		}
-//		JPAPlugin.closeTx(false);
-//
-//		flash.success("La persona %s %s eliminata dall'anagrafica"
-//				+ " insieme a tutti i suoi dati.",name, surname);
-//
+
+		flash.success("La persona %s %s eliminata dall'anagrafica"
+				+ " insieme a tutti i suoi dati.",person.name, person.surname);
+
 		list(null);
 
 	}

@@ -114,36 +114,6 @@ public class PersonManager {
 	}
 
 	/**
-	 * utilizzata nel metodo delete del controller Persons per cancellare gli eventuali figli della persona passata come parametro
-	 * @param person
-	 */
-	public void deletePersonChildren(Person person){
-		for(PersonChildren pc : person.personChildren){
-			long id = pc.id;
-			log.debug("Elimino figli di {}", person.getFullname());
-			pc = personChildrenDao.getById(id);
-			pc.delete();
-		}
-	}
-
-	/**
-	 * Utilizzato nel metodo delete del controller Persons per eleminare turni, reperibilità, ore di formazione e riepiloghi annuali
-	 * per la persona person
-	 * @param person
-	 */
-	public void deleteShiftReperibilityTrainingHoursAndYearRecap(Person person){
-		if(person.personHourForOvertime != null)
-			person.personHourForOvertime.delete();
-		if(person.personShift != null)
-			person.personShift.delete();
-		if(person.reperibility != null)
-			person.reperibility.delete();
-		for(PersonYear py : person.personYears){
-			py.delete();
-		}
-	}
-
-	/**
 	 * 
 	 * @return false se l'id passato alla funzione non trova tra le persone presenti in anagrafica, una che avesse nella vecchia applicazione un id
 	 * uguale a quello che la sequence postgres genera automaticamente all'inserimento di una nuova persona in anagrafica.

@@ -66,7 +66,7 @@ public class Contract extends BaseModel {
 	@Column(name="source_remaining_meal_ticket")
 	public Integer sourceRemainingMealTicket = null;
 
-	@ManyToOne()
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
 
