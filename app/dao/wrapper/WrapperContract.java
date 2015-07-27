@@ -120,6 +120,16 @@ public class WrapperContract implements IWrapperContract {
 			return new DateInterval(value.sourceDate.plusDays(1),
 					contractInterval.getEnd());
 		}
+		
+		Optional<LocalDate> dateInitUse = confGeneralManager
+				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, value.person.office);
+		if(dateInitUse.isPresent() ) {
+			
+			if(dateInitUse.get().isAfter(contractInterval.getBegin())) {
+				return new DateInterval(dateInitUse.get(), contractInterval.getEnd());
+			}
+		}
+		
 		return contractInterval;
 	}
 	

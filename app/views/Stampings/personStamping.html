@@ -136,7 +136,7 @@
 		<td class="invisible"></td>
 		
 		<td class="assenza default-single">
-		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.toString())}" data-modal=".my-modal">
+		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.personDay.date.value())}" data-modal=".my-modal">
 		  ___
 		  </a>
 		  
@@ -195,7 +195,24 @@
 		<td class="invisible"></td>
 		
 	    <td class="tempoLavoro default-single">
+		 
 		  ${dayRecap.workTime}
+		  #{if dayRecap.personDay.decurted != null}
+			  <a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="${(
+	    		'Tempo Totale Timbrature: <strong>'+dayRecap.stampingWorkingTime+'</strong>'+
+	    		'<br>Tempo Sottratto Per Pausa Pranzo: <strong>'+dayRecap.personDay.decurted+' minuti</strong>').escape()}"
+	    		title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
+			  </a>
+		  #{/if}
+		  #{else}
+		     
+		  #{/else}
+		  
+		  
 		  #{ifnot dayRecap.todayLunchTimeCode.equals("")}
 		    <strong>${dayRecap.todayLunchTimeCode}</strong>
 		  #{/ifnot}

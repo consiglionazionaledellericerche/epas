@@ -6,11 +6,9 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import models.ConfGeneral;
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;
-import models.enumerate.Parameter;
 import models.query.QOffice;
 
 import com.google.common.base.Function;
@@ -35,14 +33,12 @@ import dao.wrapper.IWrapperOffice;
 public class OfficeDao extends DaoBase {
 
 	private final IWrapperFactory wrapperFactory;
-	private final ConfGeneralDao confGeneralDao;
 
 	@Inject
-	OfficeDao(IWrapperFactory wrapperFactory,ConfGeneralDao confGeneralDao,
+	OfficeDao(IWrapperFactory wrapperFactory,
 			JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 		this.wrapperFactory = wrapperFactory;
-		this.confGeneralDao = confGeneralDao;
 	}
 
 	/**
@@ -248,18 +244,4 @@ public class OfficeDao extends DaoBase {
 				.where(condition).exists();
 	}
 
-	public Set<Office> getOfficesWithAllowedIp(String ip){
-
-		Preconditions.checkNotNull(ip);
-
-		return FluentIterable.from(confGeneralDao.containsValue(
-				Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
-						new Function<ConfGeneral, Office>() {
-
-							@Override
-							public Office apply(ConfGeneral input) {
-								return input.office;
-							}
-						}).toSet();
-	}
 }

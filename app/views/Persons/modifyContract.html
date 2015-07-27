@@ -11,20 +11,20 @@
 	<!-- Begin contract -->
 	<tr>
 		<td class="lab"><strong>Data inizio contratto</strong></td>
-		<td><input name="begin" type="text" datepicker value="${contract.beginContract}"/></td>
+		<td><input name="begin" type="text" datepicker-year value="${contract.beginContract?.value()}"/></td>
 
 	</tr>
 	
 	<!-- Expire contract -->
 	<tr>
 		<td class="lab"><strong>Data fine contratto</strong></td>
-		<td><input name="expire" type="text" datepicker value="${contract.expireContract}" /></td>
+		<td><input name="expire" type="text" datepicker-year value="${contract.expireContract?.value()}" /></td>
 	</tr>
 	
 	<!-- End contract -->
 	<tr>
 		<td class="lab"><strong>Data terminazione contratto<br>(causa morte, pensione...)</strong></td>
-		<td><input name="end" type="text" datepicker value="${contract.endContract}" /></td>
+		<td><input name="end" type="text" datepicker-year value="${contract.endContract?.value()}" /></td>
 	</tr>
 	
 	<!-- On certificate -->

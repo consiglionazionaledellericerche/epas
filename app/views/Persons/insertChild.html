@@ -11,7 +11,7 @@
   padding-top: 3em;
 }
 form > legend{
-  margin-top: 5em;
+  margin-top: 2em;
 }
 </style>
 #{/set}
@@ -22,38 +22,13 @@ form > legend{
   </div>
 <div class="panel-body">
 
-#{form @Persons.saveChild(),role:'form'}
+#{form @Persons.saveChild(),class:'form-horizontal'}
 <input type="hidden" name="person.id" value="${person.id}"/>
-<input type="hidden" name="child.id" value="${child?.id}"/>
+<input type="hidden" name="child.id" value="${child.id}"/>
 
-
-  #{field 'child.name'}
-  <div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
-    <label class="control-label" for="${field.id}">Nome</label>
-    <input class="form-control" id="${field.id}" type="text" name="${field.name}" value="${field.value}" >
-    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-  </div>
-  #{/field}
-
-  #{field 'child.surname'}
-  <div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
-    <label class="control-label" for="${field.id}">Cognome</label>
-    <input class="form-control" id="${field.id}" type="text" name="${field.name}" value="${field.value}">
-    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-  </div>
-  #{/field}
-
-  #{field 'child.bornDate'}
-    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data di Nascita</label>
-      <div class="input-group">
-        <input datepicker-year class="form-control" placeholder="yyyy-mm-dd" id="${field.id}" type="text" name="${field.name}" value="${field.value}">
-        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-      </div>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-  #{/field}
-
+#{field 'child.name'}#{f.input field/}#{/field}
+#{field 'child.surname'}#{f.input field/}#{/field}
+#{field 'child.bornDate'}#{f.date field,view:'year'/}#{/field} 
 <legend></legend>
 <button type="submit" class="btn btn-primary col-sm-4 col-sm-offset-4">Salva</button>
 

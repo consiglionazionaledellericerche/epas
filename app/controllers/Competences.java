@@ -81,6 +81,14 @@ public class Competences extends Controller{
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
+		
+		//Redirect in caso di mese futuro
+		LocalDate today = LocalDate.now();
+		if (today.getYear() == year && month > today.getMonthOfYear()) {
+			flash.error("Impossibile accedere a situazione futura, "
+					+ "redirect automatico a mese attuale");
+			competences(year, today.getMonthOfYear());
+		}
 
 		Person person = user.get().person;
 

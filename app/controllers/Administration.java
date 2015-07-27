@@ -11,7 +11,6 @@ import jobs.RemoveInvalidStampingsJob;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import models.AbsenceType;
-import models.ConfGeneral;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -30,7 +29,6 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
@@ -216,46 +214,6 @@ public class Administration extends Controller {
 		//		exportToYaml.writeToYamlFile("Users"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(User.findAll()));
 		//		exportToYaml.writeToYamlFile("Permission"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Permission.findAll()));
 		//		exportToYaml.writeToYamlFile("Roles"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Role.findAll()));
-	}
-	
-	public static void killclock()
-	{
-		Person person = Person.find("byName", "epas").first();
-	
-	
-		//destroy person day in trouble
-		List<PersonDay> pdList = PersonDay.find("select pd from PersonDay pd where pd.person = ?", person).fetch();
-		for(PersonDay pd : pdList)
-		{
-			while(pd.troubles.size()>0)
-			{
-				PersonDayInTrouble pdt = pd.troubles.get(0);
-				pd.troubles.remove(pdt);
-				pdt.delete();
-				pd.save();
-			}
-		}
-	
-		//destroy person day
-		while(pdList.size()>0)
-		{
-			PersonDay pd = pdList.get(0);
-			pdList.remove(pd);
-			pd.delete();
-		}
-	
-		//destroy contracts
-		while(person.contracts.size()>0)
-		{
-			Contract c = person.contracts.get(0);
-			person.contracts.remove(c);
-			c.delete();
-			person.save();
-		}
-	
-		person.save();
-	
-		renderText(person.name);
 	}
 	
 	public static void updateExceedeMinInCompetenceTable() {

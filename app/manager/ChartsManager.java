@@ -43,7 +43,6 @@ import controllers.Security;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
-import dao.ConfGeneralDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -52,12 +51,12 @@ import dao.wrapper.IWrapperPerson;
 public class ChartsManager {
 
 	@Inject
-	public ChartsManager(ConfGeneralDao confGeneralDao,
-			CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao,
-			CompetenceManager competenceManager, PersonDao personDao,
-			VacationsRecapFactory vacationsFactory,
-			AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
-		this.confGeneralDao = confGeneralDao;
+	public ChartsManager(CompetenceCodeDao competenceCodeDao,
+			CompetenceDao competenceDao,CompetenceManager competenceManager, 
+			PersonDao personDao,VacationsRecapFactory vacationsFactory,
+			AbsenceDao absenceDao, ConfGeneralManager confGeneralManager,
+			IWrapperFactory wrapperFactory) {
+		this.confGeneralManager = confGeneralManager;
 		this.competenceCodeDao = competenceCodeDao;
 		this.competenceDao = competenceDao;
 		this.competenceManager = competenceManager;
@@ -68,8 +67,8 @@ public class ChartsManager {
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(ChartsManager.class);
-
-	private final ConfGeneralDao confGeneralDao;
+	
+	private final ConfGeneralManager confGeneralManager;
 	private final CompetenceCodeDao competenceCodeDao;
 	private final CompetenceDao competenceDao;
 	private final CompetenceManager competenceManager;
@@ -162,14 +161,13 @@ public class ChartsManager {
 		List<Year> annoList = Lists.newArrayList();
 		Integer yearBegin = null;
 		int counter = 0;
-		Optional<ConfGeneral> yearInitUseProgram = confGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description, office);
-		if(yearInitUseProgram.isPresent()){
-			counter++;			
-			LocalDate date = new LocalDate(yearInitUseProgram.get().fieldValue);
-			yearBegin =  date.getYear();
-			annoList.add(new Year(counter, yearBegin));
 
-		}
+		ConfGeneral yearInitUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
+		counter++;			
+		LocalDate date = new LocalDate(yearInitUseProgram.fieldValue);
+		yearBegin =  date.getYear();
+		annoList.add(new Year(counter, yearBegin));
+
 		if(yearBegin != null){			
 			for(int i = yearBegin; i <= LocalDate.now().getYear(); i++){
 				counter++;
@@ -434,7 +432,7 @@ public class ChartsManager {
 
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
-				contractList = p.contracts;
+				contractList.addAll(p.contracts);
 
 			for (Contract contract : contractList){
 				if (beginContract != null && beginContract.equals(contract.beginContract)){

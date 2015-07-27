@@ -59,7 +59,7 @@
 	          </tr>
 		      #{list items:totalList, as:'tot'}
 	          <tr>
-	            <td>${tot.date}</td>
+	            <td>${tot.date?.value()}</td>
 	            <td>${tot.numberOfHours}</td>
 	          </tr>
 	          #{/list}

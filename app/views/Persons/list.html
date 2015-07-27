@@ -4,7 +4,7 @@
 
 #{set 'moreStyles'}
   <style>
-    td.personName { text-align: left !important; }
+    td.alignLeft { text-align: left !important; }
   </style>
 #{/set}
 
@@ -24,20 +24,19 @@
 <table class="datatable-test table table-striped table-hover table-condensed center">
     <thead>
 	  <tr>
-		<th>Nome</th>
-		<th>Matricola</th>
-		<th>Matricola<br> Badge</th>
-		<th>Data inizio<br> lavoro</th>
-		<th>Data fine<br> lavoro</th>
-		<th>Orario</th>
-		<th>Ferie</th>
-		<th>Livello</th>
-		<th>Timbratura<br>Default</th>
-		<th>Email</th>
-		<th>Contatti</th>
+		<th>&{'person.name'}</th>
+		<th>&{'person.number'}</th>
+		<th>&{'person.badgeNumber'}</th>
+		<th>&{'contract.beginContract'}</th>
+		<th>&{'contract.expireContract'}</th>
+		<th>&{'person.currentWorkingTimeType'}</th>
+		<th>&{'person.currentVacationPeriod'}</th>
+		<th>&{'person.qualification'}</th>
+		<th>&{'contractStampProfile.fixedworkingtime'}</th>
+		<th>&{'person.email'}</th>
+		<th>&{'person.telephone'}</th>
 		<th>Dati<br> Iniziali</th>
-		<th>Invio<br> Email</th>
-		<th>Note</th>
+		<th>&{'person.wantEmail'}</th>
 		#{if switchUser}<th></th>#{/if}
 	  </tr>
 	</thead>
@@ -46,15 +45,15 @@
 	 
 	 #{if person.currentContract.present}
 	   <tr>
-	 	<td class="personName success">
+	 	<td class="alignLeft success">
 		<a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
 		#{if person.currentContractMonthRecapMissing()}
 		<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="mancano i riepiloghi"></span>
 		#{/if}
 		<td><font color="#000000">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
-		<td><font color="#000000">${person.currentContract.get().beginContract}</font></td>
-		<td><font color="#000000">${person.currentContract.get().expireContract}</font></td>
+		<td><font color="#000000">${person.currentContract.get().beginContract?.value()}</font></td>
+		<td><font color="#000000">${person.currentContract.get().expireContract?.value()}</font></td>
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
@@ -78,7 +77,7 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>
-		<td><font color="#000000">${person.value.email}</font></td>
+		<td class="alignLeft"><font color="#000000">${person.value.email}</font></td>
 		<td>
 		 <a href="#" data-popover
 	    		data-trigger="hover" data-toggle="popover"
@@ -97,6 +96,7 @@
 		">
 		 #{if person.currentContract.get().sourceDate != null}
 		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Modifica</a>
+		   #{if person.currentContract.get().sourceByAdmin == false} X #{/if}
     	 #{/if}
 		 #{else}
 	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Definisci</a>
@@ -109,20 +109,12 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>
-
-		<!-- Note -->
-
-		#{if person.value.user == null}
-			<td><a href="@{Persons.insertUsername(person.value.id)}">Ins.username</a></td>
-		#{/if}
-		#{else}
-			<td></td>
-		#{/else}
 		#{if switchUser}
-		<td>
-			<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
-		</td>#{/if}
-		 </tr>
+			<td>
+				<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+			</td>
+		#{/if}
+		</tr>
 	  #{/if}
 	
     
@@ -135,26 +127,16 @@
   <table class="datatable-test table table-striped table-hover table-condensed center" cellspacing="0" >
     <thead>
 	  <tr>
-		<th>Nome</th>
-		<th>Matricola</th>
-		<th>Matricola<br> Badge</th>
-		<th>Data inizio<br> lavoro</th>
-		<th>Data fine<br> lavoro</th>
-		<th>Orario</th>
-		<th>Ferie</th>
-		<th>Livello</th>
-		<th>Timbratura<br>Default</th>
-		<th>Email</th>
-		<th>Contatti</th>
-		<th>Dati<br> Iniziali</th>
-		<th>Invio<br> Email</th>
-		<th>Note</th>
+		<th>&{'person.name'}</th>
+		<th>&{'person.number'}</th>
+		<th>&{'person.badgeNumber'}</th>
+		<th>&{'person.qualification'}</th>
+		<th>&{'person.email'}</th>
 		#{if switchUser}<th></th>#{/if}
 	  </tr>
 	</thead>
 	<tbody>
 	 #{list items:personList, as:'person'}
-	 
 	 #{if person.currentContract.present}
 	  #{/if}
 	  #{else}
@@ -162,21 +144,15 @@
 		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
 		<td><font color="#808080">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
-		<td><!-- begin contract --></td>
-		<td><!-- expire contract --></td>
-		<td><!-- tipo orario --></td>
-		<td><!-- ferie --></td>
 		<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
-		<td>${''}</td>
 		<td><font color="#808080">${person.value.email}</font></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		#{if switchUser}<td></td>#{/if}
-		</tr>
+		#{if switchUser}
+		  <td>
+			<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+		  </td>
+		#{/if}
+	   </tr>
 	  #{/else}
-	     
 	#{/list}
 	</tbody>
   </table>

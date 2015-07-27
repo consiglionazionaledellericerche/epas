@@ -39,6 +39,10 @@ Month.10=Ottobre
 Month.11=Novembre
 Month.12=Dicembre
 
+child.name= Nome
+child.surname= Cognome
+child.bornDate= Data di Nascita
+
 person.surname=Cognome
 person.name=Nome
 person.number=Matricola
@@ -47,11 +51,18 @@ person.telephone=Telefono
 person.email=Email
 person.eppn=Eppn (Per login Shibboleth)
 person.birthday=Data di nascita
-person.wantEmail=Invio mail
+person.wantEmail=Invio Email
+person.currentWorkingTimeType= Tipo Orario
+person.currentVacationPeriod= Ferie
+person.qualification= Livello
+person.office= Sede
+person.isPersonInCharge= Responsabile gruppo di lavoro
 
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
 contract.onCertificate=In attestati
+
+contractStampProfile.fixedworkingtime= Timbratura Default
 
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti
@@ -70,3 +81,11 @@ PDFReport.thIncompleteTime=Orario incompleto
 qualification=Livello
 
 office=Sede
+
+
+########################
+# Messaggi di validazione
+########################
+
+Required= Campo obbligatorio
+Invalid email address= Indirizzo email non valido

@@ -24,12 +24,14 @@ $(function($){
 		
 		
 		this.find('input[datepicker-year]').datepicker({
-			  format: "yyyy-mm-dd",
+			  format: "dd/mm/yyyy",
 			  startView: 2,
 			  todayBtn: "linked",
 			  language: "it",
 			  autoclose: true,
-			  todayHighlight: true
+			  todayHighlight: true,
+			  startDate: '-100y',
+			  endDate: '+100y'
 			});
 
 		this.find('input[datepicker-month]').datepicker({
@@ -42,11 +44,12 @@ $(function($){
 			});
 
 		this.find('input[datepicker]').datepicker({
-			  format: "yyyy-mm-dd",
+			  format: "dd/mm/yyyy",
 			  todayBtn: "linked",
 			  language: "it",
 			  autoclose: true,
-			  todayHighlight: true
+			  startDate: '-100y',
+			  endDate: '+100y'
 			});
 		
 		this.find('data-tooltip').tooltip();
@@ -61,15 +64,13 @@ $(function($){
 			/* $(this).removeData('bs.modal'); per bootstrap precedente al 3*/
 			/* $(this).find('.modal-content').empty(); nuovo metodo che però non funziona */
 		});
-		
+
+		this.find('a[data-x-editable][data-type="textarea"]').editable({
+		    showbuttons: 'bottom'
+		});	
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
-		
 		this.find("a[data-popover]").popover();
-		this.find("input[data-datepicker]").datepicker();
-		this.find("#datepicker1" ).datepicker();
-		this.find(".datepicker" ).datepicker();
-		this.find("#datepicker3" ).datepicker();
 		
 		this.find('#myModal1').on('show', function () {
 			$('#myModal2').modal('hide');
@@ -131,23 +132,6 @@ $(function($){
 		this.find('#modal-absencetype-month').on('hidden', function(){
 		    $(this).data('modal', null);
 		});
-
-		this.find('#select1').editable(); 
-		this.find('#select2').editable(); 
-		this.find('#select3').editable(); 
-		this.find('#select4').editable(); 
-		this.find('#select5').editable(); 
-		this.find('#select6').editable(); 
-		this.find('#simpleText1').editable(); 
-		this.find('#simpleText2').editable();
-		this.find('#simpleText3').editable(); 
-		
-
-		this.find('#textComments1').editable({
-		    showbuttons: 'bottom'
-		});
-		
-		this.find('#dob1').editable();
 		
 		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
 			var $form = $(this).closest("form");
@@ -245,6 +229,7 @@ function generateUserName(name,surname,username){
    username.empty(); // remove old options
 
    var options = [
+   {text: null,value:null},
    {text: name+'.'+surname, value: name+'.'+surname},
    {text: name.charAt(0)+'.'+surname, value: name.charAt(0)+'.'+surname},
    {text: name+'_'+surname, value: name+'_'+surname}

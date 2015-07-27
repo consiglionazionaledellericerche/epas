@@ -51,7 +51,6 @@ public class PersonDayManager {
 		this.confGeneralManager = confGeneralManager;
 		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
-		this.vacationManager = vacationManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
@@ -61,7 +60,6 @@ public class PersonDayManager {
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
-	private final VacationManager vacationManager;
 	
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
@@ -73,12 +71,17 @@ public class PersonDayManager {
 		}
 		
 		if(pd.absences.size() == 1) {
+
+			Absence abs = pd.absences.get(0);
 			
-			// FIXME: le assenze orarie romane potrebbero essere inserite
-			// AllDay per comodità, ma non vanno considerate come giornaliere.
-			return pd.absences.get(0).justifiedMinutes == null &&
-					pd.absences.get(0).absenceType.justifiedTimeAtWork
-					.equals(JustifiedTimeAtWork.AllDay);
+			// TODO: per adesso il telelavoro lo considero come giorno lavorativo
+			// normale. Chiedere ai romani.
+			if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+				return false;
+			}
+			
+			return abs.justifiedMinutes == null //eludo PIPE, RITING etc...
+					&& abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay);
 		}
 		
 		return false;
@@ -128,6 +131,11 @@ public class PersonDayManager {
 
 	/**
 	 * Calcola i minuti lavorati nel person day. Assegna il campo isTicketAvailable.
+	 * 
+	 * //FIXME: questo metodo per motivi di sicurezza non dovrebbe modificare il personDay.
+	 * Ma dovrebbe esclusivamente fornire risultati. Creare un Message che contenga
+	 * tutte le decisioni dell'algoritmo e delegare il chiamante alla modifica dei 
+	 * campi del person day. 
 	 *
 	 * @return il numero di minuti trascorsi a lavoro
 	 */
@@ -150,15 +158,13 @@ public class PersonDayManager {
 		for(Absence abs : pd.getValue().absences) {
 
 			if(abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-				// TODO: capire bene la logica del telelavoro.
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
 			
-			// Caso di assenza giornaliera. 
-			if(abs.justifiedMinutes == null &&
+			// Caso di assenza giornaliera.  
+			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
 					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
 				
-				// TODO: attenzione a quei codici romani AllDay tipo PEPE.
 				setIsTickeAvailable(pd, false);
 				return 0;
 			}
@@ -249,6 +255,7 @@ public class PersonDayManager {
 				effectiveTimeSpent = gapLunchPairs.get(0).timeInPair;
 			}
 		} else {
+			// sommo tutte le pause marcate come pr
 			for(PairStamping lunchPair : gapLunchPairs) {
 				if(lunchPair.prPair) {
 					effectiveTimeSpent += lunchPair.timeInPair;
@@ -299,23 +306,30 @@ public class PersonDayManager {
 		
 		setIsTickeAvailable(pd,true);
 
-		// marcatori: 
+		// marcatori: versione p ed e
+//		//e
+//		if(effectiveTimeSpent > 0 && workingTimeDecurted < workTime) {
+//			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+//					StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+//		}
+//		//p
+//		if(effectiveTimeSpent == 0) {
+//			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+//					StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+//		}
+		
+		// marcatori: versione con solo e salvataggio del tempo decurtato.
 		//e
 		if(workingTimeDecurted < workTime) {
-			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-					StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-		}
-		//p
-		else if(effectiveTimeSpent == 0) {
-			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-					StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+		
+			pd.getValue().decurted = missingTime;
 		}
 			
 		return workingTimeDecurted + justifiedTimeAtWork;
 
 		
 	}
-	
+
 	/**
 	 * La condizione del lavoro minimo pomeridiano è soddisfatta?
 	 * @param validPairs

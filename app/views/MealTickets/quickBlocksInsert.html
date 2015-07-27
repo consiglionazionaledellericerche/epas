@@ -13,8 +13,8 @@
 	 <!-- Recap current contract -->
 	 Intervallo considerato per buoni pasto:
 	 #{if recap.getMealTicketInterval().isClosed() }
-	   Da <strong>${recap.getMealTicketInterval().getBegin()}</strong>
-	   A <strong>${recap.getMealTicketInterval().getEnd()}</strong>
+	   Da <strong>${recap.getMealTicketInterval().getBegin()?.value()}</strong>
+	   A <strong>${recap.getMealTicketInterval().getEnd()?.value()}</strong>
 	 #{/if}
 	 #{else}
 	   Da <strong>${recap.getMealTicketInterval().getBegin()}</strong>
@@ -114,11 +114,10 @@
 		      </td>
 		      <td>
 		        <input name="expireDate1" type="text" 
-		        data-datepicker data-date-format="yyyy-mm-dd" 
-		        value="${expireDate}"/>
+		        datepicker value="${expireDate?.value()}"/>
 		      </td>
 		      <td>
-		        ${today}
+		        ${today?.value()}
 		      </td>
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
@@ -135,11 +134,10 @@
 		      </td>
 		      <td>
 		        <input name="expireDate2" type="text" 
-		        data-datepicker data-date-format="yyyy-mm-dd" 
-		        value="${expireDate}"/>
+		        datepicker value="${expireDate?.value()}"/>
 		      </td>
 		      <td>
-		        ${today}
+		        ${today?.value()}
 		      </td>
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
@@ -156,11 +154,10 @@
 		      </td>
 		      <td>
 		        <input name="expireDate3" type="text" 
-		        data-datepicker data-date-format="yyyy-mm-dd" 
-		        value="${expireDate}"/>
+		        datepicker value="${expireDate?.value()}"/>
 		      </td>
 		       <td>
-		        ${today}
+		        ${today?.value()}
 		      </td>
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
@@ -194,7 +191,7 @@
 		        <td>
 		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
 		        </td>
-		        <td>${block.getExpireDate()}</td>
+		        <td>${block.getExpireDate()?.value()}</td>
 		        <td>
 		        
 		    	  <div class="delete-confirmed">
