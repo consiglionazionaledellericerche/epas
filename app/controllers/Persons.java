@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
@@ -25,17 +26,18 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
+import models.PersonDay;
+import models.PersonReperibility;
 import models.Qualification;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -59,7 +61,6 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
@@ -67,11 +68,11 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+@Slf4j
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
 
 	//	private final static String USERNAME_SESSION_KEY = "username";
-	private final static Logger log = LoggerFactory.getLogger(Persons.class);
 
 	@Inject
 	private static OfficeDao officeDao;
@@ -92,13 +93,7 @@ public class Persons extends Controller {
 	@Inject
 	private static ContractDao contractDao;
 	@Inject
-	private static QualificationDao qualificationDao;
-	@Inject
-	private static CompetenceManager competenceManager;
-	@Inject
 	private static ContractStampProfileManager contractStampProfileManager;
-	@Inject
-	private static PersonDayManager personDayManager;
 	@Inject
 	private static UserDao userDao;
 	@Inject
@@ -129,32 +124,21 @@ public class Persons extends Controller {
 		Contract contract = new Contract();
 
 		render(person, contract);
-
 	}
 
 	public static void save(@Valid @Required Person person,
-			@Valid @Required Qualification qualification, @Valid @Required Office office,
-			@Valid @Required Contract contract,@Required String userName) {
-
+			@Valid Contract contract,@Valid User user) {
+		
 		if(Validation.hasErrors()) {
-
-			flash.error("Inserire correttamente tutti i parametri");
-			params.flash(); // add http parameters to the flash scope
-			render("@insertPerson", person, qualification, office);
+			flash.error("Correggere gli errori indicati");
+			render("@insertPerson", person,contract,user);
 		}
 
-		rules.checkIfPermitted(office);
-
-		person.qualification = qualification;
-		person.office = office;
-		
-		User user = new User();
-		user.username = userName;
-		
+		rules.checkIfPermitted(person.office);
+				
 		//generate random token
 		SecureRandom random = new SecureRandom();
 		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32));
-		
 		user.save();
 		
 		person.user = user;
@@ -244,22 +228,15 @@ public class Persons extends Controller {
 		List<IWrapperContract> contractList = FluentIterable
 				.from(contractDao.getPersonContractList(person))
 				.transform(wrapperFunctionFactory.contract()).toList();
-		
-		Set<Office> officeList = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		List<ContractStampProfile> contractStampProfileList =
 				contractDao.getPersonContractStampProfile(Optional.fromNullable(person), 
 						Optional.<Contract>absent());
 
-		LocalDate actualDate = new LocalDate();
-		Integer month = actualDate.getMonthOfYear();
-		Integer year = actualDate.getYear();
-
-		Long id = person.id;
-		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
+		render(person, contractList, contractStampProfileList);
 	}
 
-	public static void update(@Valid Person person, Office office, Integer qualification, boolean isPersonInCharge){
+	public static void update(@Valid Person person){
 		
 		if(person==null) {
 			flash.error("La persona da modificare non esiste. Operazione annullata");
@@ -269,24 +246,13 @@ public class Persons extends Controller {
 		if (Validation.hasErrors()) {
 			log.warn("validation errors for {}: {}", person,
 					validation.errorsMap());
-			flash.error("Impossibile salvare la persona %s, verificare i parametri",person);
+			flash.error("Correggere gli errori indicati.");
+			Validation.keep();
 			edit(person.id);
 		}
 		
 		rules.checkIfPermitted(person.office);
-		rules.checkIfPermitted(office);
 
-		if(office!=null) {
-			person.office = office;
-		}
-
-		Optional<Qualification> q = qualificationDao.byQualification(qualification);
-		if( !q.isPresent() ) {
-			flash.error("La qualifica selezionata non esiste. Operazione annullata");
-			list(null);
-		}
-		person.isPersonInCharge = isPersonInCharge;
-		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 
@@ -298,6 +264,7 @@ public class Persons extends Controller {
 
 	public static void deletePerson(Long personId){
 		Person person = personDao.getPersonById(personId);
+
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -312,88 +279,43 @@ public class Persons extends Controller {
 	
 	@SuppressWarnings("deprecation")
 	public static void deletePersonConfirmed(Long personId){
+		
 		Person person = personDao.getPersonById(personId);
+		
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			list(null);
 		}
-
+		// FIX per oggetto in entityManager monco.
+		person.refresh();
+		
 		rules.checkIfPermitted(person.office);
-
-		/***** person.delete(); ******/
-
-		if(person.user != null) {
-
-			if(person.user.usersRolesOffices.size() > 0) {
-				flash.error("Impossibile eliminare una persona che detiene diritti di amministrazione su almeno una sede. Rimuovere tali diritti e riprovare.");
-				list(null);
-			}
-
-			if(person.user.username.equals(Security.getUser().get().username)) {
-
-				flash.error("Impossibile eliminare la persona loggata nella sessione corrente. Operazione annullata.");
-				list(null);
-			}
+		
+		// FIXME: se non spezzo in transazioni errore HashMap.
+		// Per adesso spezzo l'eliminazione della persona in tre fasi.
+		// person.delete() senza errore HashMap dovrebbe però essere sufficiente.
+		
+		for(Contract c : person.contracts) {
+			c.delete();
 		}
-
-		String name = person.name;
-		String surname = person.surname;
-
-		log.debug("Elimino competenze...");
-		JPAPlugin.startTx(false);
-
-		// Eliminazione competenze
-		competenceManager.deletePersonCompetence(person);
-		JPAPlugin.closeTx(false);
-
-		// Eliminazione contratti
-		log.debug("Elimino contratti...");
-		JPAPlugin.startTx(false);
-		contractManager.deletePersonContracts(person);
-
-		// Eliminazione assenze e tempi da inizializzazione
-		contractManager.deleteInitializations(person);
-
-		JPAPlugin.closeTx(false);
-		log.debug("Elimino timbrature e dati mensili e annuali...");
-		JPAPlugin.startTx(false);
-		person = personDao.getPersonById(personId);
-		// Eliminazione figli in anagrafica
-		personManager.deletePersonChildren(person);
-
-		// Eliminazione person day
-		personDayManager.deletePersonDays(person);
-
+		
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
 		person = personDao.getPersonById(personId);
-		//Eliminazione riepiloghi annuali
-
-		// Eliminazione reperibilità turni e ore di formazione e riepiloghi annuali
-		personManager.deleteShiftReperibilityTrainingHoursAndYearRecap(person);
-
-		JPAPlugin.closeTx(false);
-
-		// Eliminazione persona e user
-		JPAPlugin.startTx(false);
-		person = personDao.getPersonById(personId);
-
-		Long userId = null;
-		if(person.user != null) {
-			userId = person.user.id;
+		
+		for(PersonDay pd : person.personDays) {
+			pd.delete();
 		}
+		
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		person = personDao.getPersonById(personId);
+		
 		person.delete();
-		JPAPlugin.closeTx(false);
 
-		JPAPlugin.startTx(false);
-		if(userId != null) {
-			User user = userDao.getUserById(userId, Optional.<String>absent());
-			user.delete();
-		}
-		JPAPlugin.closeTx(false);
-
-		flash.success("La persona %s %s eliminata dall'anagrafica insieme a tutti i suoi dati.",name, surname);
+		flash.success("La persona %s %s eliminata dall'anagrafica"
+				+ " insieme a tutti i suoi dati.",person.name, person.surname);
 
 		list(null);
 
@@ -871,6 +793,7 @@ public class Persons extends Controller {
 		Preconditions.checkState(person.isPersistent());
 
 		if(Validation.hasErrors()) {
+			flash.error("Correggere gli errori riportati.");
 			render("@insertChild", person, child);
 		}
 
@@ -895,7 +818,7 @@ public class Persons extends Controller {
 		child.save();
 
 		log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}",
-				new Object[]{child.name, child.surname, person});
+				child.name, child.surname, person);
 		flash.success("Salvato figlio nell'anagrafica dei figli di %s", person.getFullname());
 
 		childrenList(person.id);

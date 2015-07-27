@@ -8,13 +8,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.InitializationAbsence;
-import models.InitializationTime;
-import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
@@ -46,15 +44,17 @@ public class ContractManager {
 	@Inject
 	public ContractManager(ConfGeneralManager confGeneralManager,
 			ConsistencyManager consistencyManager, 
-			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
+			VacationManager vacationManager,
+			IWrapperFactory wrapperFactory, 
 			ContractDao contractDao, 
 			PersonDao personDao) {
 
 		this.confGeneralManager = confGeneralManager;
 		this.consistencyManager = consistencyManager;
-		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
+		this.vacationManager = vacationManager;
+		this.wrapperFactory = wrapperFactory;
 		this.contractDao = contractDao;
 		this.personDao = personDao;
 	}
@@ -62,9 +62,10 @@ public class ContractManager {
 	private final ConfGeneralManager confGeneralManager;
 	private final ConsistencyManager consistencyManager;
 	private final IWrapperFactory wrapperFactory;
-	private final VacationCodeDao vacationCodeDao;
 	private final ContractDao contractDao;
 	private final PersonDao personDao;
+	private final VacationCodeDao vacationCodeDao;
+	private final VacationManager vacationManager;
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	
@@ -157,6 +158,32 @@ public class ContractManager {
 		csp.fixedworkingtime = false;
 		csp.save();
 		contract.contractStampProfile.add(csp);
+		
+		//Se il contratto inizia prima di today inserisco un source fittizio alla
+		// data attuale che mi imposta tutti i residui a zero.
+		
+		IWrapperContract wcontract = wrapperFactory.create(contract);
+		
+		contract.sourceDate = LocalDate.now().minusDays(1);
+		
+		contract.sourceRemainingMealTicket = 0;
+		contract.sourceRemainingMinutesCurrentYear = 0;
+		contract.sourceRemainingMinutesLastYear = 0;
+
+		List<Absence> postPartum = Lists.newArrayList();
+		
+		contract.sourcePermissionUsed = vacationManager.getPermissionAccruedYear(wcontract, 
+				contract.sourceDate.getYear() , Optional.<LocalDate>absent());
+		
+		contract.sourceVacationLastYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+				contract.sourceDate.getYear() -1, Optional.<LocalDate>absent(), postPartum);
+				
+		contract.sourceVacationCurrentYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+				contract.sourceDate.getYear(), Optional.<LocalDate>absent(), postPartum);
+		
+		contract.sourceRecoveryDayUsed = 0;		
+		
+		contract.sourceByAdmin = false;
 		
 		contract.save();
 		
@@ -462,54 +489,5 @@ public class ContractManager {
 
 		contract.save();
 	}
-
-	/**
-	 * Utilizzata nel metodo delete del controller Persons, elimina contratti, orari di lavoro e stamp profile
-	 * @param person
-	 */
-	public void deletePersonContracts(Person person){
-		List<Contract> helpList = contractDao.getPersonContractList(person);
-		for(Contract c : helpList){
-
-			log.debug("Elimino contratto di {} che va da {} a {}", 
-					new Object[]{person.getFullname(), c.beginContract, c.expireContract});
-
-			// Eliminazione orari di lavoro
-			List<ContractWorkingTimeType> cwttList = contractDao.getContractWorkingTimeTypeList(c);
-			for(ContractWorkingTimeType cwtt : cwttList){
-				cwtt.delete();
-			}
-			// Eliminazione stamp profile
-			List<ContractStampProfile> cspList = contractDao.getPersonContractStampProfile(Optional.<Person>absent(), Optional.fromNullable(c));
-			for(ContractStampProfile csp : cspList){
-				csp.delete();
-			}
-
-			c.delete();
-			person = personDao.getPersonById(person.id);
-			person.contracts.remove(c);
-
-			person.save();
-
-		}
-	}
-
-	/**
-	 * utilizzata nel metodo delete del controller Persons, elimina le eventuali inizializzazioni di tempi e assenze
-	 * @param person
-	 */
-	public void deleteInitializations(Person person){
-		for(InitializationAbsence ia : person.initializationAbsences){
-			long id = ia.id;
-			ia = contractDao.getInitializationAbsenceById(id);
-			ia.delete();
-		}
-		for(InitializationTime ia : person.initializationTimes){
-			long id = ia.id;
-			ia = contractDao.getInitializationTimeById(id);
-			ia.delete();
-		}
-	}
-
 
 }

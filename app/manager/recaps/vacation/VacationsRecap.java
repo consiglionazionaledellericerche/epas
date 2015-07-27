@@ -139,18 +139,18 @@ public class VacationsRecap {
 		//(4) Calcolo ferie e permessi maturati per l'anno passato e l'anno corrente 
 		// (sono indipendenti dal database)
 		
-		this.vacationDaysLastYearAccrued = 
-				getVacationAccruedYear(year-1, Optional.<LocalDate>absent());
-		this.permissionCurrentYearAccrued = 
-				getPermissionAccruedYear( year, accruedDate);
-		this.vacationDaysCurrentYearAccrued = 
-				getVacationAccruedYear( year, accruedDate);
+		this.vacationDaysLastYearAccrued =	vacationManager
+				.getVacationAccruedYear(wcontract, year-1, Optional.<LocalDate>absent(), postPartum);
+		this.permissionCurrentYearAccrued = vacationManager
+				.getPermissionAccruedYear(wcontract, year, accruedDate);
+		this.vacationDaysCurrentYearAccrued = vacationManager
+				.getVacationAccruedYear(wcontract, year, accruedDate, postPartum);
 
 		//(5) Calcolo ferie e permessi totali per l'anno corrente
-		this.permissionCurrentYearTotal = 
-				getPermissionAccruedYear(year, Optional.<LocalDate>absent());
-		this.vacationDaysCurrentYearTotal = 
-				getVacationAccruedYear(year, Optional.<LocalDate>absent());
+		this.permissionCurrentYearTotal = vacationManager
+				 .getPermissionAccruedYear(wcontract, year, Optional.<LocalDate>absent());
+		this.vacationDaysCurrentYearTotal = vacationManager
+				 .getVacationAccruedYear(wcontract, year, Optional.<LocalDate>absent(), postPartum);
 		
 		//(6) Calcolo ferie e permessi non ancora utilizzati per l'anno corrente e per l'anno precedente 
 		// (sono funzione di quanto calcolato precedentemente)
@@ -231,163 +231,6 @@ public class VacationsRecap {
 			return this.contract.sourcePermissionUsed;
 		}
 		return 0;
-	}
-
-	/**
-	 * 
-	 * @param yearInterval
-	 * @param contract
-	 * @return numero di permessi maturati nel periodo yearInterval associati a contract
-	 */
-	private int getPermissionAccruedYear(int year, Optional<LocalDate> accruedDate) {
-		
-		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		DateInterval yearInterval = new DateInterval(new LocalDate(year,1,1), 
-				new LocalDate(year,12,31));
-		if(accruedDate.isPresent()) {
-			yearInterval = new DateInterval(new LocalDate(year,1,1), 
-				accruedDate.get());
-		}
-		yearInterval = DateUtility.intervalIntersection(yearInterval, 
-				this.wcontract.getContractDateInterval());
-						
-		if(yearInterval == null) {
-			return 0;
-		}
-		
-		//int days = 0;
-		int permissionDays = 0;
-
-		for(VacationPeriod vp : this.wcontract.getValue().vacationPeriods){
-			int days = 0;
-			DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
-			DateInterval intersection = 
-					DateUtility.intervalIntersection(vpInterval, yearInterval);
-			
-			if(intersection != null) {
-				days = DateUtility.daysInInterval(intersection);
-			}
-			if(vp.vacationCode.equals("21+3") || vp.vacationCode.description.equals("22+3")){
-				permissionDays = permissionDays + VacationsPermissionsDaysAccrued
-						.convertWorkDaysToPermissionDaysPartTime(days);
-				
-			} else {
-				permissionDays = permissionDays + VacationsPermissionsDaysAccrued
-						.convertWorkDaysToPermissionDays(days);
-			}
-		}
-
-		return permissionDays;
-	}
-
-	/**
-	 * 
-	 * @param yearInterval
-	 * @param contract
-	 * @param vacationPeriodList
-	 * @return il numero di giorni di ferie maturati nell'anno year 
-	 * 	calcolati a partire dai piani ferie associati al contratto corrente
-	 */
-	private int getVacationAccruedYear(int year, Optional<LocalDate> accruedDate) {
-
-		LocalDate beginYear = new LocalDate(year,1,1);
-		LocalDate endYear = new LocalDate(year,12,31);
-		
-		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		DateInterval yearInterval = new DateInterval(beginYear, endYear);
-		
-		if(accruedDate.isPresent()) {
-			yearInterval = new DateInterval(new LocalDate(year,1,1), 
-					accruedDate.get());
-		}
-		yearInterval = DateUtility.intervalIntersection(yearInterval, 
-				this.wcontract.getContractDateInterval());
-
-		if(yearInterval == null) {
-			return 0;
-		}
-
-		//per ogni piano ferie conto i giorni trascorsi in yearInterval 
-		//e applico la funzione di conversione		
-		int vacationDays = 0;
-
-		//Variabili di supporto
-		int totalYearPostPartum = 0;
-		int minVacationPeriod = 28;
-		
-		for(VacationPeriod vp : this.wcontract.getValue().vacationPeriods) {
-			
-			int days = 0;
-			
-			DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
-			DateInterval intersection = 
-					DateUtility.intervalIntersection(vpInterval, yearInterval);
-			
-			if(intersection != null) {
-				
-				// il piano ferie col minor numero di ferie è un potenziale limite
-				// inferiore (issue tarveniti)
-				if (vp.vacationCode.vacationDays < minVacationPeriod) {
-					minVacationPeriod = vp.vacationCode.vacationDays;
-				}
-				
-				int postPartumInIntersection = filterAbsences(postPartum, intersection);
-				days = DateUtility.daysInInterval(intersection) 
-						- postPartumInIntersection;
-				
-				totalYearPostPartum += postPartumInIntersection;
-				
-				//calcolo i giorni maturati col metodo di conversione
-
-				if(vp.vacationCode.description.equals("26+4")) {
-					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
-							.convertWorkDaysToVacationDaysLessThreeYears(days);
-				}
-				if(vp.vacationCode.description.equals("28+4")) {
-					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
-							.convertWorkDaysToVacationDaysMoreThreeYears(days);
-				}
-				if(vp.vacationCode.description.equals("21+3")){
-					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
-							.converWorkDaysToVacationDaysPartTime(days);
-				}
-				if(vp.vacationCode.description.equals("22+3")){
-					vacationDays = vacationDays + VacationsPermissionsDaysAccrued
-							.converWorkDaysToVacationDaysPartTimeMoreThanThreeYears(
-							days);
-				}
-			}
-		}
-
-		// FIXME: decidere se deve essere un parametro di configurazione
-		if (vacationDays > 28) {
-			vacationDays = 28;
-		}
-		
-		// (issue tarveniti)
-		// passare da 26 a 28 ed avere 25... aggiusto il calcolo se 
-		// il contratto copre tutto l'anno richiesto e se non ho avuto assenze
-		// postPartum che abbassano i giorno per ferie maturate.
-		if(totalYearPostPartum == 0 && yearInterval.getBegin().equals(beginYear) 
-				&& yearInterval.getEnd().equals(endYear)) {
-			if(DateUtility.isIntervalIntoAnother(yearInterval,	this.wcontract
-					.getContractDateInterval())	&& minVacationPeriod > vacationDays) {
-				vacationDays = minVacationPeriod;
-			}
-		}
-		
-		return vacationDays;
-
-	}
-	
-	private int filterAbsences(List<Absence> absences, DateInterval interval) {
-		int count = 0;
-		for(Absence ab : absences) {
-			if(DateUtility.isDateIntoInterval(ab.personDay.date, interval)) {
-				count++;
-			}
-		}
-		return count;
 	}
 	
 	private void initDataStructures(List<Absence> otherAbsences) {

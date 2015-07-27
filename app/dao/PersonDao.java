@@ -293,8 +293,13 @@ public final class PersonDao extends DaoBase{
 	public Person getPersonById(Long personId) {
 
 		final QPerson person = QPerson.person;
+		final QContract contract = QContract.contract;
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.id.eq(personId));
+		final JPQLQuery query = getQueryFactory()
+				.from(person)
+				.leftJoin(person.contracts, contract).fetchAll()
+				.where(person.id.eq(personId))
+				.distinct();
 
 		return query.singleResult(person);
 	}
@@ -321,13 +326,23 @@ public final class PersonDao extends DaoBase{
 	 * @param number
 	 * @return la persona corrispondente alla matricola passata come parametro
 	 */
-	public Person getPersonByNumber(Integer number){
+	public Person getPersonByNumber(Integer number, Optional<Set<Office>> officeList){
 
+		final BooleanBuilder condition = new BooleanBuilder();
 		final QPerson person = QPerson.person;
+		if(officeList.isPresent()){
+			condition.and(person.office.in(officeList.get()));
+		}
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.number.eq(number));
+		condition.and(person.number.eq(number));
+		
+		final JPQLQuery query = getQueryFactory().from(person).where(condition);
 
 		return query.singleResult(person);
+	}
+	
+	public Person getPersonByNumber(Integer number){
+		return getPersonByNumber(number, Optional.<Set<Office>>absent());
 	}
 
 	/**
@@ -389,13 +404,24 @@ public final class PersonDao extends DaoBase{
 	 * @param oldId
 	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
 	 */
-	public Person getPersonByOldID(Long oldId){
+	public Person getPersonByOldID(Long oldId, Optional<Set<Office>> offices){
 
+		final BooleanBuilder condition = new BooleanBuilder();
 		final QPerson person = QPerson.person;
+		if(offices.isPresent()){
+			condition.and(person.office.in(offices.get()));
+		}
+		
+		condition.and(person.oldId.eq(oldId));
+		
 
-		final JPQLQuery query = getQueryFactory().from(person).where(person.oldId.eq(oldId));
+		final JPQLQuery query = getQueryFactory().from(person).where(condition);
 
 		return query.singleResult(person);
+	}
+	
+	public Person getPersonByOldID(Long oldId){
+		return getPersonByOldID(oldId, Optional.<Set<Office>>absent());
 	}
 
 	/**
@@ -403,15 +429,26 @@ public final class PersonDao extends DaoBase{
 	 * @param badgeNumber
 	 * @return la persona associata al badgeNumber passato come parametro
 	 */
-	public Person getPersonByBadgeNumber(String badgeNumber){
+	public Person getPersonByBadgeNumber(String badgeNumber, Optional<Set<Office>> offices){
 
+		final BooleanBuilder condition = new BooleanBuilder();
 		final QPerson person = QPerson.person;
+		if(offices.isPresent()){
+			condition.and(person.office.in(offices.get()));
+		}
 		
-		final JPQLQuery query = getQueryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
+		condition.and(person.badgeNumber.eq(badgeNumber));
+		
+		final JPQLQuery query = getQueryFactory().from(person).where(condition);
 
 		return query.singleResult(person);
 	}
 
+	
+	public Person getPersonByBadgeNumber(String badgeNumber){
+		return getPersonByBadgeNumber(badgeNumber, Optional.<Set<Office>>absent());
+	}
+	
 	/**
 	 * 
 	 * @param type
@@ -694,7 +731,9 @@ public final class PersonDao extends DaoBase{
 				.distinct();
 		contracts = query2b.where(condition).list(contract);
 		// TODO: riportare a List tutte le relazioni uno a molti di contract
-		// e inserire singolarmente la fetch.
+		// e inserire singolarmente la fetch. 
+		// TODO 2: in realtà questo è opinabile. Anche i Set 
+		// sono semanticamente corretti. Decidere. 
 
 		if(person.isPresent()) {
 		//Fetch dei tipi orario associati ai contratti (verificare l'utilità)
@@ -708,17 +747,15 @@ public final class PersonDao extends DaoBase{
 
 	/**
 	 * Genera la lista di PersonLite contenente le persone attive nel mese specificato
-	 * appartenenti ad un office in offices. 
+	 * appartenenti ad un office in offices.
 	 * 
-	 * Deprecata. Ma Buon esempio di query dsl con proiezione del risultato
-	 * in DTO.
+	 * Importante: utile perchè non sporca l'entity manager con oggetti parziali.
 	 * 
 	 * @param offices
 	 * @param year
 	 * @param month
 	 * @return
 	 */
-	@Deprecated
 	public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
 		
 		final QPerson person = QPerson.person;
@@ -748,7 +785,6 @@ public final class PersonDao extends DaoBase{
 	 * Dto contenente le sole informazioni della persona
 	 * richieste dalla select nel template menu.
 	 */
-	@Deprecated
 	public static class PersonLite {
 		
 		public Long id;

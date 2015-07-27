@@ -46,7 +46,7 @@
     <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Data di Nascita</label>
       <div class="input-group">
-        <input datepicker-year class="form-control" placeholder="yyyy-mm-dd" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
+        <input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -77,7 +77,7 @@
     <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Data inizio contratto</label>
       <div class="input-group">
-        <input datepicker-year class="form-control" placeholder="yyyy-mm-dd" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+        <input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -88,7 +88,7 @@
     <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Data termine contratto</label>
       <div class="input-group">
-        <input datepicker-year class="form-control" placeholder="yyyy-mm-dd" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
+        <input datepicker-year class="form-control"  id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}

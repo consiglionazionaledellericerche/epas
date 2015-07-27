@@ -8,10 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import models.BadgeReader;
+import models.Office;
 import models.Person;
 import models.StampType;
 import models.exports.StampingFromClient;
@@ -22,13 +24,16 @@ import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import controllers.Security;
 import dao.BadgeReaderDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.StampingDao;
 
@@ -48,6 +53,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	private static StampingDao stampingDao;
 	@Inject
 	private static PersonDao personDao;
+	@Inject
+	private static OfficeDao officeDao;
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], 
@@ -60,6 +67,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
 			
+			Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 			Person person = null;
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 			
@@ -129,7 +137,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					}
 					try {
 						int firma = Integer.parseInt(matricolaFirma);
-						person = personDao.getPersonByNumber(firma);
+						person = personDao.getPersonByNumber(firma, Optional.fromNullable(offices));
 						//person = Person.find("Select p from Person p where p.number = ?", firma).first();
 					} catch (NumberFormatException nfe) {
 						Logger.debug("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
@@ -160,7 +168,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					
 										
 					//Controlla sul campo person oldId
-					person = personDao.getPersonByOldID(intMatricolaFirmaAsLong);
+					person = personDao.getPersonByOldID(intMatricolaFirmaAsLong, Optional.fromNullable(offices));
 					//person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
 					if(person != null){
 						stamping.personId = person.id;
@@ -190,7 +198,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					// http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
 					String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
 					
-					person = personDao.getPersonByBadgeNumber(badgeNumber);
+					person = personDao.getPersonByBadgeNumber(badgeNumber, Optional.fromNullable(offices));
 					//person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
 					if(person != null){
 						stamping.personId = person.id;

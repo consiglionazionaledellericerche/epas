@@ -138,7 +138,7 @@ end
 rule developer
 when
  $uro: UsersRolesOffices()
- $p: Permission(description == "developer") from $uro.role.permissions
+ Role(name == "developer") from $uro.role
  $c: PermissionCheck( granted == false)
 then
  $c.grant();
@@ -652,6 +652,7 @@ when
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
 		"Configurations.savePastYearVacationLimit",
+		"Configurations.savePatron",
 		
         "Import.officeList"
 
@@ -671,7 +672,8 @@ when
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
-        "Configurations.savePastYearVacationLimit"
+        "Configurations.savePastYearVacationLimit",
+        "Configurations.savePatron"
         
        ), target == $o, granted == false)
 then

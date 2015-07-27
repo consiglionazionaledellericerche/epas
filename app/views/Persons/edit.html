@@ -11,7 +11,6 @@
   #table-list-contract {
   	margin-top: 30px;
   	margin-bottom: 10px;
-  
   }
 </style>
 #{/set}
@@ -26,146 +25,60 @@
 
 <div class="container">		<!-- Container dati personali e di contatto -->
 
-	#{form @Persons.update() }
+	#{form @Persons.update(),,class:'form-horizontal' }
 		<input type="hidden" name="person.id" value="${person.id}"/>
 		
 		<!-- Pannello 1 Dati personali -->
 		<div class="panel panel-default">
-		  <div class="panel-heading">
-		    <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
-		  </div>
-		  <div class="panel-body">
-		    
-		
-		    <table class="table table-condensed table-form table-hover">
-				<tr>
-					<td class="lab"><b>Cognome</b></td>
-					<td><input name="person.surname" type="text" value="${person.surname}"/></td>
-				</tr>
-				<tr>
-					<td class="lab"><b>Nome</b></td> 
-					<td><input name="person.name" type="text" value="${person.name}"/></td>
-				</tr>
-				<!-- 
-				<tr>
-					<td class="lab">Id univoco</td> 
-					<td><input name="daeliminare" type="text" value="${person.id}" disabled="disabled" /></td>
-				</tr>
-				 -->
-				<tr>
-					<td class="lab">Matricola</td> 
-					<td><input name="person.number" type="number" value="${person.number}"/></td>
-				</tr>
-				<tr>
-					<td class="lab">Numbero badge</td>
-					<td><input name="person.badgeNumber" value="${person.badgeNumber}"/></td>
-				</tr>
-				<tr>
-					<td class="lab"> Livello </td>
-					<td>
-					#{if person.qualification != null}
-						#{select 'qualification', value:person.qualification.qualification, class:'span1', id:'withoutborder'} 
-						#{option null}Seleziona la qualifica#{/option}
-						#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
-						#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
-						#{option 7}7#{/option} #{option 8}8#{/option} #{/select}</div>
-					#{/if}
-					#{else}
-						#{select 'qualification', value:'', class:'span1',id:'withoutborder'} 
-						#{option null}Seleziona la qualifica#{/option}
-						#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
-						#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
-						#{option 7}7#{/option} #{option 8}8#{/option} #{/select} 
-				
-					#{/else}
-					</td>
-				</tr>
-				<tr>
-					<td class="lab">Sede</td>
-					<td>
-					    #{select 'office.id', value:person.office.id, id:'office'} 
-							#{list items: officeList, as: 'office'}
-								#{option office.id}${office.name}#{/option}
-							#{/list}
-					    #{/select}
-					</td>
-				</tr>
-				<tr>
-					<td class="lab">Responsabile <br>gruppo di lavoro</td>
-					#{if person.isPersonInCharge}
-					<td><input name="isPersonInCharge" type="checkbox" checked="checked" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
-					#{/if}
-					#{else}
-					<td><input name="isPersonInCharge" type="checkbox" aria-hidden="true" title="Selezionare se la persona in questione deve essere un responsabile"/></td>
-					#{/else}
-				</tr>
-				<tr>
-					<td class="lab"><strong>Email</strong></td>
-					<td><input name="person.email" type="email" value="${person.email}"/></td>
-				</tr>
-				<tr>
-					<td class="lab">Invio email</td>
-					<td>
-					  <a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal">
-					  #{if person.wantEmail}<i class="fa fa-check-square-o"></i>#{/if}
-					  #{else}<i class="fa fa-square-o"></i>#{/else}
-					  Modifica</a>
-					</td>
-				</tr>
-			
-			
-			</table>
-			
-			<p>
-  	   			Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
-  	   			<strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
-  	   			<strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
-      			al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
-  			</p>
-		
-		  </div>
+			<div class="panel-heading">
+				<h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
+			</div>
+			<div class="panel-body">
+
+				#{field 'person.surname'}#{f.input field/}#{/field}
+				#{field 'person.name'}#{f.input field/}#{/field}
+				#{field 'person.number'}#{f.input field,type:'number'/}#{/field}
+				#{field 'person.badgeNumber'}#{f.input field/}#{/field}
+				#{field 'person.email'}#{f.input field/}#{/field}
+
+				#{field 'person.qualification'}#{f.select field, items:templateUtility.allQualifications/}#{/field} 
+				#{field 'person.office'}#{f.select field, items:templateUtility.allOfficesAllowed/}#{/field} 
+
+				#{field 'person.isPersonInCharge'}#{f.checkbox field,title:'Selezionare se la persona in questione deve essere un responsabile'/}#{/field}
+
+				<div class='form-group'>
+					<label class="col-sm-3 control-label">Invio mail</label>
+					<div class="col-sm-6">
+						<a class="btn btn-default" href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal">
+							#{if person.wantEmail}<i class="fa fa-check-square-o"></i> Attivo#{/if}
+							#{else}<i class="fa fa-square-o"></i> Inattivo#{/else}
+						</a>
+					</div>
+				</div>
+				<p>
+					Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
+					<strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
+					<strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
+					al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
+				</p>
+
+			</div>
 		</div>  <!-- Fine pannello 1 -->
-		
-		
 		
 		<!-- Pannello 2 Contatti -->
 		<div class="panel panel-default">
-		  <div class="panel-heading">
-		    <h3 class="panel-title"><span class="badge">2</span> Altre informazioni</h3>
-		  </div>
-		  <div class="panel-body">
-			
-		    <table class="table table-condensed table-form table-hover">
-				<tr>
-					<td class="lab">Telefono</td>
-					#{if person.telephone != null || !person.telephone.equals('No phone number') }
-						<td><input name="person.telephone" type="text" value="${person.telephone}"/></td>
-					#{/if}
-					#{else}
-						<td><input name="person.telephone" type="text" value=""/></td>
-					#{/else}
-				</tr>
-				<tr>
-					<td class="lab">Data di nascita </td>
-					#{if person.birthday != null }
-						<td><input datepicker name="person.birthday" type="text" value="${person.birthday}"/></td>
-					#{/if}
-					#{else}
-						<td><input datepicker name="person.birthday" type="text" value=""/></td>
-					#{/else}
-					
-				</tr>
-				<tr>
-					<td class="lab">Eppn (Per login Shibboleth)</td>
-					<td><input name="person.eppn" type="text" value="${person.eppn}"/></td>
-				</tr>
-			</table>
-			
-			<p>
-  	   			Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo. 
-  			</p>
-		  
-		  </div>
+			<div class="panel-heading">
+				<h3 class="panel-title"><span class="badge">2</span> Altre informazioni</h3>
+			</div>
+			<div class="panel-body">
+
+				#{field 'person.telephone'}#{f.input field/}#{/field}
+				#{field 'person.birthday'}#{f.date field,view:'year'/}#{/field} 
+				#{field 'person.eppn'}#{f.input field/}#{/field}
+
+				<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
+
+			</div>
 		</div>	<!-- Fine pannello 2 -->
 		
 		</div>
@@ -365,8 +278,6 @@
   </div>  <!-- Fine pannello dati contrattuli -->
   
   
-  
-  
    <!-- Pannello 4 Elimina -->
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -379,8 +290,6 @@
    </div>
   </div>	<!-- Fine pannello 2 -->
   
-  
- 
 </div>
 
 #{include '_myModal.html' /}

@@ -37,12 +37,12 @@
 				
 				<tr>
 					<td>Inizio validita':</td>
-					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${abt.validFrom}"></td>
+					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${abt.validFrom?.value()}"></td>
 					<td>Data inizio validità di questo codice (se vuoto valido da sempre)</td>
 				</tr>
 				<tr>
 					<td>Fine validita': </td>
-					<td><input type="text" name="absenceType.validTo" datepicker-year value="${abt.validTo}"></td>
+					<td><input type="text" name="absenceType.validTo" datepicker-year value="${abt.validTo?.value()}"></td>
 					<td>Data fine validità di questo codice (se vuoto valido per sempre)</td>
 				</tr>
 				<tr>

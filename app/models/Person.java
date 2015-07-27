@@ -9,6 +9,7 @@ import it.cnr.iit.epas.NullStringBinder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -22,6 +23,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import models.base.BaseModel;
@@ -47,7 +49,8 @@ import play.data.validation.Unique;
  */
 @Entity
 @Audited
-@Table(name = "persons")
+@Table(name = "persons", uniqueConstraints={@UniqueConstraint(columnNames={"badgenumber", "office_id"})})
+
 public class Person extends BaseModel implements Comparable<Person>{
 
 	private static final long serialVersionUID = -2293369685203872207L;
@@ -85,7 +88,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 * numero di matricola sul badge
 	 */
-	@Unique @As(binder=NullStringBinder.class)
+//	@Unique
+	@As(binder=NullStringBinder.class)
 	public String badgeNumber;
 
 	/**
@@ -124,7 +128,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 * i successivi due campi servono per la nuova relazione tra Person e Person 
 	 * relativa ai responsabili
 	 */
-	@OneToMany(mappedBy="personInCharge", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="personInCharge", fetch = FetchType.LAZY)
 	@OrderBy("surname")
     public List<Person> people = new ArrayList<Person>();
 	
@@ -140,31 +144,20 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public boolean isPersonInCharge;
 
 	/**
-	 * relazione con la tabella delle assenze iniziali
-	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
-
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
-
-	/**
 	 *  relazione con i turni
 	 */
-	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY)
 	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
 
-
-
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Contract> contracts = new ArrayList<Contract>();
+	@OneToMany(mappedBy="person",fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<Contract> contracts;
 
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonChildren> personChildren;
+	public Set<PersonChildren> personChildren;
 
 	/**
 	 * relazione con la nuova tabella dei person day
@@ -175,7 +168,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
-	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY)
 	public List<MealTicket> mealTicketsAdmin;
 
 	/**
@@ -209,7 +202,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
 	public PersonHourForOvertime personHourForOvertime;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public PersonReperibility reperibility;
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
@@ -217,10 +210,12 @@ public class Person extends BaseModel implements Comparable<Person>{
 	
 	@ManyToOne
 	@JoinColumn(name="qualification_id")
+	@Required
 	public Qualification qualification;
 
 	@ManyToOne
 	@JoinColumn(name="office_id")
+	@Required
 	public Office office;
 
 

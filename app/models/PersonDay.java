@@ -55,6 +55,9 @@ public class PersonDay extends BaseModel {
 	public Integer difference;
 
 	public Integer progressive;
+	
+	/** Minuti tolti per pausa pranzo preve */
+	public Integer decurted;
 
 	@Column(name = "is_ticket_available")
 	public boolean isTicketAvailable = true;
