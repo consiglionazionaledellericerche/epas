@@ -157,7 +157,7 @@ public class ConfGeneralManager {
 		if(confGeneral == null){
 			confGeneral = getByField(param, office).orNull();
 			
-//			Se non e' presente sul db e ne creo uno con la configurazione di default
+//			Se non e' presente sul db ne creo uno con la configurazione di default
 			if(confGeneral == null){
 				return saveConfGeneral(param, office, Optional.<String>absent());
 			}
