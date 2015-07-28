@@ -72,7 +72,7 @@ public class PersonDayManager {
 			if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
 				return false;
 			}
-			else if(abs.justifiedMinutes == null //eludo PIPE, RITING etc...
+			else if(abs.justifiedMinutes == null //eludo PEPE, RITING etc...
 					&& abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)){
 				return true;
 			}
@@ -154,7 +154,6 @@ public class PersonDayManager {
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
 			
-//			FIXME BUG IN ALCUNI CODICI (VEDI 09B 13 LUGLIO SANNICANDRO)
 			// Caso di assenza giornaliera.  
 			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
 					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
