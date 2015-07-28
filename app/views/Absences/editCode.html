@@ -48,9 +48,9 @@
 				<tr>
 					<td>Tempo di lavoro giustificato: </td>
 					<td>
-					#{select 'justifiedTimeAtWork',value:abt.justifiedTimeAtWork.description}
-						#{list items:justifiedTimeAtWorkList, as: 'jtw'}
-							#{option jtw.description}${jtw.description}#{/option}
+					#{select 'absenceType.justifiedTimeAtWork',value:abt.justifiedTimeAtWork.description}
+						#{list items:models.enumerate.JustifiedTimeAtWork.values(), as: 'jtw'}
+							#{option jtw}${jtw.description}#{/option}
 						#{/list}
 					#{/select}
 					</td>

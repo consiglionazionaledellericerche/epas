@@ -32,7 +32,7 @@ public class AbsenceTypeGroup extends BaseModel{
 	
 	private static final long serialVersionUID = -8664634519147481684L;
 
-	@OneToMany(mappedBy="absenceTypeGroup", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="absenceTypeGroup")
 	public List<AbsenceType> absenceTypes;
 		
 	@Required

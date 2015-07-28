@@ -39,7 +39,7 @@ public class AbsenceType extends BaseModel {
 
 	private static final long serialVersionUID = 7157167508454574329L;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="absence_type_group_id")
 	public AbsenceTypeGroup absenceTypeGroup;
 

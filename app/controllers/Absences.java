@@ -264,7 +264,6 @@ public class Absences extends Controller{
 
 		AbsenceType abt = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
 
-		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
 		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
 		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
 
@@ -276,7 +275,7 @@ public class Absences extends Controller{
 			tecnico = !tecnico ? QualificationMapping.TECNICI.contains(q) : tecnico;
 		}
 
-		render(abt,justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
+		render(abt, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
 	}
 
 
