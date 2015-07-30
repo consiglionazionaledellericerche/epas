@@ -47,7 +47,7 @@ legend{
 <div class="form-group">
   <label for="${field.id}" class="col-sm-1 control-label">Dal</label>
   <div class="col-sm-6">
-  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.value()}'>
+  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
   </div>
   #{if field.error}<span class="help-block">${field.error}</span>#{/if}
 </div>
@@ -57,7 +57,7 @@ legend{
 <div class="form-group">
   <label for="${field.id}" class="col-sm-1 control-label">Al</label>
   <div class="col-sm-6">
-  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.value()}'>
+  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
   </div>
   #{if field.error}<span class="help-block">${field.error}</span>#{/if}
 </div>

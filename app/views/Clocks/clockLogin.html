@@ -39,7 +39,7 @@
 
 
 <div class="center">
-    <h3>Situazione ${user.person.name} ${user.person.surname} giorno ${dayRecap.date}</h3>
+    <h3>Situazione ${user.person.name} ${user.person.surname} giorno ${dayRecap.date.format()}</h3>
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -67,12 +67,9 @@
 	
 
 	<tr>
-     		#{if dayRecap.holiday==false}
-				<td class="capitalized default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
-			#{/if}
-			#{else}
-				<td class="festivi default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
-			#{/else}
+			<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
+				${dayRecap.date.shortDayName()}
+			</td>
 
             <td class="default-single">
 			#{if dayRecap.mealTicket.equals("NO")}

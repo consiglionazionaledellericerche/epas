@@ -23,9 +23,13 @@ import models.User;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -85,7 +89,7 @@ public class Stampings extends Controller {
 
 		PersonStampingRecap psDto = stampingsRecapFactory
 				.create(person.getValue(), year, month);
-
+		       
 		render(psDto) ;
 	}
 

@@ -1,13 +1,15 @@
-<div class='form-group #{if _arg.error}has-error has-feedback#{/if}'>
-	<label for="${_arg.id}" class="col-sm-3 control-label">&{_arg.name}#{if _required?:false}*#{/if}</label>
+#{field _arg}
+<div class='form-group #{if field.error}has-error has-feedback#{/if}'>
+	<label for="${field.id}" class="col-sm-3 control-label">&{field.name}#{if _required?:false}*#{/if}</label>
 	<div class="col-sm-6">
-      <input  class="form-control ${_attrs['class']}" id="${_arg.id}" name="${_arg.name}" type="${_type == null ? 'text' : _type}" 
-      placeholder="${_placeholder == null ? '' : _placeholder}" value="${_value == null ? _arg.value : _value}" >
-    #{if _arg.error}
+      <input  class="form-control ${_attrs['class']}" id="${field.id}" name="${field.name}" type="${_type == null ? 'text' : _type}" 
+      placeholder="${_placeholder == null ? '' : _placeholder}" value="${_value == null ? field.value : _value}" >
+    #{if field.error}
 	  <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 	</div>
-    <span class="help-block col-sm-3">&{_arg.error}</span>
+    <span class="help-block col-sm-3">&{field.error}</span>
     #{/if}
  #{else}</div>#{/else}
  #{doBody /}
 </div>
+#{/field}

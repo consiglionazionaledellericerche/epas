@@ -3,7 +3,7 @@
 	<div class="col-sm-6">
 		<div class="input-group">
 			<input datepicker#{if _view}-${_view}#{/if} class="form-control ${_attrs['class']}" id="${_arg.id}" name="${_arg.name}" type="text" 
-			value="${_value == null ? _arg.value?.value() : _value}" >
+			value="${_value == null ? _arg.value?.format() : _value}" >
 			<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 		</div>
 	</div>

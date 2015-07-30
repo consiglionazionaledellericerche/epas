@@ -38,12 +38,12 @@
 				
 				<tr>
 					<td>Inizio validita':</td>
-					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${absenceType.validFrom?.value()}"></td>
+					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${absenceType.validFrom?.format()}"></td>
 					<td>Data inizio validità di questo codice (se vuoto valido da sempre)</td>
 				</tr>
 				<tr>
 					<td>Fine validita': </td>
-					<td><input type="text" name="absenceType.validTo" datepicker-year value="${absenceType.validTo?.value()}"></td>
+					<td><input type="text" name="absenceType.validTo" datepicker-year value="${absenceType.validTo?.format()}"></td>
 					<td>Data fine validità di questo codice (se vuoto valido per sempre)</td>
 				</tr>
 				<tr>

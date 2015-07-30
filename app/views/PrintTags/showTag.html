@@ -77,13 +77,13 @@ tr:nth-child(even) {
 			if(dayRecap.holiday==false)
 			{
 			}%	
-				<td><font size="0.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
+				<td><font size="0.5">${dayRecap.date.shortDayName()}</font></td>
 			%{
 			}
 			else
 			{
 			}%	
-				<td><font size="0.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
+				<td><font size="0.5">${dayRecap.date.shortDayName()}</font></td>
 			%{
 			}
 			}%

@@ -1,6 +1,6 @@
 #{extends 'modal.html' /}
 #{set modalHeader:'Modifica assenza in data ' 
-+ absence.personDay.date.value() + ' per ' + absence.personDay.person.name + ' ' + absence.personDay.person.surname /}
++ absence.personDay.date.format() + ' per ' + absence.personDay.person.name + ' ' + absence.personDay.person.surname /}
 
 <div class="container-fluid">
 
@@ -39,7 +39,7 @@
     
       <tr>
         <td class="lab"><strong>Fino a</strong></td>
-        <td><input name="dateTo" value="${absence.personDay.date?.value()}" type="text" datepicker /></td>
+        <td><input name="dateTo" value="${absence.personDay.date?.format()}" type="text" datepicker /></td>
 	  </tr>
 	
 	  <tr>

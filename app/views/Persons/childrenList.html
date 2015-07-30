@@ -47,7 +47,7 @@
     <tr>
       <td>${child.name}</td>
       <td>${child.surname}</td>
-      <td>${child.bornDate?.value()}</td>
+      <td>${child.bornDate?.format()}</td>
       <td class="col-xs-3">
         <div class="btn-group pull-right" role="group" >
             <a role="button" class="btn btn-default" href="@{Persons.editChild(child.id)}">Modifica <i class="fa fa-cogs"></i></a>
