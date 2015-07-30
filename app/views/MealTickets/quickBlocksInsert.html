@@ -13,8 +13,8 @@
 	 <!-- Recap current contract -->
 	 Intervallo considerato per buoni pasto:
 	 #{if recap.getMealTicketInterval().isClosed() }
-	   Da <strong>${recap.getMealTicketInterval().getBegin()?.value()}</strong>
-	   A <strong>${recap.getMealTicketInterval().getEnd()?.value()}</strong>
+	   Da <strong>${recap.getMealTicketInterval().getBegin()?.format()}</strong>
+	   A <strong>${recap.getMealTicketInterval().getEnd()?.format()}</strong>
 	 #{/if}
 	 #{else}
 	   Da <strong>${recap.getMealTicketInterval().getBegin()}</strong>
@@ -114,10 +114,10 @@
 		      </td>
 		      <td>
 		        <input name="expireDate1" type="text" 
-		        datepicker value="${expireDate?.value()}"/>
+		        datepicker value="${expireDate?.format()}"/>
 		      </td>
 		      <td>
-		        ${today?.value()}
+		        ${today?.format()}
 		      </td>
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
@@ -134,10 +134,10 @@
 		      </td>
 		      <td>
 		        <input name="expireDate2" type="text" 
-		        datepicker value="${expireDate?.value()}"/>
+		        datepicker value="${expireDate?.format()}"/>
 		      </td>
 		      <td>
-		        ${today?.value()}
+		        ${today?.format()}
 		      </td>
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
@@ -154,10 +154,10 @@
 		      </td>
 		      <td>
 		        <input name="expireDate3" type="text" 
-		        datepicker value="${expireDate?.value()}"/>
+		        datepicker value="${expireDate?.format()}"/>
 		      </td>
 		       <td>
-		        ${today?.value()}
+		        ${today?.format()}
 		      </td>
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
@@ -191,7 +191,7 @@
 		        <td>
 		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
 		        </td>
-		        <td>${block.getExpireDate()?.value()}</td>
+		        <td>${block.getExpireDate()?.format()}</td>
 		        <td>
 		        
 		    	  <div class="delete-confirmed">

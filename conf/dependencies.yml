@@ -54,6 +54,11 @@ require:
 # My custom repository
 
 repositories:
+    - kjetland:
+        type:       http
+        artifact:   "http://mbknor.github.com/play-modules/[module]-[revision].zip"
+        contains:
+            - kjetland -> *
     - github:
          type:       http
          artifact:   "https://github.com/jackmoore/colorbox"
