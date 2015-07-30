@@ -19,7 +19,6 @@ import models.Person;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -28,15 +27,11 @@ import cnr.sync.dto.AbsenceRest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;

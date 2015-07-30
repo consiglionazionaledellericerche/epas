@@ -12,7 +12,6 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
-import models.VacationPeriod;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;

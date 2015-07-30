@@ -21,9 +21,9 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
+import models.enumerate.TimeAtWorkModifier;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
@@ -603,7 +603,7 @@ public class AbsenceManager {
 		List<Absence> absences91 = absenceDao.getAbsenceByCodeInPeriod(
 				Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
 				date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(),
-				date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+				date, Optional.<TimeAtWorkModifier>absent(), false, false);
 		if(absences91 != null){
 			alreadyUsed = absences91.size();
 		}
@@ -921,7 +921,7 @@ public class AbsenceManager {
 		
 		List<Absence> usateDb = absenceDao.getAbsenceByCodeInPeriod(Optional.of(person), 
 				Optional.of(abt.code),begin, begin.plusYears(1), 
-				Optional.<JustifiedTimeAtWork>absent(), false, false);
+				Optional.<TimeAtWorkModifier>absent(), false, false);
 		
 		// TODO: di otherAbsences devo conteggiare
 		// le sole assenze [begin, begin.plusYears(1)]

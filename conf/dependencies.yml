@@ -4,6 +4,7 @@ require:
     - play
     - play -> shibboleth 1.2
     - play -> secure
+    - kjetland -> fastergt 1.8
     - org.hibernate -> hibernate-envers 4.2.15.Final:
           transitive: false
     - org.jadira.usertype -> usertype.core 3.2.0.GA

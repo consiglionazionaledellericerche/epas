@@ -17,8 +17,8 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
+import models.enumerate.TimeAtWorkModifier;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
@@ -73,7 +72,7 @@ public class PersonDayManager {
 				return false;
 			}
 			else if(abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-					&& abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)){
+					&& abs.absenceType.timeAtWorkModification.equals(TimeAtWorkModifier.JustifyAllDay)){
 				return true;
 			}
 		}
@@ -89,10 +88,10 @@ public class PersonDayManager {
 
 		if(pd.person.qualification.qualification > 3){
 			for(Absence abs : pd.absences){
-				if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
-						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
-						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
-						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
+				if(abs.absenceType.timeAtWorkModification.equals(TimeAtWorkModifier.JustifyFourHours) ||
+						abs.absenceType.timeAtWorkModification.equals(TimeAtWorkModifier.JustifyFiveHours) ||
+						abs.absenceType.timeAtWorkModification.equals(TimeAtWorkModifier.JustifySixHours) ||
+						abs.absenceType.timeAtWorkModification.equals(TimeAtWorkModifier.JustifySevenHours))
 					return true;
 			}
 			return false;
@@ -136,7 +135,7 @@ public class PersonDayManager {
 
 		Preconditions.checkState( pd.getWorkingTimeTypeDay().isPresent() );
 
-		int justifiedTimeAtWork = 0;
+		int timeAtWorkModification = 0;
 		pd.getValue().stampModificationType = null;
 
 		//Se hanno il tempo di lavoro fissato non calcolo niente
@@ -156,7 +155,7 @@ public class PersonDayManager {
 			
 			// Caso di assenza giornaliera.  
 			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+					abs.absenceType.timeAtWorkModification.equals(TimeAtWorkModifier.JustifyAllDay)) {
 				
 				setIsTickeAvailable(pd, false);
 				return 0;
@@ -164,28 +163,28 @@ public class PersonDayManager {
 			
 			// Giustificativi grana minuti (priorità sugli altri casi)
 			if( abs.justifiedMinutes != null) {
-				justifiedTimeAtWork += abs.justifiedMinutes;
+				timeAtWorkModification += abs.justifiedMinutes;
 				continue;
 			}
 			// FIXME: togliere questa eccezione dal codice.
 			if( !abs.absenceType.code.equals("89") && 
-					abs.absenceType.justifiedTimeAtWork.minutesJustified != null) {
+					abs.absenceType.timeAtWorkModification.minutes != null) {
 
-				justifiedTimeAtWork += abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				timeAtWorkModification += abs.absenceType.timeAtWorkModification.minutes;
 				continue;
 			}
-			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
+			if(abs.absenceType.timeAtWorkModification == TimeAtWorkModifier.JustifyHalfDay){
 
-				justifiedTimeAtWork += pd.getWorkingTimeTypeDay().get().workingTime / 2;
+				timeAtWorkModification += pd.getWorkingTimeTypeDay().get().workingTime / 2;
 				continue;
 			}
 		}
 
-		//se non c'è almeno una coppia di timbrature considero il justifiedTimeAtwork
+		//se non c'è almeno una coppia di timbrature considero il timeAtWorkModification
 		//(che però non contribuisce all'attribuzione del buono mensa che quindi è certamente non assegnato)
 		if (pd.getValue().stampings.size() < 2) {
 			setIsTickeAvailable(pd, false);
-			return justifiedTimeAtWork;
+			return timeAtWorkModification;
 		}
 
 		Collections.sort(pd.getValue().stampings);
@@ -202,7 +201,7 @@ public class PersonDayManager {
 			}
 
 			setIsTickeAvailable(pd,false);
-			return justifiedTimeAtWork + holidayWorkTime;
+			return timeAtWorkModification + holidayWorkTime;
 		}
 
 		List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
@@ -221,7 +220,7 @@ public class PersonDayManager {
 		if( ! wttd.mealTicketEnabled() ) {
 
 			setIsTickeAvailable(pd, false);
-			return workTime + justifiedTimeAtWork;
+			return workTime + timeAtWorkModification;
 		}
 
 		// Calcolo ...
@@ -268,7 +267,7 @@ public class PersonDayManager {
 		// Non ho eseguito il tempo minimo per buono pasto.
 		if (workTime - missingTime < mealTicketTime) {
 			setIsTickeAvailable(pd, false);
-			return workTime + justifiedTimeAtWork;
+			return workTime + timeAtWorkModification;
 		}
 
 		// Calcolo tempo decurtato per pausa troppo breve.
@@ -282,16 +281,16 @@ public class PersonDayManager {
 				pd.getWorkingTimeTypeDay().get()) ) {
 			
 			setIsTickeAvailable(pd, false);
-			return workTime + justifiedTimeAtWork;
+			return workTime + timeAtWorkModification;
 		}
 		
 		// Decidere quando verrà il momento di fare i conti con gianvito...
-//		if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork, 
+//		if( !isGianvitoConditionSatisfied(workingTimeDecurted, timeAtWorkModification, 
 //				pd.getValue().date, pd.getPersonDayContract().get(), 
 //				pd.getWorkingTimeTypeDay().get()) ){
 //			
 //			setIsTickeAvailable(pd, false);
-//			return workTime + justifiedTimeAtWork;
+//			return workTime + timeAtWorkModification;
 //		}
 	
 		
@@ -318,7 +317,7 @@ public class PersonDayManager {
 			pd.getValue().decurted = missingTime;
 		}
 			
-		return workingTimeDecurted + justifiedTimeAtWork;
+		return workingTimeDecurted + timeAtWorkModification;
 
 		
 	}
@@ -387,12 +386,12 @@ public class PersonDayManager {
 	 * che sta succedendo nel giorno.
 	 * 
 	 * @param workingTimeDecurted
-	 * @param justifiedTimeAtWork
+	 * @param timeAtWorkModification
 	 * @param wttd
 	 * @return
 	 */
 	private boolean isGianvitoConditionSatisfied(int workingTimeDecurted, 
-			int justifiedTimeAtWork, LocalDate date, Contract contract, WorkingTimeTypeDay wttd) {
+			int timeAtWorkModification, LocalDate date, Contract contract, WorkingTimeTypeDay wttd) {
 		
 		// - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro giornaliero.
 		// 		ok buono pasto
@@ -403,9 +402,9 @@ public class PersonDayManager {
 		// - Ho il tempo di lavoro (eventualmente decurtato) che non raggiunge il tempo di lavoro giornaliero.
 		//	 - Aggiungo PEPE 
 		//     - livello raggiunto ok buono pasto
-		//TODO: capire se in justifiedTimeAtWork posso considerare tutte le assenze
+		//TODO: capire se in timeAtWorkModification posso considerare tutte le assenze
 		// orarie o solo PEPE e gravi motivi personali.
-		if( workingTimeDecurted + justifiedTimeAtWork >= wttd.workingTime) {
+		if( workingTimeDecurted + timeAtWorkModification >= wttd.workingTime) {
 			return true;
 		}
 		
@@ -413,7 +412,7 @@ public class PersonDayManager {
 		//Ultimo tentativo con flessibilità
 		int flexibility = contractMonthRecapManager
 				.getMinutesForCompensatoryRest(contract, date.minusDays(1), new ArrayList<Absence>());
-		if( workingTimeDecurted + justifiedTimeAtWork + flexibility >= wttd.workingTime )  {
+		if( workingTimeDecurted + timeAtWorkModification + flexibility >= wttd.workingTime )  {
 			return true;
 		}
 

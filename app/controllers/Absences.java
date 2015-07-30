@@ -28,8 +28,8 @@ import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
+import models.enumerate.TimeAtWorkModifier;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -97,7 +97,7 @@ public class Absences extends Controller{
 				Optional.fromNullable(absenceCode), 
 				DateUtility.getMonthFirstDay(yearMonth), 
 				DateUtility.getMonthLastDay(yearMonth),
-				Optional.<JustifiedTimeAtWork>absent(),
+				Optional.<TimeAtWorkModifier>absent(),
 				false, 
 				true);
 
@@ -118,17 +118,12 @@ public class Absences extends Controller{
 	}
 
 	public static void insertAbsenceCode(){
-
-		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
-		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
-		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
-
-		render(justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
+		render("@editAbsenceCode");
 	}
 
 	public static void saveAbsenceCode(
 			@Required @Valid AbsenceType absenceType,
-			@Required String justifiedTimeAtWork,
+			@Required String timeAtWorkModification,
 			boolean tecnologi,
 			boolean tecnici,
 			AbsenceTypeGroup absenceTypeGroup,
@@ -149,7 +144,7 @@ public class Absences extends Controller{
 			insertAbsenceCode();
 		}
 
-		absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
+//		absenceType.timeAtWorkModification = timeAtWorkModification.getByDescription(timeAtWorkModification);
 
 		Range<Integer> qualifiche;
 		if(tecnologi && tecnici){
@@ -262,7 +257,7 @@ public class Absences extends Controller{
 		//		FIXME decidere se permetterlo all'admin, ed eventualmente sistemare il controllo, o il permesso
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 
-		AbsenceType abt = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
+		AbsenceType absenceType = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
 
 		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
 		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
@@ -270,18 +265,17 @@ public class Absences extends Controller{
 		boolean tecnologo = false;
 		boolean tecnico = false;
 
-		for(Qualification q : abt.qualifications){
+		for(Qualification q : absenceType.qualifications){
 			tecnologo = !tecnologo ? QualificationMapping.TECNOLOGI.contains(q) : tecnologo;
 			tecnico = !tecnico ? QualificationMapping.TECNICI.contains(q) : tecnico;
 		}
 
-		render(abt, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
+		render(absenceType, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
 	}
 
 
 	public static void updateCode(@Required @Valid AbsenceType absenceType,
-			boolean tecnologi,
-			boolean tecnici){
+			boolean tecnologi,boolean tecnici){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 
@@ -482,7 +476,7 @@ public class Absences extends Controller{
 				Optional.<Person>absent(),Optional.fromNullable(code), 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
-				Optional.<JustifiedTimeAtWork>absent(), true, false);
+				Optional.<TimeAtWorkModifier>absent(), true, false);
 		byte[] buffer = new byte[1024];
 
 		for(Absence abs : absList){
@@ -560,7 +554,7 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(person.office);
 
 		List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
-				Optional.<String>absent(), from, to, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false, false);
+				Optional.<String>absent(), from, to, Optional.of(TimeAtWorkModifier.JustifyAllDay), false, false);
 
 		for(Absence abs : absenceList){
 			if(AbsenceTypeMapping.MISSIONE.is(abs.absenceType)){

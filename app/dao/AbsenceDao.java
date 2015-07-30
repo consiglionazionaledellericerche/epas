@@ -14,7 +14,7 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
-import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.TimeAtWorkModifier;
 import models.exports.FrequentAbsenceCode;
 import models.query.QAbsence;
 import models.query.QPersonDay;
@@ -97,13 +97,13 @@ public class AbsenceDao extends DaoBase {
 	 * @param code
 	 * @param from
 	 * @param to
-	 * @param justifiedTimeAtWork
+	 * @param timeAtWorkModification
 	 * @param forAttachment
 	 * @return 
 	 */
 	public List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, 
 			Optional<String> code,	LocalDate from, LocalDate to, 
-			Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment, 
+			Optional<TimeAtWorkModifier> timeAtWorkModification, boolean forAttachment, 
 			boolean ordered){
 
 		final QAbsence absence = QAbsence.absence;
@@ -115,8 +115,8 @@ public class AbsenceDao extends DaoBase {
 		if(person.isPresent()){
 			condition.and(absence.personDay.person.eq(person.get()));
 		}
-		if(justifiedTimeAtWork.isPresent()){
-			condition.and(absence.absenceType.justifiedTimeAtWork.eq(justifiedTimeAtWork.get()));
+		if(timeAtWorkModification.isPresent()){
+			condition.and(absence.absenceType.timeAtWorkModification.eq(timeAtWorkModification.get()));
 		}
 		if(code.isPresent()){
 			condition.and(absence.absenceType.code.eq(code.get()));
@@ -298,7 +298,7 @@ public class AbsenceDao extends DaoBase {
 		return getQueryFactory().from(absence)
 				.where(absence.personDay.person.eq(person).and(
 						absence.personDay.date.between(fromDate, toDate.or(fromDate))).and(
-								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay))).list(absence);
+								absence.absenceType.timeAtWorkModification.eq(TimeAtWorkModifier.JustifyAllDay))).list(absence);
 
 	}
 
@@ -377,7 +377,7 @@ public class AbsenceDao extends DaoBase {
 			return new ArrayList<Absence>();
 
 		List<Absence> absences = getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
-				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
+				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<TimeAtWorkModifier>absent(), false, true);
 
 		return absences;	
 
