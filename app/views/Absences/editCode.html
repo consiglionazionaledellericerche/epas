@@ -49,30 +49,30 @@
 				<tr>
 					<td>Calcolo orario:</td>
 					<td>
-                        Giustifica<input type="radio" name="calculationType" value="justify" #{if absenceType.justifiedTimeAtWork}checked#{/if}/>
-                        Assegna<input type="radio" name="calculationType" value="assign" #{if absenceType.assignedTimeAtWork}checked#{/if}/>
+                        Giustifica<input type="radio" name="calculationType" value="justify" #{if absenceType.timeAtWorkModifier}checked#{/if}/>
+                        Assegna<input type="radio" name="calculationType" value="assign" #{if absenceType.timeAtWorkModifier}checked#{/if}/>
 					</td>
 					<td>Seleziona "si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza</td>
 				</tr>
-				<tr id="justified" #{if absenceType.justifiedTimeAtWork == null}hidden#{/if}>
+				<tr id="justified" #{if absenceType.timeAtWorkModifier == null}hidden#{/if}>
 					<td>Tempo di lavoro giustificato: </td>
 					<td>
-					#{select 'absenceType.justifiedTimeAtWork',value:absenceType?.justifiedTimeAtWork}
+					#{select 'absenceType.timeAtWorkModifier',value:absenceType?.timeAtWorkModifier}
 						#{option}#{/option}
-						#{list items:models.enumerate.TimeAtWorkModifier.values()}
-							#{option _}${_.description}#{/option}
+						#{list models.enumerate.TimeAtWorkModifier.justifyingValues()}
+							#{option _}${_.label()}#{/option}
 						#{/list}
 					#{/select}
 					</td>
 					<td>Tempo di lavoro giustificato (Es. codice 661h2 indicare 2)</td>
 				</tr>
-				<tr id="assigned" #{if absenceType.assignedTimeAtWork == null}hidden#{/if} >
+				<tr id="assigned" #{if absenceType.timeAtWorkModifier == null}hidden#{/if} >
 					<td>Tempo di lavoro Assegnato: </td>
 					<td>
-					#{select 'absenceType.assignedTimeAtWork',value:absenceType?.assignedTimeAtWork}
+					#{select 'absenceType.timeAtWorkModifier',value:absenceType?.timeAtWorkModifier}
 						#{option}#{/option}
-						#{list items:models.enumerate.AssignedTimeAtWork.values()}
-							#{option _}&{_.label()}#{/option}
+						#{list models.enumerate.TimeAtWorkModifier.assigningValues()}
+							#{option _}${_.label()}#{/option}
 						#{/list}
 					#{/select}
 					</td>
