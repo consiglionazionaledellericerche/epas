@@ -87,7 +87,7 @@
 								  <a href="@{Administrators.deleteSelfAsAdministrator(sede.value.id)}" data-modal=".my-modal">
 								  #{/if}
 								  #{else}
-								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id)}">
+								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.user.id, roleAdmin.id)}">
 								  #{/else}
 								    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
@@ -108,7 +108,7 @@
 				              <br>
 				            #{list items:sede.getPersonnelAdminMini(), as:'person'}
 				                <br>${person.surname} ${person.name}
-								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id)}">
+								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id, roleAdminMini.id)}">
 				                    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
 				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
