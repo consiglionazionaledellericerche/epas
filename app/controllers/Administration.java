@@ -69,7 +69,7 @@ public class Administration extends Controller {
 			absenceType.code = "PEPE";
 			absenceType.description = "Permesso Personale";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 
@@ -79,7 +79,7 @@ public class Administration extends Controller {
 			absenceType.code = "RITING";
 			absenceType.description = "AUTORIZ.DIRIG.RITARDO.INGR.TUR";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 
@@ -89,7 +89,7 @@ public class Administration extends Controller {
 			absenceType.code = "661h";
 			absenceType.description = "PERM.ORARIO GRAVI MOTIVI";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 		absenceType = AbsenceType.find("byCode", "09B").first();
@@ -98,7 +98,7 @@ public class Administration extends Controller {
 			absenceType.code = "09B";
 			absenceType.description = "ORE DI  MALAT. O VIS.ME";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 		absenceType = AbsenceType.find("byCode", "103").first();
@@ -107,7 +107,7 @@ public class Administration extends Controller {
 			absenceType.code = "103";
 			absenceType.description = "Telelavoro";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 		absenceType = AbsenceType.find("byCode", "91.").first();
@@ -116,7 +116,7 @@ public class Administration extends Controller {
 			absenceType.code = "91.";
 			absenceType.description = "RIPOSO COMPENSATIVO 1/3 L";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 		absenceType = AbsenceType.find("byCode", "91CE").first();
@@ -125,7 +125,7 @@ public class Administration extends Controller {
 			absenceType.code = "91CE";
 			absenceType.description = "RIP. COMP.CHIUSURA ENTE";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 		absenceType = AbsenceType.find("byCode", "182").first();
@@ -134,7 +134,7 @@ public class Administration extends Controller {
 			absenceType.code = "182";
 			absenceType.description = "PERM ASSIST.PARENTI 2";
 			absenceType.internalUse = true;
-			absenceType.timeAtWorkModification = TimeAtWorkModifier.JustifyAllDay;
+			absenceType.timeAtWorkModifier = TimeAtWorkModifier.JustifyAllDay;
 			absenceType.save();
 		}
 

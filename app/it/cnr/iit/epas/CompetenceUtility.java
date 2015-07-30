@@ -350,7 +350,7 @@ public class CompetenceUtility {
 				// check for absences
 				if (!personDay.get().absences.isEmpty()) {
 					for (Absence absence : personDay.get().absences) {
-						if (absence.absenceType.timeAtWorkModification == TimeAtWorkModifier.JustifyAllDay) {
+						if (absence.absenceType.timeAtWorkModifier == TimeAtWorkModifier.JustifyAllDay) {
 							Logger.info("La reperibilit√† di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 
 							absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences)) ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();							
@@ -741,7 +741,7 @@ public class CompetenceUtility {
 				if (!personDay.get().absences.isEmpty()) {
 					Logger.debug("E assente!!!! Esamino le assenze(%s)", personDay.get().absences.size());
 					for (Absence absence : personDay.get().absences) {
-						if (absence.absenceType.timeAtWorkModification == TimeAtWorkModifier.JustifyAllDay) {
+						if (absence.absenceType.timeAtWorkModifier == TimeAtWorkModifier.JustifyAllDay) {
 
 							if (absence.absenceType.code.equals("92")) {
 								Logger.info("Il turno di %s %s √® coincidente con una missione il giorno %s", person.name, person.surname, personShiftDay.date);

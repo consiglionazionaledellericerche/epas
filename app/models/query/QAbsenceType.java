@@ -51,7 +51,7 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final ListPath<models.Qualification, QQualification> qualifications = this.<models.Qualification, QQualification>createList("qualifications", models.Qualification.class, QQualification.class, PathInits.DIRECT2);
 
-    public final EnumPath<models.enumerate.TimeAtWorkModifier> timeAtWorkModification = createEnum("timeAtWorkModification", models.enumerate.TimeAtWorkModifier.class);
+    public final EnumPath<models.enumerate.TimeAtWorkModifier> timeAtWorkModifier = createEnum("timeAtWorkModifier", models.enumerate.TimeAtWorkModifier.class);
 
     public final DatePath<org.joda.time.LocalDate> validFrom = createDate("validFrom", org.joda.time.LocalDate.class);
 
