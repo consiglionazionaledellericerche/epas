@@ -97,13 +97,13 @@ public class AbsenceDao extends DaoBase {
 	 * @param code
 	 * @param from
 	 * @param to
-	 * @param timeAtWorkModification
+	 * @param timeAtWorkModifier
 	 * @param forAttachment
 	 * @return 
 	 */
 	public List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, 
 			Optional<String> code,	LocalDate from, LocalDate to, 
-			Optional<TimeAtWorkModifier> timeAtWorkModification, boolean forAttachment, 
+			Optional<TimeAtWorkModifier> timeAtWorkModifier, boolean forAttachment, 
 			boolean ordered){
 
 		final QAbsence absence = QAbsence.absence;
@@ -115,8 +115,8 @@ public class AbsenceDao extends DaoBase {
 		if(person.isPresent()){
 			condition.and(absence.personDay.person.eq(person.get()));
 		}
-		if(timeAtWorkModification.isPresent()){
-			condition.and(absence.absenceType.timeAtWorkModification.eq(timeAtWorkModification.get()));
+		if(timeAtWorkModifier.isPresent()){
+			condition.and(absence.absenceType.timeAtWorkModifier.eq(timeAtWorkModifier.get()));
 		}
 		if(code.isPresent()){
 			condition.and(absence.absenceType.code.eq(code.get()));
@@ -298,7 +298,7 @@ public class AbsenceDao extends DaoBase {
 		return getQueryFactory().from(absence)
 				.where(absence.personDay.person.eq(person).and(
 						absence.personDay.date.between(fromDate, toDate.or(fromDate))).and(
-								absence.absenceType.timeAtWorkModification.eq(TimeAtWorkModifier.JustifyAllDay))).list(absence);
+								absence.absenceType.timeAtWorkModifier.eq(TimeAtWorkModifier.JustifyAllDay))).list(absence);
 
 	}
 

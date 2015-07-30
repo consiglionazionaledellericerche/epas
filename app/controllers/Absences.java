@@ -123,7 +123,7 @@ public class Absences extends Controller{
 
 	public static void saveAbsenceCode(
 			@Required @Valid AbsenceType absenceType,
-			@Required String timeAtWorkModification,
+			@Required String timeAtWorkModifier,
 			boolean tecnologi,
 			boolean tecnici,
 			AbsenceTypeGroup absenceTypeGroup,

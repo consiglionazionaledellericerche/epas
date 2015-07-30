@@ -41,8 +41,8 @@ public class YearlyAbsencesRecap {
 	private int checkHourAbsence(List<Absence> yearlyAbsence) {
 		int count = 0;
 		for(Absence abs : yearlyAbsence){
-			if(abs.absenceType.timeAtWorkModification.minutes != null && 
-					abs.absenceType.timeAtWorkModification.minutes < TimeAtWorkModifier.JustifySevenHours.minutes)
+			if(abs.absenceType.timeAtWorkModifier.minutes != null && 
+					abs.absenceType.timeAtWorkModifier.minutes < TimeAtWorkModifier.JustifySevenHours.minutes)
 				count ++;
 		}
 		return count;

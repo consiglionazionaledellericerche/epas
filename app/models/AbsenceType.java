@@ -68,8 +68,8 @@ public class AbsenceType extends BaseModel {
 	
 	@Required
 	@Enumerated(EnumType.STRING)
-	@Column(name = "time_at_work_modification")
-	public TimeAtWorkModifier timeAtWorkModification;
+	@Column(name = "time_at_work_modifier")
+	public TimeAtWorkModifier timeAtWorkModifier;
 
 	/**
 	 * Relazione inversa con le assenze.
