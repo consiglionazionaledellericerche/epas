@@ -54,36 +54,31 @@
 			<th>cosa fare raggiunto il limite</th>
 			<th>codice per sostituzione</th>
 		</tr>
-		%{
-			for(absenceCode in absenceList){			
-		}%
+
+		#{list absenceList}
 		<tr>
-			<td class="caratteristica"><a href="@{Absences.editCode(absenceCode.id)}">${absenceCode.code}</a></td>
-			<td>${absenceCode.certificateCode}</td>
-			<td>${absenceCode.description}</td>
-			<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
+			<td class="caratteristica"><a href="@{Absences.editCode(_.id)}">${_.code}</a></td>
+			<td>${_.certificateCode}</td>
+			<td>${_.description}</td>
+			<td>${_.internalUse ? 'Sì' : 'No'}</td>
 	
-			<td>${absenceCode.consideredWeekEnd == true ? 'Sì' : 'No'}</td>
-			<td>${absenceCode.validFrom?.format()}</td>
-			<td>${absenceCode.validTo?.format()}</td>
-			<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
+			<td>${_.consideredWeekEnd ? 'Sì' : 'No'}</td>
+			<td>${_.validFrom?.format()}</td>
+			<td>${_.validTo?.format()}</td>
+			<td>${_.timeAtWorkModifier?.label()}</td>
 			<td>
-				#{list absenceCode.qualifications}
-					${_.qualification}#{if !_isLast},#{/if}
+				#{list items:_.qualifications, as: 'q'}
+					${q.qualification}#{if !q_isLast},#{/if}
 				#{/list}
 			</td> 
-			
-			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
+			<td>${_.absenceTypeGroup?.label}</td>
 			<td>${}</td> <!-- cos'è??? -->
-			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>
-			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType.description : ''}</td>
-			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.limitInMinute : ''}</td>
-			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour.description : ''}</td>
-			<td>${absenceCode.absenceTypeGroup != null && absenceCode.absenceTypeGroup.replacingAbsenceType != null ? absenceCode.absenceTypeGroup.replacingAbsenceType.code : ''}</td>
+			<td>${_.absenceTypeGroup?.minutesExcess}</td>
+			<td>${_.absenceTypeGroup?.accumulationType?.description}</td>
+			<td>${_.absenceTypeGroup?.limitInMinute}</td>
+			<td>${_.absenceTypeGroup?.accumulationBehaviour?.description}</td>
+			<td>${_.absenceTypeGroup?.replacingAbsenceType?.code}</td>
 		</tr>
-		%{
-			}
-		}%
-	
+		#{/list}
 	</table>
 </section>
