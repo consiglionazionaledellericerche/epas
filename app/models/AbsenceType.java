@@ -17,7 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import models.base.BaseModel;
-import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.TimeAtWorkModifier;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -54,10 +54,8 @@ public class AbsenceType extends BaseModel {
 
 	public String description;
 
-
 	@Column(name = "valid_from")
 	public LocalDate validFrom;
-
 
 	@Column(name = "valid_to")
 	public LocalDate validTo;
@@ -65,34 +63,13 @@ public class AbsenceType extends BaseModel {
 	@Column(name = "internal_use")
 	public boolean internalUse = false;
 
-	@Column(name = "multiple_use")
-	public boolean multipleUse = false;
-	//FIXME questo campo non è mai utilizzato. la sua utilità mi sfugge
-
-
-	@Column(name = "meal_ticket_calculation")
-	public boolean mealTicketCalculation = false;
-	//FIXME questo campo non e' mai utilizzato, e' il caso della missione che prevede comunque il calcolo del buono mensa?
-
-
 	@Column(name = "considered_week_end")
 	public boolean consideredWeekEnd = false;
-
+	
+	@Required
 	@Enumerated(EnumType.STRING)
-	@Column(name = "justified_time_at_work")
-	public JustifiedTimeAtWork justifiedTimeAtWork;
-
-	/**
-	 * questo campo booleano serve nei casi in cui il codice sostitutivo da usare non debba essere considerato nel calcolo dell'orario di lavoro
-	 * giornaliero, ma che mi ricordi che arrivati a quel giorno, la quantità di assenze orarie per quel tipo ha superato il limite per cui deve
-	 * essere inviata a Roma.
-	 * Es.: i codici 09hX hanno un limite di 432 minuti che, una volta raggiunto, fa sì che a Roma debba essere inviata una assenza di tipo 09B.
-	 * Questa assenza 09B viene inserita nel giorno in cui si raggiunge il limite, ma non influisce sul calcolo del tempo di lavoro di quel
-	 * giorno.
-	 */
-	@Column(name = "replacing_absence")
-	public boolean replacingAbsence = false;
-	//FIXME questo campo non è mai utilizzato
+	@Column(name = "time_at_work_modification")
+	public TimeAtWorkModifier timeAtWorkModification;
 
 	/**
 	 * Relazione inversa con le assenze.
@@ -100,7 +77,6 @@ public class AbsenceType extends BaseModel {
 	@OneToMany(mappedBy="absenceType")
 	@LazyCollection(LazyCollectionOption.EXTRA)
 	public Set<Absence> absences = Sets.newHashSet();
-
 
 	@Transient
 	public String getShortDescription(){

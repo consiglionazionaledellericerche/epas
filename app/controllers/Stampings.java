@@ -1,6 +1,5 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
 import helpers.PersonTags;
 import it.cnr.iit.epas.DateUtility;
 
@@ -25,7 +24,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -35,8 +33,6 @@ import security.SecurityRules;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
 
 import dao.OfficeDao;
 import dao.PersonDao;

@@ -4,58 +4,79 @@
 
 <div class="container">
  #{form @Absences.updateCode()}
- 	<input type="hidden" name="absenceType.id" value="${abt.id}">
+ 	<input type="hidden" name="absenceType.id" value="${absenceType.id}">
 	<div class="panel panel-default">
 		  <div class="panel-heading">
-		    <h3 class="panel-title">Modifica dati per codice di assenza: ${abt.code} (${abt.description})</h3>
+		    <h3 class="panel-title">Modifica dati per codice di assenza: ${absenceType.code} (${absenceType.description})</h3>
 		  </div>
 		<div class="panel-body">
+
 			<table class="table table-form table-condensed table-hover">
 				<tr>
 					<td>Codice: </td>
-					<td><input type="text" name="absenceType.code" value="${abt.code}" disabled></td>
+					<td><input type="text" name="absenceType.code" value="${absenceType.code}" disabled></td>
 					<td>codice di assenza</td>
 				</tr>
  				<tr>
  					<td>Codice per attestati di presenza: </td>
- 					<td><input type="text" name="absenceType.certificateCode" value="${abt.certificateCode}"></td>
+ 					<td><input type="text" name="absenceType.certificateCode" value="${absenceType.certificateCode}"></td>
  					<td>Usare solo se il codice che deve andare negli attestati di presenza e' diverso da quello definito nella riga precedente (questo diventa il codice vero e quello sulla riga precedente un alias per uso interno)</td>
  				</tr>
 				<tr>
 					<td>Descrizione: </td>
-					<td><input type="text" name="absenceType.description" value="${abt.description}"></td>
+					<td><input type="text" name="absenceType.description" value="${absenceType.description}"></td>
 					<td>Descrizione codice di assenza</td>
 				</tr>
 				<tr>
 					<td>Uso interno:</td>
 					<td>
-						Sì <input type="radio" name="absenceType.internalUse" value="true" #{if abt.internalUse}checked #{/if}> 
-						No <input type="radio" name="absenceType.internalUse" value="false" #{if !abt.internalUse }checked #{/if}>
+						Sì <input type="radio" name="absenceType.internalUse" value="true" #{if absenceType.internalUse}checked #{/if}> 
+						No <input type="radio" name="absenceType.internalUse" value="false" #{if !absenceType.internalUse }checked #{/if}>
 					</td>
 					<td>Seleziona "si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza</td>
 				</tr>
 				
 				<tr>
 					<td>Inizio validita':</td>
-					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${abt.validFrom?.value()}"></td>
+					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${absenceType.validFrom?.value()}"></td>
 					<td>Data inizio validità di questo codice (se vuoto valido da sempre)</td>
 				</tr>
 				<tr>
 					<td>Fine validita': </td>
-					<td><input type="text" name="absenceType.validTo" datepicker-year value="${abt.validTo?.value()}"></td>
+					<td><input type="text" name="absenceType.validTo" datepicker-year value="${absenceType.validTo?.value()}"></td>
 					<td>Data fine validità di questo codice (se vuoto valido per sempre)</td>
 				</tr>
 				<tr>
+					<td>Calcolo orario:</td>
+					<td>
+                        Giustifica<input type="radio" name="calculationType" value="justify" #{if absenceType.justifiedTimeAtWork}checked#{/if}/>
+                        Assegna<input type="radio" name="calculationType" value="assign" #{if absenceType.assignedTimeAtWork}checked#{/if}/>
+					</td>
+					<td>Seleziona "si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza</td>
+				</tr>
+				<tr id="justified" #{if absenceType.justifiedTimeAtWork == null}hidden#{/if}>
 					<td>Tempo di lavoro giustificato: </td>
 					<td>
-					#{select 'absenceType.justifiedTimeAtWork',value:abt.justifiedTimeAtWork.description}
-						#{list items:models.enumerate.JustifiedTimeAtWork.values(), as: 'jtw'}
-							#{option jtw}${jtw.description}#{/option}
+					#{select 'absenceType.justifiedTimeAtWork',value:absenceType?.justifiedTimeAtWork}
+						#{option}#{/option}
+						#{list items:models.enumerate.TimeAtWorkModifier.values()}
+							#{option _}${_.description}#{/option}
 						#{/list}
 					#{/select}
 					</td>
-
 					<td>Tempo di lavoro giustificato (Es. codice 661h2 indicare 2)</td>
+				</tr>
+				<tr id="assigned" #{if absenceType.assignedTimeAtWork == null}hidden#{/if} >
+					<td>Tempo di lavoro Assegnato: </td>
+					<td>
+					#{select 'absenceType.assignedTimeAtWork',value:absenceType?.assignedTimeAtWork}
+						#{option}#{/option}
+						#{list items:models.enumerate.AssignedTimeAtWork.values()}
+							#{option _}&{_.label()}#{/option}
+						#{/list}
+					#{/select}
+					</td>
+					<td>Tempo di lavoro Assegnato (Es. codice 105BP indicare 'Tutto il giorno')</td>
 				</tr>
 				<tr>
 					<td>Utilizzabile per le categorie:</td>
@@ -68,15 +89,15 @@
 				<tr>
 					<td>Inseribile anche nei week end e festivi:</td>
 					<td>
-						Sì <input type="radio" name="absenceType.consideredWeekEnd" value="true" #{if abt.consideredWeekEnd}checked#{/if}> 
-						No <input type="radio" name="absenceType.consideredWeekEnd" value="false" #{if !abt.consideredWeekEnd}checked#{/if}>
+						Sì <input type="radio" name="absenceType.consideredWeekEnd" value="true" #{if absenceType.consideredWeekEnd}checked#{/if}> 
+						No <input type="radio" name="absenceType.consideredWeekEnd" value="false" #{if !absenceType.consideredWeekEnd}checked#{/if}>
 					</td>
 					<td>Seleziona "si" se il codice può essere inserito anche nel week end e nei festivi</td>
 				</tr>
 				<tr>
 					<td>Gruppo:</td>
 					<td>
-						<input type="text" name="absenceTypeGroup.label" value="${abt.absenceTypeGroup?.label}" disabled>
+						<input type="text" name="absenceTypeGroup.label" value="${absenceType.absenceTypeGroup?.label}" disabled>
 					</td>
 					<td><br>Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli 
 			<br>(Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)</td>
@@ -95,3 +116,22 @@
 
 #{/form}
 </div>
+
+#{set 'moreScripts'}
+<script type="text/javascript">
+
+ $(document).ready( function (){
+
+ 	$('input[type=radio][name=calculationType]').change(function() {
+        if (this.value == 'justify') {
+           $('#justified').show();
+           $('#assigned').hide();
+        }
+        else if (this.value == 'assign') {
+           $('#assigned').show();
+           $('#justified').hide();
+        }
+    });
+});
+</script>
+#{/set}

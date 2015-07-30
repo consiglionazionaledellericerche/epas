@@ -13,13 +13,11 @@ import javax.inject.Inject;
 import manager.ConfGeneralManager;
 import models.Office;
 import models.Permission;
-import models.Person;
 import models.Qualification;
 import models.User;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.i18n.Messages;

@@ -27,7 +27,6 @@ import play.Play;
 import play.libs.Mail;
 
 import com.google.common.base.Optional;
-import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
 import dao.PersonDayDao;

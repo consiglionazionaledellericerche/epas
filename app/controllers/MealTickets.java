@@ -1,7 +1,5 @@
 package controllers;
 
-import helpers.PaginableList;
-
 import java.util.List;
 import java.util.Set;
 

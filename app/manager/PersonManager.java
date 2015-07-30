@@ -15,9 +15,7 @@ import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
-import models.PersonChildren;
 import models.PersonDay;
-import models.PersonYear;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;

@@ -285,9 +285,9 @@ public class ExportToYaml {
 		out = out + getFormattedProperty("description", abt.description);
 		//		out = out + getFormattedProperty("ignoreStamping", abt.ignoreStamping+"");
 		out = out + getFormattedProperty("internalUse", abt.internalUse+"");
-		out = out + getFormattedProperty("justifiedTimeAtWork", abt.justifiedTimeAtWork.toString());
-		out = out + getFormattedProperty("mealTicketCalculation", abt.mealTicketCalculation+"");
-		out = out + getFormattedProperty("multipleUse", abt.multipleUse+"");
+		out = out + getFormattedProperty("timeAtWorkModification", abt.timeAtWorkModification.toString());
+//		out = out + getFormattedProperty("mealTicketCalculation", abt.mealTicketCalculation+"");
+//		out = out + getFormattedProperty("multipleUse", abt.multipleUse+"");
 
 		if(abt.validFrom!=null)
 			out = out + getFormattedProperty("validFrom", "'"+abt.validFrom+"'");

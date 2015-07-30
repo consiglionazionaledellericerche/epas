@@ -1,19 +1,14 @@
 package controllers;
 
 
-import it.cnr.iit.epas.JsonAbsenceBinder;
 import it.cnr.iit.epas.JsonStampingBinder;
 
 import javax.inject.Inject;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 
 import manager.AbsenceManager;
 import manager.StampingManager;
 import manager.cache.AbsenceTypeManager;
 import models.AbsenceType;
-import models.Person;
 import models.exports.AbsenceFromClient;
 import models.exports.StampingFromClient;
 import play.data.binding.As;
@@ -21,6 +16,10 @@ import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
 

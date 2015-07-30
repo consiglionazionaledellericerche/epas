@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.TimeAtWorkModifier;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -120,7 +120,7 @@ public class YearlyAbsencesManager {
 	public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end){
 		Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 		for(Person p : persons){
-			List<Absence> absenceInMonth = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<JustifiedTimeAtWork>absent(), false, false);
+			List<Absence> absenceInMonth = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<TimeAtWorkModifier>absent(), false, false);
 
 			tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
 			for(Absence abs : absenceInMonth){
