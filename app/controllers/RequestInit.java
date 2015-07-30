@@ -80,6 +80,23 @@ public class RequestInit extends Controller {
 
 			if(!user.isPresent())
 				return;
+			
+//			TODO Rifattorizzare in modo più intelligente
+			if(user.get().username.equals("developer")){
+				viewPerson = true;
+				viewPersonDay = true;
+				viewOffice = true;
+				viewCompetence = true;
+			    editCompetence = true;
+				uploadSituation = true;
+				viewWorkingTimeType = true;
+				editWorkingTimeType = true;
+				viewAbsenceType = true;
+				editAbsenceType = true;
+				viewCompetenceCode = true;
+				editCompetenceCode = true;
+				return;
+			}
 
 			List<Permission> pList = uroDao.getUserPermission(user.get());
 
