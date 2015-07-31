@@ -12,6 +12,7 @@ import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
+import models.PersonShiftDay;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -25,6 +26,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -33,6 +35,7 @@ import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.PersonDayDao;
+import dao.PersonShiftDayDao;
 import dao.wrapper.IWrapperPersonDay;
 
 public class PersonDayManager {
@@ -44,13 +47,15 @@ public class PersonDayManager {
 			ConfGeneralManager confGeneralManager,
 			PersonDayInTroubleManager personDayInTroubleManager,
 			ContractMonthRecapManager contractMonthRecapManager,
-			VacationManager vacationManager) {
+			VacationManager vacationManager,
+			PersonShiftDayDao personShiftDayDao) {
 
 		this.personDayDao = personDayDao;
 		this.stampTypeManager = stampTypeManager;
 		this.confGeneralManager = confGeneralManager;
 		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
+		this.personShiftDayDao = personShiftDayDao;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
@@ -60,6 +65,7 @@ public class PersonDayManager {
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
+	private final PersonShiftDayDao personShiftDayDao;
 	
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
@@ -1299,5 +1305,18 @@ public class PersonDayManager {
 		return coupleOfStampings;
 	}
 
+	/**
+	 * 
+	 * @param pd
+	 * @return la quantità in eccesso, se c'è, nei giorni in cui una persona
+	 * è in turno
+	 */
+	public int getExceedInShift(PersonDay pd){
+		Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(pd.person, pd.date);
+		if(psd.isPresent()){
+			return pd.difference;
+		}
+		return 0;
+	}
 
 }
