@@ -23,8 +23,8 @@ form > legend{
 <div class="panel-body">
 
 #{form @Persons.saveChild(),class:'form-horizontal'}
-<input type="hidden" name="person.id" value="${person.id}"/>
-<input type="hidden" name="child.id" value="${child.id}"/>
+<input type="hidden" name="person.id" value="${person?.id}"/>
+<input type="hidden" name="child.id" value="${child?.id}"/>
 
 #{field 'child.name'}#{f.input field/}#{/field}
 #{field 'child.surname'}#{f.input field/}#{/field}
