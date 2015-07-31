@@ -16,7 +16,7 @@
 		</tr>
 	   #{list items:person.holidyWorkingTimeDay(year), as:'pd'}
 	   <tr>
-		 <td><a href="@{Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear())}">${pd.date}</a></td>
+		 <td><a href="@{Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear())}">${pd.date?.format()}</a></td>
 	     <td>${pd.date.dayOfWeek().getAsText()}</td>
 	     <td>${pd.timeAtWork.toHourTime()}</td>
 	     #{if pd.acceptedHolidayWorkingTime}

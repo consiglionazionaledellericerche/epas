@@ -1,114 +1,111 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Inserimento nuova persona' /}
+
 <div class="container">
-#{form @Persons.save(),class:'form-horizontal'}
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
-  </div>
-  <div class="panel-body">
-    
-    #{field 'person.surname'}#{f.input field,required:'true'/}#{/field}
-    #{field 'person.name'}#{f.input field,required:'true'/}#{/field}
-    #{field 'person.number'}#{f.input field,type:'number'/}#{/field}
-    #{field 'person.badgeNumber'}#{f.input field/}#{/field}
-    #{field 'person.email'}#{f.input field,required:'true'/}#{/field}
-
-    #{field 'person.qualification'}#{f.select field, items:templateUtility.allQualifications, required:'true'/}#{/field} 
-    #{field 'person.office'}#{f.select field, items:templateUtility.allOfficesAllowed, required:'true'/}#{/field} 
-
-    #{field 'person.wantEmail'}#{f.checkbox field/}#{/field} 
-    
-    <p>
-  	   Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
-  	   <strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
-  	   <strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
-      	al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
-  	</p>
-  </div>
-</div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
-  </div>
-  <div class="panel-body">
-  #{field 'contract.beginContract'}#{f.date field,view:'year',required:'true'/}#{/field} 
-  #{field 'contract.expireContract'}#{f.date field,view:'year'/}#{/field} 
-  #{field 'contract.onCertificate'}#{f.checkbox field/}#{/field}
-  	  
-  	  <p>
-  	    Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
-  	    Sarà possibile modificarlo in un secondo momento scegliendo fra i tipi orario definiti per la sede selezionata.<br>
-  	    <strong>Importante:</strong> Per motivi di sicurezza al personale non in Attestati non può essere attribuito 
-  	    alcun ruolo amministrativo ePAS.
-  	  </p>
-  </div>
-</div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">3</span> Altre informazioni (opzionali)</h3>
-  </div>
-  <div class="panel-body">
-
-	  #{field 'person.telephone'}#{f.input field/}#{/field}
-    #{field 'person.birthday'}#{f.date field/}#{/field} 
-    #{field 'person.eppn'}#{f.input field/}#{/field}
-
-    <p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
-  </div>
-</div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">4</span>Username</h3>
-  </div>
-  <div class="panel-body">
-
- #{field 'user.username'}
-  <div class='form-group #{if field.error}has-error#{/if}' >
-    <label class="col-sm-3 control-label" for="${field.id}">Scelta Username*</label>
-    <div class="col-sm-6">
-    #{select field.name, id:field.id,value:field.value,class:'form-control'} 
-    #{/select}
+  #{form @Persons.save(),class:'form-horizontal'}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
     </div>
-    #{if field.error}
-     <span class="help-block col-sm-3">&{field.error}</span>
-    #{/if}
+    <div class="panel-body">
+
+      #{f.input 'person.surname',required:'true'/}
+      #{f.input 'person.name',required:'true'/}
+      #{f.input 'person.number',type:'number'/}
+      #{f.input 'person.badgeNumber'/}
+      #{f.input 'person.email',required:'true'/}
+
+      #{f.select 'person.qualification', items:templateUtility.allQualifications, required:'true'/}
+      #{f.select 'person.office', items:templateUtility.allOfficesAllowed, required:'true'/}
+
+      #{f.checkbox 'person.wantEmail'/}
+
+      <p>
+        Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
+        <strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
+        <strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
+        al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
+      </p>
+    </div>
   </div>
-  #{/field}
 
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
+    </div>
+    <div class="panel-body">
+      #{f.date 'contract.beginContract',view:'year',required:'true'/} 
+      #{f.date 'contract.expireContract',view:'year'/} 
+      #{f.checkbox 'contract.onCertificate'/}
 
+      <p>
+        Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
+        Sarà possibile modificarlo in un secondo momento scegliendo fra i tipi orario definiti per la sede selezionata.<br>
+        <strong>Importante:</strong> Per motivi di sicurezza al personale non in Attestati non può essere attribuito 
+        alcun ruolo amministrativo ePAS.
+      </p>
+    </div>
   </div>
-</div>
 
-   <div class="container-fluid center">
-      <input class="btn btn-primary" type="submit" value="Salva" />
-      <a href="@{ Persons.list() }" class="btn btn-default" role="button">Annulla</a>
-   </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">3</span> Altre informazioni (opzionali)</h3>
+    </div>
+    <div class="panel-body">
 
-#{/form}
+      #{f.input 'person.telephone'/}
+      #{f.date 'person.birthday'/}
+      #{f.input 'person.eppn'/}
+
+      <p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">4</span>Username</h3>
+    </div>
+    <div class="panel-body">
+
+      #{field 'user.username'}
+      <div class='form-group #{if field.error}has-error#{/if}' >
+        <label class="col-sm-3 control-label" for="${field.id}">Scelta Username*</label>
+        <div class="col-sm-6">
+          #{select field.name, id:field.id,value:field.value,class:'form-control'} 
+          #{/select}
+        </div>
+        #{if field.error}
+        <span class="help-block col-sm-3">&{field.error}</span>
+        #{/if}
+      </div>
+      #{/field}
+
+    </div>
+  </div>
+  <div class="container-fluid center">
+    <input class="btn btn-primary" type="submit" value="Salva" />
+    <a href="@{Persons.list()}" class="btn btn-default" role="button">Annulla</a>
+  </div>
+  #{/form}
 </div>    
 
 #{set 'moreScripts'}
 <script type="text/javascript">
 
- $(document).ready( function (){
+  $(document).ready( function (){
 
-  generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
-  
-  $('#person\\_surname').change(function(){
     generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
-  });
 
-  $('#person\\_name').change(function(){
-     generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
-  });
+    $('#person\\_surname').change(function(){
+      generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
+    });
 
-});
+    $('#person\\_name').change(function(){
+      generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
+    });
+
+  });
 </script>
 #{/set}
 

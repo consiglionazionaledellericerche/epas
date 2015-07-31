@@ -12,13 +12,10 @@
        <p><span class="badge">1</span><strong>Riepilogo contratto</strong></p>
 	 <!-- Recap current contract -->
 	 Intervallo considerato per buoni pasto:
-	 #{if recap.getMealTicketInterval().isClosed() }
 	   Da <strong>${recap.getMealTicketInterval().getBegin()?.format()}</strong>
+	 #{if recap.getMealTicketInterval().isClosed() }
 	   A <strong>${recap.getMealTicketInterval().getEnd()?.format()}</strong>
 	 #{/if}
-	 #{else}
-	   Da <strong>${recap.getMealTicketInterval().getBegin()}</strong>
-	 #{/else}
 	 
 	 <br>
 	 Buoni pasto consegnati <strong>${recap.getMealTicketsReceivedOrdered().size()}</strong>
@@ -27,7 +24,7 @@
 	 <br>
 	 
 	 #{if recap.isMealTicketRunOut() }
-	    La persona ha esaurito i buoni pasto in data ${recap.getDateRunOut()}<br>
+	    La persona ha esaurito i buoni pasto in data ${recap.getDateRunOut()?.format()}<br>
 	 #{/if}
 	 #{if recap.isMealTicketExpired() }
 	   <!-- Implementare meglio prima di renderizzare questo alert 
