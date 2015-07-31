@@ -1,262 +1,181 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-	
+<head>
+
 	<style type="text/css">
-table.cartellino {
-    border: 1px solid #000;
-    background-color: #ccc;
-}
+		table.cartellino {
+			border: 1px solid #000;
+			background-color: #ccc;
+		}
 
-table.cartellino tr {
-    background-color: #ccc;
-}
+		table.cartellino tr {
+			background-color: #ccc;
+		}
 
-table.cartellino td {
-    background-color: #ddd;
-    border: 1px solid #fff;
-}
+		table.cartellino td {
+			background-color: #ddd;
+			border: 1px solid #fff;
+		}
 
-table.cartellino th {
-    background-color: #ddd;
-    border: 1px solid #fff;
-    color: black;
-}
+		table.cartellino th {
+			background-color: #ddd;
+			border: 1px solid #fff;
+			color: black;
+		}
 
-table {
-    border: 1px solid #000;
-    background-color: #ccc;
-}
+		table {
+			border: 1px solid #000;
+			background-color: #ccc;
+		}
 
-tr {
-    background-color: #ddd;
-}
+		tr {
+			background-color: #ddd;
+		}
 
-tr:nth-child(even) {
-    background-color: #eee;
-}
-</style>
-	</head>
-    
-    <body>
-    
-    <h3>${titolo}</h3>
-    
+		tr:nth-child(even) {
+			background-color: #eee;
+		}
+	</style>
+</head>
 
-<table class="cartellino">
-	<tr>
-		<th><font size="0.5">Buono mensa</font></th>
-		<th><font size="0.5">Giorno</font></th>
-		<th><font size="0.5">Codice di assenza</font></th>
-		%{ for(int i = 1; i <= psDto.numberOfInOut; i++){
-		}%
-		<th><font size="0.5">${i}° entrata</font></th>
-		<th><font size="0.5">${i}° uscita</font></th>
-		%{ } }%
-		<th><font size="0.5">Tempo lavoro</font></th>
-		<th><font size="0.5">Differenza</font></th>
-		<th><font size="0.5">Progressivo</font></th>
-		<th><font size="0.5">Tipo Orario</font></th>
-		<th><font size="0.5">Note</font></th>
-	</tr>
-	
-	%{
-     for(dayRecap in psDto.daysRecap) {
-     		
-			
-	}%
-		
-	<tr >
+<body>
+
+	<h3>${titolo}</h3>
+
+	<table class="cartellino">
+		<tr>
+			<th><font size="0.5">Buono mensa</font></th>
+			<th><font size="0.5">Giorno</font></th>
+			<th><font size="0.5">Codice di assenza</font></th>
+			#{list items:1..psDto.numberOfInOut}
+			<th><font size="0.5">${_}° entrata</font></th>
+			<th><font size="0.5">${_}° uscita</font></th>
+			#{/list}
+			<th><font size="0.5">Tempo lavoro</font></th>
+			<th><font size="0.5">Differenza</font></th>
+			<th><font size="0.5">Progressivo</font></th>
+			<th><font size="0.5">Tipo Orario</font></th>
+			<th><font size="0.5">Note</font></th>
+		</tr>
+
+		#{list psDto.daysRecap,as:'dayRecap'}
+		<tr >
 			<td>
-			#{if dayRecap.mealTicket.equals('NO')}
-			  <font size="0.5">${dayRecap.mealTicket}</font>
-			#{/if}
+				#{if dayRecap.mealTicket.equals('NO')}
+				<font size="0.5">${dayRecap.mealTicket}</font>
+				#{/if}
 			</td>
-			%{
-			if(dayRecap.holiday==false)
-			{
-			}%	
-				<td><font size="0.5">${dayRecap.date.shortDayName()}</font></td>
-			%{
-			}
-			else
-			{
-			}%	
-				<td><font size="0.5">${dayRecap.date.shortDayName()}</font></td>
-			%{
-			}
-			}%
-		
+			<td>
+				<font size="0.5">${dayRecap.date.shortDayName()}</font>
+			</td>
 			<td>
 				<font size="0.5">
-				%{	
-				for (absence in dayRecap.absences) 
-				{ 
-				%}
-				 	${absence.absenceType.code}
-				 %{
-				 }
-				 }%
-				 </font>
-			</td>
-
-
-			%{  
-			for(stampingTemplate in dayRecap.stampingsTemplate){
-			}%
-			%{
-					if(stampingTemplate.colour.equals("in"))
-					{
-					}%
-						<td><font size="0.5">
-					%{
-					}
-					else if (stampingTemplate.colour.equals("out"))
-					{
-					}%
-						<td><font size="0.5">
-					%{
-					}
-					else if (stampingTemplate.colour.equals("warn"))
-					{
-					}%
-						<td><font size="0.5">
-					%{
-					}
-				}%
-				%{ if(stampingTemplate.date!=null) 
-				{ 
-				}%
-					${stampingTemplate.hour}
-				 %{
-				 }
-				 }%
-				 
-				<strong>${stampingTemplate.identifier}</strong>
-				<strong>${stampingTemplate.markedByAdminCode}</strong>
-				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+					#{list dayRecap.absences}
+					${_.absenceType.code}
+					#{/list}
 				</font>
-				</td>
-			
-			%{ 
-			} 
-			}%
+			</td>
+			#{list dayRecap.stampingsTemplate}
 			<td>
-			<font size="0.5">
-				${dayRecap.workTime}
-				<strong>${dayRecap.todayLunchTimeCode}</strong>
-				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
-				<strong>${dayRecap.exitingNowCode}</strong>
-			</font>
+				<font size="0.5">
+					#{if _.date}
+					${_.hour}
+					#{/if}			 	 
+					<strong>${_.identifier}</strong>
+					<strong>${_.markedByAdminCode}</strong>
+					<strong>${_.missingExitStampBeforeMidnightCode}</strong>
+				</font>
+			</td>
+			#{/list}
+			<td>
+				<font size="0.5">
+					${dayRecap.workTime}
+					<strong>${dayRecap.todayLunchTimeCode}</strong>
+					<strong>${dayRecap.fixedWorkingTimeCode}</strong>
+					<strong>${dayRecap.exitingNowCode}</strong>
+				</font>
 			</td>							
-	       	<td>
-	       	<font size="0.5">
-	       		${dayRecap.difference}
-	       	</font>
-	       	</td>	
 			<td>
-			<font size="0.5">
-			 	${dayRecap.progressive}
-			</font>
-		    </td>
-	        
-	        <td><font size="0.5">${dayRecap.workingTimeTypeDescription}</font></td>
-	        <td>
-	    
-	        </td>
-	        
-	</tr>
-
-	%{  		   
- 	}
-   
-	}%
-
-</table>
-	
-<p id="spiegazioneTabellaTimbrature">
-<font size="2">
-Il numero di buoni mensa usabili per questo mese e': <strong>${psDto.numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${psDto.numberOfMealTicketToRender}</strong>. 
-<br>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong> 
-<br>Il numero di ore di lavoro effettuate nel mese è di: <strong>${psDto.totalWorkingTime.toHourTime()}</strong>
-</font>
-</p>
-
-<p id="spiegazioneTabellaTimbrature"/>
-
-<div id="tabelleRiassuntive">
-%{if(!psDto.stampModificationTypeSet.isEmpty()) { }%
-
-	<strong style="margin-top: 2em">Note:</strong>
-	<br>
-	<table id="Note timbrature">
-		<tr>
-			<th width="80"><font size="2">Codice timbratura</font></th>
-			<th width="400"><font size="2">Descrizione</font></th>
-				
+				<font size="0.5">
+					${dayRecap.difference}
+				</font>
+			</td>	
+			<td>
+				<font size="0.5">
+					${dayRecap.progressive}
+				</font>
+			</td>
+			<td><font size="0.5">${dayRecap.workingTimeTypeDescription}</font></td>
+			<td></td>
 		</tr>
-		%{
-	     for(smt in psDto.stampModificationTypeSet) {
-		}%
-			<tr>
-				<td><font size="2">${smt.code}</font></td>     
-				<td><font size="2">${smt.description}</font></td>		
-			</tr>
-		
-		%{  		   
-	     }
-	     
-		}%
-		%{
-		for(type in psDto.stampTypeSet) 
-		{
-		}%
-			<tr>
-				<td><font size="2">${type.identifier}</font></td>
-				<td><font size="2">${type.description}</font></td>
-			</tr>
-		%{  		   
-	    }
-	    }%
+		#{/list}
 	</table>
-%{ 
-}
-}%
 
-*{Significato codici assenza}*
-<br>
-<strong style="margin-top: 2em">Tabella codici di assenza:</strong>
-<br>
-<table id="Codici di assenza">
-	<tr>
-		<th width="80"><font size="2">Codice assenza</font></th>
-		<th width="200"><font size="2">Descrizione</font></th>
-		<th width="80"><font size="2">Numero giorni</font></th>
-			
-	</tr>
-	%{
-	for(entry in psDto.absenceCodeMap.entrySet()) 
-	{
-	}%
-	<tr>
-		<td><font size="2">${entry.getKey().code}</font></td>     
-		<td><font size="2">${entry.getKey().description}</font></td>	
-		<td><font size="2">${entry.getValue()}</font></td>	
-	</tr>
-	%{
-	 }
-	}%
-</table>
-</div>
+	<p id="spiegazioneTabellaTimbrature">
+		<font size="2">
+			Il numero di buoni mensa usabili per questo mese e': <strong>${psDto.numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${psDto.numberOfMealTicketToRender}</strong>. 
+			<br>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong> 
+			<br>Il numero di ore di lavoro effettuate nel mese è di: <strong>${psDto.totalWorkingTime.toHourTime()}</strong>
+		</font>
+	</p>
 
-<p>
-	SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
-	<br>
-	Firma
-</p>
+	<p id="spiegazioneTabellaTimbrature"/>
+
+	<div id="tabelleRiassuntive">
+		#{ifnot psDto.stampModificationTypeSet.isEmpty()}
+		<strong style="margin-top: 2em">Note:</strong>
+		<br>
+		<table id="Note timbrature">
+			<tr>
+				<th width="80"><font size="2">Codice timbratura</font></th>
+				<th width="400"><font size="2">Descrizione</font></th>
+
+			</tr>
+			#{list psDto.stampModificationTypeSet}
+			<tr>
+				<td><font size="2">${_.code}</font></td>     
+				<td><font size="2">${_.description}</font></td>		
+			</tr>
+			#{/list}
+			#{list psDto.stampTypeSet}
+			<tr>
+				<td><font size="2">${_.identifier}</font></td>
+				<td><font size="2">${_.description}</font></td>
+			</tr>
+			#{/list}
+		</table>
+		#{/ifnot}
+
+		*{Significato codici assenza}*
+		<br>
+		<strong style="margin-top: 2em">Tabella codici di assenza:</strong>
+		<br>
+		<table id="Codici di assenza">
+			<tr>
+				<th width="80"><font size="2">Codice assenza</font></th>
+				<th width="200"><font size="2">Descrizione</font></th>
+				<th width="80"><font size="2">Numero giorni</font></th>
+
+			</tr>
+
+			#{list psDto.absenceCodeMap.entrySet()}
+			<tr>
+				<td><font size="2">${_.getKey().code}</font></td>     
+				<td><font size="2">${_.getKey().description}</font></td>	
+				<td><font size="2">${_.getValue()}</font></td>	
+			</tr>
+			#{/list}
+
+		</table>
+	</div>
+
+	<p>
+		SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
+		<br>
+		Firma
+	</p>
 
 </body>
-
 
 </html>
