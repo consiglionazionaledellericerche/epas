@@ -1,13 +1,3 @@
-AssignedTimeAtWork.AllDay= Tutto il giorno
-AssignedTimeAtWork.OneHour= 1 ora
-AssignedTimeAtWork.TwoHours= 2 ore
-AssignedTimeAtWork.ThreeHours= 3 ore
-AssignedTimeAtWork.FourHours= 4 ore
-AssignedTimeAtWork.FiveHours= 5 ore
-AssignedTimeAtWork.SixHours= 6 ore
-AssignedTimeAtWork.SevenHours= 7 ore
-AssignedTimeAtWork.Nothing= niente
-	
 views.common.true=vero
 views.common.false=falso
 
@@ -99,3 +89,18 @@ office=Sede
 
 Required= Campo obbligatorio
 Invalid email address= Indirizzo email non valido
+
+
+########################
+# Enumerati
+########################
+
+AssignedTimeAtWork.AllDay= Tutto il giorno
+AssignedTimeAtWork.OneHour= 1 ora
+AssignedTimeAtWork.TwoHours= 2 ore
+AssignedTimeAtWork.ThreeHours= 3 ore
+AssignedTimeAtWork.FourHours= 4 ore
+AssignedTimeAtWork.FiveHours= 5 ore
+AssignedTimeAtWork.SixHours= 6 ore
+AssignedTimeAtWork.SevenHours= 7 ore
+AssignedTimeAtWork.Nothing= niente

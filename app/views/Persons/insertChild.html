@@ -26,9 +26,9 @@ form > legend{
 <input type="hidden" name="person.id" value="${person?.id}"/>
 <input type="hidden" name="child.id" value="${child?.id}"/>
 
-#{field 'child.name'}#{f.input field/}#{/field}
-#{field 'child.surname'}#{f.input field/}#{/field}
-#{field 'child.bornDate'}#{f.date field,view:'year'/}#{/field} 
+#{f.input 'child.name'/}
+#{f.input 'child.surname'/}
+#{f.date 'child.bornDate',view:'year'/}
 <legend></legend>
 <button type="submit" class="btn btn-primary col-sm-4 col-sm-offset-4">Salva</button>
 
