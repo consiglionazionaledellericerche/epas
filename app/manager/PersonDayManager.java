@@ -187,39 +187,21 @@ public class PersonDayManager {
 			}
 		}
 
-		//se non c'è almeno una coppia di timbrature considero il timeAtWorkModification
+		//se non c'è almeno una coppia di timbrature considero il timeAtWorkModifier
 		//(che però non contribuisce all'attribuzione del buono mensa che quindi è certamente non assegnato)
 		if (pd.getValue().stampings.size() < 2) {
 			setIsTickeAvailable(pd, false);
 			return timeAtWorkModifier;
 		}
 
-		Collections.sort(pd.getValue().stampings);
+//		Minuti derivanti dalle timbrature
+		int stampingMinutes = stampingMinutes(pd.getValue());
 
 		if(pd.getValue().isHoliday){
-
-			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
-
-			int holidayWorkTime = 0;
-			for(PairStamping validPair : validPairs) {
-
-				holidayWorkTime = holidayWorkTime - DateUtility.toMinute(validPair.in.date);
-				holidayWorkTime = holidayWorkTime + DateUtility.toMinute(validPair.out.date);
-			}
-
 			setIsTickeAvailable(pd,false);
-			return timeAtWorkModifier + holidayWorkTime;
+			return timeAtWorkModifier + stampingMinutes;
 		}
-
-		List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
-
-		int workTime=0;
-		for(PairStamping validPair : validPairs) {
-
-			workTime = workTime - DateUtility.toMinute(validPair.in.date);
-			workTime = workTime + DateUtility.toMinute(validPair.out.date);
-		}
-
+	
 		//IL PRANZO E' SERVITOOOOO????
 		
 		// Ticket non previsto dall'orario di lavoro.
@@ -227,7 +209,7 @@ public class PersonDayManager {
 		if( ! wttd.mealTicketEnabled() ) {
 
 			setIsTickeAvailable(pd, false);
-			return workTime + timeAtWorkModifier;
+			return stampingMinutes + timeAtWorkModifier;
 		}
 
 		// Calcolo ...
@@ -235,7 +217,7 @@ public class PersonDayManager {
 		int mealTicketTime = wttd.mealTicketTime;					//6 ore
 		int minBreakTicketTime = wttd.breakTicketTime;				//30 minuti
 	
-		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(), validPairs);
+		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 		int effectiveTimeSpent = 0;
 		
 		// 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
@@ -272,23 +254,23 @@ public class PersonDayManager {
 		//3) Decisioni
 		
 		// Non ho eseguito il tempo minimo per buono pasto.
-		if (workTime - missingTime < mealTicketTime) {
+		if (stampingMinutes - missingTime < mealTicketTime) {
 			setIsTickeAvailable(pd, false);
-			return workTime + timeAtWorkModifier;
+			return stampingMinutes + timeAtWorkModifier;
 		}
 
 		// Calcolo tempo decurtato per pausa troppo breve.
-		int workingTimeDecurted = workTime;
+		int workingTimeDecurted = stampingMinutes;
 		if(missingTime > 0) {
-			workingTimeDecurted = workTime - missingTime;
+			workingTimeDecurted = stampingMinutes - missingTime;
 		}
-		
+	
 		// Controllo pausa pomeridiana (solo se la soglia è definita)
-		if( !isAfternoonThresholdConditionSatisfied(validPairs, 
+		if( !isAfternoonThresholdConditionSatisfied(getValidPairStamping(pd.getValue()), 
 				pd.getWorkingTimeTypeDay().get()) ) {
 			
 			setIsTickeAvailable(pd, false);
-			return workTime + timeAtWorkModifier;
+			return stampingMinutes + timeAtWorkModifier;
 		}
 		
 		// Decidere quando verrà il momento di fare i conti con gianvito...
@@ -319,7 +301,7 @@ public class PersonDayManager {
 		
 		// marcatori: versione con solo e salvataggio del tempo decurtato.
 		//e
-		if(workingTimeDecurted < workTime) {
+		if(workingTimeDecurted < stampingMinutes) {
 		
 			pd.getValue().decurted = missingTime;
 		}
@@ -453,7 +435,7 @@ public class PersonDayManager {
 
 			Collections.sort(pd.getValue().stampings);
 
-			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
+			List<PairStamping> validPairs = getValidPairStamping(pd.getValue());
 
 			for (PairStamping validPair : validPairs) {
 
@@ -476,8 +458,7 @@ public class PersonDayManager {
 			int breakTicketTime = wttd.breakTicketTime; // 30 minuti
 			int breakTimeDiff = breakTicketTime;
 			pd.getValue().stampModificationType = null;
-			List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(),
-					validPairs);
+			List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 
 			if (gapLunchPairs.size() > 0) {
 				// recupero la durata della pausa pranzo fatta
@@ -525,7 +506,7 @@ public class PersonDayManager {
 	 */
 	public void computeValidStampings(PersonDay pd) {
 
-		getValidPairStamping(pd.stampings);
+		getValidPairStamping(pd);
 	}
 
 	/**
@@ -538,8 +519,9 @@ public class PersonDayManager {
 	 * @param validPairs le coppie di timbrature ritenute valide all'interno del giorno
 	 * @return
 	 */
-	public List<PairStamping> getGapLunchPairs(PersonDay pd, List<PairStamping> validPairs) {
+	public List<PairStamping> getGapLunchPairs(PersonDay pd) {
 		
+		List<PairStamping> validPairs = getValidPairStamping(pd);
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
 		Integer mealTimeStartHour = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
 		Integer mealTimeStartMinute = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
@@ -980,8 +962,10 @@ public class PersonDayManager {
 	 * viene anche settato il campo valid di ciascuna stampings contenuta nel person day
 	 * @return
 	 */
-	public List<PairStamping> getValidPairStamping(List<Stamping> stampings)	{
-
+	public List<PairStamping> getValidPairStamping(PersonDay personDay)	{
+		
+		List<Stamping> stampings = personDay.stampings;
+		
 		Collections.sort(stampings);
 		//(1)Costruisco le coppie valide per calcolare il worktime
 		List<PairStamping> validPairs = new ArrayList<PairStamping>();
@@ -1316,6 +1300,35 @@ public class PersonDayManager {
 		if(psd.isPresent()){
 			return pd.difference;
 		}
+		return 0;
+	}
+	
+	
+	/**
+	 * @param personday
+	 * @return Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono
+	 */
+	private int stampingMinutes(PersonDay personDay){
+		
+		Preconditions.checkNotNull(personDay);
+		Preconditions.checkState(personDay.isPersistent());
+		
+		List<PairStamping> validPairs = getValidPairStamping(personDay);
+		
+		int stampingMinutes = 0;
+		for(PairStamping validPair : validPairs) {
+			stampingMinutes+= validPair.timeInPair;
+		}
+		
+			return stampingMinutes;
+	}
+	
+	/**
+	 * @param personDay
+	 * @return Il numero di minuti da sommare o decurtare dall'orario di lavoro derivati dalle assenze
+	 */
+	public int minutesFromAbsences(PersonDay personDay){
+//		TODO da implementare
 		return 0;
 	}
 
