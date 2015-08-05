@@ -72,7 +72,8 @@ public class PersonDayManager {
 				return false;
 			}
 			else if(abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-					&& abs.absenceType.timeAtWorkModifier.equals(TimeAtWorkModifier.JustifyAllDay)){
+					&& (abs.absenceType.timeAtWorkModifier.equals(TimeAtWorkModifier.JustifyAllDay) ||
+					abs.absenceType.timeAtWorkModifier.equals(TimeAtWorkModifier.AssignAllDay))){
 				return true;
 			}
 		}
