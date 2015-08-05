@@ -576,11 +576,11 @@ public class AbsenceManager {
 	private boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date){
 
 		//controllo se la persona è in reperibilità
-		PersonReperibilityDay prd = personReperibilityDayDao.getPersonReperibilityDay(person, date);
+		Optional<PersonReperibilityDay> prd = personReperibilityDayDao.getPersonReperibilityDay(person, date);
 		//controllo se la persona è in turno
-		PersonShiftDay psd = personShiftDayDao.getPersonShiftDay(person, date);
+		Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(person, date);
 
-		return !(psd == null && prd == null);	
+		return !(psd.isPresent() && prd.isPresent());	
 	}
 
 	/**
