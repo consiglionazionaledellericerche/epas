@@ -7,7 +7,6 @@ package models;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +35,9 @@ import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Unique;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author cristian
@@ -130,7 +132,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 */
 	@OneToMany(mappedBy="personInCharge", fetch = FetchType.LAZY)
 	@OrderBy("surname")
-    public List<Person> people = new ArrayList<Person>();
+    public List<Person> people = Lists.newArrayList();;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="person_in_charge")
@@ -147,42 +149,42 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 *  relazione con i turni
 	 */
 	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY)
-	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
+	public List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
 	@NotAudited
 	@OneToMany(mappedBy="person",fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Contract> contracts;
+	public List<Contract> contracts = Lists.newArrayList();
 
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public Set<PersonChildren> personChildren;
+	public Set<PersonChildren> personChildren = Sets.newHashSet();
 
 	/**
 	 * relazione con la nuova tabella dei person day
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonDay> personDays;
+	public List<PersonDay> personDays = Lists.newArrayList();;
 
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<CertificatedData> certificatedData;
+	public List<CertificatedData> certificatedData = Lists.newArrayList();;
 
 	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY)
-	public List<MealTicket> mealTicketsAdmin;
+	public List<MealTicket> mealTicketsAdmin = Lists.newArrayList();;
 
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonMonthRecap> personMonths = new ArrayList<PersonMonthRecap>();
+	public List<PersonMonthRecap> personMonths = Lists.newArrayList();;
 
 	/**
 	 * relazione con la nuova tabella dei person_year
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonYear> personYears;
+	public List<PersonYear> personYears = Lists.newArrayList();;
 
 
 	/**
@@ -190,14 +192,14 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Competence> competences;
+	public List<Competence> competences = Lists.newArrayList();;
 
 	/**
 	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
 	 */
 	@NotAudited
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	public List<CompetenceCode> competenceCode;
+	public List<CompetenceCode> competenceCode = Lists.newArrayList();;
 
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
 	public PersonHourForOvertime personHourForOvertime;
