@@ -12,6 +12,8 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
+import com.google.common.base.Joiner;
+
 import play.data.validation.Required;
 
 
@@ -42,6 +44,11 @@ public class Qualification extends BaseModel{
 	@Override
 	public String getLabel() {
 		return this.description;
+	}
+	
+	@Override
+	public String toString() {
+		return getLabel();
 	}
 	
 }

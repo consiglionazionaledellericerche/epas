@@ -89,6 +89,13 @@ public class AbsenceTypeDao extends DaoBase{
 
 		return query.list(absenceType);
 	} 
+	
+	public List<AbsenceType> certificateTypes() {
+
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+
+		return  getQueryFactory().from(absenceType).where(absenceType.internalUse.eq(false)).list(absenceType);
+	} 
 
 
 	public SimpleResults<AbsenceType> getAbsences(Optional<String> name){

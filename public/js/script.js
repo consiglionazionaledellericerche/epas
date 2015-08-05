@@ -4,6 +4,9 @@
 $(function($){
 	
 	$.fn.initepas = function() {
+
+		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
+		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
 		
 		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
 		//il plugin responsive abilitato sulla tabella(sono incompatibili)
@@ -243,15 +246,4 @@ function generateUserName(name,surname,username){
   });
  }
 
-
 moment.locale('it_IT');
-
-
-
-
-
-
-
-	
-
-

@@ -91,6 +91,11 @@ public class Office extends BaseModel{
     public String getLabel() {
     	return this.name;
     }
+    
+	@Override
+	public String toString() {
+		return getLabel();
+	}
 
 	@Transient
 	public List<WorkingTimeType> getEnabledWorkingTimeType() {

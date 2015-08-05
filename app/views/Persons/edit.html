@@ -41,10 +41,10 @@
 				#{f.input 'person.badgeNumber'/}
 				#{f.input 'person.email'/}
 
-				#{field 'person.qualification'}#{f.select field, items:templateUtility.allQualifications/}#{/field} 
-				#{field 'person.office'}#{f.select field, items:templateUtility.allOfficesAllowed/}#{/field} 
+				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
+				#{f.selectModel 'person.office',items:templateUtility.allOfficesAllowed /}
 
-				#{field 'person.isPersonInCharge'}#{f.checkbox field,title:'Selezionare se la persona in questione deve essere un responsabile'/}#{/field}
+				#{f.checkbox 'person.isPersonInCharge',title:'Selezionare se la persona in questione deve essere un responsabile'/}
 
 				<div class='form-group'>
 					<label class="col-sm-3 control-label">Invio mail</label>
@@ -72,9 +72,9 @@
 			</div>
 			<div class="panel-body">
 
-				#{field 'person.telephone'}#{f.input field/}#{/field}
-				#{field 'person.birthday'}#{f.date field,view:'year'/}#{/field} 
-				#{field 'person.eppn'}#{f.input field/}#{/field}
+				#{f.input 'person.telephone'/}
+				#{f.date 'person.birthday',view:'year'/}
+				#{f.input 'person.eppn'/}
 
 				<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
 

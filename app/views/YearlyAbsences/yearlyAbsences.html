@@ -57,7 +57,7 @@
 		</tr>
 		#{list items:yearlyAbsencesRecap.absenceSummary.entrySet(), as: 'entry'}
 		<tr>
-			#{if entry.getKey().TimeAtWorkModifier.minutes == null}
+			#{if entry.getKey().timeAtWorkModifier.minutes == null}
 				<td>${entry.getKey().code}</td>     
 				<td>${entry.getKey().description}</td>	
 				<td>${entry.getValue()}</td>

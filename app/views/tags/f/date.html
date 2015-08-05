@@ -1,15 +1,14 @@
 #{field _arg}
 <div class='form-group #{if field.error}has-error has-feedback#{/if}'>
-	<label for="${field.id}" class="col-sm-3 control-label">&{field.name}#{if _required?:false}*#{/if}</label>
+	<label for="${field.id}" class="col-sm-3 control-label">&{field.name}#{if _required}*#{/if}</label>
 	<div class="col-sm-6">
 		<div class="input-group">
-			<input datepicker#{if _view}-${_view}#{/if} class="form-control ${_attrs['class']}" id="${field.id}" name="${field.name}" type="text" 
-			value="${_value == null ? field.value?.format() : _value}" >
+			<input datepicker#{if _view}-${_view}#{/if} class="form-control ${_class}" id="${field.id}" name="${field.name}" type="text" 
+			value="${_value == null ? field.value?.format() : _value}"#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}#{if _disabled} disabled#{/if}>
 			<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 		</div>
+		#{if field.error}<span class="help-block">&{field.error}</span>#{/if}
 	</div>
-	#{if field.error}
-	<span class="help-block col-sm-3">&{field.error}</span>
-	#{/if}
+	#{if _description}<div class="col-sm-3">&{field.name+'.description'}</div>#{/if}
 </div>
 #{/field}

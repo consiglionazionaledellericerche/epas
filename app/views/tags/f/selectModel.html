@@ -1,0 +1,16 @@
+*{ATTENZIONE! i popover bootstrap non sono compatibili con la select2, non usarli contemporaneamente!!}*
+#{field _arg}
+<div class='form-group #{if field.error}has-error has-feedback#{/if}'>
+  <label for="${field.id}" class="col-sm-3 control-label">&{field.name}#{if _required}*#{/if}</label>
+  <div class="col-sm-6">
+    <select class="form-control ${_class}" name="${field.name}.id" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+      <option></option>
+      #{list _items}
+      <option value="${_.id}"#{if field.value?.id == _.id} selected#{/if}>${_.label()}</option>
+      #{/list}
+    </select>
+    #{if field.error}<span class="help-block">&{field.error}</span>#{/if}
+  </div>
+  #{if _description}<div class="col-sm-3">&{field.name+'.description'}</div>#{/if}
+</div>
+#{/field}
