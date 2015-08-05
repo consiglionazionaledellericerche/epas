@@ -43,15 +43,15 @@ public class AbsenceTypeGroup extends BaseModel{
 	@Column(name = "limit_in_minute")
 	public Integer limitInMinute;
 	
-	
+	@Required
 	@Enumerated(EnumType.STRING)
 	@Column(name = "accumulation_type")
 	public AccumulationType accumulationType;
 	
+	@Required
 	@Enumerated(EnumType.STRING)
 	@Column(name = "accumulationBehaviour")
 	public AccumulationBehaviour accumulationBehaviour;
-	
 	
 	@OneToOne
 	@JoinColumn(name="replacing_absence_type_id")

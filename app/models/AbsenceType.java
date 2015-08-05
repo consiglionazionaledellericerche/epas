@@ -26,6 +26,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 /**
  *
@@ -53,7 +54,7 @@ public class AbsenceType extends BaseModel {
 	public String certificateCode;
 
 	public String description;
-
+	
 	@Column(name = "valid_from")
 	public LocalDate validFrom;
 
@@ -83,6 +84,11 @@ public class AbsenceType extends BaseModel {
 		if(description != null && description.length() > 60)
 			return description.substring(0, 60)+"...";
 		return description;
+	}
+	
+	@Override
+	public String toString() {
+		return Joiner.on(" - ").skipNulls().join(code,description);
 	}
 
 }

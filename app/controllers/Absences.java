@@ -44,6 +44,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
@@ -117,35 +118,28 @@ public class Absences extends Controller{
 		render(absenceList, name, simpleResults);
 	}
 
-	public static void insertAbsenceCode(){
-		render("@editAbsenceCode");
+	public static void insertCode(){
+
+		render("@editCode");
 	}
-
-	public static void saveAbsenceCode(
-			@Required @Valid AbsenceType absenceType,
-			@Required String timeAtWorkModifier,
-			boolean tecnologi,
-			boolean tecnici,
-			AbsenceTypeGroup absenceTypeGroup,
-			String accBehaviour,
-			String accType,
-			String codiceSostituzione
-			){
-
-		if (!(tecnologi || tecnici)){
-			params.flash();
-			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-			insertAbsenceCode();
-		}
-
+	
+	public static void saveCode(@Valid AbsenceType absenceType,
+			AbsenceTypeGroup absenceTypeGroup,boolean tecnologi,boolean tecnici){
+		
+//		FIXME capire come mai senza il falsh.clear si sovrappongono i messaggi
+		flash.clear();
 		if (validation.hasErrors()){
-			flash.error(validation.errorsMap().toString());
-//			TODO modificare il template per visualizzare gli errori di validazione
-			insertAbsenceCode();
+			flash.error("Correggere gli errori indicati");
+			render("@editAbsenceCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
 		}
-
-//		absenceType.timeAtWorkModification = timeAtWorkModification.getByDescription(timeAtWorkModification);
-
+		Logger.info("tecnologi  %s - tecnici %s", tecnologi,tecnici);
+		
+		if (!(tecnologi || tecnici)){
+			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+			render("@editAbsenceCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
+		}
+		
+		absenceType.qualifications.clear();
 		Range<Integer> qualifiche;
 		if(tecnologi && tecnici){
 			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
@@ -162,20 +156,14 @@ public class Absences extends Controller{
 			absenceType.qualifications.add(q);
 		}
 
-		if(absenceTypeGroup.label != null && !absenceTypeGroup.label.isEmpty()){
-			absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription(accBehaviour);
-			absenceTypeGroup.accumulationType = AccumulationType.getByDescription(accType);
-
-			if(accBehaviour.equals(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation.description)){
-				absenceTypeGroup.replacingAbsenceType = absenceTypeDao.getAbsenceTypeByCode(codiceSostituzione).orNull();
-			}
+		if(!Strings.isNullOrEmpty(absenceTypeGroup.label) && !absenceType.isPersistent()){
 			absenceType.absenceTypeGroup = absenceTypeGroup;
 			absenceTypeGroup.save();
 		}
-
+		
 		absenceType.save();
-		Logger.info("Inserito nuovo codice di assenza %s", absenceType.code);
-		flash.success("Inserito nuovo codice di assenza %s", absenceType.code);
+		Logger.info("Inserito/modificato codice di assenza %s", absenceType.code);
+		flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
 
 		manageAbsenceCode(null, null);
 	}
@@ -254,62 +242,19 @@ public class Absences extends Controller{
 	}
 
 	public static void editCode(@Required Long absenceCodeId){
-		//		FIXME decidere se permetterlo all'admin, ed eventualmente sistemare il controllo, o il permesso
-		rules.checkIfPermitted(Security.getUser().get().person.office);
 
 		AbsenceType absenceType = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
-
-		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
-		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
-
-		boolean tecnologo = false;
-		boolean tecnico = false;
+		AbsenceTypeGroup absenceTypeGroup = absenceType.absenceTypeGroup;
+		
+		boolean tecnologi = false;
+		boolean tecnici = false;
 
 		for(Qualification q : absenceType.qualifications){
-			tecnologo = !tecnologo ? QualificationMapping.TECNOLOGI.contains(q) : tecnologo;
-			tecnico = !tecnico ? QualificationMapping.TECNICI.contains(q) : tecnico;
+			tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
+			tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
 		}
-
-		render(absenceType, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
-	}
-
-
-	public static void updateCode(@Required @Valid AbsenceType absenceType,
-			boolean tecnologi,boolean tecnici){
-
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-
-		if (!(tecnologi || tecnici)){
-			params.flash();
-			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-			insertAbsenceCode();
-		}
-
-		Verify.verify(absenceType.isPersistent(),"Codice d'assenza inesistente!");
-
-		absenceType.qualifications.clear();
-		Range<Integer> qualifiche;
-		if(tecnologi && tecnici){
-			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
-		}
-		else if(tecnologi){
-			qualifiche = QualificationMapping.TECNOLOGI.getRange();
-		}
-		else{
-			qualifiche = QualificationMapping.TECNICI.getRange();
-		}
-
-		for(int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++){
-			Qualification q = qualificationDao.byQualification(i).orNull();
-			absenceType.qualifications.add(q);
-		}
-
-		absenceType.save();
-
-		Logger.info("Modificato codice di assenza %s", absenceType.code);
-
-		flash.success("Modificato codice di assenza %s", absenceType.code);
-		Absences.manageAbsenceCode(null, null);
+		
+		render(absenceType,absenceTypeGroup,tecnologi,tecnici);
 	}
 
 	public static void edit(@Required Long absenceId) {

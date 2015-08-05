@@ -1,0 +1,16 @@
+#{field _arg}%{
+	value = _value == null ? field.value : _value;
+}%
+<div class='form-group #{if field.error}has-error has-feedback#{/if}'>
+	<label class="col-sm-3 control-label">&{field.name}#{if _required?:false}*#{/if}</label>
+	<div class="col-sm-6">
+		<label class="radio-inline ${_class}" #{if _popover}popover data-content='&{field.name+'.popover'}'#{/if}>
+			<input type="radio" name="${field.name}" value="true"#{if value == true} checked#{/if}>${_true == null ? 'Si' : _true}
+		</label>
+		<label class="radio-inline ${_class}" #{if _popover}popover data-content='&{field.name+'.popover'}'#{/if}>
+			<input type="radio" name="${field.name}" value="false"#{if value == false} checked#{/if}>${_false == null ? 'No' : _false}
+		</label>
+	</div>
+	#{if _description}<div class="col-sm-3">&{field.name+'.description'}</div>#{/if}
+</div>
+#{/field}

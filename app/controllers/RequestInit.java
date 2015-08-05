@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import models.AbsenceType;
 import models.Office;
 import models.Permission;
 import models.Qualification;
@@ -30,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import controllers.Resecure.NoCheck;
+import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDao.PersonLite;
@@ -52,6 +54,8 @@ public class RequestInit extends Controller {
 	private static UsersRolesOfficesDao uroDao;
 	@Inject
 	private static QualificationDao qualificationDao;
+	@Inject
+	private static AbsenceTypeDao absenceTypeDao;
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
 	 * TODO: esportare questa classe in un nuovo file che modella la view.
@@ -253,6 +257,11 @@ public class RequestInit extends Controller {
 		public Set<Office> getAllOfficesAllowed() {
 			return officeDao.getOfficeAllowed(Security.getUser().get());
 		}
+		
+		public List<AbsenceType> getCertificateAbsenceTypes() {
+			return absenceTypeDao.certificateTypes();
+		}
+		
 	}
 
 	@Before (priority = 1)
