@@ -223,7 +223,7 @@ public class MealTickets  extends Controller {
 			contractUpdated.add(mealTicket.contract);
 		}
 		
-		consistencyManager.updatePersonSituation(person, LocalDate.now());
+		consistencyManager.updatePersonSituation(person.id, LocalDate.now());
 
 		MealTickets.recapMealTickets(blockIdsToAdd, personId);
 
@@ -262,7 +262,7 @@ public class MealTickets  extends Controller {
 			deleted++;
 		}
 
-		consistencyManager.updatePersonSituation(person, pastDate);
+		consistencyManager.updatePersonSituation(person.id, pastDate);
 		
 		flash.success("Rimosso blocco %s con dimensione %s per %s %s", codeBlock, deleted,
 				person.name , person.surname);

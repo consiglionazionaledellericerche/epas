@@ -46,11 +46,11 @@ public class WorkingTimeType extends BaseModel {
 	public boolean mealTicketEnabled = true;	//inutile
 
 	@NotAudited
-	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="workingTimeType")
 	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
 
 	@NotAudited
-	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="workingTimeType")
 	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
 
 	@ManyToOne(fetch=FetchType.LAZY)

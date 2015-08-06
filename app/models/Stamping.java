@@ -54,11 +54,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
 	public PersonDay personDay;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 
-	@ManyToOne(optional = true, fetch = FetchType.EAGER)
+	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
 

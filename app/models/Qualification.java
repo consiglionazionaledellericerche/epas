@@ -3,7 +3,6 @@ package models;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -11,8 +10,6 @@ import javax.persistence.Table;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
-
-import com.google.common.base.Joiner;
 
 import play.data.validation.Required;
 
@@ -32,7 +29,7 @@ public class Qualification extends BaseModel{
 	@OneToMany(mappedBy="qualification")
 	public List<Person> person;
 	
-	@ManyToMany(mappedBy = "qualifications", fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "qualifications")
 	public List<AbsenceType> absenceTypes;
 	
 	@Required

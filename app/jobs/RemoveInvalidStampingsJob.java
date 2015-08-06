@@ -50,7 +50,7 @@ public class RemoveInvalidStampingsJob extends Job {
 			}
 		}
 		
-		consistencyManager.updatePersonSituation(person, begin);
+		consistencyManager.updatePersonSituation(person.id, begin);
 		
 		Logger.info("Terminato Job RemoveInvalidStampingsJob per %s,Dal %s al %s",person,begin,end);
 	}
