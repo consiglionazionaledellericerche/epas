@@ -141,10 +141,11 @@ public class PersonDayManager {
 	public int getCalculatedTimeAtWork(IWrapperPersonDay pd) {
 
 		Preconditions.checkState( pd.getWorkingTimeTypeDay().isPresent() );
-
-		int justifiedTimeAtWork = 0;
+//		Perche' in questa funzione si imposta a null lo stampModificationType ??
 		pd.getValue().stampModificationType = null;
-
+		
+		int justifiedTimeAtWork = 0;
+		
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		if ( pd.isFixedTimeAtWork() ) {
 
@@ -155,8 +156,14 @@ public class PersonDayManager {
 		}
 		
 		for(Absence abs : pd.getValue().absences) {
-
+			
 			if(abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+				return pd.getWorkingTimeTypeDay().get().workingTime;
+			}
+			
+//			Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
+			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay) ) {
+				setIsTickeAvailable(pd,true);
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
 			
@@ -173,9 +180,8 @@ public class PersonDayManager {
 				justifiedTimeAtWork += abs.justifiedMinutes;
 				continue;
 			}
-			// FIXME: togliere questa eccezione dal codice.
-			if( !abs.absenceType.code.equals("89") && 
-					abs.absenceType.justifiedTimeAtWork.minutes != null) {
+	
+			if(abs.absenceType.justifiedTimeAtWork.minutes != null) {
 
 				justifiedTimeAtWork += abs.absenceType.justifiedTimeAtWork.minutes;
 				continue;
@@ -215,7 +221,10 @@ public class PersonDayManager {
 		// Calcolo ...
 		
 		int mealTicketTime = wttd.mealTicketTime;					//6 ore
-		int minBreakTicketTime = wttd.breakTicketTime;				//30 minuti
+		
+//		Prendo il tempo della pausa pranzo specificato nell'orario di lavoro, oppure 30 se questo 
+//		ha un valore inferiore (che sarebbe un errore, vedi orario maternita')
+		int minBreakTicketTime = wttd.breakTicketTime >= 30 ? wttd.breakTicketTime : 30;	//30 minuti
 	
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 		int effectiveTimeSpent = 0;
@@ -307,7 +316,6 @@ public class PersonDayManager {
 		}
 			
 		return workingTimeDecurted + justifiedTimeAtWork;
-
 		
 	}
 
@@ -1320,16 +1328,52 @@ public class PersonDayManager {
 			stampingMinutes+= validPair.timeInPair;
 		}
 		
-			return stampingMinutes;
+		return stampingMinutes;
 	}
 	
 	/**
 	 * @param personDay
-	 * @return Il numero di minuti da sommare o decurtare dall'orario di lavoro derivati dalle assenze
+	 * @return Restituisce il calcolo della modifica sul tempo di lavoro
 	 */
-	public int minutesFromAbsences(PersonDay personDay){
-//		TODO da implementare
-		return 0;
+	public int minutesFromAbsences(IWrapperPersonDay pd){
+		
+		int minutesFromAbsences = 0;
+		
+		for(Absence abs : pd.getValue().absences) {
+//			TODO Verificare se per il telelavoro e il codice 105BP funzionano allo stesso modo
+//			In questi casi assegno l'orario di lavoro in quel giorno
+			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
+				return pd.getWorkingTimeTypeDay().get().workingTime;
+			}
+			
+			// Caso di assenza giornaliera.  
+			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+				
+//				setIsTickeAvailable(pd, false);
+				return 0;
+			}
+			
+			// Giustificativi grana minuti (priorità sugli altri casi)
+			if( abs.justifiedMinutes != null) {
+				minutesFromAbsences += abs.justifiedMinutes;
+				continue;
+			}
+//			Caso di giustificazioni orarie che devono andare ad incrementare l'orario di lavoro 
+//			TODO Il Baesso dice che in ogni caso i permessi orari non dovrebbero andare a incrementare 
+//			l'orario di lavoro oltre quello standard (Es. non piu' di 7:12 nel caso del Normale)
+			if( abs.absenceType.justifiedTimeAtWork.minutes != null) {
+
+				minutesFromAbsences += abs.absenceType.justifiedTimeAtWork.minutes;
+				continue;
+			}
+			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
+
+				minutesFromAbsences += pd.getWorkingTimeTypeDay().get().workingTime / 2;
+				continue;
+			}
+		}
+		return minutesFromAbsences;
 	}
 
 }

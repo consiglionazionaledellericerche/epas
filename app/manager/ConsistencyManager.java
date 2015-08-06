@@ -127,6 +127,8 @@ public class ConsistencyManager {
 				for(Person p : personList) {
 					
 					updatePersonSituation(p.id, fromDate);
+//					attenzione quando si forzano le transizioni o si invalida la cache dell'entityManager,
+//					possono esserci effetti collaterali....vedi il blocco try sotto
 					JPA.em().flush();
 					JPA.em().clear();
 				}
@@ -141,7 +143,7 @@ public class ConsistencyManager {
 							false, fromDate, LocalDate.now().minusDays(1), true).list();
 					
 					try {
-//						a questo punto del codice le Persone della personList sono detached a 
+//						A questo punto del codice le Persone della personList sono detached a 
 //						causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla, altrimenti schianta
 						personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
 					}

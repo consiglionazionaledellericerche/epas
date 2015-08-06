@@ -1,7 +1,8 @@
 package manager;
 
-import it.cnr.iit.epas.DateUtility;
 import models.Stamping;
+
+import org.joda.time.Minutes;
 
 /**
  * Classe che modella due stampings logicamente accoppiate nel personday
@@ -23,9 +24,7 @@ public class PairStamping{
 	public PairStamping(Stamping in, Stamping out) {
 		this.in = in;
 		this.out = out;
-		timeInPair = 0;
-		timeInPair = timeInPair - DateUtility.toMinute(in.date);
-		timeInPair = timeInPair + DateUtility.toMinute(out.date);
+		timeInPair = Minutes.minutesBetween(in.date, out.date).getMinutes();;
 		
 		this.pairId = SEQUENCE_ID++;
 		in.pairId = this.pairId;

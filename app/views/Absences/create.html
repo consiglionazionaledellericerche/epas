@@ -9,7 +9,6 @@
 	<input type="hidden" name="dateFrom" value="${personDay.date.format()}"/>
 
     <table class="table table-hover table-form">
-    
     <tr>
       <td class="lab"><strong>Codice</strong></td>
       <td>
@@ -17,24 +16,23 @@
           <div class="col-sm-6" style="padding-left:0px; padding-bottom:10px;">
             <input name="absenceCode" type="text" id="absenceCode"/><br>
           </div>
-          <div class="col-sm-6" style="padding-left:0px;">
+          <div class="col-sm-6">
 		    #{select 'code', value: '', class:'col-xs-12', id:'assenzaFrequente', 
 		    style:'margin-bottom: 10px;', onchange:'Change();'}
-		      <option value="">Codici più usati</option>
-		      #{list items: frequentAbsenceTypeList, as:'absenceType'} 
-	           #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+		      <option>Codici più usati</option>
+		      #{list frequentAbsenceTypeList} 
+	           #{option _.code}${_.label()}#{/option}
 		      #{/list}
 		    #{/select}
-			<br>
-			#{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();'}
-		      <option value="">Tutti i codici</option>
-		      #{list items: allCodes, as:'absenceType'}
-		        #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+
+		     #{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();',select2Table:''}
+		      <option>Tutti i codici</option>
+		      #{list allCodes}
+		        #{option _.code}${_.label()}#{/option}
  		      #{/list}
- 		    #{/select}
+ 		   	#{/select}
 	      </div>
-        </div>
-        		
+        </div>	
       </td>
     </tr>
     
