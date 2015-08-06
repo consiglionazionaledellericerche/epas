@@ -69,12 +69,12 @@ public class Contract extends BaseModel {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
-
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	
+	@OneToMany(mappedBy="contract", cascade = CascadeType.REMOVE)
 	@OrderBy("beginFrom")
 	public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 	
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="contract", cascade = CascadeType.REMOVE)
 	public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
 	@Required @NotNull
@@ -88,19 +88,19 @@ public class Contract extends BaseModel {
 
 	@Column(name="end_contract")
 	public LocalDate endContract;
-
+	
 	@NotAudited
-	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
 	@NotAudited
-	@OneToMany(mappedBy="contract",fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="contract", cascade = {CascadeType.REMOVE})
 	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
 	@NotAudited
-	@OneToMany(mappedBy="contract", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="contract", cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTickets;
 
 	@Transient

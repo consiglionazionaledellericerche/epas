@@ -440,7 +440,7 @@ public class AbsenceManager {
 		if(!onlySimulation && recompute) {
 			
 			//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-			consistencyManager.updatePersonSituation(person, dateFrom);
+			consistencyManager.updatePersonSituation(person.id, dateFrom);
 			
 			if(air.getAbsenceInReperibilityOrShift() > 0){
 				sendEmail(person, air);
@@ -856,7 +856,7 @@ public class AbsenceManager {
 		}
 
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		consistencyManager.updatePersonSituation(person, dateFrom);
+		consistencyManager.updatePersonSituation(person.id, dateFrom);
 
 		return deleted;
 	}

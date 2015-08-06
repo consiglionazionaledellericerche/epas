@@ -31,12 +31,12 @@ public class UsersRolesOffices extends BaseModel{
 	public User user;
 
 	@NotAudited
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name="office_id")
 	public Office office;
 
 	@NotAudited
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name="role_id")
 	public Role role;
 

@@ -16,6 +16,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.query.QContract;
+import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
 import models.query.QPersonDay;
@@ -293,10 +294,12 @@ public final class PersonDao extends DaoBase{
 
 		final QPerson person = QPerson.person;
 		final QContract contract = QContract.contract;
+		final QContractStampProfile csp = QContractStampProfile.contractStampProfile;
 		
 		final JPQLQuery query = getQueryFactory()
 				.from(person)
 				.leftJoin(person.contracts, contract).fetchAll()
+				.leftJoin(contract.contractStampProfile,csp).fetchAll()
 				.where(person.id.eq(personId))
 				.distinct();
 

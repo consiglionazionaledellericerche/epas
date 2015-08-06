@@ -222,7 +222,7 @@ public class StampingManager {
 		
 		// Ricalcolo
 		if(recompute) {
-			consistencyManager.updatePersonSituation(person, personDay.date);
+			consistencyManager.updatePersonSituation(person.id, personDay.date);
 		}
 
 		return true;

@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -44,7 +43,7 @@ public class AbsenceType extends BaseModel {
 	@JoinColumn(name="absence_type_group_id")
 	public AbsenceTypeGroup absenceTypeGroup;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany
 	public List<Qualification> qualifications = new ArrayList<Qualification>();
 
 	@Required

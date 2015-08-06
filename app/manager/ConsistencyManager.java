@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -126,10 +125,10 @@ public class ConsistencyManager {
 				}
 
 				for(Person p : personList) {
+					
+					updatePersonSituation(p.id, fromDate);
+					JPA.em().flush();
 					JPA.em().clear();
-					p = personDao.getPersonById(p.id);
-
-					updatePersonSituation(p, fromDate);
 				}
 
 				if(sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
@@ -137,8 +136,13 @@ public class ConsistencyManager {
 
 					LocalDate begin = new LocalDate().minusMonths(1);
 					LocalDate end = new LocalDate().minusDays(1);
-
+					
+					personList = personDao.list(Optional.<String>absent(), offices,
+							false, fromDate, LocalDate.now().minusDays(1), true).list();
+					
 					try {
+//						a questo punto del codice le Persone della personList sono detached a 
+//						causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla, altrimenti schianta
 						personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
 					}
 					catch(EmailException e){
@@ -156,14 +160,15 @@ public class ConsistencyManager {
 	 * @param person
 	 * @param from
 	 */
-	public void updatePersonSituation(Person person, LocalDate from){
-		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
-
+	public void updatePersonSituation(Long personId, LocalDate from){
+		
 		LocalDate date = from;
-
-		person = personDao.fetchPersonForComputation(person.id, 
+		
+		final Person person = personDao.fetchPersonForComputation(personId, 
 				Optional.fromNullable(from), 
 				Optional.<LocalDate>absent());
+		
+		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
 
 		IWrapperPerson wPerson = wrapperFactory.create(person);
 
@@ -385,8 +390,6 @@ public class ConsistencyManager {
 	 */
 	private void populateContractMonthRecapByPerson( Person person, 
 			YearMonth yearMonthFrom) {
-
-		//Person p = Person.findById(person.id);
 
 		for( Contract contract : person.contracts ){
 

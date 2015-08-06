@@ -47,7 +47,7 @@ public class User extends BaseModel{
 	//public Office restOwner;
 
 	@NotAudited
-	@OneToMany(mappedBy="user", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="user", cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 
 

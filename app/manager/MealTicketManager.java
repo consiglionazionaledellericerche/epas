@@ -123,7 +123,7 @@ public class MealTicketManager {
 			mealTicketsTransfered++;
 		}
 		
-		consistencyManager.updatePersonSituation(contract.person, pastDate);
+		consistencyManager.updatePersonSituation(contract.person.id, pastDate);
 
 		return mealTicketsTransfered;
 	}
