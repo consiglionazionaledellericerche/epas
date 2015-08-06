@@ -840,8 +840,8 @@ when
         
         /* duplicate */
         "Absences.editCode",
-        "Absences.insertAbsenceCode",
-     	"Absences.saveAbsenceCode",
+        "Absences.insertCode",
+     	"Absences.saveCode",
      	"Absences.updateCode"
         
         ), target == null, granted == false)
@@ -857,8 +857,8 @@ when
  $c: PermissionCheck(action in (
        
         "Absences.editCode",
-     	"Absences.insertAbsenceCode",
-     	"Absences.saveAbsenceCode",
+     	"Absences.insertCode",
+     	"Absences.saveCode",
      	"Absences.updateCode"
      	
        ), target == $o, granted == false)
