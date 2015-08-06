@@ -18,7 +18,7 @@
  <div class="panel panel-default">
  	<div class="panel-heading">
  		#{if absenceType?.isPersistent()}
- 		<h2 class="panel-title">Modifica dati per codice di assenza: ${absenceType.code} (${absenceType.description})</h2>
+ 		<h2 class="panel-title">Modifica dati per codice di assenza: ${absenceType.code}#{if absenceType.description} (${absenceType.description})#{/if}</h2>
  		#{/if}
  		#{else}
  		<h2 class="panel-title">Inserimento nuovo codice d'assenza</h2>
@@ -32,8 +32,7 @@
  		#{f.booleanRadio 'absenceType.internalUse',popover:'true' /}
  		#{f.date 'absenceType.validFrom',view:'year',popover:'true' /}
  		#{f.date 'absenceType.validTo',view:'year',popover:'true' /}
- 		#{f.booleanRadio 'modifierType',true:'Giustifica',false:'Assegna',popover:'true',value:absenceType?.timeAtWorkModifier?.justify /}
- 		#{f.selectEnum 'absenceType.timeAtWorkModifier',items:models.enumerate.TimeAtWorkModifier,select2:'off',popover:'true' /}
+ 		#{f.selectEnum 'absenceType.justifiedTimeAtWork',items:models.enumerate.JustifiedTimeAtWork,select2:'off',popover:'true' /}
 
  		<div class="form-group">
  			<label class="col-sm-3 control-label">Utilizzabile per le categorie:</label>
@@ -93,39 +92,6 @@ $(document).ready(function() {
       $("#absenceTypeGroup\\_replacingAbsenceType").attr('disabled', 'disabled');
     }
   });
-
-  filterValues();
- 
-  $("[name=modifierType]:radio").change(function() {
-    filterValues();
-      $("#absenceType\\_timeAtWorkModifier option").each(function() {
-    	$(this).removeAttr("selected");    // se switcho da un valore all'altro deseleziono la voce attualmente selezionata
-    });
-  });
-
-// questa funzione si occupa di nascondere/visualizzare le voci del timeAtWorkModifier dall'elenco in base al radiobutton modifierType
-  function filterValues() {
-    // controllo il valore attuale dei radiobuttons
-    var radioValue = $('[name=modifierType]:radio:checked').val();
-    // ciclo sugli option della select
-    $("#absenceType\\_timeAtWorkModifier option").each(function() {
-      if (radioValue == 'true') {							// se e' impostato su true visualizzo solo i valori di giustificazione
-        if (this.value.toLowerCase().indexOf("assign") >= 0) {
-          $(this).hide();
-        } else {
-          $(this).show();
-        }
-      } else if (radioValue == 'false') {    // se e' impostato su false visualizzo solo i valori di assegnamento
-        if (this.value.toLowerCase().indexOf("justify") >= 0) {
-          $(this).hide();
-        } else {
-          $(this).show();
-        }
-      } else {
-        $(this).hide();   // se non e' ancora selezionato nulla nascondo tutte le voci
-      }
-    });
-  }
-});
+ });
 </script>
 #{/set}

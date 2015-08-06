@@ -7,6 +7,14 @@ $(function($){
 
 		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
+
+		$('[datatable]').DataTable({
+			"lengthMenu": [ [10, 25, 50,100, -1], [10, 25, 50,100, "Tutti"] ],
+			"language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+		});
+
 		
 		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
 		//il plugin responsive abilitato sulla tabella(sono incompatibili)

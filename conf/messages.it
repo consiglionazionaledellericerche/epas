@@ -4,8 +4,9 @@ absenceType.description= Descrizione codice
 absenceType.internalUse= Codice a uso interno
 absenceType.validFrom= Inizio validita'
 absenceType.validTo= Fine validita'
-absenceType.timeAtWorkModifier= Calcolo sul tempo di lavoro
+absenceType.justifiedTimeAtWork= Tempo di lavoro giustificato
 absenceType.consideredWeekEnd= Utilizzabile nei weekend/festivi
+absenceType.qualifications= Utilizzabile per i livelli
 
 absenceTypeGroup.label= Etichetta gruppo
 absenceTypeGroup.accumulationType= Accumulo valori
@@ -121,29 +122,21 @@ AccumulationBehaviour.nothing= Niente
 AccumulationBehaviour.replaceCodeAndDecreaseAccumulation= Sostituisce il codice e decrementa l'accumulo
 AccumulationBehaviour.noMoreAbsencesAccepted= Non accettare ulteriori assenze
 
-TimeAtWorkModifier.JustifyAllDay= Giustifica intera giornata
-TimeAtWorkModifier.JustifyHalfDay= Giustifica mezza giornata
-TimeAtWorkModifier.JustifyOneHour= Giustifica 1 ora
-TimeAtWorkModifier.JustifyTwoHours= Giustifica 2 ore
-TimeAtWorkModifier.JustifyThreeHours= Giustifica 3 ore
-TimeAtWorkModifier.JustifyFourHours= Giustifica 4 ore
-TimeAtWorkModifier.JustifyFiveHours= Giustifica 5 ore
-TimeAtWorkModifier.JustifySixHours= Giustifica 6 ore
-TimeAtWorkModifier.JustifySevenHours= Giustifica 7 ore
-TimeAtWorkModifier.JustifyEightHours= Giustifica 8 ore
-TimeAtWorkModifier.JustifyNothing= Nessuna giustificazione
-TimeAtWorkModifier.JustifyTimeToComplete= Giustifica quello che manca
-TimeAtWorkModifier.JustifyReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
+JustifiedTimeAtWork.AllDay= Intera giornata
+JustifiedTimeAtWork.HalfDay= Mezza giornata
+JustifiedTimeAtWork.OneHour= 1 ora
+JustifiedTimeAtWork.TwoHours= 2 ore
+JustifiedTimeAtWork.ThreeHours= 3 ore
+JustifiedTimeAtWork.FourHours= 4 ore
+JustifiedTimeAtWork.FiveHours= 5 ore
+JustifiedTimeAtWork.SixHours= 6 ore
+JustifiedTimeAtWork.SevenHours= 7 ore
+JustifiedTimeAtWork.EightHours= 8 ore
+JustifiedTimeAtWork.Nothing= Niente
+JustifiedTimeAtWork.TimeToComplete= Quello che manca
+JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
+JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
-TimeAtWorkModifier.AssignAllDay= Assegna intera giornata
-TimeAtWorkModifier.AssignOneHour= Assegna 1 ora
-TimeAtWorkModifier.AssignTwoHours= Assegna 2 ore
-TimeAtWorkModifier.AssignThreeHours= Assegna 3 ore
-TimeAtWorkModifier.AssignFourHours= Assegna 4 ore
-TimeAtWorkModifier.AssignFiveHours= Assegna 5 ore
-TimeAtWorkModifier.AssignSixHours= Assegna 6 ore
-TimeAtWorkModifier.AssignSevenHours= Assegna 7 ore
-TimeAtWorkModifier.AssignNothing= Nessun assegnamento
 
 ########################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
@@ -163,7 +156,7 @@ absenceType.validTo.popover= Data fine validità di questo codice (se vuoto vali
 
 modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giustifichi un certo numero di ore;Al contrario si selezioni "Assegna" se si vuole che il codice aggiunga le ore al tempo di lavoro della persona (es. cod 105BP)
 
-absenceType.timeAtWorkModifier.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
+absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
 
 absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
 

@@ -29,7 +29,7 @@ import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.QualificationMapping;
-import models.enumerate.TimeAtWorkModifier;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -98,7 +98,7 @@ public class Absences extends Controller{
 				Optional.fromNullable(absenceCode), 
 				DateUtility.getMonthFirstDay(yearMonth), 
 				DateUtility.getMonthLastDay(yearMonth),
-				Optional.<TimeAtWorkModifier>absent(),
+				Optional.<JustifiedTimeAtWork>absent(),
 				false, 
 				true);
 
@@ -108,14 +108,10 @@ public class Absences extends Controller{
 		render(dateAbsences, absenceCode);
 	}
 
-	public static void manageAbsenceCode(String name, Integer page){
-		if(page==null)
-			page = 0;
-
-		SimpleResults<AbsenceType> simpleResults = absenceTypeDao.getAbsences(Optional.fromNullable(name));
-		List<AbsenceType> absenceList = simpleResults.paginated(page).getResults();
-
-		render(absenceList, name, simpleResults);
+	public static void manageAbsenceCode(){
+		
+		List<AbsenceType> absenceTypes = AbsenceType.findAll();
+		render(absenceTypes);
 	}
 
 	public static void insertCode(){
@@ -130,13 +126,13 @@ public class Absences extends Controller{
 		flash.clear();
 		if (validation.hasErrors()){
 			flash.error("Correggere gli errori indicati");
-			render("@editAbsenceCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
+			render("@editCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
 		}
 		Logger.info("tecnologi  %s - tecnici %s", tecnologi,tecnici);
 		
 		if (!(tecnologi || tecnici)){
 			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-			render("@editAbsenceCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
+			render("@editCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
 		}
 		
 		absenceType.qualifications.clear();
@@ -165,7 +161,7 @@ public class Absences extends Controller{
 		Logger.info("Inserito/modificato codice di assenza %s", absenceType.code);
 		flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
 
-		manageAbsenceCode(null, null);
+		manageAbsenceCode();
 	}
 
 	public static void create(@Required Long personId, @Valid @NotNull LocalDate date) {
@@ -421,7 +417,7 @@ public class Absences extends Controller{
 				Optional.<Person>absent(),Optional.fromNullable(code), 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
-				Optional.<TimeAtWorkModifier>absent(), true, false);
+				Optional.<JustifiedTimeAtWork>absent(), true, false);
 		byte[] buffer = new byte[1024];
 
 		for(Absence abs : absList){
@@ -499,7 +495,7 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(person.office);
 
 		List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
-				Optional.<String>absent(), from, to, Optional.of(TimeAtWorkModifier.JustifyAllDay), false, false);
+				Optional.<String>absent(), from, to, Optional.of(JustifiedTimeAtWork.AllDay), false, false);
 
 		for(Absence abs : absenceList){
 			if(AbsenceTypeMapping.MISSIONE.is(abs.absenceType)){

@@ -13,7 +13,7 @@ import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.User;
-import models.enumerate.TimeAtWorkModifier;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
@@ -153,13 +153,13 @@ public class YearlyAbsences extends Controller{
 		{
 			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
 					Optional.fromNullable(person), Optional.<String>absent(), 
-					monthBegin, monthEnd, Optional.<TimeAtWorkModifier>absent(), false, true);
+					monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
 		}
 		else
 		{
 			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
 					Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
-					monthBegin, monthEnd, Optional.<TimeAtWorkModifier>absent(), false, true);
+					monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
 		}
 
 		render(person, absenceToRender);

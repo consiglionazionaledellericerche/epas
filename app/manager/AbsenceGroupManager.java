@@ -9,7 +9,7 @@ import models.AbsenceType;
 import models.Person;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
-import models.enumerate.TimeAtWorkModifier;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
@@ -99,7 +99,7 @@ public class AbsenceGroupManager {
 
 			if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
 
-				if(absenceType.absenceTypeGroup.limitInMinute >  absenceType.timeAtWorkModifier.minutes + minutesExcess)
+				if(absenceType.absenceTypeGroup.limitInMinute >  absenceType.justifiedTimeAtWork.minutes + minutesExcess)
 					/**
 					 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
 					 */
@@ -115,7 +115,7 @@ public class AbsenceGroupManager {
 					int totalReplacingAbsence = 0;
 					List<Absence> replacingAbsenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
 							Optional.fromNullable(absenceType.absenceTypeGroup.replacingAbsenceType.code), 
-							date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, Optional.<TimeAtWorkModifier>absent(), false, false);
+							date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
 
 					totalReplacingAbsence = replacingAbsenceList.size();
 					if(absenceType.absenceTypeGroup.replacingAbsenceType.absenceTypeGroup.limitInMinute <= totalReplacingAbsence*absenceType.absenceTypeGroup.limitInMinute){
@@ -129,7 +129,7 @@ public class AbsenceGroupManager {
 			}
 			else if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.always)){
 
-				if(absenceType.absenceTypeGroup.limitInMinute >  absenceType.timeAtWorkModifier.minutes + minutesExcess)
+				if(absenceType.absenceTypeGroup.limitInMinute >  absenceType.justifiedTimeAtWork.minutes + minutesExcess)
 					/**
 					 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
 					 */
@@ -148,9 +148,9 @@ public class AbsenceGroupManager {
 					absenceType, person, new LocalDate(date.getYear(),1,1), date);
 
 			for(Absence abs : absList){
-				totalMinutesJustified = totalMinutesJustified+abs.absenceType.timeAtWorkModifier.minutes;
+				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutes;
 			}
-			if(totalMinutesJustified + absenceType.timeAtWorkModifier.minutes > absenceType.absenceTypeGroup.limitInMinute)
+			if(totalMinutesJustified + absenceType.justifiedTimeAtWork.minutes > absenceType.absenceTypeGroup.limitInMinute)
 				return new CheckMessage(true, "Si può inserire il codice di assenza richiesto e viene inserito anche il codice di rimpiazzamento", absenceType.absenceTypeGroup.replacingAbsenceType);
 			else
 				return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
@@ -181,9 +181,9 @@ public class AbsenceGroupManager {
 
 			Logger.debug("La lista di codici di assenza con gruppo %s contiene %d elementi", absenceType.absenceTypeGroup.label, absList.size());
 			for(Absence abs : absList){
-				totalMinutesJustified = totalMinutesJustified+abs.absenceType.timeAtWorkModifier.minutes;
+				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutes;
 			}
-			if(absenceType.absenceTypeGroup.limitInMinute >= totalMinutesJustified+absenceType.timeAtWorkModifier.minutes)
+			if(absenceType.absenceTypeGroup.limitInMinute >= totalMinutesJustified+absenceType.justifiedTimeAtWork.minutes)
 				return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
 			else
 				return new CheckMessage(false, "La quantità usata nell'arco del mese per questo codice ha raggiunto il limite. Non si può usarne un altro.", null);
@@ -196,21 +196,21 @@ public class AbsenceGroupManager {
 
 			Logger.debug("List size: %d", absList.size());
 			for(Absence abs : absList){
-				if(abs.absenceType.timeAtWorkModifier == TimeAtWorkModifier.JustifyAllDay)
+				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
 					totalMinutesJustified = workingTimeTypeDao
 					.getWorkingTimeType(date, person).get()
 					.workingTimeTypeDays.get(date.getDayOfWeek()-1).workingTime;
 				else{
 
-					totalMinutesJustified = totalMinutesJustified+abs.absenceType.timeAtWorkModifier.minutes;
+					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutes;
 				}
 
 
 			}
-			Logger.debug("TotalMinutesJustified= %d. Minuti giustificati: %d", totalMinutesJustified, absenceType.timeAtWorkModifier.minutes);
+			Logger.debug("TotalMinutesJustified= %d. Minuti giustificati: %d", totalMinutesJustified, absenceType.justifiedTimeAtWork.minutes);
 			int quantitaGiustificata;
-			if(absenceType.timeAtWorkModifier != TimeAtWorkModifier.JustifyAllDay)
-				quantitaGiustificata = absenceType.timeAtWorkModifier.minutes;
+			if(absenceType.justifiedTimeAtWork != JustifiedTimeAtWork.AllDay)
+				quantitaGiustificata = absenceType.justifiedTimeAtWork.minutes;
 			else
 				quantitaGiustificata = workingTimeTypeDao
 				.getWorkingTimeType(date, person).get().workingTimeTypeDays
@@ -244,7 +244,7 @@ public class AbsenceGroupManager {
 		int minutesExcess = 0;
 		int minutesJustified = 0;
 		for(Absence abs : absList){
-			minutesJustified = minutesJustified + abs.absenceType.timeAtWorkModifier.minutes;
+			minutesJustified = minutesJustified + abs.absenceType.justifiedTimeAtWork.minutes;
 			if(minutesJustified + minutesExcess >= abs.absenceType.absenceTypeGroup.limitInMinute ){
 				minutesExcess = minutesExcess + minutesJustified - abs.absenceType.absenceTypeGroup.limitInMinute;
 				minutesJustified = 0;
