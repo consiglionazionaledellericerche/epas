@@ -139,9 +139,10 @@ public class AbsenceTypeDao extends DaoBase{
 			LocalDate date) {
 
 		QAbsenceType absenceType = QAbsenceType.absenceType;
-
+		
 		final JPQLQuery query = getQueryFactory().from(absenceType)
-				.where(absenceType.validTo.after(date)).orderBy(absenceType.code.asc());
+				.where(absenceType.validTo.after(date).or(absenceType.validTo.isNull()))
+				.orderBy(absenceType.code.asc());
 
 		return query.list(absenceType);
 	}

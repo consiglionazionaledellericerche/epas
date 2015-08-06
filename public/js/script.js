@@ -6,6 +6,8 @@ $(function($){
 	$.fn.initepas = function() {
 
 		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
+		$(':input[select2Table]', this).select2({minimumResultsForSearch: 25});
+
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
 
 		$('[datatable]').DataTable({

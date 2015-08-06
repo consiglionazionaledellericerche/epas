@@ -298,7 +298,8 @@ public class AbsenceDao extends DaoBase {
 		return getQueryFactory().from(absence)
 				.where(absence.personDay.person.eq(person).and(
 						absence.personDay.date.between(fromDate, toDate.or(fromDate))).and(
-								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay))).list(absence);
+								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay)
+								.or(absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AssignAllDay)))).list(absence);
 
 	}
 
