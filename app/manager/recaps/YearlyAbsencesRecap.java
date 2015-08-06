@@ -9,7 +9,7 @@ import java.util.Map;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.enumerate.TimeAtWorkModifier;
+import models.enumerate.JustifiedTimeAtWork;
 
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
@@ -41,8 +41,8 @@ public class YearlyAbsencesRecap {
 	private int checkHourAbsence(List<Absence> yearlyAbsence) {
 		int count = 0;
 		for(Absence abs : yearlyAbsence){
-			if(abs.absenceType.timeAtWorkModifier.minutes != null && 
-					abs.absenceType.timeAtWorkModifier.minutes < TimeAtWorkModifier.JustifySevenHours.minutes)
+			if(abs.absenceType.justifiedTimeAtWork.minutes != null && 
+					abs.absenceType.justifiedTimeAtWork.minutes < JustifiedTimeAtWork.SevenHours.minutes)
 				count ++;
 		}
 		return count;

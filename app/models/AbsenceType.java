@@ -16,7 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import models.base.BaseModel;
-import models.enumerate.TimeAtWorkModifier;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -68,8 +68,8 @@ public class AbsenceType extends BaseModel {
 	
 	@Required
 	@Enumerated(EnumType.STRING)
-	@Column(name = "time_at_work_modifier")
-	public TimeAtWorkModifier timeAtWorkModifier;
+	@Column(name = "justified_time_at_work")
+	public JustifiedTimeAtWork justifiedTimeAtWork;
 
 	/**
 	 * Relazione inversa con le assenze.

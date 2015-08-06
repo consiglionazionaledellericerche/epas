@@ -2,60 +2,35 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Codici di assenza' /}
 
-<p class="lead"><a href="@{Absences.insertCode}">Definisci nuovo codice di assenza</a></p>
+<div class="row">
+	<a class="btn btn-primary col-sm-4 col-sm-offset-4" href="@{Absences.insertCode}">
+	 <strong><em>Definisci nuovo codice di assenza</em></strong>
+	</a>
+</div>
 
-<section id="results">
-	<div class="container span3"style="margin-left: 0px; margin-bottom: 20px;">
-	#{form action:@Absences.manageAbsenceCode(), class:'form-search',  
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	    <input type="text" name="name" placeholder="Codice o descrizione" value="${name}" class="input-medium search-query"/>
-	    <i class="icon-search icon-large"></i>
-	
-	#{/form}
-	</div>
+	<table datatable>
+	 <thead>
+	  <tr>
+	  	<th>&{'absenceType.code'}</th>
+	  	<th>&{'absenceType.certificateCode'}</th>
+	  	<th>&{'absenceType.description'}</th>
+	  	<th>&{'absenceType.internalUse'}</th>
+	  	<th>&{'absenceType.consideredWeekEnd'}</th>
+	  	<th>&{'absenceType.validFrom'}</th>
+	  	<th>&{'absenceType.validTo'}</th>
+	  	<th>&{'absenceType.justifiedTimeAtWork'}</th>
+	  	<th>&{'absenceType.qualifications'}</th>
 
-	<ul class="pagination pagination-centered" style="margin-left: 10px;">
-	  #{if simpleResults.totalPage > 0}
-	  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-	  	  #{if simpleResults.page==indexPage}
-	  	    <li class="active"><a href="#">${indexPage+1}</a></li>
-	  	  #{/if}
-	  	  #{else}
-	  	    <li><a href="@{Absences.manageAbsenceCode(name, indexPage)}">${indexPage+1}</a></li>
-	  	  #{/else}
-		#{/list}
-	  #{/if}
-	  #{else}
-	    <br>
-	  #{/else}
-	</ul>
-
-	<table class="table table-condensed table-hover custom2">
-		<tr>
-			<th>Codice</th>
-			<th>Codice per att. presenza</th>
-			<th>Descrizione</th>
-			<th>uso interno</th>
-	
-			<th>Usabile w.e. e festivi</th>
-			<th>inizio validità</th>
-			<th>fine validità</th>
-			<th>tempo di lavoro giustificato</th>
-			<th>livelli</th>
-			
-	
-			<th>gruppo</th>
-			<th>valore</th>
-			<th>minuti in eccesso</th>
-			<th>accumulare i valori</th>
-			<th>limite accumulo</th>
-			<th>cosa fare raggiunto il limite</th>
-			<th>codice per sostituzione</th>
-		</tr>
-
-		#{list absenceList}
+	  	<th>&{'absenceTypeGroup.label'}</th>
+	  	<th>&{'absenceTypeGroup.minutesExcess'}</th>
+	  	<th>&{'absenceTypeGroup.accumulationType'}</th>
+	  	<th>&{'absenceTypeGroup.limitInMinute'}</th>
+	  	<th>&{'absenceTypeGroup.accumulationBehaviour'}</th>
+	  	<th>&{'absenceTypeGroup.replacingAbsenceType'}</th>
+	  </tr>
+	</thead>
+	<tbody>
+		#{list absenceTypes}
 		<tr>
 			<td class="caratteristica"><a href="@{Absences.editCode(_.id)}">${_.code}</a></td>
 			<td>${_.certificateCode}</td>
@@ -65,20 +40,19 @@
 			<td>${_.consideredWeekEnd ? 'Sì' : 'No'}</td>
 			<td>${_.validFrom?.format()}</td>
 			<td>${_.validTo?.format()}</td>
-			<td>${_.timeAtWorkModifier?.label()}</td>
+			<td>${_.justifiedTimeAtWork?.label()}</td>
 			<td>
 				#{list items:_.qualifications, as: 'q'}
 					${q.qualification}#{if !q_isLast},#{/if}
 				#{/list}
 			</td> 
 			<td>${_.absenceTypeGroup?.label}</td>
-			<td>${}</td> <!-- cos'è??? -->
 			<td>${_.absenceTypeGroup?.minutesExcess}</td>
-			<td>${_.absenceTypeGroup?.accumulationType?.description}</td>
+			<td>${_.absenceTypeGroup?.accumulationType?.label()}</td>
 			<td>${_.absenceTypeGroup?.limitInMinute}</td>
-			<td>${_.absenceTypeGroup?.accumulationBehaviour?.description}</td>
+			<td>${_.absenceTypeGroup?.accumulationBehaviour?.label()}</td>
 			<td>${_.absenceTypeGroup?.replacingAbsenceType?.code}</td>
 		</tr>
 		#{/list}
+		</tbody>
 	</table>
-</section>
