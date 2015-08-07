@@ -354,4 +354,9 @@ tfoot input {
    box-sizing: border-box;
 }
 
+/* Corregge un bug della versione 4 della select2 che si verifica sui modali bootstrap */
+.select2-container {
+width: 100% !important;
+padding: 0;
+}
 

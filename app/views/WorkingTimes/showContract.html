@@ -10,32 +10,13 @@
 	    <th>Fine</th>
 	  </tr>
 	  #{list items:contractList, as:'contract'}
-	  
-	  
-
 	    <tr>
 	      <td>${contract.person.surname} ${contract.person.name}</td>
-	      <td>${contract.beginContract}</td>
+	      <td>${contract.beginContract?.format()}</td>
 	      <td>
-	        ${contract.expireContract}
+	        ${contract.expireContract?.format()}
 	      </td>
 	    </tr>
-
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-		
 	  #{/list}
 	</table>
-
-
-
-
-
 </div>

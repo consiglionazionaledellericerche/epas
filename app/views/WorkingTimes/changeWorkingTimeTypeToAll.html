@@ -5,46 +5,20 @@
 	
   <p class="text-info"> Per ogni dipendente nella finestra temporale specificata</p>
 	
-  #{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() }
-	<input type="hidden" name="officeId" value="${office.id}"/>
-    <input type="hidden" name="wttId" value="${wtt.id}" />
-	
-	<div class="well">
-	
-		<table class="table-form table-hover">
+  #{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() ,class:'form-horizontal'}
+	<input type="hidden" name="office.id" value="${office.id}"/>
+  <input type="hidden" name="wttOld.id" value="${wtt.id}" />
 		
-		  <tr>
-		    <td class="lab"><strong>Converti</strong></td>
-		    <td>${wtt.description}</td>
-		  </tr>
-		  
-		  <tr>
-		    <td class="lab"><strong>In</strong></td>
-		    <td>
-			  #{select 'wttId1'}
-	            #{list items:wttList, as:'wttItem'}
-		          #{option wttItem.id}${wttItem.description}#{/option}
-			    #{/list}
-		      #{/select}
-		    </td>
-		  </tr>
-		  
-		  <tr>
-		    <td class="lab"><strong>Dal</strong></td>
-		    <td><input name="dateFrom" type="text" datepicker /></td>
-		  </tr>
-		  
-		  <tr>
-		    <td class="lab"><strong>Al</strong></td>
-		    <td><input name="dateTo" type="text" datepicker /></td>
-		  </tr>
-		  
-		  
-		</table>
-
-    </div>
+	<div class="well">
+  	<h4>Converti <strong><em>${wtt.description}</em></strong> in</h4>
+  	<div class="panel-body">
+    	#{f.selectModel 'wttNew',label:'Nuovo tipo orario',items:wttList /}
+			#{f.date 'dateFrom',label:'Da' /}
+			#{f.date 'dateFrom',label:'A' /}
+  	</div>
+	</div>
 	
-    <button type="submit" class="btn btn-info">Cambia</button>
+  <button type="submit" class="btn btn-info">Cambia</button>
 	
   #{/form}
   <br>

@@ -1,0 +1,24 @@
+*{
+ arg (required) field attribute
+ label (optional) default to arg.name
+ description (optional) default to null
+ required (optional) default to false
+}*
+#{field _arg}%{
+  if (_body) {
+    _body.setProperty('field', field)
+  }
+}%<div class='form-group #{if field.error}has-error has-feedback#{/if}'>
+		<label for="${field.id}" class="col-sm-3 control-label">
+		#{if _label}${_label}#{/if} #{else}&{field.name}#{/else}#{if _required}*#{/if}
+		</label>
+			<div class="col-sm-6">
+			#{doBody /}
+			#{if field.error}
+			#{if _feedback}<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>#{/if}
+			<span class="help-block">&{field.error}</span>
+			#{/if}
+			</div>
+	#{if _description}<div class="col-sm-3">&{field.name+'.description'}</div>#{/if}
+</div>
+#{/field}
