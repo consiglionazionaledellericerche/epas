@@ -22,6 +22,7 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.Required;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -323,35 +324,15 @@ public class WorkingTimes extends Controller{
 	 * @param dateFrom
 	 * @param dateTo
 	 */
-	public static void executeChangeWorkingTimeTypeToAll(Long wttId, Long wttId1, Long officeId, String dateFrom, String dateTo) {
+	public static void executeChangeWorkingTimeTypeToAll(WorkingTimeType wttOld, 
+			WorkingTimeType wttNew,@Required Office office, LocalDate dateFrom, LocalDate dateTo) {
 
 		int contractChanges = 0;
 		int contractError = 0;
 
 		JPAPlugin.startTx(false);
 
-		Office office = officeDao.getOfficeById(officeId);
-		if(office == null) {
-
-			flash.error("Fornire la sede interessata per il cambio di orario. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
-		}
-
 		rules.checkIfPermitted(office);
-
-		WorkingTimeType wttOld = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-		if(wttOld==null) {
-
-			flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-			WorkingTimes.manageWorkingTime(null);
-		}
-
-		WorkingTimeType wttNew = workingTimeTypeDao.getWorkingTimeTypeById(wttId1);
-		if(wttNew==null) {
-
-			flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-			WorkingTimes.manageWorkingTime(null);
-		}
 
 		//L'operazione deve interessare tipi orario della stessa sede
 		if(wttOld.office != null && wttNew.office != null 
@@ -361,26 +342,14 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 
-		LocalDate inputBegin = null;
-		LocalDate inputEnd = null;
-		try {
-			inputBegin = new LocalDate(dateFrom);
-			if(dateTo!=null && !dateTo.equals(""))
-				inputEnd = new LocalDate(dateTo);
-
-		} catch(Exception e) {
-			flash.error("Fornire le date in un formato valido. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
-		}	
-
 		//Prendere tutti i contratti attivi da firstDay ad oggi
-		List<Contract> contractInPeriod = contractManager.getActiveContractInPeriod(inputBegin, inputEnd);
+		List<Contract> contractInPeriod = contractManager.getActiveContractInPeriod(dateFrom, dateTo);
 		JPAPlugin.closeTx(false);
 
 		//Logica aggiornamento contratto
 		for(Contract contract : contractInPeriod) {
 
-			DateInterval contractPeriod = new DateInterval(inputBegin, inputEnd);
+			DateInterval contractPeriod = new DateInterval(dateFrom, dateTo);
 
 			try {
 
@@ -427,14 +396,13 @@ public class WorkingTimes extends Controller{
 					replaceContractWorkingTimeTypeList(contract, newCwttListClean);
 					Logger.info("recompute");
 
-					contractManager.recomputeContract(contract, inputBegin, null,false);
+					contractManager.recomputeContract(contract, dateFrom, null,false);
 
 					contractChanges++;
 
 				}
 
 				JPAPlugin.closeTx(false);
-
 
 			}
 			catch (Exception e) {

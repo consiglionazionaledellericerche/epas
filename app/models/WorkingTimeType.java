@@ -66,8 +66,7 @@ public class WorkingTimeType extends BaseModel {
 
 	@Override
 	public String toString() {
-		return String.format("WorkingTimeType[%d] - description = %s, shift = %s", 
-				id, description, shift);
+		return description;
 	}
 }
 
