@@ -220,11 +220,8 @@ public class PersonDayManager {
 
 		// Calcolo ...
 		
-		int mealTicketTime = wttd.mealTicketTime;					//6 ore
-		
-//		Prendo il tempo della pausa pranzo specificato nell'orario di lavoro, oppure 30 se questo 
-//		ha un valore inferiore (che sarebbe un errore, vedi orario maternita')
-		int minBreakTicketTime = wttd.breakTicketTime >= 30 ? wttd.breakTicketTime : 30;	//30 minuti
+		int mealTicketTime = wttd.mealTicketTime;			//6 ore
+		int minBreakTicketTime =  wttd.breakTicketTime ;	//30 minuti
 	
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 		int effectiveTimeSpent = 0;
