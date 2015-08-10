@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
@@ -22,12 +23,15 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.parsing.MultipartStream;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 
 import dao.ContractDao;
@@ -58,10 +62,15 @@ public class WorkingTimes extends Controller{
 	@Inject
 	private static ContractManager contractManager;
 
-	public static void manageWorkingTime(Office office){
-
+	public static void manageWorkingTime(Long officeId){
+		
+		Office office = null;
+		if(officeId != null){
+			office = officeDao.getOfficeById(officeId);
+		}
+		
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
-		if(office == null || office.id == null) {
+		if(office == null) {
 			//TODO se offices è vuota capire come comportarsi
 			office = offices.iterator().next();
 		}
@@ -150,45 +159,24 @@ public class WorkingTimes extends Controller{
 
 	}
 
+	public static void save(@Valid WorkingTimeType wtt, WorkingTimeTypeDay wttd1,
+			WorkingTimeTypeDay wttd2,WorkingTimeTypeDay wttd3,
+			WorkingTimeTypeDay wttd4,WorkingTimeTypeDay wttd5,
+			WorkingTimeTypeDay wttd6,WorkingTimeTypeDay wttd7){
 
-	public static void save(
-
-			Office office,
-			WorkingTimeType wtt, 
-			WorkingTimeTypeDay wttd1,
-			WorkingTimeTypeDay wttd2,
-			WorkingTimeTypeDay wttd3,
-			WorkingTimeTypeDay wttd4,
-			WorkingTimeTypeDay wttd5,
-			WorkingTimeTypeDay wttd6,
-			WorkingTimeTypeDay wttd7){
-
-		if(office == null || office.id == null) {
-
-			flash.error("Per inserire un tipo orario è necessario fornire una sede esistente. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
+		if (validation.hasErrors()){
+			flash.error(ValidationHelper.errorsMessages(validation.errors()));
+			manageWorkingTime(wtt.office.id);
 		}
+		
 
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(!wOffice.isSeat()) {
+		if(!wrapperFactory.create(wtt.office).isSeat()) {
 
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
+			manageWorkingTime(null);
 		}
 
-		rules.checkIfPermitted(office);
-
-		if(wtt.description == null || wtt.description.isEmpty()) {
-			flash.error("Il campo nome tipo orario è obbligatorio. Operazione annullata");
-			WorkingTimes.manageWorkingTime(wtt.office);
-		}
-		if(workingTimeTypeDao.getWorkingTimeTypeByDescription(wtt.description) != null) {
-			flash.error("Il nome tipo orario è già esistente. Sceglierne un'altro. Operazione annullata");
-			WorkingTimes.manageWorkingTime(wtt.office);
-		}
-
-		wtt.office = office;
+		rules.checkIfPermitted(wtt.office);
 
 		wtt.save();
 
@@ -200,9 +188,9 @@ public class WorkingTimes extends Controller{
 		workingTimeTypeManager.saveWorkingTimeType(wttd6, wtt, 6);
 		workingTimeTypeManager.saveWorkingTimeType(wttd7, wtt, 7);
 
-		flash.success("Inserito nuovo orario di lavoro denominato %s per la sede %s.", wtt.description, office.name);
+		flash.success("Inserito nuovo orario di lavoro '%s' per la sede %s.", wtt.description, wtt.office.name);
 
-		manageWorkingTime(null);		//FIXME vorrei passargli office ma non funziona!!!
+		manageWorkingTime(wtt.office.id);
 
 	}
 
@@ -227,7 +215,7 @@ public class WorkingTimes extends Controller{
 		if(wtt==null) {
 
 			flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-			WorkingTimes.manageWorkingTime(null);
+			manageWorkingTime(null);
 		}
 
 		rules.checkIfPermitted(wtt.office);
@@ -236,7 +224,7 @@ public class WorkingTimes extends Controller{
 		if(contractDao.getAssociatedContract(wtt).size() > 0){
 
 			flash.error("Impossibile eliminare il tipo orario %s perchè associato ad almeno un contratto. Operazione annullata", wtt.description);
-			WorkingTimes.manageWorkingTime(wtt.office);
+			WorkingTimes.manageWorkingTime(wtt.office.id);
 		}
 
 		for(WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
@@ -245,7 +233,7 @@ public class WorkingTimes extends Controller{
 		wtt.delete();
 
 		flash.success("Eliminato orario di lavoro denominato %s.", wtt.description);
-		WorkingTimes.manageWorkingTime(null);	//FIXME vorrei metterci wtt.office
+		WorkingTimes.manageWorkingTime(wtt.office.id);	
 
 	}
 
@@ -255,7 +243,7 @@ public class WorkingTimes extends Controller{
 		if(wtt==null) {
 
 			flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-			WorkingTimes.manageWorkingTime(null);
+			manageWorkingTime(null);
 		}
 		rules.checkIfPermitted(wtt.office);
 
@@ -266,7 +254,7 @@ public class WorkingTimes extends Controller{
 		if( wtt.disabled == false && wwtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
 
 			flash.error("Impossibile eliminare il tipo orario %s perchè attualmente associato ad almeno un contratto attivo. Operazione annullata", wtt.description);
-			manageWorkingTime(wtt.office);
+			manageWorkingTime(wtt.office.id);
 		}
 
 		if( wtt.disabled ) {
@@ -274,14 +262,14 @@ public class WorkingTimes extends Controller{
 			wtt.disabled = false;
 			wtt.save();
 			flash.success("Riattivato orario di lavoro denominato %s.", wtt.description);
-			manageWorkingTime(null);	//FIXME vorrei passare wtt.office
+			manageWorkingTime(wtt.office.id);
 		}
 		else {
 
 			wtt.disabled = true;
 			wtt.save();
 			flash.success("Disattivato orario di lavoro denominato %s.", wtt.description);
-			manageWorkingTime(null); //FIXME vorrei passare wtt.office
+			manageWorkingTime(wtt.office.id);
 		}
 
 	}
@@ -300,7 +288,7 @@ public class WorkingTimes extends Controller{
 		if(office == null) {
 
 			flash.error("La sede inerente il cambio di orario è obbligatoria. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
+			manageWorkingTime(null);
 		}
 
 		rules.checkIfPermitted(office);
@@ -339,7 +327,7 @@ public class WorkingTimes extends Controller{
 				&& ! wttOld.office.id.equals(wttNew.office.id)) {
 
 			flash.error("L'operazione di cambio orario a tutti deve coinvolgere tipi orario definiti per la stessa sede.");
-			WorkingTimes.manageWorkingTime(null);
+			manageWorkingTime(office.id);
 		}
 
 		//Prendere tutti i contratti attivi da firstDay ad oggi
@@ -422,7 +410,7 @@ public class WorkingTimes extends Controller{
 		}
 
 		//TODO capire quale office deve essere ritornato
-		manageWorkingTime(null);
+		manageWorkingTime(office.id);
 
 	}
 

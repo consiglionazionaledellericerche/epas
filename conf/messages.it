@@ -106,8 +106,25 @@ modifierType= Calcolo Orario
 # Messaggi di validazione
 ########################
 
-Required= Campo obbligatorio
-Invalid email address= Indirizzo email non valido
+validation.required=Obbligatorio
+validation.minSize=Lunghezza minima %2$d
+validation.maxSize=Lunghezza massima %2$d
+validation.email=Indirizzo email non valido
+validation.range=Non può essere minore di %2$d o maggiore di %3$d
+validation.min=Non può essere minore di %2$d
+validation.max=Non può essere maggiore di %2$d
+validation.match=Deve corrispondere a %2$s
+validation.isTrue=Deve essere impostato
+validation.equals=Deve essere uguale &{%2$s}
+validation.invalid=Valore non valido
+validation.future=Deve essere futura
+validation.after=Deve essere successiva a %2$s
+validation.past=Deve essere passata
+validation.before=Deve essere precedente a %2$s
+validation.notFound=Oggetto non trovato per l'id %2$s
+validation.url=Non è un URL valido
+validation.phone=Non è un numero di telefono valido
+validation.unique =Deve essere unico
 
 ########################
 # Enumerati
