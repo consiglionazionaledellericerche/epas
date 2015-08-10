@@ -24,6 +24,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.parsing.MultipartStream;
+import play.data.validation.InPast;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
@@ -314,7 +315,12 @@ public class WorkingTimes extends Controller{
 	 */
 	public static void executeChangeWorkingTimeTypeToAll(WorkingTimeType wttOld, 
 			WorkingTimeType wttNew,@Required Office office, LocalDate dateFrom, LocalDate dateTo) {
-
+		
+		if(dateFrom.isAfter(dateTo)){
+			flash.error("Intervallo date non Valido");
+			manageWorkingTime(office.id);
+		}
+		
 		int contractChanges = 0;
 		int contractError = 0;
 
