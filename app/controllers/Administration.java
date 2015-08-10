@@ -14,8 +14,8 @@ import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.StampType;
-import models.enumerate.Parameter;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -148,8 +148,7 @@ public class Administration extends Controller {
 		for(Person person : persons) {
 			
 			//Configurazione office
-			String dateInitUse = confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, person.office);
-			LocalDate initUse = new LocalDate(dateInitUse);
+			LocalDate initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office).orNull();
 			
 			//Contratto attuale
 			Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();

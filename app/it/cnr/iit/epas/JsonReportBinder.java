@@ -53,7 +53,7 @@ public class JsonReportBinder implements TypeBinder<ReportFromJson>{
 			
 		}
 		catch(Exception e){
-			Logger.error("Ahia...");
+			Logger.error("Errore durante il parsing del Json ricevuto da una segnalazione: {}", e);
 			return null;
 		}
 		
