@@ -1,22 +1,21 @@
 #{extends 'modal.html' /}
-#{set modalHeader:'Periodi associati a contratti attivi per ' + wtt.description /}
+#{set modalHeader:'Periodi associati a contratti attivi per ' + wtt.label()/}
 
 <div class="container-fluid">
 
 	<table class="table table-condensed table-hover">
-	  <tr>
-	    <th>Nome</th>
-	    <th>Da</th>
-	    <th>A</th>
-	  </tr>
-	  #{list items:cwttList, as:'cwtt'}
-	    <tr>
-	      <td>${cwtt.contract.person.surname} ${cwtt.contract.person.name}</td>
-	      <td>${cwtt.beginDate?.format()}</td>
-	      <td>${cwtt.endDate?.format()}</td>
-	    </tr>
-	  #{/list}
+		<tr>
+			<th>Nome</th>
+			<th>Da</th>
+			<th>A</th>
+		</tr>
+		#{list items:cwttList, as:'cwtt'}
+		<tr>
+			<td>${cwtt.contract.person.surname} ${cwtt.contract.person.name}</td>
+			<td>${cwtt.beginDate?.format()}</td>
+			<td>${cwtt.endDate?.format()}</td>
+		</tr>
+		#{/list}
 	</table>
 	
-
 </div>

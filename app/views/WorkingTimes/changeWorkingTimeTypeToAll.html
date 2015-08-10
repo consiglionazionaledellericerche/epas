@@ -2,25 +2,25 @@
 #{set modalHeader:'Cambia Tipo Orario a tutti' /}
 
 <div class="container-fluid center">
-	
-  <p class="text-info"> Per ogni dipendente nella finestra temporale specificata</p>
-	
-  #{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() ,class:'form-horizontal'}
+
+	<p class="text-info"> Per ogni dipendente nella finestra temporale specificata</p>
+
+	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() ,class:'form-horizontal'}
 	<input type="hidden" name="office.id" value="${office.id}"/>
-  <input type="hidden" name="wttOld.id" value="${wtt.id}" />
-		
+	<input type="hidden" name="wttOld.id" value="${wtt.id}" />
+
 	<div class="well">
-  	<h4>Converti <strong><em>${wtt.description}</em></strong> in</h4>
-  	<div class="panel-body">
-    	#{f.selectModel 'wttNew',label:'Nuovo tipo orario',items:wttList /}
+		<h4>Converti <strong><em>${wtt.description}</em></strong> in</h4>
+		<div class="panel-body">
+			#{f.selectModel 'wttNew',label:'Nuovo tipo orario',items:wttList /}
 			#{f.date 'dateFrom',label:'Da' /}
 			#{f.date 'dateFrom',label:'A' /}
-  	</div>
+		</div>
 	</div>
-	
-  <button type="submit" class="btn btn-info">Cambia</button>
-	
-  #{/form}
-  <br>
-  <p>Nel caso di finestra temporale che impatta sul passato questa operazione potrebbe richiedere alcuni minuti.</p>
+
+	<button type="submit" class="btn btn-info">Cambia</button>
+
+	#{/form}
+	<br>
+	<p>Nel caso di finestra temporale che impatta sul passato questa operazione potrebbe richiedere alcuni minuti.</p>
 </div>

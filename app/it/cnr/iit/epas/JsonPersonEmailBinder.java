@@ -9,9 +9,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import manager.AbsenceManager;
 import models.Person;
 import models.exports.PersonEmailFromJson;
-import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -28,6 +31,8 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
 
 	@Inject
 	private static PersonDao personDao;
+	
+	private final static Logger log = LoggerFactory.getLogger(JsonPersonEmailBinder.class);
 
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,
@@ -48,20 +53,20 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
 				jsonObject = jsonElement.getAsJsonObject();
 				email = jsonObject.get("email").getAsString();
 
-				Logger.debug("email=%s personDao=%s", email, personDao);
+				log.debug("email=%s personDao=%s", email, personDao);
 				person = personDao.byEmail(email).orNull();
 
 				
 				if (person != null)
 					persons.add(person);
 			}
-			Logger.debug("Ritorno lista persone...%s", persons);
+			log.debug("Ritorno lista persone...%s", persons);
 			pefjl.persons = persons;
 
 			return pefjl;
 		}
 		catch(Exception e){
-			Logger.error("Ahia...%s", e);
+			log.error("Errore durante il parsing del Json della lista persone {}", e);
 			return null;
 		}
 	}
