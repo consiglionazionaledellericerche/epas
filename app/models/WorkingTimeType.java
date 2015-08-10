@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
@@ -18,6 +19,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 /**
@@ -31,9 +33,10 @@ import play.data.validation.Required;
 public class WorkingTimeType extends BaseModel {
 
 	private static final long serialVersionUID = -3443521979786226461L;
-
+	
 	@Required
 	@Column(nullable=false)
+	@Unique("office")
 	public String description;
 
 	/**
@@ -52,7 +55,8 @@ public class WorkingTimeType extends BaseModel {
 	@NotAudited
 	@OneToMany(mappedBy="workingTimeType")
 	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
-
+	
+	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "office_id")
 	public Office office;

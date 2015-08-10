@@ -34,7 +34,6 @@ public class WorkingTimeTypeDay extends BaseModel {
 
 	private static final long serialVersionUID = 4622948996966018754L;
 
-	@Required
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "working_time_type_id", nullable = false)
 	public WorkingTimeType workingTimeType;
@@ -47,13 +46,16 @@ public class WorkingTimeTypeDay extends BaseModel {
 	/**
 	 * tempo di lavoro giornaliero espresso in minuti 
 	 */
+	@Required
 	public Integer workingTime;
 	
 	/**
 	 * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto
 	 */
+	@Required
 	public Integer mealTicketTime;
 	
+	@Required
 	public Integer breakTicketTime;	
 	
 	/**
