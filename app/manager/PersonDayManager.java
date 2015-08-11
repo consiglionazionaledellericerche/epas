@@ -753,7 +753,7 @@ public class PersonDayManager {
 		//persona fixed
 		if( pd.isFixedTimeAtWork() ) {
 
-			if(pd.getValue().stampings.size()!=0) {
+			if(!pd.getValue().stampings.isEmpty()) {
 
 				computeValidStampings(pd.getValue());
 
@@ -763,9 +763,10 @@ public class PersonDayManager {
 
 						personDayInTroubleManager.insertPersonDayInTrouble(
 								pd.getValue(), PersonDayInTrouble.UNCOUPLED_FIXED);
-						return;
 					}
 				}
+				personDayInTroubleManager.fixTrouble(pd.getValue()
+						, PersonDayInTrouble.UNCOUPLED_FIXED);
 			}
 		}
 
@@ -773,17 +774,20 @@ public class PersonDayManager {
 		else {
 
 			//caso no festa, no assenze, no timbrature
-			if(!isAllDayAbsences(pd.getValue()) && pd.getValue().stampings.size()==0 
+			if(!isAllDayAbsences(pd.getValue()) && pd.getValue().stampings.isEmpty()
 					&& !pd.getValue().isHoliday && !isEnoughHourlyAbsences(pd.getValue())) {
 
 				personDayInTroubleManager.insertPersonDayInTrouble(
 						pd.getValue(), PersonDayInTrouble.NO_ABS_NO_STAMP);
-				return;
+			}
+			else{
+				personDayInTroubleManager.fixTrouble(pd.getValue()
+						, PersonDayInTrouble.NO_ABS_NO_STAMP);
 			}
 
 			//caso no festa, no assenze, timbrature disaccoppiate
-			if(!pd.getValue().isHoliday && !isAllDayAbsences(pd.getValue()))
-			{
+			if(!pd.getValue().isHoliday && !isAllDayAbsences(pd.getValue())){
+
 				computeValidStampings(pd.getValue());
 
 				for(Stamping s : pd.getValue().stampings) {
@@ -792,14 +796,15 @@ public class PersonDayManager {
 
 						personDayInTroubleManager.insertPersonDayInTrouble(
 								pd.getValue(), PersonDayInTrouble.UNCOUPLED_WORKING);
-						return;
 					}
 				}
+				personDayInTroubleManager.fixTrouble(pd.getValue()
+						, PersonDayInTrouble.UNCOUPLED_WORKING);
 			}
 
 			//caso festa, no assenze, timbrature disaccoppiate
-			else if( !isAllDayAbsences(pd.getValue()) && pd.getValue().isHoliday)
-			{
+			else if( !isAllDayAbsences(pd.getValue()) && pd.getValue().isHoliday){
+
 				computeValidStampings(pd.getValue());
 
 				for(Stamping s : pd.getValue().stampings) {
@@ -808,36 +813,24 @@ public class PersonDayManager {
 
 						personDayInTroubleManager.insertPersonDayInTrouble(
 								pd.getValue(), PersonDayInTrouble.UNCOUPLED_HOLIDAY);
-						return;
 					}
 				}
+				personDayInTroubleManager.fixTrouble(pd.getValue()
+						, PersonDayInTrouble.UNCOUPLED_HOLIDAY);
 			}
 		}
-
-		//giorno senza problemi, se era in trouble lo fixo
-		if( pd.getValue().troubles != null && pd.getValue().troubles.size()>0) {
-
-			//per adesso no storia, unico record
-			PersonDayInTrouble pdt = pd.getValue().troubles.get(0);
-			if (!pdt.fixed) {
-				pdt.fixed = true;
-				pdt.save();
-				//pd.getValue().save();
-			}
-		}
-
 	}
 
 	/**
 	 *
 	 * @return true se il person day è in trouble
 	 */
-	public boolean isInTrouble(PersonDay pd)
-	{
-		for(PersonDayInTrouble pdt : pd.troubles)
-		{
-			if(pdt.fixed==false)
+	public boolean isInTrouble(PersonDay pd){
+		
+		for(PersonDayInTrouble pdt : pd.troubles){
+			if(!pdt.fixed){
 				return true;
+			}
 		}
 		return false;
 	}

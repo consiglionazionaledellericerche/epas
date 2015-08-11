@@ -28,7 +28,6 @@ import play.libs.Mail;
 
 import com.google.common.base.Optional;
 
-import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
@@ -39,17 +38,14 @@ public class PersonDayInTroubleManager {
 	public PersonDayInTroubleManager(
 			PersonDayInTroubleDao personDayInTroubleDao,
 			ConfGeneralManager confGeneralManager, 
-			PersonDayDao personDayDao, ContractDao contractDao,
-			IWrapperFactory factory) {
+			PersonDayDao personDayDao,IWrapperFactory factory) {
 
-		this.contractDao = contractDao;
 		this.personDayInTroubleDao = personDayInTroubleDao;
 		this.confGeneralManager = confGeneralManager;
 		this.factory = factory;
 	}
 
 	private final IWrapperFactory factory;
-	private final ContractDao contractDao;
 	private final PersonDayInTroubleDao personDayInTroubleDao;
 	private final ConfGeneralManager confGeneralManager;
 	
@@ -60,29 +56,42 @@ public class PersonDayInTroubleManager {
 	 * @param pd
 	 * @param cause
 	 */
-	public void insertPersonDayInTrouble(PersonDay pd, String cause)
-	{
-		if(pd.troubles==null || pd.troubles.size()==0)
-		{	
-			//se non esiste lo creo
-			log.info("Nuovo PersonDayInTrouble {} - {} - {}", 
-					new Object[]{pd.person.getFullname(), pd.date, cause});
-			PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
-			trouble.save();
-			pd.troubles.add(trouble);
-			pd.save();
-			return;
-		}
-		else
-		{
-			//se esiste lo setto fixed = false;
-			pd.troubles.get(0).fixed = false;
-			pd.troubles.get(0).cause = cause;
-			pd.troubles.get(0).save();
-			pd.save();
-		}
+	public void insertPersonDayInTrouble(PersonDay pd, String cause){
 
+		for(PersonDayInTrouble pdt : pd.troubles){
+			if( pdt.cause.equals(cause)){
+//			Se e' gia' presente lo riattivo
+				pdt.fixed=false;
+				return;
+			}
+		}
+		
+//		Se non esiste lo creo
+		PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
+		trouble.save();
+		pd.troubles.add(trouble);
+		
+		log.info("Nuovo PersonDayInTrouble {} - {} - {}", 
+				new Object[]{pd.person.getFullname(), pd.date, cause});
 	}
+	
+	
+	/**
+	 * @param pd
+	 * @param cause
+	 * 
+	 * Metodo per impostare a fixed un problema con una determinata causale all'interno del personDay
+	 */
+	public void fixTrouble(PersonDay pd, String cause){
+		
+		for(PersonDayInTrouble pdt : pd.troubles){
+			if( pdt.cause.equals(cause)){
+				pdt.fixed=true;
+				return;
+			}
+		}
+	}
+	
 	
 	/**
 	 * Metodo che controlla i giorni con problemi dei dipendenti che non hanno timbratura fixed
