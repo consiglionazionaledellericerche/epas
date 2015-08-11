@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -31,10 +30,10 @@ public class StampModificationType extends BaseModel{
 	public String description;	
 
 	
-	@OneToMany(mappedBy="stampModificationType", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="stampModificationType")
 	public Set<Stamping> stampings;
 	
-	@OneToMany(mappedBy="stampModificationType", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="stampModificationType")
 	public List<PersonDay> personDays;
 
 }

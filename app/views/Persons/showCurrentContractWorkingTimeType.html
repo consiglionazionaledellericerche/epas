@@ -1,24 +1,22 @@
 #{extends 'modal.html' /}
-#{set modalHeader: 'Tipo orario ' + person.surname + ' ' + person.name /}
+#{set modalHeader: 'Tipo orario ' + person.fullname /}
 
 <div class="container-fluid">
 
-#{if cwtt != null }
-
+#{if cwtt}
 
 <h4>Validità orario: 
 
-	<strong>da</strong> <span class="label label-success">${cwtt.beginDate}</span> 
-	#{if cwtt.endDate != null }
-		<strong>a</strong> <span class="label label-success">${cwtt.endDate}</span>
+	<strong>da</strong> <span class="label label-success">${cwtt.beginDate.format()}</span> 
+	#{if cwtt.endDate}
+		<strong>a</strong> <span class="label label-success">${cwtt.endDate.format()}</span>
 	#{/if}	 
 </h4>
 </p>
 
 <table class="table table-condensed table-bordered center">
-
-      <tr>
-        <th><h4><span class="label label-primary">${wtt.description}</span></h4></th>
+  <tr>
+    <th><h4><span class="label label-primary">${wtt.description}</span></h4></th>
 		<th>Lun</th>
 		<th>Mar</th>
 		<th>Mer</th>
@@ -26,87 +24,36 @@
 		<th>Ven</th>
 		<th>Sab</th>
 		<th>Dom</th>
-	 </tr>
+	</tr>
 
-		<tr>
-			<td class="center">Tempo lavoro</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(0).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(1).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(2).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(3).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(4).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(5).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.workingTimeTypeDays.get(6).workingTime.toHourTime()}</td>
+	<tr>
+		<td class="center">Tempo lavoro</td>
+		#{list wtt.workingTimeTypeDays}
+		<td class="first-line">${_.workingTime.toHourTime()}</td>
+		#{/list}	
+	</tr>
 
-			
-		</tr>
-		<tr>
-			<td class="center">Tempo minimo per intervallo pranzo</td>
-			<td>${wtt.workingTimeTypeDays.get(0).mealTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(1).mealTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(2).mealTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(3).mealTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(4).mealTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(5).mealTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(6).mealTicketTime.toHourTime()}</td>
-
-			
-		</tr>
+	<tr>
+		<td class="center">Tempo minimo per intervallo pranzo</td>
+		#{list wtt.workingTimeTypeDays}
+		<td>${_.mealTicketTime.toHourTime()}</td>
+		#{/list}			
+	</tr>
 		
-		<tr>
-			<td class="center">Intervallo pranzo</td>
-			<td>${wtt.workingTimeTypeDays.get(0).breakTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(1).breakTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(2).breakTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(3).breakTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(4).breakTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(5).breakTicketTime.toHourTime()}</td>
-			<td>${wtt.workingTimeTypeDays.get(6).breakTicketTime.toHourTime()}</td>
+	<tr>
+		<td class="center">Intervallo pranzo</td>
+		#{list wtt.workingTimeTypeDays}
+		<td>${_.breakTicketTime.toHourTime()}</td>
+		#{/list}	
+	</tr>
 
-		</tr>
-
-		<tr>
-			<td class="center">Giorno festivo</td>
-			<td>
-				#{if wtt.workingTimeTypeDays.get(0).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-			<td>
-				#{if  wtt.workingTimeTypeDays.get(1).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-			<td>
-				#{if  wtt.workingTimeTypeDays.get(2).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-			<td>
-				#{if  wtt.workingTimeTypeDays.get(3).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-			<td>
-				#{if  wtt.workingTimeTypeDays.get(4).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-			<td>
-				#{if  wtt.workingTimeTypeDays.get(5).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-			<td>
-				#{if  wtt.workingTimeTypeDays.get(6).holiday}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if}
-			</td>
-
-		</tr>
-
+	<tr>
+		<td class="center">Giorno festivo</td>
+		#{list wtt.workingTimeTypeDays}
+			<td>#{if _.holiday}<span class="glyphicon glyphicon-ok"></span>#{/if}</td>
+		#{/list}	
+	</tr>
 </table>
-
 
 #{/if}
 

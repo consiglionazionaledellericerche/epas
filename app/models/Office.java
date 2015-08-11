@@ -48,7 +48,7 @@ public class Office extends BaseModel{
     @Column(name="joining_date")
     public LocalDate joiningDate;
     
-    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<Office> subOffices = new ArrayList<Office>();
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -58,25 +58,25 @@ public class Office extends BaseModel{
     //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     //public List<User> restUsers = new ArrayList<User>();
      
-    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<Person> persons = new ArrayList<Person>();
     
-    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<ConfGeneral> confGeneral = new ArrayList<ConfGeneral>();
     
-    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<ConfYear> confYear = new ArrayList<ConfYear>();
     
     @NotAudited
-    @OneToMany(mappedBy="office", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
     
     @NotAudited
-	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="office")
 	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
     
     @NotAudited
-	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="office")
 	public List<TotalOvertime> totalOvertimes = new ArrayList<TotalOvertime>();
     
     
@@ -91,6 +91,11 @@ public class Office extends BaseModel{
     public String getLabel() {
     	return this.name;
     }
+    
+	@Override
+	public String toString() {
+		return getLabel();
+	}
 
 	@Transient
 	public List<WorkingTimeType> getEnabledWorkingTimeType() {

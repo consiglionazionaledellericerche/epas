@@ -21,9 +21,9 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
@@ -440,7 +440,7 @@ public class AbsenceManager {
 		if(!onlySimulation && recompute) {
 			
 			//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-			consistencyManager.updatePersonSituation(person, dateFrom);
+			consistencyManager.updatePersonSituation(person.id, dateFrom);
 			
 			if(air.getAbsenceInReperibilityOrShift() > 0){
 				sendEmail(person, air);
@@ -576,11 +576,11 @@ public class AbsenceManager {
 	private boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date){
 
 		//controllo se la persona è in reperibilità
-		PersonReperibilityDay prd = personReperibilityDayDao.getPersonReperibilityDay(person, date);
+		Optional<PersonReperibilityDay> prd = personReperibilityDayDao.getPersonReperibilityDay(person, date);
 		//controllo se la persona è in turno
-		PersonShiftDay psd = personShiftDayDao.getPersonShiftDay(person, date);
+		Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(person, date);
 
-		return !(psd == null && prd == null);	
+		return !(psd.isPresent() && prd.isPresent());	
 	}
 
 	/**
@@ -856,7 +856,7 @@ public class AbsenceManager {
 		}
 
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		consistencyManager.updatePersonSituation(person, dateFrom);
+		consistencyManager.updatePersonSituation(person.id, dateFrom);
 
 		return deleted;
 	}

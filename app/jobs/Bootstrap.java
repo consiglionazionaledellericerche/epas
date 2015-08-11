@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
-import models.AbsenceType;
 import models.CompetenceCode;
 import models.Qualification;
 import models.Role;
@@ -14,8 +12,6 @@ import models.StampModificationType;
 import models.StampType;
 import models.User;
 import models.VacationCode;
-import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;

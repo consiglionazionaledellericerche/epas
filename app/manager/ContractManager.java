@@ -252,7 +252,7 @@ public class ContractManager {
 			JPAPlugin.startTx(false);
 		}
 		
-		consistencyManager.updatePersonSituation(contract.person, date);
+		consistencyManager.updatePersonSituation(contract.person.id, date);
 	}
 	
 	private void destroyContractMonthRecap(Contract contract) {

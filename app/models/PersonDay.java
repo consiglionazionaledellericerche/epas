@@ -9,7 +9,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -74,18 +73,18 @@ public class PersonDay extends BaseModel {
 	@Column(name = "is_holiday")
 	public boolean isHoliday = false;
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="personDay", cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	@OrderBy("date ASC")
 	public List<Stamping> stampings = new ArrayList<Stamping>();
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="personDay", cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
 
 	@NotAudited
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="personDay", cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
 	

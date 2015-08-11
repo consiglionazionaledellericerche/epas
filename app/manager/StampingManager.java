@@ -1,7 +1,6 @@
 package manager;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import manager.recaps.personStamping.PersonStampingDayRecap;
@@ -18,12 +17,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.db.jpa.JPAPlugin;
-
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.ImmutableTable.Builder;
-import com.google.common.collect.Table;
 import com.google.inject.Inject;
 
 import dao.PersonDao;
@@ -228,7 +222,7 @@ public class StampingManager {
 		
 		// Ricalcolo
 		if(recompute) {
-			consistencyManager.updatePersonSituation(person, personDay.date);
+			consistencyManager.updatePersonSituation(person.id, personDay.date);
 		}
 
 		return true;

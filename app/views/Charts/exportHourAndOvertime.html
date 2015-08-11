@@ -23,15 +23,9 @@
 #{form @Charts.export()}
 
 #{select 'year', value:year, id:'year'}
-					
-		%{
-			for(year in annoList){
-		}%
-			#{option year.anno}${year.anno}#{/option}
-			%{
-				}
-			}%
-		
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}			
 #{/select}
 		<div class="container-fluid center">
       		<input class="btn btn-primary" type="submit" value="Avanti" />

@@ -193,7 +193,7 @@ public class Clocks extends Controller{
 
 		final PersonDay day = personDay;
 
-		consistencyManager.updatePersonSituation(person, day.date);
+		consistencyManager.updatePersonSituation(person.id, day.date);
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 

@@ -1,97 +1,97 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title:'ePAS - Modifica codice di assenza' /}
+#{set title:'ePAS - Gestione codice d\'assenza' /}
+ 		
+%{ 
+ 		if(absenceTypeGroup?.isPersistent()){
+ 			disableGroup = true;
+ 		}
+ 		else{
+			disableGroup = false;
+ 		}
+}%
+	
+ #{form @Absences.saveCode(),class:'form-horizontal col-sm-8 col-sm-offset-2'}
+ <input type="hidden" name="absenceType.id" value="${absenceType?.id}">
+ <input type="hidden" name="absenceTypeGroup.id" value="${absenceType?.absenceTypeGroup?.id}">
 
-<div class="container">
- #{form @Absences.updateCode()}
- 	<input type="hidden" name="absenceType.id" value="${abt.id}">
+ <div class="panel panel-default">
+ 	<div class="panel-heading">
+ 		#{if absenceType?.isPersistent()}
+ 		<h2 class="panel-title">Modifica dati per codice di assenza: ${absenceType.code}#{if absenceType.description} (${absenceType.description})#{/if}</h2>
+ 		#{/if}
+ 		#{else}
+ 		<h2 class="panel-title">Inserimento nuovo codice d'assenza</h2>
+ 		#{/else}
+ 	</div>
+ 	<div class="panel-body">
+ 	
+ 		#{f.input 'absenceType.code',required:'true',value:absenceType?.code,popover:'true' /}
+ 		#{f.input 'absenceType.certificateCode',popover:'true' /}
+ 		#{f.input 'absenceType.description',popover:'true' /}
+ 		#{f.booleanRadio 'absenceType.internalUse',popover:'true' /}
+ 		#{f.date 'absenceType.validFrom',view:'year',popover:'true' /}
+ 		#{f.date 'absenceType.validTo',view:'year',popover:'true' /}
+ 		#{f.selectEnum 'absenceType.justifiedTimeAtWork',items:models.enumerate.JustifiedTimeAtWork,select2:'off',popover:'true' /}
+
+ 		<div class="form-group">
+ 			<label class="col-sm-3 control-label">Utilizzabile per le categorie:</label>
+ 				<div class="col-sm-6">
+ 					<label class="checkbox-inline">
+						<input name="tecnologi" type="checkbox"#{if tecnologi} checked#{/if}> Tecnologi (lv 1-3) 
+					</label>  
+					<label class="checkbox-inline"> 
+						<input name="tecnici" type="checkbox"#{if tecnici} checked#{/if}> Tecnici (lv 4-10)
+					</label>
+				</div>
+		</div>
+
+ 		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
+ 		#{f.input 'absenceTypeGroup.label',popover:'true',disabled:disableGroup /}
+ 	</div>
+ </div> 
+
 	<div class="panel panel-default">
 		  <div class="panel-heading">
-		    <h3 class="panel-title">Modifica dati per codice di assenza: ${abt.code} (${abt.description})</h3>
+		    <h3 class="panel-title">Da riempire in caso di gruppo valorizzato</h3>
 		  </div>
 		<div class="panel-body">
-			<table class="table table-form table-condensed table-hover">
-				<tr>
-					<td>Codice: </td>
-					<td><input type="text" name="absenceType.code" value="${abt.code}" disabled></td>
-					<td>codice di assenza</td>
-				</tr>
- 				<tr>
- 					<td>Codice per attestati di presenza: </td>
- 					<td><input type="text" name="absenceType.certificateCode" value="${abt.certificateCode}"></td>
- 					<td>Usare solo se il codice che deve andare negli attestati di presenza e' diverso da quello definito nella riga precedente (questo diventa il codice vero e quello sulla riga precedente un alias per uso interno)</td>
- 				</tr>
-				<tr>
-					<td>Descrizione: </td>
-					<td><input type="text" name="absenceType.description" value="${abt.description}"></td>
-					<td>Descrizione codice di assenza</td>
-				</tr>
-				<tr>
-					<td>Uso interno:</td>
-					<td>
-						Sì <input type="radio" name="absenceType.internalUse" value="true" #{if abt.internalUse}checked #{/if}> 
-						No <input type="radio" name="absenceType.internalUse" value="false" #{if !abt.internalUse }checked #{/if}>
-					</td>
-					<td>Seleziona "si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza</td>
-				</tr>
-				
-				<tr>
-					<td>Inizio validita':</td>
-					<td><input type="text" name="absenceType.validFrom" datepicker-year value="${abt.validFrom?.value()}"></td>
-					<td>Data inizio validità di questo codice (se vuoto valido da sempre)</td>
-				</tr>
-				<tr>
-					<td>Fine validita': </td>
-					<td><input type="text" name="absenceType.validTo" datepicker-year value="${abt.validTo?.value()}"></td>
-					<td>Data fine validità di questo codice (se vuoto valido per sempre)</td>
-				</tr>
-				<tr>
-					<td>Tempo di lavoro giustificato: </td>
-					<td>
-					#{select 'absenceType.justifiedTimeAtWork',value:abt.justifiedTimeAtWork.description}
-						#{list items:models.enumerate.JustifiedTimeAtWork.values(), as: 'jtw'}
-							#{option jtw}${jtw.description}#{/option}
-						#{/list}
-					#{/select}
-					</td>
 
-					<td>Tempo di lavoro giustificato (Es. codice 661h2 indicare 2)</td>
-				</tr>
-				<tr>
-					<td>Utilizzabile per le categorie:</td>
-					<td>
-						<input name="tecnologi" type="checkbox" #{if tecnologo}checked#{/if}> Tecnologi (lv 1-3)<br>
-						<input name="tecnici" type="checkbox" #{if tecnico}checked#{/if}> Tecnici (lv 4-10)
-					</td>
-					<td>livelli CNR per i quali può essere usato questo codice</td>
-				</tr>
-				<tr>
-					<td>Inseribile anche nei week end e festivi:</td>
-					<td>
-						Sì <input type="radio" name="absenceType.consideredWeekEnd" value="true" #{if abt.consideredWeekEnd}checked#{/if}> 
-						No <input type="radio" name="absenceType.consideredWeekEnd" value="false" #{if !abt.consideredWeekEnd}checked#{/if}>
-					</td>
-					<td>Seleziona "si" se il codice può essere inserito anche nel week end e nei festivi</td>
-				</tr>
-				<tr>
-					<td>Gruppo:</td>
-					<td>
-						<input type="text" name="absenceTypeGroup.label" value="${abt.absenceTypeGroup?.label}" disabled>
-					</td>
-					<td><br>Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli 
-			<br>(Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)</td>
-				</tr>
-			</table>
-				
-		</div>
-	</div> 
-			</table>
-		</div>
-	</div>
-	<div class="container-fluid center">
-      <input class="btn btn-primary" type="submit" value="Ok">  
-      <input class="btn inputinline" id="indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);">    
-	</div>
+		 #{f.selectEnum 'absenceTypeGroup.accumulationType',items:models.enumerate.AccumulationType,disabled:'true',popover:'true',select2:'off' /}
+		 #{f.input 'absenceTypeGroup.limitInMinute',type:'number',disabled:'true',popover:'true' /}
+		 #{f.booleanRadio 'absenceTypeGroup.minutesExcess',popover:'true' /}
+		 #{f.selectEnum 'absenceTypeGroup.accumulationBehaviour',items:models.enumerate.AccumulationBehaviour,disabled:'true',popover:'true',select2:'off' /}
+		 #{f.selectModel 'absenceTypeGroup.replacingAbsenceType',items:templateUtility.certificateAbsenceTypes,disabled:'true',description:'true' /}
+
+ 	</div>
+ </div> 
+
+
+ <div class="container-fluid center">
+ 	<input class="btn btn-primary" type="submit" value="Ok">  
+ 	<input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">    
+ </div>
 
 #{/form}
-</div>
+
+
+#{set 'moreScripts'}
+<script type="text/javascript">
+$(document).ready(function() {
+  // questa parte di codice abilita gli input per la modifica dell'absenceTypeGroup se di valorizza il campo label
+  $("input[name=absenceTypeGroup\\.label]").keyup(function() {
+    if (this.value) {
+      $("#absenceTypeGroup\\_accumulationType").removeAttr('disabled');
+      $("#absenceTypeGroup\\_limitInMinute").removeAttr('disabled');
+      $("#absenceTypeGroup\\_accumulationBehaviour").removeAttr('disabled');
+      $("#absenceTypeGroup\\_replacingAbsenceType").removeAttr('disabled');
+    } else {
+      $("#absenceTypeGroup\\_accumulationType").attr('disabled', 'disabled');
+      $("#absenceTypeGroup\\_limitInMinute").attr('disabled', 'disabled');
+      $("#absenceTypeGroup\\_accumulationBehaviour").attr('disabled', 'disabled');
+      $("#absenceTypeGroup\\_replacingAbsenceType").attr('disabled', 'disabled');
+    }
+  });
+ });
+</script>
+#{/set}

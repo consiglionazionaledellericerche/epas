@@ -1,6 +1,6 @@
 #{extends 'modal.html' /}
 #{set modalHeader:'Modifica assenza in data ' 
-+ absence.personDay.date.value() + ' per ' + absence.personDay.person.name + ' ' + absence.personDay.person.surname /}
++ absence.personDay.date.format() + ' per ' + absence.personDay.person.name + ' ' + absence.personDay.person.surname /}
 
 <div class="container-fluid">
 
@@ -25,12 +25,12 @@
 			      #{/list}
 			    #{/select}
 				<br>
-				#{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();'}
-			      <option value="">Tutti i codici</option>
-			      #{list items: allCodes, as:'absenceType'}
-			        #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
-	 		      #{/list}
-	 		    #{/select}
+		     #{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();',select2Table:''}
+		      <option>Tutti i codici</option>
+		      #{list allCodes}
+		        #{option _.code}${_.label()}#{/option}
+ 		      #{/list}
+ 		   	#{/select}
 		      </div>
 	        </div>
 	        		
@@ -39,7 +39,7 @@
     
       <tr>
         <td class="lab"><strong>Fino a</strong></td>
-        <td><input name="dateTo" value="${absence.personDay.date?.value()}" type="text" datepicker /></td>
+        <td><input name="dateTo" value="${absence.personDay.date?.format()}" type="text" datepicker /></td>
 	  </tr>
 	
 	  <tr>

@@ -26,27 +26,17 @@
 			<tr>
 				<th>Nome dipendente  </th> <th> Motivazione </th> <th> Num. ore</th>
 			</tr>
-			
-			%{
-				for(person in overtimesMonth.rowKeySet()) {
-			}%
+			#{list overtimesMonth.rowKeySet(),as:'person'}
 			<tr>
 				<td>${person}</td>
-				%{
-					for (reason in overtimesMonth.columnKeySet()) {
-						if (overtimesMonth.contains(person, reason)) {
-					}%
-						<td> ${reason}</td>
-						<td>${overtimesMonth.get(person, reason)} </td>
-					%{
-						}
-    				}
-				}%
+				#{list overtimesMonth.columnKeySet(),as:'reason'}
+					#{if overtimesMonth.contains(person, reason)}
+					<td> ${reason}</td>
+					<td>${overtimesMonth.get(person, reason)} </td>
+					#{/if}
+				#{/list}
 			</tr>
-
-			%{
-    			}
-			}%
+			#{/list}
 			</table>
       		</div>
       		<div class="date">

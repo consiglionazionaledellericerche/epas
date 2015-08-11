@@ -46,12 +46,14 @@ public class CompetenceManager {
 	@Inject
 	public CompetenceManager(CompetenceCodeDao competenceCodeDao,
 			OfficeDao officeDao, CompetenceDao competenceDao,
-			PersonDayDao personDayDao, IWrapperFactory wrapperFactory) {
+			PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
+			PersonDayManager personDayManager) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.officeDao = officeDao;
 		this.competenceDao = competenceDao;
 		this.personDayDao = personDayDao;
 		this.wrapperFactory = wrapperFactory;
+		this.personDayManager = personDayManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
@@ -61,6 +63,7 @@ public class CompetenceManager {
 	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
 	private final IWrapperFactory wrapperFactory;
+	private final PersonDayManager personDayManager;
 
 	/**
 	 * 
@@ -367,7 +370,9 @@ public class CompetenceManager {
 
 		List<Contract> monthContracts = wrapperFactory
 				.create(person).getMonthContracts(year, month);
-		
+		int differenceForShift = 0;
+		List<PersonDay> pdList = personDayDao.getPersonDayInMonth
+				(person, new YearMonth(year,month));
 		for(Contract contract : monthContracts) {
 			
 			IWrapperContract wContract = wrapperFactory.create(contract);
@@ -377,7 +382,19 @@ public class CompetenceManager {
 				Optional<ContractMonthRecap> recap = 
 						wContract.getContractMonthRecap( new YearMonth(year, month));
 				if(recap.isPresent()) {
-					return recap.get().getPositiveResidualInMonth();
+					/**
+					 * FIXME: in realtà bisogna controllare che la persona nell'arco
+					 * del mese non sia stata in turno. In quel caso nei giorni 
+					 * in cui la persona è in turno e fa un tempo di lavoro 
+					 * superiore al tempo per i turni, tutto l'eccesso non deve essere 
+					 * conteggiato nel computo del tempo disponibile per straordinari
+					 */
+					for(PersonDay pd : pdList){
+						differenceForShift = differenceForShift + 
+								personDayManager.getExceedInShift(pd);
+					}
+					return recap.get().getPositiveResidualInMonth() - 
+							differenceForShift;
 				}
 			}
 		}
@@ -403,4 +420,6 @@ public class CompetenceManager {
 		}
 		return competenceCodeList;
 	}
+	
+	
 }
