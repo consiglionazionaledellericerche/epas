@@ -1,9 +1,6 @@
 [
   	#{list shiftPeriods, as:'shiftPeriod'}
-  	
-  	%{
-  		if(shiftPeriod.cancelled == false) {
-  	}%
+  		#{if shiftPeriod.cancelled == false}
   			{
   			"id" : ${shiftPeriod.person.id},
   			"start" : "${shiftPeriod.start}",
@@ -13,16 +10,13 @@
   			"ttStart": "${shiftPeriod.startSlot}",
   			"ttEnd": "${shiftPeriod.endSlot}"
   			}${shiftPeriod_isLast ? '' : ','}
-  	%{
-  		} else {
-  	}%
+  		#{/if}
+  		#{else}
   			{
   			"start" : "${shiftPeriod.start}",
   			"end" : "${shiftPeriod.end}",
   			"cancelled": "${shiftPeriod.cancelled}"
   			}${shiftPeriod_isLast ? '' : ','}  	
-	 %{ 
-	 	}
-	 }%	
+	 	#{/else}
   	#{/list}
 ]
