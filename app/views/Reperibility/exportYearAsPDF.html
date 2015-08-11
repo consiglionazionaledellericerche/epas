@@ -25,7 +25,7 @@
 			<th>Nome dipendente</th>
 			#{list reperibilityMonth.columnKeySet(),as:'dayOfMonth'}
 				<th>${firstOfYear.plusDays(gg).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
-				%{gg++;}
+				%{gg++;}%
 			#{/list}
 		</tr>
 		

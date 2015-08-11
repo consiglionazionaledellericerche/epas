@@ -74,7 +74,7 @@
 			#{list personsShiftInconsistentAbsences.rowKeySet(),as:'person'}
 			<tr>
 				<td>${person.surname} ${person.name}</td>
-				#{list thInconsistence:as'th'}
+				#{list thInconsistence,as:'th'}
 				#{if personsShiftInconsistentAbsences.contains(person, th)}
 				<td> 
 					#{list personsShiftInconsistentAbsences.get(person, th)}
