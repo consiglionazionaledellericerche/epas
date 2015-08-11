@@ -48,16 +48,10 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final EnumPath<models.enumerate.JustifiedTimeAtWork> justifiedTimeAtWork = createEnum("justifiedTimeAtWork", models.enumerate.JustifiedTimeAtWork.class);
 
-    public final BooleanPath mealTicketCalculation = createBoolean("mealTicketCalculation");
-
-    public final BooleanPath multipleUse = createBoolean("multipleUse");
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final ListPath<models.Qualification, QQualification> qualifications = this.<models.Qualification, QQualification>createList("qualifications", models.Qualification.class, QQualification.class, PathInits.DIRECT2);
-
-    public final BooleanPath replacingAbsence = createBoolean("replacingAbsence");
 
     public final DatePath<org.joda.time.LocalDate> validFrom = createDate("validFrom", org.joda.time.LocalDate.class);
 

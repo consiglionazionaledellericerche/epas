@@ -19,8 +19,6 @@ import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
 
-
-
 import play.Logger;
 //import play.Logger;
 import play.db.jpa.Blob;

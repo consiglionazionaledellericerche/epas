@@ -1,6 +1,5 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
 import helpers.PersonTags;
 import it.cnr.iit.epas.DateUtility;
 
@@ -25,7 +24,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -35,8 +33,6 @@ import security.SecurityRules;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -89,7 +85,7 @@ public class Stampings extends Controller {
 
 		PersonStampingRecap psDto = stampingsRecapFactory
 				.create(person.getValue(), year, month);
-
+		       
 		render(psDto) ;
 	}
 
@@ -178,7 +174,7 @@ public class Stampings extends Controller {
 
 		stampingManager.addStamping(personDay, time, note, service, type, true);
 
-		consistencyManager.updatePersonSituation(personDay.person, personDay.date);
+		consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 		
 
 		Stampings.personStamping(personId, year, month);
@@ -223,7 +219,7 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			consistencyManager.updatePersonSituation(pd.person, pd.date);
+			consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -238,7 +234,7 @@ public class Stampings extends Controller {
 
 		stampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
 
-		consistencyManager.updatePersonSituation(pd.person, pd.date);
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
@@ -331,7 +327,7 @@ public class Stampings extends Controller {
 		pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
 		pd.save();
 
-		consistencyManager.updatePersonSituation(pd.person, pd.date);
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
 		flash.success("Operazione completata. Per concludere l'operazione di ricalcolo "
 				+ "sui mesi successivi o sui riepiloghi mensili potrebbero occorrere alcuni secondi. "

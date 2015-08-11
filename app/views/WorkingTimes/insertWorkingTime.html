@@ -5,7 +5,15 @@
 
 #{form @WorkingTimes.save()}
 
-  <input type="hidden" name="office.id" value="${office.id}"/>
+  <input type="hidden" name="wtt.office.id" value="${office.id}"/>
+
+  	<input type="hidden" name="wttd1.dayOfWeek" value="1" />
+  	<input type="hidden" name="wttd2.dayOfWeek" value="2" />
+  	<input type="hidden" name="wttd3.dayOfWeek" value="3" />
+  	<input type="hidden" name="wttd4.dayOfWeek" value="4" />
+  	<input type="hidden" name="wttd5.dayOfWeek" value="5" />
+  	<input type="hidden" name="wttd6.dayOfWeek" value="6" />
+  	<input type="hidden" name="wttd7.dayOfWeek" value="7" />
 
   <div class="well center">
 	<strong>Nome Orario </strong><input name="wtt.description" type="text"/>  

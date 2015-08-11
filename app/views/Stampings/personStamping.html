@@ -114,10 +114,10 @@
 	    
 	  	<tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
 
-	  	<td class="#{if dayRecap.holiday==false} capitalized #{/if} #{else} festivi #{/else} default-single">
+	  	<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
 	  	   #{if dayRecap.firstDay }F#{/if}
 	      <a data-toggle="modal" data-backdrop="true" href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-modal=".my-modal">
-		     ${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}
+		     ${dayRecap.date.shortDayName()}
           </a>
 	    </td>
 		
@@ -136,7 +136,7 @@
 		<td class="invisible"></td>
 		
 		<td class="assenza default-single">
-		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.personDay.date.value())}" data-modal=".my-modal">
+		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.personDay.date?.format())}" data-modal=".my-modal">
 		  ___
 		  </a>
 		  

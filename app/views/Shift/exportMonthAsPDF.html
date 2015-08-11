@@ -1,161 +1,111 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>Istituto di Informatica e Telematica - Turni di ${month} ${year}</title>
-        <link rel="stylesheet" href="@{'/public/stylesheets/sistorgReportPDF.css'}" type="text/css" charset="utf-8">
-        <link rel="stylesheet" href="@{'/public/stylesheets/shiftPDF.css'}" type="text/css" charset="utf-8">
-    </head>
-    <body>
-    		%{
-    			mm = 0;
-    			
-    			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
-    			anno = firstOfMonth.plusMonths(mm).year().getAsText();
+<head>
+	<title>Istituto di Informatica e Telematica - Turni di ${month} ${year}</title>
+	<link rel="stylesheet" href="@{'/public/stylesheets/sistorgReportPDF.css'}" type="text/css" charset="utf-8">
+	<link rel="stylesheet" href="@{'/public/stylesheets/shiftPDF.css'}" type="text/css" charset="utf-8">
+</head>
+<body>
+%{
+	mm = 0;
 
-    		}%
-    		
-        	<h1>Istituto di Informatica e Telematica </h1>
-        
-        	<div class="table">
-			<table class="mensile">
-			<caption> Report turni di lavoro del gruppo <em>${shiftDesc}</em> <br />  ${mese} ${anno}</caption>
-			
-			<tr>
+	mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
+	anno = firstOfMonth.plusMonths(mm).year().getAsText();
+
+}%
+
+<h1>Istituto di Informatica e Telematica </h1>
+
+<div class="table">
+	<table class="mensile">
+		<caption> Report turni di lavoro del gruppo <em>${shiftDesc}</em> <br />  ${mese} ${anno}</caption>
+
+		<tr>
 			<th>Persona</th>
-			%{
-					for(th in thShift) {
-			}%  
-			    		<th>${th} </th> 
-			%{
-					}
-			}%  
+			#{list thShift}
+			<th>${_}</th> 
+			#{/list}
+		</tr>	
+		#{list totalShiftInfo.rowKeySet()}
+		<tr>	
+			<td> 
+				<p>
+					${person.fullname} 
+				</p>
+			</td>
+			#{list thShift,as:'th'}
+			<td>
+				<p>
+					${totalShiftInfo.contains(person, th) ? totalShiftInfo.get(person, th) : ''} 
+				</p>
+			</td>
+			#{/list}				
+		</tr>			
+		#{/list}
+	</table>
+</div>
 
-			</tr>	
-			
-			%{
-				for(person in totalShiftInfo.rowKeySet()) {
-			}%
-			<tr>	
+<div class="date">
+	<strong>Data </strong>&nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+</div>
+<div class="firma dir">
+	<strong>Il Direttore</strong> <br />
+	Dott. Domenico Laforenza
+</div>
+
+<div class="firma resp">
+	<strong>Il Responsabile</strong><br />
+	Dott. ${supervisor}
+</div>
+#{if !personsShiftInconsistentAbsences.isEmpty()}
+%{fistTr = true;}%
+<div class="note_presenze">
+	<h1>Inconsistenze con le timbrature del personale </h1>
+	<p>Sono state rilevate delle inconsistenze tra i turni e le presenze del personale: </p>
+
+	<table class="mensile">
+		<tr>
+			<th>Nome dipendente</th>
+			#{list thInconsistence}
+				<th>${_} </th> 
+			#{/list}
+
+			#{list personsShiftInconsistentAbsences.rowKeySet(),as:'person'}
+			<tr>
+				<td>${person.surname} ${person.name}</td>
+				#{list thInconsistence:as'th'}
+				#{if personsShiftInconsistentAbsences.contains(person, th)}
 				<td> 
-					<p>
-						${person.surname} ${person.name}
-					</p>
+					#{list personsShiftInconsistentAbsences.get(person, th)}
+						${_}<br/>
+					#{/list}
 				</td>
+				#{/if}
+				#{else}
+					<td>&nbsp;</td>
+				#{/else}
+				#{/list}
+			</tr>
+			#{/list}
+		</table>
+	</div>
 
-			%{
-					for(th in thShift) {
-			}%  
-			    <td>
-					<p>
-						${totalShiftInfo.contains(person, th) ? totalShiftInfo.get(person, th) : ''} 
-					</p>
-				</td>
-			%{
-					}
-			}%  
-				
-			</tr>			
-			%{
-    			}
-			}%
-			
-			</table>
-			</div>
-      		
-      		
-      		<div class="date">
-      			<strong>Data </strong>&nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
-      		</div>
-      		<div class="firma dir">
-      			<strong>Il Direttore</strong> <br />
-      			Dott. Domenico Laforenza
-      		</div>
-      
-     		<div class="firma resp">
-      			<strong>Il Responsabile</strong><br />
-      			Dott. ${supervisor}
-      		</div>
-      		
-      		%{
-				if (!personsShiftInconsistentAbsences.isEmpty()) {
-				
-				fistTr = true;
-			}%
-			
-			<div class="note_presenze">
-					<h1>Inconsistenze con le timbrature del personale </h1>
-			    	<p>Sono state rilevate delle inconsistenze tra i turni e le presenze del personale: </p>
-			    	
-			    	<table class="mensile">
-			    		<tr>
-			    		<th>Nome dipendente</th>
-			 %{
-					for(th in thInconsistence) {
-			 }%  
-			    		<th>${th} </th> 
-			%{
-					}
-			 }%  
-			
-			%{
-					for(person in personsShiftInconsistentAbsences.rowKeySet()) {
-			}%
-						<tr>
-							<td>${person.surname} ${person.name}</td>
-			%{
-							for(th in thInconsistence) {
-								if (personsShiftInconsistentAbsences.contains(person, th)) {
-			}%
-							<td> 
-			%{
-								for(day in personsShiftInconsistentAbsences.get(person, th)) {
-			}%
-								${day}<br/>
-			%{
-    							}
-			}%
-							</td>
-			%{
-		    					} else {
-		    }%
-		  					<td>&nbsp;</td>
-		  	%{
-		  						}
-				
-							}
-			}%
-		    			</tr>
-		    %{
-		    		}
-		  	}%
-		  	
-		  	</table>
-						
-      		</div>
-      		
-      		<div class="date">
-      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
-      		</div>
-      		
-      		
-      		<div class="note">
-      		<p><strong>NOTE</strong>:</p>
-      		<ul>
-      		<li><strong>Timbrature errate</strong>: non sono state rilevate coppie di timbrature valide</li>
-      		<li><strong>Orario insufficiente</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza maggiore di 2 ore: il turno &egrave; da annullare.</li>
-      		<li><strong>Missione</strong>: e' stata rilevata una missione in concomitanza col turno:  è necessario verificare la compatibilita' degli orari.</li>
-      		<li><strong>Orario incompleto</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza minore di 2 ore con ingressi o uscite nella tolleranza </li>
-      		<li><strong>Orario incompleto fuori tolleranza</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza minore di 2 ore con ingressi o uscite fuori tolleranza: da motivare </li>
-      		</ul>
-      		<p>I controlli sugli orari sono calcolati in acccordo alla circolare "Approfondimenti in materia di turni" - PROT. N. 0008692 del 2/12/2014</p>
-      		</div>
-      		
-		  	%{
-		    	}						
-			}%
-			
- 
-      		
-    </body>
+	<div class="date">
+		<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+	</div>
+
+	<div class="note">
+		<p><strong>NOTE</strong>:</p>
+		<ul>
+			<li><strong>Timbrature errate</strong>: non sono state rilevate coppie di timbrature valide</li>
+			<li><strong>Orario insufficiente</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza maggiore di 2 ore: il turno &egrave; da annullare.</li>
+			<li><strong>Missione</strong>: e' stata rilevata una missione in concomitanza col turno:  ÔøΩ necessario verificare la compatibilita' degli orari.</li>
+			<li><strong>Orario incompleto</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza minore di 2 ore con ingressi o uscite nella tolleranza </li>
+			<li><strong>Orario incompleto fuori tolleranza</strong>: l'orario di lavoro e' inferiore alla durata del turno con una differenza minore di 2 ore con ingressi o uscite fuori tolleranza: da motivare </li>
+		</ul>
+		<p>I controlli sugli orari sono calcolati in acccordo alla circolare "Approfondimenti in materia di turni" - PROT. N. 0008692 del 2/12/2014</p>
+	</div>	
+	#{/if}	
+</body>
 </html>

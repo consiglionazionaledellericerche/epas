@@ -4,7 +4,6 @@
 package it.cnr.iit.epas;
 
 import injection.StaticInject;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -12,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import models.BadgeReader;
 import models.Office;
 import models.Person;
@@ -27,7 +27,6 @@ import play.data.binding.TypeBinder;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 

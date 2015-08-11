@@ -3,7 +3,6 @@ package models;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -30,7 +29,7 @@ public class Qualification extends BaseModel{
 	@OneToMany(mappedBy="qualification")
 	public List<Person> person;
 	
-	@ManyToMany(mappedBy = "qualifications", fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "qualifications")
 	public List<AbsenceType> absenceTypes;
 	
 	@Required
@@ -42,6 +41,11 @@ public class Qualification extends BaseModel{
 	@Override
 	public String getLabel() {
 		return this.description;
+	}
+	
+	@Override
+	public String toString() {
+		return getLabel();
 	}
 	
 }

@@ -12,6 +12,7 @@ import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
+import models.PersonShiftDay;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -25,14 +26,15 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.PersonDayDao;
+import dao.PersonShiftDayDao;
 import dao.wrapper.IWrapperPersonDay;
 
 public class PersonDayManager {
@@ -44,13 +46,15 @@ public class PersonDayManager {
 			ConfGeneralManager confGeneralManager,
 			PersonDayInTroubleManager personDayInTroubleManager,
 			ContractMonthRecapManager contractMonthRecapManager,
-			VacationManager vacationManager) {
+			VacationManager vacationManager,
+			PersonShiftDayDao personShiftDayDao) {
 
 		this.personDayDao = personDayDao;
 		this.stampTypeManager = stampTypeManager;
 		this.confGeneralManager = confGeneralManager;
 		this.personDayInTroubleManager = personDayInTroubleManager;
 		this.contractMonthRecapManager = contractMonthRecapManager;
+		this.personShiftDayDao = personShiftDayDao;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
@@ -60,6 +64,7 @@ public class PersonDayManager {
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
+	private final PersonShiftDayDao personShiftDayDao;
 	
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
@@ -73,7 +78,8 @@ public class PersonDayManager {
 				return false;
 			}
 			else if(abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-					&& abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)){
+					&& (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))){
 				return true;
 			}
 		}
@@ -135,10 +141,11 @@ public class PersonDayManager {
 	public int getCalculatedTimeAtWork(IWrapperPersonDay pd) {
 
 		Preconditions.checkState( pd.getWorkingTimeTypeDay().isPresent() );
-
-		int justifiedTimeAtWork = 0;
+//		Perche' in questa funzione si imposta a null lo stampModificationType ??
 		pd.getValue().stampModificationType = null;
-
+		
+		int justifiedTimeAtWork = 0;
+		
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		if ( pd.isFixedTimeAtWork() ) {
 
@@ -149,8 +156,14 @@ public class PersonDayManager {
 		}
 		
 		for(Absence abs : pd.getValue().absences) {
-
+			
 			if(abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+				return pd.getWorkingTimeTypeDay().get().workingTime;
+			}
+			
+//			Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
+			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay) ) {
+				setIsTickeAvailable(pd,true);
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
 			
@@ -167,11 +180,10 @@ public class PersonDayManager {
 				justifiedTimeAtWork += abs.justifiedMinutes;
 				continue;
 			}
-			// FIXME: togliere questa eccezione dal codice.
-			if( !abs.absenceType.code.equals("89") && 
-					abs.absenceType.justifiedTimeAtWork.minutesJustified != null) {
+	
+			if(abs.absenceType.justifiedTimeAtWork.minutes != null) {
 
-				justifiedTimeAtWork += abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				justifiedTimeAtWork += abs.absenceType.justifiedTimeAtWork.minutes;
 				continue;
 			}
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
@@ -181,39 +193,21 @@ public class PersonDayManager {
 			}
 		}
 
-		//se non c'è almeno una coppia di timbrature considero il justifiedTimeAtwork
+		//se non c'è almeno una coppia di timbrature considero il justifiedTimeAtWork
 		//(che però non contribuisce all'attribuzione del buono mensa che quindi è certamente non assegnato)
 		if (pd.getValue().stampings.size() < 2) {
 			setIsTickeAvailable(pd, false);
 			return justifiedTimeAtWork;
 		}
 
-		Collections.sort(pd.getValue().stampings);
+//		Minuti derivanti dalle timbrature
+		int stampingMinutes = stampingMinutes(pd.getValue());
 
 		if(pd.getValue().isHoliday){
-
-			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
-
-			int holidayWorkTime = 0;
-			for(PairStamping validPair : validPairs) {
-
-				holidayWorkTime = holidayWorkTime - DateUtility.toMinute(validPair.in.date);
-				holidayWorkTime = holidayWorkTime + DateUtility.toMinute(validPair.out.date);
-			}
-
 			setIsTickeAvailable(pd,false);
-			return justifiedTimeAtWork + holidayWorkTime;
+			return justifiedTimeAtWork + stampingMinutes;
 		}
-
-		List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
-
-		int workTime=0;
-		for(PairStamping validPair : validPairs) {
-
-			workTime = workTime - DateUtility.toMinute(validPair.in.date);
-			workTime = workTime + DateUtility.toMinute(validPair.out.date);
-		}
-
+	
 		//IL PRANZO E' SERVITOOOOO????
 		
 		// Ticket non previsto dall'orario di lavoro.
@@ -221,15 +215,15 @@ public class PersonDayManager {
 		if( ! wttd.mealTicketEnabled() ) {
 
 			setIsTickeAvailable(pd, false);
-			return workTime + justifiedTimeAtWork;
+			return stampingMinutes + justifiedTimeAtWork;
 		}
 
 		// Calcolo ...
 		
-		int mealTicketTime = wttd.mealTicketTime;					//6 ore
-		int minBreakTicketTime = wttd.breakTicketTime;				//30 minuti
+		int mealTicketTime = wttd.mealTicketTime;			//6 ore
+		int minBreakTicketTime =  wttd.breakTicketTime ;	//30 minuti
 	
-		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(), validPairs);
+		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 		int effectiveTimeSpent = 0;
 		
 		// 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
@@ -266,23 +260,23 @@ public class PersonDayManager {
 		//3) Decisioni
 		
 		// Non ho eseguito il tempo minimo per buono pasto.
-		if (workTime - missingTime < mealTicketTime) {
+		if (stampingMinutes - missingTime < mealTicketTime) {
 			setIsTickeAvailable(pd, false);
-			return workTime + justifiedTimeAtWork;
+			return stampingMinutes + justifiedTimeAtWork;
 		}
 
 		// Calcolo tempo decurtato per pausa troppo breve.
-		int workingTimeDecurted = workTime;
+		int workingTimeDecurted = stampingMinutes;
 		if(missingTime > 0) {
-			workingTimeDecurted = workTime - missingTime;
+			workingTimeDecurted = stampingMinutes - missingTime;
 		}
-		
+	
 		// Controllo pausa pomeridiana (solo se la soglia è definita)
-		if( !isAfternoonThresholdConditionSatisfied(validPairs, 
+		if( !isAfternoonThresholdConditionSatisfied(getValidPairStamping(pd.getValue()), 
 				pd.getWorkingTimeTypeDay().get()) ) {
 			
 			setIsTickeAvailable(pd, false);
-			return workTime + justifiedTimeAtWork;
+			return stampingMinutes + justifiedTimeAtWork;
 		}
 		
 		// Decidere quando verrà il momento di fare i conti con gianvito...
@@ -313,13 +307,12 @@ public class PersonDayManager {
 		
 		// marcatori: versione con solo e salvataggio del tempo decurtato.
 		//e
-		if(workingTimeDecurted < workTime) {
+		if(workingTimeDecurted < stampingMinutes) {
 		
 			pd.getValue().decurted = missingTime;
 		}
 			
 		return workingTimeDecurted + justifiedTimeAtWork;
-
 		
 	}
 
@@ -447,7 +440,7 @@ public class PersonDayManager {
 
 			Collections.sort(pd.getValue().stampings);
 
-			List<PairStamping> validPairs = getValidPairStamping(pd.getValue().stampings);
+			List<PairStamping> validPairs = getValidPairStamping(pd.getValue());
 
 			for (PairStamping validPair : validPairs) {
 
@@ -470,8 +463,7 @@ public class PersonDayManager {
 			int breakTicketTime = wttd.breakTicketTime; // 30 minuti
 			int breakTimeDiff = breakTicketTime;
 			pd.getValue().stampModificationType = null;
-			List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue(),
-					validPairs);
+			List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 
 			if (gapLunchPairs.size() > 0) {
 				// recupero la durata della pausa pranzo fatta
@@ -519,7 +511,7 @@ public class PersonDayManager {
 	 */
 	public void computeValidStampings(PersonDay pd) {
 
-		getValidPairStamping(pd.stampings);
+		getValidPairStamping(pd);
 	}
 
 	/**
@@ -532,8 +524,9 @@ public class PersonDayManager {
 	 * @param validPairs le coppie di timbrature ritenute valide all'interno del giorno
 	 * @return
 	 */
-	public List<PairStamping> getGapLunchPairs(PersonDay pd, List<PairStamping> validPairs) {
+	public List<PairStamping> getGapLunchPairs(PersonDay pd) {
 		
+		List<PairStamping> validPairs = getValidPairStamping(pd);
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
 		Integer mealTimeStartHour = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
 		Integer mealTimeStartMinute = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
@@ -974,8 +967,10 @@ public class PersonDayManager {
 	 * viene anche settato il campo valid di ciascuna stampings contenuta nel person day
 	 * @return
 	 */
-	public List<PairStamping> getValidPairStamping(List<Stamping> stampings)	{
-
+	public List<PairStamping> getValidPairStamping(PersonDay personDay)	{
+		
+		List<Stamping> stampings = personDay.stampings;
+		
 		Collections.sort(stampings);
 		//(1)Costruisco le coppie valide per calcolare il worktime
 		List<PairStamping> validPairs = new ArrayList<PairStamping>();
@@ -1299,5 +1294,83 @@ public class PersonDayManager {
 		return coupleOfStampings;
 	}
 
+	/**
+	 * 
+	 * @param pd
+	 * @return la quantità in eccesso, se c'è, nei giorni in cui una persona
+	 * è in turno
+	 */
+	public int getExceedInShift(PersonDay pd){
+		Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(pd.person, pd.date);
+		if(psd.isPresent()){
+			return pd.difference;
+		}
+		return 0;
+	}
+	
+	
+	/**
+	 * @param personday
+	 * @return Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono
+	 */
+	private int stampingMinutes(PersonDay personDay){
+		
+		Preconditions.checkNotNull(personDay);
+		Preconditions.checkState(personDay.isPersistent());
+		
+		List<PairStamping> validPairs = getValidPairStamping(personDay);
+		
+		int stampingMinutes = 0;
+		for(PairStamping validPair : validPairs) {
+			stampingMinutes+= validPair.timeInPair;
+		}
+		
+		return stampingMinutes;
+	}
+	
+	/**
+	 * @param personDay
+	 * @return Restituisce il calcolo della modifica sul tempo di lavoro
+	 */
+	public int minutesFromAbsences(IWrapperPersonDay pd){
+		
+		int minutesFromAbsences = 0;
+		
+		for(Absence abs : pd.getValue().absences) {
+//			TODO Verificare se per il telelavoro e il codice 105BP funzionano allo stesso modo
+//			In questi casi assegno l'orario di lavoro in quel giorno
+			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
+				return pd.getWorkingTimeTypeDay().get().workingTime;
+			}
+			
+			// Caso di assenza giornaliera.  
+			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+				
+//				setIsTickeAvailable(pd, false);
+				return 0;
+			}
+			
+			// Giustificativi grana minuti (priorità sugli altri casi)
+			if( abs.justifiedMinutes != null) {
+				minutesFromAbsences += abs.justifiedMinutes;
+				continue;
+			}
+//			Caso di giustificazioni orarie che devono andare ad incrementare l'orario di lavoro 
+//			TODO Il Baesso dice che in ogni caso i permessi orari non dovrebbero andare a incrementare 
+//			l'orario di lavoro oltre quello standard (Es. non piu' di 7:12 nel caso del Normale)
+			if( abs.absenceType.justifiedTimeAtWork.minutes != null) {
+
+				minutesFromAbsences += abs.absenceType.justifiedTimeAtWork.minutes;
+				continue;
+			}
+			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
+
+				minutesFromAbsences += pd.getWorkingTimeTypeDay().get().workingTime / 2;
+				continue;
+			}
+		}
+		return minutesFromAbsences;
+	}
 
 }

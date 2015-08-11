@@ -1,13 +1,12 @@
 package controllers.rest;
 
+import helpers.JsonResponse;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import helpers.JsonResponse;
-import manager.ContractMonthRecapManager;
 import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -18,18 +17,17 @@ import models.Stamping;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-
-import cnr.sync.dto.PersonDayDTO;
-import cnr.sync.dto.PersonMonthDTO;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+import cnr.sync.dto.PersonDayDTO;
+import cnr.sync.dto.PersonMonthDTO;
+
+import com.google.common.base.Optional;
+
 import controllers.Resecure;
-import controllers.Security;
-import controllers.Stampings;
 import controllers.Resecure.BasicAuth;
-import dao.ContractMonthRecapDao;
+import controllers.Security;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;

@@ -44,7 +44,7 @@ public class HistoryValue<T extends BaseModel> {
 		if(time == null)
 			return "";
 
-		return time.toString("yyyy-MM-dd - HH:mm");
+		return time.toString("dd/MM/yyyy - HH:mm");
 	}
 	
 	public String formattedOwner() {

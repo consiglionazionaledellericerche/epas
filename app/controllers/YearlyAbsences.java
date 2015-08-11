@@ -151,11 +151,15 @@ public class YearlyAbsences extends Controller{
 
 		if(absenceTypeCode.equals("Totale"))
 		{
-			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.<String>absent(), monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
+					Optional.fromNullable(person), Optional.<String>absent(), 
+					monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
 		}
 		else
 		{
-			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode), monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
+					Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
+					monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
 		}
 
 		render(person, absenceToRender);

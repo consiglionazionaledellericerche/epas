@@ -16,6 +16,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.query.QContract;
+import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
 import models.query.QPersonDay;
@@ -32,7 +33,6 @@ import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -294,10 +294,12 @@ public final class PersonDao extends DaoBase{
 
 		final QPerson person = QPerson.person;
 		final QContract contract = QContract.contract;
+		final QContractStampProfile csp = QContractStampProfile.contractStampProfile;
 		
 		final JPQLQuery query = getQueryFactory()
 				.from(person)
 				.leftJoin(person.contracts, contract).fetchAll()
+				.leftJoin(contract.contractStampProfile,csp).fetchAll()
 				.where(person.id.eq(personId))
 				.distinct();
 

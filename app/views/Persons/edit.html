@@ -1,6 +1,6 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title: 'ePAS - Modifica ' + person.getFullname() /}
+#{set title: 'ePAS - Modifica ' + person.fullname /}
 
 #{set 'moreStyles'}
 <style>
@@ -16,8 +16,8 @@
 #{/set}
 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
-  <li><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
+  <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.fullname}</a></li>
+  <li><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.fullname}</a></li>
   #{if person.isPersonInCharge}
   	<li><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
   #{/if}
@@ -35,16 +35,16 @@
 			</div>
 			<div class="panel-body">
 
-				#{field 'person.surname'}#{f.input field/}#{/field}
-				#{field 'person.name'}#{f.input field/}#{/field}
-				#{field 'person.number'}#{f.input field,type:'number'/}#{/field}
-				#{field 'person.badgeNumber'}#{f.input field/}#{/field}
-				#{field 'person.email'}#{f.input field/}#{/field}
+				#{f.input 'person.surname'/}
+				#{f.input 'person.name'/}
+				#{f.input 'person.number',type:'number'/}
+				#{f.input 'person.badgeNumber'/}
+				#{f.input 'person.email'/}
 
-				#{field 'person.qualification'}#{f.select field, items:templateUtility.allQualifications/}#{/field} 
-				#{field 'person.office'}#{f.select field, items:templateUtility.allOfficesAllowed/}#{/field} 
+				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
+				#{f.selectModel 'person.office',items:templateUtility.allOfficesAllowed /}
 
-				#{field 'person.isPersonInCharge'}#{f.checkbox field,title:'Selezionare se la persona in questione deve essere un responsabile'/}#{/field}
+				#{f.checkbox 'person.isPersonInCharge',title:'Selezionare se la persona in questione deve essere un responsabile'/}
 
 				<div class='form-group'>
 					<label class="col-sm-3 control-label">Invio mail</label>
@@ -72,9 +72,9 @@
 			</div>
 			<div class="panel-body">
 
-				#{field 'person.telephone'}#{f.input field/}#{/field}
-				#{field 'person.birthday'}#{f.date field,view:'year'/}#{/field} 
-				#{field 'person.eppn'}#{f.input field/}#{/field}
+				#{f.input 'person.telephone'/}
+				#{f.date 'person.birthday',view:'year'/}
+				#{f.input 'person.eppn'/}
 
 				<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
 

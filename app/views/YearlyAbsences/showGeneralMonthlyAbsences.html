@@ -16,65 +16,47 @@
 
 <div class="container-fluid">
   
-    
-      
       <p>  <h3 class="panel-title text-center">Situazione assenze &{'views.tags.display.date.month.' + month} ${year} </h3></p>
-      
-    
+
   		  <table class="datatable-test table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
   		    <thead>
 				<tr>
 					<th>Nome</th>
-					
-					%{ for(col in tableMonthlyAbsences.columnKeySet()){ }%
-				    #{if !col.code.equals("Totale") }
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+					#{if !col.code.equals("Totale") }
 						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
 					#{/if}
-					
-				    %{ } }%
-				    
+					#{/list}
 					<th>Totale<br>giorni</th>
 				</tr>
 			</thead>
             <tfoot>
             	<tr>
 					<th>Nome</th>
-					
-					%{ for(col in tableMonthlyAbsences.columnKeySet()){ }%
-				    #{if !col.code.equals("Totale") }
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+					#{if !col.code.equals("Totale") }
 						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
 					#{/if}
-					
-				    %{ } }%
-				    
+					#{/list}				    
 					<th>Totale<br>giorni</th>
 				</tr>
             </tfoot>
  
             <tbody>
-				%{  
-				for(entry in tableMonthlyAbsences.rowMap().entrySet()){
-				}%
+            	#{list tableMonthlyAbsences.rowMap().entrySet(),as:'entry'}
 				<tr>
 					<td class="warning">${entry.getKey().name} ${entry.getKey().surname}</td>
-					%{ 
-					for(col in tableMonthlyAbsences.columnKeySet()){
-					}%
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
 						<td data-order="${entry.getValue().get(col)}">
 						 	<a href="@{YearlyAbsences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-modal=".my-modal">
 						 	${entry.getValue().get(col)}							
 							</a>
 						</td>
-					%{
-					 }
-					 }%
+					#{/list}
 				</tr>	
-				%{
-				}
-				}%
+				#{/list}	
 			</tbody>	
 	      </table>
-
 </div>   
 
 #{include '_myModal.html' /}

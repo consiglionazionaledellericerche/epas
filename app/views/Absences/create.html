@@ -1,15 +1,14 @@
 #{extends 'modal.html' /}
-#{set modalHeader:'Nuovo codice assenza in data ' + personDay.date.value() + ' per ' + personDay.person.name + ' ' + personDay.person.surname /}
+#{set modalHeader:'Nuovo codice assenza in data ' + personDay.date.format() + ' per ' + personDay.person.name + ' ' + personDay.person.surname /}
 
 <div class="container-fluid">
 
   #{form @Absences.insert(),  enctype:'multipart/form-data'}
  	
 	<input type="hidden" name="person.id" value="${personDay.person.id}"/>
-	<input type="hidden" name="dateFrom" value="${personDay.date.value()}"/>
+	<input type="hidden" name="dateFrom" value="${personDay.date.format()}"/>
 
     <table class="table table-hover table-form">
-    
     <tr>
       <td class="lab"><strong>Codice</strong></td>
       <td>
@@ -17,30 +16,29 @@
           <div class="col-sm-6" style="padding-left:0px; padding-bottom:10px;">
             <input name="absenceCode" type="text" id="absenceCode"/><br>
           </div>
-          <div class="col-sm-6" style="padding-left:0px;">
+          <div class="col-sm-6">
 		    #{select 'code', value: '', class:'col-xs-12', id:'assenzaFrequente', 
 		    style:'margin-bottom: 10px;', onchange:'Change();'}
-		      <option value="">Codici più usati</option>
-		      #{list items: frequentAbsenceTypeList, as:'absenceType'} 
-	           #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+		      <option>Codici più usati</option>
+		      #{list frequentAbsenceTypeList} 
+	           #{option _.code}${_.label()}#{/option}
 		      #{/list}
 		    #{/select}
-			<br>
-			#{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();'}
-		      <option value="">Tutti i codici</option>
-		      #{list items: allCodes, as:'absenceType'}
-		        #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+
+		     #{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();',select2Table:''}
+		      <option>Tutti i codici</option>
+		      #{list allCodes}
+		        #{option _.code}${_.label()}#{/option}
  		      #{/list}
- 		    #{/select}
+ 		   	#{/select}
 	      </div>
-        </div>
-        		
+        </div>	
       </td>
     </tr>
     
 	<tr>
       <td class="lab"><strong>Fino a</strong></td>
-      <td><input name="dateTo" type="text" value="${personDay.date?.value()}" datepicker /></td>
+      <td><input name="dateTo" type="text" value="${personDay.date?.format()}" datepicker /></td>
 	</tr>
 	
 	<tr>

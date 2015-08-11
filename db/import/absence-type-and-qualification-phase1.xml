@@ -6,8 +6,8 @@
   <absence_type_groups id="4" accumulationbehaviour="noMoreAbsencesAccepted" accumulation_type="yearly" label="150ore" limit_in_minute="9000" minutes_excess="true"/>
   <absence_type_groups id="5" accumulationbehaviour="nothing" accumulation_type="no" label="" limit_in_minute="0" minutes_excess="false"/>
   
-  <absence_types id="127" certification_code="09B" code="09B" considered_week_end="false" description="Completamento giornata permessi orari per melattia/visita medica" internal_use="false" justified_time_at_work="AllDay" meal_ticket_calculation="false" multiple_use="false" replacing_absence="false" valid_from="2008-06-26" valid_to="2099-12-31"/>
-  <absence_types id="296" certification_code="32" code="32" considered_week_end="false" description="ferie anno corrente" internal_use="false" justified_time_at_work="AllDay" meal_ticket_calculation="false" multiple_use="false" replacing_absence="false" valid_from="1990-01-01" valid_to="2099-12-31"/>
-  <absence_types id="243" certification_code="89" code="89" considered_week_end="false" description="completamento g. permesso diritto allo studio" internal_use="false" justified_time_at_work="TimeToComplete" meal_ticket_calculation="false" multiple_use="false" replacing_absence="false" valid_from="1990-01-01" valid_to="2099-12-31" absence_type_group_id="4"/>
+  <absence_types id="127" certification_code="09B" code="09B" considered_week_end="false" description="Completamento giornata permessi orari per malattia/visita medica" internal_use="false" time_at_work_modifier="JustifyNothing" meal_ticket_calculation="false" multiple_use="false" replacing_absence="false" valid_from="2008-06-26" valid_to="2099-12-31"/>
+  <absence_types id="296" certification_code="32" code="32" considered_week_end="false" description="ferie anno corrente" internal_use="false" time_at_work_modifier="JustifyAllDay" meal_ticket_calculation="false" multiple_use="false" replacing_absence="false" valid_from="1990-01-01" valid_to="2099-12-31"/>
+  <absence_types id="243" certification_code="89" code="89" considered_week_end="false" description="completamento g. permesso diritto allo studio" internal_use="false" time_at_work_modifier="JustifyTimeToComplete" meal_ticket_calculation="false" multiple_use="false" replacing_absence="false" valid_from="1990-01-01" valid_to="2099-12-31" absence_type_group_id="4"/>
  
 </dataset>
