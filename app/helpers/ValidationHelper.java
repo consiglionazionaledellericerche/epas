@@ -33,7 +33,6 @@ public class ValidationHelper {
 		ISTANCE;
 		@Override
 		public String apply(Error input) {
-			Logger.info(input.getMessageKey());
 			return input.getKey()+":"+input.message();
 		}
 	}
