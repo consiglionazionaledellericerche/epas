@@ -11,6 +11,7 @@ import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
 
@@ -31,8 +32,17 @@ public class ExpandableJob extends Job{
 	private static OfficeDao officeDao;
 	@Inject
 	private static PersonDao personDao;
+	
+	private final static String JOBS_CONF = "jobs.active";
 
 	public void doJob(){
+		
+//		in modo da inibire l'esecuzione dei job in base alla configurazione
+		if(!Play.configuration.getProperty(JOBS_CONF).equals("true")){
+			Logger.info("ExpandableJob Interrotto. Disattivato dalla configurazione.");
+			return;
+		}
+		
 		Logger.info("Start Job expandable");
 
 		LocalDate fromDate = LocalDate.now().minusMonths(2);

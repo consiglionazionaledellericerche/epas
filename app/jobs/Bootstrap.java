@@ -39,6 +39,8 @@ import com.google.common.io.Resources;
  */
 @OnApplicationStart
 public class Bootstrap extends Job<Void> {
+	
+	private final static String JOBS_CONF = "jobs.active";
 
 	public static class DatasetImport implements Work {
 
@@ -69,8 +71,14 @@ public class Bootstrap extends Job<Void> {
 
 	public void doJob() throws IOException {
 
-		if (Play.id.equals("test")) {
+		if (Play.runingInTestMode()) {
 			Logger.info("Application in test mode, default boostrap job not started");
+			return;
+		}
+		
+//		in modo da inibire l'esecuzione dei job in base alla configurazione
+		if(!Play.configuration.getProperty(JOBS_CONF).equals("true")){
+			Logger.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
 			return;
 		}
 
