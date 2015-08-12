@@ -9,12 +9,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import models.Person;
+import models.exports.PersonEmailFromJson;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import manager.AbsenceManager;
-import models.Person;
-import models.exports.PersonEmailFromJson;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
