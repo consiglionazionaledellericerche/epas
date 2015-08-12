@@ -8,20 +8,20 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.ContractStampProfile;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.Parameter;
+import models.enumerate.Troubles;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.Play;
 import play.libs.Mail;
@@ -32,6 +32,7 @@ import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
 
+@Slf4j
 public class PersonDayInTroubleManager {
 
 	@Inject
@@ -49,19 +50,16 @@ public class PersonDayInTroubleManager {
 	private final PersonDayInTroubleDao personDayInTroubleDao;
 	private final ConfGeneralManager confGeneralManager;
 	
-	
-	private final static Logger log = LoggerFactory.getLogger(PersonDayInTroubleManager.class);
 	/**
 	 * 
 	 * @param pd
 	 * @param cause
 	 */
-	public void insertPersonDayInTrouble(PersonDay pd, String cause){
+	public void setTrouble(PersonDay pd, Troubles cause){
 
 		for(PersonDayInTrouble pdt : pd.troubles){
-			if( pdt.cause.equals(cause)){
-//			Se e' gia' presente lo riattivo
-				pdt.fixed=false;
+			if(pdt.cause.equals(cause)){
+//			Se esiste gia' non faccio nulla
 				return;
 			}
 		}
@@ -72,7 +70,7 @@ public class PersonDayInTroubleManager {
 		pd.troubles.add(trouble);
 		
 		log.info("Nuovo PersonDayInTrouble {} - {} - {}", 
-				new Object[]{pd.person.getFullname(), pd.date, cause});
+				pd.person.getFullname(), pd.date, cause);
 	}
 	
 	
@@ -82,11 +80,15 @@ public class PersonDayInTroubleManager {
 	 * 
 	 * Metodo per impostare a fixed un problema con una determinata causale all'interno del personDay
 	 */
-	public void fixTrouble(PersonDay pd, String cause){
+	public void fixTrouble(PersonDay pd, Troubles cause){
 		
 		for(PersonDayInTrouble pdt : pd.troubles){
 			if( pdt.cause.equals(cause)){
-				pdt.fixed=true;
+				pd.troubles.remove(pdt);
+				pdt.delete();
+				
+				log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
+						pd.person.getFullname(), pd.date, cause);
 				return;
 			}
 		}
@@ -121,7 +123,7 @@ public class PersonDayInTroubleManager {
 		
 		List<PersonDayInTrouble> pdList = personDayInTroubleDao
 				.getPersonDayInTroubleInPeriod(p, intervalToCheck.getBegin(),
-						intervalToCheck.getEnd(), false);
+						intervalToCheck.getEnd());
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 		
@@ -135,8 +137,7 @@ public class PersonDayInTroubleManager {
 				continue;
 			}
 
-			if(pdt.cause.contains(cause) && !pdt.personDay.isHoliday
-					&& pdt.fixed == false) { 
+			if(pdt.cause.description.contains(cause) && !pdt.personDay.isHoliday) { 
 				dateTroubleStampingList.add(pdt.personDay.date);
 			}
 		}

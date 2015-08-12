@@ -2,9 +2,7 @@ package helpers;
 
 import java.util.List;
 
-import play.Logger;
 import play.data.validation.Error;
-import play.i18n.Messages;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;

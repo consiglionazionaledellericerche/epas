@@ -23,8 +23,6 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.data.parsing.MultipartStream;
-import play.data.validation.InPast;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
@@ -32,7 +30,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 
 import dao.ContractDao;

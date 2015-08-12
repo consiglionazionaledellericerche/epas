@@ -5,7 +5,9 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import manager.cache.StampTypeManager;
 import models.Absence;
 import models.Contract;
@@ -20,16 +22,16 @@ import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
+import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
@@ -37,6 +39,7 @@ import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.wrapper.IWrapperPersonDay;
 
+@Slf4j
 public class PersonDayManager {
 
 	@Inject
@@ -57,20 +60,18 @@ public class PersonDayManager {
 		this.personShiftDayDao = personShiftDayDao;
 	}
 
-	private final static Logger log = LoggerFactory.getLogger(PersonDayManager.class);
-
 	private final PersonDayDao personDayDao;
 	private final StampTypeManager stampTypeManager;
 	private final ConfGeneralManager confGeneralManager;
 	private final PersonDayInTroubleManager personDayInTroubleManager;
 	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final PersonShiftDayDao personShiftDayDao;
-	
+
 	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
 	 */
 	public boolean isAllDayAbsences(PersonDay pd) {
-		
+
 		for (Absence abs : pd.absences){
 			// TODO: per adesso il telelavoro lo considero come giorno lavorativo
 			// normale. Chiedere ai romani.
@@ -79,7 +80,7 @@ public class PersonDayManager {
 			}
 			else if(abs.justifiedMinutes == null //eludo PEPE, RITING etc...
 					&& (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))){
+							abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))){
 				return true;
 			}
 		}
@@ -141,11 +142,11 @@ public class PersonDayManager {
 	public int getCalculatedTimeAtWork(IWrapperPersonDay pd) {
 
 		Preconditions.checkState( pd.getWorkingTimeTypeDay().isPresent() );
-//		Perche' in questa funzione si imposta a null lo stampModificationType ??
+		//		Perche' in questa funzione si imposta a null lo stampModificationType ??
 		pd.getValue().stampModificationType = null;
-		
+
 		int justifiedTimeAtWork = 0;
-		
+
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		if ( pd.isFixedTimeAtWork() ) {
 
@@ -154,33 +155,33 @@ public class PersonDayManager {
 			}
 			return pd.getWorkingTimeTypeDay().get().workingTime;
 		}
-		
+
 		for(Absence abs : pd.getValue().absences) {
-			
+
 			if(abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
-			
-//			Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
+
+			//			Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
 			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay) ) {
 				setIsTickeAvailable(pd,true);
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
-			
+
 			// Caso di assenza giornaliera.  
 			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
 					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
-				
+
 				setIsTickeAvailable(pd, false);
 				return 0;
 			}
-			
+
 			// Giustificativi grana minuti (priorità sugli altri casi)
 			if( abs.justifiedMinutes != null) {
 				justifiedTimeAtWork += abs.justifiedMinutes;
 				continue;
 			}
-	
+
 			if(abs.absenceType.justifiedTimeAtWork.minutes != null) {
 
 				justifiedTimeAtWork += abs.absenceType.justifiedTimeAtWork.minutes;
@@ -200,16 +201,16 @@ public class PersonDayManager {
 			return justifiedTimeAtWork;
 		}
 
-//		Minuti derivanti dalle timbrature
+		//		Minuti derivanti dalle timbrature
 		int stampingMinutes = stampingMinutes(pd.getValue());
 
 		if(pd.getValue().isHoliday){
 			setIsTickeAvailable(pd,false);
 			return justifiedTimeAtWork + stampingMinutes;
 		}
-	
+
 		//IL PRANZO E' SERVITOOOOO????
-		
+
 		// Ticket non previsto dall'orario di lavoro.
 		WorkingTimeTypeDay wttd = pd.getWorkingTimeTypeDay().get();
 		if( ! wttd.mealTicketEnabled() ) {
@@ -219,13 +220,13 @@ public class PersonDayManager {
 		}
 
 		// Calcolo ...
-		
+
 		int mealTicketTime = wttd.mealTicketTime;			//6 ore
 		int minBreakTicketTime =  wttd.breakTicketTime ;	//30 minuti
-	
+
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
 		int effectiveTimeSpent = 0;
-		
+
 		// 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
 
 		// DA CONFIGURARE /////////////////////////////////////////////////////
@@ -235,7 +236,7 @@ public class PersonDayManager {
 				baessoAlgorithm = false;
 			}
 		}
-		
+
 		if(baessoAlgorithm) {
 			if(gapLunchPairs.size() > 0 ){
 				//	recupero la durata della pausa pranzo fatta
@@ -250,15 +251,15 @@ public class PersonDayManager {
 			}
 		}
 		///////////////////////////////////////////////////////////////////////
-		
+
 		//2) Calcolo l'eventuale differenza tra la pausa fatta e la pausa minima
 		int missingTime = minBreakTicketTime - effectiveTimeSpent;
 		if(missingTime < 0) {
 			missingTime = 0;
 		}
-		
+
 		//3) Decisioni
-		
+
 		// Non ho eseguito il tempo minimo per buono pasto.
 		if (stampingMinutes - missingTime < mealTicketTime) {
 			setIsTickeAvailable(pd, false);
@@ -270,50 +271,50 @@ public class PersonDayManager {
 		if(missingTime > 0) {
 			workingTimeDecurted = stampingMinutes - missingTime;
 		}
-	
+
 		// Controllo pausa pomeridiana (solo se la soglia è definita)
 		if( !isAfternoonThresholdConditionSatisfied(getValidPairStamping(pd.getValue()), 
 				pd.getWorkingTimeTypeDay().get()) ) {
-			
+
 			setIsTickeAvailable(pd, false);
 			return stampingMinutes + justifiedTimeAtWork;
 		}
-		
+
 		// Decidere quando verrà il momento di fare i conti con gianvito...
-//		if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork, 
-//				pd.getValue().date, pd.getPersonDayContract().get(), 
-//				pd.getWorkingTimeTypeDay().get()) ){
-//			
-//			setIsTickeAvailable(pd, false);
-//			return workTime + justifiedTimeAtWork;
-//		}
-	
-		
+		//		if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork, 
+		//				pd.getValue().date, pd.getPersonDayContract().get(), 
+		//				pd.getWorkingTimeTypeDay().get()) ){
+		//			
+		//			setIsTickeAvailable(pd, false);
+		//			return workTime + justifiedTimeAtWork;
+		//		}
+
+
 		// IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		
+
 		setIsTickeAvailable(pd,true);
 
 		// marcatori: versione p ed e
-//		//e
-//		if(effectiveTimeSpent > 0 && workingTimeDecurted < workTime) {
-//			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-//					StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-//		}
-//		//p
-//		if(effectiveTimeSpent == 0) {
-//			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-//					StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-//		}
-		
+		//		//e
+		//		if(effectiveTimeSpent > 0 && workingTimeDecurted < workTime) {
+		//			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+		//					StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+		//		}
+		//		//p
+		//		if(effectiveTimeSpent == 0) {
+		//			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+		//					StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+		//		}
+
 		// marcatori: versione con solo e salvataggio del tempo decurtato.
 		//e
 		if(workingTimeDecurted < stampingMinutes) {
-		
+
 			pd.getValue().decurted = missingTime;
 		}
-			
+
 		return workingTimeDecurted + justifiedTimeAtWork;
-		
+
 	}
 
 	/**
@@ -324,23 +325,23 @@ public class PersonDayManager {
 	 */
 	private boolean isAfternoonThresholdConditionSatisfied(List<PairStamping> validPairs, 
 			WorkingTimeTypeDay wttd) {
-		
+
 		if(wttd.ticketAfternoonThreshold == null) {
 			return true;
 		}
-		
+
 		int threshold = wttd.ticketAfternoonThreshold;
 		int workingTimeInThreshold = 0;
-		
+
 		for(PairStamping pair : validPairs) {
-			
+
 			int inMinute = DateUtility.toMinute(pair.in.date);
 			int outMinute = DateUtility.toMinute(pair.out.date);
-			
+
 			if( inMinute <= threshold && outMinute >= threshold) {
 				workingTimeInThreshold += outMinute - threshold;
 			}
-			
+
 			if( inMinute >= threshold) {
 				workingTimeInThreshold += outMinute - inMinute;
 			}
@@ -351,7 +352,7 @@ public class PersonDayManager {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * La condizione Gianvito è una condizione che deteriorerà l'efficienza!
 	 * Per attribuire il buono pasto oltre a soddisfare le soglie di tempo di lavoro
@@ -386,13 +387,13 @@ public class PersonDayManager {
 	 */
 	private boolean isGianvitoConditionSatisfied(int workingTimeDecurted, 
 			int justifiedTimeAtWork, LocalDate date, Contract contract, WorkingTimeTypeDay wttd) {
-		
+
 		// - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro giornaliero.
 		// 		ok buono pasto
 		if( workingTimeDecurted >= wttd.workingTime) {
 			return true;
 		}
-		
+
 		// - Ho il tempo di lavoro (eventualmente decurtato) che non raggiunge il tempo di lavoro giornaliero.
 		//	 - Aggiungo PEPE 
 		//     - livello raggiunto ok buono pasto
@@ -401,7 +402,7 @@ public class PersonDayManager {
 		if( workingTimeDecurted + justifiedTimeAtWork >= wttd.workingTime) {
 			return true;
 		}
-		
+
 		log.info(contract.person.toString() + date);
 		//Ultimo tentativo con flessibilità
 		int flexibility = contractMonthRecapManager
@@ -510,8 +511,9 @@ public class PersonDayManager {
 	 * Setta il campo valid per ciascuna stamping contenuta in orderedStampings
 	 */
 	public void computeValidStampings(PersonDay pd) {
-
-		getValidPairStamping(pd);
+		if(!pd.stampings.isEmpty()){
+			getValidPairStamping(pd);
+		}
 	}
 
 	/**
@@ -525,7 +527,7 @@ public class PersonDayManager {
 	 * @return
 	 */
 	public List<PairStamping> getGapLunchPairs(PersonDay pd) {
-		
+
 		List<PairStamping> validPairs = getValidPairStamping(pd);
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
 		Integer mealTimeStartHour = confGeneralManager.getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
@@ -592,13 +594,13 @@ public class PersonDayManager {
 		return gapPairs;
 	}
 
-	 /**
+	/**
 	 * Assegna il numero di minuti in cui una persona è stata a lavoro in quella data
 	 * 
 	 * @param pd
 	 */
 	public void updateTimeAtWork(IWrapperPersonDay pd) {
-		
+
 		pd.getValue().timeAtWork = getCalculatedTimeAtWork(pd);
 	}
 
@@ -733,18 +735,21 @@ public class PersonDayManager {
 
 		Preconditions.checkState( pd.getPersonDayContract().isPresent() );
 
+//		Una mappa contenente tutti i problemi del giorno da inserire o rimuovere.
+//		Il booleano associato al Trouble e' settato a TRUE se il problema e' presente,
+//		 a FALSE se invece non e' presente
+		final Map<Troubles,Boolean> troubles = Maps.newHashMap();
+
 		//se prima o uguale a source contract il problema è fixato
 		if( pd.getPersonDayContract().get().sourceDate != null ) {
 
 			if( ! pd.getValue().date.isAfter( pd.getPersonDayContract().get().sourceDate ) ) {
 
 				for(PersonDayInTrouble pdt : pd.getValue().troubles) {
-					if(pdt.fixed == false) {
-						pdt.fixed = true;
-						pdt.save();
-						log.info("Fixato {} perchè precedente a sourceContract({})",
-								pd.getValue().date, pd.getPersonDayContract().get().sourceDate);
-					}
+					pd.getValue().troubles.remove(pdt);
+					pdt.delete();
+					log.info("Fixato {} perchè precedente a sourceContract({})",
+							pd.getValue().date, pd.getPersonDayContract().get().sourceDate);
 				}
 				return;
 			}
@@ -753,36 +758,26 @@ public class PersonDayManager {
 		//persona fixed
 		if( pd.isFixedTimeAtWork() ) {
 
-			if(!pd.getValue().stampings.isEmpty()) {
+			computeValidStampings(pd.getValue());
 
-				computeValidStampings(pd.getValue());
-
-				for(Stamping s : pd.getValue().stampings) {
-
-					if(!s.valid) {
-
-						personDayInTroubleManager.insertPersonDayInTrouble(
-								pd.getValue(), PersonDayInTrouble.UNCOUPLED_FIXED);
-					}
-				}
-				personDayInTroubleManager.fixTrouble(pd.getValue()
-						, PersonDayInTrouble.UNCOUPLED_FIXED);
+			if(allValidStampings(pd.getValue())){
+				troubles.put(Troubles.UNCOUPLED_FIXED, Boolean.FALSE);
+			}
+			else{
+				troubles.put(Troubles.UNCOUPLED_FIXED, Boolean.TRUE);
 			}
 		}
 
 		//persona not fixed
 		else {
-
 			//caso no festa, no assenze, no timbrature
 			if(!isAllDayAbsences(pd.getValue()) && pd.getValue().stampings.isEmpty()
 					&& !pd.getValue().isHoliday && !isEnoughHourlyAbsences(pd.getValue())) {
 
-				personDayInTroubleManager.insertPersonDayInTrouble(
-						pd.getValue(), PersonDayInTrouble.NO_ABS_NO_STAMP);
+				troubles.put(Troubles.NO_ABS_NO_STAMP,Boolean.TRUE);
 			}
 			else{
-				personDayInTroubleManager.fixTrouble(pd.getValue()
-						, PersonDayInTrouble.NO_ABS_NO_STAMP);
+				troubles.put(Troubles.NO_ABS_NO_STAMP,Boolean.FALSE);
 			}
 
 			//caso no festa, no assenze, timbrature disaccoppiate
@@ -790,16 +785,12 @@ public class PersonDayManager {
 
 				computeValidStampings(pd.getValue());
 
-				for(Stamping s : pd.getValue().stampings) {
-
-					if(!s.valid) {
-
-						personDayInTroubleManager.insertPersonDayInTrouble(
-								pd.getValue(), PersonDayInTrouble.UNCOUPLED_WORKING);
-					}
+				if(allValidStampings(pd.getValue())){
+					troubles.put(Troubles.UNCOUPLED_WORKING,Boolean.FALSE);
 				}
-				personDayInTroubleManager.fixTrouble(pd.getValue()
-						, PersonDayInTrouble.UNCOUPLED_WORKING);
+				else{
+					troubles.put(Troubles.UNCOUPLED_WORKING,Boolean.TRUE);
+				}
 			}
 
 			//caso festa, no assenze, timbrature disaccoppiate
@@ -807,18 +798,27 @@ public class PersonDayManager {
 
 				computeValidStampings(pd.getValue());
 
-				for(Stamping s : pd.getValue().stampings) {
-
-					if(!s.valid) {
-
-						personDayInTroubleManager.insertPersonDayInTrouble(
-								pd.getValue(), PersonDayInTrouble.UNCOUPLED_HOLIDAY);
-					}
+				if(allValidStampings(pd.getValue())){
+					troubles.put(Troubles.UNCOUPLED_HOLIDAY,Boolean.FALSE);
 				}
-				personDayInTroubleManager.fixTrouble(pd.getValue()
-						, PersonDayInTrouble.UNCOUPLED_HOLIDAY);
+				else{
+					troubles.put(Troubles.UNCOUPLED_HOLIDAY,Boolean.TRUE);
+				}
 			}
 		}
+
+//		INSERIMENTO/RIMOZIONE dei personDayInTrouble
+		for(Troubles t : troubles.keySet()){
+//			Se valore e' true e quindi inserisco il personDayinTrouble
+			if(troubles.get(t)){
+				personDayInTroubleManager.setTrouble(
+						pd.getValue(), t);
+			}
+			else{
+				personDayInTroubleManager.fixTrouble(pd.getValue(),t);
+			}
+		}
+
 	}
 
 	/**
@@ -826,13 +826,14 @@ public class PersonDayManager {
 	 * @return true se il person day è in trouble
 	 */
 	public boolean isInTrouble(PersonDay pd){
-		
-		for(PersonDayInTrouble pdt : pd.troubles){
-			if(!pdt.fixed){
-				return true;
-			}
-		}
-		return false;
+		return !pd.troubles.isEmpty();
+
+		//		for(PersonDayInTrouble pdt : pd.troubles){
+		//			if(!pdt.fixed){
+		//				return true;
+		//			}
+		//		}
+		//		return false;
 	}
 
 
@@ -960,10 +961,12 @@ public class PersonDayManager {
 	 * viene anche settato il campo valid di ciascuna stampings contenuta nel person day
 	 * @return
 	 */
+	// FIXME il fatto di impostare a valid il campo delle stamping e' un effetto collaterale del metodo,
+	//		che "dovrebbe" essere un getter.Questa operazione andrebbe fatta in un metodo a parte
 	public List<PairStamping> getValidPairStamping(PersonDay personDay)	{
-		
+
 		List<Stamping> stampings = personDay.stampings;
-		
+
 		Collections.sort(stampings);
 		//(1)Costruisco le coppie valide per calcolare il worktime
 		List<PairStamping> validPairs = new ArrayList<PairStamping>();
@@ -1095,7 +1098,7 @@ public class PersonDayManager {
 		return validPairs;
 	}
 
-	
+
 
 	/**
 	 * Utilizzata nel metodo delete del controller Persons per cancellare tutti i personDays relativi alla persona person
@@ -1138,7 +1141,7 @@ public class PersonDayManager {
 	 */
 	public List<PersonDay> getTotalPersonDayInMonth(List<PersonDay> personDays, 
 			Person person, int year, int month) {
-		
+
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
@@ -1203,7 +1206,7 @@ public class PersonDayManager {
 	public int numberOfMealTicketToRender(List<PersonDay> personDays){
 		int ticketTorender = 0;
 		for(PersonDay pd : personDays) {
-			
+
 			if(!pd.isTicketAvailable) {
 				//i giorni festivi e oggi
 				if(pd.isHoliday || pd.isToday() ) {
@@ -1300,58 +1303,58 @@ public class PersonDayManager {
 		}
 		return 0;
 	}
-	
-	
+
+
 	/**
 	 * @param personday
 	 * @return Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono
 	 */
 	private int stampingMinutes(PersonDay personDay){
-		
+
 		Preconditions.checkNotNull(personDay);
 		Preconditions.checkState(personDay.isPersistent());
-		
+
 		List<PairStamping> validPairs = getValidPairStamping(personDay);
-		
+
 		int stampingMinutes = 0;
 		for(PairStamping validPair : validPairs) {
 			stampingMinutes+= validPair.timeInPair;
 		}
-		
+
 		return stampingMinutes;
 	}
-	
+
 	/**
 	 * @param personDay
 	 * @return Restituisce il calcolo della modifica sul tempo di lavoro
 	 */
 	public int minutesFromAbsences(IWrapperPersonDay pd){
-		
+
 		int minutesFromAbsences = 0;
-		
+
 		for(Absence abs : pd.getValue().absences) {
-//			TODO Verificare se per il telelavoro e il codice 105BP funzionano allo stesso modo
-//			In questi casi assegno l'orario di lavoro in quel giorno
+			//			TODO Verificare se per il telelavoro e il codice 105BP funzionano allo stesso modo
+			//			In questi casi assegno l'orario di lavoro in quel giorno
 			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
 				return pd.getWorkingTimeTypeDay().get().workingTime;
 			}
-			
+
 			// Caso di assenza giornaliera.  
 			if(abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
 					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
-				
-//				setIsTickeAvailable(pd, false);
+
+				//				setIsTickeAvailable(pd, false);
 				return 0;
 			}
-			
+
 			// Giustificativi grana minuti (priorità sugli altri casi)
 			if( abs.justifiedMinutes != null) {
 				minutesFromAbsences += abs.justifiedMinutes;
 				continue;
 			}
-//			Caso di giustificazioni orarie che devono andare ad incrementare l'orario di lavoro 
-//			TODO Il Baesso dice che in ogni caso i permessi orari non dovrebbero andare a incrementare 
-//			l'orario di lavoro oltre quello standard (Es. non piu' di 7:12 nel caso del Normale)
+			//			Caso di giustificazioni orarie che devono andare ad incrementare l'orario di lavoro 
+			//			TODO Il Baesso dice che in ogni caso i permessi orari non dovrebbero andare a incrementare 
+			//			l'orario di lavoro oltre quello standard (Es. non piu' di 7:12 nel caso del Normale)
 			if( abs.absenceType.justifiedTimeAtWork.minutes != null) {
 
 				minutesFromAbsences += abs.absenceType.justifiedTimeAtWork.minutes;
@@ -1364,6 +1367,16 @@ public class PersonDayManager {
 			}
 		}
 		return minutesFromAbsences;
+	}
+
+	private boolean allValidStampings(PersonDay personDay){
+
+		return FluentIterable.from(personDay.stampings).filter(
+				new Predicate<Stamping>() {
+					@Override
+					public boolean apply(Stamping input) {
+						return !input.valid;
+					}}).isEmpty();
 	}
 
 }

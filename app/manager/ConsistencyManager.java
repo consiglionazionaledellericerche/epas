@@ -275,11 +275,6 @@ public class ConsistencyManager {
 				pd.getValue().date);
 		pd.getValue().save();
 
-		//controllo problemi strutturali del person day
-		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
-			personDayManager.checkForPersonDayInTrouble(pd);
-		}
-
 		//controllo uscita notturna
 		handlerNightStamp(pd);
 
@@ -290,6 +285,11 @@ public class ConsistencyManager {
 		personDayManager.updateProgressive(pd);
 
 		personDayManager.updateTicketAvailable(pd);
+		
+		//controllo problemi strutturali del person day
+		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
+			personDayManager.checkForPersonDayInTrouble(pd);
+		}
 
 		pd.getValue().save();
 
