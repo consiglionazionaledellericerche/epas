@@ -4,6 +4,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -27,6 +28,8 @@ import play.Play;
 import play.libs.Mail;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
@@ -78,20 +81,35 @@ public class PersonDayInTroubleManager {
 	 * @param pd
 	 * @param cause
 	 * 
-	 * Metodo per impostare a fixed un problema con una determinata causale all'interno del personDay
+	 * Metodo per rimuovere i problemi con una determinata causale all'interno del personDay
 	 */
-	public void fixTrouble(PersonDay pd, Troubles cause){
+	public void fixTrouble(final PersonDay pd, final Troubles cause){
 		
-		for(PersonDayInTrouble pdt : pd.troubles){
-			if( pdt.cause.equals(cause)){
-				pd.troubles.remove(pdt);
-				pdt.delete();
-				
-				log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
-						pd.person.getFullname(), pd.date, cause);
-				return;
+//		Questo codice schianta se si fa una remove e si continua l'iterazione
+//		
+//		for(PersonDayInTrouble pdt : pd.troubles){
+//			if( pdt.cause.equals(cause)){
+//				pd.troubles.remove(pdt);
+//				pdt.delete();
+//				
+//				log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
+//						pd.person.getFullname(), pd.date, cause);
+//			}
+//		}
+		
+		Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
+			@Override
+			public boolean apply(PersonDayInTrouble pdt) {
+				if( pdt.cause.equals(cause)){
+					pdt.delete();
+					
+					log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
+							pd.person.getFullname(), pd.date, cause);
+					return true;
+				}
+				return false;
 			}
-		}
+		});
 	}
 	
 	
