@@ -5,14 +5,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import models.CompetenceCode;
-import models.Qualification;
-import models.Role;
-import models.StampModificationType;
-import models.StampType;
-import models.User;
-import models.VacationCode;
-
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -22,14 +14,21 @@ import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 
-import play.Logger;
+import com.google.common.io.Resources;
+
+import lombok.extern.slf4j.Slf4j;
+import models.CompetenceCode;
+import models.Qualification;
+import models.Role;
+import models.StampModificationType;
+import models.StampType;
+import models.User;
+import models.VacationCode;
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
-
-import com.google.common.io.Resources;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti
@@ -38,6 +37,7 @@ import com.google.common.io.Resources;
  *
  */
 @OnApplicationStart
+@Slf4j
 public class Bootstrap extends Job<Void> {
 	
 	private final static String JOBS_CONF = "jobs.active";
@@ -72,13 +72,13 @@ public class Bootstrap extends Job<Void> {
 	public void doJob() throws IOException {
 
 		if (Play.runingInTestMode()) {
-			Logger.info("Application in test mode, default boostrap job not started");
+			log.info("Application in test mode, default boostrap job not started");
 			return;
 		}
 		
 //		in modo da inibire l'esecuzione dei job in base alla configurazione
-		if(!Play.configuration.getProperty(JOBS_CONF).equals("true")){
-			Logger.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
+		if("false".equals(Play.configuration.getProperty(JOBS_CONF))){
+			log.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
 			return;
 		}
 

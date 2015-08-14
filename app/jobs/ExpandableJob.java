@@ -4,25 +4,24 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.PersonDayInTroubleManager;
-import models.Person;
-
 import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.Play;
-import play.jobs.Job;
-import play.jobs.On;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
+import lombok.extern.slf4j.Slf4j;
+import manager.PersonDayInTroubleManager;
+import models.Person;
+import play.Play;
+import play.jobs.Job;
+import play.jobs.On;
 
 //@On("0 34 15 ? * *")
 @SuppressWarnings("rawtypes")
+@Slf4j
 @On("0 0 15 ? * MON,WED,FRI")
 public class ExpandableJob extends Job{
 
@@ -38,12 +37,12 @@ public class ExpandableJob extends Job{
 	public void doJob(){
 		
 //		in modo da inibire l'esecuzione dei job in base alla configurazione
-		if(!Play.configuration.getProperty(JOBS_CONF).equals("true")){
-			Logger.info("ExpandableJob Interrotto. Disattivato dalla configurazione.");
+		if("false".equals(Play.configuration.getProperty(JOBS_CONF))){
+			log.info("ExpandableJob Interrotto. Disattivato dalla configurazione.");
 			return;
 		}
 		
-		Logger.info("Start Job expandable");
+		log.info("Start Job expandable");
 
 		LocalDate fromDate = LocalDate.now().minusMonths(2);
 		LocalDate toDate = LocalDate.now().minusDays(1);
@@ -63,6 +62,6 @@ public class ExpandableJob extends Job{
 			e.printStackTrace();
 		}
 
-		Logger.info("Concluso Job expandable");	
+		log.info("Concluso Job expandable");	
 	}
 }
