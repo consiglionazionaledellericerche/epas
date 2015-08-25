@@ -4,85 +4,114 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.ContractStampProfile;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.Parameter;
+import models.enumerate.Troubles;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.Play;
 import play.libs.Mail;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
-import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperFactory;
 
+@Slf4j
 public class PersonDayInTroubleManager {
 
 	@Inject
 	public PersonDayInTroubleManager(
 			PersonDayInTroubleDao personDayInTroubleDao,
 			ConfGeneralManager confGeneralManager, 
-			PersonDayDao personDayDao, ContractDao contractDao,
-			IWrapperFactory factory) {
+			PersonDayDao personDayDao,IWrapperFactory factory) {
 
-		this.contractDao = contractDao;
 		this.personDayInTroubleDao = personDayInTroubleDao;
 		this.confGeneralManager = confGeneralManager;
 		this.factory = factory;
 	}
 
 	private final IWrapperFactory factory;
-	private final ContractDao contractDao;
 	private final PersonDayInTroubleDao personDayInTroubleDao;
 	private final ConfGeneralManager confGeneralManager;
 	
-	
-	private final static Logger log = LoggerFactory.getLogger(PersonDayInTroubleManager.class);
 	/**
 	 * 
 	 * @param pd
 	 * @param cause
 	 */
-	public void insertPersonDayInTrouble(PersonDay pd, String cause)
-	{
-		if(pd.troubles==null || pd.troubles.size()==0)
-		{	
-			//se non esiste lo creo
-			log.info("Nuovo PersonDayInTrouble {} - {} - {}", 
-					new Object[]{pd.person.getFullname(), pd.date, cause});
-			PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
-			trouble.save();
-			pd.troubles.add(trouble);
-			pd.save();
-			return;
-		}
-		else
-		{
-			//se esiste lo setto fixed = false;
-			pd.troubles.get(0).fixed = false;
-			pd.troubles.get(0).cause = cause;
-			pd.troubles.get(0).save();
-			pd.save();
-		}
+	public void setTrouble(PersonDay pd, Troubles cause){
 
+		for(PersonDayInTrouble pdt : pd.troubles){
+			if(pdt.cause.equals(cause)){
+//			Se esiste gia' non faccio nulla
+				return;
+			}
+		}
+		
+//		Se non esiste lo creo
+		PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
+		trouble.save();
+		pd.troubles.add(trouble);
+		
+		log.info("Nuovo PersonDayInTrouble {} - {} - {}", 
+				pd.person.getFullname(), pd.date, cause);
 	}
+	
+	
+	/**
+	 * @param pd
+	 * @param cause
+	 * 
+	 * Metodo per rimuovere i problemi con una determinata causale all'interno del personDay
+	 */
+	public void fixTrouble(final PersonDay pd, final Troubles cause){
+		
+//		Questo codice schianta se si fa una remove e si continua l'iterazione
+//		
+//		for(PersonDayInTrouble pdt : pd.troubles){
+//			if( pdt.cause.equals(cause)){
+//				pd.troubles.remove(pdt);
+//				pdt.delete();
+//				
+//				log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
+//						pd.person.getFullname(), pd.date, cause);
+//			}
+//		}
+		
+		Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
+			@Override
+			public boolean apply(PersonDayInTrouble pdt) {
+				if( pdt.cause.equals(cause)){
+					pdt.delete();
+					
+					log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
+							pd.person.getFullname(), pd.date, cause);
+					return true;
+				}
+				return false;
+			}
+		});
+	}
+	
 	
 	/**
 	 * Metodo che controlla i giorni con problemi dei dipendenti che non hanno timbratura fixed
@@ -112,7 +141,7 @@ public class PersonDayInTroubleManager {
 		
 		List<PersonDayInTrouble> pdList = personDayInTroubleDao
 				.getPersonDayInTroubleInPeriod(p, intervalToCheck.getBegin(),
-						intervalToCheck.getEnd(), false);
+						intervalToCheck.getEnd());
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 		
@@ -126,8 +155,7 @@ public class PersonDayInTroubleManager {
 				continue;
 			}
 
-			if(pdt.cause.contains(cause) && !pdt.personDay.isHoliday
-					&& pdt.fixed == false) { 
+			if(pdt.cause.description.contains(cause) && !pdt.personDay.isHoliday) { 
 				dateTroubleStampingList.add(pdt.personDay.date);
 			}
 		}

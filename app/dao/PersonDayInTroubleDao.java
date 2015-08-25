@@ -32,15 +32,14 @@ public class PersonDayInTroubleDao extends DaoBase {
 	 * nel periodo begin-end. E' possibile specificare se si vuole
 	 * ottenere quelli fixati (fixed = true) o no (fixed = false)
 	 */
-	public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(Person person, LocalDate begin, LocalDate end, boolean fixed){
+	public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(Person person, LocalDate begin, LocalDate end){
 		
 		QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
 		
 		final JPQLQuery query = getQueryFactory()
 				.from(pdit)
 				.where(pdit.personDay.person.eq(person)
-				.and(pdit.personDay.date.between(begin, end))
-				.and(pdit.fixed.eq(fixed)));
+				.and(pdit.personDay.date.between(begin, end)));
 		
 		return query.list(pdit);
 	}

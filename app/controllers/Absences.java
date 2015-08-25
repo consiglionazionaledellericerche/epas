@@ -1,6 +1,5 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
 import java.io.File;
@@ -26,10 +25,8 @@ import models.Person;
 import models.PersonDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.AccumulationBehaviour;
-import models.enumerate.AccumulationType;
-import models.enumerate.QualificationMapping;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

@@ -127,7 +127,7 @@ public class ConsistencyManager {
 				for(Person p : personList) {
 					
 					updatePersonSituation(p.id, fromDate);
-//					attenzione quando si forzano le transizioni o si invalida la cache dell'entityManager,
+//					attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
 //					possono esserci effetti collaterali....vedi il blocco try sotto
 					JPA.em().flush();
 					JPA.em().clear();
@@ -191,9 +191,9 @@ public class ConsistencyManager {
 		log.info("Fetch dei dati conclusa.");
 
 		PersonDay previous = null;
-
+		
 		while ( !date.isAfter(lastPersonDayToCompute) ) {
-
+			
 			if(! wPerson.isActiveInDay(date) ) {
 				date = date.plusDays(1);
 				previous = null;
@@ -204,13 +204,6 @@ public class ConsistencyManager {
 			PersonDay personDay = personDaysMap.get(date);
 			if(personDay == null) {
 				personDay = new PersonDay(person, date);
-
-				//				if (!personDayInList.isHoliday) {
-				//					date = date.plusDays(1);
-				//					// populate??
-				//			
-				//					continue;
-				//				}
 			}
 
 			IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
@@ -282,12 +275,6 @@ public class ConsistencyManager {
 				pd.getValue().date);
 		pd.getValue().save();
 
-		//controllo problemi strutturali del person day
-		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
-			pd.getValue().save();
-			personDayManager.checkForPersonDayInTrouble(pd);
-		}
-
 		//controllo uscita notturna
 		handlerNightStamp(pd);
 
@@ -298,6 +285,11 @@ public class ConsistencyManager {
 		personDayManager.updateProgressive(pd);
 
 		personDayManager.updateTicketAvailable(pd);
+		
+		//controllo problemi strutturali del person day
+		if( pd.getValue().date.isBefore(LocalDate.now()) ) {
+			personDayManager.checkForPersonDayInTrouble(pd);
+		}
 
 		pd.getValue().save();
 
