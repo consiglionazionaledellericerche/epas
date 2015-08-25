@@ -5,6 +5,7 @@ import java.util.List;
 import manager.PersonManager;
 import models.Person;
 import models.PersonDayInTrouble;
+import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
 
@@ -41,26 +42,26 @@ public class PersonTroublesInMonthRecap {
 		
 		this.person = person;
 		List<PersonDayInTrouble> troubles = personDayInTroubleDao
-				.getPersonDayInTroubleInPeriod(person, monthBegin, monthEnd, false);
+				.getPersonDayInTroubleInPeriod(person, monthBegin, monthEnd);
 
 		
 		for(PersonDayInTrouble trouble : troubles) {
 			
-			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_FIXED)) {
+			if(trouble.cause.equals(Troubles.UNCOUPLED_FIXED)) {
 				this.troublesAutoFixedL.add(trouble.personDay.date.getDayOfMonth());
 			}
 			
-			if(trouble.cause.equals(PersonDayInTrouble.NO_ABS_NO_STAMP)) {
+			if(trouble.cause.equals(Troubles.NO_ABS_NO_STAMP)) {
 				this.troublesNoAbsenceNoStampingsL
 					.add(trouble.personDay.date.getDayOfMonth());
 			}
 			
-			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_WORKING)) {
+			if(trouble.cause.equals(Troubles.UNCOUPLED_WORKING)) {
 				this.troublesNoAbsenceUncoupledStampingsNotHolidayL
 					.add(trouble.personDay.date.getDayOfMonth());
 			}
 			
-			if(trouble.cause.equals(PersonDayInTrouble.UNCOUPLED_HOLIDAY)) {
+			if(trouble.cause.equals(Troubles.UNCOUPLED_HOLIDAY)) {
 				this.troublesNoAbsenceUncoupledStampingsHolidayL
 					.add(trouble.personDay.date.getDayOfMonth());
 			}

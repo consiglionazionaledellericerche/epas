@@ -191,6 +191,8 @@ public class Administration extends Controller {
 		LocalDate date = new LocalDate(year,month,1);
 		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(personDao.getPersonById(personId));
 		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
+		flash.success("Esecuzione terminata");
+		utilities();
 	}
 
 	public static void buildYaml(){

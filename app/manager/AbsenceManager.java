@@ -21,9 +21,9 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
-import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
