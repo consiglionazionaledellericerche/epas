@@ -78,10 +78,19 @@ public class ContractMonthRecap extends BaseModel {
 	public int initMonteOreAnnoCorrente = 0;	//dal precedente recap ma è utile salvarlo
 	
 	@Column(name="s_pf")
-	public int progressivoFinaleMese = 0;	//person day	
+	public int progressivoFinaleMese = 0;			//person day	
 	
+	/**
+	 * Questo campo ha due scopi: <br>
+	 * 1) Il progressivo finale positivo da visualizzare nel template. <br>
+	 * 2) Il tempo disponibile per straordinari. <br>
+	 * TODO:
+	 * Siccome i due valori potrebbero differire (esempio turnisti), decidere
+	 * se splittarli in due campi distinti.
+	 */
 	@Column(name="s_pfp")
-	public int progressivoFinalePositivoMese = 0;	//per il template
+	public int progressivoFinalePositivoMese = 0;	 
+			
 
 	@Column(name="s_r_ap_usabile")
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;

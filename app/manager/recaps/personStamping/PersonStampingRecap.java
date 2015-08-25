@@ -123,23 +123,6 @@ public class PersonStampingRecap {
 			
 			if (cmr.isPresent()) {
 				
-				//Sistemo i riepilogo dei buoni pasto nel caso di mese e contratto attuale
-				if(this.currentMonth && DateUtility.isDateIntoInterval(LocalDate.now(), 
-						wrapperFactory.create(contract).getContractDateInterval())) {
-
-					// Considero i buoni pasto consegnati oggi (che non sono nel recap)
-					int assignedToday = mealTicketDao
-							.getMealTicketAssignedToPersonIntoInterval(contract, 
-							new DateInterval(LocalDate.now(), LocalDate.now())).size();
-					cmr.get().buoniPastoConsegnatiNelMese += assignedToday;
-					cmr.get().remainingMealTickets += assignedToday;
-					
-					if(LocalDate.now().equals(begin)) {
-						// Oggi essendo il primo giorno del mese aggiungo i buoni pasto dal mese precedente
-						cmr.get().remainingMealTickets += cmr.get().buoniPastoDalMesePrecedente; 
-					}
-				}
-				
 				this.contractMonths.add(wrapperFactory.create(cmr.get()));
 			}
 		}
