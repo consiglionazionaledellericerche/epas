@@ -477,7 +477,8 @@ public class ConsistencyManager {
 			if( !recap.isPresent() ) {
 
 				if( yearMonthFrom.isPresent() ) {
-					//provvisorio.
+					//sa la chiamata era su mese specifico e non ho i riepiloghi
+					//passati effettuo il tentativo di ricalcolare i riepiloghi da zero.
 					populateContractMonthRecap(contract, Optional.<YearMonth>absent());
 				}
 				return;
