@@ -240,6 +240,15 @@ public class StampingManager {
 			if(s.date.isEqual(stamping.dateTime)){
 				return true;
 			}
+			/**
+			 * controllo se esiste già una timbratura di un minuto precedente e 
+			 * nello stesso verso di quella che passo alla funzione, in questo
+			 * modo evito di inserire questa timbratura
+			 */
+			if(s.date.isEqual(stamping.dateTime.minusMinutes(1)) &&
+					((s.isIn() && stamping.inOut == 0) || (s.isOut() && stamping.inOut == 1)))
+					return true;
+			
 		}
 		return false;
 	}
