@@ -16,8 +16,7 @@ import play.jobs.On;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
-//@On("0 1 5 * * ?") // Ore 5:01
-@On("0 /1 * * * ?") // Ogni minuto
+@On("0 1 5 * * ?") // Ore 5:01
 public class DarkNightJob extends Job{
 
 	@Inject
