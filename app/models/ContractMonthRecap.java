@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
@@ -22,7 +23,7 @@ import com.google.common.base.Optional;
 import dao.wrapper.IWrapperContract;
 
 @Entity
-@Table(name="contract_month_recap")
+@Table(name="contract_month_recap", uniqueConstraints={@UniqueConstraint(columnNames={"year", "month", "contract_id"})})
 public class ContractMonthRecap extends BaseModel {
 	
 	@Required
