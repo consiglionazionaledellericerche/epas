@@ -2,36 +2,13 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Parametri di configurazione' /}
 
-<ul class="nav nav-tabs">
-  <li><a href="@{Configurations.showConfGeneral()}#">Parametri Generali</a></li>
-  <li class="active"><a href="@{Configurations.showConfYear()}#">Parametri Annuali</a></li>
-</ul>
+%{ name = 'confYear' }%
+#{include './_confTabs.html' /}
 
 <div class="container">
-  <br>
-  <div class="center">
-	  #{form action:@Configurations.showConfYear(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <select name="officeId" class="form-control" id="dip" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-  </div>
-  <br>
-
-
-
+  
+  #{include './_switchOffice.html' /} 
+ 
   <section id="results">
 
 	 <div class="panel panel-default">
