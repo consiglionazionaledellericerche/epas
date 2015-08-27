@@ -9,8 +9,7 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
-import manager.ConfigurationsManager;
-import manager.ConfigurationsManager.MessageResult;
+import manager.ConfYearManager.MessageResult;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
@@ -41,8 +40,6 @@ public class Configurations extends Controller{
 	private static ConfYearManager confYearManager;
 	@Inject
 	private static ConfYearDao confYearDao;
-	@Inject
-	private static ConfigurationsManager configurationsManager;
 
 	/**
 	 * Visualizza la pagina di configurazione generale dell'office.
@@ -175,7 +172,7 @@ public class Configurations extends Controller{
 
 		Preconditions.checkNotNull(conf);
 
-		MessageResult message = configurationsManager.persistConfYear(conf, value);
+		MessageResult message = confYearManager.persistConfYear(conf, value);
 
 		if(message.result == false){
 			response.status = 500;
@@ -201,6 +198,22 @@ public class Configurations extends Controller{
 		confYearManager.saveConfYear(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, 
 				office, year, Optional.of(dayMonth.monthOfYear().getAsString()));
 
+	}
+	
+	public static void showConfPeriod(Long officeId) {
+	
+		Office office = null;
+
+		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		if(officeId != null) {
+			office = officeDao.getOfficeById(officeId);			
+		}
+		else{
+			//TODO se offices è vuota capire come comportarsi
+			office = offices.iterator().next();
+		}
+		
+		render(office, offices);
 	}
 
 }
