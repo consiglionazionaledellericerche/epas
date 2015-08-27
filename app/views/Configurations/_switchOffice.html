@@ -1,0 +1,35 @@
+ *{ gli uffici su cui poter switchare devono essere 
+ inseriri nella lista denominata offices }*
+ 
+ <div class="center">
+ 	  
+ 	  #{if name.equals("confGeneral")} 
+ 	  	%{ url = '/configurations/showconfgeneral' }%
+ 	  #{/if}
+ 	  
+ 	  #{elseif name.equals("confYear")} 
+ 	    %{ url = '/configurations/showconfyear' }%
+ 	  #{/elseif}
+ 	  
+ 	  #{elseif name.equals("confPeriod")} 
+ 	    %{ url = '/configurations/showconfperiod' }%
+ 	  #{/elseif}
+ 	  
+ 	  #{if url}
+ 	  <form method="post" action="${url}" role="form" class="form-inline" autocomplete="off" data-reload="#results">
+    		#{authenticityToken /}
+    	  <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <select name="officeId" class="form-control" id="dip" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	      <button type="submit" class="btn btn-default">Invio</button>
+		</form>
+ 	  #{/if}
+  </div>
+  <br>
