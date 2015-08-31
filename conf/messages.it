@@ -189,3 +189,9 @@ absenceTypeGroup.minutesExcess.popover= Se impostato su "Si", consente di giusti
 absenceTypeGroup.accumulationBehaviour.popover= Comportamento da tenere al raggiungimento del limite (Es. codice 661h2 selezionere "Non accetta ...")
 
 absenceTypeGroup.replacingAbsenceType.description= Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)
+
+stampType= Causale
+stamping.stampType= Causale
+note= Note
+stampingHour= Ore
+stampingMinute= Minuti
