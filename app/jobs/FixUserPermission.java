@@ -19,7 +19,7 @@ import play.test.Fixtures;
 
 import com.google.common.collect.Lists;
 
-public class FixUserPermission extends Job{
+public class FixUserPermission{
 
 	@Inject
 	private static OfficeManager officeManager;
