@@ -21,6 +21,16 @@ import com.mysema.query.jpa.impl.JPAQueryFactory;
 
 public class ConfYearManager {
 
+	public final static class MessageResult {
+		public boolean result;
+		public String message;
+
+		public MessageResult(boolean result, String message){
+			this.result = result;
+			this.message = message;
+		}
+	}
+	
 	/**
 	 * Questo manager utilizza direttamente JPQL perchè implementa un ulteriore 
 	 * strato di astrazione sulle configurazioni (le configurazioni richieste non
@@ -233,5 +243,75 @@ public class ConfYearManager {
 
 		return Optional.fromNullable(query.singleResult(confYear));
 	}
+	
+	/**
+	 * Validazione del valore di configurazione. Aggiorna la CACHE.
+	 * 
+	 * @param conf
+	 * @param year
+	 * @param value
+	 * @return 	
+	 */
+	public MessageResult persistConfYear(ConfYear conf, String value){
+
+		Preconditions.checkNotNull(conf);
+
+		Integer year = conf.year;
+
+		if(conf.field.equals(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR.description)){
+
+			Integer month = getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR,
+					conf.office, year);
+			try{
+				new LocalDate(year, month, Integer.parseInt(value));
+			}
+			catch(Exception e){
+
+				return new MessageResult(false, Integer.parseInt(value) + "/" + month + "/" + year + " data non valida. Settare correttamente i parametri.");
+			}
+		}
+
+		if(conf.field.equals(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR.description)){
+
+			Integer day  = getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR,
+					conf.office, year);
+			try{
+				new LocalDate(year, Integer.parseInt(value), day);
+			}
+			catch(Exception e){
+				return new MessageResult(false, Integer.parseInt(value) + "/" + year + " data non valida. Settare correttamente i parametri.");
+			}
+
+		}
+
+		if(conf.field.equals(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13.description)){
+			if(Integer.parseInt(value) < 0 || Integer.parseInt(value) > 12){
+				return new MessageResult(false, "Bad request");
+			}
+		}
+
+		if(conf.field.equals(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49.description)){
+			if(Integer.parseInt(value) < 0 || Integer.parseInt(value) > 12){
+				return new MessageResult(false, "Bad request");			}
+		}
+
+		if(conf.field.equals(Parameter.MAX_RECOVERY_DAYS_13.description)){
+			if(Integer.parseInt(value) < 0 || Integer.parseInt(value) > 31){
+				return new MessageResult(false, "Bad request");
+			}
+		}
+
+		if(conf.field.equals(Parameter.MAX_RECOVERY_DAYS_49.description)){
+			if(Integer.parseInt(value) < 0 || Integer.parseInt(value) > 31){
+				return new MessageResult(false, "Bad request");
+			}
+		}
+
+		saveConfYear(getParameter(conf), conf.office, conf.year, 
+				Optional.fromNullable(value) );
+
+		return new MessageResult(true, "parametro di configurazione correttamente inserito");
+	}
+
 
 }

@@ -592,7 +592,7 @@ public class AbsenceManager {
 		//controllo se la persona è in turno
 		Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(person, date);
 
-		return !(psd.isPresent() && prd.isPresent());	
+		return psd.isPresent() || prd.isPresent();	
 	}
 
 	/**
