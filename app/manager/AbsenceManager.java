@@ -1,5 +1,6 @@
 package manager;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.CheckMessage;
 
 import java.util.ArrayList;
@@ -482,13 +483,15 @@ public class AbsenceManager {
 				ar.setDayInReperibilityOrShift(true);				
 			}
 
-			PersonDay pd = 	personDayDao.getPersonDay(person, date).orNull();
+			PersonDay pd = 	personDayDao.getPersonDay(person, date).orNull();			
 
 			if(pd == null){
 				pd = new PersonDay(person, date);
 				pd.save();
 			}
-
+			
+			LocalDate startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
+			
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
 			if(justifiedMinutes.isPresent()) {
@@ -499,7 +502,16 @@ public class AbsenceManager {
 				//creo l'assenza e l'aggiungo
 				absence.personDay = pd;
 				absence.absenceType = absenceType;
-				absence.absenceFile = file.orNull();
+				PersonDay beginAbsence = personDayDao.getPersonDay(person, startAbsence).orNull();
+				if(beginAbsence.date.isEqual(date)){
+					absence.absenceFile = file.orNull();
+				}
+				else{
+					for(Absence abs : beginAbsence.absences){
+						if(abs.absenceFile == null)
+							absence.absenceFile = file.orNull();
+					}
+				}				
 
 				log.info("Inserita nuova assenza {} per {} in data: {}", new Object[]{
 						absence.absenceType.code, absence.personDay.person.getFullname(),absence.personDay.date});
@@ -951,4 +963,37 @@ public class AbsenceManager {
 		return absentPersons;
 	}
 
+	/**
+	 * 
+	 * @param date
+	 * @param person
+	 * @param absenceType
+	 * @return la data iniziale da cui parte l'inserimento di un certo codice di assenza
+	 * di modo da poter verificare se in quella data è stato inserito anche il file
+	 * associato al codice di assenza ed evitare quindi di inserire un file per
+	 * ogni giorno del periodo
+	 */
+	private LocalDate beginDateToInsertAbsenceFile(LocalDate date, Person person, AbsenceType absenceType){
+		boolean begin = false;
+		LocalDate startAbsence = date;
+		while(begin == false){
+			PersonDay pdPrevious = personDayDao.getPreviousPersonDay(person, startAbsence);
+			List<Absence> abList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
+					pdPrevious.date, Optional.<LocalDate>absent(), false);
+			if(abList.size() == 0){
+				begin = true;
+			}
+			else{
+				for(Absence abs : abList){
+					if(!abs.absenceType.code.equals(absenceType.code)){
+						begin = true;
+					}	
+					else{
+						startAbsence = startAbsence.minusDays(1);
+					}
+				}
+			}				
+		}
+		return startAbsence;
+	}
 }
