@@ -42,4 +42,14 @@ public class StampType extends BaseModel {
 	
 	@OneToMany(mappedBy="stampType")
 	public Set<Stamping> stampings; 
+	
+	@Override
+	public String getLabel() {
+		return this.description;
+	}
+	
+	@Override
+	public String toString() {
+		return getLabel();
+	}
 }

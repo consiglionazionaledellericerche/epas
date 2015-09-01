@@ -15,6 +15,8 @@ import models.AbsenceType;
 import models.Office;
 import models.Permission;
 import models.Qualification;
+import models.StampModificationType;
+import models.StampType;
 import models.User;
 import models.enumerate.Parameter;
 
@@ -36,6 +38,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDao.PersonLite;
 import dao.QualificationDao;
+import dao.StampingDao;
 import dao.UsersRolesOfficesDao;
 
 /**
@@ -56,6 +59,8 @@ public class RequestInit extends Controller {
 	private static QualificationDao qualificationDao;
 	@Inject
 	private static AbsenceTypeDao absenceTypeDao;
+	@Inject
+	private static StampingDao stampingDao;
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
 	 * TODO: esportare questa classe in un nuovo file che modella la view.
@@ -277,6 +282,10 @@ public class RequestInit extends Controller {
 		
 		public List<AbsenceType> getCertificateAbsenceTypes() {
 			return absenceTypeDao.certificateTypes();
+		}
+		
+		public List<StampType> getAllStampTypes(){
+			return stampingDao.findAll();
 		}
 		
 	}
