@@ -249,22 +249,12 @@ public class ContractMonthRecapManager {
 		LocalDate monthEndForMealTickets = monthBeginForMealTickets.dayOfMonth().withMaximumValue();
 		DateInterval monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
 
-		// 2) Nel caso del calcolo del mese attuale
-
-		if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) )
-		{
-			// 2.1) Se oggi non è il primo giorno del mese allora tutti i giorni del mese fino a ieri.
-			if ( today.getDayOfMonth() != 1 )
-			{
-				monthEndForMealTickets = today;
-				monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
-			}
-
-			// 2.2) Se oggi è il primo giorno del mese allora null.
-			else
-			{
-				monthIntervalForMealTickets = null;
-			}
+		// 2) Nel caso del calcolo del mese attuale considero dall'inizio
+		// del mese fino a oggi.
+		if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) ) 
+		{ 
+			monthEndForMealTickets = today;
+			monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
 		}
 
 		// 3) Filtro per dati nel database, estremi del contratto, inizio utilizzo buoni pasto
@@ -321,7 +311,7 @@ public class ContractMonthRecapManager {
 					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49: 
 						Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13;
 			Integer monthExpiryRecoveryDay = confYearManager.getIntegerFieldValue(param,
-					cmr.person.office.office, cmr.year);
+					cmr.person.office, cmr.year);
 			if(monthExpiryRecoveryDay != 0 && cmr.month > monthExpiryRecoveryDay) {
 				cmr.possibileUtilizzareResiduoAnnoPrecedente = false;
 				cmr.remainingMinutesLastYear = 0;
