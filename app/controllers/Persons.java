@@ -6,6 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -538,7 +539,8 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 		
-		Optional<LocalDate> initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
+		Optional<LocalDate> initUse = confGeneralManager
+				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
 				contract.person.office);
 		
 		render(contract, initUse);
@@ -557,11 +559,9 @@ public class Persons extends Controller {
 
 		contractManager.saveSourceContract(contract);
 
-		//Ricalcolo valori
-		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-
-		contractManager.recomputeContract(contract, contractDateInterval.getBegin(),
-				contractDateInterval.getEnd(),false);
+		//Ricalcolo valori dalla nuova data inizializzazione.
+		contractManager.recomputeContract(contract, 
+				Optional.fromNullable(contract.sourceDate), false);
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
@@ -629,7 +629,7 @@ public class Persons extends Controller {
 	}
 
 	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt){
-		if(cwtt==null){
+		if (cwtt == null){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
@@ -639,20 +639,27 @@ public class Persons extends Controller {
 
 		Contract contract = cwtt.contract;
 
-		List<ContractWorkingTimeType> contractsWtt = Lists.newArrayList(contract.contractWorkingTimeType);
-
+		List<ContractWorkingTimeType> contractsWtt = 
+				Lists.newArrayList(contract.contractWorkingTimeType);
+		
+		Collections.sort(contractsWtt);
 		int index = contractsWtt.indexOf(cwtt);
-		if(contractsWtt.size()<index){
-
+		if (index <= 0) {
+			//Cioè se è il primo o non esiste.
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			edit(cwtt.contract.person.id);
 		}
-		ContractWorkingTimeType previous = contractsWtt.get(index-1);
-		contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, index, cwtt);
+		
+		ContractWorkingTimeType previous = contractsWtt.get(index - 1);
+		contractWorkingTimeTypeManager
+			.deleteContractWorkingTimeType(contract, cwtt, previous);
 
-		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null,false);
+		//Ricalcolo a partire dall'inizio del periodo che ho eliminato.
+		contractManager.recomputeContract(cwtt.contract, 
+				Optional.fromNullable(cwtt.beginDate), false);
 
-		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
+		flash.success("Orario di lavoro eliminato correttamente. Attribuito al "
+				+ "periodo eliminato il tipo orario immediatamenete precedente");
 
 		edit(cwtt.contract.person.id);
 	}
@@ -672,7 +679,7 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		contractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null,false);
+		contractManager.recomputeContract(cwtt.contract, Optional.fromNullable(cwtt.beginDate), false);
 
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 
@@ -838,24 +845,30 @@ public class Persons extends Controller {
 		render(contract, listTipo);
 	}
 
-	public static void changeTypeOfContractStampProfile(ContractStampProfile contract, String newtipo){
-		if(contract==null || newtipo==null) {
+	public static void changeTypeOfContractStampProfile(
+			ContractStampProfile contract, String newtipo) {
+		
+		if (contract == null || newtipo == null) {
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
 		}
 
 		rules.checkIfPermitted(contract.contract.person.office);
-		if(newtipo.equals("Timbratura automatica"))
+		
+		if(newtipo.equals("Timbratura automatica")) {
 			contract.fixedworkingtime = true;
-		else
+		} else {
 			contract.fixedworkingtime = false;
+		}
 
 		contract.save();
 
-		contractManager.recomputeContract(contract.contract, contract.startFrom, null,false);
+		contractManager.recomputeContract(contract.contract, 
+				Optional.fromNullable(contract.startFrom), false);
 
-		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
+		flash.success("Cambiata correttamente tipologia di timbratura "
+				+ "per il periodo a %s.", newtipo);
 
 		edit(contract.contract.person.id);
 
@@ -915,9 +928,12 @@ public class Persons extends Controller {
 		contractStampProfileManager.deleteContractStampProfile(contract, index, csp);
 
 		//Ricalcolo i valori
-		contractManager.recomputeContract(previous.contract, csp.startFrom, null,false);
+		contractManager.recomputeContract(previous.contract, 
+				Optional.fromNullable(csp.startFrom), false);
 
-		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
+		flash.success("Tipologia di timbratura eliminata correttamente. "
+				+ "Tornati alla precedente che ha timbratura automatica "
+				+ "con valore: %s", previous.fixedworkingtime);
 
 		edit(csp.contract.person.id);
 	}
