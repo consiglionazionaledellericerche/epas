@@ -135,14 +135,18 @@ public class WrapperContract implements IWrapperContract {
 	
 	/**
 	 * Il mese del primo riepilogo esistente per il contratto.
-	 * 
+	 * absent() se non ci sono i dati per costruire il primo riepilogo. 
 	 */
 	@Override
-	public YearMonth getFirstMonthToRecap() {
-		if (value.sourceDate != null) {
-			return new YearMonth(value.sourceDate);
+	public Optional<YearMonth> getFirstMonthToRecap() {
+		
+		if( initializationMissing() ) {
+			return Optional.<YearMonth>absent();
 		}
-		return new YearMonth(value.beginContract);
+		if (value.sourceDate != null) {
+			return Optional.fromNullable((new YearMonth(value.sourceDate)));
+		}
+		return Optional.fromNullable(new YearMonth(value.beginContract));
 	}
 	
 	/**
@@ -213,14 +217,17 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean monthRecapMissing() {	
 
-		YearMonth monthToCheck = getFirstMonthToRecap();
+		Optional<YearMonth> monthToCheck = getFirstMonthToRecap();
+		if (!monthToCheck.isPresent()) {
+			return true;
+		}
 		YearMonth nowMonth = YearMonth.now();
-		while( !monthToCheck.isAfter( nowMonth)) {
+		while( !monthToCheck.get().isAfter( nowMonth)) {
 			// FIXME: renderlo efficiente, un dao che li ordina.
-			if ( !getContractMonthRecap(monthToCheck).isPresent() ) {
+			if ( !getContractMonthRecap(monthToCheck.get()).isPresent() ) {
 				return true;
 			}
-			monthToCheck = monthToCheck.plusMonths(1);
+			monthToCheck = Optional.fromNullable(monthToCheck.get().plusMonths(1));
 		}
 
 		return false;

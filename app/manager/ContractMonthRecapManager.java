@@ -134,10 +134,13 @@ public class ContractMonthRecapManager {
 		Optional<ContractMonthRecap> recapPreviousMonth = 
 				Optional.<ContractMonthRecap>absent();
 		
-		YearMonth firstContractMonthRecap = wrapperFactory
+		Optional<YearMonth> firstContractMonthRecap = wrapperFactory
 				.create(contract).getFirstMonthToRecap();
+		if (!firstContractMonthRecap.isPresent()) {
+			return Optional.<ContractMonthRecap>absent();
+		}
 
-		if ( yearMonth.isAfter(firstContractMonthRecap) ) {
+		if ( yearMonth.isAfter(firstContractMonthRecap.get()) ) {
 			//Riepilogo essenziale
 			recapPreviousMonth = wcontract.getContractMonthRecap(yearMonth.minusMonths(1));
 			if( !recapPreviousMonth.isPresent() ) {
