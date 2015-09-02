@@ -161,28 +161,28 @@ public class ContractManager {
 		
 		//Se il contratto inizia prima di today inserisco un source fittizio alla
 		// data attuale che mi imposta tutti i residui a zero.
-		
-		IWrapperContract wcontract = wrapperFactory.create(contract);
-		
-		contract.sourceDate = LocalDate.now().minusDays(1);
-		
-		contract.sourceRemainingMealTicket = 0;
-		contract.sourceRemainingMinutesCurrentYear = 0;
-		contract.sourceRemainingMinutesLastYear = 0;
-
-		List<Absence> postPartum = Lists.newArrayList();
-		
-		contract.sourcePermissionUsed = vacationManager.getPermissionAccruedYear(wcontract, 
-				contract.sourceDate.getYear() , Optional.<LocalDate>absent());
-		
-		contract.sourceVacationLastYearUsed = vacationManager.getVacationAccruedYear(wcontract,
-				contract.sourceDate.getYear() -1, Optional.<LocalDate>absent(), postPartum);
-				
-		contract.sourceVacationCurrentYearUsed = vacationManager.getVacationAccruedYear(wcontract,
-				contract.sourceDate.getYear(), Optional.<LocalDate>absent(), postPartum);
-		
-		contract.sourceRecoveryDayUsed = 0;		
-		
+		//(Comportamento Disabilitato, da valutare.)
+		contract.sourceDate = null;
+//		IWrapperContract wcontract = wrapperFactory.create(contract);
+//		contract.sourceDate = LocalDate.now().minusDays(1);
+//		
+//		contract.sourceRemainingMealTicket = 0;
+//		contract.sourceRemainingMinutesCurrentYear = 0;
+//		contract.sourceRemainingMinutesLastYear = 0;
+//
+//		List<Absence> postPartum = Lists.newArrayList();
+//		
+//		contract.sourcePermissionUsed = vacationManager.getPermissionAccruedYear(wcontract, 
+//				contract.sourceDate.getYear() , Optional.<LocalDate>absent());
+//		
+//		contract.sourceVacationLastYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+//				contract.sourceDate.getYear() -1, Optional.<LocalDate>absent(), postPartum);
+//				
+//		contract.sourceVacationCurrentYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+//				contract.sourceDate.getYear(), Optional.<LocalDate>absent(), postPartum);
+//		
+//		contract.sourceRecoveryDayUsed = 0;		
+//		
 		contract.sourceByAdmin = false;
 		
 		contract.save();
@@ -191,8 +191,14 @@ public class ContractManager {
 		contract.person.contracts.add(contract);
 		
 		//Aggiornamento stato contratto
-		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd(),true);
+		//Nella creazione se effettuo i ricalcoli devo farli necessariamente
+		//per tutto il contratto (al più dall'installazione del software).
+		//TODO: Si potrebbe prevedere la possibilità di specificare se effettuare 
+		//'inizializzazione fittizia che esaurisce tutte le ferie e i permessi 
+		// e inibisce tutti i ricalcoli nel caso di creazione di contratto inserito 
+		// dopo il suo inizio.  
+		//(adesso l'ho disabilitata perchè come soluzione non mi piace).
+		recomputeContract(contract, Optional.<LocalDate>absent(), true);
 		
 		return true;
 
@@ -214,9 +220,10 @@ public class ContractManager {
 		updateContractWorkingTimeType(contract);
 		updateContractStampProfile(contract);
 		
-		//Aggiornamento stato contratto
-		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd(),true);
+		//Ricalcoli dall'inizio del contratto.
+		// TODO: l'update dovrebbe ricevere un parametro dateFrom nel quale impostare
+		//la data dalla quale effettuare i ricalcoli. Se ne deve occupare il chiamante.
+		recomputeContract(contract, Optional.<LocalDate>absent(), true);
 	}
 
 	/**
@@ -226,23 +233,25 @@ public class ContractManager {
 	 *   Se null ricalcola dall'inizio del contratto.
 	 *   newContract: indica se il ricalcolo è relativo ad un nuvo contratto o ad uno già esistente
 	 */
-	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo,boolean newContract) {
+	public void recomputeContract(Contract contract, Optional<LocalDate> dateFrom, 
+			boolean newContract) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
-		String dateInitUse = confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
-		LocalDate initUse = new LocalDate(dateInitUse);
-		LocalDate date = contract.beginContract;
-		if(date.isBefore(initUse))
-			date = initUse;
-		DateInterval contractInterval = wrapperFactory.create(contract).getContractDatabaseInterval();
-		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
-			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
+		LocalDate initUse = new LocalDate(confGeneralManager
+				.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office));
+		
+		LocalDate startDate = contract.beginContract;
+		if(startDate.isBefore(initUse)) {
+			startDate = initUse;
 		}
-		// Decido la data di fine
-		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
-			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
+
+		if(dateFrom.isPresent()) {
+			if(startDate.isBefore(dateFrom.get())) {
+				startDate = dateFrom.get();
+			}
 		}
+	
 		if(!newContract){
 			//Distruggere i riepiloghi
 			// TODO: anche quelli sulle ferie quando ci saranno
@@ -252,7 +261,7 @@ public class ContractManager {
 			JPAPlugin.startTx(false);
 		}
 		
-		consistencyManager.updatePersonSituation(contract.person.id, date);
+		consistencyManager.updatePersonSituation(contract.person.id, startDate);
 	}
 	
 	private void destroyContractMonthRecap(Contract contract) {
