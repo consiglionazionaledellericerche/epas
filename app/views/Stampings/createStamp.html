@@ -11,33 +11,19 @@
 	
 	<table class="table table-hover table-form">
 		<tr>
-			<td class="lab">
-			  <a data-popover
-	    		data-trigger="hover" data-toggle="popover" 
-	    		data-placement="bottom"
-	    		title="Formato richiesto 'HHMM' (HH ore, MM minuti)">Ore <i class="fa fa-clock-o fa-2"></i></a>
-			</td>
-			<td><input type="text" name="hourStamping" placeholder="HHMM"></td>
+			<td>#{f.input 'hourStamping', popover:'true'/}</td>
 		</tr>
 		
 		<tr>
-			<td class="lab">Tipologia</td>
-			<td>	
-			  <label for="in">Ingresso </label><input type="radio" name="type" value="true" checked id="in">
-			  <label for="out">Uscita </label><input type="radio" name="type" value="false" id="out">
-			</td>
-		</tr>	
-		<tr>	
-			<td class="lab">Di Servizio</td>
-			<td>
-			  <label for="ser">Si</label><input type="radio" name="service" value="true" id="ser">
-			  <label for="serNo">No</label><input type="radio" name="service" value="false" checked id="serNo">
-			</td>
-		</tr>	
-		<tr>	
-			<td class="lab">Note</td>
-			<td><input type="text" name="note"></td>
+			<td>#{f.booleanRadioWay 'stampingWay',popover:'true' /}</td>
 		</tr>
+		<tr>
+			<td>#{f.selectModel 'stamping.stampType', value:'', items:templateUtility.allStampTypes /}</td>
+		</tr>
+		<tr>
+			<td>#{f.input 'note' /}</td>
+		</tr>
+		
 	
 	</table>
 	
