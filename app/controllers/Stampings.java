@@ -232,6 +232,10 @@ public class Stampings extends Controller {
 			flash.error("E' necessario specificare sia il campo ore che minuti. Operazione annullata.");
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
+		if(!stampingManager.checkIfCorrectMinutesAndHours(stampingMinute, stampingHour)){
+			flash.error("E' necessario specificare ore e minuti di valore corretto. Operazione annullata.");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+		}
 		
 		if(stamping.stampType != null){
 			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
@@ -363,6 +367,25 @@ public class Stampings extends Controller {
 		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
 
 
+	}
+	
+	
+	public static void entranceClock(Long personId, Integer year, Integer month, Integer day){
+		Person person = personDao.getPersonById(personId);
+		LocalDate date = new LocalDate(year,month,day);
+
+		PersonDay personDay = new PersonDay(person, date);
+
+		render(person, personDay);
+	}
+	
+	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
+		Person person = personDao.getPersonById(personId);
+		LocalDate date = new LocalDate(year,month,day);
+
+		PersonDay personDay = new PersonDay(person, date);
+
+		render(person, personDay);
 	}
 
 }
