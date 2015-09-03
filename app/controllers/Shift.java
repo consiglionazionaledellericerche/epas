@@ -459,7 +459,8 @@ public class Shift extends Controller {
 		try {
 			Optional<Calendar> calendar = shiftManager.createCalendar(type, Optional.fromNullable(personId), year);
 			if (!calendar.isPresent()) {
-				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, type));
+				log.info("Impossible to create shift calendar for personId = {}, type = {}, year = {}", personId, type, year);
+				notFound(String.format("Person id = %d is not associated to a shift of type = %s", personId, type));
 			}
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
