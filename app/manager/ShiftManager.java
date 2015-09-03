@@ -3,6 +3,7 @@ package manager;
 import helpers.BadRequest;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ import dao.ShiftDao;
  * @authorArianna
  *
  */
+@Slf4j
 public class ShiftManager {
 
 	private PersonDayManager personDayManager;
@@ -1134,7 +1136,7 @@ public class ShiftManager {
 	public Calendar createicsShiftCalendar(int year, String type,Optional<PersonShift> personShift) {
 		List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 		
-		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personShift.get());
+		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personShift);
 		ShiftCategories shiftCategory = shiftDao.getShiftCategoryByType(type);
 		String eventLabel = "Turno ".concat(shiftCategory.description).concat(": ");
 
@@ -1238,23 +1240,25 @@ public class ShiftManager {
 	 * If the personId=0, it exports the calendar for all persons of the shift of type 'type'
 	 */
 	public Optional<Calendar> createCalendar(String type, Optional<Long> personId, int year) {
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
+		log.debug("Sto per creare iCal per l'anno {} della person con id = {}, shift type {}", year, personId, type);
 
 		Optional<PersonShift> personShift = Optional.absent();
 		if (personId.isPresent()) {
 			// read the shift person 
 			personShift = Optional.fromNullable(shiftDao.getPersonShiftByPersonAndType(personId.get(), type));
-				return Optional.<Calendar>absent();			
+			if (!personShift.isPresent()) {
+				log.info("Person id = {} is not associated to a shift of type = {}", personId.get(), type);
+				return Optional.<Calendar>absent();
+			}
 		}
-
 
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 		
-		Logger.debug("chiama la createicsReperibilityCalendar(%s, %s, %s)", year, type, personShift.get());
+		log.debug("chiama la createicsReperibilityCalendar({}, {}, {})", year, type, personShift);
 		icsCalendar = createicsShiftCalendar(year, type, personShift); /*?*/
 
-		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+		log.debug("Find {} periodi di turno.", icsCalendar.getComponents().size());
+		log.debug("Creato iCal per l'anno {} della person con id = {}, shift type {}", year, personId, type);
 
 		return Optional.of(icsCalendar);
 	}
