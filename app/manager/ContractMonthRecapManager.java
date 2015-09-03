@@ -121,7 +121,8 @@ public class ContractMonthRecapManager {
 		
 		LocalDate firstDayInDatabase = new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
 		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
-		DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
+		DateInterval requestIntervalForProgressive = new DateInterval(firstDayInDatabase, calcolaFinoA);
+		DateInterval requestIntervalForMealTicket = new DateInterval(firstDayInDatabase, calcolaFinoA);
 		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket.orNull(), calcolaFinoA);
 
 		int initMonteOreAnnoPassato = 0;
@@ -171,11 +172,20 @@ public class ContractMonthRecapManager {
 			initMonteOreAnnoCorrente = contract.sourceRemainingMinutesCurrentYear;
 
 			firstDayInDatabase = contract.sourceDate.plusDays(1);
-			requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
+			requestIntervalForProgressive = new DateInterval(firstDayInDatabase, calcolaFinoA);
 
+			
+		}
+		//TODO: contract.sourceMealTicketDate
+		if ( contract.sourceDate != null 
+				&& contract.sourceDate.getYear() == yearMonth.getYear() 
+				&& contract.sourceDate.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+			
+			firstDayInDatabase = contract.sourceDate.plusDays(1);
+			requestIntervalForMealTicket= new DateInterval(firstDayInDatabase, calcolaFinoA);
 			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		}
-
+		
 		LocalDate today = LocalDate.now();
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,7 +223,7 @@ public class ContractMonthRecapManager {
 		DateInterval validDataForPersonDay = null;
 		if(monthIntervalForPersonDay != null)
 		{
-			validDataForPersonDay = DateUtility.intervalIntersection(monthIntervalForPersonDay, requestInterval);
+			validDataForPersonDay = DateUtility.intervalIntersection(monthIntervalForPersonDay, requestIntervalForProgressive);
 			validDataForPersonDay = DateUtility.intervalIntersection(validDataForPersonDay, contractInterval);
 		}
 
@@ -264,7 +274,7 @@ public class ContractMonthRecapManager {
 		DateInterval validDataForMealTickets = null;
 		if(monthIntervalForMealTickets != null)
 		{
-			validDataForMealTickets = DateUtility.intervalIntersection(monthIntervalForMealTickets, requestInterval);
+			validDataForMealTickets = DateUtility.intervalIntersection(monthIntervalForMealTickets, requestIntervalForMealTicket);
 			validDataForMealTickets = DateUtility.intervalIntersection(validDataForMealTickets, contractInterval);
 			validDataForMealTickets = DateUtility.intervalIntersection(validDataForMealTickets, mealTicketInterval);
 		}
