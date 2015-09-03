@@ -428,9 +428,9 @@ public class Shift extends Controller {
 			badRequest("Parametri mancanti. " + validation.errors());
 		}
 		Optional<User> currentUser = Security.getUser();
-		if (personId == null && currentUser.isPresent() && currentUser.get().person != null) {
-			personId = currentUser.get().person.id;
-		}
+//		if (personId == null && currentUser.isPresent() && currentUser.get().person != null) {
+//			personId = currentUser.get().person.id;
+//		}
 		//TODO: fare controlli che il personId corrisponda ad una persona esistente e con
 		//un turno del tipo indicato
 
@@ -457,7 +457,7 @@ public class Shift extends Controller {
 		}
 		
 		try {
-			Optional<Calendar> calendar = shiftManager.createCalendar(type, personId, year);
+			Optional<Calendar> calendar = shiftManager.createCalendar(type, Optional.fromNullable(personId), year);
 			if (!calendar.isPresent()) {
 				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, type));
 			}
