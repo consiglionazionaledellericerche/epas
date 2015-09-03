@@ -18,7 +18,7 @@ public class StampingFromClient {
 	public BadgeReader badgeReader;
 	public StampType stampType;
 	public Long personId;
-	
+	public boolean markedByAdmin = false;
 	public LocalDateTime dateTime;
 	
 }

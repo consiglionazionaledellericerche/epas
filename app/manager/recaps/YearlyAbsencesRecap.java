@@ -6,20 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
-import dao.AbsenceDao;
 
 /**
  * 
@@ -33,14 +26,26 @@ public class YearlyAbsencesRecap {
 	Table<Integer, Integer, String> absenceTable;
 	public Map<AbsenceType,Integer> absenceSummary = new HashMap<AbsenceType,Integer>();
 	public int totalAbsence = 0;
+	public int totalHourlyAbsence = 0;
 
 	public YearlyAbsencesRecap(Person person, int year,List<Absence> yearlyAbsence){
 		this.person = person;
 		this.year = year;
 
 		this.totalAbsence = yearlyAbsence.size();
+		this.totalHourlyAbsence = checkHourAbsence(yearlyAbsence); 
 		this.absenceTable = buildYearlyAbsenceTable(yearlyAbsence);
 		this.absenceSummary = buildYearlyAbsenceSummary(yearlyAbsence);		
+	}
+
+	private int checkHourAbsence(List<Absence> yearlyAbsence) {
+		int count = 0;
+		for(Absence abs : yearlyAbsence){
+			if(abs.absenceType.justifiedTimeAtWork.minutes != null && 
+					abs.absenceType.justifiedTimeAtWork.minutes < JustifiedTimeAtWork.SevenHours.minutes)
+				count ++;
+		}
+		return count;
 	}
 
 	/**
@@ -103,7 +108,8 @@ public class YearlyAbsencesRecap {
 	 */
 	private Map<AbsenceType,Integer> buildYearlyAbsenceSummary(List<Absence> yearlyAbsence){
 
-		Map<AbsenceType,Integer> mappa = new HashMap<AbsenceType,Integer>();			//mappa che conterra' le entry (tipo assenza, numero occorrenze)
+		Map<AbsenceType,Integer> mappa = new HashMap<AbsenceType,Integer>();			
+		//mappa che conterra' le entry (tipo assenza, numero occorrenze)
 
 		Integer i = 0;
 		for(Absence abs : yearlyAbsence){

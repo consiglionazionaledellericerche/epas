@@ -1,15 +1,14 @@
 package dao.wrapper;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
 import manager.ConfGeneralManager;
-import manager.PersonManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
-import models.VacationPeriod;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -20,27 +19,22 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import dao.VacationPeriodDao;
-
 /**
  * @author marco
  *
  */
 public class WrapperContract implements IWrapperContract {
 
-	private final PersonManager personManager;
 	private final Contract value;
-	private final VacationPeriodDao vacationPeriodDao;
 	private final ConfGeneralManager confGeneralManager;
+	private final IWrapperFactory wrapperFactory;
 
 	@Inject
-	WrapperContract(@Assisted Contract contract, PersonManager personManager,
-			VacationPeriodDao vacationPeriodDao,
-			ConfGeneralManager confGeneralManager) {
+	WrapperContract(@Assisted Contract contract,
+			ConfGeneralManager confGeneralManager, IWrapperFactory wrapperFactory) {
 		value = contract;
-		this.personManager = personManager;
-		this.vacationPeriodDao = vacationPeriodDao;
 		this.confGeneralManager = confGeneralManager;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	@Override
@@ -57,31 +51,23 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean isLastInMonth(int month, int year) {
 		
-		List<Contract> contractInMonth = 
-				personManager.getMonthContracts(this.value.person, month, year);
-		if (contractInMonth.size() == 0) {
-			return false;
+		DateInterval monthInterval = new DateInterval(new LocalDate(year, month,1), 
+				new LocalDate(year, month,1).dayOfMonth().withMaximumValue());
+		
+		for(Contract contract : value.person.contracts) {
+			if(contract.id.equals(value.id)) {
+				continue;
+			}
+			DateInterval cInterval = wrapperFactory.create(contract)
+					.getContractDateInterval();
+			if (DateUtility.intervalIntersection(monthInterval,cInterval) != null) {
+				if(value.beginContract.isBefore(contract.beginContract)) {
+					return false; 
+				}
+			}
 		}
-		if (contractInMonth.get(contractInMonth.size()-1).id.equals(this.value.id)){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * La lista dei VacationPeriod associati al contratto 
-	 * in ordine crescente per data di inizio periodo.
-	 * 
-	 * @param contract
-	 * @return
-	 */
-	@Override
-	public List<VacationPeriod> getContractVacationPeriods() {
-
-		List<VacationPeriod> vpList = vacationPeriodDao
-				.getVacationPeriodByContract(this.value);
-		return vpList;
+		return true;
+		
 	}
 
 	/**
@@ -134,19 +120,33 @@ public class WrapperContract implements IWrapperContract {
 			return new DateInterval(value.sourceDate.plusDays(1),
 					contractInterval.getEnd());
 		}
+		
+		Optional<LocalDate> dateInitUse = confGeneralManager
+				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, value.person.office);
+		if(dateInitUse.isPresent() ) {
+			
+			if(dateInitUse.get().isAfter(contractInterval.getBegin())) {
+				return new DateInterval(dateInitUse.get(), contractInterval.getEnd());
+			}
+		}
+		
 		return contractInterval;
 	}
 	
 	/**
 	 * Il mese del primo riepilogo esistente per il contratto.
-	 * 
+	 * absent() se non ci sono i dati per costruire il primo riepilogo. 
 	 */
 	@Override
-	public YearMonth getFirstMonthToRecap() {
-		if (value.sourceDate != null) {
-			return new YearMonth(value.sourceDate);
+	public Optional<YearMonth> getFirstMonthToRecap() {
+		
+		if( initializationMissing() ) {
+			return Optional.<YearMonth>absent();
 		}
-		return new YearMonth(value.beginContract);
+		if (value.sourceDate != null) {
+			return Optional.fromNullable((new YearMonth(value.sourceDate)));
+		}
+		return Optional.fromNullable(new YearMonth(value.beginContract));
 	}
 	
 	/**
@@ -217,14 +217,17 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean monthRecapMissing() {	
 
-		YearMonth monthToCheck = getFirstMonthToRecap();
+		Optional<YearMonth> monthToCheck = getFirstMonthToRecap();
+		if (!monthToCheck.isPresent()) {
+			return true;
+		}
 		YearMonth nowMonth = YearMonth.now();
-		while( !monthToCheck.isAfter( nowMonth)) {
+		while( !monthToCheck.get().isAfter( nowMonth)) {
 			// FIXME: renderlo efficiente, un dao che li ordina.
-			if ( !getContractMonthRecap(monthToCheck).isPresent() ) {
+			if ( !getContractMonthRecap(monthToCheck.get()).isPresent() ) {
 				return true;
 			}
-			monthToCheck = monthToCheck.plusMonths(1);
+			monthToCheck = Optional.fromNullable(monthToCheck.get().plusMonths(1));
 		}
 
 		return false;

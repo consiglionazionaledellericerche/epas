@@ -12,28 +12,15 @@
 
 
 #{select 'yearChart', id:'yearChart'}
-					
-		%{
-			for(anno in annoList){
-		}%
-			#{option anno.anno}${anno.anno}#{/option}
-			%{
-				}
-			}%
-		
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}				
 #{/select}
 
 #{select 'monthChart', id:'meseChart'}
-			
-			
-		%{
-			for(mese in meseList){
-		}%
-			#{option mese.id}${mese.mese}#{/option}
-			%{
-				}
-			}%
-		
+	#{list meseList}
+		#{option _.id}${_.mese}#{/option}
+	#{/list}		
 #{/select}
 <input class="btn btn-primary span1" type="submit" value="Ok"/>
 #{/form}
@@ -51,28 +38,15 @@
 
 
 #{select 'yearChart', value:session.get("yearChart"), id:'yearChart'}
-					
-		%{
-			for(anno in annoList){
-		}%
-			#{option anno.anno}${anno.anno}#{/option}
-			%{
-				}
-			}%
-		
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}			
 #{/select}
 
 #{select 'monthChart', value: session.get("monthChart"), id:'meseChart'}
-			
-			
-		%{
-			for(mese in meseList){
-		}%
-			#{option mese.id}${mese.mese}#{/option}
-			%{
-				}
-			}%
-		
+	#{list meseList}
+		#{option _.id}${_.mese}#{/option}
+	#{/list}			
 #{/select}
 <input class="btn btn-primary span1" type="submit" value="Ok"/>
 #{/form}

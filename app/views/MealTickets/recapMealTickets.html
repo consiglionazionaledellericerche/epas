@@ -10,7 +10,8 @@
   
   <div id="container-fluid-nav-tabs" class="container-fluid">
 
-  </div>
+  
+  
     <!-- Ultimi inseriti -->
     #{if blockAdded != null }
     <div class="col-md-12 center">
@@ -18,7 +19,7 @@
   	  <div class="alert alert-success alert-dismissible fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
         <strong>Buoni Pasto correttamente inseriti per la persona 
-          <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(personAdded.id, name, page, max)}"
+          <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(personAdded.id)}"
 	  	       data-modal=".my-modal-large">	  	      
 	  	     ${personAdded.surname} ${personAdded.name}</a>
 	  	  </a>
@@ -50,100 +51,67 @@
     #{/if}
 
   
-  	<!-- Filtro nome 5 -->
-  	<div class="col-xs-5">
-      #{form action:@MealTickets.recapMealTickets()	,  
-          method:'GET', autocomplete:'off',
-          'data-reload':'#results'}
-          <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
-      #{/form}
-    </div>
-  
-    <!-- Section -->
-    <section id="results">
-    
-      <!-- Section Paginazione 5-->
-      <div class="col-xs-7">
-        <ul class="pagination">
-          #{if paginableList.totalPage > 0}
-	  	    #{list items:0..paginableList.totalPage-1, as:'indexPage', class:'inline'}
-	  	      #{if paginableList.page==indexPage}
-	  	          <li class="active"><a href="#">${indexPage+1}</a></li>
-	  	      #{/if}
-	  	      #{else}
-	  	        <li><a href="@{MealTickets.recapMealTickets(name, indexPage, max)}">${indexPage+1}</a></li>
-	  	      #{/else}
-		    #{/list}
-		  #{/if}
-	      #{else}
-	        <br>
-	      #{/else}  
-        </ul>
-      </div>
-      
-      <!-- Section Tabella 12-->
-      <div class="col-md-12">
-        <table class="table table-bordered center" cellspacing="0" width="100%">
+    <div class="col-md-12">
+      <table class="datatable-test table table-bordered center">
+        <thead>
         <tr>
 	      <th>Nome</th>
-	      <th>
-	        Rimanenti 
-	        <br>
-	        <div class="col-md-4 col-md-offset-4">
-	        #{form action:@MealTickets.recapMealTickets(), class:'form-inline auto-submit', role:'form'}
-	          <select name="max" default="${max}" class="form-control">
-  	 		    <option value="0" #{if max==0} selected #{/if}>0</option>
-  				<option value="5" #{if max==5} selected #{/if}>5</option>
-  				<option value="10"#{if max==10} selected #{/if}>10</option>
-  				<option value=""  #{if max==null} selected #{/if}>Tutti</option>
-			  </select>
-   			#{/form}
-   			</div>
-   		  </th>
-	      <th>Data Esaurimento</th>
+	      <th>Mese Precedente</th>
+	      <th>Consegnati mese</th>
+	      <th>Utilizzati mese</th>
+	      <th>Rimanenti</th>
 	  	</tr>
-	  	
-	  	#{list items:mealTicketRecaps, as:'recap'}
+	  	</thead>
+	  	<tbody>
+	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td>
-	  	      <!-- modal person recap-->
-	  	      <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(recap.contract.person.id, name, page, max)}"
+	  	       <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}"
 	  	       data-modal=".my-modal-large">
-	  	      
-	  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
+		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
+	  	    <td>${recap.buoniPastoDalMesePrecedente}</td>
+	  	    <td>${recap.buoniPastoConsegnatiNelMese}</td>
+	  	    <td>${recap.buoniPastoUsatiNelMese}</td>
 	  	    <!-- remaining cell -->
-	  	    #{if recap.remaining >= 5}
+	  	    #{if recap.remainingMealTickets >= 5}
 	  	      <td class="success">
 	  	    #{/if}
-	  	    #{if recap.remaining > 0 && recap.remaining < 5}
+	  	    #{if recap.remainingMealTickets > 0 && recap.remainingMealTickets < 5}
 	  	       <td class="warning">
 	  	    #{/if}   
-	  	    #{if recap.remaining == 0}
+	  	    #{if recap.remainingMealTickets <= 0}
 	  	      <td class="danger">
 	  	    #{/if}
 	  	      <strong>
-	  	      ${recap.remaining}
+	  	      ${recap.remainingMealTickets}
 	  	      </strong>
-	  	    </td>
-	  	    
-	  	    <td>
-	  	    #{if recap.isMealTicketRunOut()}
-	  	    	${recap.getDateError()}
-	  	    #{/if}
-	  	     #{if recap.isMealTicketExpired()}
-	  	    	${recap.getDateError()} *
-	  	    #{/if}
 	  	    </td>
 	  	  </tr>
 
 	  	  #{/list}
-	  
-	    </table>
-      </div>
-    </section>  
+	  	</tbody>	
+	  </table>
+    </div>
+  </div>    
   
-
+  <!-- Lista degli istituti che non hanno attiva la data inizio utilizzo -->
+  <div id="container-fluid-nav-tabs" class="container-fluid">
+	  <div class="alert alert-danger">
+	    #{if officesNoMealTicketConf.size() > 0}
+	    	<p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per le seguenti sedi di
+	    	cui si detengono i diritti di amministrazione:</p>
+	    	#{list items:officesNoMealTicketConf, as:'office'}
+	    		<ul>
+	    		  <li>${office.name}</li>
+	    		</ul>
+	    	#{/list}
+	    	
+	    #{/if} 
+	  </div>
+  </div>
+    
+  
 </div>
 
 #{include '_myModal_large.html' /}

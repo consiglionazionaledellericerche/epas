@@ -7,14 +7,14 @@
         <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" />
     </head>
     <body>
-        	<h1>Istituto di Informatica e Telematica - Piano delle Reperibilità ${year} </h1>
+        <h1>Istituto di Informatica e Telematica - Piano delle Reperibilità ${year} </h1>
         	
 %{
 	int mm = 0;
 	int gg = 0;
-	
-	for(reperibilityMonth in reperibilityMonths) {
 }%
+
+#{list reperibilityMonths,as:'reperibilityMonth'}
 	<div class= "page">
 	<div class="table">
 
@@ -23,44 +23,30 @@
 		
 		<tr>
 			<th>Nome dipendente</th>
-		%{
-			for (dayOfMonth in reperibilityMonth.columnKeySet()) {	
-		}%
-		
-			<th>${firstOfYear.plusDays(gg).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
-		
-		%{
-		gg++;
-			}
-		}%
-		
+			#{list reperibilityMonth.columnKeySet(),as:'dayOfMonth'}
+				<th>${firstOfYear.plusDays(gg).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
+				%{gg++;}%
+			#{/list}
 		</tr>
 		
-		%{
-			for (person in reperibilityMonth.rowKeySet()) {
-				
-		}%
-		
+		#{list reperibilityMonth.rowKeySet(),as:'person'}
 			<tr>
 				<td class="nome-dipendente" id="${person.surname.toString().replace(' ', '')}">${person.surname} ${person.name}</td>
 				%{
 					nfr = 0;
 					nfs = 0;
-
-					for (dayOfMonth in reperibilityMonth.columnKeySet()) {
-					
+				}%
+				#{list reperibilityMonth.columnKeySet(),as:'dayOfMonth'}
+					%{
 						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('FS')) { 
 							nfs++;
 						}
 						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('FR')) { 
 							nfr++;
 						}
-						
-				}%
+					}%	
 						<td class="${reperibilityMonth.get(person, dayOfMonth)}">${reperibilityMonth.contains(person, dayOfMonth) ? reperibilityMonth.get(person, dayOfMonth) : ''}</td>
-				%{
-					}
-				}%
+				#{/list}
 				
 				<td class="label no-border">
 					Feriali=
@@ -75,10 +61,7 @@
 					 ${nfs}
 				</td>
 			</tr>
-			
-		%{
-			}	
-		}%
+		#{/list}
 		
 	</table>
 	
@@ -86,16 +69,14 @@
 
 %{
 		mm++;
-		
-		if ((mm % 4) == 0) {
 }%
-
+#{if (mm % 4) == 0}		
 	</div>
 	<div class="page">
-%{
-		}
-    }
-}%
+#{/if}
+#{/list}
+
+
 	</div>
 
 	<table class="no-border">
@@ -105,9 +86,8 @@
 	<tr>
 		<th class="no-border"> </th> <th> Feriali</th> <th class="red">Festivi</th><th> Feriali</th> <th class="red">Festivi</th> <th> Feriali</th> <th class="red">Festivi</th>
 	</tr>
-%{
-	for(person in reperibilitySumDays.rowKeySet()) {
-}%
+
+#{list reperibilitySumDays.rowKeySet(),as:'person'}
 	<tr>
 		<td class="nome-dipendente" id="${person.surname.toString().replace(' ', '')}">${person.surname} ${person.name}
 	
@@ -122,12 +102,8 @@
 		<td>${totFr}</td>
 		<td class="red"> ${totFs}</td>
 	</tr>
-
-%{
-    }
-}%
-	</table>
-   
+#{/list}
+</table>
       
       <div class="firma dir">
       <strong>Il Direttore</strong> <br />
@@ -138,6 +114,5 @@
       <strong>Il Responsabile</strong><br />
       Dott. Maurizio Martinelli
       </div>
-
-    </body>
+  </body>
 </html>

@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -19,7 +18,7 @@ public class ShiftTimeTable extends BaseModel{
 
 	private static final long serialVersionUID = -7869931573320174606L;
 
-	@OneToMany(mappedBy="shiftTimeTable", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="shiftTimeTable")
 	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
 
 	// start time of morning shift

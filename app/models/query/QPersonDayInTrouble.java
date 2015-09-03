@@ -26,14 +26,12 @@ public class QPersonDayInTrouble extends EntityPathBase<PersonDayInTrouble> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final StringPath cause = createString("cause");
+    public final EnumPath<models.enumerate.Troubles> cause = createEnum("cause", models.enumerate.Troubles.class);
 
     public final BooleanPath emailSent = createBoolean("emailSent");
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
-
-    public final BooleanPath fixed = createBoolean("fixed");
 
     //inherited
     public final NumberPath<Long> id = _super.id;

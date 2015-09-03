@@ -28,7 +28,7 @@
 		  <th style="min-width: 300px;">Nome</th>
 		  <th>No assenze e timbrature</th>
 		  <th>Timbrature disaccoppiate giorno feriale</th>
-		  <th>Timbrature disaccoppiate giorno festivo</th>
+		  <th>Lavoro festivo</th>
 		</tr>
 	
 	   #{list items:missingStampings, as:'personMissingStampings'}
@@ -52,9 +52,12 @@
 	     </td>
 	     
 	     <td>
-	        #{list items:personMissingStampings.troublesNoAbsenceUncoupledStampingsHolidayL, as:'day'}
-			  <span class="badge badge-inverse">${day}</span>
-			#{/list}
+	        #{if personMissingStampings.holidayWorkingTimeNotAccepted> 0 }
+	        <span class="badge badge-warning">Non Accettate: ${personMissingStampings.holidayWorkingTimeNotAccepted.toHourTime()}</span>
+	        #{/if}
+	        #{if personMissingStampings.holidayWorkingTimeAccepted > 0 }
+	        <span class="badge badge-inverse">Accettate: ${personMissingStampings.holidayWorkingTimeAccepted.toHourTime()}</span>
+	        #{/if}
 	     </td>
 	   </tr>     
 	   #{/list}

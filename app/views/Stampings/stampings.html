@@ -78,8 +78,8 @@
 #{/set}
 
     <div class="col-xs-12 col-lg-8">
-    <table id="tabellonetimbrature" class="table table-bordered table-condensed">
-
+    <table id="tabellonetimbrature" class="table table-bordered table-condensed"  cellspacing="0" width="100%">
+    <thead>
 	<tr>
 		<th class="group-single">Giorno</th>
 		<th class="group-single">Buono<br>mensa</th>
@@ -102,15 +102,13 @@
 		<th class="group-single hidden-xs hidden-sm">Tipo<br>Orario</th>
 		<th class="group-single hidden-xs hidden-sm">Note</th>
 	</tr>
-	
+	</thead>
+	<tbody>
 	#{list items:psDto.daysRecap, as:'dayRecap'}
-	<tr>
-     		#{if dayRecap.holiday==false}
-				<td class="capitalized default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
-			#{/if}
-			#{else}
-				<td class="festivi default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
-			#{/else}
+	<tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
+			<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
+				${dayRecap.date.shortDayName()}
+			</td>
 
             <td class="default-single">
 			#{if dayRecap.mealTicket.equals("NO")}
@@ -128,7 +126,12 @@
 
 			<td class="assenza default-single">
 				#{list items:dayRecap.absences, as:'absence'}
-				 	${absence.absenceType.code}
+				  <span>
+				     ${absence.absenceType.code} 
+				     #{if absence.justifiedMinutes}
+				    	${absence.justifiedMinutes} min
+				  	 #{/if}
+				  </span>
 				 #{/list}	
 			</td>
 			
@@ -169,6 +172,20 @@
 	       			
 			<td class="tempoLavoro default-single">
 				${dayRecap.workTime}
+		  		#{if dayRecap.personDay.decurted != null}
+			  	<a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="${(
+	    		'Tempo Totale Timbrature: <strong>'+dayRecap.stampingWorkingTime+'</strong>'+
+	    		'<br>Tempo Sottratto Per Pausa Pranzo: <strong>'+dayRecap.personDay.decurted+' minuti</strong>').escape()}"
+	    		title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
+			    </a>
+		  	    #{/if}
+		  		#{else}
+                #{/else}
+				
 				#{ifnot dayRecap.todayLunchTimeCode.equals("")}
 					<strong>${dayRecap.todayLunchTimeCode}</strong>
 				#{/ifnot}
@@ -220,7 +237,7 @@
 	    	</td>
 	</tr>
 	#{/list}
-
+    </tbody>
     </table>
   </div>
 

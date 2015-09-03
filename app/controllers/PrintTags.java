@@ -7,10 +7,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.PersonManager;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.Person;
+import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -20,9 +20,12 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 
 @With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
@@ -36,19 +39,17 @@ public class PrintTags extends Controller{
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
-	private static PersonManager personManager;
+	private static IWrapperFactory wrapperFactory;
 
 	public static void showTag(Long personId, int month, int year){
 
-		if(personId == null) {
-			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
-			Application.indexAdmin();
-		}
-
+		Preconditions.checkNotNull(personId);
 		Person person = personDao.getPersonById(personId);
 
+		Preconditions.checkNotNull(person);
+		
 		rules.checkIfPermitted(person.office);
-
+		
 		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
 		String titolo = "Situazione presenze mensile " +  
@@ -73,20 +74,28 @@ public class PrintTags extends Controller{
 
 	public static void showPersonTag(Integer year, Integer month){
 
-		Person person = Security.getUser().get().person;
+		Optional<User> currentUser = Security.getUser();
+		Preconditions.checkState(currentUser.isPresent());
+		Preconditions.checkNotNull(currentUser.get().person);
+		
+		IWrapperPerson person = wrapperFactory
+				.create(Security.getUser().get().person);
+		
+		
+		if(! person.isActiveInMonth(new YearMonth(year,month)) ) {
 
-		if(!personManager.isActiveInMonth(person, new YearMonth(year,month), false)) {
-
-			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
-					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+			flash.error("La persona %s non ha contratto attivo nel mese selezionato",
+					person.getValue().fullName());
 			render("@redirectToIndex");
 		}
 
-		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
+		PersonStampingRecap psDto = stampingsRecapFactory
+				.create(person.getValue(), year, month);
 
+		// FIXME: spostare nel template
 		String titolo = "Situazione presenze mensile " +  
 				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
-				person.surname + " " + person.name;
+				person.getValue().fullName();
 
 		renderPDF(psDto, titolo) ;
 

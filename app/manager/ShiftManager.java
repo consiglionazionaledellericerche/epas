@@ -3,6 +3,7 @@ package manager;
 import helpers.BadRequest;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
@@ -65,6 +65,7 @@ import dao.ShiftDao;
  * @authorArianna
  *
  */
+@Slf4j
 public class ShiftManager {
 
 	private PersonDayManager personDayManager;
@@ -150,14 +151,14 @@ public class ShiftManager {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			Logger.debug("Prelevo il personDay %s per la persona %s", personShiftDay.date, person.surname);
 
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
-
-				if (!personDayManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
+				
+				if (!personDay.get().isHoliday && personShiftDay.date.isBefore(LocalDate.now())) {
 					Logger.info("Il turno di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
@@ -169,7 +170,7 @@ public class ShiftManager {
 			} else {
 
 				// check for the stampings in working days
-				if (!personDayManager.isHoliday(person,personShiftDay.date) && LocalDate.now().isAfter(personShiftDay.date)) {
+				if (!personDay.get().isHoliday && LocalDate.now().isAfter(personShiftDay.date)) {
 
 					// check no stampings
 					//-----------------------------
@@ -188,7 +189,7 @@ public class ShiftManager {
 						//Logger.debug("Legge le coppie di timbrature valide");
 						// legge le coppie di timbrature valide 
 						//FIXME injettare il PersonDayManager
-						List<PairStamping> pairStampings = personDayManager.getValidPairStamping(personDay.get().stampings);
+						List<PairStamping> pairStampings = personDayManager.getValidPairStamping(personDay.get());
 
 						//Logger.debug("Dimensione di pairStampings =%s", pairStampings.size());
 
@@ -1132,10 +1133,10 @@ public class ShiftManager {
 	 * 								  se è vuota carica tutto il turno
 	 * @return icsCalendar			- calendario
 	 */
-	public Calendar createicsShiftCalendar(int year, String type, List<PersonShift> personsInTheCalList) {
+	public Calendar createicsShiftCalendar(int year, String type,Optional<PersonShift> personShift) {
 		List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 		
-		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personsInTheCalList);
+		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personShift);
 		ShiftCategories shiftCategory = shiftDao.getShiftCategoryByType(type);
 		String eventLabel = "Turno ".concat(shiftCategory.description).concat(": ");
 
@@ -1157,14 +1158,14 @@ public class ShiftManager {
 		//------------------------------
 		
 		// if the list is empty, load the entire shift days
-		if (personsInTheCalList.isEmpty()) {
+		if (!personShift.isPresent()) {
 			personShiftDays = shiftDao.getShiftDaysByPeriodAndType(from, to, shiftType);	
 			Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, type, personShiftDays.size());
 		}
 		else {
 		// load the shift days of the person in the list
-			personShiftDays = shiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType, personsInTheCalList.get(0).person);	
-			Logger.debug("Shift find called from %s to %s, type %s person %s - found %s shift days", from, to, type, personsInTheCalList.get(0).person.surname, personShiftDays.size());
+			personShiftDays = shiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType, personShift.get().person);	
+			Logger.debug("Shift find called from %s to %s, type %s person %s - found %s shift days", from, to, type, personShift.get().person.surname, personShiftDays.size());
 		}
 
 		// load the shift days in the calendar
@@ -1238,28 +1239,26 @@ public class ShiftManager {
 	 * of type 'type' for the 'year' year
 	 * If the personId=0, it exports the calendar for all persons of the shift of type 'type'
 	 */
-	public Optional<Calendar> createCalendar(String type, Long personId, int year) {
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
+	public Optional<Calendar> createCalendar(String type, Optional<Long> personId, int year) {
+		log.debug("Sto per creare iCal per l'anno {} della person con id = {}, shift type {}", year, personId, type);
 
-		List<PersonShift> personsInTheCalList = new ArrayList<PersonShift>();
-
-		if (personId != 0) {
+		Optional<PersonShift> personShift = Optional.absent();
+		if (personId.isPresent()) {
 			// read the shift person 
-			PersonShift personShift = shiftDao.getPersonShiftByPersonAndType(personId, type);
-			if (personShift == null) {
+			personShift = Optional.fromNullable(shiftDao.getPersonShiftByPersonAndType(personId.get(), type));
+			if (!personShift.isPresent()) {
+				log.info("Person id = {} is not associated to a shift of type = {}", personId.get(), type);
 				return Optional.<Calendar>absent();
 			}
-			personsInTheCalList.add(personShift);
 		}
-
 
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 		
-		Logger.debug("chiama la createicsShiftCalendar(%s, %s, %s)", year, type, personsInTheCalList);
-		icsCalendar = createicsShiftCalendar(year, type, personsInTheCalList); /*?*/
+		log.debug("chiama la createicsReperibilityCalendar({}, {}, {})", year, type, personShift);
+		icsCalendar = createicsShiftCalendar(year, type, personShift); /*?*/
 
-		Logger.debug("Find %s periodi di turno.", icsCalendar.getComponents().size());
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
+		log.debug("Find {} periodi di turno.", icsCalendar.getComponents().size());
+		log.debug("Creato iCal per l'anno {} della person con id = {}, shift type {}", year, personId, type);
 
 		return Optional.of(icsCalendar);
 	}

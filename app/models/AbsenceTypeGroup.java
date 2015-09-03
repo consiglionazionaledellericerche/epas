@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -32,7 +31,7 @@ public class AbsenceTypeGroup extends BaseModel{
 	
 	private static final long serialVersionUID = -8664634519147481684L;
 
-	@OneToMany(mappedBy="absenceTypeGroup", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="absenceTypeGroup")
 	public List<AbsenceType> absenceTypes;
 		
 	@Required
@@ -44,15 +43,15 @@ public class AbsenceTypeGroup extends BaseModel{
 	@Column(name = "limit_in_minute")
 	public Integer limitInMinute;
 	
-	
+	@Required
 	@Enumerated(EnumType.STRING)
 	@Column(name = "accumulation_type")
 	public AccumulationType accumulationType;
 	
+	@Required
 	@Enumerated(EnumType.STRING)
 	@Column(name = "accumulationBehaviour")
 	public AccumulationBehaviour accumulationBehaviour;
-	
 	
 	@OneToOne
 	@JoinColumn(name="replacing_absence_type_id")

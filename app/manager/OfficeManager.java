@@ -1,11 +1,18 @@
 package manager;
 
+import java.util.Set;
+
+import models.ConfGeneral;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.enumerate.Parameter;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
 import controllers.Security;
@@ -16,13 +23,15 @@ public class OfficeManager {
 
 	@Inject
 	public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-			RoleDao roleDao) {
+			RoleDao roleDao,ConfGeneralManager confGeneralManager) {
 		this.usersRolesOfficesDao = usersRolesOfficesDao;
 		this.roleDao = roleDao;
+		this.confGeneralManager = confGeneralManager;
 	}
 
 	private final UsersRolesOfficesDao usersRolesOfficesDao;
 	private final RoleDao roleDao;
+	private final ConfGeneralManager confGeneralManager;
 
 	/**
 	 * 
@@ -84,5 +93,20 @@ public class OfficeManager {
 		}
 
 		return false;
+	}
+	
+	public Set<Office> getOfficesWithAllowedIp(String ip){
+
+		Preconditions.checkNotNull(ip);
+
+		return FluentIterable.from(confGeneralManager.containsValue(
+				Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
+						new Function<ConfGeneral, Office>() {
+
+							@Override
+							public Office apply(ConfGeneral input) {
+								return input.office;
+							}
+						}).toSet();
 	}
 }

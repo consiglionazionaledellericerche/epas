@@ -35,5 +35,6 @@ public class StampModificationType extends BaseModel{
 	
 	@OneToMany(mappedBy="stampModificationType")
 	public List<PersonDay> personDays;
+	
 
 }

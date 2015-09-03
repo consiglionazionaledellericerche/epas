@@ -5,9 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import models.Permission;
 import models.Role;
-import models.query.QPermission;
 import models.query.QRole;
 
 import com.google.common.collect.Lists;
@@ -52,19 +50,6 @@ public class RoleDao extends DaoBase {
 		return query.singleResult(role);
 	}
 
-
-	/**
-	 * 
-	 * @param description
-	 * @return il permesso associato alla descrizione passata come parametro
-	 */
-	public Permission getPermissionByDescription(String description){
-		QPermission permission = QPermission.permission;
-		final JPQLQuery query = getQueryFactory().from(permission)
-				.where(permission.description.eq(description));
-		return query.singleResult(permission);
-	}
-	
 	/**
 	 * La lista dei ruoli di sistema.
 	 * 

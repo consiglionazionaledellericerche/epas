@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.db.jpa.Blob;
+import play.db.jpa.JPAPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -42,7 +43,7 @@ import controllers.Security;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
-import dao.ConfGeneralDao;
+
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -51,12 +52,12 @@ import dao.wrapper.IWrapperPerson;
 public class ChartsManager {
 
 	@Inject
-	public ChartsManager(ConfGeneralDao confGeneralDao,
-			CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao,
-			CompetenceManager competenceManager, PersonDao personDao,
-			VacationsRecapFactory vacationsFactory,
-			AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
-		this.confGeneralDao = confGeneralDao;
+	public ChartsManager(CompetenceCodeDao competenceCodeDao,
+			CompetenceDao competenceDao,CompetenceManager competenceManager, 
+			PersonDao personDao,VacationsRecapFactory vacationsFactory,
+			AbsenceDao absenceDao, ConfGeneralManager confGeneralManager,
+			IWrapperFactory wrapperFactory) {
+		this.confGeneralManager = confGeneralManager;
 		this.competenceCodeDao = competenceCodeDao;
 		this.competenceDao = competenceDao;
 		this.competenceManager = competenceManager;
@@ -67,8 +68,8 @@ public class ChartsManager {
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(ChartsManager.class);
-
-	private final ConfGeneralDao confGeneralDao;
+	
+	private final ConfGeneralManager confGeneralManager;
 	private final CompetenceCodeDao competenceCodeDao;
 	private final CompetenceDao competenceDao;
 	private final CompetenceManager competenceManager;
@@ -161,14 +162,13 @@ public class ChartsManager {
 		List<Year> annoList = Lists.newArrayList();
 		Integer yearBegin = null;
 		int counter = 0;
-		Optional<ConfGeneral> yearInitUseProgram = confGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description, office);
-		if(yearInitUseProgram.isPresent()){
-			counter++;			
-			LocalDate date = new LocalDate(yearInitUseProgram.get().fieldValue);
-			yearBegin =  date.getYear();
-			annoList.add(new Year(counter, yearBegin));
 
-		}
+		ConfGeneral yearInitUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
+		counter++;			
+		LocalDate date = new LocalDate(yearInitUseProgram.fieldValue);
+		yearBegin =  date.getYear();
+		annoList.add(new Year(counter, yearBegin));
+
 		if(yearBegin != null){			
 			for(int i = yearBegin; i <= LocalDate.now().getYear(); i++){
 				counter++;
@@ -200,7 +200,7 @@ public class ChartsManager {
 		return meseList;
 	}
 
-	/**
+	/**.size()
 	 * 
 	 * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in anagrafica
 	 */
@@ -241,6 +241,7 @@ public class ChartsManager {
 				po.surname = p.surname;
 				po.positiveHourForOvertime = competenceManager.positiveResidualInMonth(p, year, month)/60;
 				poList.add(po);
+				log.info("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
 			}
 
 		}
@@ -312,6 +313,10 @@ public class ChartsManager {
 					int matricola = Integer.parseInt(removeApice(tokenList.get(indexMatricola)));
 					String assenza = removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
+					
+					JPAPlugin.closeTx(false);
+					JPAPlugin.startTx(false);
+					
 					Person p = personDao.getPersonByNumber(matricola);
 					Absence abs = absenceDao.getAbsencesInPeriod(
 							Optional.fromNullable(p), dataAssenza
@@ -321,28 +326,52 @@ public class ChartsManager {
 											, Optional.<LocalDate>absent(), false).get(0) : null;
 
 											if(abs == null){
-												if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
-													renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
+												if(!dataAssenza.isBefore
+														(new LocalDate(LocalDate.now().getYear()-1,1,1)))
+													renderResult = 
+													new RenderResult(null, matricola, 
+															p.name, p.surname, assenza, 
+															dataAssenza, false, "nessuna assenza trovata",
+															null);
+												log.info("Nessuna assenza trovata in data {} per {}", dataAssenza, p.surname);
 											}
 											else{
-												if(abs.absenceType.certificateCode.equalsIgnoreCase(assenza)){
-													renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, true, "", null);							
+												if(abs.absenceType.certificateCode
+														.equalsIgnoreCase(assenza)){
+													renderResult = new RenderResult(null, 
+															matricola, p.name, p.surname, 
+															assenza, dataAssenza, true, "", 
+															null);
+													log.info("Assenza riscontrata in data {} per {} con codice {}", dataAssenza, p.surname, assenza);
 												}
 												else{
-													if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
-														renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica", abs.absenceType.code);
+													if(!abs.personDay.date.isBefore
+															(new LocalDate(LocalDate.now().getYear()-1,1,1)))
+														renderResult = new RenderResult(null, 
+																matricola, p.name, p.surname, 
+																assenza, dataAssenza, false, 
+																"assenza diversa da quella in anagrafica", 
+																abs.absenceType.code);
+													log.info("Riscontrata assenza diversa da quella in anagrafica in data {} per {}", 
+															dataAssenza, p.surname);
 												}
 											}
+											
 
 				}
 				catch(Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 					renderResult = new RenderResult(line, null, null, null, null, null, true, null, null);
 					listNull.add(renderResult);
 					continue;
 				}
-				listTrueFalse.add(renderResult);
-				log.debug("Inserito in lista render result per {} in data {}", renderResult.cognome, renderResult.data);
+				if(renderResult.check == false) {
+					listTrueFalse.add(renderResult);
+					log.info("Inserito in lista render result per {} in data {} "
+							+ "il codice {}", renderResult.cognome, renderResult.data, 
+							renderResult.codice);
+				}
+				
 
 			}
 
@@ -404,7 +433,7 @@ public class ChartsManager {
 
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
-				contractList = p.contracts;
+				contractList.addAll(p.contracts);
 
 			for (Contract contract : contractList){
 				if (beginContract != null && beginContract.equals(contract.beginContract)){
@@ -491,9 +520,9 @@ public class ChartsManager {
 
 		int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
-		out.append(new Integer(vr.get().vacationDaysCurrentYearUsed.size()).toString()+','+
-				new Integer(vr.get().vacationDaysLastYearUsed.size()).toString()+','+
-				new Integer(vr.get().permissionUsed.size()).toString()+','+
+		out.append(new Integer(vr.get().vacationDaysCurrentYearUsed).toString()+','+
+				new Integer(vr.get().vacationDaysLastYearUsed).toString()+','+
+				new Integer(vr.get().permissionUsed).toString()+','+
 				new Integer(recap.get().remainingMinutesCurrentYear).toString()+','+
 				new Integer(recap.get().remainingMinutesLastYear).toString()+',');
 		int month = LocalDate.now().getMonthOfYear();

@@ -18,6 +18,9 @@
 <ul class="nav nav-tabs">
   <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
   <li class="active"><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
+  #{if person.isPersonInCharge}
+  	<li><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
+  #{/if}
 </ul>
 
 <div class="panel panel-default col-sm-6 col-sm-offset-3" id="content" >
@@ -44,7 +47,7 @@
     <tr>
       <td>${child.name}</td>
       <td>${child.surname}</td>
-      <td>${child.bornDate}</td>
+      <td>${child.bornDate?.format()}</td>
       <td class="col-xs-3">
         <div class="btn-group pull-right" role="group" >
             <a role="button" class="btn btn-default" href="@{Persons.editChild(child.id)}">Modifica <i class="fa fa-cogs"></i></a>

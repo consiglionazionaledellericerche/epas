@@ -1,152 +1,107 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>Istituto di Informatica e Telematica - Reperibilità di ${month} ${year}</title>
-        <link rel="stylesheet" href="@{'/public/stylesheets/sistorgReportPDF.css'}" type="text/css" />
-        <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" />
-    </head>
-    <body>
-    		%{
-    			mm = 0;
-    			
-       			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
-				anno = firstOfMonth.plusMonths(mm).year().getAsText();
-    		}%
-        	<h1>Istituto di Informatica e Telematica </h1>
-        
-        	<div class="table">
-			<table class="mensile">
-			<caption> Reperibilità del personale per il mese di ${mese} ${anno}</caption>
+<head>
+	<title>Istituto di Informatica e Telematica - Reperibilità di ${month} ${year}</title>
+	<link rel="stylesheet" href="@{'/public/stylesheets/sistorgReportPDF.css'}" type="text/css" />
+	<link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" />
+</head>
+<body>
+%{
+	mm = 0;
+	mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
+	anno = firstOfMonth.plusMonths(mm).year().getAsText();
+}%
+<h1>Istituto di Informatica e Telematica </h1>
+
+<div class="table">
+	<table class="mensile">
+		<caption> Reperibilità del personale per il mese di ${mese} ${anno}</caption>
+		<tr>
+			<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${cFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${cFs}</th>
+		</tr>
+		<tr>
+			<th>Nome dipendente  </th> <th> Date </th> <th> Num. giorni</th> <th> Date </th> <th>Num. giorni</th>
+		</tr>
+
+		#{list reperibilitySumDays.rowKeySet(),as:'person'}
+		<tr>
+			<td> ${person.surname} ${person.name}</td>
+			<td>
+				#{list reperibilityDateDays.get(person, cFr)}
+				${_}<br/>
+				#{/list}
+			</td>
+			<td>  ${reperibilitySumDays.contains(person, cFr) ? reperibilitySumDays.get(person, cFr) : '0'}</td>
+			<td> 
+				#{list reperibilityDateDays.get(person, cFs)}
+				${_}<br/>
+				#{/list}
+			</td>
+			<td class="red"> ${reperibilitySumDays.contains(person, cFs) ? reperibilitySumDays.get(person, cFs) : '0'}</td>
+		</tr>
+		#{/list}
+	</table>
+</div>
+
+<div class="date">
+	<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+</div>
+
+<div class="firma dir">
+	<strong>Il Direttore</strong> <br />
+	Dott. Domenico Laforenza
+</div>
+
+<div class="firma resp">
+	<strong>Il Responsabile</strong><br />
+	Dott. Maurizio Martinelli
+</div>
+
+#{ifnot inconsistentAbsence.isEmpty()}
+%{
+fistTr = true;
+}%
+<div class="note_presenze">
+	<h1>Inconsistenze con le presenze del personale </h1>
+	<p>Sono state rilevate delle inconsistenze tra i turni di reperibilit&agrave; e le presenze del personale: </p>
+
+	<table class="mensile">
+		<tr>
+			<th>Nome dipendente </th> <th>${thNoStamp}</th> <th>${thAbs}</th>
+
+			#{list inconsistentAbsence.rowKeySet(),as:'person'}
 			<tr>
-				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${cFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${cFs}</th>
-			</tr>
-			<tr>
-				<th>Nome dipendente  </th> <th> Date </th> <th> Num. giorni</th> <th> Date </th> <th>Num. giorni</th>
-			</tr>
-			
-			%{
-				for(person in reperibilitySumDays.rowKeySet()) {
-			}%
-			<tr>
-				<td> ${person.surname} ${person.name}</td>
+				<td>${person.surname} ${person.name}</td>
+				#{if inconsistentAbsence.contains(person, thNoStamp)}
 				<td>
-					%{
-								for(day in reperibilityDateDays.get(person, cFr)) {
-					}%
-								${day}<br/>
-					%{
-    							}
-					}% 
+					#{list inconsistentAbsence.get(person, thNoStamp)} 
+					${_}<br/>
+					#{/list}
 				</td>
-				<td>  ${reperibilitySumDays.contains(person, cFr) ? reperibilitySumDays.get(person, cFr) : '0'}</td>
-				<td> 
-					%{
-								for(day in reperibilityDateDays.get(person, cFs)) {
-					}%
-								${day}<br/>
-					%{
-    							}
-					}% 
+				#{/if} 
+				#{else}
+				<td>&nbsp;</td>
+				#{/else}
+				#{if inconsistentAbsence.contains(person, thAbs)}
+				<td>
+					#{list inconsistentAbsence.get(person, thAbs)}
+					${_}<br/> 
+					#{/list}
 				</td>
-				<td class="red"> ${reperibilitySumDays.contains(person, cFs) ? reperibilitySumDays.get(person, cFs) : '0'}</td>
+				#{/if} 
+				#{else}
+				<td>&nbsp;</td>
+				#{/else}
 			</tr>
+			#{/list}
+		</table>
 
-			%{
-    			}
-			}%
-			</table>
-      		</div>
-      		
-      		<div class="date">
-      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
-      		</div>
-      		
-      		<div class="firma dir">
-      			<strong>Il Direttore</strong> <br />
-      			Dott. Domenico Laforenza
-      		</div>
-      
-     		<div class="firma resp">
-      			<strong>Il Responsabile</strong><br />
-      			Dott. Maurizio Martinelli
-      		</div>
-      		
-     
-			
-			%{
-				if (!inconsistentAbsence.isEmpty()) {
-				
-				fistTr = true;
-			}%
-					<div class="note_presenze">
-					<h1>Inconsistenze con le presenze del personale </h1>
-			    	<p>Sono state rilevate delle inconsistenze tra i turni di reperibilit&agrave; e le presenze del personale: </p>
-			    	
-			    	<table class="mensile">
-			    		<tr>
-			    		<th>Nome dipendente </th> <th>${thNoStamp}</th> <th>${thAbs}</th>
-			
-			%{
-					for(person in inconsistentAbsence.rowKeySet()) {
-			}%
-						<tr>
-							<td>${person.surname} ${person.name}</td>
-			%{
-							if (inconsistentAbsence.contains(person, thNoStamp)) {
-			}%
-							<td> 
-			%{
-								for(day in inconsistentAbsence.get(person, thNoStamp)) {
-			}%
-								${day}<br/>
-			%{
-    							}
-			}%
-							</td>
-			%{
-		    				} else {
-		    }%
-		  					<td>&nbsp;</td>
-		  	%{
-		  					}
-				
-							if (inconsistentAbsence.contains(person, thAbs)) {
-			}%
-							<td> 
-			%{
-								for(day in inconsistentAbsence.get(person, thAbs)) {
-			}%
-								${day}<br/>
-			%{
-    							}
-			}%
-							</td>
-			%{
-		    				} else {
-		    }%
-		  					<td>&nbsp;</td>
-		  	%{
-		  					}
-		  	}%				
-		    			</tr>
-		    %{
-		    		}
-		  	}%
-		  	
-		  	</table>
-						
-      		</div>
-      		
-      		<div class="date">
-      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
-      		</div>
-      		
-		  	%{
-		    	}						
-			}%
-					
+	</div>
 
-      		
-    </body>
+	<div class="date">
+		<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+	</div>
+	#{/ifnot}					
+</body>
 </html>

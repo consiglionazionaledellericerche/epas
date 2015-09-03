@@ -6,11 +6,10 @@
 
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month, office.id)}">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
   <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
   <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-  <li><a href="@{Competences.approvedCompetenceInYear(office.id, year, true)}">Competenza Assegnate nell'anno</a></li>
+  <li><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenza Assegnate nell'anno</a></li>
 </ul>
 
 </div>
@@ -60,7 +59,7 @@
           <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
     
           <select name="codice" class="input-medium">
-            #{list items:activeCompetenceCodes, as:'activeCode'}
+            #{list items:competenceCodeList, as:'activeCode'}
               <option value="${activeCode.code}" #{if activeCode.code.equals(codice) } selected="selected" #{/if} >${activeCode.code}</option>
             #{/list}
 	      </select>
@@ -100,29 +99,27 @@
 	        </tr>
 	
 	        #{list items:activePersons, as:'person'}
-	          #{if person.value.competenceCode.contains(competenceCode.value) }
+
 	          <tr>
 	            <td class="person">${person.value.name} ${person.value.surname}</td>
 	            <td>
-	            #{if person.value.competenceCode.contains(competenceCode.value)}
-	     	      #{if competenceCode.value.code.equals('S1')}
-	     	        (${person.getPositiveResidualInMonth(year,month) + person.competence(competenceCode.value,year,month).valueApproved})
-	              #{/if}
-	            #{/if}
 	            
+	     	      #{if competenceCode.value.code.equals('S1')}
+	     	        (${person.getPositiveResidualInMonth(year,month)})
+	              #{/if}
 	            
 	              <a 
-	              #{secure.check 'Competences.updateCompetence', target:person.value.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
+	              #{if editCompetence} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
 		     	    data-url="@{updateCompetence()}" 
 		     	    data-title="Modifica ${competenceCode.value.description} per ${person.value.name} ${person.value.surname}"
-		     	  #{/secure.check}
+		     	  #{/if}
 		     	  >
 	    	 	  ${person.competence(competenceCode.value,year,month).valueApproved}
 	     	    </a>
 
 	            </td>
 	          </tr>
-	          #{/if}
+
 	        #{/list}
 	      </table>
 	      
