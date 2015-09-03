@@ -557,8 +557,16 @@ public class ConsistencyManager {
 			cmr.vacationCurrentYearUsed = contract.getValue().sourceVacationCurrentYearUsed;
 			cmr.recoveryDayUsed = contract.getValue().sourceRecoveryDayUsed;
 			cmr.permissionUsed = contract.getValue().sourcePermissionUsed;
-			cmr.buoniPastoDaInizializzazione = contract.getValue().sourceRemainingMealTicket;
-			cmr.remainingMealTickets = contract.getValue().sourceRemainingMealTicket;
+			
+			if(contract.getValue().sourceDate.isEqual(contract.getValue().sourceDate/*diMealTicket*/)) {
+				cmr.buoniPastoDaInizializzazione = contract.getValue().sourceRemainingMealTicket;
+				cmr.remainingMealTickets = contract.getValue().sourceRemainingMealTicket;
+			} else {
+				//Non hanno significato, il riepilogo dei residui dei buoni pasto
+				//inizia successivamente.
+				cmr.buoniPastoDaInizializzazione = 0;
+				cmr.remainingMealTickets = 0;
+			}
 			cmr.save();
 			contract.getValue().contractMonthRecaps.add(cmr);
 			contract.getValue().save();
