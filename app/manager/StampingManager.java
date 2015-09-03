@@ -267,8 +267,8 @@ public class StampingManager {
 	public void persistStampingForUpdate(Stamping stamping, String note, 
 			int stampingHour, int stampingMinute, StampType stampType){
 		
-		stamping.date.withHourOfDay(stampingHour);
-		stamping.date.withMinuteOfHour(stampingMinute);
+		stamping.date = stamping.date.withHourOfDay(stampingHour);
+		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
 		if(stampType.getLabel() != null){
 			stamping.stampType = stampType;
 			stamping.note = stampType.description;
@@ -317,5 +317,18 @@ public class StampingManager {
 
 		}
 		return daysRecap;
+	}
+	
+	/**
+	 * 
+	 * @param stampingMinutes
+	 * @param stampingHours
+	 * @return
+	 */
+	public boolean checkIfCorrectMinutesAndHours(int stampingMinutes, int stampingHours){
+		if((stampingMinutes < 0 || stampingMinutes > 59)||(stampingHours < 0 || stampingHours > 23))
+			return false;
+		return true;
+		
 	}
 }
