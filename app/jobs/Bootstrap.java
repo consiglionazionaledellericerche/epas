@@ -127,7 +127,7 @@ public class Bootstrap extends Job<Void> {
 //		Allinea tutte le sequenze del db
 		Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 		
-		new FixUserPermission().now();
+		new FixUserPermission();
 
 	}
 	
