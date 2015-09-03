@@ -719,7 +719,8 @@ public class Persons extends Controller {
 		changePassword();
 	}
 
-	public static void resetPassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword) throws Throwable {
+	public static void resetPassword(@MinLength(5) @Required String nuovaPassword, 
+			@MinLength(5) @Required String confermaPassword) throws Throwable {		
 
 		User user = Security.getUser().get();
 		if(user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now()))
