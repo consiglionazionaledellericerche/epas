@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
@@ -25,7 +26,7 @@ import com.google.common.base.MoreObjects;
 
 @Entity
 @Audited
-@Table(name="users")
+@Table(name="users", uniqueConstraints={@UniqueConstraint(columnNames={"username"})})
 public class User extends BaseModel{
 
 	private static final long serialVersionUID = -6039180733038072891L;
