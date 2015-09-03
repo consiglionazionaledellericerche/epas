@@ -34,7 +34,8 @@ end
 
 /*  
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
- *  (Ricalca il più possibile la struttura del dropdown menu della persona.)
+ *  (Ricalca il più possibile la struttura del dropdown menu della persona 
+ *  oltre i calendari iCal e le azioni REST)
  */
 rule IsEmployee
 when
@@ -92,6 +93,8 @@ when
      	 * visualizzare il calendario specifico richiesto
      	 */
      	"Shift.iCal",
+     	"Reperibility.iCal", 
+     	
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
      	"rest.PersonDays.getMonthSituation"
