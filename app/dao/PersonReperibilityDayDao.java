@@ -51,12 +51,12 @@ public class PersonReperibilityDayDao extends DaoBase{
 	 * @return un personReperibilityDay nel caso in cui la persona person in data date fosse reperibile.
 	 * Null altrimenti
 	 */
-	public PersonReperibilityDay getPersonReperibilityDay(Person person, LocalDate date){
+	public Optional<PersonReperibilityDay> getPersonReperibilityDay(Person person, LocalDate date){
 
 		JPQLQuery query = getQueryFactory().from(prd)
 				.where(prd.personReperibility.person.eq(person).and(prd.date.eq(date)));
 
-		return query.singleResult(prd);
+		return Optional.fromNullable(query.singleResult(prd));
 
 	}
 

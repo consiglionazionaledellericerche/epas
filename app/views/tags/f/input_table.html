@@ -14,7 +14,7 @@
   
   <!-- input -->
   <td>
-    <input name="${field.name}" type="${_type}" value="${flash[field.name]}"/>
+    <input id="${field.name}" name="${field.name}" type="${_type}" value="${flash[field.name]}"/>
     #{ifError field.name}<span class="error">${field.error}</span>#{/ifError}
   </td>
   	

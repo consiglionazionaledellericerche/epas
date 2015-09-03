@@ -1,10 +1,14 @@
 package manager;
 
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.ConfGeneral;
 import models.Office;
 import models.enumerate.Parameter;
+import models.query.QConfGeneral;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
@@ -13,13 +17,68 @@ import play.cache.Cache;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
-import dao.ConfGeneralDao;
+import com.google.inject.Provider;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+import com.mysema.query.jpa.impl.JPAQueryFactory;
 
 public class ConfGeneralManager {
 
+	
 	@Inject
-	private ConfGeneralDao confGeneralDao;
+	ConfGeneralManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+		this.queryFactory = new JPAQueryFactory(emp);
+	}
+
+	protected final JPQLQueryFactory queryFactory;
+
+	/**
+	 * 
+	 * @param id
+	 * @return l'oggetto confGeneral relativo all'id passato come parametro
+	 */
+	public Optional<ConfGeneral> getById(Long pk) {
+		
+		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		
+		final JPQLQuery query = queryFactory.from(confGeneral)
+				.where(confGeneral.id.eq(pk));
+		
+		return Optional.fromNullable(query.singleResult(confGeneral));
+	}
+	
+	
+	/**
+	 * 
+	 * @param field
+	 * @param office
+	 * @return il confGeneral relativo al campo param e all'ufficio office passati come parametro
+	 */
+	private Optional<ConfGeneral> getByField(Parameter param, Office office) {
+		
+		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		
+		final JPQLQuery query = queryFactory.from(confGeneral)
+				.where(confGeneral.field.eq(param.description).and(confGeneral.office.eq(office)));
+		
+		return Optional.fromNullable(query.singleResult(confGeneral));
+	}
+	
+	/**
+	 * @param field
+	 * @param value
+	 * @return restituisce la lista di tutti i confGeneral 
+	 * che nel parametro field, contengono il valore value
+	 *  
+	 */
+	public List<ConfGeneral> containsValue(String field, String value){
+		
+		final QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		
+		return queryFactory.from(confGeneral).where(confGeneral.field.eq(field)
+				.and(confGeneral.fieldValue.contains(value))).list(confGeneral);
+		
+	}
 
 	/**
 	 * Produce la configurazione generale di default. 
@@ -35,7 +94,7 @@ public class ConfGeneralManager {
 
 			if(param.isGeneral()) {
 
-				Optional<ConfGeneral> confGeneral = confGeneralDao.getByFieldName(param.description, office);
+				Optional<ConfGeneral> confGeneral = getByField(param, office);
 
 				if( !confGeneral.isPresent() || overwrite ) {
 					saveConfGeneral(param, office, Optional.<String>absent());
@@ -57,88 +116,56 @@ public class ConfGeneralManager {
 	 * @param value
 	 * @return
 	 */
-	public Optional<ConfGeneral> saveConfGeneral(Parameter param, Office office, Optional<String> value) {
+	public ConfGeneral saveConfGeneral(Parameter param, Office office, Optional<String> value) {
+//		Il valore passato o in alternativa il valore di default
+		String newValue = value.isPresent() ? value.get() : param.getDefaultValue();
+		final String key = param.description + office.id;
+		
+//		Prelevo quella esistente se esiste, altrimenti ne creo una nuova
+		ConfGeneral confGeneral = getByField(param, office)
+				.or(new ConfGeneral(office, param.description, newValue));
 
-		String newValue = param.getDefaultValue();
-
-		if(value.isPresent()) {
-			newValue = value.get();
-		}
-
-		//Prelevo quella esistente
-		Optional<ConfGeneral> confGeneral = confGeneralDao.getByFieldName(param.description, office);
-
-		if(confGeneral.isPresent()) {
-
-			confGeneral.get().fieldValue = newValue;
-			confGeneral.get().save();
-			return confGeneral;
-		}
-
-		ConfGeneral newConfGeneral = new ConfGeneral(office, param.description, newValue);
-		newConfGeneral.save();
-
-		return Optional.fromNullable(newConfGeneral);
-
+		confGeneral.fieldValue = newValue;
+		confGeneral.save();
+		
+//		Aggiorno la cache
+		Cache.set(key, confGeneral,"30mn");
+		
+		return confGeneral;
 	}
 
+
 	/**
-	 * Si recupera l'oggetto quando si vuole modificare il parametro.
-	 *  
-	 * Se serve il valore utilizzare getFieldValue (utilizzo della cache).
+	 * Questa funzione controlla effettua in un primo momento a prelevare il parametro dalla cache.
+	 * Nel caso non sia presente in cache lo preleva dal db e aggiorna la cache.
+	 * Se non presente sul db ne crea uno con i parametri di default e aggiorna la cache
 	 * 
-	 * @param field
+	 * @param param
 	 * @param office
 	 * @return
 	 */
-	public ConfGeneral getByField(Parameter param, Office office) {
-
+	public ConfGeneral getConfGeneral(Parameter param, Office office) {
+		
 		Preconditions.checkState(param.isGeneral());
-
-		Optional<ConfGeneral> confGeneral = confGeneralDao.getByFieldName(param.description, office);
-
-		if(!confGeneral.isPresent()) {
-
-			confGeneral = saveConfGeneral(param, office, Optional.<String>absent());
-		}
-
-		return confGeneral.get();
-
-		//saveConfGeneral non dovrebbe fallire mai 
-		//perchè è sempre definito un default (speriamo)
-
-	}
-
-	/**
-	 * Preleva dalla cache il valore del campo di configurazione generale.
-	 * Se non presente lo crea a partire dal valore di default.
-	 * 
-	 * @param field
-	 * @param office
-	 * @return
-	 */
-	public String getFieldValue(Parameter param, Office office) {
-
-		Preconditions.checkState(param.isGeneral());
-
-		String key = param.description + office.code;
-
-		String value = (String)Cache.get(key);
-
-		if(value == null){
-
-			Optional<ConfGeneral> conf = confGeneralDao.getByFieldName(param.description, office);
-
-			if(!conf.isPresent()){
-
-				conf = saveConfGeneral(param, office, Optional.<String>absent());
+		
+		final String key = param.description + office.id;
+		
+//		1. Provo a prelevarlo dalla cache
+		ConfGeneral confGeneral = Cache.get(key,ConfGeneral.class);
+		
+//		Se non e' presente in cache, lo prelevo dal db
+		if(confGeneral == null){
+			confGeneral = getByField(param, office).orNull();
+			
+//			Se non e' presente sul db ne creo uno con la configurazione di default
+			if(confGeneral == null){
+				return saveConfGeneral(param, office, Optional.<String>absent());
 			}
-
-			value = conf.get().fieldValue;
-			Cache.set(key, value);
+//			Aggiorno la cache se lo prelevo dal db
+			Cache.set(key, confGeneral,"30mn");
 		}
-
-		return value;
+		
+		return confGeneral;
 	}
 
 	/**
@@ -148,7 +175,7 @@ public class ConfGeneralManager {
 	 * @return
 	 */
 	public Integer getIntegerFieldValue(Parameter param, Office office) {
-		return new Integer(getFieldValue(param,office));
+		return new Integer(getConfGeneral(param,office).fieldValue);
 	}
 
 	/**
@@ -159,7 +186,7 @@ public class ConfGeneralManager {
 	 */
 	public Optional<LocalDate> getLocalDateFieldValue(Parameter param, Office office) {
 		try {
-			return Optional.fromNullable(new LocalDate(getFieldValue(param,office)));
+			return Optional.fromNullable(new LocalDate(getConfGeneral(param,office).fieldValue));
 			
 		} catch(Exception e) {
 			return Optional.<LocalDate>absent(); 
@@ -174,7 +201,7 @@ public class ConfGeneralManager {
 	 * @return
 	 */
 	public boolean getBooleanFieldValue(Parameter param, Office office){
-		return new Boolean(getFieldValue(param,office));
+		return new Boolean(getConfGeneral(param,office).fieldValue);
 	}
 	
 	public Optional<MonthDay> officePatron(Office office){
@@ -182,9 +209,13 @@ public class ConfGeneralManager {
 		if(office == null)
 			return Optional.absent();
 		
-		String monthOfPatron = getFieldValue(Parameter.MONTH_OF_PATRON, office);
-		String dayOfPatron = getFieldValue(Parameter.DAY_OF_PATRON, office);
+		String monthOfPatron = getConfGeneral(Parameter.MONTH_OF_PATRON, office).fieldValue;
+		String dayOfPatron = getConfGeneral(Parameter.DAY_OF_PATRON, office).fieldValue;
 		return Optional.of(MonthDay.parse("--"+monthOfPatron+"-"+dayOfPatron));
+	}
+	
+	public String getFieldValue(Parameter param,Office office){
+		return getConfGeneral(param,office).fieldValue;
 	}
 
 }

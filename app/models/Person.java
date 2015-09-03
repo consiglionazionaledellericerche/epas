@@ -5,9 +5,12 @@ package models;
 
 
 
-import java.util.ArrayList;
-import java.util.List;
+import it.cnr.iit.epas.NullStringBinder;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +20,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import models.base.BaseModel;
@@ -26,8 +31,13 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
+import play.data.validation.Unique;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author cristian
@@ -41,7 +51,8 @@ import play.data.validation.Required;
  */
 @Entity
 @Audited
-@Table(name = "persons")
+@Table(name = "persons", uniqueConstraints={@UniqueConstraint(columnNames={"badgenumber", "office_id"})})
+
 public class Person extends BaseModel implements Comparable<Person>{
 
 	private static final long serialVersionUID = -2293369685203872207L;
@@ -62,6 +73,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public LocalDate birthday;
 
 	@Email
+	@Unique @As(binder=NullStringBinder.class)
+	@Required
 	public String email;
 
 	@OneToOne (optional = false, fetch = FetchType.LAZY)
@@ -71,12 +84,14 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 * Numero di matricola
 	 */
+	@Unique
 	public Integer number;
 
 	/**
 	 * numero di matricola sul badge
 	 */
-
+//	@Unique
+	@As(binder=NullStringBinder.class)
 	public String badgeNumber;
 
 	/**
@@ -85,18 +100,22 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public Long oldId;
 
 	/**
-	 * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con Perseo (Person.id di Perseo)
+	 * Internal ID: server per l'identificazione univoca della persona nella 
+	 * sincronizzazione con Perseo (Person.id di Perseo)
 	 */
+	@Unique
 	public Integer iId;
 
 	/**
-	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
+	 * Campo da usarsi in caso di autenticazione via shibboleth.
 	 */
-	@Email
-	public String cnr_email;
+	@Unique
+	@As(binder=NullStringBinder.class)
+	public String eppn;
 
 	/**
-	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da contact_data così da eliminare quella tabella
+	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli 
+	 * da contact_data così da eliminare quella tabella
 	 */
 	public String telephone;
 
@@ -106,89 +125,99 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@Column(name="want_email")
 	public boolean wantEmail;
-
+	
 	/**
-	 * relazione con la tabella delle assenze iniziali
+	 * i successivi due campi servono per la nuova relazione tra Person e Person 
+	 * relativa ai responsabili
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
-
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
+	@OneToMany(mappedBy="personInCharge")
+	@OrderBy("surname")
+    public List<Person> people = Lists.newArrayList();;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="person_in_charge")
+	@Nullable
+    public Person personInCharge;
+	
+	/**
+	 * questo campo booleano serve a stabilire se una persona è un responsabile o no
+	 */
+	@Column(name="is_person_in_charge")
+	public boolean isPersonInCharge;
 
 	/**
 	 *  relazione con i turni
 	 */
-	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
-
-
+	@OneToMany(mappedBy="supervisor")
+	public List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Contract> contracts = new ArrayList<Contract>();
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public List<Contract> contracts = Lists.newArrayList();
 
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonChildren> personChildren;
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public Set<PersonChildren> personChildren = Sets.newHashSet();
 
 	/**
 	 * relazione con la nuova tabella dei person day
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonDay> personDays;
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public List<PersonDay> personDays = Lists.newArrayList();;
 
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<CertificatedData> certificatedData;
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public List<CertificatedData> certificatedData = Lists.newArrayList();;
 
-	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<MealTicket> mealTicketsAdmin;
+	@OneToMany(mappedBy="admin")
+	public List<MealTicket> mealTicketsAdmin = Lists.newArrayList();;
 
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonMonthRecap> personMonths = new ArrayList<PersonMonthRecap>();
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public List<PersonMonthRecap> personMonths = Lists.newArrayList();;
 
 	/**
 	 * relazione con la nuova tabella dei person_year
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonYear> personYears;
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public List<PersonYear> personYears = Lists.newArrayList();;
 
 
 	/**
 	 * relazione con la tabella Competence
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Competence> competences;
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public List<Competence> competences = Lists.newArrayList();;
 
 	/**
 	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
 	 */
 	@NotAudited
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	public List<CompetenceCode> competenceCode;
+	@ManyToMany(cascade = {CascadeType.REFRESH})
+	public List<CompetenceCode> competenceCode = Lists.newArrayList();;
 
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
+	@OneToOne(mappedBy="person")
 	public PersonHourForOvertime personHourForOvertime;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
+	@OneToOne(mappedBy="person", cascade = {CascadeType.REMOVE})
 	public PersonReperibility reperibility;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
+	@OneToOne(mappedBy="person")
 	public PersonShift personShift;
 	
 	@ManyToOne
 	@JoinColumn(name="qualification_id")
+	@Required
 	public Qualification qualification;
 
 	@ManyToOne
 	@JoinColumn(name="office_id")
+	@Required
 	public Office office;
 
 

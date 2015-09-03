@@ -41,6 +41,8 @@ public class QPersonReperibility extends EntityPathBase<PersonReperibility> {
 
     public final QPerson person;
 
+    public final ListPath<models.PersonReperibilityDay, QPersonReperibilityDay> personReperibilityDays = this.<models.PersonReperibilityDay, QPersonReperibilityDay>createList("personReperibilityDays", models.PersonReperibilityDay.class, QPersonReperibilityDay.class, PathInits.DIRECT2);
+
     public final QPersonReperibilityType personReperibilityType;
 
     public final DatePath<org.joda.time.LocalDate> startDate = createDate("startDate", org.joda.time.LocalDate.class);

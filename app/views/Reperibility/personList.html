@@ -3,11 +3,8 @@
 <h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
 
 <div id="logout">
-#{form @Application.logout()}
-	
-    	<input type="submit" value="Account logout" />
-     
-
+#{form @Application.logout()}	
+    <input type="submit" value="Account logout" />   
 #{/form}
 </div>
 
@@ -20,9 +17,9 @@
 	#{option 'vacations'}Ferie#{/option}
 	#{option 'competences'}Competenze e Straordinari#{/option}	
 #{/select}
-    	<input type="submit" value="go!" />
-     
 
+<input type="submit" value="go!" />
+     
 #{/form}
 </div>
 
@@ -39,21 +36,11 @@
 		<th>Email</th>
 		<th>Note</th>
 	</tr>
-	
-%{
-     for(person in personList) {
-}%
-
+	#{list personList}
 	<tr>
-		<td>${person.surname}</td>
-		<td>${person.name}</td>
-		<td>${person.number}</td>
-		
+		<td>${_.surname}</td>
+		<td>${_.name}</td>
+		<td>${_.number}</td>
 	</tr>
-
-%{  		   
-     }
-     
-}%
-
+	#{/list}
 </table>

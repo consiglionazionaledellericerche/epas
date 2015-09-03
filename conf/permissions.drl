@@ -5,6 +5,8 @@ import models.Office;
 import models.UsersRolesOffices;
 import models.Permission;
 import models.ShiftType;
+import models.Person;
+import models.Role;
 
 global models.User currentOperator;
 
@@ -17,6 +19,8 @@ global models.User currentOperator;
 *
 *
 */
+
+
 
 rule AnyUser when
   $c: PermissionCheck(action in (
@@ -42,6 +46,7 @@ when
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
+     	"Stampings.dailyPresenceForPersonInCharge",
      	
      	/* Assenze mensili */
      	"Absences.absences",
@@ -58,6 +63,7 @@ when
        	
        	/* Competenze */
      	"Competences.competences",
+     	"Competences.monthlyOvertime",
        	
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
@@ -85,12 +91,52 @@ when
      	 * dentro il metodo controllare il permesso di
      	 * visualizzare il calendario specifico richiesto
      	 */
-     	"Shift.iCal"
-     	
+     	"Shift.iCal",
+     	/* Metodi rest */
+     	"rest.PersonDays.getDaySituation",
+     	"rest.PersonDays.getMonthSituation"
        ), target == null, granted == false)
 then
  $c.grant();
 end
+
+/*  
+ *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
+ *  Metodi rest per se stessi
+ *
+rule IsEmployeeRest
+*/
+
+
+/* Azioni eseguibili da qualsiasi utente che abbiano come destinatario 
+ * dell'azione se stesso
+ */
+ 
+rule HasRightOnHimself
+when
+  $p: Person(this == currentOperator.person)
+  $c: PermissionCheck(target == $p, granted == false)
+then
+ $c.grant();
+end
+
+
+/* Consente agli amministratori e agli amministratori in sola lettura di avere
+ * diritti di visualizzazione su situazioni relative a una specifica persona che
+ * appartiene allo stesso ufficio dell'amministratore 
+ */
+ 
+rule HasRightOnPerson
+when
+  $uro: UsersRolesOffices(role.name in("personnelAdmin","personnelAdminMini"))
+  $o: Office() from $uro.office
+  $c: PermissionCheck($o.persons contains target, granted == false)
+then
+ $c.grant();
+end
+  
+
+
 
 /*
  * Azioni eseguibili da utente con permesso developer (tutto)
@@ -98,7 +144,7 @@ end
 rule developer
 when
  $uro: UsersRolesOffices()
- $p: Permission(description == "developer") from $uro.role.permissions
+ Role(name == "developer") from $uro.role
  $c: PermissionCheck( granted == false)
 then
  $c.grant();
@@ -191,6 +237,10 @@ when
      	"Persons.removeChild",
      	"Persons.deleteChild",
      	
+     	"Persons.workGroup",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
+     	
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
@@ -247,6 +297,10 @@ when
      	"Persons.insertChild",
      	"Persons.removeChild",
      	"Persons.deleteChild",
+     	
+     	"Persons.workGroup",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
    
      	"Persons.updateContractStampProfile",
      	"Persons.splitContractStampProfile",
@@ -288,8 +342,6 @@ when
  		"Stampings.missingStamping",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
-      
-      	"VacationsAdmin.list",
         
         "YearlyAbsences.showGeneralMonthlyAbsences",
         "YearlyAbsences.yearlyAbsences",
@@ -320,7 +372,8 @@ when
         "PrintTags.showTag",
 		        
         "Stampings.personStamping",
-        
+
+		"VacationsAdmin.list",        
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
@@ -364,6 +417,7 @@ when
 		
         "Stampings.personStamping",
         
+        "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
@@ -603,7 +657,9 @@ when
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
-
+		"Configurations.savePastYearVacationLimit",
+		"Configurations.savePatron",
+		
         "Import.officeList"
 
         ), target == null, granted == false)
@@ -621,7 +677,9 @@ when
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear"
+        "Configurations.saveNewConfYear",
+        "Configurations.savePastYearVacationLimit",
+        "Configurations.savePatron"
         
        ), target == $o, granted == false)
 then
@@ -788,8 +846,8 @@ when
         
         /* duplicate */
         "Absences.editCode",
-        "Absences.insertAbsenceCode",
-     	"Absences.saveAbsenceCode",
+        "Absences.insertCode",
+     	"Absences.saveCode",
      	"Absences.updateCode"
         
         ), target == null, granted == false)
@@ -805,8 +863,8 @@ when
  $c: PermissionCheck(action in (
        
         "Absences.editCode",
-     	"Absences.insertAbsenceCode",
-     	"Absences.saveAbsenceCode",
+     	"Absences.insertCode",
+     	"Absences.saveCode",
      	"Absences.updateCode"
      	
        ), target == $o, granted == false)
@@ -815,7 +873,7 @@ then
 end
 
 /*******************************************************************************
- * Azioni via REST. Protime
+ * Azioni via REST
  ******************************************************************************/
  
 rule rest
@@ -828,9 +886,26 @@ when
         "rest.Persons.missions",
         "rest.Persons.competences",
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.insertAbsence"
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence"
         
        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule rest_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Permission(description == "rest") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence"
+        
+       ), target == $o, granted == false)
 then
  $c.grant();
 end
@@ -846,7 +921,10 @@ when
  $c: PermissionCheck(action in (
  
  		/* duplicate */
- 		"StampingsFromClient.create"
+ 		"StampingsFromClient.create",
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
  		
  		), target == null, granted == false)
  then
@@ -860,7 +938,10 @@ when
  $p: Permission(description == "stampingsCreate") from $uro.role.permissions
  $c: PermissionCheck(action in (
  
- 		"StampingsFromClient.create"
+ 		"StampingsFromClient.create",
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
  	
  		), target == $o, granted == false)
 then

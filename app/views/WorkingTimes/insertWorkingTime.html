@@ -5,7 +5,15 @@
 
 #{form @WorkingTimes.save()}
 
-  <input type="hidden" name="office.id" value="${office.id}"/>
+  <input type="hidden" name="wtt.office.id" value="${office.id}"/>
+
+  	<input type="hidden" name="wttd1.dayOfWeek" value="1" />
+  	<input type="hidden" name="wttd2.dayOfWeek" value="2" />
+  	<input type="hidden" name="wttd3.dayOfWeek" value="3" />
+  	<input type="hidden" name="wttd4.dayOfWeek" value="4" />
+  	<input type="hidden" name="wttd5.dayOfWeek" value="5" />
+  	<input type="hidden" name="wttd6.dayOfWeek" value="6" />
+  	<input type="hidden" name="wttd7.dayOfWeek" value="7" />
 
   <div class="well center">
 	<strong>Nome Orario </strong><input name="wtt.description" type="text"/>  
@@ -51,6 +59,26 @@
 		<td><input name="wttd5.breakTicketTime" type="number" /></td>
 		<td><input name="wttd6.breakTicketTime" type="number" /></td>
 		<td><input name="wttd7.breakTicketTime" type="number" /></td>
+	</tr>
+	<tr>
+		<td class="item warning">Soglia pomeridiana per buono pasto<br>(in minuti dalla mezzanotte)</td>
+		<td><input name="wttd1.ticketAfternoonThreshold" type="number" /></td>
+		<td><input name="wttd2.ticketAfternoonThreshold" type="number" /></td>
+		<td><input name="wttd3.ticketAfternoonThreshold" type="number" /></td>
+		<td><input name="wttd4.ticketAfternoonThreshold" type="number" /></td>
+		<td><input name="wttd5.ticketAfternoonThreshold" type="number" /></td>
+		<td><input name="wttd6.ticketAfternoonThreshold" type="number" /></td>
+		<td><input name="wttd7.ticketAfternoonThreshold" type="number" /></td>
+	</tr>
+	<tr>
+		<td class="item warning">Lavoro minimo per buono pasto dopo soglia pomeridiana<br>(in minuti)</td>
+		<td><input name="wttd1.ticketAfternoonWorkingTime" type="number" /></td>
+		<td><input name="wttd2.ticketAfternoonWorkingTime" type="number" /></td>
+		<td><input name="wttd3.ticketAfternoonWorkingTime" type="number" /></td>
+		<td><input name="wttd4.ticketAfternoonWorkingTime" type="number" /></td>
+		<td><input name="wttd5.ticketAfternoonWorkingTime" type="number" /></td>
+		<td><input name="wttd6.ticketAfternoonWorkingTime" type="number" /></td>
+		<td><input name="wttd7.ticketAfternoonWorkingTime" type="number" /></td>
 	</tr>
 	<tr>
 		<td class="item warning">Giorno festivo</td>

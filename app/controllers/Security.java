@@ -2,16 +2,12 @@ package controllers;
 
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ConfGeneralManager;
 import models.Office;
-import models.Permission;
-import models.Person;
 import models.User;
-import models.UsersRolesOffices;
 import models.enumerate.Parameter;
 import play.Logger;
 import play.cache.Cache;
@@ -20,14 +16,9 @@ import play.utils.Java;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
-import dao.ConfGeneralDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.RoleDao;
+import dao.PermissionDao;
 import dao.UserDao;
 
 public class Security extends Secure.Security {
@@ -35,13 +26,9 @@ public class Security extends Secure.Security {
 	@Inject
 	private static UserDao userDao;
 	@Inject
-	private static OfficeDao officeDao;
+	private static PermissionDao permissionDao;
 	@Inject
-	private static RoleDao roleDao;
-	@Inject
-	private static PersonDao personDao;
-	@Inject
-	private static ConfGeneralDao confGeneralDao;
+	private static ConfGeneralManager confGeneralManager;
 
 	/* Client rest */
 
@@ -94,12 +81,9 @@ public class Security extends Secure.Security {
 	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
 	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
 
-	public final static String VIEW_SHIFT = "viewShift";
-	public final static String MANAGE_SHIFT = "manageShift";
-	
 	public final static String VIEW_REPERIBILITY = "viewReperibility";
 	public final static String MANAGE_REPERIBILITY = "manageReperibility";
-	 
+	
 //	FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 
@@ -151,7 +135,7 @@ public class Security extends Secure.Security {
 
 		//db
 		User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
-		//User user = User.find("byUsername", username).first();
+		
 		Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
 		if (user == null){
 			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
@@ -176,147 +160,20 @@ public class Security extends Secure.Security {
 		return getUser(connected());
 	}
 
-	static boolean check(String profile) {
+	/**
+	 * @param office
+	 * @param permission
+	 * @return
+	 */
+	public static boolean hasPermissionOnOffice(Office office, String permission) {
+		
+		return permissionDao
+				.getOfficePermissions(getUser().get(), office).contains(
+						permissionDao.getPermissionByDescription(permission));
 
-		if (!getUser().isPresent()) {
-			return false;
-		}
-
-		final User user = getUser().get();
-		final Permission permission = roleDao.getPermissionByDescription(profile);
-		//final Permission permission = Permission.find("byDescription", profile).first();
-		if(permission == null) {
-
-			Logger.debug("Il Permission per la check del profilo %s è null o vuoto", profile);
-			return false;
-		}
-
-		Long officeId = params.get("officeId") != null ? Long.valueOf(params.get("officeId")) : null;
-		Long personId = params.get("personId") != null ? Long.valueOf(params.get("personId")) : null;
-
-		/* caso richiesta solo su personId */
-		if( personId != null && officeId == null) {
-
-			Person person = personDao.getPersonById(personId);
-			//Person person = Person.findById(personId);
-			if( checkUro(user.usersRolesOffices, permission, person.office) ) {
-
-				return true;
-			}
-			return false;
-		}
-
-		/* caso richiesta solo su officeId */
-
-		if( personId == null && officeId != null ) {
-
-			Office office = officeDao.getOfficeById(officeId);
-			//Office office = Office.findById(officeId);
-			if( checkUro(user.usersRolesOffices, permission, office) ) {
-
-				return true;
-			}
-			return false;
-		}
-
-		/* caso richiesta sia su personId che su officeId (rara, solo cambio sede persona) */
-
-		if( personId != null && officeId != null ) { 
-
-			Person person = personDao.getPersonById(personId);
-			//Person person = Person.findById(personId);
-			Office office = officeDao.getOfficeById(officeId);
-			//Office office = Office.findById(officeId);
-			if( checkUro(user.usersRolesOffices, permission, person.office) && checkUro(user.usersRolesOffices, permission, office) ) {
-
-				return true;
-			}
-			return false;
-		}
-
-
-		/* caso richiesta generica senza personId o officeId specificati */
-
-		return checkUro(user.usersRolesOffices, permission, null);
-	}   
-
-	private static boolean checkUro(List<UsersRolesOffices> uroList, Permission permission, Office office) {
-
-		for(UsersRolesOffices uro : uroList) {
-			if(office != null && !office.id.equals(uro.office.id)) {
-
-				continue;
-			}
-			List<Permission> permissionList = Lists.newArrayList(uro.role.permissions);
-			for(Permission p : permissionList) {
-
-				if(p.description.equals(permission.description)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
-	static boolean permissionCheck() {
-		final String username = connected();
-		if (Strings.isNullOrEmpty(username)) {
-			Logger.debug("Nessun utente connesso");
-			return false;
-		}
-
-		Logger.trace("checking Admin permission for user %s", username);
-
-		//TODO Rendere più specifici i controlli per gli account di Amministrazione
-		/*
-		if (getUserAllPermissions(username).size() > 1) {
-			return true;
-		}
-		return false;
-		 */
-		return true;
-	}   
-
-	private static List<Permission> getUserAllPermissions(String username) {
-
-		final Optional<User> user = getUser(username);
-		if (!user.isPresent()) {
-			return Lists.newArrayList();
-		}
-		@SuppressWarnings("unchecked")
-		List<Permission> permissions = 
-			Cache.get(PERMISSION_CACHE_PREFIX +	username, List.class);
-
-		if (permissions == null) {
-			user.get().refresh();
-			//permissions = user.get().getAllPermissions();
-			permissions = userDao.getAllPermissions(user.get());
-			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
-		}
-
-		return permissions;
-	}
-
-	public static List<Permission> getPersonAllPermissions() {
-		return getUserAllPermissions(connected());
-	}
-
-	public static List<Office> getOfficeAllowed(String profile) {
-		if (!getUser().isPresent()) {
-			return Lists.newArrayList();
-		}
-		final List<Office> officeList = new ArrayList<Office>();
-
-		for(UsersRolesOffices uro : getUser().get().usersRolesOffices)  {
-			for(Permission p : uro.role.permissions) {
-				if(p.description.equals(profile)) {
-					officeList.add(uro.office);
-				}
-			}
-		}
-		return officeList;
-	}
-
+	
 	static Object invoke(String m, Object... args) throws Throwable {
 
 		try {
@@ -328,7 +185,7 @@ public class Security extends Secure.Security {
 	
 	public static boolean checkForWebstamping(){
 		String remoteAddress = Http.Request.current().remoteAddress;
-		return !confGeneralDao.containsValue(
+		return !confGeneralManager.containsValue(
 				Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
 	}
 }

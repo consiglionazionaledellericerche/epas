@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -49,8 +50,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	}
 
 	@Required
-	@ManyToOne(optional = false)
-
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
 	public PersonDay personDay;
 

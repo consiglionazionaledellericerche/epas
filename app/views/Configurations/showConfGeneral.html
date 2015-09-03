@@ -2,36 +2,14 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Parametri di configurazione' /}
 
-<ul class="nav nav-tabs">
-  <li class="active"><a href="@{Configurations.showConfGeneral()}#">Parametri Generali</a></li>
-  <li><a href="@{Configurations.showConfYear()}#">Parametri Annuali</a></li>
-</ul>
+%{ name = 'confGeneral' }%
+#{include './_confTabs.html' /}
 
 <div class="container">
-  <br>
-  <div class="center">
-	  #{form action:@Configurations.showConfGeneral(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <select name="officeId" class="form-control" id="dip" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-  </div>
-
+ 
+  #{include './_switchOffice.html' /} 
+ 
   <section id="results">
-  
-  <br>
 
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -45,12 +23,22 @@
           </tr>
           <tr>
             <td class="col-sm-6">Festa del patrono</td>
-            <td class="col-sm-6"><strong>${dayOfPatron.fieldValue} / ${monthOfPatron.fieldValue}</strong></td>
+            <td class="col-sm-6">
+ 			<strong>
+		          <a href="#"
+		           data-x-editable 
+		           data-type="combodate"
+		           data-format="DD/MM"
+		           data-template="DD MM"
+		           data-pk="${office.id}"
+		           data-value="${dayOfPatron?.fieldValue} ${monthOfPatron?.fieldValue}"
+		           data-url="@{savePatron()}"></a>
+		    </strong>
+            <strong></strong></td>
           </tr>
         </table>  
   	  </div>
   	</div>
-
   <br>
 
     <div class="panel panel-default">
@@ -64,15 +52,13 @@
 		      <td class="col-sm-6">Autorizzazione timbratura via web</td>
 		      <td class="col-sm-6">
 		        <strong>
-		          <a href="#" 
-		          id="select1" 
+		          <a href="#"
+		          data-x-editable
 		          data-type="select" 
-		          data-name="${webStampingAllowed?.field}"
-			  	  data-pk="${office.id}" 
+			  	  data-pk="${webStampingAllowed?.id}"
 		          data-value="['${webStampingAllowed.fieldValue}']"
 		          data-source="[{'true': 'SI'},{'false': 'NO'}]" 
-		          data-url="@{saveConfGeneral()}" 
-		          class="editable editable-click"></a>
+		          data-url="@{saveConfGeneral()}"></a>
 		        </strong>
 		      </td>
 		    </tr>
@@ -81,16 +67,12 @@
 		      <td class="col-sm-6">
 		        <strong>
 		      	  <a href="#" 
-		      	    id="textComments1" 
+		      	  	data-x-editable
 		      	    data-type="textarea" 
-		     	    data-name="addresses_allowed"
-			  	    data-pk="${office.id}"  
+			  	    data-pk="${addressesAllowed?.id}"  
 			  	    data-value="['${addressesAllowed?.fieldValue}']"
 		      	    data-title="Inserire un indirizzo IP per linea"
-		      	    data-url="@{saveConfGeneral()}" 
-		      	    class="editable editable-pre-wrapped editable-click">
-		      	    
-		      	  </a>  
+		      	    data-url="@{saveConfGeneral()}"></a>  
 		        </strong>
 		      </td>
 		    </tr>
@@ -110,18 +92,16 @@
 		    <tr>
 		      <td class="col-sm-6">Data inizio gestione Ticket Restaurant</td>
 		      <td class="col-sm-6">
-				<a href="#" 
-				   id="dob1" 
+				<a href="#"
+				   data-x-editable 
 				   data-type="combodate" 
 				   data-value="#{if dateStartMealTicket.fieldValue != null}${dateStartMealTicket.fieldValue}#{/if}"
 				   data-format="YYYY-MM-DD" 
 				   data-viewformat="DD/MM/YYYY" 
 				   data-template="D / MMM / YYYY" 
-		     	   data-name="${dateStartMealTicket?.field}"
-			  	   data-pk="${office.id}" 
+			  	   data-pk="${dateStartMealTicket?.id}" 
 				   data-title="Select Date of birth" 
-				   data-url="@{saveConfGeneral()}" 
-				   class="editable editable-click">${dateStartMealTicket.fieldValue}</a>
+				   data-url="@{saveConfGeneral()}"></a>
 		      </td>
 		    </tr>
 		    
@@ -141,52 +121,56 @@
 		    <tr>	
 		      <td class="col-sm-6">URL per gestione attestato presenza dell'amministrazione centrale </td>
 		      <td class="col-sm-6">
-		        <strong><a href="#" id="simpleText1" 
-		        		   data-type="text" 
-		     			   data-name="${urlToPresence?.field}"
-			  			   data-pk="${office.id}" 		        		
-		                   data-url="@{saveConfGeneral()}" 
-		                   class="editable editable-click">
-		          			${urlToPresence.fieldValue}
-		        </a></strong>
+		        <strong>
+		        	<a href="#"
+		        		data-x-editable 
+		        		data-type="text" 
+			  			data-pk="${urlToPresence?.id}" 		        		
+		                data-url="@{saveConfGeneral()}"
+		                data-value="${urlToPresence?.fieldValue}">
+		            </a>
+		        </strong>
 		      </td>
 		    </tr>
 		    <tr>	
 		      <td class="col-sm-6">User per gestione attestato presenza dell'amministrazione centrale</td>
-		      <td class="col-sm-6"><strong>
-		      	<a href="#" 
-		      	id="simpleText2" 
-		      	data-type="text" 
-				data-name="${userToPresence?.field}"
-				data-pk="${office.id}" 
-		      	data-url="@{saveConfGeneral()}" 
-		      	class="editable editable-click">${userToPresence.fieldValue}</a></strong></td>
+		      <td class="col-sm-6">
+		      	<strong>
+		      		<a href="#"
+		      			data-x-editable 
+		      			data-type="text" 
+						data-pk="${userToPresence?.id}" 
+		      			data-url="@{saveConfGeneral()}"
+		      			data-value="${userToPresence?.fieldValue}">
+		      		</a>
+		      	</strong>
+		      </td>
 		    </tr>
 		    <tr>	
 		      <td class="col-sm-6">Password per gestione attestato presenza dell'amministrazione centrale</td>
-		      <td class="col-sm-6"><strong>
-		      	<a href="#" 
-		      	id="simpleText3" 
-		      	data-type="text" 
-		        data-name="${passwordToPresence?.field}"
-			    data-pk="${office.id}" 
-		      	data-url="@{saveConfGeneral()}" 
-		      	class="editable editable-click">${passwordToPresence.fieldValue}
-		      	</a></strong></td>
+		      <td class="col-sm-6">
+		      <strong>
+		      	<a href="#"
+		      		data-x-editable  
+		      		data-type="text" 
+			    	data-pk="${passwordToPresence?.id}"
+			    	data-value="${passwordToPresence?.fieldValue}"  
+		      		data-url="@{saveConfGeneral()}">
+		      	</a>
+		      </strong>
+		      </td>
 		    </tr>
 		    <tr>	
 		      <td class="col-sm-6">Numero di colonne di entrata/uscita da visualizzare</td>
 		      <td class="col-sm-6">
 		        <strong>
 		      	   <a href="#" 
-			          id="select2" 
+		      	   	  data-x-editable 
 		              data-type="select" 
-		              data-name="${numberOfViewingCouple?.field}"
-			          data-pk="${office.id}"  
+			          data-pk="${numberOfViewingCouple?.id}"  
 		              data-value="[${numberOfViewingCouple.fieldValue}]"
 		              data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
-		              data-url="@{saveConfGeneral()}" 
-		              class="editable editable-click"></a>
+		              data-url="@{saveConfGeneral()}"></a>
 		        </strong>
 		      </td>
 		    </tr>
@@ -194,15 +178,13 @@
 		      <td class="col-sm-6">Invio email di avviso agli utenti</td>
 		      <td class="col-sm-6">
 		        <strong>
-		      	   <a href="#" 
-			          id="select3"
-			          data-name="send_email"
-			          data-pk="${office.id}" 
+		      	   <a href="#"
+		      	   	  data-x-editable 
+			          data-pk="${sendEmail?.id}" 
 		              data-type="select" 
 		              data-value="['${sendEmail?.fieldValue}']"
 		              data-source="[{true: 'Attivo'},{false: 'Inattivo'}]" 
-		              data-url="@{saveConfGeneral()}" 
-		              class="editable editable-click"></a>
+		              data-url="@{saveConfGeneral()}"></a>
 		        </strong>
 		      </td>
 		    </tr>

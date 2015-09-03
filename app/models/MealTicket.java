@@ -2,6 +2,7 @@ package models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -35,7 +36,6 @@ public class MealTicket extends BaseModel{
 	public Integer quarter;
 
 	@Required
-
 	public LocalDate date;
 
 	@Required
@@ -46,7 +46,7 @@ public class MealTicket extends BaseModel{
 	public String code; /* concatenzazione block + number */
 
 	@Required
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "admin_id", nullable = false)
 	public Person admin;
 

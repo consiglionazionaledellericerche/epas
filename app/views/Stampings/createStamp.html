@@ -1,5 +1,5 @@
 #{extends 'modal.html' /}
-#{set modalHeader:'Nuova timbratura ' + personDay.date + ' per ' + person.surname /}
+#{set modalHeader:'Nuova timbratura ' + personDay.date.format() + ' per ' + person.surname /}
 
 <div class="container-fluid text-center">
 #{form @Stampings.insert(), role:'form', autocomplete:'off'}

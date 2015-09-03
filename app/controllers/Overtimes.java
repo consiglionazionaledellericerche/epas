@@ -69,7 +69,7 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", email, year, month);
 
 		// get the person with the given email
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
@@ -109,7 +109,7 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getSupervisorTotalOvertimes() con email=%s", email);
 
 		// get the person with the given email
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
@@ -147,7 +147,7 @@ public class Overtimes extends Controller {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		try {
-			Person person = personDao.getPersonByEmail(email);
+			Person person = personDao.byEmail(email).orNull();
 			if (person == null) {
 				throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", email));			
 			}

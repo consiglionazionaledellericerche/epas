@@ -5,9 +5,7 @@ import java.util.List;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
-import models.Person;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -51,8 +49,8 @@ public class WrapperCompetenceCode implements IWrapperCompetenceCode {
 		List<String> competenceCodeList = Lists.newArrayList();
 		competenceCodeList.add(this.value.code);
 		
-		List<Competence> compList = competenceDao.getCompetences(Optional.<Person>absent(),
-				year, month, competenceCodeList, office, false);
+		List<Competence> compList = competenceDao.getCompetencesInOffice(year, month, 
+				competenceCodeList, office, false);
 
 		for(Competence comp : compList){
 			totale = totale+comp.valueApproved;

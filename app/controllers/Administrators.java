@@ -101,56 +101,31 @@ public class Administrators extends Controller {
 	}
 
 
-	public static void deleteAdministrator(Long officeId, Long personId) {
+	public static void deleteAdministrator(Long sedeId, Long userId, Long roleId) {
+				
 
-		Office office = officeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(sedeId);
 		if(office==null) {
 			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
 			Offices.showOffices();
 		}
 
-		Person person = personDao.getPersonById(personId);
+		User user = userDao.getUserById(userId, Optional.<String>absent());
 
-		if(person == null) {
+		if(user == null) {
 
 			flash.error("La persona per la quale si vuole rimuovere il ruolo di ammninistratore è inesistente. Riprovare o effettuare una segnalazione.");
 			Offices.showOffices();
 		}
 
-		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(person.user, office);
-		if( !uro.isPresent()) {
-
-			flash.error("La persona non dispone di alcun ruolo amministrativo. Operazione annullata.");
-			Offices.showOffices();
-		}
-		Role role = uro.get().role;
-
-		//Rimozione ruolo sola lettura
-		if(role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-
-			uro.get().delete();
-			flash.success("Rimozione amministratore avvenuta con successo.");
-			Offices.showOffices();
-		}
-
-		//controllo che l'office non rimanga senza amministratori generali
-		boolean atLeastAnother = false;
-		for(UsersRolesOffices uroOffice : office.usersRolesOffices) {
-
-			//if( uroOffice.role.id.equals(role.id) && !uroOffice.user.isAdmin()
-			if(uroOffice.role.id.equals(role.id) && userDao.isAdmin(uroOffice.user)
-					&& !uroOffice.id.equals(uro.get().id) ) {
-				atLeastAnother = true;
-				break;
+		Role role = roleDao.getRoleById(roleId);
+		
+		for(UsersRolesOffices uro : user.usersRolesOffices){
+			if(uro.role.equals(role) && uro.office.equals(office)){
+				uro.delete();
 			}
-		} 
-		if( !atLeastAnother) {
-
-			flash.error("La sede non può rimanere senza amministratori generali. Operazione annullata.");
-			Offices.showOffices();
+			
 		}
-
-		uro.get().delete();
 		flash.success("Rimozione amministratore avvenuta con successo.");
 		Offices.showOffices();
 
@@ -244,7 +219,7 @@ public class Administrators extends Controller {
 	}
 
 	/**
-	 * Switch in un'altra persona
+	 * Switch in un'altro user
 	 */ 
 	public static void switchUserTo(long id) {
 		
@@ -257,6 +232,18 @@ public class Administrators extends Controller {
 			session.put(USERNAME, user.username);
 			// redirect alla radice
 			redirect(Play.ctxPath + "/");
+	}
+	
+	/**
+	 * Switch nell'user di una persona.
+	 * @param id
+	 */
+	public static void switchUserToPersonUser(long id) {
+		
+		final Person person = personDao.getPersonById(id);
+		notFoundIfNull(person);
+		Preconditions.checkNotNull(person.user);
+		switchUserTo(person.user.id);
 	}
 
 	/**
