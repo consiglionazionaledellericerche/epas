@@ -1255,11 +1255,11 @@ public class ShiftManager {
 
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 		
-		Logger.debug("chiama la createicsReperibilityCalendar(%s, %s, %s)", year, type, personsInTheCalList);
+		Logger.debug("chiama la createicsShiftCalendar(%s, %s, %s)", year, type, personsInTheCalList);
 		icsCalendar = createicsShiftCalendar(year, type, personsInTheCalList); /*?*/
 
-		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+		Logger.debug("Find %s periodi di turno.", icsCalendar.getComponents().size());
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, shift type %s", year, personId, type);
 
 		return Optional.of(icsCalendar);
 	}
