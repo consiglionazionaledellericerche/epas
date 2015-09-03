@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -42,17 +41,19 @@ import dao.wrapper.IWrapperFactory;
 
 public class CompetenceManager {
 
+	
+
 	@Inject
 	public CompetenceManager(CompetenceCodeDao competenceCodeDao,
-			OfficeDao officeDao, PersonDayDao personDayDao,
-			CompetenceDao competenceDao,
-			PersonManager personManager, IWrapperFactory wrapperFactory) {
+			OfficeDao officeDao, CompetenceDao competenceDao,
+			PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
+			PersonDayManager personDayManager) {
 		this.competenceCodeDao = competenceCodeDao;
 		this.officeDao = officeDao;
-		this.personDayDao = personDayDao;
 		this.competenceDao = competenceDao;
-		this.personManager = personManager;
+		this.personDayDao = personDayDao;
 		this.wrapperFactory = wrapperFactory;
+		this.personDayManager = personDayManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
@@ -61,8 +62,8 @@ public class CompetenceManager {
 	private final OfficeDao officeDao;
 	private final PersonDayDao personDayDao;
 	private final CompetenceDao competenceDao;
-	private final PersonManager personManager;
 	private final IWrapperFactory wrapperFactory;
+	private final PersonDayManager personDayManager;
 
 	/**
 	 * 
@@ -161,7 +162,8 @@ public class CompetenceManager {
 	 * @param year
 	 * @param numeroOre
 	 * @param officeId
-	 * @return true se è stato possibile inserire un aggiornamento per le ore di straordinario totali per l'ufficio office nell'anno year
+	 * @return true se è stato possibile inserire un aggiornamento per le ore 
+	 * di straordinario totali per l'ufficio office nell'anno year
 	 */
 	public boolean saveOvertime(Integer year, String numeroOre, Long officeId){
 		Office office = officeDao.getOfficeById(officeId);
@@ -189,6 +191,7 @@ public class CompetenceManager {
 		}		
 		total.save();
 		return true;
+
 	}
 
 	/**
@@ -204,8 +207,10 @@ public class CompetenceManager {
 	 * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su orario di lavoro, straordinario,
 	 * riposi compensativi per l'anno year e il mese month per le persone dell'ufficio office
 	 */
-	public Table<Person, String, Integer> composeTableForOvertime(int year, int month, Integer page, 
-			String name, Office office, LocalDate beginMonth, SimpleResults<Person> simpleResults, CompetenceCode code){
+	public Table<Person, String, Integer> composeTableForOvertime(int year, 
+			int month, Integer page, 
+			String name, Office office, LocalDate beginMonth, 
+			SimpleResults<Person> simpleResults, CompetenceCode code){
 
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;	
@@ -213,23 +218,20 @@ public class CompetenceManager {
 
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
-			Integer recoveryDays = 0;
 			Integer timeAtWork = 0;
 			Integer difference = 0;
 			Integer overtime = 0;
 
-			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+			List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p, 
+					beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
 				timeAtWork = timeAtWork + pd.timeAtWork;
 				difference = difference +pd.difference;
-				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals("94"))
-						recoveryDays = recoveryDays+1;
-				}
 			}			
-			Optional<Competence> comp = competenceDao.getCompetence(p, year, month, code);
+			Optional<Competence> comp = competenceDao
+					.getCompetence(p, year, month, code);
 			if(comp.isPresent())
 				overtime = comp.get().valueApproved;
 			else
@@ -237,14 +239,13 @@ public class CompetenceManager {
 			builder.put(p, "Giorni di Presenza", daysAtWork);
 			builder.put(p, "Tempo Lavorato (HH:MM)", timeAtWork);
 			builder.put(p, "Tempo di lavoro in eccesso (HH:MM)", difference);
-			builder.put(p, "Residuo - rip. compensativi", difference-(recoveryDays*60));
-			builder.put(p, "Residuo netto", difference-(overtime*60));
 			builder.put(p, "Ore straordinario pagate", overtime);
-			builder.put(p, "Riposi compens.", recoveryDays);
+
 
 		}
 		tableFeature = builder.build();
 		return tableFeature;
+
 	}
 
 	/**
@@ -292,7 +293,8 @@ public class CompetenceManager {
 	 * @param competenceCode
 	 * @return true se avviene correttamente il cambiamento della lista di competenze attive per la persona Person passata come parametro
 	 */
-	public boolean saveNewCompetenceEnabledConfiguration(Map<String, Boolean> competence, List<CompetenceCode> competenceCode, Person person){
+	public boolean saveNewCompetenceEnabledConfiguration(Map<String, Boolean> competence,
+			List<CompetenceCode> competenceCode, Person person){
 		for(CompetenceCode code : competenceCode){
 			boolean value = false;
 			if (competence.containsKey(code.code)) {
@@ -300,15 +302,19 @@ public class CompetenceManager {
 				log.info("competence {} is {}",  code.code, value);
 			}
 			if (!value){
-				if(person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
-					person.competenceCode.remove(competenceCodeDao.getCompetenceCodeById(code.id));
+				if(person.competenceCode
+						.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
+					person.competenceCode
+					.remove(competenceCodeDao.getCompetenceCodeById(code.id));
 				else
 					continue;
 			} else { 
-				if(person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
+				if(person.competenceCode
+						.contains(competenceCodeDao.getCompetenceCodeById(code.id)))
 					continue;
 				else
-					person.competenceCode.add(competenceCodeDao.getCompetenceCodeById(code.id));
+					person.competenceCode
+					.add(competenceCodeDao.getCompetenceCodeById(code.id));
 			}
 
 		}		
@@ -352,18 +358,6 @@ public class CompetenceManager {
 	}
 
 	/**
-	 * Viene utilizzata nella delete della persona nel controller Persons
-	 * @param person
-	 */
-	public void deletePersonCompetence(Person person){
-		for(Competence c : person.competences){
-			long id = c.id;
-			c = competenceDao.getCompetenceById(id);
-			c.delete();
-		}
-	}
-
-	/**
 	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
 	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
 	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.
@@ -374,7 +368,11 @@ public class CompetenceManager {
 	 */
 	public Integer positiveResidualInMonth(Person person, int year, int month){
 
-		List<Contract> monthContracts = personManager.getMonthContracts(person,month, year);
+		List<Contract> monthContracts = wrapperFactory
+				.create(person).getMonthContracts(year, month);
+		int differenceForShift = 0;
+		List<PersonDay> pdList = personDayDao.getPersonDayInMonth
+				(person, new YearMonth(year,month));
 		for(Contract contract : monthContracts) {
 			
 			IWrapperContract wContract = wrapperFactory.create(contract);
@@ -384,7 +382,19 @@ public class CompetenceManager {
 				Optional<ContractMonthRecap> recap = 
 						wContract.getContractMonthRecap( new YearMonth(year, month));
 				if(recap.isPresent()) {
-					return recap.get().getPositiveResidualInMonth();
+					/**
+					 * FIXME: in realtà bisogna controllare che la persona nell'arco
+					 * del mese non sia stata in turno. In quel caso nei giorni 
+					 * in cui la persona è in turno e fa un tempo di lavoro 
+					 * superiore al tempo per i turni, tutto l'eccesso non deve essere 
+					 * conteggiato nel computo del tempo disponibile per straordinari
+					 */
+					for(PersonDay pd : pdList){
+						differenceForShift = differenceForShift + 
+								personDayManager.getExceedInShift(pd);
+					}
+					return recap.get().getPositiveResidualInMonth() - 
+							differenceForShift;
 				}
 			}
 		}
@@ -410,4 +420,6 @@ public class CompetenceManager {
 		}
 		return competenceCodeList;
 	}
+	
+	
 }

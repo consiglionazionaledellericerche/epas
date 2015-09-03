@@ -62,8 +62,7 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
 
 				personEmail = jsonObject.get("email").getAsString();
 
-				person = personDao.getPersonByEmail(personEmail);
-				//person = Person.find("SELECT p FROM Person p WHERE p.email = ? ORDER BY p.surname", personEmail).first();
+				person = personDao.byEmail(personEmail).orNull();
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			
 				}

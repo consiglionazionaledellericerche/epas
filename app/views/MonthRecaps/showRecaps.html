@@ -4,9 +4,10 @@
 
 <div class="container-fluid">
 
-	<table class="table">
-		<tr>
-		  <th>Nome</th>
+ <table class="datatable-test table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
+   <thead>
+      <tr>
+          <th>Nome</th>
 		  <th>Monte ore <br>anno passato</th>
 		  <th>Monte ore <br>anno corrente</th>
 		  <th>Buoni residui</th>
@@ -14,27 +15,43 @@
 		  <th>Ore Lavorate</th>
 		  <th>Riposi</th>
 		  <th>Straordinari</th>
-		</tr>
-		
-		#{list items:recaps, as:'recap'}
+      </tr>
+   </thead>
+ 
+   <tfoot>
+      <tr>
+          <th>Nome</th>
+		  <th>Monte ore <br>anno passato</th>
+		  <th>Monte ore <br>anno corrente</th>
+		  <th>Buoni residui</th>
+		  <th>Progressivo</th>
+		  <th>Ore Lavorate</th>
+		  <th>Riposi</th>
+		  <th>Straordinari</th>
+      </tr>
+   </tfoot>
+   <tbody>
+   		
+   		#{list items:recaps, as:'recap'}
 		
 		   <tr>
 		     <td>${recap.contract.person.fullname}</td>
 		     
-		     <td#{if recap.remainingMinutesLastYear < 0} class="danger"#{/if}>${recap.remainingMinutesLastYear.toHourTime()}</td>
+		     <td data-order="${recap.remainingMinutesLastYear}" #{if recap.remainingMinutesLastYear < 0} class="danger"#{/if}>${recap.remainingMinutesLastYear.toHourTime()}</td>
 		     
-		     <td#{if recap.remainingMinutesCurrentYear < 0} class="danger"#{/if}>${recap.remainingMinutesCurrentYear.toHourTime()}</td>
-		     <td#{if recap.remainingMealTickets < 0} class="danger"#{/if}>${recap.remainingMealTickets}</td>
+		     <td data-order="${recap.remainingMinutesCurrentYear}" #{if recap.remainingMinutesCurrentYear < 0} class="danger"#{/if}>${recap.remainingMinutesCurrentYear.toHourTime()}</td>
+		     <td #{if recap.remainingMealTickets < 0} class="danger"#{/if}>${recap.remainingMealTickets}</td>
 		     
-		     <td#{if recap.progressivoFinaleMese < 0} class="danger"#{/if}>${recap.progressivoFinaleMese.toHourTime()}</td>
-		     <td>${recap.oreLavorate.toHourTime()}</td>
+		     <td data-order="${recap.progressivoFinaleMese}" #{if recap.progressivoFinaleMese < 0} class="danger"#{/if}>${recap.progressivoFinaleMese.toHourTime()}</td>
+		     <td data-order="${recap.oreLavorate}">${recap.oreLavorate.toHourTime()}</td>
 		     <td>${recap.recoveryDayUsed}</td>
-		     <td#{if recap.straordinarioMinuti > 0} class="warning"#{/if}>${recap.straordinarioMinuti.toHourTime()}</td>
+		     <td #{if recap.straordinarioMinuti > 0} class="warning"#{/if}>${recap.straordinarioMinuti.toHourTime()}</td>
 		   </tr>
 		
 		#{/list}
-	
-	</table>
+   
+   </tbody>
+ </table>
 
 </div>>
 

@@ -14,6 +14,8 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
+import play.data.validation.Required;
+
 
 
 @Entity
@@ -43,7 +45,8 @@ public class ShiftType extends BaseModel{
 	@JoinColumn(name="shift_time_table_id")
 	public ShiftTimeTable shiftTimeTable;
 	
-	@ManyToOne(optional = true)
+	@Required
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "shift_categories_id")
 	public ShiftCategories shiftCategories;
 }

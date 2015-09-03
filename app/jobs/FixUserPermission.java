@@ -14,20 +14,15 @@ import models.UsersRolesOffices;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
-import play.jobs.Job;
 import play.test.Fixtures;
 
 import com.google.common.collect.Lists;
 
-import controllers.Security;
-import dao.RoleDao;
+public class FixUserPermission {
 
-public class FixUserPermission extends Job{
 
 	@Inject
 	private static OfficeManager officeManager;
-
-	private static RoleDao roleDao;
 	
 	public void doJob(){
 

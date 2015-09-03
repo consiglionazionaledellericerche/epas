@@ -11,15 +11,9 @@
 #{form @Charts.overtimeOnPositiveResidualInYear()}
 
 #{select 'yearChart', value:annoList.get(0), id:'yearChart'}
-					
-		%{
-			for(anno in annoList){
-		}%
-			#{option anno.anno}${anno.anno}#{/option}
-			%{
-				}
-			}%
-		
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}	
 #{/select}
 <input class="btn btn-primary span1" type="submit" value="Ok"/>
 #{/form}
@@ -36,15 +30,9 @@
 #{form @Charts.overtimeOnPositiveResidualInYear()}
 
 #{select 'yearChart', value:session.get("yearChart"), id:'yearChart'}
-					
-		%{
-			for(anno in annoList){
-		}%
-			#{option anno.anno}${anno.anno}#{/option}
-			%{
-				}
-			}%
-		
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}					
 #{/select}
 <input class="btn btn-primary span1" type="submit" value="Ok"/>
 #{/form}

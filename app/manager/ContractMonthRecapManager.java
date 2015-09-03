@@ -7,30 +7,25 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.cache.CompetenceCodeManager;
 import models.Absence;
-import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
-import models.Person;
+import models.ContractWorkingTimeType;
 import models.PersonDay;
-import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
+import models.WorkingTimeTypeDay;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
@@ -38,20 +33,12 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 /**
- * TODO: una volta mergiato il branch fare un unico manager che gestisca sia 
- * year che month recap.
  * 
  * @author alessandro
  *
  */
 public class ContractMonthRecapManager {
 
-	@Inject
-	private VacationsRecapFactory vacationsFactory;
-	@Inject 
-	private ConfGeneralManager confGeneralManager;
-	@Inject
-	private ConfYearManager confYearManager;
 	@Inject 
 	private MealTicketDao mealTicketDao;
 	@Inject
@@ -59,17 +46,18 @@ public class ContractMonthRecapManager {
 	@Inject
 	private CompetenceDao competenceDao;
 	@Inject
+	private CompetenceCodeManager competenceCodeManager;
+	@Inject
 	private AbsenceDao absenceDao;
 	@Inject
 	private IWrapperFactory wrapperFactory;
 	@Inject
-	private AbsenceTypeDao absenceTypeDao;
+	private ConfGeneralManager confGeneralManager;
 	@Inject
-	private CompetenceCodeDao competenceCodeDao;
-		
+	private ConfYearManager confYearManager;
 	
-	private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
 	
+	//private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
 	
 	/**
 	 * Metodo da utilizzare per calcolare i minuti di residuo disponibili per 
@@ -82,7 +70,7 @@ public class ContractMonthRecapManager {
 	 * @return
 	 */
 	public int getMinutesForCompensatoryRest (
-			Contract contract, LocalDate date) {
+			Contract contract, LocalDate date, List<Absence> otherAbsences) {
 		
 		ContractMonthRecap cmr = new ContractMonthRecap();
 		cmr.year = date.getYear();
@@ -90,7 +78,7 @@ public class ContractMonthRecapManager {
 		cmr.contract = contract;
 		
 		Optional<ContractMonthRecap> recap = 
-				populateResidualModule(cmr, new YearMonth(date), date);
+				computeResidualModule(cmr, new YearMonth(date), date, otherAbsences);
 		
 		if( recap.isPresent() ) {
 			return recap.get().remainingMinutesCurrentYear 
@@ -99,276 +87,23 @@ public class ContractMonthRecapManager {
 		return 0;
 	}
 	
-	
-	
 	/**
-	 * Costruisce i riepiloghi mensili per il contratto fornito.
-	 * Se yearMonthFrom è present costruisce i riepiloghi a partire da quel mese.
-	 * Se non vi sono i riepiloghi mensili necessari precedenti a yearMonthFrom
-	 * vengono costruiti.
-	 * 
-	 * @param contract
-	 * @param yearMonthFrom
-	 */
-	public void populateContractMonthRecap(Contract contract, 
-			Optional<YearMonth> yearMonthFrom) {
-
-		YearMonth yearMonthToCompute = wrapperFactory.create(contract).getFirstMonthToRecap();
-		
-		if(yearMonthFrom.isPresent() && yearMonthFrom.get().isAfter(yearMonthToCompute)) {
-			yearMonthToCompute = yearMonthFrom.get();
-		}
-		
-		//Tentativo da sourceDate
-		yearMonthToCompute = populateContractMonthFromSource(contract, yearMonthToCompute);
-		
-		YearMonth lastMonthToCompute = wrapperFactory.create(contract).getLastMonthToRecap();
-		
-		ContractMonthRecap cmr = null;
-		
-		while ( !yearMonthToCompute.isAfter(lastMonthToCompute) ) {
-			
-			cmr = buildContractMonthRecap(contract, yearMonthToCompute);
-
-			// (1) FERIE E PERMESSI 
-			
-			// TODO: per il calcolo delle ferie e permessi ho bisogno solo del
-			// riepilogo di dicembre. Una ottimizzazione è calcolare questi campi
-			// solo nel caso di dicembre. Però i dati dei mesi intermedi potrebbero 
-			// essere usati per report. Decidere. 
-			
-			LocalDate lastDayInYearMonth = new LocalDate(yearMonthToCompute.getYear(), 
-					yearMonthToCompute.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();
-
-			Optional<VacationsRecap> vacationRecap = vacationsFactory
-					.create(yearMonthToCompute.getYear(), contract, lastDayInYearMonth, true);
-			
-			if( !vacationRecap.isPresent() ) {
-				
-				//Siccome non ci sono i riepiloghi quando vado a fare l'update della
-				// timbratura schianta. Soluzioni? Se yeraMonthFrom.present() fare una
-				// missingRecap()??
-				if( yearMonthFrom.isPresent() ) {
-					//provvisorio.
-					populateContractMonthRecap(contract, Optional.<YearMonth>absent());
-				}
-				return;
-			}
-			
-			cmr.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed.size();
-			cmr.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed.size();
-			cmr.permissionUsed = vacationRecap.get().permissionUsed.size();
-			
-			// (2) RESIDUI
-			Optional<ContractMonthRecap> recap = 
-					populateResidualModule(cmr, yearMonthToCompute, lastDayInYearMonth);
-
-			if( !recap.isPresent() ) {
-				return;
-			}
-			
-			recap.get().save();
-			contract.contractMonthRecaps.add(recap.get());
-			contract.save();
-			
-			yearMonthToCompute = yearMonthToCompute.plusMonths(1);
-		}
-	}
-
-	/**
-	 * Costruisce i riepiloghi mensili inerenti la persona a partire da yeraMonthFrom.
-	 * 
-	 * Utilizzo: specificare il mese dal quale ricostruire i riepiloghi. 
-
- 	 * @param person
-	 * @param yearMonthFrom
-	 */
-	public void populateContractMonthRecapByPerson( Person person, 
-			YearMonth yearMonthFrom) {
-
-		Person p = Person.findById(person.id);
-		
-		for( Contract contract : p.contracts ){
-			
-			DateInterval contractDateInterval = 
-					wrapperFactory.create(contract).getContractDateInterval();
-			YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
-			
-			//Se yearMonthFrom non è successivo alla fine del contratto...
-			if ( !yearMonthFrom.isAfter(endContractYearMonth) ) {
-				
-				if( wrapperFactory.create(contract).getContractVacationPeriods().isEmpty()) {
-					log.info("No vacation period {}", contract.toString());
-					continue;
-				}
-				
-				populateContractMonthRecap(contract, Optional.fromNullable(yearMonthFrom));
-			} 
-		}
-	}
-	
-	/**
-	 * Ritorna il riepilogo mensile del contatto.
-	 * Se needed effettua il tentativo di ricalcolarlo.
-	 * 
-	 * @param contract
-	 * @param yearMonth
-	 * @param needed
-	 * @return
-	 */
-	private Optional<ContractMonthRecap> getContractMonthRecap(Contract contract,
-			YearMonth yearMonth, boolean needed) {
-		
-		for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-			
-			if ( cmr.year == yearMonth.getYear() && cmr.month == yearMonth.getMonthOfYear() )
-				return Optional.fromNullable(cmr);
-		}
-		
-		if (needed) {
-			populateContractMonthRecap(contract,
-					Optional.fromNullable(yearMonth));
-			
-			Optional<ContractMonthRecap> recap = getContractMonthRecap(contract, 
-					yearMonth, false );
-			
-			return recap;
-		}
-		
-		return Optional.absent();
-	}
-	
-	/**
-	 * Costruzione di un ContractMonthRecap pulito. Il preesistente se presente
-	 * viene distrutto. Alternativa pulirlo (ma sono tanti campi!) 
-	 * 
-	 * @param contract
-	 * @param yearMonth
-	 * @return
-	 */
-	private ContractMonthRecap buildContractMonthRecap(Contract contract, 
-			YearMonth yearMonth ) {
-		
-		Optional<ContractMonthRecap> cmrOld = 
-				getContractMonthRecap(contract, yearMonth, false);
-
-		if ( cmrOld.isPresent() ) {
-			cmrOld.get().delete();
-			contract.contractMonthRecaps.remove(cmrOld.get());
-			contract.save();
-		}
-		
-		ContractMonthRecap cmr = new ContractMonthRecap();
-		cmr.year = yearMonth.getYear();
-		cmr.month = yearMonth.getMonthOfYear();
-		cmr.contract = contract;
-		
-		return cmr;
-	}
-	
-	/**
-	 * Costruisce il contractMonthRecap da contract.SourceDate.
-	 * 1) Se sourceDate è l'ultimo giorno del mese costruisce il riepilogo 
-	 *    copiando le informazioni in esso contenute.
-	 * 2) Se sourceDate non è l'ultimo giorno del mese e si riferisce al mese corrente
-	 *    allora non si deve creare alcun riepilogo.
-	 * 3) Se sourceDate non è l'ultimo giorno del mese e si riferisce ad un mese passato
-	 *    costruisce il riepilogo andando a combinare le informazioni presenti in sourceContract
-	 *    e nel database (a partire dal giorno successivo a sourceDate).
-	 *    
-	 * @return YearMonth di cui si deve costruire il prossimo contractMonthRecap
-	 * @param contract
-	 * @param yearMonthToCompute il riepilogo che si vuole costruire
-	 * @return
-	 */
-	private YearMonth populateContractMonthFromSource(Contract contract, 
-			YearMonth yearMonthToCompute) {
-		
-		if(contract.sourceDate == null)
-			return yearMonthToCompute;
-		
-		// Mese da costruire con sourceDate
-		YearMonth yearMonthToComputeFromSource = new YearMonth(contract.sourceDate);
-
-		//Mese da costruire di competenza si sourceDate?
-		if( yearMonthToCompute.isAfter(yearMonthToComputeFromSource ) ) {
-			return yearMonthToCompute;
-		}
-
-		//Caso semplice ultimo giorno del mese
-		LocalDate lastDayInSourceMonth = contract.sourceDate.dayOfMonth().withMaximumValue();
-		if(lastDayInSourceMonth.isEqual(contract.sourceDate))
-		{
-			ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
-
-			cmr.remainingMinutesCurrentYear = contract.sourceRemainingMinutesCurrentYear;
-			cmr.remainingMinutesLastYear = contract.sourceRemainingMinutesLastYear;
-			cmr.vacationLastYearUsed = contract.sourceVacationLastYearUsed;
-			cmr.vacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed;
-			cmr.recoveryDayUsed = contract.sourceRecoveryDayUsed;
-			cmr.permissionUsed = contract.sourcePermissionUsed;
-			cmr.save();
-			contract.contractMonthRecaps.add(cmr);
-			contract.save();
-			return yearMonthToCompute.plusMonths(1);
-		}
-
-		//Nel caso in cui non sia l'ultimo giorno del mese e source cade nel mese_anno attuale 
-		
-		ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
-		
-		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
-		AbsenceType ab31 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
-		AbsenceType ab32 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
-		AbsenceType ab37 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
-		AbsenceType ab94 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
-				
-		DateInterval monthInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInSourceMonth);
-		List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract, ab32);
-		List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract, ab31);
-		List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract, ab37);
-		List<Absence> abs94 = absenceDao.getAbsenceDays(monthInterSource, contract, ab94);
-				
-		cmr.vacationLastYearUsed = contract.sourceVacationLastYearUsed + abs31.size() + abs37.size();
-		cmr.vacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed + abs32.size();
-		cmr.permissionUsed = contract.sourcePermissionUsed + abs94.size();
-		
-		contract.contractMonthRecaps.add(cmr);
-		cmr.save();
-		
-		// Informazioni relative ai residui		
-				 
-		populateResidualModule(cmr, yearMonthToCompute, new LocalDate().minusDays(1));
-		
-		cmr.save();
-		
-		contract.save();
-		return yearMonthToCompute.plusMonths(1);
-		
-	}
-
-	/**
-	 * FIXME: questa versione nasce come copia adattate del vecchio algoritmo basato
-	 * sui riepiloghi annuali. Necessita di una rifattorizzazione per renderla meno complessa
-	 * e più leggibile.
-	 * 
+	 * Aggiorna i campi inerenti la situazione residuale del riepilogo mensile.
+	 *  
+	 * NB: Non effettua salvataggi ma solo assegnamenti.
+	 *
 	 * Popola la parte residuale del riepilogo mensile fino alla data calcolaFinoA: 
 	 *  - minuti rimanenti dell'anno passato
 	 *  - minuti rimanenti dell'anno corrente
 	 *  - buoni pasto rimanenti
-	 *  
-	 *  Se il riepilogo mensile precedente necessario come input dell'algoritmo
-	 *  non esiste, esso viene costruito tramite una chiamata a populateContractMonthRecap
-	 *  con yearMonthToCompute absent() in modo che calcoli i riepiloghi per tutto il contratto.
-	 *  Se è impossibile costruire il riepilogo torna absent().
 	 * 
 	 * @param cmr
 	 * @param yearMonth
 	 * @param calcolaFinoA
 	 * @return il riepilogo costruito.
 	 */
-	private Optional<ContractMonthRecap> populateResidualModule(ContractMonthRecap cmr, 
-			YearMonth yearMonth, LocalDate calcolaFinoA) {
+	public Optional<ContractMonthRecap> computeResidualModule(ContractMonthRecap cmr, 
+			YearMonth yearMonth, LocalDate calcolaFinoA, List<Absence> otherAbsences) {
 
 		IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
 		Contract contract = cmr.contract;
@@ -396,19 +131,23 @@ public class ContractMonthRecapManager {
 		//	Recupero situazione iniziale del mese richiesto
 		////////////////////////////////////////////////////////////////////////
 		
-		Optional<ContractMonthRecap> recapPreviousMonth;
+		Optional<ContractMonthRecap> recapPreviousMonth = 
+				Optional.<ContractMonthRecap>absent();
 		
-		YearMonth firstContractMonthRecap = wrapperFactory
+		Optional<YearMonth> firstContractMonthRecap = wrapperFactory
 				.create(contract).getFirstMonthToRecap();
-		if ( yearMonth.isAfter(firstContractMonthRecap) ) {
+		if (!firstContractMonthRecap.isPresent()) {
+			return Optional.<ContractMonthRecap>absent();
+		}
+
+		if ( yearMonth.isAfter(firstContractMonthRecap.get()) ) {
 			//Riepilogo essenziale
-			recapPreviousMonth = getContractMonthRecap(contract, yearMonth.minusMonths(1), true);
+			recapPreviousMonth = wcontract.getContractMonthRecap(yearMonth.minusMonths(1));
 			if( !recapPreviousMonth.isPresent() ) {
+				//Errore nella costruzione manca il riepilogo essenziale
 				return Optional.absent();
 			}
-		} else {
-			recapPreviousMonth = getContractMonthRecap(contract, yearMonth.minusMonths(1), false);
-		}
+		} 
 
 		////////////////////////////////////////////////////////////////////////
 		//	Utilizzo situazione iniziale del mese richiesto
@@ -434,7 +173,7 @@ public class ContractMonthRecapManager {
 			firstDayInDatabase = contract.sourceDate.plusDays(1);
 			requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 
-			// TODO: initMealTickets da source contract
+			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		}
 
 		LocalDate today = LocalDate.now();
@@ -513,22 +252,12 @@ public class ContractMonthRecapManager {
 		LocalDate monthEndForMealTickets = monthBeginForMealTickets.dayOfMonth().withMaximumValue();
 		DateInterval monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
 
-		// 2) Nel caso del calcolo del mese attuale
-
-		if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) )
-		{
-			// 2.1) Se oggi non è il primo giorno del mese allora tutti i giorni del mese fino a ieri.
-			if ( today.getDayOfMonth() != 1 )
-			{
-				monthEndForMealTickets = today;
-				monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
-			}
-
-			// 2.2) Se oggi è il primo giorno del mese allora null.
-			else
-			{
-				monthIntervalForMealTickets = null;
-			}
+		// 2) Nel caso del calcolo del mese attuale considero dall'inizio
+		// del mese fino a oggi.
+		if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) ) 
+		{ 
+			monthEndForMealTickets = today;
+			monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
 		}
 
 		// 3) Filtro per dati nel database, estremi del contratto, inizio utilizzo buoni pasto
@@ -585,7 +314,7 @@ public class ContractMonthRecapManager {
 					Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49: 
 						Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13;
 			Integer monthExpiryRecoveryDay = confYearManager.getIntegerFieldValue(param,
-					cmr.person.office.office, cmr.year);
+					cmr.person.office, cmr.year);
 			if(monthExpiryRecoveryDay != 0 && cmr.month > monthExpiryRecoveryDay) {
 				cmr.possibileUtilizzareResiduoAnnoPrecedente = false;
 				cmr.remainingMinutesLastYear = 0;
@@ -593,14 +322,13 @@ public class ContractMonthRecapManager {
 		}
 		
 		//Inizializzazione buoni pasto
-		if (recapPreviousMonth.isPresent()) {
+		if (cmr.buoniPastoDaInizializzazione == 0 && recapPreviousMonth.isPresent()) {
 			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
 		}
 		
 		setMealTicketsInformation(cmr, validDataForMealTickets);
-		
 		setPersonDayInformation(cmr, validDataForPersonDay);
-		setPersonMonthInformation(cmr, validDataForCompensatoryRest, wcontract);
+		setPersonMonthInformation(cmr, wcontract, validDataForCompensatoryRest, otherAbsences);
 		
 
 		assegnaProgressivoFinaleNegativo(cmr);
@@ -618,16 +346,22 @@ public class ContractMonthRecapManager {
 		return Optional.fromNullable( cmr );
 	}
 	
+	
+	
 	/**
 	 * 
 	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
 	 */
 	private void setPersonDayInformation(ContractMonthRecap monthRecap, DateInterval validDataForPersonDay)
 	{
-		if(validDataForPersonDay!=null)
-		{
-			List<PersonDay> pdList = personDayDao.getPersonDayInPeriodDesc(monthRecap.person,
-					validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), true);
+		if(validDataForPersonDay!=null) {
+			
+			// TODO: implementare un metodo che no fa fetch di stampings... in 
+			// questo caso non servono.
+			
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriodDesc(
+					monthRecap.person, validDataForPersonDay.getBegin(), 
+					Optional.fromNullable(validDataForPersonDay.getEnd()));
 
 			//progressivo finale fine mese
 			for(PersonDay pd : pdList){
@@ -667,7 +401,8 @@ public class ContractMonthRecapManager {
 		if(validDataForMealTickets!=null)
 		{
 			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(monthRecap.person,
-					validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
+					validDataForMealTickets.getBegin(), 
+					Optional.fromNullable(validDataForMealTickets.getEnd()));
 
 			//buoni pasto utilizzati
 			for(PersonDay pd : pdList){
@@ -680,69 +415,105 @@ public class ContractMonthRecapManager {
 			monthRecap.buoniPastoConsegnatiNelMese = 
 					mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
 							monthRecap.contract, validDataForMealTickets).size();
-			
-			//residuo
-			monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
-					+ monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
-						
 		}
+		
+		//residuo
+		monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
+				+ monthRecap.buoniPastoDaInizializzazione
+				+ monthRecap.buoniPastoConsegnatiNelMese 
+				- monthRecap.buoniPastoUsatiNelMese;
 	}
 	
 	/**
 	 * 
 	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
 	 */
-	private void setPersonMonthInformation(ContractMonthRecap monthRecap, DateInterval validDataForCompensatoryRest, IWrapperContract wcontract)
-	{
-		CompetenceCode s1 = competenceCodeDao.getCompetenceCodeByCode("S1");
-		CompetenceCode s2 = competenceCodeDao.getCompetenceCodeByCode("S2");
-		CompetenceCode s3 = competenceCodeDao.getCompetenceCodeByCode("S3");
+	private void setPersonMonthInformation(ContractMonthRecap cmr, 
+			IWrapperContract wcontract,	DateInterval validDataForCompensatoryRest, List<Absence> otherAbsences) {
 		
-		if(wcontract.isLastInMonth(monthRecap.month, monthRecap.year))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
-		{
-			//straordinari s1
-			Optional<Competence> competenceS1 = competenceDao.getCompetence(monthRecap.person, monthRecap.year, monthRecap.month, s1);
-
-			if(competenceS1.isPresent())
-				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.get().valueApproved * 60);
-			else
-				monthRecap.straordinariMinutiS1Print = 0;
-			//straordinari s2
-			Optional<Competence> competenceS2 = competenceDao.getCompetence(monthRecap.person, monthRecap.year, monthRecap.month, s2);
+		//gli straordinari li assegno solo all'ultimo contratto attivo del mese
+		if (wcontract.isLastInMonth(cmr.month, cmr.year)) {
 			
+			CompetenceCode s1 = competenceCodeManager.getCompetenceCode("S1");
+			CompetenceCode s2 = competenceCodeManager.getCompetenceCode("S2");
+			CompetenceCode s3 = competenceCodeManager.getCompetenceCode("S3");
+			List<CompetenceCode> codes = Lists.newArrayList();
+			codes.add(s1);
+			codes.add(s2);
+			codes.add(s3);
+			
+			cmr.straordinariMinuti = 0;
+			cmr.straordinariMinutiS1Print = 0;
+			cmr.straordinariMinutiS2Print = 0;
+			cmr.straordinariMinutiS3Print = 0;
+			
+			List<Competence> competences = competenceDao
+					.getCompetences(cmr.person, cmr.year, cmr.month, codes);
+			
+			for (Competence competence : competences) {
+				
+				if(competence.competenceCode.id.equals(s1.id)) {
+					cmr.straordinariMinutiS1Print = (competence.valueApproved * 60);
+				} else if(competence.competenceCode.id.equals(s2.id)) {
+					cmr.straordinariMinutiS2Print = (competence.valueApproved * 60);
+				} else if(competence.competenceCode.id.equals(s3.id)) {
+					cmr.straordinariMinutiS3Print = (competence.valueApproved * 60);
+				}
+			}
 
-			if(competenceS2.isPresent())
-				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.get().valueApproved * 60);
-			else
-				monthRecap.straordinariMinutiS2Print = 0;
-			//straordinari s3
-			Optional<Competence> competenceS3 = competenceDao.getCompetence(monthRecap.person, monthRecap.year, monthRecap.month, s3);
-			if(competenceS3.isPresent())
-				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.get().valueApproved * 60);
-			else
-				monthRecap.straordinariMinutiS3Print = 0;
-
-
-			monthRecap.straordinariMinuti = monthRecap.straordinariMinutiS1Print + monthRecap.straordinariMinutiS2Print + monthRecap.straordinariMinutiS3Print;
+			cmr.straordinariMinuti = cmr.straordinariMinutiS1Print 
+					+ cmr.straordinariMinutiS2Print 
+					+ cmr.straordinariMinutiS3Print;
 		}
 		
-		if(validDataForCompensatoryRest!=null)
-		{
-			List<Absence> riposiCompensativi = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("91"), 
-					validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd(), 
-					Optional.<JustifiedTimeAtWork>absent(), false, false);
-			monthRecap.riposiCompensativiMinuti = 0;
-			monthRecap.recoveryDayUsed = 0;
-			for(Absence abs : riposiCompensativi){
-				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
-						wrapperFactory.create(abs.personDay).getWorkingTimeTypeDay().get().workingTime;	
-				// FIXME: potrebbe essere absent() ??
-				monthRecap.recoveryDayUsed++;
-			}
-			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;
+		if (validDataForCompensatoryRest != null) {
 			
-		}		
+			LocalDate begin = validDataForCompensatoryRest.getBegin();
+			LocalDate end = validDataForCompensatoryRest.getEnd();
+			
+			List<Absence> riposi = absenceDao.absenceInPeriod(cmr.person, begin, end, "91");
+			
+			
+			cmr.riposiCompensativiMinuti = 0;
+			cmr.recoveryDayUsed = 0;
+			
+			for(Absence riposo : otherAbsences) {
+				if(DateUtility.isDateIntoInterval(riposo.date, validDataForCompensatoryRest)) {
 
+					// TODO: rifattorizzare questa parte. Serve un metodo 
+					// .getWorkingTimeTypeDay(date) in WrapperContract
+					
+					LocalDate date = riposo.date;
+					for(ContractWorkingTimeType cwtt : 
+						wcontract.getValue().contractWorkingTimeType ) {
+
+						if(DateUtility.isDateIntoInterval(date, 
+								wrapperFactory.create(cwtt).getDateInverval())) {
+
+							WorkingTimeTypeDay wttd = cwtt.workingTimeType.workingTimeTypeDays
+									.get(date.getDayOfWeek() - 1);
+
+							Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+							cmr.riposiCompensativiMinuti += wttd.workingTime;
+							cmr.recoveryDayUsed++;
+						}
+					}
+				} 
+			}
+			for (Absence abs : riposi){
+				cmr.riposiCompensativiMinuti += wrapperFactory.create(abs.personDay)
+						.getWorkingTimeTypeDay().get().workingTime;
+				cmr.recoveryDayUsed++;
+			}	
+			
+			cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
+
+
+		}
+			
+		
+			
+	
 	}
 	
 	private void assegnaProgressivoFinaleNegativo(ContractMonthRecap monthRecap)

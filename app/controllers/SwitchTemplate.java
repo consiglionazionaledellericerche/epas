@@ -69,11 +69,6 @@ public class SwitchTemplate extends Controller{
 			Competences.showCompetences(year, month, null, null,  null,  null);
 		}
 
-		if(action.equals("Competences.overtime")) {
-
-			Competences.overtime(year, month, null, null,  null);
-		}
-
 		if(action.equals("Competences.totalOvertimeHours")) {
 
 			Competences.totalOvertimeHours(year, null);
@@ -99,9 +94,14 @@ public class SwitchTemplate extends Controller{
 			Stampings.dailyPresence(year, month, day);
 		}
 
-		if(action.equals("Stampings.mealTicketSituation")) {
+		if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
 
-			Stampings.mealTicketSituation(year, month, null, null);
+			Stampings.dailyPresenceForPersonInCharge(year, month, day);
+		}
+		
+		if(action.equals("Competences.monthlyOvertime")) {
+
+			Competences.monthlyOvertime(year, month, null, null);
 		}
 
 		if(action.equals("UploadSituation.show")) {
@@ -138,6 +138,10 @@ public class SwitchTemplate extends Controller{
 
 			WorkingTimes.manageWorkingTime(null);
 		}
+		if(action.equals("MealTickets.recapMealTickets")) {
+			
+			MealTickets.recapMealTickets(year, month, null, null);
+		}
 
 
 	}
@@ -155,8 +159,6 @@ public class SwitchTemplate extends Controller{
 
 			Application.index();	
 		}
-
-		session.put("daySelected", day);
 
 		executeAction(action);
 

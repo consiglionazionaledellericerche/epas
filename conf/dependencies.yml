@@ -4,6 +4,7 @@ require:
     - play
     - play -> shibboleth 1.2
     - play -> secure
+    - kjetland -> fastergt 1.8
     - org.hibernate -> hibernate-envers 4.2.15.Final:
           transitive: false
     - org.jadira.usertype -> usertype.core 3.2.0.GA
@@ -39,12 +40,32 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
+    - asufana -> play-lombok 1.2.3
+    - org.projectlombok -> lombok 1.16.4
+    - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.1.0
+    - com.fasterxml.jackson.core -> jackson-core 2.4.5
+    - com.fasterxml.jackson.core -> jackson-annotations 2.4.5
+    - com.fasterxml.jackson.core -> jackson-databind 2.4.5
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.4.5
+    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.4.5
+    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.4.5
+    - com.github.fge -> jackson-coreutils 1.6
 
 # My custom repository
 
 repositories:
+    - kjetland:
+        type:       http
+        artifact:   "http://mbknor.github.com/play-modules/[module]-[revision].zip"
+        contains:
+            - kjetland -> *
     - github:
          type:       http
          artifact:   "https://github.com/jackmoore/colorbox"
          contains:
                   -com.github -> *
+    - asufana_zip_repo:
+        type: http
+        artifact: https://github.com/asufana/[module]/raw/master/dist/[module]-[revision].zip
+        contains:
+            - asufana -> play-lombok

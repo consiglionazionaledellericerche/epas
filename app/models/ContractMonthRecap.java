@@ -3,31 +3,27 @@ package models;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
-import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 import com.google.common.base.Optional;
 
 import dao.wrapper.IWrapperContract;
-import play.data.validation.Required;
 
 @Entity
-@Table(name="contract_month_recap")
+@Table(name="contract_month_recap", uniqueConstraints={@UniqueConstraint(columnNames={"year", "month", "contract_id"})})
 public class ContractMonthRecap extends BaseModel {
 	
 	@Required
@@ -61,6 +57,9 @@ public class ContractMonthRecap extends BaseModel {
 	 * FONTI DELL'ALGORITMO RESIDUI
 	 **************************************************************************/
 	
+	@Column(name="s_r_bp_init")
+	public int buoniPastoDaInizializzazione = 0;
+	
 	@Column(name="s_r_bp")
 	public int buoniPastoDalMesePrecedente = 0;
 	
@@ -80,10 +79,19 @@ public class ContractMonthRecap extends BaseModel {
 	public int initMonteOreAnnoCorrente = 0;	//dal precedente recap ma è utile salvarlo
 	
 	@Column(name="s_pf")
-	public int progressivoFinaleMese = 0;	//person day	
+	public int progressivoFinaleMese = 0;			//person day	
 	
+	/**
+	 * Questo campo ha due scopi: <br>
+	 * 1) Il progressivo finale positivo da visualizzare nel template. <br>
+	 * 2) Il tempo disponibile per straordinari. <br>
+	 * TODO:
+	 * Siccome i due valori potrebbero differire (esempio turnisti), decidere
+	 * se splittarli in due campi distinti.
+	 */
 	@Column(name="s_pfp")
-	public int progressivoFinalePositivoMese = 0;	//per il template
+	public int progressivoFinalePositivoMese = 0;	 
+			
 
 	@Column(name="s_r_ap_usabile")
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
@@ -187,6 +195,50 @@ public class ContractMonthRecap extends BaseModel {
 	public int getPositiveResidualInMonth() {
 	
 		return this.progressivoFinalePositivoMese;
+	}
+	
+	/**
+	 * Clean dell'oggetto persistito pre ricomputazione.
+	 */
+	public void clean() {
+
+		//MODULO RECAP ASSENZE
+		
+		this.vacationLastYearUsed = 0;
+		this.vacationCurrentYearUsed = 0;
+		this.permissionUsed = 0;
+		this.recoveryDayUsed = 0;		//numeroRiposiCompensativi
+		
+		//FONTI DELL'ALGORITMO RESIDUI
+
+		this.buoniPastoDaInizializzazione = 0;
+		this.buoniPastoDalMesePrecedente = 0;
+		this.buoniPastoConsegnatiNelMese = 0;
+		this.buoniPastoUsatiNelMese = 0;
+		this.initResiduoAnnoCorrenteNelMese = 0;	
+		this.initMonteOreAnnoPassato = 0;		
+		this.initMonteOreAnnoCorrente = 0;	
+		this.progressivoFinaleMese = 0;		
+		this.progressivoFinalePositivoMese = 0;
+		this.possibileUtilizzareResiduoAnnoPrecedente = true;
+		this.straordinariMinutiS1Print	 = 0;	
+		this.straordinariMinutiS2Print	 = 0;	
+		this.straordinariMinutiS3Print	 = 0;	
+		this.riposiCompensativiMinutiPrint = 0;	
+		this.oreLavorate = 0;				
+		
+		//DECISIONI DELL'ALGORITMO
+
+		this.progressivoFinaleNegativoMeseImputatoAnnoPassato = 0;
+		this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = 0;
+		this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = 0;
+		this.riposiCompensativiMinutiImputatoAnnoPassato = 0;
+		this.riposiCompensativiMinutiImputatoAnnoCorrente = 0;
+		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = 0;
+		this.remainingMinutesLastYear = 0;
+		this.remainingMinutesCurrentYear = 0;
+		this.remainingMealTickets = 0; 
+	
 	}
 	
 }

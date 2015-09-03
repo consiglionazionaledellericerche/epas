@@ -61,22 +61,24 @@ public class ReperibilityManager {
 	public ReperibilityManager(CompetenceDao competenceDao,
 			AbsenceDao absenceDao, PersonDao personDao,
 			PersonReperibilityDayDao personReperibilityDayDao,
-			PersonDayManager personDayManager, PersonDayDao personDayDao, CompetenceCodeDao competenceCodeDao) {
+			PersonDayManager personDayManager, PersonDayDao personDayDao, CompetenceCodeDao competenceCodeDao,
+			PersonManager personManager) {
 		this.competenceDao = competenceDao;
 		this.absenceDao = absenceDao;
 		this.personDao = personDao;
 		this.personReperibilityDayDao = personReperibilityDayDao;
-		this.personDayManager = personDayManager;
 		this.personDayDao = personDayDao;
 		this.competenceCodeDao = competenceCodeDao;
+		this.personManager = personManager;
 	}
 
 	private final CompetenceDao competenceDao;
 	private final AbsenceDao absenceDao;
 	private final PersonDao personDao;
 	private final PersonReperibilityDayDao personReperibilityDayDao;
-	private final PersonDayManager personDayManager;
 	private final PersonDayDao personDayDao;
+	private final PersonManager personManager;
+
 	private final CompetenceCodeDao competenceCodeDao;
 
 	// Label della tabella delle inconsistenze delle reperibilità con le timbrature
@@ -413,7 +415,7 @@ public class ReperibilityManager {
 				Person person = personReperibilityDay.personReperibility.person;
 
 				//builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "FS" : "FR");
-				builder.put(person, personReperibilityDay.date.getDayOfMonth(), personDayManager.isHoliday(person, personReperibilityDay.date) ? "FS" : "FR");
+				builder.put(person, personReperibilityDay.date.getDayOfMonth(), personManager.isHoliday(person, personReperibilityDay.date) ? "FS" : "FR");
 			}
 			reperibilityMonth = builder.build();
 			reperibilityMonths.add(reperibilityMonth);
@@ -528,7 +530,7 @@ public class ReperibilityManager {
 
 			// record the reperibility day
 			//builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? codFs : codFr);
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), personDayManager.isHoliday(person, personReperibilityDay.date) ? codFs : codFr);
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), personManager.isHoliday(person, personReperibilityDay.date) ? codFs : codFr);
 
 		}
 		reperibilityMonth = builder.build();
@@ -698,13 +700,13 @@ public class ReperibilityManager {
 			//check for the absence inconsistencies
 			//------------------------------------------
 
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personReperibilityDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personReperibilityDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				//if (!person.isHoliday(personReperibilityDay.date)) {
-				if(!personDayManager.isHoliday(person, personReperibilityDay.date)){
+				if(!personDay.get().isHoliday){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 
 
@@ -715,7 +717,7 @@ public class ReperibilityManager {
 			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
 				// check for the stampings in working days
 				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
-				if (!personDayManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+				if (!personDay.get().isHoliday && personDay.get().stampings.isEmpty()){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 
 

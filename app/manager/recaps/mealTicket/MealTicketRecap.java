@@ -11,8 +11,6 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dao.MealTicketDao;
@@ -25,14 +23,13 @@ import dao.PersonDao;
  */
 public class MealTicketRecap {
 
-	public final int MESSAGE_MEAL_TICKET_EXPIRED = -1;
-	public final int MESSAGE_MEAL_TICKET_RUN_OUT = -2;
-
 	private MealTicketManager mealTicketManager;
 
 	private final Contract contract;
-	private int error = 0;
-	private LocalDate dateErrore = null;
+	
+	private LocalDate dateExpire = null;
+	private LocalDate dateRunOut = null;
+	
 	private List<PersonDay> personDaysMealTickets = Lists.newArrayList();
 	private List<MealTicket> mealTicketsReceivedOrdered = Lists.newArrayList();
 
@@ -76,8 +73,7 @@ public class MealTicketRecap {
 
 			if(this.mealTicketsReceivedOrdered.size() == i )
 			{
-				this.dateErrore = currentPersonDay.date;
-				this.error = MESSAGE_MEAL_TICKET_RUN_OUT;
+				this.dateRunOut = currentPersonDay.date;
 				return;
 			}
 
@@ -85,9 +81,9 @@ public class MealTicketRecap {
 
 			if(currentPersonDay.date.isAfter(currentMealTicket.expireDate)) 
 			{
-				this.dateErrore = currentPersonDay.date;
-				this.error = MESSAGE_MEAL_TICKET_EXPIRED;
-				return;
+				this.dateExpire = currentPersonDay.date;
+				//continue;
+				//return;
 			}
 
 			currentPersonDay.mealTicketAssigned = currentMealTicket;
@@ -106,13 +102,17 @@ public class MealTicketRecap {
 	public DateInterval getMealTicketInterval() { return this.mealTicketInterval; }
 
 	public boolean isMealTicketRunOut() { 
-		return this.error == MESSAGE_MEAL_TICKET_RUN_OUT; 
+		return this.dateRunOut != null; 
 	}
 	public boolean isMealTicketExpired() { 
-		return this.error == MESSAGE_MEAL_TICKET_EXPIRED; 
+		return this.dateExpire != null; 
 	}
-	public LocalDate getDateError() { return this.dateErrore; }
-
+	public LocalDate getDateExpire() {
+		return this.dateExpire;
+	}
+	public LocalDate getDateRunOut() {
+		return this.dateRunOut;
+	}
 	public List<PersonDay> getPersonDayMapped() { 
 		return this.personDaysMealTickets; 
 	}

@@ -28,6 +28,8 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
 
     public final NumberPath<Integer> buoniPastoConsegnatiNelMese = createNumber("buoniPastoConsegnatiNelMese", Integer.class);
 
+    public final NumberPath<Integer> buoniPastoDaInizializzazione = createNumber("buoniPastoDaInizializzazione", Integer.class);
+
     public final NumberPath<Integer> buoniPastoDalMesePrecedente = createNumber("buoniPastoDalMesePrecedente", Integer.class);
 
     public final NumberPath<Integer> buoniPastoUsatiNelMese = createNumber("buoniPastoUsatiNelMese", Integer.class);

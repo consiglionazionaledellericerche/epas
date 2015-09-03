@@ -1,11 +1,17 @@
 package dao;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import models.ContractMonthRecap;
+
+import models.Office;
+import models.query.QContract;
+
 import models.query.QContractMonthRecap;
+import models.query.QPerson;
 
 import org.joda.time.YearMonth;
 
@@ -15,6 +21,8 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+
+import dao.filter.QFilters;
 
 /**
  * DAO per i riepiloghi mensili.
@@ -42,22 +50,29 @@ public class ContractMonthRecapDao extends DaoBase {
 	 * 
 	 * @param yearMonth
 	 * @param max
+	 * @param name
 	 * @return
 	 */
 	public List<ContractMonthRecap> getPersonMealticket(YearMonth yearMonth,
-			Optional<Integer> max) {
+			Optional<Integer> max, Optional<String> name, Set<Office> offices) {
 		
 		final QContractMonthRecap recap = QContractMonthRecap.contractMonthRecap;
+		final QContract contract = QContract.contract;
+		final QPerson person = QPerson.person;
 		
 		final BooleanBuilder condition = new BooleanBuilder();
 		if (max.isPresent()) {
 			condition.and( recap.remainingMealTickets.loe(max.get()) );
 		}
+		condition.and(new QFilters().filterNameFromPerson(person, name));
 		
 		final JPQLQuery query = getQueryFactory().from(recap)
+				.leftJoin(recap.contract, contract)
+				.leftJoin(contract.person, person)
 				.where(recap.year.eq(yearMonth.getYear())
 				.and(recap.month.eq(yearMonth.getMonthOfYear())
-				.and(condition)) );
+				.and(person.office.in(offices))
+				.and(condition)) ).orderBy(recap.contract.person.surname.asc());
 						
 		return query.list(recap);
 	}

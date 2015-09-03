@@ -18,6 +18,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
 import play.data.validation.Unique;
 
 import com.google.common.base.MoreObjects;
@@ -32,12 +33,13 @@ public class User extends BaseModel{
 	@Unique
 	@NotNull
 	@Column(nullable=false)
+	@Required
 	public String username;
 
 	public String password;
 
 	@NotAudited
-	@OneToOne(mappedBy="user", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
+	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
 	public Person person;
 	
 	//@ManyToOne
@@ -45,7 +47,7 @@ public class User extends BaseModel{
 	//public Office restOwner;
 
 	@NotAudited
-	@OneToMany(mappedBy="user", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="user", cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 
 
