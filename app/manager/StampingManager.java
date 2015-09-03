@@ -8,6 +8,7 @@ import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
@@ -16,6 +17,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.db.jpa.JPA;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -261,26 +264,20 @@ public class StampingManager {
 	 * @param stampingMinute
 	 * @param service
 	 */
-	public void persistStampingForUpdate(Stamping stamping, String note, int stampingHour, int stampingMinute, boolean service){
+	public void persistStampingForUpdate(Stamping stamping, String note, 
+			int stampingHour, int stampingMinute, StampType stampType){
+		
 		stamping.date = stamping.date.withHourOfDay(stampingHour);
 		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
-
-		//TODO rivedere questi if se possono essere semplificati  
-		if(service == false && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = note;
+		if(stampType.getLabel() != null){
+			stamping.stampType = stampType;
+			stamping.note = stampType.description;
 		}
-		if(service == true && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = "timbratura di servizio";
-			stamping.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
-		}
-		if(service == false && (stamping.stampType != null)){
+		else{
 			stamping.stampType = null;
-			stamping.note = "timbratura inserita dall'amministratore";
-		}
-		if(service == true && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
 			stamping.note = note;
+			
 		}
-
 		stamping.markedByAdmin = true;
 
 		stamping.save();
@@ -320,5 +317,18 @@ public class StampingManager {
 
 		}
 		return daysRecap;
+	}
+	
+	/**
+	 * 
+	 * @param stampingMinutes
+	 * @param stampingHours
+	 * @return
+	 */
+	public boolean checkIfCorrectMinutesAndHours(int stampingMinutes, int stampingHours){
+		if((stampingMinutes < 0 || stampingMinutes > 59)||(stampingHours < 0 || stampingHours > 23))
+			return false;
+		return true;
+		
 	}
 }

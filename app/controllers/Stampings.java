@@ -17,6 +17,8 @@ import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Person;
 import models.PersonDay;
+import models.StampModificationType;
+import models.StampType;
 import models.Stamping;
 import models.User;
 
@@ -200,28 +202,27 @@ public class Stampings extends Controller {
 		render(stamping, hour, minute, date);				
 	}
 
-	public static void update(@Required Long stampingId, String elimina, 
-			Integer stampingHour, Integer stampingMinute,
-			@Required boolean service, String note) {
+	public static void update(Stamping stamping, Long stampingId, Integer stampingMinute, 
+			Integer stampingHour, StampType stampType, String note, String elimina) {
 
-		Stamping stamping = stampingDao.getStampingById(stampingId);
-		if (stamping == null) {
+		Stamping stamp = stampingDao.getStampingById(stampingId);
+		if (stamp == null) {
 			notFound();
 		}
 
-		rules.checkIfPermitted(stamping.personDay.person.office);
+		rules.checkIfPermitted(stamp.personDay.person.office);
 
-		final PersonDay pd = stamping.personDay;
+		final PersonDay pd = stamp.personDay;
 
 		//elimina
 		if( elimina != null) {
 
-			stamping.delete();
-			pd.stampings.remove(stamping);
+			stamp.delete();
+			pd.stampings.remove(stamp);
 
 			consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
-			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
+			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamp.date.toLocalDate()));	
 
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
@@ -231,12 +232,21 @@ public class Stampings extends Controller {
 			flash.error("E' necessario specificare sia il campo ore che minuti. Operazione annullata.");
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
-
-		stampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
+		if(!stampingManager.checkIfCorrectMinutesAndHours(stampingMinute, stampingHour)){
+			flash.error("E' necessario specificare ore e minuti di valore corretto. Operazione annullata.");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+		}
+		
+		if(stamping.stampType != null){
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
+		}
+		else{
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
+		}
 
 		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
-		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
+		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.surname, stamp.personDay.person.name);
 
 		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
@@ -357,6 +367,25 @@ public class Stampings extends Controller {
 		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
 
 
+	}
+	
+	
+	public static void entranceClock(Long personId, Integer year, Integer month, Integer day){
+		Person person = personDao.getPersonById(personId);
+		LocalDate date = new LocalDate(year,month,day);
+
+		PersonDay personDay = new PersonDay(person, date);
+
+		render(person, personDay);
+	}
+	
+	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
+		Person person = personDao.getPersonById(personId);
+		LocalDate date = new LocalDate(year,month,day);
+
+		PersonDay personDay = new PersonDay(person, date);
+
+		render(person, personDay);
 	}
 
 }

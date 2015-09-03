@@ -45,7 +45,7 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 * 
 	 * @return
 	 */
-	YearMonth getFirstMonthToRecap();
+	Optional<YearMonth> getFirstMonthToRecap();
 	
 	/**
 	 * 
