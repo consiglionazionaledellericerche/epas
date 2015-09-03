@@ -9,7 +9,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -55,6 +54,9 @@ public class PersonDay extends BaseModel {
 	public Integer difference;
 
 	public Integer progressive;
+	
+	/** Minuti tolti per pausa pranzo preve */
+	public Integer decurted;
 
 	@Column(name = "is_ticket_available")
 	public boolean isTicketAvailable = true;
@@ -71,21 +73,21 @@ public class PersonDay extends BaseModel {
 	@Column(name = "is_holiday")
 	public boolean isHoliday = false;
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="personDay", cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	@OrderBy("date ASC")
 	public List<Stamping> stampings = new ArrayList<Stamping>();
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToMany(mappedBy="personDay", cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
+
+	@NotAudited
+	@OneToMany(mappedBy="personDay", cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 
 	@ManyToOne
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
-
-	@NotAudited
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
-	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
-
+	
 	@Transient
 	public PersonDay previousPersonDayInMonth = null;
 

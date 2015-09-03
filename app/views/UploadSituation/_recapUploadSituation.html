@@ -19,56 +19,56 @@
 #{if actions != null && ! actions.isEmpty()}
 	<p>Operazioni effettuate:</p>
 	<ul>
-	%{for(action in actions){ }%
-	  <li>${action}</li>
-	%{ } }%
+	#{list actions}
+		<li>${_}</li>
+	#{/list}
 	</ul>		
 #{/if}
 
-#{if dipendentiNonInEpas != null && dipendentiNonInEpas.size() > 0}
+#{if dipendentiNonInEpas?.size() > 0}
 	<p>I seguenti dipendenti sono nell'anagrafica della sede centrale del CNR ma non in quella ePAS dell'istituto:
 	<ul>
-	%{for(dipendente in dipendentiNonInEpas){ }%
-	  <li>${dipendente.cognomeNome} (matricola=${dipendente.matricola})</li>
-	%{ } }%
+	#{list dipendentiNonInEpas}
+		<li>${_.cognomeNome} (matricola=${_.matricola})</li>
+	#{/list}
 	</ul>
 #{/if}
 
-#{if dipendentiNonInCNR && dipendentiNonInCNR.size() > 0}
+#{if dipendentiNonInCNR?.size() > 0}
 	<p>I seguenti dipendenti sono nell'anagrafica ePAS dell'Istituto ma non in quella della sede centrale del CNR:
 	<ul>
-	%{for(dipendente in dipendentiNonInCNR){ }%
-	  <li>${dipendente.cognomeNome} (matricola=${dipendente.matricola})</li>
-	%{ } }%
+	#{list dipendentiNonInCNR}
+		<li>${_.cognomeNome} (matricola=${_.matricola})</li>
+	#{/list}
 	</ul>
 #{/if}
 
-#{if risposteOk != null && risposteOk.size() > 0}
+#{if risposteOk?.size() > 0}
 	<p>Invio assenze e competenze del personale effettuate senza problemi:</p>
 	<ul>
-	%{for(risposta in risposteOk){ }%
-	  <li>
-		  Dati inseriti OK per ${risposta.cognomeNome} (matricola ${risposta.matricola}). 
-		  #{if risposta.absencesSent != null} <strong>Assenze</strong>: ${risposta.absencesSent} #{/if}
-		  #{if risposta.competencesSent != null} <strong>Competenze</strong>: ${risposta.competencesSent} #{/if}
-		  #{if risposta.mealTicketSent != null} <strong>Buoni mensa</strong>: ${risposta.mealTicket} #{/if}
-	  </li>
-	%{ } }%
+	#{list risposteOk}
+	<li>
+		  Dati inseriti OK per ${_.cognomeNome} (matricola ${_.matricola}). 
+		  #{if _.absencesSent != null} <strong>Assenze</strong>: ${_.absencesSent} #{/if}
+		  #{if _.competencesSent != null} <strong>Competenze</strong>: ${_.competencesSent} #{/if}
+		  #{if _.mealTicketSent != null} <strong>Buoni mensa</strong>: ${_.mealTicket} #{/if}
+	 </li>
+	#{/list}
 	</ul>		
 #{/if}
 
 #{if risposteNotOk != null && risposteNotOk.size() > 0}
 	<p>Invio assenze e competenze del personale effettuate <strong>CON</strong> problemi:</p>
 	<ul>
-	%{for(risposta in risposteNotOk){ }%
-	  <li>
-		  ${risposta.cognomeNome} -&gt;
-		  #{if risposta.absencesSent != null} assenze: ${risposta.absencesSent} #{/if}
-		  #{if risposta.competencesSent != null} competenze: ${risposta.competencesSent} #{/if}
-		  #{if risposta.mealTicketSent != null} buoni mensa: ${risposta.mealTicket} #{/if}
-		  <strong>${risposta.problems}</strong>
-	  </li>	
-	%{ } }%
+	#{list risposteNotOk}
+	<li>
+		  ${_.cognomeNome} -&gt; 
+		  #{if _.absencesSent != null} assenze: ${_.absencesSent} #{/if}
+		  #{if _.competencesSent != null} competenze: ${_.competencesSent} #{/if}
+		  #{if _.mealTicketSent != null} buoni mensa: ${_.mealTicket} #{/if}
+		  <strong>${_.problems}</strong>
+	 </li>
+	#{/list}
 	</ul>
 #{/if}
 

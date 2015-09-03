@@ -9,13 +9,7 @@
 <table class="table table-hover table-form">
 	<tr>
 		<td><strong>Invio mail</strong></td>
-		#{if person.wantEmail }
-		  <td><input name="wantEmail" type="checkbox" checked="checked" /></td>
-		#{/if}
-		#{else}
-		  <td><input name="wantEmail" type="checkbox" /></td>
-		#{/else}
-		
+		<td><input name="wantEmail" type="checkbox" #{if person.wantEmail}checked#{/if} /></td>
 	</tr>
 </table>
 <input class="btn btn-primary" type="submit" value="Modifica"/>

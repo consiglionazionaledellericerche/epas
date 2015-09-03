@@ -1,34 +1,19 @@
 package cnr.sync.manager;
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 
-import manager.ConfGeneralManager;
-import manager.PersonDayManager;
-import models.AbsenceType;
-import models.ConfGeneral;
-import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
-import models.PersonChildren;
-import models.PersonDay;
-import models.PersonYear;
-import models.User;
 
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.Play;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
 import cnr.sync.dto.DepartmentDTO;
 import cnr.sync.dto.PersonRest;
 
@@ -36,16 +21,8 @@ import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
-import play.Play;
-import play.db.jpa.JPA;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
-import dao.ContractDao;
 import dao.OfficeDao;
-import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPersonDay;
 
 public class SyncManager {
 
@@ -65,6 +42,7 @@ public class SyncManager {
 	 * tempi di lavoro e le missioni del personale per la rendicontazione dei
 	 * progetti
 	 */
+	@Deprecated //Deprecato oppure inserire nuova chiave di sincronizzazione
 	public void syncronizeCnrEmail(){
 		List<Office> helpList = officeDao.getAllOffices();
 		List<Office> officeList = Lists.newArrayList();
@@ -93,7 +71,8 @@ public class SyncManager {
 				else{
 					Person person = personDao.getPersonByNumber(pr.number);
 					if(person != null){
-						person.cnr_email = pr.email;
+						// FIXME: usare un altra chiave di sincronizzazione (cnr_email non esiste più)
+						//person.cnr_email = pr.email;
 						person.iId = new Integer(pr.id);
 						person.save();
 						log.info("Salvata la mail cnr per {} {}", person.name, person.surname);

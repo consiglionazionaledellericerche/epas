@@ -89,6 +89,13 @@ public class AbsenceTypeDao extends DaoBase{
 
 		return query.list(absenceType);
 	} 
+	
+	public List<AbsenceType> certificateTypes() {
+
+		final QAbsenceType absenceType = QAbsenceType.absenceType;
+
+		return  getQueryFactory().from(absenceType).where(absenceType.internalUse.eq(false)).list(absenceType);
+	} 
 
 
 	public SimpleResults<AbsenceType> getAbsences(Optional<String> name){
@@ -132,9 +139,10 @@ public class AbsenceTypeDao extends DaoBase{
 			LocalDate date) {
 
 		QAbsenceType absenceType = QAbsenceType.absenceType;
-
+		
 		final JPQLQuery query = getQueryFactory().from(absenceType)
-				.where(absenceType.validTo.after(date)).orderBy(absenceType.code.asc());
+				.where(absenceType.validTo.after(date).or(absenceType.validTo.isNull()))
+				.orderBy(absenceType.code.asc());
 
 		return query.list(absenceType);
 	}
@@ -175,25 +183,6 @@ public class AbsenceTypeDao extends DaoBase{
 						.groupBy(absenceType)
 						.orderBy(absence.count().desc())
 						.map(absenceType, absence.count());
-	}
-
-	/**
-	 * 
-	 * @return la lista di tutti i codici di assenza che prevedono la riduzione
-	 * dei giorni dell'anno su cui computare la maturazione delle ferie
-	 */
-	public List<AbsenceType> getReducingAccruingDaysForVacations(){
-
-		QAbsenceType absenceType = QAbsenceType.absenceType;
-
-		JPQLQuery query = getQueryFactory().from(absenceType)
-				.where(absenceType.code.startsWith("24")
-						.or(absenceType.code.startsWith("25")
-								.or(absenceType.code.startsWith("17C")
-										.or(absenceType.code.startsWith("C17")
-												.or(absenceType.code.startsWith("C18"))))));
-		return query.list(absenceType);
-
 	}
 
 }

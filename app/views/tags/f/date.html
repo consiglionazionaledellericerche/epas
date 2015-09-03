@@ -1,0 +1,7 @@
+#{f.edit _arg, label:_label}
+<div class="input-group">
+	<input datepicker#{if _view}-${_view}#{/if} class="form-control ${_class}" id="${field.id}" name="${field.name}" type="text" 
+	value="${_value == null ? field.value?.format() : _value}"#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}#{if _disabled} disabled#{/if}>
+	<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+</div>
+#{/f.edit}

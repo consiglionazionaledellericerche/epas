@@ -43,6 +43,10 @@ public class QWorkingTimeTypeDay extends EntityPathBase<WorkingTimeTypeDay> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final NumberPath<Integer> ticketAfternoonThreshold = createNumber("ticketAfternoonThreshold", Integer.class);
+
+    public final NumberPath<Integer> ticketAfternoonWorkingTime = createNumber("ticketAfternoonWorkingTime", Integer.class);
+
     public final NumberPath<Integer> timeMealFrom = createNumber("timeMealFrom", Integer.class);
 
     public final NumberPath<Integer> timeMealTo = createNumber("timeMealTo", Integer.class);

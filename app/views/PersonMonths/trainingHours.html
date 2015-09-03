@@ -64,8 +64,8 @@
 					  <li class="list-group-item list-group-item-info" >
 					    <p>
 					      <span class="label label-success">${pm.trainingHours} ore</span>
-					      <span><b>Da:</b> ${pm.fromDate}</span>
-					      <span><b>A:</b> ${pm.toDate}</span>
+					      <span><b>Da:</b> ${pm.fromDate?.format()}</span>
+					      <span><b>A:</b> ${pm.toDate?.format()}</span>
 					    </p>
 						<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target=".my-modal"><i class="fa fa-pencil"></i></a>
 						
@@ -73,7 +73,7 @@
 					  </li>
 					#{/if}
 					#{else}
-					  <li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>	
+					  <li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate?.format()}</u> <b>A:</b> <u>${pm.toDate?.format()}</u></li>	
 					#{/else}
 				  #{/if}
 				

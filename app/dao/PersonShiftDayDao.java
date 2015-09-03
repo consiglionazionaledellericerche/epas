@@ -15,6 +15,8 @@ import models.query.QPersonShiftDay;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -38,7 +40,7 @@ public class PersonShiftDayDao extends DaoBase{
 	 * @return il personShiftDay relativo alla persona person nel caso in cui in data date fosse in turno
 	 * Null altrimenti 
 	 */
-	public PersonShiftDay getPersonShiftDay(Person person, LocalDate date){
+	public Optional<PersonShiftDay> getPersonShiftDay(Person person, LocalDate date){
 		final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 		final QPersonShift personShift = QPersonShift.personShift;
 
@@ -47,7 +49,7 @@ public class PersonShiftDayDao extends DaoBase{
 				.where(personShift.person.eq(person).and(personShiftDay.date.eq(date)));
 		PersonShiftDay psd = query.singleResult(personShiftDay);
 
-		return psd;
+		return Optional.fromNullable(psd);
 	}
 
 	/**

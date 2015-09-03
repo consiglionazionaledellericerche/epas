@@ -1,17 +1,7 @@
 package manager;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingDayRecapFactory;
-import models.Contract;
-import models.Person;
-import models.PersonDay;
-import models.Stamping;
-import models.Stamping.WayType;
-import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -19,15 +9,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.ImmutableTable.Builder;
-import com.google.common.collect.Table;
 import com.google.inject.Inject;
 
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
-import dao.wrapper.IWrapperFactory;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import models.Contract;
+import models.Person;
+import models.PersonDay;
+import models.StampType;
+import models.Stamping;
+import models.Stamping.WayType;
+import models.exports.StampingFromClient;
 
 public class StampingManager {
 
@@ -36,15 +31,15 @@ public class StampingManager {
 			PersonDayDao personDayDao,
 			PersonDao personDao,
 			PersonDayManager personDayManager, 
-			IWrapperFactory wrapperFactory,
-			PersonStampingDayRecapFactory stampingDayRecapFactory) {
+			PersonStampingDayRecapFactory stampingDayRecapFactory,
+			ConsistencyManager consistencyManager) {
 
 		this.stampingDao = stampingDao;
 		this.personDayDao = personDayDao;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
-		this.wrapperFactory = wrapperFactory;
 		this.stampingDayRecapFactory = stampingDayRecapFactory;
+		this.consistencyManager = consistencyManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(StampingManager.class);
@@ -53,8 +48,8 @@ public class StampingManager {
 	private final PersonDayDao personDayDao;
 	private final PersonDao personDao;
 	private final PersonDayManager personDayManager;
-	private final IWrapperFactory wrapperFactory;
 	private final PersonStampingDayRecapFactory stampingDayRecapFactory;
+	private final ConsistencyManager consistencyManager;
 
 	/**
 	 * Versione per inserimento amministratore.
@@ -105,19 +100,18 @@ public class StampingManager {
 		if(service) {
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
-		}
-		else {
-			if(!note.equals(""))
+		} else {
+			if(!note.equals("")) {
 				stamp.note = note;
-			else
+			} else {
 				stamp.note = "timbratura inserita dall'amministratore";
+			}
 		}
 
 		//in out: true->in false->out
-		if(type){
+		if (type){
 			stamp.way = Stamping.WayType.in;
-		}
-		else{
+		} else {
 			stamp.way = Stamping.WayType.out;
 		}
 
@@ -125,9 +119,7 @@ public class StampingManager {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
-
-		//		TODO implementare un ricalcolo asincrono, per il momento è stato spostato nel controlle utilizzando i job play
-		//		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		
 	}
 
 	/**
@@ -146,7 +138,7 @@ public class StampingManager {
 
 		for(Person person : activePersonsInDay){
 			PersonDay personDay = null;
-			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, date);
+			Optional<PersonDay> pd = personDayDao.getPersonDay(person, date);
 
 			if(pd.isPresent()) 
 			{
@@ -161,89 +153,78 @@ public class StampingManager {
 
 
 	/**
-	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
-	 * passato dal client python
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * metodo per la creazione di una timbratura a partire dall'oggetto 
+	 * che è stato costruito dal binder del Json passato dal client python
+	 * 
 	 */
-	public boolean createStamping(StampingFromClient stamping){
+	public boolean createStamping(StampingFromClient stamping, boolean recompute){
 
-		if(stamping == null)
-			return false;
-
-		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
-			log.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
-			return false;
-		}
-		Long id = stamping.personId;
-
-		if(id == null){
-			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = null");
+		// Check della richiesta
+		
+		if(stamping == null) {
 			return false;
 		}
 
-		Person person = personDao.getPersonById(id);
+//		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
+//			log.warn("La timbratura che si cerca di inserire è troppo "
+//					+ "precedente rispetto alla data odierna. Controllare il server!");
+//			return false;
+//		}
 
+ 		Person person = personDao.getPersonById(stamping.personId);
 		if(person == null){
-			log.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = {}", id);
+			log.warn("L'id della persona passata tramite json non ha trovato "
+					+ "corrispondenza nell'anagrafica del personale. "
+					+ "Controllare id = {}", stamping.personId);
 			return false;
 		}
-
-		log.debug("Sto per segnare la timbratura di {}", person.getFullname());
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
-		if(!pd.isPresent()){
-			/**
-			 * non esiste un personDay per quella data, va creato e quindi salvato
-			 */
-			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
+		
+		// Recuperare il personDay
+		PersonDay personDay;
+		Optional<PersonDay> pd = personDayDao
+				.getPersonDay(person, stamping.dateTime.toLocalDate());
+		if(!pd.isPresent()) {
 			personDay = new PersonDay(person, stamping.dateTime.toLocalDate());
 			personDay.save();		
-			log.debug("Salvato il nuovo personDay {}", personDay);
-			Stamping stamp = new Stamping();
-			stamp.date = stamping.dateTime;
-			stamp.markedByAdmin = false;
-			if(stamping.inOut == 0)
-				stamp.way = WayType.in;
-			else
-				stamp.way = WayType.out;
-			stamp.stampType = stamping.stampType;
-			stamp.badgeReader = stamping.badgeReader;
-			stamp.personDay = personDay;
-			stamp.save();
-			personDay.stampings.add(stamp);
-			personDay.save();
-
-		}
-		else{
+		} else {
 			personDay = pd.get();
-			if(checkDuplicateStamping(personDay, stamping) == false){
-				Stamping stamp = new Stamping();
-				stamp.date = stamping.dateTime;
-				stamp.markedByAdmin = false;
-				if(stamping.inOut == 0)
-					stamp.way = WayType.in;
-				else
-					stamp.way = WayType.out;
-				stamp.stampType = stamping.stampType;
-				stamp.badgeReader = stamping.badgeReader;
-				stamp.personDay = personDay;
-				stamp.save();
-				personDay.stampings.add(stamp);
-				personDay.save();
-			}
-			else{
-				log.info("All'interno della lista di timbrature di {} nel giorno {} c'è una timbratura uguale a quella passata dallo" +
-						"stampingsFromClient: {}", new Object[]{person.getFullname(), personDay.date, stamping.dateTime});
-			}
-
-
+		}
+		
+		// Check stamping duplicata
+		if(checkDuplicateStamping(personDay, stamping)){
+			log.info("All'interno della lista di timbrature di {} nel giorno {} "
+					+ "c'è una timbratura uguale a quella passata dallo" +
+					"stampingsFromClient: {}", 
+					new Object[]{person.getFullname(), personDay.date, stamping.dateTime});
+			return true;
 		}
 
-		log.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay {}", pd);
-		personDayManager.populatePersonDay(wrapperFactory.create(personDay));
+		//Creazione stamping e inserimento
+		Stamping stamp = new Stamping();
+		stamp.date = stamping.dateTime;
+		if(stamping.markedByAdmin) {
+			stamp.markedByAdmin = true;
+		} else {
+			stamp.markedByAdmin = false;
+		}
 
+		if(stamping.inOut == 0) {
+			stamp.way = WayType.in;
+		} else {
+			stamp.way = WayType.out;
+		}
+		stamp.stampType = stamping.stampType;
+		stamp.badgeReader = stamping.badgeReader;
+		stamp.personDay = personDay;
+		stamp.save();
+		personDay.stampings.add(stamp);
 		personDay.save();
+		
+		// Ricalcolo
+		if(recompute) {
+			consistencyManager.updatePersonSituation(person.id, personDay.date);
+		}
+
 		return true;
 	}
 
@@ -259,7 +240,17 @@ public class StampingManager {
 			if(s.date.isEqual(stamping.dateTime)){
 				return true;
 			}
-		}return false;
+			/**
+			 * controllo se esiste già una timbratura di un minuto precedente e 
+			 * nello stesso verso di quella che passo alla funzione, in questo
+			 * modo evito di inserire questa timbratura
+			 */
+			if(s.date.isEqual(stamping.dateTime.minusMinutes(1)) &&
+					((s.isIn() && stamping.inOut == 0) || (s.isOut() && stamping.inOut == 1)))
+					return true;
+			
+		}
+		return false;
 	}
 
 	/**
@@ -270,26 +261,20 @@ public class StampingManager {
 	 * @param stampingMinute
 	 * @param service
 	 */
-	public void persistStampingForUpdate(Stamping stamping, String note, int stampingHour, int stampingMinute, boolean service){
+	public void persistStampingForUpdate(Stamping stamping, String note, 
+			int stampingHour, int stampingMinute, StampType stampType){
+		
 		stamping.date = stamping.date.withHourOfDay(stampingHour);
 		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
-
-		//TODO rivedere questi if se possono essere semplificati  
-		if(service == false && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = note;
+		if(stampType.getLabel() != null){
+			stamping.stampType = stampType;
+			stamping.note = stampType.description;
 		}
-		if(service == true && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = "timbratura di servizio";
-			stamping.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
-		}
-		if(service == false && (stamping.stampType != null)){
+		else{
 			stamping.stampType = null;
-			stamping.note = "timbratura inserita dall'amministratore";
-		}
-		if(service == true && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
 			stamping.note = note;
+			
 		}
-
 		stamping.markedByAdmin = true;
 
 		stamping.save();
@@ -309,14 +294,15 @@ public class StampingManager {
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-
+			
 			PersonDay personDay = null;
 			person = personDao.getPersonById(person.id);
-			Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, dayPresence); 
+			Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence); 
 
 			if(!pd.isPresent()){
-				personDay = new PersonDay(person, dayPresence);
-				personDay.create();
+//				personDay = new PersonDay(person, dayPresence);
+//				personDay.create();
+				continue;
 			}
 			else{
 				personDay = pd.get();
@@ -329,55 +315,17 @@ public class StampingManager {
 		}
 		return daysRecap;
 	}
-
-
+	
 	/**
 	 * 
-	 * @param activePersons
-	 * @param beginMonth
-	 * @return la tabella contenente la struttura persona-data-buonopasto per tutte le persone attive
+	 * @param stampingMinutes
+	 * @param stampingHours
+	 * @return
 	 */
-	public Table<Person, LocalDate, String> populatePersonTicketTable(List<Person> activePersons, LocalDate beginMonth){
-		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
-			public int compare(LocalDate date1, LocalDate date2) {
-				return date1.compareTo(date2);
-			}
-		}).orderRowsBy(new Comparator<Person>(){
-			public int compare(Person p1, Person p2) {
-
-				return p1.surname.compareTo(p2.surname);
-			}
-
-		});
-		for(Person p : activePersons)
-		{
-			List<PersonDay> pdList = personDayDao
-					.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
-
-			for(PersonDay pd : pdList){
-				if(pd.isTicketForcedByAdmin) {
-
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "siAd");
-					}
-					else {
-						builder.put(p, pd.date, "noAd");
-					}
-				}
-				else {
-
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "si");
-					}
-					else {
-						builder.put(p, pd.date, "");
-					}
-				}    			
-
-			}
-
-		}
-		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
-		return tablePersonTicket;
+	public boolean checkIfCorrectMinutesAndHours(int stampingMinutes, int stampingHours){
+		if((stampingMinutes < 0 || stampingMinutes > 59)||(stampingHours < 0 || stampingHours > 23))
+			return false;
+		return true;
+		
 	}
 }

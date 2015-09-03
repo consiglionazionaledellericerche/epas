@@ -1,0 +1,72 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assegnazione a gruppo di lavoro di ' + person.getFullname() /}
+
+#{set 'moreStyles'}
+<style type="text/css">
+#content{
+  margin-top: 5em;
+}
+.panel-body{
+  padding-top: 3em;
+}
+</style>
+#{/set}
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
+  <li><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
+  #{if person.isPersonInCharge}
+  	<li class="active"><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
+  #{/if}
+</ul>
+
+#{form @Persons.confirmGroup() }
+<input type="hidden" name="personId" value="${person.id}"/>
+<div class="panel panel-default col-sm-6 col-sm-offset-3" id="content" >
+  <div class="panel-heading">
+      <h3>Gruppo di lavoro di ${person.getFullname()}</h3>
+  </div>
+<div class="panel-body">
+#{if (person.people.isEmpty())}
+   <h4>Nessuna persona selezionata</h4>
+#{/if}
+
+#{else}
+<ul class="list-group">
+	#{list items:person.people, as:'p'}
+	<li class="list-group-item">
+	#{form @Persons.removePersonFromGroup() }
+           <div class="pull-right btn-group">
+            <input type="hidden" name="pId" value="${p.id}" />
+           	<a href="@{Persons.removePersonFromGroup(p.id)}" style="color:red;"><i style="color:red;" class="fa fa-trash-o"></i>Rimuovi</a>
+           </div>
+           <h4 class="list-group-item-heading">${p.fullname}</h4>
+           <div class="list-group-item-text">
+             <i class="fa fa-user"></i> ${p.email}
+           </div>
+    #{/form}
+    </li>
+    #{/list}
+</ul>
+#{/else}
+
+#{field 'peopleId'}
+#{select field.name, id:field.id,class:'form-control', multiple:'',size:'8'}
+ #{list items:people, as:'item'}
+ 	#{option item.id}${item.fullname}#{/option}
+    
+  #{/list}
+#{/select}
+#{/field}
+<input class="btn btn-primary col-xs-offset-5 col-xs-2" type="submit" value="Salva" />
+</div>
+</div>
+		
+#{/form}
+
+#{set 'moreScripts'}
+<script type="text/javascript">
+  $('select').select2();
+</script>
+#{/set}

@@ -19,7 +19,6 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
@@ -150,14 +149,14 @@ public class ShiftManager {
 
 			//check for the absence inconsistencies
 			//------------------------------------------
-			Optional<PersonDay> personDay = personDayDao.getSinglePersonDay(person, personShiftDay.date);
+			Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personShiftDay.date);
 			//PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
 			Logger.debug("Prelevo il personDay %s per la persona %s", personShiftDay.date, person.surname);
 
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
-
-				if (!personDayManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
+				
+				if (!personDay.get().isHoliday && personShiftDay.date.isBefore(LocalDate.now())) {
 					Logger.info("Il turno di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
@@ -169,7 +168,7 @@ public class ShiftManager {
 			} else {
 
 				// check for the stampings in working days
-				if (!personDayManager.isHoliday(person,personShiftDay.date) && LocalDate.now().isAfter(personShiftDay.date)) {
+				if (!personDay.get().isHoliday && LocalDate.now().isAfter(personShiftDay.date)) {
 
 					// check no stampings
 					//-----------------------------
@@ -188,7 +187,7 @@ public class ShiftManager {
 						//Logger.debug("Legge le coppie di timbrature valide");
 						// legge le coppie di timbrature valide 
 						//FIXME injettare il PersonDayManager
-						List<PairStamping> pairStampings = personDayManager.getValidPairStamping(personDay.get().stampings);
+						List<PairStamping> pairStampings = personDayManager.getValidPairStamping(personDay.get());
 
 						//Logger.debug("Dimensione di pairStampings =%s", pairStampings.size());
 

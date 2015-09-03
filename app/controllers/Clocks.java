@@ -8,7 +8,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
-import manager.ContractMonthRecapManager;
+import manager.ConsistencyManager;
+import manager.OfficeManager;
 import manager.PersonDayManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
@@ -23,7 +24,6 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.mvc.Controller;
@@ -34,7 +34,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
@@ -43,7 +42,7 @@ import dao.UserDao;
 public class Clocks extends Controller{
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static OfficeManager officeManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -51,13 +50,13 @@ public class Clocks extends Controller{
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
-	private static ContractMonthRecapManager contractMonthRecapManager;
-	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static PersonDayManager personDayManager;
 	@Inject
 	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 
 	public static void show(){
@@ -66,7 +65,7 @@ public class Clocks extends Controller{
 
 		String remoteAddress = Http.Request.current().remoteAddress;
 
-		Set<Office> offices = officeDao.getOfficesWithAllowedIp(remoteAddress);
+		Set<Office> offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
 
 		if(offices.isEmpty()){
 			flash.error("Le timbrature web non sono permesse da questo terminale! "
@@ -115,7 +114,7 @@ public class Clocks extends Controller{
 		}
 
 		PersonDay personDay = null;			
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(user.person, today);
+		Optional<PersonDay> pd = personDayDao.getPersonDay(user.person, today);
 
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
@@ -149,7 +148,7 @@ public class Clocks extends Controller{
 		LocalDateTime ldt = LocalDateTime.now();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, ldt.toLocalDate());
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, ldt.toLocalDate());
 
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
@@ -194,10 +193,7 @@ public class Clocks extends Controller{
 
 		final PersonDay day = personDay;
 
-		personDayManager.updatePersonDaysFromDate(day.person, day.date);
-		contractMonthRecapManager
-			.populateContractMonthRecapByPerson(person, new YearMonth(day.date));
-		
+		consistencyManager.updatePersonSituation(person.id, day.date);
 
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 
@@ -213,7 +209,7 @@ public class Clocks extends Controller{
 
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getSinglePersonDay(person, today);
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, today);
 		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			personDay = new PersonDay(person, today);

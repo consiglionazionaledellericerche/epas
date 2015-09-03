@@ -33,7 +33,7 @@ public class JsonRequestedFrequentAbsenceBinder implements TypeBinder<FrequentAb
 			return periodAbsenceCode;
 		}
 		catch(Exception e){
-			Logger.error("Ahia...");
+			Logger.error("Errore durante il parsing del Json....(dei codici di assenza piu' frequenti?): {}", e);
 			return null;
 		}		
 		

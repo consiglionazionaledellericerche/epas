@@ -17,9 +17,9 @@ legend{
 #{form @Administration.fixPersonSituation()}
   #{select 'personId', value:personList.get(0), id:'person'}
     #{option -1}Tutti#{/option}
-		%{for(person in personList){}%
-		#{option person.id}${person.surname + ' ' + person.name}#{/option}
-		%{}}%
+   	  #{list personList}
+		  #{option _.id}${_.fullname}#{/option}
+	  #{/list}
   #{/select}
 	<input type="number" name="month" />Mese da ripristinare 
 	<input type="number" name="year"/>Anno da ripristinare
@@ -47,7 +47,7 @@ legend{
 <div class="form-group">
   <label for="${field.id}" class="col-sm-1 control-label">Dal</label>
   <div class="col-sm-6">
-  	<input class="form-control" datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
+  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
   </div>
   #{if field.error}<span class="help-block">${field.error}</span>#{/if}
 </div>
@@ -57,7 +57,7 @@ legend{
 <div class="form-group">
   <label for="${field.id}" class="col-sm-1 control-label">Al</label>
   <div class="col-sm-6">
-  	<input class="form-control" datepicker id="${field.id}" type="text" name="${field.name}" value='${field.value}'>
+  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
   </div>
   #{if field.error}<span class="help-block">${field.error}</span>#{/if}
 </div>

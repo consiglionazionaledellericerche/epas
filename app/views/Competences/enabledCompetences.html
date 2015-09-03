@@ -7,10 +7,10 @@
 
 <ul class="nav nav-tabs">
   <li><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month, office.id)}">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
   <li class="active"><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
   <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
+  <li><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenza Assegnate nell'anno</a></li>
 </ul>
 
 </div>
@@ -59,45 +59,24 @@
   <table class="table table-condensed table-hover center">
 	<tr>
 		<th>Nome</th>
-		%{for(col in tableRecapCompetence.columnKeySet()){
-		}%
-		<th>${col}</th>
-	%{
-		}
-	}%
+		#{list tableRecapCompetence.columnKeySet()}
+		<th>${_}</th>
+		#{/list}
 	</tr>
-
-	%{  for(entry in tableRecapCompetence.rowMap().entrySet()){
-		}%
+	#{list tableRecapCompetence.rowMap().entrySet(),as:'entry'}
 	<tr>
 		<td>
 		  <a data-toggle="modal" href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-modal=".my-modal"> 
 		    ${entry.getKey().name} ${entry.getKey().surname}
 		  </a>
 		</td>
-		
-		%{ for(col in tableRecapCompetence.columnKeySet()){
-		}%
-		%{ if(entry.getValue().get(col) == true){
-		}%	<td>	
-				<span class="glyphicon glyphicon-ok"></span>
-			</td>
-		%{ 
-		}else{
-		}%
+		#{list tableRecapCompetence.columnKeySet(),as:'col'}
 			<td>	
-				
+				#{if entry.getValue().get(col) == true}<span class="glyphicon glyphicon-ok"></span>#{/if}
 			</td>
-		%{
-			}
-		}%
-		%{
-		   }
-		}%
+		#{/list}
 	</tr>	
-	%{
-		}
-	}%
+	#{/list}
   </table>
  </section> 
 </div>

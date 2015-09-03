@@ -7,10 +7,13 @@ import injection.StaticInject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import models.BadgeReader;
+import models.Office;
 import models.Person;
 import models.StampType;
 import models.exports.StampingFromClient;
@@ -21,12 +24,15 @@ import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import controllers.Security;
 import dao.BadgeReaderDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.StampingDao;
 
@@ -35,6 +41,7 @@ import dao.StampingDao;
  * @author cristian
  *
  */
+@Slf4j
 @Global
 @StaticInject
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
@@ -45,16 +52,21 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	private static StampingDao stampingDao;
 	@Inject
 	private static PersonDao personDao;
+	@Inject
+	private static OfficeDao officeDao;
 
 	/**
-	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
+	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], 
+	 * java.lang.String, java.lang.Class, java.lang.reflect.Type)
 	 */
 	@Override
-	public Object bind(String name, Annotation[] annotations, String value,	Class actualClass, Type genericType) throws Exception {
+	public Object bind(String name, Annotation[] annotations, String value,	
+			Class actualClass, Type genericType) throws Exception {
 		
 		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
 			
+			Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 			Person person = null;
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 			
@@ -62,14 +74,15 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
 			StampingFromClient stamping = new StampingFromClient();
 			
-			String badgeReaderCode = jsonObject.get("lettore").getAsString();
-			if (!badgeReaderCode.isEmpty()) {
-				BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
-				//BadgeReader badgeReader = BadgeReader.find("byCode", badgeReaderCode).first();
-				if (badgeReader == null) {
-					//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
+			if(jsonObject.has("lettore")) {
+				String badgeReaderCode = jsonObject.get("lettore").getAsString();
+				if (! Strings.isNullOrEmpty(badgeReaderCode) ) {
+					BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
+					if (badgeReader == null) {
+						//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
+					}
+					stamping.badgeReader = badgeReader;
 				}
-				stamping.badgeReader = badgeReader;
 			}
 			
 			Integer inOut = jsonObject.get("operazione").getAsInt();
@@ -77,22 +90,22 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				stamping.inOut = inOut;
 			}
 			
-			
-			JsonElement jsel = jsonObject.get("causale");
-			if(!jsel.isJsonNull()){
-				String stampTypeCode = jsel.getAsString();
-				//Logger.info("Arrivata causale: %s", stampTypeCode);
-				if (!stampTypeCode.isEmpty()) {					
-					StampType stampType = stampingDao.getStampTypeByCode(stampTypeCode);
-					//StampType stampType = StampType.find("Select st from StampType st where st.code = ?", stampTypeCode).first();
-					
+			if( jsonObject.has("causale") && !jsonObject.get("causale").isJsonNull() ) {
+				String causale = jsonObject.get("causale").getAsString();
+				if(!Strings.isNullOrEmpty(causale)){
+					StampType stampType = stampingDao.getStampTypeByCode(causale);
 					if (stampType == null) {
-						throw new IllegalArgumentException(
-								
-							String.format("Causale con codice %s sconosciuta.", stampTypeCode));
+						throw new IllegalArgumentException(String
+								.format("Causale con codice %s sconosciuta.", causale));
 					}
-					//Logger.info("StampType con codice: %s", stampType.code);
 					stamping.stampType = stampType;
+				}
+			}
+			
+			if( jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull() ) {
+				String admin = jsonObject.get("admin").getAsString();
+				if(admin.equals("true")) { 
+					stamping.markedByAdmin = true;
 				}
 			}
 								
@@ -123,7 +136,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					}
 					try {
 						int firma = Integer.parseInt(matricolaFirma);
-						person = personDao.getPersonByNumber(firma);
+						person = personDao.getPersonByNumber(firma, Optional.fromNullable(offices));
 						//person = Person.find("Select p from Person p where p.number = ?", firma).first();
 					} catch (NumberFormatException nfe) {
 						Logger.debug("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
@@ -154,7 +167,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					
 										
 					//Controlla sul campo person oldId
-					person = personDao.getPersonByOldID(intMatricolaFirmaAsLong);
+					person = personDao.getPersonByOldID(intMatricolaFirmaAsLong, Optional.fromNullable(offices));
 					//person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
 					if(person != null){
 						stamping.personId = person.id;
@@ -184,7 +197,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					// http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
 					String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
 					
-					person = personDao.getPersonByBadgeNumber(badgeNumber);
+					person = personDao.getPersonByBadgeNumber(badgeNumber, Optional.fromNullable(offices));
 					//person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
 					if(person != null){
 						stamping.personId = person.id;
@@ -197,7 +210,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			}
 	
 			if(stamping.personId == null){
-				Logger.warn("Non è stato possibile recuperare l'id della persona a cui si riferisce la timbratura. Controllare il database");
+				log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
+						+ " matricolaFirma={}. Controllare il database.", matricolaFirma);
 				return null;
 			}
 						

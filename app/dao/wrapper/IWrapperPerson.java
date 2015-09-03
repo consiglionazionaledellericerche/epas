@@ -1,6 +1,6 @@
 package dao.wrapper;
 
-import org.joda.time.YearMonth;
+import java.util.List;
 
 import models.CertificatedData;
 import models.Competence;
@@ -12,6 +12,9 @@ import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import com.google.common.base.Optional;
 
 /**
@@ -20,6 +23,22 @@ import com.google.common.base.Optional;
  */
 public interface IWrapperPerson extends IWrapperModel<Person> {
 
+	/**
+	 * Se la persona ha contratto attivo nella data.
+	 * 
+	 * @param date
+	 * @return
+	 */
+	boolean isActiveInDay(LocalDate date);
+	
+	/**
+	 * Se la persona ha contratto attivo nel mese.
+	 * 
+	 * @param yearMonth
+	 * @return
+	 */
+	boolean isActiveInMonth(YearMonth yearMonth);
+	
 	/**
 	 * Il contratto attuale. Istanzia una variabile Lazy.
 	 * 
@@ -56,6 +75,22 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
 	 * @return
 	 */
 	Optional<ContractStampProfile> getCurrentContractStampProfile();
+	
+	/**
+	 * I contratti della persona nell'anno.
+	 * @param year
+	 * @return
+	 */
+	List<Contract> getYearContracts(int year);
+	
+	/**
+	 * I contratti della persona nel mese.
+	 * 
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	List<Contract> getMonthContracts(int year, int month);
 	
 	/**
 	 * L'ultimo contratto attivo della persona nel mese. 
@@ -120,5 +155,7 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
 	 */
 	public boolean currentContractInitializationMissing();
 	public boolean currentContractMonthRecapMissing();
+	
+
 
 }

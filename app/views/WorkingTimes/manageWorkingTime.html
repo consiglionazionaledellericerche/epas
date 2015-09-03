@@ -27,7 +27,7 @@
 	    
 	       <div class="form-group">
 	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <select name="office.id" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
 	            #{list items:offices, as:'officeItem'}
 	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
 	                ${officeItem.name}

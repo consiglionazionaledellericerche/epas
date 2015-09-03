@@ -7,10 +7,10 @@
 
 <ul class="nav nav-tabs">
   <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected") )}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.overtime(session.get("yearSelected"), session.get("monthSelected") )}">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(session.get("yearSelected") )}">Monte ore</a></li>
   <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(session.get("yearSelected") )}">Monte ore</a></li>
   <li class="active"><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
+  <li><a href="@{Competences.approvedCompetenceInYear(year, true)}">Competenza Assegnate nell'anno</a></li>
 </ul>
 
 </div>

@@ -10,16 +10,17 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import models.ConfGeneral;
+import manager.ConfGeneralManager;
+import models.AbsenceType;
 import models.Office;
 import models.Permission;
-import models.Person;
 import models.Qualification;
+import models.StampModificationType;
+import models.StampType;
 import models.User;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.i18n.Messages;
@@ -32,10 +33,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import controllers.Resecure.NoCheck;
-import dao.ConfGeneralDao;
+import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDao.PersonLite;
 import dao.QualificationDao;
+import dao.StampingDao;
 import dao.UsersRolesOfficesDao;
 
 /**
@@ -49,11 +52,15 @@ public class RequestInit extends Controller {
 	@Inject
 	private static PersonDao personDao;
 	@Inject
-	private static ConfGeneralDao confGeneralDao;
+	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static UsersRolesOfficesDao uroDao;
 	@Inject
 	private static QualificationDao qualificationDao;
+	@Inject
+	private static AbsenceTypeDao absenceTypeDao;
+	@Inject
+	private static StampingDao stampingDao;
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
 	 * TODO: esportare questa classe in un nuovo file che modella la view.
@@ -80,6 +87,23 @@ public class RequestInit extends Controller {
 
 			if(!user.isPresent())
 				return;
+			
+//			TODO Rifattorizzare in modo più intelligente
+			if(user.get().username.equals("developer")){
+				viewPerson = true;
+				viewPersonDay = true;
+				viewOffice = true;
+				viewCompetence = true;
+			    editCompetence = true;
+				uploadSituation = true;
+				viewWorkingTimeType = true;
+				editWorkingTimeType = true;
+				viewAbsenceType = true;
+				editAbsenceType = true;
+				viewCompetenceCode = true;
+				editCompetenceCode = true;
+				return;
+			}
 
 			List<Permission> pList = uroDao.getUserPermission(user.get());
 
@@ -153,6 +177,7 @@ public class RequestInit extends Controller {
 
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
 		}
+		
 	}
 
 	/**
@@ -254,6 +279,15 @@ public class RequestInit extends Controller {
 		public Set<Office> getAllOfficesAllowed() {
 			return officeDao.getOfficeAllowed(Security.getUser().get());
 		}
+		
+		public List<AbsenceType> getCertificateAbsenceTypes() {
+			return absenceTypeDao.certificateTypes();
+		}
+		
+		public List<StampType> getAllStampTypes(){
+			return stampingDao.findAll();
+		}
+		
 	}
 
 	@Before (priority = 1)
@@ -271,11 +305,16 @@ public class RequestInit extends Controller {
 
 		ItemsPermitted ip = new ItemsPermitted(user);
 		renderArgs.put("ip", ip);
-
-		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
-
-		if(!user.isPresent())
+		
+		if(!user.isPresent()) {
 			return;
+		}
+		
+		if(user.get().person != null) {
+			renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
+		}
+			
+		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
 
 		// year init /////////////////////////////////////////////////////////////////
 		Integer year;
@@ -355,20 +394,20 @@ public class RequestInit extends Controller {
 			
 			Set<Office> officeList = officeDao.getOfficeAllowed(user.get());
 			if(!officeList.isEmpty()) {
-				List<Person> persons = personDao
-						.getActivePersonInMonth(officeList, new YearMonth(year, month)); 	
-//				List<PersonLite> persons = personDao
-//						.liteList(officeList, year, month);
+				//List<Person> persons = personDao
+				//		.getActivePersonInMonth(officeList, new YearMonth(year, month)); 	
+				List<PersonLite> persons = personDao
+						.liteList(officeList, year, month);
 				renderArgs.put("navPersons", persons);
 			}
 		}  else {
 
 			List<Office> allOffices = officeDao.getAllOffices();
 			if (allOffices!=null && !allOffices.isEmpty()) {
-				List<Person> persons = personDao.getActivePersonInMonth(
-						Sets.newHashSet(allOffices), new YearMonth(year, month));
-//				List<PersonLite> persons = personDao
-//						.liteList(Sets.newHashSet(allOffices), year, month);
+				//List<Person> persons = personDao.getActivePersonInMonth(
+				//		Sets.newHashSet(allOffices), new YearMonth(year, month));
+				List<PersonLite> persons = personDao
+						.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
 			}
 		}
@@ -391,17 +430,10 @@ public class RequestInit extends Controller {
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
 
-		Optional<ConfGeneral> yearInitUseProgram = confGeneralDao.getByFieldName(Parameter.INIT_USE_PROGRAM.description,
+		Optional<LocalDate> dateBeginProgram = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
 				officeDao.getOfficeAllowed(user.get()).iterator().next());
 
-		Integer yearBeginProgram;
-		if(yearInitUseProgram.isPresent()){
-			yearBeginProgram = new Integer(yearInitUseProgram.get().fieldValue.substring(0, 4));
-		}
-		else{
-			yearBeginProgram = new LocalDate().getYear();
-		}
-
+		Integer yearBeginProgram = dateBeginProgram.get().getYear();
 		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
 
 		while(yearBeginProgram <= actualYear+1){
@@ -411,7 +443,6 @@ public class RequestInit extends Controller {
 		}
 
 		renderArgs.put("navYears", years);
-
 
 	}
 
@@ -459,15 +490,14 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.dailyPresence";
 			}
+			
+			if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
 
-			if(action.equals("Stampings.mealTicketSituation")) {
-
+				renderArgs.put("switchDay", true);
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDownAdministration");
-				return "Stampings.mealTicketSituation";
+				return "Stampings.dailyPresenceForPersonInCharge";
 			}
-
 		}
 
 		if( action.startsWith("PersonMonths.")) {
@@ -595,13 +625,12 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Competences.showCompetences";
 			}
-
-			if(action.equals("Competences.overtime")) {
+			
+			if(action.equals("Competences.monthlyOvertime")) {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
-				renderArgs.put("dropDown", "dropDownAdministration");
-				return "Competences.overtime";
+				return "Competences.monthlyOvertime";
 			}
 
 			if(action.equals("Competences.totalOvertimeHours")) {
@@ -674,7 +703,16 @@ public class RequestInit extends Controller {
 			}
 		}
 
+		if(action.startsWith("MealTickets.")) {
 
+			if(action.equals("MealTickets.recapMealTickets")) {
+
+				renderArgs.put("dropDown", "dropDownAdministration");
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				return "MealTickets.recapMealTickets";
+			}
+		}
 
 		return session.get("actionSelected");
 	}

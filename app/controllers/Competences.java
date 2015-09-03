@@ -4,7 +4,6 @@ import helpers.ModelQuery.SimpleResults;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +33,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -81,6 +81,14 @@ public class Competences extends Controller{
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
+		
+		//Redirect in caso di mese futuro
+		LocalDate today = LocalDate.now();
+		if (today.getYear() == year && month > today.getMonthOfYear()) {
+			flash.error("Impossibile accedere a situazione futura, "
+					+ "redirect automatico a mese attuale");
+			competences(year, today.getMonthOfYear());
+		}
 
 		Person person = user.get().person;
 
@@ -99,65 +107,73 @@ public class Competences extends Controller{
 
 	}
 
-	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
+	public static void showCompetences(Integer year, Integer month, Long officeId, 
+			String name, String codice, Integer page){
 
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 
 		if(officeId == null) {
+			
 			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
+				flash.error("L'user non dispone di alcun diritto di visione "
+						+ "delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
 			officeId = offices.iterator().next().id;
+		}
+		
+		//Redirect in caso di mese futuro
+		LocalDate today = LocalDate.now();
+		if (today.getYear() == year && month > today.getMonthOfYear()) {
+			flash.error("Impossibile accedere a situazione futura, "
+					+ "redirect automatico a mese attuale");
+			showCompetences(year, today.getMonthOfYear(), officeId, name, codice, page);
 		}
 
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
-		if(page==null)
+		if (page==null) {
 			page = 0;
+		}
+		
+		boolean editCompetence = Security.hasPermissionOnOffice(office, Security.EDIT_COMPETENCE);
+		renderArgs.put("editCompetence", editCompetence);
 
-		List<CompetenceCode> activeCompetenceCodes = competenceManager.activeCompetence(year);
-
-		IWrapperCompetenceCode competenceCode = null;
-
-		if(activeCompetenceCodes.size() == 0) {
-			flash.error("Per visualizzare la sezione Competenze è necessario abilitare almeno un codice competenza ad un dipendente.");
+		////////////////////////////////////////////////////////////////////////
+		// La lista dei codici competenceCode da visualizzare nella select
+		// Ovver: I codici attualmente attivi per almeno un dipendente di quell'office
+		Set<CompetenceCode> competenceCodeList = Sets.newHashSet();
+		competenceCodeList.addAll(competenceDao.activeCompetenceCode(office));
+		
+		if (competenceCodeList.size() == 0) {
+			flash.error("Per visualizzare la sezione Competenze è necessario "
+					+ "abilitare almeno un codice competenza ad un dipendente.");
 			Competences.enabledCompetences(officeId, null);
 		}
+		
+        ////////////////////////////////////////////////////////////////////////
+		// Il codice della richiesta ( check esistenza )
+		IWrapperCompetenceCode competenceCode = null;
+		if (codice == null || codice == "") {
+			competenceCode = wrapperFactory.create(competenceCodeList.iterator().next());
+		} else {
+			competenceCode = wrapperFactory.create(competenceCodeDao
+					.getCompetenceCodeByCode(codice));
+			Preconditions.checkNotNull(competenceCode.getValue());
+		}	
 
-		if(codice==null || codice=="") {
-			competenceCode = wrapperFactory.create(activeCompetenceCodes.get(0));
-		}
-		else
-		{
-			for(CompetenceCode compCode : activeCompetenceCodes)
-			{
-				if(compCode.code.equals(codice))
-					competenceCode = wrapperFactory.create(compCode);
-			}
-		}		
-
+        ////////////////////////////////////////////////////////////////////////
+        // Le persone che hanno quella competence attualmente abilitata
 		SimpleResults<Person> simpleResults = personDao.listForCompetence(competenceCode.getValue(),
 				Optional.fromNullable(name), Sets.newHashSet(office), false, 
 				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+				Optional.<Person>absent());
 
 		List<IWrapperPerson> activePersons = FluentIterable
 				.from(simpleResults.paginated(page).getResults())
 				.transform(wrapperFunctionFactory.person()).toList();
-
-		if(activePersons == null)
-			activePersons = new ArrayList<IWrapperPerson>();
-
-		//Redirect in caso di mese futuro
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-			//FIXME impostare il redirect!!
-		}
 
 		for(IWrapperPerson p : activePersons){
 			Competence competence = null;
@@ -171,19 +187,23 @@ public class Competences extends Controller{
 
 			}
 		}
+		
+		// TODO: mancano da visualizzare le competence assegnate nel mese a quelle
+		// persone che non hanno più il relativo codice abilitato.
+		
 		List<String> code = competenceManager.populateListWithOvertimeCodes();		
 
-		List<Competence> competenceList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
+		List<Competence> competenceList = competenceDao.getCompetencesInOffice(year, month, code, office, false);
 		int totaleOreStraordinarioMensile = competenceManager.getTotalMonthlyOvertime(competenceList);
 
-		List<Competence> competenceYearList = competenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, true);		
+		List<Competence> competenceYearList = competenceDao.getCompetencesInOffice(year, month, code, office, true);		
 		int totaleOreStraordinarioAnnuale = competenceManager.getTotalYearlyOvertime(competenceYearList);
 
 		List<TotalOvertime> total = competenceDao.getTotalOvertime(year, office);				
 		int totaleMonteOre = competenceManager.getTotalOvertime(total);		
 
 		render(year, month, office, offices, activePersons, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, 
-				totaleMonteOre, simpleResults, name, codice, activeCompetenceCodes, competenceCode);
+				totaleMonteOre, simpleResults, name, codice, competenceCodeList, competenceCode);
 
 	}
 
@@ -284,51 +304,7 @@ public class Competences extends Controller{
 		Competences.totalOvertimeHours(year, officeId);
 	}
 
-	public static void overtime(int year, int month, Long officeId, String name, Integer page){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
-
-		if(officeId == null) {
-			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
-				Application.indexAdmin();
-			}
-			officeId = offices.iterator().next().id;
-		}
-
-		Office office = officeDao.getOfficeById(officeId);
-		notFoundIfNull(office);
-
-		rules.checkIfPermitted(office);
-
-		if(page == null)
-			page = 0;
-		Table<Person, String, Integer> tableFeature = null;
-		LocalDate beginMonth = null;
-		if(year == 0 && month == 0){
-			int yearParams = params.get("year", Integer.class);
-			int monthParams = params.get("month", Integer.class);
-			beginMonth = new LocalDate(yearParams, monthParams, 1);
-		}
-		else{
-			beginMonth = new LocalDate(year, month, 1);
-		}
-		CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-		SimpleResults<Person> simpleResults = personDao.listForCompetence(code, Optional.fromNullable(name), 
-				Sets.newHashSet(office), 
-				false, 
-				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		tableFeature = competenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
-
-		if(year != 0 && month != 0)
-			render(tableFeature, year, month, simpleResults, name, office, offices);
-		else{
-			int yearParams = params.get("year", Integer.class);
-			int monthParams = params.get("month", Integer.class);
-			render(tableFeature,yearParams,monthParams,simpleResults, name, office, offices );
-		}
-	}
 
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
@@ -406,7 +382,8 @@ public class Competences extends Controller{
 				Sets.newHashSet(office), 
 				false, 
 				new LocalDate(year, 1, 1), 
-				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue());
+				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
+				Optional.<Person>absent());
 
 		List<Person> personList = simpleResults.list();
 		FileInputStream inputStream = competenceManager.getOvertimeInYear(year, personList);
@@ -421,12 +398,19 @@ public class Competences extends Controller{
 	 * @param year
 	 * @param onlyDefined true se si vuole applicare il calcolo ai soli tempi determinati
 	 */
-	public static void approvedCompetenceInYear(Long officeId, int year, boolean onlyDefined) {
+	public static void approvedCompetenceInYear(int year, boolean onlyDefined, Long officeId) {
 
-		Office office = officeDao.getOfficeById(officeId);
+		
 		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Preconditions.checkState(!offices.isEmpty());
+		
+		Office office;
+		if(officeId != null) {
+			office = officeDao.getOfficeById(officeId);
+		} else {
+			office = offices.iterator().next();
+		}
 
-		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 
 		Set<Person> personSet = Sets.newHashSet();
@@ -499,8 +483,48 @@ public class Competences extends Controller{
 
 		int month = LocalDate.now().getMonthOfYear();
 
-		render(personList, totalValueAssigned, mapPersonCompetenceRecap, office, offices, year, month);
+		render(personList, totalValueAssigned, mapPersonCompetenceRecap, office, offices, year, month, onlyDefined);
 
+	}
+	
+	
+	public static void monthlyOvertime(Integer year, Integer month, String name, Integer page){
+		
+		if(!Security.getUser().get().person.isPersonInCharge)
+			forbidden();
+		
+		User user = Security.getUser().get();
+		if(page == null)
+			page = 0;
+		Table<Person, String, Integer> tableFeature = null;
+		LocalDate beginMonth = null;
+		if(year == 0 && month == 0){
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			beginMonth = new LocalDate(yearParams, monthParams, 1);
+		}
+		else{
+			beginMonth = new LocalDate(year, month, 1);
+		}
+		CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+		SimpleResults<Person> simpleResults = personDao.listForCompetence(code, 
+				Optional.fromNullable(name), 
+				Sets.newHashSet(user.person.office), 
+				false, 
+				new LocalDate(year, month, 1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+				Optional.fromNullable(user.person));
+		tableFeature = competenceManager.composeTableForOvertime(year, month, 
+				page, name, user.person.office, beginMonth, simpleResults, code);
+		
+
+		if(year != 0 && month != 0)
+			render(tableFeature, year, month, simpleResults, name);
+		else{
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			render(tableFeature,yearParams,monthParams,simpleResults, name);
+		}
 	}
 
 }

@@ -8,28 +8,26 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import models.Absence;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.InitializationAbsence;
-import models.InitializationTime;
-import models.Person;
-import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.db.jpa.JPAPlugin;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.ContractDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -46,34 +44,28 @@ public class ContractManager {
 	@Inject
 	public ContractManager(ConfGeneralManager confGeneralManager,
 			ConsistencyManager consistencyManager, 
-			PersonDayDao personDayDao,
-			PersonDayManager personDayManager,
-			ContractMonthRecapManager contractMonthRecapManager,
-			IWrapperFactory wrapperFactory, 
 			VacationCodeDao vacationCodeDao,
+			VacationManager vacationManager,
+			IWrapperFactory wrapperFactory, 
 			ContractDao contractDao, 
 			PersonDao personDao) {
 
 		this.confGeneralManager = confGeneralManager;
 		this.consistencyManager = consistencyManager;
-		this.personDayDao = personDayDao;
-		this.personDayManager = personDayManager;
-		this.contractMonthRecapManager = contractMonthRecapManager;
-		this.wrapperFactory = wrapperFactory;
 		this.vacationCodeDao = vacationCodeDao;
+		this.vacationManager = vacationManager;
+		this.wrapperFactory = wrapperFactory;
 		this.contractDao = contractDao;
 		this.personDao = personDao;
 	}
 
 	private final ConfGeneralManager confGeneralManager;
 	private final ConsistencyManager consistencyManager;
-	private final PersonDayDao personDayDao;
-	private final PersonDayManager personDayManager;
-	private final ContractMonthRecapManager contractMonthRecapManager;
 	private final IWrapperFactory wrapperFactory;
-	private final VacationCodeDao vacationCodeDao;
 	private final ContractDao contractDao;
 	private final PersonDao personDao;
+	private final VacationCodeDao vacationCodeDao;
+	private final VacationManager vacationManager;
 	
 	private final static Logger log = LoggerFactory.getLogger(ContractManager.class);
 	
@@ -167,14 +159,46 @@ public class ContractManager {
 		csp.save();
 		contract.contractStampProfile.add(csp);
 		
+		//Se il contratto inizia prima di today inserisco un source fittizio alla
+		// data attuale che mi imposta tutti i residui a zero.
+		//(Comportamento Disabilitato, da valutare.)
+		contract.sourceDate = null;
+//		IWrapperContract wcontract = wrapperFactory.create(contract);
+//		contract.sourceDate = LocalDate.now().minusDays(1);
+//		
+//		contract.sourceRemainingMealTicket = 0;
+//		contract.sourceRemainingMinutesCurrentYear = 0;
+//		contract.sourceRemainingMinutesLastYear = 0;
+//
+//		List<Absence> postPartum = Lists.newArrayList();
+//		
+//		contract.sourcePermissionUsed = vacationManager.getPermissionAccruedYear(wcontract, 
+//				contract.sourceDate.getYear() , Optional.<LocalDate>absent());
+//		
+//		contract.sourceVacationLastYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+//				contract.sourceDate.getYear() -1, Optional.<LocalDate>absent(), postPartum);
+//				
+//		contract.sourceVacationCurrentYearUsed = vacationManager.getVacationAccruedYear(wcontract,
+//				contract.sourceDate.getYear(), Optional.<LocalDate>absent(), postPartum);
+//		
+//		contract.sourceRecoveryDayUsed = 0;		
+//		
+		contract.sourceByAdmin = false;
+		
 		contract.save();
 		
 		// FIXME: comando JPA per aggiornale la person
 		contract.person.contracts.add(contract);
 		
 		//Aggiornamento stato contratto
-		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		//Nella creazione se effettuo i ricalcoli devo farli necessariamente
+		//per tutto il contratto (al più dall'installazione del software).
+		//TODO: Si potrebbe prevedere la possibilità di specificare se effettuare 
+		//'inizializzazione fittizia che esaurisce tutte le ferie e i permessi 
+		// e inibisce tutti i ricalcoli nel caso di creazione di contratto inserito 
+		// dopo il suo inizio.  
+		//(adesso l'ho disabilitata perchè come soluzione non mi piace).
+		recomputeContract(contract, Optional.<LocalDate>absent(), true);
 		
 		return true;
 
@@ -196,91 +220,56 @@ public class ContractManager {
 		updateContractWorkingTimeType(contract);
 		updateContractStampProfile(contract);
 		
-		//Aggiornamento stato contratto
-		DateInterval contractDateInterval = wrapperFactory.create(contract).getContractDateInterval();
-		recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		//Ricalcoli dall'inizio del contratto.
+		// TODO: l'update dovrebbe ricevere un parametro dateFrom nel quale impostare
+		//la data dalla quale effettuare i ricalcoli. Se ne deve occupare il chiamante.
+		recomputeContract(contract, Optional.<LocalDate>absent(), true);
 	}
 
 	/**
 	 * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
-	 *  
-	 * 1) CheckHistoryError 
-	 * 2) Ricalcolo tempi lavoro
-	 * 3) Ricalcolo riepiloghi annuali 
 	 * 
 	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. 
 	 *   Se null ricalcola dall'inizio del contratto.
-	 *   
-	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
-	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
-	 *   modifica la data fine che potrebbe non essere persistita)
+	 *   newContract: indica se il ricalcolo è relativo ad un nuvo contratto o ad uno già esistente
 	 */
-	public void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+	public void recomputeContract(Contract contract, Optional<LocalDate> dateFrom, 
+			boolean newContract) {
 
 		// (0) Definisco l'intervallo su cui operare
 		// Decido la data inizio
-		String dateInitUse = confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office);
-		LocalDate initUse = new LocalDate(dateInitUse);
-		LocalDate date = contract.beginContract;
-		if(date.isBefore(initUse))
-			date = initUse;
-		DateInterval contractInterval = wrapperFactory.create(contract).getContractDatabaseInterval();
-		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
-			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
-		}
-		// Decido la data di fine
-		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
-			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
+		LocalDate initUse = new LocalDate(confGeneralManager
+				.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office));
+		
+		LocalDate startDate = contract.beginContract;
+		if(startDate.isBefore(initUse)) {
+			startDate = initUse;
 		}
 
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		LocalDate today = new LocalDate();
-		log.info("CheckPersonDay (creazione ed history error) DA {} A {}", date, today);
-		while(true) {
-			log.debug("RecomputePopulate {}", date);
-
-			if(date.isEqual(today))
-				break;
-
-			if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
-				date = date.plusDays(1);
-				continue;
+		if(dateFrom.isPresent()) {
+			if(startDate.isBefore(dateFrom.get())) {
+				startDate = dateFrom.get();
 			}
-
-			consistencyManager.checkPersonDay(contract.person, date);
-
-			date = date.plusDays(1);
-
 		}
-
-		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
-		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
-
-		log.debug("PopulatePersonDay (ricalcoli ed history error) DA {} A {}", actualMonth, endMonth);
-
-		while( !actualMonth.isAfter(endMonth) )
-		{
-			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
-
-			for(PersonDay pd : pdList){
-
-				PersonDay pd1 = personDayDao.getPersonDayById(pd.id);
-
-				log.debug("RecomputePopulate {}", pd1.date);	
-
-				personDayManager.populatePersonDay(wrapperFactory.create(pd1));
-			}
-
-			actualMonth = actualMonth.plusMonths(1);
+	
+		if(!newContract){
+			//Distruggere i riepiloghi
+			// TODO: anche quelli sulle ferie quando ci saranno
+			destroyContractMonthRecap(contract);
+			
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
 		}
-
-		log.info("Calcolato il riepilogo per il contratto {}",contract);
-
-		//(3) Ricalcolo dei riepiloghi mensili
-		contractMonthRecapManager.populateContractMonthRecapByPerson(contract.person,
-				new YearMonth(contractInterval.getBegin()));
-
+		
+		consistencyManager.updatePersonSituation(contract.person.id, startDate);
+	}
+	
+	private void destroyContractMonthRecap(Contract contract) {
+		for(ContractMonthRecap cmr : contract.contractMonthRecaps) {
+			cmr.delete();
+		}
+		//contract = contractDao.getContractById(contract.id);
+		contract.save();
 	}
 
 	/**
@@ -485,64 +474,29 @@ public class ContractManager {
 	 * @param contract
 	 */
 	public void saveSourceContract(Contract contract){
-		if(contract.sourceVacationLastYearUsed==null) contract.sourceVacationLastYearUsed=0;
-		if(contract.sourceVacationCurrentYearUsed==null) contract.sourceVacationCurrentYearUsed=0;
-		if(contract.sourcePermissionUsed==null) contract.sourcePermissionUsed=0;
-		if(contract.sourceRemainingMinutesCurrentYear==null) contract.sourceRemainingMinutesCurrentYear=0;
-		if(contract.sourceRemainingMinutesLastYear==null) contract.sourceRemainingMinutesLastYear=0;
-		if(contract.sourceRecoveryDayUsed==null) contract.sourceRecoveryDayUsed=0;
+		if(contract.sourceVacationLastYearUsed == null){ 
+			contract.sourceVacationLastYearUsed = 0;
+		}
+		if(contract.sourceVacationCurrentYearUsed == null) {
+			contract.sourceVacationCurrentYearUsed = 0;
+		}
+		if(contract.sourcePermissionUsed == null) {
+			contract.sourcePermissionUsed = 0;
+		}
+		if(contract.sourceRemainingMinutesCurrentYear == null){ 
+			contract.sourceRemainingMinutesCurrentYear = 0;
+		}
+		if(contract.sourceRemainingMinutesLastYear == null){ 
+			contract.sourceRemainingMinutesLastYear = 0;
+		}
+		if(contract.sourceRecoveryDayUsed == null){ 
+			contract.sourceRecoveryDayUsed = 0;
+		}
+		if(contract.sourceRemainingMealTicket == null){ 
+			contract.sourceRemainingMealTicket = 0;
+		}
 
 		contract.save();
-
 	}
-
-	/**
-	 * Utilizzata nel metodo delete del controller Persons, elimina contratti, orari di lavoro e stamp profile
-	 * @param person
-	 */
-	public void deletePersonContracts(Person person){
-		List<Contract> helpList = contractDao.getPersonContractList(person);
-		for(Contract c : helpList){
-
-			log.debug("Elimino contratto di {} che va da {} a {}", 
-					new Object[]{person.getFullname(), c.beginContract, c.expireContract});
-
-			// Eliminazione orari di lavoro
-			List<ContractWorkingTimeType> cwttList = contractDao.getContractWorkingTimeTypeList(c);
-			for(ContractWorkingTimeType cwtt : cwttList){
-				cwtt.delete();
-			}
-			// Eliminazione stamp profile
-			List<ContractStampProfile> cspList = contractDao.getPersonContractStampProfile(Optional.<Person>absent(), Optional.fromNullable(c));
-			for(ContractStampProfile csp : cspList){
-				csp.delete();
-			}
-
-			c.delete();
-			person = personDao.getPersonById(person.id);
-			person.contracts.remove(c);
-
-			person.save();
-
-		}
-	}
-
-	/**
-	 * utilizzata nel metodo delete del controller Persons, elimina le eventuali inizializzazioni di tempi e assenze
-	 * @param person
-	 */
-	public void deleteInitializations(Person person){
-		for(InitializationAbsence ia : person.initializationAbsences){
-			long id = ia.id;
-			ia = contractDao.getInitializationAbsenceById(id);
-			ia.delete();
-		}
-		for(InitializationTime ia : person.initializationTimes){
-			long id = ia.id;
-			ia = contractDao.getInitializationTimeById(id);
-			ia.delete();
-		}
-	}
-
 
 }

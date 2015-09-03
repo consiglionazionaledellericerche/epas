@@ -14,12 +14,9 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
-import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.FrequentAbsenceCode;
 import models.query.QAbsence;
-import models.query.QAbsenceType;
-import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
@@ -70,7 +67,8 @@ public class AbsenceDao extends DaoBase {
 	 * In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno.
 	 * Se il booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
 	 */
-	public List<Absence> getAbsencesInPeriod(Optional<Person> person, LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment){
+	public List<Absence> getAbsencesInPeriod(Optional<Person> person, 
+			LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment){
 
 		final QAbsence absence = QAbsence.absence;
 
@@ -93,19 +91,20 @@ public class AbsenceDao extends DaoBase {
 	}
 
 	/**
-	 *
+	 * // TODO: questo metodo deve essere privato e esportarne le viste.
+	 * 
 	 * @param person
 	 * @param code
 	 * @param from
 	 * @param to
 	 * @param justifiedTimeAtWork
 	 * @param forAttachment
-	 * @return A seconda dei parametri passati alla funzione, può ritornare la lista dei codici di assenza in un certo periodo,
-	 * le eventuali assenze di una persona in un certo periodo di tempo, le assenze da ritornare con codice giustificativo giornaliero,
-	 * le assenze da ritornare per il download degli allegati
+	 * @return 
 	 */
-	public List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, Optional<String> code,
-			LocalDate from, LocalDate to, Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment, boolean ordered){
+	public List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, 
+			Optional<String> code,	LocalDate from, LocalDate to, 
+			Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment, 
+			boolean ordered){
 
 		final QAbsence absence = QAbsence.absence;
 
@@ -131,22 +130,25 @@ public class AbsenceDao extends DaoBase {
 	}
 
 	/**
-	 *
 	 * @param begin
 	 * @param end
 	 * @param code
-	 * @return il numero di volte in cui viene utilizzato un certo codice di assenza nel periodo che va da begin a end
+	 * @return 
 	 */
-	public Long howManyAbsenceInPeriod(LocalDate begin, LocalDate end, String code){
+	public List<Absence> absenceInPeriod(Person person, 
+			LocalDate begin, LocalDate end, String code){
 
 		final QAbsence absence = QAbsence.absence;
 
 		final JPQLQuery query = getQueryFactory().from(absence)
-				.where(absence.absenceType.code.eq(code).and(absence.personDay.date.between(begin, end)));
-		if(query.count() != 0)
-			return query.count();
-		else
-			return new Long(0);
+				.leftJoin(absence.personDay)
+				.leftJoin(absence.personDay.person)
+				
+				.where(absence.absenceType.code.eq(code)
+				.and(absence.personDay.date.between(begin, end))
+				.and(absence.personDay.person.eq(person)));
+		
+		return query.list(absence);
 	}
 
 	/**
@@ -296,7 +298,8 @@ public class AbsenceDao extends DaoBase {
 		return getQueryFactory().from(absence)
 				.where(absence.personDay.person.eq(person).and(
 						absence.personDay.date.between(fromDate, toDate.or(fromDate))).and(
-								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay))).list(absence);
+								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay)
+								.or(absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AssignAllDay)))).list(absence);
 
 	}
 
@@ -312,33 +315,7 @@ public class AbsenceDao extends DaoBase {
 
 		return getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 	}
-
-	/**
-	 *
-	 * @param abt
-	 * @param pd
-	 * @return
-	 */
-	public boolean getAbsenceWithReplacingAbsenceTypeNotNull(AbsenceType abt, PersonDay pd){
-		final QAbsence qabs = QAbsence.absence;
-		final QAbsenceType qabt = QAbsenceType.absenceType;
-		final QAbsenceTypeGroup qabtg = QAbsenceTypeGroup.absenceTypeGroup;
-
-		final JPQLQuery query2 = getQueryFactory().from(qabs)
-				.leftJoin(qabs.absenceType, qabt).fetch()
-				.leftJoin(qabt.absenceTypeGroup, qabtg).fetch();
-
-
-		final BooleanBuilder condition = new BooleanBuilder();
-		condition.and(qabs.absenceType.eq(qabt));
-		condition.and(qabt.absenceTypeGroup.eq(qabtg));
-		condition.and(qabtg.replacingAbsenceType.eq(abt));
-		condition.and(qabs.personDay.eq(pd));
-		query2.where(condition);
-
-		return query2.count() > 0;
-	}
-
+	
 	/**
 	 * 
 	 * @param personList
@@ -365,17 +342,26 @@ public class AbsenceDao extends DaoBase {
 	 * @param end
 	 * @param postPartumCodeList
 	 * @param ordered
-	 * @return la lista delle assenze effettuate nel period begin-end dalla persona person appartenenti al tipo 'post-partum' presenti
-	 * nella lista passata come parametro
+	 * @return il numero delle assenze effettuate nel period begin-end 
+	 * dalla persona con codice in codeList 
 	 */
-	public List<Absence> getAbsenceWithPostPartumCode(Person person, LocalDate begin, LocalDate end, List<AbsenceType> postPartumCodeList, boolean ordered){
+	public List<Absence> getAbsencesInCodeList(Person person, LocalDate begin, 
+			LocalDate end, List<AbsenceType> codeList, boolean ordered){
+		
 		final QAbsence absence = QAbsence.absence;
 
 		final JPQLQuery query = getQueryFactory().from(absence)
-				.where(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end).and(absence.absenceType.in(postPartumCodeList))));
-		if(ordered)
+				.leftJoin(absence.personDay).fetch()
+				.where(absence.personDay.person.eq(person)
+				.and(absence.personDay.date.between(begin, end)
+				.and(absence.absenceType.in(codeList))));
+		
+		if(ordered) {
 			query.orderBy(absence.personDay.date.asc());
+		}
+		
 		return query.list(absence);
+		 
 	}
 
 	/**
@@ -449,7 +435,9 @@ public class AbsenceDao extends DaoBase {
 	 */
 	public List<Absence> getYearlyAbsence(Person person, int year){
 
-		return getAbsencesInPeriod(Optional.fromNullable(person),new LocalDate(year,1,1), Optional.of(new LocalDate(year,12,31)), false);
+		return getAbsencesInPeriod(Optional.fromNullable(person),
+				new LocalDate(year,1,1), Optional.of(new LocalDate(year,12,31)), false);
 	}
-
+	
+	
 }

@@ -114,10 +114,10 @@
 	    
 	  	<tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
 
-	  	<td class="#{if dayRecap.holiday==false} capitalized #{/if} #{else} festivi #{/else} default-single">
+	  	<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
 	  	   #{if dayRecap.firstDay }F#{/if}
 	      <a data-toggle="modal" data-backdrop="true" href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-modal=".my-modal">
-		     ${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}
+		     ${dayRecap.date.shortDayName()}
           </a>
 	    </td>
 		
@@ -136,12 +136,18 @@
 		<td class="invisible"></td>
 		
 		<td class="assenza default-single">
-		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.toString())}" data-modal=".my-modal">
+		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.personDay.date?.format())}" data-modal=".my-modal">
 		  ___
 		  </a>
+		  
 		  #{list items:dayRecap.absences, as:'absence'}
 		    <a href="@{Absences.edit(absence.id)}" data-modal=".my-modal">
-			  ${absence.absenceType.code}
+			  <span>
+				     ${absence.absenceType.code} 
+				     #{if absence.justifiedMinutes}
+				    	${absence.justifiedMinutes}min
+				  	 #{/if}
+				  </span>
 			</a>
 		  #{/list}	
 		</td>
@@ -189,7 +195,24 @@
 		<td class="invisible"></td>
 		
 	    <td class="tempoLavoro default-single">
+		 
 		  ${dayRecap.workTime}
+		  #{if dayRecap.personDay.decurted != null}
+			  <a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="${(
+	    		'Tempo Totale Timbrature: <strong>'+dayRecap.stampingWorkingTime+'</strong>'+
+	    		'<br>Tempo Sottratto Per Pausa Pranzo: <strong>'+dayRecap.personDay.decurted+' minuti</strong>').escape()}"
+	    		title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
+			  </a>
+		  #{/if}
+		  #{else}
+		     
+		  #{/else}
+		  
+		  
 		  #{ifnot dayRecap.todayLunchTimeCode.equals("")}
 		    <strong>${dayRecap.todayLunchTimeCode}</strong>
 		  #{/ifnot}

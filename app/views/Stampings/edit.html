@@ -2,7 +2,7 @@
 
 <div class="modal-header center">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date} per ${stamping.personDay.person.surname}</h4>
+  <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.surname} <i class="fa fa-clock-o"></i></h4>
 </div>
 
 <!-- Start Body -->
@@ -13,36 +13,24 @@
 	
 	<input type="hidden" name="stampingId" value="${stamping.id}"/>
 		
-	<table class="table table-hover table-form">
+  	<table class="table table-hover table-form">
+	
 		<tr>
-			<td class="lab">
-			  Ore <i class="fa fa-clock-o fa-2"></i>
-			</td>
-			<td>
-			    <input type="text" name="stampingHour" value="${hour}" class="input-sm">
-			    <input type="text" name="stampingMinute" value="${minute}" class="input-sm">
-			</td>
+			<td>#{f.input 'stampingHour', value:stamping.date.getHourOfDay(), type:'number', class:'input-sm'/}</td>
+		</tr>
+		<tr>
+			<td>#{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm' /}</td>
 		</tr>
 		
-		<tr>	
-			<td class="lab">Di Servizio</td>
-			<td>
-			  #{if stamping.isServiceStamping() }
-			    <label for="ser">Si</label><input type="radio" name="service" value="true" checked id="ser">
-			    <label for="serNo">No</label><input type="radio" name="service" value="false" id="serNo">
-			  #{/if}
-			  #{else}
-			    <label for="ser">Si</label><input type="radio" name="service" value="true" id="ser">
-			    <label for="serNo">No</label><input type="radio" name="service" value="false" checked id="serNo">
-			  #{/else}
-			</td>
-		</tr>	
-		<tr>	
-			<td class="lab">Note</td>
-			<td><input type="text" name="note" value="${stamping.note}"></td>
+		<tr>
+			<td>#{f.selectModel 'stamping.stampType', value:stamping.stampType, items:templateUtility.allStampTypes /}</td>
 		</tr>
-	
-	</table>
+		
+		<tr>
+			<td>#{f.input 'note' /}</td>
+		</tr>
+
+ 	</table> 
 	
 	<input class="btn btn-primary" type="submit" value="Aggiorna"/>
 	

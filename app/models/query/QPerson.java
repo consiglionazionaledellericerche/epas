@@ -32,8 +32,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
 
-    public final StringPath cnr_email = createString("cnr_email");
-
     public final ListPath<models.CompetenceCode, QCompetenceCode> competenceCode = this.<models.CompetenceCode, QCompetenceCode>createList("competenceCode", models.CompetenceCode.class, QCompetenceCode.class, PathInits.DIRECT2);
 
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
@@ -45,6 +43,8 @@ public class QPerson extends EntityPathBase<Person> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath eppn = createString("eppn");
+
     public final StringPath fax = createString("fax");
 
     //inherited
@@ -52,9 +52,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final NumberPath<Integer> iId = createNumber("iId", Integer.class);
 
-    public final ListPath<models.InitializationAbsence, QInitializationAbsence> initializationAbsences = this.<models.InitializationAbsence, QInitializationAbsence>createList("initializationAbsences", models.InitializationAbsence.class, QInitializationAbsence.class, PathInits.DIRECT2);
-
-    public final ListPath<models.InitializationTime, QInitializationTime> initializationTimes = this.<models.InitializationTime, QInitializationTime>createList("initializationTimes", models.InitializationTime.class, QInitializationTime.class, PathInits.DIRECT2);
+    public final BooleanPath isPersonInCharge = createBoolean("isPersonInCharge");
 
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
@@ -70,14 +68,18 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath othersSurnames = createString("othersSurnames");
 
+    public final ListPath<Person, QPerson> people = this.<Person, QPerson>createList("people", Person.class, QPerson.class, PathInits.DIRECT2);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createList("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
+    public final SetPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createSet("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
 
     public final ListPath<models.PersonDay, QPersonDay> personDays = this.<models.PersonDay, QPersonDay>createList("personDays", models.PersonDay.class, QPersonDay.class, PathInits.DIRECT2);
 
     public final QPersonHourForOvertime personHourForOvertime;
+
+    public final QPerson personInCharge;
 
     public final ListPath<models.PersonMonthRecap, QPersonMonthRecap> personMonths = this.<models.PersonMonthRecap, QPersonMonthRecap>createList("personMonths", models.PersonMonthRecap.class, QPersonMonthRecap.class, PathInits.DIRECT2);
 
@@ -121,6 +123,7 @@ public class QPerson extends EntityPathBase<Person> {
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;
+        this.personInCharge = inits.isInitialized("personInCharge") ? new QPerson(forProperty("personInCharge"), inits.get("personInCharge")) : null;
         this.personShift = inits.isInitialized("personShift") ? new QPersonShift(forProperty("personShift"), inits.get("personShift")) : null;
         this.qualification = inits.isInitialized("qualification") ? new QQualification(forProperty("qualification")) : null;
         this.reperibility = inits.isInitialized("reperibility") ? new QPersonReperibility(forProperty("reperibility"), inits.get("reperibility")) : null;

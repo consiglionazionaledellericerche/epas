@@ -7,7 +7,6 @@ import java.util.List;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
-import models.VacationPeriod;
 
 import org.joda.time.YearMonth;
 
@@ -23,12 +22,6 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 */
 	boolean isLastInMonth(int month, int year);
 
-	/**
-	 * 
-	 * @return
-	 */
-	List<VacationPeriod> getContractVacationPeriods();
-	
 	/**
 	 * True se il contratto è a tempo determinato.
 	 * 
@@ -52,7 +45,7 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 * 
 	 * @return
 	 */
-	YearMonth getFirstMonthToRecap();
+	Optional<YearMonth> getFirstMonthToRecap();
 	
 	/**
 	 * 

@@ -19,7 +19,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import cnr.sync.dto.CompetenceDTO;
 import cnr.sync.dto.DayRecap;
-import cnr.sync.manager.SyncManager;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -46,19 +45,11 @@ public class Persons extends Controller{
 	private static AbsenceDao absenceDao;
 	@Inject
 	private static CompetenceDao competenceDao;
-	@Inject
-	private static SyncManager syncManager;
-	
 	@BasicAuth
-	public static void days(Integer perseoId ,LocalDate start,LocalDate end){
-//		long checkedPeople = personDao.checkCnrEmailForEmployee();
-//		if(checkedPeople == 0){
-//			
-//			syncManager.syncronizeCnrEmail();
-//		}
+	public static void days(String email ,LocalDate start,LocalDate end){
 
-		//Person person = personDao.getPersonByEmail(email);
-		Person person = personDao.getPersonByPerseoId(perseoId);
+		//Person person = personDao.getPersonByPerseoId(perseoId);
+		Person person = personDao.getPersonByEmail(email);
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
 					+ "mail cnr che serve per la ricerca. Assicurarsi di aver"
@@ -86,17 +77,10 @@ public class Persons extends Controller{
 	}
 
 	@BasicAuth
-	public static void missions(Integer perseoId, LocalDate start, LocalDate end, boolean forAttachment){
-//		long checkedPeople = personDao.checkCnrEmailForEmployee();
-//		if(checkedPeople == 0){
-//			/**
-//			 * TODO: chiamare qui il metodo del personManager per sincronizzare
-//			 * le email cnr
-//			 */
-//			syncManager.syncronizeCnrEmail();
-//		}
-		//Person person = personDao.getPersonByEmail(email);
-		Person person = personDao.getPersonByPerseoId(perseoId);
+	public static void missions(String email, LocalDate start, LocalDate end, boolean forAttachment){
+
+		//Person person = personDao.getPersonByPerseoId(perseoId);
+		Person person = personDao.getPersonByEmail(email);
 		List<DayRecap> personDays = Lists.newArrayList();
 		if(person != null){
 
@@ -123,7 +107,7 @@ public class Persons extends Controller{
 	@BasicAuth
 	public static void competences(String email,LocalDate start,LocalDate end,List<String> code){
 
-		Person person = personDao.getPersonByEmail(email);
+		Person person = personDao.byEmail(email).orNull();
 		if(person == null){
 			JsonResponse.notFound("Indirizzo email incorretto");
 		}

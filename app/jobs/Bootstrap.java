@@ -1,20 +1,9 @@
 package jobs;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-
-import models.CompetenceCode;
-import models.Qualification;
-import models.Role;
-import models.StampModificationType;
-import models.StampType;
-import models.User;
-import models.VacationCode;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -24,20 +13,22 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.yaml.snakeyaml.Yaml;
 
-import play.Logger;
+import com.google.common.io.Resources;
+
+import lombok.extern.slf4j.Slf4j;
+import models.CompetenceCode;
+import models.Qualification;
+import models.Role;
+import models.StampModificationType;
+import models.StampType;
+import models.User;
+import models.VacationCode;
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-import play.libs.Codec;
 import play.test.Fixtures;
-import play.vfs.VirtualFile;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti
@@ -46,7 +37,10 @@ import com.google.common.io.Resources;
  *
  */
 @OnApplicationStart
+@Slf4j
 public class Bootstrap extends Job<Void> {
+	
+	private final static String JOBS_CONF = "jobs.active";
 
 	public static class DatasetImport implements Work {
 
@@ -77,8 +71,14 @@ public class Bootstrap extends Job<Void> {
 
 	public void doJob() throws IOException {
 
-		if (Play.id.equals("test")) {
-			Logger.info("Application in test mode, default boostrap job not started");
+		if (Play.runingInTestMode()) {
+			log.info("Application in test mode, default boostrap job not started");
+			return;
+		}
+		
+//		in modo da inibire l'esecuzione dei job in base alla configurazione
+		if("false".equals(Play.configuration.getProperty(JOBS_CONF))){
+			log.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
 			return;
 		}
 
@@ -103,7 +103,6 @@ public class Bootstrap extends Job<Void> {
 //			// History
 //			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class,
 //					"../db/import/history/part2_history.xml")));
-
 		}
 		
 		if(User.find("byUsername", "developer").fetch().isEmpty()) {
@@ -128,7 +127,10 @@ public class Bootstrap extends Job<Void> {
 //		Allinea tutte le sequenze del db
 		Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 		
-		new FixUserPermission().now();
+		new FixUserPermission();
+
 	}
+	
+	
 
 }

@@ -1,8 +1,8 @@
 package dao.wrapper;
 
-import com.google.common.base.Optional;
-
 import models.ContractMonthRecap;
+
+import com.google.common.base.Optional;
 
 /**
  * @author alessandro

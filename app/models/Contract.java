@@ -42,6 +42,9 @@ public class Contract extends BaseModel {
 	@Column(name="source_date")
 	public LocalDate sourceDate = null;
 
+	@Column(name="source_by_admin")
+	public boolean sourceByAdmin = false;
+	
 	@Column(name="source_vacation_last_year_used")
 	public Integer sourceVacationLastYearUsed = null;
 
@@ -59,16 +62,19 @@ public class Contract extends BaseModel {
 
 	@Column(name="source_remaining_minutes_current_year")
 	public Integer sourceRemainingMinutesCurrentYear = null;
+	
+	@Column(name="source_remaining_meal_ticket")
+	public Integer sourceRemainingMealTicket = null;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
-
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
-	@OrderBy("beginFrom")
-	public Set<VacationPeriod> vacationPeriods = Sets.newHashSet();
 	
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="contract", cascade = CascadeType.REMOVE)
+	@OrderBy("beginFrom")
+	public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
+	
+	@OneToMany(mappedBy="contract", cascade = CascadeType.REMOVE)
 	public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
 	@Required @NotNull
@@ -82,19 +88,19 @@ public class Contract extends BaseModel {
 
 	@Column(name="end_contract")
 	public LocalDate endContract;
-
+	
 	@NotAudited
-	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
 	@NotAudited
-	@OneToMany(mappedBy="contract")
+	@OneToMany(mappedBy="contract", cascade = {CascadeType.REMOVE})
 	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
 	@NotAudited
-	@OneToMany(mappedBy="contract", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="contract", cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTickets;
 
 	@Transient
