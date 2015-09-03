@@ -30,6 +30,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import dao.ContractDao;
@@ -367,7 +368,13 @@ public class WorkingTimes extends Controller{
 
 					for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) { //requires ordinata per beginDate @OrderBy
 
-						DateInterval intersection = DateUtility.intervalIntersection(contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate));
+						// FIXME: secondo me la requires che siano ordinati non serve più
+						// verificare.
+						
+						DateInterval intersection = DateUtility
+								.intervalIntersection(contractPeriod, 
+										new DateInterval(cwtt.beginDate, cwtt.endDate));
+						
 						if(cwtt.workingTimeType.id.equals(wttOld.id) && intersection != null) {
 
 							newCwttList.addAll( splitContractWorkingTimeType(cwtt, intersection, wttNew) );
@@ -387,7 +394,7 @@ public class WorkingTimes extends Controller{
 					replaceContractWorkingTimeTypeList(contract, newCwttListClean);
 					Logger.info("recompute");
 
-					contractManager.recomputeContract(contract, dateFrom, null,false);
+					contractManager.recomputeContract(contract, Optional.fromNullable(dateFrom), false);
 
 					contractChanges++;
 
