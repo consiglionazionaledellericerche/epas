@@ -15,11 +15,9 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
-
-
-//@Audited
-//@Entity
-//@Table(name="conf_period")
+@Audited
+@Entity
+@Table(name="conf_period")
 public class ConfPeriod extends BaseModel{
 	
 	@ManyToOne( fetch=FetchType.LAZY)
@@ -39,16 +37,4 @@ public class ConfPeriod extends BaseModel{
 	@Column(name="field_value")
 	public String fieldValue;
 
-	public ConfPeriod() {
-		this.office = null;
-		this.field = null;
-		this.fieldValue = null;
-	}
-	
-	public ConfPeriod(Office office, String fieldName, String fieldValue) {
-		this.office = office;
-		this.field = fieldName;
-		this.fieldValue = fieldValue;
-	}
-	
 }
