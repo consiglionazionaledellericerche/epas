@@ -4,37 +4,32 @@ Gestione buoni pasto
 Il sistema ePAS permette all'amministratore di poter gestire i buoni pasto da attribuire a ciascun dipendente.
 Dal menu :menuselection:`Amministrazione --> Gestione buoni pasto` si arriva in questa schermata:
 
-.. figure:: _static/images/assegnaBuoni.png
-   :scale: 40
-   :align: center
-   
-   Schermata di assegnamento buoni pasto
-   
-Per ogni dipendente è presente un pannello nel quale è possibile assegnare un massimo di 3 blocchi di buoni pasto specificando per ognuno:
-   * il codice del blocco
-   * il quantitativo di buoni per ogni blocco (selezionabile dal menu a tendina)
-   * la data di assegnazione (precompilata con la data in cui viene visualizzata la pagina)
-   * l'amministratore che ha assegnato il blocco (precompilato con il nome dell'amministratore che sta visitando la pagina)
-   
-Inoltre è possibile visualizzare il riepilogo dei blocchi assegnati, per ogni blocco possiamo notare:
-   * il codice del blocco assegnato
-   * il quantitativo di buoni assegnati per ogni blocco che è un valore cliccabile. Cliccandoci sopra, si aprirà una finestra nella quale sarà possibile visualizzare:
-      * il numero del buono pasto
-      * la data di assegnazione
-      * l'amministratore che ha fatto l'assegnamento
-   * un pulsante di rimozione del blocco precedentemente assegnato
-
-In alto a sinistra nella pagina, appena sopra la lista di pannelli referenti ciascuno a un dipendente, possiamo notare una form di ricerca per nome o cognome con la quale ridurre la lista di pannelli a solo quelli relativi alle persone che ci interessa aggiornare.
-
-Ancora al di sopra di essa possiamo cambiare visualizzazione andando a cliccare su "Riepilogo buoni pasto".
-
 .. figure:: _static/images/riepilogoBuoni.png
    :scale: 40
    :align: center
    
    Schermata di riepilogo buoni pasto
 
-In questa schermata sono riportati tutti i dipendenti afferenti alla sede e, per ognuno, la situazione in termini di:
-   * buoni assegnati
-   * buoni utilizzati
-   * buoni rimanenti
+
+Come si può notare, la strutturazione della tabella ricalca quella della lista persone.
+Vengono, di default, visualizzate 10 persone ma dalla form in alto a sinistra è possibile specificare la visualizzazione di 25, 50 o di tutte le persone.
+E' possibile la ricerca di una specifica persona usufruendo del riquadro di ricerca a destra in alto, scrivendo il nome o il cognome della persona che si sta cercando.
+E' possibile l'ordinamento degli elementi su ciascuno dei campi della tabella, è sufficiente cliccare sull'intestazione della colonna per ordinare in modo discendente o ascendente su quello specifico campo.
+
+Per ogni persona vengono visualizzati i buoni rimanenti dal mese precedente, quelli consegnati nel mese, quelli usati nel mese e i rimanenti.
+
+Cliccando sulla persona, si aprirà la form di inserimento dei ticket:
+
+.. figure:: _static/images/assegnaBuoni.png
+   :scale: 40
+   :align: center
+   
+   Schermata di assegnamento buoni pasto
+
+In questa schermata vengono visualizzati:
+   * i dati contrattuali con la data da cui si parte a considerare il conteggio per i buoni (solitamente l'inizio del mese selezionato) con i riepiloghi dei quantitativi di buoni assegnati e consumati
+   * la schermata di inserimento dei blocchetti di buoni pasto (tre alla volta, in cui specificare il codice del blocco, il numero di buoni, la data di attribuzione che è quella in cui si sta usando la form e il nome dell'amministratore che li ha assegnati).
+   * il riepilogo dei blocchi assegnati nell'anno in corso, con la possibilità di rimuoverli
+   * il riepilogo dei blocchi assegnati nell'anno passato, con la possibilità di rimuoverli
+
+
