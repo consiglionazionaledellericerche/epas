@@ -51,6 +51,16 @@ La colonna "*inserisci timbratura*" permette all'amministratore di inserire una 
    
 Le colonne, "*Tempo lavoro*", "*Differenza*", "*Progressivo*", sono quelle che concorrono alla formazione del residuo mensile orario per il dipendente.
 In particolare nella colonna "*Tempo lavoro*" troviamo quante ore effettive di lavoro sono state effettuate dal dipendente in un certo giorno, calcolate sulla base di quanto tempo è trascorso tra le timbrature di ingresso e uscita effettuate.
+Nel caso ci trovassimo di fronte a un tempo di lavoro calcolato su giorno festivo (v. :doc:`Presenza festiva </holidayPresence>`), così come da figura:
+
+.. figure:: _static/images/giornoFestivo.png
+   :scale: 40
+   :align: center
+   
+   Schermata di abilitazione orario nel festivo
+   
+sarà sufficiente per l'amministratore cliccare sulla scritta "*Abilita*" così da abilitare il tempo di lavoro per quel giorno.
+   
 Nella colonna "*Differenza*" troviamo invece la quantità oraria di differenza (positiva o negativa) rispetto a quante ore il dipendente deve lavorare in quel giorno.
 La colonna "*Progressivo*", infine, contiene la somma algebrica di tutte le differenze giornaliere accumulatesi fino al giorno in cui stiamo appunto guardando il progressivo.
 Le ultime due colonne "*Orario di lavoro*" e "*Note*" contengono rispettivamente il tipo di orario di lavoro assegnato al dipendente e le eventuali note riguardanti le timbrature del dipendente giorno per giorno.

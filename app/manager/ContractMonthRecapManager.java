@@ -107,40 +107,16 @@ public class ContractMonthRecapManager {
 
 		IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
 		Contract contract = cmr.contract;
-		boolean mealTicketToCompute = true;
-		
-		Optional<LocalDate> dateStartMealTicket = 
-				confGeneralManager.getLocalDateFieldValue(
-						Parameter.DATE_START_MEAL_TICKET, contract.person.office); 
-				
-		
-		if(!dateStartMealTicket.isPresent() 
-				|| dateStartMealTicket.get().isAfter(calcolaFinoA)) {
-			mealTicketToCompute = false;
-		}
-		
-		LocalDate firstDayInDatabase = new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
-		DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
-		DateInterval requestIntervalForProgressive = new DateInterval(firstDayInDatabase, calcolaFinoA);
-		DateInterval requestIntervalForMealTicket = new DateInterval(firstDayInDatabase, calcolaFinoA);
-		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket.orNull(), calcolaFinoA);
 
-		int initMonteOreAnnoPassato = 0;
-		int initMonteOreAnnoCorrente = 0;
-
-		////////////////////////////////////////////////////////////////////////
-		//	Recupero situazione iniziale del mese richiesto
-		////////////////////////////////////////////////////////////////////////
-		
+		//Se ho necessità del riepilogo del mese precedente lo cerco nel DataBase.
+		// Se non lo trovo non posso costruire il riepilogo quindi esco.
 		Optional<ContractMonthRecap> recapPreviousMonth = 
 				Optional.<ContractMonthRecap>absent();
-		
 		Optional<YearMonth> firstContractMonthRecap = wrapperFactory
 				.create(contract).getFirstMonthToRecap();
 		if (!firstContractMonthRecap.isPresent()) {
 			return Optional.<ContractMonthRecap>absent();
 		}
-
 		if ( yearMonth.isAfter(firstContractMonthRecap.get()) ) {
 			//Riepilogo essenziale
 			recapPreviousMonth = wcontract.getContractMonthRecap(yearMonth.minusMonths(1));
@@ -150,11 +126,13 @@ public class ContractMonthRecapManager {
 			}
 		} 
 
-		////////////////////////////////////////////////////////////////////////
-		//	Utilizzo situazione iniziale del mese richiesto
-		////////////////////////////////////////////////////////////////////////
+		//Valori dei residui all'inizio del mese richiesto
+		//Se è il mese di beginContrat i residui sono 0
+		int initMonteOreAnnoPassato = 0;
+		int initMonteOreAnnoCorrente = 0;
 		
 		if( recapPreviousMonth.isPresent() ) {
+			//Se ho il riepilogo del mese precedente lo utilizzo.
 			if ( recapPreviousMonth.get().month == 12 ) {
 				initMonteOreAnnoPassato = 
 						recapPreviousMonth.get().remainingMinutesCurrentYear 
@@ -165,128 +143,42 @@ public class ContractMonthRecapManager {
 				initMonteOreAnnoPassato = recapPreviousMonth.get().remainingMinutesLastYear;
 			}
 		}
-		if ( contract.sourceDateResidual != null 
+		else if ( contract.sourceDateResidual != null 
 				&& contract.sourceDateResidual.getYear() == yearMonth.getYear() 
 				&& contract.sourceDateResidual.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+			//Se è il primo riepilogo dovuto ad inzializzazione utilizzo in dati 
+			//in source
 			initMonteOreAnnoPassato = contract.sourceRemainingMinutesLastYear;
 			initMonteOreAnnoCorrente = contract.sourceRemainingMinutesCurrentYear;
-
-			firstDayInDatabase = contract.sourceDateResidual.plusDays(1);
-			requestIntervalForProgressive = new DateInterval(firstDayInDatabase, calcolaFinoA);
-
-			
 		}
+		
 		//TODO: contract.sourceMealTicketDate
-		if ( contract.sourceDateResidual != null 
-				&& contract.sourceDateResidual.getYear() == yearMonth.getYear() 
-				&& contract.sourceDateResidual.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+		if ( contract.sourceDateMealTicket != null 
+				&& contract.sourceDateMealTicket.getYear() == yearMonth.getYear() 
+				&& contract.sourceDateMealTicket.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
 			
-			firstDayInDatabase = contract.sourceDateResidual.plusDays(1);
-			requestIntervalForMealTicket= new DateInterval(firstDayInDatabase, calcolaFinoA);
 			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
+		} else {
+			cmr.buoniPastoDaInizializzazione = 0;
 		}
 		
-		LocalDate today = LocalDate.now();
-
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//	Intervallo per progressivi
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		// 1) Tutti i giorni del mese
-
-		LocalDate monthBeginForPersonDay = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
-		LocalDate monthEndForPersonDay = monthBeginForPersonDay.dayOfMonth().withMaximumValue();
-		DateInterval monthIntervalForPersonDay = new DateInterval(monthBeginForPersonDay, monthEndForPersonDay);
-
-		// 2) Nel caso del calcolo del mese attuale
-
-		if( DateUtility.isDateIntoInterval(today, monthIntervalForPersonDay) )
-		{
-			// 2.1) Se oggi non è il primo gPersonResidualYearRecap csap = new PersonResidualYearRecap();iorno del mese allora tutti i giorni del mese fino a ieri.
-
-			if ( today.getDayOfMonth() != 1 )
-			{
-				monthEndForPersonDay = today.minusDays(1);
-				monthIntervalForPersonDay = new DateInterval(monthBeginForPersonDay, monthEndForPersonDay);
-			}
-
-			// 2.2) Se oggi è il primo giorno del mese allora null.
-
-			else
-			{
-				monthIntervalForPersonDay = null;
-			}
-		}
-
-		// 3) Filtro per dati nel database e estremi del contratto
-
-		DateInterval validDataForPersonDay = null;
-		if(monthIntervalForPersonDay != null)
-		{
-			validDataForPersonDay = DateUtility.intervalIntersection(monthIntervalForPersonDay, requestIntervalForProgressive);
-			validDataForPersonDay = DateUtility.intervalIntersection(validDataForPersonDay, contractInterval);
-		}
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//	Intervallo per riposi compensativi
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		// 1) Tutti i giorni del mese
-
-		LocalDate monthBeginForCompensatoryRest = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
-		LocalDate monthEndForCompensatoryRest = monthBeginForCompensatoryRest.dayOfMonth().withMaximumValue();
-		DateInterval monthIntervalForCompensatoryRest = new DateInterval(monthBeginForCompensatoryRest, monthEndForCompensatoryRest);
-
-		// 2) Nel caso del mese attuale considero anche il mese successivo
-
-		if( DateUtility.isDateIntoInterval(today, monthIntervalForCompensatoryRest) ) 
-		{
-			monthEndForCompensatoryRest = monthEndForCompensatoryRest.plusMonths(1).dayOfMonth().withMaximumValue();
-			monthIntervalForCompensatoryRest = new DateInterval(monthBeginForCompensatoryRest, monthEndForCompensatoryRest);
-		}
-
-		// 3) Filtro per dati nel database e estremi del contratto
-
-		DateInterval validDataForCompensatoryRest = null;
-
-		validDataForCompensatoryRest = DateUtility.intervalIntersection(monthIntervalForCompensatoryRest, contractInterval);
-
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//	Intervallo per mealTickets
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		// 1) Tutti i giorni del mese
-
-		LocalDate monthBeginForMealTickets = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
-		LocalDate monthEndForMealTickets = monthBeginForMealTickets.dayOfMonth().withMaximumValue();
-		DateInterval monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
-
-		// 2) Nel caso del calcolo del mese attuale considero dall'inizio
-		// del mese fino a oggi.
-		if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) ) 
-		{ 
-			monthEndForMealTickets = today;
-			monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
-		}
-
-		// 3) Filtro per dati nel database, estremi del contratto, inizio utilizzo buoni pasto
-		DateInterval validDataForMealTickets = null;
-		if(monthIntervalForMealTickets != null)
-		{
-			validDataForMealTickets = DateUtility.intervalIntersection(monthIntervalForMealTickets, requestIntervalForMealTicket);
-			validDataForMealTickets = DateUtility.intervalIntersection(validDataForMealTickets, contractInterval);
-			validDataForMealTickets = DateUtility.intervalIntersection(validDataForMealTickets, mealTicketInterval);
+		//Inizializzazione buoni pasto
+		if (cmr.buoniPastoDaInizializzazione == 0 && recapPreviousMonth.isPresent()) {
+			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
 		}
 		
-		if( !mealTicketToCompute ) {
-			validDataForMealTickets = null;
-		}
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//		Intervallo per mealTickets
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
+		DateInterval validDataForPersonDay = buildIntervalForProgressive(yearMonth, 
+				calcolaFinoA, contract);
+		
+		DateInterval validDataForCompensatoryRest = 
+				buildIntervalForCompensatoryRest(yearMonth, contract);
+		
+		DateInterval validDataForMealTickets = buildIntervalForMealTicket(yearMonth, 
+				calcolaFinoA, contract);
+		
+
 		cmr.wcontract = wrapperFactory.create(contract);
 		cmr.person = contract.person;
 		cmr.qualifica = cmr.person.qualification.qualification;
@@ -331,10 +223,7 @@ public class ContractMonthRecapManager {
 			}
 		}
 		
-		//Inizializzazione buoni pasto
-		if (cmr.buoniPastoDaInizializzazione == 0 && recapPreviousMonth.isPresent()) {
-			cmr.buoniPastoDalMesePrecedente = recapPreviousMonth.get().remainingMealTickets;
-		}
+
 		
 		setMealTicketsInformation(cmr, validDataForMealTickets);
 		setPersonDayInformation(cmr, validDataForPersonDay);
@@ -355,28 +244,194 @@ public class ContractMonthRecapManager {
 		
 		return Optional.fromNullable( cmr );
 	}
-	
-	
+
+	/**
+	 * Costruisce l'intervallo dei giorni da considerare per il calcolo dei progressivi.<br>
+	 * 1) Parto dall'intero intervallo del mese.<br>
+	 * 2) Nel caso di calcolo riepilogo mese attuale considero i giorni fino
+	 *    a ieri. (se oggi è il primo giorno del mese ritorna l'intervallo vuoto)<br>
+	 * 3) Riduco ulteriormente in base al parametro calcolaFinoA
+	 *    e sull'intervallo del contratto nel database. 
+	 * @param yearMonth
+	 * @param calcolaFinoA
+	 * @param contract
+	 * @return
+	 */
+	private DateInterval buildIntervalForProgressive(YearMonth yearMonth, 
+			LocalDate calcolaFinoA, Contract contract) {
+		
+		LocalDate firstDayOfRequestedMonth = 
+				new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
+		DateInterval requestInterval = 
+				new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
+		
+		DateInterval contractDatabaseInterval = 
+				wrapperFactory.create(contract).getContractDatabaseInterval();
+		
+		LocalDate today = LocalDate.now();
+		
+		//Parto da tutti i giorni del mese
+		LocalDate monthBegin = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		
+		//Filtro se mese attuale
+		if( DateUtility.isDateIntoInterval(today, monthInterval) ) {
+
+			if ( today.getDayOfMonth() != 1 ) {
+				
+				//Se oggi non è il primo giorno del mese allora 
+				//tutti i giorni del mese fino a ieri.
+				
+				monthEnd = today.minusDays(1);
+				monthInterval = new DateInterval(monthBegin, monthEnd);
+			} else {
+				
+				//Se oggi è il primo giorno del mese allora nessun giorno.
+				monthInterval = null;
+			}
+		}
+
+		//Filtro per dati nel database e estremi del contratto
+		DateInterval validDataForPersonDay = null;
+		if(monthInterval != null) {
+			validDataForPersonDay = DateUtility
+					.intervalIntersection(monthInterval, requestInterval);
+			validDataForPersonDay = DateUtility
+					.intervalIntersection(validDataForPersonDay, contractDatabaseInterval);
+		}
+		
+		return validDataForPersonDay;
+	}
+
+	/**
+	 * Costruisce l'intervallo dei giorni da considerare per il conteggio 
+	 * dei riposi compensativi utilizzati.<br>
+	 * 1) Parto dall'intero intervallo del mese.<br>
+	 * 2) Nel caso di calcolo riepilogo mese attuale considero tutti i giorni 
+	 *    del mese attuale e di quello successivo<br>
+	 * 3) Riduco ulteriormente in base agli estremi del contratto nel database. 
+	 * @param yearMonth
+	 * @param contract
+	 * @return
+	 */
+	private DateInterval buildIntervalForCompensatoryRest(YearMonth yearMonth, 
+			Contract contract) {
+
+		DateInterval contractDatabaseInterval = 
+				wrapperFactory.create(contract).getContractDatabaseInterval();
+		
+		LocalDate today = LocalDate.now();
+		
+		//Parto da tutti i giorni del mese
+		LocalDate monthBegin = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+
+		//Nel caso del mese attuale considero anche il mese successivo
+		if( DateUtility.isDateIntoInterval(today, monthInterval) ) {
+			monthEnd = monthEnd.plusMonths(1).dayOfMonth().withMaximumValue();
+			monthInterval = new DateInterval(monthBegin, monthEnd);
+		}
+
+		//Filtro per dati nel database e estremi del contratto
+		DateInterval validDataForCompensatoryRest = null;
+		validDataForCompensatoryRest = DateUtility
+				.intervalIntersection(monthInterval, contractDatabaseInterval);
+		return validDataForCompensatoryRest;
+		
+	}
 	
 	/**
-	 * 
-	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
+	 * Costruisce l'intervallo dei giorni da considerare per il calcolo 
+	 * buoni pasto utilizzati.<br>
+	 * Se l'office della persona non ha una data di inizio utilizzo buoni pasto
+	 * ritorna un intervallo vuoto (null)<br>
+	 * 1) Parto dall'intero intervallo del mese.<br>
+	 * 2) Nel caso di calcolo riepilogo mese attuale considero i giorni fino
+	 *    a oggi. <br>
+	 * 3) Riduco ulteriormente in base al parametro calcolaFinoA,
+	 *    in base all'inizializzazione del contratto per buoni pasto 
+	 *    ed alla data di inizio utilizzo buoni pasto dell'office. 
+	 * @param yearMonth
+	 * @param calcolaFinoA
+	 * @param contract
+	 * @return
 	 */
-	private void setPersonDayInformation(ContractMonthRecap monthRecap, DateInterval validDataForPersonDay)
-	{
+	private DateInterval buildIntervalForMealTicket(YearMonth yearMonth, 
+			LocalDate calcolaFinoA,	Contract contract) {
+
+		LocalDate firstDayOfRequestedMonth = 
+				new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
+		DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
+		
+		Optional<LocalDate> dateStartMealTicketInOffice = 
+				confGeneralManager.getLocalDateFieldValue(
+						Parameter.DATE_START_MEAL_TICKET, contract.person.office); 
+		
+		if (!dateStartMealTicketInOffice.isPresent()) {
+			return null;
+		}
+		
+		LocalDate today = LocalDate.now();
+		
+		//Parto da tutti i giorni del mese
+		LocalDate monthBegin = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+				
+		//Nel caso del calcolo del mese attuale considero dall'inizio
+		//del mese fino a oggi.
+		if( DateUtility.isDateIntoInterval(today, monthInterval) ) { 
+			monthEnd = today;
+			monthInterval = new DateInterval(monthBegin, monthEnd);
+		}
+
+		//Filtro per dati nel database, estremi del contratto, inizio utilizzo buoni pasto
+		DateInterval contractIntervalForMealTicket = 
+				wrapperFactory.create(contract).getContractDatabaseIntervalForMealTicket();
+		DateInterval mealTicketIntervalInOffice = 
+				new DateInterval(dateStartMealTicketInOffice.orNull(), null);
+		
+		DateInterval validDataForMealTickets = null;
+		if(monthInterval != null)	{
+			validDataForMealTickets = DateUtility
+					.intervalIntersection(monthInterval, requestInterval);
+			validDataForMealTickets = DateUtility
+					.intervalIntersection(validDataForMealTickets, contractIntervalForMealTicket);
+			validDataForMealTickets = DateUtility
+					.intervalIntersection(validDataForMealTickets, mealTicketIntervalInOffice);
+		}
+
+		return validDataForMealTickets;
+
+	}
+
+	/**
+	 * Assegna i seguenti campi del riepilogo mensile: <br>
+	 * cmr.progressivoFinaleMese <br>
+	 * cmr.progressivoFinalePositivoMeseAux <br>
+	 * cmr.progressivoFinaleNegativoMese <br>
+	 *  
+	 * @param cmr
+	 * @param validDataForPersonDay
+	 */
+	private void setPersonDayInformation(ContractMonthRecap cmr, 
+			DateInterval validDataForPersonDay) {
+		
 		if(validDataForPersonDay!=null) {
 			
 			// TODO: implementare un metodo che no fa fetch di stampings... in 
 			// questo caso non servono.
 			
 			List<PersonDay> pdList = personDayDao.getPersonDayInPeriodDesc(
-					monthRecap.person, validDataForPersonDay.getBegin(), 
+					cmr.person, validDataForPersonDay.getBegin(), 
 					Optional.fromNullable(validDataForPersonDay.getEnd()));
 
 			//progressivo finale fine mese
-			for(PersonDay pd : pdList){
-				if(pd != null){
-					monthRecap.progressivoFinaleMese = pd.progressive;
+			for (PersonDay pd : pdList) {
+				if(pd != null) {
+					cmr.progressivoFinaleMese = pd.progressive;
 					break;
 				}
 				else{
@@ -385,61 +440,80 @@ public class ContractMonthRecapManager {
 			}
 
 			//progressivo finale positivo e negativo mese
-			for(PersonDay pd : pdList)
-			{
-				if(pd.difference>=0)
-					monthRecap.progressivoFinalePositivoMeseAux += pd.difference;
-				else
-					monthRecap.progressivoFinaleNegativoMese += pd.difference;
-				
-				monthRecap.oreLavorate += pd.timeAtWork;
+			for (PersonDay pd : pdList) {
+				if (pd.difference >= 0) {
+					cmr.progressivoFinalePositivoMeseAux += pd.difference;
+				} else {
+					cmr.progressivoFinaleNegativoMese += pd.difference;
+				}
+				cmr.oreLavorate += pd.timeAtWork;
 			}
-			monthRecap.progressivoFinaleNegativoMese = monthRecap.progressivoFinaleNegativoMese*-1;
+			cmr.progressivoFinaleNegativoMese = 
+					cmr.progressivoFinaleNegativoMese * -1;
 
-			monthRecap.progressivoFinalePositivoMese = monthRecap.progressivoFinalePositivoMeseAux;
+			cmr.progressivoFinalePositivoMese = 
+					cmr.progressivoFinalePositivoMeseAux;
 			
 		}
 	}
-	
+
 	/**
+	 * Assegna i seguenti campi del riepilogo mensile: <br>
+	 * cmr.buoniPastoUsatiNelMese <br>
+	 * cmr.buoniPastoConsegnatiNelMese <br>
+	 * cmr.remainingMealTickets <br>
 	 * 
-	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
+	 * @param cmr
+	 * @param validDataForMealTickets l'intervallo all'interno del quale 
+	 * ricercare i person day per buoni pasto utilizzati e buoni pasto consegnati.
 	 */
-	private void setMealTicketsInformation(ContractMonthRecap monthRecap, DateInterval validDataForMealTickets)
-	{
+	private void setMealTicketsInformation(ContractMonthRecap cmr, 
+			DateInterval validDataForMealTickets) {
 		
-		if(validDataForMealTickets!=null)
-		{
-			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(monthRecap.person,
+		if (validDataForMealTickets != null) {
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(cmr.person,
 					validDataForMealTickets.getBegin(), 
 					Optional.fromNullable(validDataForMealTickets.getEnd()));
 
 			//buoni pasto utilizzati
-			for(PersonDay pd : pdList){
-				if(pd != null && pd.isTicketAvailable){
-					monthRecap.buoniPastoUsatiNelMese++;
+			for (PersonDay pd : pdList) {
+				if (pd != null && pd.isTicketAvailable) {
+					cmr.buoniPastoUsatiNelMese++;
 				}
 			}
 			
 			//Numero ticket consegnati nel mese
-			monthRecap.buoniPastoConsegnatiNelMese = 
+			cmr.buoniPastoConsegnatiNelMese = 
 					mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
-							monthRecap.contract, validDataForMealTickets).size();
+							cmr.contract, validDataForMealTickets).size();
 		}
 		
 		//residuo
-		monthRecap.remainingMealTickets = monthRecap.buoniPastoDalMesePrecedente 
-				+ monthRecap.buoniPastoDaInizializzazione
-				+ monthRecap.buoniPastoConsegnatiNelMese 
-				- monthRecap.buoniPastoUsatiNelMese;
+		cmr.remainingMealTickets = cmr.buoniPastoDalMesePrecedente 
+				+ cmr.buoniPastoDaInizializzazione
+				+ cmr.buoniPastoConsegnatiNelMese 
+				- cmr.buoniPastoUsatiNelMese;
 	}
 	
 	/**
+	 * Assegna i seguenti campi del riepilogo mensile: <br>
+	 * cmr.straordinariMinuti <br>
+	 * cmr.straordinariMinutiS1Print <br>
+	 * cmr.straordinariMinutiS2Print <br>
+	 * cmr.straordinariMinutiS3Print <br>
+	 * cmr.riposiCompensativiMinuti <br>
+	 * cmr.recoveryDayUsed <br>
 	 * 
-	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
+	 * @param cmr
+	 * @param wcontract
+	 * @param validDataForCompensatoryRest l'intervallo all'interno del quale 
+	 * ricercare i riposi compensativi
+	 * @param otherAbsences le assenze inserire e non persistite (usato per le 
+	 * simulazioni di inserimento assenze).
 	 */
 	private void setPersonMonthInformation(ContractMonthRecap cmr, 
-			IWrapperContract wcontract,	DateInterval validDataForCompensatoryRest, List<Absence> otherAbsences) {
+			IWrapperContract wcontract,	DateInterval validDataForCompensatoryRest, 
+			List<Absence> otherAbsences) {
 		
 		//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		if (wcontract.isLastInMonth(cmr.month, cmr.year)) {
@@ -483,7 +557,6 @@ public class ContractMonthRecapManager {
 			
 			List<Absence> riposi = absenceDao.absenceInPeriod(cmr.person, begin, end, "91");
 			
-			
 			cmr.riposiCompensativiMinuti = 0;
 			cmr.recoveryDayUsed = 0;
 			
@@ -517,13 +590,7 @@ public class ContractMonthRecapManager {
 			}	
 			
 			cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
-
-
 		}
-			
-		
-			
-	
 	}
 	
 	private void assegnaProgressivoFinaleNegativo(ContractMonthRecap monthRecap)

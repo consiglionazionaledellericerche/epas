@@ -39,6 +39,10 @@ public class Contract extends BaseModel {
 	private static final long serialVersionUID = -4472102414284745470L;
 
 
+	/*
+	 * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
+	 * anche la sourceDateMealTicket 
+	 */
 	@Column(name="source_date_residual")
 	public LocalDate sourceDateResidual = null;
 	
