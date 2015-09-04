@@ -265,7 +265,7 @@ public class VacationsRecap {
 						absenceTypeManager.codesForVacations(), true);
 		
 		absencesForVacationsRecap.addAll(otherAbsences);
-		// TODO: filtrare otherAbsencs [dateFrom, dateTo]
+		// TODO: filtrare otherAbsencs le sole nell'intervallo [dateFrom, dateTo]
 		
 		AbsenceType ab32  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
 		AbsenceType ab31  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
