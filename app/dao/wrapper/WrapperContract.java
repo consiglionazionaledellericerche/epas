@@ -120,17 +120,33 @@ public class WrapperContract implements IWrapperContract {
 			return new DateInterval(value.sourceDate.plusDays(1),
 					contractInterval.getEnd());
 		}
-		
-		Optional<LocalDate> dateInitUse = confGeneralManager
-				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, value.person.office);
-		if(dateInitUse.isPresent() ) {
-			
-			if(dateInitUse.get().isAfter(contractInterval.getBegin())) {
-				return new DateInterval(dateInitUse.get(), contractInterval.getEnd());
-			}
-		}
+//		
+//		Optional<LocalDate> dateInitUse = confGeneralManager
+//				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, value.person.office);
+//		if(dateInitUse.isPresent() ) {
+//			
+//			if(dateInitUse.get().isAfter(contractInterval.getBegin())) {
+//				return new DateInterval(dateInitUse.get(), contractInterval.getEnd());
+//			}
+//		}
 		
 		return contractInterval;
+	}
+	
+	/**
+	 * L'intervallo dei giorni da considerare per le computazioni nel database ePAS.
+	 * 
+	 */
+	@Override 
+	public DateInterval getContractDatabaseIntervalForMealTicket() {
+		
+		DateInterval contractDatebaseInterval = getContractDatabaseInterval();
+		if (value.sourceDate != null) {
+			return new DateInterval(value.sourceDate/*forMealTicekt*/.plusDays(1),
+					contractDatebaseInterval.getEnd());
+		}
+	
+		return contractDatebaseInterval;
 	}
 	
 	/**
