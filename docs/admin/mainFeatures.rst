@@ -22,6 +22,7 @@ Il sistema consente di:
 
 Il sistema implementa un meccanismo per il controllo degli accessi basato su 
 ruoli e permessi che permette:
+ 
  * ai dipendenti
  
    * di visualizzare, tramite interfaccia web, la propria situazione corrente e trascorsa in termini di timbrature, assenze e relativi codici (numerici e descrittivi), il diritto al buono pasto, i riepiloghi orari comprensivi di recuperi e straordinari, ecc.

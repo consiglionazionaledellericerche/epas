@@ -39,8 +39,15 @@ public class Contract extends BaseModel {
 	private static final long serialVersionUID = -4472102414284745470L;
 
 
-	@Column(name="source_date")
-	public LocalDate sourceDate = null;
+	/*
+	 * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
+	 * anche la sourceDateMealTicket 
+	 */
+	@Column(name="source_date_residual")
+	public LocalDate sourceDateResidual = null;
+	
+	@Column(name="source_date_meal_ticket")
+	public LocalDate sourceDateMealTicket = null;
 
 	@Column(name="source_by_admin")
 	public boolean sourceByAdmin = false;
@@ -107,8 +114,8 @@ public class Contract extends BaseModel {
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
 
-	public void setSourceDate(String date){
-		this.sourceDate = new LocalDate(date);
+	public void setSourceDateResidual(String date){
+		this.sourceDateResidual = new LocalDate(date);
 	}
 
 	/**

@@ -116,8 +116,8 @@ public class WrapperContract implements IWrapperContract {
 		// allora automaticamente deve essere definito sourceContract.
 		
 		DateInterval contractInterval = getContractDateInterval();
-		if (value.sourceDate != null) {
-			return new DateInterval(value.sourceDate.plusDays(1),
+		if (value.sourceDateResidual != null) {
+			return new DateInterval(value.sourceDateResidual.plusDays(1),
 					contractInterval.getEnd());
 		}
 //		
@@ -141,8 +141,8 @@ public class WrapperContract implements IWrapperContract {
 	public DateInterval getContractDatabaseIntervalForMealTicket() {
 		
 		DateInterval contractDatebaseInterval = getContractDatabaseInterval();
-		if (value.sourceDate != null) {
-			return new DateInterval(value.sourceDate/*forMealTicekt*/.plusDays(1),
+		if (value.sourceDateMealTicket != null) {
+			return new DateInterval(value.sourceDateMealTicket.plusDays(1),
 					contractDatebaseInterval.getEnd());
 		}
 	
@@ -159,8 +159,8 @@ public class WrapperContract implements IWrapperContract {
 		if( initializationMissing() ) {
 			return Optional.<YearMonth>absent();
 		}
-		if (value.sourceDate != null) {
-			return Optional.fromNullable((new YearMonth(value.sourceDate)));
+		if (value.sourceDateResidual != null) {
+			return Optional.fromNullable((new YearMonth(value.sourceDateResidual)));
 		}
 		return Optional.fromNullable(new YearMonth(value.beginContract));
 	}
@@ -214,7 +214,7 @@ public class WrapperContract implements IWrapperContract {
 						Parameter.INIT_USE_PROGRAM, value.person.office));
 		
 		if( value.beginContract.isBefore(officeInstallation) 
-				&& value.sourceDate == null) {
+				&& value.sourceDateResidual == null) {
 			return true;
 		}
 		
@@ -258,8 +258,8 @@ public class WrapperContract implements IWrapperContract {
 		}
 		
 		// se source date cade nell'anno non ho bisogno del recap.
-		if (value.sourceDate != null 
-				&& value.sourceDate.getYear() == yearToRecap) {
+		if (value.sourceDateResidual != null 
+				&& value.sourceDateResidual.getYear() == yearToRecap) {
 			return true;
 		}
 		// Altrimenti ho bisogno del riepilogo finale dell'anno precedente.
