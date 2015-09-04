@@ -216,9 +216,9 @@ public class PersonStampingDayRecap {
 				}
 
 				// se è precedente a source lo ignoro
-				if (contract.sourceDate != null 
-						&& ( contract.sourceDate.equals(pd.date) || 
-								contract.sourceDate.isAfter(pd.date)) ) {
+				if (contract.sourceDateResidual != null 
+						&& ( contract.sourceDateResidual.equals(pd.date) || 
+								contract.sourceDateResidual.isAfter(pd.date)) ) {
 					this.ignoreDay = true;
 				}
 

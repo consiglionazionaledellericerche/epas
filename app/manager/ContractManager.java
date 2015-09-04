@@ -162,7 +162,7 @@ public class ContractManager {
 		//Se il contratto inizia prima di today inserisco un source fittizio alla
 		// data attuale che mi imposta tutti i residui a zero.
 		//(Comportamento Disabilitato, da valutare.)
-		contract.sourceDate = null;
+		contract.sourceDateResidual = null;
 //		IWrapperContract wcontract = wrapperFactory.create(contract);
 //		contract.sourceDate = LocalDate.now().minusDays(1);
 //		

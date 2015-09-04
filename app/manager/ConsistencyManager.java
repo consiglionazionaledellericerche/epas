@@ -257,8 +257,8 @@ public class ConsistencyManager {
 
 		//Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
 		if(pd.getPersonDayContract().isPresent()
-				&& pd.getPersonDayContract().get().sourceDate != null
-				&& ! pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDate) ) {
+				&& pd.getPersonDayContract().get().sourceDateResidual != null
+				&& ! pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDateResidual) ) {
 
 			pd.getValue().isHoliday = false;			
 			pd.getValue().timeAtWork = 0;
@@ -532,12 +532,12 @@ public class ConsistencyManager {
 	private YearMonth populateContractMonthFromSource(IWrapperContract contract, 
 			YearMonth yearMonthToCompute) {
 
-		if(contract.getValue().sourceDate == null)
+		if(contract.getValue().sourceDateResidual == null)
 			return yearMonthToCompute;
 
 		// Mese da costruire con sourceDate
 		YearMonth yearMonthToComputeFromSource =
-				new YearMonth(contract.getValue().sourceDate);
+				new YearMonth(contract.getValue().sourceDateResidual);
 
 		//Mese da costruire di competenza si sourceDate?
 		if( yearMonthToCompute.isAfter(yearMonthToComputeFromSource ) ) {
@@ -546,8 +546,8 @@ public class ConsistencyManager {
 
 		//Caso semplice ultimo giorno del mese
 		LocalDate lastDayInSourceMonth = contract.getValue()
-				.sourceDate.dayOfMonth().withMaximumValue();
-		if(lastDayInSourceMonth.isEqual(contract.getValue().sourceDate))
+				.sourceDateResidual.dayOfMonth().withMaximumValue();
+		if(lastDayInSourceMonth.isEqual(contract.getValue().sourceDateResidual))
 		{
 			ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
 
@@ -558,7 +558,8 @@ public class ConsistencyManager {
 			cmr.recoveryDayUsed = contract.getValue().sourceRecoveryDayUsed;
 			cmr.permissionUsed = contract.getValue().sourcePermissionUsed;
 			
-			if(contract.getValue().sourceDate.isEqual(contract.getValue().sourceDate/*diMealTicket*/)) {
+			if(contract.getValue().sourceDateMealTicket != null && 
+					contract.getValue().sourceDateResidual.isEqual(contract.getValue().sourceDateMealTicket)) {
 				cmr.buoniPastoDaInizializzazione = contract.getValue().sourceRemainingMealTicket;
 				cmr.remainingMealTickets = contract.getValue().sourceRemainingMealTicket;
 			} else {
@@ -583,7 +584,7 @@ public class ConsistencyManager {
 		AbsenceType ab37 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()).orNull(); 
 		AbsenceType ab94 = absenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull(); 
 
-		DateInterval monthInterSource = new DateInterval(contract.getValue().sourceDate.plusDays(1), lastDayInSourceMonth);
+		DateInterval monthInterSource = new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
 		List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab32);
 		List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab31);
 		List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab37);

@@ -165,23 +165,23 @@ public class ContractMonthRecapManager {
 				initMonteOreAnnoPassato = recapPreviousMonth.get().remainingMinutesLastYear;
 			}
 		}
-		if ( contract.sourceDate != null 
-				&& contract.sourceDate.getYear() == yearMonth.getYear() 
-				&& contract.sourceDate.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+		if ( contract.sourceDateResidual != null 
+				&& contract.sourceDateResidual.getYear() == yearMonth.getYear() 
+				&& contract.sourceDateResidual.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
 			initMonteOreAnnoPassato = contract.sourceRemainingMinutesLastYear;
 			initMonteOreAnnoCorrente = contract.sourceRemainingMinutesCurrentYear;
 
-			firstDayInDatabase = contract.sourceDate.plusDays(1);
+			firstDayInDatabase = contract.sourceDateResidual.plusDays(1);
 			requestIntervalForProgressive = new DateInterval(firstDayInDatabase, calcolaFinoA);
 
 			
 		}
 		//TODO: contract.sourceMealTicketDate
-		if ( contract.sourceDate != null 
-				&& contract.sourceDate.getYear() == yearMonth.getYear() 
-				&& contract.sourceDate.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+		if ( contract.sourceDateResidual != null 
+				&& contract.sourceDateResidual.getYear() == yearMonth.getYear() 
+				&& contract.sourceDateResidual.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
 			
-			firstDayInDatabase = contract.sourceDate.plusDays(1);
+			firstDayInDatabase = contract.sourceDateResidual.plusDays(1);
 			requestIntervalForMealTicket= new DateInterval(firstDayInDatabase, calcolaFinoA);
 			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		}
@@ -296,9 +296,9 @@ public class ContractMonthRecapManager {
 		
 		
 		//Per stampare a video il residuo da inizializzazione se riferito al mese
-		if(contract.sourceDate != null && 
-				contract.sourceDate.getMonthOfYear() == cmr.month && 
-				contract.sourceDate.getYear() == cmr.year) {
+		if(contract.sourceDateResidual != null && 
+				contract.sourceDateResidual.getMonthOfYear() == cmr.month && 
+				contract.sourceDateResidual.getYear() == cmr.year) {
 			cmr.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
 		}
 		
