@@ -143,9 +143,9 @@ public class ContractMonthRecapManager {
 				initMonteOreAnnoPassato = recapPreviousMonth.get().remainingMinutesLastYear;
 			}
 		}
-		else if ( contract.sourceDate != null 
-				&& contract.sourceDate.getYear() == yearMonth.getYear() 
-				&& contract.sourceDate.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+		else if ( contract.sourceDateResidual != null 
+				&& contract.sourceDateResidual.getYear() == yearMonth.getYear() 
+				&& contract.sourceDateResidual.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
 			//Se è il primo riepilogo dovuto ad inzializzazione utilizzo in dati 
 			//in source
 			initMonteOreAnnoPassato = contract.sourceRemainingMinutesLastYear;
@@ -153,9 +153,9 @@ public class ContractMonthRecapManager {
 		}
 		
 		//TODO: contract.sourceMealTicketDate
-		if ( contract.sourceDate != null 
-				&& contract.sourceDate.getYear() == yearMonth.getYear() 
-				&& contract.sourceDate.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
+		if ( contract.sourceDateMealTicket != null 
+				&& contract.sourceDateMealTicket.getYear() == yearMonth.getYear() 
+				&& contract.sourceDateMealTicket.getMonthOfYear() == yearMonth.getMonthOfYear() )	{
 			
 			cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
 		} else {
@@ -188,9 +188,9 @@ public class ContractMonthRecapManager {
 		
 		
 		//Per stampare a video il residuo da inizializzazione se riferito al mese
-		if(contract.sourceDate != null && 
-				contract.sourceDate.getMonthOfYear() == cmr.month && 
-				contract.sourceDate.getYear() == cmr.year) {
+		if(contract.sourceDateResidual != null && 
+				contract.sourceDateResidual.getMonthOfYear() == cmr.month && 
+				contract.sourceDateResidual.getYear() == cmr.year) {
 			cmr.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
 		}
 		

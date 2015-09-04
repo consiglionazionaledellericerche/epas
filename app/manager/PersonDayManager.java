@@ -741,15 +741,15 @@ public class PersonDayManager {
 		final Map<Troubles,Boolean> troubles = Maps.newHashMap();
 
 		//se prima o uguale a source contract il problema è fixato
-		if( pd.getPersonDayContract().get().sourceDate != null ) {
+		if( pd.getPersonDayContract().get().sourceDateResidual != null ) {
 
-			if( ! pd.getValue().date.isAfter( pd.getPersonDayContract().get().sourceDate ) ) {
+			if( ! pd.getValue().date.isAfter( pd.getPersonDayContract().get().sourceDateResidual ) ) {
 
 				for(PersonDayInTrouble pdt : pd.getValue().troubles) {
 					pd.getValue().troubles.remove(pdt);
 					pdt.delete();
 					log.info("Fixato {} perchè precedente a sourceContract({})",
-							pd.getValue().date, pd.getPersonDayContract().get().sourceDate);
+							pd.getValue().date, pd.getPersonDayContract().get().sourceDateResidual);
 				}
 				return;
 			}
