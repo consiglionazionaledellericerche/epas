@@ -28,6 +28,7 @@ import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.User;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
@@ -37,9 +38,11 @@ import net.fortuna.ical4j.model.ValidationException;
 
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
+import org.slf4j.LoggerFactory;
 
 import play.Logger;
 import play.data.binding.As;
+import play.data.validation.Required;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
@@ -47,6 +50,7 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
@@ -64,6 +68,8 @@ import dao.PersonReperibilityDayDao;
  */
 @With(Resecure.class)
 public class Reperibility extends Controller {
+	
+	private final static org.slf4j.Logger log = LoggerFactory.getLogger(Shift.class);
 
 	private static String codFr = "207";
 	private static String codFs = "208";
@@ -489,10 +495,12 @@ public class Reperibility extends Controller {
 	}
 
 	@BasicAuth
-	public static void iCal() {
-		Long type = params.get("type", Long.class);
-		Long personId = params.get("personId", Long.class);
-		int year = params.get("year", Integer.class);
+	public static void iCal(@Required Long type, @Required int year, Long personId) {
+		
+		if (validation.hasErrors()) {
+			badRequest("Parametri mancanti. " + validation.errors());
+		}
+		Optional<User> currentUser = Security.getUser();
 
 		response.accessControl("*");
 		
@@ -501,9 +509,25 @@ public class Reperibility extends Controller {
 				notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
 		
+		ImmutableList<Person> canAccess =  
+				ImmutableList.<Person>builder()
+					.addAll(personDao.getPersonForReperibility(type))
+					.add(reperibilityType.supervisor).build();
+		
+		
+		if (!currentUser.isPresent() || currentUser.get().person == null 
+				|| !canAccess.contains(currentUser.get().person)) {
+			log.debug("Accesso all'iCal dei turni non autorizzato: Type = {}, Current User = {}, "
+					+ "canAccess = {}", 
+				type, currentUser.get(), canAccess, currentUser.get());
+			unauthorized();
+		}
+		
+	
+		
 		try {
 			
-			Optional<Calendar> calendar = reperibilityManager.createCalendar(type, personId, year);
+			Optional<Calendar> calendar = reperibilityManager.createCalendar(type, Optional.fromNullable(personId), year);
 			if (!calendar.isPresent()) {
 				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
 			}

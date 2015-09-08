@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -19,6 +20,7 @@ import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.PersonShift;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
@@ -55,6 +57,7 @@ import dao.PersonReperibilityDayDao;
  * @author Arianna e Dario
  *
  */
+@Slf4j
 public class ReperibilityManager {
 
 	@Inject
@@ -750,7 +753,7 @@ public class ReperibilityManager {
 	 * of type 'type' for the 'year' year
 	 * If the personId=0, it exports the calendar for all  the reperibility persons of type 'type'
 	 */
-	public Optional<Calendar> createCalendar(Long type, Long personId, int year) {
+	public Optional<Calendar> createCalendar(Long type, Optional<Long> personId, int year) {
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
 
 		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
@@ -758,7 +761,17 @@ public class ReperibilityManager {
 		// check for the parameter
 		//---------------------------
 
-		if (personId == 0) {
+		Optional<PersonReperibility> personReperibility = Optional.absent();
+		if (personId.isPresent()) {
+			// read the reperibility person 
+			personReperibility = Optional.fromNullable(personReperibilityDayDao.getPersonReperibilityByPersonAndType(personDao.getPersonById(personId.get()), personReperibilityDayDao.getPersonReperibilityTypeById(type)));
+			if (!personReperibility.isPresent()) {
+				log.info("Person id = {} is not associated to a reperibility of type = {}", personId.get(), type);
+				return Optional.<Calendar>absent();
+			}
+		}
+		
+/*		if (personId == 0) {
 			// read the reperibility person 
 			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
 			List<PersonReperibility> personsReperibility = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
@@ -774,11 +787,12 @@ public class ReperibilityManager {
 				return Optional.<Calendar>absent();
 			}
 			personsInTheCalList.add(personReperibility);
-		}
+		}*/
 
 
+		log.debug("chiama la createicsReperibilityCalendar({}, {}, {})", year, type, personReperibility);
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
-		icsCalendar = createicsReperibilityCalendar(year, personsInTheCalList);
+		icsCalendar = createicsReperibilityCalendar(year, type, personReperibility);
 
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
@@ -787,9 +801,11 @@ public class ReperibilityManager {
 	}
 	
 	
-	public Calendar createicsReperibilityCalendar(int year, List<PersonReperibility> personsInTheCalList) {
+	public Calendar createicsReperibilityCalendar(int year, Long type, Optional<PersonReperibility> personReperibility) {
+		
 		String eventLabel;
-
+		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
+		
 		// Create a calendar
 		//---------------------------       
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
@@ -802,14 +818,24 @@ public class ReperibilityManager {
 		LocalDate from = new LocalDate(year, 1, 1);
 		LocalDate to = new LocalDate(year, 12, 31);
 
+		
+		if (!personReperibility.isPresent()) {
+			// read the reperibility person 
+			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
+			List<PersonReperibility> personsReperibility = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
+			personsInTheCalList = personsReperibility;
+		} else {
+			personsInTheCalList.add(personReperibility.get());
+		}
+		
 
-		for (PersonReperibility personReperibility: personsInTheCalList) {
+		for (PersonReperibility personRep: personsInTheCalList) {
 
-			eventLabel = (personsInTheCalList.size() == 0) ? "Reperibilità Registro" : "Reperibilità ".concat(personReperibility.person.surname);
-			List<PersonReperibilityDay> reperibilityDays = personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, personReperibility.personReperibilityType, Optional.fromNullable(personReperibility));
-			//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
+			eventLabel = (personsInTheCalList.size() == 0) ? "Reperibilità Registro" : "Reperibilità ".concat(personRep.person.surname);
+			List<PersonReperibilityDay> reperibilityDays = personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, personRep.personReperibilityType, Optional.fromNullable(personReperibility).get());
+			//PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
 
-			Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personReperibility.person.id);
+			Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personReperibility.get().person.id);
 
 			Date startDate = null;
 			Date endDate = null;
