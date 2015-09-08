@@ -1133,7 +1133,7 @@ public class ShiftManager {
 	 * 								  se è vuota carica tutto il turno
 	 * @return icsCalendar			- calendario
 	 */
-	public Calendar createicsShiftCalendar(int year, String type,Optional<PersonShift> personShift) {
+	public Calendar createicsShiftCalendar(int year, String type, Optional<PersonShift> personShift) {
 		List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 		
 		Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personShift);
@@ -1254,8 +1254,8 @@ public class ShiftManager {
 
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 		
-		log.debug("chiama la createicsReperibilityCalendar({}, {}, {})", year, type, personShift);
-		icsCalendar = createicsShiftCalendar(year, type, personShift); /*?*/
+		log.debug("chiama la createicsShiftCalendar({}, {}, {})", year, type, personShift);
+		icsCalendar = createicsShiftCalendar(year, type, personShift); 
 
 		log.debug("Find {} periodi di turno.", icsCalendar.getComponents().size());
 		log.debug("Creato iCal per l'anno {} della person con id = {}, shift type {}", year, personId, type);

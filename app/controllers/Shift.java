@@ -431,8 +431,6 @@ public class Shift extends Controller {
 //		if (personId == null && currentUser.isPresent() && currentUser.get().person != null) {
 //			personId = currentUser.get().person.id;
 //		}
-		//TODO: fare controlli che il personId corrisponda ad una persona esistente e con
-		//un turno del tipo indicato
 
 		response.accessControl("*");
 		
