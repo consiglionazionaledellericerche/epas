@@ -94,7 +94,7 @@
 		  danger
 		#{/if}
 		">
-		 #{if person.currentContract.get().sourceDate != null}
+		 #{if person.currentContract.get().sourceDateResidual != null}
 		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Modifica</a>
 		   #{if person.currentContract.get().sourceByAdmin == false} X #{/if}
     	 #{/if}

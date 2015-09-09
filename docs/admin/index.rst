@@ -16,6 +16,7 @@ Contenuti:
    mainFeatures
    managePerson
    workingTimeType
+   holidayPresence
    stampings
    seat
    parameters

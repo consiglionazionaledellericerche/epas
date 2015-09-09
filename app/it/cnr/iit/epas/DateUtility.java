@@ -386,11 +386,10 @@ public class DateUtility {
 	 */
 	public static int toMinute(LocalDateTime date){
 		int dateToMinute = 0;
-		if (date!=null)
-		{
+		if (date!=null) {
 			int hour = date.get(DateTimeFieldType.hourOfDay());
 			int minute = date.get(DateTimeFieldType.minuteOfHour());
-			dateToMinute = (60*hour)+minute;
+			dateToMinute = (60 * hour) + minute;
 		}
 		return dateToMinute;
 	}

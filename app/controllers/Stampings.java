@@ -144,7 +144,7 @@ public class Stampings extends Controller {
 
 	public static void insert(@Valid @Required Long personId, 
 			@Required Integer year, @Required Integer month, @Required Integer day,
-			@Required boolean type, @Required boolean service, @Required String hourStamping,
+			@Required boolean stampingWay, Stamping stamping, @Required String hourStamping,
 			String note) {
 
 		Person person = Person.em().getReference(Person.class, personId);
@@ -173,7 +173,7 @@ public class Stampings extends Controller {
 			personDay.save();
 		}
 
-		stampingManager.addStamping(personDay, time, note, service, type, true);
+		stampingManager.addStamping(personDay, time, note, stamping.stampType, stampingWay, true);
 
 		consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 		

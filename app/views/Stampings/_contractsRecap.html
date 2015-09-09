@@ -55,7 +55,7 @@
 		  
 		  #{if mese.value.initResiduoAnnoCorrenteNelMese != 0}
 		  <tr>
-		    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.value.sourceDate})</td>
+		    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.value.sourceDateResidual})</td>
 		       #{if mese.value.initResiduoAnnoCorrenteNelMese > 0}
 		    	<td class="col-xs-2 success">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
 		    	#{/if}
