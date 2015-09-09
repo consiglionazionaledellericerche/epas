@@ -150,9 +150,9 @@ public class Administration extends Controller {
 			Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 			
 			if(contract.isPresent()) {
-				if(contract.get().sourceDate == null && contract.get().beginContract.isBefore(initUse)) {
+				if(contract.get().sourceDateResidual == null && contract.get().beginContract.isBefore(initUse)) {
 					Contract c = contract.get();
-					c.sourceDate = initUse.minusDays(1);
+					c.sourceDateResidual = initUse.minusDays(1);
 					c.sourcePermissionUsed = 0;
 					c.sourceRecoveryDayUsed = 0;
 					c.sourceRemainingMealTicket = 0;

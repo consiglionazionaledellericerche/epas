@@ -223,31 +223,31 @@
 			</td>
 			
 			 <td class="span4" style="text-align: center;">
-			 #{if contract.value.sourceDate!=null}
+			 #{if contract.value.sourceDateResidual!=null}
 			     Situazione alla data
-			     <strong class="text-error">${contract.value.sourceDate}</strong><br>
+			     <strong class="text-error">${contract.value.sourceDateResidual}</strong><br>
 			   #{if contract.value.sourceRemainingMinutesLastYear>0 }
-			     Residuo ${contract.value.sourceDate.getYear()-1} 
+			     Residuo ${contract.value.sourceDateResidual.getYear()-1} 
 			     <strong class="text-error">${contract.value.sourceRemainingMinutesLastYear}</strong><br>
 			   #{/if}
 			   #{if contract.value.sourceRemainingMinutesCurrentYear>0}
-			     Residuo ${contract.value.sourceDate.getYear()} 
+			     Residuo ${contract.value.sourceDateResidual.getYear()} 
 			     <strong class="text-error">${contract.value.sourceRemainingMinutesCurrentYear}</strong><br>
 			   #{/if}
 			   #{if contract.value.sourceVacationLastYearUsed>0}
-			     Ferie usate ${contract.value.sourceDate.getYear()-1}
+			     Ferie usate ${contract.value.sourceDateResidual.getYear()-1}
 			     <strong class="text-error">${contract.value.sourceVacationLastYearUsed}</strong><br>
 			   #{/if}
 			   #{if contract.value.sourceVacationCurrentYearUsed>0}
-			     Ferie usate ${contract.value.sourceDate.getYear()} 
+			     Ferie usate ${contract.value.sourceDateResidual.getYear()} 
 			     <strong class="text-error">${contract.value.sourceVacationCurrentYearUsed}</strong><br>
 			   #{/if}
 			   #{if contract.value.sourcePermissionUsed>0}
-			     Permessi usati ${contract.value.sourceDate.getYear()} 
+			     Permessi usati ${contract.value.sourceDateResidual.getYear()} 
 			     <strong class="text-error">${contract.value.sourcePermissionUsed}</strong><br>
 			   #{/if}
 			   #{if contract.value.sourceRecoveryDayUsed!=null && contract.value.sourceRecoveryDayUsed>0}
-			     Riposi compensativi usati ${contract.value.sourceDate.getYear()} 
+			     Riposi compensativi usati ${contract.value.sourceDateResidual.getYear()} 
 			     <strong class="text-error">${contract.value.sourceRecoveryDayUsed}</strong><br>
 			   #{/if}
 			   #{if contract.value.sourceRemainingMealTicket!=null && contract.value.sourceRemainingMealTicket>0}

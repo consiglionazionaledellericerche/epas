@@ -90,16 +90,16 @@ public class StampingManager {
 	 * @param markedByAdmin
 	 */
 	public void addStamping(PersonDay pd, LocalDateTime time, String note,
-			boolean service, boolean type, boolean markedByAdmin) {
+			StampType stampType, boolean type, boolean markedByAdmin) {
 
 		Stamping stamp = new Stamping();
 
 		stamp.date = time; 
 		stamp.markedByAdmin = markedByAdmin;
 
-		if(service) {
-			stamp.note = "timbratura di servizio";
-			stamp.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
+		if(stampType != null) {
+			stamp.note = note != "" ? note : stampType.description;
+			stamp.stampType = stampType;
 		} else {
 			if(!note.equals("")) {
 				stamp.note = note;

@@ -195,3 +195,7 @@ stamping.stampType= Causale
 note= Note
 stampingHour= Ore
 stampingMinute= Minuti
+hourStamping= Ore
+stampingWay= Verso
+stampingWay.popover= Il verso della timbratura
+hourStamping.popover= Formato richiesto HHMM (HH ore, MM minuti)

@@ -561,7 +561,7 @@ public class Persons extends Controller {
 
 		//Ricalcolo valori dalla nuova data inizializzazione.
 		contractManager.recomputeContract(contract, 
-				Optional.fromNullable(contract.sourceDate), false);
+				Optional.fromNullable(contract.sourceDateResidual), false);
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 

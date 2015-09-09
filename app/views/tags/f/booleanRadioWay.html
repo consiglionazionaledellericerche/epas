@@ -1,0 +1,10 @@
+#{f.edit _arg, label:_label}%{
+	value = _value == null ? field.value : _value;
+}%
+<label class="radio-inline ${_class}" #{if _popover}popover data-content='&{field.name+'.popover'}'#{/if}>
+	<input type="radio" name="${field.name}" value="true"#{if value == true} checked#{/if}>${_true == null ? 'Ingresso' : _true}
+</label>
+<label class="radio-inline ${_class}" #{if _popover}popover data-content='&{field.name+'.popover'}'#{/if}>
+	<input type="radio" name="${field.name}" value="false"#{if value == false} checked#{/if}>${_false == null ? 'Uscita' : _false}
+</label>
+#{/f.edit}
