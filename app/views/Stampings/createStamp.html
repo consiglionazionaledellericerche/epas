@@ -15,7 +15,7 @@
 		</tr>
 		
 		<tr>
-			<td>#{f.booleanRadioWay 'stampingWay',popover:'true' /}</td>
+			<td>#{f.booleanRadio 'stampingWay',popover:'true', true:'Ingresso', false:'Uscita' /}</td>
 		</tr>
 		<tr>
 			<td>#{f.selectModel 'stamping.stampType', value:'', items:templateUtility.allStampTypes /}</td>
