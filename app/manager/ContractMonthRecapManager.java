@@ -89,6 +89,8 @@ public class ContractMonthRecapManager {
 		//FIXME: questo funziona nel caso di otherCompensatoryRest vuoto.
 		// nel caso di simulazione inserimento riposi compensativi che impattano
 		// su due mesi potrebbe non fornire il risultato desiderato.
+		//TODO: se in otherComensatoryRest ci sono assenze dei mesi precedenti,
+		//ricalcolare anche quelli.
 		
 		//Se serve il riepilogo precedente devo recuperarlo.
 		Optional<ContractMonthRecap> previousMonthRecap = 
@@ -101,6 +103,8 @@ public class ContractMonthRecapManager {
 				return 0;
 			}
 		}
+		
+		
 		
 		Optional<ContractMonthRecap> recap = computeResidualModule(cmr, 
 				previousMonthRecap, yearMonth, date, otherCompensatoryRest);
