@@ -30,16 +30,19 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
+import controllers.Resecure.NoCheck;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
 
 @With( RequestInit.class )
+//@With( {RequestInit.class, Resecure.class} )
 public class Clocks extends Controller{
 
 	@Inject
@@ -60,8 +63,10 @@ public class Clocks extends Controller{
 	private static ConsistencyManager consistencyManager;
 	@Inject
 	private static StampingManager stampingManager;
+	@Inject
+	private static SecurityRules rules;
 
-
+	
 	public static void show(){
 
 		LocalDate data = new LocalDate();
@@ -86,7 +91,7 @@ public class Clocks extends Controller{
 		render(data, personList);
 	}
 
-
+	
 	public static void clockLogin(Long userId, String password) {
 		LocalDate today = new LocalDate();
 		if(userId == null || userId == 0){
@@ -136,13 +141,14 @@ public class Clocks extends Controller{
 		render(user, dayRecap, numberOfInOut);
 	}
 
+	
 	public static void showRecap(Long personId)
 	{
 		Person person = personDao.getPersonById(personId);
 
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-
+		rules.checkIfPermitted(person);
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = personDayDao.getPersonDay(person, today);
@@ -185,6 +191,7 @@ public class Clocks extends Controller{
 	
 	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
 		Person person = personDao.getPersonById(personId);
+
 		LocalDate date = new LocalDate(year,month,day);
 
 		PersonDay personDay = null;
@@ -203,6 +210,7 @@ public class Clocks extends Controller{
 	public static void insertEntranceStampingClock(Long personDayId, Stamping stamping, String note){
 		PersonDay pd = personDayDao.getPersonDayById(personDayId);
 		LocalDateTime time = LocalDateTime.now();
+		rules.checkIfPermitted(pd.person);
 		stampingManager.addStamping(pd, time, note, stamping.stampType, true, false);
 				
 		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
@@ -213,6 +221,7 @@ public class Clocks extends Controller{
 	public static void insertExitStampingClock(Long personDayId, Stamping stamping, String note){
 		PersonDay pd = personDayDao.getPersonDayById(personDayId);
 		LocalDateTime time = LocalDateTime.now();
+		rules.checkIfPermitted(pd.person);
 		stampingManager.addStamping(pd, time, note, stamping.stampType, false, false);
 				
 		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
