@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import models.Office;
-import models.Permission;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -79,12 +78,13 @@ public class UserDao extends DaoBase {
 	}
 	
 	
-	public boolean isAdmin(User user)
-	{
-		if(user.username.equals("admin"))
+	public boolean isAdmin(User user) {
+		
+		if(user.username.equals("admin")) {
 			return true;
-		else
+		} else {
 			return false;
+		}
 	}
 	
 	/**
@@ -107,39 +107,4 @@ public class UserDao extends DaoBase {
 		return userList;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public List<Permission> getAllPermissions(User user) {
-		List<Permission> permissions = new ArrayList<Permission>();
-		
-		//FIXME un dao può usare un altro dao?? Problema delle dipendenze cicliche??
-		
-		if(user.person != null){
-			Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, user.person.office);
-			if(uro.isPresent()){
-				for(Permission p : uro.get().role.permissions){
-					permissions.add(p);
-				}
-			}
-//			UsersRolesOffices uro = UsersRolesOffices.find("Select upo from UsersRolesOffices uro where " +
-//					"uro.user = ? and uro.office = ?", this, this.person.office).first();
-			
-			
-		}
-		
-		//TODO admin 
-		/*
-		else{
-			Office office = Office.find("Select off from Office off where off.joiningDate is null").first();
-			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
-					"upo.user = ? and upo.office = ?", this, office).fetch();
-			for(UsersPermissionsOffices upo : upoList){
-				permissions.add(upo.permission);
-			}
-		}
-		*/
-		return permissions;
-	}
 }

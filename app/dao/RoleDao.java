@@ -5,7 +5,10 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import models.Office;
 import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 import models.query.QRole;
 
 import com.google.common.collect.Lists;
@@ -64,5 +67,4 @@ public class RoleDao extends DaoBase {
 		return roleList;
 		
 	}
-
 }
