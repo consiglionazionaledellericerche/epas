@@ -1,132 +1,21 @@
-# Permessi predefiniti
-Permission(rest):
-  description: rest
-
-Permission(stampingsCreate):
-  description: stampingsCreate
-
-Permission(developer):
-  description: developer
-
-Permission(employee):
-  description: employee
-
-Permission(viewPerson):
-  description: viewPerson
-
-Permission(editPerson):
-  description: editPerson
-
-Permission(viewPersonDay):
-  description: viewPersonDay
-
-Permission(editPersonDay):
-  description: editPersonDay
-
-Permission(viewCompetence):
-  description: viewCompetence
-
-Permission(editCompetence):
-  description: editCompetence
-
-Permission(uploadSituation):
-  description: uploadSituation
-
-Permission(viewAbsenceType):
-  description: viewAbsenceType
-
-Permission(editAbsenceType):
-  description: editAbsenceType
-
-Permission(viewConfiguration):
-  description: viewConfiguration
-
-Permission(editConfiguration):
-  description: editConfiguration
-
-Permission(viewOffice):
-  description: viewOffice
-
-Permission(editOffice):
-  description: editOffice
-
-Permission(viewWorkingTimeType):
-  description: viewWorkingTimeType
-
-Permission(editWorkingTimeType):
-  description: editWorkingTimeType
-
-Permission(viewCompetenceCode):
-  description: viewCompetenceCode
-
-Permission(editCompetenceCode):
-  description: editCompetenceCode
-
-
 # Ruoli predefiniti
 Role(developer_role):
   name: developer
-  permissions: !!set 
-    ? developer
 
 Role(admin):
   name: admin
-  permissions: !!set 
-    ? viewPerson
-    ? editPerson
-    ? viewAbsenceType
-    ? editAbsenceType
-    ? viewConfiguration
-    ? editConfiguration
-    ? viewOffice
-    ? editOffice
-    ? viewWorkingTimeType
-    ? editWorkingTimeType
-    ? viewCompetenceCode
-    ? editCompetenceCode
 
 Role(personnelAdmin):
   name: personnelAdmin
-  permissions: !!set 
-    ? viewPerson
-    ? editPerson
-    ? viewPersonDay
-    ? editPersonDay
-    ? viewCompetence
-    ? editCompetence
-    ? uploadSituation
-    ? viewAbsenceType
-    ? editAbsenceType
-    ? viewConfiguration
-    ? editConfiguration
-    ? viewWorkingTimeType
-    ? editWorkingTimeType
-    ? viewCompetenceCode
-    ? editCompetenceCode
 
 Role(personnelAdminMini):
   name: personnelAdminMini
-  permissions: !!set
-    ? viewPerson
-    ? viewPersonDay
-    ? viewCompetence
-    ? uploadSituation
-    ? viewAbsenceType
-    ? viewConfiguration
-    ? viewWorkingTimeType
-    ? viewCompetenceCode
 
 Role(employee_role):
   name: employee
-  permissions: !!set 
-    ? employee
 
 Role(badgeReader):
   name: badgeReader
-  permissions: !!set
-    ? stampingsCreate
 
 Role(restClient):
   name: restClient
-  permissions: !!set 
-    ? rest

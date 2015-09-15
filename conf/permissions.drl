@@ -3,7 +3,6 @@ package security;
 import security.PermissionCheck;
 import models.Office;
 import models.UsersRolesOffices;
-import models.Permission;
 import models.Person;
 import models.Role;
 
@@ -19,8 +18,6 @@ global models.User currentOperator;
 *
 */
 
-
-
 rule AnyUser when
   $c: PermissionCheck(action in (
      	"Application.index",
@@ -30,7 +27,6 @@ then
  $c.grant();
 end
 
-
 /*  
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
  *  (Ricalca il più possibile la struttura del dropdown menu della persona.)
@@ -38,7 +34,7 @@ end
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
-  $p: Permission(description == "employee") from $uro.role.permissions
+  $r: Role(name == "employee") from $uro.role
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administrators.restoreUser",
@@ -130,11 +126,9 @@ then
 end
   
 
-
-
-/*
- * Azioni eseguibili da utente con permesso developer (tutto)
- */
+/*******************************************************************************
+ * Azioni utente DEVELOPER
+ ******************************************************************************/
 rule developer
 when
  $uro: UsersRolesOffices()
@@ -144,63 +138,266 @@ then
  $c.grant();
 end
 
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewPerson
- */
-rule viewPerson_Generic
-when 
+/*******************************************************************************
+ * Azioni utente ADMIN
+ ******************************************************************************/
+rule admin_Generic
+when
  $uro: UsersRolesOffices()
- $p: Permission(description == "viewPerson") from $uro.role.permissions
+ $p: Role(name == "admin") from $uro.role
  $c: PermissionCheck(action in (
  
-        "Persons.list",
-        "MealTickets.recapMealTickets",
-        "MonthRecaps.showRecaps",
+ 		"Offices.editSeat",
+        "Offices.updateSeat",
+        "Offices.saveSeat",
+        "Offices.insertSeat",
+        "Offices.saveInstitute",
+        "Offices.editInstitute",
+        "Offices.insertInstitute",
+        "Offices.insertArea",
         
-        /* duplicate */
-        "Persons.showCurrentVacation",
-        "Persons.showCurrentContractWorkingTimeType",
-        
-        "Stampings.holidaySituation",
-        "Stampings.personHolidaySituation"
-        
-        ), target == null, granted == false)
-then
+        "Administrators.insertNewAdministrator",
+        "Administrators.saveNewAdministrator",
+        "Administrators.deleteAdministrator",
+        "Administrators.deleteSelfAsAdministrator",
+        "Administrators.insertAccountSystem",
+        "Administrators.saveAccountSystem",
+        "Administrators.deleteAccountSystem",
+
+		/* duplicate */
+        "Configurations.saveConfGeneral",
+        "Configurations.saveConfYear",
+        "Configurations.insertNewConfYear",
+        "Configurations.saveNewConfYear",
+		"Configurations.savePastYearVacationLimit",
+		"Configurations.savePatron",
+		
+        "Import.officeList"
+
+ 		
+ 		), target == null, granted == false)
+ then
  $c.grant();
 end
 
-rule viewPerson_InOffice
+rule admin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "viewPerson") from $uro.role.permissions
+ $p: Role(name == "admin") from $uro.role
  $c: PermissionCheck(action in (
- 		
-       "Persons.showCurrentVacation",
-       "Persons.showCurrentContractWorkingTimeType",
-       
-       "MealTickets.recapMealTickets",
-       
-       "Stampings.holidaySituation",
-       "Stampings.personHolidaySituation"
-              
+ 	
+ 	    "Configurations.saveConfGeneral",
+        "Configurations.saveConfYear",
+        "Configurations.insertNewConfYear",
+        "Configurations.saveNewConfYear",
+        "Configurations.savePastYearVacationLimit",
+        "Configurations.savePatron"
+               
        ), target == $o, granted == false)
 then
  $c.grant();
 end
 
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editPerson
- */
-rule editPerson_Generic
+/*******************************************************************************
+ * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
+ ******************************************************************************/
+
+rule alLeastPersonnelAdminMini_Generic
 when 
  $uro: UsersRolesOffices()
- $p: Permission(description == "editPerson") from $uro.role.permissions
+ $p: Role(name in ("personnelAdmin","personnelAdminMini")) from $uro.role
  $c: PermissionCheck(action in (
- 
+        
+        /* Vecchio permesso viewPerson */
+        "Persons.list",
+        "MealTickets.recapMealTickets",
+        "MonthRecaps.showRecaps",
+        
+        /* Vecchio permesso viewPersonDay */
+        /* credo che siano comunque da filtrare sull'office 
+ 		   per cui andrebbero cambiate le action e inserite
+ 		   in viewPersonDay_InOffice */	
+ 		"Absences.manageAttachmentsPerCode",
+ 		
+ 		"MonthRecaps.show",
+ 		
+ 		"Stampings.missingStamping",
+        "Stampings.dailyPresence",
+        "Stampings.mealTicketSituation",
+        
+        "YearlyAbsences.showGeneralMonthlyAbsences",
+        "YearlyAbsences.yearlyAbsences",
+        
+        /* Vecchio permesso viewCompetence */
+        "Competences.exportCompetences",
+        "Competences.getOvertimeInYear",
+        "Competences.approvedCompetenceInYear",
+        
+        /* Vecchio permesso viewOffice 
+         *  In questo caso le action non sono inserite all'interno della regola
+         *  InOffice poichè i filtri sono all'interno delle stesse action.
+         */
+        "Offices.showOffices",
+        "Configurations.showConfGeneral",
+        "Configurations.showConfYear",
+        
+        /* Vecchio permesso viewCompetenceCode */
+        "Competences.manageCompetenceCode",
+        
+        /*********** duplicate prima di avere il contesto office  *************/
+        
+        /* Vecchio permesso viewPerson */
+        "Persons.showCurrentVacation",
+        "Persons.showCurrentContractWorkingTimeType",
+        
+        "Stampings.holidaySituation",
+        "Stampings.personHolidaySituation",
+        
+        /* Vecchio permesso viewPersonDay */
+        "Absences.manageAttachmentsPerPerson",
+        "Absences.downloadAttachment",
+        "Absences.zipAttachment",
+        "Absences.absenceInPeriod",
+		
+		"Charts.indexCharts",
+        "Charts.checkLastYearAbsences",
+        "Charts.whichAbsenceInYear",
+     	"Charts.overtimeOnPositiveResidual",
+     	"Charts.overtimeOnPositiveResidualInYear",
+     	"Charts.exportHourAndOvertime",
+     	"Charts.export",
+     	"Charts.processLastYearAbsences",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation",
+		
+		"MonthRecaps.justifiedAbsences",
+        "MonthRecaps.notJustifiedAbsences",
+        "MonthRecaps.workingDayNotHoliday",
+        "MonthRecaps.workingDayHoliday",
+		
+		"PrintTags.listPersonForPrintTags",
+        "PrintTags.showTag",
+		        
+        "Stampings.personStamping",
+
+		"VacationsAdmin.list",        
+        "VacationsAdmin.vacationsLastYear",
+        "VacationsAdmin.vacationsCurrentYear",
+        "VacationsAdmin.permissionCurrentYear",
+        
+        "YearlyAbsences.showPersonMonthlyAbsences",
+        
+        /* Vecchio permesso viewCompetence */
+        "Competences.showCompetences",
+        "Competences.overtime",
+        "Competences.totalOvertimeHours",
+        "Competences.enabledCompetences",
+        "Competences.approvedCompetenceInYear",
+        
+        /* Vecchio permesso viewWorkingTimeType */
+        "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.showWorkingTimeType",
+        "WorkingTimes.showContractWorkingTimeType",		
+        "WorkingTimes.showContract",				
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
+        
+
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule alLeastPersonnelAdminMini_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name in ("personnelAdmin","personnelAdminMini")) from $uro.role
+ $c: PermissionCheck(action in (
+ 	
+ 	   /* Vecchio permesso viewPerson */
+ 	   "Persons.showCurrentVacation",
+       "Persons.showCurrentContractWorkingTimeType",
+       
+       "MealTickets.recapMealTickets",
+       
+       "Stampings.holidaySituation",
+       "Stampings.personHolidaySituation",	
+       
+       /* Vecchio permesso viewPersonDay */
+        "Absences.manageAttachmentsPerPerson",
+        "Absences.downloadAttachment",
+        "Absences.zipAttachment",
+	    "Absences.absenceInPeriod",
+		
+		"Charts.indexCharts",
+        "Charts.checkLastYearAbsences",
+        "Charts.whichAbsenceInYear",
+     	"Charts.overtimeOnPositiveResidual",
+     	"Charts.overtimeOnPositiveResidualInYear",
+     	"Charts.exportHourAndOvertime",
+     	"Charts.export",
+     	"Charts.processLastYearAbsences",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation",
+		
+		"MonthRecaps.justifiedAbsences",
+        "MonthRecaps.notJustifiedAbsences",
+        "MonthRecaps.workingDayNotHoliday",
+        "MonthRecaps.workingDayHoliday",
+        "PrintTags.listPersonForPrintTags",
+        "PrintTags.showTag",
+		
+        "Stampings.personStamping",
+        
+        "VacationsAdmin.list",
+        "VacationsAdmin.vacationsLastYear",
+        "VacationsAdmin.vacationsCurrentYear",
+        "VacationsAdmin.permissionCurrentYear",
+        
+        "YearlyAbsences.showPersonMonthlyAbsences",
+        
+        /* Vecchio permesso viewCompetence */
+        "Competences.showCompetences",
+        "Competences.overtime",
+        "Competences.totalOvertimeHours",
+        "Competences.enabledCompetences",
+        "Competences.approvedCompetenceInYear",
+        
+        /* Vecchio permesso viewWorkingTimeType */
+        "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.showWorkingTimeType",
+        "WorkingTimes.showContractWorkingTimeType",		
+        "WorkingTimes.showContract",				
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
+               
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni utente con ruolo solo PERSONNEL_ADMIN
+ ******************************************************************************/
+
+rule onlyForPersonnelAdmin_Generic
+when 
+ $uro: UsersRolesOffices()
+ $p: Role(name == "personnelAdmin") from $uro.role
+ $c: PermissionCheck(action in (
+ 		
+ 		/* Vecchio permesso editPerson */
         "Persons.insertPerson",
 		
-		/* duplicate */        
+		/* Vecchio permesso editAbsenceCode */
+		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
+		"Absences.manageAbsenceCode",
+        
+		/*********** duplicate prima di avere il contesto office  *************/   
+
+		/* Vecchio permesso editPerson */
         "Persons.edit",
         "Persons.update",
         "Persons.save",
@@ -248,20 +445,68 @@ when
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
-        "MealTickets.quickBlocksInsert"
+        "MealTickets.quickBlocksInsert",
+        
+        /* Vecchio permesso editPersonDay */
+		"Absences.create",
+     	"Absences.insert",
+     	"Absences.edit",
+     	"Absences.update",
+        
+        "Stampings.createStamp",
+       	"Stampings.insert",
+       	"Stampings.edit",
+     	"Stampings.update",
+     	"Stampings.toggleWorkingHoliday",
+     	
+     	/* Vecchio permesso editCompetence */
+        "Competences.updateCompetence",
+        "Competences.saveOvertime",
+        "Competences.updatePersonCompetence",
+        "Competences.saveNewCompetenceConfiguration",
+        
+        /* Vecchio permesso uploadSituation */
+        "UploadSituation.show",
+        "UploadSituation.uploadSituation",
+        "UploadSituation.loginAttestati",
+        "UploadSituation.processAttestati",
+        "UploadSituation.processSinglePerson",
+        "UploadSituation.processAllPersons",
+        "UploadSituation.showProblems",
+        "UploadSituation.showCertificatedData",
+        
+         /* Vecchio permesso editWorkingTimeType */
+        "WorkingTimes.insertWorkingTime",
+        "WorkingTimes.save",
+        "WorkingTimes.delete",
+        "WorkingTimes.toggleWorkingTimeTypeEnabled",
+        
+        /* Vecchio permesso editCompetenceCode */
+        /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
+        "Competences.insertCompetenceCode",
+        "Competences.edit",
+        "Competences.save",      
+        
+        /* Vecchio permesso editAbsenceCode */
+		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
+        "Absences.editCode",
+        "Absences.insertCode",
+     	"Absences.saveCode",
+     	"Absences.updateCode"
         
         ), target == null, granted == false)
 then
  $c.grant();
 end
 
-rule editPerson_InOffice
+rule onlyForPersonnelAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editPerson") from $uro.role.permissions
+ $p: Role(name == "personnelAdmin") from $uro.role
  $c: PermissionCheck(action in (
-        /* inserire le action interessate */
+ 		
+ 		/* Vecchio permesso editPerson */
         "Persons.edit",
         "Persons.update",
         "Persons.save",
@@ -304,157 +549,14 @@ when
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
      	
-     	"WorkingTimes.executeChangeWorkin/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewPersonDay
- */gTimeTypeToAll",
+     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
      	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
-        "MealTickets.quickBlocksInsert"
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewPersonDay
- */
-rule viewPersonDay_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "viewPersonDay") from $uro.role.permissions
- $c: PermissionCheck(  action in (
- 		
- 		/* credo che siano comunque da filtrare sull'office 
- 		   per cui andrebbero cambiate le action e inserite
- 		   in viewPersonDay_InOffice */	
- 		"Absences.manageAttachmentsPerCode",
- 		
- 		"MonthRecaps.show",
- 		
- 		"Stampings.missingStamping",
-        "Stampings.dailyPresence",
-        "Stampings.mealTicketSituation",
+        "MealTickets.quickBlocksInsert",
         
-        "YearlyAbsences.showGeneralMonthlyAbsences",
-        "YearlyAbsences.yearlyAbsences",
-        
-        /* duplicate */
-        "Absences.manageAttachmentsPerPerson",
-        "Absences.downloadAttachment",
-        "Absences.zipAttachment",
-        "Absences.absenceInPeriod",
-		
-		"Charts.indexCharts",
-        "Charts.checkLastYearAbsences",
-        "Charts.whichAbsenceInYear",
-     	"Charts.overtimeOnPositiveResidual",
-     	"Charts.overtimeOnPositiveResidualInYear",
-     	"Charts.exportHourAndOvertime",
-     	"Charts.export",
-     	"Charts.processLastYearAbsences",
-     	"Charts.exportDataSituation",
-     	"Charts.exportFinalSituation",
-		
-		"MonthRecaps.justifiedAbsences",
-        "MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
-		
-		"PrintTags.listPersonForPrintTags",
-        "PrintTags.showTag",
-		        
-        "Stampings.personStamping",
-
-		"VacationsAdmin.list",        
-        "VacationsAdmin.vacationsLastYear",
-        "VacationsAdmin.vacationsCurrentYear",
-        "VacationsAdmin.permissionCurrentYear",
-        
-        "YearlyAbsences.showPersonMonthlyAbsences"
-        
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-rule viewPersonDay_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "viewPersonDay") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        /* inserire le action interessate */
-        "Absences.manageAttachmentsPerPerson",
-        "Absences.downloadAttachment",
-        "Absences.zipAttachment",
-	    "Absences.absenceInPeriod",
-		
-		"Charts.indexCharts",
-        "Charts.checkLastYearAbsences",
-        "Charts.whichAbsenceInYear",
-     	"Charts.overtimeOnPositiveResidual",
-     	"Charts.overtimeOnPositiveResidualInYear",
-     	"Charts.exportHourAndOvertime",
-     	"Charts.export",
-     	"Charts.processLastYearAbsences",
-     	"Charts.exportDataSituation",
-     	"Charts.exportFinalSituation",
-		
-		"MonthRecaps.justifiedAbsences",
-        "MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
-        "PrintTags.listPersonForPrintTags",
-        "PrintTags.showTag",
-		
-        "Stampings.personStamping",
-        
-        "VacationsAdmin.list",
-        "VacationsAdmin.vacationsLastYear",
-        "VacationsAdmin.vacationsCurrentYear",
-        "VacationsAdmin.permissionCurrentYear",
-        
-        "YearlyAbsences.showPersonMonthlyAbsences"
-        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editPersonDay
- */
-rule editPersonDay_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "editPersonDay") from $uro.role.permissions
- $c: PermissionCheck(action in (
-       	/*duplicate */
-        "Absences.create",
-     	"Absences.insert",
-     	"Absences.edit",
-     	"Absences.update",
-        
-        "Stampings.createStamp",
-       	"Stampings.insert",
-       	"Stampings.edit",
-     	"Stampings.update",
-     	"Stampings.toggleWorkingHoliday"
-     	
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-
-rule editPersonDay_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editPersonDay") from $uro.role.permissions
- $c: PermissionCheck(action in (
+        /* Vecchio permesso editPersonDay */
         "Absences.create",
      	"Absences.insert",
      	"Absences.edit",
@@ -464,105 +566,15 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
-     	"Stampings.toggleWorkingHoliday"
+     	"Stampings.toggleWorkingHoliday",
      	
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewCompetence
- */
-rule viewCompetence_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "viewCompetence") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Competences.exportCompetences",
-        "Competences.getOvertimeInYear",
-        "Competences.approvedCompetenceInYear",
-        
-        /* duplicate */
-        "Competences.showCompetences",
-        "Competences.overtime",
-        "Competences.totalOvertimeHours",
-        "Competences.enabledCompetences",
-        "Competences.approvedCompetenceInYear"
-        
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-rule viewCompetence_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "viewCompetence") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Competences.showCompetences",
-        "Competences.overtime",
-        "Competences.totalOvertimeHours",
-        "Competences.enabledCompetences",
-        "Competences.approvedCompetenceInYear"
-        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editCompetence
- */
-rule editCompetence_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "editCompetence") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        /* duplicate */
+     	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
-        "Competences.saveNewCompetenceConfiguration"
+        "Competences.saveNewCompetenceConfiguration",
         
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-rule editCompetence_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editCompetence") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Competences.updateCompetence",
-        "Competences.saveOvertime",
-        "Competences.updatePersonCompetence",
-        "Competences.saveNewCompetenceConfiguration"
-        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso uploadSituation
- */
-rule uploadSituation_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "uploadSituation") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        /* duplicate */
+         /* Vecchio permesso uploadSituation */
         "UploadSituation.show",
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
@@ -570,310 +582,84 @@ when
         "UploadSituation.processSinglePerson",
         "UploadSituation.processAllPersons",
         "UploadSituation.showProblems",
-        "UploadSituation.showCertificatedData"      
+        "UploadSituation.showCertificatedData",
         
-        ), target == null, granted == false)
-then
- $c.grant();
-end
- 
-rule uploadSituation_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "uploadSituation") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        /* inserire le action interessate */
-        "UploadSituation.show",
-        "UploadSituation.uploadSituation",
-        "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati",
-        "UploadSituation.processSinglePerson",
-        "UploadSituation.processAllPersons",
-        "UploadSituation.showProblems",
-        "UploadSituation.showCertificatedData"        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewOffice
- *  In questo caso la regola viewOffice_InOffice non è implementata
- *  poichè i filtri sono all'interno dell'action.
- */
-rule viewOffice_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "viewOffice") from $uro.role.permissions
- $c: PermissionCheck(action in (
-      
-        "Offices.showOffices",
-        
-        "Configurations.showConfGeneral",
-        "Configurations.showConfYear"
-
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editOffice
- */
-rule editOffice_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "editOffice") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Offices.editSeat",
-        "Offices.updateSeat",
-        "Offices.saveSeat",
-        "Offices.insertSeat",
-        "Offices.saveInstitute",
-        "Offices.editInstitute",
-        "Offices.insertInstitute",
-        "Offices.insertArea",
-        
-        "Administrators.insertNewAdministrator",
-        "Administrators.saveNewAdministrator",
-        "Administrators.deleteAdministrator",
-        "Administrators.deleteSelfAsAdministrator",
-        "Administrators.insertAccountSystem",
-        "Administrators.saveAccountSystem",
-        "Administrators.deleteAccountSystem",
-
-        "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear",
-        "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear",
-		"Configurations.savePastYearVacationLimit",
-		"Configurations.savePatron",
-		
-        "Import.officeList"
-
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-rule editOffice_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editOffice") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear",
-        "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear",
-        "Configurations.savePastYearVacationLimit",
-        "Configurations.savePatron"
-        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewWorkingTimeType
- */
-rule viewWorkingTimeType_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        
-        
-        /* duplicate */
-        "WorkingTimes.manageWorkingTime",
-        "WorkingTimes.showWorkingTimeType",
-        "WorkingTimes.showContractWorkingTimeType",		/* forse è viewPerson */
-        "WorkingTimes.showContract",					/* forse è viewPerson */
-        "WorkingTimes.changeWorkingTimeTypeToAll",
-        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
-        
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-
-rule viewWorkingTimeType_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "WorkingTimes.manageWorkingTime",
-        "WorkingTimes.showWorkingTimeType",
-        "WorkingTimes.showContractWorkingTimeType",		/* forse è viewPerson */
-        "WorkingTimes.showContract",					/* forse è viewPerson */
-        "WorkingTimes.changeWorkingTimeTypeToAll",
-        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
-        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editWorkingTimeType
- */
-rule editWorkingTimeType_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "editWorkingTimeType") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        /* duplicate */
+         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save",
         "WorkingTimes.delete",
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
-        "WorkingTimes.insertWorkingTime"
-        
-        ), target == null, granted == false)
-then
- $c.grant();
-end
- 
-rule editWorkingTimeType_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editWorkingTimeType") from $uro.role.permissions
- $c: PermissionCheck(action in (
- 
         "WorkingTimes.insertWorkingTime",
-        "WorkingTimes.save",
-        "WorkingTimes.delete",
-        "WorkingTimes.toggleWorkingTimeTypeEnabled",
-        "WorkingTimes.insertWorkingTime"
         
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso viewCompetenceCode.
- */
-rule viewCompetenceCode_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "viewCompetenceCode") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Competences.manageCompetenceCode"
-        
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editCompetenceCode.
- *
- *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
- *  impostare la regola editCompetenceCode_InOffice. O si associano all'office in modo
- *  che ogni ufficio possa avere i propri privati (come in workingTimeType) oppure si
- *  rimuove questo permesso ai PersonellAdmin e si delega esclusivamente a utente SuperUser.
- *  Quest'ultima soluzione potrebbe essere la più opportuna e meno dispendiosa in ottica
- *  centralizzazione.
- */
-rule editCompetenceCode_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "editCompetenceCode") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        /* duplicate */
+        /* Vecchio permesso editCompetenceCode
+         *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
+ 	     *  impostare la regola editCompetenceCode_InOffice. O si associano all'office in modo
+ 	     *  che ogni ufficio possa avere i propri privati (come in workingTimeType) oppure si
+ 	     *  rimuove questo permesso ai PersonellAdmin e si delega esclusivamente a utente SuperUser.
+ 	     *  Quest'ultima soluzione potrebbe essere la più opportuna e meno dispendiosa in ottica
+ 	     *  centralizzazione.
+ 	     */
         "Competences.insertCompetenceCode",
         "Competences.edit",
-        "Competences.save"
+        "Competences.save",
         
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-rule editCompetenceCode_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editCompetenceCode") from $uro.role.permissions
- $c: PermissionCheck(action in (
-        
-        "Competences.insertCompetenceCode",
-        "Competences.edit",
-        "Competences.save"
-        
-       ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-
-/*
- *	Azioni eseguibili da amministratore che detenga il permesso editAbsenceType
- *  FIXME: vedi fixme precedente.
- */
-rule editAbsenceType_Generic
-when 
- $uro: UsersRolesOffices()
- $p: Permission(description == "editAbsenceType") from $uro.role.permissions
- $c: PermissionCheck(action in (
- 
-        "Absences.manageAbsenceCode",
-        
-        /* duplicate */
-        "Absences.editCode",
-        "Absences.insertCode",
-     	"Absences.saveCode",
-     	"Absences.updateCode"
-        
-        ), target == null, granted == false)
-then
- $c.grant();
-end
-
-rule editAbsenceCode_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "editAbsenceType") from $uro.role.permissions
- $c: PermissionCheck(action in (
-       
+        /* Vecchio permesso editAbsenceCode */
+		/* FIXME: stesso ragionamento del editCompetenceCode*/
         "Absences.editCode",
      	"Absences.insertCode",
      	"Absences.saveCode",
-     	"Absences.updateCode"
-     	
+     	"Absences.updateCode"      
+               
        ), target == $o, granted == false)
 then
  $c.grant();
 end
 
 /*******************************************************************************
- * Azioni via REST
+ * Azioni utente con ruolo BADGE_READER
  ******************************************************************************/
+
+rule stampings_create
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "badgeReader") from $uro.role
+ $c: PermissionCheck(action in (
  
+ 		/* duplicate */
+ 		"StampingsFromClient.create",
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
+ 		
+ 		), target == null, granted == false)
+ then
+ $c.grant();
+end
+
+rule stampings_create_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "badgeReader") from $uro.role
+ $c: PermissionCheck(action in (
+ 
+ 		"StampingsFromClient.create",
+ 		"StampingsFromClient.createNotRecompute",
+ 		"StampingsFromClient.absence",
+ 		"StampingsFromClient.absenceNotRecompute"
+ 	
+ 		), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni utente con ruolo REST_CLIENT
+ ******************************************************************************/
 rule rest
 when
  $uro: UsersRolesOffices()
- $p: Permission(description == "rest") from $uro.role.permissions
+ $p: Role(name == "restClient") from $uro.role
  $c: PermissionCheck(action in (
         
         "rest.Persons.days",
@@ -892,7 +678,7 @@ rule rest_inOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "rest") from $uro.role.permissions
+ $p: Role(name == "restClient") from $uro.role
  $c: PermissionCheck(action in (
 
         "rest.Absences.absencesInPeriod",
@@ -900,44 +686,6 @@ when
         "rest.Absences.checkAbsence"
         
        ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-/*******************************************************************************
- * Azioni via REST. Client Timbrature
- ******************************************************************************/
-
-rule stampings_create
-when
- $uro: UsersRolesOffices()
- $p: Permission(description == "stampingsCreate") from $uro.role.permissions
- $c: PermissionCheck(action in (
- 
- 		/* duplicate */
- 		"StampingsFromClient.create",
- 		"StampingsFromClient.createNotRecompute",
- 		"StampingsFromClient.absence",
- 		"StampingsFromClient.absenceNotRecompute"
- 		
- 		), target == null, granted == false)
- then
- $c.grant();
-end
-
-rule stampings_create_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Permission(description == "stampingsCreate") from $uro.role.permissions
- $c: PermissionCheck(action in (
- 
- 		"StampingsFromClient.create",
- 		"StampingsFromClient.createNotRecompute",
- 		"StampingsFromClient.absence",
- 		"StampingsFromClient.absenceNotRecompute"
- 	
- 		), target == $o, granted == false)
 then
  $c.grant();
 end
