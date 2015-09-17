@@ -1,7 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +17,6 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
-import models.Stamping.WayType;
 import models.User;
 import models.enumerate.Parameter;
 
@@ -27,30 +24,30 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.hash.Hashing;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 
-import controllers.Resecure.NoCheck;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.UserDao;
 
 @With( RequestInit.class )
 //@With( {RequestInit.class, Resecure.class} )
 public class Clocks extends Controller{
 
 	@Inject
+	private static OfficeDao officeDao;
+	@Inject
 	private static OfficeManager officeManager;
 	@Inject
 	private static PersonDao personDao;
-	@Inject
-	private static UserDao userDao;
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
@@ -65,20 +62,31 @@ public class Clocks extends Controller{
 	private static StampingManager stampingManager;
 	@Inject
 	private static SecurityRules rules;
-
+	
+	public final static String SKIP_IP_CHECK = "skip.ip.check";
 	
 	public static void show(){
 
 		LocalDate data = new LocalDate();
-
-		String remoteAddress = Http.Request.current().remoteAddress;
-
-		Set<Office> offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+		Set<Office> offices;
+		
+		if("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			offices = FluentIterable.from(officeDao.getAllOffices()).filter(new Predicate<Office>() {
+				@Override
+				public boolean apply(Office input) {
+//					filtro per avere solo le sedi
+					return input.office != null && input.office.office != null;
+				}
+			}).toSet();
+		}
+		else{
+			String remoteAddress = Http.Request.current().remoteAddress;
+			offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+		}
 
 		if(offices.isEmpty()){
 			flash.error("Le timbrature web non sono permesse da questo terminale! "
 					+ "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
-
 			try {
 				Secure.login();
 			} catch (Throwable e) {
@@ -92,35 +100,33 @@ public class Clocks extends Controller{
 	}
 
 	
-	public static void clockLogin(Long userId, String password) {
-		LocalDate today = new LocalDate();
-		if(userId == null || userId == 0){
+	public static void clockLogin(Person person, String password) {
+		
+		User user = person.user;
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
-			flash.error("Utente non selezionato");
-			Clocks.show();
-		}
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
 
-		User user = userDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
-
-		if(user == null){
-
-			flash.error("Password non corretta");
-			Clocks.show();
-		}
-
-		String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
-
-		if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
-
-			flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
-					"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
-			try {
-				Secure.login();
-			} catch (Throwable e) {
-				e.printStackTrace();
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
 			}
 		}
-
+		
+		LocalDate today = new LocalDate();
+		
+		if(user!= null && Security.authenticate(user.username,password)) {
+			// Mark user as connected
+			session.put("username", user.username);
+		}
+		else{
+			flash.error("Autenticazione fallita!");
+			Clocks.show();
+		}
+		
 		PersonDay personDay = null;			
 		Optional<PersonDay> pd = personDayDao.getPersonDay(user.person, today);
 
@@ -208,6 +214,21 @@ public class Clocks extends Controller{
 	}
 	
 	public static void insertEntranceStampingClock(Long personDayId, Stamping stamping, String note){
+		
+		User user = Security.getUser().orNull();
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
+
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
+			}
+		}
+		
 		PersonDay pd = personDayDao.getPersonDayById(personDayId);
 		LocalDateTime time = LocalDateTime.now();
 		rules.checkIfPermitted(pd.person);
@@ -219,6 +240,7 @@ public class Clocks extends Controller{
 	
 	
 	public static void insertExitStampingClock(Long personDayId, Stamping stamping, String note){
+		
 		PersonDay pd = personDayDao.getPersonDayById(personDayId);
 		LocalDateTime time = LocalDateTime.now();
 		rules.checkIfPermitted(pd.person);

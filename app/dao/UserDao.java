@@ -38,9 +38,9 @@ public class UserDao extends DaoBase {
 	/**
 	 * 
 	 * @param id
-	 * @return l'ufficio identificato dall'id passato come parametro
+	 * @return lo user  identificato dall'id passato come parametro
 	 */
-	public User getUserById(Long id, Optional<String> password){
+	public User getUserByIdAndPassword(Long id, Optional<String> password){
 		final QUser user = QUser.user;
 		final BooleanBuilder condition = new BooleanBuilder();
 		if(password.isPresent())

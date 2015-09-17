@@ -80,6 +80,8 @@ cron
 fi
 
 # configure ePAS
+
+SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 sudo -u epas -H cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/prod.conf
 
 sudo -u epas -H sed 's/{{EPAS_APPLICATION_BASEURL}}/'"${EPAS_APPLICATION_BASEURL}"'/' -i /home/epas/epas/conf/prod.conf
@@ -96,6 +98,10 @@ sudo -u epas -H sed 's/{{SMTP_PASS}}/'"${SMTP_PASS}"'/' -i /home/epas/epas/conf/
 sudo -u epas -H sed 's/{{SMTP_CHANNEL}}/'"${SMTP_CHANNEL}"'/' -i /home/epas/epas/conf/prod.conf
 
 sudo -u epas -H sed 's/{{EPAS_SHIB_LOGIN}}/'"${EPAS_SHIB_LOGIN}"'/' -i /home/epas/epas/conf/prod.conf
+
+if [ "${SKIP_IP_CHECK}" == true ]; then
+echo "skip.ip.check=true" >> /home/epas/epas/conf/prod.conf
+fi
 
 appRun () {
   echo "Applico eventuali evoluzioni al database..."
