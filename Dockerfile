@@ -28,6 +28,9 @@ RUN play precompile
 USER root
 VOLUME ["/home/epas/epas/logs", "/home/epas/epas/data/attachments", "/home/epas/epas/backups"]
 
+#Fix for crontab 
+RUN sed -e '/pam_loginuid.so/ s/^#*/#/' -i /etc/pam.d/cron
+
 ENTRYPOINT ["/home/epas/epas/docker_conf/init"]
 
 CMD ["app:run"]

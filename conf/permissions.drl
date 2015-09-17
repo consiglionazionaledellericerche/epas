@@ -42,6 +42,8 @@ when
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	"Stampings.dailyPresenceForPersonInCharge",
+     	"Stampings.editEmployee",
+     	"Stampings.updateEmployee",
      	
      	/* Assenze mensili */
      	"Absences.absences",
@@ -584,7 +586,7 @@ when
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
         
-         /* Vecchio permesso editWorkingTypeType */
+        /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save",
         "WorkingTimes.delete",

@@ -1,0 +1,41 @@
+<div class="modal-header center">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 class="modal-title">Nuova timbratura di USCITA ${personDay.date.format()} per ${personDay.person.surname} ${personDay.person.name}</h4>
+</div>
+<div class="modal-body">
+
+<div class="panel panel-danger">
+<div class="panel-heading">Importante</div>
+  <div class="panel-body">
+    <p>La timbratura che si va a inserire è di <strong>USCITA</strong>
+    L'orario della timbratura verrà salvato sulla base del momento in cui sarà premuto il tasto "Inserisci".
+    Selezionare la causale qui sotto solo se l'uscita che si sta facendo ha una causale allegata.
+    Non selezionare la causale se è un'uscita normale.
+    </p>
+  </div>  
+</div>
+</div>
+
+<div class="container-fluid text-center">
+#{form @Clocks.insertExitStampingClock(), role:'form', autocomplete:'off'}
+	
+	<input type="hidden" name="personDayId" value="${personDay.id}"/>
+	
+<table class="table table-hover table-form">
+
+		<tr>
+			<td>#{f.selectModel 'stamping.stampType', value:'', items:templateUtility.allStampTypes /}</td>
+		</tr>
+		<tr>
+			<td>#{f.input 'note' /}</td>
+		</tr>
+		
+	
+</table>
+	
+	<input class="btn btn-primary" type="submit" value="Inserisci"/>
+
+#{/form}
+
+</div>
+</div>
