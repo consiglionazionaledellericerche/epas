@@ -248,7 +248,7 @@ public class Person extends MutableModel implements Comparable<Person>{
 
 	@Override
 	public String toString() {
-		return String.format("Person[%d] - %s %s", id, name, surname);
+		return getFullname();
 	}
 
 	@Override
