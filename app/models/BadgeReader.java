@@ -3,8 +3,7 @@
  */
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -18,13 +17,14 @@ import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.envers.Audited;
 
+import com.google.common.collect.Sets;
+
 
 
 /**
  * @author cristian
  *
  */
-
 @Entity
 @Table(name="badge_readers")
 @Audited
@@ -42,6 +42,10 @@ public class BadgeReader extends BaseModel {
 	@OneToOne (optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	public User user;
+
+	@OneToMany(mappedBy="badgeReader")
+	public Set<Badge> badges = Sets.newHashSet();
+	
 	
 	public boolean enabled = true;
 }

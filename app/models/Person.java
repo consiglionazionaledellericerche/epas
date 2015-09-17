@@ -214,11 +214,12 @@ public class Person extends MutableModel implements Comparable<Person>{
 	@JoinColumn(name="office_id")
 	@Required
 	public Office office;
-	
-	/**
-	 * numero di matricola sul badge
+
+	/** 
+	 * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge
+	 * alla tabella badges.
 	 */
-	// TODO: rimuoverlo creando il badge assegnandolo al corretto badge reader.
+	@Deprecated
 	@As(binder=NullStringBinder.class)
 	public String badgeNumber;
 	

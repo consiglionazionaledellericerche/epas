@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -30,6 +31,7 @@ public class Badge extends BaseModel{
 	public Person person;
 	
 	@ManyToOne
+	@JoinColumn(name = "badge_reader_id")
 	public BadgeReader badgeReader;
 
 }
