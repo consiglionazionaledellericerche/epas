@@ -1,3 +1,5 @@
+
+
 <div class="modal-header center">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
   <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.surname} <i class="fa fa-clock-o"></i></h4>
@@ -7,17 +9,17 @@
 <div class="modal-body">
 
 <div class="container-fluid text-center">
-#{form @Stampings.update(), role:'form'}
+#{form @Stampings.updateEmployee(), role:'form'}
 	
 	<input type="hidden" name="stampingId" value="${stamping.id}"/>
 		
   	<table class="table table-hover table-form">
 	
 		<tr>
-			<td>#{f.input 'stampingHour', value:stamping.date.getHourOfDay(), type:'number', class:'input-sm'/}</td>
+			<td>#{f.input 'stampingHour', value:stamping.date.getHourOfDay(), type:'number', class:'input-sm', disabled:'disabled'/}</td>
 		</tr>
 		<tr>
-			<td>#{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm' /}</td>
+			<td>#{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm', disabled:'disabled' /}</td>
 		</tr>
 		
 		<tr>
@@ -39,5 +41,3 @@
 </div>
 
 </div>
-
- 

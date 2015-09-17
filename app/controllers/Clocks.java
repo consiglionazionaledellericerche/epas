@@ -11,6 +11,7 @@ import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
+import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Contract;
@@ -29,16 +30,19 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
+import controllers.Resecure.NoCheck;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
 
 @With( RequestInit.class )
+//@With( {RequestInit.class, Resecure.class} )
 public class Clocks extends Controller{
 
 	@Inject
@@ -57,8 +61,12 @@ public class Clocks extends Controller{
 	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
 	@Inject
 	private static ConsistencyManager consistencyManager;
+	@Inject
+	private static StampingManager stampingManager;
+	@Inject
+	private static SecurityRules rules;
 
-
+	
 	public static void show(){
 
 		LocalDate data = new LocalDate();
@@ -83,7 +91,7 @@ public class Clocks extends Controller{
 		render(data, personList);
 	}
 
-
+	
 	public static void clockLogin(Long userId, String password) {
 		LocalDate today = new LocalDate();
 		if(userId == null || userId == 0){
@@ -133,80 +141,14 @@ public class Clocks extends Controller{
 		render(user, dayRecap, numberOfInOut);
 	}
 
-
-
-	/**
-	 * 
-	 * @param personId. Con questo metodo si permette l'inserimento della timbratura per la persona contrassegnata da id personId.
-	 */
-	public static void insertStamping(Long personId){
-		Person person = personDao.getPersonById(personId);
-		if(person == null){
-			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-		}
-		
-		LocalDateTime ldt = LocalDateTime.now();
-		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, ldt.toLocalDate());
-
-		if(!pd.isPresent()){
-			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
-			personDay = new PersonDay(person, ldt.toLocalDate());
-			personDay.create();
-		}
-		else{
-			personDay = pd.get();
-		}		
-		//Se la stamping esiste già mostro il riepilogo
-		int minNew = time.getMinuteOfHour();
-		int hourNew = time.getHourOfDay();
-		for(Stamping s : personDay.stampings){
-			int hour = s.date.getHourOfDay();
-			int min = s.date.getMinuteOfHour();
-			int minMinusOne = s.date.plusMinutes(1).getMinuteOfHour();
-			if( hour==hourNew && (minNew==min || minNew==minMinusOne) )
-			{
-
-				flash.error("Timbratura ore %s gia' inserita, prossima timbratura accettata a partire da %s",
-						DateUtility.fromLocalDateTimeHourTime(s.date),
-						DateUtility.fromLocalDateTimeHourTime(s.date.plusMinutes(2)));
-
-				Clocks.showRecap(personId);
-			}
-		}
-
-
-		//Altrimenti la inserisco
-		Stamping stamp = new Stamping();
-		stamp.date = time;
-		if(params.get("type").equals("true")){
-			stamp.way = WayType.in;
-		}
-		else
-			stamp.way = WayType.out;
-		stamp.personDay = personDay;
-		stamp.markedByAdmin = false;
-		stamp.save();
-		personDay.stampings.add(stamp);
-		personDay.save();
-
-		final PersonDay day = personDay;
-
-		consistencyManager.updatePersonSituation(person.id, day.date);
-
-		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
-
-		Clocks.showRecap(personId);
-	}
-
+	
 	public static void showRecap(Long personId)
 	{
 		Person person = personDao.getPersonById(personId);
 
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-
+		rules.checkIfPermitted(person);
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = personDayDao.getPersonDay(person, today);
@@ -229,4 +171,60 @@ public class Clocks extends Controller{
 
 	}
 
+	
+	public static void entranceClock(Long personId, Integer year, Integer month, Integer day){
+		
+		Person person = personDao.getPersonById(personId);
+		
+		LocalDate date = new LocalDate(year,month,day);
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, date); 
+				
+		if(!pd.isPresent()){
+			personDay = new PersonDay(person, date);
+			personDay.save();
+		}
+		else
+			personDay = pd.get();
+		render(person, personDay);
+	}
+	
+	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
+		Person person = personDao.getPersonById(personId);
+
+		LocalDate date = new LocalDate(year,month,day);
+
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, date); 
+				
+		if(!pd.isPresent()){
+			personDay = new PersonDay(person, date);
+			personDay.save();
+		}
+		else
+			personDay = pd.get();
+
+		render(person, personDay);
+	}
+	
+	public static void insertEntranceStampingClock(Long personDayId, Stamping stamping, String note){
+		PersonDay pd = personDayDao.getPersonDayById(personDayId);
+		LocalDateTime time = LocalDateTime.now();
+		rules.checkIfPermitted(pd.person);
+		stampingManager.addStamping(pd, time, note, stamping.stampType, true, false);
+				
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		Clocks.showRecap(pd.person.id);
+	}
+	
+	
+	public static void insertExitStampingClock(Long personDayId, Stamping stamping, String note){
+		PersonDay pd = personDayDao.getPersonDayById(personDayId);
+		LocalDateTime time = LocalDateTime.now();
+		rules.checkIfPermitted(pd.person);
+		stampingManager.addStamping(pd, time, note, stamping.stampType, false, false);
+				
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		Clocks.showRecap(pd.person.id);
+	}
 }
