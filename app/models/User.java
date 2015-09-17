@@ -65,5 +65,17 @@ public class User extends BaseModel{
 				.add("user", this.username)
 				.toString();
 	}
+	
+	/**
+	 * Se l'user è un account di sistema. 
+	 * TODO: definire la logica più dettagliata se necessario.
+	 * @return
+	 */
+	public boolean isSystemUser() {
+		if (person == null) {
+			return true;
+		}
+		return false;
+	}
 
 }
