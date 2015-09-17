@@ -87,12 +87,7 @@ public class Person extends MutableModel implements Comparable<Person>{
 	@Unique
 	public Integer number;
 
-	/**
-	 * numero di matricola sul badge
-	 */
-//	@Unique
-	@As(binder=NullStringBinder.class)
-	public String badgeNumber;
+
 
 	/**
 	 * id che questa persona aveva nel vecchio database
@@ -219,6 +214,16 @@ public class Person extends MutableModel implements Comparable<Person>{
 	@JoinColumn(name="office_id")
 	@Required
 	public Office office;
+	
+	/**
+	 * numero di matricola sul badge
+	 */
+	// TODO: rimuoverlo creando il badge assegnandolo al corretto badge reader.
+	@As(binder=NullStringBinder.class)
+	public String badgeNumber;
+	
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public Set<Badge> badges = Sets.newHashSet();
 
 
 	public String getName(){

@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import models.base.BaseModel;
@@ -36,8 +39,9 @@ public class BadgeReader extends BaseModel {
 	
 	public String location;
 	
-	@OneToMany(mappedBy="badgeReader")
-	public List<Stamping> stampings = new ArrayList<Stamping>();
+	@OneToOne (optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	public User user;
 	
 	public boolean enabled = true;
 }
