@@ -43,10 +43,10 @@ public class User extends BaseModel{
 	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
 	public Person person;
 	
-	//@ManyToOne
-	//@JoinColumn(name="office_id")
-	//public Office restOwner;
-
+	@NotAudited
+	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
+	public BadgeReader badgeReader;
+	
 	@NotAudited
 	@OneToMany(mappedBy="user", cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
