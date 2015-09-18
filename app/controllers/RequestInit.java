@@ -13,8 +13,8 @@ import javax.inject.Inject;
 import manager.ConfGeneralManager;
 import models.AbsenceType;
 import models.Office;
-import models.Permission;
 import models.Qualification;
+import models.Role;
 import models.StampModificationType;
 import models.StampType;
 import models.User;
@@ -85,68 +85,38 @@ public class RequestInit extends Controller {
 
 		public ItemsPermitted(Optional<User> user) {
 
-			if(!user.isPresent())
-				return;
-			
-//			TODO Rifattorizzare in modo più intelligente
-			if(user.get().username.equals("developer")){
-				viewPerson = true;
-				viewPersonDay = true;
-				viewOffice = true;
-				viewCompetence = true;
-			    editCompetence = true;
-				uploadSituation = true;
-				viewWorkingTimeType = true;
-				editWorkingTimeType = true;
-				viewAbsenceType = true;
-				editAbsenceType = true;
-				viewCompetenceCode = true;
-				editCompetenceCode = true;
+			if(!user.isPresent()) {
 				return;
 			}
+			
+			List<Role> roles = uroDao.getUserRole(user.get());
 
-			List<Permission> pList = uroDao.getUserPermission(user.get());
+			for(Role role : roles) {
 
-			for(Permission p : pList) {
-
-				if(p.description.equals("employee"))
+				if (role.name.equals(Role.EMPLOYEE)) {
 					this.isEmployee = true;
-
-				if(p.description.equals("viewPerson"))
+				}
+				
+				if (role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
+						role.name.equals(Role.PERSONNEL_ADMIN) || 
+						role.name.equals(Role.DEVELOPER)) {
 					this.viewPerson = true;
-
-				if(p.description.equals("viewPersonDay"))
 					this.viewPersonDay = true;
-
-				if(p.description.equals("viewOffice"))
 					this.viewOffice = true;
-
-				if(p.description.equals("viewCompetence"))
 					this.viewCompetence = true;
-
-				if(p.description.equals("editCompetence"))
-					this.editCompetence = true;
-
-				if(p.description.equals("uploadSituation"))
-					this.uploadSituation = true;
-
-				if(p.description.equals("viewWorkingTimeType"))
 					this.viewWorkingTimeType = true;
-
-				if(p.description.equals("editWorkingTimeType"))
-					this.editWorkingTimeType = true;
-
-				if(p.description.equals("viewCompetenceCode"))
 					this.viewCompetenceCode = true;
-
-				if(p.description.equals("editCompetenceCode"))
-					this.editCompetenceCode = true;
-
-				if(p.description.equals("viewAbsenceType"))
 					this.viewAbsenceType = true;
-
-				if(p.description.equals("editAbsenceType"))
+				}
+				
+				if (role.name.equals(Role.PERSONNEL_ADMIN) || 
+						role.name.equals(Role.DEVELOPER)) {
+					this.editCompetence = true;
+					this.uploadSituation = true;
+					this.editCompetenceCode = true;
 					this.editAbsenceType = true;
+					this.editWorkingTimeType = true;
+				}
 			}
 		}
 

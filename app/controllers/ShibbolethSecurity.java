@@ -68,10 +68,9 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 	    
 	    Person person = personDao.byEppn(eppn).orNull();
 	    		
-		if(person != null){
+		if (person != null) {
+
 			Cache.set(person.user.username, person, Security.CACHE_DURATION);
-			//Cache.set(Security.PERMISSION_CACHE_PREFIX + person.user.username, person.user.getAllPermissions(), Security.CACHE_DURATION);
-			Cache.set(Security.PERMISSION_CACHE_PREFIX + person.user.username, userDao.getAllPermissions(person.user), Security.CACHE_DURATION);
 			Cache.set("personId", person.id, Security.CACHE_DURATION);
 
 			session.put("username", person.user.username);

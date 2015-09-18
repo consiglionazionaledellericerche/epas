@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 
 import manager.OfficeManager;
 import models.Office;
-import models.Permission;
 import models.Person;
 import models.Role;
 import models.User;
@@ -59,18 +58,17 @@ public class FixUserPermission{
 			List<Permesso> permessi = Lists.newArrayList();
 			
 			for(UsersRolesOffices uro : uros){
-//				Il ruolo superAdmin e' stato rinominato in Admin
+				//Il ruolo superAdmin e' stato rinominato in Admin
 				String ruolo = uro.role.name.equals("superAdmin") ? Role.ADMIN : uro.role.name;
 				permessi.add(new Permesso(uro.user.id,uro.office.id,ruolo));
 			}
 
 			UsersRolesOffices.deleteAll();
-			Permission.deleteAll();
 			Role.deleteAll();
 
 			JPA.em().clear();
 			
-//			Allinea tutte le sequenze del db
+			//Allinea tutte le sequenze del db
 			Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
 			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
