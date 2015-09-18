@@ -5,8 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.hash.Hashing;
+
+import dao.UserDao;
 import manager.ConfGeneralManager;
-import models.Office;
 import models.User;
 import models.enumerate.Parameter;
 import play.Logger;
@@ -15,19 +19,10 @@ import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.hash.Hashing;
-
-import dao.PermissionDao;
-import dao.UserDao;
-
 public class Security extends Secure.Security {
 
 	@Inject
 	private static UserDao userDao;
-	@Inject
-	private static PermissionDao permissionDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
 
@@ -85,10 +80,9 @@ public class Security extends Secure.Security {
 	public final static String VIEW_REPERIBILITY = "viewReperibility";
 	public final static String MANAGE_REPERIBILITY = "manageReperibility";
 	
-//	FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
-	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+	//FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
 
-	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
+	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 
 	public final static String CACHE_DURATION = "30mn";
 
@@ -159,20 +153,6 @@ public class Security extends Secure.Security {
 		return getUser(connected());
 	}
 
-	/**
-	 * @param office
-	 * @param permission
-	 * @return
-	 */
-	public static boolean hasPermissionOnOffice(Office office, String permission) {
-		
-		return permissionDao
-				.getOfficePermissions(getUser().get(), office).contains(
-						permissionDao.getPermissionByDescription(permission));
-
-	}
-
-	
 	static Object invoke(String m, Object... args) throws Throwable {
 
 		try {

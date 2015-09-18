@@ -19,6 +19,7 @@ import models.CompetenceCode;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.Role;
 import models.TotalOvertime;
 import models.User;
 
@@ -43,6 +44,8 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -72,6 +75,10 @@ public class Competences extends Controller{
 	private static CompetenceDao competenceDao;
 	@Inject
 	private static CompetenceCodeDao competenceCodeDao;
+	@Inject
+	private static RoleDao roleDao;
+	@Inject
+	private static UsersRolesOfficesDao userRoleOfficeDao;
 
 	public static void competences(int year, int month) {
 
@@ -137,8 +144,18 @@ public class Competences extends Controller{
 			page = 0;
 		}
 		
-		boolean editCompetence = Security.hasPermissionOnOffice(office, Security.EDIT_COMPETENCE);
+		Role role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		
+		//Per permettere la modifica delle competenze nel template. 
+		// TODO: usare qualche tag.
+		boolean editCompetence = false;
+		if( userRoleOfficeDao.getUsersRolesOffices(
+				Security.getUser().get(), role, office).isPresent() ) {
+			editCompetence = true;
+		}
 		renderArgs.put("editCompetence", editCompetence);
+		
+		
 
 		////////////////////////////////////////////////////////////////////////
 		// La lista dei codici competenceCode da visualizzare nella select
