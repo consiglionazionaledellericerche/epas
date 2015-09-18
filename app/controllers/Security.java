@@ -10,6 +10,7 @@ import models.Office;
 import models.User;
 import models.enumerate.Parameter;
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
@@ -108,8 +109,6 @@ public class Security extends Secure.Security {
 			Logger.info("user %s successfully logged in from ip %s", user.username,
 					Http.Request.current().remoteAddress);
 			
-//			Logger.info("headers request %s", Http.Request.current().headers);
-		
 			return true;
 		}
 
@@ -184,6 +183,9 @@ public class Security extends Secure.Security {
 	}
 	
 	public static boolean checkForWebstamping(){
+		if("true".equals(Play.configuration.getProperty(Clocks.SKIP_IP_CHECK))){
+			return true;
+		}
 		String remoteAddress = Http.Request.current().remoteAddress;
 		return !confGeneralManager.containsValue(
 				Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();

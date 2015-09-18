@@ -187,38 +187,23 @@
  <table class="table-form" align="center">
 	<tr>
 	<td>
-		#{form @Clocks.insertStamping()}
-			<input type="hidden" name="personId" value="${user.person.id}">
-			<input type="hidden" name="type" value="true"/> 
-			<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Entrata" />
-
-		#{/form}
-
-	</td>
-
-	
-
+	<a href="@{Clocks.entranceClock(dayRecap.person.id,dayRecap.date.getYear(),dayRecap.date.getMonthOfYear(),dayRecap.date.getDayOfMonth())}" data-modal=".my-modal">
+		<button type="button" class="btn btn-primary btn-lg">Timbratura di ingresso</button>
+	</a>
+	</td>	
 	<td>
 		#{form @Clocks.show()}
-			<input type="submit" class="btn btn-large btn-primary btn-danger" name ="submit" value="Annulla" />
+			<input type="submit" class="btn btn-lg btn-primary btn-danger" name ="submit" value="Annulla" />
 
 		#{/form}
 	</td>
-	
 	<td>
-		#{form @Clocks.insertStamping()}
-			<input type="hidden" name="personId" value="${user.person.id}">
-			<input type="hidden" name="type" value="false"/> 
-			<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Uscita" />
-
-		#{/form}
+	<a href="@{Clocks.exitClock(dayRecap.person.id,dayRecap.date.getYear(),dayRecap.date.getMonthOfYear(),dayRecap.date.getDayOfMonth())}" data-modal=".my-modal">
+		<button type="button" class="btn btn-primary btn-lg">Timbratura di uscita</button>
+	</a>
 	</td>
-	
-	
 	</tr>
 </table>
  
- 
- 
- 
 </div>
+#{include '_myModal.html' /}

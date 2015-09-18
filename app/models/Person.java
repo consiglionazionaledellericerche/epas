@@ -25,7 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import models.base.BaseModel;
+import models.base.MutableModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -53,7 +53,7 @@ import com.google.common.collect.Sets;
 @Audited
 @Table(name = "persons", uniqueConstraints={@UniqueConstraint(columnNames={"badgenumber", "office_id"})})
 
-public class Person extends BaseModel implements Comparable<Person>{
+public class Person extends MutableModel implements Comparable<Person>{
 
 	private static final long serialVersionUID = -2293369685203872207L;
 
@@ -248,7 +248,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@Override
 	public String toString() {
-		return String.format("Person[%d] - %s %s", id, name, surname);
+		return getFullname();
 	}
 
 	@Override

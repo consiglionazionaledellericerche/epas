@@ -27,7 +27,7 @@
  	<div class="panel-body">
  	
  		#{f.input 'absenceType.code',required:'true',value:absenceType?.code,popover:'true' /}
- 		#{f.input 'absenceType.certificateCode', value:absenceType.certificateCode,popover:'true' /}
+ 		#{f.input 'absenceType.certificateCode',popover:'true' /}
  		#{f.input 'absenceType.description',popover:'true' /}
  		#{f.booleanRadio 'absenceType.internalUse',popover:'true' /}
  		#{f.date 'absenceType.validFrom',view:'year',popover:'true' /}

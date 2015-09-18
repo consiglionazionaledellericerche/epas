@@ -20,12 +20,14 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
+import models.Stamping.WayType;
 import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -200,6 +202,24 @@ public class Stampings extends Controller {
 
 		render(stamping, hour, minute, date);				
 	}
+	
+	public static void editEmployee(@Required Long stampingId) {
+
+		Stamping stamping = stampingDao.getStampingById(stampingId);
+
+		if (stamping == null) {
+			notFound();
+		}
+
+		rules.checkIfPermitted(stamping.personDay.person);
+
+		LocalDate date = stamping.date.toLocalDate();
+
+		Integer hour = stamping.date.getHourOfDay();
+		Integer minute = stamping.date.getMinuteOfHour();
+
+		render(stamping, hour, minute, date);				
+	}
 
 	public static void update(Stamping stamping, Long stampingId, Integer stampingMinute, 
 			Integer stampingHour, StampType stampType, String note, String elimina) {
@@ -248,6 +268,34 @@ public class Stampings extends Controller {
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.surname, stamp.personDay.person.name);
 
 		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+
+	}
+	
+	
+	public static void updateEmployee(Stamping stamping, Long stampingId, 
+			Integer stampingHour, Integer stampingMinute, StampType stampType, String note) {
+
+		Stamping stamp = stampingDao.getStampingById(stampingId);
+		if (stamp == null) {
+			notFound();
+		}
+
+		rules.checkIfPermitted(stamp.personDay.person);
+
+		final PersonDay pd = stamp.personDay;
+
+		if(stamping.stampType != null){
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
+		}
+		else{
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
+		}
+
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+
+		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.surname, stamp.personDay.person.name);
+
+		Stampings.stampings(pd.date.getYear(), pd.date.getMonthOfYear());
 
 	}
 
@@ -367,25 +415,7 @@ public class Stampings extends Controller {
 
 
 	}
-	
-	
-	public static void entranceClock(Long personId, Integer year, Integer month, Integer day){
-		Person person = personDao.getPersonById(personId);
-		LocalDate date = new LocalDate(year,month,day);
-
-		PersonDay personDay = new PersonDay(person, date);
-
-		render(person, personDay);
-	}
-	
-	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
-		Person person = personDao.getPersonById(personId);
-		LocalDate date = new LocalDate(year,month,day);
-
-		PersonDay personDay = new PersonDay(person, date);
-
-		render(person, personDay);
-	}
-
+		
+		
 }
 
