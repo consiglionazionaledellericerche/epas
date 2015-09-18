@@ -13,7 +13,6 @@ SELECT SETVAL('public.seq_conf_year', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL 
 SELECT SETVAL('public.seq_contracts', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.contracts;
 SELECT SETVAL('public.seq_contracts_working_time_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.contracts_working_time_types;
 SELECT SETVAL('public.seq_office', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.office;
-SELECT SETVAL('public.seq_permissions', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.permissions;
 SELECT SETVAL('public.seq_person_children', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_children;
 SELECT SETVAL('public.seq_person_days', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_days;
 SELECT SETVAL('public.seq_person_days_in_trouble', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_days_in_trouble;
