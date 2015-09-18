@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Lists;
 
+import injection.StaticInject;
 import manager.OfficeManager;
 import models.Office;
 import models.Person;
@@ -17,10 +18,11 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.test.Fixtures;
 
-public class FixUserPermission{
+@StaticInject
+public class FixUserPermission {
 
 	@Inject
-	private static OfficeManager officeManager;
+	static OfficeManager officeManager;
 
 	public static void doJob(){
 
