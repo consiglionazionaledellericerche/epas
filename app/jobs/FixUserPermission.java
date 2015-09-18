@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Lists;
 
-import lombok.extern.slf4j.Slf4j;
+import injection.StaticInject;
 import manager.OfficeManager;
 import models.Office;
 import models.Person;
@@ -18,13 +18,13 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.test.Fixtures;
 
-@Slf4j
+@StaticInject
 public class FixUserPermission {
 
 	@Inject
 	private static OfficeManager officeManager;
 	
-	public void doJob(){
+	public static void doJob(){
 
 		final class Permesso{
 
@@ -87,7 +87,6 @@ public class FixUserPermission {
 
 		//		Sistema i permessi per gli user admin e developer
 		List<Office> offices = Office.findAll();
-		log.info("Office manager = {}", officeManager);
 		
 		for(Office o : offices){
 			officeManager.setSystemUserPermission(o);
