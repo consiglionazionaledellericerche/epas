@@ -5,8 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.hash.Hashing;
+
+import dao.UserDao;
 import manager.ConfGeneralManager;
-import models.Office;
 import models.User;
 import models.enumerate.Parameter;
 import play.Logger;
@@ -14,12 +18,6 @@ import play.Play;
 import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.hash.Hashing;
-
-import dao.UserDao;
 
 public class Security extends Secure.Security {
 
@@ -79,7 +77,11 @@ public class Security extends Secure.Security {
 	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
 	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
 
+	public final static String VIEW_REPERIBILITY = "viewReperibility";
+	public final static String MANAGE_REPERIBILITY = "manageReperibility";
+	
 	//FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
+
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 
 	public final static String CACHE_DURATION = "30mn";

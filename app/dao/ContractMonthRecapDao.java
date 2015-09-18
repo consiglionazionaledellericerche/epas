@@ -6,8 +6,10 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import models.ContractMonthRecap;
+
 import models.Office;
 import models.query.QContract;
+
 import models.query.QContractMonthRecap;
 import models.query.QPerson;
 
