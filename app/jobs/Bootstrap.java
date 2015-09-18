@@ -5,6 +5,8 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.inject.Inject;
+
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -42,6 +44,9 @@ public class Bootstrap extends Job<Void> {
 	
 	private final static String JOBS_CONF = "jobs.active";
 
+	@Inject
+	static FixUserPermission fixUserPermission;
+	
 	public static class DatasetImport implements Work {
 
 		private DatabaseOperation operation;
@@ -128,7 +133,7 @@ public class Bootstrap extends Job<Void> {
 		
 		Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 		
-		FixUserPermission.doJob();
+		fixUserPermission.doJob();
 
 	}
 	
