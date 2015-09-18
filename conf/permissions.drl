@@ -48,6 +48,8 @@ when
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	"Stampings.dailyPresenceForPersonInCharge",
+     	"Stampings.editEmployee",
+     	"Stampings.updateEmployee",
      	
      	/* Assenze mensili */
      	"Absences.absences",
@@ -652,9 +654,9 @@ when
         "Administrators.saveNewAdministrator",
         "Administrators.deleteAdministrator",
         "Administrators.deleteSelfAsAdministrator",
-        "Administrators.insertAccountSystem",
-        "Administrators.saveAccountSystem",
-        "Administrators.deleteAccountSystem",
+        "Administrators.insertSystemUro",
+        "Administrators.saveSystemUro",
+        "Administrators.deleteSystemUro",
 
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",

@@ -262,10 +262,13 @@ public class StampingManager {
 	 * @param service
 	 */
 	public void persistStampingForUpdate(Stamping stamping, String note, 
-			int stampingHour, int stampingMinute, StampType stampType){
+			Integer stampingHour, Integer stampingMinute, StampType stampType){
 		
-		stamping.date = stamping.date.withHourOfDay(stampingHour);
-		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
+		if(stampingMinute != null && stampingHour != null){
+			stamping.date = stamping.date.withHourOfDay(stampingHour);
+			stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
+		}
+		
 		if(stampType.getLabel() != null){
 			stamping.stampType = stampType;
 			stamping.note = stampType.description;

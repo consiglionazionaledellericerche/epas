@@ -1,7 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +9,7 @@ import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
+import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Contract;
@@ -18,7 +17,6 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
-import models.Stamping.WayType;
 import models.User;
 import models.enumerate.Parameter;
 
@@ -26,27 +24,30 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+import security.SecurityRules;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.hash.Hashing;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.UserDao;
 
 @With( RequestInit.class )
+//@With( {RequestInit.class, Resecure.class} )
 public class Clocks extends Controller{
 
+	@Inject
+	private static OfficeDao officeDao;
 	@Inject
 	private static OfficeManager officeManager;
 	@Inject
 	private static PersonDao personDao;
-	@Inject
-	private static UserDao userDao;
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
@@ -57,20 +58,35 @@ public class Clocks extends Controller{
 	private static PersonStampingDayRecapFactory stampingDayRecapFactory;
 	@Inject
 	private static ConsistencyManager consistencyManager;
-
-
+	@Inject
+	private static StampingManager stampingManager;
+	@Inject
+	private static SecurityRules rules;
+	
+	public final static String SKIP_IP_CHECK = "skip.ip.check";
+	
 	public static void show(){
 
 		LocalDate data = new LocalDate();
-
-		String remoteAddress = Http.Request.current().remoteAddress;
-
-		Set<Office> offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+		Set<Office> offices;
+		
+		if("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			offices = FluentIterable.from(officeDao.getAllOffices()).filter(new Predicate<Office>() {
+				@Override
+				public boolean apply(Office input) {
+//					filtro per avere solo le sedi
+					return input.office != null && input.office.office != null;
+				}
+			}).toSet();
+		}
+		else{
+			String remoteAddress = Http.Request.current().remoteAddress;
+			offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+		}
 
 		if(offices.isEmpty()){
 			flash.error("Le timbrature web non sono permesse da questo terminale! "
 					+ "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
-
 			try {
 				Secure.login();
 			} catch (Throwable e) {
@@ -83,36 +99,34 @@ public class Clocks extends Controller{
 		render(data, personList);
 	}
 
+	
+	public static void clockLogin(Person person, String password) {
+		
+		User user = person.user;
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
-	public static void clockLogin(Long userId, String password) {
-		LocalDate today = new LocalDate();
-		if(userId == null || userId == 0){
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
 
-			flash.error("Utente non selezionato");
-			Clocks.show();
-		}
-
-		User user = userDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
-
-		if(user == null){
-
-			flash.error("Password non corretta");
-			Clocks.show();
-		}
-
-		String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
-
-		if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
-
-			flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
-					"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
-			try {
-				Secure.login();
-			} catch (Throwable e) {
-				e.printStackTrace();
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
 			}
 		}
-
+		
+		LocalDate today = new LocalDate();
+		
+		if(user!= null && Security.authenticate(user.username,password)) {
+			// Mark user as connected
+			session.put("username", user.username);
+		}
+		else{
+			flash.error("Autenticazione fallita!");
+			Clocks.show();
+		}
+		
 		PersonDay personDay = null;			
 		Optional<PersonDay> pd = personDayDao.getPersonDay(user.person, today);
 
@@ -133,80 +147,14 @@ public class Clocks extends Controller{
 		render(user, dayRecap, numberOfInOut);
 	}
 
-
-
-	/**
-	 * 
-	 * @param personId. Con questo metodo si permette l'inserimento della timbratura per la persona contrassegnata da id personId.
-	 */
-	public static void insertStamping(Long personId){
-		Person person = personDao.getPersonById(personId);
-		if(person == null){
-			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-		}
-		
-		LocalDateTime ldt = LocalDateTime.now();
-		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, ldt.toLocalDate());
-
-		if(!pd.isPresent()){
-			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
-			personDay = new PersonDay(person, ldt.toLocalDate());
-			personDay.create();
-		}
-		else{
-			personDay = pd.get();
-		}		
-		//Se la stamping esiste già mostro il riepilogo
-		int minNew = time.getMinuteOfHour();
-		int hourNew = time.getHourOfDay();
-		for(Stamping s : personDay.stampings){
-			int hour = s.date.getHourOfDay();
-			int min = s.date.getMinuteOfHour();
-			int minMinusOne = s.date.plusMinutes(1).getMinuteOfHour();
-			if( hour==hourNew && (minNew==min || minNew==minMinusOne) )
-			{
-
-				flash.error("Timbratura ore %s gia' inserita, prossima timbratura accettata a partire da %s",
-						DateUtility.fromLocalDateTimeHourTime(s.date),
-						DateUtility.fromLocalDateTimeHourTime(s.date.plusMinutes(2)));
-
-				Clocks.showRecap(personId);
-			}
-		}
-
-
-		//Altrimenti la inserisco
-		Stamping stamp = new Stamping();
-		stamp.date = time;
-		if(params.get("type").equals("true")){
-			stamp.way = WayType.in;
-		}
-		else
-			stamp.way = WayType.out;
-		stamp.personDay = personDay;
-		stamp.markedByAdmin = false;
-		stamp.save();
-		personDay.stampings.add(stamp);
-		personDay.save();
-
-		final PersonDay day = personDay;
-
-		consistencyManager.updatePersonSituation(person.id, day.date);
-
-		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
-
-		Clocks.showRecap(personId);
-	}
-
+	
 	public static void showRecap(Long personId)
 	{
 		Person person = personDao.getPersonById(personId);
 
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-
+		rules.checkIfPermitted(person);
 		LocalDate today = new LocalDate();
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = personDayDao.getPersonDay(person, today);
@@ -229,4 +177,76 @@ public class Clocks extends Controller{
 
 	}
 
+	
+	public static void entranceClock(Long personId, Integer year, Integer month, Integer day){
+		
+		Person person = personDao.getPersonById(personId);
+		
+		LocalDate date = new LocalDate(year,month,day);
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, date); 
+				
+		if(!pd.isPresent()){
+			personDay = new PersonDay(person, date);
+			personDay.save();
+		}
+		else
+			personDay = pd.get();
+		render(person, personDay);
+	}
+	
+	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
+		Person person = personDao.getPersonById(personId);
+
+		LocalDate date = new LocalDate(year,month,day);
+
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = personDayDao.getPersonDay(person, date); 
+				
+		if(!pd.isPresent()){
+			personDay = new PersonDay(person, date);
+			personDay.save();
+		}
+		else
+			personDay = pd.get();
+
+		render(person, personDay);
+	}
+	
+	public static void insertEntranceStampingClock(Long personDayId, Stamping stamping, String note){
+		
+		User user = Security.getUser().orNull();
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
+
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
+			}
+		}
+		
+		PersonDay pd = personDayDao.getPersonDayById(personDayId);
+		LocalDateTime time = LocalDateTime.now();
+		rules.checkIfPermitted(pd.person);
+		stampingManager.addStamping(pd, time, note, stamping.stampType, true, false);
+				
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		Clocks.showRecap(pd.person.id);
+	}
+	
+	
+	public static void insertExitStampingClock(Long personDayId, Stamping stamping, String note){
+		
+		PersonDay pd = personDayDao.getPersonDayById(personDayId);
+		LocalDateTime time = LocalDateTime.now();
+		rules.checkIfPermitted(pd.person);
+		stampingManager.addStamping(pd, time, note, stamping.stampType, false, false);
+				
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		Clocks.showRecap(pd.person.id);
+	}
 }

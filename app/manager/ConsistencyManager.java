@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import play.db.jpa.JPA;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -65,7 +66,8 @@ public class ConsistencyManager {
 			PersonDayDao personDayDao, ConfYearManager confYearManager, 
 			StampTypeManager stampTypeManager,
 			AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, 
-			VacationsRecapFactory vacationsFactory) {
+			VacationsRecapFactory vacationsFactory,
+			ConfGeneralManager confGeneralManager) {
 
 		this.officeDao = officeDao;
 		this.personManager = personManager;
@@ -80,6 +82,7 @@ public class ConsistencyManager {
 		this.absenceDao = absenceDao;
 		this.absenceTypeDao = absenceTypeDao;
 		this.vacationsFactory = vacationsFactory;
+		this.confGeneralManager = confGeneralManager;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
@@ -97,6 +100,7 @@ public class ConsistencyManager {
 	private final AbsenceDao absenceDao;
 	private final AbsenceTypeDao absenceTypeDao;
 	private final VacationsRecapFactory vacationsFactory;
+	private final ConfGeneralManager confGeneralManager;
 
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
@@ -127,8 +131,8 @@ public class ConsistencyManager {
 				for(Person p : personList) {
 					
 					updatePersonSituation(p.id, fromDate);
-//					attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
-//					possono esserci effetti collaterali....vedi il blocco try sotto
+					//attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
+					//possono esserci effetti collaterali....vedi il blocco try sotto
 					JPA.em().flush();
 					JPA.em().clear();
 				}
@@ -143,8 +147,8 @@ public class ConsistencyManager {
 							false, fromDate, LocalDate.now().minusDays(1), true).list();
 					
 					try {
-//						A questo punto del codice le Persone della personList sono detached a 
-//						causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla, altrimenti schianta
+						//A questo punto del codice le Persone della personList sono detached a 
+						//causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla, altrimenti schianta
 						personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
 					}
 					catch(EmailException e){
@@ -162,9 +166,7 @@ public class ConsistencyManager {
 	 * @param person
 	 * @param from
 	 */
-	public void updatePersonSituation(Long personId, LocalDate from){
-		
-		LocalDate date = from;
+	public void updatePersonSituation(Long personId, LocalDate from) {
 		
 		final Person person = personDao.fetchPersonForComputation(personId, 
 				Optional.fromNullable(from), 
@@ -179,14 +181,16 @@ public class ConsistencyManager {
 		
 		IWrapperPerson wPerson = wrapperFactory.create(person);
 
-		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, from, 
-				Optional.<LocalDate>absent());
-
+		//Gli intervalli di ricalcolo dei person day.
 		LocalDate lastPersonDayToCompute = LocalDate.now();
-		if(personDays.size() > 0) {
-			lastPersonDayToCompute = personDays.get(personDays.size()-1).date;
-		}
-
+		
+		LocalDate date = personFirstDateForEpasComputation(person,
+				Optional.fromNullable(from));
+		log.info("Il primo personDay utile è del {}", date);
+		
+		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
+				Optional.fromNullable(lastPersonDayToCompute));
+		
 		//Costruire la tabella hash
 		HashMap<LocalDate, PersonDay> personDaysMap = Maps.newHashMap();
 		for(PersonDay personDay : personDays) {
@@ -236,6 +240,40 @@ public class ConsistencyManager {
 
 		log.info("Update riepiloghi conclusa.");
 	}
+	
+	/**
+	 * Il primo giorno di ricalcolo ePAS per la persona. <br>
+	 * La data più recente fra: 
+	 * 1) from <br>
+	 * 2) inizio utilizzo software per l'office della persona <br> 
+	 * 3) creazione della persona. 
+	 *
+	 * @param person
+	 * @param from
+	 * @return
+	 */
+	private LocalDate personFirstDateForEpasComputation(
+			Person person, Optional<LocalDate> from) {
+		
+		Optional<LocalDate> officeLimit = confGeneralManager
+				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office);
+		
+		Preconditions.checkState(officeLimit.isPresent());
+		
+		//Calcolo a partire da
+		LocalDate lowerBoundDate = new LocalDate(person.createdAt);
+
+		if (officeLimit.get().isAfter(lowerBoundDate)) {
+			lowerBoundDate = officeLimit.get();
+		}
+		
+		if (from.isPresent() && from.get().isAfter(lowerBoundDate)) {
+			lowerBoundDate = from.get();
+		}
+		
+		return lowerBoundDate;
+	}
+	
 
 	/**
 	 * (1) Controlla che il personDay sia ben formato 
