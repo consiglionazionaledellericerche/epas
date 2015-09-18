@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.Lists;
+
 import manager.OfficeManager;
 import models.Office;
 import models.Permission;
@@ -14,17 +16,14 @@ import models.UsersRolesOffices;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
-import play.jobs.Job;
 import play.test.Fixtures;
-
-import com.google.common.collect.Lists;
 
 public class FixUserPermission{
 
 	@Inject
 	private static OfficeManager officeManager;
 
-	public void doJob(){
+	public static void doJob(){
 
 		final class Permesso{
 
