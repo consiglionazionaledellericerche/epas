@@ -39,7 +39,7 @@ public class SecureManager {
 		Preconditions.checkNotNull(user);
 		Preconditions.checkState(user.isPersistent());
 		
-		List<Role> roles = roleDao.getRolesByNames(rolesNames);
+		final List<Role> roles = roleDao.getRolesByNames(rolesNames);
 
 		return	FluentIterable.from(user.usersRolesOffices)
 				.filter(new Predicate<UsersRolesOffices>() {
