@@ -32,8 +32,6 @@ public class QRole extends EntityPathBase<Role> {
 
     public final StringPath name = createString("name");
 
-    public final SetPath<models.Permission, QPermission> permissions = this.<models.Permission, QPermission>createSet("permissions", models.Permission.class, QPermission.class, PathInits.DIRECT2);
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

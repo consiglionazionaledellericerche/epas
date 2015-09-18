@@ -7,11 +7,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import models.Office;
-import models.Permission;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.query.QPermission;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
 
@@ -76,19 +74,17 @@ public class UsersRolesOfficesDao extends DaoBase {
 	}
 
 	/**
-	 * La lista di tutti i permessi per l'user. 
+	 * La lista di tutti i ruoli per l'user. 
 	 * Utilizzato per visualizzare gli elementi della navbar.
 	 * @param user
 	 * @return
 	 */
-	public List<Permission> getUserPermission(User user) {
+	public List<Role> getUserRole(User user) {
 
 		final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
 		final QRole qr = QRole.role;
-		final QPermission qp = QPermission.permission;
-
-		final JPQLQuery query = getQueryFactory().from(qp)
-				.leftJoin(qp.roles, qr).fetch()
+		
+		final JPQLQuery query = getQueryFactory().from(qr)
 				.leftJoin(qr.usersRolesOffices, quro).fetch()
 				.distinct();
 
@@ -97,8 +93,7 @@ public class UsersRolesOfficesDao extends DaoBase {
 
 		query.where(condition);
 
-		List<Permission> pList = ModelQuery.simpleResults(query, qp).list();
-
-		return pList;
+		return ModelQuery.simpleResults(query, qr).list();
 	}
+	
 }
