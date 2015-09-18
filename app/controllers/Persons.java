@@ -19,6 +19,7 @@ import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.OfficeManager;
 import manager.PersonManager;
+import manager.SecureManager;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -54,7 +55,6 @@ import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
-import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
@@ -71,7 +71,7 @@ public class Persons extends Controller {
 	//	private final static String USERNAME_SESSION_KEY = "username";
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static OfficeManager officeManager;
 	@Inject
@@ -103,9 +103,10 @@ public class Persons extends Controller {
 
 	public static void list(String name){
 		
-		List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, null,
-				null, false).list();
+		List<Person> simplePersonList = personDao.listFetched(
+				Optional.fromNullable(name),
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, null, null, false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)

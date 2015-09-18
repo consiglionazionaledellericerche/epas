@@ -1,6 +1,3 @@
-/**
- * 
- */
 package it.cnr.iit.epas;
 
 import injection.StaticInject;
@@ -12,6 +9,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
+import manager.SecureManager;
 import models.BadgeReader;
 import models.Office;
 import models.Person;
@@ -32,10 +30,8 @@ import com.google.gson.JsonParser;
 
 import controllers.Security;
 import dao.BadgeReaderDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.StampingDao;
-
 
 /**
  * @author cristian
@@ -53,7 +49,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	@Inject
 	private static PersonDao personDao;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], 
@@ -66,8 +62,11 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
 			
-			Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+			Set<Office> offices = secureManager
+					.officesBadgeReaderAllowed(Security.getUser().get());
+			
 			Person person = null;
+			
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 			
 			Logger.debug("jsonObject = %s", jsonObject);

@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
+import manager.SecureManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -53,7 +54,6 @@ import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
@@ -81,7 +81,7 @@ public class UploadSituation extends Controller{
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static AbsenceDao absenceDao;
 	@Inject
@@ -260,8 +260,11 @@ public class UploadSituation extends Controller{
 			}
 		}
 
-		final List<Person> activePersons = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+		final List<Person> activePersons = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesWriteAllowed(Security.getUser().get()),
+				false, new LocalDate(year,month,1), 
+				new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -522,9 +525,11 @@ public class UploadSituation extends Controller{
 
 	private static Set<Dipendente> getActiveDipendenti(int year, int month){
 		
-		final List<Person> activePersons = 
-				personDao.list(Optional.<String>absent(),
-						officeDao.getOfficeAllowed(Security.getUser().get()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+		final List<Person> activePersons = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesWriteAllowed(Security.getUser().get()),
+				false, new LocalDate(year,month,1),
+				new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

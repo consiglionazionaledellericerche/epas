@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.SecureManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -18,7 +19,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -29,7 +29,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 public class MonthRecaps extends Controller{
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -50,8 +50,9 @@ public class MonthRecaps extends Controller{
 		//Secondo me si deve mettere le persone non attive in un elenco da poter
 		//Analizzare singolarmente.
 
-		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()),
+		List<Person> simplePersonList = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesReadAllowed(Security.getUser().get()),
 				false, LocalDate.now(), LocalDate.now(), false).list();
 
 		List<IWrapperPerson> personList = FluentIterable

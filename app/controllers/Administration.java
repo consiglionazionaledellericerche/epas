@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
+import manager.SecureManager;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
@@ -27,7 +28,6 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -35,7 +35,7 @@ import dao.wrapper.IWrapperFactory;
 public class Administration extends Controller {
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -174,7 +174,8 @@ public class Administration extends Controller {
 	public static void utilities(){
 
 		final List<Person> personList = personDao.list(
-				Optional.<String>absent(),officeDao.getOfficeAllowed(Security.getUser().get()), 
+				Optional.<String>absent(), 
+				secureManager.officesWriteAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 

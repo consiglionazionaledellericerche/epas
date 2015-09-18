@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.OfficeManager;
+import manager.SecureManager;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -38,6 +39,8 @@ public class Administrators extends Controller {
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
+	private static SecureManager secureManager;
+	@Inject
 	private static RoleDao roleDao;
 	@Inject
 	private static PersonDao personDao;
@@ -67,8 +70,8 @@ public class Administrators extends Controller {
 
 		String name = null;
 		List<Person> personList = personDao.list(Optional.fromNullable(name), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
-				LocalDate.now(), LocalDate.now(), true).list();
+				secureManager.officesSystemAdminAllowed(Security.getUser().get()),
+				false, LocalDate.now(), LocalDate.now(), true).list();
 
 		render(office, role, personList);
 	}

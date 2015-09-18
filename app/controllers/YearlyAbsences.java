@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.SecureManager;
 import manager.YearlyAbsencesManager;
 import manager.recaps.YearlyAbsencesRecap;
 import models.Absence;
@@ -28,7 +29,6 @@ import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -39,7 +39,7 @@ public class YearlyAbsences extends Controller{
 	@Inject
 	private static YearlyAbsencesManager yearlyAbsencesManager;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static AbsenceDao absenceDao;
 	@Inject
@@ -82,8 +82,9 @@ public class YearlyAbsences extends Controller{
 		AbsenceType abt = new AbsenceType();
 		abt.code = "Totale";		
 
-		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), 
+		SimpleResults<Person> simpleResults = personDao.list(
+				Optional.fromNullable(name), 
+				secureManager.officesReadAllowed(Security.getUser().get()), 
 				false, new LocalDate(year, month,1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
 

@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.MealTicketManager;
+import manager.SecureManager;
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
 import manager.recaps.mealTicket.MealTicketRecapFactory;
@@ -34,7 +35,6 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -60,7 +60,7 @@ public class MealTickets  extends Controller {
 	@Inject
 	private static ConsistencyManager consistencyManager;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
 
@@ -68,12 +68,14 @@ public class MealTickets  extends Controller {
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
 		List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
-				.getPersonMealticket(new YearMonth(year,month), Optional.<Integer>absent(),
-						Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()));
+				.getPersonMealticket(
+						new YearMonth(year,month),
+						Optional.<Integer>absent(), Optional.<String>absent(),
+						secureManager.officesReadAllowed(Security.getUser().get()));
 		
 		// Lista degli istituti allowed che non hanno data inizio mealTicket
 		List<Office> officesNoMealTicketConf = Lists.newArrayList();
-		for(Office office : officeDao.getOfficeAllowed(Security.getUser().get())) {
+		for(Office office : secureManager.officesReadAllowed(Security.getUser().get())) {
 			Optional<LocalDate> officeStartDate = confGeneralManager
 					.getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office); 
 			if(!officeStartDate.isPresent()) {

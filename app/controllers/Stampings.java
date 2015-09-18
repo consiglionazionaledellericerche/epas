@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConsistencyManager;
+import manager.SecureManager;
 import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingRecap;
@@ -17,17 +18,14 @@ import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Person;
 import models.PersonDay;
-import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
-import models.Stamping.WayType;
 import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -38,7 +36,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
@@ -63,7 +60,7 @@ public class Stampings extends Controller {
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
 	@Inject
@@ -311,9 +308,10 @@ public class Stampings extends Controller {
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
-		List<Person> activePersons = 
-				personDao.list(Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()), 
-						false, monthBegin, monthEnd, true).list();
+		List<Person> activePersons = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesReadAllowed(Security.getUser().get()), 
+				false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 
@@ -335,8 +333,10 @@ public class Stampings extends Controller {
 
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
-		List<Person> activePersonsInDay = personDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, dayPresence, dayPresence, true).list();
+		List<Person> activePersonsInDay = personDao.list(
+				Optional.<String>absent(), 
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, dayPresence, dayPresence, true).list();
 
 		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 
@@ -351,9 +351,10 @@ public class Stampings extends Controller {
 
 	public static void holidaySituation(int year) {
 
-		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
-				new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
+		List<Person> simplePersonList = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
