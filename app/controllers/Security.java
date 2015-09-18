@@ -2,12 +2,15 @@ package controllers;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import models.Office;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.enumerate.Parameter;
 import play.Logger;
 import play.cache.Cache;
@@ -15,10 +18,15 @@ import play.mvc.Http;
 import play.utils.Java;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.hash.Hashing;
 
 import dao.UserDao;
+import dao.wrapper.IWrapperFactory;
 
 public class Security extends Secure.Security {
 
@@ -26,6 +34,7 @@ public class Security extends Secure.Security {
 	private static UserDao userDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
+
 
 	/* Client rest */
 
@@ -136,7 +145,7 @@ public class Security extends Secure.Security {
 		//Cache.set(username, user, CACHE_DURATION);
 		return Optional.of(user);
 	}
-
+	
 	static String connected() {
 		if (request == null){
 			return null;

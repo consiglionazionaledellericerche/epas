@@ -427,10 +427,11 @@ public final class PersonDao extends DaoBase{
 	}
 
 	/**
-	 *
+	 * FIXME: usare la nuova struttura dati sui badge.
 	 * @param badgeNumber
 	 * @return la persona associata al badgeNumber passato come parametro
 	 */
+	@Deprecated
 	public Person getPersonByBadgeNumber(String badgeNumber, Optional<Set<Office>> offices){
 
 		final BooleanBuilder condition = new BooleanBuilder();
@@ -446,7 +447,8 @@ public final class PersonDao extends DaoBase{
 		return query.singleResult(person);
 	}
 
-	
+	//FIXME: usare la nuova struttura dati sui badge.
+	@Deprecated
 	public Person getPersonByBadgeNumber(String badgeNumber){
 		return getPersonByBadgeNumber(badgeNumber, Optional.<Set<Office>>absent());
 	}
