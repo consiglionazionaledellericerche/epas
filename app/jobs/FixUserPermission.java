@@ -22,8 +22,8 @@ import play.test.Fixtures;
 public class FixUserPermission {
 
 	@Inject
-	static OfficeManager officeManager;
-
+	private static OfficeManager officeManager;
+	
 	public static void doJob(){
 
 		final class Permesso{
@@ -87,6 +87,7 @@ public class FixUserPermission {
 
 		//		Sistema i permessi per gli user admin e developer
 		List<Office> offices = Office.findAll();
+		
 		for(Office o : offices){
 			officeManager.setSystemUserPermission(o);
 		}
@@ -114,6 +115,15 @@ public class FixUserPermission {
 			if(!exist) {
 				officeManager.setUro(p.user, p.office, employeeRole);
 			}
+		}
+		
+		//Ruoli e permessi per la gestione di turni e reperibilità 
+		//(principalmente via REST)
+		Role shiftManagerRole = Role.find("byName",  Role.SHIFT_MANAGER).first();
+		Role reperibilityManagerRole = Role.find("byName",  Role.REPERIBILITY_MANAGER).first();
+		
+		if (shiftManagerRole == null && reperibilityManagerRole == null) {
+			Fixtures.loadModels("../db/import/shiftReperibilityRolesAndPermissions.yml");
 		}
 	}
 
