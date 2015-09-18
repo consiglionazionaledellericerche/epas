@@ -4,9 +4,6 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
-import it.cnr.iit.epas.CompetenceUtility;
-import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +16,24 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.joda.time.LocalDate;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
+import controllers.Resecure.BasicAuth;
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.PersonDao;
+import dao.PersonReperibilityDayDao;
+import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import manager.AbsenceManager;
 import manager.ReperibilityManager;
 import models.Absence;
@@ -35,11 +50,6 @@ import models.exports.ReperibilityPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
-
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.joda.time.LocalDate;
-import org.slf4j.LoggerFactory;
-
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
@@ -47,19 +57,6 @@ import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-import controllers.Resecure.BasicAuth;
-import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.PersonDao;
-import dao.PersonReperibilityDayDao;
 
 
 /**
@@ -84,8 +81,6 @@ public class Reperibility extends Controller {
 	private static AbsenceDao absenceDao;
 	@Inject
 	private static AbsenceManager absenceManager;
-	@Inject
-	private static CompetenceUtility competenceUtility;
 	@Inject
 	private static CompetenceCodeDao competenceCodeDao;
 	@Inject
@@ -304,13 +299,13 @@ public class Reperibility extends Controller {
 		//Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile 
 		Set<Integer> repDaysOfMonthToRemove = new HashSet<Integer>();	
 
-
 		repDaysOfMonthToRemove = reperibilityManager.savePersonReperibilityDaysFromReperibilityPeriods(reperibilityType, year, month, body.periods);
 
 		Logger.debug("Giorni di reperibilità da rimuovere = %s", repDaysOfMonthToRemove);
 
 		int deletedRep = reperibilityManager.deleteReperibilityDaysFromMonth(reperibilityType, year, month, repDaysOfMonthToRemove);
-
+		log.info("Deleted {} days, reperibilityType={}, {}/{}, repDaysOfMonthToRemove={}", 
+			deletedRep, reperibilityType, year, month, repDaysOfMonthToRemove);
 	}
 
 
@@ -542,9 +537,11 @@ public class Reperibility extends Controller {
 			bos.close();
 			is.close();
 		} catch (IOException e) {
-			Logger.error("Io exception building ical", e);
+			log.error("Io exception building ical", e);
+			error("Io exception building ical");
 		} catch (ValidationException e) {
-			Logger.error("Validation exception generating ical", e);
+			log.error("Validation exception generating ical", e);
+			error("Validation exception generating ical");
 		}
 	}
 
