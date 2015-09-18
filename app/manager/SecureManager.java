@@ -96,7 +96,7 @@ public class SecureManager {
 	}
 	
 	/**
-	 * Le sedi per le quali l'utente dispone del ruolo di scrittura.
+	 * Le sedi per le quali l'utente dispone del ruolo di badge reader.
 	 * @param user
 	 * @return
 	 */
