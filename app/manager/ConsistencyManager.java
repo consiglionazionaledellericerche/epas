@@ -56,7 +56,8 @@ import dao.wrapper.IWrapperPersonDay;
 public class ConsistencyManager {
 
 	@Inject
-	public ConsistencyManager(OfficeDao officeDao, 
+	public ConsistencyManager(SecureManager secureManager, 
+			OfficeDao officeDao,
 			PersonManager personManager,
 			PersonDao personDao, 
 			PersonDayManager personDayManager,
@@ -69,7 +70,8 @@ public class ConsistencyManager {
 			VacationsRecapFactory vacationsFactory,
 			ConfGeneralManager confGeneralManager) {
 
-		//this.officeDao = officeDao;
+		this.secureManager = secureManager;
+		this.officeDao = officeDao;
 		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;
@@ -87,6 +89,7 @@ public class ConsistencyManager {
 
 	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
 
+	private final SecureManager secureManager;
 	private final OfficeDao officeDao;
 	private final PersonManager personManager;
 	private final PersonDao personDao;
@@ -114,7 +117,7 @@ public class ConsistencyManager {
 			LocalDate fromDate, boolean sendMail){
 
 		Set<Office> offices = user.isPresent() ? 
-				officeDao.getOfficeAllowed(user.get()) 
+				secureManager.officesWriteAllowed(user.get()) 
 				: Sets.newHashSet(officeDao.getAllOffices());
 
 				//  (0) Costruisco la lista di persone su cui voglio operare

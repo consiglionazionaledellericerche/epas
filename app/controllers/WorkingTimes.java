@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ContractManager;
+import manager.SecureManager;
 import manager.WorkingTimeTypeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -47,6 +48,8 @@ public class WorkingTimes extends Controller{
 	@Inject 
 	private static OfficeDao officeDao;
 	@Inject
+	private static SecureManager secureManager;
+	@Inject
 	private static SecurityRules rules;
 	@Inject
 	private static WorkingTimeTypeDao workingTimeTypeDao;
@@ -68,7 +71,7 @@ public class WorkingTimes extends Controller{
 			office = officeDao.getOfficeById(officeId);
 		}
 		
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 		if(office == null) {
 			//TODO se offices è vuota capire come comportarsi
 			office = offices.iterator().next();

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import manager.SecureManager;
 import manager.VacationManager;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
@@ -39,6 +40,8 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
+	private static SecureManager secureManager;
+	@Inject
 	private static PersonDao personDao;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
@@ -53,8 +56,7 @@ public class VacationsAdmin extends Controller{
 
 	public static void list(Integer year, String name, Integer page, Long officeId){
 
-		
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione "

@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
+import manager.SecureManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
@@ -51,7 +52,6 @@ import com.google.common.collect.Range;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 
@@ -72,7 +72,7 @@ public class Absences extends Controller{
 	@Inject
 	private static AbsenceManager absenceManager;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
@@ -482,7 +482,7 @@ public class Absences extends Controller{
 		List<Absence> altreAssenze = Lists.newArrayList();
 
 		List<Person> personList = personDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, from, to, true).list();
+				secureManager.officesReadAllowed(Security.getUser().get()), false, from, to, true).list();
 
 		if(from.isAfter(to)){
 			flash.error("Intervallo non valido (%s - %s)", from,to);

@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
+import manager.SecureManager;
 import manager.recaps.PersonCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
@@ -63,6 +64,8 @@ public class Competences extends Controller{
 	private static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
 	@Inject
 	private static OfficeDao officeDao;
+	@Inject
+	private static SecureManager secureManager;
 	@Inject
 	private static CompetenceManager competenceManager;
 	@Inject
@@ -117,7 +120,7 @@ public class Competences extends Controller{
 	public static void showCompetences(Integer year, Integer month, Long officeId, 
 			String name, String codice, Integer page){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			
@@ -285,7 +288,7 @@ public class Competences extends Controller{
 
 	public static void totalOvertimeHours(int year, Long officeId){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());		
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());		
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
@@ -328,7 +331,7 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(Long officeId, String name){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -418,7 +421,7 @@ public class Competences extends Controller{
 	public static void approvedCompetenceInYear(int year, boolean onlyDefined, Long officeId) {
 
 		
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 		Preconditions.checkState(!offices.isEmpty());
 		
 		Office office;

@@ -11,11 +11,11 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.SecureManager;
 import models.AbsenceType;
 import models.Office;
 import models.Qualification;
 import models.Role;
-import models.StampModificationType;
 import models.StampType;
 import models.User;
 import models.enumerate.Parameter;
@@ -49,6 +49,8 @@ public class RequestInit extends Controller {
 
 	@Inject
 	private static OfficeDao officeDao;
+	@Inject
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -246,10 +248,6 @@ public class RequestInit extends Controller {
 			return qualificationDao.findAll();
 		}
 
-		public Set<Office> getAllOfficesAllowed() {
-			return officeDao.getOfficeAllowed(Security.getUser().get());
-		}
-		
 		public List<AbsenceType> getCertificateAbsenceTypes() {
 			return absenceTypeDao.certificateTypes();
 		}
@@ -362,7 +360,7 @@ public class RequestInit extends Controller {
 
 		if(user.get().person != null) {
 			
-			Set<Office> officeList = officeDao.getOfficeAllowed(user.get());
+			Set<Office> officeList = secureManager.officesReadAllowed(user.get());
 			if(!officeList.isEmpty()) {
 				//List<Person> persons = personDao
 				//		.getActivePersonInMonth(officeList, new YearMonth(year, month)); 	
@@ -400,8 +398,10 @@ public class RequestInit extends Controller {
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
 
-		Optional<LocalDate> dateBeginProgram = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
-				officeDao.getOfficeAllowed(user.get()).iterator().next());
+		Optional<LocalDate> dateBeginProgram = confGeneralManager
+				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
+						secureManager.officesReadAllowed(
+								user.get()).iterator().next());
 
 		Integer yearBeginProgram = dateBeginProgram.get().getYear();
 		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
