@@ -69,7 +69,7 @@ public class ConsistencyManager {
 			VacationsRecapFactory vacationsFactory,
 			ConfGeneralManager confGeneralManager) {
 
-		this.officeDao = officeDao;
+		//this.officeDao = officeDao;
 		this.personManager = personManager;
 		this.personDao = personDao;
 		this.personDayManager = personDayManager;

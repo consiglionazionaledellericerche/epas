@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import models.Office;
+import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QOffice;
@@ -196,30 +197,6 @@ public class OfficeDao extends DaoBase {
 		return office.office;
 	}
 
-	/**
-	 * 
-	 * @param user
-	 * @return la lista degli uffici permessi per l'utente user passato come parametro
-	 */
-
-	public Set<Office> getOfficeAllowed(User user) {
-
-		Preconditions.checkNotNull(user);
-		Preconditions.checkState(user.isPersistent());
-
-		return	FluentIterable.from(user.usersRolesOffices).transform(
-				new Function<UsersRolesOffices,Office>() {
-					@Override
-					public Office apply(UsersRolesOffices uro) {
-						return uro.office;
-					}}).filter(
-							new Predicate<Office>() {
-								@Override
-								public boolean apply(Office o) {
-									return wrapperFactory.create(o).isSeat();
-								}}).toSet();
-
-	}
 
 	public boolean checkForDuplicate(Office o){
 
