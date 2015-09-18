@@ -6,6 +6,7 @@
 ALTER TABLE stampings DROP CONSTRAINT fk785e8f148868391d;
 DROP TABLE badge_readers;
 DROP TABLE badge_readers_history;
+DROP SEQUENCE IF EXISTS seq_badge_readers;
 
 CREATE SEQUENCE seq_badge_readers
   START WITH 1
@@ -63,7 +64,7 @@ CREATE TABLE badges (
     PRIMARY KEY (id),
     FOREIGN KEY (person_id) REFERENCES persons (id),
     FOREIGN KEY (badge_reader_id) REFERENCES badge_readers (id),
-    CONSTRAINT badge_unique UNIQUE(code, badge_reader_id, person_id)
+    CONSTRAINT badge_unique UNIQUE(code, badge_reader_id)
 );
 
 CREATE TABLE badges_history (
@@ -107,6 +108,14 @@ DROP TABLE badges_history;
 
 DROP TABLE badge_readers;
 DROP TABLE badge_readers_history;
+DROP SEQUENCE IF EXISTS seq_badge_readers;
+DROP SEQUENCE IF EXISTS seq_badges;
+
+CREATE SEQUENCE seq_badge_readers
+  START WITH 1
+  INCREMENT BY 1
+  NO MINVALUE
+  NO MAXVALUE;
 
 CREATE TABLE badge_readers (
     
@@ -140,8 +149,7 @@ CREATE TABLE badge_readers_history (
     PRIMARY KEY (id, _revision)
 );
 
-ALTER TABLE stampings ADD CONSTRAINT fk785e8f148868391d FOREIGN KEY ((badge_reader_id) REFERENCES badge_readers(id);
-
+ALTER TABLE stampings ADD CONSTRAINT fk785e8f148868391d FOREIGN KEY (badge_reader_id) REFERENCES badge_readers(id);
 
 	
 
