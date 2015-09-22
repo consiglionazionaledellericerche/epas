@@ -564,7 +564,6 @@ public final class PersonDao extends DaoBase{
 				.leftJoin(person.user, QUser.user)
 				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
 				.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
-				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
 				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
 				.leftJoin(person.qualification).fetch()
 				.orderBy(person.surname.asc(), person.name.asc())
