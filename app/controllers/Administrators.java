@@ -110,7 +110,7 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 
-		User user = userDao.getUserById(userId, Optional.<String>absent());
+		User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
 
 		if(user == null) {
 
@@ -144,7 +144,7 @@ public class Administrators extends Controller {
 
 	}
 
-	public static void insertAccountSystem(Long officeId) {
+	public static void insertSystemUro(Long officeId) {
 
 		Office office = officeDao.getOfficeById(officeId);
 		if(office==null) {
@@ -155,41 +155,60 @@ public class Administrators extends Controller {
 
 		List<Role> systemRoles = roleDao.getSystemRolesOffices();
 
-		// TODO: riportare nella select una lista di user già presente in ePAS.
-		// esempio l'accaunto del lettore d'area dovrebbe essere dispobile per essere
-		// assegnato anche agli altri istituti d'area e non essere duplicato.
-
 		IWrapperOffice wrapperOffice = wrapperFactory.create(office);
 
 		render(wrapperOffice, systemRoles);
 
 	}
 
-	public static void saveAccountSystem(Office office, User user, Role role) {
+	/**
+	 * Crea un nuovo userRoleOffice di sistema. 
+	 * Se l'user è già presente utilizza quello. Altrimenti ne viene creato uno
+	 * nuovo.
+	 * 
+	 * @param office
+	 * @param username
+	 * @param password
+	 * @param role
+	 */
+	public static void saveSystemUro(Office office, String username, 
+			String password, Role role) {
 
 		Preconditions.checkNotNull(office);
 		Preconditions.checkState(office.isPersistent());
 		Preconditions.checkNotNull(role);
 		Preconditions.checkState(role.isPersistent());
 
-		Preconditions.checkState(user.username != null && user.username != "");
-		Preconditions.checkState(user.password != null && user.password != "");
+		Preconditions.checkState(username != null && username != "");
+		Preconditions.checkState(password != null && password != "");
 
-		// TODO: effettuare ulteriori controlli sul nome dell'utente
-
-		user.password = Codec.hexMD5(user.password);
-
-		user.save();
-		
+		User user =	userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
+		if (user != null) {
+			if (!user.password.equals(Codec.hexMD5(password))) {
+				flash.error(username + " è già presente come account di sistema."
+						+ " Inserire la password corretta o creare un nuovo account si sistema.");
+				Offices.showOffices();
+			}
+			if ( !user.isSystemUser() ) {
+				flash.error("Impossibile utilizzare un user non di sistema.");
+				Offices.showOffices();
+			}
+		} else {
+			user = new User();
+			user.username = username;
+			user.password = Codec.hexMD5(password);
+			user.save();
+		}
+				
 		officeManager.setUro(user, office, role);
 
-		flash.success("Account creato con successo.");
+		flash.success("Associazione account di sistema inserita con successo.");
 
 		Offices.showOffices();
 
 	}
 
-	public static void deleteAccountSystem(Long systemUroId) {
+	public static void deleteSystemUro(Long systemUroId) {
 
 		UsersRolesOffices systemUro = usersRolesOfficesDao.getById(systemUroId);
 
@@ -205,25 +224,20 @@ public class Administrators extends Controller {
 
 		Preconditions.checkState(isSystemRole);
 
-		// TODO: se l'user di sistema è presente in altri uro non andrebbe eliminato.
-		User user = systemUro.user;
-
 		systemUro.delete();
-
-		user.delete();
-
-		flash.success("Account rimosso con successo.");
+		
+		flash.success("Associazione account di sistema rimossa con successo.");
 
 		Offices.showOffices();
 
 	}
-
+	
 	/**
 	 * Switch in un'altro user
 	 */ 
 	public static void switchUserTo(long id) {
 		
-		final User user = userDao.getUserById(id, Optional.<String>absent());
+		final User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
 		notFoundIfNull(user);
 
 			// salva il precedente

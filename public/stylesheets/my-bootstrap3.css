@@ -239,12 +239,9 @@ td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bo
 
 /* tabellone timbrature */
 table#tabellonetimbrature{
-	font-size: small;
-	border-right: 0;
-    border-top: 0;
-    border-bottom: 0;
+		font-size: small;
+		border: 0;
     border-spacing: 0px 1px; 
-    
     border-collapse: separate; /* per i bordi tondiiiiiiiii */
 }
 

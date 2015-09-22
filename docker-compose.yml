@@ -6,6 +6,8 @@ postgres:
 
   volumes:
   - /opt/epas/db/data:/var/lib/postgresql/data
+  - /etc/localtime:/etc/localtime:ro
+  - /opt/epas/backups/:/tmp:ro
 
   # restart: always
 
@@ -18,6 +20,7 @@ nginx:
 #  - "443:443"
 
   volumes:
+  - /etc/localtime:/etc/localtime:ro
   - /var/run/docker.sock:/tmp/docker.sock
 #  - /opt/epas/certs/:/etc/nginx/certs
 
