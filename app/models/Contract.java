@@ -114,9 +114,9 @@ public class Contract extends BaseModel {
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
 
-	public void setSourceDateResidual(String date){
-		this.sourceDateResidual = new LocalDate(date);
-	}
+//	public void setSourceDateResidual(String date){
+//		this.sourceDateResidual = new LocalDate(date);
+//	}
 
 	/**
 	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e
