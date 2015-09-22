@@ -43,10 +43,10 @@ public class User extends BaseModel{
 	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
 	public Person person;
 	
-	//@ManyToOne
-	//@JoinColumn(name="office_id")
-	//public Office restOwner;
-
+	@NotAudited
+	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
+	public BadgeReader badgeReader;
+	
 	@NotAudited
 	@OneToMany(mappedBy="user", cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
@@ -64,6 +64,18 @@ public class User extends BaseModel{
 				.add("id", this.id)
 				.add("user", this.username)
 				.toString();
+	}
+	
+	/**
+	 * Se l'user è un account di sistema. 
+	 * TODO: definire la logica più dettagliata se necessario.
+	 * @return
+	 */
+	public boolean isSystemUser() {
+		if (person == null) {
+			return true;
+		}
+		return false;
 	}
 
 }

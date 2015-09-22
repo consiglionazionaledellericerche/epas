@@ -35,38 +35,23 @@
 
 <div class="container center">
 
-<h3>Orologio per firma nel mese di &{'views.tags.display.date.month.' + data.getMonthOfYear()} dell'anno ${data.getYear()}</h3>
+<h2>Timbratura web per la data ${data.format()}</h3>
 <br>
 <div class="col-sm-offset-2 col-sm-8">
+
 #{form action:@Clocks.clockLogin(), class:'form-horizontal', role:'form'}
 
-  <div class="form-group">
-    <label class="col-sm-2 control-label" for="forUsername">Nome</label>
-    <div class="col-sm-10">
-    <select name="userId" class="form-control" id="forUsername">
-	  <option value="0"></option>
-	  #{list items:personList, as:'person'}
-	   <option value="${person.user.id}">${person.surname + ' ' + person.name}</option>
-	  #{/list}
-      </select>
-    </div>
-  </div>
-  
-  <div class="form-group">
-    <label class="col-sm-2 control-label" for="forPassword">Password</label>
-    <div class="col-sm-10">
-      <input name="password" type="password" class="form-control" id="forPassword" placeholder="Password">
-    </div>
-  </div>
-  <div >
-    <input type="submit" class="btn btn-large btn-primary" name ="submit" value="Login" align="center"/>
-  </div>
-#{/form}
-</div>
+  	#{f.selectModel 'person',items:personList,label:'Nome' /}
+  	#{f.input 'password',type:'password',label:'Password' /}
 
+<div >
+    <input type="submit" class="btn btn-large btn-primary" name ="submit" value="Login" align="center"/>
+</div>
+#{/form}
 </div>
 
 <div class="container center">
   <div id="clockBase"></div>
+</div>
 </div>
 

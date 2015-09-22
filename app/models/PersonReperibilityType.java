@@ -6,6 +6,8 @@ package models;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -32,6 +34,11 @@ public class PersonReperibilityType extends BaseModel {
 	
 	@OneToMany(mappedBy = "personReperibilityType")
 	public List<PersonReperibility> personReperibilities;
+	
+	/* responsabile della reperibilità */
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "supervisor")
+	public Person supervisor;
 	
 	@Override
 	public String toString() {

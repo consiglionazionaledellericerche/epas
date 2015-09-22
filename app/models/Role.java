@@ -18,8 +18,6 @@ import org.hibernate.envers.NotAudited;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-
-
 @Entity
 @Audited
 @Table(name="roles")
@@ -34,11 +32,10 @@ public class Role extends BaseModel{
 	public final static String EMPLOYEE = "employee";
 	public final static String BADGE_READER = "badgeReader";
 	public final static String REST_CLIENT = "restClient";
-
+	public final static String SHIFT_MANAGER = "shiftManager";
+	public final static String REPERIBILITY_MANAGER = "reperibilityManager";
+	
 	public String name;
-
-	@ManyToMany(fetch = FetchType.EAGER)
-	public Set<Permission> permissions = Sets.newHashSet();
 
 	@NotAudited
 	@OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
