@@ -24,9 +24,11 @@ public class QPerson extends EntityPathBase<Person> {
 
     public static final QPerson person = new QPerson("person");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QMutableModel _super = new models.base.query.QMutableModel(this);
 
     public final StringPath badgeNumber = createString("badgeNumber");
+
+    public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
@@ -37,6 +39,9 @@ public class QPerson extends EntityPathBase<Person> {
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
 
     public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
+
+    //inherited
+    public final DateTimePath<org.joda.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final StringPath email = createString("email");
 
@@ -96,6 +101,9 @@ public class QPerson extends EntityPathBase<Person> {
     public final StringPath surname = createString("surname");
 
     public final StringPath telephone = createString("telephone");
+
+    //inherited
+    public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public final QUser user;
 
