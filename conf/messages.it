@@ -99,8 +99,9 @@ qualification=Livello
 
 office=Sede
 
-
 modifierType= Calcolo Orario
+
+stamping.note= Note
 
 ########################
 # Messaggi di validazione
