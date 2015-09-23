@@ -252,6 +252,12 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean hasMonthRecapForVacationsRecap(int yearToRecap) {
 		
+		// se non ho il contratto inizializzato il riepilogo ferie non esiste
+		//o non è veritiero.
+		if (initializationMissing()) {
+			return false;
+		}
+		
 		// se il contratto inizia nell'anno non ho bisogno del recap.
 		if (value.beginContract.getYear() == yearToRecap) {
 			return true;
@@ -262,6 +268,7 @@ public class WrapperContract implements IWrapperContract {
 				&& value.sourceDateResidual.getYear() == yearToRecap) {
 			return true;
 		}
+		
 		// Altrimenti ho bisogno del riepilogo finale dell'anno precedente.
 		Optional<ContractMonthRecap> yearMonthToCheck = 
 				getContractMonthRecap( new YearMonth(yearToRecap-1, 12) );
