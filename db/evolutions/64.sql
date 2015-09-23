@@ -1,5 +1,4 @@
 # ---!Ups
-
 # -- Evoluzione per la modellazione dei badgeReaders.
 
 # -- Eliminare vecchia implementazione badge_readers
@@ -150,7 +149,3 @@ CREATE TABLE badge_readers_history (
 );
 
 ALTER TABLE stampings ADD CONSTRAINT fk785e8f148868391d FOREIGN KEY (badge_reader_id) REFERENCES badge_readers(id);
-
-	
-
- 
