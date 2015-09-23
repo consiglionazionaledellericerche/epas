@@ -3,30 +3,12 @@
  */
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import manager.ConfGeneralManager;
-import models.AbsenceType;
-import models.Office;
-import models.Qualification;
-import models.Role;
-import models.StampModificationType;
-import models.StampType;
-import models.User;
-import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.i18n.Messages;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.Http;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -40,6 +22,20 @@ import dao.PersonDao.PersonLite;
 import dao.QualificationDao;
 import dao.StampingDao;
 import dao.UsersRolesOfficesDao;
+import it.cnr.iit.epas.DateUtility;
+import manager.ConfGeneralManager;
+import models.AbsenceType;
+import models.Office;
+import models.Qualification;
+import models.Role;
+import models.StampType;
+import models.User;
+import models.enumerate.Parameter;
+import play.Logger;
+import play.i18n.Messages;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Http;
 
 /**
  * @author cristian

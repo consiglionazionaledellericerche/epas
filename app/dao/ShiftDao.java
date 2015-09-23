@@ -1,7 +1,5 @@
 package dao;
 
-import it.cnr.iit.epas.CompetenceUtility;
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,20 +29,11 @@ import com.mysema.query.jpa.JPQLQueryFactory;
  */
 public class ShiftDao extends DaoBase{
 
-	private final CompetenceCodeDao competenceCodeDao;
-	private final CompetenceUtility competenceUtility;
-
 	@Inject
-	ShiftDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp
-			,CompetenceCodeDao competenceCodeDao
-			,CompetenceUtility competenceUtility) {
+	ShiftDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
 		super(queryFactory, emp);
-		this.competenceCodeDao = competenceCodeDao;
-		this.competenceUtility = competenceUtility;
-	}
 
-	
-	private final static String codShift = "T1";
+	}
 
 	/**
 	 * 

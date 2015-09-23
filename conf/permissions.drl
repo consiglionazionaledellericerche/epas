@@ -3,6 +3,7 @@ package security;
 import security.PermissionCheck;
 import models.Office;
 import models.UsersRolesOffices;
+import models.ShiftType;
 import models.Person;
 import models.Role;
 
@@ -29,7 +30,8 @@ end
 
 /*  
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
- *  (Ricalca il più possibile la struttura del dropdown menu della persona.)
+ *  (Ricalca il più possibile la struttura del dropdown menu della persona 
+ *  oltre i calendari iCal e le azioni REST)
  */
 rule IsEmployee
 when
@@ -82,6 +84,14 @@ when
      	
      	/* Stampa cartellino */
      	"PrintTags.showPersonTag",
+     	
+     	/* 
+     	 * Visualizzazione eventuali turni via iCal
+     	 * dentro il metodo controllare il permesso di
+     	 * visualizzare il calendario specifico richiesto
+     	 */
+     	"Shift.iCal",
+     	"Reperibility.iCal", 
      	
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
@@ -685,6 +695,64 @@ when
         "rest.Absences.checkAbsence"
         
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni via REST e iCal per Turni e Reperibilità
+ ******************************************************************************/
+
+/**
+rule viewShiftICal
+when
+  $uro: UsersRolesOffices()
+  $st: ShiftType(shiftCategories.supervisor == $uro.user || )
+  $c: PermissionCheck(action in (
+        "Shift.iCal"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+*/
+
+rule manageShift
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "shiftManager") from $uro.role
+ $c: PermissionCheck(action in (
+        
+        "Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence",  
+        "Shift.iCal"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule manageReperibility
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "reperibilityManager") from $uro.role
+ $c: PermissionCheck(action in (
+        
+        "Reperibility.personList",
+        "Reperibility.find",
+        "Reperibility.who",
+        "Reperibility.absence",
+        "Reperibility.whoIsAbsent",
+        "Reperibility.update",
+        "Reperibility.changePeriods",  
+        "Reperibility.exportYearAsPDF", 
+        "Reperibility.exportMonthAsPDF",
+        "Reperibility.iCal"
+        
+       ), target == null, granted == false)
 then
  $c.grant();
 end
