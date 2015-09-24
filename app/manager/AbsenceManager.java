@@ -459,8 +459,18 @@ public class AbsenceManager {
 				pd = new PersonDay(person, date);
 				pd.save();
 			}
+			LocalDate startAbsence = null;
+			if(file.isPresent()){
+				startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
+				if(startAbsence == null){
+					ar.setWarning(AbsencesResponse.PERSONDAY_PRECEDENTE_NON_PRESENTE);
+					return ar;
+				}
+			}
+			else{
+				startAbsence = date;
+			}
 			
-			LocalDate startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
 			
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
@@ -948,6 +958,11 @@ public class AbsenceManager {
 		LocalDate startAbsence = date;
 		while(begin == false){
 			PersonDay pdPrevious = personDayDao.getPreviousPersonDay(person, startAbsence);
+			if(pdPrevious == null){
+				log.warn("Non è presente il personday precedente a quello in cui "
+						+ "si vuole inserire il primo giorno di assenza per il periodo. Verificare");
+				return null;
+			}
 			List<Absence> abList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
 					pdPrevious.date, Optional.<LocalDate>absent(), false);
 			if(abList.size() == 0){
