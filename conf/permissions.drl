@@ -95,19 +95,17 @@ when
      	
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
-     	"rest.PersonDays.getMonthSituation"
+     	"rest.PersonDays.getMonthSituation",
+     	
+     	/* Timbrature web */
+     	"Clocks.daySituation",
+     	"Clocks.webStamping",
+     	"Clocks.insertWebStamping"   	
+     	
        ), target == null, granted == false)
 then
  $c.grant();
 end
-
-/*  
- *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
- *  Metodi rest per se stessi
- *
-rule IsEmployeeRest
-*/
-
 
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario 
  * dell'azione se stesso
@@ -750,7 +748,7 @@ when
         "Reperibility.whoIsAbsent",
         "Reperibility.update",
         "Reperibility.changePeriods",  
-        "Reperibility.exportYearAsPDF",    
+        "Reperibility.exportYearAsPDF", 
         "Reperibility.exportMonthAsPDF",
         "Reperibility.iCal"
         
