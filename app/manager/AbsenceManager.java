@@ -131,13 +131,11 @@ public class AbsenceManager {
 	private AbsenceType whichVacationCode(Person person, LocalDate date, List<Absence> otherAbsences) {
 
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-		
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return null;
+		}
 
 		if(vr.get().vacationDaysLastYearNotYetUsed > 0)
 			return absenceTypeDao.getAbsenceTypeByCode(
@@ -166,13 +164,11 @@ public class AbsenceManager {
 	private boolean canTake32(Person person, LocalDate date,  List<Absence> otherAbsences) {
 
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return false;
+		}
 		
 		return (vr.get().vacationDaysCurrentYearNotYetUsed > 0);		
 
@@ -188,13 +184,12 @@ public class AbsenceManager {
 	private boolean canTake31(Person person, LocalDate date,  List<Absence> otherAbsences) {
  
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-		
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return false;
+		}
+
 
 		return (vr.get().vacationDaysLastYearNotYetUsed > 0);
 	}
@@ -209,13 +204,11 @@ public class AbsenceManager {
 	private boolean canTake94(Person person, LocalDate date,  List<Absence> otherAbsences) {
 
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-		
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return false;
+		}
 
 		return (vr.get().persmissionNotYetUsed > 0);
 
@@ -237,7 +230,7 @@ public class AbsenceManager {
 		//N.B Non posso inserire un riposo compensativo oltre il mese successivo.
 		LocalDate dateToCheck = date;
 		//Caso generale
-		if( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1){
+		if ( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1){
 			dateToCheck = LocalDate.now();
 		}
 		//Caso particolare dicembre - gennaio
@@ -687,19 +680,20 @@ public class AbsenceManager {
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
 		if (date.getYear() == LocalDate.now().getYear()) {
-
 			Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(), 
 					contractDao.getContract(LocalDate.now(),person), 
 					LocalDate.now(), false, otherAbsences);
-			
-			Preconditions.checkState(vr.isPresent());
-			
-			int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
-			if (remaining37 > 0) {
-				return insert(person, date,absenceType, file, Optional.<Integer>absent(), persist);
+			if (vr.isPresent()) {
+				int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
+				if (remaining37 > 0) {
+					//37 disponibile
+					return insert(person, date,absenceType, file, 
+							Optional.<Integer>absent(), persist);
+				}
 			}
 		}
-
+		
+		//37 non disponibile
 		return new AbsencesResponse(date,absenceType.code,
 				AbsencesResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
 	}

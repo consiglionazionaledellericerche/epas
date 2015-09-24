@@ -34,12 +34,15 @@
 #{/set}
 
 <div class="container">
-<div id="clockBase"></div>
 
+<a href="@{secure.logout()}" class="btn btn-default col-xs-2 pull-right"><i class="fa fa-share text-danger"> Logout</i></a>
 
+<div class="row">
+	<div class="col-xs-12" id="clockBase"></div>
+</div>
 
 <div class="center">
-    <h3>Situazione ${person.name} ${person.surname} giorno ${dayRecap.date.format()}</h3>
+    <h2>Situazione ${user.person.fullname} ${dayRecap.date.format()}</h2>
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -178,28 +181,16 @@
 	        #{/list}
 	    	</td>
 	</tr>
-
-
     </table>
  </div> 
 
- 	
- 
+<a href="@{Clocks.webStamping(dayRecap.personDay.id,"in")}" class="btn btn-lg btn-default col-xs-offset-3" data-modal=".my-modal">
+	<i class="fa fa-sign-in text-success"> Timbratura di ingresso</i>
+</a>
 
- <table class="table-form" align="center">
-	<tr>
-	<td>
-		#{form @Clocks.show()}
-			<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Logout" />
-
-		#{/form}
-	</td>
-	</tr>
-</table>
- 
- 
- 
+<a href="@{Clocks.webStamping(dayRecap.personDay.id,"out")}" class="btn btn-lg btn-default col-xs-offset-1" data-modal=".my-modal">
+	<i class="fa fa-sign-out text-primary"> Timbratura di uscita</i>
+</a>
  
 </div>
-
-
+#{include '_myModal.html' /}

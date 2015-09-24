@@ -1,6 +1,10 @@
+%{
+  way = wayType.description.equals("in") ? "INGRESSO" : "USCITA";
+}%
+
 <div class="modal-header center">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Nuova timbratura di USCITA ${personDay.date.format()} per ${personDay.person.fullname}</h4>
+  <h4 class="modal-title">Nuova timbratura di ${way} in data ${personDay.date.format()} per ${personDay.person.fullname} </h4>
 </div>
 
 <div class="modal-body">
@@ -8,20 +12,21 @@
 <div class="panel panel-danger">
 <div class="panel-heading">Importante</div>
   <div class="panel-body">
-    <p>La timbratura che si va a inserire è di <strong>USCITA</strong>
+    <p>La timbratura che si va a inserire è di <strong>${way}</strong>.<br>
     L'orario della timbratura verrà salvato sulla base del momento in cui sarà premuto il tasto "Inserisci".
     Selezionare la causale qui sotto solo se l'ingresso che si sta facendo ha una causale allegata.
-    Non selezionare la causale se è un'uscita normale.
+    Non selezionare la causale se è una timbratura normale.
     </p>
   </div>  
 </div>
 
-#{form @Clocks.insertExitStampingClock(), class:'form-horizontal'}
+#{form @Clocks.insertWebStamping(), class:'form-horizontal'}
 	
-<input type="hidden" name="personDayId" value="${personDay.id}"/>
+<input type="hidden" name="stamping.personDay.id" value="${personDay.id}"/>
+<input type="hidden" name="stamping.way" value="${wayType}"/>
 
 #{f.selectModel 'stamping.stampType', items:templateUtility.allStampTypes /}
-#{f.input 'note' /}
+#{f.input 'stamping.note' /}
 
  <div class="container-fluid center">
 		<input class="btn btn-primary col-xs-4 col-xs-offset-4" type="submit" value="Timbra"/> 
@@ -29,3 +34,4 @@
 
 #{/form}
 </div>
+

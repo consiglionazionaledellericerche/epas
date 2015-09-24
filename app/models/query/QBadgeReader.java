@@ -20,9 +20,13 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     private static final long serialVersionUID = 642176162L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QBadgeReader badgeReader = new QBadgeReader("badgeReader");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+
+    public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
     public final StringPath code = createString("code");
 
@@ -41,18 +45,27 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.Stamping, QStamping> stampings = this.<models.Stamping, QStamping>createList("stampings", models.Stamping.class, QStamping.class, PathInits.DIRECT2);
+    public final QUser user;
 
     public QBadgeReader(String variable) {
-        super(BadgeReader.class, forVariable(variable));
+        this(BadgeReader.class, forVariable(variable), INITS);
     }
 
     public QBadgeReader(Path<? extends BadgeReader> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
     }
 
     public QBadgeReader(PathMetadata<?> metadata) {
-        super(BadgeReader.class, metadata);
+        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    }
+
+    public QBadgeReader(PathMetadata<?> metadata, PathInits inits) {
+        this(BadgeReader.class, metadata, inits);
+    }
+
+    public QBadgeReader(Class<? extends BadgeReader> type, PathMetadata<?> metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }
 
 }

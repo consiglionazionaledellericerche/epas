@@ -2,6 +2,34 @@
 #{set header:'clock' /}
 #{set title:'ePAS - electronic Personnel Attendance System' /}
 
+#{set 'moreStyles'}
+<style type="text/css">
+.panel{
+	margin-top: 110px;
+}
+#top_divider{
+	margin-top: 5px;
+	margin-bottom: 55px;
+}
+
+.panel-title{
+	text-align: center;
+	font-style: italic;
+	text-transform: capitalize;
+	font-size: 35px;
+	color: #1990d5;
+}
+fieldset > legend{
+	margin-top: 1em;
+	margin-top: 1em;
+}
+#bottom_line{
+	margin-top: 2em;
+}
+</style>
+#{get 'moreStyles' /}
+#{/set}
+
 #{set 'moreScripts'}
 	<script type = "text/javascript" >
 		function preventBack(){window.history.forward();}
@@ -35,23 +63,19 @@
 
 <div class="container center">
 
-<h2>Timbratura web per la data ${data.format()}</h3>
-<br>
-<div class="col-sm-offset-2 col-sm-8">
+<div id="clockBase"></div>
 
+<h1 class="margin-bottom">Timbratura web per il giorno ${data.format()}</h1>
+
+<div class="col-sm-offset-2 col-sm-8">
 #{form action:@Clocks.clockLogin(), class:'form-horizontal', role:'form'}
 
   	#{f.selectModel 'person',items:personList,label:'Nome' /}
   	#{f.input 'password',type:'password',label:'Password' /}
 
-<div >
-    <input type="submit" class="btn btn-large btn-primary" name ="submit" value="Login" align="center"/>
-</div>
+    <input type="submit" class="btn btn-success col-xs-2 col-xs-offset-5" name ="submit" value="Login" align="center"/>
 #{/form}
 </div>
 
-<div class="container center">
-  <div id="clockBase"></div>
-</div>
 </div>
 
