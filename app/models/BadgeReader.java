@@ -17,6 +17,8 @@ import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.envers.Audited;
 
+import play.data.validation.Unique;
+
 import com.google.common.collect.Sets;
 
 
@@ -32,6 +34,7 @@ public class BadgeReader extends BaseModel {
 
 	private static final long serialVersionUID = -3508739971079270193L;
 
+	@Unique
 	@NotNull
 	public String code;
 	
