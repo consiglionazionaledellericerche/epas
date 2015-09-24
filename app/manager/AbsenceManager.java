@@ -1,57 +1,34 @@
 package manager;
 
-import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.CheckMessage;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
-import manager.response.AbsenceInsertReport;
-import manager.response.AbsencesResponse;
-import models.Absence;
-import models.AbsenceType;
-import models.Contract;
-import models.Person;
-import models.PersonChildren;
-import models.PersonDay;
-import models.PersonReperibilityDay;
-import models.PersonShiftDay;
-import models.Qualification;
-import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.Parameter;
-import models.enumerate.QualificationMapping;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.Play;
-import play.db.jpa.Blob;
-import play.libs.Mail;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.ContractDao;
-import dao.PersonChildrenDao;
-import dao.PersonDayDao;
-import dao.PersonReperibilityDayDao;
-import dao.PersonShiftDayDao;
-import dao.WorkingTimeTypeDao;
+import dao.*;
 import dao.wrapper.IWrapperFactory;
+import it.cnr.iit.epas.CheckMessage;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
+import models.*;
+import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
+import models.enumerate.QualificationMapping;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.db.jpa.Blob;
+import play.libs.Mail;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -553,7 +530,6 @@ public class AbsenceManager {
 
 		try {
 			email.addTo(person.email);
-			email.setFrom(Play.configuration.getProperty("application.mail.address"));
 			email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
@@ -567,7 +543,7 @@ public class AbsenceManager {
 					"Servizio ePas");
 
 		} catch (EmailException e) {
-			// TODO GESTIRE L'Eccezzione nella generazione dell'email
+			// TODO GESTIRE L'Eccezione nella generazione dell'email
 			e.printStackTrace();
 		}
 
