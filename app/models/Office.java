@@ -36,8 +36,8 @@ public class Office extends BaseModel{
 	@Column(name = "name")
     public String name;
     
-    @Column(name = "contraction")
-    public String contraction;
+//    @Column(name = "contraction")
+//    public String contraction;
     
     @Column(name = "address")
     public String address = "";
@@ -48,12 +48,12 @@ public class Office extends BaseModel{
     @Column(name="joining_date")
     public LocalDate joiningDate;
     
-    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
-    public List<Office> subOffices = new ArrayList<Office>();
+//    @OneToMany(mappedBy="institute", cascade = {CascadeType.REMOVE})
+//    public List<Office> subOffices = new ArrayList<Office>();
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="office_id")
-    public Office office;
+    @JoinColumn(name="institute_id")
+    public Institute institute;
     
     //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     //public List<User> restUsers = new ArrayList<User>();
