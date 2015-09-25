@@ -471,8 +471,7 @@ public class Wizard extends Controller {
 		//		Istituto
 		Office institute = new Office();
 		institute.name = properties.getProperty("institute");
-		institute.contraction = properties.getProperty("institute_contraction");
-		institute.office = area;
+//		institute.office = area;
 		institute.save();
 
 		//		Sede
@@ -492,7 +491,7 @@ public class Wizard extends Controller {
 				!properties.getProperty("seat_affiliation_date").isEmpty()){
 			seat.joiningDate = LocalDate.parse(properties.getProperty("seat_affiliation_date"));
 		}
-		seat.office = institute;
+//		seat.office = institute;
 		seat.save();
 		
 //		Invalido la cache sul conteggio degli uffici

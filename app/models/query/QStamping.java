@@ -69,7 +69,7 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public QStamping(Class<? extends Stamping> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader")) : null;
+        this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
         this.personDay = inits.isInitialized("personDay") ? new QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
         this.stampModificationType = inits.isInitialized("stampModificationType") ? new QStampModificationType(forProperty("stampModificationType")) : null;
         this.stampType = inits.isInitialized("stampType") ? new QStampType(forProperty("stampType")) : null;

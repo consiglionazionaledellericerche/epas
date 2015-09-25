@@ -45,9 +45,6 @@ public class SecureManager {
 				.filter(new Predicate<UsersRolesOffices>() {
 					@Override
 					public boolean apply(UsersRolesOffices input) {
-						if(!wrapperFactory.create(input.office).isSeat()) {
-							return false;
-						}
 						if(!roles.contains(input.role)) {
 							return false;
 						}

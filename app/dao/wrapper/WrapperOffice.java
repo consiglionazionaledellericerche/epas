@@ -30,25 +30,12 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 public class WrapperOffice implements IWrapperOffice {
 
 	private final Office value;
-	private final OfficeManager officeManager;
-	private final OfficeDao officeDao;
 	private final RoleDao roleDao;
-	private final PersonDao personDao;
-	private final WrapperModelFunctionFactory wrapperFunctionFactory;
-
-	private Boolean isEditable = null;
-
 
 	@Inject
-	WrapperOffice(@Assisted Office office, OfficeManager officeManager,
-			WrapperModelFunctionFactory wrapperFuncionFactory, OfficeDao officeDao,
-			RoleDao roleDao,PersonDao personDao) {
+	WrapperOffice(@Assisted Office office, RoleDao roleDao) {
 		value = office;
-		this.officeManager = officeManager;
-		this.wrapperFunctionFactory = wrapperFuncionFactory;
-		this.officeDao = officeDao;
 		this.roleDao = roleDao;
-		this.personDao = personDao;
 	}
 
 	@Override
@@ -56,151 +43,6 @@ public class WrapperOffice implements IWrapperOffice {
 		return value;
 	}
 
-	/**
-	 * Area livello 0
-	 * @return true se this è una Area, false altrimenti
-	 */
-	public boolean isArea() {
-
-		if(this.value.office != null) 
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * Istituto livello 1
-	 * @return true se this è un Istituto, false altrimenti
-	 */
-	public boolean isInstitute() {
-
-		if(this.isArea())
-			return false;
-
-		if(this.value.office.office != null)
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * Sede livello 2
-	 * @return
-	 */
-	public boolean isSeat() {
-
-		if(this.isArea())
-			return false;
-
-		if(this.isInstitute())
-			return false;
-
-		return true;
-
-	}
-
-	/**
-	 * Verifica la visibilità dell'office rispetto ai ruoli dell'amministratore loggato.
-	 * (Almeno un office del sottoalbero radice compresa deve essere amministrato dall'user
-	 * loggato)
-	 * @return
-	 */
-	@Deprecated
-	public boolean isPrintable() {
-
-		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-
-		return officeManager.isRightPermittedOnOfficeTree(value, roleAdmin) 
-				|| officeManager.isRightPermittedOnOfficeTree(value, roleAdminMini);
-
-	}
-
-	/**
-	 *	Verifica il ruolo di personnel_Admin dell'user loggato. 
-	 *  Gestisce una variabile LAZY.
-	 * @return
-	 */
-	@Deprecated
-	public boolean isEditable() {
-
-		if(isEditable != null)
-			return this.isEditable;
-
-		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		this.isEditable = officeManager.isRightPermittedOnOfficeTree(this.value, roleAdmin);
-
-		return this.isEditable;
-	}
-
-	/**
-	 * Ritorna il numero di dipendenti attivi registrati nella sede e nelle sottosedi
-	 * @return
-	 */
-	public List<Person> activePersonsInOffice() {
-
-		LocalDate date = new LocalDate();
-
-		List<Person> activePerson = personDao.list(Optional.<String>absent(), 
-				Sets.newHashSet(officeDao.getSubOfficeTree(value)), false, date, date, true).list();
-
-		return activePerson;
-	}
-
-	/**
-	 * Se this è una Area ritorna la lista degli istituti definiti per quell'area
-	 * @return la lista degli istituti associati all'area, null nel caso this non 
-	 * sia un'area
-	 */
-	public List<IWrapperOffice> getWrapperInstitutes() {
-
-		if(!this.isArea())
-			return null;
-
-		List<IWrapperOffice> wrapperSubOffice = FluentIterable
-				.from(this.value.subOffices).transform(wrapperFunctionFactory.office()).toList();
-		return wrapperSubOffice;
-	}
-
-
-	/**
-	 * Se this è un Istituto ritorna la lista delle sedi definite per quell'istituto
-	 * @return la lista delle sedi associate all'istituto, null nel caso this non 
-	 * sia un istituto
-	 */
-	public List<IWrapperOffice> getWrapperSeats() {
-
-		if(!this.isInstitute())
-			return null;
-
-		List<IWrapperOffice> wrapperSubOffice = FluentIterable
-				.from(this.value.subOffices).transform(wrapperFunctionFactory.office()).toList();
-		return wrapperSubOffice;
-	}
-
-	/**
-	 * Ritorna i nomi (user.username) dei lettori badge abilitati all'ufficio.
-	 * @return
-	 */
-	public List<String> getActiveBadgeReaders() {
-
-		List<String> bgList = Lists.newArrayList();
-
-		List<Office> officeList = officeDao.getSubOfficeTree(this.value);
-
-		for(Office office : officeList) {
-
-			for(UsersRolesOffices uro : office.usersRolesOffices) {
-
-				if( uro.role.name.equals(Role.BADGE_READER) && !bgList.contains(uro.user.username) ) {
-
-					bgList.add(uro.user.username);
-				}
-			}
-		}
-
-		return bgList;
-	}
 
 	/**
 	 * Gli amministratori dell'office.
@@ -235,37 +77,5 @@ public class WrapperOffice implements IWrapperOffice {
 		}
 		return personList;
 	}
-
-
-	/**
-	 * Le regole circa gli account di sistema.
-	 * Da chiamare al livello di Sede.
-	 * 
-	 * @return
-	 */
-	public List<UsersRolesOffices> getSeatSystemUsersRolesOffices() {
-
-		Preconditions.checkState(this.isSeat());
-
-		List<Role> roleList = roleDao.getSystemRolesOffices();
-
-		List<UsersRolesOffices> uroList = Lists.newArrayList();
-
-		for(UsersRolesOffices uro : this.value.usersRolesOffices) {
-
-			for(Role role : roleList) {
-
-				if( uro.role.name.equals(role.name) ) {
-					uroList.add(uro);
-					break;
-				}
-			}
-
-		}
-
-		return uroList;
-
-	}
-
 
 }

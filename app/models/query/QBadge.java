@@ -1,7 +1,7 @@
 package models.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
-import models.User;
+import models.Badge;
 
 
 import com.mysema.query.types.path.*;
@@ -13,59 +13,51 @@ import com.mysema.query.types.path.PathInits;
 
 
 /**
- * QUser is a Querydsl query type for User
+ * QBadge is a Querydsl query type for Badge
  */
 @Generated("com.mysema.query.codegen.EntitySerializer")
-public class QUser extends EntityPathBase<User> {
+public class QBadge extends EntityPathBase<Badge> {
 
-    private static final long serialVersionUID = 1339629807L;
+    private static final long serialVersionUID = -1439233281L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QUser user = new QUser("user");
+    public static final QBadge badge = new QBadge("badge");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final QBadgeReader badgeReader;
 
+    public final StringPath code = createString("code");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
-    public final DatePath<org.joda.time.LocalDate> expireRecoveryToken = createDate("expireRecoveryToken", org.joda.time.LocalDate.class);
-
     //inherited
     public final NumberPath<Long> id = _super.id;
-
-    public final StringPath password = createString("password");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
 
-    public final StringPath recoveryToken = createString("recoveryToken");
-
-    public final StringPath username = createString("username");
-
-    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
-
-    public QUser(String variable) {
-        this(User.class, forVariable(variable), INITS);
+    public QBadge(String variable) {
+        this(Badge.class, forVariable(variable), INITS);
     }
 
-    public QUser(Path<? extends User> path) {
+    public QBadge(Path<? extends Badge> path) {
         this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
     }
 
-    public QUser(PathMetadata<?> metadata) {
+    public QBadge(PathMetadata<?> metadata) {
         this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
     }
 
-    public QUser(PathMetadata<?> metadata, PathInits inits) {
-        this(User.class, metadata, inits);
+    public QBadge(PathMetadata<?> metadata, PathInits inits) {
+        this(Badge.class, metadata, inits);
     }
 
-    public QUser(Class<? extends User> type, PathMetadata<?> metadata, PathInits inits) {
+    public QBadge(Class<? extends Badge> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;

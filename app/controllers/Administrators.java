@@ -84,15 +84,6 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		//Per adesso faccio inserire solo alle sedi
-		if( !wOffice.isSeat() ) {
-
-			flash.error("Impossibile assegnare amministratori a livello diverso da quello Sede. Operazione annullata.");
-			Offices.showOffices();
-		}
-
 		if(!officeManager.setUro(person.user, office, role)) {
 
 			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");

@@ -22,7 +22,7 @@ public class QOffice extends EntityPathBase<Office> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QOffice office1 = new QOffice("office1");
+    public static final QOffice office = new QOffice("office");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
@@ -34,13 +34,13 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.ConfYear, QConfYear> confYear = this.<models.ConfYear, QConfYear>createList("confYear", models.ConfYear.class, QConfYear.class, PathInits.DIRECT2);
 
-    public final StringPath contraction = createString("contraction");
-
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final QInstitute institute;
 
     public final DatePath<org.joda.time.LocalDate> joiningDate = createDate("joiningDate", org.joda.time.LocalDate.class);
 
@@ -48,14 +48,10 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final StringPath name = createString("name");
 
-    public final QOffice office;
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
-
-    public final ListPath<Office, QOffice> subOffices = this.<Office, QOffice>createList("subOffices", Office.class, QOffice.class, PathInits.DIRECT2);
 
     public final ListPath<models.TotalOvertime, QTotalOvertime> totalOvertimes = this.<models.TotalOvertime, QTotalOvertime>createList("totalOvertimes", models.TotalOvertime.class, QTotalOvertime.class, PathInits.DIRECT2);
 
@@ -81,7 +77,7 @@ public class QOffice extends EntityPathBase<Office> {
 
     public QOffice(Class<? extends Office> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
+        this.institute = inits.isInitialized("institute") ? new QInstitute(forProperty("institute")) : null;
     }
 
 }
