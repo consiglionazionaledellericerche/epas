@@ -65,12 +65,12 @@ public class Offices extends Controller {
 
 		IWrapperOffice wArea = wrapperFactory.create(area);
 
-		if(area==null || !wArea.isArea()) {
+		if(area==null) {
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
 		}
 
-		render("@editInstitute",area);
+		render("@editInstitute", area);
 	}
 
 	public static void saveInstitute(Office area,@Valid Office institute,@Required String contraction) {
@@ -82,13 +82,12 @@ public class Offices extends Controller {
 
 		IWrapperOffice wArea = wrapperFactory.create(area);
 
-		if(!area.isPersistent() || !wArea.isArea()) {
+		if(!area.isPersistent()) {
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
 		}
 
-		institute.contraction = contraction;
-		institute.office = area;
+		//institute.office = area;
 
 		if(officeDao.checkForDuplicate(institute)){
 			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
@@ -99,7 +98,7 @@ public class Offices extends Controller {
 
 		officeManager.setSystemUserPermission(institute);
 
-		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name, institute.contraction);
+		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name);
 		Offices.showOffices();
 	}
 
@@ -132,7 +131,7 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 
-		seat.office = institute;
+//		seat.office = institute;
 
 		final boolean newSeat = !seat.isPersistent();
 
@@ -159,9 +158,9 @@ public class Offices extends Controller {
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		Office institute = seat.office;
+//		Office institute = seat.office;
 
-		render(seat,institute);
+//		render(seat,institute);
 	}
 
 	public static void editInstitute(Long instituteId){
@@ -173,8 +172,8 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 
-		Office area = institute.office;
-
-		render(area,institute);
+//		Office area = institute.office;
+//
+//		render(area,institute);
 	}
 }

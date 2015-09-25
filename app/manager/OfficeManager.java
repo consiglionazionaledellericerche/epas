@@ -34,26 +34,6 @@ public class OfficeManager {
 	private final ConfGeneralManager confGeneralManager;
 
 	/**
-	 * 
-	 * @param permission
-	 * @return true se permission è presente in almeno un office del sottoalbero, radice compresa, 
-	 * false altrimenti
-	 */
-	public boolean isRightPermittedOnOfficeTree(Office office, Role role) {
-
-		if(usersRolesOfficesDao.getUsersRolesOffices(Security.getUser().get(), role, office).isPresent())
-			return true;
-
-		for(Office subOff : office.subOffices) {
-
-			if(isRightPermittedOnOfficeTree(subOff, role))
-				return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
 	 * @param office
 	 */

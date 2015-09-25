@@ -143,12 +143,6 @@ public class WorkingTimes extends Controller{
 
 		IWrapperOffice wOffice = wrapperFactory.create(office);
 
-		if(!wOffice.isSeat()) {
-
-			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
-		}
-
 		rules.checkIfPermitted(office);
 
 		List<WorkingTimeTypeDay> wttd = new LinkedList<WorkingTimeTypeDay>();
@@ -171,12 +165,6 @@ public class WorkingTimes extends Controller{
 			manageWorkingTime(wtt.office.id);
 		}
 		
-
-		if(!wrapperFactory.create(wtt.office).isSeat()) {
-
-			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
-			manageWorkingTime(null);
-		}
 
 		rules.checkIfPermitted(wtt.office);
 

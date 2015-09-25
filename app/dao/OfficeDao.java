@@ -33,13 +33,9 @@ import dao.wrapper.IWrapperOffice;
  */
 public class OfficeDao extends DaoBase {
 
-	private final IWrapperFactory wrapperFactory;
-
 	@Inject
-	OfficeDao(IWrapperFactory wrapperFactory,
-			JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
+	OfficeDao(JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
 		super(queryFactory, emp);
-		this.wrapperFactory = wrapperFactory;
 	}
 
 	/**
@@ -49,7 +45,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Office getOfficeById(Long id){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.id.eq(id));
@@ -62,7 +58,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getAllOffices(){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office);
 
@@ -72,27 +68,12 @@ public class OfficeDao extends DaoBase {
 
 	/**
 	 * 
-	 * @param contraction
-	 * @return  
-	 */
-	public Optional<Office> getOfficeByContraction(String contraction){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.contraction.eq(contraction));
-
-		return Optional.fromNullable(query.singleResult(office));
-	}
-
-	/**
-	 * 
 	 * @param name
 	 * @return  
 	 */
 	public Optional<Office> getOfficeByName(String name){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.name.eq(name));
@@ -107,7 +88,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Optional<Office> getOfficeByCode(Integer code){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
@@ -122,7 +103,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getOfficesByCode(Integer code){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
@@ -135,79 +116,19 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getAreas(){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.office.isNull());
 		return query.list(office);
 	}
 
-	/**
-	 * Ritorna la lista di tutte le sedi gerarchicamente sotto a Office
-	 * @return
-	 */
-	public List<Office> getSubOfficeTree(Office o) {
-
-		List<Office> officeToCompute = new ArrayList<Office>();
-		List<Office> officeComputed = new ArrayList<Office>();
-
-		officeToCompute.add(o);
-		while(officeToCompute.size() != 0) {
-
-			Office office = officeToCompute.get(0);
-			officeToCompute.remove(office);
-
-			for(Office remoteOffice : office.subOffices) {
-
-				officeToCompute.add((Office)remoteOffice);
-			}
-
-			officeComputed.add(office);
-		}
-		return officeComputed;
-	}
-
-	/**
-	 * Ritorna l'area padre se office è un istituto o una sede
-	 * @return
-	 */
-	public Office getSuperArea(Office office) {
-
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(wOffice.isSeat())
-			return office.office.office;
-
-		if(wOffice.isInstitute())
-			return office.office;
-
-		return null;
-	}
-
-	/**
-	 * Ritorna l'istituto padre se this è una sede
-	 * @return 
-	 */
-	public Office getSuperInstitute(Office office) {
-
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(!wOffice.isSeat())
-			return null;
-		return office.office;
-	}
-
-
 	public boolean checkForDuplicate(Office o){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final BooleanBuilder condition = new BooleanBuilder();
 		condition.or(office.name.equalsIgnoreCase(o.name));
-
-		if(o.contraction!=null){
-			condition.or(office.contraction.equalsIgnoreCase(o.contraction));
-		}
 
 		if(o.code!=null){
 			condition.or(office.code.eq(o.code));

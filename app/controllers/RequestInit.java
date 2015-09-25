@@ -390,25 +390,25 @@ public class RequestInit extends Controller {
 
 		}		
 
-		/**
-		 *  years per la gestione dinamica degli anni(provvisorio) 
-		 *  //FIXME la lista degli anni andrebbe presa in funzione della persona selezionata 
-		 *  // e della action richiesta, non in funzione del primo office allowed (??).
-		 */
+		// TODO: un metodo per popolare il menu degli anni umano.
 		List<Integer> years = Lists.newArrayList();
-		Integer actualYear = new LocalDate().getYear();
 
-		Optional<LocalDate> dateBeginProgram = confGeneralManager
-				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
-						secureManager.officesReadAllowed(
-								user.get()).iterator().next());
+		Integer yearBeginProgram = LocalDate.now().getYear();
 
-		Integer yearBeginProgram = dateBeginProgram.get().getYear();
-		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
-
-		while(yearBeginProgram <= actualYear+1){
+		List<Office> offices = Lists.newArrayList();
+		offices.addAll(secureManager.officesReadAllowed(
+				user.get()));
+		for(Office office : offices) {
+			Optional<LocalDate> dateBeginProgram = confGeneralManager
+					.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, office);
+			if(dateBeginProgram.isPresent() 
+					&& dateBeginProgram.get().getYear() < yearBeginProgram) {
+				yearBeginProgram = dateBeginProgram.get().getYear();
+			}
+		}
+		Integer actualYear = LocalDate.now().getYear();
+		while (yearBeginProgram <= actualYear+1) {
 			years.add(yearBeginProgram);
-			Logger.trace("injectMenu -> aggiunto %s alla lista", yearBeginProgram);
 			yearBeginProgram++;
 		}
 
