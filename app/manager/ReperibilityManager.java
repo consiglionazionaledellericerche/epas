@@ -769,7 +769,7 @@ public class ReperibilityManager {
 		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 		icsCalendar = createicsReperibilityCalendar(year, type, personReperibility);
 
-		log.debug("Find {} periodi di reperibilità.", icsCalendar.getComponents().size());
+		log.debug("la createicsReperibilityCalendar ha trovato {} periodi di reperibilità.", icsCalendar.getComponents().size());
 		log.debug("Crea iCal per l'anno {} della person con id = {}, reperibility type {}", year, personId, type);
 
 		return Optional.of(icsCalendar);
@@ -812,6 +812,8 @@ public class ReperibilityManager {
 			log.debug("Reperibility find called from {} to {}, found {} reperibility days for person id = {}", 
 				from, to, reperibilityDays.size(), personRep.person.id);
 
+			log.debug("Calcola i periodi di reperibilità");
+			
 			Date startDate = null;
 			Date endDate = null;
 			int sequence = 1;
@@ -819,10 +821,10 @@ public class ReperibilityManager {
 			for (PersonReperibilityDay prd : reperibilityDays) {
 
 				Date date = new Date(prd.date.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());				
-				log.trace("Data reperibilita' per {}, date={}", prd.personReperibility.person.surname, date);
+				//log.debug("Data reperibilita' per {}, date={}", prd.personReperibility.person.surname, date.toString());
 
 				if ( startDate == null) {
-					Logger.trace("Nessun periodo, nuovo periodo: startDate=%s", date);
+					Logger.debug("Nessun periodo, nuovo periodo: startDate=%s", date);
 
 					startDate = endDate = date;
 					sequence = 1;
@@ -830,7 +832,7 @@ public class ReperibilityManager {
 				} 
 
 				if ( date.getTime() - endDate.getTime() > 86400*1000 ) {
-					Logger.trace("Termine periodo: startDate=%s, sequence=%s", startDate, sequence);
+					Logger.debug("Memorizza periodo: startDate=%s, sequence=%s", startDate, sequence);
 					icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
 					startDate = endDate = date;
 					sequence = 1;
@@ -838,12 +840,16 @@ public class ReperibilityManager {
 				} else {
 					sequence++;
 					endDate = date;
-					Logger.trace("Allungamento periodo: startDate=%s, endDate=%s, sequence.new=%s", startDate, endDate, sequence);
+					Logger.debug("Allungamento periodo: startDate=%s, endDate=%s, sequence.new=%s", startDate, endDate, sequence);
 				}
 
 			}
+			
+			Logger.debug("Memorizzo l'ultimo periodo: startDate=%s, sequence=%s", startDate, sequence);
+			icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
 		}	
 
+		
 		return icsCalendar;
 	}
 
