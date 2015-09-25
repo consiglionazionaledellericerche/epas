@@ -512,7 +512,7 @@ public class Reperibility extends Controller {
 		
 		if (!currentUser.isPresent() || currentUser.get().person == null 
 				|| !canAccess.contains(currentUser.get().person)) {
-			log.debug("Accesso all'iCal dei turni non autorizzato: Type = {}, Current User = {}, "
+			log.debug("Accesso all'iCal delle reperibilità non autorizzato: Type = {}, Current User = {}, "
 					+ "canAccess = {}", 
 				type, currentUser.get(), canAccess, currentUser.get());
 			unauthorized();
@@ -526,6 +526,8 @@ public class Reperibility extends Controller {
 			if (!calendar.isPresent()) {
 				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
 			}
+			
+			//log.debug("dentro calendar ci sono: {}", calendar.get().getComponents());
 			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			CalendarOutputter outputter = new CalendarOutputter();
