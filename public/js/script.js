@@ -3,6 +3,63 @@
 
 $(function($){
 	
+	
+	/**
+	 * Author: Marco
+     * form ajax attivate con l'attributo data-async:
+     *   data-async deve contenere il target per le risposte di successo;
+     *   data-async-error deve contenere il target per gli errori.
+     */
+    $(document.body).on('submit', 'form[data-async]', function(e) {
+        var $form = $(this);
+        var target = $form.data('async');
+        var errorTarget = $form.data('async-error');
+        var $target = $(target);
+//        $form.find(':input').prop("readonly", true);
+//        var bgcolor = $form.css('background-color');
+//        $form.css('backround-color', '#e0e0e0');
+
+        $.ajax({
+            type: $form.attr('method'),
+            url: $form.attr('action'),
+            data: $form.serialize(),
+        }).done(function(data, status) {
+            $target.replaceWith($(target, data));
+            // TODO: verificare se occorre fare unwrap
+            $(target).parent().initepas();
+            // disattiva la modale sopra (se c'è).
+            $form.parents('.modal').modal('hide');
+        }).fail(function(xhr, status, error) {
+        	if (xhr.status == 400) {
+        		var $res = $(errorTarget, xhr.responseText);
+        		var $etarget = errorTarget ? $(errorTarget) : $form;
+        		$etarget.html($res.html()).parent().initepas();
+        	} else {
+        		
+        		//bootbox.alert('Si è verificato un errore: '+ error);
+        	}// else segnala l'errore in qualche modo.
+        }).always(function() {
+//        	$form.find(':input').prop('readonly', true);
+//        	$form.css('background-color', bgcolor);
+        });
+        e.preventDefault();
+    });
+    
+    /**
+     * Author: Marco
+     */
+    $(document.body).on('click', 'a[data-async-modal]', function(e) {
+    	var $this = $(this);
+    	var $modal = $($this.data('asyncModal'));
+    	var url = $this.attr('href');
+    	$('body').modalmanager('loading');
+
+    	$modal.load(url, '', function() {
+    		$modal.modal().initepas();
+    	});
+    	e.preventDefault();
+    });
+    
 	$.fn.initepas = function() {
 
 		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
@@ -220,7 +277,7 @@ $(function($){
 	    
 	}	/* fine initepas() */
 	
-	$('body').initepas();
+	$(document.body).initepas();
 	
 });	/* fine on document load */
 

@@ -59,13 +59,13 @@ public class Institutes extends Controller {
 		render(results, name);
 	}
 	
-	public static void show(int id) {
+	public static void show(Long id) {
 		final Institute institute = Institute.findById(id);
 		notFoundIfNull(institute);
 		render(institute);
 	}
 
-	public static void edit(int id) {
+	public static void edit(Long id) {
 		final Institute institute = Institute.findById(id);
 		notFoundIfNull(institute);
 		render(institute);
@@ -77,8 +77,10 @@ public class Institutes extends Controller {
 	}
 
 	public static void save(Institute institute) {
+		
 		validation.valid(institute);
 		if (Validation.hasErrors()) {
+			response.status = 400;
 			log.warn("validation errors for {}: {}", institute,
 					validation.errorsMap());
 			flash.error(Web.msgHasErrors());
@@ -88,6 +90,19 @@ public class Institutes extends Controller {
 			flash.success(Web.msgSaved(Institute.class));
 			index();
 		}
+	}
+	
+	public static void delete(Long id) {
+		final Institute institute = Institute.findById(id);
+		notFoundIfNull(institute);
+		
+		if(institute.seats.isEmpty()) {
+			institute.delete();
+			flash.success(Web.msgDeleted(Institute.class));
+			index();
+		}
+		flash.error(Web.msgHasErrors());
+		index();
 	}
 	
 }
