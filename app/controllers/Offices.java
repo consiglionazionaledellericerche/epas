@@ -1,5 +1,7 @@
 package controllers;
 
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -7,6 +9,7 @@ import javax.inject.Inject;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.OfficeManager;
+import models.Institute;
 import models.Office;
 import models.Role;
 
@@ -19,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.collect.FluentIterable;
+import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
 import dao.RoleDao;
@@ -32,10 +36,6 @@ public class Offices extends Controller {
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
-	private static WrapperModelFunctionFactory wrapperFunctionFactory;
-	@Inject
-	private static RoleDao roleDao;
-	@Inject
 	private static IWrapperFactory wrapperFactory;
 	@Inject
 	private static OfficeManager officeManager;
@@ -44,16 +44,12 @@ public class Offices extends Controller {
 	@Inject
 	private static ConfYearManager confYearManager;
 
-	public static void showOffices(){
+	@Deprecated
+	public static void showOffices(String name){
 
-		List<IWrapperOffice> allAreas = FluentIterable
-				.from(officeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
-		
-		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-
-		render(allAreas, roleAdmin, roleAdminMini);
+		renderText("to implemente");
 	}
+	
 
 	public static void insertArea() {
 		render();
@@ -67,7 +63,7 @@ public class Offices extends Controller {
 
 		if(area==null) {
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		render("@editInstitute", area);
@@ -77,21 +73,21 @@ public class Offices extends Controller {
 
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente i campi, operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		IWrapperOffice wArea = wrapperFactory.create(area);
 
 		if(!area.isPersistent()) {
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		//institute.office = area;
 
 		if(officeDao.checkForDuplicate(institute)){
 			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		institute.save();
@@ -99,14 +95,14 @@ public class Offices extends Controller {
 		officeManager.setSystemUserPermission(institute);
 
 		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name);
-		Offices.showOffices();
+		Offices.showOffices(null);
 	}
 
 	public static void insertSeat(Long instituteId) {
 		Office institute = officeDao.getOfficeById(instituteId);
 		if(institute==null) {
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		render("@editSeat",institute);
@@ -116,19 +112,19 @@ public class Offices extends Controller {
 
 		if(Validation.hasErrors()){
 			flash.error("Valorizzare correttamente tutti i campi! operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		if(!institute.isPersistent()) {
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		seat.code = code;
 
 		if(officeDao.checkForDuplicate(seat)){
 			flash.error("Parametri già utilizzati in un'altra sede,verificare.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 //		seat.office = institute;
@@ -147,7 +143,7 @@ public class Offices extends Controller {
 		}
 
 		flash.success("Sede correttamente inserita: %s",seat.name);
-		Offices.showOffices();
+		Offices.showOffices(null);
 	}
 
 	public static void editSeat(Long seatId){
@@ -156,7 +152,7 @@ public class Offices extends Controller {
 
 		if(seat==null) {
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 //		Office institute = seat.office;
 
@@ -169,7 +165,7 @@ public class Offices extends Controller {
 
 		if(institute==null) {
 			flash.error("L'istituto selezionato non esiste. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 //		Office area = institute.office;

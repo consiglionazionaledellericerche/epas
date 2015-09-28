@@ -17,6 +17,7 @@ import com.mysema.query.types.Expression;
  * @author marco
  *
  */
+@Deprecated
 public final class ModelQuery {
 	
 	/**
@@ -24,6 +25,7 @@ public final class ModelQuery {
 	 *
 	 * @param <T>
 	 */
+	 @Deprecated
 	public static class SimpleResults<T> {
 		private final Expression<T> e;
 		private final JPQLQuery query;

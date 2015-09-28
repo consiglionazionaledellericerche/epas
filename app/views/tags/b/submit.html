@@ -1,0 +1,8 @@
+*{
+   arg: label
+   fa: optional, default to 'check'
+ }*
+ %{ fa = _fa ?: 'check' }%
+<button class="btn btn-primary" type="submit">
+     <i class="fa fa-${fa}"></i><span class="hidden-xs"> &{_arg}</span>
+</button>

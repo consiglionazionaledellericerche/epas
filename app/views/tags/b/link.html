@@ -1,0 +1,6 @@
+*{ arg: (href) required
+   fa: optional fontawesome code
+}*
+<a href="${_arg}" class="btn btn-default${_class != null ? (' '+_class) : ''}" ${helpers.Web.serialize(_attrs, "arg", "class", "fa").raw()}>
+    #{if _fa}<i class="fa fa-${_fa}"></i><span class="hidden-xs"> #{/if}#{doBody/}#{if _fa}</span>#{/if}
+</a>

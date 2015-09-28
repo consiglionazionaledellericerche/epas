@@ -1,0 +1,15 @@
+*{ per le pagine contenenti pannelli, usate tipicamente nelle crud di modifica.
+   _arg: (obbligatorio) il titolo del pannello  
+   step: (opzionale) un identificativo nel pannello.
+}* 
+<div class="container">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        #{if _step}<span class="badge">${_step}</span>#{/if}${_arg}</h3>
+    </div>
+    <div class="panel-body">
+      #{doBody /}
+    </div>
+  </div>
+</div>

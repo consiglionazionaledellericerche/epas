@@ -1,30 +1,27 @@
 package dao;
 
-import java.util.ArrayList;
+import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import models.Institute;
 import models.Office;
 import models.Role;
 import models.User;
-import models.UsersRolesOffices;
+import models.query.QInstitute;
 import models.query.QOffice;
+import models.query.QUsersRolesOffices;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
+import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
 
 /**
  * 
@@ -33,11 +30,14 @@ import dao.wrapper.IWrapperOffice;
  */
 public class OfficeDao extends DaoBase {
 
+	public static final Splitter TOKEN_SPLITTER = Splitter.on(' ')
+			.trimResults().omitEmptyStrings();
+	
 	@Inject
 	OfficeDao(JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 	}
-
+	
 	/**
 	 * 
 	 * @param id
@@ -140,6 +140,51 @@ public class OfficeDao extends DaoBase {
 
 		return getQueryFactory().from(office)
 				.where(condition).exists();
+	}
+	
+	private BooleanBuilder matchInstituteName(QInstitute institute, String name) {
+		final BooleanBuilder nameCondition = new BooleanBuilder();
+		for (String token : TOKEN_SPLITTER.split(name)) {
+			nameCondition.and(institute.name.startsWithIgnoreCase(token)
+					.or(institute.code.startsWithIgnoreCase(token)));
+		}
+		return nameCondition.or(institute.name.startsWithIgnoreCase(name))
+				.or(institute.code.startsWithIgnoreCase(name));
+	}
+	
+	/**
+	 * Gli istituti che contengono sede sulle quali l'user ha il ruolo role.
+	 * @param user
+	 * @param role
+	 * @return
+	 */
+	public PerseoSimpleResults<Institute> institutes(Optional<String> name, User user, Role role) {
+		
+		final QInstitute institute = QInstitute.institute;
+		final QOffice office = QOffice.office;
+		final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		if (name.isPresent()) {
+			condition.and(matchInstituteName(institute, name.get()));
+		}
+		
+		if(user.isSystemUser()) {
+			final JPQLQuery query = getQueryFactory()
+					.from(institute)
+					.where(condition);
+			return PerseoModelQuery.wrap(query, institute);
+		}
+		
+		final JPQLQuery query = getQueryFactory()
+				.from(institute)
+				.rightJoin(institute.seats, office)
+				.rightJoin(office.usersRolesOffices, uro)
+				.where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+				.distinct();
+				
+		return PerseoModelQuery.wrap(query, institute);
+		
 	}
 
 }
