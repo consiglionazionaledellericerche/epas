@@ -1,39 +1,27 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import dao.PersonDayDao;
+import dao.PersonDayInTroubleDao;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-import models.Contract;
-import models.ContractStampProfile;
-import models.Person;
-import models.PersonDay;
-import models.PersonDayInTrouble;
+import models.*;
 import models.enumerate.Parameter;
 import models.enumerate.Troubles;
-
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import play.Play;
 import play.libs.Mail;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
-import dao.PersonDayDao;
-import dao.PersonDayInTroubleDao;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class PersonDayInTroubleManager {
@@ -220,8 +208,7 @@ public class PersonDayInTroubleManager {
 		log.info("Preparo invio mail per {}", person.getFullname());
 		SimpleEmail simpleEmail = new SimpleEmail();
 		try {
-			simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
-			simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office) );
+			simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
 		} catch (EmailException e1) {
 			e1.printStackTrace();
 		}

@@ -1,0 +1,21 @@
+<div class="modal-header center">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.fullname} <i class="fa fa-clock-o"></i></h4>
+</div>
+
+<!-- Start Body -->
+<div class="modal-body">
+
+    <div class="container-fluid text-center">
+    #{form @Stampings.updateEmployee(), class:'form-horizontal'}
+
+        <input type="hidden" name="stampingId" value="${stamping.id}"/>
+
+        #{f.view 'Timbratura', value:stamping.date.time()/}
+        #{f.selectModel 'stampType' ,value:stamping.stampType, items:templateUtility.allStampTypes /}
+        #{f.textArea 'note',value:stamping.note /}
+
+        <input class="btn btn-primary" type="submit" value="Aggiorna"/>
+    #{/form}
+    </div>
+</div>

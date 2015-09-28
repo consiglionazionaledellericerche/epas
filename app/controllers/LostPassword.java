@@ -1,22 +1,19 @@
 package controllers;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
-import javax.inject.Inject;
-
+import dao.PersonDao;
+import dao.UserDao;
 import models.Person;
 import models.User;
-
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.Play;
 import play.libs.Mail;
 import play.mvc.Controller;
-import dao.PersonDao;
-import dao.UserDao;
+
+import javax.inject.Inject;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 public class LostPassword extends Controller{
 	
@@ -61,31 +58,18 @@ public class LostPassword extends Controller{
 		person.user.recoveryToken = token;
 		person.user.expireRecoveryToken = new LocalDate();
 		person.user.save();
-		
-		SimpleEmail simpleEmail = new SimpleEmail();
-		simpleEmail.setFrom(Play.configuration.getProperty("application.mail.address"));
-		simpleEmail.addTo(email);
-		if(Play.configuration.getProperty("mail.smtp.user")!=null && 
-				!Play.configuration.getProperty("mail.smtp.user").equals("") && 
-				Play.configuration.getProperty("mail.smtp.port") != null && 
-				!Play.configuration.getProperty("mail.smtp.port").equals("")){
-			simpleEmail.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), 
-					Play.configuration.getProperty("mail.smtp.password"));
-			simpleEmail.setSmtpPort(new Integer(Play.configuration.getProperty("mail.smtp.port")).intValue());
-		}
-		
-		simpleEmail.setSubject("ePas Recupero Password");
-
-//		String message = "Utente: " + person.user.username + "\r\n" + 
-//		"Per ottenere una nuova password apri il seguente collegamento: " + GET_RECOVERY_PREFIX + token;
 
 		String message = "Utente: " + person.user.username + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: " + getRecoveryBaseUrl() + token;
 
-		
-		Logger.info("Messaggio recovery password spedito è: %s", message);
-		
+		SimpleEmail simpleEmail = new SimpleEmail();
+
+		simpleEmail.addTo(email);
+		simpleEmail.setSubject("ePas Recupero Password");
 		simpleEmail.setMsg(message);
-		Mail.send(simpleEmail); 
+
+		Mail.send(simpleEmail);
+
+		Logger.info("Messaggio recovery password spedito è: %s", message);
 		
 		flash.success("E' stata inviata una mail all'indirizzo %s. "
 				+ "Completare la procedura di recovery password entro la data di oggi."

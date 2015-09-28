@@ -99,8 +99,9 @@ qualification=Livello
 
 office=Sede
 
-
 modifierType= Calcolo Orario
+
+stamping.note= Note
 
 ########################
 # Messaggi di validazione
@@ -195,3 +196,7 @@ stamping.stampType= Causale
 note= Note
 stampingHour= Ore
 stampingMinute= Minuti
+hourStamping= Ore
+stampingWay= Verso
+stampingWay.popover= Il verso della timbratura
+hourStamping.popover= Formato richiesto HHMM (HH ore, MM minuti)

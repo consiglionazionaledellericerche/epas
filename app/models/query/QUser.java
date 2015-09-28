@@ -26,6 +26,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final QBadgeReader badgeReader;
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
@@ -65,6 +67,7 @@ public class QUser extends EntityPathBase<User> {
 
     public QUser(Class<? extends User> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

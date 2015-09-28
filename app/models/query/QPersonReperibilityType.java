@@ -20,6 +20,8 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     private static final long serialVersionUID = -1571481893L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QPersonReperibilityType personReperibilityType = new QPersonReperibilityType("personReperibilityType");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
@@ -37,16 +39,27 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public final ListPath<models.PersonReperibility, QPersonReperibility> personReperibilities = this.<models.PersonReperibility, QPersonReperibility>createList("personReperibilities", models.PersonReperibility.class, QPersonReperibility.class, PathInits.DIRECT2);
 
+    public final QPerson supervisor;
+
     public QPersonReperibilityType(String variable) {
-        super(PersonReperibilityType.class, forVariable(variable));
+        this(PersonReperibilityType.class, forVariable(variable), INITS);
     }
 
     public QPersonReperibilityType(Path<? extends PersonReperibilityType> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
     }
 
     public QPersonReperibilityType(PathMetadata<?> metadata) {
-        super(PersonReperibilityType.class, metadata);
+        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    }
+
+    public QPersonReperibilityType(PathMetadata<?> metadata, PathInits inits) {
+        this(PersonReperibilityType.class, metadata, inits);
+    }
+
+    public QPersonReperibilityType(Class<? extends PersonReperibilityType> type, PathMetadata<?> metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
     }
 
 }

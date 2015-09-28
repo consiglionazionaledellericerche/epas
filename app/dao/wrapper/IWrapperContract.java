@@ -45,6 +45,12 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 * 
 	 * @return
 	 */
+	DateInterval getContractDatabaseIntervalForMealTicket();
+	
+	/**
+	 * 
+	 * @return
+	 */
 	Optional<YearMonth> getFirstMonthToRecap();
 	
 	/**

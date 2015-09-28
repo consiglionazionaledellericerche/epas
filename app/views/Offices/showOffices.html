@@ -120,7 +120,7 @@
 					      <td class="center">
 					      <a class="btn btn-primary btn-xs"
 				                 data-modal=".my-modal"
-				                 href="@{Administrators.insertAccountSystem(sede.value.id)}">
+				                 href="@{Administrators.insertSystemUro(sede.value.id)}">
 				                 <span class="glyphicon glyphicon-plus" 
 				                    data-toggle="tooltip" data-placement="left" 
 				                    title="Aggiungi Amministratore per ${sede.value.name}">
@@ -132,7 +132,7 @@
 					          
 					          <strong>${systemUro.role.name}</strong> ${systemUro.user.username} 
 					          
-					          <a href="@{Administrators.deleteAccountSystem(systemUro.id)}">
+					          <a href="@{Administrators.deleteSystemUro(systemUro.id)}">
 				                    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
 				                      title="Rimuovi dagli account di sistema.">

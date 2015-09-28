@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
@@ -25,7 +26,7 @@ import com.google.common.base.MoreObjects;
 
 @Entity
 @Audited
-@Table(name="users")
+@Table(name="users", uniqueConstraints={@UniqueConstraint(columnNames={"username"})})
 public class User extends BaseModel{
 
 	private static final long serialVersionUID = -6039180733038072891L;
@@ -42,10 +43,10 @@ public class User extends BaseModel{
 	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
 	public Person person;
 	
-	//@ManyToOne
-	//@JoinColumn(name="office_id")
-	//public Office restOwner;
-
+	@NotAudited
+	@OneToOne(mappedBy="user", fetch=FetchType.LAZY)
+	public BadgeReader badgeReader;
+	
 	@NotAudited
 	@OneToMany(mappedBy="user", cascade = {CascadeType.REMOVE})
 	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
@@ -64,4 +65,17 @@ public class User extends BaseModel{
 				.add("user", this.username)
 				.toString();
 	}
+	
+	/**
+	 * Se l'user è un account di sistema. 
+	 * TODO: definire la logica più dettagliata se necessario.
+	 * @return
+	 */
+	public boolean isSystemUser() {
+		if (person == null) {
+			return true;
+		}
+		return false;
+	}
+
 }

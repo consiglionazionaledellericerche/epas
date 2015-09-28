@@ -3,6 +3,17 @@ package manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.StampingDao;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Contract;
@@ -12,20 +23,6 @@ import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.db.jpa.JPA;
-
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.StampingDao;
 
 public class StampingManager {
 
@@ -93,16 +90,16 @@ public class StampingManager {
 	 * @param markedByAdmin
 	 */
 	public void addStamping(PersonDay pd, LocalDateTime time, String note,
-			boolean service, boolean type, boolean markedByAdmin) {
+			StampType stampType, boolean type, boolean markedByAdmin) {
 
 		Stamping stamp = new Stamping();
 
 		stamp.date = time; 
 		stamp.markedByAdmin = markedByAdmin;
 
-		if(service) {
-			stamp.note = "timbratura di servizio";
-			stamp.stampType = stampingDao.getStampTypeByCode("motiviDiServizio");
+		if(stampType != null) {
+			stamp.note = note != "" ? note : stampType.description;
+			stamp.stampType = stampType;
 		} else {
 			if(!note.equals("")) {
 				stamp.note = note;
@@ -265,10 +262,13 @@ public class StampingManager {
 	 * @param service
 	 */
 	public void persistStampingForUpdate(Stamping stamping, String note, 
-			int stampingHour, int stampingMinute, StampType stampType){
+			Integer stampingHour, Integer stampingMinute, StampType stampType){
 		
-		stamping.date = stamping.date.withHourOfDay(stampingHour);
-		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
+		if(stampingMinute != null && stampingHour != null){
+			stamping.date = stamping.date.withHourOfDay(stampingHour);
+			stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
+		}
+		
 		if(stampType.getLabel() != null){
 			stamping.stampType = stampType;
 			stamping.note = stampType.description;

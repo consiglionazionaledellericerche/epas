@@ -4,9 +4,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.Lists;
+
+import injection.StaticInject;
 import manager.OfficeManager;
 import models.Office;
-import models.Permission;
 import models.Person;
 import models.Role;
 import models.User;
@@ -14,17 +16,15 @@ import models.UsersRolesOffices;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
-import play.jobs.Job;
 import play.test.Fixtures;
 
-import com.google.common.collect.Lists;
-
-public class FixUserPermission{
+@StaticInject
+public class FixUserPermission {
 
 	@Inject
 	private static OfficeManager officeManager;
-
-	public void doJob(){
+	
+	public static void doJob(){
 
 		final class Permesso{
 
@@ -60,18 +60,17 @@ public class FixUserPermission{
 			List<Permesso> permessi = Lists.newArrayList();
 			
 			for(UsersRolesOffices uro : uros){
-//				Il ruolo superAdmin e' stato rinominato in Admin
+				//Il ruolo superAdmin e' stato rinominato in Admin
 				String ruolo = uro.role.name.equals("superAdmin") ? Role.ADMIN : uro.role.name;
 				permessi.add(new Permesso(uro.user.id,uro.office.id,ruolo));
 			}
 
 			UsersRolesOffices.deleteAll();
-			Permission.deleteAll();
 			Role.deleteAll();
 
 			JPA.em().clear();
 			
-//			Allinea tutte le sequenze del db
+			//Allinea tutte le sequenze del db
 			Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
 			Fixtures.loadModels("../db/import/rolesAndPermission.yml");
@@ -88,6 +87,7 @@ public class FixUserPermission{
 
 		//		Sistema i permessi per gli user admin e developer
 		List<Office> offices = Office.findAll();
+		
 		for(Office o : offices){
 			officeManager.setSystemUserPermission(o);
 		}
@@ -115,6 +115,15 @@ public class FixUserPermission{
 			if(!exist) {
 				officeManager.setUro(p.user, p.office, employeeRole);
 			}
+		}
+		
+		//Ruoli e permessi per la gestione di turni e reperibilità 
+		//(principalmente via REST)
+		Role shiftManagerRole = Role.find("byName",  Role.SHIFT_MANAGER).first();
+		Role reperibilityManagerRole = Role.find("byName",  Role.REPERIBILITY_MANAGER).first();
+		
+		if (shiftManagerRole == null && reperibilityManagerRole == null) {
+			Fixtures.loadModels("../db/import/shiftReperibilityRolesAndPermissions.yml");
 		}
 	}
 

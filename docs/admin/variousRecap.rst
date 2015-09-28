@@ -80,20 +80,22 @@ In questa pagina è possibile avere un riepilogo della situazione di ciascun dip
 
 Come nelle pagine precedenti, dalla barra di menu in alto si possono selezionare mese e anno di cui interessa verificare la situazione.
 All'interno del pannello viene conteggiato il numero di giorni lavorativi contati fino al momento della visualizzazione
-Nel pannello si trovano, paginati in liste di 10 elementi, i dipendenti afferenti alla sede di cui si è amministratori.
+Come nel caso evidenziato in :doc:`Gestione e modifica del personale </managePerson>`, la tabella contiene paginati in liste di 10 elementi, i dipendenti afferenti alla sede di cui si è amministratori.
+E' però possibile, tramite l'opzione presente in alto a sinistra nella pagina, selezionare il quantitativo di persone visibile: 10, 25, 50 o tutte.
+E' altresì possibile specificare il nome o il cognome della persona specifica che interessa, tramite la form a destra sopra la tabella, così da circoscrivere la ricerca alla situazione della singola persona.
+Sempre come nel caso della lista persone, è possibile ordinare gli elementi in tabella sul campo che più interessa (attualmente i dipendenti vengono ordinati per cognome).
+
 Per ciascuno di essi viene visualizzato:
 
-   * nome e cognome, cliccabile, che riporta alla situazione di timbrature mensili per l'anno e il mese selezionati
-   * il quantitativo di assenze giustificate
-   * il quantitativo di assenze non giustificate
-   * i buoni mensa da restituire
-   * la differenza ore residua (tra il quantitativo previsto dall'orario di lavoro e il quantitativo orario effettivamente lavorato)
-   * giorni di presenza a lavoro nei giorni festivi
-   * giorni di presenza a lavoro nei giorni feriali
-   * le ore di lavoro effettivamente fatte
+   * nome e cognome
+   * il monte ore dell'anno passato
+   * il monte ore dell'anno corrente
+   * i buoni mensa residui
+   * il progressivo del mese
+   * le ore lavorate nel mese
+   * i giorni di riposo compensativo fatti nel mese
    * le ore di straordinario pagate
    
-Alcune di queste quantità risultano cliccabili, cliccandoci sopra si potranno verificare i dettagli relativi al valore selezionato.
-
+Là dove i valori presenti nella cella risultassero negativi, verranno evidenziati dal fondo della cella di colore rosso, così da rendere più evidente la situazione.
 Per quanto concerne i valori dell'ultima colonna, quella relativa agli straordinari pagati, i quantitativi saranno disponibili e diversi da zero per coloro i quali hanno lo straordinario tra le competenze assegnate **E** saranno stati assegnati secondo la logica di assegnamento (di solito all'inizio del mese successivo, per gli straordinari relativi a un certo mese. Es.: gli straordinari di ottobre verranno assegnati a inizio novembre) (v. :doc:`Gestione competenze </competences>`).
  

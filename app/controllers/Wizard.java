@@ -25,6 +25,9 @@ import models.WorkingTimeType;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import play.Logger;
 import play.Play;
@@ -72,6 +75,8 @@ public class Wizard extends Controller {
 
 	public static final String STEPS_KEY = "steps";
 	public static final String PROPERTIES_KEY = "properties";
+	
+	private final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
 
 	public static class WizardStep {
 		public final int index;
@@ -339,7 +344,7 @@ public class Wizard extends Controller {
 			properties.setProperty("manager_badge_number",manager_badge_number);
 			properties.setProperty("manager_registration_number",manager_registration_number);
 			properties.setProperty("manager_email",manager_email);
-			properties.setProperty("manager_contract_begin",manager_contract_begin.toString());
+			properties.setProperty("manager_contract_begin",manager_contract_begin.toString(dtf));
 			properties.setProperty("manager_username",manager_username);
 			properties.setProperty("manager_password",manager_password);
 
@@ -347,7 +352,7 @@ public class Wizard extends Controller {
 				properties.setProperty("manager_birthday",manager_birthday.toString());	
 			}
 			if(manager_contract_end!=null){
-				properties.setProperty("manager_contract_end",manager_contract_end.toString());
+				properties.setProperty("manager_contract_end",manager_contract_end.toString(dtf));
 			}
 
 			if(!steps.get(stepIndex).completed){
@@ -421,7 +426,7 @@ public class Wizard extends Controller {
 			properties.setProperty("manager_badge_number",manager_badge_number);
 			properties.setProperty("manager_registration_number",manager_registration_number);
 			properties.setProperty("manager_email",manager_email);
-			properties.setProperty("manager_contract_begin",manager_contract_begin.toString());
+			properties.setProperty("manager_contract_begin",manager_contract_begin.toString(dtf));
 			properties.setProperty("manager_username",manager_username);
 			properties.setProperty("manager_password",manager_password);
 
@@ -429,7 +434,7 @@ public class Wizard extends Controller {
 				properties.setProperty("manager_birthday",manager_birthday.toString()); 
 			}
 			if(manager_contract_end!=null){
-				properties.setProperty("manager_contract_end",manager_contract_end.toString());
+				properties.setProperty("manager_contract_end",manager_contract_end.toString(dtf));
 			}
 
 
@@ -562,11 +567,11 @@ public class Wizard extends Controller {
 
 		Contract contract = new Contract();
 
-		LocalDate contractBegin = LocalDate.parse(properties.getProperty("manager_contract_begin"));
+		LocalDate contractBegin = LocalDate.parse(properties.getProperty("manager_contract_begin"),dtf);
 		LocalDate contractEnd = null;
 		if(properties.containsKey("manager_contract_end") && 
 				!properties.getProperty("manager_contract_end").isEmpty()){
-			contractEnd = LocalDate.parse(properties.getProperty("manager_contract_end"));
+			contractEnd = LocalDate.parse(properties.getProperty("manager_contract_end"),dtf);
 		}
 		contract.beginContract = contractBegin;
 		contract.expireContract = contractEnd;

@@ -5,28 +5,24 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.inject.Inject;
 
-import manager.ConfGeneralManager;
-import models.Office;
-import models.User;
-import models.enumerate.Parameter;
-import play.Logger;
-import play.cache.Cache;
-import play.mvc.Http;
-import play.utils.Java;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
-import dao.PermissionDao;
 import dao.UserDao;
+import manager.ConfGeneralManager;
+import models.User;
+import models.enumerate.Parameter;
+import play.Logger;
+import play.Play;
+import play.cache.Cache;
+import play.mvc.Http;
+import play.utils.Java;
 
 public class Security extends Secure.Security {
 
 	@Inject
 	private static UserDao userDao;
-	@Inject
-	private static PermissionDao permissionDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
 
@@ -81,10 +77,12 @@ public class Security extends Secure.Security {
 	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
 	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
 
-//	FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
-	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+	public final static String VIEW_REPERIBILITY = "viewReperibility";
+	public final static String MANAGE_REPERIBILITY = "manageReperibility";
+	
+	//FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
 
-	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
+	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 
 	public final static String CACHE_DURATION = "30mn";
 
@@ -105,8 +103,6 @@ public class Security extends Secure.Security {
 			Logger.info("user %s successfully logged in from ip %s", user.username,
 					Http.Request.current().remoteAddress);
 			
-//			Logger.info("headers request %s", Http.Request.current().headers);
-		
 			return true;
 		}
 
@@ -157,20 +153,6 @@ public class Security extends Secure.Security {
 		return getUser(connected());
 	}
 
-	/**
-	 * @param office
-	 * @param permission
-	 * @return
-	 */
-	public static boolean hasPermissionOnOffice(Office office, String permission) {
-		
-		return permissionDao
-				.getOfficePermissions(getUser().get(), office).contains(
-						permissionDao.getPermissionByDescription(permission));
-
-	}
-
-	
 	static Object invoke(String m, Object... args) throws Throwable {
 
 		try {
@@ -181,6 +163,9 @@ public class Security extends Secure.Security {
 	}
 	
 	public static boolean checkForWebstamping(){
+		if("true".equals(Play.configuration.getProperty(Clocks.SKIP_IP_CHECK))){
+			return true;
+		}
 		String remoteAddress = Http.Request.current().remoteAddress;
 		return !confGeneralManager.containsValue(
 				Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();

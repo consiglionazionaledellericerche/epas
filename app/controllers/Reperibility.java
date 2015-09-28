@@ -4,9 +4,6 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
-import it.cnr.iit.epas.CompetenceUtility;
-import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +16,24 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.joda.time.LocalDate;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
+import controllers.Resecure.BasicAuth;
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.PersonDao;
+import dao.PersonReperibilityDayDao;
+import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import manager.AbsenceManager;
 import manager.ReperibilityManager;
 import models.Absence;
@@ -28,39 +43,30 @@ import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.User;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
-
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.data.binding.As;
+import play.data.validation.Required;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.PersonDao;
-import dao.PersonReperibilityDayDao;
+import play.mvc.With;
 
 
 /**
  * @author cristian
  *
  */
+@With(Resecure.class)
 public class Reperibility extends Controller {
+	
+	private final static org.slf4j.Logger log = LoggerFactory.getLogger(Shift.class);
 
 	private static String codFr = "207";
 	private static String codFs = "208";
@@ -76,8 +82,6 @@ public class Reperibility extends Controller {
 	@Inject
 	private static AbsenceManager absenceManager;
 	@Inject
-	private static CompetenceUtility competenceUtility;
-	@Inject
 	private static CompetenceCodeDao competenceCodeDao;
 	@Inject
 	private static CompetenceDao competenceDao;
@@ -86,6 +90,7 @@ public class Reperibility extends Controller {
 	 * @author arianna
 	 * Restituisce la lista dei reperibili attivi al momento di un determinato tipo
 	 */
+	@BasicAuth
 	public static void personList() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.devel.iit.cnr.it");
@@ -105,6 +110,7 @@ public class Reperibility extends Controller {
 	 * 
 	 * per provarlo: curl -H "Accept: application/json" http://localhost:9001/reperibility/1/find/2012/11/26/2013/01/06
 	 */
+	@BasicAuth
 	public static void find() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -140,6 +146,7 @@ public class Reperibility extends Controller {
 	 * nell'intervallo di tempo da 'yearFrom/monthFrom/dayFrom'  a 'yearTo/monthTo/dayTo'
 	 * 
 	 */
+	@BasicAuth
 	public static void who() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -175,6 +182,7 @@ public class Reperibility extends Controller {
 	 * Legge le assenze dei reperibili di una determinata tipologia in un dato intervallo di tempo
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void absence() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -223,6 +231,7 @@ public class Reperibility extends Controller {
 	 * Restituisce la lista delle persone reperibili assenti di una determinata tipologia in un dato intervallo di tempo
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void whoIsAbsent() {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -273,6 +282,7 @@ public class Reperibility extends Controller {
 	 * 
 	 * @param body
 	 */
+	@BasicAuth
 	public static void update(Long type, Integer year, Integer month, @As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
 
 		Logger.debug("update: Received reperebilityPeriods %s", body);	
@@ -289,13 +299,13 @@ public class Reperibility extends Controller {
 		//Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile 
 		Set<Integer> repDaysOfMonthToRemove = new HashSet<Integer>();	
 
-
 		repDaysOfMonthToRemove = reperibilityManager.savePersonReperibilityDaysFromReperibilityPeriods(reperibilityType, year, month, body.periods);
 
 		Logger.debug("Giorni di reperibilità da rimuovere = %s", repDaysOfMonthToRemove);
 
 		int deletedRep = reperibilityManager.deleteReperibilityDaysFromMonth(reperibilityType, year, month, repDaysOfMonthToRemove);
-
+		log.info("Deleted {} days, reperibilityType={}, {}/{}, repDaysOfMonthToRemove={}", 
+			deletedRep, reperibilityType, year, month, repDaysOfMonthToRemove);
 	}
 
 
@@ -310,6 +320,7 @@ public class Reperibility extends Controller {
 	 * 
 	 * @param body
 	 */
+	@BasicAuth
 	public static void changePeriods(Long type, @As(binder=JsonReperibilityChangePeriodsBinder.class) ReperibilityPeriods body) {
 
 		Logger.debug("update: Received reperebilityPeriods %s", body);	
@@ -339,6 +350,7 @@ public class Reperibility extends Controller {
 	 * crea il file PDF con il calendario annuale delle reperibilità di tipi 'type' per l'anno 'year'
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void exportYearAsPDF() {
 		int year = params.get("year", Integer.class);
 		Long reperibilityId = params.get("type", Long.class);
@@ -376,18 +388,16 @@ public class Reperibility extends Controller {
 		// for each person contains days with absences and no-stamping  matching the reperibility days 
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
 
-
 		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
 		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
 		}
 
-
 		List<PersonReperibilityDay> personReperibilityDays = 
 				personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(startDate, endDate, reperibilityType, Optional.<PersonReperibility>absent());
 
-		inconsistentAbsence = competenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
+		inconsistentAbsence = reperibilityManager.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, startDate, endDate);
 
 		return inconsistentAbsence;
 	}
@@ -400,6 +410,7 @@ public class Reperibility extends Controller {
 	 * Segnala le eventuali inconsistenze con le assenze o le mancate timbrature
 	 * (portale sistorg)
 	 */
+	@BasicAuth
 	public static void exportMonthAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
@@ -465,7 +476,7 @@ public class Reperibility extends Controller {
 		reperibilityManager.updateReperibilityDatesReportFromCompetences(reperibilityDateDays, fsCompetences);
 
 		// get the table with the absence and no stampings inconsistency 
-		inconsistentAbsence = competenceUtility.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue());
+		inconsistentAbsence = reperibilityManager.getReperibilityInconsistenceAbsenceTable(personReperibilityDays, firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue());
 
 		Logger.info("Creazione del documento PDF con il resoconto delle reperibilità per il periodo %s/%s Fs=%s Fr=%s", firstOfMonth.plusMonths(0).monthOfYear().getAsText(), firstOfMonth.plusMonths(0).year().getAsText(), codFs, codFr);
 
@@ -478,78 +489,61 @@ public class Reperibility extends Controller {
 
 	}
 
-
-	/*
-	 * Export the reperibility calendar in iCal for the person with id = personId with reperibility 
-	 * of type 'type' for the 'year' year
-	 * If the personId=0, it exports the calendar for all  the reperibility persons of type 'type'
-	 */
-	private static Calendar createCalendar(Long type, Long personId, int year) {
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-
-		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
-
-		// check for the parameter
-		//---------------------------
-		//PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
-		if (reperibilityType == null) {
-			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
+	@BasicAuth
+	public static void iCal(@Required Long type, @Required int year, Long personId) {
+		
+		if (validation.hasErrors()) {
+			badRequest("Parametri mancanti. " + validation.errors());
 		}
-
-		if (personId == 0) {
-			// read the reperibility person 
-			//List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
-			List<PersonReperibility> personsReperibility = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
-			if (personsReperibility.isEmpty()) {
-				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
-			}
-			personsInTheCalList = personsReperibility;
-		} else {
-			// read the reperibility person 
-			//PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
-			PersonReperibility personReperibility = personReperibilityDayDao.getPersonReperibilityByPersonAndType(personDao.getPersonById(personId), personReperibilityDayDao.getPersonReperibilityTypeById(type));
-			if (personReperibility == null) {
-				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
-			}
-			personsInTheCalList.add(personReperibility);
-		}
-
-
-		Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
-		icsCalendar = reperibilityManager.createicsReperibilityCalendar(Integer.parseInt(params.get("year")), personsInTheCalList);
-
-		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
-
-		return icsCalendar;
-	}
-
-
-	public static void iCal() {
-		Long type = params.get("type", Long.class);
-		Long personId = params.get("personId", Long.class);
-		int year = params.get("year", Integer.class);
+		Optional<User> currentUser = Security.getUser();
 
 		response.accessControl("*");
-
-		//response.setHeader("Access-Control-Allow-Origin", "*");
-
+		
+		PersonReperibilityType reperibilityType = personReperibilityDayDao.getPersonReperibilityTypeById(type);
+		if (reperibilityType == null) {
+				notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
+		
+		ImmutableList<Person> canAccess =  
+				ImmutableList.<Person>builder()
+					.addAll(personDao.getPersonForReperibility(type))
+					.add(reperibilityType.supervisor).build();
+		
+		
+		if (!currentUser.isPresent() || currentUser.get().person == null 
+				|| !canAccess.contains(currentUser.get().person)) {
+			log.debug("Accesso all'iCal delle reperibilità non autorizzato: Type = {}, Current User = {}, "
+					+ "canAccess = {}", 
+				type, currentUser.get(), canAccess, currentUser.get());
+			unauthorized();
+		}
+		
+	
+		
 		try {
-			Calendar calendar = createCalendar(type, personId, year);
-
+			
+			Optional<Calendar> calendar = reperibilityManager.createCalendar(type, Optional.fromNullable(personId), year);
+			if (!calendar.isPresent()) {
+				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
+			}
+			
+			//log.debug("dentro calendar ci sono: {}", calendar.get().getComponents());
+			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			CalendarOutputter outputter = new CalendarOutputter();
-			outputter.output(calendar, bos);
+			outputter.output(calendar.get(), bos);
+			
 			response.setHeader("Content-Type", "application/ics");
 			InputStream is = new ByteArrayInputStream(bos.toByteArray());
 			renderBinary(is,"reperibilitaRegistro.ics");
 			bos.close();
 			is.close();
 		} catch (IOException e) {
-			Logger.error("Io exception building ical", e);
+			log.error("Io exception building ical", e);
+			error("Io exception building ical");
 		} catch (ValidationException e) {
-			Logger.error("Validation exception generating ical", e);
+			log.error("Validation exception generating ical", e);
+			error("Validation exception generating ical");
 		}
 	}
 

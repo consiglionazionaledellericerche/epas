@@ -66,7 +66,7 @@ public class QPersonReperibility extends EntityPathBase<PersonReperibility> {
     public QPersonReperibility(Class<? extends PersonReperibility> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
-        this.personReperibilityType = inits.isInitialized("personReperibilityType") ? new QPersonReperibilityType(forProperty("personReperibilityType")) : null;
+        this.personReperibilityType = inits.isInitialized("personReperibilityType") ? new QPersonReperibilityType(forProperty("personReperibilityType"), inits.get("personReperibilityType")) : null;
     }
 
 }

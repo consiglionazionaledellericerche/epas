@@ -20,6 +20,7 @@ public class AbsencesResponse {
 	public final static String CODICI_MALATTIA_FIGLI_NON_DISPONIBILE = "Impossibile usufruire dei codici ferie per malattia dei figli";
 	public final static String NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37 = "Nessun codice ferie dell'anno precedente 37 utilizzabile";
 	public final static String ERRORE_GENERICO = "Impossibile inserire il codice d'assenza";
+	public final static String PERSONDAY_PRECEDENTE_NON_PRESENTE = "Nessun personday per il giorno precedente a quando si intende inserire il codice con allegato. Verificare";
 	
 	private LocalDate date;
 	private String absenceCode;

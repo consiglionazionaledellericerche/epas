@@ -3,18 +3,63 @@ Gestione e inserimento Personale
 La prima funzionalità che si incontra analizzando il sistema in modalità amministratore riguarda la possibilità di inserire, modificare e, più in generale, gestire il personale.
 Dal menu :menuselection:`Amministrazione --> Lista Persone` è possibile aprire l'interfaccia di consultazione delle persone presenti in anagrafica.
 
-.. figure:: _static/images/listPersone.png
+.. figure:: _static/images/listaPersone.png
    :scale: 40
    :align: center
 
    Schermata visualizzazione lista personale
    
-In primo luogo si può notare come esistano due colorazioni distine per il personale:
-   * quelli colorati di blu sono i dipendenti effettivi, ovvero coloro i quali sono strutturati attraverso un contratto a tempo determinato o indeterminato e che sono abilitati alle timbrature.
-   * quelli colorati di grigio sono o ex dipendenti per i quali è terminato il rapporto di lavoro con l'ente, o personale non strutturato (co.co,co., co.co.pro., assegnisti ecc...) che non sono abilitati alle timbrature.   
+In primo luogo si può notare come esistano due liste distine per il personale:
+   * La *Lista del personale attivo* contiene la lista di tutte le persone contrattualizzate e strutturate nella sede 
+   * La *Lista del personale non attivo* che contiene la lista di tutte le persone che in passato sono state contrattualizzate ma che al momento risultano non presenti nella lista del personale da inviare ad **Attestati**.
+   
+   
+Entrambe le liste presentano gli stessi campi, ovvero:
+   * il nome e il cognome del dipendente (che per privacy sono stati oscurati così come la matricola), 
+   * la matricola, 
+   * il numero del badge,
+   * le date di inizio e fine lavoro (la fine non è presente quando il contratto è a tempo indeterminato), 
+   * il tipo di orario di lavoro assegnato alla persona,
+   * il piano ferie attualmente disponibile per la persona, 
+   * il livello di contratto, 
+   * se la persona ha selezionata la possibilità di avere la timbratura automatica (v. **Decisioni implementative** dal menu *Documentazioni*),
+   * la mail di riferimento per le comunicazioni, 
+   * gli eventuali altri contatti (passando sopra con il mouse si apre una finestra con elencati i numeri utili),
+   * l'inizializzazione, ovvero nel caso il dipendente provenga da altro istituto e si porti dietro una situazione definita in termini di ferie, residui orari e buoni pasto, cliccando qui è possibile inserirla, datandola, e il sistema la terrà presente per i calcoli,
+   * l'invio mail, ovvero se per il dipendente è stata selezionata la possibilità di ricevere mail informative circa la propria situazione di mancate timbrature, mancate assenze o timbrature disaccoppiate che rendono non veritiero il calcolo dei residui,
+   * eventuali note
 
-Da questa schermata è possibile evincere quali siano i tipi di dato supportati per ciascun dipendente.
-Ogni persona è attualmente modificabile cliccando sul nominativo. 
+Naturalmente, per quanto concerne la lista del personale non attivo, la situazione visualizzata è limitata ai soli campi nome e cognome, matricola e mail.
+
+Per entrambe le liste è presente la possibilità, in alto a sinistra appena sotto il titolo della lista, di selezionare quanti elementi far visualizzare (10, 25, 50 o tutti).
+Inoltre, è presente una form di ricerca testuale nella parte in alto a destra delle tabelle che permette la ricerca puntuale di elementi sulla base del nome o del cognome.
+Le tabelle, infine, sono entrambe ordinabili per campo, nel senso che è possibile specificare l'ordinamento delle righe (inizialmente per ordine alfabetico) a seconda del campo più di interesse (numero di matricola, data di inizio lavoro ecc...).
+
+
+Inserimento persona
+-------------------
+
+Nel caso si intenda inserire una nuova persona in anagrafica sarà per prima cosa necessario cliccare sul link in alto a sinistra nella pagina: "*Inserisci una nuova persona*".
+
+La pagina che si aprirà sarà come quella presentata nelle figure seguenti:
+
+.. figure:: _static/images/inserisciPersonaTop.png
+   :scale: 40
+   :align: center
+
+   Schermata modifica persona (top)
+   
+.. figure:: _static/images/inserisciPersonaBottom.png
+   :scale: 40
+   :align: center
+
+   Schermata modifica persona (bottom)
+   
+In queste due schermate sono presenti i campi da compilare (in grassetto quelli obbligatori) per poter inserire una persona in anagrafica.
+Tutti i campi sono decisamente esplicativi, quelli particolari presentano una breve descrizione che ne esplica il funzionamento.
+Inoltre, nella parte finale della schermata, dove occorre definire lo username con cui tale dipendente potrà loggarsi su epas, è presente un campo autogenerante che popola lo username di default con i valori *nome* e *cognome* del dipendente separati dal "**.**".
+Naturalmente questo valore è modificabile.
+
 
 
 Modifica persona
@@ -22,19 +67,23 @@ Modifica persona
 
 In caso si vogliano modificare i dati di una certa persona la schermata che potremo visualizzare sarà di questo tipo
 
-.. figure:: _static/images/modificaPersona.png
+.. figure:: _static/images/modificaPersonaTop.png
    :scale: 40
    :align: center
 
    Schermata modifica persona (top)
    
-.. figure:: _static/images/modificaPersona2.png
+.. figure:: _static/images/modificaPersonaBottom.png
    :scale: 40
    :align: center
 
    Schermata modifica persona (bottom)
 
 In ogni pannello (titolato) sono contenute informazioni referenti ad esso, rendendo così più intuitivo dove andare a cercare l'informazione specifica che si richiede o che si intende modificare.
+Nel pannello relativo ai dati personali, è possibile trovare alcune informazioni aggiuntive rispetto alla precedente versione.
+Difatti, esiste la possibilità di specificare se la persona in questione è Responsabile di un gruppo di lavoro (e in tal caso può usufruire della possibilità di vedere le timbrature delle persone che afferiscono al proprio gruppo e la loro presenza giornaliera v. :menuselection:`Amministrazione --> Timbrature`);
+è possibile inoltre specificare se la persona può/non può ricevere le mail per le informazioni circa la propria situazione di timbrature e assenze (invio email).
+E' stato aggiunto inoltre un pannello relativo alle *altre informazioni*, contenente anche il campo in cui specificare l'eventuale **eppn** ovvero il campo utilizzato dalla piattaforma *Shibboleth* (v. **Decisioni implementative** dal menu *Documentazioni*).
 Nel caso ad esempio del pannello relativo alle informazioni sulla "presenza default", è possibile specificare se il dipendente può godere dell'autocertificazione per la presenza a lavoro (orario giornaliero fissato al quantitativo orario giornaliero che per contratto il dipendente deve effettuare) oppure no.
 Cliccando sul tasto "Modifica", sarà possibile andare a modificare tale informazione seguendo i semplici passi che vengono spiegati nella finestra che si aprirà e che sarà di questo tipo:
 
@@ -87,9 +136,23 @@ Appena sotto questo box contenente informazioni contrattuali, è presente il lin
 Inserimento figli dipendente
 ----------------------------
 
-Nella schermata top della modifica del personale si può notare anche il link ad un'altra schermata: la possibilità di inserire per il dipendente in questione, dei figli in anagrafica. Di modo da poter far verificare al sistema la possibilità per quel dipendente di usufruire di particolari permessi per l'astensione dal lavoro.
-Il link si chiama "Inserisci figlio per...", cliccandoci verrà proposta una form di inserimento per l'eventuale figlio del dipendente contenente nome, cognome e data di nascita e, sopra, un link per la visualizzazione di eventuali figli già inseriti.
+Nella schermata top della modifica del personale si può notare che è presente un'ulteriore scheda: la possibilità di inserire per il dipendente in questione, dei figli in anagrafica. Di modo da poter far verificare al sistema la possibilità per quel dipendente di usufruire di particolari permessi per l'astensione dal lavoro.
+La scheda si chiama "Gestione figli di...", cliccandoci verrà proposta una form di riepilogo con la possibilità di inserire ulteriori figli per il dipendente così come in figura:
 
+
+.. figure:: _static/images/gestioneFigli.png
+   :scale: 40
+   :align: center
+   
+   Schermata di riepilogo dei figli del dipendente
+   
+Cliccando quindi sul bottone "Inserisci nuovo figlio", si aprirà una schermata in cui potranno essere riempiti i campi relativi a nome, cognome e data di nascita, così come illustrato nella schermata seguente:
+
+.. figure:: _static/images/inserisciFiglio.png
+   :scale: 40
+   :align: center
+   
+   Schermata di inserimento figli del dipendente
 
 
 

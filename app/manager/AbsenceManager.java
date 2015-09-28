@@ -1,57 +1,34 @@
 package manager;
 
-import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.CheckMessage;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
-import manager.response.AbsenceInsertReport;
-import manager.response.AbsencesResponse;
-import models.Absence;
-import models.AbsenceType;
-import models.Contract;
-import models.Person;
-import models.PersonChildren;
-import models.PersonDay;
-import models.PersonReperibilityDay;
-import models.PersonShiftDay;
-import models.Qualification;
-import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.Parameter;
-import models.enumerate.QualificationMapping;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.Play;
-import play.db.jpa.Blob;
-import play.libs.Mail;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.ContractDao;
-import dao.PersonChildrenDao;
-import dao.PersonDayDao;
-import dao.PersonReperibilityDayDao;
-import dao.PersonShiftDayDao;
-import dao.WorkingTimeTypeDao;
+import dao.*;
 import dao.wrapper.IWrapperFactory;
+import it.cnr.iit.epas.CheckMessage;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
+import models.*;
+import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
+import models.enumerate.QualificationMapping;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.db.jpa.Blob;
+import play.libs.Mail;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -131,13 +108,11 @@ public class AbsenceManager {
 	private AbsenceType whichVacationCode(Person person, LocalDate date, List<Absence> otherAbsences) {
 
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-		
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return null;
+		}
 
 		if(vr.get().vacationDaysLastYearNotYetUsed > 0)
 			return absenceTypeDao.getAbsenceTypeByCode(
@@ -166,13 +141,11 @@ public class AbsenceManager {
 	private boolean canTake32(Person person, LocalDate date,  List<Absence> otherAbsences) {
 
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return false;
+		}
 		
 		return (vr.get().vacationDaysCurrentYearNotYetUsed > 0);		
 
@@ -188,13 +161,12 @@ public class AbsenceManager {
 	private boolean canTake31(Person person, LocalDate date,  List<Absence> otherAbsences) {
  
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-		
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return false;
+		}
+
 
 		return (vr.get().vacationDaysLastYearNotYetUsed > 0);
 	}
@@ -209,13 +181,11 @@ public class AbsenceManager {
 	private boolean canTake94(Person person, LocalDate date,  List<Absence> otherAbsences) {
 
 		Contract contract = contractDao.getContract(date, person);
-
-		Preconditions.checkNotNull(contract);
-
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
 				contract, date, true, otherAbsences);
-		
-		Preconditions.checkState(vr.isPresent());
+		if (!vr.isPresent()) {
+			return false;
+		}
 
 		return (vr.get().persmissionNotYetUsed > 0);
 
@@ -237,7 +207,7 @@ public class AbsenceManager {
 		//N.B Non posso inserire un riposo compensativo oltre il mese successivo.
 		LocalDate dateToCheck = date;
 		//Caso generale
-		if( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1){
+		if ( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1){
 			dateToCheck = LocalDate.now();
 		}
 		//Caso particolare dicembre - gennaio
@@ -489,8 +459,18 @@ public class AbsenceManager {
 				pd = new PersonDay(person, date);
 				pd.save();
 			}
+			LocalDate startAbsence = null;
+			if(file.isPresent()){
+				startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
+				if(startAbsence == null){
+					ar.setWarning(AbsencesResponse.PERSONDAY_PRECEDENTE_NON_PRESENTE);
+					return ar;
+				}
+			}
+			else{
+				startAbsence = date;
+			}
 			
-			LocalDate startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
 			
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
@@ -560,7 +540,6 @@ public class AbsenceManager {
 
 		try {
 			email.addTo(person.email);
-			email.setFrom(Play.configuration.getProperty("application.mail.address"));
 			email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
@@ -574,7 +553,7 @@ public class AbsenceManager {
 					"Servizio ePas");
 
 		} catch (EmailException e) {
-			// TODO GESTIRE L'Eccezzione nella generazione dell'email
+			// TODO GESTIRE L'Eccezione nella generazione dell'email
 			e.printStackTrace();
 		}
 
@@ -677,19 +656,20 @@ public class AbsenceManager {
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
 		if (date.getYear() == LocalDate.now().getYear()) {
-
 			Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(), 
 					contractDao.getContract(LocalDate.now(),person), 
 					LocalDate.now(), false, otherAbsences);
-			
-			Preconditions.checkState(vr.isPresent());
-			
-			int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
-			if (remaining37 > 0) {
-				return insert(person, date,absenceType, file, Optional.<Integer>absent(), persist);
+			if (vr.isPresent()) {
+				int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
+				if (remaining37 > 0) {
+					//37 disponibile
+					return insert(person, date,absenceType, file, 
+							Optional.<Integer>absent(), persist);
+				}
 			}
 		}
-
+		
+		//37 non disponibile
 		return new AbsencesResponse(date,absenceType.code,
 				AbsencesResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
 	}
@@ -978,6 +958,11 @@ public class AbsenceManager {
 		LocalDate startAbsence = date;
 		while(begin == false){
 			PersonDay pdPrevious = personDayDao.getPreviousPersonDay(person, startAbsence);
+			if(pdPrevious == null){
+				log.warn("Non è presente il personday precedente a quello in cui "
+						+ "si vuole inserire il primo giorno di assenza per il periodo. Verificare");
+				return null;
+			}
 			List<Absence> abList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
 					pdPrevious.date, Optional.<LocalDate>absent(), false);
 			if(abList.size() == 0){
