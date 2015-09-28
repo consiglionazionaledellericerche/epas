@@ -239,8 +239,12 @@ when
         /* Vecchio permesso viewOffice 
          *  In questo caso le action non sono inserite all'interno della regola
          *  InOffice poichè i filtri sono all'interno delle stesse action.
+         *  TODO rifattorizzare tutte le action di Institutes e Offices
          */
         "Offices.showOffices",
+        "Institute.list",
+        
+        
         "Configurations.showConfGeneral",
         "Configurations.showConfYear",
         

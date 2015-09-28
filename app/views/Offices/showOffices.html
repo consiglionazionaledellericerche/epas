@@ -2,15 +2,49 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sedi'  /}
 
-<div class="container">
-	<!-- TODO 
-	<p>
-	  <a  data-modal=".my-modal" href="@{Offices.insertArea()}">
-	    <span class="glyphicon glyphicon-plus"></span> Crea una nuova Area
-	  </a>
-	</p>
-	 -->
 
+
+<div class="container">
+	
+	#{form action:@Offices.showOffices(), class:'form-inline', method:'GET',
+    'data-reload':'#results', autocomplete:'off'}
+
+    <div class="row">
+     <div class="col-sm-3">
+        #{f.text 'name', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label(), inline:true /}
+     </div>
+     <div class="col-sm-1">
+        <button type="submit" name="_filter" class="btn btn-primary">
+            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+        </button>
+     </div>
+    </div>
+	#{/form}
+	
+	#{secure.check 'People.blank'}
+	  #{b.actions}
+        #{b.link @blank(), fa:'plus'}&{'People.blank'}#{/b.link}
+        #{b.link @People.vcards(), fa:'download'}&{'People.vcards'}#{/b.link}
+      #{/b.actions}
+    #{/secure.check}
+	
+	<section id="results">
+    #{paginate results} 
+	   <ul class="list-group">
+	   #{list items:results.results, as:'item'}
+		 <li class="list-group-item">
+	           <h4 class="list-group-item-heading">${item.name}</h4>
+	           <div class="list-group-item-text">
+	             <i class="fa fa-university"></i> ${item.code}
+	           </div>
+	     </li>
+	   #{/list}
+	   </ul>
+     #{/paginate} 
+</section>
+	
+	
 	#{list items:allAreas, as:'area'}
 		<div class="panel panel-info">
 		  <div class="panel-heading">

@@ -58,14 +58,14 @@ public class Administrators extends Controller {
 		Office office = officeDao.getOfficeById(officeId);
 		if(office==null) {
 			flash.error("La sede per la quale si vuole definire l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		Role role = roleDao.getRoleById(roleId);
 
 		if(role==null) {
 			flash.error("Il ruolo selezionato è inesistente. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		String name = null;
@@ -81,17 +81,17 @@ public class Administrators extends Controller {
 		if(person==null || office==null || role==null) {
 
 			flash.error("Errore nell'inserimento parametri. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		if(!officeManager.setUro(person.user, office, role)) {
 
 			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		flash.success("Nuovo amministratore inserito con successo.");
-		Offices.showOffices();
+		Offices.showOffices(null);
 	}
 
 
@@ -101,7 +101,7 @@ public class Administrators extends Controller {
 		Office office = officeDao.getOfficeById(sedeId);
 		if(office==null) {
 			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		User user = userDao.getUserById(userId, Optional.<String>absent());
@@ -109,7 +109,7 @@ public class Administrators extends Controller {
 		if(user == null) {
 
 			flash.error("La persona per la quale si vuole rimuovere il ruolo di ammninistratore è inesistente. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		Role role = roleDao.getRoleById(roleId);
@@ -121,7 +121,7 @@ public class Administrators extends Controller {
 			
 		}
 		flash.success("Rimozione amministratore avvenuta con successo.");
-		Offices.showOffices();
+		Offices.showOffices(null);
 
 	}
 
@@ -130,7 +130,7 @@ public class Administrators extends Controller {
 		Office office = officeDao.getOfficeById(officeId);
 		if(office==null) {
 			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		Person person = Security.getUser().get().person;
@@ -144,7 +144,7 @@ public class Administrators extends Controller {
 		if(office==null) {
 			flash.error("La sede per la quale si vuole definire l'account di sistema "
 					+ "è inesistente. Riprovare o effettuare una segnalazione.");
-			Offices.showOffices();
+			Offices.showOffices(null);
 		}
 
 		List<Role> systemRoles = roleDao.getSystemRolesOffices();
@@ -181,11 +181,11 @@ public class Administrators extends Controller {
 			if (!user.password.equals(Codec.hexMD5(password))) {
 				flash.error(username + " è già presente come account di sistema."
 						+ " Inserire la password corretta o creare un nuovo account si sistema.");
-				Offices.showOffices();
+				Offices.showOffices(null);
 			}
 			if ( !user.isSystemUser() ) {
 				flash.error("Impossibile utilizzare un user non di sistema.");
-				Offices.showOffices();
+				Offices.showOffices(null);
 			}
 		} else {
 			user = new User();
@@ -198,7 +198,7 @@ public class Administrators extends Controller {
 
 		flash.success("Associazione account di sistema inserita con successo.");
 
-		Offices.showOffices();
+		Offices.showOffices(null);
 
 	}
 
@@ -222,7 +222,7 @@ public class Administrators extends Controller {
 		
 		flash.success("Associazione account di sistema rimossa con successo.");
 
-		Offices.showOffices();
+		Offices.showOffices(null);
 
 	}
 	

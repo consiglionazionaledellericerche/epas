@@ -43,6 +43,9 @@ secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 passwordSuccessfullyChanged = Password modificata con successo
 
+pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
+name=Nome
+
 Month.1=Gennaio
 Month.2=Febbraio
 Month.3=Marzo
@@ -59,6 +62,13 @@ Month.12=Dicembre
 child.name= Nome
 child.surname= Cognome
 child.bornDate= Data di Nascita
+
+crud.cancel=Indietro
+crud.save=Salva
+
+Institutes.blank=Nuovo istituto
+institute.name=Nome
+institute.code=Sigla
 
 person.surname=Cognome
 person.name=Nome

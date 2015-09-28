@@ -191,6 +191,7 @@
           		Configurazione <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 #{if ip.viewOffice }
+                  <li><a href="@{Institutes.list()}">Istituti</a></li>
                   <li><a href="@{Offices.showOffices()}">Sedi e Amministratori</a></li>
                   <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
                 #{/if}

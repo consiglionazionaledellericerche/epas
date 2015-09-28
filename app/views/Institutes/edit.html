@@ -1,0 +1,26 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
+
+#{panel 'Dati Nuovo Istituto'}
+
+#{form action:@save(), class:'form form-horizontal', autocomplete:'off', method:'POST'}
+
+#{if institute.persistent}
+ #{f.hidden 'institute.id' /}
+#{/if}
+
+
+
+
+#{f.input 'institute.name', required:true /}
+#{f.input 'institute.code'/}
+
+#{b.buttons}
+    #{b.cancel @index() /}
+    #{b.save /}
+#{/b.buttons}
+
+#{/form}
+
+#{/panel}
