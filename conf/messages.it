@@ -65,6 +65,7 @@ child.bornDate= Data di Nascita
 
 crud.cancel=Indietro
 crud.save=Salva
+crud.delete=Elimina
 
 Institutes.blank=Nuovo istituto
 institute.name=Nome

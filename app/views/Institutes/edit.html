@@ -1,26 +1,28 @@
-#{extends 'main3.html' /}
-#{set header:'navbar' /}
-#{set title: 'ePAS - Gestione sedi'  /}
+#{modalAsync id:'modalEditInstitute', button:'Salva', title:(institute?.persistent ? 'Modifica istituto' : 'Nuovo istituto')}
 
-#{panel 'Dati Nuovo Istituto'}
+  <div class="alert alert-success" role="alert">
+  Inserisci il nome del nuovo istituto e la sigla (ex. IIT). 
+  </div>
 
-#{form action:@save(), class:'form form-horizontal', autocomplete:'off', method:'POST'}
+  <div id="instituteData">
 
-#{if institute.persistent}
- #{f.hidden 'institute.id' /}
-#{/if}
+	#{form action:@save(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#instituteList',
+	    'data-async-error':'#instituteData'}
+	        
+	    
+		#{if institute.persistent}
+ 		 #{f.hidden 'institute.id' /}
+        #{/if}
 
-
-
-
-#{f.input 'institute.name', required:true /}
-#{f.input 'institute.code'/}
-
-#{b.buttons}
-    #{b.cancel @index() /}
-    #{b.save /}
-#{/b.buttons}
-
-#{/form}
-
-#{/panel}
+        #{f.input 'institute.name', required:true /}
+        #{f.input 'institute.code'/}
+	  	
+    	#{b.buttons}
+          #{b.cancel @index() /}
+          #{b.save /}
+        #{/b.buttons}
+	#{/form}
+	
+  </div>
+#{/modalAsync}

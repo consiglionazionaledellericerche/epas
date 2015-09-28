@@ -2,6 +2,8 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sedi'  /}
 
+
+
 <div class="container">
 	
 	#{form action:@Institutes.list(), class:'form-inline', method:'GET',
@@ -22,19 +24,31 @@
 	
 	#{secure.checkAction 'Institutes.blank'}
 	  #{b.actions}
-	    <a data-async-modal="#modalBlank" class="btn btn-default"
+	    <a data-async-modal="#modalEditInstitute" class="btn btn-default"
 			   	href="@{blank()}">
 				<i class="fa fa-plus"></i> &{'Institutes.blank'}
 	    </a>
       #{/b.actions}
     #{/secure.checkAction}
 	
+	<div id="instituteList"> <!-- per il risultato della modale asincrona -->
+	
 	<section id="results">
     #{paginate results} 
 	   <ul class="list-group">
 	   #{list items:results.results, as:'item'}
 		 <li class="list-group-item">
-	           <h4 class="list-group-item-heading">${item.name}</h4>
+		   <div class="pull-right btn-group">
+		    #{secure.check 'Institutes.delete'}
+		       <a class="btn btn-default" href=@{delete(item.id)}><i class="fa fa-trash"></i></a> 
+	        #{/secure.check}
+		    </div>
+	           
+	             <a data-async-modal="#modalEditInstitute" class="list-group-item-heading"
+			    	href="@{edit(item.id)}">
+				    ${item.name}
+	    	    </a>
+	           
 	           <div class="list-group-item-text">
 	             <i class="fa fa-university"></i> ${item.code}
 	           </div>
@@ -43,8 +57,11 @@
 	   </ul>
      #{/paginate} 
      </section>
+     </div>
 </div>
 
-<div id="modalBlank" class="modal fade container" tabindex="-1"></div>
+
+
+<div id="modalEditInstitute" class="modal container" tabindex="-1"></div>
 
 <!-- <a class="btn btn-primary pull-right" href="@\{Import.officeList()}">Importa da Perseo</a>	 -->
