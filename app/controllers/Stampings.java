@@ -1,43 +1,8 @@
 package controllers;
 
-import helpers.PersonTags;
-import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import manager.ConsistencyManager;
-import manager.StampingManager;
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingRecap;
-import manager.recaps.personStamping.PersonStampingRecapFactory;
-import manager.recaps.troubles.PersonTroublesInMonthRecap;
-import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
-import models.Person;
-import models.PersonDay;
-import models.StampModificationType;
-import models.StampType;
-import models.Stamping;
-import models.Stamping.WayType;
-import models.User;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
-
-import play.Logger;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -45,6 +10,28 @@ import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.PersonTags;
+import it.cnr.iit.epas.DateUtility;
+import manager.ConsistencyManager;
+import manager.StampingManager;
+import manager.recaps.personStamping.PersonStampingDayRecap;
+import manager.recaps.personStamping.PersonStampingRecap;
+import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.troubles.PersonTroublesInMonthRecap;
+import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
+import models.*;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @With( {RequestInit.class, Resecure.class} )
 public class Stampings extends Controller {
@@ -213,15 +200,10 @@ public class Stampings extends Controller {
 
 		rules.checkIfPermitted(stamping.personDay.person);
 
-		LocalDate date = stamping.date.toLocalDate();
-
-		Integer hour = stamping.date.getHourOfDay();
-		Integer minute = stamping.date.getMinuteOfHour();
-
-		render(stamping, hour, minute, date);				
+		render(stamping);
 	}
 
-	public static void update(Stamping stamping, Long stampingId, Integer stampingMinute, 
+	public static void update(Stamping stamping, Long stampingId, Integer stampingMinute,
 			Integer stampingHour, StampType stampType, String note, String elimina) {
 
 		Stamping stamp = stampingDao.getStampingById(stampingId);
@@ -272,8 +254,7 @@ public class Stampings extends Controller {
 	}
 	
 	
-	public static void updateEmployee(Stamping stamping, Long stampingId, 
-			Integer stampingHour, Integer stampingMinute, StampType stampType, String note) {
+	public static void updateEmployee(Long stampingId, StampType stampType, String note) {
 
 		Stamping stamp = stampingDao.getStampingById(stampingId);
 		if (stamp == null) {
@@ -282,21 +263,22 @@ public class Stampings extends Controller {
 
 		rules.checkIfPermitted(stamp.personDay.person);
 
-		final PersonDay pd = stamp.personDay;
-
-		if(stamping.stampType != null){
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
+		if(stampType.code == null){
+			stamp.stampType = null;
 		}
 		else{
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
+			stamp.stampType = stampType;
 		}
 
-		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		stamp.note = note;
 
-		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.surname, stamp.personDay.person.name);
+		stamp.save();
 
-		Stampings.stampings(pd.date.getYear(), pd.date.getMonthOfYear());
+		consistencyManager.updatePersonSituation(stamp.personDay.person.id, stamp.personDay.date);
 
+		flash.success("Timbratura per il giorno %s per %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.fullName());
+
+		Stampings.stampings(stamp.personDay.date.getYear(), stamp.personDay.date.getMonthOfYear());
 	}
 
 	/**

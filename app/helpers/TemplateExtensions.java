@@ -1,10 +1,10 @@
 package helpers;
 
+import com.google.common.base.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Range;
+import com.google.gson.Gson;
 import injection.StaticInject;
-
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.ReadablePeriod;
@@ -12,20 +12,13 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
-
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.Crypto;
 import play.templates.JavaExtensions;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Range;
-import com.google.gson.Gson;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 /**
  * @author marco
@@ -63,6 +56,10 @@ public class TemplateExtensions extends JavaExtensions {
 	private static final DateTimeFormatter DT_FORMATTER = DateTimeFormat
 			.forPattern("dd/MM/yyyy HH:mm:ss");
 
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat
+			.forPattern("HH:mm");
+
+
 	public static String format(ReadablePeriod period) {
 		return PERIOD_FORMATTER.print(period);
 	}
@@ -75,6 +72,9 @@ public class TemplateExtensions extends JavaExtensions {
 		return DT_FORMATTER.print(dt);
 	}
 
+	public static String time(LocalDateTime dt) {
+		return TIME_FORMATTER.print(dt);
+	}
 
 	public static String format(Object obj) {
 		if (obj instanceof LocalDate) {
