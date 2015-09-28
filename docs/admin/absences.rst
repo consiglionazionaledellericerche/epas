@@ -12,9 +12,13 @@ In particolare, dal menu :menuselection:`Amministrazione --> Assenze`, accediamo
    Schermata assenze mensili
    
 In questa pagina è possibile controllare la tipologia delle assenze, raggruppate per codice, in un determinato mese.
-I numeri che compaiono appena al di sopra della tabella rappresentano le pagine in cui sono stati divisi i dipendenti per non inserirli tutti in un'unica schermata e rendere così meno comprensibile la consultazione.
-Ogni pagina contiene 10 persone. 
-Sulla sinistra della pagina è presente inoltre un box in cui è possibile scrivere il nome o il cognome della persona di cui si intende verificare la situazione di assenze mensili, il sistema ricaricherà la pagina con tutte le occorrenze che verranno trovate nel database della sequenza di caratteri inserita. 
+La tabella, così come avviene nella tabella della lista del personale, è soggetta a dimensionamento, infatti in alto a sinistra è presente un bottone che consente di decidere quanti elementi della lista visualizzare
+(di default impostato a 10, è possibile comunque scegliere 25, 50 o tutti gli elementi).
+Sulla destra della tabella è inoltre presente un campo testuale per la ricerca puntuale dei dipendenti. Qui è possibile scrivere il nome o il cognome del dipendente di cui si intende verificare la situazione di assenze nel mese così da poterlo 
+visualizzare senza tutti gli altri.
+In basso, sotto alla tabella, è possibile vedere il numero di pagine in cui è stata suddivisa la lista di persone, che cambia naturalmente in base a quanti elementi vengono selezionati in visualizzazione dalla form descritta in precedenza.
+E' possibile ordinare la tabella per ciascuno dei campi presenti. Di default la tabella è ordinata in ordine alfabetico del personale, ma ciò non toglie che, per esigenze personali, cliccando sull'intestazione della colonna, si decida di visualizzare la lista 
+in ordine ascendente o discendente rispetto a uno specifico campo (ad esempio in figura si può selezionare l'ordine discendente dei codici di assenza "31" così da vedere chi nel mese ne ha presi di più).
 
 Passando il mouse sopra il codice di assenza presente nell'intestazione della tabella, è possible anche vedere la descrizione del codice in questione.
 Inoltre, cliccando sul numero corrispondente al quantitativo di assenze fatte per quel codice, verrà visualizzato un prospetto nel quale veriricare i giorni precisi del mese in cui quella persona ha usufruito di quel codice di assenza.

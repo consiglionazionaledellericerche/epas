@@ -44,11 +44,9 @@ public class PersonReperibility extends BaseModel {
 	public Person person;
 	
 	@Column(name="start_date")
-
 	public LocalDate startDate;
 	
 	@Column(name="end_date")
-
 	public LocalDate endDate;
 	
 	@Required

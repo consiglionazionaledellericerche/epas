@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import controllers.Security;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import injection.StaticInject;
 
 public class OfficeManager {
 

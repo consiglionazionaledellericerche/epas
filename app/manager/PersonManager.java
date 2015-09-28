@@ -1,8 +1,5 @@
 package manager;
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,18 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
 
-import models.AbsenceType;
-import models.Contract;
-import models.ContractWorkingTimeType;
-import models.Person;
-import models.PersonDay;
-import models.WorkingTimeTypeDay;
-
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.db.jpa.JPA;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -34,6 +20,15 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+import models.AbsenceType;
+import models.Contract;
+import models.ContractWorkingTimeType;
+import models.Person;
+import models.PersonDay;
+import models.WorkingTimeTypeDay;
+import play.db.jpa.JPA;
 
 public class PersonManager {
 
@@ -44,7 +39,6 @@ public class PersonManager {
 			PersonDayManager personDayManager,
 			IWrapperFactory wrapperFactory,ConfGeneralManager confGeneralManager) {
 		this.contractDao = contractDao;
-		this.personChildrenDao = personChildrenDao;
 		this.personDao = personDao;
 		this.personDayDao = personDayDao;
 		this.absenceDao = absenceDao;
@@ -53,10 +47,7 @@ public class PersonManager {
 		this.confGeneralManager = confGeneralManager;
 	}
 
-	private final static Logger log = LoggerFactory.getLogger(PersonManager.class);
-
 	private final ContractDao contractDao;
-	private final PersonChildrenDao personChildrenDao;
 	private final PersonDao personDao;
 	private final PersonDayDao personDayDao;
 	private final PersonDayManager personDayManager;

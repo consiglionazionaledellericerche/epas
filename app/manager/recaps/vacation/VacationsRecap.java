@@ -129,7 +129,7 @@ public class VacationsRecap {
 		//(3) permessi usati dell'anno richiesto
 		permissionUsed = list94RequestYear.size();
 		
-		if (this.contract.sourceDate != null && this.contract.sourceDate.getYear() == year) {
+		if (this.contract.sourceDateResidual != null && this.contract.sourceDateResidual.getYear() == year) {
 			vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
 			vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
 			permissionUsed += this.contract.sourcePermissionUsed;
@@ -186,8 +186,8 @@ public class VacationsRecap {
 		absences.addAll(list32RequestYear);
 		absences.addAll(list31NextYear);
 		absences.addAll(list37NextYear);
-		if (this.contract.sourceDate != null && 
-				this.contract.sourceDate.getYear() == year) {
+		if (this.contract.sourceDateResidual != null && 
+				this.contract.sourceDateResidual.getYear() == year) {
 			vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
 			vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
 			permissionUsed += this.contract.sourcePermissionUsed;
@@ -209,24 +209,24 @@ public class VacationsRecap {
 	}
 	
 	public int sourceVacationCurrentYearUsed() {
-		if (this.contract.sourceDate != null && 
-				this.contract.sourceDate.getYear() == year) {
+		if (this.contract.sourceDateResidual != null && 
+				this.contract.sourceDateResidual.getYear() == year) {
 			return this.contract.sourceVacationCurrentYearUsed;
 		}
 		return 0;
 	}
 	
 	public int sourceVacationLastYearUsed() {
-		if (this.contract.sourceDate != null && 
-				this.contract.sourceDate.getYear() == year) {
+		if (this.contract.sourceDateResidual != null && 
+				this.contract.sourceDateResidual.getYear() == year) {
 			return this.contract.sourceVacationLastYearUsed;
 		}
 		return 0;
 	}
 	
 	public int sourcePermissionUsed() {
-		if (this.contract.sourceDate != null && 
-				this.contract.sourceDate.getYear() == year) {
+		if (this.contract.sourceDateResidual != null && 
+				this.contract.sourceDateResidual.getYear() == year) {
 			return this.contract.sourcePermissionUsed;
 		}
 		return 0;
@@ -265,7 +265,7 @@ public class VacationsRecap {
 						absenceTypeManager.codesForVacations(), true);
 		
 		absencesForVacationsRecap.addAll(otherAbsences);
-		// TODO: filtrare otherAbsencs [dateFrom, dateTo]
+		// TODO: filtrare otherAbsencs le sole nell'intervallo [dateFrom, dateTo]
 		
 		AbsenceType ab32  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
 		AbsenceType ab31  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());

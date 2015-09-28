@@ -149,7 +149,9 @@
 				#{/elseif}
 					
 				#{if stampingTemplate.date!=null}
-				  ${stampingTemplate.hour}
+				 <a data-toggle="modal" href="@{Stampings.editEmployee(stampingTemplate.stampingId)}" data-modal=".my-modal">
+			  		${stampingTemplate.hour}
+				</a>
 				#{/if}
 				#{elseif stampingTemplate.pairPosition.equals("center")}
 				    <abbr title="Timbratura di servizio mancante" class="initialism"><i class="icon-warning-sign"></i></abbr>
@@ -253,4 +255,4 @@
   
   </div>
 
-
+#{include '_myModal.html' /}

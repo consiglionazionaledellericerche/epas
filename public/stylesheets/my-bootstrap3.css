@@ -43,6 +43,18 @@ footer p {
 }
 
 
+/* Helper Classes
+------------------------------------------------------------------------- */
+
+.margin-top{
+	margin-top: 2em;
+}
+
+.margin-bottom{
+	margin-bottom: 2em;
+}
+
+
 /* Regole per smartphone s2
 ------------------------------------------------------------------------- */
 @media (max-width: 400px) {
@@ -239,12 +251,9 @@ td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bo
 
 /* tabellone timbrature */
 table#tabellonetimbrature{
-	font-size: small;
-	border-right: 0;
-    border-top: 0;
-    border-bottom: 0;
+		font-size: small;
+		border: 0;
     border-spacing: 0px 1px; 
-    
     border-collapse: separate; /* per i bordi tondiiiiiiiii */
 }
 
@@ -353,10 +362,3 @@ tfoot input {
    padding: 3px;
    box-sizing: border-box;
 }
-
-/* Corregge un bug della versione 4 della select2 che si verifica sui modali bootstrap */
-.select2-container {
-width: 100% !important;
-padding: 0;
-}
-

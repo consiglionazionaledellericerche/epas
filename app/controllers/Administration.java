@@ -1,12 +1,20 @@
 package controllers;
 
-import it.cnr.iit.epas.CompetenceUtility;
-import it.cnr.iit.epas.ExportToYaml;
-
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import it.cnr.iit.epas.CompetenceUtility;
+import it.cnr.iit.epas.ExportToYaml;
 import jobs.RemoveInvalidStampingsJob;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
@@ -16,20 +24,9 @@ import models.Person;
 import models.StampType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
-
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
@@ -72,7 +69,6 @@ public class Administration extends Controller {
 			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
 			absenceType.save();
 		}
-
 		absenceType = AbsenceType.find("byCode", "RITING").first();
 		if(absenceType==null) {
 			absenceType = new AbsenceType();
@@ -154,9 +150,9 @@ public class Administration extends Controller {
 			Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 			
 			if(contract.isPresent()) {
-				if(contract.get().sourceDate == null && contract.get().beginContract.isBefore(initUse)) {
+				if(contract.get().sourceDateResidual == null && contract.get().beginContract.isBefore(initUse)) {
 					Contract c = contract.get();
-					c.sourceDate = initUse.minusDays(1);
+					c.sourceDateResidual = initUse.minusDays(1);
 					c.sourcePermissionUsed = 0;
 					c.sourceRecoveryDayUsed = 0;
 					c.sourceRemainingMealTicket = 0;

@@ -25,7 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import models.base.BaseModel;
+import models.base.MutableModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -53,7 +53,7 @@ import com.google.common.collect.Sets;
 @Audited
 @Table(name = "persons", uniqueConstraints={@UniqueConstraint(columnNames={"badgenumber", "office_id"})})
 
-public class Person extends BaseModel implements Comparable<Person>{
+public class Person extends MutableModel implements Comparable<Person>{
 
 	private static final long serialVersionUID = -2293369685203872207L;
 
@@ -87,12 +87,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Unique
 	public Integer number;
 
-	/**
-	 * numero di matricola sul badge
-	 */
-//	@Unique
-	@As(binder=NullStringBinder.class)
-	public String badgeNumber;
+
 
 	/**
 	 * id che questa persona aveva nel vecchio database
@@ -220,6 +215,17 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Required
 	public Office office;
 
+	/** 
+	 * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge
+	 * alla tabella badges.
+	 */
+	@Deprecated
+	@As(binder=NullStringBinder.class)
+	public String badgeNumber;
+	
+	@OneToMany(mappedBy="person", cascade = {CascadeType.REMOVE})
+	public Set<Badge> badges = Sets.newHashSet();
+
 
 	public String getName(){
 		return this.name;
@@ -248,7 +254,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@Override
 	public String toString() {
-		return String.format("Person[%d] - %s %s", id, name, surname);
+		return getFullname();
 	}
 
 	@Override
