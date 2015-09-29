@@ -202,6 +202,50 @@ then
 end
 
 /*******************************************************************************
+ * Azioni utente con ruolo TECNICAL_ADMIN
+ ******************************************************************************/
+rule tecnicalAdmin_Generic
+when 
+ $uro: UsersRolesOffices()
+ $p: Role(name == "tecnicalAdmin") from $uro.role
+ $c: PermissionCheck(action in (
+ 	
+ 	
+        "Institutes.list",
+        "Institutes.index",
+        
+        "Offices.list",
+        
+        /* duplicate prima di avere il contesto office */
+		"Institutes.edit",
+		"Institutes.save",
+		"Institutes.delete",
+		
+		"Offices.list"
+   
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule tecnicalAdmin_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "tecnicalAdmin") from $uro.role
+ $c: PermissionCheck(action in (
+ 
+ 	   "Institutes.edit",
+ 	   "Institutes.save",
+	   "Institutes.delete"
+	   
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*******************************************************************************
  * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
  ******************************************************************************/
 
@@ -242,7 +286,7 @@ when
          *  TODO rifattorizzare tutte le action di Institutes e Offices
          */
         "Offices.showOffices",
-        "Institute.list",
+        "Institutes.list",
         
         
         "Configurations.showConfGeneral",

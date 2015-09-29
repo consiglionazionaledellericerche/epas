@@ -194,7 +194,7 @@
               <ul class="dropdown-menu">
                 #{if ip.viewOffice }
                   <li><a href="@{Institutes.list()}">Istituti</a></li>
-                  <li><a href="@{Offices.showOffices()}">Sedi e Amministratori</a></li>
+                  <li><a href="@{Offices.list()}">Sedi e Amministratori</a></li>
                   <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
                 #{/if}
                 #{if ip.viewWorkingTimeType}
@@ -387,6 +387,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
     <script src="@{'/public/js/bootstrap-modalmanager.js'}"></script>
     <script src="@{'/public/js/bootstrap-modal.js'}"></script>
 

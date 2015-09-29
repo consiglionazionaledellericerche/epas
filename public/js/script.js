@@ -3,7 +3,6 @@
 
 $(function($){
 	
-	
 	/**
 	 * Author: Marco
      * form ajax attivate con l'attributo data-async:
@@ -59,6 +58,8 @@ $(function($){
     	});
     	e.preventDefault();
     });
+    
+    bootbox.setDefaults({locale: 'it', className: 'bootbox_modal'});
     
 	$.fn.initepas = function() {
 

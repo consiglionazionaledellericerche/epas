@@ -4,7 +4,7 @@
 
 <div class="container">
 	
-	#{form action:@Institutes.list(), class:'form-inline', method:'GET',
+	#{form action:@Offices.list(), class:'form-inline', method:'GET',
     'data-reload':'#results', autocomplete:'off'}
 
     <div class="row">
@@ -20,7 +20,8 @@
     </div>
 	#{/form}
 	
-	#{secure.checkAction 'Institutes.blank'}
+	
+	#{secure.checkAction 'Offices.blank'}
 	  #{b.actions}
 	    <a data-async-modal="#modalEditInstitute" class="btn btn-default"
 			   	href="@{blank()}">
@@ -37,9 +38,11 @@
 	   #{list items:results.results, as:'item'}
 		 <li class="list-group-item">
 		   <div class="pull-right btn-group">
+		    
 		    #{secure.check 'Institutes.delete'}
 		       <a class="btn btn-default" href=@{delete(item.id)}><i class="fa fa-trash"></i></a> 
 	        #{/secure.check}
+	        
 		    </div>
 	           
 	             <a data-async-modal="#modalEditInstitute" class="list-group-item-heading"
@@ -47,6 +50,9 @@
 				    ${item.name}
 	    	    </a>
 	           
+	           <div class="list-group-item-text">
+	             <i class="fa fa-university"></i> ${item.address}
+	           </div>
 	           <div class="list-group-item-text">
 	             <i class="fa fa-university"></i> ${item.code}
 	           </div>
