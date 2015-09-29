@@ -21,7 +21,7 @@
 
 <p><h3>Lista del Personale Attivo</h3></p>
 
-<table width="100%" datatable>
+<table class="datatable-test table table-striped table-hover table-condensed center">
     <thead>
 	  <tr>
 		<th>&{'person.name'}</th>
@@ -95,11 +95,11 @@
 		#{/if}
 		">
 		 #{if person.currentContract.get().sourceDateResidual != null}
-		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Modifica</a>
-		   #{if person.currentContract.get().sourceByAdmin == false} X #{/if}
+		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Modifica</a>
+		   #{if person.currentContract.get().sourceByAdmin == false} <i class="fa fa-exclamation-triangle"></i> #{/if}
     	 #{/if}
 		 #{else}
-	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Definisci</a>
+	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Definisci</a>
 		 #{/else}
 		</td>
 
@@ -124,7 +124,7 @@
   
   <p><h3>Lista del Personale Non Attivo</h3></p>
 
-<table width="100%" datatable>
+<table class="datatable-test table table-striped table-hover table-condensed center" cellspacing="0" >
     <thead>
 	  <tr>
 		<th>&{'person.name'}</th>
@@ -157,5 +157,4 @@
 	</tbody>
   </table>
 
- #{include '_myModal.html' /}
-
+#{include '_myModal_large.html' /}
