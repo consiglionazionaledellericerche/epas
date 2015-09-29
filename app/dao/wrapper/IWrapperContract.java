@@ -8,6 +8,7 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 
+import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
@@ -74,6 +75,7 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 	 */
 	public boolean noRelevant();
 	public boolean initializationMissing();
+	public LocalDate dateForInitialization();
 	public boolean monthRecapMissing(YearMonth yearMonth);
 	public boolean monthRecapMissing();
 	public boolean hasMonthRecapForVacationsRecap(int yearToRecap);
