@@ -424,6 +424,7 @@ when
         
         "Persons.updateSourceContract",
      	"Persons.saveSourceContract",
+     	"Persons.approveAutomatedSource",
      	
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
@@ -533,6 +534,7 @@ when
      	
      	"Persons.updateSourceContract",
      	"Persons.saveSourceContract",
+     	"Persons.approveAutomatedSource",
      	
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
