@@ -66,6 +66,7 @@ public class Institutes extends Controller {
 	}
 
 	public static void edit(Long id) {
+		
 		final Institute institute = Institute.findById(id);
 		notFoundIfNull(institute);
 		render(institute);
@@ -76,9 +77,8 @@ public class Institutes extends Controller {
 		render("@edit", institute);
 	}
 
-	public static void save(Institute institute) {
+	public static void save(@Valid Institute institute) {
 		
-		validation.valid(institute);
 		if (Validation.hasErrors()) {
 			response.status = 400;
 			log.warn("validation errors for {}: {}", institute,

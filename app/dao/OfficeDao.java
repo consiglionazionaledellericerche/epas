@@ -152,6 +152,15 @@ public class OfficeDao extends DaoBase {
 				.or(institute.code.startsWithIgnoreCase(name));
 	}
 	
+	private BooleanBuilder matchOfficeName(QOffice office, String name) {
+		final BooleanBuilder nameCondition = new BooleanBuilder();
+		for (String token : TOKEN_SPLITTER.split(name)) {
+			nameCondition.and(office.name.startsWithIgnoreCase(token));
+		}
+		return nameCondition.or(office.name.startsWithIgnoreCase(name));
+				
+	}
+	
 	/**
 	 * Gli istituti che contengono sede sulle quali l'user ha il ruolo role.
 	 * @param user
@@ -184,6 +193,42 @@ public class OfficeDao extends DaoBase {
 				.distinct();
 				
 		return PerseoModelQuery.wrap(query, institute);
+		
+	}
+	
+	/**
+	 * Le sedi sulle quali l'user ha il ruolo role.
+	 * @param user
+	 * @param role
+	 * @return
+	 */
+	public PerseoSimpleResults<Office> offices(Optional<String> name, User user, Role role) {
+		
+		final QOffice office = QOffice.office;
+		final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+		final QInstitute institute = QInstitute.institute;
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		if (name.isPresent()) {
+			condition.and(matchOfficeName(office, name.get()));
+		}
+		
+		if(user.isSystemUser()) {
+			final JPQLQuery query = getQueryFactory()
+					.from(office)
+					.where(condition);
+			return PerseoModelQuery.wrap(query, office);
+		}
+		
+		final JPQLQuery query = getQueryFactory()
+				.from(office)
+				.leftJoin(office.usersRolesOffices, uro)
+				.leftJoin(office.institute, institute).fetch()
+				.where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+				.distinct()
+				.orderBy(office.institute.name.asc());
+				
+		return PerseoModelQuery.wrap(query, office);
 		
 	}
 

@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.Web;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.mysema.query.SearchResults;
 
@@ -43,7 +45,69 @@ public class Offices extends Controller {
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static ConfYearManager confYearManager;
+	
+	@Inject
+	private static RoleDao roleDao;
 
+	public static void list(String name) {
+		
+		//la lista di office su cui si ha tecnical admin. Nel template l'iterazione
+		//sui seats.
+		
+		SearchResults<?> results = officeDao.offices(Optional.<String>fromNullable(name),
+				Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
+				.listResults();
+		
+		render(results, name);
+		
+	}
+	
+	public static void show(Long id) {
+//		final Institute institute = Institute.findById(id);
+//		notFoundIfNull(institute);
+//		render(institute);
+	}
+
+	public static void edit(Long id) {
+		
+//		final Institute institute = Institute.findById(id);
+//		notFoundIfNull(institute);
+//		render(institute);
+	}
+
+	public static void blank() {
+//		final Institute institute = new Institute();
+//		render("@edit", institute);
+	}
+
+	public static void save(@Valid Institute institute) {
+		
+//		if (Validation.hasErrors()) {
+//			response.status = 400;
+//			log.warn("validation errors for {}: {}", institute,
+//					validation.errorsMap());
+//			flash.error(Web.msgHasErrors());
+//			render("@edit", institute);
+//		} else {
+//			institute.save();
+//			flash.success(Web.msgSaved(Institute.class));
+//			index();
+//		}
+	}
+	
+	public static void delete(Long id) {
+//		final Institute institute = Institute.findById(id);
+//		notFoundIfNull(institute);
+//		
+//		if(institute.seats.isEmpty()) {
+//			institute.delete();
+//			flash.success(Web.msgDeleted(Institute.class));
+//			index();
+//		}
+//		flash.error(Web.msgHasErrors());
+//		index();
+	}
+	
 	@Deprecated
 	public static void showOffices(String name){
 
