@@ -19,7 +19,49 @@
   </style>
 #{/set}
 
-<div class="container-fluid">
+#{panel title:'Tipi orario CNR', dim:6, offset:3, fluid:true, color:'success'}
+  	
+  	<div class="alert alert-success" role="alert">
+   	  I <strong>tipi orario predefiniti</strong> possono essere assegnati ad ogni dipendente di ogni sede.<br>
+   	  Non possono essere modificati o aggiunti ma possono essere presi ad esempio da parte degli amministratori
+   	  del personale per creare nuovi tipi orario particolari per le sedi amministrate. 
+   </div>
+  
+    <table class="table table-hover">
+      <tr>
+         <th class="center">Descrizione</th>
+         <th class="center">Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
+         <th class="center">Periodi associati<br>a contratti attivi</th> 
+         <th class="center">Cambia orario<br>a tutti</th>
+      </tr>
+      #{list items:wttDefault, as:'wtt'}
+      <tr>
+        <td>
+          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
+		    ${wtt.value.description}			    
+		  </a>
+        </td>
+        <td class="center">
+          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-modal=".my-modal">
+            ${wtt.getAssociatedActiveContract(office.id).size()}
+    	  </a>    
+        </td>
+        <td class="center">
+          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-modal=".my-modal">
+            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+          </a>
+        </td>
+        <td class="center">
+          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
+            Cambia
+    	  </a>
+        </td>
+       </tr>	
+       #{/list}
+	</table>
+  #{/panel}
+
+	<div class="container-fluid">
  <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
 	  #{form action:@WorkingTimes.manageWorkingTime(), role:'form', class:'form-inline', 
 	    method:'GET', autocomplete:'off',
@@ -40,60 +82,15 @@
 	  #{/form}
       </div>
 </div>
-
-
-
-<div class="container-fluid">
-
-	<div class="col-md-6">
-	<div class="panel panel-info">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">Tipi orario CNR</h3>
-	  </div>
-	  <div class="panel-body">
-	    <table class="table table-hover">
-	        <tr>
-	          <th class="center">Descrizione</th>
-	          <th class="center">Contratti attivi<br>attualmente associati</th>
-	          <th class="center">Periodi associati<br>a contratti attivi</th> 
-	          <th class="center">Cambia orario<br>a tutti</th>
-	        </tr>
-		    #{list items:wttDefault, as:'wtt'}
-		      <tr>
-		        <td>
-		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
-				    ${wtt.value.description}			    
-				  </a>
-		        </td>
-		        <td class="center">
-		          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-modal=".my-modal">
-		            ${wtt.getAssociatedActiveContract(office.id).size()}
-		    	  </a>    
-		        </td>
-		        <td class="center">
-		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-modal=".my-modal">
-		            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
-		          </a>
-		        </td>
-		        <td class="center">
-		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
-		            Cambia
-		    	  </a>
-		        </td>
-		      </tr>	
-		    #{/list}
-		</table>
-	  </div>
-	</div>
-	</div>
 	
-	<div class="col-md-6">
-		<div class="panel panel-info">
-		  <div class="panel-heading">
-		    <h3 class="panel-title">Tipi Orario particolari attivi per ${office.name} </h3>
-		  </div>
-		  <div class="panel-body">
-		    <!-- lista -->
+  #{panel title:'Tipi Orario particolari per ' + office.name, dim:6, offset:3, fluid:true}
+  
+   <!-- Nuovo -->
+			<a href="@{WorkingTimes.insertWorkingTime(office.id)}" data-modal=".my-modal-large">
+		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
+		    </a>
+  
+   <h4>Attivi</h4>
 		    <table class="table table-condensed table-hover">
 		        <tr>
 		          <th>Descrizione</th>
@@ -149,27 +146,9 @@
 			    #{/list}
 			</table>
 			
-			<!-- Nuovo -->
-			<a href="@{WorkingTimes.insertWorkingTime(office.id)}" data-modal=".my-modal-large">
-		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
-		    </a>
-		  </div>
-		</div>
-	</div>
-	
-	<div class="col-md-6">
-	<div class="panel-group" id="accordion-wtt">
-	  <div class="panel panel-default">
-	    <div class="panel-heading">
-	      <h4 class="panel-title">
-	        <a data-toggle="collapse" data-parent="#accordion-wtt" href="#collapseOne-wtt">
-	          Tipi Orario particolari disattivati
-	        </a>
-	      </h4>
-	    </div>
-	    <div id="collapseOne-wtt" class="panel-collapse collapse out">
-	      <div class="panel-body">
-		    <!-- lista -->
+			
+		<h4>Disabilitati</h4>
+
 		    <table class="table table-condensed table-hover">
 		        <tr>
 		          <th>Descrizione</th>
@@ -208,13 +187,17 @@
 			    #{/list}
 			</table>
 			
-		  </div>
-		</div>
-      </div>
-	</div>
-	</div>
+			
+  #{/panel}
+	
+	
 
-</div>
+	
+	
+#{panel title:'Tipi Orario disattivati per ' + office.name, dim:6, offset:3, fluid:true}
+		
+#{/panel}			
+
 
 <div class="container">	
 
