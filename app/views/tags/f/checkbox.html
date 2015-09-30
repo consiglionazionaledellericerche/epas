@@ -1,14 +1,14 @@
 #{field _arg}
 <div class='form-group #{if field.error}has-error has-feedback#{/if}'>
-	<div class="col-sm-offset-3 col-sm-6">
-		<div class="checkbox">
-			<label>
-				<input #{if _class}class=${_class} #{/if}name="${field.name}" type="checkbox"#{if field.value == true} checked#{/if}#{if _title} title='${_title}'#{/if}#{if _disabled} disabled#{/if}/> 
+    <div class="col-sm-offset-3 col-sm-6">
+        <div class="checkbox">
+            <label>
+                <input #{if _class}class=${_class} #{/if}name="${field.name}" type="checkbox"#{if field.value == true} checked#{/if}#{if _title} title='${_title}'#{/if}#{if _disabled} disabled#{/if}/>
 				#{if _label}${_label}#{/if}#{else}&{field.name}#{/else}
-				<input name="${field.name}" type="hidden"  />
-			</label>
-		</div>
-	</div>
+                <input name="${field.name}" type="hidden"  />
+            </label>
+        </div>
+    </div>
 	#{if _description}<div class="col-sm-3">&{field.name+'.description'}</div>#{/if}
 </div>
 #{/field}
