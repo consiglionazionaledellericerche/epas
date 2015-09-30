@@ -15,7 +15,6 @@ $(function($){
 			"language": {"url": "/public/i18n/DataTablesItalian.json"}
 		});
 
-		
 		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
 		//il plugin responsive abilitato sulla tabella(sono incompatibili)
 		this.find('.datatable-test').DataTable( {
