@@ -577,6 +577,7 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
+		contract.sourceByAdmin = true;
 		contractManager.saveSourceContract(contract);
 
 		//Ricalcolo valori dalla nuova data inizializzazione.
