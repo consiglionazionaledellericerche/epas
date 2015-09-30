@@ -41,7 +41,7 @@ import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperWorkingTimeType;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class WorkingTimes extends Controller{
 
 	@Inject 
@@ -305,14 +305,15 @@ public class WorkingTimes extends Controller{
 	}
 
 	/**
-	 * NB nelle drools questa action è considerata editPerson!!!
 	 * @param wttId
 	 * @param wttId1
 	 * @param dateFrom
 	 * @param dateTo
 	 */
 	public static void executeChangeWorkingTimeTypeToAll(WorkingTimeType wttOld, 
-			WorkingTimeType wttNew,@Required Office office, LocalDate dateFrom, LocalDate dateTo) {
+			WorkingTimeType wttNew, Long officeId, LocalDate dateFrom, LocalDate dateTo) {
+		
+		Office office = officeDao.getOfficeById(officeId);
 		
 		if(dateFrom.isAfter(dateTo)){
 			flash.error("Intervallo date non Valido");
@@ -321,8 +322,6 @@ public class WorkingTimes extends Controller{
 		
 		int contractChanges = 0;
 		int contractError = 0;
-
-		JPAPlugin.startTx(false);
 
 		rules.checkIfPermitted(office);
 
@@ -337,6 +336,7 @@ public class WorkingTimes extends Controller{
 		//Prendere tutti i contratti attivi da firstDay ad oggi
 		List<Contract> contractInPeriod = contractManager.getActiveContractInPeriod(dateFrom, dateTo);
 		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
 
 		//Logica aggiornamento contratto
 		for(Contract contract : contractInPeriod) {

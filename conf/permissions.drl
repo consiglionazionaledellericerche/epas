@@ -308,10 +308,7 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract",				
-        "WorkingTimes.changeWorkingTimeTypeToAll",
-        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
-        
+        "WorkingTimes.showContract"				
 
         ), target == null, granted == false)
 then
@@ -378,9 +375,7 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract",				
-        "WorkingTimes.changeWorkingTimeTypeToAll",
-        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
+        "WorkingTimes.showContract"				
                
        ), target == $o, granted == false)
 then
@@ -450,8 +445,6 @@ when
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
      	
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
-     	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
@@ -490,6 +483,8 @@ when
         "WorkingTimes.save",
         "WorkingTimes.delete",
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll",
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
@@ -565,8 +560,6 @@ when
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
      	
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
-     	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
@@ -606,6 +599,8 @@ when
         "WorkingTimes.delete",
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
         "WorkingTimes.insertWorkingTime",
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll",
         
         /* Vecchio permesso editCompetenceCode
          *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
