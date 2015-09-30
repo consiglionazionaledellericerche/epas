@@ -75,7 +75,7 @@ public class Configurations extends Controller{
 
 		ConfGeneral dateStartMealTicket = confGeneralManager.getConfGeneral(Parameter.DATE_START_MEAL_TICKET, office);
 		ConfGeneral sendEmail = confGeneralManager.getConfGeneral(Parameter.SEND_EMAIL, office);
-
+		
 		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, addressesAllowed, urlToPresence, userToPresence,
 				passwordToPresence, numberOfViewingCouple, dateStartMealTicket,sendEmail, offices, office);
 
