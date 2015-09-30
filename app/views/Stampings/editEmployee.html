@@ -11,7 +11,7 @@
 
         <input type="hidden" name="stampingId" value="${stamping.id}"/>
 
-        #{f.view 'Timbratura', value:stamping.date.time()/}
+        <h2 class="margin-bottom">${stamping.date.time()}</h2>
         #{f.selectModel 'stampType' ,value:stamping.stampType, items:templateUtility.allStampTypes /}
         #{f.textArea 'note',value:stamping.note /}
 
