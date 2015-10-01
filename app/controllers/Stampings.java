@@ -239,10 +239,10 @@ public class Stampings extends Controller {
 		}
 		
 		if(stamping.stampType != null){
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType, false);
 		}
 		else{
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType, false);
 		}
 
 		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
@@ -254,7 +254,8 @@ public class Stampings extends Controller {
 	}
 	
 	
-	public static void updateEmployee(Long stampingId, StampType stampType, String note) {
+	public static void updateEmployee(Stamping stamping,Long stampingId, StampType stampType, 
+			Integer stampingHour, Integer stampingMinute,String note) {
 
 		Stamping stamp = stampingDao.getStampingById(stampingId);
 		if (stamp == null) {
@@ -263,22 +264,23 @@ public class Stampings extends Controller {
 
 		rules.checkIfPermitted(stamp.personDay.person);
 
-		if(stampType.code == null){
-			stamp.stampType = null;
+
+		final PersonDay pd = stamp.personDay;
+
+		if(stamping.stampType != null){
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType, true);
+
 		}
 		else{
-			stamp.stampType = stampType;
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType, true);
+			
 		}
+		
+		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
-		stamp.note = note;
+		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.surname, stamp.personDay.person.name);
 
-		stamp.save();
-
-		consistencyManager.updatePersonSituation(stamp.personDay.person.id, stamp.personDay.date);
-
-		flash.success("Timbratura per il giorno %s per %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.fullName());
-
-		Stampings.stampings(stamp.personDay.date.getYear(), stamp.personDay.date.getMonthOfYear());
+		Stampings.stampings(pd.date.getYear(), pd.date.getMonthOfYear());
 	}
 
 	/**
