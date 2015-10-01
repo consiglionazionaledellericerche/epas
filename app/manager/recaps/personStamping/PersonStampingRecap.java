@@ -173,6 +173,12 @@ public class PersonStampingRecap {
 									StampModificationTypeCode.MARKED_BY_ADMIN);
 					stampModificationTypeSet.add(smt);
 				}
+				if(stamp.markedByEmployee){
+					StampModificationType smt = stampingDayRecapFactory
+							.stampTypeManager.getStampMofificationType(
+									StampModificationTypeCode.MARKED_BY_EMPLOYEE);
+					stampModificationTypeSet.add(smt);
+				}
 				if(stamp.stampModificationType != null) {
 					if(stamp.stampModificationType.code.equals(
 							StampModificationTypeCode

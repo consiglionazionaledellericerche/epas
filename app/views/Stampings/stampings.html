@@ -162,6 +162,9 @@
 				#{/ifnot}	
 				#{ifnot stampingTemplate.markedByAdminCode.equals("")}
 					<strong>${stampingTemplate.markedByAdminCode}</strong>
+				#{/ifnot}
+				#{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
+					<strong>${stampingTemplate.markedByEmployeeCode}</strong>
 				#{/ifnot}	
 				#{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
 					<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
