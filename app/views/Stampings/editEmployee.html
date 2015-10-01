@@ -13,7 +13,7 @@
 
         <h2 class="margin-bottom">${stamping.date.time()}</h2>
         #{f.selectModel 'stampType' ,value:stamping.stampType, items:templateUtility.allStampTypes /}
-        #{f.textArea 'note',value:stamping.note /}
+        #{f.input 'note',value:stamping.note /}
 
         <input class="btn btn-primary" type="submit" value="Aggiorna"/>
     #{/form}
