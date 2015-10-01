@@ -1,28 +1,22 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
-import models.Contract;
-import models.Person;
-import models.PersonDay;
-import models.StampType;
-import models.Stamping;
+import models.*;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StampingManager {
 

@@ -6,7 +6,6 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 

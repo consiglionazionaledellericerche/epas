@@ -460,6 +460,7 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
+     	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
      	/* Vecchio permesso editCompetence */
@@ -575,6 +576,7 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
+     	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
      	/* Vecchio permesso editCompetence */
