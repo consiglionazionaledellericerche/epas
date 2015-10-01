@@ -243,7 +243,7 @@ public class ContractMonthRecapManager {
 						buildIntervalForCompensatoryRest(yearMonth, contract);
 				
 		DateInterval validDataForMealTickets = buildIntervalForMealTicket(yearMonth, 
-						calcolaFinoA, contract);
+						contract);
 		
 		setMealTicketsInformation(cmr, validDataForMealTickets);
 		setPersonDayInformation(cmr, validDataForPersonDay);
@@ -390,11 +390,15 @@ public class ContractMonthRecapManager {
 	 * @return
 	 */
 	private DateInterval buildIntervalForMealTicket(YearMonth yearMonth, 
-			LocalDate calcolaFinoA,	Contract contract) {
+			/*LocalDate calcolaFinoA,*/	Contract contract) {
 
-		LocalDate firstDayOfRequestedMonth = 
-				new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
-		DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
+		// FIXME: nel caso di buono pasto attribuito oggi non prenderei il dato
+		// in fin dei conti la restrizione sul calcolaFinoA potrebbe essere inutile
+		// nel caso dei buoni pasto attribuiti. Valutare
+		
+		//LocalDate firstDayOfRequestedMonth = 
+		//		new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
+		//DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
 		
 		Optional<LocalDate> dateStartMealTicketInOffice = 
 				confGeneralManager.getLocalDateFieldValue(
@@ -427,9 +431,9 @@ public class ContractMonthRecapManager {
 		DateInterval validDataForMealTickets = null;
 		if(monthInterval != null)	{
 			validDataForMealTickets = DateUtility
-					.intervalIntersection(monthInterval, requestInterval);
-			validDataForMealTickets = DateUtility
-					.intervalIntersection(validDataForMealTickets, contractIntervalForMealTicket);
+					.intervalIntersection(monthInterval, contractIntervalForMealTicket);
+			//validDataForMealTickets = DateUtility
+			//		.intervalIntersection(validDataForMealTickets, requestInterval);
 			validDataForMealTickets = DateUtility
 					.intervalIntersection(validDataForMealTickets, mealTicketIntervalInOffice);
 		}

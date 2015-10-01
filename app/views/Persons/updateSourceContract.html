@@ -3,6 +3,22 @@
 
 <div class="container-fluid">
 
+#{if contract.sourceDateResidual != null 
+		&& contract.sourceByAdmin == false}
+
+<div class="alert alert-danger">
+	I valori iniziali sottostanti sono stati creati automaticamente da ePAS, impostando a zero ogni campo. 
+	Inserire i valori effettivi e cliccare su <em>Salva</em>, oppure cliccare su <strong>Approva</strong> per 
+	validare l'inizializzazione automatica e non visualizzare più questo messaggio. 
+	#{form @Persons.approveAutomatedSource()}
+	<input type="hidden" name="contractId" value="${contract.id}" />
+	<div class="center">
+  	  <input class="btn btn-default" type="submit" value="Approva"/>
+    </div>
+    #{/form}
+    
+#{/if}
+</div>
 
 #{form @Persons.saveSourceContract()}
   <input type="hidden" name="contract.id" value="${contract.id}" />
@@ -50,17 +66,9 @@
 
 
  
-  <div class="panel-group" id="accordionUpdateSource">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordionUpdateSource" href="#collapseUpdateSource">
-            <strong>Importante</strong>
-          </a>
-        </h4>
-      </div>
-      <div id="collapseUpdateSource" class="panel-collapse collapse out">
-        <div class="panel-body">
+
+	<h3>Guida alla definizione dell'inizializzazione</h3>
+  
           <p>
           	Tramite questa form è possibile inizializzare la situazione di una persona in un momento arbitrario del contratto selezionato.
   			Questa procedura si rende necessaria nei casi in cui:
@@ -78,14 +86,11 @@
   	 	  Una volta definiti i dati il software provvederà a ricalcolare i ripiloghi annuali della persona utilizzando i dati di inizializzazione e i dati presenti nel database 
   		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
   		  </p>
-  		  #{if initUse.isPresent() }
-  		  <p>Impostare una data di inizializzazione uguale o successiva a ${initUse.get().plusDays(1)}.</p>
-  		  #{/if}
   		  
-        </div>
-      </div>
-    </div>
-  </div> <!-- end accordion -->  
+  		  <p><i class="fa fa-exclamation-triangle"></i> Impostare una data di inizializzazione uguale o successiva a ${dateForInit}.</p>
+  		  
+
+
  
   
 </div>	<!-- end container-fluid -->

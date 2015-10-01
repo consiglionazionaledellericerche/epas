@@ -424,6 +424,7 @@ when
         
         "Persons.updateSourceContract",
      	"Persons.saveSourceContract",
+     	"Persons.approveAutomatedSource",
      	
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
@@ -466,6 +467,7 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
+     	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
      	/* Vecchio permesso editCompetence */
@@ -501,7 +503,12 @@ when
         "Absences.editCode",
         "Absences.insertCode",
      	"Absences.saveCode",
-     	"Absences.updateCode"
+     	"Absences.updateCode",
+     	
+     	"Configurations.saveConfGeneral",
+     	"Configurations.savePatron",
+     	"Configurations.saveConfYear",
+		"Configurations.savePastYearVacationLimit"
         
         ), target == null, granted == false)
 then
@@ -533,6 +540,7 @@ when
      	
      	"Persons.updateSourceContract",
      	"Persons.saveSourceContract",
+     	"Persons.approveAutomatedSource",
      	
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
@@ -575,6 +583,7 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
+     	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
      	/* Vecchio permesso editCompetence */
@@ -617,7 +626,12 @@ when
         "Absences.editCode",
      	"Absences.insertCode",
      	"Absences.saveCode",
-     	"Absences.updateCode"      
+     	"Absences.updateCode",
+     	
+     	"Configurations.saveConfGeneral",
+     	"Configurations.savePatron",
+     	"Configurations.saveConfYear",
+		"Configurations.savePastYearVacationLimit"
                
        ), target == $o, granted == false)
 then
