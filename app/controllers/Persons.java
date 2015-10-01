@@ -1,40 +1,25 @@
 package controllers;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.*;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-import manager.ConfGeneralManager;
-import manager.ContractManager;
-import manager.ContractStampProfileManager;
-import manager.ContractWorkingTimeTypeManager;
-import manager.OfficeManager;
-import manager.PersonManager;
-import models.Contract;
-import models.ContractStampProfile;
-import models.ContractWorkingTimeType;
-import models.Office;
-import models.Person;
-import models.PersonChildren;
-import models.PersonDay;
-import models.Role;
-import models.User;
-import models.VacationPeriod;
-import models.WorkingTimeType;
+import manager.*;
+import models.*;
 import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -45,24 +30,13 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.hash.Hashing;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.ContractDao;
-import dao.OfficeDao;
-import dao.PersonChildrenDao;
-import dao.PersonDao;
-import dao.UserDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @With( {Resecure.class, RequestInit.class} )
@@ -576,6 +550,22 @@ public class Persons extends Controller {
 		}
 
 		rules.checkIfPermitted(contract.person.office);
+
+		
+		ConfGeneral initUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM,  contract.person.office);
+		if(new LocalDate(initUseProgram.fieldValue).isAfter(contract.sourceDateResidual) 
+				&& contract.sourceDateResidual.isBefore(contract.person.createdAt.toLocalDate())){
+			flash.error("La data di inizializzazione ( %s ) non può essere "
+					+ "precedente alla data di creazione della persona ( %s ) e "
+					+ "nemmeno precedente alla data di inizio di utilizzo del programma ( %s )",
+					contract.sourceDateResidual, contract.person.createdAt.toLocalDate(), 
+					new LocalDate(initUseProgram.fieldValue));
+			edit(contract.person.id);
+			
+		}
+
+
+		contract.sourceByAdmin = true;
 
 		contractManager.saveSourceContract(contract);
 

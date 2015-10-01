@@ -220,6 +220,8 @@ public class Stampings extends Controller {
 		stamping.date = stamping.date.withHourOfDay(stampingHour);
 		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
 
+		stamping.markedByAdmin= true;
+
 		stamping.save();
 
 		consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
@@ -251,7 +253,7 @@ public class Stampings extends Controller {
 
 		flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(personDay.date));
 
-		personStamping(personDay.person.id,personDay.date.getYear(),personDay.date.getMonthOfYear());
+		personStamping(personDay.person.id, personDay.date.getYear(), personDay.date.getMonthOfYear());
 	}
 	
 	
@@ -272,6 +274,8 @@ public class Stampings extends Controller {
 		}
 
 		stamp.note = note;
+
+		stamp.markedByEmployee = true;
 
 		stamp.save();
 
