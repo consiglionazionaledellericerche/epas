@@ -1,9 +1,17 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Creazione nuovo Tipo Orario per ' + office.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Creazione nuovo Tipo Orario per ' + office.name  /}
 
-<div class="container-fluid">
+#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(), 'Nuovo tipo orario':null] /}
+ 
+<div class="container">
 
-#{form @WorkingTimes.save()}
+#{breadcrumbs breadcrumbs /}
+
+
+
+
+#{form @WorkingTimes.save(), class:'form-horizontal'}
 
   <input type="hidden" name="wtt.office.id" value="${office.id}"/>
 
@@ -15,9 +23,12 @@
   	<input type="hidden" name="wttd6.dayOfWeek" value="6" />
   	<input type="hidden" name="wttd7.dayOfWeek" value="7" />
 
-  <div class="well center">
-	<strong>Nome Orario </strong><input name="wtt.description" type="text"/>  
-  </div>
+  
+  #{f.input 'wtt.description', required:'true' /}  
+  #{f.selectModel 'wtt.office', items:templateUtility.getAllOfficesAllowed(), disabled:'true' /}
+  #{f.booleanRadio 'Orizzontale', popover:'true', popText:'provetta'/} 
+  
+  *{
 
   <table id="table-wtt" class="table center table-hover">
 	<tr class="info">
@@ -92,15 +103,17 @@
 	</tr>
 
   </table>
+  }*
 
   <div class="center">
     <input class="btn btn-primary" type="submit" value="Crea"/>
   </div>
 #{/form}
 
-	<br>
-	
-	#{include './_wttLegend.html' /}
+%{ wttTips = true; }%
+#{include './_wttLegend.html' /}
 
 </div>
+
+
 

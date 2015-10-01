@@ -1,0 +1,26 @@
+*{ arg:    id dell'accordion item, richiesto
+   parent: id del gruppo genitore, non richiesto
+   title:  il titolo, richiesto
+   open:   se true (default false) rende aperto il pannello.
+   color:  per specificare i colori bootstrap dei panel (default: default)
+}*
+%{ 
+  open = _open ?: false
+  if (!_color) {
+    _color = 'info';
+  }
+}%
+<div class="panel panel-${_color}">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse"#{if _parent} data-parent="${_parent}"#{/if} href="#${_arg}">
+          <i class="fa fa-chevron-${open ? 'down' : 'up'}"></i> ${_title?:'...'}
+        </a>
+      </h4>
+    </div>
+    <div id="${_arg}" class="panel-collapse collapse#{if open} in#{/if}">
+      <div class="panel-body">
+        #{doBody/}
+      </div>
+    </div>
+</div>

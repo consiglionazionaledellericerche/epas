@@ -1,7 +1,8 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione tipi orario'  /}
-
+#{set breadcrumbs:['Tipi Orario':null] /}
+ 
 #{set 'moreStyles'}
   <style>
   	#table-wtt th, #table-wtt td {
@@ -19,7 +20,32 @@
   </style>
 #{/set}
 
-#{panel title:'Tipi orario CNR', dim:6, offset:3, fluid:true, color:'success'}
+<div class="container">
+#{breadcrumbs breadcrumbs /}
+
+<div class="container-fluid">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@WorkingTimes.manageWorkingTime(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+      </div>
+</div>
+
+#{panel title:'Tipi orario CNR', dim:12, fluid:true, color:'success'}
   	
   	<div class="alert alert-success" role="alert">
    	  I <strong>tipi orario predefiniti</strong> possono essere assegnati ad ogni dipendente di ogni sede.<br>
@@ -37,7 +63,7 @@
       #{list items:wttDefault, as:'wtt'}
       <tr>
         <td>
-          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
+          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">
 		    ${wtt.value.description}			    
 		  </a>
         </td>
@@ -61,32 +87,12 @@
 	</table>
   #{/panel}
 
-	<div class="container-fluid">
- <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@WorkingTimes.manageWorkingTime(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-      </div>
-</div>
-	
-  #{panel title:'Tipi Orario particolari per ' + office.name, dim:6, offset:3, fluid:true}
+  
+
+  #{panel title:'Tipi Orario particolari per ' + office.name, dim:12, fluid:true}
   
    <!-- Nuovo -->
-			<a href="@{WorkingTimes.insertWorkingTime(office.id)}" data-modal=".my-modal-large">
+			<a href="@{WorkingTimes.insertWorkingTime(office.id)}">
 		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
 		    </a>
   
@@ -192,7 +198,7 @@
 	
 
 
-  #{panel title:'Guida alla modifica dei tipi orario', dim:6, offset:3, color:'warning', fluid:true}
+  #{panel title:'Guida alla modifica dei tipi orario', dim:12, color:'warning', fluid:true}
   
 		<p class="text-danger"><strong><em>Modifica di un tipo orario utilizzato da molti dipendenti</em></strong></p>
 		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
@@ -216,10 +222,8 @@
 		Per disabilitare un tipo orario è necessario che non sia attualmente associato ad alcun contratto attivo.
 		</p>  
  #{/panel}
+ 
+ </div>
 	
-	
-
-
-
 #{include '_myModal_large.html' /}
 #{include '_myModal.html' /}
