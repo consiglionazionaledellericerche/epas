@@ -19,6 +19,7 @@ import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.OfficeManager;
 import manager.PersonManager;
+import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -577,7 +578,22 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
+		
+		ConfGeneral initUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM,  contract.person.office);
+		if(new LocalDate(initUseProgram.fieldValue).isAfter(contract.sourceDateResidual) 
+				&& contract.sourceDateResidual.isBefore(contract.person.createdAt.toLocalDate())){
+			flash.error("La data di inizializzazione ( %s ) non può essere "
+					+ "precedente alla data di creazione della persona ( %s ) e "
+					+ "nemmeno precedente alla data di inizio di utilizzo del programma ( %s )",
+					contract.sourceDateResidual, contract.person.createdAt.toLocalDate(), 
+					new LocalDate(initUseProgram.fieldValue));
+			edit(contract.person.id);
+			
+		}
+
+
 		contract.sourceByAdmin = true;
+
 		contractManager.saveSourceContract(contract);
 
 		//Ricalcolo valori dalla nuova data inizializzazione.
