@@ -150,6 +150,8 @@ public class WorkingTimes extends Controller{
 
 		List<WorkingTimeTypeDay> wttd = new LinkedList<WorkingTimeTypeDay>();
 		WorkingTimeType wtt = new WorkingTimeType();
+		wtt.office = office;
+		
 		for(int i = 1; i < 8; i++){
 			WorkingTimeTypeDay w = new WorkingTimeTypeDay();
 			wttd.add(w);
