@@ -3,23 +3,13 @@
  */
 package models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
-
 import play.data.validation.InPast;
 import play.data.validation.Required;
+
+import javax.persistence.*;
 
 
 /**
@@ -44,7 +34,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 			this.description = description;
 		}
 
-		public String getDescriptio(){
+		public String getDescription(){
 			return this.description;
 		}
 	}
@@ -82,14 +72,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	 * in questione non ha potuto effettuare la timbratura (valore = true)
 	 */
 	@Column(name = "marked_by_admin")
-	public Boolean markedByAdmin;	
+	public Boolean markedByAdmin = false;
 	
 	/**
 	 * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a true quando
 	 * è il dipendente a modificare la propria timbratura
 	 */
 	@Column(name = "marked_by_employee")
-	public Boolean markedByEmployee;	
+	public Boolean markedByEmployee = false;
 
 	/**
 	 * true, cella bianca; false, cella gialla
