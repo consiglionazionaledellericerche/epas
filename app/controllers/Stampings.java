@@ -257,10 +257,10 @@ public class Stampings extends Controller {
 		}
 		
 		if(stamping.stampType != null){
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType, false);
 		}
 		else{
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType, false);
 		}
 
 		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
@@ -285,10 +285,10 @@ public class Stampings extends Controller {
 		final PersonDay pd = stamp.personDay;
 
 		if(stamping.stampType != null){
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType, true);
 		}
 		else{
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
+			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType, true);
 		}
 
 		consistencyManager.updatePersonSituation(pd.person.id, pd.date);

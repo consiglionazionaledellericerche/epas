@@ -262,7 +262,8 @@ public class StampingManager {
 	 * @param service
 	 */
 	public void persistStampingForUpdate(Stamping stamping, String note, 
-			Integer stampingHour, Integer stampingMinute, StampType stampType){
+			Integer stampingHour, Integer stampingMinute, StampType stampType,
+			boolean isEmployee){
 		
 		if(stampingMinute != null && stampingHour != null){
 			stamping.date = stamping.date.withHourOfDay(stampingHour);
@@ -278,7 +279,10 @@ public class StampingManager {
 			stamping.note = note;
 			
 		}
-		stamping.markedByAdmin = true;
+		if(isEmployee)
+			stamping.markedByEmployee = true;
+		else
+			stamping.markedByAdmin = true;
 
 		stamping.save();
 	}

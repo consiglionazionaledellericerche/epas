@@ -26,6 +26,7 @@ public class StampingTemplate {
 	public String hour;
 	public String insertStampingClass;
 	public String markedByAdminCode;
+	public String markedByEmployeeCode;
 	public String identifier;
 	public String missingExitStampBeforeMidnightCode;
 	public boolean valid;
@@ -42,6 +43,7 @@ public class StampingTemplate {
 		if(stamping.date == null  || stamping.exitingNow) {
 			this.hour = ""; 
 			this.markedByAdminCode = "";
+			this.markedByEmployeeCode = "";
 			this.identifier = "";
 			this.insertStampingClass = "";
 			this.missingExitStampBeforeMidnightCode = "";
@@ -71,6 +73,14 @@ public class StampingTemplate {
 			StampModificationType smt = stampTypeManager.getStampMofificationType(
 					StampModificationTypeCode.MARKED_BY_ADMIN);
 			this.markedByAdminCode = smt.code;
+		}
+		
+		//timbratura modificata dal dipendente
+		this.markedByEmployeeCode = "";
+		if(stamping.markedByEmployee){
+			StampModificationType smt = stampTypeManager.getStampMofificationType(
+					StampModificationTypeCode.MARKED_BY_EMPLOYEE);
+			this.markedByEmployeeCode = smt.code;
 		}
 
 		//timbratura di mezzanotte
