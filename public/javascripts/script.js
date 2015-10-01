@@ -2,7 +2,7 @@
  */
 
 $(function($){
-	
+
 	$.fn.initepas = function() {
 
 		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
@@ -82,67 +82,6 @@ $(function($){
 		this.find('a[data-x-editable]').editable();
 		this.find("a[data-popover]").popover();
 		
-		this.find('#myModal1').on('show', function () {
-			$('#myModal2').modal('hide');
-		})
-
-		this.find('#myModal2').on('show', function () {
-			$('#myModal1').modal('hide');
-		})
-
-		this.find('#myModal1').on('hide', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal2').on('hide', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal1').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal2').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal3').on('hidden.bs.modal', function(){
-		    $(this).data('bs.modal', null);
-		});
-		
-
-		this.find('#myModal4').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-insert-contract').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-edit-contract').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-edit-source-contract').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-terminate-person').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-edit-vacationperiod').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-insert-vacationperiod').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-absencetype-month').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-		
 		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
 			var $form = $(this).closest("form");
 	    	var $this = $(this);
@@ -216,9 +155,9 @@ $(function($){
 	    });
 	    
 	}	/* fine initepas() */
-	
+
 	$('body').initepas();
-	
+
 });	/* fine on document load */
 
 function Change(){
