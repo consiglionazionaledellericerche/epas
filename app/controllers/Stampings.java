@@ -12,6 +12,7 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.PersonTags;
 import it.cnr.iit.epas.DateUtility;
+import it.cnr.iit.epas.NullStringBinder;
 import manager.ConsistencyManager;
 import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
@@ -23,6 +24,7 @@ import models.*;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
+import play.data.binding.As;
 import play.data.validation.*;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -257,7 +259,7 @@ public class Stampings extends Controller {
 	}
 	
 	
-	public static void updateEmployee(Long stampingId, StampType stampType, String note) {
+	public static void updateEmployee(Long stampingId, StampType stampType, @As(binder=NullStringBinder.class) String note) {
 
 		Stamping stamp = stampingDao.getStampingById(stampingId);
 		if (stamp == null) {
