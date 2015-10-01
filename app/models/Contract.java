@@ -50,7 +50,7 @@ public class Contract extends BaseModel {
 	public LocalDate sourceDateMealTicket = null;
 
 	@Column(name="source_by_admin")
-	public boolean sourceByAdmin = false;
+	public boolean sourceByAdmin = true;
 	
 	@Column(name="source_vacation_last_year_used")
 	public Integer sourceVacationLastYearUsed = null;

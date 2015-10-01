@@ -47,8 +47,8 @@
 		<div class="panel-body">
 
 
-			<table 	class="datatable-test table table-striped table-bordered table-condensed"
-				cellspacing="0" width="100%">
+			<table 	class="table table-striped table-bordered table-condensed"
+				datatable width="100%">
 				<thead>
 					<tr>
 						<th>Nome</th>
@@ -73,31 +73,6 @@
 						</th>
 					</tr>
 				</thead>
-
-				<tfoot>
-					<tr>
-						<th>Nome</th>
-						<th>Ferie Fatte ${year-1}</th>
-						<th>Ferie Fatte ${year}</th>
-						<th>Permessi Fatti ${year}</th>
-						<th>Ferie ${year-1}<br> #{if isVacationLastYearExpired}<span
-							class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
-							#{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
-						</th>
-						<th>Ferie ${year}<br>Residue Totali
-						</th>
-						<th>Ferie ${year}<br>Residue Maturate
-						</th>
-						<th>Permessi<br>Residui Totali
-						</th>
-						<th>Permessi<br>Residui Maturati
-						</th>
-						<th>Limite <br>Iniziale
-						</th>
-						<th>Limite <br>Finale
-						</th>
-					</tr>
-				</tfoot>
 
 				<tbody>
 					#{list items:vacationsList, as:'vacationsRecap'}
