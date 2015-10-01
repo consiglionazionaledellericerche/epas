@@ -2,30 +2,17 @@
 #{set modalHeader:'Nuova timbratura ' + personDay.date.format() + ' per ' + person.surname /}
 
 <div class="container-fluid text-center">
-#{form @Stampings.insert(), role:'form', autocomplete:'off'}
+#{form @Stampings.insert(), class:'form-horizontal', autocomplete:'off'}
 	
 	<input type="hidden" name="personId" value="${personDay.person.id}"/>
 	<input type="hidden" name="year" value="${personDay.date.year}"/>
 	<input type="hidden" name="month" value="${personDay.date.monthOfYear}"/>
 	<input type="hidden" name="day" value="${personDay.date.dayOfMonth}"/>
 	
-	<table class="table table-hover table-form">
-		<tr>
-			<td>#{f.input 'hourStamping', popover:'true'/}</td>
-		</tr>
-		
-		<tr>
-			<td>#{f.booleanRadio 'stampingWay',popover:'true', true:'Ingresso', false:'Uscita' /}</td>
-		</tr>
-		<tr>
-			<td>#{f.selectModel 'stamping.stampType', value:'', items:templateUtility.allStampTypes /}</td>
-		</tr>
-		<tr>
-			<td>#{f.input 'note' /}</td>
-		</tr>
-		
-	
-	</table>
+	#{f.input 'hourStamping', popover:'true'/}
+	#{f.booleanRadio 'stampingWay',popover:'true', true:'Ingresso', false:'Uscita' /}
+	#{f.selectModel 'stamping.stampType', items:templateUtility.allStampTypes /}
+	#{f.input 'note' /}
 	
 	<input class="btn btn-primary" type="submit" value="Inserisci"/>
 

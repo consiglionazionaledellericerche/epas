@@ -26,8 +26,9 @@
     <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}"> 
 
     #{stylesheet 'select2-bootstrap.min.css'/}
+    *{#{stylesheet 'bootstrap-modal.css'/}}*
+    *{#{stylesheet 'bootstrap-modal-bs3patch.css'/}}*
     #{stylesheet 'my-bootstrap3.css'/}
-
 
 	#{get 'moreStyles' /}
 	
@@ -233,7 +234,7 @@
       	    
       	      #{if loginResponse != null}
       	      <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
-      	        <a style="color: red"><span class="glyphicon glyphicon-user"> ${loginResponse.getUsernameCnr()}</a>
+      	        <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	      </li>
       	      #{/if}
       	      
@@ -250,12 +251,12 @@
       		  
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"> ${session.username} </a>
+      	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
       	        </li>
       		    #{/if}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"> ${loginResponse.getUsernameCnr()}</a>
+      	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	        </li>
       	        #{/if}
       		
@@ -385,8 +386,10 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
     
     <script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
+    *{#{script 'bootstrap-modal.js' /}}*
+    *{#{script 'bootstrap-modalmanager.js' /}}*
+    #{script 'script.js' /}
 
-    <script src="@{'/public/js/script.js'}"></script>
     #{include './feedback.html' /}  
 	#{get 'moreScripts' /}
   </body>

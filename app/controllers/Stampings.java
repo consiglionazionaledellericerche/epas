@@ -12,6 +12,7 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.PersonTags;
 import it.cnr.iit.epas.DateUtility;
+import it.cnr.iit.epas.NullStringBinder;
 import manager.ConsistencyManager;
 import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
@@ -23,8 +24,8 @@ import models.*;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-import play.data.validation.Required;
-import play.data.validation.Valid;
+import play.data.binding.As;
+import play.data.validation.*;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -168,9 +169,7 @@ public class Stampings extends Controller {
 		
 
 		Stampings.personStamping(personId, year, month);
-
 	}
-
 
 	public static void edit(@Required Long stampingId) {
 
@@ -182,12 +181,9 @@ public class Stampings extends Controller {
 
 		rules.checkIfPermitted(stamping.personDay.person.office);
 
-		LocalDate date = stamping.date.toLocalDate();
+		boolean stampingWay = stamping.way.equals(Stamping.WayType.in) ? true : false;
 
-		Integer hour = stamping.date.getHourOfDay();
-		Integer minute = stamping.date.getMinuteOfHour();
-
-		render(stamping, hour, minute, date);				
+		render(stamping, stampingWay);
 	}
 	
 	public static void editEmployee(@Required Long stampingId) {
@@ -203,58 +199,67 @@ public class Stampings extends Controller {
 		render(stamping);
 	}
 
-	public static void update(Stamping stamping, Long stampingId, Integer stampingMinute,
-			Integer stampingHour, StampType stampType, String note, String elimina) {
+	public static void update(Stamping stamping, boolean stampingWay,@Required @Min(0) @Max(59) Integer stampingMinute,
+							  @Required @Min(0) @Max(23)Integer stampingHour) {
 
-		Stamping stamp = stampingDao.getStampingById(stampingId);
-		if (stamp == null) {
+//		TODO implementare validazione sulla finestra del modale
+
+		if(Validation.hasError("stampingHour") || Validation.hasError("stampingMinute")){
+			flash.error("Indicare un orario Valido!   Operazione annulata");
+			personStamping(stamping.personDay.person.id, stamping.personDay.date.getYear(),
+					stamping.personDay.date.getMonthOfYear());
+		}
+		if(!stamping.isPersistent()){
 			notFound();
+			personStamping(stamping.personDay.person.id, stamping.personDay.date.getYear(),
+					stamping.personDay.date.getMonthOfYear());
 		}
 
-		rules.checkIfPermitted(stamp.personDay.person.office);
+		rules.checkIfPermitted(stamping.personDay.person.office);
 
-		final PersonDay pd = stamp.personDay;
+		stamping.way = stampingWay ? Stamping.WayType.in : Stamping.WayType.out;
 
-		//elimina
-		if( elimina != null) {
+		stamping.date = stamping.date.withHourOfDay(stampingHour);
+		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
 
-			stamp.delete();
-			pd.stampings.remove(stamp);
+		stamping.markedByAdmin= true;
 
-			consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		stamping.save();
 
-			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamp.date.toLocalDate()));	
+		consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
 
-			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+		flash.success("Timbratura per il giorno %s per %s aggiornata.",
+				PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.fullName());
+
+		personStamping(stamping.personDay.person.id,
+				stamping.personDay.date.getYear(),
+				stamping.personDay.date.getMonthOfYear());
+	}
+
+	public static void delete(Long id){
+
+		final Stamping stamping = stampingDao.getStampingById(id);
+
+		if(stamping == null) {
+			flash.error("Timbratura specificata inesistente");
+			// TODO scegliere un redirect più furbo
+			personStamping(Security.getUser().get().person.id,LocalDate.now().getYear(),LocalDate.now().getMonthOfYear());
 		}
 
-		if (stampingHour == null || stampingMinute == null) {
+		rules.checkIfPermitted(stamping.personDay.person);
 
-			flash.error("E' necessario specificare sia il campo ore che minuti. Operazione annullata.");
-			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-		}
-		if(!stampingManager.checkIfCorrectMinutesAndHours(stampingMinute, stampingHour)){
-			flash.error("E' necessario specificare ore e minuti di valore corretto. Operazione annullata.");
-			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-		}
-		
-		if(stamping.stampType != null){
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stamping.stampType);
-		}
-		else{
-			stampingManager.persistStampingForUpdate(stamp, note, stampingHour, stampingMinute, stampType);
-		}
+		final PersonDay personDay = stamping.personDay;
+		stamping.delete();
 
-		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+		consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
-		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.surname, stamp.personDay.person.name);
+		flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(personDay.date));
 
-		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-
+		personStamping(personDay.person.id, personDay.date.getYear(), personDay.date.getMonthOfYear());
 	}
 	
 	
-	public static void updateEmployee(Long stampingId, StampType stampType, String note) {
+	public static void updateEmployee(Long stampingId, StampType stampType, @As(binder=NullStringBinder.class) String note) {
 
 		Stamping stamp = stampingDao.getStampingById(stampingId);
 		if (stamp == null) {
@@ -271,6 +276,8 @@ public class Stampings extends Controller {
 		}
 
 		stamp.note = note;
+
+		stamp.markedByEmployee = true;
 
 		stamp.save();
 

@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
+import manager.ConsistencyManager;
 import manager.recaps.PersonCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
@@ -79,6 +80,8 @@ public class Competences extends Controller{
 	private static RoleDao roleDao;
 	@Inject
 	private static UsersRolesOfficesDao userRoleOfficeDao;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 	public static void competences(int year, int month) {
 
@@ -246,6 +249,11 @@ public class Competences extends Controller{
 		log.info("saved id={} (person={}) code={} (value={})", 
 				new Object[] { competence.id, competence.person, 
 				competence.competenceCode.code, competence.valueApproved} );
+		
+		
+		
+		consistencyManager.updatePersonSituation(competence.person.id, 
+				new LocalDate(competence.year, competence.month, 1));
 
 		renderText("ok");
 	}

@@ -223,6 +223,11 @@
 			</td>
 			
 			 <td class="span4" style="text-align: center;">
+			 
+			 #{if contract.value.sourceDateResidual != null && contract.value.sourceByAdmin == false }
+				<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="Questa inizializzazione non è ancora stata approvata dall'amministratore"></span>
+			 #{/if}
+			 
 			 #{if contract.value.sourceDateResidual!=null}
 			     Situazione alla data
 			     <strong class="text-error">${contract.value.sourceDateResidual}</strong><br>
@@ -254,13 +259,9 @@
 			     Buoni pasto residui
 			   <strong class="text-error">${contract.value.sourceRemainingMealTicket}</strong><br>
 			   #{/if}
-			   
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Modifica</a>
-			
-			 #{/if}
-			 #{else}
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Definisci Inizializzazione</a>
-			 #{/else}
+			 #{/if}  
+
+			  <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal-large">Definisci Inizializzazione</a>
 			</td>
 			
 		</tr>
@@ -293,3 +294,4 @@
 </div>
 
 #{include '_myModal.html' /}
+#{include '_myModal_large.html' /}

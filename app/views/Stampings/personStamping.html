@@ -14,7 +14,7 @@
 		padding-top: 70px;
 	}
 	
-	.col-xs-12, col-sm-12, col-md-6  {
+	.col-xs-12, .col-sm-12, .col-md-6  {
 		padding-left: 4px;
 		padding-right: 4px;
 	} 
@@ -178,6 +178,9 @@
 		  #{ifnot stampingTemplate.markedByAdminCode.equals("")}
 			<strong>${stampingTemplate.markedByAdminCode}</strong>
 		  #{/ifnot}	
+		  #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
+			<strong>${stampingTemplate.markedByEmployeeCode}</strong>
+		  #{/ifnot}	
 		  #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
 			<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
 		  #{/ifnot}	
@@ -289,6 +292,10 @@
   <div id="riepiloghi">
   
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+      #{include './_alerts.html' /}
+  </div>
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
       #{include './_contractsRecap.html' /}
   </div>
   
@@ -297,7 +304,7 @@
   </div>
   
   </div>
-  
+
 #{include '_myModal.html' /}
 
 
