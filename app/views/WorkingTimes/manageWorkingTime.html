@@ -190,18 +190,10 @@
 			
   #{/panel}
 	
-	
-
-	
-	
-#{panel title:'Tipi Orario disattivati per ' + office.name, dim:6, offset:3, fluid:true}
-		
-#{/panel}			
 
 
-<div class="container">	
-
-	<div class="well">
+  #{panel title:'Guida alla modifica dei tipi orario', dim:6, offset:3, color:'warning', fluid:true}
+  
 		<p class="text-danger"><strong><em>Modifica di un tipo orario utilizzato da molti dipendenti</em></strong></p>
 		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
 		La procedura corretta per modificare il tipo orario è la seguente:
@@ -223,11 +215,8 @@
 		Per eliminare un tipo orario è necessario che non sia associato ad alcun contratto presente in ePAS (anche terminato).<br>
 		Per disabilitare un tipo orario è necessario che non sia attualmente associato ad alcun contratto attivo.
 		</p>  
-	</div>
+ #{/panel}
 	
-	
-	
-</div>
 	
 
 
