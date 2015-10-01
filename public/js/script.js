@@ -10,11 +10,9 @@ $(function($){
 
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
 
-		$('[datatable]').DataTable({
+		this.find('[datatable]').DataTable({
 			"lengthMenu": [ [10, 25, 50,100, -1], [10, 25, 50,100, "Tutti"] ],
-			"language": {
-        "url": "/public/i18n/DataTablesItalian.json"
-      }
+			"language": {"url": "/public/i18n/DataTablesItalian.json"}
 		});
 
 		

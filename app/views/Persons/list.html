@@ -21,7 +21,7 @@
 
 <p><h3>Lista del Personale Attivo</h3></p>
 
-<table class="datatable-test table table-striped table-hover table-condensed center">
+<table class="table table-striped table-hover table-condensed center" datatable>
     <thead>
 	  <tr>
 		<th>&{'person.name'}</th>
@@ -95,11 +95,11 @@
 		#{/if}
 		">
 		 #{if person.currentContract.get().sourceDateResidual != null}
-		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Modifica</a>
-		   #{if person.currentContract.get().sourceByAdmin == false} X #{/if}
+		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Modifica</a>
+		   #{if person.currentContract.get().sourceByAdmin == false} <i class="fa fa-exclamation-triangle"></i> #{/if}
     	 #{/if}
 		 #{else}
-	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal">Definisci</a>
+	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Definisci</a>
 		 #{/else}
 		</td>
 
@@ -116,15 +116,15 @@
 		#{/if}
 		</tr>
 	  #{/if}
-	
-    
+
+
 	#{/list}
 	</tbody>
   </table>
   
   <p><h3>Lista del Personale Non Attivo</h3></p>
-  
-  <table class="datatable-test table table-striped table-hover table-condensed center" cellspacing="0" >
+
+<table class="table table-striped table-hover table-condensed center" width="100%" datatable>
     <thead>
 	  <tr>
 		<th>&{'person.name'}</th>
@@ -141,7 +141,7 @@
 	  #{/if}
 	  #{else}
 	   <tr>
-		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
+		<td class="personName alignLeft"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
 		<td><font color="#808080">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
 		<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
@@ -157,6 +157,4 @@
 	</tbody>
   </table>
 
-
- #{include '_myModal.html' /}
-
+#{include '_myModal_large.html' /}
