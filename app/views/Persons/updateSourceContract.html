@@ -1,10 +1,9 @@
 #{extends 'modal.html' /}
-#{set modalHeader: 'Definisci dati di inizializzazione per ' + contract.person.name + ' ' + contract.person.surname /}
+#{set modalHeader: 'Definisci dati di inizializzazione per ' + contract.person.fullname /}
 
 <div class="container-fluid">
 
-#{if contract.sourceDateResidual != null 
-		&& contract.sourceByAdmin == false}
+#{if contract.sourceDateResidual != null && contract.sourceByAdmin == false}
 
 <div class="alert alert-danger">
 	I valori iniziali sottostanti sono stati creati automaticamente da ePAS, impostando a zero ogni campo. 
@@ -26,7 +25,7 @@
   <table class="table table-condensed table-hover table-form">
 	<tr>
 	  <td class="lab"><strong>Data Inizializzazione (aaaa-mm-gg)</strong> </td>
-	  <td><input name="contract.sourceDateResidual" type="text" datepicker value="${contract.sourceDateResidual}" /></td>
+	  <td><input name="contract.sourceDateResidual" type="text" datepicker value="${contract.sourceDateResidual.format()}" /></td>
 	</tr>
 	<tr>
 	  <td class="lab">Residuo anno passato (in minuti)</td>
@@ -87,7 +86,7 @@
   		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
   		  </p>
   		  
-  		  <p><i class="fa fa-exclamation-triangle"></i> Impostare una data di inizializzazione uguale o successiva a ${dateForInit}.</p>
+  		  <p><i class="fa fa-exclamation-triangle"></i> Impostare una data di inizializzazione uguale o successiva a ${dateForInit.format()}.</p>
   		  
 
 

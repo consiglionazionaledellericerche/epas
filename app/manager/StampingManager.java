@@ -113,7 +113,6 @@ public class StampingManager {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
-		
 	}
 
 	/**
