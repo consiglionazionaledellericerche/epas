@@ -64,7 +64,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 			List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
 
 			JsonArray jsonArray = new JsonParser().parse(value).getAsJsonArray();
-			Logger.debug("jsonArray di shift period letti = %s", jsonArray);
+			Logger.debug("\n\njsonArray di shift period letti = %s \n\n", jsonArray);
 
 			JsonObject jsonObject = null;
 			Person person = null;
