@@ -9,6 +9,7 @@ $(function($){
 		$(':input[select2Table]', this).select2({minimumResultsForSearch: 25});
 
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
+		$('[popover-hover]').popover({trigger: "hover",placement: 'right auto',container: 'body'});
 
 		this.find('[datatable]').DataTable({
 			"lengthMenu": [ [10, 25, 50,100, -1], [10, 25, 50,100, "Tutti"] ],

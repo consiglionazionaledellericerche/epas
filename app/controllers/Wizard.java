@@ -1,55 +1,38 @@
 package controllers;
 
-import helpers.validators.StringIsTime;
-import it.cnr.iit.epas.DateUtility;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
-import javax.inject.Inject;
-
-import manager.ConfGeneralManager;
-import manager.ConfYearManager;
-import manager.ContractManager;
-import manager.OfficeManager;
-import models.Contract;
-import models.Office;
-import models.Person;
-import models.Qualification;
-import models.Role;
-import models.User;
-import models.WorkingTimeType;
-import models.enumerate.Parameter;
-
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
-import play.Logger;
-import play.Play;
-import play.cache.Cache;
-import play.data.validation.CheckWith;
-import play.data.validation.Email;
-import play.data.validation.Equals;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.libs.Codec;
-import play.mvc.Controller;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.WorkingTimeTypeDao;
+import helpers.validators.StringIsTime;
+import it.cnr.iit.epas.DateUtility;
+import manager.ConfGeneralManager;
+import manager.ConfYearManager;
+import manager.ContractManager;
+import manager.OfficeManager;
+import models.*;
+import models.enumerate.Parameter;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import play.Logger;
+import play.Play;
+import play.cache.Cache;
+import play.data.validation.*;
+import play.libs.Codec;
+import play.mvc.Controller;
+
+import javax.inject.Inject;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author daniele
@@ -250,7 +233,7 @@ public class Wizard extends Controller {
 			properties.setProperty("seat_address",seat_address);
 			properties.setProperty("seat_code",seat_code);
 			if(seat_affiliation_date!=null){
-				properties.setProperty("seat_affiliation_date",seat_affiliation_date.toString());
+				properties.setProperty("seat_affiliation_date",seat_affiliation_date.toString(dtf));
 			}
 
 			if(!steps.get(stepIndex).completed){
@@ -349,7 +332,7 @@ public class Wizard extends Controller {
 			properties.setProperty("manager_password",manager_password);
 
 			if(manager_birthday!= null){
-				properties.setProperty("manager_birthday",manager_birthday.toString());	
+				properties.setProperty("manager_birthday",manager_birthday.toString(dtf));
 			}
 			if(manager_contract_end!=null){
 				properties.setProperty("manager_contract_end",manager_contract_end.toString(dtf));
@@ -412,7 +395,7 @@ public class Wizard extends Controller {
 			properties.setProperty("seat_address",seat_address);
 			properties.setProperty("seat_code",seat_code);
 			if(seat_affiliation_date!=null){
-				properties.setProperty("seat_affiliation_date",seat_affiliation_date.toString());
+				properties.setProperty("seat_affiliation_date",seat_affiliation_date.toString(dtf));
 			}
 
 			properties.setProperty("date_of_patron",date_of_patron);
@@ -431,7 +414,7 @@ public class Wizard extends Controller {
 			properties.setProperty("manager_password",manager_password);
 
 			if(manager_birthday!= null){
-				properties.setProperty("manager_birthday",manager_birthday.toString()); 
+				properties.setProperty("manager_birthday",manager_birthday.toString(dtf));
 			}
 			if(manager_contract_end!=null){
 				properties.setProperty("manager_contract_end",manager_contract_end.toString(dtf));
@@ -495,7 +478,7 @@ public class Wizard extends Controller {
 		}
 		if(properties.containsKey("seat_affiliation_date") && 
 				!properties.getProperty("seat_affiliation_date").isEmpty()){
-			seat.joiningDate = LocalDate.parse(properties.getProperty("seat_affiliation_date"));
+			seat.joiningDate = LocalDate.parse(properties.getProperty("seat_affiliation_date"),dtf);
 		}
 		seat.office = institute;
 		seat.save();
@@ -556,7 +539,7 @@ public class Wizard extends Controller {
 
 		if(properties.containsKey("manager_birthday") && 
 				!properties.getProperty("manager_birthday").isEmpty()){
-			p.birthday = LocalDate.parse(properties.getProperty("manager_birthday"));
+			p.birthday = LocalDate.parse(properties.getProperty("manager_birthday"),dtf);
 
 		}
 		if(!properties.getProperty("manager_email").isEmpty()){
