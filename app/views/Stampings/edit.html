@@ -1,43 +1,31 @@
 <div class="modal-header center">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.surname} <i class="fa fa-clock-o"></i></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.surname} <i class="fa fa-clock-o"></i></h4>
 </div>
 
 <!-- Start Body -->
 <div class="modal-body">
+    <div class="container-fluid text-center">
+	#{form @Stampings.update(), class:'form-horizontal'}
 
-<div class="container-fluid text-center">
-#{form @Stampings.update(), role:'form'}
-	
-	<input type="hidden" name="stampingId" value="${stamping.id}"/>
-		
-  	<table class="table table-hover table-form">
-	
-		<tr>
-			<td>#{f.input 'stampingHour', value:stamping.date.getHourOfDay(), type:'number', class:'input-sm'/}</td>
-		</tr>
-		<tr>
-			<td>#{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm' /}</td>
-		</tr>
-		
-		<tr>
-			<td>#{f.selectModel 'stamping.stampType', value:stamping.stampType, items:templateUtility.allStampTypes /}</td>
-		</tr>
-		
-		<tr>
-			<td>#{f.input 'note' /}</td>
-		</tr>
+        <input type="hidden" name="stamping.id" value="${stamping.id}"/>
 
- 	</table> 
-	
-	<input class="btn btn-primary" type="submit" value="Aggiorna"/>
-	
-	<input class="btn btn-danger pull-right" type="submit" name="elimina" value="Elimina timbratura"/>
+        #{f.input 'stampingHour',value:stamping.date.getHourOfDay(), type:'number', class:'input-sm'/}
+        #{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm' /}
 
-#{/form}
+		#{f.booleanRadio 'stampingWay', true:'Ingresso', false:'Uscita' /}
+		#{f.selectModel 'stamping.stampType', items:templateUtility.allStampTypes /}
+		#{f.input 'stamping.note' /}
 
+        <input class="btn btn-primary col-xs-6 col-xs-offset-3 margin-bottom" type="submit" value="Aggiorna"/>
+
+        <a href="@{Stampings.delete(stamping.id)}" class="btn btn-danger col-xs-4 col-xs-offset-4 margin-top-3">
+            <i class="fa fa-trash-o"> Elimina timbratura</i>
+        </a>
+
+
+	#{/form}
+
+    </div>
 </div>
 
-</div>
-
- 

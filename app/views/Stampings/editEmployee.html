@@ -1,43 +1,21 @@
-
-
 <div class="modal-header center">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.surname} <i class="fa fa-clock-o"></i></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.fullname} <i class="fa fa-clock-o"></i></h4>
 </div>
 
 <!-- Start Body -->
 <div class="modal-body">
 
-<div class="container-fluid text-center">
-#{form @Stampings.updateEmployee(), role:'form'}
-	
-	<input type="hidden" name="stampingId" value="${stamping.id}"/>
-		
-  	<table class="table table-hover table-form">
-	
-		<tr>
-			<td>#{f.input 'stampingHour', value:stamping.date.getHourOfDay(), type:'number', class:'input-sm', disabled:'disabled'/}</td>
-		</tr>
-		<tr>
-			<td>#{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm', disabled:'disabled' /}</td>
-		</tr>
-		
-		<tr>
-			<td>#{f.selectModel 'stamping.stampType', value:stamping.stampType, items:templateUtility.allStampTypes /}</td>
-		</tr>
-		
-		<tr>
-			<td>#{f.input 'note' /}</td>
-		</tr>
+    <div class="container-fluid text-center">
+    #{form @Stampings.updateEmployee(), class:'form-horizontal'}
 
- 	</table> 
-	
-	<input class="btn btn-primary" type="submit" value="Aggiorna"/>
-	
-	<input class="btn btn-danger pull-right" type="submit" name="elimina" value="Elimina timbratura"/>
+        <input type="hidden" name="stampingId" value="${stamping.id}"/>
 
-#{/form}
+        <h2 class="margin-bottom">${stamping.date.time()}</h2>
+        #{f.selectModel 'stampType' ,value:stamping.stampType, items:templateUtility.allStampTypes /}
+        #{f.input 'note',value:stamping.note /}
 
-</div>
-
+        <input class="btn btn-primary" type="submit" value="Aggiorna"/>
+    #{/form}
+    </div>
 </div>
