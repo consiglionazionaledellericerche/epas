@@ -30,6 +30,7 @@
 		<th>&{'person.currentVacationPeriod'}</th>
 		<th>&{'person.qualification'}</th>
 		<th>&{'contractStampProfile.fixedworkingtime'}</th>
+        <th>&{'user.username'}</th>
 		<th>&{'person.email'}</th>
 		<th>&{'person.telephone'}</th>
 		<th>Dati<br> Iniziali</th>
@@ -74,6 +75,7 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>
+        <td class="alignLeft">${person.value.user.username}</td>
 		<td class="alignLeft"><font color="#000000">${person.value.email}</font></td>
 		<td>
 		 <a href="#" data-popover
@@ -118,7 +120,7 @@
 	#{/list}
 	</tbody>
   </table>
-  
+
   <h3 class="margin-bottom margin-top-2">Lista del Personale Non Attivo</h3>
 
 <table class="table table-striped table-hover table-condensed center" width="100%" datatable>
@@ -128,6 +130,7 @@
 		<th>&{'person.number'}</th>
 		<th>&{'person.badgeNumber'}</th>
 		<th>&{'person.qualification'}</th>
+        <th>&{'user.username'}</th>
 		<th>&{'person.email'}</th>
 		#{if switchUser}<th></th>#{/if}
 	  </tr>
@@ -142,7 +145,8 @@
 		<td><font color="#808080">${person.value.number}</font></td>
 		<td><font color="#000000">${person.value.badgeNumber}</font></td>
 		<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
-		<td><font color="#808080">${person.value.email}</font></td>
+        <td class="alignLeft">${person.value.user.username}</td>
+        <td><font color="#808080">${person.value.email}</font></td>
 		#{if switchUser}
 		  <td>
 			<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
@@ -154,5 +158,4 @@
 	</tbody>
   </table>
 
-#{include '_myModal.html' /}
 #{include '_myModal_large.html' /}
