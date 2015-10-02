@@ -67,8 +67,6 @@ import dao.ShiftDao;
  */
 @Slf4j
 public class ShiftManager {
-
-	private PersonDayManager personDayManager;
 	
 	public static String thNoStampings = Messages.get("PDFReport.thNoStampings");  		// nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
 	public static String thBadStampings = Messages.get("PDFReport.thBadStampings");  	// nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
@@ -94,6 +92,11 @@ public class ShiftManager {
 		}
 	}
 
+	@Inject
+	private PersonManager personManager;
+	
+	@Inject
+	private PersonDayManager personDayManager;
 	@Inject
 	private PersonShiftDayDao personShiftDayDao;
 	@Inject
@@ -158,7 +161,7 @@ public class ShiftManager {
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
 				
-				if (!personDay.get().isHoliday && personShiftDay.date.isBefore(LocalDate.now())) {
+				if (!personManager.isHoliday(person, personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
 					Logger.info("Il turno di %s %s √® incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
@@ -188,7 +191,6 @@ public class ShiftManager {
 						//-----------------------------
 						//Logger.debug("Legge le coppie di timbrature valide");
 						// legge le coppie di timbrature valide 
-						//FIXME injettare il PersonDayManager
 						List<PairStamping> pairStampings = personDayManager.getValidPairStamping(personDay.get());
 
 						//Logger.debug("Dimensione di pairStampings =%s", pairStampings.size());
