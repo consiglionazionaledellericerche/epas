@@ -3,9 +3,11 @@
  */
 package models;
 
+import it.cnr.iit.epas.NullStringBinder;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
+import play.data.binding.As;
 import play.data.validation.InPast;
 import play.data.validation.Required;
 
@@ -64,6 +66,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	@JoinColumn(name ="badge_reader_id")
 	public BadgeReader badgeReader;
 
+	@As(binder=NullStringBinder.class)
 	public String note;
 
 	/**

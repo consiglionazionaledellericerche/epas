@@ -54,7 +54,7 @@
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
-		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal">
+		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal-large">
 		      ${person.currentWorkingTimeType.get().description}
 		    </a>
 		  #{/if}
@@ -62,7 +62,7 @@
 
 		<td>
 		  #{if person.currentVacationPeriod.present }
-		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal">
+		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal-large">
 		        ${person.currentVacationPeriod.get().vacationCode.description}
 		     </a>
 		  #{/if}
@@ -154,4 +154,5 @@
 	</tbody>
   </table>
 
+#{include '_myModal.html' /}
 #{include '_myModal_large.html' /}
