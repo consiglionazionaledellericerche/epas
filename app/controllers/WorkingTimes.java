@@ -1,7 +1,6 @@
 package controllers;
 
 import play.data.validation.Error;
-
 import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -34,7 +33,9 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -87,11 +88,17 @@ public class WorkingTimes extends Controller{
 				.from(office.workingTimeType)
 				.transform(wrapperFunctionFactory.workingTimeType()).toList();
 
-		List<IWrapperWorkingTimeType> wttList = FluentIterable 
-				.from(workingTimeTypeDao.getAllWorkingTimeType())
-				.transform(wrapperFunctionFactory.workingTimeType()).toList(); 
+		 List<IWrapperWorkingTimeType> wttAllowedEnabled = Lists.newArrayList();
+		 List<IWrapperWorkingTimeType> wttAllowedDisabled = Lists.newArrayList();
+		 for (IWrapperWorkingTimeType wtt : wttAllowed ){
+			 if (wtt.getValue().disabled) {
+				 wttAllowedDisabled.add(wtt);
+			 } else {
+				 wttAllowedEnabled.add(wtt);
+			 }
+		 }
 
-		render(wttList, wttDefault, wttAllowed, office, offices);
+		render(wttDefault, wttAllowedEnabled, wttAllowedDisabled, office, offices);
 	}
 
 	public static void showContract(Long wttId, Long officeId) {
@@ -225,7 +232,22 @@ public class WorkingTimes extends Controller{
 		manageWorkingTime(wtt.office.id);
 
 	}
-
+	
+	public static void showHorizontal(Long wttId) {
+		
+		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
+		notFoundIfNull(wtt);
+		
+		// se non è horizontal ho sbagliato action
+		Preconditions.checkState(wtt.horizontal);
+		
+		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime(wtt);
+		
+		Office office = wtt.office;
+		
+		render(horizontalPattern, office);
+	}
+	
 	public static void showWorkingTimeType(Long wttId) {
 
 		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -238,7 +260,6 @@ public class WorkingTimes extends Controller{
 		rules.checkIfPermitted(wtt.office);
 
 		render(wtt);
-
 	}
 
 	public static void delete(Long wttId){

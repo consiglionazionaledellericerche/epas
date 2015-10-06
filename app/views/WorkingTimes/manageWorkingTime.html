@@ -56,16 +56,27 @@
     <table class="table table-hover">
       <tr>
          <th class="center">Descrizione</th>
+         <th class="center">Orizzontale</th>
          <th class="center">Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
          <th class="center">Periodi associati<br>a contratti attivi</th> 
+         <!-- 	
          <th class="center">Cambia orario<br>a tutti</th>
+          -->
       </tr>
       #{list items:wttDefault, as:'wtt'}
       <tr>
         <td>
-          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">
-		    ${wtt.value.description}			    
-		  </a>
+          #{if wtt.value.horizontal}
+          <a href="@{WorkingTimes.showHorizontal(wtt.value.id)}">${wtt.value.description}</a>
+          #{/if}
+          #{else}
+          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">${wtt.value.description}</a>
+          #{/else}
+          
+        </td>
+        <td> 
+        #{if wtt.value.horizontal} Si #{/if}
+        #{else} No#{/else}
         </td>
         <td class="center">
           <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-modal=".my-modal">
@@ -77,11 +88,13 @@
             ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
           </a>
         </td>
+        <!-- 
         <td class="center">
           <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
             Cambia
     	  </a>
         </td>
+         -->
        </tr>	
        #{/list}
 	</table>
@@ -92,26 +105,36 @@
   #{panel title:'Tipi Orario particolari per ' + office.name, dim:12, fluid:true}
   
    <!-- Nuovo -->
+        <p> 
 			<a href="@{WorkingTimes.insertWorkingTime(office.id)}">
 		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
 		    </a>
-  
-   <h4>Attivi</h4>
+		</p>    
+        #{if wttAllowedEnabled.empty}
+        <div class="alert alert-info">
+          Non è presente alcun orario particolare attivo per l'istituto amministrato <strong>${office.name}</strong>
+        </div>
+        #{/if}
+        #{else}
+   	        
+            <h4>Attivi</h4>
 		    <table class="table table-condensed table-hover">
 		        <tr>
 		          <th>Descrizione</th>
 		          <th class="center">Contratti attivi<br>attualmente associati</th>
 		          <th class="center">Periodi associati<br>a contratti attivi</th> 
 		          <th class="center">Contratti<br>associati<br>(storico)</th>
-		          <th class="center">Cambia orario<br>a tutti</th>
+		          <!-- <th class="center">Cambia orario<br>a tutti</th>  -->
 		        </tr>
-			    #{list items:wttAllowed, as:'wtt'}
-			    #{if wtt.value.disabled == false }
+			    #{list items:wttAllowedEnabled, as:'wtt'}
 			      <tr>
 			        <td>
-			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
-					    ${wtt.value.description}			    
-					  </a>
+			          #{if wtt.value.horizontal}
+          				 <a href="@{WorkingTimes.showHorizontal(wtt.value.id)}">${wtt.value.description}</a>
+          			  #{/if}
+                      #{else}
+                         <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">${wtt.value.description}</a>
+                      #{/else}
 			        </td>
 			        
 			        <!-- contratti attualmente attivi con wtt -->
@@ -142,18 +165,20 @@
 			    	    </a>
 			    	  #{/if}
 			    	</td>
+			    	<!-- 
 			        <td class="center">
 			          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
 		                Cambia
 		    	      </a>
 					</td>
+					 -->
 			      </tr>	
-			    #{/if }  
 			    #{/list}
 			</table>
-			
-			
-		<h4>Disabilitati</h4>
+		#{/else}	
+		
+		#{if !wttAllowedDisabled.empty}
+      	<h4>Disabilitati</h4>
 
 		    <table class="table table-condensed table-hover">
 		        <tr>
@@ -162,8 +187,7 @@
 		          <th class="center">Riattiva</th>
 		          <th class="center">Contratti<br>associati<br>(storico)</th>
 		        </tr>
-			    #{list items:wttAllowed, as:'wtt'}
-			    #{if wtt.value.disabled == true }
+			    #{list items:wttAllowedDisabled, as:'wtt'}
 			      <tr>
 
 			        <td>
@@ -189,10 +213,9 @@
 			    	  #{/if}
 			    	</td>
 			      </tr>	
-			    #{/if }  
 			    #{/list}
 			</table>
-			
+		#{/if}	
 			
   #{/panel}
 	
@@ -200,26 +223,22 @@
 
   #{panel title:'Guida alla modifica dei tipi orario', dim:12, color:'warning', fluid:true}
   
-		<p class="text-danger"><strong><em>Modifica di un tipo orario utilizzato da molti dipendenti</em></strong></p>
+		<p class="text-danger"><strong><em>Modifica di un tipo orario esistente</em></strong></p>
 		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
-		La procedura corretta per modificare il tipo orario è la seguente:
+		In caso di necessità seguire la seguente procedura:
 		<ul>
 		 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
 		 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
-		 <li>Attraverso la Form <strong>Cambia orario a tutti</strong> impostare la data (anche passata) a partire dalla quale tutti coloro che hanno impostato
-		  il vecchio orario (<em>Normale</em>) vengano migrati al nuovo orario (<em>Normale-mod</em>)</li>
-		 <li>Poichè il software provvederà ad effettuare nuovamente tutti i calcoli inerenti tempo lavorato e situazioni residuali 
-		per ogni contratto attivo interessato dall'operazione a partire dalla data specificata, questa procedura potrebbe richiedere alcuni minuti.</li>
+		 <li>Attribuire il nuovo tipo orario ad ogni dipendente interessato tramite le procedure fornite 
+		 nella sezione amministrativa lista persone e modifica dati dipendente.</li>
 		</ul>
 		
-		
-		<p><strong class="text-danger"><em>Modifiche per singoli dipendenti</em></strong><br>
-		Nel caso di modifiche del tipo orario riguardanti un numero ristretto di dipendenti si consiglia di utilizzare le procedure messe a disposizione
-		nella sezione amministrativa Lista Persone.
-		</p>
 		<p><strong class="text-danger"><em>Eliminare o disabilitare tipi orario</em></strong><br>
-		Per eliminare un tipo orario è necessario che non sia associato ad alcun contratto presente in ePAS (anche terminato).<br>
-		Per disabilitare un tipo orario è necessario che non sia attualmente associato ad alcun contratto attivo.
+		E' possibile eliminare o disabilitare i tipi orario che non si vuole più associare ad alcun dipendente.<br>
+		<strong>Eliminare:</strong> La procedura di eliminazione permette di eliminare i tipi orario creati in modo erroneo 
+		oppure mai utilizzati in alcun contratto presente in ePAS (anche terminato).<br>
+		<strong>Disabilitare:</strong> La procedura di disabilita permette di nascondere 
+		i tipi orario usati in passato e che non si vogliono più associare ad alcun dipendente.
 		</p>  
  #{/panel}
  
