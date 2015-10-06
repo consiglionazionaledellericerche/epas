@@ -1,8 +1,0 @@
-# Ruolo per la gestione dei turni
-Role(shiftManager):
-  name: shiftManager
-
-# Ruolo per la gestione delle reperibilità
-Role(reperibilityManager):
-  name: reperibilityManager
-
