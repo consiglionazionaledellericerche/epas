@@ -1,22 +1,16 @@
 package jobs;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
 import com.google.common.collect.Lists;
-
 import injection.StaticInject;
 import manager.OfficeManager;
-import models.Office;
-import models.Person;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
+import models.*;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.test.Fixtures;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @StaticInject
 public class FixUserPermission {
@@ -115,15 +109,6 @@ public class FixUserPermission {
 			if(!exist) {
 				officeManager.setUro(p.user, p.office, employeeRole);
 			}
-		}
-		
-		//Ruoli e permessi per la gestione di turni e reperibilità 
-		//(principalmente via REST)
-		Role shiftManagerRole = Role.find("byName",  Role.SHIFT_MANAGER).first();
-		Role reperibilityManagerRole = Role.find("byName",  Role.REPERIBILITY_MANAGER).first();
-		
-		if (shiftManagerRole == null && reperibilityManagerRole == null) {
-			Fixtures.loadModels("../db/import/shiftReperibilityRolesAndPermissions.yml");
 		}
 	}
 
