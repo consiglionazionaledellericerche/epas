@@ -164,8 +164,4 @@ DELETE FROM vacation_codes;
 DELETE FROM competence_codes;
 DELETE FROM stamp_modification_types;
 DELETE FROM stamp_types;
-DELETE FROM absence_types_qualifications;
-DELETE FROM absence_type_groups;
-DELETE FROM absence_types;
-DELETE FROM qualifications;
 DELETE FROM roles;
