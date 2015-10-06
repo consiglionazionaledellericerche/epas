@@ -106,6 +106,8 @@ modifierType= Calcolo Orario
 
 stamping.note= Note
 
+user.username= Username
+
 ########################
 # Messaggi di validazione
 ########################
