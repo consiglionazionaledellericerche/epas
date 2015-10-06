@@ -43,12 +43,20 @@ public class HorizontalWorkingTime {
 	@Required
 	public String name;
 	
+	/**
+	 * Costruisce il pattern di default per la costruzione di un nuovo tipo
+	 * orario orizzontale.
+	 */
 	public HorizontalWorkingTime() {
 		this.holidays = Lists.newArrayList();
 		this.holidays.add("sabato");
 		this.holidays.add("domenica");
 	}
 	
+	/**
+	 * Dal tipo orario ricava il pattern originario.
+	 * @param wtt
+	 */
 	public HorizontalWorkingTime(WorkingTimeType wtt) {
 		
 		this.name = wtt.description;
@@ -85,6 +93,12 @@ public class HorizontalWorkingTime {
 		}
 	}
 	
+	/**
+	 * Dal pattern orizzontale costruisce il tipo orario con ogni giorno di 
+	 * lavoro e persiste i dati.
+	 * @param office
+	 * @return
+	 */
 	public WorkingTimeType buildWorkingTimeType(Office office) {
 		
 		WorkingTimeType wtt = new WorkingTimeType();
