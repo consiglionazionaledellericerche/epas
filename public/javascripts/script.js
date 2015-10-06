@@ -15,8 +15,10 @@ $(function($){
     $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
 
 	$.fn.initepas = function() {
+		
+		//$(':input[data-selectize]', this).select2({allowClear:true});
 
-		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
+		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap", placeholder: "Seleziona un valore"});
 		$(':input[select2Table]', this).select2({minimumResultsForSearch: 25});
 
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});

@@ -39,6 +39,7 @@ import models.StampModificationType;
 import models.StampType;
 import models.User;
 import models.VacationCode;
+import models.WorkingTimeType;
 import models.enumerate.Parameter;
 import play.Play;
 import play.db.jpa.JPA;
@@ -182,6 +183,17 @@ public class Bootstrap extends Job<Void> {
 				
 				consistencyManager.updatePersonSituation(person.id, c.sourceDateResidual);
 			}
+		}
+		
+		//impostare il campo tipo orario orizzondale si/no effettuando una euristica
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll(); 
+		for(WorkingTimeType wtt : wttList) {
+			
+			if (wtt.horizontal == null) {
+				wtt.horizontal = wtt.horizontalEuristic();
+				wtt.save();
+			}
+			
 		}
 
 	}
