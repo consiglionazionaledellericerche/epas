@@ -49,6 +49,42 @@ public class HorizontalWorkingTime {
 		this.holidays.add("domenica");
 	}
 	
+	public HorizontalWorkingTime(WorkingTimeType wtt) {
+		
+		this.name = wtt.description;
+		this.holidays = Lists.newArrayList();
+		
+		
+		for (WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
+			
+			if (wttd.holiday) {
+				this.holidays.add(holidayName(wttd.dayOfWeek));
+				continue;
+			}
+		
+			this.workingTimeHour = wttd.workingTime / 60;
+			this.workingTimeMinute = wttd.workingTime % 60;
+			
+			if (wttd.mealTicketTime > 0) {
+				this.mealTicketEnabled = true;
+				this.mealTicketTimeHour = wttd.mealTicketTime / 60;
+				this.mealTicketTimeMinute = wttd.mealTicketTime % 60;
+				this.breakTicketTime = wttd.breakTicketTime;
+			} else {
+				this.mealTicketEnabled = false;
+			}
+			
+			if (wttd.ticketAfternoonThreshold > 0) {
+				this.afternoonThresholdEnabled = true;
+				this.ticketAfternoonThresholdHour = wttd.ticketAfternoonThreshold / 60;
+				this.ticketAfternoonThresholdMinute = wttd.ticketAfternoonThreshold % 60;
+				this.ticketAfternoonWorkingTime = wttd.ticketAfternoonWorkingTime;
+			} else {
+				this.afternoonThresholdEnabled = false;
+			}
+		}
+	}
+	
 	public WorkingTimeType buildWorkingTimeType(Office office) {
 		
 		WorkingTimeType wtt = new WorkingTimeType();
@@ -57,6 +93,8 @@ public class HorizontalWorkingTime {
 		wtt.description = this.name;
 		wtt.office = office;
 		wtt.disabled = false;
+		
+		wtt.save();
 		
 		for (int i = 0; i < 7; i++) {
 			
@@ -76,11 +114,11 @@ public class HorizontalWorkingTime {
 				}
 			}
 			
-			wtt.workingTimeTypeDays.add(wttd);
+			wttd.workingTimeType = wtt;
+			wttd.save();
+
 		}
-		
-		wtt.save();
-		
+
  	    return null;
 		
 	}
@@ -109,11 +147,31 @@ public class HorizontalWorkingTime {
 		} else {
 			name = "domenica";
 		}
-		
-		ImmutableList lists = ImmutableList.of(this.holidays);
-		
-		return lists.contains(name);
-		
+
+		return this.holidays.contains(name);
+	}
+	
+	/**
+	 * FIXME: Anche questo è brutto.
+	 * @param wttd
+	 * @return
+	 */
+	private static String holidayName(int dayOfWeek) {
+		if (dayOfWeek == 1) {
+			return "lunedì";
+		} else if (dayOfWeek == 2) {
+			return "martedì";
+		} else if (dayOfWeek == 3) {
+			return "mercoledì";
+		} else if (dayOfWeek == 4) {
+			return "giovedì";
+		} else if (dayOfWeek == 5) {
+			return "venerd'";
+		} else if (dayOfWeek == 6) {
+			return "sabato";
+		} else {
+			return "domenica";
+		}
 	}
 	
 	/**

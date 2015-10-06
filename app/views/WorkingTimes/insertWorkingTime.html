@@ -79,7 +79,7 @@
 	  
 	  <!-- Soglia buono pasto -->
 	  
-	  #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+	  
 	  
 	  #{workingTime.input
 	   type:'radio', 
@@ -88,7 +88,10 @@
 	   field:'horizontalPattern.afternoonThresholdEnabled',
 	   value:horizontalPattern.afternoonThresholdEnabled /}  
 	  
-	   <div id="horizontal-afternoon" style="display: none">	
+	   <div id="horizontal-afternoon" style="display: none">
+	   
+	      #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+	      	
 		  #{workingTime.input 
 		   type:'hoursAndMinutes',
 		   title:'Soglia pomeridiana per buono pasto',
@@ -163,12 +166,6 @@
 			jQuery( "#horizontal-afternoon" ).toggle(0);
 		
 		});
-		
-		
-		
-		
-		
-		
        
 	 });
 	</script>

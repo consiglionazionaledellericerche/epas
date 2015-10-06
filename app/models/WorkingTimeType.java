@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
@@ -75,7 +76,7 @@ public class WorkingTimeType extends BaseModel {
 		return description;
 	}
 	
-	
+	@Transient
 	public boolean horizontalEuristic() {
 		
 		Integer workingTime = null;
@@ -121,5 +122,6 @@ public class WorkingTimeType extends BaseModel {
 		return equal;
 		
 	}
+
 }
 
