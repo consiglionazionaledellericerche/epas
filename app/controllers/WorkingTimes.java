@@ -1,13 +1,15 @@
 package controllers;
 
+import play.data.validation.Error;
+
 import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,6 +21,7 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.dto.HorizontalWorkingTime;
 
 import org.joda.time.LocalDate;
 
@@ -148,16 +151,44 @@ public class WorkingTimes extends Controller{
 
 		rules.checkIfPermitted(office);
 
-		List<WorkingTimeTypeDay> wttd = new LinkedList<WorkingTimeTypeDay>();
-		WorkingTimeType wtt = new WorkingTimeType();
-		wtt.office = office;
+		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
+			
+		boolean horizontal = true;
 		
-		for(int i = 1; i < 8; i++){
-			WorkingTimeTypeDay w = new WorkingTimeTypeDay();
-			wttd.add(w);
-		}
-		render(office, wtt, wttd);
+		render(office, horizontalPattern, horizontal);
 
+	}
+	
+	public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
+			@Required Office office) {
+
+		notFoundIfNull(office);
+		
+		rules.checkIfPermitted(office);
+		
+		WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(
+				horizontalPattern.name, Optional.fromNullable(office));
+		if(wtt != null) {
+			validation.addError("horizontalPattern.name", 
+					"nome già presente", horizontalPattern.name);
+		}
+		
+		for( Error error : validation.errors()) {
+			System.out.println(error.getKey());
+			System.out.println(error.message());
+		}
+		
+		if (validation.hasErrors()) {
+			boolean horizontal = true;
+   		    render("@insertWorkingTime", horizontalPattern, horizontal, office);
+		}
+		
+		horizontalPattern.buildWorkingTimeType(office);
+
+		flash.success("Orario creato con successo.");
+		
+		manageWorkingTime(office.id);
+		
 	}
 
 	public static void save(@Valid WorkingTimeType wtt, WorkingTimeTypeDay wttd1,
