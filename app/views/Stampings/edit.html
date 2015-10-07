@@ -17,10 +17,16 @@
 
 		#{f.select 'stamping.stampType'}
 			<option></option>
+			    %{ 
+			    	firstStampTypeId = 1l
+			    	firstStampType = models.StampType.findById(firstStampTypeId) 
+			    }%
+			    #{if firstStampType}
 				<optgroup label="più comuni">
 				    <!-- motivi di servizio -->
-					<option value="1">${models.StampType.findById(1l).label()}</option>
+					<option value="${firstStampTypeId}">${firstStampType.label()}</option>
 				</optgroup>
+				#{/if}
 				<optgroup label="tutte">
 				  #{list templateUtility.allStampTypes}
 				    <option value="${_.id}"#{if field.value?.id == _.id} selected#{/if}>${_.label()}</option>
