@@ -12,6 +12,7 @@ public enum StampModificationTypeCode {
   4 | x    | Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte
   5 | f    | Tempo di lavoro che si avrebbe uscendo adesso
   6 | d    | Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)
+  7 | md   | Timbratura modificata dal dipendente
 	*/
 	
 	
@@ -21,7 +22,8 @@ public enum StampModificationTypeCode {
     MARKED_BY_ADMIN("m"),
     TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT("x"),
     ACTUAL_TIME_AT_WORK("f"),
-    FIXED_WORKINGTIME("d");
+    FIXED_WORKINGTIME("d"),
+    MARKED_BY_EMPLOYEE("md");
     
     
     private String code;

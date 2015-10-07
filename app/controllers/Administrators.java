@@ -104,7 +104,7 @@ public class Administrators extends Controller {
 			Offices.showOffices(null);
 		}
 
-		User user = userDao.getUserById(userId, Optional.<String>absent());
+		User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
 
 		if(user == null) {
 
@@ -231,7 +231,7 @@ public class Administrators extends Controller {
 	 */ 
 	public static void switchUserTo(long id) {
 		
-		final User user = userDao.getUserById(id, Optional.<String>absent());
+		final User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
 		notFoundIfNull(user);
 
 			// salva il precedente

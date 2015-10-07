@@ -1,0 +1,74 @@
+*{
+ type: ["hoursAndMinutes", "multipleSelect", "minutes"]
+ title: etichetta della form
+ field: nome del campo http
+ value: valore di default del campo
+ color: colore del div
+
+ hoursAndMinutes:
+   field: il prefisso del nome del campo. 
+          Si assume che i campi siano field + "Hour" e field + "Minute"
+   hourValue: default per l'ora
+   minuteValue: default per i minuti
+ 
+ minutes: stilizzare un campo soli minuti in colonna con hoursAndMinutes
+   
+ multipleSelect:
+   items: gli oggetti su cui scegliere
+ 
+
+}*
+
+<div class="alert alert-${_color}"> 
+   <div class="form-group">
+    <label class="col-sm-4 control-label">${_title}</label>
+    
+    <div class="col-sm-8">
+    #{if _type.equals("hoursAndMinutes")}
+      <label for="${_field}Hour" class="col-sm-2 control-label">Ore</label>
+      <div class="col-sm-3">
+        <input type="number" class="form-control" name="${_field}Hour" value="${_hourValue}">
+        #{ifError _field+'Hour'} #{error _field+'Hour' /} #{/ifError}
+      </div>
+    
+      <label for="${_field}Minute" class="col-sm-2 control-label">Minuti</label>
+      <div class="col-sm-3">
+        <input type="number" class="form-control" name="${_field}Minute" value="${_minuteValue}">
+        #{ifError _field+'Minute'} #{error _field+'Minute' /} #{/ifError}
+      </div>
+    #{/if}
+
+   #{if _type.equals("multipleSelect")}
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+      <select name="${_field}" class="form-control" multiple select2>
+        <option></option>
+        #{list items:templateUtility.allDays, as:'item'}
+          <option value="${item}"#{if _value.contains(item)} selected#{/if}>${item.label()}</option>
+        #{/list}
+	  </select>
+	</div>  
+    #{/if}
+    
+    #{if _type.equals("minutes")}
+      <label for="${_field}" class="col-sm-2 control-label">Minuti</label>
+        <div class="col-sm-3">
+          <input type="number" class="form-control" name="${_field}" value="${_value}">
+          #{ifError _field} #{error _field /} #{/ifError}
+        </div>    
+    #{/if}
+    
+    #{if _type.equals("radio")}
+      <div class="col-sm-2"></div>
+      <label class="radio-inline">
+	    <input type="radio" name="${_field}" value="true"#{if _value == true} checked#{/if}>Si
+	  </label>
+	
+	  <label class="radio-inline">
+	    <input type="radio" name="${_field}" value="false"#{if _value == false} checked#{/if}>No
+	  </label>
+       
+    #{/if}
+    </div>
+  </div>
+</div>

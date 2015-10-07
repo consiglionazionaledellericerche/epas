@@ -220,12 +220,10 @@ public class CompetenceUtility {
 			lastCompetence.save();
 		}
 
-
-
-
 	}
 
-	public Competence getLastCompetence(Person person, int year, int month, CompetenceCode competenceCode) {
+	
+	private Competence getLastCompetence(Person person, int year, int month, CompetenceCode competenceCode) {
 		QCompetence com2 = QCompetence.competence;
 		QCompetenceCode comCode = QCompetenceCode.competenceCode;
 		// prendo la competenza del mese precedente
@@ -750,13 +748,6 @@ public class CompetenceUtility {
 								absenceDays.add(personShiftDay.date.toString("dd MMM"));							
 								inconsistentAbsenceTable.put(person, thMissions, absenceDays);
 
-							} else {
-								Logger.info("Il turno di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personShiftDay.date);
-
-
-								/*absenceDays = (inconsistentAbsence.contains(personName, thAbsences)) ? inconsistentAbsence.get(personName, thAbsences) : new ArrayList<Integer>();							
-								absenceDays.add(personShiftDay.date.getDayOfMonth());							
-								inconsistentAbsence.put(personName, thAbsences, absenceDays);*/
 
 								absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences)) ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();							
 								absenceDays.add(personShiftDay.date.toString("dd MMM"));							
@@ -770,3 +761,4 @@ public class CompetenceUtility {
 		//return inconsistentAbsenceTable;
 	}
 }
+

@@ -3,6 +3,7 @@ package security;
 import security.PermissionCheck;
 import models.Office;
 import models.UsersRolesOffices;
+import models.ShiftType;
 import models.Person;
 import models.Role;
 
@@ -29,7 +30,8 @@ end
 
 /*  
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
- *  (Ricalca il più possibile la struttura del dropdown menu della persona.)
+ *  (Ricalca il più possibile la struttura del dropdown menu della persona 
+ *  oltre i calendari iCal e le azioni REST)
  */
 rule IsEmployee
 when
@@ -83,22 +85,27 @@ when
      	/* Stampa cartellino */
      	"PrintTags.showPersonTag",
      	
+     	/* 
+     	 * Visualizzazione eventuali turni via iCal
+     	 * dentro il metodo controllare il permesso di
+     	 * visualizzare il calendario specifico richiesto
+     	 */
+     	"Shift.iCal",
+     	"Reperibility.iCal", 
+     	
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
-     	"rest.PersonDays.getMonthSituation"    	
+     	"rest.PersonDays.getMonthSituation",
+     	
+     	/* Timbrature web */
+     	"Clocks.daySituation",
+     	"Clocks.webStamping",
+     	"Clocks.insertWebStamping"   	
      	
        ), target == null, granted == false)
 then
  $c.grant();
 end
-
-/*  
- *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
- *  Metodi rest per se stessi
- *
-rule IsEmployeeRest
-*/
-
 
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario 
  * dell'azione se stesso
@@ -349,10 +356,7 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract",				
-        "WorkingTimes.changeWorkingTimeTypeToAll",
-        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
-        
+        "WorkingTimes.showContract"				
 
         ), target == null, granted == false)
 then
@@ -419,9 +423,7 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract",				
-        "WorkingTimes.changeWorkingTimeTypeToAll",
-        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
+        "WorkingTimes.showContract"				
                
        ), target == $o, granted == false)
 then
@@ -465,6 +467,7 @@ when
         
         "Persons.updateSourceContract",
      	"Persons.saveSourceContract",
+     	"Persons.approveAutomatedSource",
      	
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
@@ -490,8 +493,6 @@ when
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
      	
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
-     	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
@@ -507,6 +508,7 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
+     	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
      	/* Vecchio permesso editCompetence */
@@ -530,6 +532,8 @@ when
         "WorkingTimes.save",
         "WorkingTimes.delete",
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll",
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
@@ -542,7 +546,12 @@ when
         "Absences.editCode",
         "Absences.insertCode",
      	"Absences.saveCode",
-     	"Absences.updateCode"
+     	"Absences.updateCode",
+     	
+     	"Configurations.saveConfGeneral",
+     	"Configurations.savePatron",
+     	"Configurations.saveConfYear",
+		"Configurations.savePastYearVacationLimit"
         
         ), target == null, granted == false)
 then
@@ -574,6 +583,7 @@ when
      	
      	"Persons.updateSourceContract",
      	"Persons.saveSourceContract",
+     	"Persons.approveAutomatedSource",
      	
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
@@ -599,8 +609,6 @@ when
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
      	
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
-     	
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
@@ -616,6 +624,7 @@ when
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
+     	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
      	/* Vecchio permesso editCompetence */
@@ -640,6 +649,8 @@ when
         "WorkingTimes.delete",
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
         "WorkingTimes.insertWorkingTime",
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll",
         
         /* Vecchio permesso editCompetenceCode
          *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
@@ -658,7 +669,12 @@ when
         "Absences.editCode",
      	"Absences.insertCode",
      	"Absences.saveCode",
-     	"Absences.updateCode"      
+     	"Absences.updateCode",
+     	
+     	"Configurations.saveConfGeneral",
+     	"Configurations.savePatron",
+     	"Configurations.saveConfYear",
+		"Configurations.savePastYearVacationLimit"
                
        ), target == $o, granted == false)
 then
@@ -736,6 +752,64 @@ when
         "rest.Absences.checkAbsence"
         
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni via REST e iCal per Turni e Reperibilità
+ ******************************************************************************/
+
+/**
+rule viewShiftICal
+when
+  $uro: UsersRolesOffices()
+  $st: ShiftType(shiftCategories.supervisor == $uro.user || )
+  $c: PermissionCheck(action in (
+        "Shift.iCal"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+*/
+
+rule manageShift
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "shiftManager") from $uro.role
+ $c: PermissionCheck(action in (
+        
+        "Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence",  
+        "Shift.iCal"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule manageReperibility
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "reperibilityManager") from $uro.role
+ $c: PermissionCheck(action in (
+        
+        "Reperibility.personList",
+        "Reperibility.find",
+        "Reperibility.who",
+        "Reperibility.absence",
+        "Reperibility.whoIsAbsent",
+        "Reperibility.update",
+        "Reperibility.changePeriods",  
+        "Reperibility.exportYearAsPDF", 
+        "Reperibility.exportMonthAsPDF",
+        "Reperibility.iCal"
+        
+       ), target == null, granted == false)
 then
  $c.grant();
 end

@@ -1,29 +1,24 @@
 package jobs;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.Lists;
+import injection.StaticInject;
 import manager.OfficeManager;
-import models.Office;
-import models.Person;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
+import models.*;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
-import play.jobs.Job;
 import play.test.Fixtures;
 
-import com.google.common.collect.Lists;
+import javax.inject.Inject;
+import java.util.List;
 
-public class FixUserPermission{
+@StaticInject
+public class FixUserPermission {
 
 	@Inject
 	private static OfficeManager officeManager;
-
-	public void doJob(){
+	
+	public static void doJob(){
 
 		final class Permesso{
 
@@ -86,6 +81,7 @@ public class FixUserPermission{
 
 		//		Sistema i permessi per gli user admin e developer
 		List<Office> offices = Office.findAll();
+		
 		for(Office o : offices){
 			officeManager.setSystemUserPermission(o);
 		}

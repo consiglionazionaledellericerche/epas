@@ -183,7 +183,7 @@ public class ContractManager {
 //		
 //		contract.sourceRecoveryDayUsed = 0;		
 //		
-		contract.sourceByAdmin = false;
+		//contract.sourceByAdmin = false;
 		
 		contract.save();
 		
@@ -473,7 +473,8 @@ public class ContractManager {
 	 * 
 	 * @param contract
 	 */
-	public void saveSourceContract(Contract contract){
+	public void saveSourceContract(Contract contract) {
+		
 		if(contract.sourceVacationLastYearUsed == null){ 
 			contract.sourceVacationLastYearUsed = 0;
 		}
@@ -495,7 +496,6 @@ public class ContractManager {
 		if(contract.sourceRemainingMealTicket == null){ 
 			contract.sourceRemainingMealTicket = 0;
 		}
-
 		contract.save();
 	}
 

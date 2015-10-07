@@ -72,7 +72,6 @@ public class Administration extends Controller {
 			absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
 			absenceType.save();
 		}
-
 		absenceType = AbsenceType.find("byCode", "RITING").first();
 		if(absenceType==null) {
 			absenceType = new AbsenceType();

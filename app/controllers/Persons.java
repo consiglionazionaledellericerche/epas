@@ -20,6 +20,7 @@ import manager.ContractWorkingTimeTypeManager;
 import manager.OfficeManager;
 import manager.PersonManager;
 import manager.SecureManager;
+import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -63,6 +64,7 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+
 
 @Slf4j
 @With( {Resecure.class, RequestInit.class} )
@@ -540,11 +542,31 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 		
-		Optional<LocalDate> initUse = confGeneralManager
-				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, 
-				contract.person.office);
+		IWrapperContract wContract = wrapperFactory.create(contract);
 		
-		render(contract, initUse);
+		LocalDate dateForInit = wContract.dateForInitialization();
+		
+		render(contract, dateForInit);
+	}
+	
+	public static void approveAutomatedSource(Long contractId) {
+		
+		Contract contract = contractDao.getContractById(contractId);
+		if(contract == null) {
+
+			flash.error("Contratto inesistente. Operazione annullata.");
+			list(null);
+		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
+		contract.sourceByAdmin = true;
+		contract.save();
+		
+		flash.success("Operazione conclusa con successo.");
+		
+		list(null);
+		
 	}
 
 
@@ -557,6 +579,22 @@ public class Persons extends Controller {
 		}
 
 		rules.checkIfPermitted(contract.person.office);
+
+		
+		ConfGeneral initUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM,  contract.person.office);
+		if(new LocalDate(initUseProgram.fieldValue).isAfter(contract.sourceDateResidual) 
+				&& contract.sourceDateResidual.isBefore(contract.person.createdAt.toLocalDate())){
+			flash.error("La data di inizializzazione ( %s ) non può essere "
+					+ "precedente alla data di creazione della persona ( %s ) e "
+					+ "nemmeno precedente alla data di inizio di utilizzo del programma ( %s )",
+					contract.sourceDateResidual, contract.person.createdAt.toLocalDate(), 
+					new LocalDate(initUseProgram.fieldValue));
+			edit(contract.person.id);
+			
+		}
+
+
+		contract.sourceByAdmin = true;
 
 		contractManager.saveSourceContract(contract);
 

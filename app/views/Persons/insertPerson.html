@@ -37,7 +37,7 @@
     <div class="panel-body">
       #{f.date 'contract.beginContract',view:'year',required:'true'/} 
       #{f.date 'contract.expireContract',view:'year'/} 
-      #{f.checkbox 'contract.onCertificate'/}
+      #{f.checkbox 'contract.onCertificate',title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
 
       <p>
         Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>

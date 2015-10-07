@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
@@ -37,6 +38,9 @@ public class WorkingTimeType extends BaseModel {
 	@Column(nullable=false)
 	@Unique("office")
 	public String description;
+	
+	@Required
+	public Boolean horizontal;
 
 	/**
 	 * True se il tipo di orario corrisponde ad un "turno di lavoro"
@@ -71,5 +75,53 @@ public class WorkingTimeType extends BaseModel {
 	public String toString() {
 		return description;
 	}
+	
+	@Transient
+	public boolean horizontalEuristic() {
+		
+		Integer workingTime = null;
+		Integer mealTicketTime = null;
+		Integer breakTicketTime = null;
+		Integer afternoonThreshold = null;
+		Integer afternoonThresholdTime = null;
+		
+		boolean equal = true;
+		
+		for(WorkingTimeTypeDay wttd : this.workingTimeTypeDays) {
+			
+			if( wttd.holiday ) {
+				continue;
+			}
+			
+			if (workingTime == null) {
+				workingTime = wttd.workingTime;
+				mealTicketTime = wttd.mealTicketTime;
+				breakTicketTime = wttd.breakTicketTime;
+				afternoonThreshold = wttd.ticketAfternoonThreshold;
+				afternoonThresholdTime = wttd.ticketAfternoonWorkingTime;
+				continue;
+			}
+
+			if ( !workingTime.equals(wttd.workingTime) ) {
+				equal = false;
+			} 
+			if ( !mealTicketTime.equals(wttd.mealTicketTime) ) {
+				equal = false;
+			}
+			if ( !breakTicketTime.equals(wttd.breakTicketTime) ) {
+				equal = false;
+			}
+			if ( !afternoonThreshold.equals(wttd.ticketAfternoonThreshold) ) {
+				equal = false;
+			}
+			if ( !afternoonThresholdTime.equals(wttd.ticketAfternoonWorkingTime) ) {
+				equal = false;
+			}
+		}
+		
+		return equal;
+		
+	}
+
 }
 

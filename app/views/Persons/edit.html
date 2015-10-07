@@ -104,8 +104,8 @@
 	  		</tr>
 	  		#{list items:contractStampProfileList, as:'contractStampProfile'}
 	  		<tr>  			
-	  			<td><h4><span class="label label-default">${contractStampProfile.startFrom}</span></h4></td>
-	  			<td><h4><span class="label label-default">${contractStampProfile.endTo}</span></h4></td>
+	  			<td><h4><span class="label label-default">${contractStampProfile.startFrom.format()}</span></h4></td>
+	  			<td><h4><span class="label label-default">${contractStampProfile.endTo.format()}</span></h4></td>
 	  			<td>
 	  				#{if contractStampProfile.fixedworkingtime == true}
 	  					<i class="fa fa-check-square-o"></i>
@@ -170,11 +170,11 @@
 			   #{if contract.monthRecapMissing() }
 			    mancariep
 			  #{/if}
-			  <h4><span class="label label-default">${contract.value.beginContract}</span></h4>
+			  <h4><span class="label label-default">${contract.value.beginContract.format()}</span></h4>
 			</td>
 			
 			<td>
-			  <h4><span class="label label-default">${contract.value.expireContract}</span></h4>
+			  <h4><span class="label label-default">${contract.value.expireContract.format()}</span></h4>
 			</td>
 			
 			<td>
@@ -191,8 +191,8 @@
 	    		data-html="true"
 	    		data-content="
 	    		${(
-	    		'Inizio Periodo: <strong>'+wtt.beginDate+'</strong>'+
-	    		'<br>Fine Periodo: <strong>'+wtt.endDate+'</strong>'
+	    		'Inizio Periodo: <strong>'+wtt.beginDate.format()+'</strong>'+
+	    		'<br>Fine Periodo: <strong>'+wtt.endDate.format()+'</strong>'
 	    		).escape()}"
 	    		title="Periodo validità orario">
 	    		
@@ -223,9 +223,14 @@
 			</td>
 			
 			 <td class="span4" style="text-align: center;">
+			 
+			 #{if contract.value.sourceDateResidual != null && contract.value.sourceByAdmin == false }
+				<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="Questa inizializzazione non è ancora stata approvata dall'amministratore"></span>
+			 #{/if}
+			 
 			 #{if contract.value.sourceDateResidual!=null}
 			     Situazione alla data
-			     <strong class="text-error">${contract.value.sourceDateResidual}</strong><br>
+			     <strong class="text-error">${contract.value.sourceDateResidual.format()}</strong><br>
 			   #{if contract.value.sourceRemainingMinutesLastYear>0 }
 			     Residuo ${contract.value.sourceDateResidual.getYear()-1} 
 			     <strong class="text-error">${contract.value.sourceRemainingMinutesLastYear}</strong><br>
@@ -254,13 +259,9 @@
 			     Buoni pasto residui
 			   <strong class="text-error">${contract.value.sourceRemainingMealTicket}</strong><br>
 			   #{/if}
-			   
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Modifica</a>
-			
-			 #{/if}
-			 #{else}
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal">Definisci Inizializzazione</a>
-			 #{/else}
+			 #{/if}  
+
+			  <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" data-modal=".my-modal-large">Definisci Inizializzazione</a>
 			</td>
 			
 		</tr>
@@ -293,3 +294,4 @@
 </div>
 
 #{include '_myModal.html' /}
+#{include '_myModal_large.html' /}

@@ -1,37 +1,24 @@
 package manager.recaps.personStamping;
 
-import it.cnr.iit.epas.DateInterval;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.MealTicketDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperContractMonthRecap;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
+import manager.ContractMonthRecapManager;
+import manager.PersonDayManager;
+import manager.PersonManager;
+import models.*;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import manager.ContractMonthRecapManager;
-import manager.PersonDayManager;
-import manager.PersonManager;
-import models.AbsenceType;
-import models.Contract;
-import models.ContractMonthRecap;
-import models.Person;
-import models.PersonDay;
-import models.StampModificationType;
-import models.StampModificationTypeCode;
-import models.StampType;
-import models.Stamping;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import dao.MealTicketDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperContractMonthRecap;
-import dao.wrapper.IWrapperFactory;
 
 /**
  * Oggetto che modella il contenuto della vista contenente il tabellone timbrature.
@@ -171,6 +158,12 @@ public class PersonStampingRecap {
 					StampModificationType smt = stampingDayRecapFactory
 							.stampTypeManager.getStampMofificationType(
 									StampModificationTypeCode.MARKED_BY_ADMIN);
+					stampModificationTypeSet.add(smt);
+				}
+				if(stamp.markedByEmployee){
+					StampModificationType smt = stampingDayRecapFactory
+							.stampTypeManager.getStampMofificationType(
+									StampModificationTypeCode.MARKED_BY_EMPLOYEE);
 					stampModificationTypeSet.add(smt);
 				}
 				if(stamp.stampModificationType != null) {

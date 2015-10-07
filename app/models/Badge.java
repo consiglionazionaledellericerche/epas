@@ -11,6 +11,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
@@ -22,9 +24,10 @@ import com.google.common.collect.Sets;
 
 @Entity
 @Audited
-@Table(name="badges")
+@Table(name="badges", uniqueConstraints={@UniqueConstraint(columnNames={"badge_reader_id", "code"})})
 public class Badge extends BaseModel{
 	
+	@NotNull
 	public String code;
 
 	@ManyToOne

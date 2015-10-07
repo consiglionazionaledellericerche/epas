@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
+import models.Office;
 import models.Person;
 import models.WorkingTimeType;
 import models.query.QWorkingTimeType;
@@ -39,8 +40,9 @@ public class WorkingTimeTypeDao extends DaoBase{
 	/**
 	 * 
 	 * @param description
-	 * @return il workingTimeType relativo alla descrizione passata come parametro
+	 * @return 
 	 */
+	@Deprecated
 	public WorkingTimeType getWorkingTimeTypeByDescription(String description){
 		final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
 		final JPQLQuery query = getQueryFactory().from(wtt)
@@ -48,10 +50,35 @@ public class WorkingTimeTypeDao extends DaoBase{
 		return query.singleResult(wtt);
 	}
 
+	/**
+	 * Se office è present il tipo orario di con quella descrizione se esiste.
+	 * Se office non è present il tipo orario di default con quella descrizione.
+	 * @param description
+	 * @param office
+	 * @return
+	 */
+	public WorkingTimeType workingTypeTypeByDescription(String description,
+			Optional<Office> office) {
+		
+		final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+		
+		if(office.isPresent()) {
+			return getQueryFactory().from(wtt)
+					.where(wtt.description.eq(description).and(wtt.office.eq(office.get())))
+					.singleResult(wtt);
+		} else {
+			return getQueryFactory().from(wtt)
+					.where(wtt.description.eq(description).and(wtt.office.isNull()))
+					.singleResult(wtt);
+		}
+		
+	}
+	 
+
 
 	/**
 	 * 
-	 * @return la lista di tutti gli workingTimeType presenti nel database
+	 * @return 
 	 */
 	public List<WorkingTimeType> getAllWorkingTimeType(){
 		final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
@@ -63,7 +90,7 @@ public class WorkingTimeTypeDao extends DaoBase{
 	/**
 	 * 
 	 * @param id
-	 * @return il workingTimeType relativo all'id passato come parametro
+	 * @return 
 	 */
 	public WorkingTimeType getWorkingTimeTypeById(Long id){
 		final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
@@ -75,7 +102,7 @@ public class WorkingTimeTypeDao extends DaoBase{
 
 	/**
 	 * 
-	 * @return la lista degli orari di lavoro presenti di default sul database perchè validi a livello nazionale per il CNR
+	 * @return la lista degli orari di lavoro presenti di default sul database
 	 */
 	public List<WorkingTimeType> getDefaultWorkingTimeType(){
 		final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;

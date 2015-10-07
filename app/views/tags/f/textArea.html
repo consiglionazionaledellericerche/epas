@@ -1,0 +1,6 @@
+#{f.edit _arg, label:_label,feedback:'true'}
+<textarea class="form-control ${_class}" rows="${_rows == null ? 3 : _rows}" id="${field.id}" name="${field.name}" type="${_type == null ? 'text' : _type}"
+    #{if _placeholder} placeholder="${_placeholder}"#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}#{if _disabled} disabled#{/if}>
+${_value == null ? field.value : _value}
+</textarea>
+#{/f.edit}

@@ -206,19 +206,31 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean initializationMissing() {
 		
-		// Se la data di inizio contratto è successiva alla data di utilizzo del 
-		// programma allora ci sono problemi di inizializzazione.
+		LocalDate dateForInit = dateForInitialization();
 		
-		LocalDate officeInstallation = 
-				new LocalDate(confGeneralManager.getFieldValue(
-						Parameter.INIT_USE_PROGRAM, value.person.office));
-		
-		if( value.beginContract.isBefore(officeInstallation) 
-				&& value.sourceDateResidual == null) {
-			return true;
+		if(value.sourceDateResidual != null) {
+			return false;
 		}
+
+		return value.beginContract.isBefore(dateForInit);
+	}
+	
+	/**
+	 * La data di inizilizzazione è la successiva fra la creazione della persona
+	 * e l'inizio utilizzo del software della sede della persona (che potrebbe 
+	 * cambiare a causa del trasferimento).
+	 */
+	@Override
+	public LocalDate dateForInitialization() {
+		LocalDate officeInstallation =	new LocalDate(
+				confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM,
+						value.person.office));
 		
-		return false;
+		LocalDate personCreation = new LocalDate(value.person.createdAt);
+		if(personCreation.isAfter(officeInstallation)) {
+			return personCreation;
+		} 
+		return officeInstallation;
 	}
 	
 	@Override
@@ -252,6 +264,12 @@ public class WrapperContract implements IWrapperContract {
 	@Override
 	public boolean hasMonthRecapForVacationsRecap(int yearToRecap) {
 		
+		// se non ho il contratto inizializzato il riepilogo ferie non esiste
+		//o non è veritiero.
+		if (initializationMissing()) {
+			return false;
+		}
+		
 		// se il contratto inizia nell'anno non ho bisogno del recap.
 		if (value.beginContract.getYear() == yearToRecap) {
 			return true;
@@ -262,6 +280,7 @@ public class WrapperContract implements IWrapperContract {
 				&& value.sourceDateResidual.getYear() == yearToRecap) {
 			return true;
 		}
+		
 		// Altrimenti ho bisogno del riepilogo finale dell'anno precedente.
 		Optional<ContractMonthRecap> yearMonthToCheck = 
 				getContractMonthRecap( new YearMonth(yearToRecap-1, 12) );
