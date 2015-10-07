@@ -1,0 +1,54 @@
+*{
+ arg field.name
+ value (optional) if empty fallback on field.value
+ label (optional) if empty fallback to arg
+ link (optional) if href create a with href
+ bodyonly (optional)
+}*
+#{field _arg}
+%{
+if (_value != null) {
+value = _value
+} else {
+value = field.value
+}
+if (_body) {
+_body.setProperty('field.value', value);
+_body.setProperty('field', field);
+}
+label = _label ?: _arg;
+empty = value == null || ((value instanceof String ) && value.empty)
+if (noLabel == null) {
+noLabel = _inline;
+}
+// XXX: attenzione gli a-capo nel seguito in alcuni casi mancano volutamente.
+}%
+<div class="form-group ${empty ? 'text-muted' : ''}">
+    <label class="#{if noLabel}sr-only#{/if}#{else}col-sm-3#{/else} control-label">${label.label()}</label>
+
+    <div #{if !noLabel}class="col-sm-6"#{/if}>
+        <p class="form-control-static" id="${field.id}">
+        #{if !_bodyonly}
+        #{if !empty}
+        #{if _link}<a href="${_link}">#{/if}
+            #{if value instanceof String}${value}#{/if}
+            #{elseif value instanceof Boolean}
+                 <i class="fa ${value ? 'fa-check-square-o' : 'fa-square-o text-muted'}"></i>
+                 <span class="sr-only">${value ? 'si':'no'}</span>
+            #{/elseif}
+            #{elseif value instanceof Enum}${value.label()}#{/elseif}
+            #{else}${value.format()}#{/else}
+        #{if _link}</a>#{/if}
+        #{/if}
+        #{else}
+            <span class="text-muted">${'notAvailable'.label()}</span>
+        #{/else}
+        #{if _description}<span class="help-block">${_description}</span>#{/if}
+        #{/if}
+        #{else}
+            #{doBody /}
+        #{/else}
+        </p>
+    </div>
+</div>
+#{/field}

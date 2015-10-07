@@ -1,25 +1,21 @@
 package controllers;
 
 import it.cnr.iit.epas.JsonReportBinder;
+import models.Person;
+import models.User;
+import models.exports.ReportFromJson;
+import org.apache.commons.mail.EmailAttachment;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import play.Logger;
+import play.data.binding.As;
+import play.libs.Mail;
+import play.mvc.Controller;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import models.Person;
-import models.User;
-import models.exports.ReportFromJson;
-
-import org.apache.commons.mail.EmailAttachment;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-
-import play.Logger;
-import play.Play;
-import play.data.binding.As;
-import play.libs.Mail;
-import play.mvc.Controller;
 
 
 public class ReportCentre extends Controller{
@@ -66,7 +62,6 @@ public class ReportCentre extends Controller{
 			email.addTo("epas@iit.cnr.it");
 //			FIXME rendere configurabile quest'indirizzo!!
 			
-			email.setFrom(Play.configuration.getProperty("application.mail.address"));
 			if(person != null && !person.email.equals(""))
 				email.addReplyTo(person.email);
 			email.attach(attachment);

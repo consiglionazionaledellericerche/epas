@@ -9,8 +9,6 @@ fi
 
 EPAS_HOST=${VIRTUAL_HOST}
 
-EMAIL_EPAS=${EMAIL_EPAS:-epas@cnr.it}
-
 chown -R epas:epas /home/epas
 
 HTTPS=${HTTPS:-false}
@@ -39,10 +37,6 @@ if [ -z "${DB_PASS}" ]; then
 else
 	DB_USER_PASS="$DB_USER:$DB_PASS"
 fi
-
-SMTP_HOST=${SMTP_HOST:-smtp.cnr.it}
-SMTP_PORT=${SMTP_PORT:-587}
-SMTP_CHANNEL=${SMTP_CHANNEL:-starttls}
 
 BACKUP_MINUTES=${BACKUP_MINUTES:-5}
 BACKUP_HOURS=${BACKUP_HOURS:-6,12,18}
@@ -80,6 +74,8 @@ cron
 fi
 
 # configure ePAS
+SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
+
 sudo -u epas -H cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/prod.conf
 
 sudo -u epas -H sed 's/{{EPAS_APPLICATION_BASEURL}}/'"${EPAS_APPLICATION_BASEURL}"'/' -i /home/epas/epas/conf/prod.conf
@@ -88,13 +84,42 @@ sudo -u epas -H sed 's/{{DB_PORT}}/'"${DB_PORT}"'/' -i /home/epas/epas/conf/prod
 sudo -u epas -H sed 's/{{DB_NAME}}/'"${DB_NAME}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{DB_USER_PASS}}/'"${DB_USER_PASS}"'/' -i /home/epas/epas/conf/prod.conf
 
-sudo -u epas -H sed 's/{{EMAIL_EPAS}}/'"${EMAIL_EPAS}"'/' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's/{{SMTP_HOST}}/'"${SMTP_HOST}"'/' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's/{{SMTP_PORT}}/'"${SMTP_PORT}"'/' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's/{{SMTP_USER}}/'"${SMTP_USER}"'/' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's/{{SMTP_PASS}}/'"${SMTP_PASS}"'/' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's/{{SMTP_CHANNEL}}/'"${SMTP_CHANNEL}"'/' -i /home/epas/epas/conf/prod.conf
 
+### Impostazione server smtp
+
+SMTP_FROM=${SMTP_FROM:-epas@cnr.it}
+SMTP_HOST=${SMTP_HOST:-smtp.cnr.it}
+
+sudo -u epas -H sed 's/{{SMTP_FROM}}/'"${SMTP_FROM}"'/' -i /home/epas/epas/conf/prod.conf
+sudo -u epas -H sed 's/{{SMTP_HOST}}/'"${SMTP_HOST}"'/' -i /home/epas/epas/conf/prod.conf
+
+if [ -z "${SMTP_USER}" ]; then
+  sed -n '/SMTP_USER/!p' -i /home/epas/epas/conf/prod.conf
+  sed -n '/SMTP_PASS/!p' -i /home/epas/epas/conf/prod.conf
+else
+  sudo -u epas -H sed 's/{{SMTP_USER}}/'"${SMTP_USER}"'/' -i /home/epas/epas/conf/prod.conf
+  sudo -u epas -H sed 's/{{SMTP_PASS}}/'"${SMTP_PASS}"'/' -i /home/epas/epas/conf/prod.conf
+fi
+
+if [ -z "${SMTP_PORT}" ]; then
+  sed -n '/SMTP_PORT/!p'  -i /home/epas/epas/conf/prod.conf
+else
+  sudo -u epas -H sed 's/{{SMTP_PORT}}/'"${SMTP_PORT}"'/' -i /home/epas/epas/conf/prod.conf
+fi
+
+if [ -z "${SMTP_CHANNEL}" ]; then
+  sed -n '/SMTP_CHANNEL/!p' -i /home/epas/epas/conf/prod.conf
+else
+  sudo -u epas -H sed 's/{{SMTP_CHANNEL}}/'"${SMTP_CHANNEL}"'/' -i /home/epas/epas/conf/prod.conf
+fi
+
+if [ -z "${SMTP_PROTOCOL}" ]; then
+  sed -n '/SMTP_PROTOCOL/!p' -i /home/epas/epas/conf/prod.conf
+else
+  sudo -u epas -H sed 's/{{SMTP_PROTOCOL}}/'"${SMTP_PROTOCOL}"'/' -i /home/epas/epas/conf/prod.conf
+fi
+
+sudo -u epas -H sed 's/{{SKIP_IP_CHECK}}/'"${SKIP_IP_CHECK}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{EPAS_SHIB_LOGIN}}/'"${EPAS_SHIB_LOGIN}"'/' -i /home/epas/epas/conf/prod.conf
 
 appRun () {

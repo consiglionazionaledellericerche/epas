@@ -1,23 +1,20 @@
 package jobs;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.apache.commons.mail.EmailException;
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayInTroubleManager;
 import models.Person;
+import org.apache.commons.mail.EmailException;
+import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
+
+import javax.inject.Inject;
+import java.util.List;
 
 //@On("0 34 15 ? * *")
 @SuppressWarnings("rawtypes")

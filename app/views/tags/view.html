@@ -1,0 +1,68 @@
+*{
+ arg field.name
+ value (optional) if empty fallback on field.value
+ label (optional) if empty fallback to arg
+ link (optional) if href create a with href
+ half (optional)
+ bodyonly (optional)
+}*
+#{field _arg}
+%{
+  if (_value != null) {
+    value = _value
+  } else {
+    value = field.value
+  }
+  if (_body) {
+     _body.setProperty('field.value', value);
+    _body.setProperty('field', field);
+  }
+  label = _label ?: _arg;
+  empty = value == null || ((value instanceof String ) && value.empty)
+  if (noLabel == null) {
+    noLabel = _inline;
+  }
+  // XXX: attenzione gli a-capo nel seguito in alcuni casi mancano volutamente.
+}%
+<div class="form-group ${empty ? 'text-muted' : ''}${_half ? ' col-sm-6' :''}">
+ <label class="#{if noLabel}sr-only#{/if}#{else}col-sm-${_half ? 4 : 2}#{/else} control-label">${label.label()}</label>
+ <div #{if !noLabel}class="col-sm-${_half ? 8 : 10}"#{/if}>
+  <p class="form-control-static" id="${field.id}">
+    #{if !_bodyonly}
+		#{if !empty}
+          #{if _link}
+<a href="${_link}" ${helpers.Web.serialize(_attrs, "arg", "value", "label", "link", "half").raw()}>#{/if}#{if value instanceof String}${value}#{/if}#{else}
+		  #{if value instanceof Boolean}
+		    <i class="fa ${value ? 'fa-check-square-o' : 'fa-square-o text-muted'}"></i>
+		      <span class="sr-only">${value ? 'si':'no'}</span>
+		  #{/if}
+		  #{else}
+		    #{if value instanceof Enum}
+		      ${value.label()}
+		    #{/if}
+		    #{else}
+		     #{if value instanceof models.base.INameable}
+		      ${value.name}
+		     #{/if}
+		     #{else}
+		      #{if value instanceof org.joda.time.LocalDate}
+		       ${value.format()}
+		      #{/if}#{else}
+		       ${value}
+		      #{/else}
+		     #{/else}
+		    #{/else}
+		  #{/else}#{/else}#{if _link}</a>
+		  #{/if}
+		#{/if}
+		#{else}
+		  <span class="text-muted">${'notAvailable'.label()}</span>
+		#{/else}
+	#{if _description}<span class="help-block">${_description}</span>#{/if}
+	#{/if}#{else}
+	#{doBody /}
+	#{/else}
+  </p>
+ </div>
+</div>
+#{/field}

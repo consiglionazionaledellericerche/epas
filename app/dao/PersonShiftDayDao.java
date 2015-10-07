@@ -16,6 +16,7 @@ import models.query.QPersonShiftDay;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;

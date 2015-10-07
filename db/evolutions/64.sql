@@ -1,5 +1,4 @@
 # ---!Ups
-
 # -- Evoluzione per la modellazione dei badgeReaders.
 
 # -- Eliminare vecchia implementazione badge_readers
@@ -83,11 +82,8 @@ CREATE TABLE badges_history (
 # -- Gli utenti con ruolo 'badgeReader' diventano badge_readers.
 
 INSERT INTO badge_readers (user_id, code, enabled) 
-SELECT DISTINCT u.id AS user_id, u.username AS code, true AS enabled 
-FROM roles r 
-LEFT OUTER JOIN users_roles_offices uro ON r.id = uro.role_id 
-LEFT OUTER JOIN users u ON u.id = uro.user_id 
-WHERE r.name = 'badgeReader';
+select id,username,true from users where id in
+(select user_id from users_roles_offices where role_id = (select id from roles where name = 'badgeReader'));
 
 # -- Alle persone con badgenumber definito viene associato un badge 
 # -- per ogni badge_reader associato all'office cui la persona appartiene.
@@ -150,7 +146,3 @@ CREATE TABLE badge_readers_history (
 );
 
 ALTER TABLE stampings ADD CONSTRAINT fk785e8f148868391d FOREIGN KEY (badge_reader_id) REFERENCES badge_readers(id);
-
-	
-
- 

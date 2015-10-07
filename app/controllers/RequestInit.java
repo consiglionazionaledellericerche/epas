@@ -22,13 +22,13 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -256,6 +256,13 @@ public class RequestInit extends Controller {
 			return stampingDao.findAll();
 		}
 		
+		public ImmutableList<String> getAllDays() {
+			final ImmutableList<String> days = ImmutableList.of(
+					  "lunedì", "martedì", "mercoledì", "giovedì", 
+					  "venerdì", "sabato", "domenica");
+			return days;		  
+		}
+	
 	}
 
 	@Before (priority = 1)

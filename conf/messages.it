@@ -92,6 +92,9 @@ contract.onCertificate=In attestati
 
 contractStampProfile.fixedworkingtime= Timbratura Default
 
+wtt.description= Nome Tipo Orario
+wtt.office=Sede 
+
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti
 PDFReport.thAppHour =Num. di ore approvate
@@ -110,8 +113,11 @@ qualification=Livello
 
 office=Sede
 
-
 modifierType= Calcolo Orario
+
+stamping.note= Note
+
+user.username= Username
 
 ########################
 # Messaggi di validazione

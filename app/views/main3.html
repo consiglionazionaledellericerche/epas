@@ -13,7 +13,7 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/cerulean/bootstrap.min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker3.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
@@ -26,12 +26,9 @@
     <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}"> 
 
     #{stylesheet 'select2-bootstrap.min.css'/}
-    #{stylesheet 'bootstrap-modal-bs3patch.css' /}
-    #{stylesheet 'bootstrap-modal.css' /}
+    #{stylesheet 'bootstrap-modal.css'/}
+    #{stylesheet 'bootstrap-modal-bs3patch.css'/}
     #{stylesheet 'my-bootstrap3.css'/}
-
-
-
 
 	#{get 'moreStyles' /}
 	
@@ -238,7 +235,7 @@
       	    
       	      #{if loginResponse != null}
       	      <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
-      	        <a style="color: red"><span class="glyphicon glyphicon-user"> ${loginResponse.getUsernameCnr()}</a>
+      	        <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	      </li>
       	      #{/if}
       	      
@@ -255,12 +252,12 @@
       		  
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"> ${session.username} </a>
+      	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
       	        </li>
       		    #{/if}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"> ${loginResponse.getUsernameCnr()}</a>
+      	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	        </li>
       	        #{/if}
       		
@@ -321,7 +318,7 @@
 	
     <!-- Begin page content -->
     <div class="container-fluid" id="page_content">
-       
+      
       <!-- do layout -->
       #{doLayout /}
 
@@ -386,14 +383,16 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/locales/bootstrap-datepicker.it.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
-    <script src="@{'/public/js/bootstrap-modalmanager.js'}"></script>
-    <script src="@{'/public/js/bootstrap-modal.js'}"></script>
-
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
+    
     <script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
     
-    <script src="@{'/public/js/script.js'}"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
+    #{script 'bootstrap-modal.js' /}
+    #{script 'bootstrap-modalmanager.js' /}
+    #{script 'script.js' /}
+
     #{include './feedback.html' /}  
 	#{get 'moreScripts' /}
   </body>

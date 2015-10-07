@@ -1,7 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +9,6 @@ import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
-import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
 import models.Contract;
@@ -25,32 +22,33 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.Minutes;
 
 import play.Logger;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.hash.Hashing;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 
 import controllers.Resecure.NoCheck;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.UserDao;
 
-@With( RequestInit.class )
-//@With( {RequestInit.class, Resecure.class} )
+@With( {RequestInit.class, Resecure.class} )
 public class Clocks extends Controller{
 
+	@Inject
+	private static OfficeDao officeDao;
 	@Inject
 	private static OfficeManager officeManager;
 	@Inject
 	private static PersonDao personDao;
-	@Inject
-	private static UserDao userDao;
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
@@ -62,23 +60,27 @@ public class Clocks extends Controller{
 	@Inject
 	private static ConsistencyManager consistencyManager;
 	@Inject
-	private static StampingManager stampingManager;
-	@Inject
 	private static SecurityRules rules;
-
 	
+	public final static String SKIP_IP_CHECK = "skip.ip.check";
+	
+	@NoCheck
 	public static void show(){
 
 		LocalDate data = new LocalDate();
-
-		String remoteAddress = Http.Request.current().remoteAddress;
-
-		Set<Office> offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+		Set<Office> offices;
+		
+		if("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			offices = FluentIterable.from(officeDao.getAllOffices()).toSet();
+		}
+		else{
+			String remoteAddress = Http.Request.current().remoteAddress;
+			offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+		}
 
 		if(offices.isEmpty()){
 			flash.error("Le timbrature web non sono permesse da questo terminale! "
 					+ "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
-
 			try {
 				Secure.login();
 			} catch (Throwable e) {
@@ -91,140 +93,121 @@ public class Clocks extends Controller{
 		render(data, personList);
 	}
 
-	
-	public static void clockLogin(Long userId, String password) {
-		LocalDate today = new LocalDate();
-		if(userId == null || userId == 0){
+	@NoCheck
+	public static void clockLogin(Person person, String password) {
+		
+		User user = person.user;
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
-			flash.error("Utente non selezionato");
-			Clocks.show();
-		}
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
 
-		User user = userDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
-
-		if(user == null){
-
-			flash.error("Password non corretta");
-			Clocks.show();
-		}
-
-		String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
-
-		if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
-
-			flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
-					"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
-			try {
-				Secure.login();
-			} catch (Throwable e) {
-				e.printStackTrace();
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
 			}
 		}
+		
+		if(user!= null && Security.authenticate(user.username,password)) {
+			// Mark user as connected
+			session.put("username", user.username);
+			daySituation();
+		}
+		else{
+			flash.error("Autenticazione fallita!");
+			show();
+		}
+	}
+	
+	public static void daySituation(){
+//		Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
+//		Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
+		User user = Security.getUser().orNull();
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
-		PersonDay personDay = null;			
-		Optional<PersonDay> pd = personDayDao.getPersonDay(user.person, today);
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
 
-		if(!pd.isPresent()){
-			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
+			}
+		}
+		
+		LocalDate today = LocalDate.now();
+		
+		PersonDay personDay = personDayDao.getPersonDay(user.person, today).orNull();			
+
+		if(personDay == null){
+			Logger.debug("Prima timbratura per %s non c'è il personday quindi va creato.", user.person.fullName());
 			personDay = new PersonDay(user.person, today);
 			personDay.create();
 		}
-		else{
-			personDay = pd.get();
-		}				
-		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, user.person.office);
-		int numberOfInOut = Math.max(minInOutColumn, personDayManager.numberOfInOutInPersonDay(personDay));
+		
+		int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay)+1;
 
 		PersonStampingDayRecap dayRecap = stampingDayRecapFactory
 				.create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
 
 		render(user, dayRecap, numberOfInOut);
-	}
-
-	
-	public static void showRecap(Long personId)
-	{
-		Person person = personDao.getPersonById(personId);
-
-		if(person == null)
-			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
-		rules.checkIfPermitted(person);
-		LocalDate today = new LocalDate();
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, today);
-		if(!pd.isPresent()){
-			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
-			personDay = new PersonDay(person, today);
-			personDay.create();
-		}
-		else{
-			personDay = pd.get();
-		}
-
-		int minInOutColumn = confGeneralManager.getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, person.office);
-		int numberOfInOut = Math.max(minInOutColumn,  personDayManager.numberOfInOutInPersonDay(personDay));
-
-		PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-				.create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
-
-		render(person, dayRecap, numberOfInOut);
-
-	}
-
-	
-	public static void entranceClock(Long personId, Integer year, Integer month, Integer day){
 		
-		Person person = personDao.getPersonById(personId);
+	}
+	
+	public static void webStamping(Long personDayId,WayType wayType){
 		
-		LocalDate date = new LocalDate(year,month,day);
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, date); 
-				
-		if(!pd.isPresent()){
-			personDay = new PersonDay(person, date);
-			personDay.save();
+		PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+		
+		if(personDay == null || personDay.person != Security.getUser().get().person){
+			flash.error("Errore nel recupero del personDay");
+			daySituation();
 		}
-		else
-			personDay = pd.get();
-		render(person, personDay);
+		
+		render(personDay,wayType);
 	}
+
 	
-	public static void exitClock(Long personId, Integer year, Integer month, Integer day){
-		Person person = personDao.getPersonById(personId);
+	public static void insertWebStamping(Stamping stamping){
+		
+		rules.checkIfPermitted(stamping.personDay.person);
+		
+		User user = Security.getUser().orNull();
+		
+		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
+			
+			String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
-		LocalDate date = new LocalDate(year,month,day);
+			if(!addressesAllowed.contains(Http.Request.current().remoteAddress)){
 
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = personDayDao.getPersonDay(person, date); 
-				
-		if(!pd.isPresent()){
-			personDay = new PersonDay(person, date);
-			personDay.save();
+				flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
+						"Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+			show();
+			}
 		}
-		else
-			personDay = pd.get();
+		
+		stamping.date = LocalDateTime.now();
+		
+		for(Stamping s : stamping.personDay.stampings){
+			
+			if(Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1 
+				||(s.way.equals(stamping.way) && 
+						Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2)){
 
-		render(person, personDay);
-	}
-	
-	public static void insertEntranceStampingClock(Long personDayId, Stamping stamping, String note){
-		PersonDay pd = personDayDao.getPersonDayById(personDayId);
-		LocalDateTime time = LocalDateTime.now();
-		rules.checkIfPermitted(pd.person);
-		stampingManager.addStamping(pd, time, note, stamping.stampType, true, false);
-				
-		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
-		Clocks.showRecap(pd.person.id);
-	}
-	
-	
-	public static void insertExitStampingClock(Long personDayId, Stamping stamping, String note){
-		PersonDay pd = personDayDao.getPersonDayById(personDayId);
-		LocalDateTime time = LocalDateTime.now();
-		rules.checkIfPermitted(pd.person);
-		stampingManager.addStamping(pd, time, note, stamping.stampType, false, false);
-				
-		consistencyManager.updatePersonSituation(pd.person.id, pd.date);
-		Clocks.showRecap(pd.person.id);
+				flash.error("Impossibile inserire 2 timbrature così ravvicinate."
+						+ "Attendere 1 minuto per timbrature di verso opposto o "
+						+ "2 minuti per timbrature dello stesso verso");
+				daySituation();
+			}
+		}
+		
+		stamping.markedByAdmin=false;
+		stamping.save();
+		
+		consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
+
+		daySituation();
 	}
 }

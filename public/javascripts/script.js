@@ -60,22 +60,34 @@ $(function($){
     });
     
     bootbox.setDefaults({locale: 'it', className: 'bootbox_modal'});
-    
-	$.fn.initepas = function() {
 
-		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
+	
+	function toggleChevron(e) {
+		var $fa = $(e.target).prev('.panel-heading').find('i.fa');
+		if (e.type == "hide") {
+			$fa.addClass('fa-chevron-up').removeClass('fa-chevron-down');
+		} else {
+			$fa.addClass('fa-chevron-down').removeClass('fa-chevron-up');
+		}
+	}
+    $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
+    $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
+
+	$.fn.initepas = function() {
+		
+		//$(':input[data-selectize]', this).select2({allowClear:true});
+
+		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap", placeholder: "Seleziona un valore"});
 		$(':input[select2Table]', this).select2({minimumResultsForSearch: 25});
 
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
+		$('[popover-hover]').popover({trigger: "hover",placement: 'right auto',container: 'body'});
 
-		$('[datatable]').DataTable({
+		this.find('[datatable]').DataTable({
 			"lengthMenu": [ [10, 25, 50,100, -1], [10, 25, 50,100, "Tutti"] ],
-			"language": {
-        "url": "/public/i18n/DataTablesItalian.json"
-      }
+			"language": {"url": "/public/i18n/DataTablesItalian.json"}
 		});
 
-		
 		//Datatables. Se imposto lo scrollX devo ricordarmi di non avere
 		//il plugin responsive abilitato sulla tabella(sono incompatibili)
 		this.find('.datatable-test').DataTable( {
@@ -142,67 +154,6 @@ $(function($){
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
 		this.find("a[data-popover]").popover();
-		
-		this.find('#myModal1').on('show', function () {
-			$('#myModal2').modal('hide');
-		})
-
-		this.find('#myModal2').on('show', function () {
-			$('#myModal1').modal('hide');
-		})
-
-		this.find('#myModal1').on('hide', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal2').on('hide', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal1').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal2').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#myModal3').on('hidden.bs.modal', function(){
-		    $(this).data('bs.modal', null);
-		});
-		
-
-		this.find('#myModal4').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-insert-contract').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-edit-contract').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-edit-source-contract').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-terminate-person').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-edit-vacationperiod').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-insert-vacationperiod').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
-
-		this.find('#modal-absencetype-month').on('hidden', function(){
-		    $(this).data('modal', null);
-		});
 		
 		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
 			var $form = $(this).closest("form");
@@ -275,11 +226,11 @@ $(function($){
 	    	$deleteFirst.hide();
 	    	$delete.show( "fast" );
 	    });
-	    
+    
 	}	/* fine initepas() */
-	
-	$(document.body).initepas();
-	
+
+	$('body').initepas();
+
 });	/* fine on document load */
 
 function Change(){
@@ -312,6 +263,8 @@ function generateUserName(name,surname,username){
     .text(option.text);
     username.append($option);
   });
- }
+}
+
+
 
 moment.locale('it_IT');

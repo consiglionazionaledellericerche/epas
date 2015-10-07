@@ -1,0 +1,63 @@
+*{
+     wttTips: se true visualizza i consigli di inserimento.
+     tempoALavoro
+     buonoPasto
+     sogliaPomeridiana
+}*   
+
+
+
+#{accordionGroup 'info'}
+
+
+	#{if _tempoALavoro}
+    #{accordionItem 'orario', parent:'info', title:'Tempo a lavoro', open:true, color:'info'}
+      <p>
+        <strong>Tempo di lavoro giornaliero</strong><br>
+        La quantità di tempo in minuti che il dipendente deve effettuare per ogni giorno della settimana.
+        #{if _wttTips}
+           <br>Nei giorni impostati come festivi questa quantità viene automaticamente impostata a 0.
+        #{/if}
+      </p>
+    #{/accordionItem}
+    #{/if}
+    
+    #{if _buonoPastoAbilitato}
+    #{accordionItem 'buonoPastoAbilitato', parent:'info', title:'Buono pasto abilitato', open:true, color:'danger'}
+      <p>
+        Nel caso di <strong>calcolo buono pasto abilitato</strong> per il tipo orario è possibile specificare le condizioni 
+        di ottenimento del buono nel caso dei giorni non festivi.<br>
+        
+      </p>
+    #{/accordionItem}
+    #{/if}
+    
+    #{if _buonoPasto}
+    #{accordionItem 'buonoPasto', parent:'info', title:'Attribuzione buoni pasto', open:true, color:'danger'}
+      <p>
+        <strong>Tempo di lavoro minimo per diritto a usufruire del buono pasto</strong><br>
+        La quantità di lavoro minima che il dipendente deve aver lavorato per poter usufruire del buono pasto. 
+      </p>
+      
+      <p>
+      <strong>Durata minima intervallo pranzo</strong><br>
+        Il tempo minimo che deve obbligatoriamente trascorrere fra la timbratura di uscita per pranzo e la conseguente timbratura di ingresso.
+        #{if _wttTips}
+           <br> <em>N.B.</em>
+          Per legge tale quantità minima non può essere inferiore a 30 minuti.
+        #{/if}
+        
+      </p>
+    #{/accordionItem}
+     #{/if}
+    
+    #{if _sogliaPomeridiana}
+    #{accordionItem 'buonoPastoSoglia', parent:'info', title:'Soglia pomeridiana per attribuzione buoni pasto', open:true, color:'danger'}
+ 
+      <p>
+        <strong><em>Soglia pomeridiana per buono pasto e lavoro minimo per buono pasto dopo soglia pomeridiana </em></strong><br>
+        Permette di aggiungere una ulteriore restrizione sulla attribuzione del buono pasto 
+      </p>
+    #{/accordionItem}
+     #{/if}
+#{/accordionGroup} 
