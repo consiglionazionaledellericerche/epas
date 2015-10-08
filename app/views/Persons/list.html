@@ -55,7 +55,7 @@
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
-		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal-large">
+		    <a href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-modal=".my-modal-large">
 		      ${person.currentWorkingTimeType.get().description}
 		    </a>
 		  #{/if}
@@ -63,7 +63,7 @@
 
 		<td>
 		  #{if person.currentVacationPeriod.present }
-		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal-large">
+		     <a href="@{Persons.showCurrentVacation(person.value.id)}" data-modal=".my-modal-large">
 		        ${person.currentVacationPeriod.get().vacationCode.description}
 		     </a>
 		  #{/if}
