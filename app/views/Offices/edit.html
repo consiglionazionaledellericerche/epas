@@ -1,0 +1,34 @@
+#{modalAsync id:'modalEditOffice', button:'Salva', title:(office?.persistent ? 'Modifica sede' : 'Nuova sede')}
+
+  <div class="alert alert-success" role="alert">
+  Inserisci i dati della nuova sede appartenente all'istituto <strong>${office.institute.name}</strong>
+  </div>
+
+  <div id="officeData">
+
+	#{form action:@save(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#instituteList',
+	    'data-async-error':'#officeData'}
+	        
+	    
+		#{if office.persistent}
+ 		 #{f.hidden 'office.id' /}
+        #{/if}
+		#{else}
+		 #{f.hidden 'office.institute.id' /}
+		#{/else}
+		
+        #{f.input 'office.name', required:true /}
+        #{f.input 'office.code', required:true /}
+        #{f.input 'office.address'/}
+        #{f.booleanRadio 'office.headQuarter'/}
+        
+	  	
+    	#{b.buttons}
+          #{b.cancel @index() /}
+          #{b.save /}
+        #{/b.buttons}
+	#{/form}
+	
+  </div>
+#{/modalAsync}

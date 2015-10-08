@@ -68,8 +68,15 @@ crud.save=Salva
 crud.delete=Elimina
 
 Institutes.blank=Nuovo istituto
+Institutes.delete=Elimina istituto
 institute.name=Nome
 institute.code=Sigla
+
+Offices.blank=Nuova sede
+office.name=Nome
+office.code=Codice
+office.address=Indirizzo
+office.headQuarter=Sede principale
 
 person.surname=Cognome
 person.name=Nome
