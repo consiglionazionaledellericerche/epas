@@ -42,6 +42,7 @@ public class Office extends BaseModel{
     @Column(name = "address")
     public String address = "";
     
+	@Required
     @Column(name = "code")
     public Integer code;
     
@@ -54,6 +55,8 @@ public class Office extends BaseModel{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="institute_id")
     public Institute institute;
+    
+    public boolean headQuarter = false;
     
     //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     //public List<User> restUsers = new ArrayList<User>();

@@ -15,10 +15,13 @@ import models.Office;
 import models.Role;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -49,6 +52,13 @@ public class Offices extends Controller {
 	@Inject
 	private static RoleDao roleDao;
 
+	private static final Logger log = LoggerFactory.getLogger(Offices.class);
+	
+	public static void index() {
+		flash.keep();
+		list(null);
+	}
+	
 	public static void list(String name) {
 		
 		//la lista di office su cui si ha tecnical admin. Nel template l'iterazione
@@ -59,53 +69,56 @@ public class Offices extends Controller {
 				.listResults();
 		
 		render(results, name);
-		
 	}
 	
 	public static void show(Long id) {
-//		final Institute institute = Institute.findById(id);
-//		notFoundIfNull(institute);
-//		render(institute);
+		final Office office = Office.findById(id);
+		notFoundIfNull(office);
+		render(office);
 	}
 
 	public static void edit(Long id) {
-		
-//		final Institute institute = Institute.findById(id);
-//		notFoundIfNull(institute);
-//		render(institute);
+		final Office office = Office.findById(id);
+		notFoundIfNull(office);
+		render(office);
 	}
 
-	public static void blank() {
-//		final Institute institute = new Institute();
-//		render("@edit", institute);
+	public static void blank(Long instituteId) {
+		final Institute institute = Institute.findById(instituteId);
+		notFoundIfNull(institute);
+		final Office office = new Office();
+		office.institute = institute;
+		
+		render("@edit", office);
 	}
 
-	public static void save(@Valid Institute institute) {
+	public static void save(@Valid Office office) {
 		
-//		if (Validation.hasErrors()) {
-//			response.status = 400;
-//			log.warn("validation errors for {}: {}", institute,
-//					validation.errorsMap());
-//			flash.error(Web.msgHasErrors());
-//			render("@edit", institute);
-//		} else {
-//			institute.save();
-//			flash.success(Web.msgSaved(Institute.class));
-//			index();
-//		}
+		if (Validation.hasErrors()) {
+			response.status = 400;
+			log.warn("validation errors for {}: {}", office,
+					validation.errorsMap());
+			flash.error(Web.msgHasErrors());
+			render("@edit", office);
+		} else {
+			office.save();
+			flash.success(Web.msgSaved(Office.class));
+			Institutes.index();
+		}
 	}
 	
 	public static void delete(Long id) {
-//		final Institute institute = Institute.findById(id);
-//		notFoundIfNull(institute);
-//		
-//		if(institute.seats.isEmpty()) {
-//			institute.delete();
-//			flash.success(Web.msgDeleted(Institute.class));
-//			index();
-//		}
-//		flash.error(Web.msgHasErrors());
-//		index();
+		
+		final Office office = Office.findById(id);
+		notFoundIfNull(office);
+	
+		// TODO: if( nessuna persona nella sede?? ) {
+			office.delete();
+			flash.success(Web.msgDeleted(Institute.class));
+			index();
+		//}
+		flash.error(Web.msgHasErrors());
+		index();
 	}
 	
 	@Deprecated

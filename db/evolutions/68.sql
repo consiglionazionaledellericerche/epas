@@ -38,8 +38,8 @@ CREATE TABLE institutes_history (
 ALTER TABLE office ADD COLUMN institute_id BIGINT;
 ALTER TABLE office_history ADD COLUMN institute_id BIGINT;
 
-ALTER TABLE office ADD COLUMN headquarter BOOLEAN;
-ALTER TABLE office_history ADD COLUMN headquarter BOOLEAN;
+ALTER TABLE office ADD COLUMN headquarter BOOLEAN DEFAULT false NOT NULL;
+ALTER TABLE office_history ADD COLUMN headquarter BOOLEAN ;
 
 delete from conf_year where id in (
 select cy.id 
@@ -94,5 +94,11 @@ update office set headquarter = false;
 alter table institutes drop column oldid;
 
 update institutes set created_at = current_timestamp;
+
+-- fix tabella storico conf general
+alter table conf_general_history alter column office_id drop not null;
+
+
+
 
 -- TODO impostare not null i nuovi campi institute_id e headquarter della tabella office
