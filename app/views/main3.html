@@ -254,14 +254,21 @@
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
-      	        </li>
+      	        </li>      			
       		    #{/if}
+      		    #{else}
+      		    <li>
+  		  		 <a data-toggle="modal" href="@{ReportCentre.generateReport()}" data-modal=".my-modal"><i class="fa fa-bug"></i>
+			  		Segnala un problema
+			 	</a>
+			 	</li>
+			 	#{/else}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	        </li>
       	        #{/if}
-      		
+  
      		    #{if ip.viewPerson }
 	   	        <li><a href="@{Faq.faq()}"><i class="fa fa-comment-o"></i> FAQ</a></li>
       	        #{/if}
@@ -271,8 +278,7 @@
     	    #{/if}
   		  
   		  #{/else}
-  		  
-  		  
+  
   		  
   		  
   		  <div class="clearfix">
@@ -393,8 +399,8 @@
     #{script 'bootstrap-modal.js' /}
     #{script 'bootstrap-modalmanager.js' /}
     #{script 'script.js' /}
-
-    #{include './feedback.html' /}  
+      
+    #{include '_myModal.html' /}
 	#{get 'moreScripts' /}
   </body>
 </html>
