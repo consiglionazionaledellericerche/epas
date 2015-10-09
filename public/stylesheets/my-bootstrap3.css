@@ -377,3 +377,9 @@ tfoot input {
    padding: 3px;
    box-sizing: border-box;
 }
+
+/* -----------------------------------------------------*/
+/* VOGLIO UNA VITA COLORATA BELLA, FANCULO QUESTA CELLA */
+/* -----------------------------------------------------*/
+
+.list-group-item-grey{ background-color: #EAEAEA; }

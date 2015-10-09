@@ -9,7 +9,7 @@
 	#{form action:@save(), method:'POST', autocomplete:false,
 	    class:'form form-horizontal', 'data-async':'#instituteList',
 	    'data-async-error':'#instituteData'}
-	        
+      
 	    
 		#{if institute.persistent}
  		 #{f.hidden 'institute.id' /}
@@ -25,4 +25,20 @@
 	#{/form}
 	
   </div>
+  
+  #{if institute.seats.empty}
+   #{secure.checkAction 'Institutes.delete'}
+    #{accordionGroup 'delete'}
+     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questo istituto', open:false, color:'danger'}
+	  
+	  <div class="text-danger center">
+	    E' possibile eliminare <strong>${institute.name}</strong> poichè non ha alcuna sede associata inserita.<br><br>
+		<a class="btn btn-danger" href=@{delete(institute.id)}><i class="fa fa-trash"></i>Elimina</a> 
+	  </div>
+	  
+     #{/accordionItem}
+    #{/accordionGroup }  
+   #{/secure.checkAction}
+  #{/if}
+  
 #{/modalAsync}

@@ -20,37 +20,48 @@
     </div>
 	#{/form}
 	
+	<br>
+	
 	
 	<div id="instituteList"> <!-- per il risultato della modale asincrona -->
 	
+	%{ previousInstitute = null; }%
+	
 	<section id="results">
     #{paginate results} 
-	   <ul class="list-group">
+	   
 	   #{list items:results.results, as:'item'}
-		 <li class="list-group-item">
-		   <div class="pull-right btn-group">
-		    
-		    #{secure.check 'Office.delete'}
-		       <a class="btn btn-default" href=@{delete(item.id)}><i class="fa fa-trash"></i></a> 
-	        #{/secure.check}
-	        
-		    </div>
-	           
-	            <h4><a data-async-modal="#modalEditOffice" class="list-group-item-heading"
+	   
+	   *{ prima iterata }*
+	   #{if previousInstitute == null }
+	     %{ previousInstitute = item.institute.id; }%
+	     <ul class="list-group">
+	        <li class="list-group-item list-group-item-grey"><h4>${item.institute.name}</h4></li>
+	   #{/if}
+	   
+	   *{ iterate successive }*
+	   #{if !previousInstitute.equals(item.institute.id) }
+	     %{ previousInstitute = item.institute.id; }%
+	     </ul>
+	     <ul class="list-group">
+	       <li class="list-group-item list-group-item-grey"><h4>${item.institute.name}</h4></li>
+	   #{/if} 
+	     
+		 <li class="list-group-item  list-group-item-bianco">
+		       <h4><a data-async-modal="#modalEditOffice" class="list-group-item-heading"
 			    	href="@{edit(item.id)}">
 				    ${item.name}
 	    	    </a></h4>
 	           
 	           <div class="list-group-item-text">
-	             <p class="text-success">prova</p>
-	             <i class="fa fa-university"></i> ${item.address}
+	            ${item.address}
 	           </div>
 	           <div class="list-group-item-text">
-	             <i class="fa fa-university"></i> ${item.code}
+	            ${item.code}
 	           </div>
 	     </li>
 	   #{/list}
-	   </ul>
+	   
      #{/paginate} 
      </section>
      </div>
