@@ -20,6 +20,8 @@
     </div>
 	#{/form}
 	
+	<br>
+	
 	
 	<div id="instituteList"> <!-- per il risultato della modale asincrona -->
 	
@@ -34,7 +36,7 @@
 	   #{if previousInstitute == null }
 	     %{ previousInstitute = item.institute.id; }%
 	     <ul class="list-group">
-	       <h3>Sedi di ${item.institute.name}</h3>
+	        <li class="list-group-item list-group-item-grey"><h4>${item.institute.name}</h4></li>
 	   #{/if}
 	   
 	   *{ iterate successive }*
@@ -42,16 +44,10 @@
 	     %{ previousInstitute = item.institute.id; }%
 	     </ul>
 	     <ul class="list-group">
-	       <h3>Sedi di ${item.institute.name}</h3>
+	       <li class="list-group-item list-group-item-grey"><h4>${item.institute.name}</h4></li>
 	   #{/if} 
 	     
-		 <li class="list-group-item  list-group-item-warning">
-		   <div class="pull-right btn-group">
-		    #{secure.check 'Office.delete'}
-		       <a class="btn btn-default" href=@{delete(item.id)}><i class="fa fa-trash"></i></a> 
-	        #{/secure.check}
-	       </div>
-	       
+		 <li class="list-group-item  list-group-item-bianco">
 		       <h4><a data-async-modal="#modalEditOffice" class="list-group-item-heading"
 			    	href="@{edit(item.id)}">
 				    ${item.name}
