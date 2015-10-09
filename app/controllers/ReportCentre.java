@@ -1,24 +1,47 @@
 package controllers;
 
 import it.cnr.iit.epas.JsonReportBinder;
+import manager.ReportCentreManager;
 import models.Person;
 import models.User;
 import models.exports.ReportFromJson;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
+import org.apache.commons.mail.SimpleEmail;
+import org.jboss.netty.handler.codec.http.HttpRequestEncoder;
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+
+import antlr.StringUtils;
+import dao.UserDao;
 import play.Logger;
 import play.data.binding.As;
 import play.libs.Mail;
 import play.mvc.Controller;
+import play.mvc.Http.Header;
+import play.mvc.Http.Request;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.inject.Inject;
 
 
 public class ReportCentre extends Controller{
+	
+	@Inject
+	static UserDao userDao;
+	@Inject
+	static ReportCentreManager reportCentreManager;
 
 	public static void sendReport(@As(binder=JsonReportBinder.class) ReportFromJson body){
 
@@ -45,7 +68,7 @@ public class ReportCentre extends Controller{
 			}
 			String path = person != null ? "/tmp/immagini-mail/image"+person.id+".png"
 					: "/tmp/immagini-mail/image"+userLogged.username+".png";
-			
+
 			FileOutputStream imageOutFile = new FileOutputStream(path);
 			imageOutFile.write(body.image); 
 
@@ -60,16 +83,16 @@ public class ReportCentre extends Controller{
 			MultiPartEmail email = new MultiPartEmail();
 
 			email.addTo("epas@iit.cnr.it");
-//			FIXME rendere configurabile quest'indirizzo!!
-			
+			//			FIXME rendere configurabile quest'indirizzo!!
+
 			if(person != null && !person.email.equals(""))
 				email.addReplyTo(person.email);
 			email.attach(attachment);
 
 			email.setSubject("Segnalazione malfunzionamento ");
-			
+
 			String sender = person != null ? person.fullName() : userLogged.username;
-			
+
 			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+body.url+" visitata da: "+sender+'\n'+"Con il seguente messaggio: "+body.note);
 			Mail.send(email); 
 
@@ -84,6 +107,48 @@ public class ReportCentre extends Controller{
 
 		}		
 
+	}
+
+
+	public static void generateReport(){
+		User userLogged = Security.getUser().get();		
+		render(userLogged);
+	}
+	
+	
+	public static void sendProblem(Long userId, String report, String mese, String anno){
+		User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
+		if(user == null)
+			notFound();
+		
+		HashMap<String, Header> map = (HashMap<String, Header>) request.headers;
+		
+		String action = reportCentreManager.getActionFromRequest(map);
+		SimpleEmail email = new SimpleEmail();
+		String sender = user.person != null ? user.person.fullName() : user.username;
+		try {
+			email.addTo("epas@iit.cnr.it");
+			//email.setFrom("epas@iit.cnr.it");
+			if(user.person != null && !user.person.email.equals(""))
+				email.addReplyTo(user.person.email);
+			email.setSubject("Segnalazione malfunzionamento ");
+			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+action+'\n'
+					+" con mese uguale a: "+mese+'\n'
+					+" con anno uguale a: "+anno+'\n'
+					+" visitata da: "+sender+'\n'
+					+" in data: "+LocalDate.now()+'\n'
+					+" con il seguente messaggio: "+report);
+			Mail.send(email); 
+			flash.success("Mail inviata con successo");
+			Application.index();
+			
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			flash.error("Errore durante l'invio della mail");
+			Application.index();
+		}	
+		
 	}
 
 }
