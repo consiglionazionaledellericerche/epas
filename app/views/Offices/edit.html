@@ -1,7 +1,11 @@
 #{modalAsync id:'modalEditOffice', button:'Salva', title:(office?.persistent ? 'Modifica sede' : 'Nuova sede')}
 
   <div class="alert alert-success" role="alert">
-  Inserisci i dati della nuova sede appartenente all'istituto <strong>${office.institute.name}</strong>
+    #{if office?.persistent }
+  		Modifica i dati di ${office.name} appartenente all'istituto <strong>${office.institute.name}</strong>
+    #{/if} #{else}
+    	Inserisci i dati della nuova sede appartenente all'istituto <strong>${office.institute.name}</strong>
+    #{/else}
   </div>
 
   <div id="officeData">
