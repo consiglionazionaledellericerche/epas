@@ -3,43 +3,27 @@
  */
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import controllers.Resecure.NoCheck;
+import dao.*;
+import dao.PersonDao.PersonLite;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.ConfGeneralManager;
 import manager.SecureManager;
-import models.AbsenceType;
-import models.Office;
-import models.Qualification;
-import models.Role;
-import models.StampType;
-import models.User;
+import models.*;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
-
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import controllers.Resecure.NoCheck;
-import dao.AbsenceTypeDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDao.PersonLite;
-import dao.QualificationDao;
-import dao.StampingDao;
-import dao.UsersRolesOfficesDao;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author cristian
@@ -50,7 +34,7 @@ public class RequestInit extends Controller {
 	@Inject
 	private static OfficeDao officeDao;
 	@Inject
-	private static SecureManager secureManager;
+	protected static SecureManager secureManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -84,6 +68,7 @@ public class RequestInit extends Controller {
 		public boolean editAbsenceType = false;
 		public boolean viewCompetenceCode = false;
 		public boolean editCompetenceCode = false;
+
 
 		public ItemsPermitted(Optional<User> user) {
 
@@ -244,6 +229,8 @@ public class RequestInit extends Controller {
 		///////////////////////////////////////////////////////////////////////////7
 		//Liste di utilità per i template
 
+		public Set<Office> officesAllowed(){ return secureManager.officesWriteAllowed(Security.getUser().get()); }
+
 		public List<Qualification> getAllQualifications() {
 			return qualificationDao.findAll();
 		}
@@ -257,10 +244,9 @@ public class RequestInit extends Controller {
 		}
 		
 		public ImmutableList<String> getAllDays() {
-			final ImmutableList<String> days = ImmutableList.of(
+			return ImmutableList.of(
 					  "lunedì", "martedì", "mercoledì", "giovedì", 
 					  "venerdì", "sabato", "domenica");
-			return days;		  
 		}
 	
 	}
