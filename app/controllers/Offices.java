@@ -116,7 +116,7 @@ public class Offices extends Controller {
 		// TODO: if( nessuna persona nella sede?? ) {
 			office.delete();
 			flash.success(Web.msgDeleted(Institute.class));
-			index();
+			Institutes.index();
 		//}
 		flash.error(Web.msgHasErrors());
 		Institutes.index();

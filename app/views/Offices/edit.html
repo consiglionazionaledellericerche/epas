@@ -44,7 +44,7 @@
      #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
 	  <div class="text-danger center">
 	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
-		<a class="btn btn-danger" href=@{delete(office.id)}></i>Elimina</a> 
+		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
 	  </div>
      #{/accordionItem}
     #{/accordionGroup }  
