@@ -145,8 +145,8 @@ public class OfficeDao extends DaoBase {
 	private BooleanBuilder matchInstituteName(QInstitute institute, String name) {
 		final BooleanBuilder nameCondition = new BooleanBuilder();
 		for (String token : TOKEN_SPLITTER.split(name)) {
-			nameCondition.and(institute.name.startsWithIgnoreCase(token)
-					.or(institute.code.startsWithIgnoreCase(token)));
+			nameCondition.and(institute.name.containsIgnoreCase(token)
+					.or(institute.code.containsIgnoreCase(token)));
 		}
 		return nameCondition.or(institute.name.startsWithIgnoreCase(name))
 				.or(institute.code.startsWithIgnoreCase(name));
@@ -155,9 +155,9 @@ public class OfficeDao extends DaoBase {
 	private BooleanBuilder matchOfficeName(QOffice office, String name) {
 		final BooleanBuilder nameCondition = new BooleanBuilder();
 		for (String token : TOKEN_SPLITTER.split(name)) {
-			nameCondition.and(office.name.startsWithIgnoreCase(token));
+			nameCondition.and(office.name.containsIgnoreCase(token));
 		}
-		return nameCondition.or(office.name.startsWithIgnoreCase(name));
+		return nameCondition.or(office.name.containsIgnoreCase(name));
 				
 	}
 	
@@ -202,7 +202,8 @@ public class OfficeDao extends DaoBase {
 	 * @param role
 	 * @return
 	 */
-	public PerseoSimpleResults<Office> offices(Optional<String> name, User user, Role role) {
+	public PerseoSimpleResults<Office> offices(Optional<String> name,
+			User user, Role role) {
 		
 		final QOffice office = QOffice.office;
 		final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
@@ -211,12 +212,16 @@ public class OfficeDao extends DaoBase {
 		final BooleanBuilder condition = new BooleanBuilder();
 		if (name.isPresent()) {
 			condition.and(matchOfficeName(office, name.get()));
+			condition.and(matchInstituteName(institute, name.get()));
 		}
 		
 		if(user.isSystemUser()) {
 			final JPQLQuery query = getQueryFactory()
 					.from(office)
-					.where(condition);
+					.leftJoin(office.institute, institute).fetch()	
+					.where(condition)
+					.distinct()
+					.orderBy(office.institute.name.asc());
 			return PerseoModelQuery.wrap(query, office);
 		}
 		

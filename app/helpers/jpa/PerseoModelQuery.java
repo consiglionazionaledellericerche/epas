@@ -28,7 +28,7 @@ public class PerseoModelQuery {
 	 *  
 	 */
 	private static final String PAGE_SIZE_PARAM = "limit";
-	private static final long DEFAULT_PAGE_SIZE = 20L;
+	private static final long DEFAULT_PAGE_SIZE = 10L;
 
 	private PerseoModelQuery() {}
 
