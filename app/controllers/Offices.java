@@ -119,7 +119,7 @@ public class Offices extends Controller {
 			index();
 		//}
 		flash.error(Web.msgHasErrors());
-		index();
+		Institutes.index();
 	}
 	
 	@Deprecated

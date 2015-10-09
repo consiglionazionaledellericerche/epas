@@ -22,7 +22,7 @@
 	
 	#{secure.checkAction 'Institutes.blank'}
 	  #{b.actions}
-	    <a class="btn btn-default" href="@{blank()}" data-async-modal="#modalEditInstitute">
+	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
 	      <i class="fa fa-plus"></i> &{'Institutes.blank'}
 	    </a>
       #{/b.actions}
@@ -37,12 +37,9 @@
 		 <li class="list-group-item">
 		   <div class="pull-right btn-group">
 		    #{secure.checkAction 'Offices.blank'}
-	            <a class="btn btn-success" href="@{Offices.blank(item.id)}" data-async-modal="#modalEditOffice">
+	            <a class="btn btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalEditOffice">
 	            <i class="fa fa-plus"></i> &{'Offices.blank'}</a>
             #{/secure.checkAction}
-		    #{secure.checkAction 'Institutes.delete'}
-		       <a class="btn btn-danger" href=@{delete(item.id)}><i class="fa fa-trash"></i> &{'Institutes.delete'}</a> 
-	        #{/secure.checkAction}
 		    </div>
 			  <h4 style="color: black">	
 	            <i class="fa fa-university"></i>
@@ -56,7 +53,7 @@
 	          #{list items:item.seats, as:'seat'}
 	              <li>
 	                <a data-async-modal="#modalEditOffice" class="list-group-item-heading"
-			    	href="@{Offices.edit(item.id)}">
+			    	href="@{Offices.edit(seat.id)}">
 				    ${seat.name}
 	    	        </a>
 	              </li>

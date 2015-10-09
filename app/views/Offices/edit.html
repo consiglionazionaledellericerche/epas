@@ -2,9 +2,9 @@
 
   <div class="alert alert-success" role="alert">
     #{if office?.persistent }
-  		Modifica i dati di ${office.name} appartenente all'istituto <strong>${office.institute.name}</strong>
+  		Modifica i dati di ${office.name} appartenente a <strong>${office.institute.name}</strong>
     #{/if} #{else}
-    	Inserisci i dati della nuova sede appartenente all'istituto <strong>${office.institute.name}</strong>
+    	Inserisci i dati della nuova sede appartenente a <strong>${office.institute.name}</strong>
     #{/else}
   </div>
 
@@ -27,7 +27,7 @@
         #{f.input 'office.address'/}
         #{f.booleanRadio 'office.headQuarter'/}
         
-	  	
+
     	#{b.buttons}
           #{b.cancel @index() /}
           #{b.save /}
@@ -35,4 +35,17 @@
 	#{/form}
 	
   </div>
+  
+  <br>
+  
+  #{secure.check 'Office.delete'}
+  #{accordionGroup 'delete'}
+    #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
+	  <div class="text-danger center">
+	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
+		<a class="btn btn-danger" href=@{delete(office.id)}></i>Elimina</a> 
+	  </div>
+    #{/accordionItem}
+  #{/accordionGroup }  
+  #{/secure.check}
 #{/modalAsync}
