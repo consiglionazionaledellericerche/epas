@@ -32,9 +32,10 @@
 	
 	<section id="results">
     #{paginate results} 
-	   <ul class="list-group">
+	   
 	   #{list items:results.results, as:'item'}
-		 <li class="list-group-item">
+	   <ul class="list-group">
+		 <li class="list-group-item list-group-item-grey">
 		   <div class="pull-right btn-group">
 		    #{secure.checkAction 'Offices.blank'}
 	            <a class="btn btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalEditOffice">
@@ -48,21 +49,35 @@
 				    ${item.name}
 	    	    </a>
 	          </h4>
+	      </li>      
+          #{list items:item.seats, as:'seat'}
+          
+           <li class="list-group-item  list-group-item-bianco">
+	         <h4><a data-async-modal="#modalEditOffice" class="list-group-item-heading"
+		    	href="@{Offices.edit(seat.id)}">
+			    ${seat.name}
+    	        </a></h4>
+           
+             <div class="list-group-item-text">
+              ${seat.address}
+             </div>
+             <div class="list-group-item-text">
+              ${seat.code}
+             </div>
+             <div class="list-group-item-text">
+               #{list items:seat.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('personnelAdmin') }
+                  <span class="label label-default">${uro.user.username}</span>
+                 #{/if}
+               #{/list}
+             </div>
+     	   </li>
 	          
-	          <ul>
-	          #{list items:item.seats, as:'seat'}
-	              <li>
-	                <a data-async-modal="#modalEditOffice" class="list-group-item-heading"
-			    	href="@{Offices.edit(seat.id)}">
-				    ${seat.name}
-	    	        </a>
-	              </li>
-	          #{/list}
-	          </ul>
-	     </li>
+	      #{/list}
+	    </ul>
+	     
 	   #{/list}
-	   </ul>
-     #{/paginate} 
+	        #{/paginate} 
      </section>
      </div>
 </div>

@@ -61,10 +61,9 @@ public class Offices extends Controller {
 	
 	public static void list(String name) {
 		
-		//la lista di office su cui si ha tecnical admin. Nel template l'iterazione
-		//sui seats.
+		//la lista di institutes su cui si ha tecnical admin in almeno un office
 		
-		SearchResults<?> results = officeDao.offices(
+		SearchResults<?> results = officeDao.institutes(
 				Optional.<String>fromNullable(name),
 				Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
 				.listResults();
