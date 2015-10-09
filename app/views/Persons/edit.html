@@ -42,7 +42,7 @@
 				#{f.input 'person.email'/}
 
 				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
-				#{f.selectModel 'person.office',items:templateUtility.allOfficesAllowed /}
+				#{f.selectModel 'person.office',items:templateUtility.officesAllowed() /}
 
 				#{f.checkbox 'person.isPersonInCharge',title:'Selezionare se la persona in questione deve essere un responsabile'/}
 

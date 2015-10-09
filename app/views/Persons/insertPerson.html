@@ -17,7 +17,7 @@
       #{f.input 'person.email',required:'true'/}
 
       #{f.selectModel 'person.qualification', items:templateUtility.allQualifications, required:'true'/}
-      #{f.selectModel 'person.office', items:templateUtility.allOfficesAllowed, required:'true'/}
+      #{f.selectModel 'person.office', items:templateUtility.officesAllowed(), required:'true'/}
 
       #{f.checkbox 'person.wantEmail'/}
 

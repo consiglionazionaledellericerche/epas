@@ -142,7 +142,7 @@ end
 /*******************************************************************************
  * Azioni utente DEVELOPER
  ******************************************************************************/
-rule developer
+rule Developer
 when
  $uro: UsersRolesOffices()
  Role(name == "developer") from $uro.role
@@ -154,7 +154,7 @@ end
 /*******************************************************************************
  * Azioni utente ADMIN
  ******************************************************************************/
-rule admin_Generic
+rule Admin_Generic
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "admin") from $uro.role
@@ -184,16 +184,24 @@ when
         "Configurations.saveNewConfYear",
 		"Configurations.savePastYearVacationLimit",
 		"Configurations.savePatron",
-		
-        "Import.officeList"
 
- 		
+        "Import.officeList",
+
+        "Persons.list",
+        "Persons.edit",
+        "Persons.update",
+        "Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+        "Persons.deletePerson",
+     	"Persons.deletePersonConfirmed"
+
  		), target == null, granted == false)
  then
  $c.grant();
 end
 
-rule admin_InOffice
+rule Admin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -205,7 +213,15 @@ when
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
         "Configurations.savePastYearVacationLimit",
-        "Configurations.savePatron"
+        "Configurations.savePatron",
+
+        "Persons.edit",
+        "Persons.update",
+        "Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+        "Persons.deletePerson",
+     	"Persons.deletePersonConfirmed"
                
        ), target == $o, granted == false)
 then
@@ -215,31 +231,28 @@ end
 /*******************************************************************************
  * Azioni utente con ruolo TECNICAL_ADMIN
  ******************************************************************************/
-rule tecnicalAdmin_Generic
+rule TecnicalAdmin_Generic
 when 
  $uro: UsersRolesOffices()
  $p: Role(name == "tecnicalAdmin") from $uro.role
  $c: PermissionCheck(action in (
- 	
- 	
+
         "Institutes.list",
         "Institutes.index",
-        
-        "Offices.list",
         
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
 		"Institutes.save",
 		"Institutes.delete",
-		
+
 		"Offices.list"
-   
+		
         ), target == null, granted == false)
 then
  $c.grant();
 end
 
-rule tecnicalAdmin_InOffice
+rule TecnicalAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -260,7 +273,7 @@ end
  * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
  ******************************************************************************/
 
-rule alLeastPersonnelAdminMini_Generic
+rule AtLeastPersonnelAdminMini_Generic
 when 
  $uro: UsersRolesOffices()
  $p: Role(name in ("personnelAdmin","personnelAdminMini")) from $uro.role
@@ -367,7 +380,7 @@ then
  $c.grant();
 end
 
-rule alLeastPersonnelAdminMini_InOffice
+rule AtLeastPersonnelAdminMini_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -438,7 +451,7 @@ end
  * Azioni utente con ruolo solo PERSONNEL_ADMIN
  ******************************************************************************/
 
-rule onlyForPersonnelAdmin_Generic
+rule OnlyForPersonnelAdmin_Generic
 when 
  $uro: UsersRolesOffices()
  $p: Role(name == "personnelAdmin") from $uro.role
@@ -562,7 +575,7 @@ then
  $c.grant();
 end
 
-rule onlyForPersonnelAdmin_InOffice
+rule OnlyForPersonnelAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -689,7 +702,7 @@ end
  * Azioni utente con ruolo BADGE_READER
  ******************************************************************************/
 
-rule stampings_create
+rule Stampings_create
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "badgeReader") from $uro.role
@@ -706,7 +719,7 @@ when
  $c.grant();
 end
 
-rule stampings_create_InOffice
+rule Stampings_create_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -726,7 +739,7 @@ end
 /*******************************************************************************
  * Azioni utente con ruolo REST_CLIENT
  ******************************************************************************/
-rule rest
+rule Rest
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "restClient") from $uro.role
@@ -744,7 +757,7 @@ then
  $c.grant();
 end
 
-rule rest_inOffice
+rule Rest_inOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -777,7 +790,7 @@ then
 end
 */
 
-rule manageShift
+rule ManageShift
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "shiftManager") from $uro.role
@@ -796,7 +809,7 @@ then
  $c.grant();
 end
 
-rule manageReperibility
+rule ManageReperibility
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "reperibilityManager") from $uro.role
