@@ -100,7 +100,11 @@ when
      	/* Timbrature web */
      	"Clocks.daySituation",
      	"Clocks.webStamping",
-     	"Clocks.insertWebStamping"   	
+     	"Clocks.insertWebStamping",
+     	
+     	/*Possibilità di inviare report*/
+     	"ReportCentre.generateReport",
+     	"ReportCentre.sendProblem"   	
      	
        ), target == null, granted == false)
 then
