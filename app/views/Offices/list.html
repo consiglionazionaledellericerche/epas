@@ -45,7 +45,7 @@
 	       <h3>Sedi di ${item.institute.name}</h3>
 	   #{/if} 
 	     
-		 <li class="list-group-item">
+		 <li class="list-group-item  list-group-item-warning">
 		   <div class="pull-right btn-group">
 		    #{secure.check 'Office.delete'}
 		       <a class="btn btn-default" href=@{delete(item.id)}><i class="fa fa-trash"></i></a> 
