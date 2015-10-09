@@ -223,3 +223,6 @@ hourStamping= Ore
 stampingWay= Verso
 stampingWay.popover= Il verso della timbratura
 hourStamping.popover= Formato richiesto HHMM (HH ore, MM minuti)
+report=Descrizione problema
+mese= Mese (se presente)
+anno= Anno (se presente)

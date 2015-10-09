@@ -1,0 +1,21 @@
+<div class="modal-header center">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">Benvenuto ${userLogged.person.name} ${userLogged.person.surname} <br>compila il form di segnalazione</h4>
+</div>
+
+<!-- Start Body -->
+<div class="modal-body">
+
+    <div class="container-fluid text-center">
+    #{form @ReportCentre.sendProblem(), class:'form-horizontal'}
+    	<div class="alert alert-info" role="alert">
+    		Compila i campi seguenti specificandone i valori se presenti nella pagina in cui hai riscontrato l'errore
+    	</div>
+    	<input type="hidden" name="userId" value="${userLogged.id}"/>
+    	#{f.input 'mese' /}
+    	#{f.input 'anno' /}
+    	#{f.textArea 'report' /}
+    	#{b.submit 'Invia segnalazione' /}
+    #{/form}
+    </div>
+</div>
