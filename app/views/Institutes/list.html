@@ -65,9 +65,27 @@
               ${seat.code}
              </div>
              <div class="list-group-item-text">
+               <span class="label label-primary">Amministratore Tecnico</span>
                #{list items:seat.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('personnelAdmin') }
-                  <span class="label label-default">${uro.user.username}</span>
+                 #{if uro.role.name.equals('tecnicalAdmin') && uro.user.person }
+                  <span class="label label-info">${uro.user.person.fullname}</span>
+                 #{/if}
+               #{/list}
+               <br>
+               <span class="label label-primary">Amministratori Personale</span>
+               #{list items:seat.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('personnelAdmin') && uro.user.person }
+                  <span class="label label-success">${uro.user.person.fullname}</span>
+                 #{/if}
+                 #{if uro.role.name.equals('personnelAdminMini') && uro.user.person }
+                  <span class="label label-warning">${uro.user.person.fullname}</span>
+                 #{/if}
+               #{/list}
+               <br>
+               <span class="label label-primary">Lettori Badge</span>
+               #{list items:seat.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('badgeReader') }
+                  <span class="label label-danger">${uro.user.username}</span>
                  #{/if}
                #{/list}
              </div>
