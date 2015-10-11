@@ -1,40 +1,118 @@
-#{modalAsync id:'modalEditOffice', button:'Salva', title:(office?.persistent ? 'Modifica sede' : 'Nuova sede')}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sede'  /}
 
-  <div class="alert alert-success" role="alert">
-    #{if office?.persistent }
-  		Modifica i dati di ${office.name} appartenente a <strong>${office.institute.name}</strong>
-    #{/if} #{else}
-    	Inserisci i dati della nuova sede appartenente a <strong>${office.institute.name}</strong>
-    #{/else}
-  </div>
+#{set breadcrumbs:['Istituti':@Institutes.list(), 'Configura sede':null] /}
+ 
+<div class="container">
 
-  <div id="officeData">
+  #{breadcrumbs breadcrumbs /}
+   
+  #{accordionGroup 'info'}
+    #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true, color:'info'}
+  	  <div class="alert alert-success" role="alert">
+    	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
+      </div>
+		#{form action:@save(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#instituteList',
+		    'data-async-error':'#officeData'}
+			
+	 		#{f.hidden 'office.id' /}
+	        #{f.hidden 'office.institute.id' /}
 
-	#{form action:@save(), method:'POST', autocomplete:false,
-	    class:'form form-horizontal', 'data-async':'#instituteList',
-	    'data-async-error':'#officeData'}
-	        
-	    
-		#{if office.persistent}
- 		 #{f.hidden 'office.id' /}
-        #{/if}
-		#{else}
-		 #{f.hidden 'office.institute.id' /}
-		#{/else}
-		
-        #{f.input 'office.name', required:true /}
-        #{f.input 'office.code', required:true /}
-        #{f.input 'office.address'/}
-        #{f.booleanRadio 'office.headQuarter'/}
-        
-
-    	#{b.buttons}
-          #{b.cancel @index() /}
-          #{b.save /}
-        #{/b.buttons}
-	#{/form}
+	        #{f.input 'office.name', required:true /}
+	        #{f.input 'office.code', required:true /}
+	        #{f.input 'office.address'/}
+	        #{f.booleanRadio 'office.headQuarter'/}
 	
-  </div>
+	    	#{b.buttons}
+	          #{b.save /}
+	        #{/b.buttons}
+		#{/form}
+    #{/accordionItem}
+  #{/accordionGroup}  
+  
+   #{accordionGroup 'ammi'}
+    #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true, color:'info'}
+  
+    <div class="row">
+      <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.insertNewAdministrator(office.id)}" data-async-modal="#modalInsertUro">
+      <i class="fa fa-plus"></i> Nuovo amministratore </a>
+	</div>
+
+	<h4>Amministratore tecnico</h4>    
+    #{if wOffice.tecnicalAdmins.empty }
+      <div class="alert alert-danger">
+        Non è stato ancora impostato alcun amministratore tecnico!
+      </div>
+    #{/if}
+    #{else}
+	    <ul class="list-group">
+	       #{list items:wOffice.tecnicalAdmins, as:'admin'}
+	         <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{Offices.blank()}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${admin.fullname}
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/else}
+    
+    <h4>Amministratore del personale</h4>
+    #{if wOffice.personnelAdmins.empty }
+      <div class="alert alert-danger">
+        Non è stato ancora impostato alcun amministratore del personale!
+      </div>
+    #{/if}
+    #{else}
+	    <ul class="list-group">
+	       #{list items:wOffice.personnelAdmins, as:'admin'}
+	         <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{Offices.blank()}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${admin.fullname}
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/else}
+	
+	
+    #{if !wOffice.miniAdmins.empty }
+      <h4>Amministratore del personale sola lettura</h4>    
+	    <ul class="list-group">
+	       #{list items:wOffice.miniAdmins, as:'admin'}
+	         <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{Offices.blank()}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${admin.fullname}
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/if}
+
+  
+    #{/accordionItem}
+  #{/accordionGroup}   
+
+     #{accordionGroup 'badge'}
+    #{accordionItem 'badgeReader', parent:'badge', title:'Lettori Badge Abilitati', open:true, color:'info'}
+
+                 <span class="label label-primary">Lettori Badge</span>
+               #{list items:office.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('badgeReader') }
+                  <span class="label label-danger">${uro.user.username}</span>
+                 #{/if}
+               #{/list}
+               
+        #{/accordionItem}
+  #{/accordionGroup}  
+             
   
   <br>
   
@@ -50,4 +128,7 @@
     #{/accordionGroup }  
    #{/secure.checkAction}
   #{/if}
-#{/modalAsync}
+
+</div>
+
+<div id="modalInsertUro" class="modal container" tabindex="-1"></div>

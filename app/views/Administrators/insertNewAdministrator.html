@@ -1,37 +1,13 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Gestione amministratori ' + office.name /}
+#{modalAsync id:'modalEditInstitute', button:'Salva', title:'Nuovo amministratore'}
 
-<div class="container-fluid">
+  <div class="alert alert-success" role="alert">
+  Inserisci il nome del nuovo istituto e la sigla (ex. IIT). 
+  </div>
 
   #{form @Administrators.saveNewAdministrator()}
 	
 	<input type="hidden" name="office.id" value="${office.id}"/>
-	<input type="hidden" name="role.id" value="${role.id}"/>
 	
-	<table class="table table-form table-hover">
-	  <tr>
-	    <td>
-	      <strong>
-	      #{if role.name.equals("personnelAdmin") }
-	        Amministratore
-	      #{/if}
-	      #{if role.name.equals("personnelAdminMini") }
-    	    Amministratore sola lettura 
-          #{/if} 
-          </strong>
-        </td>
-        <td>
-          <select name="person.id">
-	        #{list items:personList, as:'personItem'}
-	          <option value="${personItem.id}">
-                ${personItem.surname} ${personItem.name}
-	          </option>
-			#{/list}
-	      </select>
-        </td>
-      </tr>
-	 </table>
-	 
 	 <p class="center">
 	 <input class="btn btn-primary" type="submit" value="Inserisci" />
 	 </p>
@@ -40,3 +16,5 @@
 	#{/form}
 
 </div>
+
+#{/modalAsync}

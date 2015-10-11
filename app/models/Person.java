@@ -108,10 +108,6 @@ public class Person extends MutableModel implements Comparable<Person>{
 	@As(binder=NullStringBinder.class)
 	public String eppn;
 
-	/**
-	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli 
-	 * da contact_data così da eliminare quella tabella
-	 */
 	public String telephone;
 
 	public String fax;
