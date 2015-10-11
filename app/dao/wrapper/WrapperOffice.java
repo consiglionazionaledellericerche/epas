@@ -42,13 +42,30 @@ public class WrapperOffice implements IWrapperOffice {
 	public Office getValue() {
 		return value;
 	}
+	
+	/**
+	 * Gli amministratori tecnici dell'office.
+	 * @return
+	 */
+	public List<Person> getTecnicalAdmins() {
+
+		Role roleAdmin = roleDao.getRoleByName(Role.TECNICAL_ADMIN);
+		List<Person> personList = Lists.newArrayList();
+		for(UsersRolesOffices uro : this.value.usersRolesOffices) {
+
+			if(uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id) 
+					&& uro.user.person != null)
+				personList.add(uro.user.person);
+		}
+		return personList;
+	}
 
 
 	/**
 	 * Gli amministratori dell'office.
 	 * @return
 	 */
-	public List<Person> getPersonnelAdmin() {
+	public List<Person> getPersonnelAdmins() {
 
 		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
 		List<Person> personList = Lists.newArrayList();
@@ -65,7 +82,7 @@ public class WrapperOffice implements IWrapperOffice {
 	 * I mini amministratori dell'office.
 	 * @return
 	 */
-	public List<Person> getPersonnelAdminMini() {
+	public List<Person> getMiniAdmins() {
 
 		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
 		List<Person> personList = Lists.newArrayList();
