@@ -1,11 +1,15 @@
 package controllers;
 
+import helpers.Web;
+
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import manager.OfficeManager;
 import manager.SecureManager;
+import models.Institute;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -13,13 +17,20 @@ import models.User;
 import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import play.Play;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.OfficeDao;
@@ -36,82 +47,73 @@ public class Administrators extends Controller {
 	private static final String SUDO_USERNAME = "sudo.username";
 	private static final String USERNAME = "username";
 
+	private static final Logger log = LoggerFactory.getLogger(Institutes.class);
+	
+	@Inject
+	private static SecurityRules rules;
+//	@Inject
+//	private static SecureManager secureManager;
+	
 	@Inject
 	private static OfficeDao officeDao;
-	@Inject
-	private static SecureManager secureManager;
-	@Inject
-	private static RoleDao roleDao;
+//	@Inject
+//	private static RoleDao roleDao;
 	@Inject
 	private static PersonDao personDao;
-	@Inject
-	private static IWrapperFactory wrapperFactory;
-	@Inject
-	private static OfficeManager officeManager;
-	@Inject
-	private static UsersRolesOfficesDao usersRolesOfficesDao;
+
+//	@Inject
+//	private static IWrapperFactory wrapperFactory;
+//	@Inject
+//	private static OfficeManager officeManager;
+//	@Inject
+//	private static UsersRolesOfficesDao usersRolesOfficesDao;
 	@Inject
 	private static UserDao userDao;
 
-	public static void insertNewAdministrator(Long officeId) {
+	public static void blank(Long officeId) {
 
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
-		List<Person> personList = personDao.list(Optional.<String>absent(), 
-				secureManager.officesSystemAdminAllowed(Security.getUser().get()),
-				false, LocalDate.now(), LocalDate.now(), true).list();
+		// deve avere tecnicalAdmin sull'office, oppure super admin
+		rules.checkIfPermitted(office);
 
-		render(office, personList);
-	}
-
-	public static void saveNewAdministrator(Person person, Office office, Role role) {
-
+		UsersRolesOffices uro = new UsersRolesOffices();
+		uro.office = office;
 		
-//		if(person==null || office==null || role==null) {
-//
-//			flash.error("Errore nell'inserimento parametri. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		if(!officeManager.setUro(person.user, office, role)) {
-//
-//			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
-//			Offices.showOffices(null);
-//		}
-//
-//		flash.success("Nuovo amministratore inserito con successo.");
-//		Offices.showOffices(null);
+		render(uro);
+	}
+
+	public static void save(@Valid UsersRolesOffices uro) {
+		
+		if (Validation.hasErrors()) {
+			response.status = 400;
+			log.warn("validation errors for {}: {}", uro,
+					validation.errorsMap());
+			flash.error(Web.msgHasErrors());
+
+			render("@insertNewAdministrator", uro);
+		} else {
+			
+			rules.checkIfPermitted(uro.office);
+			
+			uro.save();
+			flash.success(Web.msgSaved(Institute.class));
+			Offices.edit(uro.office.id);
+		}
 	}
 
 
-	public static void deleteAdministrator(Long sedeId, Long userId, Long roleId) {
+	public static void delete(Long uroId) {
 				
-//
-//		Office office = officeDao.getOfficeById(sedeId);
-//		if(office==null) {
-//			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
-//
-//		if(user == null) {
-//
-//			flash.error("La persona per la quale si vuole rimuovere il ruolo di ammninistratore è inesistente. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		Role role = roleDao.getRoleById(roleId);
-//		
-//		for(UsersRolesOffices uro : user.usersRolesOffices){
-//			if(uro.role.equals(role) && uro.office.equals(office)){
-//				uro.delete();
-//			}
-//			
-//		}
-//		flash.success("Rimozione amministratore avvenuta con successo.");
-//		Offices.showOffices(null);
+		final UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
+		notFoundIfNull(uro);
+		
+		rules.checkIfPermitted(uro.office);
+		
+		uro.delete();
+		flash.success(Web.msgDeleted(UsersRolesOffices.class));
+		Offices.edit(uro.office.id);
 
 	}
 

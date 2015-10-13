@@ -36,9 +36,6 @@ public class Office extends BaseModel{
 	@Column(name = "name")
     public String name;
     
-//    @Column(name = "contraction")
-//    public String contraction;
-    
     @Column(name = "address")
     public String address = "";
     
@@ -49,18 +46,15 @@ public class Office extends BaseModel{
     @Column(name="joining_date")
     public LocalDate joiningDate;
     
-//    @OneToMany(mappedBy="institute", cascade = {CascadeType.REMOVE})
-//    public List<Office> subOffices = new ArrayList<Office>();
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="institute_id")
     public Institute institute;
     
     public boolean headQuarter = false;
     
-    //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-    //public List<User> restUsers = new ArrayList<User>();
-     
+    @OneToMany(mappedBy="owner", cascade = {CascadeType.REMOVE})
+    public List<BadgeReader> badgeReaders = Lists.newArrayList();
+    
     @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<Person> persons = new ArrayList<Person>();
     
@@ -74,6 +68,8 @@ public class Office extends BaseModel{
     @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
     
+    
+    
     @NotAudited
 	@OneToMany(mappedBy="office")
 	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
@@ -81,6 +77,8 @@ public class Office extends BaseModel{
     @NotAudited
 	@OneToMany(mappedBy="office")
 	public List<TotalOvertime> totalOvertimes = new ArrayList<TotalOvertime>();
+    
+    
     
     
     @Transient

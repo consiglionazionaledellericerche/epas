@@ -1,0 +1,57 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
+
+<div class="container">
+	
+	#{form action:@BadgeReaders.list(), class:'form-inline', method:'GET',
+    'data-reload':'#results', autocomplete:'off'}
+
+    <div class="row">
+     <div class="col-sm-3">
+        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label(), inline:true /}
+     </div>
+     <div class="col-sm-1">
+        <button type="submit" name="_filter" class="btn btn-primary">
+            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+        </button>
+     </div>
+    </div>
+	#{/form}
+	
+	#{secure.checkAction 'BadgeReaders.blank'}
+	  #{b.actions}
+	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditBadgeReader">
+	      <i class="fa fa-plus"></i> &{'BadgeReader.blank'}
+	    </a>
+      #{/b.actions}
+    #{/secure.checkAction}
+	
+	<div id="instituteList"> <!-- per il risultato della modale asincrona -->
+	
+	<section id="results">
+    #{paginate results} 
+	   <ul class="list-group">
+	   #{list items:results.results, as:'item'}
+	   
+		 <li class="list-group-item list-group-item-grey">
+		   <h4 style="color: black">	
+	         <i class="fa fa-university"></i>
+	         <a data-async-modal="#modalEditBadgeReader" class="list-group-item-heading"
+			  	href="@{edit(item.id)}">
+			    ${item.code}
+	    	 </a>
+	       </h4>
+	     </li>      
+
+	   #{/list}
+	   </ul>
+    #{/paginate} 
+     </section>
+     </div>
+</div>
+
+
+
+<div id="modalEditBadgeReader" class="modal container" tabindex="-1"></div>

@@ -2,6 +2,8 @@ package dao;
 
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
@@ -80,6 +82,36 @@ public final class PersonDao extends DaoBase{
 				Optional.<Person>absent()); 
 		
 		return ModelQuery.simpleResults( query, person ).list();
+	}
+	
+	/**
+	 * La lista di persone una volta applicati i filtri dei parametri. 
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @return
+	 */
+	public PerseoSimpleResults<Person> listPerseo(
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			LocalDate start, LocalDate end, 
+			boolean onlyOnCertificate) {
+		
+		final QPerson person = QPerson.person;
+		
+		return PerseoModelQuery.wrap(
+				//JPQLQuery
+				personQuery(name, offices, onlyTechnician, 
+						Optional.fromNullable(start), Optional.fromNullable(end), 
+						onlyOnCertificate, Optional.<CompetenceCode>absent(),
+						Optional.<Person>absent()),
+				//Expression
+				person);
 	}
 	
 	/**
