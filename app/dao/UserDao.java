@@ -1,23 +1,22 @@
 package dao;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import models.Office;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-import models.query.QUser;
-
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import models.Office;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
+import models.query.QUser;
+
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 
@@ -105,6 +104,13 @@ public class UserDao extends DaoBase {
 			}
 		}
 		return userList;
+	}
+
+	public List<String> containsUsername(String username){
+		Preconditions.checkState(!Strings.isNullOrEmpty(username));
+		final QUser user = QUser.user;
+
+		return getQueryFactory().from(user).where(user.username.contains(username)).list(user.username);
 	}
 	
 }
