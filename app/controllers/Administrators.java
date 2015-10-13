@@ -51,13 +51,13 @@ public class Administrators extends Controller {
 	
 	@Inject
 	private static SecurityRules rules;
-	@Inject
-	private static SecureManager secureManager;
+//	@Inject
+//	private static SecureManager secureManager;
 	
 	@Inject
 	private static OfficeDao officeDao;
-	@Inject
-	private static RoleDao roleDao;
+//	@Inject
+//	private static RoleDao roleDao;
 	@Inject
 	private static PersonDao personDao;
 
