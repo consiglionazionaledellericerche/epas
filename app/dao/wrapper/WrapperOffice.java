@@ -47,17 +47,17 @@ public class WrapperOffice implements IWrapperOffice {
 	 * Gli amministratori tecnici dell'office.
 	 * @return
 	 */
-	public List<Person> getTecnicalAdmins() {
+	public List<UsersRolesOffices> getTecnicalAdmins() {
 
 		Role roleAdmin = roleDao.getRoleByName(Role.TECNICAL_ADMIN);
-		List<Person> personList = Lists.newArrayList();
+		List<UsersRolesOffices> uroList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.value.usersRolesOffices) {
 
 			if(uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id) 
 					&& uro.user.person != null)
-				personList.add(uro.user.person);
+				uroList.add(uro);
 		}
-		return personList;
+		return uroList;
 	}
 
 
@@ -65,34 +65,34 @@ public class WrapperOffice implements IWrapperOffice {
 	 * Gli amministratori dell'office.
 	 * @return
 	 */
-	public List<Person> getPersonnelAdmins() {
+	public List<UsersRolesOffices> getPersonnelAdmins() {
 
 		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		List<Person> personList = Lists.newArrayList();
+		List<UsersRolesOffices> uroList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.value.usersRolesOffices) {
 
 			if(uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id) 
 					&& uro.user.person != null)
-				personList.add(uro.user.person);
+				uroList.add(uro);
 		}
-		return personList;
+		return uroList;
 	}
 
 	/**
 	 * I mini amministratori dell'office.
 	 * @return
 	 */
-	public List<Person> getMiniAdmins() {
+	public List<UsersRolesOffices> getMiniAdmins() {
 
 		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-		List<Person> personList = Lists.newArrayList();
+		List<UsersRolesOffices> uroList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.value.usersRolesOffices) {
 
 			if(uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdminMini.id) 
 					&& uro.user.person != null)
-				personList.add(uro.user.person);
+				uroList.add(uro);
 		}
-		return personList;
+		return uroList;
 	}
 
 }

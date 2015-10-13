@@ -70,7 +70,7 @@ public class Administrators extends Controller {
 	@Inject
 	private static UserDao userDao;
 
-	public static void insertNewAdministrator(Long officeId) {
+	public static void blank(Long officeId) {
 
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
@@ -84,7 +84,7 @@ public class Administrators extends Controller {
 		render(uro);
 	}
 
-	public static void saveNewAdministrator(@Valid UsersRolesOffices uro) {
+	public static void save(@Valid UsersRolesOffices uro) {
 		
 		if (Validation.hasErrors()) {
 			response.status = 400;
@@ -104,33 +104,16 @@ public class Administrators extends Controller {
 	}
 
 
-	public static void deleteAdministrator(Long sedeId, Long userId, Long roleId) {
+	public static void delete(Long uroId) {
 				
-//
-//		Office office = officeDao.getOfficeById(sedeId);
-//		if(office==null) {
-//			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
-//
-//		if(user == null) {
-//
-//			flash.error("La persona per la quale si vuole rimuovere il ruolo di ammninistratore è inesistente. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		Role role = roleDao.getRoleById(roleId);
-//		
-//		for(UsersRolesOffices uro : user.usersRolesOffices){
-//			if(uro.role.equals(role) && uro.office.equals(office)){
-//				uro.delete();
-//			}
-//			
-//		}
-//		flash.success("Rimozione amministratore avvenuta con successo.");
-//		Offices.showOffices(null);
+		final UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
+		notFoundIfNull(uro);
+		
+		rules.checkIfPermitted(uro.office);
+		
+		uro.delete();
+		flash.success(Web.msgDeleted(UsersRolesOffices.class));
+		Offices.edit(uro.office.id);
 
 	}
 
