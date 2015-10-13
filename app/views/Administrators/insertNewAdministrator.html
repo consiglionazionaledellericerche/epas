@@ -1,20 +1,25 @@
-#{modalAsync id:'modalEditInstitute', button:'Salva', title:'Nuovo amministratore'}
+#{modalAsync id:'modalInsertUro', button:'Salva', title:'Nuovo amministratore'}
 
   <div class="alert alert-success" role="alert">
-  Inserisci il nome del nuovo istituto e la sigla (ex. IIT). 
+  Nuovo amministratore per <strong>${uro.office.name}</strong> 
   </div>
 
-  #{form @Administrators.saveNewAdministrator()}
-	
-	<input type="hidden" name="office.id" value="${office.id}"/>
-	
-	 <p class="center">
-	 <input class="btn btn-primary" type="submit" value="Inserisci" />
-	 </p>
-	
-	
-	#{/form}
 
-</div>
+  <div id="uroData">
+
+    #{form action:@Administrators.saveNewAdministrator(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#uroList',
+	    'data-async-error':'#uroData' }
+	
+	#{f.hidden 'uro.office.id' /}
+
+	#{f.selectModel 'uro.user',items:templateUtility.usersInInstitute(uro.office.institute), getLabel:true /}
+	#{f.selectModel 'uro.role',items:templateUtility.rolesAssignable(uro.office) /} 
+
+	<p class="center">
+	  <input class="btn btn-primary" type="submit" value="Inserisci" />
+	</p>
+  #{/form}
+ </div>
 
 #{/modalAsync}
