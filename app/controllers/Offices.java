@@ -42,12 +42,12 @@ public class Offices extends Controller {
 	private static OfficeDao officeDao;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
-	@Inject
-	private static OfficeManager officeManager;
-	@Inject
-	private static ConfGeneralManager confGeneralManager;
-	@Inject
-	private static ConfYearManager confYearManager;
+//	@Inject
+//	private static OfficeManager officeManager;
+//	@Inject
+//	private static ConfGeneralManager confGeneralManager;
+//	@Inject
+//	private static ConfYearManager confYearManager;
 	
 	@Inject
 	private static RoleDao roleDao;
