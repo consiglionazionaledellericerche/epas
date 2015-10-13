@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -17,6 +18,7 @@ import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.envers.Audited;
 
+import play.data.validation.Required;
 import play.data.validation.Unique;
 
 import com.google.common.collect.Sets;
@@ -48,6 +50,13 @@ public class BadgeReader extends BaseModel {
 
 	@OneToMany(mappedBy="badgeReader")
 	public Set<Badge> badges = Sets.newHashSet();
+	
+	@Required
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "office_owner_id")
+	public Office owner;
+	
 	
 	
 	public boolean enabled = true;

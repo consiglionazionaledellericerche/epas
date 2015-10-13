@@ -98,8 +98,40 @@ update institutes set created_at = current_timestamp;
 -- fix tabella storico conf general
 alter table conf_general_history alter column office_id drop not null;
 
+-- constraint sugli user role office
 ALTER TABLE users_roles_offices ALTER COLUMN office_id NOT NULL;
 ALTER TABLE users_roles_offices ALTER COLUMN role_id NOT NULL;
 ALTER TABLE users_roles_offices ALTER COLUMN user_id NOT NULL;
+
+-- ------------------------------------------------------------------------------
+-- la relazione fra badge_readers e l'office proprietario
+-- ------------------------------------------------------------------------------
+
+ALTER TABLE badge_readers ADD COLUMN office_owner_id BIGINT;
+ALTER TABLE badge_readers_history ADD column office_owner_id BIGINT;
+ALTER TABLE badge_readers ADD CONSTRAINT "badge_reader_owner_id_fkey" 
+  FOREIGN KEY (office_owner_id) REFERENCES office(id);
+
+-- riempire il campo con un valore di default (esempio tutti alla prima sede)
+update badge_readers set office_owner_id = (select id from office order by id limit 1);
+
+-- rimuovere i badge_reader che continuano ad avere il campo office_owner_id null
+delete from badge_readers where office_owner_id is null;
+-- TODO: potrebbe saltare se rimuovo un badge_reader con badge associati (ma è un caso che 
+-- non si verifica mai)
+
+-- aggiungere il vincolo not null
+ALTER TABLE badge_readers ALTER COLUMN office_owner_id NOT NULL;
+
+
+
+
+
+
+
+
+
+
+
 
 -- TODO impostare not null i nuovi campi institute_id e headquarter della tabella office
