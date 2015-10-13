@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
@@ -58,6 +59,16 @@ public class User extends BaseModel{
 	@Column(name="recovery_token")
 	public String recoveryToken;
 
+	@Override
+	public String getLabel() {
+		if (this.person != null) {
+			return  this.person.fullName() + " - " + this.person.office.name;
+		} else {
+			return this.username;
+		}
+		
+	}
+	
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

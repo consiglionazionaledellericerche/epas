@@ -98,7 +98,8 @@ update institutes set created_at = current_timestamp;
 -- fix tabella storico conf general
 alter table conf_general_history alter column office_id drop not null;
 
-
-
+ALTER TABLE users_roles_offices ALTER COLUMN office_id NOT NULL;
+ALTER TABLE users_roles_offices ALTER COLUMN role_id NOT NULL;
+ALTER TABLE users_roles_offices ALTER COLUMN user_id NOT NULL;
 
 -- TODO impostare not null i nuovi campi institute_id e headquarter della tabella office

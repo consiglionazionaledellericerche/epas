@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import controllers.Resecure.NoCheck;
 import dao.*;
 import dao.PersonDao.PersonLite;
@@ -15,13 +16,16 @@ import manager.ConfGeneralManager;
 import manager.SecureManager;
 import models.*;
 import models.enumerate.Parameter;
+
 import org.joda.time.LocalDate;
+
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 
 import javax.inject.Inject;
+
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +51,8 @@ public class RequestInit extends Controller {
 	private static AbsenceTypeDao absenceTypeDao;
 	@Inject
 	private static StampingDao stampingDao;
+	@Inject
+	private static RoleDao roleDao;
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
 	 * TODO: esportare questa classe in un nuovo file che modella la view.
@@ -247,6 +253,42 @@ public class RequestInit extends Controller {
 			return ImmutableList.of(
 					  "lunedì", "martedì", "mercoledì", "giovedì", 
 					  "venerdì", "sabato", "domenica");
+		}
+		
+		/**
+		 * Gli user associati a tutte le persone appartenenti all'istituto.
+		 * @param institute
+		 * @return
+		 */
+		public List<User> usersInInstitute(Institute institute) {
+			
+			Set<Office> offices = Sets.newHashSet();
+			offices.addAll(institute.seats);
+			
+			List<Person> personList = personDao.listPerseo(Optional.<String>absent(), 
+					offices, false, LocalDate.now(), LocalDate.now(), true).list();
+
+			List<User> users = Lists.newArrayList();
+			for(Person person : personList) {
+				users.add(person.user);
+			}
+			
+			return users;
+		}
+		
+		public List<Role> rolesAssignable(Office office) {
+			
+			List roles = Lists.newArrayList();
+
+			// TODO: i ruoli impostabili sull'office dipendono da chi esegue la richiesta...
+			Optional<User> user = Security.getUser();
+			if(user.isPresent()) {
+				roles.add(roleDao.getRoleByName(Role.TECNICAL_ADMIN));
+				roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+				roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
+				return roles;
+			}
+			return roles;
 		}
 	
 	}
