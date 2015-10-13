@@ -38,7 +38,7 @@
 		 <li class="list-group-item list-group-item-grey">
 		   <div class="pull-right btn-group">
 		     #{secure.checkAction 'Offices.blank'}
-	            <a class="btn btn-sm btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalEditOffice">
+	            <a class="btn btn-sm btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalInsertOffice">
 	            <i class="fa fa-plus"></i> Aggiungi sede</a>
               #{/secure.checkAction}
 		   </div>
@@ -65,11 +65,6 @@
              <div class="list-group-item-text">
               ${seat.code}
              </div>
-             
-              <div class="pull-right btn-group">
-				<a class="btn btn-sm btn-warning" href="@{Offices.blank(item.id)}" data-async-modal="#modalEditOffice">
-	            <i class="fa fa-cogs"></i> Configura</a>
-              </div>
              
              <div class="list-group-item-text">
                <span class="label label-primary">Amministratore Tecnico</span>

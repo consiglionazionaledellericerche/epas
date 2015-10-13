@@ -36,9 +36,11 @@
     #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true, color:'info'}
   
     <div class="row">
-      <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.insertNewAdministrator(office.id)}" data-async-modal="#modalInsertUro">
+      <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.blank(office.id)}" data-async-modal="#modalInsertUro">
       <i class="fa fa-plus"></i> Nuovo amministratore </a>
 	</div>
+
+    <div id="uroList">
 
 	<h4>Amministratore tecnico</h4>    
     #{if wOffice.tecnicalAdmins.empty }
@@ -48,13 +50,13 @@
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wOffice.tecnicalAdmins, as:'admin'}
+	       #{list items:wOffice.tecnicalAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{Offices.blank()}" >
+	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
 		          <i class="fa fa-trash"></i> Rimuovi</a>
 	            </div>
-	            ${admin.fullname}
+	            ${uroAdmin.user.person.fullname}
 	          </li>
 	       #{/list}
 	    </ul>
@@ -68,13 +70,13 @@
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wOffice.personnelAdmins, as:'admin'}
+	       #{list items:wOffice.personnelAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{Offices.blank()}" >
+	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
 		          <i class="fa fa-trash"></i> Rimuovi</a>
 	            </div>
-	            ${admin.fullname}
+	            ${uroAdmin.user.person.fullname}
 	          </li>
 	       #{/list}
 	    </ul>
@@ -84,17 +86,19 @@
     #{if !wOffice.miniAdmins.empty }
       <h4>Amministratore del personale sola lettura</h4>    
 	    <ul class="list-group">
-	       #{list items:wOffice.miniAdmins, as:'admin'}
+	       #{list items:wOffice.miniAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{Offices.blank()}" >
+	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
 		          <i class="fa fa-trash"></i> Rimuovi</a>
 	            </div>
-	            ${admin.fullname}
+	            ${uroAdmin.user.person.fullname}
 	          </li>
 	       #{/list}
 	    </ul>
     #{/if}
+    
+    </div> <!-- fine uroData -->
 
   
     #{/accordionItem}

@@ -151,8 +151,6 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
 		rules.checkIfPermitted(office);
 
 		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();

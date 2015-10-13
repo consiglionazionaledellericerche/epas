@@ -70,6 +70,6 @@ public class RoleDao extends DaoBase {
 		roleList.add(getRoleByName(Role.REST_CLIENT));
 		
 		return roleList;
-		
 	}
+	
 }

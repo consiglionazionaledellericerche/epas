@@ -41,5 +41,16 @@ public class Role extends BaseModel{
 	@NotAudited
 	@OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+	
+	@Override
+	public String toString() {
+		if( name.equals(Role.PERSONNEL_ADMIN))
+			return "Amministratore Personale";
+		if( name.equals(Role.PERSONNEL_ADMIN_MINI))
+			return "Amministratore Personale Sola lettura";
+		if( name.equals(Role.TECNICAL_ADMIN))
+			return "Amministratore Tecnico";
+		return this.name;
+	}
 
 }
