@@ -4,14 +4,12 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import controllers.Resecure.NoCheck;
 import dao.*;
 import dao.PersonDao.PersonLite;
-import it.cnr.iit.epas.DateUtility;
 import manager.ConfGeneralManager;
 import manager.SecureManager;
 import models.*;
@@ -36,23 +34,26 @@ import java.util.Set;
 public class RequestInit extends Controller {
 
 	@Inject
-	private static OfficeDao officeDao;
+	static OfficeDao officeDao;
 	@Inject
 	protected static SecureManager secureManager;
 	@Inject
-	private static PersonDao personDao;
+	static PersonDao personDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static UsersRolesOfficesDao uroDao;
 	@Inject
-	private static QualificationDao qualificationDao;
+	static QualificationDao qualificationDao;
 	@Inject
-	private static AbsenceTypeDao absenceTypeDao;
+	static AbsenceTypeDao absenceTypeDao;
 	@Inject
-	private static StampingDao stampingDao;
+	static StampingDao stampingDao;
 	@Inject
-	private static RoleDao roleDao;
+	static RoleDao roleDao;
+	@Inject
+	static TemplateUtility templateUtility;
+	
 	/**
 	 * Oggetto che modella i permessi abilitati per l'user
 	 * TODO: esportare questa classe in un nuovo file che modella la view.
@@ -167,135 +168,9 @@ public class RequestInit extends Controller {
 		}
 	}
 
-	/**
-	 * Metodi usabili nel template.
-	 * @author alessandro
-	 *
-	 */
-	public static class TemplateUtility {
-
-		///////////////////////////////////////////////////////////////////////////7
-		//Convertitori mese
-
-		public String monthName(String month) {
-
-			return DateUtility.getName(Integer.parseInt(month));
-		}
-
-		public String monthName(Integer month) {
-
-			return DateUtility.getName(month);
-		}
-
-		public String monthNameByString(String month){
-			if(month != null)
-				return DateUtility.getName(Integer.parseInt(month));
-			else
-				return null;
-		}
-
-		public boolean checkTemplate(String profile) {
-
-			return false;
-		}
-
-
-
-		///////////////////////////////////////////////////////////////////////////7
-		//Navigazione menu (next/previous month)
-
-		public int computeNextMonth(int month){
-			if(month==12)
-				return 1;
-
-			return month + 1;
-		}
-
-		public int computeNextYear(int month, int year){
-			if(month==12)
-				return year + 1;
-
-			return year;
-		}
-
-		public int computePreviousMonth(int month){
-			if(month==1)
-				return 12;
-
-			return month - 1;
-		}
-
-		public int computePreviousYear(int month, int year){
-			if(month==1)
-				return year - 1;
-
-			return year;
-		}
-
-		///////////////////////////////////////////////////////////////////////////7
-		//Liste di utilità per i template
-
-		public Set<Office> officesAllowed(){ return secureManager.officesWriteAllowed(Security.getUser().get()); }
-
-		public List<Qualification> getAllQualifications() {
-			return qualificationDao.findAll();
-		}
-
-		public List<AbsenceType> getCertificateAbsenceTypes() {
-			return absenceTypeDao.certificateTypes();
-		}
-		
-		public List<StampType> getAllStampTypes(){
-			return stampingDao.findAll();
-		}
-		
-		public ImmutableList<String> getAllDays() {
-			return ImmutableList.of(
-					  "lunedì", "martedì", "mercoledì", "giovedì", 
-					  "venerdì", "sabato", "domenica");
-		}
-		
-		/**
-		 * Gli user associati a tutte le persone appartenenti all'istituto.
-		 * @param institute
-		 * @return
-		 */
-		public List<User> usersInInstitute(Institute institute) {
-			
-			Set<Office> offices = Sets.newHashSet();
-			offices.addAll(institute.seats);
-			
-			List<Person> personList = personDao.listPerseo(Optional.<String>absent(), 
-					offices, false, LocalDate.now(), LocalDate.now(), true).list();
-
-			List<User> users = Lists.newArrayList();
-			for(Person person : personList) {
-				users.add(person.user);
-			}
-			
-			return users;
-		}
-		
-		public List<Role> rolesAssignable(Office office) {
-			
-			List roles = Lists.newArrayList();
-
-			// TODO: i ruoli impostabili sull'office dipendono da chi esegue la richiesta...
-			Optional<User> user = Security.getUser();
-			if(user.isPresent()) {
-				roles.add(roleDao.getRoleByName(Role.TECNICAL_ADMIN));
-				roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
-				roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
-				return roles;
-			}
-			return roles;
-		}
-	
-	}
-
 	@Before (priority = 1)
 	static void injectUtility() {
-		TemplateUtility templateUtility = new TemplateUtility();
+		
 		renderArgs.put("templateUtility", templateUtility);
 	}
 

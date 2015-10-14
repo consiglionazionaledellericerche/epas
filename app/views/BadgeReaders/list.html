@@ -22,13 +22,13 @@
 	
 	#{secure.checkAction 'BadgeReaders.blank'}
 	  #{b.actions}
-	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditBadgeReader">
+	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalInsertBadgeReader">
 	      <i class="fa fa-plus"></i> &{'BadgeReader.blank'}
 	    </a>
       #{/b.actions}
     #{/secure.checkAction}
 	
-	<div id="instituteList"> <!-- per il risultato della modale asincrona -->
+	<div id="badgeReaderList"> <!-- per il risultato della modale asincrona -->
 	
 	<section id="results">
     #{paginate results} 
@@ -37,9 +37,8 @@
 	   
 		 <li class="list-group-item list-group-item-grey">
 		   <h4 style="color: black">	
-	         <i class="fa fa-university"></i>
-	         <a data-async-modal="#modalEditBadgeReader" class="list-group-item-heading"
-			  	href="@{edit(item.id)}">
+	         <i class="fa fa-credit-card"></i>
+	         <a class="list-group-item-heading" href="@{edit(item.id)}">
 			    ${item.code}
 	    	 </a>
 	       </h4>
@@ -54,4 +53,4 @@
 
 
 
-<div id="modalEditBadgeReader" class="modal container" tabindex="-1"></div>
+<div id="modalInsertBadgeReader" class="modal container" tabindex="-1"></div>
