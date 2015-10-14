@@ -1,42 +1,25 @@
 package controllers;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.*;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-import manager.ConfGeneralManager;
-import manager.ContractManager;
-import manager.ContractStampProfileManager;
-import manager.ContractWorkingTimeTypeManager;
-import manager.OfficeManager;
-import manager.PersonManager;
-import manager.SecureManager;
-import models.ConfGeneral;
-import models.Contract;
-import models.ContractStampProfile;
-import models.ContractWorkingTimeType;
-import models.Office;
-import models.Person;
-import models.PersonChildren;
-import models.PersonDay;
-import models.Role;
-import models.User;
-import models.VacationPeriod;
-import models.WorkingTimeType;
+import manager.*;
+import models.*;
 import models.enumerate.Parameter;
 import net.sf.oval.constraint.MinLength;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -47,23 +30,11 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.hash.Hashing;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.ContractDao;
-import dao.PersonChildrenDao;
-import dao.PersonDao;
-import dao.UserDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 
 @Slf4j
@@ -71,7 +42,10 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 public class Persons extends Controller {
 
 	//	private final static String USERNAME_SESSION_KEY = "username";
-
+	@Inject
+	private static UserManager userManager;
+	@Inject
+	private static EmailManager emailManager;
 	@Inject
 	private static SecureManager secureManager;
 	@Inject
@@ -126,21 +100,21 @@ public class Persons extends Controller {
 	}
 
 	public static void save(@Valid @Required Person person,
-			@Valid Contract contract,@Valid User user) {
-		
+			@Valid Contract contract) {
+
+		if(contract.expireContract != null && !contract.expireContract.isAfter(contract.beginContract)){
+			Validation.addError("contract.expireContract","Dev'essere successivo all'inizio del contratto");
+		}
+
 		if(Validation.hasErrors()) {
 			flash.error("Correggere gli errori indicati");
-			render("@insertPerson", person,contract,user);
+			render("@insertPerson", person,contract);
 		}
 
 		rules.checkIfPermitted(person.office);
-				
-		//generate random token
-		SecureRandom random = new SecureRandom();
-		user.password = Codec.hexMD5(new BigInteger(130, random).toString(32));
-		user.save();
 		
-		person.user = user;
+		person.user = personManager.createUser(person);
+
 		person.save();
 		
 		Role employee = Role.find("byName", Role.EMPLOYEE).first();
@@ -148,7 +122,7 @@ public class Persons extends Controller {
 		
 		contract.person = person;
 
-		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription("Normale", Optional.<Office>absent());
 		
 		if( !contractManager.properContractCreate(contract, wtt)) {
 			flash.error("Errore durante la creazione del contratto. "
@@ -158,59 +132,15 @@ public class Persons extends Controller {
 		}
 		
 		person.save();
+
+		userManager.generateRecoveryToken(person);
+		emailManager.newUserMail(person);
+
+		log.info("Creata nuova persona: id[{}] - {}", person.id, person.fullName());
 		
 		flash.success("Persona inserita correttamente in anagrafica - %s", person.fullName());
 		
 		list(null);
-	}
-
-	@Deprecated
-	public static void insertUsername(Long personId){
-		Person person = personDao.getPersonById(personId);
-		if(person==null) {
-
-			flash.error("La persona selezionata non esiste. Operazione annullata");
-			list(null);
-		}
-
-		rules.checkIfPermitted(person.office);
-
-		List<String> usernameList = personManager.composeUsername(person.name, person.surname);
-
-		render(person, usernameList);
-	}
-
-	@Deprecated
-	public static void updateUsername(Long personId, String username){
-
-		Person person = personDao.getPersonById(personId);
-		if(person==null) {
-
-			flash.error("La persona selezionata non esiste. Operazione annullata");
-			list(null);
-		}
-		rules.checkIfPermitted(person.office);
-
-		if(person.user != null){
-			person.user.save();
-		}
-		else{
-			User user = new User();
-			user.password = Codec.hexMD5("epas");
-			user.person = person;
-			user.username = username;
-			user.save();
-			person.user = user;
-			person.save();
-		}
-
-		Role employee = Role.find("byName", Role.EMPLOYEE).first();
-		officeManager.setUro(person.user, person.office, employee);
-
-		flash.success("%s %s inserito in anagrafica con il valore %s come username", 
-				person.name, person.surname, person.user.username);
-		list(null);
-
 	}
 
 	public static void edit(Long personId){
