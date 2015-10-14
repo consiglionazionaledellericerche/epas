@@ -15,6 +15,11 @@ absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
+badgeReader.code=Nome 
+badgeReader.description=Descrizione 
+badgeReader.location=Location
+badgeReader.owner=Sede Afferente
+
 views.common.true=vero
 views.common.false=falso
 
@@ -125,6 +130,7 @@ modifierType= Calcolo Orario
 stamping.note= Note
 
 user.username= Username
+user.password= Password
 
 ########################
 # Messaggi di validazione

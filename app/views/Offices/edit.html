@@ -14,8 +14,7 @@
     	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
       </div>
 		#{form action:@save(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#instituteList',
-		    'data-async-error':'#officeData'}
+		    class:'form form-horizontal' }
 			
 	 		#{f.hidden 'office.id' /}
 	        #{f.hidden 'office.institute.id' /}

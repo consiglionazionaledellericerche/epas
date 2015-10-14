@@ -38,6 +38,7 @@ public class User extends BaseModel{
 	@Required
 	public String username;
 
+	@Required
 	public String password;
 
 	@NotAudited
@@ -87,6 +88,15 @@ public class User extends BaseModel{
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Se l'user il super amministratore 
+	 * TODO: definire la logica più dettagliata se necessario.
+	 * @return
+	 */
+	public boolean isSuperAdmin() {
+		return username.equals("admin") || username.equals("developer");
 	}
 
 }
