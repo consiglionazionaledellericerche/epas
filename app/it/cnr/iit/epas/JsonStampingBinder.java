@@ -76,7 +76,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			if(jsonObject.has("lettore")) {
 				String badgeReaderCode = jsonObject.get("lettore").getAsString();
 				if (! Strings.isNullOrEmpty(badgeReaderCode) ) {
-					BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
+					BadgeReader badgeReader = badgeReaderDao.byCode(badgeReaderCode);
 					if (badgeReader == null) {
 						//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
 					}

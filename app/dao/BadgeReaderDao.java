@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.List;
+
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
@@ -12,6 +14,7 @@ import models.User;
 import models.query.QBadgeReader;
 import models.query.QInstitute;
 import models.query.QOffice;
+import models.query.QUser;
 import models.query.QUsersRolesOffices;
 
 import com.google.common.base.Optional;
@@ -36,18 +39,33 @@ public class BadgeReaderDao extends DaoBase {
 	BadgeReaderDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return il badgereader associato al codice passato come parametro
+	 */
+	public BadgeReader byId(Long id){
+
+		final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+
+		final JPQLQuery query = getQueryFactory().from(badgeReader)
+				.where(badgeReader.id.eq(id));
+		return query.singleResult(badgeReader);
+	}
+	
 	/**
 	 * 
 	 * @param code
 	 * @return il badgereader associato al codice passato come parametro
 	 */
-	public BadgeReader getBadgeReaderByCode(String code){
+	public BadgeReader byCode(String code){
 
-		final QBadgeReader badge = QBadgeReader.badgeReader;
+		final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
-		final JPQLQuery query = getQueryFactory().from(badge)
-				.where(badge.code.eq(code));
-		return query.singleResult(badge);
+		final JPQLQuery query = getQueryFactory().from(badgeReader)
+				.where(badgeReader.code.eq(code));
+		return query.singleResult(badgeReader);
 	}
 	
 	/**
@@ -81,4 +99,21 @@ public class BadgeReaderDao extends DaoBase {
 		}
 		return nameCondition.or(badgeReader.code.startsWithIgnoreCase(name));
 	}
+
+	/**
+	 * La lista degli account di tutti i badgeReader.
+	 * @return
+	 */
+	public List<User> usersBadgeReader() {
+		
+		final QUser user = QUser.user;
+		
+		return getQueryFactory()
+				.from(user)
+				.leftJoin(user.badgeReader)
+				.where(user.badgeReader.isNotNull())
+				.orderBy(user.badgeReader.code.asc())
+				.list(user);
+	}
+
 }

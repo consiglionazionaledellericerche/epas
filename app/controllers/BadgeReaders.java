@@ -1,12 +1,16 @@
 package controllers;
 
+import java.util.List;
+
 import helpers.Web;
 
 import javax.inject.Inject;
 
 import models.BadgeReader;
+import models.Office;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import net.sf.oval.constraint.MinLength;
 
 import org.slf4j.Logger;
@@ -18,8 +22,10 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.mysema.query.SearchResults;
 
 import dao.BadgeReaderDao;
@@ -33,6 +39,10 @@ public class BadgeReaders extends Controller {
 	
 	@Inject
 	private static BadgeReaderDao badgeReaderDao;
+	@Inject
+	private static SecurityRules rules;
+	@Inject
+	private static RoleDao roleDao;
 
 	public static void index() {
 		flash.keep();
@@ -65,6 +75,24 @@ public class BadgeReaders extends Controller {
 	public static void blank() {
 		
 		render();
+	}
+	
+	public static void updateInfo(@Valid BadgeReader badgeReader) {
+		
+		if (Validation.hasErrors()) {
+			response.status = 400;
+			log.warn("validation errors for {}: {}", badgeReader,
+					validation.errorsMap());
+			flash.error(Web.msgHasErrors());
+			render("@edit", badgeReader);
+		}
+		
+		rules.checkIfPermitted(badgeReader.owner);
+		
+		badgeReader.save();
+		
+		flash.success(Web.msgSaved(BadgeReader.class));
+		edit(badgeReader.id);
 	}
 	
 	public static void changePassword(Long id, 
@@ -124,6 +152,54 @@ public class BadgeReaders extends Controller {
 		//}
 		flash.error(Web.msgHasErrors());
 		index();
+	}
+	
+	public static void joinOffice(Long officeId) {
+	
+		final Office office = Office.findById(officeId);
+		notFoundIfNull(office);
+		
+		//Lista tutti i badgeReader ancora non associati a office
+		List<BadgeReader> badgeReaderList = Lists.newArrayList();
+		
+		UsersRolesOffices uro = new UsersRolesOffices();
+		uro.office = office;
+		uro.role = roleDao.getRoleByName(Role.BADGE_READER);
+		
+		render(uro,  badgeReaderList);
+	}
+	
+	public static void saveJoinOffice(@Valid UsersRolesOffices uro) {
+		
+		if (Validation.hasErrors()) {
+			response.status = 400;
+			log.warn("validation errors for {}: {}", uro,
+					validation.errorsMap());
+			flash.error(Web.msgHasErrors());
+			render("@blank", uro);
+		} 
+		
+		rules.checkIfPermitted(uro.office);
+		
+		uro.save();
+		
+		flash.success("Lettore Badge associato correttamente.");
+		flash.keep();
+		Offices.edit(uro.office.id);
+	}
+	
+	public static void unjoinOffice(Long uroId) {
+		
+		UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
+		notFoundIfNull(uro);
+		
+		rules.checkIfPermitted(uro.office);
+		
+		uro.delete();
+		
+		flash.success("Operazione avvenuta con successo.");
+		
+		Offices.edit(uro.office.id);
 	}
 	
 }

@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dao.AbsenceTypeDao;
+import dao.BadgeReaderDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
@@ -56,12 +57,13 @@ public class TemplateUtility {
 	private final AbsenceTypeDao absenceTypeDao;
 	private final StampingDao stampingDao;
 	private final RoleDao roleDao;
+	private final BadgeReaderDao badgeReaderDao;
 
 	@Inject
 	public TemplateUtility(SecureManager secureManager,
 			OfficeDao officeDao, PersonDao personDao,
 			QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
-			StampingDao stampingDao, RoleDao roleDao) {
+			StampingDao stampingDao, RoleDao roleDao, BadgeReaderDao badgeReaderDao) {
 		
 				this.secureManager = secureManager;
 				this.officeDao = officeDao;
@@ -70,6 +72,7 @@ public class TemplateUtility {
 				this.absenceTypeDao = absenceTypeDao;
 				this.stampingDao = stampingDao;
 				this.roleDao = roleDao;
+				this.badgeReaderDao = badgeReaderDao;
 	}
 
 	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
@@ -217,6 +220,31 @@ public class TemplateUtility {
 			}
 		}
 		return offices;
+	}
+	
+	/**
+	 * Gli account di tutti i badgeReader non ancora assegnati ad office.
+	 * @param office
+	 * @return
+	 */
+	public List<User> badgeReaderUserForOffice(Office office) {
+		
+		List<User> users = Lists.newArrayList();
+		
+		List<User> badgeReaders = badgeReaderDao.usersBadgeReader();
+		for (User user : badgeReaders) {
+			boolean insert = true;
+			for (UsersRolesOffices uro : user.usersRolesOffices) {
+				if (uro.office.id.equals(office.id)) {
+					insert = false;
+					break;
+				}
+			}
+			if (insert) {
+				users.add(user);
+			}
+		}
+		return users;
 	}
 
 }
