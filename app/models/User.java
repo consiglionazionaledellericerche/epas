@@ -64,6 +64,10 @@ public class User extends BaseModel{
 	public String getLabel() {
 		if (this.person != null) {
 			return  this.person.fullName() + " - " + this.person.office.name;
+		}
+		else if (this.badgeReader != null) {
+			return this.badgeReader.code;
+			
 		} else {
 			return this.username;
 		}

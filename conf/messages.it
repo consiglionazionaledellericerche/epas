@@ -129,8 +129,11 @@ modifierType= Calcolo Orario
 
 stamping.note= Note
 
+uro.office=Sede
+
 user.username= Username
 user.password= Password
+
 
 ########################
 # Messaggi di validazione

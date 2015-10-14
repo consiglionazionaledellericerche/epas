@@ -1,7 +1,12 @@
 #{modalAsync id:'modalEditInstitute', button:'Salva', title:(institute?.persistent ? 'Modifica istituto' : 'Nuovo istituto')}
 
   <div class="alert alert-success" role="alert">
-  Inserisci il nome del nuovo istituto e la sigla (ex. IIT). 
+  #{if institute.persistent }
+    Modifica il nome dell'istituto e la sigla (ex. IIT).
+  #{/if}
+  #{else}
+    Inserisci il nome del nuovo istituto e la sigla (ex. IIT).
+  #{/else} 
   </div>
 
   <div id="instituteData">
