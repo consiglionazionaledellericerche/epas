@@ -104,7 +104,7 @@ public class HorizontalWorkingTime {
 	 * @param office
 	 * @return
 	 */
-	public WorkingTimeType buildWorkingTimeType(Office office) {
+	public void buildWorkingTimeType(Office office) {
 		
 		WorkingTimeType wtt = new WorkingTimeType();
 		
@@ -137,13 +137,9 @@ public class HorizontalWorkingTime {
 			wttd.save();
 
 		}
-
- 	    return null;
-		
 	}
 	
 	/**
-	 * FIXME: Un metodo un pò brutto...
 	 * @param wttd
 	 * @return
 	 */
