@@ -388,7 +388,8 @@ public class WorkingTimes extends Controller{
 		}
 
 		//Prendere tutti i contratti attivi da firstDay ad oggi
-		List<Contract> contractInPeriod = contractManager.getActiveContractInPeriod(dateFrom, dateTo);
+		List<Contract> contractInPeriod = 
+				contractDao.getActiveContractsInPeriod(dateFrom, Optional.fromNullable(dateTo));
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
 

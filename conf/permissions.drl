@@ -180,10 +180,18 @@ when
         "Configurations.saveNewConfYear",
 		"Configurations.savePastYearVacationLimit",
 		"Configurations.savePatron",
-		
-        "Import.officeList"
 
- 		
+        "Import.officeList",
+
+        "Persons.list",
+        "Persons.edit",
+        "Persons.update",
+        "Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+        "Persons.deletePerson",
+     	"Persons.deletePersonConfirmed"
+
  		), target == null, granted == false)
  then
  $c.grant();

@@ -66,6 +66,8 @@ public class RequestInit extends Controller {
 	public static class ItemsPermitted {
 
 		public boolean isEmployee = false;
+		
+		public boolean isDeveloper = false;
 
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
@@ -90,13 +92,23 @@ public class RequestInit extends Controller {
 
 			for(Role role : roles) {
 
-				if (role.name.equals(Role.EMPLOYEE)) {
+				if (role.name.equals(Role.ADMIN)) {
+					this.viewPerson = true;
+					this.viewOffice = true;
+					this.viewWorkingTimeType = true;
+					
+				} else if (role.name.equals(Role.DEVELOPER)) {
+					this.isDeveloper = true;
+					this.viewPerson = true;
+					this.viewOffice = true;
+					this.viewWorkingTimeType = true;
+					
+				} else if (role.name.equals(Role.EMPLOYEE)) {
 					this.isEmployee = true;
 				}
 				
-				if (role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
-						role.name.equals(Role.PERSONNEL_ADMIN) || 
-						role.name.equals(Role.DEVELOPER)) {
+				if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
+						role.name.equals(Role.PERSONNEL_ADMIN) ) {
 					this.viewPerson = true;
 					this.viewPersonDay = true;
 					this.viewOffice = true;
@@ -106,8 +118,7 @@ public class RequestInit extends Controller {
 					this.viewAbsenceType = true;
 				}
 				
-				if (role.name.equals(Role.PERSONNEL_ADMIN) || 
-						role.name.equals(Role.DEVELOPER)) {
+				if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN) ) {
 					this.editCompetence = true;
 					this.uploadSituation = true;
 					this.editCompetenceCode = true;
@@ -143,6 +154,14 @@ public class RequestInit extends Controller {
 		public boolean isConfigurationVisible() {
 
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
+		}
+		
+		/**
+		 * Se l'user ha i permessi per vedere Tools.
+		 * @return
+		 */
+		public boolean isToolsVisible() {
+			return isDeveloper;
 		}
 		
 	}
