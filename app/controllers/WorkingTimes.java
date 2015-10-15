@@ -180,11 +180,6 @@ public class WorkingTimes extends Controller{
 					"nome già presente", horizontalPattern.name);
 		}
 		
-		for( Error error : validation.errors()) {
-			System.out.println(error.getKey());
-			System.out.println(error.message());
-		}
-		
 		if (validation.hasErrors()) {
 			boolean horizontal = true;
    		    render("@insertWorkingTime", horizontalPattern, horizontal, office);
