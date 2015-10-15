@@ -2,17 +2,18 @@ package models.dto;
 
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class HorizontalWorkingTime {
@@ -51,12 +52,10 @@ public class HorizontalWorkingTime {
 	 */
 	public HorizontalWorkingTime() {
 		this.holidays = Lists.newArrayList();
-		//sabato
-		this.holidays.add(LocalDate.now()
-				.withDayOfWeek(6).dayOfWeek().getAsText());
-		//domenica
-		this.holidays.add(LocalDate.now()
-				.withDayOfWeek(7).dayOfWeek().getAsText());
+		this.holidays.add(LocalDate.now().withDayOfWeek(
+				DateTimeConstants.SATURDAY).dayOfWeek().getAsText());
+		this.holidays.add(LocalDate.now().withDayOfWeek(
+				DateTimeConstants.SUNDAY).dayOfWeek().getAsText());
 	}
 	
 	/**
@@ -164,6 +163,7 @@ public class HorizontalWorkingTime {
 	}
 	
 	/**
+	 * TODO: Impostare un global binder.
 	 * @param value
 	 */
 	public void setHolidays(String value) {
