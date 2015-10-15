@@ -150,7 +150,7 @@ public class HorizontalWorkingTime {
 	private boolean isHoliday(WorkingTimeTypeDay wttd) {
 		
 		return this.holidays.contains(LocalDate.now()
-				.withDayOfWeek(2).dayOfWeek().getAsText());
+				.withDayOfWeek(wttd.dayOfWeek).dayOfWeek().getAsText());
 	}
 	
 	/**
