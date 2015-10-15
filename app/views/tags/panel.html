@@ -1,0 +1,29 @@
+*{
+  _title  (required): il titolo del pannello
+  _device (optional): default(md), valori impostabili [xs,sm,md,lg] 
+  _dim    (required):  numero celle della griglia del pannello (ex. 6 significa col-md-6)
+  _offset (optional): numero celle della griglia dell'offset (ex. col-md-offset-6)
+  _color  (optional): default(info) colori bootstrap 3
+  _fluid  (optional): pannello dentro un container-fluid
+  
+}*
+%{
+  if (!_device) {
+    _device = 'md';
+  }
+  if (!_color) {
+    _color = 'info';
+  }
+}%
+#{if _fluid}<div class="container-fluid">#{/if} 
+<div class="col-${_device}-${_dim} #{if _offset}col-${_device}-offset-${_offset}#{/if}" >
+  <div class="panel panel-${_color}">
+	<div class="panel-heading">
+	  <h3 class="panel-title">${_title}</h3>
+	</div>
+	<div class="panel-body">
+	  	#{doBody /}
+    </div>
+  </div>
+</div>
+#{if _fluid}</div>#{/if}

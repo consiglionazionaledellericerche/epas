@@ -40,5 +40,5 @@ public class VacationPeriod extends BaseModel{
 
 	@Column(name="end_to")
 	public LocalDate endTo;
-	
+		
 }

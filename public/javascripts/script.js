@@ -2,10 +2,23 @@
  */
 
 $(function($){
+	
+	function toggleChevron(e) {
+		var $fa = $(e.target).prev('.panel-heading').find('i.fa');
+		if (e.type == "hide") {
+			$fa.addClass('fa-chevron-up').removeClass('fa-chevron-down');
+		} else {
+			$fa.addClass('fa-chevron-down').removeClass('fa-chevron-up');
+		}
+	}
+    $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
+    $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
 
 	$.fn.initepas = function() {
+		
+		//$(':input[data-selectize]', this).select2({allowClear:true});
 
-		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap",placeholder: "Seleziona un valore"});
+		$(':input[select2]', this).select2({allowClear: true,theme: "bootstrap", placeholder: "Seleziona un valore"});
 		$(':input[select2Table]', this).select2({minimumResultsForSearch: 25});
 
 		$('[popover]').popover({trigger: "focus",placement: 'right auto',container: 'body'});
@@ -154,7 +167,7 @@ $(function($){
 	    	$deleteFirst.hide();
 	    	$delete.show( "fast" );
 	    });
-	    
+    
 	}	/* fine initepas() */
 
 	$('body').initepas();
@@ -191,6 +204,8 @@ function generateUserName(name,surname,username){
     .text(option.text);
     username.append($option);
   });
- }
+}
+
+
 
 moment.locale('it_IT');

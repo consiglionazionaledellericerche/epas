@@ -3,9 +3,9 @@
 ALTER TABLE person_reperibility_types ADD COLUMN supervisor bigint REFERENCES persons(id);
 ALTER TABLE person_reperibility_types_history ADD COLUMN supervisor bigint;
 
--------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 -- DA QUI IN POI SI FA L'INSERIMENTO DEI RECORD CHE PRIMA VENIVANO INSERITI TRAMITE YML AL BOOTSTRAP --
--------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 
 --
 -- Data for Name: competence_codes; Type: TABLE DATA; Schema: public; Owner: postgres

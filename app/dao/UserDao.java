@@ -77,6 +77,15 @@ public class UserDao extends DaoBase {
 		return query.singleResult(user);
 	}
 	
+	public User byUsername(String username) {
+		
+		final QUser user = QUser.user;
+		final JPQLQuery query = getQueryFactory()
+				.from(user)
+				.where(user.username.eq(username));
+		return query.singleResult(user);
+	}
+	
 	
 	public boolean isAdmin(User user) {
 		
