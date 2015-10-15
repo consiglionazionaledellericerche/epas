@@ -14,7 +14,26 @@
         #{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm' /}
 
 		#{f.booleanRadio 'stampingWay', true:'Ingresso', false:'Uscita' /}
-		#{f.selectModel 'stamping.stampType', items:templateUtility.allStampTypes /}
+
+		#{f.select 'stamping.stampType'}
+			<option></option>
+			    %{ 
+			    	firstStampTypeId = 1l
+			    	firstStampType = models.StampType.findById(firstStampTypeId) 
+			    }%
+			    #{if firstStampType}
+				<optgroup label="più comuni">
+				    <!-- motivi di servizio -->
+					<option value="${firstStampTypeId}">${firstStampType.label()}</option>
+				</optgroup>
+				#{/if}
+				<optgroup label="tutte">
+				  #{list templateUtility.allStampTypes}
+				    <option value="${_.id}"#{if field.value?.id == _.id} selected#{/if}>${_.label()}</option>
+				  #{/list}
+			  </optgroup>
+		#{/f.select}	
+		
 		#{f.input 'stamping.note' /}
 
         <input class="btn btn-primary col-xs-6 col-xs-offset-3 margin-bottom" type="submit" value="Aggiorna"/>

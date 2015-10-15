@@ -1,106 +1,174 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Creazione nuovo Tipo Orario per ' + office.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Creazione nuovo Tipo Orario per ' + office.name  /}
 
-<div class="container-fluid">
+#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(), 'Nuovo tipo orario':null] /}
+ 
+<div class="container">
 
-#{form @WorkingTimes.save()}
+#{breadcrumbs breadcrumbs /}
 
-  <input type="hidden" name="wtt.office.id" value="${office.id}"/>
-
-  	<input type="hidden" name="wttd1.dayOfWeek" value="1" />
-  	<input type="hidden" name="wttd2.dayOfWeek" value="2" />
-  	<input type="hidden" name="wttd3.dayOfWeek" value="3" />
-  	<input type="hidden" name="wttd4.dayOfWeek" value="4" />
-  	<input type="hidden" name="wttd5.dayOfWeek" value="5" />
-  	<input type="hidden" name="wttd6.dayOfWeek" value="6" />
-  	<input type="hidden" name="wttd7.dayOfWeek" value="7" />
-
-  <div class="well center">
-	<strong>Nome Orario </strong><input name="wtt.description" type="text"/>  
-  </div>
-
-  <table id="table-wtt" class="table center table-hover">
-	<tr class="info">
-		<th></th>
-		<th>Lun</th>
-		<th>Mar</th>
-		<th>Mer</th>
-		<th>Gio</th>
-		<th>Ven</th>
-		<th>Sab</th>
-		<th>Dom</th>
-	</tr>
-	<tr>
-		<td class="item warning">Tempo di lavoro giornaliero<br>(in minuti)</td>
-		<td><input name="wttd1.workingTime" type="number"/></td>
-		<td><input name="wttd2.workingTime" type="number"/></td>
-		<td><input name="wttd3.workingTime" type="number"/></td>
-		<td><input name="wttd4.workingTime" type="number"/></td>
-		<td><input name="wttd5.workingTime" type="number"/></td>
-		<td><input name="wttd6.workingTime" type="number"/></td>
-		<td><input name="wttd7.workingTime" type="number"/></td>
-	</tr>
-	<tr>
-		<td class="item warning">Tempo di lavoro minimo per diritto a intervallo pranzo<br>(in minuti)</td>
-		<td><input name="wttd1.mealTicketTime" type="number" /></td>
-		<td><input name="wttd2.mealTicketTime" type="number" /></td>
-		<td><input name="wttd3.mealTicketTime" type="number" /></td>
-		<td><input name="wttd4.mealTicketTime" type="number" /></td>
-		<td><input name="wttd5.mealTicketTime" type="number" /></td>
-		<td><input name="wttd6.mealTicketTime" type="number" /></td>
-		<td><input name="wttd7.mealTicketTime" type="number" /></td>
-	</tr>
-	<tr>
-		<td class="item warning">Durata minima intervallo pranzo<br>(in minuti)</td>
-		<td><input name="wttd1.breakTicketTime" type="number" /></td>
-		<td><input name="wttd2.breakTicketTime" type="number" /></td>
-		<td><input name="wttd3.breakTicketTime" type="number" /></td>
-		<td><input name="wttd4.breakTicketTime" type="number" /></td>
-		<td><input name="wttd5.breakTicketTime" type="number" /></td>
-		<td><input name="wttd6.breakTicketTime" type="number" /></td>
-		<td><input name="wttd7.breakTicketTime" type="number" /></td>
-	</tr>
-	<tr>
-		<td class="item warning">Soglia pomeridiana per buono pasto<br>(in minuti dalla mezzanotte)</td>
-		<td><input name="wttd1.ticketAfternoonThreshold" type="number" /></td>
-		<td><input name="wttd2.ticketAfternoonThreshold" type="number" /></td>
-		<td><input name="wttd3.ticketAfternoonThreshold" type="number" /></td>
-		<td><input name="wttd4.ticketAfternoonThreshold" type="number" /></td>
-		<td><input name="wttd5.ticketAfternoonThreshold" type="number" /></td>
-		<td><input name="wttd6.ticketAfternoonThreshold" type="number" /></td>
-		<td><input name="wttd7.ticketAfternoonThreshold" type="number" /></td>
-	</tr>
-	<tr>
-		<td class="item warning">Lavoro minimo per buono pasto dopo soglia pomeridiana<br>(in minuti)</td>
-		<td><input name="wttd1.ticketAfternoonWorkingTime" type="number" /></td>
-		<td><input name="wttd2.ticketAfternoonWorkingTime" type="number" /></td>
-		<td><input name="wttd3.ticketAfternoonWorkingTime" type="number" /></td>
-		<td><input name="wttd4.ticketAfternoonWorkingTime" type="number" /></td>
-		<td><input name="wttd5.ticketAfternoonWorkingTime" type="number" /></td>
-		<td><input name="wttd6.ticketAfternoonWorkingTime" type="number" /></td>
-		<td><input name="wttd7.ticketAfternoonWorkingTime" type="number" /></td>
-	</tr>
-	<tr>
-		<td class="item warning">Giorno festivo</td>
-		<td><input type="checkbox" name="wttd1.holiday" value="true"/></td>
-		<td><input type="checkbox" name="wttd2.holiday" value="true"/></td>
-		<td><input type="checkbox" name="wttd3.holiday" value="true"/></td>
-		<td><input type="checkbox" name="wttd4.holiday" value="true"/></td>
-		<td><input type="checkbox" name="wttd5.holiday" value="true"/></td>
-		<td><input type="checkbox" name="wttd6.holiday" value="true"/></td>
-		<td><input type="checkbox" name="wttd7.holiday" value="true"/></td>
-	</tr>
-
-  </table>
-
-  <div class="center">
-    <input class="btn btn-primary" type="submit" value="Crea"/>
-  </div>
-#{/form}
-
-	<br>
+  <div class="col-md-10 col-md-offset-1">
+     
+     <!-- Switcher horizontal / vertical -->
+     <form class="form-horizontal"> 
+       #{f.booleanRadio 'Orario Orizzontale', value:true /}
+     </form>
+     
+     <div id="form-horizontal">
+      #{form @WorkingTimes.saveHorizontal(), class:'form-horizontal'}
+	  
+      <input type="hidden" name="office.id" value="${office.id}"/>
+  
+	  #{f.input 'horizontalPattern.name', required:'true' /}  
+	  #{f.view 'office'  /}
+	  
+	  <div class="alert alert-success">
+	   <h4>Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
+	   della settimana ad eccezione dei giorni festivi.</h4>
+      </div>	 
 	
-	#{include './_wttLegend.html' /}
+	  <!-- Tempo a lavoro -->	 
 
+	  #{workingTime.legend tempoALavoro:'true', wttTips:'true' /}			  
+	  
+	  #{workingTime.input 
+	    type:'hoursAndMinutes',
+	    title:'Tempo lavoro giornaliero', 
+	  	color:'info', 
+	  	field:'horizontalPattern.workingTime',
+	  	hourValue:horizontalPattern.workingTimeHour,
+	  	minuteValue:horizontalPattern.workingTimeMinute  /}
+	  	
+	  #{workingTime.input 
+	    type:'multipleSelect',
+	    selectHolidays:'true', 
+	    title:'Giorni festivi', 
+	  	color:'info', 
+	  	field:'horizontalPattern.holidays',
+	  	value:horizontalPattern.holidays /}
+	  
+	  <!-- Buono pasto -->
+	  
+	  #{workingTime.legend buonoPastoAbilitato:'true', wttTips:'true' /}
+	  
+	  #{workingTime.input
+	   type:'radio', 
+	   title:'Calcolo Buono Pasto abilitato',
+	   color:'danger',
+	   field:'horizontalPattern.mealTicketEnabled',
+	   value:horizontalPattern.mealTicketEnabled /}  
+  
+	  <div id="horizontal-mealticket">
+	  #{workingTime.legend buonoPasto:'true', wttTips:'true' /}
+	  
+      #{workingTime.input 
+	    type:'hoursAndMinutes', 
+	    title:'Tempo di lavoro minimo per diritto a usufruire del buono pasto', 
+	  	color:'danger', 
+	  	field:'horizontalPattern.mealTicketTime',
+	  	hourValue:horizontalPattern.mealTicketTimeHour,
+	  	minuteValue:horizontalPattern.mealTicketTimeMinute /}
+	  	
+	  #{workingTime.input 
+	   type:'minutes', 
+	   title:'Durata minima intervallo pranzo', 
+	   color:'danger',
+	   field:'horizontalPattern.breakTicketTime',
+	   value:horizontalPattern.breakTicketTime /}
+	  
+	  <!-- Soglia buono pasto -->
+	  
+	  
+	  
+	  #{workingTime.input
+	   type:'radio', 
+	   title:'Condizione soglia pomeridiana attiva',
+	   color:'danger',
+	   field:'horizontalPattern.afternoonThresholdEnabled',
+	   value:horizontalPattern.afternoonThresholdEnabled /}  
+	  
+	   <div id="horizontal-afternoon" style="display: none">
+	   
+	      #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+	      	
+		  #{workingTime.input 
+		   type:'hoursAndMinutes',
+		   title:'Soglia pomeridiana per buono pasto',
+		   color:'danger',
+		   field:'horizontalPattern.ticketAfternoonThreshold',
+		   hourValue:horizontalPattern.ticketAfternoonThresholdHour,
+		   minuteValue:horizontalPattern.ticketAfternoonThresholdMinute  /}
+		
+		  #{workingTime.input
+		   type:'minutes', 
+		   title:'Lavoro minimo per buono pasto dopo soglia pomeridiana',
+		   color:'danger',
+		   field:'horizontalPattern.ticketAfternoonWorkingTime',
+		   value:horizontalPattern.ticketAfternoonWorkingTime /}  
+		</div>	
+		
+	   </div> 	
+	  *{		
+	  <div class="col-sm-12">
+	    #{include './_wttRecap.html' /}
+	  </div>
+	  }*	
+ 
+	  <div class="center">
+	    <input class="btn btn-primary" type="submit" value="Crea"/>
+	  </div>
+      #{/form}
+    </div> <!-- end form horizontal -->
+ 
+  
+    <div id="form-vertical" style="display: none">
+      #{form @WorkingTimes.save(), class:'form-horizontal'}
+  	    <input type="hidden" name="office.id" value="${office.id}"/>
+  
+	    #{f.input 'horizontalPattern.name', required:'true' /}  
+	    #{f.view 'office'  /}
+	  
+	    <div class="alert alert-success">
+	      Nell'orario verticale impostare lo schema giornaliero per ogni singolo
+	      giorno.
+        </div>	 
+        
+        <div class="alert alert-danger">
+          In fase di implementazione. In caso di necessità contattare epas@iit.cnr.it
+        </div>
+      #{/form}
+    </div> <!-- end form vertical -->
+   
+ </div> 
 </div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+		
+		$("input[name='Orario Orizzontale']").change(function(){
+			
+			jQuery( "#form-horizontal" ).toggle(200);
+			jQuery( "#form-vertical" ).toggle(200);
+			
+		});
+		
+		$("input[name='horizontalPattern.mealTicketEnabled']").change(function(){
+			
+			jQuery( "#horizontal-mealticket" ).toggle(0);
+		
+		});
+		
+
+		$("input[name='horizontalPattern.afternoonThresholdEnabled']").change(function(){
+			
+			jQuery( "#horizontal-afternoon" ).toggle(0);
+		
+		});
+       
+	 });
+	</script>
+#{/set}
+
 

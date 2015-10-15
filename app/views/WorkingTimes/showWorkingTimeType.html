@@ -1,7 +1,10 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Tipo Orario ' + wtt.description /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Tipo Orario ' + wtt.description  /}
 
-<div class="container-fluid">
+<div class="container">
+
+  #{f.input 'wtt.description', disabled:true/}</h3>
 
   <table id="table-wtt" class="table center table-hover">
   
@@ -83,31 +86,6 @@
   
   <br>
   
-	<div class="panel-group" id="accordion">
-	  <div class="panel panel-default">
-	    <div class="panel-heading">
-	      <h4 class="panel-title">
-	        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-	          Legenda
-	        </a>
-	      </h4>
-	    </div>
-	    <div id="collapseOne" class="panel-collapse collapse out">
-	      <div class="panel-body">
-	        <p>
-	          <strong><em>Tempo di lavoro giornaliero: </em></strong><br>
-	          La quantità di tempo in minuti che il dipendente deve effettuare per ogni giorno della settimana.
-	        </p>
-	        <p>
-	          <strong><em>Tempo di lavoro minimo per diritto a intervallo pranzo: </em></strong><br>
-	          La quantità di lavoro minima che il dipendente deve aver lavorato per poter usufruire del buono pasto. 
-	        </p>
-	        <p>
-	          <strong><em>Durata minima intervallo pranzo: </em></strong><br>
-	          Il tempo minimo che deve obbligatoriamente trascorrere fra la timbratura di uscita per pranzo e la conseguente timbratura di ingresso.
-	        </p>
-	  	  </div>
-	    </div>
-	  </div>
-	</div>
+
+  
 </div>

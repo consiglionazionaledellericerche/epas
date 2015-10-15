@@ -1,15 +1,24 @@
 package jobs;
 
-import com.google.common.base.Optional;
-import com.google.common.io.Resources;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
+import manager.ContractManager;
 import models.Contract;
 import models.Person;
 import models.Qualification;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
+import models.WorkingTimeType;
+
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -19,18 +28,19 @@ import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.joda.time.LocalDate;
+
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
+import com.google.common.base.Optional;
+import com.google.common.io.Resources;
+
+import dao.UserDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti
@@ -50,6 +60,8 @@ public class Bootstrap extends Job<Void> {
 	static IWrapperFactory wrapperFactory;
 	@Inject
 	static ConsistencyManager consistencyManager; 
+	@Inject
+	static UserDao userDao;
 	
 	public static class DatasetImport implements Work {
 
@@ -127,6 +139,9 @@ public class Bootstrap extends Job<Void> {
 			IWrapperContract wcontract = wrapperFactory.create(contract.get());
 			if (wcontract.initializationMissing()) {
 			
+				log.info("Bootstrap contract scan: il contratto di {} iniziato il {} non è initializationMissing",
+						person.fullName(), contract.get().beginContract);
+				/*
 				Contract c = contract.get();
 				c.sourceDateResidual = new LocalDate(wcontract.dateForInitialization());
 				c.sourcePermissionUsed = 0;
@@ -140,7 +155,32 @@ public class Bootstrap extends Job<Void> {
 				c.save();
 				
 				consistencyManager.updatePersonSituation(person.id, c.sourceDateResidual);
+				*/
 			}
 		}
+		
+		//impostare il campo tipo orario orizzondale si/no effettuando una euristica
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll(); 
+		for(WorkingTimeType wtt : wttList) {
+			
+			if (wtt.horizontal == null) {
+				wtt.horizontal = wtt.horizontalEuristic();
+				wtt.save();
+			}
+		}
+		
+		//L'utente admin non deve disporre del ruolo di amminstratore del personale. FIX
+		User user = userDao.byUsername("admin");
+		if (user != null) {
+			for(UsersRolesOffices uro : user.usersRolesOffices) {
+				if(uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+						|| uro.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+					uro.delete();
+				}
+			}
+		} else {
+			//BOH
+		}
+		
 	}
 }

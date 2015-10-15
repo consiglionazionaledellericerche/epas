@@ -1,13 +1,14 @@
 package controllers;
 
+import play.data.validation.Error;
 import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.dto.HorizontalWorkingTime;
 
 import org.joda.time.LocalDate;
 
@@ -31,7 +33,9 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -41,7 +45,7 @@ import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperWorkingTimeType;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class WorkingTimes extends Controller{
 
 	@Inject 
@@ -84,11 +88,17 @@ public class WorkingTimes extends Controller{
 				.from(office.workingTimeType)
 				.transform(wrapperFunctionFactory.workingTimeType()).toList();
 
-		List<IWrapperWorkingTimeType> wttList = FluentIterable 
-				.from(workingTimeTypeDao.getAllWorkingTimeType())
-				.transform(wrapperFunctionFactory.workingTimeType()).toList(); 
+		 List<IWrapperWorkingTimeType> wttAllowedEnabled = Lists.newArrayList();
+		 List<IWrapperWorkingTimeType> wttAllowedDisabled = Lists.newArrayList();
+		 for (IWrapperWorkingTimeType wtt : wttAllowed ){
+			 if (wtt.getValue().disabled) {
+				 wttAllowedDisabled.add(wtt);
+			 } else {
+				 wttAllowedEnabled.add(wtt);
+			 }
+		 }
 
-		render(wttList, wttDefault, wttAllowed, office, offices);
+		render(wttDefault, wttAllowedEnabled, wttAllowedDisabled, office, offices);
 	}
 
 	public static void showContract(Long wttId, Long officeId) {
@@ -148,14 +158,44 @@ public class WorkingTimes extends Controller{
 
 		rules.checkIfPermitted(office);
 
-		List<WorkingTimeTypeDay> wttd = new LinkedList<WorkingTimeTypeDay>();
-		WorkingTimeType wtt = new WorkingTimeType();
-		for(int i = 1; i < 8; i++){
-			WorkingTimeTypeDay w = new WorkingTimeTypeDay();
-			wttd.add(w);
-		}
-		render(office, wtt, wttd);
+		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
+			
+		boolean horizontal = true;
+		
+		render(office, horizontalPattern, horizontal);
 
+	}
+	
+	public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
+			@Required Office office) {
+
+		notFoundIfNull(office);
+		
+		rules.checkIfPermitted(office);
+		
+		WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(
+				horizontalPattern.name, Optional.fromNullable(office));
+		if(wtt != null) {
+			validation.addError("horizontalPattern.name", 
+					"nome già presente", horizontalPattern.name);
+		}
+		
+		for( Error error : validation.errors()) {
+			System.out.println(error.getKey());
+			System.out.println(error.message());
+		}
+		
+		if (validation.hasErrors()) {
+			boolean horizontal = true;
+   		    render("@insertWorkingTime", horizontalPattern, horizontal, office);
+		}
+		
+		horizontalPattern.buildWorkingTimeType(office);
+
+		flash.success("Orario creato con successo.");
+		
+		manageWorkingTime(office.id);
+		
 	}
 
 	public static void save(@Valid WorkingTimeType wtt, WorkingTimeTypeDay wttd1,
@@ -192,7 +232,22 @@ public class WorkingTimes extends Controller{
 		manageWorkingTime(wtt.office.id);
 
 	}
-
+	
+	public static void showHorizontal(Long wttId) {
+		
+		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
+		notFoundIfNull(wtt);
+		
+		// se non è horizontal ho sbagliato action
+		Preconditions.checkState(wtt.horizontal);
+		
+		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime(wtt);
+		
+		Office office = wtt.office;
+		
+		render(horizontalPattern, office);
+	}
+	
 	public static void showWorkingTimeType(Long wttId) {
 
 		WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -205,7 +260,6 @@ public class WorkingTimes extends Controller{
 		rules.checkIfPermitted(wtt.office);
 
 		render(wtt);
-
 	}
 
 	public static void delete(Long wttId){
@@ -305,14 +359,15 @@ public class WorkingTimes extends Controller{
 	}
 
 	/**
-	 * NB nelle drools questa action è considerata editPerson!!!
 	 * @param wttId
 	 * @param wttId1
 	 * @param dateFrom
 	 * @param dateTo
 	 */
 	public static void executeChangeWorkingTimeTypeToAll(WorkingTimeType wttOld, 
-			WorkingTimeType wttNew,@Required Office office, LocalDate dateFrom, LocalDate dateTo) {
+			WorkingTimeType wttNew, Long officeId, LocalDate dateFrom, LocalDate dateTo) {
+		
+		Office office = officeDao.getOfficeById(officeId);
 		
 		if(dateFrom.isAfter(dateTo)){
 			flash.error("Intervallo date non Valido");
@@ -321,8 +376,6 @@ public class WorkingTimes extends Controller{
 		
 		int contractChanges = 0;
 		int contractError = 0;
-
-		JPAPlugin.startTx(false);
 
 		rules.checkIfPermitted(office);
 
@@ -335,8 +388,10 @@ public class WorkingTimes extends Controller{
 		}
 
 		//Prendere tutti i contratti attivi da firstDay ad oggi
-		List<Contract> contractInPeriod = contractManager.getActiveContractInPeriod(dateFrom, dateTo);
+		List<Contract> contractInPeriod = 
+				contractDao.getActiveContractsInPeriod(dateFrom, Optional.fromNullable(dateTo));
 		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
 
 		//Logica aggiornamento contratto
 		for(Contract contract : contractInPeriod) {

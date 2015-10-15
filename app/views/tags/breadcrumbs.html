@@ -1,0 +1,14 @@
+*{
+  arg array of string
+}*
+<ul class="breadcrumb">
+    <li><a href="@{Application.index()}"><i class="icon-home"></i> ${'Home'.label()}</a> <span class="divider"></span></li>
+#{list items:_arg, as:'item'}
+    #{if item_isLast}
+    <li class="active">${item.key.label()}</li>
+    #{/if}
+    #{else}
+    <li><a href="${item.value}">${item.key.label()}</a> <span class="divider"></span></li>
+    #{/else}
+#{/list}
+</ul>

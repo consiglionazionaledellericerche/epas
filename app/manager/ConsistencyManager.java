@@ -110,8 +110,8 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
-			LocalDate fromDate, boolean sendMail){
+	public void fixPersonSituation(Optional<Person> person ,Optional<User> user,
+			LocalDate fromDate, boolean sendMail, boolean onlyRecap){
 
 		Set<Office> offices = user.isPresent() ? 
 				officeDao.getOfficeAllowed(user.get()) 
@@ -130,7 +130,11 @@ public class ConsistencyManager {
 
 				for(Person p : personList) {
 					
-					updatePersonSituation(p.id, fromDate);
+					if (onlyRecap) {
+						updatePersonRecaps(p.id, fromDate);
+					} else {
+						updatePersonSituation(p.id, fromDate);
+					}
 					//attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
 					//possono esserci effetti collaterali....vedi il blocco try sotto
 					JPA.em().flush();
@@ -157,8 +161,6 @@ public class ConsistencyManager {
 				}
 	}
 
-
-
 	/**
 	 * Controlla la presenza di errori nelle timbrature. 
 	 * Gestisce i giorni problematici nella tabella PersonDayInTrouble.
@@ -167,15 +169,25 @@ public class ConsistencyManager {
 	 * @param from
 	 */
 	public void updatePersonSituation(Long personId, LocalDate from) {
+		updatePersonSituationEngine(personId, from, false);
+	}
+	
+	public void updatePersonRecaps(Long personId, LocalDate from) {
+		updatePersonSituationEngine(personId, from, true);
+	}
+
+	
+	private void updatePersonSituationEngine(Long personId, LocalDate from, 
+			boolean updateOnlyRecaps) {
 		
 		final Person person = personDao.fetchPersonForComputation(personId, 
 				Optional.fromNullable(from), 
 				Optional.<LocalDate>absent());
 		
-		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
+		log.info("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
 
 		if (person.qualification == null) {
-			log.info("Annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
+			log.info("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
 			return;
 		}
 		
@@ -186,8 +198,7 @@ public class ConsistencyManager {
 		
 		LocalDate date = personFirstDateForEpasComputation(person,
 				Optional.fromNullable(from));
-		log.info("Il primo personDay utile è del {}", date);
-		
+				
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
 				Optional.fromNullable(lastPersonDayToCompute));
 		
@@ -197,48 +208,50 @@ public class ConsistencyManager {
 			personDaysMap.put(personDay.date, personDay);
 		}
 
-		log.info("Fetch dei dati conclusa.");
+		log.info("... fetch dei dati conclusa, inizio dei ricalcoli.");
 
 		PersonDay previous = null;
-		
-		while ( !date.isAfter(lastPersonDayToCompute) ) {
-			
-			if(! wPerson.isActiveInDay(date) ) {
+
+		if (!updateOnlyRecaps) {
+
+			while ( !date.isAfter(lastPersonDayToCompute) ) {
+
+				if(! wPerson.isActiveInDay(date) ) {
+					date = date.plusDays(1);
+					previous = null;
+					continue;
+				}
+
+				//Prendere da map
+				PersonDay personDay = personDaysMap.get(date);
+				if(personDay == null) {
+					personDay = new PersonDay(person, date);
+				}
+
+				IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
+
+				//set previous for progressive
+				if(previous != null) {
+					wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
+				}
+				//set previous for night stamp
+				if(previous != null) {
+					wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
+				}
+
+				populatePersonDay(wPersonDay);
+
+				previous = personDay;
 				date = date.plusDays(1);
-				previous = null;
-				continue;
+
 			}
 
-			//Prendere da map
-			PersonDay personDay = personDaysMap.get(date);
-			if(personDay == null) {
-				personDay = new PersonDay(person, date);
-			}
-
-			IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
-
-			//set previous for progressive
-			if(previous != null) {
-				wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
-			}
-			//set previous for night stamp
-			if(previous != null) {
-				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
-			}
-
-			populatePersonDay(wPersonDay);
-
-			previous = personDay;
-			date = date.plusDays(1);
-
+			log.info("... ricalcolo dei giorni lavorativi conclusa.");
 		}
-
-		log.info("Update personDay conclusa.");
-
 		// (3) Ricalcolo dei residui per mese
 		populateContractMonthRecapByPerson(person, new YearMonth(from));
 
-		log.info("Update riepiloghi conclusa.");
+		log.info("... ricalcolo dei riepiloghi conclusa.");
 	}
 	
 	/**
