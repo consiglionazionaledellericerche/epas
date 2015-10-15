@@ -60,13 +60,19 @@ public class ContractDao extends DaoBase{
 	 * @param end
 	 * @return la lista di contratti che sono attivi nel periodo compreso tra begin e end
 	 */
-	public List<Contract> getActiveContractsInPeriod(LocalDate begin, LocalDate end){
+	public List<Contract> getActiveContractsInPeriod(
+			LocalDate begin, Optional<LocalDate> end){
+		
+		if(!end.isPresent()) {
+			end = Optional.fromNullable(new LocalDate(9999,01,01));
+		}
+		
 		QContract contract = QContract.contract;
 		final JPQLQuery query = getQueryFactory().from(contract)
 				.where(contract.endContract.isNull().andAnyOf(
-						contract.expireContract.isNull().and(contract.beginContract.loe(end)), 
-						contract.expireContract.isNotNull().and(contract.beginContract.loe(end).and(contract.expireContract.goe(begin))))
-						.or(contract.endContract.isNotNull().and(contract.beginContract.loe(end).and(contract.endContract.goe(begin)))));
+						contract.expireContract.isNull().and(contract.beginContract.loe(end.get())), 
+						contract.expireContract.isNotNull().and(contract.beginContract.loe(end.get()).and(contract.expireContract.goe(begin))))
+						.or(contract.endContract.isNotNull().and(contract.beginContract.loe(end.get()).and(contract.endContract.goe(begin)))));
 		return query.list(contract);
 	}
 

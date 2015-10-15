@@ -292,7 +292,7 @@ public class ContractManager {
 	 * 
 	 * @param contract
 	 */
-	private void buildVacationPeriods(Contract contract){
+	public void buildVacationPeriods(Contract contract){
 
 		//TODO: Quando verrà implementata la crud per modificare manualmente
 		// i piani ferie non sarà sufficiente cancellare la storia, ma dare conflitto.
@@ -451,23 +451,6 @@ public class ContractManager {
 
 		return Lists.newArrayList(contract.contractStampProfile);
 	}
-
-	/**
-	 * La lista con tutti i contratti attivi nel periodo selezionato.
-	 * @return
-	 */
-	public List<Contract> getActiveContractInPeriod(LocalDate begin, LocalDate end) {
-
-		if(end == null)
-			end = new LocalDate(9999,1,1);
-
-		List<Contract> activeContract = contractDao.getActiveContractsInPeriod(begin, end);
-
-		return activeContract;
-
-	}
-
-	
 
 	/**
 	 * 

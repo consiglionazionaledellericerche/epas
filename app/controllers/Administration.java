@@ -10,14 +10,17 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
 import jobs.RemoveInvalidStampingsJob;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
+import manager.ContractManager;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
@@ -28,6 +31,7 @@ import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 
+@Slf4j
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
 
@@ -45,6 +49,10 @@ public class Administration extends Controller {
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static ContractDao contractDao;
+	@Inject
+	private static ContractManager contractManager;
 
 	
 	public static void initializeRomanAbsences() {
@@ -183,11 +191,17 @@ public class Administration extends Controller {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */
-	public static void fixPersonSituation(Long personId, int year, int month) {	
+	public static void fixPersonSituation(Long personId, int year, int month, boolean onlyRecap) {	
+		
 		LocalDate date = new LocalDate(year,month,1);
-		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(personDao.getPersonById(personId));
-		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
+		
+		Optional<Person> person = personId == null ? Optional.<Person>absent() 
+				: Optional.fromNullable(personDao.getPersonById(personId));
+		
+		consistencyManager.fixPersonSituation(person,Security.getUser(), date, false, onlyRecap);
+		
 		flash.success("Esecuzione terminata");
+		
 		utilities();
 	}
 
@@ -239,6 +253,20 @@ public class Administration extends Controller {
 		}
 	
 		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
+		utilities();
+	}
+	
+	public static void fixVacationPeriods(LocalDate from) {
+		
+		List<Contract> contracts = contractDao
+				.getActiveContractsInPeriod(from, Optional.<LocalDate>absent());
+		
+		for(Contract contract : contracts) {
+			contractManager.buildVacationPeriods(contract);
+			log.info("Il contratto di {} iniziato il {} non è stato ripristinato con i piani ferie corretti.",
+				contract.person.fullName(), contract.beginContract);
+		}
+		
 		utilities();
 	}
 
