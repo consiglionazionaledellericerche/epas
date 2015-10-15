@@ -262,6 +262,7 @@ when
         /* Vecchio permesso viewCompetenceCode */
         "Competences.manageCompetenceCode",
         
+       
         /*********** duplicate prima di avere il contesto office  *************/
         
         /* Vecchio permesso viewPerson */
@@ -316,7 +317,8 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract"				
+        "WorkingTimes.showContract",
+        "WorkingTimes.showHorizontal"				
 
         ), target == null, granted == false)
 then
@@ -383,7 +385,8 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract"				
+        "WorkingTimes.showContract",
+        "WorkingTimes.showHorizontal"				
                
        ), target == $o, granted == false)
 then
@@ -494,6 +497,7 @@ when
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll",
+        "WorkingTimes.saveHorizontal",
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
@@ -611,6 +615,7 @@ when
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll",
+        "WorkingTimes.saveHorizontal",
         
         /* Vecchio permesso editCompetenceCode
          *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso

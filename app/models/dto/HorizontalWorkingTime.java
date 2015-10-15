@@ -5,12 +5,15 @@ import java.util.List;
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class HorizontalWorkingTime {
@@ -49,8 +52,10 @@ public class HorizontalWorkingTime {
 	 */
 	public HorizontalWorkingTime() {
 		this.holidays = Lists.newArrayList();
-		this.holidays.add("sabato");
-		this.holidays.add("domenica");
+		this.holidays.add(LocalDate.now().withDayOfWeek(
+				DateTimeConstants.SATURDAY).dayOfWeek().getAsText());
+		this.holidays.add(LocalDate.now().withDayOfWeek(
+				DateTimeConstants.SUNDAY).dayOfWeek().getAsText());
 	}
 	
 	/**
@@ -144,48 +149,17 @@ public class HorizontalWorkingTime {
 	 */
 	private boolean isHoliday(WorkingTimeTypeDay wttd) {
 		
-		String name;
-		
-		if (wttd.dayOfWeek == 1) {
-			name = "lunedì";
-		} else if (wttd.dayOfWeek == 2) {
-			name = "martedì";
-		} else if (wttd.dayOfWeek == 3) {
-			name = "mercoledì";
-		} else if (wttd.dayOfWeek == 4) {
-			name = "giovedì";
-		} else if (wttd.dayOfWeek == 5) {
-			name = "venerd'";
-		} else if (wttd.dayOfWeek == 6) {
-			name = "sabato";
-		} else {
-			name = "domenica";
-		}
-
-		return this.holidays.contains(name);
+		return this.holidays.contains(LocalDate.now()
+				.withDayOfWeek(wttd.dayOfWeek).dayOfWeek().getAsText());
 	}
 	
 	/**
-	 * FIXME: Anche questo è brutto.
 	 * @param wttd
 	 * @return
 	 */
 	private static String holidayName(int dayOfWeek) {
-		if (dayOfWeek == 1) {
-			return "lunedì";
-		} else if (dayOfWeek == 2) {
-			return "martedì";
-		} else if (dayOfWeek == 3) {
-			return "mercoledì";
-		} else if (dayOfWeek == 4) {
-			return "giovedì";
-		} else if (dayOfWeek == 5) {
-			return "venerd'";
-		} else if (dayOfWeek == 6) {
-			return "sabato";
-		} else {
-			return "domenica";
-		}
+
+		return LocalDate.now().withDayOfWeek(dayOfWeek).dayOfWeek().getAsText();
 	}
 	
 	/**

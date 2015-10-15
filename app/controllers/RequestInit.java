@@ -274,10 +274,12 @@ public class RequestInit extends Controller {
 			return stampingDao.findAll();
 		}
 		
-		public ImmutableList<String> getAllDays() {
-			final ImmutableList<String> days = ImmutableList.of(
-					  "lunedì", "martedì", "mercoledì", "giovedì", 
-					  "venerdì", "sabato", "domenica");
+		public List<String> getAllDays() {
+			LocalDate date = LocalDate.now();
+			List<String> days = Lists.newArrayList();
+			for(int day = 1; day < 8; day++) {
+				days.add(date.withDayOfWeek(day).dayOfWeek().getAsText());
+			}
 			return days;		  
 		}
 	
