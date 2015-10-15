@@ -169,6 +169,7 @@ public class WorkingTimes extends Controller{
 	public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
 			@Required Office office) {
 
+		// TODO: la creazione dell'orario default ha office null.
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
@@ -235,6 +236,10 @@ public class WorkingTimes extends Controller{
 		
 		// se non è horizontal ho sbagliato action
 		Preconditions.checkState(wtt.horizontal);
+		
+		if (wtt.office != null) {
+			rules.checkIfPermitted(wtt.office);
+		}
 		
 		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime(wtt);
 		
