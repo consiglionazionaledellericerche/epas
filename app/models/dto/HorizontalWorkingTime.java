@@ -2,6 +2,8 @@ package models.dto;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -49,8 +51,12 @@ public class HorizontalWorkingTime {
 	 */
 	public HorizontalWorkingTime() {
 		this.holidays = Lists.newArrayList();
-		this.holidays.add("sabato");
-		this.holidays.add("domenica");
+		//sabato
+		this.holidays.add(LocalDate.now()
+				.withDayOfWeek(6).dayOfWeek().getAsText());
+		//domenica
+		this.holidays.add(LocalDate.now()
+				.withDayOfWeek(7).dayOfWeek().getAsText());
 	}
 	
 	/**
@@ -144,52 +150,20 @@ public class HorizontalWorkingTime {
 	 */
 	private boolean isHoliday(WorkingTimeTypeDay wttd) {
 		
-		String name;
-		
-		if (wttd.dayOfWeek == 1) {
-			name = "lunedì";
-		} else if (wttd.dayOfWeek == 2) {
-			name = "martedì";
-		} else if (wttd.dayOfWeek == 3) {
-			name = "mercoledì";
-		} else if (wttd.dayOfWeek == 4) {
-			name = "giovedì";
-		} else if (wttd.dayOfWeek == 5) {
-			name = "venerd'";
-		} else if (wttd.dayOfWeek == 6) {
-			name = "sabato";
-		} else {
-			name = "domenica";
-		}
-
-		return this.holidays.contains(name);
+		return this.holidays.contains(LocalDate.now()
+				.withDayOfWeek(2).dayOfWeek().getAsText());
 	}
 	
 	/**
-	 * FIXME: Anche questo è brutto.
 	 * @param wttd
 	 * @return
 	 */
 	private static String holidayName(int dayOfWeek) {
-		if (dayOfWeek == 1) {
-			return "lunedì";
-		} else if (dayOfWeek == 2) {
-			return "martedì";
-		} else if (dayOfWeek == 3) {
-			return "mercoledì";
-		} else if (dayOfWeek == 4) {
-			return "giovedì";
-		} else if (dayOfWeek == 5) {
-			return "venerd'";
-		} else if (dayOfWeek == 6) {
-			return "sabato";
-		} else {
-			return "domenica";
-		}
+
+		return LocalDate.now().withDayOfWeek(dayOfWeek).dayOfWeek().getAsText();
 	}
 	
 	/**
-	 * TODO: Impostare un global binder.
 	 * @param value
 	 */
 	public void setHolidays(String value) {
