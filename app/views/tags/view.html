@@ -41,16 +41,13 @@
 		      ${value.label()}
 		    #{/if}
 		    #{else}
-		     #{if value instanceof models.base.INameable}
-		      ${value.name}
-		     #{/if}
-		     #{else}
+		     
 		      #{if value instanceof org.joda.time.LocalDate}
 		       ${value.format()}
 		      #{/if}#{else}
 		       ${value}
 		      #{/else}
-		     #{/else}
+		     
 		    #{/else}
 		  #{/else}#{/else}#{if _link}</a>
 		  #{/if}
