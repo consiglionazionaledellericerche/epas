@@ -289,9 +289,11 @@ public class Administration extends Controller {
 			
 			log.info("... rimosse {} timbrature disaccoppiate.", count);
 			
-			flash.success("Esecuzione terminata");
+			
 			
 		}
+		
+		flash.success("Esecuzione terminata");
 	
 		utilities();
 	}
