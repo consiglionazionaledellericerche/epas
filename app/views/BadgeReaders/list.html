@@ -42,8 +42,13 @@
 			    ${item.code}
 	    	 </a>
 	       </h4>
-	     </li>      
-
+	       <div class="container">
+	       Istituto Responsabile del Client <strong>${item.owner.name}</strong>
+	       <br>
+	       Badge Associati <strong>${item.badges.size()}</strong>
+	       </div>
+	     </li>
+	    
 	   #{/list}
 	   </ul>
     #{/paginate} 
