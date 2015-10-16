@@ -16,6 +16,7 @@ import models.BadgeReader;
 import models.Office;
 import models.Person;
 import models.StampType;
+import models.User;
 import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDateTime;
@@ -29,6 +30,7 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.ning.http.client.Request;
 
 import controllers.Security;
 import dao.BadgeReaderDao;
@@ -63,9 +65,16 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	public Object bind(String name, Annotation[] annotations, String value,	
 			Class actualClass, Type genericType) throws Exception {
 		
-		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
 			
+			Optional<User> user = Security.getUser();
+			if (!user.isPresent()) {
+				log.info("StampingFromClient: {}, {}, {}, {}, {}", name, 
+						annotations, value, actualClass, genericType);
+				
+				log.info("StampingFromClient: l'user non presente");
+				return null;
+			}
 			Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 			Person person = null;
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();

@@ -1,11 +1,33 @@
 package controllers;
 
+import it.cnr.iit.epas.CompetenceUtility;
+import it.cnr.iit.epas.ExportToYaml;
+
 import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+import manager.ConfGeneralManager;
+import manager.ConsistencyManager;
+import manager.ContractManager;
+import manager.PersonDayManager;
+import models.AbsenceType;
+import models.Contract;
+import models.Person;
+import models.PersonDay;
+import models.StampType;
+import models.Stamping;
+import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.Parameter;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+import play.db.jpa.JPAPlugin;
+import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -13,23 +35,8 @@ import com.google.common.collect.Lists;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
-import it.cnr.iit.epas.CompetenceUtility;
-import it.cnr.iit.epas.ExportToYaml;
-import jobs.RemoveInvalidStampingsJob;
-import lombok.extern.slf4j.Slf4j;
-import manager.ConfGeneralManager;
-import manager.ConsistencyManager;
-import manager.ContractManager;
-import models.AbsenceType;
-import models.Contract;
-import models.Person;
-import models.StampType;
-import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.Parameter;
-import play.data.validation.Required;
-import play.mvc.Controller;
-import play.mvc.With;
 
 @Slf4j
 @With( {Resecure.class, RequestInit.class} )
@@ -53,8 +60,11 @@ public class Administration extends Controller {
 	private static ContractDao contractDao;
 	@Inject
 	private static ContractManager contractManager;
-
-	
+	@Inject
+	private static PersonDayDao personDayDao;
+	@Inject
+	private static PersonDayManager personDayManager;
+		
 	public static void initializeRomanAbsences() {
 
 		//StampType pausa pranzo
@@ -230,8 +240,8 @@ public class Administration extends Controller {
 		renderText("OK");
 	}
 	
-	public static void deleteUncoupledStampings(@Required List<Long> peopleId,
-			@Required LocalDate begin,LocalDate end){
+	public static void deleteUncoupledStampings(List<Long> peopleId,
+			@Required LocalDate begin,LocalDate end,  boolean forAll){
 	
 		if (validation.hasErrors()){
 			params.flash(); 
@@ -243,16 +253,48 @@ public class Administration extends Controller {
 		}
 	
 		List<Person> people = Lists.newArrayList();
-	
-		for(Long id : peopleId){
-			people.add(personDao.getPersonById(id));
+		if (!forAll) {
+			for(Long id : peopleId){
+				people.add(personDao.getPersonById(id));
+			}
+			
+		} else {
+			// Tutte le persone attive nella finestra speficificata.
+			List<Contract> contracts = contractDao
+					.getActiveContractsInPeriod(begin, Optional.fromNullable(end));
+			for(Contract contract : contracts) {
+				people.add(contract.person);
+			}
 		}
 	
 		for(Person person : people){
-			new RemoveInvalidStampingsJob(person, begin, end).afterRequest();
+			
+
+			person = Person.findById(person.id);
+			
+			log.info("Rimozione timbrature disaccoppiate per {} ...", person.fullName());
+			List<PersonDay> persondays = personDayDao
+					.getPersonDayInPeriod(person, begin, Optional.of(end));
+			int count = 0;
+			for(PersonDay pd : persondays){
+				personDayManager.computeValidStampings(pd);
+				
+				for(Stamping stamping : pd.stampings){
+					if (!stamping.valid) {
+						stamping.delete();
+						count++;
+					}
+				}
+			}
+			
+			log.info("... rimosse {} timbrature disaccoppiate.", count);
+			
+			
+			
 		}
+		
+		flash.success("Esecuzione terminata");
 	
-		flash.success("Avviati Job per la rimozione delle timbrature non valide per %s", people);
 		utilities();
 	}
 	
