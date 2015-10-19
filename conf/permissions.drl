@@ -174,6 +174,9 @@ when
         "Administrators.deleteAccountSystem",
 
 		/* duplicate */
+		"Configurations.showConfGeneral",
+		"Configurations.showConfYear",
+		"Configurations.showConfPeriod",
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
@@ -187,10 +190,16 @@ when
         "Persons.edit",
         "Persons.update",
         "Persons.save",
+        "Persons.insertPerson",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
         "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed"
+     	"Persons.deletePersonConfirmed",
+     	
+     	"WorkingTimes.manageWorkingTime",
+     	"WorkingTimes.showHorizontal",
+     	"WorkingTimes.showContract",
+     	"WorkingTimes.showContractWorkingTimeType"          
 
  		), target == null, granted == false)
  then
@@ -217,7 +226,12 @@ when
         "Persons.insertUsername",
         "Persons.updateUsername",
         "Persons.deletePerson",
-        "Persons.deletePersonConfirmed"
+        "Persons.deletePersonConfirmed",
+        
+        "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.showHorizontal",
+     	"WorkingTimes.showContract",
+     	"WorkingTimes.showContractWorkingTimeType"             
                
        ), target == $o, granted == false)
 then
