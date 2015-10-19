@@ -157,13 +157,13 @@ when
  $c: PermissionCheck(action in (
  
  		"Offices.editSeat",
-        "Offices.updateSeat",
         "Offices.saveSeat",
         "Offices.insertSeat",
         "Offices.saveInstitute",
         "Offices.editInstitute",
         "Offices.insertInstitute",
         "Offices.insertArea",
+        "Offices.showOffices",
         
         "Administrators.insertNewAdministrator",
         "Administrators.saveNewAdministrator",
@@ -209,7 +209,15 @@ when
         "Configurations.insertNewConfYear",
         "Configurations.saveNewConfYear",
         "Configurations.savePastYearVacationLimit",
-        "Configurations.savePatron"
+        "Configurations.savePatron",
+        
+        "Persons.edit",
+        "Persons.update",
+        "Persons.save",
+        "Persons.insertUsername",
+        "Persons.updateUsername",
+        "Persons.deletePerson",
+        "Persons.deletePersonConfirmed"
                
        ), target == $o, granted == false)
 then
