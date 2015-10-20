@@ -305,7 +305,7 @@ public class ContractManager {
 		contract.refresh();
 		
 		VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
-		VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("26+4");
+		VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
 		
 		if(contract.expireContract == null) {
 
