@@ -136,20 +136,20 @@ public class MealTicketManager {
 	 */
 	public Optional<DateInterval> getContractMealTicketDateInterval(Contract contract) {
 
-		DateInterval contractDataBaseInterval = wrapperFactory.create(contract)
-				.getContractDatabaseInterval();
+		DateInterval intervalForMealTicket = wrapperFactory.create(contract)
+				.getContractDatabaseIntervalForMealTicket();
 
 		Optional<LocalDate> officeStartDate = confGeneralManager
 				.getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, contract.person.office); 
 
 		if (officeStartDate.isPresent()) {
-			if (officeStartDate.get().isBefore(contractDataBaseInterval.getBegin())) {
-				return Optional.fromNullable(contractDataBaseInterval);
+			if (officeStartDate.get().isBefore(intervalForMealTicket.getBegin())) {
+				return Optional.fromNullable(intervalForMealTicket);
 			}
 			if (DateUtility
-					.isDateIntoInterval(officeStartDate.get(), contractDataBaseInterval)) {
+					.isDateIntoInterval(officeStartDate.get(), intervalForMealTicket)) {
 				return Optional.fromNullable(new DateInterval(officeStartDate.get(),
-						contractDataBaseInterval.getEnd()));
+						intervalForMealTicket.getEnd()));
 			}
 		}
 		

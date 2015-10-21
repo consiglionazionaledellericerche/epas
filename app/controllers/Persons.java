@@ -74,6 +74,8 @@ public class Persons extends Controller {
 	private static ContractWorkingTimeTypeManager contractWorkingTimeTypeManager;
 	@Inject
 	private static PersonChildrenDao personChildrenDao;
+	@Inject
+	private static ConsistencyManager consistencyManager;
 
 	public static void list(String name){
 		
@@ -541,44 +543,40 @@ public class Persons extends Controller {
 	}
 
 
-	public static void saveSourceContract(Contract contract) {
+	public static void saveSourceContract(Contract contract, boolean onlyMealTicket) {
 
-		if(contract == null) {
-
-			flash.error("Contratto inesistente. Operazione annullata.");
-			list(null);
-		}
+		Preconditions.checkNotNull(contract);
 
 		rules.checkIfPermitted(contract.person.office);
-
 		
-		ConfGeneral initUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM,  contract.person.office);
-		if(new LocalDate(initUseProgram.fieldValue).isAfter(contract.sourceDateResidual) 
-				&& contract.sourceDateResidual.isBefore(contract.person.createdAt.toLocalDate())){
-			flash.error("La data di inizializzazione ( %s ) non può essere "
-					+ "precedente alla data di creazione della persona ( %s ) e "
-					+ "nemmeno precedente alla data di inizio di utilizzo del programma ( %s )",
-					contract.sourceDateResidual, contract.person.createdAt.toLocalDate(), 
-					new LocalDate(initUseProgram.fieldValue));
-			edit(contract.person.id);
+		IWrapperContract wContract = wrapperFactory.create(contract);
+		
+		if( !onlyMealTicket && contract.sourceDateResidual != null 
+				&& contract.sourceDateResidual.isBefore(wContract.dateForInitialization())){
 			
+			flash.error("Data inizializzazione non valida");
+			edit(contract.person.id);
 		}
-
 
 		contract.sourceByAdmin = true;
 
 		contractManager.saveSourceContract(contract);
 
 		//Ricalcolo valori dalla nuova data inizializzazione.
-		contractManager.recomputeContract(contract, 
-				Optional.fromNullable(contract.sourceDateResidual), false);
-
+		if (!onlyMealTicket) {
+			consistencyManager.updatePersonSituation(contract.person.id, 
+					contract.sourceDateResidual);
+		} else {
+			//modifico solo i buoni pasto quindi ricalcolo solo i riepiloghi
+			consistencyManager.updatePersonRecaps(contract.person.id, 
+					contract.sourceDateResidual);
+		}
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
 		edit(contract.person.id);
 
 	}
-
+	
 
 	public static void updateContractWorkingTimeType(Long id){
 

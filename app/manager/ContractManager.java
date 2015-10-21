@@ -458,26 +458,30 @@ public class ContractManager {
 	 */
 	public void saveSourceContract(Contract contract) {
 		
-		if(contract.sourceVacationLastYearUsed == null){ 
+		if (contract.sourceVacationLastYearUsed == null){ 
 			contract.sourceVacationLastYearUsed = 0;
 		}
-		if(contract.sourceVacationCurrentYearUsed == null) {
+		if (contract.sourceVacationCurrentYearUsed == null) {
 			contract.sourceVacationCurrentYearUsed = 0;
 		}
-		if(contract.sourcePermissionUsed == null) {
+		if (contract.sourcePermissionUsed == null) {
 			contract.sourcePermissionUsed = 0;
 		}
-		if(contract.sourceRemainingMinutesCurrentYear == null){ 
+		if (contract.sourceRemainingMinutesCurrentYear == null){ 
 			contract.sourceRemainingMinutesCurrentYear = 0;
 		}
-		if(contract.sourceRemainingMinutesLastYear == null){ 
+		if (contract.sourceRemainingMinutesLastYear == null){ 
 			contract.sourceRemainingMinutesLastYear = 0;
 		}
-		if(contract.sourceRecoveryDayUsed == null){ 
+		if (contract.sourceRecoveryDayUsed == null){ 
 			contract.sourceRecoveryDayUsed = 0;
 		}
-		if(contract.sourceRemainingMealTicket == null){ 
+		if (contract.sourceRemainingMealTicket == null){ 
 			contract.sourceRemainingMealTicket = 0;
+		}
+		if (contract.sourceDateMealTicket == null 
+				&& contract.sourceDateResidual != null) {
+			contract.sourceDateMealTicket = contract.sourceDateResidual;
 		}
 		contract.save();
 	}
