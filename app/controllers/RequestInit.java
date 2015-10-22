@@ -418,25 +418,13 @@ public class RequestInit extends Controller {
 		}		
 
 		/**
-		 *  years per la gestione dinamica degli anni(provvisorio) 
-		 *  //FIXME la lista degli anni andrebbe presa in funzione della persona selezionata 
-		 *  // e della action richiesta, non in funzione del primo office allowed (??).
+		 * Quando si fa merge con BadgeReader ci sarà la versione aggiornata.
 		 */
 		List<Integer> years = Lists.newArrayList();
-		Integer actualYear = new LocalDate().getYear();
-
-		Optional<LocalDate> dateBeginProgram = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
-				officeDao.getOfficeAllowed(user.get()).iterator().next());
-
-		Integer yearBeginProgram = dateBeginProgram.get().getYear();
-		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
-
-		while(yearBeginProgram <= actualYear+1){
-			years.add(yearBeginProgram);
-			Logger.trace("injectMenu -> aggiunto %s alla lista", yearBeginProgram);
-			yearBeginProgram++;
-		}
-
+		years.add(2016);
+		years.add(2015);
+		years.add(2014);
+		years.add(2013);
 		renderArgs.put("navYears", years);
 
 	}
