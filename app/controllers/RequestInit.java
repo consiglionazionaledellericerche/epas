@@ -3,17 +3,16 @@
  */
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
 
-import controllers.Resecure.NoCheck;
-import dao.*;
-import dao.PersonDao.PersonLite;
+import javax.inject.Inject;
+
 import manager.ConfGeneralManager;
 import manager.SecureManager;
-import models.*;
-import models.enumerate.Parameter;
+import models.Office;
+import models.Role;
+import models.User;
 
 import org.joda.time.LocalDate;
 
@@ -22,10 +21,19 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 
-import javax.inject.Inject;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import java.util.List;
-import java.util.Set;
+import controllers.Resecure.NoCheck;
+import dao.AbsenceTypeDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.PersonDao.PersonLite;
+import dao.QualificationDao;
+import dao.RoleDao;
+import dao.StampingDao;
+import dao.UsersRolesOfficesDao;
 
 /**
  * @author cristian
@@ -39,8 +47,6 @@ public class RequestInit extends Controller {
 	protected static SecureManager secureManager;
 	@Inject
 	static PersonDao personDao;
-	@Inject
-	private static ConfGeneralManager confGeneralManager;
 	@Inject
 	private static UsersRolesOfficesDao uroDao;
 	@Inject
@@ -62,6 +68,8 @@ public class RequestInit extends Controller {
 	public static class ItemsPermitted {
 
 		public boolean isEmployee = false;
+		
+		public boolean isDeveloper = false;
 
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
@@ -87,13 +95,23 @@ public class RequestInit extends Controller {
 
 			for(Role role : roles) {
 
-				if (role.name.equals(Role.EMPLOYEE)) {
+				if (role.name.equals(Role.ADMIN)) {
+					this.viewPerson = true;
+					this.viewOffice = true;
+					this.viewWorkingTimeType = true;
+					
+				} else if (role.name.equals(Role.DEVELOPER)) {
+					this.isDeveloper = true;
+					this.viewPerson = true;
+					this.viewOffice = true;
+					this.viewWorkingTimeType = true;
+					
+				} else if (role.name.equals(Role.EMPLOYEE)) {
 					this.isEmployee = true;
 				}
 				
-				if (role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
-						role.name.equals(Role.PERSONNEL_ADMIN) || 
-						role.name.equals(Role.DEVELOPER)) {
+				if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
+						role.name.equals(Role.PERSONNEL_ADMIN) ) {
 					this.viewPerson = true;
 					this.viewPersonDay = true;
 					this.viewOffice = true;
@@ -103,8 +121,7 @@ public class RequestInit extends Controller {
 					this.viewAbsenceType = true;
 				}
 				
-				if (role.name.equals(Role.PERSONNEL_ADMIN) || 
-						role.name.equals(Role.DEVELOPER)) {
+				if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN) ) {
 					this.editCompetence = true;
 					this.uploadSituation = true;
 					this.editCompetenceCode = true;
@@ -140,6 +157,14 @@ public class RequestInit extends Controller {
 		public boolean isConfigurationVisible() {
 
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
+		}
+		
+		/**
+		 * Se l'user ha i permessi per vedere Tools.
+		 * @return
+		 */
+		public boolean isToolsVisible() {
+			return isDeveloper;
 		}
 		
 	}
@@ -303,24 +328,10 @@ public class RequestInit extends Controller {
 		// TODO: un metodo per popolare il menu degli anni umano.
 		List<Integer> years = Lists.newArrayList();
 
-		Integer yearBeginProgram = LocalDate.now().getYear();
-
-		List<Office> offices = Lists.newArrayList();
-		offices.addAll(secureManager.officesReadAllowed(
-				user.get()));
-		for(Office office : offices) {
-			Optional<LocalDate> dateBeginProgram = confGeneralManager
-					.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, office);
-			if(dateBeginProgram.isPresent() 
-					&& dateBeginProgram.get().getYear() < yearBeginProgram) {
-				yearBeginProgram = dateBeginProgram.get().getYear();
-			}
-		}
-		Integer actualYear = LocalDate.now().getYear();
-		while (yearBeginProgram <= actualYear+1) {
-			years.add(yearBeginProgram);
-			yearBeginProgram++;
-		}
+		years.add(2016);
+		years.add(2015);
+		years.add(2014);
+		years.add(2013);
 
 		renderArgs.put("navYears", years);
 
