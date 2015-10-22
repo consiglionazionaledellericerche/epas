@@ -44,8 +44,8 @@ when
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	"Stampings.dailyPresenceForPersonInCharge",
-     	"Stampings.editEmployee",
-     	"Stampings.updateEmployee",
+     	/* "Stampings.editEmployee", 
+     	"Stampings.updateEmployee", */
      	
      	/* Assenze mensili */
      	"Absences.absences",
@@ -161,13 +161,13 @@ when
  $c: PermissionCheck(action in (
  
  		"Offices.editSeat",
-        "Offices.updateSeat",
         "Offices.saveSeat",
         "Offices.insertSeat",
         "Offices.saveInstitute",
         "Offices.editInstitute",
         "Offices.insertInstitute",
         "Offices.insertArea",
+        "Offices.showOffices",
         
         "Administrators.blank",
         "Administrators.save",
@@ -178,6 +178,9 @@ when
         "Administrators.deleteAccountSystem",
 
 		/* duplicate */
+		"Configurations.showConfGeneral",
+		"Configurations.showConfYear",
+		"Configurations.showConfPeriod",
         "Configurations.saveConfGeneral",
         "Configurations.saveConfYear",
         "Configurations.insertNewConfYear",
@@ -191,10 +194,16 @@ when
         "Persons.edit",
         "Persons.update",
         "Persons.save",
+        "Persons.insertPerson",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
         "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed"
+     	"Persons.deletePersonConfirmed",
+     	
+     	"WorkingTimes.manageWorkingTime",
+     	"WorkingTimes.showHorizontal",
+     	"WorkingTimes.showContract",
+     	"WorkingTimes.showContractWorkingTimeType"          
 
  		), target == null, granted == false)
  then
@@ -214,14 +223,19 @@ when
         "Configurations.saveNewConfYear",
         "Configurations.savePastYearVacationLimit",
         "Configurations.savePatron",
-
+        
         "Persons.edit",
         "Persons.update",
         "Persons.save",
-     	"Persons.insertUsername",
-     	"Persons.updateUsername",
+        "Persons.insertUsername",
+        "Persons.updateUsername",
         "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed"
+        "Persons.deletePersonConfirmed",
+        
+        "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.showHorizontal",
+     	"WorkingTimes.showContract",
+     	"WorkingTimes.showContractWorkingTimeType"             
                
        ), target == $o, granted == false)
 then
@@ -319,6 +333,7 @@ when
         /* Vecchio permesso viewCompetenceCode */
         "Competences.manageCompetenceCode",
         
+       
         /*********** duplicate prima di avere il contesto office  *************/
         
         /* Vecchio permesso viewPerson */
@@ -373,7 +388,8 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract"				
+        "WorkingTimes.showContract",
+        "WorkingTimes.showHorizontal"				
 
         ), target == null, granted == false)
 then
@@ -440,7 +456,8 @@ when
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
-        "WorkingTimes.showContract"				
+        "WorkingTimes.showContract",
+        "WorkingTimes.showHorizontal"				
                
        ), target == $o, granted == false)
 then
@@ -551,6 +568,7 @@ when
         "WorkingTimes.toggleWorkingTimeTypeEnabled",
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll",
+        "WorkingTimes.saveHorizontal",
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
@@ -668,6 +686,7 @@ when
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll",
+        "WorkingTimes.saveHorizontal",
         
         /* Vecchio permesso editCompetenceCode
          *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso

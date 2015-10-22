@@ -1,68 +1,82 @@
 #{extends 'main3.html' /}
-<h3>Utility per il Supremo</h3>
+#{set header:'navbar' /}
+#{set title:'ePAS - Utility Supreme' /}
 
-#{set 'moreStyles'}
-<style type="text/css">
 
-legend{
-	margin-top: 2em;
-	margin-bottom: 2em;
-}
-
-</style>
-#{get 'moreStyles' /}
-#{/set}
-
-<legend> Ricalcolo dei personDay </legend>
-#{form @Administration.fixPersonSituation()}
-  #{select 'personId', value:personList.get(0), id:'person'}
-    #{option -1}Tutti#{/option}
-   	  #{list personList}
-		  #{option _.id}${_.fullname}#{/option}
-	  #{/list}
-  #{/select}
-	<input type="number" name="month" />Mese da ripristinare 
-	<input type="number" name="year"/>Anno da ripristinare
-	<input id="submitCartellino" type="submit" value="Invio"/>
-	<input id = "indietroCartellino" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
-#{/form}
-
-<legend> Eliminazione timbrature disaccoppiate </legend>
-
-#{form @Administration.deleteUncoupledStampings(),class:'form-horizontal'}
-<div class="col-sm-4">
-#{field 'peopleId'}
-<div class="form-group">
-    #{select field.name, id:field.id,class:'form-control', multiple:'',size:'8'}
-   	#{list personList}
-		  #{option _.id}${_.fullname}#{/option}
-	  #{/list}
-    #{/select}
-</div>
-#{/field}
-</div>
-
-<div class="col-sm-4">
-#{field 'begin'}
-<div class="form-group">
-  <label for="${field.id}" class="col-sm-1 control-label">Dal</label>
-  <div class="col-sm-6">
-  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
-  </div>
-  #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-</div>
-#{/field}
-
-#{field 'end'}
-<div class="form-group">
-  <label for="${field.id}" class="col-sm-1 control-label">Al</label>
-  <div class="col-sm-6">
-  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
-  </div>
-  #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-</div>
-#{/field}
-
-<button type="submit" class="btn btn-default col-sm-offset-1">Elimina timbrature disaccoppiate</button>
-#{/form}
-</div>
+<div class="container">
+    
+    <h3><i class="fa fa-hand-spock-o"></i> Utility per il Supremo</h3>
+    
+    <br>
+    
+    <!-- RICALCOLO DEI PERSONDAY -->
+    #{panel title:'Ricalcolo dei personDay ', dim:12 }
+    
+    #{form @Administration.fixPersonSituation(), class:'form-horizontal'}
+      <div class="alert alert-danger">
+        Impostare il mese-anno dal quale effettuare i ricalcoli. Per effettuare il ricalcolo per tutti i dipendenti lasciare vuoto il campo Dipendente. 
+        
+      </div>
+      #{f.selectModel 'person', items:personList, label:'Dipendente', placeholder:'Vuoto per ricalcolare tutti' /}
+	  #{f.input 'month', type:'number', label:'Mese' /}
+	  #{f.input 'year', type:'number', label:'anno' /}
+	  #{f.booleanRadio 'onlyRecap', label:'Ricalcola soli i riepiloghi', value:false /}
+	
+	  <input class="btn btn-primary" type="submit" value="Esegui" />
+	#{/form}
+   #{/panel}
+   
+   <!-- LE TIMBRATURE DISACCOPPIATE -->
+   #{panel title:'Eliminazione timbrature disaccoppiate', dim:12 }
+	
+		#{form @Administration.deleteUncoupledStampings(),class:'form-horizontal'}
+		<div class="col-sm-4">
+		#{field 'peopleId'}
+		<div class="form-group">
+		    #{select field.name, id:field.id,class:'form-control', multiple:'',size:'8'}
+		   	#{list personList}
+				  #{option _.id}${_.fullname}#{/option}
+			  #{/list}
+		    #{/select}
+		</div>
+		#{/field}
+		</div>
+		
+		<div class="col-sm-4">
+		#{field 'begin'}
+		<div class="form-group">
+		  <label for="${field.id}" class="col-sm-1 control-label">Dal</label>
+		  <div class="col-sm-6">
+		  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
+		  </div>
+		  #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+		</div>
+		#{/field}
+		
+		#{field 'end'}
+		<div class="form-group">
+		  <label for="${field.id}" class="col-sm-1 control-label">Al</label>
+		  <div class="col-sm-6">
+		  	<input class="form-control" datepicker-year id="${field.id}" type="text" name="${field.name}" value='${field.value?.format()}'>
+		  </div>
+		  #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+		</div>
+		#{/field}
+		
+		#{f.booleanRadio 'forAll', label:'Per tutti', value:false /}
+		
+		<button type="submit" class="btn btn-default col-sm-offset-1">Elimina timbrature disaccoppiate</button>
+		#{/form}
+    </div>
+  #{/panel}
+  
+  <!-- I PIANI FERIE -->
+  #{panel title:'Fix dei Piani Ferie', dim:12 }
+  
+   #{form @Administration.fixVacationPeriods(),class:'form-horizontal'}
+     #{f.date 'from', label:'Contratti iniziati da' /}
+	 <button type="submit" class="btn btn-default">Ripristina i Piani Ferie</button>
+   #{/form}
+  #{/panel}
+  
+</div>  

@@ -14,6 +14,7 @@ import models.BadgeReader;
 import models.Office;
 import models.Person;
 import models.StampType;
+import models.User;
 import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDateTime;
@@ -59,9 +60,16 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	public Object bind(String name, Annotation[] annotations, String value,	
 			Class actualClass, Type genericType) throws Exception {
 		
-		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
-			
+
+			Optional<User> user = Security.getUser();
+			if (!user.isPresent()) {
+				log.info("StampingFromClient: {}, {}, {}, {}, {}", name, 
+						annotations, value, actualClass, genericType);
+
+				log.info("StampingFromClient: l'user non presente");
+				return null;
+			}
 			Set<Office> offices = secureManager
 					.officesBadgeReaderAllowed(Security.getUser().get());
 			
