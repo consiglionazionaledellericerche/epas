@@ -190,11 +190,12 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura default-single">
-        
+        #{if !dayRecap.future}
 		    <a href="@{Stampings.blank(dayRecap.person.id, dayRecap.date.format())}" 
 		    data-async-modal="#modalStamping">
 		      +++
 		    </a>
+		#{/if}    
 		</td>
 		
 		<td class="invisible"></td>
