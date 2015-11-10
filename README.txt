@@ -1,6 +1,15 @@
 ePAS - Electronic Personnel Attendance System
 ==============================================
   
+Avvio da Eclipse
+----------------
+
+Per il run su eclipse utilizzare questo parametro vmargs:
+
+ -javaagent:"${project_loc:Personnel Attendance System}/lib/lombok-1.16.4.jar"
+
+Per java>=8 aggiungere -noverify per java<8 aggiungere -XX:-UseSplitVerifier
+
 Test
 ----
 
