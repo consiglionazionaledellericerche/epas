@@ -149,15 +149,9 @@ public class Stampings extends Controller {
 		render(person, date);
 	}
 	
-	public static void edit(Long stampingId, boolean blank, Stamping blankStamping) {
+	public static void edit(Long stampingId) {
 
-		Stamping stamping;
-		
-		if (blank) {
-			stamping = blankStamping;
-		} else {
-			stamping = stampingDao.getStampingById(stampingId);
-		}
+		Stamping stamping = stampingDao.getStampingById(stampingId);
 		
 		if (stamping == null) {
 			notFound();
