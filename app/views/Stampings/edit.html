@@ -1,50 +1,57 @@
-<div class="modal-header center">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h4 class="modal-title">Modifica timbratura ${stamping.personDay.date.format()} per ${stamping.personDay.person.surname} <i class="fa fa-clock-o"></i></h4>
-</div>
-
-<!-- Start Body -->
-<div class="modal-body">
-    <div class="container-fluid text-center">
-	#{form @Stampings.update(), class:'form-horizontal'}
-
+#{modalAsync id:'modalStamping', button:'Salva', 
+  title:('Modifica timbratura ' + stamping.personDay.date.format() 
+           + ' per ' + stamping.personDay.person.fullname) }
+  #{if stamping.persistent}
+    <div class="alert alert-success center">Modifica i dati della timbratura delle ore ${stamping.time}</div>
+  #{/if}
+  #{else}
+    <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
+  #{/else}
+  <div id="stampingData">    
+	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#personStamping',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData'}
+	    
         <input type="hidden" name="stamping.id" value="${stamping.id}"/>
 
-        #{f.input 'stampingHour',value:stamping.date.getHourOfDay(), type:'number', class:'input-sm'/}
-        #{f.input 'stampingMinute', value:stamping.date.getMinuteOfHour(), type:'number', class:'input-sm' /}
+		#{f.hidden 'person.id', value:stamping.personDay.person.id /}
+		#{f.hidden 'date', value:stamping.personDay.date.format() /}
+		#{if stamping.persistent}
+			#{f.input 'time', popover:'true', value:stamping.time/}
+			#{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay /}
+		#{/if}#{else}
+		    #{f.input 'time', popover:'true' /}
+		    #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita' /}
+		#{/else}	
 
-		#{f.booleanRadio 'stampingWay', true:'Ingresso', false:'Uscita' /}
-
-		#{f.select 'stamping.stampType'}
-			<option></option>
-			    %{ 
-			    	firstStampTypeId = 1l
-			    	firstStampType = models.StampType.findById(firstStampTypeId) 
-			    }%
-			    #{if firstStampType}
-				<optgroup label="più comuni">
-				    <!-- motivi di servizio -->
-					<option value="${firstStampTypeId}">${firstStampType.label()}</option>
-				</optgroup>
-				#{/if}
-				<optgroup label="tutte">
-				  #{list templateUtility.allStampTypes}
-				    <option value="${_.id}"#{if field.value?.id == _.id} selected#{/if}>${_.label()}</option>
-				  #{/list}
-			  </optgroup>
-		#{/f.select}	
+		#{include './_inputStampType.html' /}
 		
 		#{f.input 'stamping.note' /}
 
-        <input class="btn btn-primary col-xs-6 col-xs-offset-3 margin-bottom" type="submit" value="Aggiorna"/>
+      
+     #{b.buttons center:true}   
 
-        <a href="@{Stampings.delete(stamping.id)}" class="btn btn-danger col-xs-4 col-xs-offset-4 margin-top-3">
-            <i class="fa fa-trash-o"> Elimina timbratura</i>
-        </a>
+      #{if stamping.persistent}
+        #{b.submit 'Aggiorna'/}
+      #{/if}    
+      #{else}
+        #{b.submit 'Inserisci'/}
+      #{/else}
 
+     #{/b.buttons}
 
 	#{/form}
-
-    </div>
-</div>
-
+	
+	#{if stamping.persistent}
+	<div class="center">
+	#{accordionGroup 'delete'}
+     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa timbratura delle ' + stamping.time, open:false, color:'danger'}
+	  <div class="text-danger center">
+	    E' possibile eliminare questa timbratura. 
+		<a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a> 
+	  </div>
+     #{/accordionItem}
+    #{/accordionGroup } 
+    </div> 
+	#{/if}
+  </div>
+#{/modalAsync}
