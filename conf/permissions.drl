@@ -538,10 +538,9 @@ when
      	"Absences.edit",
      	"Absences.update",
         
-        "Stampings.createStamp",
-       	"Stampings.insert",
+        "Stampings.blank",
        	"Stampings.edit",
-     	"Stampings.update",
+     	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
@@ -655,10 +654,9 @@ when
      	"Absences.edit",
      	"Absences.update",
      	
-       	"Stampings.createStamp",
-       	"Stampings.insert",
+       	"Stampings.blank",
        	"Stampings.edit",
-     	"Stampings.update",
+     	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
