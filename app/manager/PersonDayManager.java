@@ -873,9 +873,8 @@ public class PersonDayManager {
 			}
 			if(lastStampingIsIn)
 			{
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, LocalDateTime.now());
 				stamping.way = WayType.out;
-				stamping.date = new LocalDateTime();
 				stamping.markedByAdmin = false;
 				stamping.exitingNow = true;
 				pd.stampings.add(stamping);
@@ -897,9 +896,8 @@ public class PersonDayManager {
 			if (isLastIn && s.way == WayType.in)
 			{
 				//creo l'uscita fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.out;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				//salvo l'entrata
 				stampingsForTemplate.add(s);
@@ -920,9 +918,8 @@ public class PersonDayManager {
 			if (!isLastIn && s.way == WayType.out)
 			{
 				//creo l'entrata fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.in;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				//salvo l'uscita
 				stampingsForTemplate.add(s);
@@ -935,9 +932,8 @@ public class PersonDayManager {
 			if(isLastIn)
 			{
 				//creo l'uscita fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.out;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				isLastIn = false;
 				continue;
@@ -945,9 +941,8 @@ public class PersonDayManager {
 			if(!isLastIn)
 			{
 				//creo l'entrata fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.in;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				isLastIn = true;
 				continue;

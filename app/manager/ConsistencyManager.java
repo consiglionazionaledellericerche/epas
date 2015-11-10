@@ -394,40 +394,41 @@ public class ConsistencyManager {
 								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
 
 				//timbratura chiusura giorno precedente
-				Stamping correctStamp = new Stamping();
-				correctStamp.date = new LocalDateTime(previous.date.getYear(), 
-						previous.date.getMonthOfYear(), previous.date.getDayOfMonth(), 23, 59);
-
-				correctStamp.way = WayType.out;
-				correctStamp.markedByAdmin = false;
-				correctStamp.stampModificationType = smtMidnight;
-				correctStamp.note = 
+				Stamping exitStamp = new Stamping(previous, 
+						new LocalDateTime(previous.date.getYear(), previous.date.getMonthOfYear(),
+								previous.date.getDayOfMonth(), 23, 59));
+				
+				exitStamp.way = WayType.out;
+				exitStamp.markedByAdmin = false;
+				exitStamp.stampModificationType = smtMidnight;
+				exitStamp.note = 
 						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-				correctStamp.personDay = previous;
-				correctStamp.save();
-				previous.stampings.add(correctStamp);
+				exitStamp.personDay = previous;
+				exitStamp.save();
+				previous.stampings.add(exitStamp);
 				previous.save();
 
 				populatePersonDay(wrapperFactory.create(previous));
 
 				//timbratura apertura giorno attuale
-				Stamping newEntranceStamp = new Stamping();
-				newEntranceStamp.date = new LocalDateTime(pd.getValue().date.getYear(),
-						pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(),0,0);
+				Stamping enterStamp = new Stamping(pd.getValue(), 
+						new LocalDateTime(pd.getValue().date.getYear(),
+						pd.getValue().date.getMonthOfYear(), 
+						pd.getValue().date.getDayOfMonth(), 0, 0) );
+				
+				enterStamp.way = WayType.in;
+				enterStamp.markedByAdmin = false;
 
-				newEntranceStamp.way = WayType.in;
-				newEntranceStamp.markedByAdmin = false;
-
-				newEntranceStamp.stampModificationType = smtMidnight;
+				enterStamp.stampModificationType = smtMidnight;
 
 
 
-				newEntranceStamp.note = 
+				enterStamp.note = 
 						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-				newEntranceStamp.personDay = pd.getValue();
-				newEntranceStamp.save();
+				
+				enterStamp.save();
 
-				pd.getValue().stampings.add( newEntranceStamp );
+				pd.getValue().stampings.add( enterStamp );
 				pd.getValue().save();
 			}
 		}

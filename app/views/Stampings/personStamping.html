@@ -77,6 +77,8 @@
 
 #{/set}
 
+<div id="personStamping"> <!-- Per il caricamento asincrono della pagina -->
+
   <div class="col-xs-12 col-lg-8">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
       
@@ -164,7 +166,7 @@
 	      #{/elseif}
 					
 		  #{if stampingTemplate.date!=null}
-		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-modal=".my-modal">
+		    <a href="@{Stampings.edit(stampingTemplate.stampingId)}" data-async-modal="#modalStamping">
 			  ${stampingTemplate.hour}
 			</a>
 		  #{/if}
@@ -188,9 +190,9 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura default-single">
-
-		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.createStamp(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
-
+        
+		    <a href="@{Stampings.blank(dayRecap.person.id, dayRecap.date.format())}" 
+		    data-async-modal="#modalStamping">
 		      +++
 		    </a>
 		</td>
@@ -305,7 +307,11 @@
   
   </div>
 
+</div>  
+
 #{include '_myModal.html' /}
+
+<div id="modalStamping" class="modal container" tabindex="-1"></div>
 
 
 

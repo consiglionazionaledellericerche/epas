@@ -69,6 +69,38 @@ public class PersonDayDao extends DaoBase {
 	}
 	
 	/**
+	 * Cerca il personDay se non esiste ne crea una copia.
+	 * @param person
+	 * @param date
+	 * @return
+	 */
+	public PersonDay getOrBuildPersonDay(Person person, LocalDate date) {
+		
+		Optional<PersonDay> optPersonDay = getPersonDay(person, date);
+		if (optPersonDay.isPresent()) {
+			return optPersonDay.get();
+		} 
+		PersonDay personDay = new PersonDay(person, date);
+		return personDay;
+	}
+	
+	/**
+	 * Cerca il personDay se non esiste lo crea e lo persiste.
+	 * @param person
+	 * @param date
+	 * @return
+	 */
+	public PersonDay getOrCreateAndPersistPersonDay(Person person, LocalDate date) {
+		
+		Optional<PersonDay> optPersonDay = getPersonDay(person, date);
+		if (optPersonDay.isPresent()) {
+			return optPersonDay.get();
+		} 
+		PersonDay personDay = new PersonDay(person, date);
+		return personDay;
+	}
+	
+	/**
 	 * Il primo personDay esistente precedente a date per person.
 	 * 
 	 * @param person
