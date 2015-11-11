@@ -14,6 +14,15 @@ $(function($){
         var target = $form.data('async');
         var errorTarget = $form.data('async-error');
         var $target = $(target);
+        
+        //patch per multipart (blob) 
+        var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+        var formData = $form.serialize();
+        if($form.attr('enctype') === 'multipart/form-data') {
+        	contentType = false;
+        	formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449 
+        }
+        
 //        $form.find(':input').prop("readonly", true);
 //        var bgcolor = $form.css('background-color');
 //        $form.css('backround-color', '#e0e0e0');
@@ -21,7 +30,8 @@ $(function($){
         $.ajax({
             type: $form.attr('method'),
             url: $form.attr('action'),
-            data: $form.serialize(),
+            data: formData,
+            contentType: contentType
         }).done(function(data, status) {
             $target.replaceWith($(target, data));
             // TODO: verificare se occorre fare unwrap
@@ -49,7 +59,7 @@ $(function($){
      */
     $(document.body).on('click', 'a[data-async-modal]', function(e) {
     	var $this = $(this);
-    	var $modal = $($this.data('asyncModal'));
+    	var $modal = $($this.data('async-modal'));
     	var url = $this.attr('href');
     	$('body').modalmanager('loading');
 
