@@ -533,10 +533,12 @@ when
         "MealTickets.quickBlocksInsert",
         
         /* Vecchio permesso editPersonDay */
-		"Absences.create",
-     	"Absences.insert",
+		"Absences.blank",
+     	"Absences.save",
      	"Absences.edit",
-     	"Absences.update",
+     	"Absences.delete",
+     	"Absences.addAttach",
+     	"Absences.deleteAttach",
         
         "Stampings.blank",
        	"Stampings.edit",
@@ -649,10 +651,12 @@ when
         "MealTickets.quickBlocksInsert",
         
         /* Vecchio permesso editPersonDay */
-        "Absences.create",
-     	"Absences.insert",
+ 		"Absences.blank",
+     	"Absences.save",
      	"Absences.edit",
-     	"Absences.update",
+     	"Absences.delete",
+     	"Absences.addAttach",
+     	"Absences.deleteAttach",
      	
        	"Stampings.blank",
        	"Stampings.edit",

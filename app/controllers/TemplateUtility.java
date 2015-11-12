@@ -20,12 +20,15 @@ import models.Role;
 import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
+import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -74,8 +77,6 @@ public class TemplateUtility {
 				this.roleDao = roleDao;
 				this.badgeReaderDao = badgeReaderDao;
 	}
-
-	private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
 
 	//Convertitori mese
 
@@ -246,5 +247,29 @@ public class TemplateUtility {
 		}
 		return users;
 	}
+	
+	/**
+	 * I codici di assenza ordinati dai più utilizzati.
+	 * @return
+	 */
+	public List<AbsenceType> frequentAbsenceTypeList() {
 
+		Optional<AbsenceType> ferCode = absenceTypeDao.getAbsenceTypeByCode(
+				AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
+		Preconditions.checkState(ferCode.isPresent());
+		
+		return FluentIterable.from(Lists.newArrayList(ferCode.get()))
+				.append(absenceTypeDao.getFrequentTypes()).toList();
+	}
+	
+	/**
+	 * I codici di assenza attivi ordinati per codice. 
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public List<AbsenceType> allAbsenceCodes(LocalDate date) {
+		return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
+	}
+	
 }

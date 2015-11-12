@@ -337,10 +337,9 @@
       <!-- do layout -->
       #{doLayout /}
 
-    </div>
-    
-    <!-- Altri componenti html -->
-    #{if flash.error}
+
+     <!-- Altri componenti html -->
+     #{if flash.error}
       <div id="flash-error" class="popover bottom">
         <div class="arrow"></div>
         <h3 class="popover-title"><strong>Notifica</strong>
@@ -355,8 +354,8 @@
           #{/else}
         </div>
       </div>
-    #{/if}
-    #{if flash.success}
+     #{/if}
+     #{if flash.success}
       <div id="flash-success" class="popover bottom">
         <div class="arrow"></div>
         <h3 class="popover-title"><strong>Notifica</strong>
@@ -371,7 +370,11 @@
           	#{/else}
         </div>
       </div>
-    #{/if}  
+     #{/if}
+       
+    </div>
+    
+   
       
    </div>
 

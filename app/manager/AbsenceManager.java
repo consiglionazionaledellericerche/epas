@@ -833,6 +833,9 @@ public class AbsenceManager {
 
 			for(Absence absence : absenceList){
 				if(absence.absenceType.code.equals(absenceType.code)) {
+					if( absence.absenceFile.exists()) {
+						absence.absenceFile.getFile().delete();
+					}
 					absence.delete();
 					pd.absences.remove(absence);
 					pd.isTicketForcedByAdmin = false;

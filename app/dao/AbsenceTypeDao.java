@@ -84,8 +84,7 @@ public class AbsenceTypeDao extends DaoBase{
 		final JPQLQuery query = getQueryFactory().from(absence)
 				.join(absence.absenceType, absenceType)
 				.groupBy(absenceType)
-				.orderBy(absence.count().desc())
-				.limit(20);
+				.orderBy(absence.count().desc());
 
 		return query.list(absenceType);
 	} 
@@ -133,7 +132,8 @@ public class AbsenceTypeDao extends DaoBase{
 	/**
 	 * 
 	 * @param date
-	 * @return la lista di codici di assenza che sono validi da una certa data in poi, ordinati per codice di assenza crescente
+	 * @return la lista di codici di assenza che sono validi da una certa data in poi
+	 *  ordinati per codice di assenza crescente
 	 */
 	public List<AbsenceType> getAbsenceTypeFromEffectiveDate(
 			LocalDate date) {

@@ -21,6 +21,7 @@ import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
+import models.Absence;
 import models.Institute;
 import models.Person;
 import models.PersonDay;
@@ -52,6 +53,8 @@ import com.google.common.collect.Lists;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
+import dao.history.HistoryValue;
+import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -82,6 +85,8 @@ public class Stampings extends Controller {
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
 	private static ConsistencyManager consistencyManager;
+	@Inject 
+	private static StampingHistoryDao stampingsHistoryDao;
 
 	public static void stampings(Integer year, Integer month) {
 
@@ -156,10 +161,13 @@ public class Stampings extends Controller {
 		if (stamping == null) {
 			notFound();
 		}
+		
+		List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
+				.stampings(stampingId);
 	
 		rules.checkIfPermitted(stamping.personDay.person.office);
 		
-		render(stamping);
+		render(stamping, historyStamping);
 	}
 	
 	public static void save(@Required Person person, @Required LocalDate date,
@@ -181,7 +189,12 @@ public class Stampings extends Controller {
 			response.status = 400;
 			flash.error(Web.msgHasErrors());
 			
-			render("@edit", stamping, time, way, stampType);
+			List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
+			if (stamping.isPersistent()) {
+				historyStamping = stampingsHistoryDao.stampings(stamping.id);
+			}
+			
+			render("@edit", stamping, time, way, stampType, historyStamping);
 			//log.warn("validation errors for {}: {}", institute,
 			//		validation.errorsMap());
 		} 

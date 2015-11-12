@@ -2,15 +2,29 @@
   title:('Modifica timbratura ' + stamping.personDay.date.format() 
            + ' per ' + stamping.personDay.person.fullname) }
   #{if stamping.persistent}
-    <div class="alert alert-success center">Modifica i dati della timbratura delle ore ${stamping.time}</div>
+    <ul class="nav nav-pills">
+      <li id="pills1" role="presentation" class="active"><a>Modifica</a></li>
+      <li id="pills2" role="presentation"><a>Elimina</a></li>
+    </ul>
+    <br>
   #{/if}
-  #{else}
-    <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
-  #{/else}
-  <div id="stampingData">    
-	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#personStamping',
+ 
+  <div id="divpills1"><!-- Riepilogo -->
+  
+   <div id="stampingData">    
+	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingData'}
 	    
+	    #{if stamping.persistent}
+	      <div class="alert alert-success center">Modifica i dati della timbratura delle ore ${stamping.time}</div>
+	      
+	      <!-- storico ?? -->
+	      
+	    #{/if}
+        #{else}
+          <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
+        #{/else}
+           
         <input type="hidden" name="stamping.id" value="${stamping.id}"/>
 
 		#{f.hidden 'person.id', value:stamping.personDay.person.id /}
@@ -41,17 +55,28 @@
 
 	#{/form}
 	
-	#{if stamping.persistent}
-	<div class="center">
-	#{accordionGroup 'delete'}
-     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa timbratura delle ' + stamping.time, open:false, color:'danger'}
-	  <div class="text-danger center">
-	    E' possibile eliminare questa timbratura. 
-		<a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a> 
-	  </div>
-     #{/accordionItem}
-    #{/accordionGroup } 
-    </div> 
-	#{/if}
+   </div>
   </div>
+  
+  <div id="divpills2" style="display: none"><!-- Elimina -->
+   #{if stamping.persistent}
+   
+    <form class="form-horizontal">
+      #{f.view 'time', value:stamping.time/}
+	  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay, disabled:true /}
+      #{list items:historyStamping, as:'state'}
+        
+           #{if state.typeIsAdd() }
+		    #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
+		    #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
+		 	#{f.view 'Amministratore', value:state.formattedOwner() /}
+		   #{/if}
+ 	  #{/list}
+ 	</form>
+	<div class="alert alert-danger center">
+	    E' possibile eliminare questa timbratura.<br> 
+	   <a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a> 
+	</div>
+   #{/if}
+  </div> 
 #{/modalAsync}
