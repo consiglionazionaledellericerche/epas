@@ -1,3 +1,4 @@
+absenceType = Codice assenza
 absenceType.code= Codice d'assenza
 absenceType.certificateCode= Codice per attestati di presenza
 absenceType.description= Descrizione codice
@@ -7,6 +8,8 @@ absenceType.validTo= Fine validita'
 absenceType.justifiedTimeAtWork= Tempo di lavoro giustificato
 absenceType.consideredWeekEnd= Utilizzabile nei weekend/festivi
 absenceType.qualifications= Utilizzabile per i livelli
+
+absenceFile=Allegato
 
 absenceTypeGroup.label= Etichetta gruppo
 absenceTypeGroup.accumulationType= Accumulo valori
@@ -71,6 +74,9 @@ child.bornDate= Data di Nascita
 crud.cancel=Indietro
 crud.save=Salva
 crud.delete=Elimina
+
+dateFrom=Dal
+dateTo=Fino Al
 
 Institutes.blank=Nuovo istituto
 Institutes.delete=Elimina istituto

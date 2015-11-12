@@ -1,8 +1,10 @@
 *{
    arg: label
+   color: bootstrap color default primary
    fa: optional, default to 'check'
  }*
  %{ fa = _fa ?: 'check' }%
-<button class="btn btn-primary" type="submit">
-     <i class="fa fa-${fa}"></i><span class="hidden-xs"> &{_arg}</span>
+<button class="btn btn-#{if _color}${_color}#{/if}#{else}primary#{/else}"
+      type="submit">
+     <i class="fa fa-${_fa}"></i><span class="hidden-xs"> &{_arg}</span>
 </button>
