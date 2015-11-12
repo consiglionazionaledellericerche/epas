@@ -118,7 +118,7 @@
 
 	  	<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
 	  	   #{if dayRecap.firstDay }F#{/if}
-	      <a data-toggle="modal" data-backdrop="true" href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-modal=".my-modal">
+	      <a href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-async-modal="#modalStamping">
 		     ${dayRecap.date.shortDayName()}
           </a>
 	    </td>
