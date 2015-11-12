@@ -538,7 +538,7 @@ when
      	"Absences.edit",
      	"Absences.delete",
      	"Absences.addAttach",
-     	"Absences.deleteAttach",
+     	"Absences.removeAttach",
         
         "Stampings.blank",
        	"Stampings.edit",
@@ -656,7 +656,7 @@ when
      	"Absences.edit",
      	"Absences.delete",
      	"Absences.addAttach",
-     	"Absences.deleteAttach",
+     	"Absences.removeAttach",
      	
        	"Stampings.blank",
        	"Stampings.edit",
