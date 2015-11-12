@@ -2,9 +2,9 @@
   title:('Nuova timbratura ' + date.format() 
            + ' per ' + person.fullname) }
 
-<div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
-
 <div id="stampingData">
+
+  <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
 
   #{form action:@save(), method:'POST', autocomplete:false,
 	    class:'form form-horizontal', 'data-async':'#page_content',
