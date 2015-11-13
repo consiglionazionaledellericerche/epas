@@ -90,7 +90,17 @@ public class Clocks extends Controller{
 	@NoCheck
 	public static void clockLogin(Person person, String password) {
 		
+		if (person == null) {
+			flash.error("Selezionare una persona dall'elenco del personale.");
+			show();
+		}
+		
 		User user = person.user;
+		if (user == null) {
+			flash.error("La persona selezionata non dispone di un account valido."
+					+ " Contattare l'amministratore");
+			show();
+		}
 		
 		if(!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
 			
@@ -104,7 +114,7 @@ public class Clocks extends Controller{
 			}
 		}
 		
-		if(user!= null && Security.authenticate(user.username,password)) {
+		if (Security.authenticate(user.username,password)) {
 			// Mark user as connected
 			session.put("username", user.username);
 			daySituation();

@@ -1,5 +1,9 @@
+*{ center: true bottoni centrati }*
+
+
 <div class="row">
-     <p class="col-sm-offset-2 col-sm-10">
-#{doBody/}
-    </p>
+  #{if _center}<p class="center">#{/if}
+  #{else}<p class="col-sm-offset-2 col-sm-10">#{/else}
+   #{doBody/}
+  </p>
 </div>

@@ -14,8 +14,7 @@
     	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
       </div>
 		#{form action:@save(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#instituteList',
-		    'data-async-error':'#officeData'}
+		    class:'form form-horizontal' }
 			
 	 		#{f.hidden 'office.id' /}
 	        #{f.hidden 'office.institute.id' /}
@@ -104,17 +103,30 @@
     #{/accordionItem}
   #{/accordionGroup}   
 
-     #{accordionGroup 'badge'}
+  #{accordionGroup 'badge'}
     #{accordionItem 'badgeReader', parent:'badge', title:'Lettori Badge Abilitati', open:true, color:'info'}
-
-                 <span class="label label-primary">Lettori Badge</span>
-               #{list items:office.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('badgeReader') }
-                  <span class="label label-danger">${uro.user.username}</span>
-                 #{/if}
-               #{/list}
+      
+      <div class="row">
+        <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{BadgeReaders.joinOffice(office.id)}" 
+          data-async-modal="#modalJoinOffice">
+        <i class="fa fa-plus"></i> Associa Lettore Badge </a>
+	  </div>
+      <ul class="list-group">
+        #{list items:office.usersRolesOffices, as:'uro'}
+          #{if uro.role.name.equals('badgeReader') }
+            <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{BadgeReaders.unjoinOffice(uro.id)}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${uro.user.badgeReader.code}
+	        </li> 
+          #{/if}
+        #{/list}
+      
+      </ul>
                
-        #{/accordionItem}
+    #{/accordionItem}
   #{/accordionGroup}  
              
   
@@ -136,3 +148,4 @@
 </div>
 
 <div id="modalInsertUro" class="modal container" tabindex="-1"></div>
+<div id="modalJoinOffice" class="modal container" tabindex="-1"></div>

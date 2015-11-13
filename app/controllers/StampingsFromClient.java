@@ -49,7 +49,7 @@ public class StampingsFromClient extends Controller{
 			badRequest();	
 		}
 				
-		if (stampingManager.createStamping(body, true)) {
+		if (stampingManager.createStampingFromClient(body, true)) {
 			return "OK";
 		}
 		
@@ -70,7 +70,7 @@ public class StampingsFromClient extends Controller{
 			badRequest();	
 		}
 				
-		if (stampingManager.createStamping(body, false)) {
+		if (stampingManager.createStampingFromClient(body, false)) {
 			return "OK";
 		}
 		

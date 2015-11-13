@@ -24,7 +24,6 @@ import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
 import org.joda.time.LocalDate;
 import play.Logger;
-import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
@@ -156,6 +155,7 @@ public class WorkingTimes extends Controller{
 	public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
 			@Required Office office) {
 
+		// TODO: la creazione dell'orario default ha office null.
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
@@ -165,11 +165,6 @@ public class WorkingTimes extends Controller{
 		if(wtt != null) {
 			validation.addError("horizontalPattern.name", 
 					"nome già presente", horizontalPattern.name);
-		}
-		
-		for( Error error : validation.errors()) {
-			System.out.println(error.getKey());
-			System.out.println(error.message());
 		}
 		
 		if (validation.hasErrors()) {
@@ -221,6 +216,10 @@ public class WorkingTimes extends Controller{
 		
 		// se non è horizontal ho sbagliato action
 		Preconditions.checkState(wtt.horizontal);
+		
+		if (wtt.office != null) {
+			rules.checkIfPermitted(wtt.office);
+		}
 		
 		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime(wtt);
 		
@@ -369,7 +368,8 @@ public class WorkingTimes extends Controller{
 		}
 
 		//Prendere tutti i contratti attivi da firstDay ad oggi
-		List<Contract> contractInPeriod = contractManager.getActiveContractInPeriod(dateFrom, dateTo);
+		List<Contract> contractInPeriod = 
+				contractDao.getActiveContractsInPeriod(dateFrom, Optional.fromNullable(dateTo));
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
 

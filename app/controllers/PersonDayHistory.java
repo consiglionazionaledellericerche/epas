@@ -35,8 +35,6 @@ public class PersonDayHistory extends Controller {
 
 		PersonDay pd = PersonDay.findById(personDayId);
 
-		// ASSENZE ////////////////////////////////////////////////////////////////////
-
 		List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
 				.absences(personDayId);
 
@@ -57,8 +55,6 @@ public class PersonDayHistory extends Controller {
 					.absences(absenceId);
 			historyAbsencesList.add(historyAbsence);
 		}
-
-		// TIMBRATURE /////////////////////////////////////////////////////////////////
 
 		List<HistoryValue<Stamping>> allStampings = personDayHistoryDao
 				.stampings(personDayId);

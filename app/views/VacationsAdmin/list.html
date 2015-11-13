@@ -84,20 +84,20 @@
 						<td data-order="${vacationsRecap.vacationDaysLastYearUsed}">
 							<a
 							href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.contract.id, vacationsRecap.year)}"
-							data-modal=".my-modal">
+							data-async-modal="#defaultModal">
 								${vacationsRecap.vacationDaysLastYearUsed} </a>
 						</td>
 
 						<td data-order="${vacationsRecap.vacationDaysCurrentYearUsed}">
 							<a
 							href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}"
-							data-modal=".my-modal">
+							data-async-modal="#defaultModal">
 								${vacationsRecap.vacationDaysCurrentYearUsed} </a>
 						</td>
 
 						<td data-order="${vacationsRecap.permissionUsed}"><a
 							href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.contract.id, vacationsRecap.year)}"
-							data-modal=".my-modal"> ${vacationsRecap.permissionUsed} </a></td>
+							data-async-modal="#defaultModal"> ${vacationsRecap.permissionUsed} </a></td>
 
 						<!-- residui -->
 
@@ -167,6 +167,3 @@
 <!-- end panel -->
 
 </div>
-
-
-#{include '_myModal.html' /}

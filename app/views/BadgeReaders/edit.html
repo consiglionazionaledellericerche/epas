@@ -1,0 +1,69 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sede'  /}
+
+#{set breadcrumbs:['Lettori Badge':@BadgeReaders.list(), 'Configura Lettore Badge':null] /}
+ 
+<div class="container">
+
+  #{breadcrumbs breadcrumbs /}
+   
+  #{accordionGroup 'info'}
+    #{accordionItem 'badgeReader', parent:'info', title:'Informazioni', open:true, color:'info'}
+  	  <div class="alert alert-success" role="alert">
+    	Modifica i dati del lettore <strong>${badgeReader.code}</strong>
+      </div>
+		#{form action:@updateInfo(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }
+			
+
+		  #{f.hidden 'badgeReader.id' /}				
+		  #{f.input 'badgeReader.code', required:true /}
+	      #{f.input 'badgeReader.description' /}
+	      #{f.input 'badgeReader.location' /}
+	    
+	      #{f.selectModel 'badgeReader.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
+ 	  	
+	      #{b.buttons}
+	        #{b.save /}
+	      #{/b.buttons}
+		#{/form}
+    #{/accordionItem}
+  #{/accordionGroup}  
+  
+  #{accordionGroup 'pass'}
+    #{accordionItem 'newPass', parent:'info', title:'Nuova Password', open:true, color:'info'}
+  	  <div class="alert alert-danger" role="alert">
+    	Modifica la password di accesso del lettore <strong>${badgeReader.code}</strong>
+      </div>
+		#{form action:@changePassword(badgeReader.id), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }
+			
+
+		  #{f.hidden 'badgeReader.id' /}				
+		  #{f.view 'user.username' /}
+	  	  #{f.input 'newPass', type:'password', label:'Nuova password' /} 
+	
+	      #{b.buttons}
+	        #{b.save /}
+	      #{/b.buttons}
+		#{/form}
+    #{/accordionItem}
+  #{/accordionGroup}  
+  
+  *{  
+  #{if office.persons.empty}
+   #{secure.checkAction 'Office.delete', target:office}
+    #{accordionGroup 'delete'}
+     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
+	  <div class="text-danger center">
+	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
+		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
+	  </div>
+     #{/accordionItem}
+    #{/accordionGroup }  
+   #{/secure.checkAction}
+  #{/if}
+  }*
+
+</div>

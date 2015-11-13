@@ -34,6 +34,7 @@ public class BadgeReader extends BaseModel {
 
 	@Unique
 	@NotNull
+	@Required
 	public String code;
 	
 	public String description;

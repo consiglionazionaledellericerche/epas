@@ -1,0 +1,31 @@
+#{modalAsync id:'modalStamping', button:'Salva', 
+  title:('Nuova timbratura ' + date.format() 
+           + ' per ' + person.fullname) }
+
+<div id="stampingData">
+
+  <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
+
+  #{form action:@save(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#page_content',
+	    'data-async-error':'#stampingData'}
+
+	#{f.hidden 'person.id', value:person.id /}
+	#{f.hidden 'date', value:date.format() /}
+		
+	#{f.input 'time', popover:'true'/}
+	#{f.booleanRadio 'way', popover:'true', true:'Ingresso', false:'Uscita', required:true /}
+	
+	#{include './_inputStampType.html' /}
+	
+	#{f.input 'note' /}
+	
+	#{b.buttons center:true}   
+      #{b.submit 'Inserisci'/}
+    #{/b.buttons}    
+
+  #{/form}
+
+</div>
+
+#{/modalAsync}

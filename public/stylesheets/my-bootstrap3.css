@@ -259,11 +259,11 @@ div.datepicker {
 
 /* CSS Tabellone Timbrature */
 
-/* tabella default */
+/* tabella default 
 table{ border: 1px solid #aaa; }
 th { background: #eee}
 td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
-
+*/
 /* tabellone timbrature */
 table#tabellonetimbrature{
 		font-size: small;

@@ -1,5 +1,6 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.ContractDao;
@@ -11,6 +12,7 @@ import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * @author alessandro
@@ -47,14 +49,16 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		LocalDate today = new LocalDate();
 
-		List<Contract> activeContract = contractManager.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = 
+				contractDao.getActiveContractsInPeriod(today, Optional.fromNullable(today));
 
 		for(Contract contract : activeContract) {
 
 			if( !contract.person.office.id.equals(officeId))
 				continue;
 
-			ContractWorkingTimeType current = contractManager.getContractWorkingTimeTypeFromDate(contract, today);
+			ContractWorkingTimeType current = contractManager
+					.getContractWorkingTimeTypeFromDate(contract, today);
 			if(current.workingTimeType.id.equals(value.id))
 				contractList.add(contract);
 		}
@@ -74,7 +78,8 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		LocalDate today = new LocalDate();
 
-		List<Contract> activeContract = contractManager.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = 
+				contractDao.getActiveContractsInPeriod(today, Optional.fromNullable(today));
 
 		for(Contract contract : activeContract) {
 
