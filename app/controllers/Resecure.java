@@ -1,18 +1,17 @@
 package controllers;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import javax.inject.Inject;
-
 import models.Office;
 import play.Play;
 import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
 import security.SecurityRules;
+
+import javax.inject.Inject;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author marco

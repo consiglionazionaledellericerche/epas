@@ -4,11 +4,17 @@
 package models;
 
 
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import it.cnr.iit.epas.NullStringBinder;
-
-import java.util.List;
-import java.util.Set;
+import models.base.MutableModel;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import play.data.binding.As;
+import play.data.validation.Email;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -24,20 +30,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-
-import models.base.MutableModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import play.data.binding.As;
-import play.data.validation.Email;
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author cristian

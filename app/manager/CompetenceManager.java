@@ -1,6 +1,29 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
+import com.google.inject.Inject;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 import helpers.ModelQuery.SimpleResults;
+import models.Competence;
+import models.CompetenceCode;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Office;
+import models.Person;
+import models.PersonDay;
+import models.TotalOvertime;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,33 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import models.Competence;
-import models.CompetenceCode;
-import models.Contract;
-import models.ContractMonthRecap;
-import models.Office;
-import models.Person;
-import models.PersonDay;
-import models.TotalOvertime;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
-import com.google.inject.Inject;
-
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.OfficeDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
 
 
 public class CompetenceManager {

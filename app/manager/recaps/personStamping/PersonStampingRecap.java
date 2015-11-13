@@ -11,7 +11,15 @@ import it.cnr.iit.epas.DateUtility;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.*;
+import models.AbsenceType;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Person;
+import models.PersonDay;
+import models.StampModificationType;
+import models.StampModificationTypeCode;
+import models.StampType;
+import models.Stamping;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 

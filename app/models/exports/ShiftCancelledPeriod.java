@@ -1,7 +1,6 @@
 package models.exports;
 
 import models.ShiftType;
-
 import org.joda.time.LocalDate;
 
 /**

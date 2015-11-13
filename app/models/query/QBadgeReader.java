@@ -1,15 +1,19 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SetPath;
+import com.mysema.query.types.path.SimplePath;
+import com.mysema.query.types.path.StringPath;
 import models.BadgeReader;
 
-
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
 
 /**
@@ -42,6 +46,8 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public final StringPath location = createString("location");
 
+    public final QOffice owner;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -65,6 +71,7 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public QBadgeReader(Class<? extends BadgeReader> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.owner = inits.isInitialized("owner") ? new QOffice(forProperty("owner"), inits.get("owner")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }
 

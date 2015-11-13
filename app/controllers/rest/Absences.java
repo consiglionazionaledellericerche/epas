@@ -1,12 +1,22 @@
 package controllers.rest;
 
+import cnr.sync.dto.AbsenceAddedRest;
+import cnr.sync.dto.AbsenceRest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import controllers.Resecure;
+import controllers.Resecure.BasicAuth;
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import helpers.rest.JacksonModule;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
 import manager.AbsenceManager;
 import manager.cache.AbsenceTypeManager;
 import manager.response.AbsenceInsertReport;
@@ -15,30 +25,14 @@ import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-import cnr.sync.dto.AbsenceAddedRest;
-import cnr.sync.dto.AbsenceRest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-
-import controllers.Resecure;
-import controllers.Resecure.BasicAuth;
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.util.List;
 
 @With(Resecure.class)
 public class Absences extends Controller{

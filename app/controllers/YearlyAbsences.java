@@ -1,12 +1,12 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+import dao.AbsenceDao;
+import dao.PersonDao;
 import helpers.ModelQuery.SimpleResults;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import manager.SecureManager;
 import manager.YearlyAbsencesManager;
 import manager.recaps.YearlyAbsencesRecap;
@@ -15,21 +15,15 @@ import models.AbsenceType;
 import models.Person;
 import models.User;
 import models.enumerate.JustifiedTimeAtWork;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-import dao.AbsenceDao;
-import dao.PersonDao;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @With( {Resecure.class, RequestInit.class} )
 public class YearlyAbsences extends Controller{

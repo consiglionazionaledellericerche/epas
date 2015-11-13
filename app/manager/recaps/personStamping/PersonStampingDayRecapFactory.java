@@ -1,9 +1,8 @@
 package manager.recaps.personStamping;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -11,10 +10,8 @@ import manager.cache.StampTypeManager;
 import models.Contract;
 import models.PersonDay;
 
-import com.google.common.base.Optional;
-
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.util.List;
 
 
 public class PersonStampingDayRecapFactory {

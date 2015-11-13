@@ -1,23 +1,20 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import manager.ConfGeneralManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import java.util.List;
 
 /**
  * @author marco

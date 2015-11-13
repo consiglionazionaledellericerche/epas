@@ -1,9 +1,8 @@
 package dao.filter;
 
-import models.query.QPerson;
-
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
+import models.query.QPerson;
 
 public class QFilters {
 

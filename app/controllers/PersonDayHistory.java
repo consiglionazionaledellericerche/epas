@@ -1,23 +1,20 @@
 package controllers;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.history.AbsenceHistoryDao;
+import dao.history.HistoryValue;
+import dao.history.PersonDayHistoryDao;
+import dao.history.StampingHistoryDao;
 import models.Absence;
 import models.PersonDay;
 import models.Stamping;
 import play.mvc.Controller;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import dao.history.AbsenceHistoryDao;
-import dao.history.HistoryValue;
-import dao.history.PersonDayHistoryDao;
-import dao.history.StampingHistoryDao;
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author marco

@@ -1,15 +1,14 @@
 package it.cnr.iit.epas;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import models.exports.FrequentAbsenceCode;
 import models.exports.PeriodAbsenceCode;
 import play.Logger;
 import play.data.binding.TypeBinder;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 public class JsonRequestedFrequentAbsenceBinder implements TypeBinder<FrequentAbsenceCode>{
 

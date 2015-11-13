@@ -3,13 +3,13 @@
  */
 package helpers;
 
-import java.io.IOException;
-
 import play.Logger;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.results.Result;
+
+import java.io.IOException;
 
 /**
  * BadRequest (HTTP 400) with response content)

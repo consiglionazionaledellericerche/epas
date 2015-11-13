@@ -3,7 +3,12 @@
  */
 package models;
 
-import java.util.Set;
+import com.google.common.collect.Sets;
+import models.base.BaseModel;
+import net.sf.oval.constraint.NotNull;
+import org.hibernate.envers.Audited;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,16 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
-import net.sf.oval.constraint.NotNull;
-
-import org.hibernate.envers.Audited;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
-import com.google.common.collect.Sets;
+import java.util.Set;
 
 
 

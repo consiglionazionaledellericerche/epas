@@ -99,9 +99,9 @@ update institutes set created_at = current_timestamp;
 alter table conf_general_history alter column office_id drop not null;
 
 -- constraint sugli user role office
-ALTER TABLE users_roles_offices ALTER COLUMN office_id NOT NULL;
-ALTER TABLE users_roles_offices ALTER COLUMN role_id NOT NULL;
-ALTER TABLE users_roles_offices ALTER COLUMN user_id NOT NULL;
+ALTER TABLE users_roles_offices ALTER COLUMN office_id SET NOT NULL;
+ALTER TABLE users_roles_offices ALTER COLUMN role_id SET NOT NULL;
+ALTER TABLE users_roles_offices ALTER COLUMN user_id SET NOT NULL;
 
 -- ------------------------------------------------------------------------------
 -- la relazione fra badge_readers e l'office proprietario
@@ -121,17 +121,9 @@ delete from badge_readers where office_owner_id is null;
 -- non si verifica mai)
 
 -- aggiungere il vincolo not null
-ALTER TABLE badge_readers ALTER COLUMN office_owner_id NOT NULL;
+ALTER TABLE badge_readers ALTER COLUMN office_owner_id SET NOT NULL;
 
-
-
-
-
-
-
-
-
-
+INSERT INTO roles(name) VALUES('tecnicalAdmin');
 
 
 -- TODO impostare not null i nuovi campi institute_id e headquarter della tabella office

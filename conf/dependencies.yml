@@ -7,7 +7,7 @@ require:
     - kjetland -> fastergt 1.8
     - org.hibernate -> hibernate-envers 4.2.15.Final:
           transitive: false
-    - org.jadira.usertype -> usertype.core 3.2.0.GA
+    - org.jadira.usertype -> usertype.core 4.0.0.GA
     - com.google.guava -> guava 18.0
     - com.google.inject -> guice 4.0-beta5
     - com.google.inject.extensions -> guice-assistedinject 4.0-beta5

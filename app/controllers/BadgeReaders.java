@@ -1,26 +1,19 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.mysema.query.SearchResults;
+import dao.BadgeReaderDao;
+import dao.RoleDao;
 import helpers.Web;
-
-import javax.inject.Inject;
-
 import models.BadgeReader;
-import models.Role;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Optional;
-import com.mysema.query.SearchResults;
-
-import dao.BadgeReaderDao;
-import dao.OfficeDao;
-import dao.RoleDao;
+import javax.inject.Inject;
 
 @With( {Resecure.class, RequestInit.class})
 public class BadgeReaders extends Controller {

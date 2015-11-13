@@ -1,7 +1,12 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.MoreObjects;
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,20 +15,10 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
-import com.google.common.base.MoreObjects;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Audited

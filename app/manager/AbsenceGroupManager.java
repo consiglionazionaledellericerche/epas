@@ -1,25 +1,20 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import dao.AbsenceDao;
+import dao.WorkingTimeTypeDao;
 import it.cnr.iit.epas.CheckMessage;
-
-import java.util.List;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-
-import dao.AbsenceDao;
-import dao.WorkingTimeTypeDao;
+import java.util.List;
 
 
 
@@ -243,6 +238,7 @@ public class AbsenceGroupManager {
 			Logger.debug("TotalMinutesJustified= %d. Minuti giustificati: %d", 
 					totalMinutesJustified, absenceType.justifiedTimeAtWork.minutes);
 			int quantitaGiustificata;
+//			FIXME non c'è solo il tipo AllDay da considerare, ci sono anche altri valori che non indicano un valore in minuti sui quali va calcolato il quantitativo da giustificare
 			if(absenceType.justifiedTimeAtWork != JustifiedTimeAtWork.AllDay)
 				quantitaGiustificata = absenceType.justifiedTimeAtWork.minutes;
 			else

@@ -1,18 +1,18 @@
 package controllers;
 
-import play.data.validation.Error;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import dao.ContractDao;
+import dao.OfficeDao;
+import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperWorkingTimeType;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.ContractManager;
 import manager.SecureManager;
 import manager.WorkingTimeTypeManager;
@@ -22,10 +22,9 @@ import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
+import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
@@ -33,18 +32,11 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-
-import dao.ContractDao;
-import dao.OfficeDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
-import dao.wrapper.IWrapperWorkingTimeType;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class WorkingTimes extends Controller{

@@ -1,16 +1,15 @@
 package manager.recaps.personStamping;
 
+import dao.MealTicketDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
-
-import javax.inject.Inject;
-
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Person;
-import dao.MealTicketDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
+
+import javax.inject.Inject;
 
 public class PersonStampingRecapFactory {
 

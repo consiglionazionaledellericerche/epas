@@ -1,14 +1,17 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.StampingDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.PersonTags;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.StampingManager;
@@ -22,11 +25,9 @@ import models.PersonDay;
 import models.StampType;
 import models.Stamping;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
 import play.data.binding.As;
 import play.data.validation.Max;
 import play.data.validation.Min;
@@ -37,16 +38,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.StampingDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @With( {RequestInit.class, Resecure.class} )
 public class Stampings extends Controller {

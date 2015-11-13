@@ -1,19 +1,5 @@
 package dao;
 
-import helpers.jpa.PerseoModelQuery;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
-
-import javax.persistence.EntityManager;
-
-import models.BadgeReader;
-import models.Institute;
-import models.Role;
-import models.User;
-import models.query.QBadgeReader;
-import models.query.QInstitute;
-import models.query.QOffice;
-import models.query.QUsersRolesOffices;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
@@ -21,6 +7,12 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import models.BadgeReader;
+import models.query.QBadgeReader;
+
+import javax.persistence.EntityManager;
 
 /**
  * 

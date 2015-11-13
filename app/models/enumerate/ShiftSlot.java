@@ -11,7 +11,7 @@ public enum ShiftSlot {
 	
 	private String name;
 	
-	private ShiftSlot(String name) {
+	ShiftSlot(String name) {
 		this.name = name;
 	};
 	

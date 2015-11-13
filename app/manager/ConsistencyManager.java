@@ -1,14 +1,20 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.cache.StampTypeManager;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
@@ -26,7 +32,6 @@ import models.Stamping.WayType;
 import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
-
 import org.apache.commons.mail.EmailException;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -34,24 +39,13 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.db.jpa.JPA;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.IWrapperPersonDay;
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class ConsistencyManager {
 
@@ -116,7 +110,7 @@ public class ConsistencyManager {
 	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
 			LocalDate fromDate, boolean sendMail){
 
-		Set<Office> offices = user.isPresent() ? 
+		Set<Office> offices = user.isPresent() ?
 				secureManager.officesWriteAllowed(user.get()) 
 				: Sets.newHashSet(officeDao.getAllOffices());
 

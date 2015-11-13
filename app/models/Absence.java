@@ -1,5 +1,10 @@
 package models;
 
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+import play.db.jpa.Blob;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -7,13 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.db.jpa.Blob;
 
 
 /**

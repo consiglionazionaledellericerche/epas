@@ -1,19 +1,17 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
+import controllers.Security;
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateUtility;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Absence;
@@ -26,28 +24,23 @@ import models.Person;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
 import models.exports.PersonOvertime;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.db.jpa.Blob;
 import play.db.jpa.JPAPlugin;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.gdata.util.common.base.Preconditions;
-
-import controllers.Security;
-import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-
-import dao.PersonDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
+import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChartsManager {
 
