@@ -1,17 +1,15 @@
 package dao.wrapper;
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import dao.CompetenceDao;
+import dao.OfficeDao;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import dao.CompetenceDao;
-import dao.OfficeDao;
+import java.util.List;
 
 /**
  * @author alessandro

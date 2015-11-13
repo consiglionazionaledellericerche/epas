@@ -1,36 +1,30 @@
 package controllers.rest;
 
-import helpers.JsonResponse;
-import it.cnr.iit.epas.DateInterval;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
-import manager.PersonDayManager;
-import models.Absence;
-import models.Competence;
-import models.Person;
-import models.PersonDay;
-
-import org.joda.time.LocalDate;
-
-import play.mvc.Controller;
-import play.mvc.With;
 import cnr.sync.dto.CompetenceDTO;
 import cnr.sync.dto.DayRecap;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
+import helpers.JsonResponse;
+import it.cnr.iit.epas.DateInterval;
+import manager.PersonDayManager;
+import models.Absence;
+import models.Competence;
+import models.Person;
+import models.PersonDay;
+import org.joda.time.LocalDate;
+import play.mvc.Controller;
+import play.mvc.With;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @With(Resecure.class)
 public class Persons extends Controller{

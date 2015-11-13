@@ -1,5 +1,7 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import dao.UserDao;
 import it.cnr.iit.epas.JsonReportBinder;
 import manager.ReportCentreManager;
 import models.Person;
@@ -9,31 +11,19 @@ import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 import org.apache.commons.mail.SimpleEmail;
-import org.jboss.netty.handler.codec.http.HttpRequestEncoder;
 import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-
-import antlr.StringUtils;
-import dao.UserDao;
 import play.Logger;
 import play.data.binding.As;
 import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
-import play.mvc.Http.Request;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.inject.Inject;
 
 
 public class ReportCentre extends Controller{

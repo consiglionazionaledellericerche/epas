@@ -1,12 +1,12 @@
 package dao;
 
+import com.google.common.base.Optional;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -15,16 +15,11 @@ import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 

@@ -1,10 +1,10 @@
 package controllers;
 
 
-import java.lang.reflect.InvocationTargetException;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.hash.Hashing;
+import dao.UserDao;
 import manager.ConfGeneralManager;
 import models.User;
 import models.enumerate.Parameter;
@@ -14,11 +14,8 @@ import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.hash.Hashing;
-
-import dao.UserDao;
+import javax.inject.Inject;
+import java.lang.reflect.InvocationTargetException;
 
 
 public class Security extends Secure.Security {

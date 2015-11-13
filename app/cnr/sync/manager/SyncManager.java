@@ -1,28 +1,23 @@
 package cnr.sync.manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import models.Office;
-import models.Person;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.Play;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
 import cnr.sync.dto.DepartmentDTO;
 import cnr.sync.dto.PersonRest;
-
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-
 import dao.OfficeDao;
 import dao.PersonDao;
+import models.Office;
+import models.Person;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.Play;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SyncManager {
 
@@ -47,7 +42,7 @@ public class SyncManager {
 		List<Office> helpList = officeDao.getAllOffices();
 		List<Office> officeList = Lists.newArrayList();
 		for(Office office : helpList){
-			if(office.code != null)
+			if(office.codeId != null)
 				officeList.add(office);
 		}
 		int contatore = 0;
@@ -55,7 +50,7 @@ public class SyncManager {
 	
 		String perseoUrl = Play.configuration.getProperty("perseo.department");
 		for(Office office : officeList){
-			perseoUrl = perseoUrl+office.code.toString();
+			perseoUrl = perseoUrl+office.codeId;
 			HttpResponse perseoResponse = WS.url(perseoUrl).get();
 			Gson gson = new Gson();
 

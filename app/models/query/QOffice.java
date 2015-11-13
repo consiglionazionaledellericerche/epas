@@ -1,15 +1,20 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.DatePath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.ListPath;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SimplePath;
+import com.mysema.query.types.path.StringPath;
 import models.Office;
 
-
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
 
 /**
@@ -28,7 +33,11 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final StringPath address = createString("address");
 
-    public final NumberPath<Integer> code = createNumber("code", Integer.class);
+    public final ListPath<models.BadgeReader, QBadgeReader> badgeReaders = this.<models.BadgeReader, QBadgeReader>createList("badgeReaders", models.BadgeReader.class, QBadgeReader.class, PathInits.DIRECT2);
+
+    public final StringPath code = createString("code");
+
+    public final StringPath codeId = createString("codeId");
 
     public final ListPath<models.ConfGeneral, QConfGeneral> confGeneral = this.<models.ConfGeneral, QConfGeneral>createList("confGeneral", models.ConfGeneral.class, QConfGeneral.class, PathInits.DIRECT2);
 
@@ -36,6 +45,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final BooleanPath headQuarter = createBoolean("headQuarter");
 
     //inherited
     public final NumberPath<Long> id = _super.id;

@@ -3,8 +3,6 @@ package manager;
 import it.cnr.iit.epas.DateUtility;
 import models.Stamping;
 
-import org.joda.time.Minutes;
-
 /**
  * Classe che modella due stampings logicamente accoppiate nel PersonDay.
  * (una di ingresso ed una di uscita)

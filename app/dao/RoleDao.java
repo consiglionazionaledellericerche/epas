@@ -1,18 +1,16 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import models.Role;
-import models.query.QRole;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import models.Role;
+import models.query.QRole;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 

@@ -1,0 +1,94 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+<div class="container">
+#{form @Import.importOffices(),class:'form-horizontal'}
+
+  <div class="row">
+    <button type="submit" class="btn btn-default col-xs-2 col-xs-offset-5">
+       <em class="text-primary"><i class="fa fa-cloud-download fa-2x"></i> Importa Sedi</em>
+    </button>
+
+  </div>
+
+	#{field 'offices'}
+	<div class='form-group'>
+		<label class="control-label col-sm-2" for="${field.id}">Uffici</label>
+
+		<div class="col-sm-8">
+			<div class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+        <input id="search" class="form-control" type="text">
+      </div>
+			<div id="all" class="btn btn-default" >Select All</div>
+			<div id="none" class="btn btn-default" >Deselect All</div>
+			#{select field.id,id:field.id,class:'list-group form-control',multiple:'multiple'}
+			#{list importedOffices}
+				#{option _.id}${_.id} - ${_.name} - ${_.code}#{/option}
+			#{/list}
+			#{/select}
+		</div>
+	</div>
+	#{/field}
+
+#{/form}
+</div>
+
+#{set 'moreScripts'}
+<script src="//cdn.jsdelivr.net/bootstrap.listgroup/1.1.2/listgroup.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#all').click(function() {
+        $('ul.list-group > a').each(function() {
+            if (!$(this).hasClass('active')) {
+                $(this).click();
+            }
+        });
+    });
+    $('#none').click(function() {
+        $('ul.list-group > a').each(function() {
+            if ($(this).hasClass('active')) {
+                $(this).click();
+            }
+        });
+    });
+    // $('select.list-group').show();
+    $('ul.list-group').filter($('#search'));
+});
+jQuery.fn.filter = function(textbox) {
+    return this.each(function() {
+        var select = this;
+        var options = [];
+        $(select).find('a').each(function() {
+            options.push({
+                value: $(this).attr('data-value'),
+                text: $(this).text()
+            });
+        });
+        $(select).data('options', options);
+        $(textbox).bind('change keyup', function() {
+            var options = $(select).empty().data('options');
+            var search = $(this).val().trim();
+            var regex = new RegExp(search, "gi");
+            $.each(options, function(i) {
+                var option = options[i];
+                if (option.text.match(regex) !==
+                    null) {
+                    $(select).append($('<a>').addClass(
+                        'list-group-item').prop(
+                        "href", "#").text(
+                        option.text).attr(
+                        'data-value',
+                        option.value));
+                    $(select).trigger("change");
+                }
+            });
+            $(select).data('options', options);
+        });
+    });
+};
+</script>
+#{/set}
+

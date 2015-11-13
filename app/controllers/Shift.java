@@ -1,18 +1,16 @@
 package controllers;
 
-import static play.modules.pdf.PDF.renderPDF;
+import com.google.common.base.Optional;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+import controllers.Resecure.BasicAuth;
+import dao.AbsenceDao;
+import dao.PersonDao;
+import dao.PersonShiftDayDao;
+import dao.ShiftDao;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import manager.ShiftManager;
 import models.Absence;
 import models.Competence;
@@ -29,11 +27,9 @@ import models.exports.ShiftPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
-
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import org.slf4j.LoggerFactory;
-
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
@@ -43,17 +39,16 @@ import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import controllers.Resecure.BasicAuth;
-import dao.AbsenceDao;
-import dao.PersonDao;
-import dao.PersonShiftDayDao;
-import dao.ShiftDao;
+import static play.modules.pdf.PDF.renderPDF;
 
 
 /**

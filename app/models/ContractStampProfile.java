@@ -1,16 +1,14 @@
 package models;
 
+import com.google.common.collect.Range;
+import models.base.BaseModel;
+import org.joda.time.LocalDate;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Range;
 
 @Entity
 @Table(name="contract_stamp_profiles")

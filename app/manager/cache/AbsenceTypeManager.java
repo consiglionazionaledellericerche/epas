@@ -1,17 +1,5 @@
 package manager.cache;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import models.AbsenceType;
-import models.enumerate.AbsenceTypeMapping;
-import models.query.QAbsenceType;
-
-import org.apache.commons.lang.NotImplementedException;
-
-import play.cache.Cache;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -19,6 +7,14 @@ import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
+import models.AbsenceType;
+import models.enumerate.AbsenceTypeMapping;
+import models.query.QAbsenceType;
+import org.apache.commons.lang.NotImplementedException;
+import play.cache.Cache;
+
+import javax.persistence.EntityManager;
+import java.util.List;
 
 public class AbsenceTypeManager {
 	

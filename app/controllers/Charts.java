@@ -1,12 +1,10 @@
 package controllers;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.CompetenceDao;
+import dao.PersonDao;
 import manager.ChartsManager;
 import manager.ChartsManager.Month;
 import manager.ChartsManager.RenderList;
@@ -17,22 +15,20 @@ import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.exports.PersonOvertime;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
-//import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.inject.Inject;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
-import dao.CompetenceDao;
-import dao.PersonDao;
+//import play.Logger;
 
 @With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{

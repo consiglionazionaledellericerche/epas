@@ -1,10 +1,9 @@
 package helpers.validators;
 
-import java.util.List;
-
+import com.google.common.base.Splitter;
 import play.data.validation.Check;
 
-import com.google.common.base.Splitter;
+import java.util.List;
 
 public class StringIsTime extends Check {
 

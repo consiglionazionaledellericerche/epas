@@ -12,7 +12,7 @@ public enum AuthWebStamping {
 	
 	public String description;
 	
-	private AuthWebStamping(String description){
+	AuthWebStamping(String description){
 		this.description = description;
 	}
 }

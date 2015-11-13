@@ -1,14 +1,29 @@
 package manager;
 
-import com.google.common.base.*;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import dao.*;
+import dao.AbsenceDao;
+import dao.ContractDao;
+import dao.PersonChildrenDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.UserDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
-import models.*;
+import models.AbsenceType;
+import models.Contract;
+import models.ContractWorkingTimeType;
+import models.Person;
+import models.PersonDay;
+import models.User;
+import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 import play.libs.Codec;
@@ -17,17 +32,20 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class PersonManager {
 
 	@Inject
 	public PersonManager(ContractDao contractDao,
-			PersonChildrenDao personChildrenDao, PersonDao personDao,
-			PersonDayDao personDayDao, AbsenceDao absenceDao,
-			PersonDayManager personDayManager,UserDao userDao,
-			IWrapperFactory wrapperFactory,ConfGeneralManager confGeneralManager) {
+						 PersonChildrenDao personChildrenDao, PersonDao personDao,
+						 PersonDayDao personDayDao, AbsenceDao absenceDao,
+						 PersonDayManager personDayManager, UserDao userDao,
+						 IWrapperFactory wrapperFactory, ConfGeneralManager confGeneralManager) {
 		this.contractDao = contractDao;
 		this.personDao = personDao;
 		this.personDayDao = personDayDao;
@@ -130,7 +148,7 @@ public class PersonManager {
 	 * nuovo dipendente inserito 
 	 */
 	public List<String> composeUsername(String name, String surname){
-		List<String> usernameList = new ArrayList<String>();
+		List<String> usernameList = Lists.newArrayList();
 		usernameList.add(name.replace(' ', '_').toLowerCase() + '.' + surname.replace(' ', '_').toLowerCase());
 		usernameList.add(name.trim().toLowerCase().substring(0,1)+'.'+surname.replace(' ','_').toLowerCase());
 
@@ -261,7 +279,7 @@ public class PersonManager {
 	 * @param month
 	 * @return
 	 */
-	public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year, 
+	public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year,
 			Optional<Integer> month) {
 		
 		List<PersonDay> pdList = personDayDao

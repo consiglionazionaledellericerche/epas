@@ -1,13 +1,10 @@
 package manager;
 
-import java.util.Iterator;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
+import java.util.Iterator;
 
 public class ContractWorkingTimeTypeManager {
 

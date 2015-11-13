@@ -1,26 +1,21 @@
 package controllers;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
+import javax.inject.Inject;
+import java.util.List;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{

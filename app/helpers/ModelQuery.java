@@ -1,17 +1,15 @@
 package helpers;
 
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-
-import play.db.jpa.JPA;
-
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 import com.mysema.query.types.Expression;
+import play.db.jpa.JPA;
+
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * @author marco

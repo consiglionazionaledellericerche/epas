@@ -1,10 +1,10 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
+import com.google.common.base.Optional;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
@@ -12,14 +12,11 @@ import models.PersonReperibilityType;
 import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityDay;
 import models.query.QPersonReperibilityType;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 

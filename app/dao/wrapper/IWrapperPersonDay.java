@@ -1,11 +1,10 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
 import models.Contract;
 import models.PersonDay;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-
-import com.google.common.base.Optional;
 
 /**
  * @author alessandro

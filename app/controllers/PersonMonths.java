@@ -1,11 +1,12 @@
 package controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.PersonMonthRecapDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperContractMonthRecap;
+import dao.wrapper.IWrapperFactory;
 import manager.PersonMonthsManager;
 import manager.PersonMonthsManager.Insertable;
 import models.Contract;
@@ -13,22 +14,16 @@ import models.ContractMonthRecap;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.PersonMonthRecapDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperContractMonthRecap;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @With( {Resecure.class, RequestInit.class} )
 public class PersonMonths extends Controller{

@@ -1,21 +1,19 @@
 package dao.wrapper.function;
 
-import javax.inject.Inject;
-
-import models.Contract;
-import models.ContractMonthRecap;
-import models.Office;
-import models.Person;
-import models.WorkingTimeType;
-
 import com.google.common.base.Function;
-
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperWorkingTimeType;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Office;
+import models.Person;
+import models.WorkingTimeType;
+
+import javax.inject.Inject;
 
 public class WrapperModelFunctionFactory {
 	

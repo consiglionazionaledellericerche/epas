@@ -3,15 +3,13 @@
  */
 package it.cnr.iit.epas;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import dao.CompetenceCodeDao;
+import dao.PersonDao;
 import injection.StaticInject;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -20,13 +18,11 @@ import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import dao.CompetenceCodeDao;
-import dao.PersonDao;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

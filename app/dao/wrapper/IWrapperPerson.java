@@ -1,7 +1,6 @@
 package dao.wrapper;
 
-import java.util.List;
-
+import com.google.common.base.Optional;
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -11,11 +10,10 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
+import java.util.List;
 
 /**
  * @author marco

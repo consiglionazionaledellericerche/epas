@@ -1,14 +1,13 @@
 package controllers;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
 
 @With( {Resecure.class} )
 public class Version extends Controller {
