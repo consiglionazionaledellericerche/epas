@@ -73,8 +73,8 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	/*background: #fff;*/
-	background: rgba(0, 51, 128, 0.57);
+	background: black;
+	/*background: rgba(0, 51, 128, 0.57);*/
 	border-radius: 6px;
 }
 
@@ -85,10 +85,10 @@
 
 .modal-backdrop, 
 .modal-backdrop.fade.in{
-	/*opacity: 0.7;
+	opacity: 0.5;
 	filter: alpha(opacity=70);
-	background: #fff;*/
-	background: rgba(0, 51, 128, 0.57);
+	background: black;
+	/*background: rgba(0, 51, 128, 0.57);*/
 }
 
 .modal.container {

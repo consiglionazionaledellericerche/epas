@@ -194,17 +194,6 @@ $(function($){
 		
 		this.find('data-tooltip').tooltip();
 		
-		this.find('.my-modal').on('hidden.bs.modal', function(){
-			$(this).data('bs.modal', null);
-		    /* $(this).find('.modal-content').empty(); */
-		});
-		
-		this.find('.my-modal-large').on('hidden.bs.modal', function(){
-			$(this).data('bs.modal', null); /* vecchio metodo che non svuotava il modale*/
-			/* $(this).removeData('bs.modal'); per bootstrap precedente al 3*/
-			/* $(this).find('.modal-content').empty(); nuovo metodo che però non funziona */
-		});
-
 		this.find('a[data-x-editable][data-type="textarea"]').editable({
 		    showbuttons: 'bottom'
 		});	
@@ -225,7 +214,6 @@ $(function($){
 	    	}, 500));
 	    });
 
-		
 		this.find('form[data-reload] :input').on('change', function(e) {
 	    	var $form = $(this).closest("form");
 	    	var selector = $form.data('reload');
@@ -253,17 +241,6 @@ $(function($){
 	    		$this.trigger('change');
 	    	}, 500));
 	    });
-	    
-	    this.find('a[data-modal]').click(function(e) {
-			var $this = $(this);
-			var url = $this.attr('href');
-			var $modal = $($this.data('modal'));
-			var $modalbody = $modal.modal('show').find('.modal-content');
-			$modalbody.load(url, function() {
-				$modalbody.initepas();
-			});
-			e.preventDefault();
-		});
 	    
 	    this.find('#buttonError').click(function() {
 	    	$('#flash-error').hide();

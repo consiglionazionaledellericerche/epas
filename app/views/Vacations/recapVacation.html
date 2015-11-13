@@ -1,0 +1,118 @@
+#{modalAsync title: vacationsRecap.person.fullname + ' Riepilogo ferie e permessi' }
+  
+<div>
+  #{tabs}
+    
+    #{tabItem id:'vacationLastYear', title:'Ferie del ' + (vacationsRecap.year-1), active:activeVacationLastYear /}
+    #{tabItem id:'vacationCurrentYear', title:'Ferie del ' + vacationsRecap.year, active:activeVacationCurrentYear /}
+    #{tabItem id:'permission', title:'Permessi del ' + vacationsRecap.year, active:activePermission /}
+  
+  #{/tabs}
+  
+  #{tabContent}
+   
+   <!--  ferie anno passato -->
+   #{tabContentItem id:'vacationLastYear', active:activeVacationLastYear}
+      #{if vacationsRecap.sourceVacationLastYearUsed() > 0}
+        <div class="alert alert-success">
+			<p>Per l'anno ${vacationsRecap.year - 1} sono stati definiti  
+			<strong>${vacationsRecap.sourceVacationLastYearUsed()}</strong>
+			giorni di ferie da inizializzazione ePAS.</p>
+		</div>	
+	  #{/if}
+	      
+      <div class="col-xs-8 col-xs-offset-2">
+        <table class="table table-condensed table-hover">
+			    
+		<thead>
+		  <tr>
+			 <th class="col-xs-4">Data</th>
+		     <th class="col-xs-2">Codice</th>
+		     <th class="col-xs-6">Descrizione</th>
+		  </tr>
+		</thead>
+		<tbody>
+		#{list items:vacationsRecap.listVacationLastYearUsed(), as:'absence'}
+		    <tr>
+		       <td>${absence.personDay.date.format()}</td>
+		       <td>${absence.absenceType.code}</td>
+		       <td>${absence.absenceType.description}</td>
+		    </tr>
+		#{/list}
+		</tbody>
+	    </table>
+      </div>
+   #{/tabContentItem}
+   
+   <!--  ferie anno corrente -->
+   #{tabContentItem id:'vacationCurrentYear', active:activeVacationCurrentYear}
+	  #{if vacationsRecap.sourceVacationCurrentYearUsed() > 0}
+	  <div class="alert alert-warning">
+			<p>Sono stati definiti per l'anno ${vacationsRecap.year} 
+			<strong>${vacationsRecap.sourceVacationCurrentYearUsed()}</strong>
+			giorni di ferie da inizializzazione ePAS.</p>
+	  </div>	
+	  #{/if}
+	
+	  <div class="col-xs-8 col-xs-offset-2">
+	  
+	  <table class="table table-condensed table-hover">
+	   <thead>
+	   <tr>
+	     <th class="col-xs-4">Data</th>
+	     <th class="col-xs-4">Codice</th>
+	     <th class="col-xs-4">Descrizione</th>
+	   </tr>
+	   </thead>
+	   <tbody>
+	   #{list items:vacationsRecap.listVacationCurrentYearUsed(), as:'absence'}
+	     <tr>
+	       <td>${absence.personDay.date.format()}</td>
+	       <td>${absence.absenceType.code}</td>
+	       <td>${absence.absenceType.description}</td>
+	     </tr>
+	   #{/list}
+	   </tbody>
+	   </table>
+      </div>    
+   #{/tabContentItem}
+   
+   <!--  permessi -->
+   #{tabContentItem id:'permission', active:activePermission}
+      #{if vacationsRecap.sourcePermissionUsed() > 0}
+         <div class="alert alert-warning">
+			<p>Sono stati definiti per l'anno ${vacationsRecap.year} 
+		      <strong>${vacationsRecap.sourcePermissionUsed()}</strong>
+			  giorni di permesso da inizializzazione ePAS.
+			</p>
+		 </div>	
+      #{/if}
+      
+      <div class="col-xs-8 col-xs-offset-2">
+      <table class="table table-condensed table-hover">
+	   <thead>
+	   <tr>
+	     <th class="col-xs-4">Data</th>
+	     <th class="col-xs-4">Codice</th>
+	     <th class="col-xs-4">Descrizione</th>
+	   </tr>
+	   </thead>
+	   <tbody>
+	   #{list items:vacationsRecap.listPermissionUsed(), as:'absence'}
+	      <tr>
+	       <td>${absence.personDay.date.format()}</td>
+	       <td>${absence.absenceType.code}</td>
+	       <td>${absence.absenceType.description}</td>
+	      </tr>
+	   #{/list}
+	   </tbody>
+	   </table>
+	  </div> 
+   #{/tabContentItem}
+   
+  #{/tabContent}
+
+</div>          
+ 
+#{/modalAsync}        
+
