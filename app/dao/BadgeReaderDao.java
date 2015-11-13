@@ -1,5 +1,6 @@
 package dao;
 
+
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
@@ -10,9 +11,12 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 import models.BadgeReader;
+import models.User;
 import models.query.QBadgeReader;
+import models.query.QUser;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 
@@ -28,18 +32,33 @@ public class BadgeReaderDao extends DaoBase {
 	BadgeReaderDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
 		super(queryFactory, emp);
 	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return il badgereader associato al codice passato come parametro
+	 */
+	public BadgeReader byId(Long id){
+
+		final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+
+		final JPQLQuery query = getQueryFactory().from(badgeReader)
+				.where(badgeReader.id.eq(id));
+		return query.singleResult(badgeReader);
+	}
+	
 	/**
 	 * 
 	 * @param code
 	 * @return il badgereader associato al codice passato come parametro
 	 */
-	public BadgeReader getBadgeReaderByCode(String code){
+	public BadgeReader byCode(String code){
 
-		final QBadgeReader badge = QBadgeReader.badgeReader;
+		final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
-		final JPQLQuery query = getQueryFactory().from(badge)
-				.where(badge.code.eq(code));
-		return query.singleResult(badge);
+		final JPQLQuery query = getQueryFactory().from(badgeReader)
+				.where(badgeReader.code.eq(code));
+		return query.singleResult(badgeReader);
 	}
 	
 	/**
@@ -73,4 +92,21 @@ public class BadgeReaderDao extends DaoBase {
 		}
 		return nameCondition.or(badgeReader.code.startsWithIgnoreCase(name));
 	}
+
+	/**
+	 * La lista degli account di tutti i badgeReader.
+	 * @return
+	 */
+	public List<User> usersBadgeReader() {
+		
+		final QUser user = QUser.user;
+		
+		return getQueryFactory()
+				.from(user)
+				.leftJoin(user.badgeReader)
+				.where(user.badgeReader.isNotNull())
+				.orderBy(user.badgeReader.code.asc())
+				.list(user);
+	}
+
 }

@@ -14,6 +14,15 @@ $(function($){
         var target = $form.data('async');
         var errorTarget = $form.data('async-error');
         var $target = $(target);
+        
+        //patch per multipart (blob) 
+        var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+        var formData = $form.serialize();
+        if($form.attr('enctype') === 'multipart/form-data') {
+        	contentType = false;
+        	formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449 
+        }
+        
 //        $form.find(':input').prop("readonly", true);
 //        var bgcolor = $form.css('background-color');
 //        $form.css('backround-color', '#e0e0e0');
@@ -21,7 +30,8 @@ $(function($){
         $.ajax({
             type: $form.attr('method'),
             url: $form.attr('action'),
-            data: $form.serialize(),
+            data: formData,
+            contentType: contentType
         }).done(function(data, status) {
             $target.replaceWith($(target, data));
             // TODO: verificare se occorre fare unwrap
@@ -49,7 +59,7 @@ $(function($){
      */
     $(document.body).on('click', 'a[data-async-modal]', function(e) {
     	var $this = $(this);
-    	var $modal = $($this.data('asyncModal'));
+    	var $modal = $($this.data('async-modal'));
     	var url = $this.attr('href');
     	$('body').modalmanager('loading');
 
@@ -61,6 +71,53 @@ $(function($){
     
     bootbox.setDefaults({locale: 'it', className: 'bootbox_modal'});
 
+    /* switcher 2/3 tabs. 
+     * mettere come id:
+     * ai li pills1 pills2 pills3
+     * ai div divpills1 divpills2 divpills3
+     */ 
+    $.fn.switchpills = function() {
+    	var divpills1 = $('#divpills1');
+    	var divpills2 = $('#divpills2');
+    	var divpills3 = $('#divpills3');
+		var pills1 = $('#pills1');
+		var pills2 = $('#pills2');
+		var pills3 = $('#pills3');
+		
+		function toggle() {
+			divpills1.toogle(0);
+			divpills2.toogle(0);
+			divpills3.toogle(0);
+		}  
+    	
+		$(pills1.click(function(){
+			pills1.addClass('active');
+			pills2.removeClass('active');
+			pills3.removeClass('active');
+			divpills1.show();
+			divpills2.hide();
+			divpills3.hide();
+			
+		}));
+		$(pills2.click(function(){
+			pills1.removeClass('active');
+			pills2.addClass('active');
+			pills3.removeClass('active');
+			divpills1.hide();
+			divpills2.show();
+			divpills3.hide();
+			
+		}));
+		$(pills3.click(function(){
+			pills1.removeClass('active');
+			pills2.removeClass('active');
+			pills3.addClass('active');
+			divpills1.hide();
+			divpills2.hide();
+			divpills3.show();
+			
+		}));
+    }
 	
 	function toggleChevron(e) {
 		var $fa = $(e.target).prev('.panel-heading').find('i.fa');
@@ -137,17 +194,6 @@ $(function($){
 		
 		this.find('data-tooltip').tooltip();
 		
-		this.find('.my-modal').on('hidden.bs.modal', function(){
-			$(this).data('bs.modal', null);
-		    /* $(this).find('.modal-content').empty(); */
-		});
-		
-		this.find('.my-modal-large').on('hidden.bs.modal', function(){
-			$(this).data('bs.modal', null); /* vecchio metodo che non svuotava il modale*/
-			/* $(this).removeData('bs.modal'); per bootstrap precedente al 3*/
-			/* $(this).find('.modal-content').empty(); nuovo metodo che però non funziona */
-		});
-
 		this.find('a[data-x-editable][data-type="textarea"]').editable({
 		    showbuttons: 'bottom'
 		});	
@@ -168,7 +214,6 @@ $(function($){
 	    	}, 500));
 	    });
 
-		
 		this.find('form[data-reload] :input').on('change', function(e) {
 	    	var $form = $(this).closest("form");
 	    	var selector = $form.data('reload');
@@ -197,17 +242,6 @@ $(function($){
 	    	}, 500));
 	    });
 	    
-	    this.find('a[data-modal]').click(function(e) {
-			var $this = $(this);
-			var url = $this.attr('href');
-			var $modal = $($this.data('modal'));
-			var $modalbody = $modal.modal('show').find('.modal-content');
-			$modalbody.load(url, function() {
-				$modalbody.initepas();
-			});
-			e.preventDefault();
-		});
-	    
 	    this.find('#buttonError').click(function() {
 	    	$('#flash-error').hide();
 		});	
@@ -226,10 +260,15 @@ $(function($){
 	    	$deleteFirst.hide();
 	    	$delete.show( "fast" );
 	    });
-    
+	    
+	    this.switchpills();
+	    
 	}	/* fine initepas() */
 
 	$('body').initepas();
+	
+
+
 
 });	/* fine on document load */
 
@@ -264,7 +303,5 @@ function generateUserName(name,surname,username){
     username.append($option);
   });
 }
-
-
 
 moment.locale('it_IT');

@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import dao.AbsenceDao;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 
 @Slf4j
 public class PersonDayManager {
@@ -381,7 +383,7 @@ public class PersonDayManager {
 	 * @param wttd
 	 * @return
 	 */
-	private boolean isGianvitoConditionSatisfied(int workingTimeDecurted, 
+	public boolean isGianvitoConditionSatisfied(int workingTimeDecurted, 
 			int justifiedTimeAtWork, LocalDate date, Contract contract, WorkingTimeTypeDay wttd) {
 
 		// - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro giornaliero.
@@ -507,7 +509,7 @@ public class PersonDayManager {
 	 * Setta il campo valid per ciascuna stamping contenuta in orderedStampings
 	 */
 	public void computeValidStampings(PersonDay pd) {
-		if(!pd.stampings.isEmpty()){
+		if (!pd.stampings.isEmpty()) {
 			getValidPairStamping(pd);
 		}
 	}
@@ -868,9 +870,8 @@ public class PersonDayManager {
 			}
 			if(lastStampingIsIn)
 			{
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, LocalDateTime.now());
 				stamping.way = WayType.out;
-				stamping.date = new LocalDateTime();
 				stamping.markedByAdmin = false;
 				stamping.exitingNow = true;
 				pd.stampings.add(stamping);
@@ -892,9 +893,8 @@ public class PersonDayManager {
 			if (isLastIn && s.way == WayType.in)
 			{
 				//creo l'uscita fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.out;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				//salvo l'entrata
 				stampingsForTemplate.add(s);
@@ -915,9 +915,8 @@ public class PersonDayManager {
 			if (!isLastIn && s.way == WayType.out)
 			{
 				//creo l'entrata fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.in;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				//salvo l'uscita
 				stampingsForTemplate.add(s);
@@ -930,9 +929,8 @@ public class PersonDayManager {
 			if(isLastIn)
 			{
 				//creo l'uscita fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.out;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				isLastIn = false;
 				continue;
@@ -940,9 +938,8 @@ public class PersonDayManager {
 			if(!isLastIn)
 			{
 				//creo l'entrata fittizia
-				Stamping stamping = new Stamping();
+				Stamping stamping = new Stamping(pd, null);
 				stamping.way = WayType.in;
-				stamping.date = null;
 				stampingsForTemplate.add(stamping);
 				isLastIn = true;
 				continue;
@@ -951,19 +948,23 @@ public class PersonDayManager {
 
 		return stampingsForTemplate;
 	}
-
+	
 	/**
-	 * Ritorna le coppie di stampings valide al fine del calcolo del time at work. All'interno del metodo
-	 * viene anche settato il campo valid di ciascuna stampings contenuta nel person day
+	 * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
+	 * 
+	 * N.B. setta il campo valid di ciascuna stampings contenuta nel person day.
+     *
 	 * @return
 	 */
-	// FIXME il fatto di impostare a valid il campo delle stamping e' un effetto collaterale del metodo,
-	//		che "dovrebbe" essere un getter.Questa operazione andrebbe fatta in un metodo a parte
 	public List<PairStamping> getValidPairStamping(PersonDay personDay)	{
-
-		List<Stamping> stampings = personDay.stampings;
-
+		
+		//Lavoro su una copia ordinata.
+		List<Stamping> stampings = Lists.newArrayList();
+		for(Stamping stamping : personDay.stampings) {
+			stampings.add(stamping);
+		}
 		Collections.sort(stampings);
+		
 		//(1)Costruisco le coppie valide per calcolare il worktime
 		List<PairStamping> validPairs = new ArrayList<PairStamping>();
 		List<Stamping> serviceStampings = new ArrayList<Stamping>();

@@ -85,8 +85,10 @@ public class Vacations extends Controller{
 
 		VacationsRecap vacationsRecap = vr.get();
 		
-		render(vacationsRecap);
-
+		boolean activeVacationCurrentYear = true;
+		
+		render("@recapVacation", vacationsRecap, activeVacationCurrentYear);
+		
 	}
 	
 
@@ -111,7 +113,9 @@ public class Vacations extends Controller{
 
 		VacationsRecap vacationsRecap = vr.get();
 		
-		render(vacationsRecap);
+		boolean activeVacationLastYear = true;
+		
+		render("@recapVacation", vacationsRecap, activeVacationLastYear);
 	}
 	
 	
@@ -135,7 +139,10 @@ public class Vacations extends Controller{
 
 		VacationsRecap vacationsRecap = vr.get();
 		
-		render(vacationsRecap);
+		boolean activePermission = true;
+		
+		render("@recapVacation", vacationsRecap, activePermission);
 	}
+	
 	
 }

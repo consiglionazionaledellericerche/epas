@@ -12,6 +12,7 @@
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/cerulean/bootstrap.min.css">
+
     *{ <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">  }*
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
@@ -90,7 +91,7 @@
             #{/else}
             
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
-          		${session.username} <b class="caret"></b></a>
+          	  <div class="visible-lg-inline">	${session.username}</div></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
@@ -122,57 +123,52 @@
             <li class="dropdown">  
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
-          		Amministrazione <b class="caret"></b></a>
+          		<div class="visible-md-inline visible-lg-inline"> Amministrazione</div></a>
               <ul class="dropdown-menu">
                 
                 #{if ip.viewPerson }
-                  <li><a href="@{Persons.list()}">Lista Persone</a></li> 
+                  <li><a href="@{Persons.list()}">Lista Persone</a></li>
+                  <li class="divider"></li> 
                 #{/if}
                 
-                #{if ip.isEmployeeVisible()}
-                <li class="divider"></li>
-                
-	                #{if ip.viewPersonDay }
-	                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
-	                   session.get("yearSelected"), 
-	                   session.get("monthSelected"))}">Timbrature</a></li> 
-	                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
-	                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
-	                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
-	                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
-	                  <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> 
-	                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
-	                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
-	                  <li class="divider"></li>
-	                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
-	                  <li class="divider"></li>
-	                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
-	                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
-	                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-	                   session.get("monthSelected"))}">Assenze</a></li>
-	                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
-	                  
-	                  <li class="divider"></li>
-	                  
-	                #{/if}
+                #{if ip.viewPersonDay }
+                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
+                   session.get("yearSelected"), 
+                   session.get("monthSelected"))}">Timbrature</a></li> 
+                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
+                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
+                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
+                  <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> 
+                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
+                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
+                  <li class="divider"></li>
+                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
+                  <li class="divider"></li>
+                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
+                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+                   session.get("monthSelected"))}">Assenze</a></li>
+                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+                  
+                  <li class="divider"></li>
+	            #{/if}
 	                
-	                #{if ip.viewCompetence }
+	            #{if ip.viewCompetence }
 	                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
 	                  session.get("monthSelected"))}">Competenze</a></li>
 	                <li class="divider"></li>
-	                #{/if}
+	            #{/if}
 	                
-	                #{if ip.uploadSituation }
+	            #{if ip.uploadSituation }
 	                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
-	                #{/if}
-	                
 	                <li class="divider"></li>
-	                #{if ip.viewPerson }
+	            #{/if}
+	                
+	            #{if ip.viewPersonDay }
 	                  <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"), 
 	                   session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
-	        		#{/if}
-        		
-        		#{/if}
+	        	#{/if}
         		
               </ul>
             </li>
@@ -188,7 +184,7 @@
             <li class="dropdown">  
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-          		Configurazione <b class="caret"></b></a>
+          	  <div class="visible-md-inline visible-lg-inline">	Configurazione</div></a>
               <ul class="dropdown-menu">
                 #{if ip.viewOffice }
                   <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
@@ -227,58 +223,95 @@
           	</li>
           </ul>
           #{/if}
+          
+          #{if ip.isToolsVisible()}
+          <ul class="nav navbar-nav">
+          	<li class="dropdown">
+          		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-medkit"></i></i>
+          		Tools <b class="caret"></b></a>
+          		<ul class="dropdown-menu">
+          			<li><a href="@{Administration.utilities()}">Utilities</a></li>
+          		</ul>
+          	</li>
+          </ul>
+          #{/if}
 
 		  #{include '/menu.html' /}          
       
-
-      	  #{if session.contains("sudo.username")}
-      	    <ul class="nav navbar-nav navbar-right">
+		  <ul class="nav navbar-nav navbar-right">
+		  
+		    <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring"></i></a>
+              <ul class="dropdown-menu">
+			    #{if ip.viewPerson }
+			     <li> 
+  		  		   <a data-toggle="modal" href="@{ReportCentre.generateReport()}" data-modal=".my-modal">
+			  		<i class="fa fa-bug"></i> Segnala un problema
+			 	   </a>
+			     </li>
+			    #{/if}              
+                <li> 
+  		  		   <a href="@{Faq.faq()}">
+			  		<i class="fa fa-comment-o"> FAQ</i>
+			 	   </a>
+			    </li>
+			  </ul>
+            </li>      
+					  	
+		  
+		  
+      	    #{if session.contains("sudo.username")}
       	    
       	      #{if loginResponse != null}
-      	      <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
+			  <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	        <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-      	      </li>
-      	      #{/if}
-      	      
-      	      <li><a href="@{Administrators.restoreUser()}"><span class="glyphicon glyphicon-log-out"></span> Torna chi eri</a></li>
+      	      </li>      	      
+     	      #{/if}
+     	      
+     	      <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
+                <ul class="dropdown-menu">
+      	         <li> 
+  		  		   <a href="@{Administrators.restoreUser()}"></i>
+			  		Torna chi eri
+			 	   </a>
+			     </li>
+				</ul>
+			  </li>
             
-            </ul>
-  		  #{/if}
+  		    #{/if}
   		  
   		  
   		  
-  		  #{else}
-    	    #{if session.username}
-      		  <ul class="nav navbar-nav navbar-right">
+  		    #{else}
+    	      #{if session.username}
       		  
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
       	        </li>      			
       		    #{/if}
-      		    #{else}
-      		    <li>
-  		  		 <a data-toggle="modal" href="@{ReportCentre.generateReport()}" data-modal=".my-modal"><i class="fa fa-bug"></i>
-			  		Segnala un problema
-			 	</a>
-			 	</li>
-			 	#{/else}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	        </li>
       	        #{/if}
   
-     		    #{if ip.viewPerson }
-	   	        <li><a href="@{Faq.faq()}"><i class="fa fa-comment-o"></i> FAQ</a></li>
-      	        #{/if}
-    	    
-    	        <li><a href="@{secure.logout()}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-    	      </ul>
-    	    #{/if}
+    	        <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
+                <ul class="dropdown-menu">
+      	         <li> 
+  		  		   <a href=href="@{secure.logout()}"></i>
+			  		Esci
+			 	   </a>
+			     </li>
+				</ul>
+			  </li>
+   	      
+    	      #{/if}
   		  
-  		  #{/else}
-  
+  		    #{/else}
+  		  </ul>
   		  
   		  
   		  <div class="clearfix">
@@ -329,10 +362,9 @@
       <!-- do layout -->
       #{doLayout /}
 
-    </div>
-    
-    <!-- Altri componenti html -->
-    #{if flash.error}
+
+     <!-- Altri componenti html -->
+     #{if flash.error}
       <div id="flash-error" class="popover bottom">
         <div class="arrow"></div>
         <h3 class="popover-title"><strong>Notifica</strong>
@@ -347,8 +379,8 @@
           #{/else}
         </div>
       </div>
-    #{/if}
-    #{if flash.success}
+     #{/if}
+     #{if flash.success}
       <div id="flash-success" class="popover bottom">
         <div class="arrow"></div>
         <h3 class="popover-title"><strong>Notifica</strong>
@@ -363,7 +395,14 @@
           	#{/else}
         </div>
       </div>
-    #{/if}  
+     #{/if}
+     
+     <div id="defaultModal" class="modal container" tabindex="-1"></div>
+    
+       
+    </div>
+    
+   
       
    </div>
 

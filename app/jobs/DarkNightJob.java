@@ -34,7 +34,7 @@ public class DarkNightJob extends Job{
 
 		consistencyManager.fixPersonSituation(
 				Optional.<Person>absent(),Optional.<User>absent(),
-				LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue(), true);
+				LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue(), true, false);
 
 		log.info("Concluso DarkNightJob");
 

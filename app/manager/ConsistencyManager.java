@@ -107,8 +107,8 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public void fixPersonSituation(Optional<Person> person,Optional<User> user,
-			LocalDate fromDate, boolean sendMail){
+	public void fixPersonSituation(Optional<Person> person ,Optional<User> user,
+			LocalDate fromDate, boolean sendMail, boolean onlyRecap){
 
 		Set<Office> offices = user.isPresent() ?
 				secureManager.officesWriteAllowed(user.get()) 
@@ -127,7 +127,11 @@ public class ConsistencyManager {
 
 				for(Person p : personList) {
 					
-					updatePersonSituation(p.id, fromDate);
+					if (onlyRecap) {
+						updatePersonRecaps(p.id, fromDate);
+					} else {
+						updatePersonSituation(p.id, fromDate);
+					}
 					//attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
 					//possono esserci effetti collaterali....vedi il blocco try sotto
 					JPA.em().flush();
@@ -154,8 +158,6 @@ public class ConsistencyManager {
 				}
 	}
 
-
-
 	/**
 	 * Controlla la presenza di errori nelle timbrature. 
 	 * Gestisce i giorni problematici nella tabella PersonDayInTrouble.
@@ -164,15 +166,25 @@ public class ConsistencyManager {
 	 * @param from
 	 */
 	public void updatePersonSituation(Long personId, LocalDate from) {
+		updatePersonSituationEngine(personId, from, false);
+	}
+	
+	public void updatePersonRecaps(Long personId, LocalDate from) {
+		updatePersonSituationEngine(personId, from, true);
+	}
+
+	
+	private void updatePersonSituationEngine(Long personId, LocalDate from, 
+			boolean updateOnlyRecaps) {
 		
 		final Person person = personDao.fetchPersonForComputation(personId, 
 				Optional.fromNullable(from), 
 				Optional.<LocalDate>absent());
 		
-		log.info("Update person situation {} da {} a oggi", person.getFullname(), from);
+		log.info("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
 
 		if (person.qualification == null) {
-			log.info("Annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
+			log.info("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
 			return;
 		}
 		
@@ -183,8 +195,7 @@ public class ConsistencyManager {
 		
 		LocalDate date = personFirstDateForEpasComputation(person,
 				Optional.fromNullable(from));
-		log.info("Il primo personDay utile è del {}", date);
-		
+				
 		List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, date, 
 				Optional.fromNullable(lastPersonDayToCompute));
 		
@@ -194,48 +205,50 @@ public class ConsistencyManager {
 			personDaysMap.put(personDay.date, personDay);
 		}
 
-		log.info("Fetch dei dati conclusa.");
+		log.info("... fetch dei dati conclusa, inizio dei ricalcoli.");
 
 		PersonDay previous = null;
-		
-		while ( !date.isAfter(lastPersonDayToCompute) ) {
-			
-			if(! wPerson.isActiveInDay(date) ) {
+
+		if (!updateOnlyRecaps) {
+
+			while ( !date.isAfter(lastPersonDayToCompute) ) {
+
+				if(! wPerson.isActiveInDay(date) ) {
+					date = date.plusDays(1);
+					previous = null;
+					continue;
+				}
+
+				//Prendere da map
+				PersonDay personDay = personDaysMap.get(date);
+				if(personDay == null) {
+					personDay = new PersonDay(person, date);
+				}
+
+				IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
+
+				//set previous for progressive
+				if(previous != null) {
+					wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
+				}
+				//set previous for night stamp
+				if(previous != null) {
+					wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
+				}
+
+				populatePersonDay(wPersonDay);
+
+				previous = personDay;
 				date = date.plusDays(1);
-				previous = null;
-				continue;
+
 			}
 
-			//Prendere da map
-			PersonDay personDay = personDaysMap.get(date);
-			if(personDay == null) {
-				personDay = new PersonDay(person, date);
-			}
-
-			IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
-
-			//set previous for progressive
-			if(previous != null) {
-				wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));	
-			}
-			//set previous for night stamp
-			if(previous != null) {
-				wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
-			}
-
-			populatePersonDay(wPersonDay);
-
-			previous = personDay;
-			date = date.plusDays(1);
-
+			log.info("... ricalcolo dei giorni lavorativi conclusa.");
 		}
-
-		log.info("Update personDay conclusa.");
-
 		// (3) Ricalcolo dei residui per mese
 		populateContractMonthRecapByPerson(person, new YearMonth(from));
 
-		log.info("Update riepiloghi conclusa.");
+		log.info("... ricalcolo dei riepiloghi conclusa.");
 	}
 	
 	/**
@@ -375,40 +388,41 @@ public class ConsistencyManager {
 								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
 
 				//timbratura chiusura giorno precedente
-				Stamping correctStamp = new Stamping();
-				correctStamp.date = new LocalDateTime(previous.date.getYear(), 
-						previous.date.getMonthOfYear(), previous.date.getDayOfMonth(), 23, 59);
-
-				correctStamp.way = WayType.out;
-				correctStamp.markedByAdmin = false;
-				correctStamp.stampModificationType = smtMidnight;
-				correctStamp.note = 
+				Stamping exitStamp = new Stamping(previous, 
+						new LocalDateTime(previous.date.getYear(), previous.date.getMonthOfYear(),
+								previous.date.getDayOfMonth(), 23, 59));
+				
+				exitStamp.way = WayType.out;
+				exitStamp.markedByAdmin = false;
+				exitStamp.stampModificationType = smtMidnight;
+				exitStamp.note = 
 						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-				correctStamp.personDay = previous;
-				correctStamp.save();
-				previous.stampings.add(correctStamp);
+				exitStamp.personDay = previous;
+				exitStamp.save();
+				previous.stampings.add(exitStamp);
 				previous.save();
 
 				populatePersonDay(wrapperFactory.create(previous));
 
 				//timbratura apertura giorno attuale
-				Stamping newEntranceStamp = new Stamping();
-				newEntranceStamp.date = new LocalDateTime(pd.getValue().date.getYear(),
-						pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(),0,0);
+				Stamping enterStamp = new Stamping(pd.getValue(), 
+						new LocalDateTime(pd.getValue().date.getYear(),
+						pd.getValue().date.getMonthOfYear(), 
+						pd.getValue().date.getDayOfMonth(), 0, 0) );
+				
+				enterStamp.way = WayType.in;
+				enterStamp.markedByAdmin = false;
 
-				newEntranceStamp.way = WayType.in;
-				newEntranceStamp.markedByAdmin = false;
-
-				newEntranceStamp.stampModificationType = smtMidnight;
+				enterStamp.stampModificationType = smtMidnight;
 
 
 
-				newEntranceStamp.note = 
+				enterStamp.note = 
 						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-				newEntranceStamp.personDay = pd.getValue();
-				newEntranceStamp.save();
+				
+				enterStamp.save();
 
-				pd.getValue().stampings.add( newEntranceStamp );
+				pd.getValue().stampings.add( enterStamp );
 				pd.getValue().save();
 			}
 		}

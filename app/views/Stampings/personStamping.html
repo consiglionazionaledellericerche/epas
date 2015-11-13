@@ -77,6 +77,8 @@
 
 #{/set}
 
+
+
   <div class="col-xs-12 col-lg-8">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
       
@@ -116,7 +118,7 @@
 
 	  	<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
 	  	   #{if dayRecap.firstDay }F#{/if}
-	      <a data-toggle="modal" data-backdrop="true" href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-modal=".my-modal">
+	      <a href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-async-modal="#modalStamping">
 		     ${dayRecap.date.shortDayName()}
           </a>
 	    </td>
@@ -136,18 +138,24 @@
 		<td class="invisible"></td>
 		
 		<td class="assenza default-single">
-		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.personDay.date?.format())}" data-modal=".my-modal">
+		  <a href="@{Absences.blank(dayRecap.person.id, dayRecap.personDay.date?.format())}" 
+		    data-async-modal="#modalAbsence">
 		  ___
 		  </a>
 		  
 		  #{list items:dayRecap.absences, as:'absence'}
-		    <a href="@{Absences.edit(absence.id)}" data-modal=".my-modal">
+		    <a href="@{Absences.edit(absence.id)}" data-async-modal="#modalAbsence">
 			  <span>
 				     ${absence.absenceType.code} 
 				     #{if absence.justifiedMinutes}
 				    	${absence.justifiedMinutes}min
 				  	 #{/if}
-				  </span>
+			  </span>
+			  #{if absence.absenceFile.exists()}
+			    <a href="@{Absences.downloadAttachment(absence.id)}">
+					<span class="glyphicon glyphicon-envelope"></span>
+				</a>
+			  #{/if}
 			</a>
 		  #{/list}	
 		</td>
@@ -164,7 +172,7 @@
 	      #{/elseif}
 					
 		  #{if stampingTemplate.date!=null}
-		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-modal=".my-modal">
+		    <a href="@{Stampings.edit(stampingTemplate.stampingId)}" data-async-modal="#modalStamping">
 			  ${stampingTemplate.hour}
 			</a>
 		  #{/if}
@@ -188,11 +196,12 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura default-single">
-
-		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.createStamp(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
-
+        #{if !dayRecap.future}
+		    <a href="@{Stampings.blank(dayRecap.person.id, dayRecap.date.format())}" 
+		    data-async-modal="#modalStamping">
 		      +++
 		    </a>
+		#{/if}    
 		</td>
 		
 		<td class="invisible"></td>
@@ -293,9 +302,6 @@
   
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
       #{include './_alerts.html' /}
-  </div>
-  
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
       #{include './_contractsRecap.html' /}
   </div>
   
@@ -305,7 +311,7 @@
   
   </div>
 
-#{include '_myModal.html' /}
 
+<div id="modalStamping" class="modal container" tabindex="-1"></div>
 
-
+<div id="modalAbsence" class="modal container" tabindex="-1"></div>

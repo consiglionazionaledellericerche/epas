@@ -222,12 +222,17 @@ public class WrapperContract implements IWrapperContract {
 		LocalDate officeInstallation =	new LocalDate(
 				confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM,
 						value.person.office));
-		
 		LocalDate personCreation = new LocalDate(value.person.createdAt);
-		if(personCreation.isAfter(officeInstallation)) {
-			return personCreation;
-		} 
-		return officeInstallation;
+		LocalDate candidate = value.beginContract;
+		
+		if(candidate.isBefore(officeInstallation)) {
+			candidate = officeInstallation;
+		}
+		if(candidate.isBefore(personCreation)) {
+			candidate = personCreation;
+		}
+	 
+		return candidate;
 	}
 	
 	@Override

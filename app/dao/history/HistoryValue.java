@@ -56,5 +56,9 @@ public class HistoryValue<T extends BaseModel> {
 	public boolean typeIsDel() {
 		return type.name().equals("DEL");
 	}
+	
+	public boolean typeIsAdd() {
+		return type.name().equals("ADD");
+	}
 
 }

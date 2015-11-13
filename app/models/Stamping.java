@@ -34,6 +34,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
 	private static final long serialVersionUID = -2422323948436157747L;
 
+	public Stamping(PersonDay personDay, LocalDateTime time) {
+		this.personDay = personDay;
+		this.date = time;
+	}
+	
 	public enum WayType {
 		in("in"),
 		out("out");
@@ -100,29 +105,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	@Transient
 	public int pairId = 0;
 
-
 	/**
 	 * true, la cella fittizia di uscita adesso
 	 */
 	@Transient
 	public boolean exitingNow = false;
-
-	//setter implementato per yaml parser TODO toglierlo configurando snakeyaml
-	public void setDate(String date){
-
-		//2013-10-03T19:18:00.000
-		String data = date.split("T")[0];
-		String time = date.split("T")[1];
-		//2013-10-03
-		int year = Integer.parseInt(data.split("-")[0]);
-		int month= Integer.parseInt(data.split("-")[1]);
-		int day  = Integer.parseInt(data.split("-")[2]);
-		//19:18:00.000
-		int hour = Integer.parseInt(time.split(":")[0]);
-		int min  = Integer.parseInt(time.split(":")[1]);
-		//int sec  = Integer.parseInt( (time.split(":")[2]).split(".")[0] );
-		this.date = new LocalDateTime(year,month,day,hour,min,0);
-	}
 
 	@Transient
 	public boolean isValid() {
@@ -183,5 +170,22 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 		if(this.stampType != null)
 			mark = mark + " " + this.stampType.identifier;
 		return mark;
+	}
+	
+	@Transient
+	public boolean getBooleanWay() {
+		return this.way.equals(Stamping.WayType.in) ? true : false;
+	}
+	
+	@Transient
+	public String getTime(){
+		if (date == null) {
+			return null;
+		}
+		if (date.getHourOfDay() > 10) {
+			return date.getHourOfDay() + ":" + date.getMinuteOfHour();
+		} else {
+			return "0" + date.getHourOfDay() + ":" + date.getMinuteOfHour();
+		}
 	}
 }
