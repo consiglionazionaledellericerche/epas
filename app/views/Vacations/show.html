@@ -32,7 +32,7 @@
         <!-- utilizzate -->
         <td>
 		  #{if vacationsRecap.vacationDaysLastYearUsed != 0 } 
-           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-target="#myModal3">
+           <a href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
 			${vacationsRecap.vacationDaysLastYearUsed}
 		  </a>
 		  #{/if}
@@ -53,7 +53,7 @@
         <!-- utilizzate -->
         <td>
 		  #{if vacationsRecap.vacationDaysCurrentYearUsed != 0 } 
-           <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
+           <a href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
 			${vacationsRecap.vacationDaysCurrentYearUsed}
 		  </a>
 		  #{/if}
@@ -93,7 +93,7 @@
         <!-- utilizzate -->
         <td>
 		  #{if vacationsRecap.permissionUsed != 0 } 
-           <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
+           <a href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
 			${vacationsRecap.permissionUsed}
 		  </a>
 		  #{/if}

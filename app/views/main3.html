@@ -91,7 +91,7 @@
             #{/else}
             
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
-          		${session.username} <b class="caret"></b></a>
+          	  <div class="visible-lg-inline">	${session.username}</div></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
@@ -123,7 +123,7 @@
             <li class="dropdown">  
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
-          		Amministrazione <b class="caret"></b></a>
+          		<div class="visible-md-inline visible-lg-inline"> Amministrazione</div></a>
               <ul class="dropdown-menu">
                 
                 #{if ip.viewPerson }
@@ -184,7 +184,7 @@
             <li class="dropdown">  
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-          		Configurazione <b class="caret"></b></a>
+          	  <div class="visible-md-inline visible-lg-inline">	Configurazione</div></a>
               <ul class="dropdown-menu">
                 #{if ip.viewOffice }
                   <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
@@ -238,55 +238,80 @@
 
 		  #{include '/menu.html' /}          
       
-
-      	  #{if session.contains("sudo.username")}
-      	    <ul class="nav navbar-nav navbar-right">
+		  <ul class="nav navbar-nav navbar-right">
+		  
+		    <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring"></i></a>
+              <ul class="dropdown-menu">
+			    #{if ip.viewPerson }
+			     <li> 
+  		  		   <a data-toggle="modal" href="@{ReportCentre.generateReport()}" data-modal=".my-modal">
+			  		<i class="fa fa-bug"></i> Segnala un problema
+			 	   </a>
+			     </li>
+			    #{/if}              
+                <li> 
+  		  		   <a href="@{Faq.faq()}">
+			  		<i class="fa fa-comment-o"> FAQ</i>
+			 	   </a>
+			    </li>
+			  </ul>
+            </li>      
+					  	
+		  
+		  
+      	    #{if session.contains("sudo.username")}
       	    
       	      #{if loginResponse != null}
-      	      <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
+			  <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	        <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-      	      </li>
-      	      #{/if}
-      	      
-      	      <li><a href="@{Administrators.restoreUser()}"><span class="glyphicon glyphicon-log-out"></span> Torna chi eri</a></li>
+      	      </li>      	      
+     	      #{/if}
+     	      
+     	      <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
+                <ul class="dropdown-menu">
+      	         <li> 
+  		  		   <a href="@{Administrators.restoreUser()}"></i>
+			  		Torna chi eri
+			 	   </a>
+			     </li>
+				</ul>
+			  </li>
             
-            </ul>
-  		  #{/if}
+  		    #{/if}
   		  
   		  
   		  
-  		  #{else}
-    	    #{if session.username}
-      		  <ul class="nav navbar-nav navbar-right">
+  		    #{else}
+    	      #{if session.username}
       		  
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
       	        </li>      			
       		    #{/if}
-      		    #{else}
-      		    <li>
-  		  		 <a data-toggle="modal" href="@{ReportCentre.generateReport()}" data-modal=".my-modal"><i class="fa fa-bug"></i>
-			  		Segnala un problema
-			 	</a>
-			 	</li>
-			 	#{/else}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	        </li>
       	        #{/if}
   
-     		    #{if ip.viewPerson }
-	   	        <li><a href="@{Faq.faq()}"><i class="fa fa-comment-o"></i> FAQ</a></li>
-      	        #{/if}
-    	    
-    	        <li><a href="@{secure.logout()}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-    	      </ul>
-    	    #{/if}
+    	        <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
+                <ul class="dropdown-menu">
+      	         <li> 
+  		  		   <a href=href="@{secure.logout()}"></i>
+			  		Esci
+			 	   </a>
+			     </li>
+				</ul>
+			  </li>
+   	      
+    	      #{/if}
   		  
-  		  #{/else}
-  
+  		    #{/else}
+  		  </ul>
   		  
   		  
   		  <div class="clearfix">
@@ -371,6 +396,9 @@
         </div>
       </div>
      #{/if}
+     
+     <div id="defaultModal" class="modal container" tabindex="-1"></div>
+    
        
     </div>
     

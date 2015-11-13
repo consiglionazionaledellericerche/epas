@@ -138,7 +138,9 @@ public class VacationsAdmin extends Controller{
 		
 		VacationsRecap vacationsRecap = vr.get();
 		
-		renderTemplate("Vacations/vacationsCurrentYear.html", vacationsRecap);
+		boolean activeVacationCurrentYear = true;
+		
+		renderTemplate("Vacations/recapVacation.html", vacationsRecap, activeVacationCurrentYear);
 	}
 
 	public static void vacationsLastYear(Long contractId, Integer anno){
@@ -157,7 +159,9 @@ public class VacationsAdmin extends Controller{
 		
 		VacationsRecap vacationsRecap = vr.get();
 		
-		renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
+		boolean activeVacationLastYear = true;
+		
+		renderTemplate("Vacations/recapVacation.html", vacationsRecap, activeVacationLastYear);
 	}
 
 
@@ -177,8 +181,10 @@ public class VacationsAdmin extends Controller{
 		Preconditions.checkState(vr.isPresent());
 		
 		VacationsRecap vacationsRecap = vr.get();
+		
+		boolean activePermission = true;
 
-		renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
+		renderTemplate("Vacations/recapVacation.html", vacationsRecap, activePermission);
 	}
 
 }
