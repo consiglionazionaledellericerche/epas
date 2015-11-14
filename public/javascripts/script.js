@@ -70,54 +70,6 @@ $(function($){
     });
     
     bootbox.setDefaults({locale: 'it', className: 'bootbox_modal'});
-
-    /* switcher 2/3 tabs. 
-     * mettere come id:
-     * ai li pills1 pills2 pills3
-     * ai div divpills1 divpills2 divpills3
-     */ 
-    $.fn.switchpills = function() {
-    	var divpills1 = $('#divpills1');
-    	var divpills2 = $('#divpills2');
-    	var divpills3 = $('#divpills3');
-		var pills1 = $('#pills1');
-		var pills2 = $('#pills2');
-		var pills3 = $('#pills3');
-		
-		function toggle() {
-			divpills1.toogle(0);
-			divpills2.toogle(0);
-			divpills3.toogle(0);
-		}  
-    	
-		$(pills1.click(function(){
-			pills1.addClass('active');
-			pills2.removeClass('active');
-			pills3.removeClass('active');
-			divpills1.show();
-			divpills2.hide();
-			divpills3.hide();
-			
-		}));
-		$(pills2.click(function(){
-			pills1.removeClass('active');
-			pills2.addClass('active');
-			pills3.removeClass('active');
-			divpills1.hide();
-			divpills2.show();
-			divpills3.hide();
-			
-		}));
-		$(pills3.click(function(){
-			pills1.removeClass('active');
-			pills2.removeClass('active');
-			pills3.addClass('active');
-			divpills1.hide();
-			divpills2.hide();
-			divpills3.show();
-			
-		}));
-    }
 	
 	function toggleChevron(e) {
 		var $fa = $(e.target).prev('.panel-heading').find('i.fa');
@@ -260,8 +212,6 @@ $(function($){
 	    	$deleteFirst.hide();
 	    	$delete.show( "fast" );
 	    });
-	    
-	    this.switchpills();
 	    
 	}	/* fine initepas() */
 
