@@ -1,13 +1,18 @@
 #{modalAsync title: vacationsRecap.person.fullname + ' Riepilogo ferie e permessi' }
   
 <div>
-  #{tabs}
+  *{
+  
+   Quando si riesce a risolvere il problema della dimenzione fissa del modale allora si può
+   riabilitare lo switcher.
+   #{tabs}
     
     #{tabItem id:'vacationLastYear', title:'Ferie del ' + (vacationsRecap.year-1), active:activeVacationLastYear /}
     #{tabItem id:'vacationCurrentYear', title:'Ferie del ' + vacationsRecap.year, active:activeVacationCurrentYear /}
     #{tabItem id:'permission', title:'Permessi del ' + vacationsRecap.year, active:activePermission /}
   
   #{/tabs}
+  }*
   
   #{tabContent}
    
@@ -21,7 +26,7 @@
 		</div>	
 	  #{/if}
 	      
-      <div class="col-xs-8 col-xs-offset-2">
+      <div class="col-md-8 col-md-offset-2">
         <table class="table table-condensed table-hover">
 			    
 		<thead>
@@ -54,14 +59,14 @@
 	  </div>	
 	  #{/if}
 	
-	  <div class="col-xs-8 col-xs-offset-2">
+	  <div class="col-md-8 col-md-offset-2">
 	  
 	  <table class="table table-condensed table-hover">
 	   <thead>
 	   <tr>
 	     <th class="col-xs-4">Data</th>
-	     <th class="col-xs-4">Codice</th>
-	     <th class="col-xs-4">Descrizione</th>
+	     <th class="col-xs-2">Codice</th>
+	     <th class="col-xs-6">Descrizione</th>
 	   </tr>
 	   </thead>
 	   <tbody>
@@ -88,13 +93,13 @@
 		 </div>	
       #{/if}
       
-      <div class="col-xs-8 col-xs-offset-2">
+      <div class="col-md-8 col-md-offset-2">
       <table class="table table-condensed table-hover">
 	   <thead>
 	   <tr>
 	     <th class="col-xs-4">Data</th>
-	     <th class="col-xs-4">Codice</th>
-	     <th class="col-xs-4">Descrizione</th>
+	     <th class="col-xs-2">Codice</th>
+	     <th class="col-xs-6">Descrizione</th>
 	   </tr>
 	   </thead>
 	   <tbody>
