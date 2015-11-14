@@ -1,16 +1,18 @@
 #{modalAsync id:'modalStamping', button:'Salva', 
   title:('Modifica timbratura ' + stamping.personDay.date.format() 
            + ' per ' + stamping.personDay.person.fullname) }
+           
   #{if stamping.persistent}
-    <ul class="nav nav-pills">
-      <li id="pills1" role="presentation" class="active"><a>Modifica</a></li>
-      <li id="pills2" role="presentation"><a>Elimina</a></li>
-    </ul>
+    #{tabs}
+      #{tabItem id:'edit', title:'Modifica', active:true /}
+      #{tabItem id:'delete', title:'Elimina' /}
+    #{/tabs}
     <br>
   #{/if}
  
-  <div id="divpills1"><!-- Riepilogo -->
-  
+  #{tabContent}
+
+   #{tabContentItem id:'edit', active:true}
    <div id="stampingData">    
 	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingData'}
@@ -56,9 +58,9 @@
 	#{/form}
 	
    </div>
-  </div>
+   #{/tabContentItem}
   
-  <div id="divpills2" style="display: none"><!-- Elimina -->
+   #{tabContentItem id:'delete'}
    #{if stamping.persistent}
    
     <form class="form-horizontal">
@@ -78,5 +80,8 @@
 	   <a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a> 
 	</div>
    #{/if}
-  </div> 
+   #{/tabContentItem} 
+   
+  #{/tabContent} 
+  
 #{/modalAsync}
