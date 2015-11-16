@@ -252,6 +252,7 @@ when
         "Persons.list",
         "MealTickets.recapMealTickets",
         "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
         
         /* Vecchio permesso viewPersonDay */
         /* credo che siano comunque da filtrare sull'office 
@@ -310,11 +311,6 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
-		
-		"MonthRecaps.justifiedAbsences",
-        "MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
 		
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
@@ -380,10 +376,8 @@ when
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
 		
-		"MonthRecaps.justifiedAbsences",
-        "MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
+        "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
         "PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
 		
