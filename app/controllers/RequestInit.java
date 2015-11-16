@@ -3,28 +3,10 @@
  */
 package controllers;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import manager.ConfGeneralManager;
-import manager.SecureManager;
-import models.Office;
-import models.Role;
-import models.User;
-
-import org.joda.time.LocalDate;
-
-import play.i18n.Messages;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.Http;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
@@ -34,6 +16,20 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.StampingDao;
 import dao.UsersRolesOfficesDao;
+import manager.SecureManager;
+import models.Office;
+import models.Role;
+import models.User;
+import org.joda.time.LocalDate;
+import play.i18n.Messages;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Http;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * @author cristian

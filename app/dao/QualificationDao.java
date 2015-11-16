@@ -1,20 +1,18 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import models.AbsenceType;
-import models.Qualification;
-import models.query.QQualification;
-
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import models.AbsenceType;
+import models.Qualification;
+import models.query.QQualification;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 

@@ -9,7 +9,7 @@ public enum AccumulationType {
 	
 	public String description;
 	
-	private AccumulationType(String description){
+	AccumulationType(String description){
 		this.description = description;
 	}
 	

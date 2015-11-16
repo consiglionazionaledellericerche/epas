@@ -3,7 +3,11 @@
  */
 package models;
 
-import java.util.List;
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,14 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
+import java.util.List;
 
 
 /**

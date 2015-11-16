@@ -1,19 +1,16 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import models.Person;
-import models.PersonDayInTrouble;
-import models.query.QPersonDayInTrouble;
-
-import org.joda.time.LocalDate;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import models.Person;
+import models.PersonDayInTrouble;
+import models.query.QPersonDayInTrouble;
+import org.joda.time.LocalDate;
+
+import javax.persistence.EntityManager;
+import java.util.List;
 
 public class PersonDayInTroubleDao extends DaoBase {
 

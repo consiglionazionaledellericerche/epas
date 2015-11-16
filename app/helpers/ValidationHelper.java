@@ -1,13 +1,12 @@
 package helpers;
 
-import java.util.List;
-
-import play.data.validation.Error;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import play.data.validation.Error;
+
+import java.util.List;
 
 
 /**

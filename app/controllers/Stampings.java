@@ -1,17 +1,22 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.StampingDao;
+import dao.history.HistoryValue;
+import dao.history.StampingHistoryDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.PersonTags;
 import helpers.Web;
 import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -21,43 +26,27 @@ import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
-import models.Absence;
 import models.Institute;
 import models.Person;
 import models.PersonDay;
 import models.StampType;
 import models.Stamping;
 import models.User;
-
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
 import play.data.binding.As;
 import play.data.validation.CheckWith;
-import play.data.validation.InPast;
-import play.data.validation.Max;
-import play.data.validation.Min;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.StampingDao;
-import dao.history.HistoryValue;
-import dao.history.StampingHistoryDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @Slf4j
 @With( {RequestInit.class, Resecure.class} )

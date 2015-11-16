@@ -1,12 +1,8 @@
 package helpers.validators;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import play.data.validation.Check;
 
-import com.google.common.base.Splitter;
+import java.util.regex.Pattern;
 
 public class StringIsTime extends Check {
 

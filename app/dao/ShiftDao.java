@@ -1,10 +1,8 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
+import com.google.inject.Provider;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 import models.Person;
 import models.PersonShift;
 import models.PersonShiftDay;
@@ -15,12 +13,11 @@ import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
 import models.query.QShiftType;
-
 import org.joda.time.LocalDate;
 
-import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 

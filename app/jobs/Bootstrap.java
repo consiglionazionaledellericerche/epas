@@ -1,16 +1,12 @@
 package jobs;
 
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import com.google.common.io.Resources;
+import dao.UserDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
-import manager.ContractManager;
 import models.Contract;
 import models.Person;
 import models.Qualification;
@@ -18,7 +14,6 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -27,20 +22,19 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.joda.time.LocalDate;
-
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
-import com.google.common.base.Optional;
-import com.google.common.io.Resources;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
-import dao.UserDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti

@@ -1,45 +1,26 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.UserDao;
 import helpers.Web;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import manager.OfficeManager;
-import manager.SecureManager;
 import models.Institute;
 import models.Office;
 import models.Person;
-import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.Play;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.RoleDao;
-import dao.UserDao;
-import dao.UsersRolesOfficesDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
+import javax.inject.Inject;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administrators extends Controller {

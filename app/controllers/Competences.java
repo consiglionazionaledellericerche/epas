@@ -1,15 +1,24 @@
 package controllers;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
+import dao.wrapper.IWrapperCompetenceCode;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.ModelQuery.SimpleResults;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -24,35 +33,20 @@ import models.Person;
 import models.Role;
 import models.TotalOvertime;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.RoleDao;
-import dao.UsersRolesOfficesDao;
-import dao.wrapper.IWrapperCompetenceCode;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{

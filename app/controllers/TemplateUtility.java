@@ -1,15 +1,19 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.AbsenceTypeDao;
+import dao.BadgeReaderDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.QualificationDao;
+import dao.RoleDao;
+import dao.StampingDao;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import manager.CompetenceManager;
-import manager.ConfGeneralManager;
-import manager.PersonDayManager;
 import manager.SecureManager;
 import models.AbsenceType;
 import models.Institute;
@@ -21,30 +25,11 @@ import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.AbsenceTypeMapping;
-
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import dao.AbsenceTypeDao;
-import dao.BadgeReaderDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.QualificationDao;
-import dao.RoleDao;
-import dao.StampingDao;
-import dao.UsersRolesOfficesDao;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Metodi usabili nel template.

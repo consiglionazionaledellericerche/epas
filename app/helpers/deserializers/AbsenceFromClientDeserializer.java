@@ -1,18 +1,5 @@
 package helpers.deserializers;
 
-import injection.StaticInject;
-
-import java.lang.reflect.Type;
-
-import javax.inject.Inject;
-
-import models.Person;
-import models.exports.AbsenceFromClient;
-
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -20,8 +7,16 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-
 import dao.PersonDao;
+import injection.StaticInject;
+import models.Person;
+import models.exports.AbsenceFromClient;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.lang.reflect.Type;
 
 @StaticInject
 public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFromClient>{

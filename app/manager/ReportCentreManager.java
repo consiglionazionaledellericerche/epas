@@ -1,12 +1,11 @@
 package manager;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.mvc.Http.Header;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReportCentreManager {
 	

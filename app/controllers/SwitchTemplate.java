@@ -1,7 +1,6 @@
 package controllers;
 
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
 

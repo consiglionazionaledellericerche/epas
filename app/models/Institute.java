@@ -1,23 +1,16 @@
 package models;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.google.common.collect.Sets;
+import models.base.MutableModel;
+import org.hibernate.envers.Audited;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Objects;
-import com.google.common.collect.Sets;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-import models.base.BaseModel;
-import models.base.MutableModel;
+import java.util.Set;
 
 /**
  * @author alessandro
@@ -34,12 +27,18 @@ public class Institute extends MutableModel {
 	public String name;
 
 	/**
+	 *  Codice univoco dell'istituto, per l'IIT è 044
+	 */
+	@Unique
+	@NotNull
+	public String cds;
+
+	/**
 	 * sigla, ex.: IIT
 	 */
 	@Unique
 	public String code;
-	
+
 	@OneToMany(mappedBy="institute")
 	public Set<Office> seats = Sets.newHashSet();
-
 }

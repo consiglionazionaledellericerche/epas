@@ -1,12 +1,13 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import dao.ContractDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
@@ -21,21 +22,15 @@ import models.StampType;
 import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
-
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import javax.inject.Inject;
+import java.util.List;
 
-import dao.ContractDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
 
 @Slf4j
 @With( {Resecure.class, RequestInit.class} )
@@ -271,7 +266,7 @@ public class Administration extends Controller {
 			
 
 			person = Person.findById(person.id);
-			
+
 			log.info("Rimozione timbrature disaccoppiate per {} ...", person.fullName());
 			List<PersonDay> persondays = personDayDao
 					.getPersonDayInPeriod(person, begin, Optional.of(end));
@@ -288,9 +283,6 @@ public class Administration extends Controller {
 			}
 			
 			log.info("... rimosse {} timbrature disaccoppiate.", count);
-			
-			
-			
 		}
 		
 		flash.success("Esecuzione terminata");
@@ -305,6 +297,7 @@ public class Administration extends Controller {
 		
 		for(Contract contract : contracts) {
 			contractManager.buildVacationPeriods(contract);
+
 			log.info("Il contratto di {} iniziato il {} non è stato ripristinato con i piani ferie corretti.",
 				contract.person.fullName(), contract.beginContract);
 		}

@@ -1,14 +1,13 @@
 package dao;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import models.ConfYear;
-import models.query.QConfYear;
-
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import models.ConfYear;
+import models.query.QConfYear;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 
 /**

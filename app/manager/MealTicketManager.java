@@ -1,28 +1,24 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import dao.MealTicketDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-
-import dao.MealTicketDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
+import java.util.List;
 
 /**
  * Manager per MealTicket

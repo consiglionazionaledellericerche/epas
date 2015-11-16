@@ -1,25 +1,25 @@
 package controllers;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.AbsenceDao;
+import dao.CompetenceDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
+import dao.wrapper.IWrapperFactory;
 import helpers.attestati.AttestatiClient;
 import helpers.attestati.AttestatiClient.LoginResponse;
 import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
@@ -32,32 +32,26 @@ import models.PersonDay;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import dao.AbsenceDao;
-import dao.CompetenceDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.PersonMonthRecapDao;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e 
@@ -152,7 +146,7 @@ public class UploadSituation extends Controller{
 		FileWriter writer = new FileWriter(tempFile, true);
 		try {
 			BufferedWriter out = new BufferedWriter(writer);
-			out.write(user.person.office.code);
+			out.write(user.person.office.codeId);
 			out.write(' ');
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();

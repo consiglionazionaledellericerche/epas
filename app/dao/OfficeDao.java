@@ -1,12 +1,14 @@
 package dao;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
 import models.Institute;
 import models.Office;
 import models.Role;
@@ -15,13 +17,8 @@ import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 
@@ -66,27 +63,27 @@ public class OfficeDao extends DaoBase {
 
 	}
 
+//	/**
+//	 *
+//	 * @param name
+//	 * @return
+//	 */
+//	public Optional<Office> getOfficeByName(String name){
+//
+//		final QOffice office = QOffice.office;
+//
+//		final JPQLQuery query = getQueryFactory().from(office)
+//				.where(office.name.eq(name));
+//
+//		return Optional.fromNullable(query.singleResult(office));
+//	}
+//
 	/**
-	 * 
-	 * @param name
-	 * @return  
-	 */
-	public Optional<Office> getOfficeByName(String name){
-
-		final QOffice office = QOffice.office;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.name.eq(name));
-
-		return Optional.fromNullable(query.singleResult(office));
-	}
-
-	/**
-	 * 
+	 *
 	 * @param code
 	 * @return l'ufficio associato al codice passato come parametro
 	 */
-	public Optional<Office> getOfficeByCode(Integer code){
+	public Optional<Office> byCode(String code){
 
 		final QOffice office = QOffice.office;
 
@@ -95,52 +92,39 @@ public class OfficeDao extends DaoBase {
 		return Optional.fromNullable(query.singleResult(office));
 
 	}
+    /**
+     *
+     * @param code
+     * @return l'ufficio associato al codice passato come parametro
+     */
+    public Optional<Office> byCodeId(String codeId){
 
-	/**
-	 * 
-	 * @param code
-	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
-	 */
-	public List<Office> getOfficesByCode(Integer code){
+        final QOffice office = QOffice.office;
 
-		final QOffice office = QOffice.office;
+        final JPQLQuery query = getQueryFactory().from(office)
+                .where(office.codeId.eq(codeId));
+        return Optional.fromNullable(query.singleResult(office));
 
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.code.eq(code));
-		return query.list(office);
-	}
-
-	/**
-	 *  La lista di tutte le Aree definite nel db ePAS (Area -> campo office = null)
-	 * @return la lista delle aree presenti in anagrafica
-	 */
-	public List<Office> getAreas(){
-
-		final QOffice office = QOffice.office;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.office.isNull());
-		return query.list(office);
-	}
-
-	public boolean checkForDuplicate(Office o){
-
-		final QOffice office = QOffice.office;
-
-		final BooleanBuilder condition = new BooleanBuilder();
-		condition.or(office.name.equalsIgnoreCase(o.name));
-
-		if(o.code!=null){
-			condition.or(office.code.eq(o.code));
-		}
-
-		if(o.id!=null){
-			condition.and(office.id.ne(o.id));
-		}
-
-		return getQueryFactory().from(office)
-				.where(condition).exists();
-	}
+    }
+//
+//	public boolean checkForDuplicate(Office o){
+//
+//		final QOffice office = QOffice.office;
+//
+//		final BooleanBuilder condition = new BooleanBuilder();
+//		condition.or(office.name.equalsIgnoreCase(o.name));
+//
+//		if(o.code!=null){
+//			condition.or(office.code.eq(o.code));
+//		}
+//
+//		if(o.id!=null){
+//			condition.and(office.id.ne(o.id));
+//		}
+//
+//		return getQueryFactory().from(office)
+//				.where(condition).exists();
+//	}
 	
 	private BooleanBuilder matchInstituteName(QInstitute institute, String name) {
 		final BooleanBuilder nameCondition = new BooleanBuilder();
@@ -237,4 +221,12 @@ public class OfficeDao extends DaoBase {
 		
 	}
 
+	public Optional<Institute> byCds(String cds) {
+
+		final QInstitute institute = QInstitute.institute;
+
+        final JPQLQuery query = queryFactory.from(institute).where(institute.cds.eq(cds));
+
+		return Optional.fromNullable(query.singleResult(institute));
+	}
 }

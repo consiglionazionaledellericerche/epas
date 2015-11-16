@@ -1,14 +1,17 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.ContractDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.SecureManager;
 import manager.VacationManager;
 import manager.recaps.vacation.VacationsRecap;
@@ -16,23 +19,14 @@ import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.ContractDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{

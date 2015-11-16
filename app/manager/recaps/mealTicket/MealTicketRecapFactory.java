@@ -1,17 +1,14 @@
 package manager.recaps.mealTicket;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import dao.MealTicketDao;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
-
-import javax.inject.Inject;
-
 import manager.MealTicketManager;
 import models.Contract;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
-import dao.MealTicketDao;
-import dao.PersonDao;
+import javax.inject.Inject;
 
 /**
  * @author alessandro
