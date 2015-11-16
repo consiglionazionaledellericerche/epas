@@ -1,0 +1,34 @@
+*{ action:
+   year:
+   month:
+   name:
+   items: offices
+   value: id l'office selezionato
+}*   
+
+
+<div class="container-fluid">
+	<div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+		#{form action:_action, role:'form',
+		class:'form-inline', method:'GET', autocomplete:'off'}
+
+		<div class="form-group">
+			<label class="hidden-xs hidden-sm" for="dip">Sede </label> 
+			    #{if _year} <input type="hidden" name="year" value="${_year}" /> #{/if} 
+			    #{if _month} <input type="hidden" name="month" value="${_month}" /> #{/if}
+			    #{if _day} <input type="hidden" name="day" value="${_day}" /> #{/if}  
+			    #{if _name} <input type="hidden" name="name" value="${name}"> #{/if} 
+			    <select name="officeId" class="form-control" id="dip"
+				onChange="javascript:this.form.submit()"> 
+				#{list items:offices, as:'officeItem'}
+				  <option value="${officeItem.id}" #{if	officeItem.id.equals(_value) } selected="selected"#{/if} >
+					${officeItem.name}
+				  </option>
+				#{/list}
+			</select>
+		</div>
+
+		<button type="submit" class="btn btn-default">Invio</button>
+		#{/form}
+	</div>
+</div>
