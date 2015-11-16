@@ -1,27 +1,14 @@
 package dao.wrapper;
 
-import java.util.List;
-
-import manager.OfficeManager;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import dao.RoleDao;
 import models.Office;
-import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.RoleDao;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import java.util.List;
 
 /**
  * @author alessandro

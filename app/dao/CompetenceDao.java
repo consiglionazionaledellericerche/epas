@@ -1,9 +1,12 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+import dao.wrapper.IWrapperFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -17,18 +20,11 @@ import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
-import dao.wrapper.IWrapperFactory;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 

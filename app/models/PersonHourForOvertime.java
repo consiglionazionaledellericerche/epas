@@ -1,12 +1,12 @@
 package models;
 
+import models.base.BaseModel;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
 
 
 

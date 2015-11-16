@@ -1,14 +1,13 @@
 package models;
 
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
 
 
 

@@ -1,10 +1,11 @@
 package controllers;
 
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import controllers.Resecure.BasicAuth;
+import dao.PersonDao;
 import it.cnr.iit.epas.JsonStampingBinder;
-
-import javax.inject.Inject;
-
 import manager.AbsenceManager;
 import manager.StampingManager;
 import manager.cache.AbsenceTypeManager;
@@ -17,11 +18,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-
-import controllers.Resecure.BasicAuth;
-import dao.PersonDao;
+import javax.inject.Inject;
 
 
 @With( {Resecure.class, RequestInit.class} )

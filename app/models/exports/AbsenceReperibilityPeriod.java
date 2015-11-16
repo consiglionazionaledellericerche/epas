@@ -5,7 +5,6 @@ package models.exports;
 
 import models.Person;
 import models.PersonReperibilityType;
-
 import org.joda.time.LocalDate;
 
 /**

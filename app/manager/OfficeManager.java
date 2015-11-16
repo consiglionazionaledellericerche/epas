@@ -1,38 +1,40 @@
 package manager;
 
-import java.util.Set;
-
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.inject.Inject;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import models.ConfGeneral;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.Parameter;
+import org.joda.time.LocalDate;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.inject.Inject;
-
-import controllers.Security;
-import dao.RoleDao;
-import dao.UsersRolesOfficesDao;
-import injection.StaticInject;
+import java.util.Set;
 
 public class OfficeManager {
 
+
+
 	@Inject
 	public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-			RoleDao roleDao,ConfGeneralManager confGeneralManager) {
+			RoleDao roleDao,ConfGeneralManager confGeneralManager,
+			ConfYearManager confYearManager) {
 		this.usersRolesOfficesDao = usersRolesOfficesDao;
 		this.roleDao = roleDao;
 		this.confGeneralManager = confGeneralManager;
+        this.confYearManager = confYearManager;
 	}
 
 	private final UsersRolesOfficesDao usersRolesOfficesDao;
 	private final RoleDao roleDao;
 	private final ConfGeneralManager confGeneralManager;
+	private final ConfYearManager confYearManager;
 
 	/**
 	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
@@ -89,5 +91,20 @@ public class OfficeManager {
 								return input.office;
 							}
 						}).toSet();
+	}
+
+	public void generateConfAndPermission(Office office){
+
+		Preconditions.checkNotNull(office);
+
+        if(office.confGeneral.isEmpty()){
+            confGeneralManager.buildOfficeConfGeneral(office, false);
+        }
+        if (office.confYear.isEmpty()){
+            confYearManager.buildOfficeConfYear(office, LocalDate.now().getYear() - 1, false);
+            confYearManager.buildOfficeConfYear(office, LocalDate.now().getYear(), false);
+        }
+
+		setSystemUserPermission(office);
 	}
 }

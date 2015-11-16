@@ -1,20 +1,16 @@
 package manager.recaps.mealTicket;
 
+import com.google.common.collect.Lists;
+import dao.MealTicketDao;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
-
-import java.util.List;
-
 import manager.MealTicketManager;
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
-
-import dao.MealTicketDao;
-import dao.PersonDao;
+import java.util.List;
 
 /**
  * 

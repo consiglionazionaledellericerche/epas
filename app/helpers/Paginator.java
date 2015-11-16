@@ -1,18 +1,17 @@
 package helpers;
 
-import java.util.Map;
-
-import play.mvc.Http.Request;
-import play.mvc.Router;
-import play.mvc.Scope;
-import play.mvc.Scope.Params;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.mysema.query.SearchResults;
+import play.mvc.Http.Request;
+import play.mvc.Router;
+import play.mvc.Scope;
+import play.mvc.Scope.Params;
+
+import java.util.Map;
 
 /**
  * @author marco

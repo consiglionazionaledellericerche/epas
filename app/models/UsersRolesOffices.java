@@ -1,19 +1,16 @@
 package models;
 
+import com.google.common.base.MoreObjects;
+import models.base.BaseModel;
+import org.hibernate.envers.NotAudited;
+import play.data.validation.Required;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.NotAudited;
-
-import play.data.validation.Required;
-
-import com.google.common.base.MoreObjects;
 
 /**
  * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le 

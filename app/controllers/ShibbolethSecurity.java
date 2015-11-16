@@ -1,18 +1,17 @@
 package controllers;
 
 
-import java.util.HashMap;
-
-import javax.inject.Inject;
-
+import dao.PersonDao;
+import dao.UserDao;
 import models.Person;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.cache.Cache;
 import play.mvc.Router;
-import dao.PersonDao;
-import dao.UserDao;
+
+import javax.inject.Inject;
+import java.util.HashMap;
 
 /**
  * 

@@ -1,9 +1,9 @@
 package manager.recaps;
 
-import java.util.List;
-
 import models.CompetenceCode;
 import models.Person;
+
+import java.util.List;
 
 /**
  * 

@@ -1,18 +1,18 @@
 package manager;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingDayRecapFactory;
-import models.*;
+import models.Contract;
+import models.Person;
+import models.PersonDay;
+import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;

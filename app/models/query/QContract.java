@@ -1,15 +1,20 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.DatePath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.ListPath;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SetPath;
+import com.mysema.query.types.path.SimplePath;
 import models.Contract;
 
-
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
 
 /**

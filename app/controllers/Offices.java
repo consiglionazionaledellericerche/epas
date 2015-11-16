@@ -1,39 +1,23 @@
 package controllers;
 
-import helpers.Web;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
-import manager.ConfGeneralManager;
-import manager.ConfYearManager;
-import manager.OfficeManager;
-import models.Institute;
-import models.Office;
-import models.Role;
-
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.data.validation.Validation;
-import play.db.jpa.JPAPlugin;
-import play.mvc.Controller;
-import play.mvc.With;
-
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.mysema.query.SearchResults;
-
 import dao.OfficeDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.Web;
+import models.Institute;
+import models.Office;
+import models.Role;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
+import play.mvc.Controller;
+import play.mvc.With;
+
+import javax.inject.Inject;
 
 @With( {Resecure.class, RequestInit.class})
 public class Offices extends Controller {
@@ -42,13 +26,6 @@ public class Offices extends Controller {
 	private static OfficeDao officeDao;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
-//	@Inject
-//	private static OfficeManager officeManager;
-//	@Inject
-//	private static ConfGeneralManager confGeneralManager;
-//	@Inject
-//	private static ConfYearManager confYearManager;
-	
 	@Inject
 	private static RoleDao roleDao;
 

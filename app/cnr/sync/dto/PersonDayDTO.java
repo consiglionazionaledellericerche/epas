@@ -1,8 +1,8 @@
 package cnr.sync.dto;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 public class PersonDayDTO {
 

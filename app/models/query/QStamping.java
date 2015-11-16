@@ -1,15 +1,20 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.DateTimePath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.EnumPath;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SimplePath;
+import com.mysema.query.types.path.StringPath;
 import models.Stamping;
 
-
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
 
 /**
@@ -37,6 +42,8 @@ public class QStamping extends EntityPathBase<Stamping> {
     public final NumberPath<Long> id = _super.id;
 
     public final BooleanPath markedByAdmin = createBoolean("markedByAdmin");
+
+    public final BooleanPath markedByEmployee = createBoolean("markedByEmployee");
 
     public final StringPath note = createString("note");
 

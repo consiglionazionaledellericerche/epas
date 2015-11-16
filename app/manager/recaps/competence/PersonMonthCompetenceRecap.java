@@ -1,21 +1,17 @@
 package manager.recaps.competence;
 
+import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.wrapper.IWrapperFactory;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
-
 import org.joda.time.YearMonth;
-
 import play.data.validation.Valid;
-
-import com.google.common.base.Optional;
-import com.google.gdata.util.common.base.Preconditions;
-
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.wrapper.IWrapperFactory;
 
 /**
  * Riepilogo che popola la vista competenze del dipendente.

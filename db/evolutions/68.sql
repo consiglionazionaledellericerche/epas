@@ -125,15 +125,4 @@ ALTER TABLE badge_readers ALTER COLUMN office_owner_id SET NOT NULL;
 
 INSERT INTO roles(name) values('tecnicalAdmin');
 
-
-
-
-
-
-
-
-
-
-
-
 -- TODO impostare not null i nuovi campi institute_id e headquarter della tabella office

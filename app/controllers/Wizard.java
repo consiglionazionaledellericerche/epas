@@ -15,7 +15,14 @@ import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ContractManager;
 import manager.OfficeManager;
-import models.*;
+import models.Contract;
+import models.Institute;
+import models.Office;
+import models.Person;
+import models.Qualification;
+import models.Role;
+import models.User;
+import models.WorkingTimeType;
 import models.enumerate.Parameter;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -23,7 +30,11 @@ import org.joda.time.format.DateTimeFormatter;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
-import play.data.validation.*;
+import play.data.validation.CheckWith;
+import play.data.validation.Email;
+import play.data.validation.Equals;
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.libs.Codec;
 import play.mvc.Controller;
 
@@ -449,45 +460,32 @@ public class Wizard extends Controller {
 		adminUser.password = Codec.hexMD5(properties.getProperty("admin_password"));
 		adminUser.save();
 
-		//		 Creazione Area,Istituto e Sede
-
-		//		Area
-		Office area = new Office();
-		area.name = properties.getProperty("area");
-		area.save();
+		//		 Creazione Istituto e Sede
 
 		//		Istituto
-		Office institute = new Office();
+		Institute institute = new Institute();
 		institute.name = properties.getProperty("institute");
-//		institute.office = area;
+
 		institute.save();
 
 		//		Sede
 		Office seat = new Office();
 		seat.name = properties.getProperty("seat");
+		seat.codeId = properties.getProperty("seat_code");
 
 		if(!properties.getProperty("seat_address").isEmpty()){
 			seat.address = properties.getProperty("seat_address");
 		}
-		try{
-			seat.code = Integer.decode(properties.getProperty("seat_code"));	
-		}
-		catch(Exception f){
-			Logger.error("Errore nel parsing dal Wizard_Properties.conf: %s", f);	
-		}
+
 		if(properties.containsKey("seat_affiliation_date") && 
 				!properties.getProperty("seat_affiliation_date").isEmpty()){
 			seat.joiningDate = LocalDate.parse(properties.getProperty("seat_affiliation_date"),dtf);
 		}
-//		seat.office = institute;
+		seat.institute = institute;
 		seat.save();
 		
 //		Invalido la cache sul conteggio degli uffici
 		Cache.safeDelete(Resecure.OFFICE_COUNT);
-		
-		officeManager.setSystemUserPermission(area);
-		officeManager.setSystemUserPermission(institute);
-		officeManager.setSystemUserPermission(seat);
 
 		confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, seat, 
 				Optional.fromNullable(LocalDate.now().toString()));
@@ -513,10 +511,7 @@ public class Wizard extends Controller {
 		confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, seat, 
 				Optional.fromNullable(properties.getProperty("email_to_contact")));
 
-		confGeneralManager.buildOfficeConfGeneral(seat, false);
-
-		confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
-		confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
+		officeManager.generateConfAndPermission(seat);
 
 		//Creazione Profilo Amministratore
 

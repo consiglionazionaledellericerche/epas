@@ -1,11 +1,10 @@
 package manager;
 
-import javax.inject.Inject;
-
 import models.Contract;
 import models.ContractStampProfile;
-
 import org.joda.time.LocalDate;
+
+import javax.inject.Inject;
 
 public class ContractStampProfileManager {
 

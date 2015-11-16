@@ -5,15 +5,21 @@ package models;
 
 import it.cnr.iit.epas.NullStringBinder;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
-
 import play.data.binding.As;
 import play.data.validation.InPast;
 import play.data.validation.Required;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 
 /**

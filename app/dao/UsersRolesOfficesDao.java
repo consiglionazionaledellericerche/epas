@@ -1,11 +1,12 @@
 package dao;
 
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.ModelQuery;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
 import models.Office;
 import models.Role;
 import models.User;
@@ -13,12 +14,8 @@ import models.UsersRolesOffices;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 public class UsersRolesOfficesDao extends DaoBase {
 

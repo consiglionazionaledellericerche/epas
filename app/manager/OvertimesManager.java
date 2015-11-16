@@ -1,22 +1,19 @@
 package manager;
 
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+import dao.CompetenceDao;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonHourForOvertime;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-import dao.CompetenceDao;
+import javax.inject.Inject;
 
 public class OvertimesManager {
 

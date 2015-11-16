@@ -1,15 +1,20 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.DateTimePath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SetPath;
+import com.mysema.query.types.path.SimplePath;
+import com.mysema.query.types.path.StringPath;
 import models.Institute;
 
-
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
 
 /**
@@ -23,6 +28,8 @@ public class QInstitute extends EntityPathBase<Institute> {
     public static final QInstitute institute = new QInstitute("institute");
 
     public final models.base.query.QMutableModel _super = new models.base.query.QMutableModel(this);
+
+    public final StringPath cds = createString("cds");
 
     public final StringPath code = createString("code");
 

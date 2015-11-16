@@ -1,12 +1,17 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import dao.AbsenceDao;
+import dao.PersonDayDao;
+import dao.PersonShiftDayDao;
+import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
 import manager.cache.StampTypeManager;
 import models.Absence;
@@ -23,22 +28,14 @@ import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.Troubles;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import dao.AbsenceDao;
-import dao.PersonDayDao;
-import dao.PersonShiftDayDao;
-import dao.wrapper.IWrapperPersonDay;
 
 @Slf4j
 public class PersonDayManager {
