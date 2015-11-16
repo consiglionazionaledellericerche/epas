@@ -109,7 +109,7 @@ public class AbsenceManager {
 
 		Contract contract = contractDao.getContract(date, person);
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-				contract, date, true, otherAbsences);
+				contract, date, true, otherAbsences, Optional.<LocalDate>absent());
 		if (!vr.isPresent()) {
 			return null;
 		}
@@ -142,7 +142,7 @@ public class AbsenceManager {
 
 		Contract contract = contractDao.getContract(date, person);
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-				contract, date, true, otherAbsences);
+				contract, date, true, otherAbsences, Optional.<LocalDate>absent());
 		if (!vr.isPresent()) {
 			return false;
 		}
@@ -162,7 +162,7 @@ public class AbsenceManager {
  
 		Contract contract = contractDao.getContract(date, person);
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-				contract, date, true, otherAbsences);
+				contract, date, true, otherAbsences, Optional.<LocalDate>absent());
 		if (!vr.isPresent()) {
 			return false;
 		}
@@ -182,7 +182,7 @@ public class AbsenceManager {
 
 		Contract contract = contractDao.getContract(date, person);
 		Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-				contract, date, true, otherAbsences);
+				contract, date, true, otherAbsences, Optional.<LocalDate>absent());
 		if (!vr.isPresent()) {
 			return false;
 		}
@@ -658,7 +658,7 @@ public class AbsenceManager {
 		if (date.getYear() == LocalDate.now().getYear()) {
 			Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(), 
 					contractDao.getContract(LocalDate.now(),person), 
-					LocalDate.now(), false, otherAbsences);
+					LocalDate.now(), false, otherAbsences, Optional.<LocalDate>absent());
 			if (vr.isPresent()) {
 				int remaining37 = vr.get().vacationDaysLastYearNotYetUsed; 
 				if (remaining37 > 0) {
