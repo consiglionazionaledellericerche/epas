@@ -277,54 +277,59 @@ public class Stampings extends Controller {
 	}
 
 	/**
-	 * Controller che attua la verifica di timbrature mancanti per il mese selezionato per tutte quelle persone
-	 * che avevano almeno un contratto attivo in tale mese
-	 * @param year
-	 * @param month
+	 * Timbrature mancanti per le persone attive della sede.
+	 * 
+	 * @param year anno 
+	 * @param month mese
+	 * @param officeId sede
 	 */
-	public static void missingStamping(int year, int month, Long officeId) {
+	public static void missingStamping(final int year, final int month, 
+			final Long officeId) {
 
-		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
 		if (offices.isEmpty()) {
 			forbidden();
-		}
-		if (officeId == null) {
-			officeId = offices.iterator().next().id;
 		}
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		
 		LocalDate monthBegin = new LocalDate(year, month, 1);
-		LocalDate monthEnd = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+		LocalDate monthEnd = new LocalDate(year, month, 1)
+		.dayOfMonth().withMaximumValue();
 
-		List<Person> activePersons = personDao.list( Optional.<String>absent(),
-				Sets.newHashSet(office), false, monthBegin, monthEnd, true).list();
+		List<Person> activePersons = personDao.list(Optional.<String>absent(),
+				Sets.newHashSet(office), false, monthBegin, monthEnd, true)
+				.list();
 
-		List<PersonTroublesInMonthRecap> missingStampings = Lists.newArrayList();
+		List<PersonTroublesInMonthRecap> missingStampings = 
+				Lists.newArrayList();
 
-		for(Person person : activePersons) {
+		for (Person person : activePersons) {
 			
-			PersonTroublesInMonthRecap pt = personTroubleRecapFactory.create(person, monthBegin, monthEnd);
+			PersonTroublesInMonthRecap pt = personTroubleRecapFactory
+					.create(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
 		render(month, year, office, offices, missingStampings);
 	}
 
 	/**
-	 * Controller che renderizza la presenza giornaliera dei dipendenti visibili all'amministratore.
-	 * @param year
-	 * @param month
-	 * @param day
+	 * Presenza giornaliera dei dipendenti visibili all'amministratore.
+	 * 
+	 * @param year anno
+	 * @param month mese
+	 * @param day giorno
+	 * @param officeId sede
 	 */
-	public static void dailyPresence(Integer year, Integer month, Integer day, Long officeId) {
+	public static void dailyPresence(final Integer year, final Integer month, 
+			final Integer day, final Long officeId) {
 
-		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
 		if (offices.isEmpty()) {
 			forbidden();
-		}
-		if (officeId == null) {
-			officeId = offices.iterator().next().id;
 		}
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
@@ -341,8 +346,8 @@ public class Stampings extends Controller {
 
 		List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
 
-		daysRecap = stampingManager
-				.populatePersonStampingDayRecapList(activePersonsInDay, date, numberOfInOut);
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(
+				activePersonsInDay, date, numberOfInOut);
 
 		render(daysRecap, year, month, day, numberOfInOut, office, offices);
 	}
@@ -352,7 +357,8 @@ public class Stampings extends Controller {
 		List<Person> simplePersonList = personDao.list(
 				Optional.<String>absent(),
 				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
+				false, new LocalDate(year, 1, 1), 
+				new LocalDate(year, 12, 31), false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)

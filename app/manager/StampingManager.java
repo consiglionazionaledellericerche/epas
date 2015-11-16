@@ -63,28 +63,33 @@ public class StampingManager {
 	}
 
 	/**
-	 * Calcola il numero massimo di coppie ingresso/uscita nel personday di un giorno specifico 
-	 * per tutte le persone presenti nella lista di persone attive a quella data.
-	 * @param year
-	 * @param month
-	 * @param day
-	 * @param activePersonsInDay
-	 * @return 
+	 * Calcola il numero massimo di coppie ingresso/uscita in un giorno 
+	 * specifico per tutte le persone presenti nella lista di persone attive 
+	 * a quella data.
+	 * 
+	 * @param date data 
+	 * @param activePersonsInDay lista delle persone da verificare
+	 * @return numero di coppie
 	 */
-	public int maxNumberOfStampingsInMonth(LocalDate date, List<Person> activePersonsInDay){
+	public final int maxNumberOfStampingsInMonth(final LocalDate date, 
+			final List<Person> activePersonsInDay) {
 
 		int max = 0;
 
-		for(Person person : activePersonsInDay){
+		for (Person person : activePersonsInDay) {
 			PersonDay personDay = null;
 			Optional<PersonDay> pd = personDayDao.getPersonDay(person, date);
 
-			if(pd.isPresent()) {
+			if (pd.isPresent()) {
 				personDay = pd.get();
-				if(max < personDayManager.numberOfInOutInPersonDay(personDay)) {
+				if (max < personDayManager.numberOfInOutInPersonDay(personDay)){
 					max = personDayManager.numberOfInOutInPersonDay(personDay);
 				}
 			}
+		}
+		
+		if (max < 2) {
+			max = 2;
 		}
 		return max;
 	}

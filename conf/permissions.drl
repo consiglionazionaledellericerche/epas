@@ -437,6 +437,8 @@ when
         "PrintTags.showTag",
 		
         "Stampings.personStamping",
+        "Stampings.dailyPresence",
+        "Stampings.missingStamping",
         
         "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
