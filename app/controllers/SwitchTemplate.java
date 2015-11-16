@@ -15,6 +15,7 @@ public class SwitchTemplate extends Controller{
 		Integer month = Integer.parseInt(session.get("monthSelected"));
 		Integer day = Integer.parseInt(session.get("daySelected"));
 		Long personId = Long.parseLong(session.get("personSelected"));
+		Long officeId = Long.parseLong(session.get("officeSelected"));
 
 		session.put("actionSelected", action);
 
@@ -85,12 +86,12 @@ public class SwitchTemplate extends Controller{
 
 		if(action.equals("Stampings.missingStamping")) {
 
-			Stampings.missingStamping(year, month);
+			Stampings.missingStamping(year, month, officeId);
 		}
 
 		if(action.equals("Stampings.dailyPresence")) {
 
-			Stampings.dailyPresence(year, month, day);
+			Stampings.dailyPresence(year, month, day, officeId);
 		}
 
 		if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {

@@ -176,12 +176,15 @@ public class RequestInit extends Controller {
 		public final Integer month;
 		public final Integer day;
 		public final Long personId;
+		public final Long officeId;
 
-		CurrentData(Integer year, Integer month, Integer day, Long personId) {
+		CurrentData(Integer year, Integer month, Integer day, 
+				Long personId, Long officeId) {
 			this.year = year;
 			this.month = month;
 			this.day = day;
 			this.personId = personId;
+			this.officeId = officeId;
 		}
 
 		public String getMonthLabel() {
@@ -286,9 +289,7 @@ public class RequestInit extends Controller {
 			session.put("personSelected", 1);
 		}
 
-		renderArgs.put("currentData", new CurrentData(year, month, day, 
-				Long.valueOf(session.get("personSelected"))));
-
+		Optional<Office> first = Optional.<Office>absent();
 		if(user.get().person != null) {
 			
 			Set<Office> officeList = secureManager.officesReadAllowed(user.get());
@@ -298,6 +299,7 @@ public class RequestInit extends Controller {
 				List<PersonLite> persons = personDao
 						.liteList(officeList, year, month);
 				renderArgs.put("navPersons", persons);
+				first = Optional.fromNullable(officeList.iterator().next());
 			}
 		}  else {
 
@@ -308,9 +310,30 @@ public class RequestInit extends Controller {
 				List<PersonLite> persons = personDao
 						.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
+				first = Optional.fromNullable(allOffices.iterator().next());
 			}
 		}
+		
+		// office init (l'office selezionato, andrà combinato con la lista persone sopra)
+		
+		Long officeId;
+		if ( params.get("officeId") != null ) {
 
+			officeId = Long.valueOf(params.get("officeId"));
+		} 
+		else if (session.get("officeSelected") != null ){
+
+			officeId = Long.valueOf(session.get("officeSelected"));
+		}
+		else if (first.isPresent() ){
+
+			officeId = first.get().id;
+		} else {
+			officeId = -1l;
+		}
+
+		session.put("officeSelected", officeId);
+		
 		// day lenght (provvisorio)
 		try {
 
@@ -330,6 +353,11 @@ public class RequestInit extends Controller {
 		years.add(2013);
 
 		renderArgs.put("navYears", years);
+		
+		
+		renderArgs.put("currentData", new CurrentData(year, month, day, 
+				Long.valueOf(session.get("personSelected")),
+				Long.valueOf(session.get("officeSelected")) ));
 
 	}
 

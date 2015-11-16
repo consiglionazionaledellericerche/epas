@@ -4,7 +4,10 @@
 
 <div class="container-fluid">
 
-  <div class="panel panel-info col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
+  <!-- filtro office -->
+  #{switchOffice action:@Stampings.dailyPresence(), year:year, month:month, day:day, items:offices, value: office.id /}
+
+  <div class="panel panel-info col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
       <div class="panel-heading">
         <h3 class="panel-title text-center">Presenza giornaliera del ${day} &{'views.tags.display.date.month.' + month} ${year} </h3>
       </div>

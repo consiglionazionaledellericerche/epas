@@ -74,16 +74,20 @@ public class Absences extends Controller{
 	@Inject
 	private static AbsenceHistoryDao absenceHistoryDao;
 
-	public static void absences(int year, int month) {
+	/**
+	 * Le assenze della persona nel mese.
+	 * @param year anno richiesto
+	 * @param month mese richiesto
+	 */
+	public static void absences(final int year, final int month) {
 		Person person = Security.getUser().get().person;
-		YearMonth yearMonth = new YearMonth(year,month);
-		Map<AbsenceType,Long> absenceTypeInMonth = 
+		YearMonth yearMonth = new YearMonth(year, month);
+		Map<AbsenceType, Long> absenceTypeInMonth = 
 				absenceTypeDao.getAbsenceTypeInPeriod(person,
-						DateUtility.getMonthFirstDay(yearMonth), 
-						Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
+						DateUtility.getMonthFirstDay(yearMonth), Optional
+						.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
 
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(absenceTypeInMonth, year, month, month_capitalized);
+		render(absenceTypeInMonth, year, month);
 	}
 
 	public static void absenceInMonth(String absenceCode, int year, int month){

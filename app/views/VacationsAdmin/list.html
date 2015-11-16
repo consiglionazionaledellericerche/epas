@@ -12,30 +12,8 @@
 
 #{/set}
 
-<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
-<div class="container-fluid">
-	<div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-		#{form action:@VacationsAdmin.list(), role:'form',
-		class:'form-inline', method:'GET', autocomplete:'off'}
-
-		<div class="form-group">
-			<label class="hidden-xs hidden-sm" for="dip">Sede </label> <input
-				type="hidden" name="year" value="${year}" /> <input type="hidden"
-				name="name" value="${name}"> <select name="officeId"
-				class="form-control" id="dip"
-				onChange="javascript:this.form.submit()"> #{list
-				items:offices, as:'officeItem'}
-				<option value="${officeItem.id}" #{if
-					officeItem.id.equals(office.id) } selected="selected"#{/if} >
-					${officeItem.name}</option> #{/list}
-			</select>
-		</div>
-
-		<button type="submit" class="btn btn-default">Invio</button>
-		#{/form}
-	</div>
-</div>
-<!-- FINE FILTRO OFFICE -->
+<!-- filtro office -->
+#{switchOffice action:@VacationsAdmin.list(), year:year, name:name, items:offices, value: office.id /}
 
 <div class="container-fluid">
 
