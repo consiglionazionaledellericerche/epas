@@ -147,7 +147,7 @@
                   <li><a href="@{Charts.indexCharts()}">Utility</a></li>
                   <li class="divider"></li>
                   <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
+                   session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
                   <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
                    session.get("monthSelected"))}">Assenze</a></li>
                   <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
