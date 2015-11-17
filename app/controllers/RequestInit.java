@@ -648,8 +648,10 @@ public class RequestInit extends Controller {
 			}
 			
 			if(action.equals("MonthRecaps.showRecaps")) {
-
-				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "MonthRecaps.showRecaps";
 			}
 			
 			if(action.equals("MonthRecaps.customRecap")) {
