@@ -231,6 +231,22 @@ public class SwitchTemplate extends Controller{
 		session.put("personSelected", personId);
 
 		executeAction(action);
+	}
+	
+	public static void updateOffice(Long officeId) throws Throwable {
+
+		String action = session.get("actionSelected");
+		if (action == null) {
+			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+			Secure.login();
+		}
+		if (officeId == null) {	
+			Application.index();	
+		}
+
+		session.put("officeSelected", officeId);
+
+		executeAction(action);
 
 	}
 

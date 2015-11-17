@@ -1,5 +1,6 @@
 #{ if switchYear && switchMonth}
-		  <ul class="nav navbar-nav">
+   
+		  <ul class="hidden-xs nav navbar-nav">
         	<li><a href="?month=${templateUtility.computePreviousMonth(currentData.month)}&year=${templateUtility.computePreviousYear(currentData.month, currentData.year)}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.day}"><i class="fa fa-arrow-left"></i></a></li>
       	  </ul>
 #{/if}
@@ -31,7 +32,7 @@
       	  </ul>
 #{/if}
 #{ if switchYear && switchMonth }
-      	  <ul class="nav navbar-nav">
+      	  <ul class="hidden-xs nav navbar-nav">
         	<li><a href="?month=${templateUtility.computeNextMonth(currentData.month)}&year=${templateUtility.computeNextYear(currentData.month, currentData.year)}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.day}"><i class="fa fa-arrow-right"></i></a></li>
       	  </ul>	
 #{/if}
@@ -49,15 +50,33 @@
       		#{/form}
 #{/if}
 #{if switchPerson}
-      	  	#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
-      	  	<div class="form-group">
-      	  	<!-- Lista persone -->
-          	  #{select 'personId', value:session.get("personSelected"), class:'form-control', id:'person', onChange:'javascript:this.form.submit()'}
-		  		#{list items:navPersons, as:'person'}
-		    		#{option person.id}${person.surname + ' ' + person.name}#{/option}
-	  			#{/list}
-		  	  #{/select}
-		  	</div>
-  			
-      		#{/form}
+  	#{form @SwitchTemplate.updatePerson(), 
+  	  class: 'navbar-form navbar-left my-navbar-form', 
+  	  onChange:'javascript:this.form.submit()' }
+  	  
+	 	<div class="form-group">
+	    <!-- Lista persone -->
+	    #{select 'personId', value:session.get("personSelected"), 
+	    class:'form-control', id:'person', onChange:'javascript:this.form.submit()'}
+		  #{list items:navPersons, as:'person'}
+			#{option person.id}${person.surname + ' ' + person.name}#{/option}
+		  #{/list}
+		#{/select}
+		</div>
+  	#{/form}
+#{/if}
+#{if switchOffice}
+  #{form @SwitchTemplate.updateOffice(),  
+      class: 'navbar-form navbar-left my-navbar-form', 
+  	  onChange:'javascript:this.form.submit()' }}
+
+		<div class="form-group">
+			    #{select 'officeId', value:session.get("officeSelected"), 
+	               class:'form-control', id:'office', onChange:'javascript:this.form.submit()'}
+			      #{list items:navOffices, as:'office'}
+				    #{option office.id}${office.name}#{/option}
+				  #{/list}
+			    #{/select}
+		</div>
+		#{/form}  
 #{/if}
