@@ -499,31 +499,27 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Absences.absenceInPeriod";
 			}
-		}
-
-		if(action.startsWith("YearlyAbsences.")) {
-
-			if(action.equals("YearlyAbsences.absencesPerPerson")) {
+			if(action.equals("Absences.absencesPerPerson")) {
 
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownEmployee");
-				return "YearlyAbsences.absencesPerPerson";
+				return "Absences.absencesPerPerson";
 			}
 
-			if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
+			if(action.equals("Absences.showGeneralMonthlyAbsences")) {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownAdministration");
-				return "YearlyAbsences.showGeneralMonthlyAbsences";
+				return "Absences.showGeneralMonthlyAbsences";
 			}
 
-			if(action.equals("YearlyAbsences.yearlyAbsences")) {
+			if(action.equals("Absences.yearlyAbsences")) {
 
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("switchPerson", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
-				return "YearlyAbsences.yearlyAbsences";
+				return "Absences.yearlyAbsences";
 			}
 		}
 
@@ -584,12 +580,19 @@ public class RequestInit extends Controller {
 			}
 			
 			if(action.equals("MonthRecaps.showRecaps")) {
-
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "MonthRecaps.showRecaps";
+			}
+			
+			if(action.equals("MonthRecaps.customRecap")) {
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "MonthRecaps.customRecap";
 			}
 		}
 

@@ -92,13 +92,14 @@ public class VacationsRecap {
 			ConfYearManager confYearManager, 
 			VacationManager vacationManager,
 			int year, Contract contract, Optional<LocalDate> accruedDate, 
-			boolean considerExpireLastYear, List<Absence> otherAbsences) {
+			boolean considerExpireLastYear, List<Absence> otherAbsences, 
+			Optional<LocalDate> dateAsToday) {
 
 		this.absenceDao = absenceDao;
 		this.vacationManager = vacationManager;
 		this.absenceTypeManager = absenceTypeManager;
 		
-		if(accruedDate.isPresent()) {
+		if (accruedDate.isPresent()) {
 			//Preconditions.checkArgument(year == accruedDate.get().getYear());
 		} else {
 			accruedDate = Optional.fromNullable(LocalDate.now());
@@ -112,7 +113,7 @@ public class VacationsRecap {
 		this.wcontract = wrapperFactory.create(contract);
 		this.activeContractInterval = wcontract.getContractDateInterval();
 		
-		initDataStructures(otherAbsences);
+		initDataStructures(otherAbsences, dateAsToday);
 
 		//(1) ferie fatte dell'anno precedente all'anno richiesto
 		vacationDaysLastYearUsed = list32PreviouYear.size() 
@@ -228,7 +229,8 @@ public class VacationsRecap {
 		return 0;
 	}
 	
-	private void initDataStructures(List<Absence> otherAbsences) {
+	private void initDataStructures(List<Absence> otherAbsences, 
+			Optional<LocalDate> dateAsToday) {
 		
 		// Gli intervalli su cui predere le assenze nel db
 		this.previousYearInterval = DateUtility
@@ -261,19 +263,23 @@ public class VacationsRecap {
 						absenceTypeManager.codesForVacations(), true);
 		
 		absencesForVacationsRecap.addAll(otherAbsences);
-		// TODO: filtrare otherAbsencs le sole nell'intervallo [dateFrom, dateTo]
+		// TODO: filtrare otherAbsencs le sole nell'intervallo[dateFrom, dateTo]
 		
-		AbsenceType ab32  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
-		AbsenceType ab31  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
-		AbsenceType ab37  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode());
-		AbsenceType ab94  = absenceTypeManager.getAbsenceType(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
+		AbsenceType ab32  = absenceTypeManager.getAbsenceType(
+				AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
+		AbsenceType ab31  = absenceTypeManager.getAbsenceType(
+				AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
+		AbsenceType ab37  = absenceTypeManager.getAbsenceType(
+				AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode());
+		AbsenceType ab94  = absenceTypeManager.getAbsenceType(
+				AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
 		
 		
 		for(Absence ab : absencesForVacationsRecap) {
 			
 			int abYear;
 			
-			if(ab.personDay != null) {
+			if (ab.personDay != null) {
 				 abYear = ab.personDay.date.getYear();
 			} else {
 				 abYear = ab.date.getYear();
@@ -281,34 +287,51 @@ public class VacationsRecap {
 			
 			//32
 			if (ab.absenceType.id.equals(ab32.id)) {
-				if(abYear == year - 1) {
+				if (dateAsToday.isPresent() 
+						&& ab.personDay.date.isAfter(dateAsToday.get())) {
+					continue;
+				}
+				if (abYear == year - 1) {
 					list32PreviouYear.add(ab);
-				} else if (abYear == year){
+				} else if (abYear == year) {
 					list32RequestYear.add(ab);
 				} 
 				continue;
 			}
 			//31
 			if (ab.absenceType.id.equals(ab31.id)) {
-				if(abYear == year) {
+				if (dateAsToday.isPresent() 
+						&& ab.personDay.date.isAfter(dateAsToday.get())) {
+					continue;
+				}
+				if (abYear == year) {
 					list31RequestYear.add(ab);
-				} else if (abYear == year + 1){
+				} else if (abYear == year + 1) {
 					list31NextYear.add(ab);
 				}
 				continue;
 			}
 			//94
 			if (ab.absenceType.id.equals(ab94.id)) {
-				if(abYear == year) {
+				if (dateAsToday.isPresent() 
+						&& ab.personDay.date.isAfter(dateAsToday.get())) {
+					continue;
+				}
+
+				if (abYear == year) {
 					list94RequestYear.add(ab);
 				}
 				continue;
 			}
 			//37
 			if (ab.absenceType.id.equals(ab37.id)) {
-				if(abYear == year) {
+				if (dateAsToday.isPresent() 
+						&& ab.personDay.date.isAfter(dateAsToday.get())) {
+					continue;
+				}
+				if (abYear == year) {
 					list37RequestYear.add(ab);
-				} else if (abYear == year + 1){
+				} else if (abYear == year + 1) {
 					list37NextYear.add(ab);
 				}
 				continue;

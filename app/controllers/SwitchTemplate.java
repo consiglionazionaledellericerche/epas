@@ -54,9 +54,19 @@ public class SwitchTemplate extends Controller{
 			Absences.absences(year, month);
 		}
 
-		if(action.equals("YearlyAbsences.absencesPerPerson")) {
+		if(action.equals("Absences.absencesPerPerson")) {
 
-			YearlyAbsences.absencesPerPerson(year);
+			Absences.absencesPerPerson(year);
+		}
+		
+		if(action.equals("Absences.showGeneralMonthlyAbsences")) {
+
+			Absences.showGeneralMonthlyAbsences(year, month, null, null);
+		}
+
+		if(action.equals("Absences.yearlyAbsences")) {
+
+			Absences.yearlyAbsences(personId, year);
 		}
 
 		if(action.equals("Competences.competences")) {
@@ -107,16 +117,6 @@ public class SwitchTemplate extends Controller{
 		if(action.equals("UploadSituation.show")) {
 
 			UploadSituation.show();
-		}
-
-		if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
-
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
-		}
-
-		if(action.equals("YearlyAbsences.yearlyAbsences")) {
-
-			YearlyAbsences.yearlyAbsences(personId, year);
 		}
 
 		if(action.equals("Absences.manageAttachmentsPerCode")) {

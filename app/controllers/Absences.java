@@ -9,6 +9,9 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
@@ -16,9 +19,12 @@ import dao.QualificationDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import helpers.Web;
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 import manager.AbsenceManager;
 import manager.SecureManager;
+import manager.YearlyAbsencesManager;
+import manager.recaps.YearlyAbsencesRecap;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import models.Absence;
@@ -26,11 +32,14 @@ import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Person;
 import models.Qualification;
+import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
+
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -42,6 +51,7 @@ import security.SecurityRules;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -73,6 +83,8 @@ public class Absences extends Controller{
 	private static SecureManager secureManager;
 	@Inject
 	private static AbsenceHistoryDao absenceHistoryDao;
+	@Inject
+	private static YearlyAbsencesManager yearlyAbsencesManager;
 
 	/**
 	 * Le assenze della persona nel mese.
@@ -493,7 +505,7 @@ public class Absences extends Controller{
 		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona inesistente");
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
+			showGeneralMonthlyAbsences(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
 		List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
@@ -555,6 +567,127 @@ public class Absences extends Controller{
 		}
 		render(personList, person, absenceList, from, to, missioni, ferie, riposiCompensativi, altreAssenze, person.id);
 
+	}
+	
+	public static void yearlyAbsences(Long personId, int year) {
+		//controllo sui parametri
+		Person person = null;
+		if(personId == null)
+			person = Security.getUser().get().person;
+		else
+			person = personDao.getPersonById(personId);
+
+		Integer anno = params.get("year", Integer.class);
+		Logger.debug("L'id della persona è: %s", personId);
+		Logger.debug("La persona è: %s %s", person.name, person.surname);
+		Logger.trace("Anno: "+anno);
+
+		//rendering 
+		if(anno==null){
+			LocalDate now = new LocalDate();
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					person, now.getYear(),absenceDao.getYearlyAbsence(person, now.getYear()));
+			render(yearlyAbsencesRecap, year);
+		}
+		else{
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					person, anno.intValue(),absenceDao.getYearlyAbsence(person, anno.intValue()));
+			render(yearlyAbsencesRecap, year, personId, person);
+		}		
+
+	}
+
+	public static void showGeneralMonthlyAbsences(int year, int month, String name, Integer page) {
+
+		if(page==null)
+			page=0;
+
+		Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(yearlyAbsencesManager.PersonNameComparator, yearlyAbsencesManager.AbsenceCodeComparator);
+		AbsenceType abt = new AbsenceType();
+		abt.code = "Totale";		
+
+		SimpleResults<Person> simpleResults = personDao.list(
+				Optional.fromNullable(name), 
+				secureManager.officesReadAllowed(Security.getUser().get()), 
+				false, new LocalDate(year, month,1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
+
+		List<Person> persons = simpleResults.paginated(page).getResults();
+		LocalDate begin = new LocalDate(year, month, 1);
+		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+		tableMonthlyAbsences = yearlyAbsencesManager.populateMonthlyAbsencesTable(persons, abt, begin, end);
+		int numberOfDifferentAbsenceType = tableMonthlyAbsences.columnKeySet().size();
+
+		if (!Strings.isNullOrEmpty(name)) {
+			Logger.info("filtrare per nome qui... %s", name);
+			// TODO: filtrare per nome tableMonthly...
+		}
+
+		render(tableMonthlyAbsences, year, month,numberOfDifferentAbsenceType, simpleResults, name, page);
+
+	}
+
+
+	/**
+	 * 
+	 * @param personId
+	 * @param year
+	 * Render della pagina absencePerPerson.html che riassume le assenze annuali di una persona
+	 */
+
+	public static void absencesPerPerson(Integer year){
+
+		//controllo sui parametri
+		Optional<User> currentUser = Security.getUser();
+		if( !currentUser.isPresent() || currentUser.get().person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		User user = currentUser.get();
+		//rendering 
+		if(year==null){
+			LocalDate now = new LocalDate();
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					user.person, now.getYear(),absenceDao.getYearlyAbsence(user.person, now.getYear()));
+			render(yearlyAbsencesRecap);
+		}
+		else{
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+					user.person, year.intValue(),absenceDao.getYearlyAbsence(user.person, year.intValue()));
+			render(yearlyAbsencesRecap);
+		}
+	}
+
+
+	public static void showPersonMonthlyAbsences(Long personId, Integer year, Integer month, String absenceTypeCode) throws InstantiationException, IllegalAccessException
+	{
+
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
+		Person person = personDao.getPersonById(personId);
+		if(person == null){
+			flash.error("Persona inesistente");
+			showGeneralMonthlyAbsences(year, month, null, null);
+		}
+
+		rules.checkIfPermitted(person.office);		
+		List<Absence> absenceToRender = new ArrayList<Absence>();
+
+		if(absenceTypeCode.equals("Totale"))
+		{
+			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
+					Optional.fromNullable(person), Optional.<String>absent(), 
+					monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+		}
+		else
+		{
+			absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
+					Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
+					monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+		}
+
+		render(person, absenceToRender);
 	}
 
 }
