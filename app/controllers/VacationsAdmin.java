@@ -48,7 +48,7 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	private static ContractDao contractDao;
 
-	public static void list(Integer year, Integer page, Long officeId){
+	public static void list(Integer year, Long officeId){
 
 		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 		if (offices.isEmpty()) {
@@ -60,10 +60,6 @@ public class VacationsAdmin extends Controller{
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
-
-		if (page==null) {
-			page = 0;
-		}
 
 		LocalDate beginYear = new LocalDate(year, 1, 1);
 		LocalDate endYear = new LocalDate(year, 12, 31);

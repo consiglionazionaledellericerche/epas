@@ -1,0 +1,107 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title:'Assenze annuali' /}<br> 
+
+#{switcher year:true /}
+
+#{set 'moreStyles' }
+
+<style>
+	@media (max-width: 767px) {
+	
+	  #assenzeannuali{
+	    font-size: .8em;
+	  }
+	  
+	  #assenzeannuali th, #assenzeannuali td{
+	    padding-left: 1px;
+	    padding-right: 1px;
+	  }
+	
+	}
+	
+	@media (max-width: 991px) {
+	
+	  #assenzeannuali{
+	    font-size: .8em;
+	  }
+	  
+	  #assenzeannuali {
+		background-color: white;
+		max-width: 700px;
+	  }
+	
+	}
+
+	.panel-info > .panel-heading {
+	   border-color: #033c73;
+	}
+	
+	#containertitle {
+		padding: 0;
+	}
+	
+}
+	
+
+</style>
+
+#{/set}
+
+<div class="container" id="containertitle">
+<div class="panel panel-info">
+  <div class="panel-heading">
+        <h3 class="panel-title text-center">Assenze annuali ${session.get("yearSelected")}</h3>
+      </div>
+</div>
+</div>
+
+<div class="container col-lg-8 col-lg-offset-2">
+  <table id="assenzeannuali" class="table table-bordered table-hover table-condensed">
+
+	<!--  Riga di intestazione -->
+		
+	<tr>
+		<th rowspan="2">Mese</th>
+		<th colspan="31">Giorni</th>
+	</tr>
+		
+		#{list items:1..31, as: 'i'}
+		  <th class="bolded centered">${i}</th>
+		#{/list}
+		
+		
+	<!-- Contenuto tabella assenze annuali -->
+	#{list items:yearlyAbsencesRecap.absenceTable.rowMap(), as: 'month'}
+	<tr>
+		
+		<td class="month">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
+		#{list items:yearlyAbsencesRecap.absenceTable.columnKeySet(), as: 'col'}
+		  <td>${month.getValue().get(col)}</td>
+        #{/list}
+	</tr>
+    #{/list}
+  </table>
+</div>
+
+<div class="container col-lg-8 col-lg-offset-2">
+<table class="table table-bordered table-hover table-condensed">
+	<tr>
+		<th>Codice assenza</th>
+		<th>Descrizione</th>
+		<th>Totale</th>			
+	</tr>
+	#{list items:yearlyAbsencesRecap.absenceSummary.entrySet(), as: 'entry'}
+	<tr>
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		<td>${entry.getValue()}</td>
+	</tr>
+    #{/list}
+	<tr>
+		<td>TOTALE</td>
+		<td></td>
+		<td>${yearlyAbsencesRecap.totalAbsence}</td>
+	</tr>
+</table>
+</div>

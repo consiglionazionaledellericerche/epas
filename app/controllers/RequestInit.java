@@ -446,6 +446,16 @@ public class RequestInit extends Controller {
 				return "Vacations.show";
 			}
 		}
+		
+		if( action.startsWith("VacationsAdmin.")) {
+			
+			if(action.equals("VacationsAdmin.list")) {
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "VacationsAdmin.list";
+			}
+		}
 
 		if( action.startsWith("Persons.")) {
 

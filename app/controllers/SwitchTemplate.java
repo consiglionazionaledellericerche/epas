@@ -44,6 +44,12 @@ public class SwitchTemplate extends Controller{
 			Vacations.show(year);
 		}
 
+		if(action.equals("VacationsAdmin.list")) {
+
+			VacationsAdmin.list(year, officeId);
+		}
+
+
 		if(action.equals("Persons.changePassword")) {
 
 			Persons.changePassword();
