@@ -15,22 +15,19 @@
 </style>
 #{/set}
 
-<!-- filtro office -->
-#{switchOffice action:@Stampings.missingStamping(), year:year, month:month, items:offices, value: office.id /}
+#{set breadcrumbs:['Timbrature mancanti':null] /}
+ 
+<div class="container">
 
-<div class="container-fluid center">
+#{breadcrumbs breadcrumbs /}
 
-   <div class="panel panel-info col-xs-12 col-sm-12 col-md-8 col-md-offset-2">
-      <div class="panel-heading">
-        <h3 class="panel-title">Timbrature mancanti di &{'views.tags.display.date.month.' + month} ${year} </h3>
-      </div>
-      <div class="panel-body">
-      
-      <table class="table table-hover table-striped">
+#{title title:'Timbrature mancanti ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+
+      <table class="table table-hover table-striped table-bordered">
 	    <tr>
 		  <th style="min-width: 300px;">Nome</th>
 		  <th>No assenze e timbrature</th>
-		  <th>Timbrature disaccoppiate giorno feriale</th>
+		  <th>Timbrature disaccoppiate<br>giorno feriale</th>
 		  <th>Lavoro festivo</th>
 		</tr>
 	
@@ -56,7 +53,7 @@
 	     
 	     <td>
 	        #{if personMissingStampings.holidayWorkingTimeNotAccepted> 0 }
-	        <span class="badge badge-warning">Non Accettate: ${personMissingStampings.holidayWorkingTimeNotAccepted.toHourTime()}</span>
+	        <span class="badge badge-warning">Non Accettate: ${personMissingStampings.holidayWorkingTimeNotAccepted.toHourTime()}</span><br>
 	        #{/if}
 	        #{if personMissingStampings.holidayWorkingTimeAccepted > 0 }
 	        <span class="badge badge-inverse">Accettate: ${personMissingStampings.holidayWorkingTimeAccepted.toHourTime()}</span>
@@ -66,11 +63,7 @@
 	   #{/list}
 	
      </table>
-      
-      
-  </div>
- </div>  
- 
+
  
  
 </div>

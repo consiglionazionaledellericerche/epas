@@ -2,17 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Presenza Giornaliera'  /}
 
+#{set breadcrumbs:['Presenza giornaliera':null] /}
+ 
 <div class="container-fluid">
 
-  <!-- filtro office -->
-  #{switchOffice action:@Stampings.dailyPresence(), year:year, month:month, day:day, items:offices, value: office.id /}
+#{breadcrumbs breadcrumbs /}
 
-  <div class="panel panel-info col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-      <div class="panel-heading">
-        <h3 class="panel-title text-center">Presenza giornaliera del ${day} &{'views.tags.display.date.month.' + month} ${year} </h3>
-      </div>
-      <div class="panel-body">
+#{title title:'Presenza giornaliera ' + day + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
+
+   <div class="col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
 	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
 	      <tr>
 			<th>Nome</th>
@@ -97,8 +96,5 @@
 		</tr>	
 		#{/list}
 	  </table>
-	  
-	</div>
-  </div>	<!-- end panel -->
-
+   </div>
 </div>

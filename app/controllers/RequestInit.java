@@ -300,6 +300,7 @@ public class RequestInit extends Controller {
 						.liteList(officeList, year, month);
 				renderArgs.put("navPersons", persons);
 				first = Optional.fromNullable(officeList.iterator().next());
+				renderArgs.put("navOffices", officeList);
 			}
 		}  else {
 
@@ -311,6 +312,7 @@ public class RequestInit extends Controller {
 						.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
 				first = Optional.fromNullable(allOffices.iterator().next());
+				renderArgs.put("navOffices", allOffices);
 			}
 		}
 		
@@ -387,6 +389,7 @@ public class RequestInit extends Controller {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.missingStamping";
 			}
