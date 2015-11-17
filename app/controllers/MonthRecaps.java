@@ -3,6 +3,8 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -11,14 +13,20 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import manager.SecureManager;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Office;
 import models.Person;
+
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import javax.inject.Inject;
+
 import java.util.List;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
@@ -31,24 +39,34 @@ public class MonthRecaps extends Controller{
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static OfficeDao officeDao;
+	@Inject
+	private static SecurityRules rules;
 	
 	/**
 	 * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
 	 * 
 	 * @param year
 	 */
-	public static void showRecaps(int year, int month) {
-
-		//FIXME per adesso senza paginazione
-
-		//Prendo la lista delle persone attive in questo momento. 
-		//Secondo me si deve mettere le persone non attive in un elenco da poter
-		//Analizzare singolarmente.
-
+	public static void showRecaps(int year, int month, Long officeId) {
+		
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		LocalDate monthEnd = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+		
 		List<Person> simplePersonList = personDao.list(
 				Optional.<String>absent(),
 				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, LocalDate.now(), LocalDate.now(), false).list();
+				false, monthBegin, monthEnd, false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
@@ -72,7 +90,7 @@ public class MonthRecaps extends Controller{
 			}
 		}
 
-		render(recaps);
+		render(recaps, year, month);
 	}
 
 }

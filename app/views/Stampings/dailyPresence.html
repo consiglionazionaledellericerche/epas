@@ -4,14 +4,12 @@
 
 #{set breadcrumbs:['Presenza giornaliera':null] /}
  
-<div class="container-fluid">
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:'Presenza giornaliera ' + day + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+</div>
 
-#{breadcrumbs breadcrumbs /}
-
-#{title title:'Presenza giornaliera ' + day + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
-
-
-   <div class="col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
+<div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
 	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
 	      <tr>
 			<th>Nome</th>
@@ -96,5 +94,4 @@
 		</tr>	
 		#{/list}
 	  </table>
-   </div>
 </div>

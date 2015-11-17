@@ -405,6 +405,7 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchDay", true);
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.dailyPresence";
 			}
@@ -586,6 +587,7 @@ public class RequestInit extends Controller {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "MonthRecaps.showRecaps";
 			}
