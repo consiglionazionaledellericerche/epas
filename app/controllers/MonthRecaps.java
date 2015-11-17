@@ -1,16 +1,15 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Set;
 
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+
+import lombok.Data;
+import manager.PersonManager;
 import manager.SecureManager;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -23,10 +22,17 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import javax.inject.Inject;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import java.util.List;
-import java.util.Set;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
@@ -41,6 +47,10 @@ public class MonthRecaps extends Controller{
 	private static IWrapperFactory wrapperFactory;
 	@Inject
 	private static OfficeDao officeDao;
+	@Inject
+	private static VacationsRecapFactory vacationsFactory;
+	@Inject
+	private static PersonManager personManager;
 	@Inject
 	private static SecurityRules rules;
 	
@@ -90,7 +100,100 @@ public class MonthRecaps extends Controller{
 			}
 		}
 
+
 		render(recaps, year, month);
+	}
+	
+	/**
+	 * Recap chiesto da IVV. 
+	 * TODO: una raccolta di piccole funzionalità 
+	 * 
+	 * @param year anno 
+	 * @param month mese
+	 * @param officeId sede
+	 */
+	public static void customRecap(final int year, final int month, 
+			Long officeId) {
+		
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
+		LocalDate monthBegin = new LocalDate().withYear(year)
+				.withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year)
+				.withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		
+		List<Person> activePersons = personDao.list(Optional.<String>absent(), 
+				Sets.newHashSet(office), false, monthBegin, monthEnd, true)
+				.list();
+		
+		List<CustomRecapDTO> customRecapList = Lists.newArrayList();
+		
+		for (Person person : activePersons) {
+			
+			IWrapperPerson wPerson = wrapperFactory.create(person);
+
+			for (Contract contract : wPerson.getMonthContracts(year, month)) {
+				Optional<VacationsRecap> vr = vacationsFactory.create(year,
+						contract, LocalDate.now(), true, monthEnd);
+				
+				CustomRecapDTO danilaDto = new CustomRecapDTO();
+				danilaDto.ferieAnnoCorrente = 
+						vr.get().vacationDaysCurrentYearTotal 
+						- vr.get().vacationDaysCurrentYearUsed;
+				danilaDto.ferieAnnoPassato = 
+						vr.get().vacationDaysLastYearAccrued 
+						- vr.get().vacationDaysLastYearUsed;
+				danilaDto.permessi = vr.get().permissionCurrentYearTotal 
+						- vr.get().permissionUsed;
+				
+				Optional<ContractMonthRecap> recap = 
+						wrapperFactory.create(contract).getContractMonthRecap(
+								new YearMonth(year, month));
+				
+				danilaDto.monteOreAnnoPassato = recap.get()
+						.remainingMinutesLastYear;
+				danilaDto.monteOreAnnoCorrente = recap.get()
+						.remainingMinutesCurrentYear;
+				danilaDto.giorni = 22 - personManager
+						.numberOfCompensatoryRestUntilToday(person, 
+								year, month);
+				
+				danilaDto.straordinariFeriali = recap.get()
+						.straordinariMinutiS1Print;
+				danilaDto.straordinariFestivi = recap.get()
+						.straordinariMinutiS2Print;
+				danilaDto.person = person;
+				customRecapList.add(danilaDto);
+			}
+			
+		}
+		render(customRecapList, offices, office, year, month);
+	}
+
+	/**
+	 * 
+	 * @author alessandro
+	 *
+	 * Raccoglitore per il CustomRecap
+	 */
+	@Data
+	public static class CustomRecapDTO {
+		public Person person;
+		public int ferieAnnoPassato;
+		public int ferieAnnoCorrente;
+		public int permessi;
+		public int monteOreAnnoPassato;
+		public int monteOreAnnoCorrente;
+		public int giorni;
+		public int straordinariFeriali;
+		public int straordinariFestivi;
 	}
 
 }

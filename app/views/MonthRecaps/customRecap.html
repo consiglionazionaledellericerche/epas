@@ -1,0 +1,51 @@
+#{extends 'main3.html' /}
+#{set header: 'navbar' /}
+#{set title: 'ePAS - Riepilogo Danila'  /}
+
+ #{set breadcrumbs:['Riepilogo mensile':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:'Riepilogo mensile ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+
+ <table class="table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
+   <thead>
+      <tr>
+          <th>Persona</th>
+		  <th>Ferie residue<br>anno passato</th>
+		  <th>Ferie residue<br>anno corrente</th>
+		  <th>Permessi residui<br>anno corrente</th>
+		  <th>Monte ore<br>anno passato</th>
+		  <th>Monte ore<br>anno corrente</th>
+		  <th>Riposi</th>
+		  <th>Straordinari<br>Feriali S1</th>
+		  <th>Straordinari<br>Festivi S2</th>
+      </tr>
+   </thead>
+
+   <tbody>
+   		
+   		#{list items:customRecapList, as:'recap'}
+		
+		   <tr>
+		     <td>${recap.person.fullname}</td>
+		     <td>${recap.ferieAnnoPassato}</td>
+		     <td>${recap.ferieAnnoCorrente}</td>
+		     <td>${recap.permessi}</td>
+		     <td data-order="${recap.monteOreAnnoPassato}">${recap.monteOreAnnoPassato.toHourTime()}</td>
+		     <td data-order="${recap.monteOreAnnoCorrente}">${recap.monteOreAnnoCorrente.toHourTime()}</td>
+		     <td>${recap.giorni}</td>
+		     <td>${recap.straordinariFeriali / 60 }</td>
+		     <td>${recap.straordinariFestivi / 60 }</td>
+		   </tr>
+		
+		#{/list}
+   
+   </tbody>
+ </table>
+
+</div>
+
+<div class="alert alert-success">
+	Riepilogo mensile <a href="@{MonthRecaps.showRecaps(year, month, officeId)}">versione classica</a> (link provvisorio).
+</div>

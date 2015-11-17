@@ -96,7 +96,7 @@
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
             	<li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
-            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
+            	<li><a href="@{Absences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
             	<li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
             	<li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
             	<li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
@@ -148,7 +148,7 @@
                   <li class="divider"></li>
                   <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
                    session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
-                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+                  <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
                    session.get("monthSelected"))}">Assenze</a></li>
                   <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
                   

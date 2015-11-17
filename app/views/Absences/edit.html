@@ -34,7 +34,7 @@
 					</a>
 	 	</div>
 	 #{/if}
-	 #{/tabContentItem}
+  #{/tabContentItem}
 
   #{tabContentItem id:'attach'}
  
@@ -79,7 +79,6 @@
 	       </p>
 	  </div>
 	
-	  <div id="absenceData">
 	  #{form action:@Absences.delete(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#absenceData'}
@@ -97,7 +96,7 @@
 	      #{b.submit 'Elimina', color:'danger', fa:'trash' /}
 	    #{/b.buttons}
 	  #{/form}
-	  </div>
+	  
   #{/tabContentItem}
    
 #{/tabContent}
