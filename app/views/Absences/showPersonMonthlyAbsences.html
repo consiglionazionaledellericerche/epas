@@ -1,0 +1,21 @@
+#{extends 'modal.html' /}
+#{set modalHeader: 'Assenze mensili per ' + person.surname + ' ' + person.name /}
+
+<div class="container-fluid">
+
+<table align="center">
+	<tr>
+		<th>Giorno del mese</th>
+		<th>Codice</th>
+	</tr>
+
+	#{list items:absenceToRender, as:'ab'}
+	<tr>
+		<td>${ab.personDay.date.getDayOfMonth()}</td>
+		<td>${ab.absenceType.code}</td>
+	</tr>
+	#{/list}
+
+</table>
+
+</div>
