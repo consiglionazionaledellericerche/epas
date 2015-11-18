@@ -52,7 +52,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	 */
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,	
-			Class actualClass, Type genericType) throws Exception {
+			@SuppressWarnings("rawtypes") Class actualClass, Type genericType) throws Exception {
 		
 		try {
 

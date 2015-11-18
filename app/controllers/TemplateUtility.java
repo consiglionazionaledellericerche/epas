@@ -38,6 +38,7 @@ import java.util.Set;
  */
 public class TemplateUtility {
 	
+
 	private final SecureManager secureManager;
 	private final OfficeDao officeDao;
 	private final PersonDao personDao;
@@ -63,64 +64,76 @@ public class TemplateUtility {
 				this.badgeReaderDao = badgeReaderDao;
 	}
 
-	//Convertitori mese
+	
+	/**
+	 * @param month numero mese nel formato stringa (ex: "1")
+	 * @return il nome del mese
+	 */
+	public final String monthName(final String month) {
 
-	public String monthName(String month) {
-
-		return DateUtility.getName(Integer.parseInt(month));
+		return DateUtility.fromIntToStringMonth(Integer.parseInt(month));
 	}
 
-	public String monthName(Integer month) {
+	/**
+	 * @param month numero mese formato integer (ex: 1)
+	 * @return il nome del mese
+	 */
+	public final String monthName(final Integer month) {
 
-		return DateUtility.getName(month);
+		return DateUtility.fromIntToStringMonth(month);
 	}
 
-	public String monthNameByString(String month){
-		if(month != null)
-			return DateUtility.getName(Integer.parseInt(month));
-		else
-			return null;
-	}
-
-	public boolean checkTemplate(String profile) {
-
-		return false;
-	}
-
-
-	//Navigazione menu (next/previous month)
-
-	public int computeNextMonth(int month){
-		if(month==12)
-			return 1;
-
+	/**
+	 * @param month mese di partenza
+	 * @return mese successivo a mese di partenza
+	 */
+	public final int computeNextMonth(final int month) {
+		if (month == DateUtility.DECEMBER) {
+			return DateUtility.JANUARY;
+		}
 		return month + 1;
 	}
 
-	public int computeNextYear(int month, int year){
-		if(month==12)
+	/**
+	 * 
+	 * @param month mese di partenza
+	 * @param year anno di partenza
+	 * @return anno successivo al mese/anno di partenza
+	 */
+	public final int computeNextYear(final int month, final int year){
+		if (month == DateUtility.DECEMBER) {
 			return year + 1;
-
+		}
 		return year;
 	}
 
-	public int computePreviousMonth(int month){
-		if(month==1)
-			return 12;
-
+	/**
+	 * @param month mese di partenza
+	 * @return mese precedente a mese di partenza
+	 */
+	public final int computePreviousMonth(final int month){
+		if (month == DateUtility.JANUARY) {
+			return DateUtility.DECEMBER;
+		}
 		return month - 1;
 	}
 
-	public int computePreviousYear(int month, int year){
-		if(month==1)
+	/**
+	 * 
+	 * @param month mese di partenza
+	 * @param year anno di partenza
+	 * @return anno precedente al mese/anno di partenza
+	 */
+	public final int computePreviousYear(final int month, final int year){
+		if (month == DateUtility.JANUARY) {
 			return year - 1;
-
+		}
 		return year;
 	}
 
 	//Liste di utilità per i template
 
-	public Set<Office> officesAllowed(){ 
+	public Set<Office> officesAllowed() { 
 		return secureManager.officesWriteAllowed(Security.getUser().get());
 	}
 

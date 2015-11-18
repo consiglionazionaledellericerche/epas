@@ -2,22 +2,27 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
+#{set breadcrumbs:['Assenze Annuali':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  
+  #{absences.absencesTabs activeAction:'yearlyAbsences' /}
+  
+  #{title title:'Assenze Annuali ' + year, administration:true /}
+
+*{   
 <div id="container-fluid-nav-tabs" class="container-fluid">
   <ul class="nav nav-tabs">
-    <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year,  session.get("monthSelected"))}">Assenze Mensili</a></li>
-    <li class="active"><a href="@{YearlyAbsences.yearlyAbsences(personId, month)}">Assenze Annuali</a></li>
+    <li><a href="@{Absences.showGeneralMonthlyAbsences(year,  session.get("monthSelected"))}">Assenze Mensili</a></li>
+    <li class="active"><a href="@{Absences.yearlyAbsences(personId, month)}">Assenze Annuali</a></li>
     <li><a href="@{Absences.manageAttachmentsPerCode(year, session.get("monthSelected"))}">Allegati Per Codice Assenza</a></li>
     <li><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, session.get("monthSelected"))}">Allegati Per Persona</a></li>
     <li><a href="@{Absences.absenceInPeriod()}">Assenze in periodo</a></li>
   </ul>
-</div>
+</div> }*
 
-<div class="container-fluid center">
-  <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Assenze annuali ${person.name} ${person.surname} anno ${year} </h3>
-      </div>
-      <div class="panel-body">
+
 	  <table class="table table-hover table-condensed">
 	
 		<!--  Riga di intestazione -->
@@ -70,7 +75,6 @@
 			<td>${yearlyAbsencesRecap.totalAbsence - yearlyAbsencesRecap.totalHourlyAbsence}</td>
 		</tr>
 	  </table>
-	  </div>
-	</div>
+      </div>
 </div>
 

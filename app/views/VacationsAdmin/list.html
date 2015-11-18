@@ -12,42 +12,16 @@
 
 #{/set}
 
-<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
-<div class="container-fluid">
-	<div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-		#{form action:@VacationsAdmin.list(), role:'form',
-		class:'form-inline', method:'GET', autocomplete:'off'}
-
-		<div class="form-group">
-			<label class="hidden-xs hidden-sm" for="dip">Sede </label> <input
-				type="hidden" name="year" value="${year}" /> <input type="hidden"
-				name="name" value="${name}"> <select name="officeId"
-				class="form-control" id="dip"
-				onChange="javascript:this.form.submit()"> #{list
-				items:offices, as:'officeItem'}
-				<option value="${officeItem.id}" #{if
-					officeItem.id.equals(office.id) } selected="selected"#{/if} >
-					${officeItem.name}</option> #{/list}
-			</select>
-		</div>
-
-		<button type="submit" class="btn btn-default">Invio</button>
-		#{/form}
-	</div>
-</div>
-<!-- FINE FILTRO OFFICE -->
+#{set breadcrumbs:['Ferie E Permessi':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:'Ferie e Permessi ' + year, administration:true /}
+</div>  
 
 <div class="container-fluid">
 
-	<div class="panel panel-info">
-		<div class="panel-heading">
-			<h3 class="panel-title text-center">Situazione Ferie e Permessi
-				per l'anno ${year}</h3>
-		</div>
-		<div class="panel-body">
-
-
-			<table 	class="table table-striped table-bordered table-condensed"
+	<table 	class="table table-striped table-bordered table-condensed"
 				datatable width="100%">
 				<thead>
 					<tr>
@@ -156,14 +130,5 @@
 			<p>Tali errori potrebbero derivare dalla mancanza di dati di
 				inizializzazione inerenti il contratto.</p>
 			#{/if}
-
-		</div>
-
-
-
-	</div>
-	<!-- end panel body -->
-</div>
-<!-- end panel -->
 
 </div>

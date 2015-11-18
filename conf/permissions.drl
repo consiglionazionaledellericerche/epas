@@ -52,7 +52,7 @@ when
      	"Absences.absenceInMonth",
      	
      	/* Assenze annuali */
-     	"YearlyAbsences.absencesPerPerson",
+     	"Absences.absencesPerPerson",
      	
      	/* Ferie */
      	"Vacations.show",
@@ -200,6 +200,8 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Contracts.personContracts",
+     	
      	"WorkingTimes.manageWorkingTime",
      	"WorkingTimes.showHorizontal",
      	"WorkingTimes.showContract",
@@ -231,6 +233,8 @@ when
         "Persons.updateUsername",
         "Persons.deletePerson",
         "Persons.deletePersonConfirmed",
+        
+        "Contracts.personContracts",
         
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showHorizontal",
@@ -297,21 +301,21 @@ when
         "Persons.list",
         "MealTickets.recapMealTickets",
         "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
         
         /* Vecchio permesso viewPersonDay */
         /* credo che siano comunque da filtrare sull'office 
  		   per cui andrebbero cambiate le action e inserite
  		   in viewPersonDay_InOffice */	
  		"Absences.manageAttachmentsPerCode",
+ 		"Absences.showGeneralMonthlyAbsences",
+        "Absences.yearlyAbsences",
  		
  		"MonthRecaps.show",
  		
  		"Stampings.missingStamping",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
-        
-        "YearlyAbsences.showGeneralMonthlyAbsences",
-        "YearlyAbsences.yearlyAbsences",
         
         /* Vecchio permesso viewCompetence */
         "Competences.exportCompetences",
@@ -348,7 +352,8 @@ when
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
         "Absences.absenceInPeriod",
-		
+		"Absences.showPersonMonthlyAbsences",
+		 
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
         "Charts.whichAbsenceInYear",
@@ -360,11 +365,6 @@ when
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
 		
-		"MonthRecaps.justifiedAbsences",
-        "MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
-		
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
 		        
@@ -375,7 +375,7 @@ when
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
         
-        "YearlyAbsences.showPersonMonthlyAbsences",
+       
         
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -417,6 +417,7 @@ when
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
 	    "Absences.absenceInPeriod",
+	    "Absences.showPersonMonthlyAbsences",
 		
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -429,21 +430,21 @@ when
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
 		
-		"MonthRecaps.justifiedAbsences",
-        "MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
+        "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
         "PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
 		
         "Stampings.personStamping",
+        "Stampings.dailyPresence",
+        "Stampings.missingStamping",
         
         "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
         
-        "YearlyAbsences.showPersonMonthlyAbsences",
+
         
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -492,6 +493,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
         
+        "Contracts.personContracts",
+        "Contracts.splitContractWorkingTimeType",
+        "Contracts.updateContractWorkingTimeType",
+        
         "Persons.insertContract",
         "Persons.saveContract",
         "Persons.modifyContract",
@@ -503,9 +508,7 @@ when
      	"Persons.saveSourceContract",
      	"Persons.approveAutomatedSource",
      	
-     	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
      	"Persons.deleteContractWorkingTimeType",
      	
      	"Persons.childrenList",
@@ -610,6 +613,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Contracts.personContracts",
+     	"Contracts.splitContractWorkingTimeType",
+     	"Contracts.updateContractWorkingTimeType",
+     	
      	"Persons.insertContract",
         "Persons.saveContract",
         "Persons.modifyContract",
@@ -621,9 +628,7 @@ when
      	"Persons.saveSourceContract",
      	"Persons.approveAutomatedSource",
      	
-     	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
      	"Persons.deleteContractWorkingTimeType",
      	
      	"Persons.childrenList",

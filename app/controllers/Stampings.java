@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
@@ -27,6 +29,7 @@ import manager.recaps.personStamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Institute;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.StampType;
@@ -46,10 +49,15 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
+/**
+ * @author alessandro
+ *
+ */
 @Slf4j
-@With( {RequestInit.class, Resecure.class} )
+@With({RequestInit.class, Resecure.class})
 public class Stampings extends Controller {
 
 	@Inject
@@ -76,13 +84,22 @@ public class Stampings extends Controller {
 	private static ConsistencyManager consistencyManager;
 	@Inject 
 	private static StampingHistoryDao stampingsHistoryDao;
-
-	public static void stampings(Integer year, Integer month) {
+	@Inject
+	private static OfficeDao officeDao;
+	
+	
+	/**
+	 * Tabellone timbrature dipendente.
+	 * 
+	 * @param year anno
+	 * @param month mese
+	 */
+	public static void stampings(final Integer year, final Integer month) {
 
 		IWrapperPerson person = wrapperFactory
 				.create(Security.getUser().get().person);
 
-		if(! person.isActiveInMonth(new YearMonth(year, month))) {
+		if (!person.isActiveInMonth(new YearMonth(year, month))) {
 			flash.error("Non esiste situazione mensile per il mese di %s %s", 
 					DateUtility.fromIntToStringMonth(month), year);
 
@@ -93,23 +110,20 @@ public class Stampings extends Controller {
 		PersonStampingRecap psDto = stampingsRecapFactory
 				.create(person.getValue(), year, month);
 		       
-		render(psDto) ;
+		render(psDto);
 	}
 
 
-	public static void personStamping(Long personId, int year, int month) {
+	/**
+	 * Tabellone timbrature amministratore.
+	 * 
+	 * @param personId dipendente
+	 * @param year anno
+	 * @param month mese
+	 */
+	public static void personStamping(final Long personId, 
+			final int year, final int month) {
 
-		if (personId == null) {
-			personId = Security.getUser().get().person.getId();
-			year = LocalDate.now().getYear();
-			month = LocalDate.now().getMonthOfYear();
-		}
-		if (year == 0 || month == 0) {
-
-			year = LocalDate.now().getYear();
-			month = LocalDate.now().getMonthOfYear();
-		}
-		
 		Person person = personDao.getPersonById(personId);
 		Preconditions.checkNotNull(person); 
 		
@@ -117,10 +131,10 @@ public class Stampings extends Controller {
 		
 		IWrapperPerson wPerson = wrapperFactory.create(person);
 		
-		if(! wPerson.isActiveInMonth(new YearMonth(year,month) )) {
+		if (!wPerson.isActiveInMonth(new YearMonth(year, month))) {
 			
 			flash.error("Non esiste situazione mensile per il mese di %s", 
-					person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+					person.fullName(), DateUtility.fromIntToStringMonth(month));
 			
 			YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
 			personStamping(personId, last.getYear(), last.getMonthOfYear());
@@ -259,44 +273,68 @@ public class Stampings extends Controller {
 	}
 
 	/**
-	 * Controller che attua la verifica di timbrature mancanti per il mese selezionato per tutte quelle persone
-	 * che avevano almeno un contratto attivo in tale mese
-	 * @param year
-	 * @param month
+	 * Timbrature mancanti per le persone attive della sede.
+	 * 
+	 * @param year anno 
+	 * @param month mese
+	 * @param officeId sede
 	 */
-	public static void missingStamping(int year, int month) {
+	public static void missingStamping(final int year, final int month, 
+			final Long officeId) {
 
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		LocalDate monthEnd = new LocalDate(year, month, 1)
+		.dayOfMonth().withMaximumValue();
 
-		List<Person> activePersons = personDao.list(
-				Optional.<String>absent(),
-				secureManager.officesReadAllowed(Security.getUser().get()), 
-				false, monthBegin, monthEnd, true).list();
+		List<Person> activePersons = personDao.list(Optional.<String>absent(),
+				Sets.newHashSet(office), false, monthBegin, monthEnd, true)
+				.list();
 
-		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
+		List<PersonTroublesInMonthRecap> missingStampings = 
+				Lists.newArrayList();
 
-		for(Person person : activePersons) {
+		for (Person person : activePersons) {
 			
-			PersonTroublesInMonthRecap pt = personTroubleRecapFactory.create(person, monthBegin, monthEnd);
+			PersonTroublesInMonthRecap pt = personTroubleRecapFactory
+					.create(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
-		render(month, year, missingStampings);
+		render(month, year, office, offices, missingStampings);
 	}
 
 	/**
-	 * Controller che renderizza la presenza giornaliera dei dipendenti visibili all'amministratore.
-	 * @param year
-	 * @param month
-	 * @param day
+	 * Presenza giornaliera dei dipendenti visibili all'amministratore.
+	 * 
+	 * @param year anno
+	 * @param month mese
+	 * @param day giorno
+	 * @param officeId sede
 	 */
-	public static void dailyPresence(Integer year, Integer month, Integer day) {
+	public static void dailyPresence(final Integer year, final Integer month, 
+			final Integer day, final Long officeId) {
 
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
 		LocalDate date = new LocalDate(year, month, day);
 
 		List<Person> activePersonsInDay = personDao.list(
-				Optional.<String>absent(), 
-				secureManager.officesReadAllowed(Security.getUser().get()),
+				Optional.<String>absent(), Sets.newHashSet(office),
 				false, date, date, true).list();
 
 		int numberOfInOut = stampingManager
@@ -304,12 +342,10 @@ public class Stampings extends Controller {
 
 		List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
 
-		daysRecap = stampingManager
-				.populatePersonStampingDayRecapList(activePersonsInDay, date, numberOfInOut);
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(
+				activePersonsInDay, date, numberOfInOut);
 
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-
-		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
+		render(daysRecap, year, month, day, numberOfInOut, office, offices);
 	}
 
 	public static void holidaySituation(int year) {
@@ -317,7 +353,8 @@ public class Stampings extends Controller {
 		List<Person> simplePersonList = personDao.list(
 				Optional.<String>absent(),
 				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
+				false, new LocalDate(year, 1, 1), 
+				new LocalDate(year, 12, 31), false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
@@ -378,8 +415,7 @@ public class Stampings extends Controller {
 		daysRecap = stampingManager
 				.populatePersonStampingDayRecapList(people, date, numberOfInOut);
 
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
+		render(daysRecap, year, month, day, numberOfInOut);
 
 
 	}

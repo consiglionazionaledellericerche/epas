@@ -12,11 +12,14 @@
   #{set switchUser:true /}
 #{/secure.checkAction}
 
-<div class="row">
-    <a class="btn btn-success col-xs-offset-5 col-xs-2" href="@{Persons.insertPerson}"><i class="fa fa-user-plus"></i> Inserisci una nuova persona </a>
+ 
+<div class="container-fluid">
+  #{title title:'Lista del Personale Attivo', administration:true /}
 </div>
 
-<h3 class="margin-bottom">Lista del Personale Attivo</h3>
+<div class="text-center">
+    <a class="btn btn-success" href="@{Persons.insertPerson}"><i class="fa fa-user-plus"></i> Inserisci una nuova persona </a>
+</div>
 
 <table class="table table-striped table-hover table-condensed center" datatable>
     <thead>
@@ -55,7 +58,7 @@
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
-		    <a href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-modal=".my-modal-large">
+		    <a href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-async-modal="#defaultModal">
 		      ${person.currentWorkingTimeType.get().description}
 		    </a>
 		  #{/if}
@@ -63,7 +66,7 @@
 
 		<td>
 		  #{if person.currentVacationPeriod.present }
-		     <a href="@{Persons.showCurrentVacation(person.value.id)}" data-modal=".my-modal-large">
+		     <a href="@{Persons.showCurrentVacation(person.value.id)}" data-async-modal="#defaultModal">
 		        ${person.currentVacationPeriod.get().vacationCode.description}
 		     </a>
 		  #{/if}
@@ -94,11 +97,11 @@
 		#{/if}
 		">
 		 #{if person.currentContract.get().sourceDateResidual != null}
-		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Modifica</a>
+		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Modifica</a>
 		   #{if person.currentContract.get().sourceByAdmin == false} <i class="fa fa-exclamation-triangle"></i> #{/if}
     	 #{/if}
 		 #{else}
-	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Definisci</a>
+	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Definisci</a>
 		 #{/else}
 		</td>
 
@@ -121,7 +124,10 @@
 	</tbody>
   </table>
 
-  <h3 class="margin-bottom margin-top-2">Lista del Personale Non Attivo</h3>
+<div class="container-fluid">
+  #{title title:'Lista del Personale Non Attivo', administration:true /}
+</div>
+
 
 <table class="table table-striped table-hover table-condensed center" width="100%" datatable>
     <thead>

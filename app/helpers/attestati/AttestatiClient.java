@@ -106,7 +106,7 @@ public class AttestatiClient {
 		public Map<String, String> getCookies() { return cookies; }
 		public Integer getYear() {return this.year;}
 		public Integer getMonth() {return this.month;}
-		public String getNamedMonth() {return DateUtility.getName(this.month);}
+		public String getNamedMonth() {return DateUtility.fromIntToStringMonth(this.month);}
 	}
 
 

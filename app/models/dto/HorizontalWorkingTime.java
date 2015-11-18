@@ -15,13 +15,22 @@ import java.util.List;
 
 
 public class HorizontalWorkingTime {
-	
-	@Min(1) @Max(23)
+
+	/**
+	 * Ore lavorative.
+	 */
+	@Min(1) @Max(DateTimeConstants.HOURS_PER_DAY - 1)
 	public int workingTimeHour = 7;
-	@Min(0) @Max(59)
+	
+	/**
+	 * Frazione orario di minuti lavorativi da sommare alle ore lavorative
+	 * FIXME: perché non fare un campo unico con i minuti lavorativi 
+	 * 	del giorno?
+	 */
+	@Min(0) @Max(DateTimeConstants.MINUTES_PER_HOUR - 1)
 	public int workingTimeMinute = 12;
 	
-	public List holidays;
+	public List<String> holidays;
 	
 	public boolean mealTicketEnabled = true;
 	
@@ -60,7 +69,7 @@ public class HorizontalWorkingTime {
 	 * Dal tipo orario ricava il pattern originario.
 	 * @param wtt
 	 */
-	public HorizontalWorkingTime(WorkingTimeType wtt) {
+	public HorizontalWorkingTime(final WorkingTimeType wtt) {
 		
 		this.name = wtt.description;
 		this.holidays = Lists.newArrayList();
@@ -73,13 +82,17 @@ public class HorizontalWorkingTime {
 				continue;
 			}
 		
-			this.workingTimeHour = wttd.workingTime / 60;
-			this.workingTimeMinute = wttd.workingTime % 60;
+			this.workingTimeHour = 
+				wttd.workingTime / DateTimeConstants.SECONDS_PER_MINUTE;
+			this.workingTimeMinute = 
+				wttd.workingTime % DateTimeConstants.SECONDS_PER_MINUTE;
 			
 			if (wttd.mealTicketTime > 0) {
 				this.mealTicketEnabled = true;
-				this.mealTicketTimeHour = wttd.mealTicketTime / 60;
-				this.mealTicketTimeMinute = wttd.mealTicketTime % 60;
+				this.mealTicketTimeHour = 
+					wttd.mealTicketTime / DateTimeConstants.SECONDS_PER_MINUTE;
+				this.mealTicketTimeMinute = 
+					wttd.mealTicketTime % DateTimeConstants.SECONDS_PER_MINUTE;
 				this.breakTicketTime = wttd.breakTicketTime;
 			} else {
 				this.mealTicketEnabled = false;
@@ -87,9 +100,17 @@ public class HorizontalWorkingTime {
 			
 			if (wttd.ticketAfternoonThreshold > 0) {
 				this.afternoonThresholdEnabled = true;
-				this.ticketAfternoonThresholdHour = wttd.ticketAfternoonThreshold / 60;
-				this.ticketAfternoonThresholdMinute = wttd.ticketAfternoonThreshold % 60;
-				this.ticketAfternoonWorkingTime = wttd.ticketAfternoonWorkingTime;
+				this.ticketAfternoonThresholdHour = 
+					wttd.ticketAfternoonThreshold 
+						/ 
+					DateTimeConstants.SECONDS_PER_MINUTE;
+				
+				this.ticketAfternoonThresholdMinute = 
+					wttd.ticketAfternoonThreshold 
+						% 
+					DateTimeConstants.SECONDS_PER_MINUTE;
+				this.ticketAfternoonWorkingTime = 
+					wttd.ticketAfternoonWorkingTime;
 			} else {
 				this.afternoonThresholdEnabled = false;
 			}
@@ -102,7 +123,7 @@ public class HorizontalWorkingTime {
 	 * @param office
 	 * @return
 	 */
-	public void buildWorkingTimeType(Office office) {
+	public final void buildWorkingTimeType(final Office office) {
 		
 		WorkingTimeType wtt = new WorkingTimeType();
 		
@@ -113,21 +134,33 @@ public class HorizontalWorkingTime {
 		
 		wtt.save();
 		
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < DateTimeConstants.DAYS_PER_WEEK; i++) {
 			
 			WorkingTimeTypeDay wttd = new WorkingTimeTypeDay();
 			wttd.dayOfWeek = i + 1;
-			wttd.workingTime = this.workingTimeHour * 60 + this.workingTimeMinute;
+			wttd.workingTime = 
+				this.workingTimeHour * DateTimeConstants.SECONDS_PER_MINUTE 
+					+ this.workingTimeMinute;
 			wttd.holiday = isHoliday(wttd);
 			
 			if (this.mealTicketEnabled) {
-				wttd.mealTicketTime = this.mealTicketTimeHour * 60 + this.mealTicketTimeMinute;
+				wttd.mealTicketTime = 
+					this.mealTicketTimeHour 
+						* 
+					DateTimeConstants.SECONDS_PER_MINUTE 
+						+ 
+					this.mealTicketTimeMinute;
 				wttd.breakTicketTime = this.breakTicketTime;
 				
 				if (this.afternoonThresholdEnabled) {
-					wttd.ticketAfternoonThreshold = this.ticketAfternoonThresholdHour * 60 
-							+ this.ticketAfternoonThresholdMinute;
-					wttd.ticketAfternoonWorkingTime = this.ticketAfternoonWorkingTime;
+					wttd.ticketAfternoonThreshold = 
+							this.ticketAfternoonThresholdHour 
+								* 
+							DateTimeConstants.SECONDS_PER_MINUTE 
+								+ 
+							this.ticketAfternoonThresholdMinute;
+					wttd.ticketAfternoonWorkingTime = 
+						this.ticketAfternoonWorkingTime;
 				}
 			}
 			
@@ -141,7 +174,7 @@ public class HorizontalWorkingTime {
 	 * @param wttd
 	 * @return
 	 */
-	private boolean isHoliday(WorkingTimeTypeDay wttd) {
+	private final boolean isHoliday(final WorkingTimeTypeDay wttd) {
 		
 		return this.holidays.contains(LocalDate.now()
 				.withDayOfWeek(wttd.dayOfWeek).dayOfWeek().getAsText());
@@ -151,7 +184,7 @@ public class HorizontalWorkingTime {
 	 * @param wttd
 	 * @return
 	 */
-	private static String holidayName(int dayOfWeek) {
+	private final static String holidayName(final int dayOfWeek) {
 
 		return LocalDate.now().withDayOfWeek(dayOfWeek).dayOfWeek().getAsText();
 	}
@@ -160,7 +193,7 @@ public class HorizontalWorkingTime {
 	 * TODO: Impostare un global binder.
 	 * @param value
 	 */
-	public void setHolidays(String value) {
+	public final void setHolidays(final String value) {
 		this.holidays = Lists.newArrayList((Splitter.on(",")
 			       .trimResults()
 			       .omitEmptyStrings()
