@@ -1,7 +1,10 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+
 import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
@@ -29,7 +32,9 @@ import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
+
 import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -37,7 +42,9 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import javax.inject.Inject;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
