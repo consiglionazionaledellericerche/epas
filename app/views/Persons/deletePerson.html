@@ -1,12 +1,19 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Eliminazione ' + person.name + ' ' + person.surname /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Eliminazione ' + person.fullname /}
 
-<div class="container-fluid center">
-<p class="lead">Attenzione!!! <br>Questa operazione non potrà essere annullata.</p>
-<a href="@{Persons.deletePersonConfirmed(person.id)}">
-  <input value="Conferma Elimina" class="btn btn-danger" type="button">
-</a>
+#{persons.personsTabs activeAction:'deletePerson' /}
 
+<div class="container">		<!-- Container dati personali e di contatto -->
+  <div class="alert alert-dangel text-center">
+    <p>Rimozione di <strong>${person.fullname}</strong> dal software ePAS</p>
+	<p>Attenzione!!! Questa operazione non potrà essere annullata.</p>
+	<p>
+	<a href="@{Persons.deletePersonConfirmed(person.id)}">
+      <input value="Conferma Elimina" class="btn btn-danger" type="button">
+    </a>
+    </p>
+  </div> 
 </div>
 
 

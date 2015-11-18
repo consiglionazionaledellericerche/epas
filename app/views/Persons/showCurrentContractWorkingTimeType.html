@@ -1,18 +1,14 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Tipo orario ' + person.fullname /}
-
-<div class="container-fluid">
+#{modalAsync id:'defaultModal', title:('Tipo Orario Attuale di ' + person.fullname) }
 
 #{if cwtt}
 
-<h4>Validità orario: 
+<div class="alert alert-success">Validità orario attuale: 
 
-	<strong>da</strong> <span class="label label-success">${cwtt.beginDate.format()}</span> 
+	<strong>Dal </strong>${cwtt.beginDate.format()}
 	#{if cwtt.endDate}
-		<strong>a</strong> <span class="label label-success">${cwtt.endDate.format()}</span>
+		<strong>Al </strong>${cwtt.endDate.format()}
 	#{/if}	 
-</h4>
-</p>
+</div>
 
 <table class="table table-condensed table-bordered center">
   <tr>
@@ -57,4 +53,4 @@
 
 #{/if}
 
-</div>
+#{/modalAsync}
