@@ -1,25 +1,25 @@
+#{modalAsync id:'defaultModal', title:('Piano Ferie Attuale di ' + person.fullname) }
 
-#{extends 'modal.html' /}
-#{set modalHeader: 'Piano ferie ' + person.surname + ' ' + person.name /}
+<div class="alert alert-success">Validità piano ferie attuale: 
 
-<div class="container-fluid">
+	<strong>Dal </strong>${vp.beginFrom.format()}
+	#{if vp.endTo}
+		<strong>Al </strong>${vp.endTo.format()}
+	#{/if}	 
+</div>
 
 <table class="table table-bordered table-hover table-condensed">
 	<tr>
 		<th>Nome</th>
 		<th>Giorni ferie</th>
 		<th>Giorni permesso</th>
-		<th>Data inizio</th>
-		<th>Data fine</th>
 	</tr>
 	<tr>
 		<td>${vp.vacationCode.description}</td>
 		<td>${vp.vacationCode.vacationDays}</td>
 		<td>${vp.vacationCode.permissionDays}</td>
-		<td>${vp.beginFrom?.format()}</td>
-		<td>${vp.endTo?.format()}</td>
 	</tr>
 </table>
 
-</div>
+#{/modalAsync}
 

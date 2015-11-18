@@ -1,0 +1,147 @@
+
+#{modalAsync id:'defaultModal', title:('Modifica tipo orario per ' + contract.person.fullname) }
+
+<div id="updateCwtt">
+<div class="alert alert-info">
+Il software richiede che per ogni giorno di contratto sia specificato uno e uno solo tipo di orario.
+  Con questa procedura guidata è possibile definire in modo sicuro il tipo orario per ogni singolo periodo del contratto.
+
+</div>
+
+
+<div class="alert alert-success">
+  <p><strong>Fase 1</strong></p>
+  <p>Individuare il periodo in cui avviene il cambio orario fra quelli presenti in tabella
+       e specificare nella form <strong>Data Cambio Orario</strong> la data a partire dalla quale entrerà in vigore il nuovo tipo orario.
+  </p>
+</div>
+<div id="splitCwtt" class="text-center">
+	<table class="table table-bordered table-condensed center">
+	  <tr>
+	    <th>Dal</th>
+	    <th>Al</th>
+	    <th>Data Cambio Orario</th>
+	  </tr>
+	  #{list items:contract.contractWorkingTimeType, as:'cwtt'}
+	    <tr>
+	      <td>
+	         ${cwtt.beginDate}
+	      </td>
+	      <td>#{if cwtt.endDate} ${cwtt.endDate} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+	    
+	      <!-- Dividi periodo -->
+	      
+	      <td>
+	      
+	      #{form action:@Contracts.splitContractWorkingTimeType(), method:'POST', autocomplete:false, 
+	        'data-async':'#updateCwtt', 'data-async-error':'#splitCwtt'}
+	        
+	        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+	        <input name="splitDate" type="text" datepicker #{if splitDate} value="${splitDate}"#{/if}/>
+		    <button type="submit" class="btn btn-default btn-xs">Dividi</button>
+		    #{ifError 'splitDate'} <br><span class="bg-danger">#{error 'splitDate' /}</span> #{/ifError}
+	      #{/form}
+	      </td>
+	 
+	    </tr>
+	  #{/list}
+	</table>
+</div>
+
+<div class="alert alert-success">
+   <p><strong>Fase 2</strong></p>
+   <p>Assegnare al periodo creato il Tipo Orario desiderato attraverso la form <strong>Cambio Orario</strong>.</p>
+</div>
+
+<table class="table table-bordered table-condensed center">
+  <tr>
+    <tr>
+	    <th>Dal</th>
+	    <th>Al</th>
+	    <th>Cambio Orario</th>
+	  </tr>
+    
+    
+  </tr>
+  #{list items:contract.contractWorkingTimeType, as:'cwtt'}
+    <tr>
+      <td>
+	         ${cwtt.beginDate}
+	  </td>
+	  <td>#{if cwtt.endDate} ${cwtt.endDate} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+      
+      <!-- Cambia tipo orario -->
+      <td>
+      #{form @Persons.changeTypeOfContractWorkingTimeType() }
+        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+        #{select 'newWtt.id', value:cwtt.workingTimeType.id, class:'span2', id:'newWtt.id'}
+          #{list items:wttList, as:'wttItem'}
+	        #{option wttItem.id}${wttItem.description}#{/option}
+		  #{/list}
+	    #{/select}
+	    <button type="submit" class="btn btn-default btn-xs">Cambia</button>
+	  #{/form}
+      </td>
+      
+      *{		      
+      <!-- Elimina periodo -->
+      
+      <td style="text-align: center;" >
+       #{if contract.contractWorkingTimeTypeAsList.indexOf(cwtt) > 0}
+       #{form @Persons.deleteContractWorkingTimeType() }
+        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+        <br>
+        <button type="submit" class="btn btn-default"><i style="color:red;" class="fa fa-trash-o"></i></button>
+	    
+       #{/form}
+       #{/if}
+      </td>
+ 	  }*
+    </tr>
+  #{/list}
+</table>
+
+<div class="alert alert-danger">
+   <p><strong>Elimina Periodo</strong></p>
+   <p>Attraverso questa funzione è possibile tornare alla situazione precedente.
+       Al periodo eliminato verrà attribuito il tipo orario del periodo precedente. 
+       Non è possibile eliminare il primo periodo.
+   </p>
+   <strong>Attenzione!</strong>
+   <p>Il cambio di tipo orario per periodi passati del tutto o in parte causerà il ricalcolo di tutti i valori riguardanti i giorni
+   lavorati quali il tempo lavorato, la differenza rispetto al tempo giornaliero, i progressivi aggregati a livello mensile e i monte ore residui.</p>
+</div>
+
+<table class="table table-bordered table-condensed center">
+  <tr>
+    <tr>
+	    <th>Dal</th>
+	    <th>Al</th>
+	    <th>Elimina Periodo</th>
+	  </tr>
+    
+    
+  </tr>
+  #{list items:contract.contractWorkingTimeType, as:'cwtt'}
+    <tr>
+      <td>
+	         ${cwtt.beginDate}
+	  </td>
+	  <td>#{if cwtt.endDate} ${cwtt.endDate} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+      
+      <!-- Elimina periodo -->
+      <td>
+       #{if contract.contractWorkingTimeTypeAsList.indexOf(cwtt) > 0}
+       #{form @Persons.deleteContractWorkingTimeType() }
+        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+        <button type="submit" class="btn btn-default"><i style="color:red;" class="fa fa-trash-o"></i></button>
+       #{/form}
+       #{/if}
+      </td>
+    </tr>
+  #{/list}
+</table>
+
+</div>
+
+#{/modalAsync}

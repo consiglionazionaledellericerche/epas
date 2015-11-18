@@ -200,6 +200,8 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Contracts.personContracts",
+     	
      	"WorkingTimes.manageWorkingTime",
      	"WorkingTimes.showHorizontal",
      	"WorkingTimes.showContract",
@@ -231,6 +233,8 @@ when
         "Persons.updateUsername",
         "Persons.deletePerson",
         "Persons.deletePersonConfirmed",
+        
+        "Contracts.personContracts",
         
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.showHorizontal",
@@ -489,6 +493,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
         
+        "Contracts.personContracts",
+        "Contracts.splitContractWorkingTimeType",
+        "Contracts.updateContractWorkingTimeType",
+        
         "Persons.insertContract",
         "Persons.saveContract",
         "Persons.modifyContract",
@@ -500,9 +508,7 @@ when
      	"Persons.saveSourceContract",
      	"Persons.approveAutomatedSource",
      	
-     	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
      	"Persons.deleteContractWorkingTimeType",
      	
      	"Persons.childrenList",
@@ -607,6 +613,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Contracts.personContracts",
+     	"Contracts.splitContractWorkingTimeType",
+     	"Contracts.updateContractWorkingTimeType",
+     	
      	"Persons.insertContract",
         "Persons.saveContract",
         "Persons.modifyContract",
@@ -618,9 +628,7 @@ when
      	"Persons.saveSourceContract",
      	"Persons.approveAutomatedSource",
      	
-     	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
      	"Persons.deleteContractWorkingTimeType",
      	
      	"Persons.childrenList",
