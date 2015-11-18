@@ -1,0 +1,57 @@
+#{modalAsync id:'defaultModal', title:('Modifica dati contrattuali per ' + wrappedContract.value.person.fullname) }
+
+
+  
+  <div class="alert alert-info">
+  	<p>Utilizzare questa form per modificare le date del contratto.</p>
+    <p>Per questo contratto è stata definita la data di inizializzazione <strong>${wrappedContract.value.sourceDateResidual.format()}</strong>,
+     sarà pertanto impossibile spostare la data di inizio del contratto successivamente a quella data.</p>
+    <p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
+     il tipo orario attribuito alla parte conclusiva del contratto.</p>
+  </div>
+  
+  <div class="alert alert-danger">
+    <p><strong>Attenzione!!!</strong></p>
+    <p>La modifica delle date del contratto se attuata nel passato potrebbe causare il ricalcolo della situazione del dipendente
+    relativamente al contratto selezionato. Anticipare o posticipare la data di inizo del contratto, per esempio, 
+    comporterebbe un cambiamento dei progressivi mensili del mese interessato ma di conseguenza anche dei riepiloghi mensili fino ad oggi.
+    <p>
+    <p>Nel caso di ricalcoli necessari ePAS effettuerà un riepilogo delle modifiche necessarie e chiederà un comando di conferma.</p> 
+  </div>
+
+  <div id="modifyContract">
+	#{form @Contracts.updateContract(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#modifyContract'}
+	
+	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
+
+		#{if recomputeFrom }
+			#{f.date 'beginContract', value:beginContract?.format(), disabled:true /}
+	    	#{f.date 'expireContract', value:expireContract?.format(), disabled:true /}
+	    	#{f.date 'endContract', value:endContract?.format(), disabled:true /}
+	    	#{f.booleanRadio 'onCertificate', value:onCertificate, disabled:true /}
+		#{/if}
+		
+		#{else}
+			#{f.date 'beginContract', value:beginContract?.format() /}
+	    	#{f.date 'expireContract', value:expireContract?.format() /}
+	    	#{f.date 'endContract', value:endContract?.format() /}
+	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
+		   
+		#{/else}
+	    
+	    #{if recomputeFrom }
+	    <input type="hidden" name="confirmed" value="true" />
+	      <div class="alert alert-danger">
+	        ePAS effettuerà i ricalcoli a partire dal <strong>${recomputeFrom.format()}</strong>
+	      </div>
+	    #{/if}
+	
+	  <input class="btn btn-primary" type="submit" value="Modifica"/>
+	  
+	#{/form}
+
+  </div>
+
+
+#{/modalAsync}

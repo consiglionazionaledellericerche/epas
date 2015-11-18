@@ -187,17 +187,13 @@ public class ContractManager {
 	 * 
 	 * @param contract
 	 */
-	public final void properContractUpdate(final Contract contract) {
+	public final void properContractUpdate(final Contract contract, final LocalDate from) {
 
 		buildVacationPeriods(contract);
 		updateContractWorkingTimeType(contract);
 		updateContractStampProfile(contract);
-		
-		//Ricalcoli dall'inizio del contratto.
-		// TODO: l'update dovrebbe ricevere un parametro dateFrom nel quale
-		// impostare la data dalla quale effettuare i ricalcoli. 
-		// Se ne deve occupare il chiamante.
-		recomputeContract(contract, Optional.<LocalDate>absent(), true);
+
+		recomputeContract(contract, Optional.fromNullable(from), true);
 	}
 
 	/**

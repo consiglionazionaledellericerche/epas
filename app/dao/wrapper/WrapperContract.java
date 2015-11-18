@@ -64,7 +64,10 @@ public class WrapperContract implements IWrapperContract {
 			}
 		}
 		return true;
-		
+	}
+	
+	public boolean isActive() {
+		return DateUtility.isDateIntoInterval(LocalDate.now(), getContractDateInterval());
 	}
 
 	/**
@@ -95,10 +98,11 @@ public class WrapperContract implements IWrapperContract {
 	 */
 	@Override
 	public DateInterval getContractDateInterval() {
-		if (value.endContract != null)
+		if (value.endContract != null) {
 			return new DateInterval(value.beginContract, value.endContract);
-		else
+		} else {
 			return new DateInterval(value.beginContract, value.expireContract);
+		}
 	}
 	
 	/**
