@@ -296,7 +296,7 @@ public class Persons extends Controller {
 
 		Person person = personDao.getPersonById(personId);
 
-		if(person == null) {
+		if (person == null) {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			list(null);
 		}
@@ -406,9 +406,8 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		if(begin==null){
-
-			flash.error("Errore nel fornire il parametro data inizio contratto. "
+		if (begin==null) {
+			flash.error("Errore nel fornire il parametro data inizio contratto."
 					+ "Inserire la data nel corretto formato aaaa-mm-gg");
 			edit(contract.person.id);
 		}

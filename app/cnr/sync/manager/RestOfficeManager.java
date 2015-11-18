@@ -70,9 +70,7 @@ public class RestOfficeManager {
 		for(OfficeDTO officeDTO : officeDTOList){
 
 			Office office = new Office();
-			office.name = officeDTO.name;
-			office.codeId = officeDTO.codeId;
-			office.code = officeDTO.code;
+			officeDTO.copyInto(office);
 
 			Optional<Institute> institute=officeDao.byCds(officeDTO.institute.cds);
 
@@ -93,8 +91,8 @@ public class RestOfficeManager {
 			else{
 				Optional<Office> existentSeat = officeDao.byCode(office.code);
 				if(existentSeat.isPresent()){
-					existentSeat.get().name = office.name;
-					existentSeat.get().codeId = office.codeId;
+
+                    officeDTO.copyInto(existentSeat.get());
 					existentSeat.get().save();
 					syncedOffices++;
 					log.info("Sincronizzata sede esistente durante l'import - {}", office.name);
@@ -108,5 +106,4 @@ public class RestOfficeManager {
 		}
 		return syncedOffices;
 	}
-
 }
