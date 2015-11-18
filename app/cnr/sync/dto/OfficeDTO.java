@@ -1,33 +1,25 @@
 package cnr.sync.dto;
 
-import com.google.common.base.MoreObjects;
+import models.Office;
 
 public class OfficeDTO {
 	public int id;
 	public String name;
 	public String code;
 	public String codeId;
+	public boolean isHeadQuarters;
 	public InstituteDTO institute;
     public String dismissionDate;
-    
-//    public enum toOffice implements Function<OfficeDTO, Office>{
-//		ISTANCE;
-//
-//		@Override
-//			public Office apply(OfficeDTO officeDTO){
-//				Office office = new Office();
-//
-//				office.name = officeDTO.name;
-//				office.codeId = officeDTO.codeId;
-//				office.code = officeDTO.code;
-//
-//				return office;
-//		}
-//	}
-		
+
+    public void copyInto(Office office){
+        office.name = name;
+        office.code= code;
+        office.codeId= codeId;
+        office.headQuarter= isHeadQuarters;
+    }
+
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this)
-				.add("id",id).add("name",name).add("code", code).toString();
+		return String.format("%s - %s - %s",name,code,codeId );
 	}
 }

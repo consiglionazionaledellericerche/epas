@@ -1,13 +1,15 @@
 package it.cnr.iit.epas;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import controllers.Security;
+import dao.BadgeReaderDao;
+import dao.PersonDao;
+import dao.StampingDao;
 import injection.StaticInject;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 import manager.SecureManager;
 import models.BadgeReader;
@@ -16,23 +18,15 @@ import models.Person;
 import models.StampType;
 import models.User;
 import models.exports.StampingFromClient;
-
 import org.joda.time.LocalDateTime;
-
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import controllers.Security;
-import dao.BadgeReaderDao;
-import dao.PersonDao;
-import dao.StampingDao;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
 /**
  * @author cristian

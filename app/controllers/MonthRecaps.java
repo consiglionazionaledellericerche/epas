@@ -1,10 +1,15 @@
 package controllers;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import lombok.Data;
 import manager.PersonManager;
 import manager.SecureManager;
@@ -14,25 +19,15 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{

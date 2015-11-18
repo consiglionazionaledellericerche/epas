@@ -34,22 +34,21 @@ public class Vacations extends Controller{
 		
 		IWrapperPerson person = wrapperFactory.create(currentUser.get().person);
 
-		if(year == null) {
-			year = LocalDate.now().getYear(); 
+		if (year == null) {
+			year = LocalDate.now().getYear();
 		}
-		
+
 		List<Contract> contractList = person.getYearContracts(year);
 		
-		if(contractList.isEmpty()) {
+		if (contractList.isEmpty()) {
 			flash.error("Non ci sono contratti attivi nel %s", year);
-			YearMonth lastActiveMonth = person.getLastActiveMonth();
+            YearMonth lastActiveMonth = person.getLastActiveMonth();
 			show(lastActiveMonth.getYear());
 		}
 		
 		List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
 		
-		for(Contract contract : contractList) {
-			
+		for (Contract contract : contractList) {
 			Optional<VacationsRecap> vacationsRecap;
 
 			vacationsRecap = vacationsFactory.create(
@@ -61,14 +60,12 @@ public class Vacations extends Controller{
 		}
 
 		render(vacationsRecapList);
-	
-		
 	}
-	
-	public static void vacationsCurrentYear(Integer anno){
-		
+
+	public static void vacationsCurrentYear(Integer anno) {
+
 		Optional<User> currentUser = Security.getUser();
-		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
+		if (!currentUser.isPresent() || currentUser.get().person == null) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}

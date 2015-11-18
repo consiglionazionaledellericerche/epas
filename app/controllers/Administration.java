@@ -1,12 +1,13 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import dao.ContractDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
@@ -21,21 +22,14 @@ import models.StampType;
 import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
-
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
-import dao.ContractDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
+import javax.inject.Inject;
+import java.util.List;
 
 
 @Slf4j
