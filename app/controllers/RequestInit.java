@@ -176,12 +176,15 @@ public class RequestInit extends Controller {
 		public final Integer month;
 		public final Integer day;
 		public final Long personId;
+		public final Long officeId;
 
-		CurrentData(Integer year, Integer month, Integer day, Long personId) {
+		CurrentData(Integer year, Integer month, Integer day, 
+				Long personId, Long officeId) {
 			this.year = year;
 			this.month = month;
 			this.day = day;
 			this.personId = personId;
+			this.officeId = officeId;
 		}
 
 		public String getMonthLabel() {
@@ -286,9 +289,7 @@ public class RequestInit extends Controller {
 			session.put("personSelected", 1);
 		}
 
-		renderArgs.put("currentData", new CurrentData(year, month, day, 
-				Long.valueOf(session.get("personSelected"))));
-
+		Optional<Office> first = Optional.<Office>absent();
 		if(user.get().person != null) {
 			
 			Set<Office> officeList = secureManager.officesReadAllowed(user.get());
@@ -298,6 +299,8 @@ public class RequestInit extends Controller {
 				List<PersonLite> persons = personDao
 						.liteList(officeList, year, month);
 				renderArgs.put("navPersons", persons);
+				first = Optional.fromNullable(officeList.iterator().next());
+				renderArgs.put("navOffices", officeList);
 			}
 		}  else {
 
@@ -308,9 +311,31 @@ public class RequestInit extends Controller {
 				List<PersonLite> persons = personDao
 						.liteList(Sets.newHashSet(allOffices), year, month);
 				renderArgs.put("navPersons", persons);
+				first = Optional.fromNullable(allOffices.iterator().next());
+				renderArgs.put("navOffices", allOffices);
 			}
 		}
+		
+		// office init (l'office selezionato, andrà combinato con la lista persone sopra)
+		
+		Long officeId;
+		if ( params.get("officeId") != null ) {
 
+			officeId = Long.valueOf(params.get("officeId"));
+		} 
+		else if (session.get("officeSelected") != null ){
+
+			officeId = Long.valueOf(session.get("officeSelected"));
+		}
+		else if (first.isPresent() ){
+
+			officeId = first.get().id;
+		} else {
+			officeId = -1l;
+		}
+
+		session.put("officeSelected", officeId);
+		
 		// day lenght (provvisorio)
 		try {
 
@@ -330,6 +355,11 @@ public class RequestInit extends Controller {
 		years.add(2013);
 
 		renderArgs.put("navYears", years);
+		
+		
+		renderArgs.put("currentData", new CurrentData(year, month, day, 
+				Long.valueOf(session.get("personSelected")),
+				Long.valueOf(session.get("officeSelected")) ));
 
 	}
 
@@ -359,6 +389,7 @@ public class RequestInit extends Controller {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.missingStamping";
 			}
@@ -374,6 +405,7 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchDay", true);
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Stampings.dailyPresence";
 			}
@@ -412,6 +444,16 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownEmployee");
 				return "Vacations.show";
+			}
+		}
+		
+		if( action.startsWith("VacationsAdmin.")) {
+			
+			if(action.equals("VacationsAdmin.list")) {
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "VacationsAdmin.list";
 			}
 		}
 
@@ -467,31 +509,27 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "Absences.absenceInPeriod";
 			}
-		}
-
-		if(action.startsWith("YearlyAbsences.")) {
-
-			if(action.equals("YearlyAbsences.absencesPerPerson")) {
+			if(action.equals("Absences.absencesPerPerson")) {
 
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownEmployee");
-				return "YearlyAbsences.absencesPerPerson";
+				return "Absences.absencesPerPerson";
 			}
 
-			if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
+			if(action.equals("Absences.showGeneralMonthlyAbsences")) {
 
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownAdministration");
-				return "YearlyAbsences.showGeneralMonthlyAbsences";
+				return "Absences.showGeneralMonthlyAbsences";
 			}
 
-			if(action.equals("YearlyAbsences.yearlyAbsences")) {
+			if(action.equals("Absences.yearlyAbsences")) {
 
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("switchPerson", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
-				return "YearlyAbsences.yearlyAbsences";
+				return "Absences.yearlyAbsences";
 			}
 		}
 
@@ -552,11 +590,19 @@ public class RequestInit extends Controller {
 			}
 			
 			if(action.equals("MonthRecaps.showRecaps")) {
-
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "MonthRecaps.showRecaps";
+			}
+			
+			if(action.equals("MonthRecaps.customRecap")) {
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchOffice", true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "MonthRecaps.customRecap";
 			}
 		}
 

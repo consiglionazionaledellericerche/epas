@@ -177,7 +177,6 @@ public class Administration extends Controller {
 			}
 		}
 	}
-	//private final static Logger log = LoggerFactory.getLogger(Administration.class);
 
 	public static void utilities(){
 

@@ -91,12 +91,12 @@
             #{/else}
             
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
-          	  <div class="visible-lg-inline">	${session.username}</div></a>
+          	  <div class="visible-lg-inline visible-xs-inline">	${session.username}</div></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
             	<li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
-            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
+            	<li><a href="@{Absences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
             	<li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
             	<li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
             	<li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
@@ -123,7 +123,7 @@
             <li class="dropdown">  
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
-          		<div class="visible-md-inline visible-lg-inline"> Amministrazione</div></a>
+          		<div class="visible-xs-inline visible-md-inline visible-lg-inline"> Amministrazione</div></a>
               <ul class="dropdown-menu">
                 
                 #{if ip.viewPerson }
@@ -136,20 +136,21 @@
                    session.get("yearSelected"), 
                    session.get("monthSelected"))}">Timbrature</a></li> 
                   <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
+                   session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a></li>
                   <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
-                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
-                  <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> 
+                   session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a></li>
+                  
+                  *{ <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> }* 
                   <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
                    session.get("monthSelected"))}">Stampa Cartellino</a></li>
                   <li class="divider"></li>
                   <li><a href="@{Charts.indexCharts()}">Utility</a></li>
                   <li class="divider"></li>
                   <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
-                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+                   session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
+                  <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
                    session.get("monthSelected"))}">Assenze</a></li>
-                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
                   
                   <li class="divider"></li>
 	            #{/if}
@@ -184,7 +185,7 @@
             <li class="dropdown">  
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-          	  <div class="visible-md-inline visible-lg-inline">	Configurazione</div></a>
+          	  <div class="visible-xs-inline visible-md-inline visible-lg-inline">	Configurazione</div></a>
               <ul class="dropdown-menu">
                 #{if ip.viewOffice }
                   <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
@@ -301,7 +302,7 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
                 <ul class="dropdown-menu">
       	         <li> 
-  		  		   <a href=href="@{secure.logout()}"></i>
+  		  		   <a href="@{secure.logout()}"></i>
 			  		Esci
 			 	   </a>
 			     </li>

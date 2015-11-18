@@ -9,7 +9,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
@@ -48,33 +47,27 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	private static ContractDao contractDao;
 
-	public static void list(Integer year, String name, Integer page, Long officeId){
+	public static void list(Integer year, Long officeId){
 
 		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
-		if(officeId == null) {
-			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione "
-						+ "delle sedi. Operazione annullata.");
-				Application.indexAdmin();
-			}
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		if (officeId == null) {
 			officeId = offices.iterator().next().id;
 		}
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 
-		if(page==null) {
-			page = 0;
-		}
-
 		LocalDate beginYear = new LocalDate(year, 1, 1);
 		LocalDate endYear = new LocalDate(year, 12, 31);
 		DateInterval yearInterval = new DateInterval(beginYear, endYear);
 
-		SimpleResults<Person> simpleResults = personDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(office), false, beginYear, endYear, true);
+		List<Person> personList = personDao.list(Optional.<String>absent(), 
+				Sets.newHashSet(office), false, beginYear, endYear, true).list();
 
-		List<Person> personList = simpleResults.paginated(page).getResults();
+		//List<Person> personList = simpleResults.paginated(page).getResults();
 
 		List<VacationsRecap> vacationsList = Lists.newArrayList();
 
@@ -112,7 +105,7 @@ public class VacationsAdmin extends Controller{
 				.isVacationsLastYearExpired(year, expireDate);
 
 		render(vacationsList, isVacationLastYearExpired, 
-				contractsWithVacationsProblems, year, simpleResults, name, offices, office);
+				contractsWithVacationsProblems, year, offices, office);
 	}
 
 	public static void vacationsCurrentYear(Long contractId, Integer anno){

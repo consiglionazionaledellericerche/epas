@@ -2,21 +2,20 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-<div id="container-fluid-nav-tabs" class="container-fluid">
-
-<ul class="nav nav-tabs">
-  <li class="active"><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year, month)}">Assenze Mensili</a></li>
-  <li><a href="@{YearlyAbsences.yearlyAbsences(session.get("personSelected"), year)}">Assenze Annuali</a></li>
-  <li><a href="@{Absences.manageAttachmentsPerCode(year, month)}">Gestione Allegati Per Codice</a></li>
-  <li><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, month)}">Allegati Per Persona</a></li>
-  <li><a href="@{Absences.absenceInPeriod()}">Assenze in periodo</a></li>
-</ul>
-
+#{set breadcrumbs:['Assenze Mensili':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  
+  #{absences.absencesTabs activeAction:'showGeneralMonthlyAbsences' /}
+  
+  #{title title:'Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 </div>
+
+
 
 <div class="container-fluid">
   
-      <p>  <h3 class="panel-title text-center">Situazione assenze &{'views.tags.display.date.month.' + month} ${year} </h3></p>
 
   		  <table class="table table-striped table-bordered table-condensed" datatable width="100%">
   		    <thead>
@@ -48,7 +47,7 @@
 					<td class="warning">${entry.getKey().name} ${entry.getKey().surname}</td>
 					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
 						<td data-order="${entry.getValue().get(col)}">
-						 	<a href="@{YearlyAbsences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-modal=".my-modal">
+						 	<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-modal=".my-modal">
 						 	${entry.getValue().get(col)}							
 							</a>
 						</td>

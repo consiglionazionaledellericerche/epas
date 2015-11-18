@@ -1,7 +1,4 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Definisci dati di inizializzazione per ' + contract.person.fullname /}
-
-<div class="container-fluid">
+#{modalAsync id:'defaultModal', title:('Dati di inizializzazione di ' + contract.person.fullname) }
 
 #{if contract.sourceDateResidual != null && contract.sourceByAdmin == false}
   <div class="alert alert-danger">
@@ -123,11 +120,5 @@
     #{/panel}
 #{/if}
 
-<br>
+#{/modalAsync}
 
-
-
-
- 
-  
-</div>	<!-- end container-fluid -->

@@ -56,8 +56,6 @@ public class PrintTags extends Controller{
 
 	public static void listPersonForPrintTags(int year, int month){
 
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-
 		LocalDate date = new LocalDate(year, month,1);
 
 		List<Person> personList = personDao.list(

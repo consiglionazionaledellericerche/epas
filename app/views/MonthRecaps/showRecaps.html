@@ -2,7 +2,11 @@
 #{set header: 'navbar' /}
 #{set title: 'ePAS - Riepilogo Mensile'  /}
 
-<div class="container-fluid">
+#{set breadcrumbs:['Riepilogo mensile':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:'Riepilogo mensile ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
  <table class="datatable-test table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
    <thead>
@@ -53,5 +57,11 @@
    </tbody>
  </table>
 
-</div>>
+</div>
+
+<div class="alert alert-success">
+	Riepilogo mensile <a href="@{MonthRecaps.customRecap(year, month, session.get("officeSelected"))}">versione 2</a> (link provvisorio).
+</div>
+
+
 
