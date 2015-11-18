@@ -106,7 +106,12 @@ person.isPersonInCharge= Responsabile gruppo di lavoro
 
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
+contract.endContract=Terminato Il
 contract.onCertificate=In attestati
+beginContract=Inizio contratto
+expireContract=Fine contratto
+onCertificate=In attestati
+endContract=Terminato Il
 
 contractStampProfile.fixedworkingtime= Timbratura Default
 
