@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -36,10 +35,8 @@ import models.PersonDay;
 import models.StampType;
 import models.Stamping;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -50,7 +47,6 @@ import security.SecurityRules;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

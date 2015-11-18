@@ -53,7 +53,6 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;

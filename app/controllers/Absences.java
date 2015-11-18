@@ -11,15 +11,14 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
-import helpers.Web;
 import helpers.ModelQuery.SimpleResults;
+import helpers.Web;
 import it.cnr.iit.epas.DateUtility;
 import manager.AbsenceManager;
 import manager.SecureManager;
@@ -36,10 +35,8 @@ import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -51,7 +48,6 @@ import security.SecurityRules;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

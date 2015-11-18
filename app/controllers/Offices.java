@@ -79,7 +79,8 @@ public class Offices extends Controller {
 			log.warn("validation errors for {}: {}", office,
 					validation.errorsMap());
 			flash.error(Web.msgHasErrors());
-			render("@edit", office);
+			IWrapperOffice wOffice = wrapperFactory.create(office);
+			render("@edit", office, wOffice);
 		} else {
 			office.save();
 			flash.success(Web.msgSaved(Office.class));
