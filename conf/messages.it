@@ -82,10 +82,12 @@ Institutes.blank=Nuovo istituto
 Institutes.delete=Elimina istituto
 institute.name=Nome
 institute.code=Sigla
+institute.cds= Centro di spesa
 
 Offices.blank=Nuova sede
 office.name=Nome
-office.code=Codice
+office.code= Codice
+office.codeId= Sede Id
 office.address=Indirizzo
 office.headQuarter=Sede principale
 
@@ -136,9 +138,22 @@ modifierType= Calcolo Orario
 stamping.note= Note
 
 uro.office=Sede
+uro.user= Utente
+uro.role= Ruolo
 
 user.username= Username
 user.password= Password
+
+stampType= Causale
+note= Note
+time= Ore
+time.popover= Formato richiesto HHMM (HH ore, MM minuti)
+invalid.time=Formato del tempo errato.
+way= Verso
+
+report=Descrizione problema
+mese= Mese (se presente)
+anno= Anno (se presente)
 
 
 ########################
@@ -194,9 +209,9 @@ JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 or
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
 
-########################################
+###########################################################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
-########################################
+###########################################################################
 
 absenceType.code.popover= Codice di assenza
 
@@ -229,13 +244,7 @@ absenceTypeGroup.accumulationBehaviour.popover= Comportamento da tenere al raggi
 
 absenceTypeGroup.replacingAbsenceType.description= Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)
 
-stampType= Causale
-note= Note
-time= Ore
-time.popover= Formato richiesto HHMM (HH ore, MM minuti)
-invalid.time=Formato del tempo errato.
-way= Verso
+institute.cds.popover= Codice univoco del centro di spesa (per l&#39;IIT è 044)
 
-report=Descrizione problema
-mese= Mese (se presente)
-anno= Anno (se presente)
+office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
+office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
