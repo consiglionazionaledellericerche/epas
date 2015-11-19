@@ -1,0 +1,22 @@
+*{
+   label:
+   value:
+   
+   hidden:
+   name
+}*
+<div class="form-group #{if _value == null}text-muted #{/if}">
+    <label class="col-sm-3 control-label">${_label}</label>
+
+    <div class="col-sm-6">
+        <p class="form-control-static">
+        #{if _value == null} <span class="text-muted"></span> #{/if}
+        #{else}
+            ${_value}
+        #{/else}
+        </p>
+    </div>
+</div>
+#{if _hidden}
+  #{if _value}<input type="hidden" name="${_name}" value="${_value}" />#{/if}
+#{/if}

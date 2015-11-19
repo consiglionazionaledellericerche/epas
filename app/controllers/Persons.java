@@ -351,67 +351,7 @@ public class Persons extends Controller {
 		edit(person.id);
 	}
 
-	public static void modifyContract(Long contractId){
-		Contract contract = contractDao.getContractById(contractId);
-		
-		notFoundIfNull(contract);
-
-		rules.checkIfPermitted(contract.person.office);
-
-		render(contract);
-	}
-
-	public static void updateContract(Contract contract, @Required LocalDate begin, 
-			@Valid LocalDate expire, @Valid LocalDate end, boolean onCertificate){
-
-		notFoundIfNull(contract);
-
-		rules.checkIfPermitted(contract.person.office);
-
-		if (begin == null) {
-
-			flash.error("Errore nel fornire il parametro data inizio contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			edit(contract.person.id);
-		}
-		if (validation.hasError("expire")) {
-
-			flash.error("Errore nel fornire il parametro data fine contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			edit(contract.person.id);
-		}
-		if (validation.hasError("end")) {
-
-			flash.error("Errore nel fornire il parametro data terminazione contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			edit(contract.person.id);
-		}
-
-		contract.beginContract = begin;
-		contract.expireContract = expire;
-		contract.endContract = end;
-
-		//Date non si sovrappongono con gli altri contratti della persona
-		if (!contractManager.isProperContract(contract)) {
-
-			flash.error("Il contratto si interseca con altri contratti della persona. "
-					+ "Controllare le date di inizio e fine. Operazione annulalta.");
-			edit(contract.person.id);
-		}
-
-		contract.onCertificate = onCertificate;
-
-		contractManager.properContractUpdate(contract);
-
-		contract.save();
-
-		flash.success("Aggiornato contratto per il dipendente %s %s", 
-				contract.person.name, contract.person.surname);
-
-		edit(contract.person.id);
-
-	}
-
+	
 	public static void deleteContract(Long contractId){
 
 		Contract contract = contractDao.getContractById(contractId);
@@ -507,68 +447,7 @@ public class Persons extends Controller {
 		edit(contract.person.id);
 
 	}
-	
 
-	
-
-	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt){
-		if (cwtt == null){
-
-			flash.error("Impossibile completare la richiesta, controllare i log.");
-			Application.indexAdmin();
-		}
-
-		rules.checkIfPermitted(cwtt.contract.person.office);
-
-		Contract contract = cwtt.contract;
-
-		List<ContractWorkingTimeType> contractsWtt = 
-				Lists.newArrayList(contract.contractWorkingTimeType);
-		
-		Collections.sort(contractsWtt);
-		int index = contractsWtt.indexOf(cwtt);
-		if (index <= 0) {
-			//Cioè se è il primo o non esiste.
-			flash.error("Impossibile completare la richiesta, controllare i log.");
-			edit(cwtt.contract.person.id);
-		}
-		
-		ContractWorkingTimeType previous = contractsWtt.get(index - 1);
-		contractWorkingTimeTypeManager
-			.deleteContractWorkingTimeType(contract, cwtt, previous);
-
-		//Ricalcolo a partire dall'inizio del periodo che ho eliminato.
-		contractManager.recomputeContract(cwtt.contract, 
-				Optional.fromNullable(cwtt.beginDate), false);
-
-		flash.success("Orario di lavoro eliminato correttamente. Attribuito al "
-				+ "periodo eliminato il tipo orario immediatamenete precedente");
-
-		edit(cwtt.contract.person.id);
-	}
-
-	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
-	{
-		if(cwtt==null || newWtt==null) {
-
-			flash.error("Impossibile completare la richiesta, controllare i log.");
-			Application.indexAdmin();
-		}
-
-		rules.checkIfPermitted(cwtt.contract.person.office);
-		rules.checkIfPermitted(newWtt.office);
-
-		cwtt.workingTimeType = newWtt;
-		cwtt.save();
-
-		//Ricalcolo valori
-		contractManager.recomputeContract(cwtt.contract, Optional.fromNullable(cwtt.beginDate), false);
-
-		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
-
-		edit(cwtt.contract.person.id);
-
-	}
 
 	public static void changePassword(){
 		User user = Security.getUser().get();

@@ -17,17 +17,12 @@
 
 #{persons.personsTabs activeAction:'edit' /}
 
-<div class="container">		<!-- Container dati personali e di contatto -->
+<div class="container">	
 
 	#{form @Persons.update(),,class:'form-horizontal' }
 		<input type="hidden" name="person.id" value="${person.id}"/>
 		
-		<!-- Pannello 1 Dati personali -->
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
-			</div>
-			<div class="panel-body">
+		#{panel title:'Dati personali', color:'primary'}
 
 				#{f.input 'person.surname'/}
 				#{f.input 'person.name'/}
@@ -56,26 +51,18 @@
 					al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
 				</p>
 
-			</div>
-		</div>  <!-- Fine pannello 1 -->
-		
-		<!-- Pannello 2 Contatti -->
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title"><span class="badge">2</span> Altre informazioni</h3>
-			</div>
-			<div class="panel-body">
+		#{/panel}
 
+		#{panel title:'Altre informazioni', color:'primary'}
 				#{f.input 'person.telephone'/}
 				#{f.date 'person.birthday',view:'year'/}
 				#{f.input 'person.eppn'/}
 
 				<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
 
-			</div>
-		</div>	<!-- Fine pannello 2 -->
+		#{/panel}
 		
-				<div class="container-fluid center">
+		<div class="container-fluid center">
 		   <input class="btn btn-primary" type="submit" value="Salva" />
 		</div>
 	#{/form}

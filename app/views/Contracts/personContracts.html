@@ -2,32 +2,55 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Modifica ' + person.fullname /}
 
-#{set 'moreStyles'}
-<style>
-  .panel {
-  	margin-top: 20px;
-  }
-  
-  #table-list-contract {
-  	margin-top: 30px;
-  	margin-bottom: 10px;
-  }
-</style>
-#{/set}
-
 #{persons.personsTabs activeAction:'personContracts' /}
 
-<div class="container">
+ <div class="container">
 
+  <p>
+    <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
+      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto per ${person.surname} ${person.name}
+  	</a>
+  </p>
+  
+  #{list items:contractList, as:'contract'}
 	
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">Dati Contrattuali</h3>
-  </div>
-  <div class="panel-body">
+	#{if contract.isActive()}
+	
+	#{panel title:'Contratto Attuale', color:'primary'}
+        
+        <p>Data Inizio: <strong>${contract.value.beginContract.format()}</strong></p>
+        <p>Data Fine: <strong>
+        #{if contract.value.expireContract}${contract.value.expireContract.format()}#{/if}
+        #{else}<em>Indeterminato</em>#{/else}</strong>
+        </p>
+        #{if contract.value.endContract}
+          <p>Terminato il: <strong>${contract.value.endContract.format()}</strong></p>
+        #{/if}
+        
+        <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
+			    <i class="fa fa-pencil-square-o"></i> Modifica Date
+		</a>
+        
+        
+        <!-- Inizializzazione -->
+        <p>Inizializzazione</p>
+        <!-- Orari di lavoro -->
+        <p>Orari di lavoro</p>
+        <a href="@{Contracts.updateContractWorkingTimeType(contract.value.id)}" data-async-modal="#defaultModal">
+			    <i class="fa fa-pencil-square-o"></i> Modifica Date
+		</a>
+        
+	#{/panel} 
+  	#{/if}
   	  
-	  <table class="table table-hover center table-list-contract">
+ #{/list}	
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Altri contratti</h3>
+    </div>
+    <div class="panel-body">
+  	  <table class="table table-hover center table-list-contract">
 		<tr class="warning">
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
@@ -39,10 +62,10 @@
 			<th>Inizializzazione<br>ePAS</th>
 			
 		</tr>
-		
-		#{list items:contractList, as:'contract'}
-		
-		<tr>
+        #{list items:contractList, as:'contract'}
+
+  	    #{if !contract.isActive()}
+ 		<tr>
 			<td>
 			  #{if contract.noRelevant() }
 			    irrilevante
@@ -100,7 +123,7 @@
 			</td>
 			
 			<td>
-			  <a href="@{Persons.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
+			  <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
 			    <i class="fa fa-pencil-square-o"></i> Modifica
 			  </a>
 			</td>
@@ -154,18 +177,10 @@
 			    data-async-modal="#defaultModal">Definisci Inizializzazione
 			  </a>
 			</td>
-			
 		</tr>
-		#{/list}
-
+	    #{/if}
+	  #{/list}
 	  </table>
-	  
-	  <p>
-  	    <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
-  	      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto per ${person.surname} ${person.name}
-  	    </a>
-  	  </p>
-	
     </div>
   </div>  <!-- Fine pannello dati contrattuli -->
 
