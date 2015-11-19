@@ -1,15 +1,8 @@
 #{list items:psDto.contractMonths, as:'mese'} 
-<div class="panel-group" id="accordion_meal">
-  <div class="panel panel-info">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion_meal" href="#meal">
-          Situazione buoni pasto
-        </a>
-      </h4>
-    </div>
-    <div id="meal" class="panel-collapse collapse in">
-      <div class="panel-body">
+ #{accordionGroup 'tickets'}
+ 
+  #{accordionItem ('accordion_contract_meal'+mese.contract.value.id), parent:'tickets', 
+                  title:'Situazione buoni pasto', open:true, color:'primary'} 
        #{if psDto.currentMonth}
 	   	   <p><em>Il giorno attuale non è considerato nel conteggio dei buoni pasto utilizzati.</em></p>
    	   #{/if}
@@ -46,11 +39,10 @@
 	  <p>Il numero di buoni mensa da restituire per questo mese è 
 	  	<strong>${psDto.numberOfMealTicketToRender}</strong>
 	   <p> -->
-	   
-	  #{if !psDto.stampModificationTypeSet.isEmpty() }
-      <table class="table table-condensed table-bordered">
-		<tr>
-			<th width="80">Codice</th>
+	  
+	  <table class="table table-condensed table-bordered"> 
+	 	<tr>
+			<th width="80">Simbolo</th>
 			<th width="400">Descrizione</th>
 				
 		</tr>
@@ -67,26 +59,14 @@
 		  <td>Buono mensa ottenuto se si uscisse in questo momento</td>
 		</tr>
 	  </table>
-      #{/if}
 
-
-      </div>
-    </div>
-  </div>
-</div>
+  #{/accordionItem}
+  #{/accordionGroup}
 #{/list}
-
-<div class="panel-group" id="accordion_notes">
-  <div class="panel panel-info">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion_notes" href="#notes">
-          Legenda
-        </a>
-      </h4>
-    </div>
-    <div id="notes" class="panel-collapse collapse out">
-      <div class="panel-body">
+  
+  #{accordionGroup 'notes'}
+  #{accordionItem 'accordion_notes', parent:'notes', 
+                  title:'Legenda', open:false, color:'primary'} 
  
  	  #{if !psDto.stampModificationTypeSet.isEmpty() }
       <table class="table table-condensed table-bordered">
@@ -110,24 +90,12 @@
 		#{/list}
 	    </table>
        #{/if}
+  #{/accordionItem}
+  #{/accordionGroup}
 
-
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="panel-group" id="accordion_assenze">
-  <div class="panel panel-info">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion_assenze" href="#assenze">
-          Riepilogo assenze
-        </a>
-      </h4>
-    </div>
-    <div id="assenze" class="panel-collapse collapse out">
-      <div class="panel-body">
+  #{accordionGroup 'absenceRecap'}
+  #{accordionItem 'accordion_absence', parent:'absenceRecap', 
+                  title:'Riepilogo Assenze', open:false, color:'primary'} 
         <table class="table table-condensed table-bordered">
 	      <tr>
 		    <th width="80">Codice assenza</th>
@@ -142,7 +110,5 @@
 	      </tr>
 		  #{/list}
         </table>
-      </div>
-    </div>
-  </div>
-</div>
+  #{/accordionItem}
+  #{/accordionGroup}
