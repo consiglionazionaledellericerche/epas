@@ -246,7 +246,7 @@
               <ul class="dropdown-menu">
 			    #{if ip.viewPerson }
 			     <li> 
-  		  		   <a data-toggle="modal" href="@{ReportCentre.generateReport()}" data-modal=".my-modal">
+  		  		   <a href="@{ReportCentre.generateReport(session.get("actionSelected"), session.get("personSelected"), session.get("monthSelected"), session.get("yearSelected"), session.get("daySelected"))}" data-async-modal="#defaultModal">
 			  		<i class="fa fa-bug"></i> Segnala un problema
 			 	   </a>
 			     </li>

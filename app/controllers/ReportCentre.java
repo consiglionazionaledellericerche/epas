@@ -1,6 +1,8 @@
 package controllers;
 
 import com.google.common.base.Optional;
+
+import dao.PersonDao;
 import dao.UserDao;
 import it.cnr.iit.epas.JsonReportBinder;
 import manager.ReportCentreManager;
@@ -19,6 +21,8 @@ import play.mvc.Controller;
 import play.mvc.Http.Header;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,6 +34,8 @@ public class ReportCentre extends Controller{
 	
 	@Inject
 	static UserDao userDao;
+	@Inject
+	static PersonDao personDao;
 	@Inject
 	static ReportCentreManager reportCentreManager;
 
@@ -100,20 +106,20 @@ public class ReportCentre extends Controller{
 	}
 
 
-	public static void generateReport(){
-		User userLogged = Security.getUser().get();		
-		render(userLogged);
+	public static void generateReport(String actionInfected, Long personId, @Valid Integer month,
+			@Valid Integer year,  @Valid Integer day){
+		Person person = personDao.getPersonById(personId);
+		User userLogged = Security.getUser().get();
+		render(userLogged, person, actionInfected, year, month, day);
 	}
 	
 	
-	public static void sendProblem(Long userId, String report, String mese, String anno){
+	public static void sendProblem(Long userId, String report, 
+			@Valid String month, @Valid String year, String actionInfected){
 		User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
 		if(user == null)
 			notFound();
-		
-		HashMap<String, Header> map = (HashMap<String, Header>) request.headers;
-		
-		String action = reportCentreManager.getActionFromRequest(map);
+				
 		SimpleEmail email = new SimpleEmail();
 		String sender = user.person != null ? user.person.fullName() : user.username;
 		try {
@@ -122,9 +128,9 @@ public class ReportCentre extends Controller{
 			if(user.person != null && !user.person.email.equals(""))
 				email.addReplyTo(user.person.email);
 			email.setSubject("Segnalazione malfunzionamento ");
-			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+action+'\n'
-					+" con mese uguale a: "+mese+'\n'
-					+" con anno uguale a: "+anno+'\n'
+			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+actionInfected+'\n'
+					+" con mese uguale a: "+month+'\n'
+					+" con anno uguale a: "+year+'\n'
 					+" visitata da: "+sender+'\n'
 					+" in data: "+LocalDate.now()+'\n'
 					+" con il seguente messaggio: "+report);
