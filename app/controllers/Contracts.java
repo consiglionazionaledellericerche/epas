@@ -1,7 +1,10 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+
 import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
@@ -29,7 +32,9 @@ import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
+
 import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -37,7 +42,9 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import javax.inject.Inject;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -84,6 +91,8 @@ public class Contracts extends Controller {
 
 	public static void personContracts(final Long personId) {
 		
+		flash.keep();
+		
 		Person person = personDao.getPersonById(personId);
 		notFoundIfNull(person);
 		rules.checkIfPermitted(person.office);
@@ -99,6 +108,130 @@ public class Contracts extends Controller {
 		
 		render(person, contractList, contractStampProfileList);
 	}
+	
+	public static void modifyContract(Long contractId) {
+		
+		Contract contract = contractDao.getContractById(contractId);
+		notFoundIfNull(contract);
+		rules.checkIfPermitted(contract.person.office);
+		
+		IWrapperContract wrappedContract = wrapperFactory.create(contract);
+		
+		LocalDate beginContract = contract.beginContract;
+		LocalDate expireContract = contract.expireContract;
+		LocalDate endContract = contract.endContract;
+		boolean onCertificate = contract.onCertificate;
+
+		render(wrappedContract, beginContract, expireContract, endContract, onCertificate);
+	}
+
+	public static void updateContract(@Valid Contract contract, @Required LocalDate beginContract, 
+			@Valid LocalDate expireContract, @Valid LocalDate endContract, boolean onCertificate,
+			boolean confirmed) {
+
+		notFoundIfNull(contract);
+		rules.checkIfPermitted(contract.person.office);
+
+		IWrapperContract wrappedContract = wrapperFactory.create(contract);
+		
+		if (!validation.hasErrors()) {
+			if (contract.sourceDateResidual!=null 
+					&& contract.sourceDateResidual.isBefore(beginContract)) {
+				validation.addError("beginContract", 
+						"non può essere successiva alla data di inizializzazione");
+			}
+			if (expireContract!=null && expireContract.isBefore(beginContract)) {
+				validation.addError("expireContract", "non può precedere l'inizio del contratto.");
+			}
+			if (endContract!=null && endContract.isBefore(beginContract)) {
+				validation.addError("endContract", "non può precedere l'inizio del contratto.");
+			}
+			if (expireContract!=null && endContract!=null && !endContract.isBefore(beginContract)) {
+				validation.addError("endContract", 
+						"non può essere successivo alla scadenza del contratto");
+			}
+		}
+		
+		if (validation.hasErrors()) {
+			
+			response.status = 400;
+			flash.error(Web.msgHasErrors());
+			
+			log.warn("validation errors: {}", validation.errorsMap());
+			
+			render("@modifyContract", wrappedContract, beginContract, expireContract,
+					endContract, onCertificate);
+		}
+		
+		//Salvo la situazione precedente
+		DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
+		
+		//Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
+		contract.beginContract = beginContract;
+		contract.expireContract = expireContract;
+		contract.endContract = endContract;
+		contract.onCertificate = onCertificate;
+		if (!contractManager.isProperContract(contract)) {
+			flash.error("Il contratto si interseca con altri contratti della persona. "
+					+ "Controllare le date di inizio e fine. Operazione annullata.");
+			Contracts.personContracts(contract.person.id);
+		}
+		
+		//Se non ho avuto conferma la data da cui ricalcolare
+		boolean changeBegin = false;
+		boolean changeEnd = false;
+		boolean onlyRecap = false;
+		LocalDate recomputeFrom = null;
+		if (!confirmed) {
+			DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
+			if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
+				changeBegin = true;
+				if (newInterval.getBegin().isBefore(LocalDate.now())) {
+					recomputeFrom = newInterval.getBegin();
+				}
+			}
+			if (recomputeFrom == null) {
+				if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
+					changeEnd = true;
+					//scorcio allora solo riepiloghi
+					if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
+						onlyRecap = true;
+						recomputeFrom = newInterval.getEnd();
+					} 
+					//allungo ma se inglobo passato allora ricalcolo
+					if (newInterval.getEnd().isAfter(previousInterval.getEnd())
+							&& previousInterval.getEnd().isBefore(LocalDate.now()))  {
+						recomputeFrom = previousInterval.getEnd();
+					}
+				}
+			}
+			if ( recomputeFrom != null ) {
+				
+				LocalDate recomputeTo = newInterval.getEnd();
+				if (!recomputeTo.isBefore(LocalDate.now())) {
+					recomputeTo = LocalDate.now();
+				}
+				
+				response.status = 400;
+				render("@modifyContract", wrappedContract, beginContract, expireContract,
+						endContract, onCertificate, changeBegin, changeEnd, recomputeFrom, recomputeTo, onlyRecap);
+			}
+		}
+
+		//Conferma ricevuta
+		if (recomputeFrom != null) {
+			contractManager.properContractUpdate(contract, recomputeFrom);
+		}
+
+		contract.save();
+
+		flash.success("Aggiornato contratto per il dipendente %s %s", 
+				contract.person.name, contract.person.surname);
+
+		Contracts.personContracts(contract.person.id);
+
+	}
+
 	
 	public static void updateContractWorkingTimeType(Long id){
 
@@ -164,14 +297,89 @@ public class Contracts extends Controller {
 			
 			log.warn("validation errors: {}", validation.errorsMap());
 			
-			render("@updateContractWorkingTimeType", wrappedContract, contract, wttList, splitDate);
+			render("@updateContractWorkingTimeType", cwtt, wrappedContract,
+					contract, wttList, splitDate);
 		} 
 
 		//agire
 		contractWorkingTimeTypeManager.saveSplitContractWorkingTimeType(cwtt, splitDate);
 
-		//flash.success("Orario di lavoro correttamente suddiviso in due sottoperiodi con tipo orario %s.", cwtt.workingTimeType.description);
-		render("@updateContractWorkingTimeType", wrappedContract, contract, wttList);
+		flash.success("Operazione eseguita.");
+
+		personContracts(contract.person.id);
+	}
+	
+	/**
+	 * Elimina il periodo tipo orario. Non può essere rimosso il primo tipo orario.
+	 * 
+	 * @param cwtt periodo tipo orario da rimuovere
+	 */
+	public static void deleteContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt) {
+		
+		notFoundIfNull(cwtt);
+
+		rules.checkIfPermitted(cwtt.contract.person.office);
+
+		Contract contract = cwtt.contract;
+
+		IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
+		List<WorkingTimeType> wttList = wttList(contract);
+		
+		if (validation.hasErrors()) {
+			
+			response.status = 400;
+			flash.error(Web.msgHasErrors());
+			
+			log.warn("validation errors: {}", validation.errorsMap());
+			
+			render("@updateContractWorkingTimeType", cwtt, wrappedContract,
+					contract, wttList);
+		} 
+	
+		List<ContractWorkingTimeType> contractsWtt = 
+				Lists.newArrayList(contract.contractWorkingTimeType);
+		
+		Collections.sort(contractsWtt);
+		int index = contractsWtt.indexOf(cwtt);
+		Preconditions.checkState(index > 0);
+	
+		ContractWorkingTimeType previous = contractsWtt.get(index - 1);
+		contractWorkingTimeTypeManager
+			.deleteContractWorkingTimeType(contract, cwtt, previous);
+
+		//Ricalcolo a partire dall'inizio del periodo che ho eliminato.
+		contractManager.recomputeContract(cwtt.contract, 
+				Optional.fromNullable(cwtt.beginDate), false);
+
+		flash.success("Operazione eseguita.");
+
+		personContracts(contract.person.id);
+	}
+
+	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, 
+			WorkingTimeType newWtt) {
+	
+		notFoundIfNull(cwtt);
+		notFoundIfNull(newWtt);
+		
+		rules.checkIfPermitted(cwtt.contract.person.office);
+		rules.checkIfPermitted(newWtt.office);
+		
+		Contract contract = cwtt.contract;
+		IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
+		List<WorkingTimeType> wttList = wttList(contract);
+
+		cwtt.workingTimeType = newWtt;
+		cwtt.save();
+
+		//Ricalcolo valori
+		contractManager.recomputeContract(cwtt.contract, 
+				Optional.fromNullable(cwtt.beginDate), false);
+		
+		flash.success("Operazione eseguita.");
+
+		personContracts(contract.person.id);
+
 	}
 
 	
