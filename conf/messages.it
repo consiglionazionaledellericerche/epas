@@ -157,9 +157,9 @@ invalid.time=Formato del tempo errato.
 way= Verso
 
 report=Descrizione problema
-mese= Mese (se presente)
-anno= Anno (se presente)
-
+month= Mese (se presente)
+year= Anno (se presente)
+day= Giorno (se presente)
 
 ########################
 # Messaggi di validazione
