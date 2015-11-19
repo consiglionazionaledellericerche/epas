@@ -231,6 +231,18 @@ public class Contracts extends Controller {
 		Contracts.personContracts(contract.person.id);
 
 	}
+	
+	public static void insertContract(Person person){
+		
+		notFoundIfNull(person);
+
+		rules.checkIfPermitted(person.office);
+
+		Contract con = new Contract();
+		List<WorkingTimeType> wttList = workingTimeTypeDao.getAllWorkingTimeType();
+		render(con, person, wttList);
+	}
+
 
 	
 	public static void updateContractWorkingTimeType(Long id){
