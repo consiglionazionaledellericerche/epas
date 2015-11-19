@@ -28,6 +28,10 @@ public class SwitchTemplate extends Controller{
 
 			Stampings.personStamping(personId, year, month);
 		}
+		
+		if(action.equals("Contracts.personContracts")) {
+			Contracts.personContracts(personId);
+		}
 
 		if(action.equals("PersonMonths.trainingHours")) {
 
