@@ -5,13 +5,15 @@
 #{persons.personsTabs activeAction:'personContracts' /}
 
  <div class="container">
-
-  <p>
-    <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
-      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto per ${person.surname} ${person.name}
-  	</a>
-  </p>
   
+  <div class="text-center">
+   <p>
+    <a class="btn btn-success" href="@{Contracts.insertContract('person.id':person.id)}" data-async-modal="#defaultModal">
+      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto
+    </a>
+   </p>
+  </div>
+
   #{list items:contractList, as:'contract'}
 	
 	#{if contract.isActive()}
@@ -45,11 +47,7 @@
   	  
  #{/list}	
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Altri contratti</h3>
-    </div>
-    <div class="panel-body">
+	#{panel title:'Altri Contratti', color:'primary'}
   	  <table class="table table-hover center table-list-contract">
 		<tr class="warning">
 			<th>Data inizio contratto</th>
@@ -67,6 +65,7 @@
   	    #{if !contract.isActive()}
  		<tr>
 			<td>
+			  *{
 			  #{if contract.noRelevant() }
 			    irrilevante
 			  #{/if}
@@ -75,17 +74,13 @@
 			  #{/if}
 			   #{if contract.monthRecapMissing() }
 			    mancariep
-			  #{/if}
-			  <h4><span class="label label-default">${contract.value.beginContract.format()}</span></h4>
+			  #{/if}}*
+			  ${contract.value.beginContract.format()}
 			</td>
 			
-			<td>
-			  <h4><span class="label label-default">${contract.value.expireContract.format()}</span></h4>
-			</td>
+			<td>${contract.value.expireContract.format()}</td>
 			
-			<td>
-			  <h4><span class="label label-default">${contract.value.endContract}</span></h4>
-			</td>
+			<td>${contract.value.endContract}</td>
 			
 			<td>
 			  
@@ -181,15 +176,10 @@
 	    #{/if}
 	  #{/list}
 	  </table>
-    </div>
-  </div>  <!-- Fine pannello dati contrattuli -->
+	#{/panel}
 
 
-<div class="panel panel-default">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">Informazioni su presenza default</h3>
-	  </div>
-	  <div class="panel-body">
+   #{panel title:'Presenza Automatica', color:'primary'}
 	  	<table class="table table-hover center table-list-contract">
 	  		<tr>
 	  			<th class="warning">Da</th>
@@ -226,7 +216,6 @@
 	  		</tr>
 	  		#{/list}
 	  	</table>
-	  </div>
-	</div>	<!-- Fine pannello 3 -->
+     #{/panel}
 
 </div>

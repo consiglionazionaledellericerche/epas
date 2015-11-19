@@ -290,17 +290,7 @@ public class Persons extends Controller {
 		render(person, cwtt, wtt);
 	}
 
-	public static void insertContract(Person person){
-		
-		notFoundIfNull(person);
-
-		rules.checkIfPermitted(person.office);
-
-		Contract con = new Contract();
-		List<WorkingTimeType> wttList = workingTimeTypeDao.getAllWorkingTimeType();
-		render(con, person, wttList);
-	}
-
+	
 	public static void saveContract(@Required LocalDate dataInizio, 
 			@Valid LocalDate dataFine, Person person, WorkingTimeType wtt,
 			boolean onCertificate) {
