@@ -385,3 +385,8 @@ tfoot input {
 .list-group-item-grey{ background-color: #EAEAEA; }
 
 .btn ,i{ vertical-align: middle; }
+
+.data-select-bar{
+  margin-top: 2em;
+  margin-bottom: 2em;
+}

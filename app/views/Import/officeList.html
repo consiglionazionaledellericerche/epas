@@ -3,24 +3,32 @@
 #{set title: 'ePAS - Import istituti da Anagrafica'  /}
 
 <div class="container">
-#{form @Import.importOffices(),class:'form-horizontal'}
+  #{form @Import.importOffices(),class:'form-horizontal'}
 
-  <div class="row">
-    <button type="submit" class="btn btn-default col-xs-2 col-xs-offset-5">
-       <em class="text-primary"><i class="fa fa-cloud-download fa-2x"></i> Importa Sedi</em>
-    </button>
+  <div class="well well-sm">
+    <h3 class="center"><em>Import Sedi</em></h3>
   </div>
 
-  #{field 'offices'}
-    <select id="${field.id}" name="${field.name}.id" class="list-group form-control"
-            multiple="multiple">
-        #{list importedOffices}
-        <option value="${_.id}">
-            ${_.label()}
-        </option>
-        #{/list}
-    </select>
-  #{/field}
+  <div class="col-sm-8 col-sm-offset-2">
+    <div class="row">
+      <button type="submit" class="btn btn-default col-sm-4 col-sm-offset-4">
+        <em class="text-primary"><i class="fa fa-cloud-download fa-2x"></i> Importa Sedi</em>
+      </button>
+    </div>
 
-#{/form}
+    <div class="list-group" data-select="offices">
+      #{list importedOffices}
+      <a href="#" class="list-group-item row" data-value="${_.id}">
+        ${_.label()}
+        #{if officeCodes.contains(_.code)}
+        <div class="pull-right"><span class="label label-success">
+                Sede già presente nel sistema</span></div>
+        #{/if}
+      </a>
+      #{/list}
+    </div>
+  </div>
+  #{/form}
 </div>
+
+
