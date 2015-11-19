@@ -2,22 +2,9 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Modifica ' + person.fullname /}
 
-#{set 'moreStyles'}
-<style>
-  .panel {
-  	margin-top: 20px;
-  }
-  
-  #table-list-contract {
-  	margin-top: 30px;
-  	margin-bottom: 10px;
-  }
-</style>
-#{/set}
-
 #{persons.personsTabs activeAction:'personContracts' /}
 
-<div class="container">
+ <div class="container">
 
   <p>
     <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
@@ -29,11 +16,8 @@
 	
 	#{if contract.isActive()}
 	
-	<div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Contratto Attuale</h3>
-      </div>
-      <div class="panel-body">
+	#{panel title:'Contratto Attuale', color:'primary'}
+        
         <p>Data Inizio: <strong>${contract.value.beginContract.format()}</strong></p>
         <p>Data Fine: <strong>
         #{if contract.value.expireContract}${contract.value.expireContract.format()}#{/if}
@@ -56,8 +40,7 @@
 			    <i class="fa fa-pencil-square-o"></i> Modifica Date
 		</a>
         
-  	  </div>
-  	</div>  
+	#{/panel} 
   	#{/if}
   	  
  #{/list}	
@@ -140,7 +123,7 @@
 			</td>
 			
 			<td>
-			  <a href="@{Persons.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
+			  <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
 			    <i class="fa fa-pencil-square-o"></i> Modifica
 			  </a>
 			</td>

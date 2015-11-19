@@ -203,21 +203,28 @@ public class ContractManager {
 			final Contract contract, final Optional<LocalDate> dateFrom, 
 			final boolean newContract) {
 
-		// (0) Definisco l'intervallo su cui operare
-		// Decido la data inizio
-		LocalDate initUse = new LocalDate(confGeneralManager
-			.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office));
-		
-		LocalDate startDate = contract.beginContract;
-		if (startDate.isBefore(initUse)) {
-			startDate = initUse;
+		IWrapperContract wContract = wrapperFactory.create(contract);
+		LocalDate startDate = wContract.getContractDatabaseInterval().getBegin();
+		if (dateFrom.isPresent() && dateFrom.get().isAfter(startDate)) {
+			startDate = dateFrom.get();
 		}
-
-		if (dateFrom.isPresent()) {
-			if (startDate.isBefore(dateFrom.get())) {
-				startDate = dateFrom.get();
-			}
-		}
+//		// (0) Definisco l'intervallo su cui operare
+//		I
+//		//la data inizio
+//		LocalDate initUse = new LocalDate(confGeneralManager
+//			.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office));
+//		
+//		LocalDate startDate = contract.beginContract;
+//		if (startDate.isBefore(initUse)) {
+//			startDate = initUse;
+//		}
+//
+//		if (dateFrom.isPresent()) {
+//			if (startDate.isBefore(dateFrom.get())) {
+//				startDate = dateFrom.get();
+//			}
+//		}
+//		// D
 	
 		if (!newContract) {
 			//Distruggere i riepiloghi
@@ -228,7 +235,7 @@ public class ContractManager {
 			JPAPlugin.startTx(false);
 		}
 		
-		consistencyManager.updatePersonSituation(contract.person.id, startDate);
+		consistencyManager.updateContractSituation(contract, startDate);
 	}
 	
 	private void destroyContractMonthRecap(final Contract contract) {

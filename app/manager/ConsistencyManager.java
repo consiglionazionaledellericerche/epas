@@ -166,15 +166,21 @@ public class ConsistencyManager {
 	 * @param from
 	 */
 	public void updatePersonSituation(Long personId, LocalDate from) {
-		updatePersonSituationEngine(personId, from, false);
+		updatePersonSituationEngine(personId, from, Optional.<LocalDate>absent(), false);
+	}
+	
+	public void updateContractSituation(Contract contract, LocalDate from) {
+		
+		LocalDate to = wrapperFactory.create(contract).getContractDatabaseInterval().getEnd();
+		updatePersonSituationEngine(contract.person.id, from, Optional.fromNullable(to), false);
 	}
 	
 	public void updatePersonRecaps(Long personId, LocalDate from) {
-		updatePersonSituationEngine(personId, from, true);
+		updatePersonSituationEngine(personId, from, Optional.<LocalDate>absent(), true);
 	}
 
 	
-	private void updatePersonSituationEngine(Long personId, LocalDate from, 
+	private void updatePersonSituationEngine(Long personId, LocalDate from, Optional<LocalDate> to,
 			boolean updateOnlyRecaps) {
 		
 		final Person person = personDao.fetchPersonForComputation(personId, 
@@ -192,7 +198,9 @@ public class ConsistencyManager {
 
 		//Gli intervalli di ricalcolo dei person day.
 		LocalDate lastPersonDayToCompute = LocalDate.now();
-		
+		if (to.isPresent() && to.get().isBefore(lastPersonDayToCompute)) {
+			lastPersonDayToCompute = to.get();
+		}
 		LocalDate date = personFirstDateForEpasComputation(person,
 				Optional.fromNullable(from));
 				
