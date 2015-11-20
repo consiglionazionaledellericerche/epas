@@ -496,6 +496,11 @@ when
         "Contracts.personContracts",
         "Contracts.modifyContract",
         "Contracts.updateContract",
+        
+        "Contracts.updateSourceContract",
+     	"Contracts.saveSourceContract",
+     	"Contracts.approveAutomatedSource",
+        
         "Contracts.splitContractWorkingTimeType",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.changeTypeOfContractWorkingTimeType",
@@ -505,10 +510,6 @@ when
         "Persons.saveContract",
         "Persons.deleteContract",
         "Persons.deleteContractConfirmed",
-        
-        "Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.approveAutomatedSource",
      	
      	"Persons.childrenList",
      	"Persons.editChild",
@@ -615,6 +616,11 @@ when
      	"Contracts.personContracts",
      	"Contracts.modifyContract",
      	"Contracts.updateContract",
+
+		"Contracts.updateSourceContract",
+     	"Contracts.saveSourceContract",
+     	"Contracts.approveAutomatedSource",
+
      	"Contracts.splitContractWorkingTimeType",
      	"Contracts.updateContractWorkingTimeType",
      	"Contracts.changeTypeOfContractWorkingTimeType",
@@ -625,10 +631,6 @@ when
         
      	"Persons.deleteContract",
      	"Persons.deleteContractConfirmed",
-     	
-     	"Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.approveAutomatedSource",
      	
      	"Persons.childrenList",
      	"Persons.editChild",
