@@ -522,6 +522,15 @@ public class RequestInit extends Controller {
 				return "Persons.edit";
 			}
 		}
+		
+		if (action.startsWith("Contracts.")) {
+			if(action.equals("Contracts.personContracts")) {
+				
+				renderArgs.put("switchPerson", true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "Contracts.personContracts";
+			}
+		}
 
 		if(action.startsWith("Absences.")) {
 
