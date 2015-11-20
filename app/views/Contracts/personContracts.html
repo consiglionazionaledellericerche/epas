@@ -30,12 +30,15 @@
         #{/if}
         
         <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
-			    <i class="fa fa-pencil-square-o"></i> Modifica Date
+			<i class="fa fa-pencil-square-o"></i> Modifica Date
 		</a>
         
         
         <!-- Inizializzazione -->
         <p>Inizializzazione</p>
+          <a href="@{Contracts.updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
+            <i class="fa fa-pencil-square-o"></i>Definisci Inizializzazione
+		  </a>
         <!-- Orari di lavoro -->
         <p>Orari di lavoro</p>
         <a href="@{Contracts.updateContractWorkingTimeType(contract.value.id)}" data-async-modal="#defaultModal">
@@ -53,12 +56,6 @@
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
 			<th>Data terminazione<br>esperienza</th>
-			<th>Orario<br>di lavoro</th>
-			<th>Attestato presenza</th>
-			<th>Modifica date</th>
-			<th>Elimina contratto</th>
-			<th>Inizializzazione<br>ePAS</th>
-			
 		</tr>
         #{list items:contractList, as:'contract'}
 
@@ -82,6 +79,7 @@
 			
 			<td>${contract.value.endContract}</td>
 			
+			*{
 			<td>
 			  
 			  #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
@@ -168,17 +166,18 @@
 			   #{/if}
 			 #{/if}  
 
-			  <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" 
+			  <a class="btn btn-small" href="@{Contracts.updateSourceContract(contract.value.id)}" 
 			    data-async-modal="#defaultModal">Definisci Inizializzazione
 			  </a>
 			</td>
+			}*
 		</tr>
 	    #{/if}
 	  #{/list}
 	  </table>
 	#{/panel}
 
-
+   *{
    #{panel title:'Presenza Automatica', color:'primary'}
 	  	<table class="table table-hover center table-list-contract">
 	  		<tr>
@@ -217,5 +216,5 @@
 	  		#{/list}
 	  	</table>
      #{/panel}
-
+    }*
 </div>
