@@ -14,18 +14,24 @@
   </div>  
 #{/if}
 
-
-	<div class="alert alert-danger">
-	  <p><p><i class="fa fa-info"></i>  
+ <div class="alert alert-danger">
+   <p><i class="fa fa-info"></i>  
 	  	  Per questo contratto iniziato in data <strong>${contract.beginContract.format()}</strong>	
   		  la possibilità di definire come data di inizializzazione una data precedente a <strong>${dateForInit.format()}</strong> è disabilitata.<br>
   		  Se si desidera definire una nuova inizializzazione scegliere una data uguale o successiva a <strong>${dateForInit.format()}</strong>
-  	  </p>
-	</div>
+  </p>
+ </div>
+ 
+#{tabs}
+  #{tabItem id:'total', title:'Inizializzazione', active:true /}
+  #{tabItem id:'meal', title:'Buoni Pasto' /}
+#{/tabs}
 
+#{tabContent}
 
-#{panel title:'Inizializzazione Intera', dim:12, fluid:false, color:'info'}
-	  <div class="alert alert-success">
+  #{tabContentItem id:'total', active:true}
+
+     <div class="alert alert-success">
 		<p>
           	Tramite questa form è possibile inizializzare la situazione di una persona in un momento arbitrario del contratto selezionato.
   		  </p> 
@@ -41,57 +47,29 @@
   		  #{/if}
 	  </div>
 
-      #{form @Persons.saveSourceContract()}
+      #{form @Contracts.saveSourceContract(), class:'form-horizontal'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
+	    
+	    #{f.date 'contract.sourceDateResidual', biglabel:true  /}
+	    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
+	    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
+	    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
+	    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
+	    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
+	    #{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+	    #{if contract.sourceDateMealTicket == null }
+	    	#{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
+	    #{/if}
 	
-	    <table class="table table-condensed table-hover table-form">
-		<tr>
-		  <td class="lab"><strong>Data Inizializzazione (aaaa-mm-gg)</strong> </td>
-		  <td><input name="contract.sourceDateResidual" type="text" datepicker value="${contract.sourceDateResidual.format()}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Residuo anno passato (in minuti)</td>
-		  <td><input name="contract.sourceRemainingMinutesLastYear" type="text" value="${contract.sourceRemainingMinutesLastYear}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Residuo anno corrente (in minuti)</td>
-		  <td><input name="contract.sourceRemainingMinutesCurrentYear" type="text" value="${contract.sourceRemainingMinutesCurrentYear}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Ferie utilizzate anno passato</td>
-		  <td><input name="contract.sourceVacationLastYearUsed" type="text" value="${contract.sourceVacationLastYearUsed}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Ferie utilizzate anno corrente</td>
-		  <td><input name="contract.sourceVacationCurrentYearUsed" type="text" value="${contract.sourceVacationCurrentYearUsed}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Permessi utilizzati anno corrente</td>
-		  <td><input name="contract.sourcePermissionUsed" type="text" value="${contract.sourcePermissionUsed}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Riposi compensativi effettuati anno corrente</td>
-		  <td><input name="contract.sourceRecoveryDayUsed" type="text" value="${contract.sourceRecoveryDayUsed}" /></td>
-		</tr>
-		#{if contract.sourceDateMealTicket == null}
-		<tr>
-		  <td class="lab">Buoni pasto residui</td>
-		  <td><input name="contract.sourceRemainingMealTicket" type="text" value="${contract.sourceRemainingMealTicket}" /></td>
-		</tr>
-		#{/if}
-		
-		
-
-	    </table>
-	    <div class="center">
+	    <div class="text-center">
 	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
 	    </div>
       #{/form}
-    #{/panel}
     
-#{if contract.sourceDateResidual }    
-    #{panel title:'Inizializzazione del residuo buoni pasto', dim:12, fluid:false, color:'info'}
-       
+  #{/tabContentItem}
+   
+  #{tabContentItem id:'meal'}
+    
        <div class="alert alert-success">
 		  <p>
           	Tramite questa form è possibile inizializzare esclusivamente il <strong>residuo buoni pasto</strong> in un momento arbitrario del contratto selezionato.  
@@ -99,7 +77,7 @@
        </div>
     
     
-       #{form @Persons.saveSourceContract()}
+       #{form @Contracts.saveSourceContract()}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
 	    <input type="hidden" name="onlyMealTicket" value="true" />
 	
@@ -117,8 +95,9 @@
 	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
 	    </div>
       #{/form}
-    #{/panel}
-#{/if}
+
+ #{/tabContentItem}  
+#{/tabContent}    
 
 #{/modalAsync}
 
