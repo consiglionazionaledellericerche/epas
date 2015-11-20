@@ -178,24 +178,43 @@ public class Contracts extends Controller {
 		}
 		
 		//Se non ho avuto conferma la data da cui ricalcolare
+		boolean changeBegin = false;
+		boolean changeEnd = false;
+		boolean onlyRecap = false;
 		LocalDate recomputeFrom = null;
 		if (!confirmed) {
 			DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
-			if (!newInterval.getBegin().isEqual(previousInterval.getBegin()) && 
-					newInterval.getBegin().isBefore(LocalDate.now())) {
-				recomputeFrom = newInterval.getBegin();
+			if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
+				changeBegin = true;
+				if (newInterval.getBegin().isBefore(LocalDate.now())) {
+					recomputeFrom = newInterval.getBegin();
+				}
 			}
 			if (recomputeFrom == null) {
-
-				if (!newInterval.getEnd().isEqual(previousInterval.getEnd()) && 
-						newInterval.getEnd().isBefore(LocalDate.now())) {
-					recomputeFrom = newInterval.getEnd();
+				if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
+					changeEnd = true;
+					//scorcio allora solo riepiloghi
+					if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
+						onlyRecap = true;
+						recomputeFrom = newInterval.getEnd();
+					} 
+					//allungo ma se inglobo passato allora ricalcolo
+					if (newInterval.getEnd().isAfter(previousInterval.getEnd())
+							&& previousInterval.getEnd().isBefore(LocalDate.now()))  {
+						recomputeFrom = previousInterval.getEnd();
+					}
 				}
 			}
 			if ( recomputeFrom != null ) {
+				
+				LocalDate recomputeTo = newInterval.getEnd();
+				if (!recomputeTo.isBefore(LocalDate.now())) {
+					recomputeTo = LocalDate.now();
+				}
+				
 				response.status = 400;
 				render("@modifyContract", wrappedContract, beginContract, expireContract,
-						endContract, onCertificate, recomputeFrom);
+						endContract, onCertificate, changeBegin, changeEnd, recomputeFrom, recomputeTo, onlyRecap);
 			}
 		}
 

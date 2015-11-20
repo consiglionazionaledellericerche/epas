@@ -11,9 +11,12 @@
     <title>#{get 'title' /}</title>
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/cerulean/bootstrap.min.css">
+    *{ <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/cerulean/bootstrap.min.css"> }*
+	#{stylesheet 'prove/css/bootstrap.min.css'/}
+	#{stylesheet 'prove/css/bootstrap-theme.min.css'/}
 
-    *{ <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">  }*
+
+    *{ <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"> }*
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker3.css">
@@ -90,7 +93,7 @@
             <li class="dropdown">  
             #{/else}
             
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
           	  <div class="visible-lg-inline visible-xs-inline">	${session.username}</div></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
@@ -432,7 +435,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
-    <script src="//cdn.jsdelivr.net/bootstrap.listgroup/1.1.2/listgroup.min.js"></script>
 
     <script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
     
@@ -440,7 +442,7 @@
     #{script 'bootstrap-modal.js' /}
     #{script 'bootstrap-modalmanager.js' /}
     #{script 'script.js' /}
-    #{script 'listGroupExtension.min.js' /}
+    #{script 'list-select.min.js' /}
       
     #{include '_myModal.html' /}
 	#{get 'moreScripts' /}
