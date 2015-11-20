@@ -97,11 +97,11 @@
 		#{/if}
 		">
 		 #{if person.currentContract.get().sourceDateResidual != null}
-		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Modifica</a>
+		   <a href="@{Contracts.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Modifica</a>
 		   #{if person.currentContract.get().sourceByAdmin == false} <i class="fa fa-exclamation-triangle"></i> #{/if}
     	 #{/if}
 		 #{else}
-	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Definisci</a>
+	       <a href="@{Contracts.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Definisci</a>
 		 #{/else}
 		</td>
 
