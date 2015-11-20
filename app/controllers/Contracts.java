@@ -231,6 +231,18 @@ public class Contracts extends Controller {
 		Contracts.personContracts(contract.person.id);
 
 	}
+	
+	public static void insertContract(Person person){
+		
+		notFoundIfNull(person);
+
+		rules.checkIfPermitted(person.office);
+
+		Contract con = new Contract();
+		List<WorkingTimeType> wttList = workingTimeTypeDao.getAllWorkingTimeType();
+		render(con, person, wttList);
+	}
+
 
 	
 	public static void updateContractWorkingTimeType(Long id){
@@ -381,6 +393,79 @@ public class Contracts extends Controller {
 		personContracts(contract.person.id);
 
 	}
+	
+	/**
+	 * Pagina aggiornamento dati iniziali del contratto.
+	 * 
+	 * @param contractId
+	 */
+	public static void updateSourceContract(Long contractId){
+
+		Contract contract = contractDao.getContractById(contractId);
+		
+		notFoundIfNull(contract);
+
+		rules.checkIfPermitted(contract.person.office);
+		
+		IWrapperContract wContract = wrapperFactory.create(contract);
+		
+		LocalDate dateForInit = wContract.dateForInitialization();
+		
+		render(contract, dateForInit);
+	}
+	
+	public static void approveAutomatedSource(Long contractId) {
+		
+		Contract contract = contractDao.getContractById(contractId);
+		
+		notFoundIfNull(contract);
+		
+		rules.checkIfPermitted(contract.person.office);
+		
+		contract.sourceByAdmin = true;
+		contract.save();
+		
+		flash.success("Operazione conclusa con successo.");
+		
+		//list(null);
+		
+	}
+
+
+	public static void saveSourceContract(Contract contract, boolean onlyMealTicket) {
+
+		notFoundIfNull(contract);
+
+		rules.checkIfPermitted(contract.person.office);
+		
+		IWrapperContract wContract = wrapperFactory.create(contract);
+		
+		if( !onlyMealTicket && contract.sourceDateResidual != null 
+				&& contract.sourceDateResidual.isBefore(wContract.dateForInitialization())){
+			
+			flash.error("Data inizializzazione non valida");
+			//edit(contract.person.id);
+		}
+
+		contract.sourceByAdmin = true;
+
+		contractManager.saveSourceContract(contract);
+
+		//Ricalcolo valori dalla nuova data inizializzazione.
+		if (!onlyMealTicket) {
+			consistencyManager.updatePersonSituation(contract.person.id, 
+					contract.sourceDateResidual);
+		} else {
+			//modifico solo i buoni pasto quindi ricalcolo solo i riepiloghi
+			consistencyManager.updatePersonRecaps(contract.person.id, 
+					contract.sourceDateResidual);
+		}
+		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
+
+		//edit(contract.person.id);
+
+	}
+
 
 	
 }
