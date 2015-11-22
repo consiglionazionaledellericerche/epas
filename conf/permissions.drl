@@ -494,6 +494,9 @@ when
      	"Persons.deletePersonConfirmed",
         
         "Contracts.personContracts",
+        "Contracts.edit",
+        "Contracts.insert",
+        "Contracts.save",
         "Contracts.modifyContract",
         "Contracts.updateContract",
         
@@ -506,8 +509,6 @@ when
         "Contracts.changeTypeOfContractWorkingTimeType",
         "Contracts.deleteContractWorkingTimeType",
         
-        "Persons.insertContract",
-        "Persons.saveContract",
         "Persons.deleteContract",
         "Persons.deleteContractConfirmed",
      	
@@ -614,6 +615,9 @@ when
      	"Persons.deletePersonConfirmed",
      	
      	"Contracts.personContracts",
+     	"Contracts.edit",
+        "Contracts.insert",
+        "Contracts.save",
      	"Contracts.modifyContract",
      	"Contracts.updateContract",
 
@@ -626,9 +630,6 @@ when
      	"Contracts.changeTypeOfContractWorkingTimeType",
      	"Contracts.deleteContractWorkingTimeType",
      	
-     	"Persons.insertContract",
-        "Persons.saveContract",
-        
      	"Persons.deleteContract",
      	"Persons.deleteContractConfirmed",
      	

@@ -37,6 +37,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -232,19 +233,86 @@ public class Contracts extends Controller {
 
 	}
 	
-	public static void insertContract(Person person){
+	public static void edit(@Valid Contract contract) {
+		
+		notFoundIfNull(contract);
+		
+		rules.checkIfPermitted(contract.person.office);
+		
+		//Contract contract = contractDao.getContractById(contractId);
+		notFoundIfNull(contract);
+		rules.checkIfPermitted(contract.person.office);
+		
+		IWrapperContract wrappedContract = wrapperFactory.create(contract);
+		
+		LocalDate beginContract = contract.beginContract;
+		LocalDate expireContract = contract.expireContract;
+		LocalDate endContract = contract.endContract;
+		boolean onCertificate = contract.onCertificate;
+
+		render(wrappedContract, beginContract, expireContract, endContract, onCertificate);
+	}
+	
+	public static void insert(Person person){
 		
 		notFoundIfNull(person);
 
 		rules.checkIfPermitted(person.office);
 
-		Contract con = new Contract();
-		List<WorkingTimeType> wttList = workingTimeTypeDao.getAllWorkingTimeType();
-		render(con, person, wttList);
+		Contract contract = new Contract();
+		contract.person = person;
+		
+		render(contract);
+	}
+	
+	public static void save(@Valid Contract contract, @Valid WorkingTimeType wtt) {
+
+		notFoundIfNull(contract);
+		notFoundIfNull(wtt);
+
+		rules.checkIfPermitted(contract.person.office);
+
+		if (contract.beginContract == null) {
+
+			flash.error("Errore nel fornire il parametro data inizio contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
+			//edit(person.id);
+		}
+		if (Validation.hasErrors()) {
+
+			flash.error("Errore nel fornire il parametro data fine contratto. "
+					+ "Inserire la data nel corretto formato aaaa-mm-gg");
+			//edit(person.id);
+		}
+
+		//Tipo orario
+		if (wtt == null) {
+			flash.error("Errore nel fornire il parametro tipo orario. "
+					+ "Operazione annullata.");
+			//edit(person.id);
+		}
+
+		//Creazione nuovo contratto
+//		Contract contract = new Contract();
+//		contract.beginContract = dataInizio;
+//		contract.expireContract = dataFine;
+//		contract.onCertificate = onCertificate;
+//		contract.person = person;
+		
+		if (!contractManager.properContractCreate(contract, wtt)) {
+			flash.error("Errore durante la creazione del contratto. "
+					+ "Assicurarsi di inserire date valide e che non si "
+					+ "sovrappongono con altri contratti della person");
+			params.flash(); // add http parameters to the flash scope
+			//edit(person.id);
+		}
+		
+//		flash.success("Il contratto per %s %s è stato correttamente salvato", 
+//				person.name, person.surname);
+
+		//edit(person.id);
 	}
 
-
-	
 	public static void updateContractWorkingTimeType(Long id){
 
 		Contract contract = contractDao.getContractById(id);
@@ -252,24 +320,9 @@ public class Contracts extends Controller {
 		
 		rules.checkIfPermitted(contract.person.office);
 
-		List<WorkingTimeType> wttList = wttList(contract);
-		
 		IWrapperContract wrappedContract = wrapperFactory.create(contract);
 		
-		render(wrappedContract, contract, wttList);
-	}
-	
-	// FIXME è del wrappercontract
-	private static List<WorkingTimeType> wttList(Contract contract) {
-		
-		//La lista dei tipi orario ammessi per la persona
-		List<WorkingTimeType> wttDefault = workingTimeTypeDao.getDefaultWorkingTimeType();
-		List<WorkingTimeType> wttAllowed = contract.person.office.getEnabledWorkingTimeType();
-		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
-		wttList.addAll(wttDefault);
-		wttList.addAll(wttAllowed);
-		return wttList;
-		
+		render(wrappedContract, contract);
 	}
 	
 	/**
@@ -286,7 +339,6 @@ public class Contracts extends Controller {
 
 		Contract contract = cwtt.contract;
 		IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
-		List<WorkingTimeType> wttList = wttList(contract);
 
 		if (!validation.hasErrors()) {
 			
@@ -310,7 +362,7 @@ public class Contracts extends Controller {
 			log.warn("validation errors: {}", validation.errorsMap());
 			
 			render("@updateContractWorkingTimeType", cwtt, wrappedContract,
-					contract, wttList, splitDate);
+					contract, splitDate);
 		} 
 
 		//agire
@@ -335,7 +387,6 @@ public class Contracts extends Controller {
 		Contract contract = cwtt.contract;
 
 		IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
-		List<WorkingTimeType> wttList = wttList(contract);
 		
 		if (validation.hasErrors()) {
 			
@@ -344,8 +395,7 @@ public class Contracts extends Controller {
 			
 			log.warn("validation errors: {}", validation.errorsMap());
 			
-			render("@updateContractWorkingTimeType", cwtt, wrappedContract,
-					contract, wttList);
+			render("@updateContractWorkingTimeType", cwtt, wrappedContract,	contract);
 		} 
 	
 		List<ContractWorkingTimeType> contractsWtt = 
@@ -378,8 +428,6 @@ public class Contracts extends Controller {
 		rules.checkIfPermitted(newWtt.office);
 		
 		Contract contract = cwtt.contract;
-		IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
-		List<WorkingTimeType> wttList = wttList(contract);
 
 		cwtt.workingTimeType = newWtt;
 		cwtt.save();

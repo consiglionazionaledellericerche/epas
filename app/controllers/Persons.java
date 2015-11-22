@@ -290,58 +290,6 @@ public class Persons extends Controller {
 		render(person, cwtt, wtt);
 	}
 
-	
-	public static void saveContract(@Required LocalDate dataInizio, 
-			@Valid LocalDate dataFine, Person person, WorkingTimeType wtt,
-			boolean onCertificate) {
-
-		//Controllo parametri
-		notFoundIfNull(person);
-
-		rules.checkIfPermitted(person.office);
-
-		if (dataInizio == null) {
-
-			flash.error("Errore nel fornire il parametro data inizio contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			edit(person.id);
-		}
-		if (Validation.hasErrors()) {
-
-			flash.error("Errore nel fornire il parametro data fine contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			edit(person.id);
-		}
-
-		//Tipo orario
-		if (wtt == null) {
-			flash.error("Errore nel fornire il parametro tipo orario. "
-					+ "Operazione annullata.");
-			edit(person.id);
-		}
-
-		//Creazione nuovo contratto
-		Contract contract = new Contract();
-		contract.beginContract = dataInizio;
-		contract.expireContract = dataFine;
-		contract.onCertificate = onCertificate;
-		contract.person = person;
-		
-		if (!contractManager.properContractCreate(contract, wtt)) {
-			flash.error("Errore durante la creazione del contratto. "
-					+ "Assicurarsi di inserire date valide e che non si "
-					+ "sovrappongono con altri contratti della person");
-			params.flash(); // add http parameters to the flash scope
-			edit(person.id);
-		}
-		
-		flash.success("Il contratto per %s %s è stato correttamente salvato", 
-				person.name, person.surname);
-
-		edit(person.id);
-	}
-
-	
 	public static void deleteContract(Long contractId){
 
 		Contract contract = contractDao.getContractById(contractId);

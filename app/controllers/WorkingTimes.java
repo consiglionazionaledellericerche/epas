@@ -326,13 +326,7 @@ public class WorkingTimes extends Controller{
 
 		rules.checkIfPermitted(office);
 
-		List<WorkingTimeType> wttDefault = workingTimeTypeDao.getDefaultWorkingTimeType();
-		List<WorkingTimeType> wttAllowed = office.getEnabledWorkingTimeType(); 
-
-		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
-		wttList.addAll(wttDefault);
-		wttList.addAll(wttAllowed);
-
+		List<WorkingTimeType> wttList = workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
 		wttList.remove(wtt);
 
 		render(wtt, wttList, office);

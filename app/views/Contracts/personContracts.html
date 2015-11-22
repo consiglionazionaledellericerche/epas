@@ -8,7 +8,7 @@
   
   <div class="text-center">
    <p>
-    <a class="btn btn-success" href="@{Contracts.insertContract('person.id':person.id)}" data-async-modal="#defaultModal">
+    <a class="btn btn-success" href="@{Contracts.insert('person.id':person.id)}" data-async-modal="#defaultModal">
       <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto
     </a>
    </p>
@@ -20,6 +20,7 @@
 	
 	#{panel title:'Contratto Attuale', color:'primary'}
         
+      #{panel title:'Validità', color:'default', dim:8, offset:2, row:true}
         <p>Data Inizio: <strong>${contract.value.beginContract.format()}</strong></p>
         <p>Data Fine: <strong>
         #{if contract.value.expireContract}${contract.value.expireContract.format()}#{/if}
@@ -28,6 +29,63 @@
         #{if contract.value.endContract}
           <p>Terminato il: <strong>${contract.value.endContract.format()}</strong></p>
         #{/if}
+      #{/panel}
+
+      #{panel title:'Orari di lavoro', color:'default', dim:8, offset:2, row:true}
+        <table class="table table-condensed table-hover">
+            <tr class="info">
+		    <th class="col-md-4">Dal</th>
+		    <th class="col-md-4">Al</th>
+		    <th class="col-md-4">Tipo Orario</th>
+		  </tr>
+        #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
+			  <tr>
+			    <td>${wtt.beginDate.format()}</td>
+			    <td>
+			    #{if wtt.endDate}${wtt.endDate}#{/if}
+        		#{else}<em>Indeterminato</em>#{/else}
+        		</td>
+			    <td>${wtt.workingTimeType.description}</td>
+			  </tr>
+		#{/list}
+		</table>
+	  #{/panel}
+
+	  #{accordionGroup 'init'}
+      #{accordionItem 'initItem', parent:'init', title:'Dati Iniziali', open:false, color:'default', offset:2, dim:8, row:true}
+
+       #{form @Contracts.saveSourceContract(), class:'form-horizontal'}
+	    
+	    #{f.simpleView label:'contract.sourceDateResidual', 
+	    	value:contract.value.sourceDateResidual?.format(), biglabel:true /}
+	    
+	    #{f.simpleView label:'contract.sourceRemainingMinutesLastYear', 
+	    	value:contract.value.sourceRemainingMinutesLastYear?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceRemainingMinutesCurrentYear', 
+	    	value:contract.value.sourceRemainingMinutesCurrentYear?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceVacationLastYearUsed', 
+	    	value:contract.value.sourceVacationLastYearUsed?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceVacationCurrentYearUsed', 
+	    	value:contract.value.sourceVacationCurrentYearUsed?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourcePermissionUsed', 
+	    	value:contract.value.sourcePermissionUsed?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceRecoveryDayUsed', 
+	    	value:contract.value.sourceRecoveryDayUsed?.format(), biglabel:true /}
+	    	
+	    *{
+	    #{f.input 'contract.value.sourceRemainingMinutesLastYear', biglabel:true /}
+	    #{f.input 'contract.value.sourceRemainingMinutesCurrentYear', biglabel:true  /}
+	    #{f.input 'contract.value.sourceVacationLastYearUsed', biglabel:true  /}
+	    #{f.input 'contract.value.sourceVacationCurrentYearUsed', biglabel:true  /}
+	    #{f.input 'contract.value.sourcePermissionUsed', biglabel:true  /}
+	    #{f.input 'contract.value.sourceRecoveryDayUsed', biglabel:true  /}
+    	#{f.input 'contract.value.sourceRemainingMealTicket', biglabel:true  /}
+  	 	}*
+  	     	 
+      #{/form}
+      #{/accordionItem}
+   	  #{/accordionGroup}
+        *{
         
         <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
 			<i class="fa fa-pencil-square-o"></i> Modifica Date
@@ -44,6 +102,14 @@
         <a href="@{Contracts.updateContractWorkingTimeType(contract.value.id)}" data-async-modal="#defaultModal">
 			    <i class="fa fa-pencil-square-o"></i> Modifica Date
 		</a>
+		
+		}*
+		<div class="text-center">
+		   <a class="btn btn-primary" href="@{Contracts.edit('contract.id':contract.value.id)}">
+            <i class="fa fa-pencil-square-o"></i>Modifica
+		   </a>
+		</div>
+		
         
 	#{/panel} 
   	#{/if}
