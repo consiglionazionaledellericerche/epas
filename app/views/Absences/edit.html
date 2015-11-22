@@ -3,16 +3,16 @@
            + ' per ' + absence.personDay.person.fullname }
 
 #{tabs}
-  #{tabItem id:'edit', title:'Riepilogo', active:true /}
+  #{tabItem id:'editAbs', title:'Riepilogo', active:true /}
   #{tabItem id:'attach', title:'Allegato' /}
-  #{tabItem id:'delete', title:'Elimina' /}
+  #{tabItem id:'deleteAbs', title:'Elimina' /}
 #{/tabs}
 
 <br>
 
 #{tabContent}
 
-  #{tabContentItem id:'edit', active:true}
+  #{tabContentItem id:'editAbs', active:true}
  
 	 #{list items:historyAbsence, as:'state'}
 	   #{if state.typeIsAdd() }
@@ -72,7 +72,7 @@
 	  #{/if}  
   #{/tabContentItem} 
  
-  #{tabContentItem id:'delete'}
+  #{tabContentItem id:'deleteAbs'}
 	  <div class="alert alert-danger center">
 		   <p>Cliccando su elimina si elimineranno tutte le assenze con codice ${absence.absenceType.code} 
 	       presenti nella finestra temporale specificata fino a <strong>Fino A</strong>

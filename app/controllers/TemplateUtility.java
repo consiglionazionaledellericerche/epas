@@ -6,6 +6,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.OfficeDao;
@@ -13,6 +14,7 @@ import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.StampingDao;
+import dao.WorkingTimeTypeDao;
 import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
 import models.AbsenceType;
@@ -24,10 +26,13 @@ import models.Role;
 import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
+import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
+
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
+
 import java.util.List;
 import java.util.Set;
 
@@ -47,12 +52,14 @@ public class TemplateUtility {
 	private final StampingDao stampingDao;
 	private final RoleDao roleDao;
 	private final BadgeReaderDao badgeReaderDao;
+	private final WorkingTimeTypeDao workingTimeTypeDao;
 
 	@Inject
 	public TemplateUtility(SecureManager secureManager,
 			OfficeDao officeDao, PersonDao personDao,
 			QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
-			StampingDao stampingDao, RoleDao roleDao, BadgeReaderDao badgeReaderDao) {
+			StampingDao stampingDao, RoleDao roleDao, BadgeReaderDao badgeReaderDao, 
+			WorkingTimeTypeDao workingTimeTypeDao) {
 		
 				this.secureManager = secureManager;
 				this.officeDao = officeDao;
@@ -62,6 +69,7 @@ public class TemplateUtility {
 				this.stampingDao = stampingDao;
 				this.roleDao = roleDao;
 				this.badgeReaderDao = badgeReaderDao;
+				this.workingTimeTypeDao = workingTimeTypeDao;
 	}
 
 	
@@ -153,6 +161,10 @@ public class TemplateUtility {
 		return ImmutableList.of(
 				  "lunedì", "martedì", "mercoledì", "giovedì", 
 				  "venerdì", "sabato", "domenica");
+	}
+	
+	public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
+		return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office); 
 	}
 	
 	/**

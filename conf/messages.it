@@ -128,6 +128,7 @@ contractStampProfile.fixedworkingtime= Timbratura Default
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede 
+wtt= Tipo Orario
 
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti
