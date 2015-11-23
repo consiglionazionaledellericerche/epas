@@ -1,6 +1,10 @@
-#{modalAsync id:'defaultModal', title:('Modifica dati contrattuali per ' + wrappedContract.value.person.fullname) }
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
 
+#{persons.personsTabs activeAction:'personContracts' /}
 
+ <div class="contai
   
   <div class="alert alert-info">
   	<p>Utilizzare questa form per modificare le date del contratto.</p>
@@ -76,5 +80,4 @@
 
   </div>
 
-
-#{/modalAsync}
+</div>

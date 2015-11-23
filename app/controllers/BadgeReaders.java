@@ -1,13 +1,20 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.mysema.query.SearchResults;
 import dao.BadgeReaderDao;
+import dao.PersonDao;
 import dao.RoleDao;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import manager.SecureManager;
+import models.Badge;
 import models.BadgeReader;
 import models.Office;
+import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -24,6 +31,7 @@ import security.SecurityRules;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Set;
 
 
 @With( {Resecure.class, RequestInit.class})
@@ -37,6 +45,12 @@ public class BadgeReaders extends Controller {
 	private static SecurityRules rules;
 	@Inject
 	private static RoleDao roleDao;
+	@Inject
+	private static PersonDao personDao;
+	@Inject
+	private static SecureManager secureManager;
+	@Inject
+	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 
 	public static void index() {
 		flash.keep();
@@ -59,11 +73,24 @@ public class BadgeReaders extends Controller {
 
 	public static void edit(Long id) {
 		
-		final BadgeReader badgeReader = BadgeReader.findById(id);
+		final BadgeReader badgeReader = badgeReaderDao.byId(id);
 		notFoundIfNull(badgeReader);
 		
 		final User user = badgeReader.user;
-		render(badgeReader, user);
+		
+		final Set<Badge> badgeList = badgeReader.badges;
+		String name = "";
+		List<Person> simplePersonList = personDao.listFetched(
+				Optional.fromNullable(name),
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, null, null, false).list();
+
+		List<IWrapperPerson> personList = FluentIterable
+				.from(simplePersonList)
+				.transform(wrapperFunctionFactory.person()).toList();
+				
+		render(badgeReader, user, badgeList, personList);		
+		
 	}
 
 	public static void blank() {

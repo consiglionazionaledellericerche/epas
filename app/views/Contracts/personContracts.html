@@ -5,19 +5,22 @@
 #{persons.personsTabs activeAction:'personContracts' /}
 
  <div class="container">
-
-  <p>
-    <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
-      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto per ${person.surname} ${person.name}
-  	</a>
-  </p>
   
+  <div class="text-center">
+   <p>
+    <a class="btn btn-success" href="@{Contracts.insert('person.id':person.id)}" data-async-modal="#defaultModal">
+      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto
+    </a>
+   </p>
+  </div>
+
   #{list items:contractList, as:'contract'}
 	
 	#{if contract.isActive()}
 	
 	#{panel title:'Contratto Attuale', color:'primary'}
         
+      #{panel title:'Validità', color:'default', dim:8, offset:2, row:true}
         <p>Data Inizio: <strong>${contract.value.beginContract.format()}</strong></p>
         <p>Data Fine: <strong>
         #{if contract.value.expireContract}${contract.value.expireContract.format()}#{/if}
@@ -26,47 +29,106 @@
         #{if contract.value.endContract}
           <p>Terminato il: <strong>${contract.value.endContract.format()}</strong></p>
         #{/if}
+      #{/panel}
+
+      #{panel title:'Orari di lavoro', color:'default', dim:8, offset:2, row:true}
+        <table class="table table-condensed table-hover">
+            <tr class="info">
+		    <th class="col-md-4">Dal</th>
+		    <th class="col-md-4">Al</th>
+		    <th class="col-md-4">Tipo Orario</th>
+		  </tr>
+        #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
+			  <tr>
+			    <td>${wtt.beginDate.format()}</td>
+			    <td>
+			    #{if wtt.endDate}${wtt.endDate}#{/if}
+        		#{else}<em>Indeterminato</em>#{/else}
+        		</td>
+			    <td>${wtt.workingTimeType.description}</td>
+			  </tr>
+		#{/list}
+		</table>
+	  #{/panel}
+
+	  #{accordionGroup 'init'}
+      #{accordionItem 'initItem', parent:'init', title:'Dati Iniziali', open:false, color:'default', offset:2, dim:8, row:true}
+
+       #{form @Contracts.saveSourceContract(), class:'form-horizontal'}
+	    
+	    #{f.simpleView label:'contract.sourceDateResidual', 
+	    	value:contract.value.sourceDateResidual?.format(), biglabel:true /}
+	    
+	    #{f.simpleView label:'contract.sourceRemainingMinutesLastYear', 
+	    	value:contract.value.sourceRemainingMinutesLastYear?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceRemainingMinutesCurrentYear', 
+	    	value:contract.value.sourceRemainingMinutesCurrentYear?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceVacationLastYearUsed', 
+	    	value:contract.value.sourceVacationLastYearUsed?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceVacationCurrentYearUsed', 
+	    	value:contract.value.sourceVacationCurrentYearUsed?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourcePermissionUsed', 
+	    	value:contract.value.sourcePermissionUsed?.format(), biglabel:true /}
+	    #{f.simpleView label:'contract.sourceRecoveryDayUsed', 
+	    	value:contract.value.sourceRecoveryDayUsed?.format(), biglabel:true /}
+	    	
+	    *{
+	    #{f.input 'contract.value.sourceRemainingMinutesLastYear', biglabel:true /}
+	    #{f.input 'contract.value.sourceRemainingMinutesCurrentYear', biglabel:true  /}
+	    #{f.input 'contract.value.sourceVacationLastYearUsed', biglabel:true  /}
+	    #{f.input 'contract.value.sourceVacationCurrentYearUsed', biglabel:true  /}
+	    #{f.input 'contract.value.sourcePermissionUsed', biglabel:true  /}
+	    #{f.input 'contract.value.sourceRecoveryDayUsed', biglabel:true  /}
+    	#{f.input 'contract.value.sourceRemainingMealTicket', biglabel:true  /}
+  	 	}*
+  	     	 
+      #{/form}
+      #{/accordionItem}
+   	  #{/accordionGroup}
+        *{
         
         <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
-			    <i class="fa fa-pencil-square-o"></i> Modifica Date
+			<i class="fa fa-pencil-square-o"></i> Modifica Date
 		</a>
         
         
         <!-- Inizializzazione -->
         <p>Inizializzazione</p>
+          <a href="@{Contracts.updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
+            <i class="fa fa-pencil-square-o"></i>Definisci Inizializzazione
+		  </a>
         <!-- Orari di lavoro -->
         <p>Orari di lavoro</p>
         <a href="@{Contracts.updateContractWorkingTimeType(contract.value.id)}" data-async-modal="#defaultModal">
 			    <i class="fa fa-pencil-square-o"></i> Modifica Date
 		</a>
+		
+		}*
+		<div class="text-center">
+		   <a class="btn btn-primary" href="@{Contracts.edit('contract.id':contract.value.id)}">
+            <i class="fa fa-pencil-square-o"></i>Modifica
+		   </a>
+		</div>
+		
         
 	#{/panel} 
   	#{/if}
   	  
  #{/list}	
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Altri contratti</h3>
-    </div>
-    <div class="panel-body">
+	#{panel title:'Altri Contratti', color:'primary'}
   	  <table class="table table-hover center table-list-contract">
 		<tr class="warning">
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
 			<th>Data terminazione<br>esperienza</th>
-			<th>Orario<br>di lavoro</th>
-			<th>Attestato presenza</th>
-			<th>Modifica date</th>
-			<th>Elimina contratto</th>
-			<th>Inizializzazione<br>ePAS</th>
-			
 		</tr>
         #{list items:contractList, as:'contract'}
 
   	    #{if !contract.isActive()}
  		<tr>
 			<td>
+			  *{
 			  #{if contract.noRelevant() }
 			    irrilevante
 			  #{/if}
@@ -75,18 +137,15 @@
 			  #{/if}
 			   #{if contract.monthRecapMissing() }
 			    mancariep
-			  #{/if}
-			  <h4><span class="label label-default">${contract.value.beginContract.format()}</span></h4>
+			  #{/if}}*
+			  ${contract.value.beginContract.format()}
 			</td>
 			
-			<td>
-			  <h4><span class="label label-default">${contract.value.expireContract.format()}</span></h4>
-			</td>
+			<td>${contract.value.expireContract.format()}</td>
 			
-			<td>
-			  <h4><span class="label label-default">${contract.value.endContract}</span></h4>
-			</td>
+			<td>${contract.value.endContract}</td>
 			
+			*{
 			<td>
 			  
 			  #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
@@ -173,23 +232,19 @@
 			   #{/if}
 			 #{/if}  
 
-			  <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.value.id)}" 
+			  <a class="btn btn-small" href="@{Contracts.updateSourceContract(contract.value.id)}" 
 			    data-async-modal="#defaultModal">Definisci Inizializzazione
 			  </a>
 			</td>
+			}*
 		</tr>
 	    #{/if}
 	  #{/list}
 	  </table>
-    </div>
-  </div>  <!-- Fine pannello dati contrattuli -->
+	#{/panel}
 
-
-<div class="panel panel-default">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">Informazioni su presenza default</h3>
-	  </div>
-	  <div class="panel-body">
+   *{
+   #{panel title:'Presenza Automatica', color:'primary'}
 	  	<table class="table table-hover center table-list-contract">
 	  		<tr>
 	  			<th class="warning">Da</th>
@@ -226,7 +281,6 @@
 	  		</tr>
 	  		#{/list}
 	  	</table>
-	  </div>
-	</div>	<!-- Fine pannello 3 -->
-
+     #{/panel}
+    }*
 </div>
