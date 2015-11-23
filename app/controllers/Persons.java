@@ -138,7 +138,7 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 		
-		person.user = personManager.createUser(person);
+		person.user = userManager.createUser(person);
 
 		person.save();
 		
