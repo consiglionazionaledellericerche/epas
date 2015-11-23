@@ -99,16 +99,4 @@ public class Office extends BaseModel{
 	public String toString() {
 		return getLabel();
 	}
-
-	@Transient
-	public List<WorkingTimeType> getEnabledWorkingTimeType() {
-		
-		List<WorkingTimeType> enabledWttList = Lists.newArrayList();
-		for(WorkingTimeType wtt: this.workingTimeType) {
-			
-			if(wtt.disabled == false)
-				enabledWttList.add(wtt);
-		}
-		return enabledWttList;
-	}
 }

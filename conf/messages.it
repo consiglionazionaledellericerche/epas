@@ -128,10 +128,20 @@ expireContract=Fine contratto
 onCertificate=In attestati
 endContract= Scadenza Contratto
 
+contract.sourceDateResidual=Data inizializzazione
+contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
+contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)
+contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
+contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
+contract.sourcePermissionUsed=Permessi utilizzati anno corrente
+contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
+contract.sourceRemainingMealTicket=Buoni pasto residui
+
 contractStampProfile.fixedworkingtime= Timbratura Default
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede 
+wtt= Tipo Orario
 
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti

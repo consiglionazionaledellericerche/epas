@@ -494,21 +494,23 @@ when
      	"Persons.deletePersonConfirmed",
         
         "Contracts.personContracts",
+        "Contracts.edit",
+        "Contracts.insert",
+        "Contracts.save",
         "Contracts.modifyContract",
         "Contracts.updateContract",
+        
+        "Contracts.updateSourceContract",
+     	"Contracts.saveSourceContract",
+     	"Contracts.approveAutomatedSource",
+        
         "Contracts.splitContractWorkingTimeType",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.changeTypeOfContractWorkingTimeType",
         "Contracts.deleteContractWorkingTimeType",
         
-        "Persons.insertContract",
-        "Persons.saveContract",
         "Persons.deleteContract",
         "Persons.deleteContractConfirmed",
-        
-        "Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.approveAutomatedSource",
      	
      	"Persons.childrenList",
      	"Persons.editChild",
@@ -613,22 +615,23 @@ when
      	"Persons.deletePersonConfirmed",
      	
      	"Contracts.personContracts",
+     	"Contracts.edit",
+        "Contracts.insert",
+        "Contracts.save",
      	"Contracts.modifyContract",
      	"Contracts.updateContract",
+
+		"Contracts.updateSourceContract",
+     	"Contracts.saveSourceContract",
+     	"Contracts.approveAutomatedSource",
+
      	"Contracts.splitContractWorkingTimeType",
      	"Contracts.updateContractWorkingTimeType",
      	"Contracts.changeTypeOfContractWorkingTimeType",
      	"Contracts.deleteContractWorkingTimeType",
      	
-     	"Persons.insertContract",
-        "Persons.saveContract",
-        
      	"Persons.deleteContract",
      	"Persons.deleteContractConfirmed",
-     	
-     	"Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.approveAutomatedSource",
      	
      	"Persons.childrenList",
      	"Persons.editChild",
