@@ -40,12 +40,6 @@ public class Institutes extends Controller {
 		render(results, name);
 	}
 	
-	public static void show(Long id) {
-		final Institute institute = Institute.findById(id);
-		notFoundIfNull(institute);
-		render(institute);
-	}
-
 	public static void edit(Long id) {
 		
 		final Institute institute = Institute.findById(id);
