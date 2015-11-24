@@ -354,23 +354,6 @@ table#tabellonetimbrature td {border: 1px solid #bbb;}
 	font-size:large;
 }
 
-
-/* ----- Datepicker Default reset --------
-
-Sosvrascrive le regole
-table{ border: 1px solid #aaa; }
-th { background: #eee}
-td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
-*/
-
-.datepicker th,td {
-	background: #FFFFFF;
-}
-
-.datepicker table{
-	border:none;
-}
-
 /* Data tables */
 tfoot input {
    width: 100%;
@@ -399,4 +382,11 @@ div.form-group .form-control-static {
     text-align: center;
 }
 */
+table[datatable] {
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+}
 
+table[datatable] > thead > tr > th:hover{
+  background: #F9F9F9;
+}

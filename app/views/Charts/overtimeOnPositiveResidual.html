@@ -3,7 +3,7 @@
 
 <div class="container">
 #{if yearChart == null && monthChart == null }
-	<div class="panel panel-default">
+	<div class="panel panel-primary">
 		  <div class="panel-heading">
 		    <h4 class="panel-title">Seleziona mese e anno</h4>
 		  </div>
@@ -29,7 +29,7 @@
 	
 	#{/if}
 #{else}
-<div class="panel panel-default">
+<div class="panel panel-primary">
 		  <div class="panel-heading">
 		    <h4 class="panel-title">Ore di straordinario a confronto con le ore in più per &{'views.tags.display.date.month.' + monthChart} ${yearChart} </h4>
 		  </div>
