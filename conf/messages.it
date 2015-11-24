@@ -128,8 +128,10 @@ expireContract=Fine contratto
 onCertificate=In attestati
 endContract= Scadenza Contratto
 
+sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 contract.sourceDateResidual=Data inizializzazione
+contract.sourceDateMealTicket=Data inizializzazione
 contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
 contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)
 contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato

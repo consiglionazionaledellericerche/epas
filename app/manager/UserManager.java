@@ -93,7 +93,7 @@ public class UserManager {
 
   public User createUser(final Person person) {
 
-    Preconditions.checkState(person.isPersistent());
+    //Preconditions.checkState(person.isPersistent());
 
     User user = new User();
 

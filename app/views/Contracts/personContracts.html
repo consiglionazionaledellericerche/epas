@@ -24,7 +24,17 @@
 	#{if contract.isActive()}
 	
 	#{panel title:'Contratto Attuale', color:'primary'}
-        
+      
+      #{if contract.initializationMissing() }
+        #{alert color:'danger', center:true}
+	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione poichè ePAS 
+	    	potrebbe non disporre di tutta l'informazione necessaria.
+	      </p>
+	      #{b.buttons center:true}
+	        #{b.link @Contracts.updateSourceContract(contract.value.id), color:'danger', title:'Inizializza'/}
+	      #{/b.buttons}
+        #{/alert}
+      #{/if}
       #{panel title:'Validità', color:'default', dim:8, offset:2, row:true}
         <p>Data Inizio: <strong>${contract.value.beginContract.format()}</strong></p>
         <p>Data Fine: <strong>
@@ -55,66 +65,11 @@
 		#{/list}
 		</table>
 	  #{/panel}
-
-	  #{accordionGroup 'init'}
-      #{accordionItem 'initItem', parent:'init', title:'Dati Iniziali', open:false, color:'default', offset:2, dim:8, row:true}
-
-       #{form @Contracts.saveResidualSourceContract(), class:'form-horizontal'}
-	    
-	    #{f.simpleView label:'contract.sourceDateResidual', 
-	    	value:contract.value.sourceDateResidual?.format(), biglabel:true /}
-	    
-	    #{f.simpleView label:'contract.sourceRemainingMinutesLastYear', 
-	    	value:contract.value.sourceRemainingMinutesLastYear?.format(), biglabel:true /}
-	    #{f.simpleView label:'contract.sourceRemainingMinutesCurrentYear', 
-	    	value:contract.value.sourceRemainingMinutesCurrentYear?.format(), biglabel:true /}
-	    #{f.simpleView label:'contract.sourceVacationLastYearUsed', 
-	    	value:contract.value.sourceVacationLastYearUsed?.format(), biglabel:true /}
-	    #{f.simpleView label:'contract.sourceVacationCurrentYearUsed', 
-	    	value:contract.value.sourceVacationCurrentYearUsed?.format(), biglabel:true /}
-	    #{f.simpleView label:'contract.sourcePermissionUsed', 
-	    	value:contract.value.sourcePermissionUsed?.format(), biglabel:true /}
-	    #{f.simpleView label:'contract.sourceRecoveryDayUsed', 
-	    	value:contract.value.sourceRecoveryDayUsed?.format(), biglabel:true /}
-	    	
-	    *{
-	    #{f.input 'contract.value.sourceRemainingMinutesLastYear', biglabel:true /}
-	    #{f.input 'contract.value.sourceRemainingMinutesCurrentYear', biglabel:true  /}
-	    #{f.input 'contract.value.sourceVacationLastYearUsed', biglabel:true  /}
-	    #{f.input 'contract.value.sourceVacationCurrentYearUsed', biglabel:true  /}
-	    #{f.input 'contract.value.sourcePermissionUsed', biglabel:true  /}
-	    #{f.input 'contract.value.sourceRecoveryDayUsed', biglabel:true  /}
-    	#{f.input 'contract.value.sourceRemainingMealTicket', biglabel:true  /}
-  	 	}*
-  	     	 
-      #{/form}
-      #{/accordionItem}
-   	  #{/accordionGroup}
-        *{
-        
-        <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
-			<i class="fa fa-pencil-square-o"></i> Modifica Date
-		</a>
-        
-        
-        <!-- Inizializzazione -->
-        <p>Inizializzazione</p>
-          <a href="@{Contracts.updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
-            <i class="fa fa-pencil-square-o"></i>Definisci Inizializzazione
-		  </a>
-        <!-- Orari di lavoro -->
-        <p>Orari di lavoro</p>
-        <a href="@{Contracts.updateContractWorkingTimeType(contract.value.id)}" data-async-modal="#defaultModal">
-			    <i class="fa fa-pencil-square-o"></i> Modifica Date
-		</a>
 		
-		}*
-		<div class="text-center">
-		   <a class="btn btn-primary" href="@{Contracts.edit(contract.value.id)}">
-            <i class="fa fa-pencil-square-o"></i>Modifica
-		   </a>
-		</div>
-		
+		#{b.buttons center:true}
+          #{b.link href:@Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+        #{/b.buttons}
+	
         
 	#{/panel} 
   	#{/if}

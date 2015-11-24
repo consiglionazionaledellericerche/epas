@@ -423,7 +423,7 @@ public class WorkingTimes extends Controller{
 					replaceContractWorkingTimeTypeList(contract, newCwttListClean);
 					Logger.info("recompute");
 
-					contractManager.recomputeContract(contract, Optional.fromNullable(dateFrom), false);
+					contractManager.recomputeContract(contract, Optional.fromNullable(dateFrom), false, false);
 
 					contractChanges++;
 

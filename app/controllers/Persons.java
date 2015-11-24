@@ -469,7 +469,7 @@ public class Persons extends Controller {
 		contract.save();
 
 		contractManager.recomputeContract(contract.contract, 
-				Optional.fromNullable(contract.startFrom), false);
+				Optional.fromNullable(contract.startFrom), false, false);
 
 		flash.success("Cambiata correttamente tipologia di timbratura "
 				+ "per il periodo a %s.", newtipo);
@@ -533,7 +533,7 @@ public class Persons extends Controller {
 
 		//Ricalcolo i valori
 		contractManager.recomputeContract(previous.contract, 
-				Optional.fromNullable(csp.startFrom), false);
+				Optional.fromNullable(csp.startFrom), false, false);
 
 		flash.success("Tipologia di timbratura eliminata correttamente. "
 				+ "Tornati alla precedente che ha timbratura automatica "

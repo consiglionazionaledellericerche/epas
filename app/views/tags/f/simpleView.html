@@ -1,24 +1,31 @@
 *{
-   label:
-   value:
    biglabel (optional) più spazio per i label
-   
-   
    hidden: (optional) un campo hidden col valore value
-   name: (optional) il nome del campo hidden
+   value: nel caso di localdate passare il format()
+   
 }*
-<div class="form-group #{if _value == null}text-muted #{/if}">
-    <label class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-3#{/else}">${_label.label()}</label>
+#{field _arg}
+%{
+  if( _value == null) {
+    _value = field.value;
+  }
 
-    <div class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-6#{/else}">
-        <p class="form-control-static">
-        #{if _value == null} <span class="text-muted"></span> #{/if}
-        #{else}
-            ${_value}
-        #{/else}
-        </p>
-    </div>
-</div>
-#{if _hidden}
-  #{if _value}<input type="hidden" name="${_name}" value="${_value}" />#{/if}
-#{/if}
+}%
+	#{if _hidden}
+	<input type="hidden" name="${field.name}" value="${_value}"/>
+	#{/if}
+	<div class="form-group">
+	    <label class="#{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else} control-label">&{field.name}</label>
+	
+	    <div class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-6#{/else}">
+	        <p class="form-control-static">
+	        #{if field.value == null} <span class="text-muted"></span> #{/if}
+	        #{else}
+	            ${_value}
+	        #{/else}
+	        </p>
+	    </div>
+	</div>
+#{/field}
+
+
