@@ -18,6 +18,9 @@ absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
+adminPassword= Password Amministratore
+adminPasswordRetype= Reinserire Password
+
 badgeReader.code=Nome 
 badgeReader.description=Descrizione 
 badgeReader.location=Location
@@ -75,8 +78,12 @@ crud.cancel=Indietro
 crud.save=Salva
 crud.delete=Elimina
 
+dateOfPatron= Data del Patrono
+
 dateFrom=Dal
 dateTo=Fino Al
+
+emailToContact= Indirizzo email dell&#39;amministrazione
 
 Institutes.blank=Nuovo istituto
 Institutes.delete=Elimina istituto
@@ -84,11 +91,15 @@ institute.name=Nome
 institute.code=Sigla
 institute.cds= Centro di spesa
 
+lunchPauseStart= Inizio pausa pranzo
+lunchPauseEnd= Fine pausa pranzo
+
 Offices.blank=Nuova sede
 office.name=Nome
 office.code= Codice
 office.codeId= Sede Id
 office.address=Indirizzo
+office.joiningDate= Data di affiliazione
 office.headQuarter=Sede principale
 
 person.surname=Cognome
@@ -106,6 +117,8 @@ person.qualification= Livello
 person.office= Sede
 person.isPersonInCharge= Responsabile gruppo di lavoro
 
+personQualification= Livello
+
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
 contract.endContract=Terminato Il
@@ -113,7 +126,7 @@ contract.onCertificate=In attestati
 beginContract=Inizio contratto
 expireContract=Fine contratto
 onCertificate=In attestati
-endContract=Terminato Il
+endContract= Scadenza Contratto
 
 sourceDateResidual=Data inizializzazione
 contract.sourceDateResidual=Data inizializzazione
@@ -260,7 +273,14 @@ absenceTypeGroup.accumulationBehaviour.popover= Comportamento da tenere al raggi
 
 absenceTypeGroup.replacingAbsenceType.description= Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)
 
+emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
+
 institute.cds.popover= Codice univoco del centro di spesa (per l&#39;IIT è 044)
+institute.code.popover= Sigla Istituto - Es. IIT,IBBR,ISAFOM etc.
+
+lunchPauseStart.popover= Inserire l&#39;orario nel formato hh:mm
+lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
 
 office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
 office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
+office.joiningDate.popover= Data di affiliazione della sede
