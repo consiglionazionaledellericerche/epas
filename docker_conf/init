@@ -42,13 +42,13 @@ BACKUP_MINUTES=${BACKUP_MINUTES:-5}
 BACKUP_HOURS=${BACKUP_HOURS:-6,12,18}
 
 # LOGCHECK
-LOGCHECK_ADDRESSES=${LOGCHECK_ADDRESSES:-cristian.lucchesi@iit.cnr.it,dario.tagliaferri@iit.cnr.it alessandro.martelli@iit.cnr.it, daniele.murgia@iit.cnr.it}
+# LOGCHECK_ADDRESSES=${LOGCHECK_ADDRESSES:-cristian.lucchesi@iit.cnr.it,dario.tagliaferri@iit.cnr.it alessandro.martelli@iit.cnr.it, daniele.murgia@iit.cnr.it}
 
-cp /home/epas/epas/docker_conf/logcheck/* /etc/logcheck/ignore.d.server/
+# cp /home/epas/epas/docker_conf/logcheck/* /etc/logcheck/ignore.d.server/
 
-echo 'epas: '${LOGCHECK_ADDRESSES} >> /etc/aliases
-echo '/home/epas/epas/logs/epas.log' >> /etc/logcheck/logcheck.logfiles
-sed  's/SENDMAILTO="logcheck"/SENDMAILTO="epas"/' -i /etc/logcheck/logcheck.conf
+# echo 'epas: '${LOGCHECK_ADDRESSES} >> /etc/aliases
+# echo '/home/epas/epas/logs/epas.log' >> /etc/logcheck/logcheck.logfiles
+# sed  's/SENDMAILTO="logcheck"/SENDMAILTO="epas"/' -i /etc/logcheck/logcheck.conf
 
 # Backup db
 sudo -u epas -H cp /home/epas/epas/docker_conf/backupdb.sh /home/epas/epas/tools/backupdb.sh 

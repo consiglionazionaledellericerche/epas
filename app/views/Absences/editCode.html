@@ -15,7 +15,7 @@
  <input type="hidden" name="absenceType.id" value="${absenceType?.id}">
  <input type="hidden" name="absenceTypeGroup.id" value="${absenceType?.absenceTypeGroup?.id}">
 
- <div class="panel panel-default">
+ <div class="panel panel-primary">
  	<div class="panel-heading">
  		#{if absenceType?.isPersistent()}
  		<h2 class="panel-title">Modifica dati per codice di assenza: ${absenceType.code}#{if absenceType.description} (${absenceType.description})#{/if}</h2>
@@ -51,7 +51,7 @@
  	</div>
  </div> 
 
-	<div class="panel panel-default">
+	<div class="panel panel-primary">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Da riempire in caso di gruppo valorizzato</h3>
 		  </div>
