@@ -4,39 +4,25 @@
 
 #{set breadcrumbs:['Lista Persone':@Persons.list(), 
   (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
-  'Modifica Contratto':null] /}
+  'Gestisci Contratto':null] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 #{contracts.editContractTabs activeAction:'updateSourceContract' /}
 
 <div class="container">
 
-#{if contract.sourceDateResidual != null && contract.sourceByAdmin == false}
-  <div class="alert alert-danger">
-	I valori iniziali sottostanti sono stati creati automaticamente da ePAS, impostando a zero ogni campo. 
-	Inserire i valori effettivi e cliccare su <em>Salva</em>, oppure cliccare su <strong>Approva</strong> per 
-	validare l'inizializzazione automatica e non visualizzare più questo messaggio. 
-	#{form @Persons.approveAutomatedSource()}
-	<input type="hidden" name="contractId" value="${contract.id}" />
-	<div class="center">
-  	  <input class="btn btn-default" type="submit" value="Approva"/>
-    </div>
-    #{/form}
-  </div>  
-#{/if}
-
-
 #{if wContract.initializationMissing()}
   <div class="alert alert-danger">
-   <p>
-   <i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione.
-   </p>
-   <p>
-   Il contratto è iniziato in data ${contract.beginContract.format()}.<br>
-   L'installazione di ${contract.person.office.name} è avvenuta in data ${wOffice.initDate().format()}.<br>
-   La persona è stata inserita nel database in data ${wPerson.value.createdAt.format()}.
-   </p>
-    <p>Per definire l'inizializzazione scegliere una data uguale o successiva al <strong>${wContract.dateForInitialization().format()}</strong>.</p>
+    <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione poichè ePAS 
+    potrebbe non disporre di tutta l'informazione necessaria.</p>
+    <p>Affinchè la situazione sia configurata correttamente occorre che l'inizio del contratto o la sua
+    inizializzazione sia successiva alle seguenti date: <br>
+    <ul>
+    <li>all'inserimento in ePAS della sede del dipendente ${contract.person.office.name} avvenuta in data ${wOffice.initDate().format()}</li>
+    <li>all'inserimento in ePAS del dipendente avvenuta in data ${wPerson.value.createdAt.format()}.</li>
+    </ul>
+    
+    <p>Pertanto scegliere una data uguale o successiva al <strong>${wContract.dateForInitialization().format()}</strong>.</p>
   </div>
 #{/if}
 #{else}
@@ -46,8 +32,9 @@
   </div>
 #{/else}
      
-<div id="sourceRes">
-    #{panel title:'Dati generali', color:'default'}
+  <div id="sourceRes">
+
+    #{panel title:'Dati generali', color:'primary'}
 
      <div class="alert alert-info">
 	  <p>
@@ -57,55 +44,122 @@
   	  </p>
 	 </div>
 
-      #{form @Contracts.saveResidualSourceContract(), class:'form-horizontal', 'data-anchor':'#sourceRes'}
+	  *{ 'data-anchor':'#sourceRes' }*
+      #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
+      'data-async':'#sourceRes', 'data-async-error':'#sourceRes'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
-	    
-	    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
-	    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
-	    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
-	    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
-	    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
-	    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
-	    #{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
 
-		#{if recap}
-		  <div class="alert alert-danger">
-		    Da confermare e riepilogare.	    
-		  </div>
+		#{if success}
+		      #{alert dismissible:true}
+		        Inizializzazione inserita con successo ed effettuati i ricalcoli.
+		      #{/alert}
 		#{/if}
-	    <div class="text-center">
-	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
-	    </div>
+		    	    
+	    #{if !confirmed}
+		    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
+		    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
+		    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
+		    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
+		    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
+		    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
+			#{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+		    #{b.buttons center:true}
+              #{b.submit 'Salva'/}
+            #{/b.buttons}
+		#{/if}
+		#{else}
+			
+			#{f.hidden 'confirmed', value:true /}
+			#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceVacationLastYearUsed', biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceVacationCurrentYearUsed', biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourcePermissionUsed', biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceRecoveryDayUsed', biglabel:true, hidden:true /}
+		    
+		  #{if sourceNew}
+		    #{alert color:'danger'}
+				La definizione di questa inizializzazione comporterà il ricalcolo della situazione
+				della persona dal 
+				<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong> 
+				per un totale di <strong>${days}</strong> giorni.		      
+		    #{/alert}
+		  #{/if}
+		  #{if sourceUpdate}
+		    #{alert color:'danger'}
+				La definizione di questa inizializzazione sovrascriverà quella esistente 
+				impostata alla data ${contract.sourceDateResidual.format()}<br>
+				Comporterà il ricalcolo della situazione della persona dal 
+				<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong>
+				 per un totale di <strong>${days}</strong> giorni.		      
+		    #{/alert} 
+		  #{/if}
+		  #{b.buttons center:true}
+            #{b.cancel @updateSourceContract(contract.id) /}
+            #{b.submit 'Conferma'/}
+          #{/b.buttons}
+		#{/else}
+	    
       #{/form}
     #{/panel}
-</div>    
-    
-    #{panel title:'Buoni Pasto', color:'default'}
+  </div>    
+  #{if !wContract.initializationMissing()}  
+  <div id="sourceMeal">    
+    #{panel title:'Buoni Pasto', color:'primary'}
        <div class="alert alert-info">
 		  <p>
-          	Tramite questa form è possibile inizializzare esclusivamente il <strong>residuo buoni pasto</strong> in un momento arbitrario del contratto selezionato.  
+          	Tramite questa form è possibile inizializzare il <strong>residuo buoni pasto</strong> in un momento arbitrario del contratto selezionato.  
   		  </p> 
        </div>
-    
-       #{form @Contracts.saveResidualSourceContract()}
+       
+       #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
+      'data-async':'#sourceMeal', 'data-async-error':'#sourceMeal'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
-	    <input type="hidden" name="onlyMealTicket" value="true" />
-	
-	    <table class="table table-condensed table-hover table-form">
-		<tr>
-		  <td class="lab"><strong>Data Inizializzazione buoni pasto (aaaa-mm-gg)</strong> </td>
-		  <td><input name="contract.sourceDateMealTicket" type="text" datepicker value="${contract.sourceDateMealTicket.format()}" /></td>
-		</tr>
-		<tr>
-		  <td class="lab">Buoni pasto residui</td>
-		  <td><input name="contract.sourceRemainingMealTicket" type="text" value="${contract.sourceRemainingMealTicket}" /></td>
-		</tr>
-	    </table>
-	    <div class="center">
-	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
-	    </div>
-      #{/form}
+       
+       #{if success}
+		      #{alert dismissible:true}
+		        Inizializzazione buoni pasto inserita con successo ed effettuati i ricalcoli.
+		      #{/alert}
+		#{/if}
+		
+	    #{if !confirmed}
+		    #{f.date 'sourceDateMealTicket', value:contract.sourceDateMealTicket?.format(), biglabel:true  /}
+		    #{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
+		    #{b.buttons center:true}
+              #{b.submit 'Salva'/}
+            #{/b.buttons}
+		#{/if}
+		#{else}
+			
+			#{f.hidden 'confirmed', value:true /}
+			#{f.simpleView 'sourceDateMealTicket', value:sourceDateMealTicket.format(), biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceRemainingMealTicket', biglabel:true, hidden:true /}
+			
+		  #{if sourceNew}
+		    #{alert color:'danger'}
+				Verranno rigenerati i riepiloghi della persona a partire dal mese 
+				<strong>${recomputeFrom.format()}</strong> a quello attuale. 
+				per un totale di <strong>${months}</strong> mesi.
+		    #{/alert}
+		  #{/if}
+		  #{if sourceUpdate}
+		    #{alert color:'danger'}
+				La definizione di questa inizializzazione sovrascriverà quella esistente 
+				impostata alla data ${contract.sourceDateMealTicket.format()}<br>
+				Verranno rigenerati i riepiloghi della persona a partire dal mese 
+				<strong>${recomputeFrom.format()}</strong> a quello attuale. 
+				per un totale di <strong>${months}</strong> mesi.	      
+		    #{/alert} 
+		  #{/if}
+		  #{b.buttons center:true}
+            #{b.cancel @updateSourceContract(contract.id) /}
+            #{b.submit 'Conferma'/}
+          #{/b.buttons}
+		#{/else}
+        #{/form}
     #{/panel}
-
+  </div>
+  #{/if}
 </div>
 

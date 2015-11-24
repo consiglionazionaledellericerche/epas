@@ -219,6 +219,10 @@ public class DateUtility {
 				- inter.getBegin().getDayOfYear() + 1;
 	}
 	
+	public static int monthsInInterval(final DateInterval inter) {
+	  return 0;
+	}
+	
 	/**
 	 * 
 	 * @param first il primo intervallo
