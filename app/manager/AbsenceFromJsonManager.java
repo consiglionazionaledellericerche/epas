@@ -1,22 +1,18 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import dao.AbsenceDao;
 import models.Absence;
 import models.Person;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
-import dao.AbsenceDao;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AbsenceFromJsonManager {
 

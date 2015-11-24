@@ -1,5 +1,7 @@
 FROM criluc/play1:1.4.0
 
+ENV LANG it_IT.UTF-8
+
 USER root
 
 WORKDIR /tmp

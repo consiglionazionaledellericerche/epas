@@ -1,16 +1,28 @@
 *{
   popover: true se si vuole abilitare il popover al momento del click.
   popText: il testo che appare al click. Se mancante utilizza il messages.
+  disabled: input disabilitato
 }*
 
 #{f.edit _arg, label:_label}
 %{
 	value = _value == null ? field.value : _value;
 }%
-<label class="radio-inline ${_class}" #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}#{else}'&{field.name+'.popover'}'#{/else}#{/if}>
-	<input type="radio" name="${field.name}" value="true"#{if value == true} checked#{/if}>${_true == null ? 'Si' : _true}
+<label class="radio-inline ${_class}" 
+    #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}
+    #{else}'&{field.name+'.popover'}'#{/else}#{/if}>
+    <input type="radio" name="${field.name}" value="true"
+    #{if value == true} checked#{/if} 
+    #{if _disabled} disabled #{/if}
+    #{if _readonly} readonly="readonly" #{/if}>
+    ${_true == null ? 'Si' : _true}
 </label>
-<label class="radio-inline ${_class}" #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}#{else}'&{field.name+'.popover'}'#{/else}#{/if}>
-	<input type="radio" name="${field.name}" value="false"#{if value == false} checked#{/if}>${_false == null ? 'No' : _false}
+<label class="radio-inline ${_class}" 
+    #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}
+    #{else}'&{field.name+'.popover'}'#{/else}#{/if}>
+	<input type="radio" name="${field.name}" value="false"#{if value == false} checked#{/if}
+	#{if _disabled} disabled #{/if}
+	#{if _readonly} readonly="readonly" #{/if}>
+	${_false == null ? 'No' : _false}
 </label>
 #{/f.edit}

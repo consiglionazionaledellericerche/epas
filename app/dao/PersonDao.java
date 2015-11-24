@@ -1,15 +1,19 @@
 package dao;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+import com.mysema.query.types.Projections;
+import com.mysema.query.types.QBean;
+import dao.filter.QFilters;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 import it.cnr.iit.epas.DateInterval;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import models.CompetenceCode;
 import models.Contract;
 import models.Office;
@@ -27,20 +31,13 @@ import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.types.Projections;
-import com.mysema.query.types.QBean;
-
-import dao.filter.QFilters;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Set;
 
 /**
  * DAO per le person.
@@ -80,6 +77,36 @@ public final class PersonDao extends DaoBase{
 				Optional.<Person>absent()); 
 		
 		return ModelQuery.simpleResults( query, person ).list();
+	}
+	
+	/**
+	 * La lista di persone una volta applicati i filtri dei parametri. 
+	 * 
+	 * @param name
+	 * @param offices
+	 * @param onlyTechnician
+	 * @param start
+	 * @param end
+	 * @param onlyOnCertificate
+	 * @return
+	 */
+	public PerseoSimpleResults<Person> listPerseo(
+			Optional<String> name, 
+			Set<Office> offices,
+			boolean onlyTechnician, 
+			LocalDate start, LocalDate end, 
+			boolean onlyOnCertificate) {
+		
+		final QPerson person = QPerson.person;
+		
+		return PerseoModelQuery.wrap(
+				//JPQLQuery
+				personQuery(name, offices, onlyTechnician, 
+						Optional.fromNullable(start), Optional.fromNullable(end), 
+						onlyOnCertificate, Optional.<CompetenceCode>absent(),
+						Optional.<Person>absent()),
+				//Expression
+				person);
 	}
 	
 	/**
@@ -427,10 +454,11 @@ public final class PersonDao extends DaoBase{
 	}
 
 	/**
-	 *
+	 * FIXME: usare la nuova struttura dati sui badge.
 	 * @param badgeNumber
 	 * @return la persona associata al badgeNumber passato come parametro
 	 */
+	@Deprecated
 	public Person getPersonByBadgeNumber(String badgeNumber, Optional<Set<Office>> offices){
 
 		final BooleanBuilder condition = new BooleanBuilder();
@@ -446,7 +474,8 @@ public final class PersonDao extends DaoBase{
 		return query.singleResult(person);
 	}
 
-	
+	//FIXME: usare la nuova struttura dati sui badge.
+	@Deprecated
 	public Person getPersonByBadgeNumber(String badgeNumber){
 		return getPersonByBadgeNumber(badgeNumber, Optional.<Set<Office>>absent());
 	}

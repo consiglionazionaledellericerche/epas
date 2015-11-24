@@ -1,13 +1,11 @@
 package manager.recaps.mealTicket;
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import models.MealTicket;
 import models.Person;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 public class BlockMealTicket {
 	

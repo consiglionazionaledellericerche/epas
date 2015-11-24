@@ -1,10 +1,11 @@
 package controllers;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import controllers.Resecure.NoCheck;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
@@ -19,11 +20,9 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
-
 import play.Logger;
 import play.Play;
 import play.mvc.Controller;
@@ -31,14 +30,9 @@ import play.mvc.Http;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-
-import controllers.Resecure.NoCheck;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 @With( {RequestInit.class, Resecure.class} )
 public class Clocks extends Controller{
@@ -71,13 +65,7 @@ public class Clocks extends Controller{
 		Set<Office> offices;
 		
 		if("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))){
-			offices = FluentIterable.from(officeDao.getAllOffices()).filter(new Predicate<Office>() {
-				@Override
-				public boolean apply(Office input) {
-//					filtro per avere solo le sedi
-					return input.office != null && input.office.office != null;
-				}
-			}).toSet();
+			offices = FluentIterable.from(officeDao.getAllOffices()).toSet();
 		}
 		else{
 			String remoteAddress = Http.Request.current().remoteAddress;

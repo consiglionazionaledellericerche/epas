@@ -1,39 +1,32 @@
-/**
- * 
- */
 package it.cnr.iit.epas;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import controllers.Security;
 import dao.BadgeReaderDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.StampingDao;
 import injection.StaticInject;
 import lombok.extern.slf4j.Slf4j;
+import manager.SecureManager;
 import models.BadgeReader;
 import models.Office;
 import models.Person;
 import models.StampType;
 import models.User;
 import models.exports.StampingFromClient;
+import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
 /**
  * @author cristian
@@ -51,7 +44,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	@Inject
 	private static PersonDao personDao;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], 
@@ -62,17 +55,20 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			@SuppressWarnings("rawtypes") Class actualClass, Type genericType) throws Exception {
 		
 		try {
-			
+
 			Optional<User> user = Security.getUser();
 			if (!user.isPresent()) {
 				log.info("StampingFromClient: {}, {}, {}, {}, {}", name, 
 						annotations, value, actualClass, genericType);
-				
+
 				log.info("StampingFromClient: l'user non presente");
 				return null;
 			}
-			Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+			Set<Office> offices = secureManager
+					.officesBadgeReaderAllowed(Security.getUser().get());
+			
 			Person person = null;
+			
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 			
 			Logger.debug("jsonObject = %s", jsonObject);
@@ -82,7 +78,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			if(jsonObject.has("lettore")) {
 				String badgeReaderCode = jsonObject.get("lettore").getAsString();
 				if (! Strings.isNullOrEmpty(badgeReaderCode) ) {
-					BadgeReader badgeReader = badgeReaderDao.getBadgeReaderByCode(badgeReaderCode);
+					BadgeReader badgeReader = badgeReaderDao.byCode(badgeReaderCode);
 					if (badgeReader == null) {
 						//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
 					}

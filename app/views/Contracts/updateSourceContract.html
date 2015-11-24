@@ -1,0 +1,111 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
+  'Modifica Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'updateSourceContract' /}
+
+<div class="container">
+
+#{if contract.sourceDateResidual != null && contract.sourceByAdmin == false}
+  <div class="alert alert-danger">
+	I valori iniziali sottostanti sono stati creati automaticamente da ePAS, impostando a zero ogni campo. 
+	Inserire i valori effettivi e cliccare su <em>Salva</em>, oppure cliccare su <strong>Approva</strong> per 
+	validare l'inizializzazione automatica e non visualizzare più questo messaggio. 
+	#{form @Persons.approveAutomatedSource()}
+	<input type="hidden" name="contractId" value="${contract.id}" />
+	<div class="center">
+  	  <input class="btn btn-default" type="submit" value="Approva"/>
+    </div>
+    #{/form}
+  </div>  
+#{/if}
+
+
+#{if wContract.initializationMissing()}
+  <div class="alert alert-danger">
+   <p>
+   <i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione.
+   </p>
+   <p>
+   Il contratto è iniziato in data ${contract.beginContract.format()}.<br>
+   L'installazione di ${contract.person.office.name} è avvenuta in data ${wOffice.initDate().format()}.<br>
+   La persona è stata inserita nel database in data ${wPerson.value.createdAt.format()}.
+   </p>
+    <p>Per definire l'inizializzazione scegliere una data uguale o successiva al <strong>${wContract.dateForInitialization().format()}</strong>.</p>
+  </div>
+#{/if}
+#{else}
+  <div class="alert alert-success">
+   <i class="fa fa-2x fa-check bg-success"></i> Il contratto non necessita di inizializzazione. 
+   <p>Se si desidera definire una nuova inizializzazione scegliere una data uguale o successiva al <strong>${wContract.dateForInitialization().format()}</strong>.</p>
+  </div>
+#{/else}
+     
+<div id="sourceRes">
+    #{panel title:'Dati generali', color:'default'}
+
+     <div class="alert alert-info">
+	  <p>
+  		  Inserire la situazione della persona alla fine della giornata specificata nel campo <strong>Data Inizializzazione</strong>.<br>
+  	 	  Una volta definiti i dati il software provvederà a ricalcolare i ripiloghi annuali della persona utilizzando i dati di inizializzazione e i dati presenti nel database 
+  		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
+  	  </p>
+	 </div>
+
+      #{form @Contracts.saveResidualSourceContract(), class:'form-horizontal', 'data-anchor':'#sourceRes'}
+	    <input type="hidden" name="contract.id" value="${contract.id}" />
+	    
+	    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
+	    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
+	    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
+	    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
+	    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
+	    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
+	    #{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+
+		#{if recap}
+		  <div class="alert alert-danger">
+		    Da confermare e riepilogare.	    
+		  </div>
+		#{/if}
+	    <div class="text-center">
+	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
+	    </div>
+      #{/form}
+    #{/panel}
+</div>    
+    
+    #{panel title:'Buoni Pasto', color:'default'}
+       <div class="alert alert-info">
+		  <p>
+          	Tramite questa form è possibile inizializzare esclusivamente il <strong>residuo buoni pasto</strong> in un momento arbitrario del contratto selezionato.  
+  		  </p> 
+       </div>
+    
+       #{form @Contracts.saveResidualSourceContract()}
+	    <input type="hidden" name="contract.id" value="${contract.id}" />
+	    <input type="hidden" name="onlyMealTicket" value="true" />
+	
+	    <table class="table table-condensed table-hover table-form">
+		<tr>
+		  <td class="lab"><strong>Data Inizializzazione buoni pasto (aaaa-mm-gg)</strong> </td>
+		  <td><input name="contract.sourceDateMealTicket" type="text" datepicker value="${contract.sourceDateMealTicket.format()}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Buoni pasto residui</td>
+		  <td><input name="contract.sourceRemainingMealTicket" type="text" value="${contract.sourceRemainingMealTicket}" /></td>
+		</tr>
+	    </table>
+	    <div class="center">
+	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
+	    </div>
+      #{/form}
+    #{/panel}
+
+</div>
+

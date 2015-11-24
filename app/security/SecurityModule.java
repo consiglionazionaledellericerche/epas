@@ -1,20 +1,16 @@
 package security;
 
-import models.User;
-
-import org.drools.KnowledgeBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.mvc.Http;
-
 import com.google.common.base.Optional;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-
 import controllers.Security;
+import models.User;
+import org.drools.KnowledgeBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.mvc.Http;
 
 /**
  * Unione di injection con il play.

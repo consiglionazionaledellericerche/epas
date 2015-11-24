@@ -1,0 +1,30 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   personId = session.get("personSelected"); }%
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("edit")} class="active" #{/if}>
+      <a href="@{Persons.edit(person.id)}">Dati Anagrafici</a>
+    </li>
+    <li #{if _activeAction.equals("personContracts")} class="active" #{/if}>
+      <a href="@{Contracts.personContracts(person.id)}">Dati Contrattuali</a>
+    </li>
+    #{if person.isPersonInCharge}
+    <li #{if _activeAction.equals("workGroup")} class="active" #{/if}>
+      <a href="@{Persons.workGroup(person.id)}">Gruppo Di Lavoro</a>
+    </li>
+    #{/if}
+    <li #{if _activeAction.equals("childrenList")} class="active" #{/if}>
+      <a href="@{Persons.childrenList(person.id)}">Figli</a>
+    </li>
+    <li #{if _activeAction.equals("deletePerson")} class="active" #{/if}>
+      <a href="@{Persons.deletePerson(person.id)}">Elimina</a>
+    </li>
+  </ul>
+</div>
+<br>

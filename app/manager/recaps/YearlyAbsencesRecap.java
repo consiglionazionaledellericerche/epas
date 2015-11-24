@@ -1,18 +1,16 @@
 package manager.recaps;
 
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 

@@ -1,20 +1,18 @@
 package dao.wrapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import dao.ContractDao;
 import manager.ContractManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import java.util.ArrayList;
+import java.util.List;
 
-import dao.ContractDao;
 
 /**
  * @author alessandro

@@ -1,0 +1,29 @@
+#{modalAsync id:'modalJoinOffice', button:'Salva', title:'Associa Lettore Badge'}
+
+  <div class="alert alert-success" role="alert">
+    Associa un nuovo lettore badge alla sede <strong>${uro.office.name}</strong>  
+  </div>
+
+  <div id="joinOfficeData">
+
+	#{form action:@saveJoinOffice(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal',
+	    'data-async-error':'#joinOfficeData'}
+      
+        #{f.hidden 'uro.office.id' /}
+        #{f.view 'uro.office' /}
+        
+	    #{f.hidden 'uro.role.id' /}
+	    
+	    #{f.selectModel 'uro.user', getLabel:true, label:'Lettore', 
+	      items:templateUtility.badgeReaderUserForOffice(uro.office), required:true /}
+	  	
+    	#{b.buttons}
+          #{b.cancel @index() /}
+          #{b.save /}
+        #{/b.buttons}
+	#{/form}
+	
+  </div>
+  
+#{/modalAsync}

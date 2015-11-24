@@ -1,12 +1,10 @@
 package dao.history;
 
+import com.google.common.base.Function;
 import models.base.BaseModel;
 import models.base.Revision;
-
 import org.hibernate.envers.RevisionType;
 import org.joda.time.LocalDateTime;
-
-import com.google.common.base.Function;
 
 /**
  * @author marco
@@ -57,6 +55,10 @@ public class HistoryValue<T extends BaseModel> {
 	
 	public boolean typeIsDel() {
 		return type.name().equals("DEL");
+	}
+	
+	public boolean typeIsAdd() {
+		return type.name().equals("ADD");
 	}
 
 }

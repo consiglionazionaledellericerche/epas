@@ -1,13 +1,13 @@
 package dao;
 
+import com.google.common.base.Optional;
+import com.google.inject.Provider;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
+import com.mysema.query.types.expr.BooleanExpression;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -17,10 +17,10 @@ import models.query.QWorkingTimeType;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import java.util.List;
 
 /**
  * 
@@ -77,7 +77,7 @@ public class WorkingTimeTypeDao extends DaoBase{
 
 
 	/**
-	 * 
+	 * Tutti gli orari.
 	 * @return 
 	 */
 	public List<WorkingTimeType> getAllWorkingTimeType(){
@@ -86,6 +86,19 @@ public class WorkingTimeTypeDao extends DaoBase{
 		return query.list(wtt);
 	}
 
+	/**
+	 * Tutti gli orari di lavoro default e quelli speciali dell'office.
+	 * @return
+	 */
+	public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
+		
+		final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+		final JPQLQuery query = getQueryFactory()
+				.from(wtt)
+				.where(wtt.office.isNull()
+				.or(BooleanExpression.allOf(wtt.office.eq(office).and(wtt.disabled.eq(false)))));
+		return query.list(wtt);
+	}
 
 	/**
 	 * 

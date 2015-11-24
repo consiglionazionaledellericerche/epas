@@ -1,29 +1,24 @@
 package dao;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-
-import models.Office;
-import models.User;
-import models.UsersRolesOffices;
-import models.query.QOffice;
-
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
+import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import models.Institute;
+import models.Office;
+import models.Role;
+import models.User;
+import models.query.QInstitute;
+import models.query.QOffice;
+import models.query.QUsersRolesOffices;
 
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 
@@ -32,15 +27,14 @@ import dao.wrapper.IWrapperOffice;
  */
 public class OfficeDao extends DaoBase {
 
-	private final IWrapperFactory wrapperFactory;
-
+	public static final Splitter TOKEN_SPLITTER = Splitter.on(' ')
+			.trimResults().omitEmptyStrings();
+	
 	@Inject
-	OfficeDao(IWrapperFactory wrapperFactory,
-			JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
+	OfficeDao(JPQLQueryFactory queryFactory,Provider<EntityManager> emp) {
 		super(queryFactory, emp);
-		this.wrapperFactory = wrapperFactory;
 	}
-
+	
 	/**
 	 * 
 	 * @param id
@@ -48,7 +42,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Office getOfficeById(Long id){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.id.eq(id));
@@ -61,7 +55,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getAllOffices(){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office);
 
@@ -69,179 +63,170 @@ public class OfficeDao extends DaoBase {
 
 	}
 
+//	/**
+//	 *
+//	 * @param name
+//	 * @return
+//	 */
+//	public Optional<Office> getOfficeByName(String name){
+//
+//		final QOffice office = QOffice.office;
+//
+//		final JPQLQuery query = getQueryFactory().from(office)
+//				.where(office.name.eq(name));
+//
+//		return Optional.fromNullable(query.singleResult(office));
+//	}
+//
 	/**
-	 * 
-	 * @param contraction
-	 * @return  
-	 */
-	public Optional<Office> getOfficeByContraction(String contraction){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.contraction.eq(contraction));
-
-		return Optional.fromNullable(query.singleResult(office));
-	}
-
-	/**
-	 * 
-	 * @param name
-	 * @return  
-	 */
-	public Optional<Office> getOfficeByName(String name){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.name.eq(name));
-
-		return Optional.fromNullable(query.singleResult(office));
-	}
-
-	/**
-	 * 
+	 *
 	 * @param code
 	 * @return l'ufficio associato al codice passato come parametro
 	 */
-	public Optional<Office> getOfficeByCode(Integer code){
+	public Optional<Office> byCode(String code){
 
-		final QOffice office = QOffice.office1;
+		final QOffice office = QOffice.office;
 
 		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
 		return Optional.fromNullable(query.singleResult(office));
 
 	}
+    /**
+     *
+     * @param code
+     * @return l'ufficio associato al codice passato come parametro
+     */
+    public Optional<Office> byCodeId(String codeId){
 
-	/**
-	 * 
-	 * @param code
-	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
-	 */
-	public List<Office> getOfficesByCode(Integer code){
+        final QOffice office = QOffice.office;
 
-		final QOffice office = QOffice.office1;
+        final JPQLQuery query = getQueryFactory().from(office)
+                .where(office.codeId.eq(codeId));
+        return Optional.fromNullable(query.singleResult(office));
 
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.code.eq(code));
-		return query.list(office);
-	}
-
-	/**
-	 *  La lista di tutte le Aree definite nel db ePAS (Area -> campo office = null)
-	 * @return la lista delle aree presenti in anagrafica
-	 */
-	public List<Office> getAreas(){
-
-		final QOffice office = QOffice.office1;
-
-		final JPQLQuery query = getQueryFactory().from(office)
-				.where(office.office.isNull());
-		return query.list(office);
-	}
-
-	/**
-	 * Ritorna la lista di tutte le sedi gerarchicamente sotto a Office
-	 * @return
-	 */
-	public List<Office> getSubOfficeTree(Office o) {
-
-		List<Office> officeToCompute = new ArrayList<Office>();
-		List<Office> officeComputed = new ArrayList<Office>();
-
-		officeToCompute.add(o);
-		while(officeToCompute.size() != 0) {
-
-			Office office = officeToCompute.get(0);
-			officeToCompute.remove(office);
-
-			for(Office remoteOffice : office.subOffices) {
-
-				officeToCompute.add((Office)remoteOffice);
-			}
-
-			officeComputed.add(office);
+    }
+//
+//	public boolean checkForDuplicate(Office o){
+//
+//		final QOffice office = QOffice.office;
+//
+//		final BooleanBuilder condition = new BooleanBuilder();
+//		condition.or(office.name.equalsIgnoreCase(o.name));
+//
+//		if(o.code!=null){
+//			condition.or(office.code.eq(o.code));
+//		}
+//
+//		if(o.id!=null){
+//			condition.and(office.id.ne(o.id));
+//		}
+//
+//		return getQueryFactory().from(office)
+//				.where(condition).exists();
+//	}
+	
+	private BooleanBuilder matchInstituteName(QInstitute institute, String name) {
+		final BooleanBuilder nameCondition = new BooleanBuilder();
+		for (String token : TOKEN_SPLITTER.split(name)) {
+			nameCondition.and(institute.name.containsIgnoreCase(token)
+					.or(institute.code.containsIgnoreCase(token)));
 		}
-		return officeComputed;
+		return nameCondition.or(institute.name.startsWithIgnoreCase(name))
+				.or(institute.code.startsWithIgnoreCase(name));
 	}
-
-	/**
-	 * Ritorna l'area padre se office è un istituto o una sede
-	 * @return
-	 */
-	public Office getSuperArea(Office office) {
-
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(wOffice.isSeat())
-			return office.office.office;
-
-		if(wOffice.isInstitute())
-			return office.office;
-
-		return null;
+	
+	private BooleanBuilder matchOfficeName(QOffice office, String name) {
+		final BooleanBuilder nameCondition = new BooleanBuilder();
+		for (String token : TOKEN_SPLITTER.split(name)) {
+			nameCondition.and(office.name.containsIgnoreCase(token));
+		}
+		return nameCondition.or(office.name.containsIgnoreCase(name));
+				
 	}
-
+	
 	/**
-	 * Ritorna l'istituto padre se this è una sede
-	 * @return 
-	 */
-	public Office getSuperInstitute(Office office) {
-
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(!wOffice.isSeat())
-			return null;
-		return office.office;
-	}
-
-	/**
-	 * 
+	 * Gli istituti che contengono sede sulle quali l'user ha il ruolo role.
 	 * @param user
-	 * @return la lista degli uffici permessi per l'utente user passato come parametro
+	 * @param role
+	 * @return
 	 */
-
-	public Set<Office> getOfficeAllowed(User user) {
-
-		Preconditions.checkNotNull(user);
-		Preconditions.checkState(user.isPersistent());
-
-		return	FluentIterable.from(user.usersRolesOffices).transform(
-				new Function<UsersRolesOffices,Office>() {
-					@Override
-					public Office apply(UsersRolesOffices uro) {
-						return uro.office;
-					}}).filter(
-							new Predicate<Office>() {
-								@Override
-								public boolean apply(Office o) {
-									return wrapperFactory.create(o).isSeat();
-								}}).toSet();
-
-	}
-
-	public boolean checkForDuplicate(Office o){
-
-		final QOffice office = QOffice.office1;
-
+	public PerseoSimpleResults<Institute> institutes(Optional<String> name, User user, Role role) {
+		
+		final QInstitute institute = QInstitute.institute;
+		final QOffice office = QOffice.office;
+		final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+		
 		final BooleanBuilder condition = new BooleanBuilder();
-		condition.or(office.name.equalsIgnoreCase(o.name));
-
-		if(o.contraction!=null){
-			condition.or(office.contraction.equalsIgnoreCase(o.contraction));
+		if (name.isPresent()) {
+			condition.and(matchInstituteName(institute, name.get()));
 		}
-
-		if(o.code!=null){
-			condition.or(office.code.eq(o.code));
+		
+		if(user.isSystemUser()) {
+			final JPQLQuery query = getQueryFactory()
+					.from(institute)
+					.where(condition);
+			return PerseoModelQuery.wrap(query, institute);
 		}
-
-		if(o.id!=null){
-			condition.and(office.id.ne(o.id));
+		
+		final JPQLQuery query = getQueryFactory()
+				.from(institute)
+				.rightJoin(institute.seats, office)
+				.rightJoin(office.usersRolesOffices, uro)
+				.where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+				.distinct();
+				
+		return PerseoModelQuery.wrap(query, institute);
+		
+	}
+	
+	/**
+	 * Le sedi sulle quali l'user ha il ruolo role.
+	 * @param user
+	 * @param role
+	 * @return
+	 */
+	public PerseoSimpleResults<Office> offices(Optional<String> name,
+			User user, Role role) {
+		
+		final QOffice office = QOffice.office;
+		final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+		final QInstitute institute = QInstitute.institute;
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		if (name.isPresent()) {
+			condition.and(matchOfficeName(office, name.get()));
+			condition.and(matchInstituteName(institute, name.get()));
 		}
-
-		return getQueryFactory().from(office)
-				.where(condition).exists();
+		
+		if(user.isSystemUser()) {
+			final JPQLQuery query = getQueryFactory()
+					.from(office)
+					.leftJoin(office.institute, institute).fetch()	
+					.where(condition)
+					.distinct()
+					.orderBy(office.institute.name.asc());
+			return PerseoModelQuery.wrap(query, office);
+		}
+		
+		final JPQLQuery query = getQueryFactory()
+				.from(office)
+				.leftJoin(office.usersRolesOffices, uro)
+				.leftJoin(office.institute, institute).fetch()
+				.where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+				.distinct()
+				.orderBy(office.institute.name.asc());
+				
+		return PerseoModelQuery.wrap(query, office);
+		
 	}
 
+	public Optional<Institute> byCds(String cds) {
+
+		final QInstitute institute = QInstitute.institute;
+
+        final JPQLQuery query = queryFactory.from(institute).where(institute.cds.eq(cds));
+
+		return Optional.fromNullable(query.singleResult(institute));
+	}
 }

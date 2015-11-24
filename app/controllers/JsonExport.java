@@ -3,27 +3,22 @@
  */
 package controllers;
 
-import java.util.HashSet;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import models.Office;
-import models.Person;
-
-import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.mvc.Controller;
-import play.mvc.With;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-
 import dao.OfficeDao;
 import dao.PersonDao;
+import models.Office;
+import models.Person;
+import org.joda.time.LocalDate;
+import play.Logger;
+import play.mvc.Controller;
+import play.mvc.With;
+
+import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author cristian

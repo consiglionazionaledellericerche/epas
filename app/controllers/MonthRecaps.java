@@ -1,50 +1,47 @@
 package controllers;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import lombok.Data;
-import manager.PersonManager;
-import manager.VacationManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
-import models.Contract;
-import models.ContractMonthRecap;
-import models.Office;
-import models.Person;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import lombok.Data;
+import manager.PersonManager;
+import manager.SecureManager;
+import manager.recaps.vacation.VacationsRecap;
+import manager.recaps.vacation.VacationsRecapFactory;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Office;
+import models.Person;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
+	@Inject
+	private static OfficeDao officeDao;
 	@Inject
 	private static VacationsRecapFactory vacationsFactory;
 	@Inject
@@ -59,30 +56,22 @@ public class MonthRecaps extends Controller{
 	 */
 	public static void showRecaps(int year, int month, Long officeId) {
 		
-		// FIXME risolto col nuovo branch.
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
-		if(officeId == null) {
-			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione "
-						+ "delle sedi. Operazione annullata.");
-				Application.indexAdmin();
-			}
-			officeId = offices.iterator().next().id;
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
 		}
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
-
-
-		//FIXME per adesso senza paginazione
-
-		//Prendo la lista delle persone attive in questo momento. 
-		//Secondo me si deve mettere le persone non attive in un elenco da poter
-		//Analizzare singolarmente.
-
-		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()),
-				false, LocalDate.now(), LocalDate.now(), false).list();
+		
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		LocalDate monthEnd = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+		
+		List<Person> simplePersonList = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, monthBegin, monthEnd, false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
@@ -106,7 +95,8 @@ public class MonthRecaps extends Controller{
 			}
 		}
 
-		render(recaps, offices, office, year, month);
+
+		render(recaps, year, month);
 	}
 	
 	/**
@@ -120,20 +110,14 @@ public class MonthRecaps extends Controller{
 	public static void customRecap(final int year, final int month, 
 			Long officeId) {
 		
-		// FIXME risolto col nuovo branch.
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
-		if(officeId == null) {
-			if(offices.size() == 0) {
-				flash.error("L'user non dispone di alcun diritto di visione "
-						+ "delle sedi. Operazione annullata.");
-				Application.indexAdmin();
-			}
-			officeId = offices.iterator().next().id;
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
 		}
 		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
-
 		
 		LocalDate monthBegin = new LocalDate().withYear(year)
 				.withMonthOfYear(month).withDayOfMonth(1);

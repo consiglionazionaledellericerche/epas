@@ -1,4 +1,9 @@
 #{f.edit _arg, label:_label,feedback:'true'}
-<input class="form-control ${_class}" id="${field.id}" name="${field.name}" type="${_type == null ? 'text' : _type}"
-value="${_value == null ? field.value : _value}"#{if _placeholder} placeholder="${_placeholder}"#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}#{if _disabled} disabled#{/if} >
+<input class="form-control ${_class}" id="${field.id}" name="${field.name}"
+       type="${_type == null ? 'text' : _type}"
+       value="${_value == null ? field.value : _value}"
+       #{if _placeholder} placeholder="${_placeholder}"#{/if}
+#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}
+#{if _disabled} disabled #{/if}
+#{if _readonly} readonly="readonly" #{/if}>
 #{/f.edit}

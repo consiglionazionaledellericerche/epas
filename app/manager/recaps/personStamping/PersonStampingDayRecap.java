@@ -1,10 +1,9 @@
 package manager.recaps.personStamping;
 
+import com.google.common.base.Optional;
+import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -19,13 +18,10 @@ import models.Stamping;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste 

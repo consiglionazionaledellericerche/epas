@@ -1,10 +1,18 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import dao.ContractDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import manager.CompetenceManager;
 import manager.PersonManager;
 import models.CertificatedData;
@@ -17,22 +25,10 @@ import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import dao.ContractDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.PersonMonthRecapDao;
+import java.util.List;
 
 /**
  * @author marco

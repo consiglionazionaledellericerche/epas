@@ -1,0 +1,63 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+#{set breadcrumbs:['Assenze Mensili':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  
+  #{absences.absencesTabs activeAction:'showGeneralMonthlyAbsences' /}
+  
+  #{title title:'Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+</div>
+
+
+
+<div class="container-fluid">
+  
+
+  		  <table class="table table-striped table-bordered table-condensed" datatable width="100%">
+  		    <thead>
+				<tr>
+					<th>Nome</th>
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+					#{if !col.code.equals("Totale") }
+						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
+					#{/if}
+					#{/list}
+					<th>Totale<br>giorni</th>
+				</tr>
+			</thead>
+            <tfoot>
+            	<tr>
+					<th>Nome</th>
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+					#{if !col.code.equals("Totale") }
+						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
+					#{/if}
+					#{/list}				    
+					<th>Totale<br>giorni</th>
+				</tr>
+            </tfoot>
+ 
+            <tbody>
+            	#{list tableMonthlyAbsences.rowMap().entrySet(),as:'entry'}
+				<tr>
+					<td class="warning">${entry.getKey().name} ${entry.getKey().surname}</td>
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+						<td data-order="${entry.getValue().get(col)}">
+						 	<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-modal=".my-modal">
+						 	${entry.getValue().get(col)}							
+							</a>
+						</td>
+					#{/list}
+				</tr>	
+				#{/list}	
+			</tbody>	
+	      </table>
+</div>   
+
+#{include '_myModal.html' /}
+
+

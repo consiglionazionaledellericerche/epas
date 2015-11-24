@@ -1,0 +1,91 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + wrappedContract.value.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (wrappedContract.value.person.fullname):@Contracts.personContracts(wrappedContract.value.person.id), 
+  'Modifica Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'edit' /}
+
+<div class="container">
+
+  <div class="alert alert-info">
+  	<p>Utilizzare questa form per modificare le date del contratto.</p>
+  	#{if wrappedContract.value.sourceDateResidual}
+    <p>Per questo contratto è stata definita la data di inizializzazione 
+       <strong>${wrappedContract.value.sourceDateResidual.format()}</strong>,
+       sarà pertanto impossibile spostare la data di inizio del contratto successivamente a quella data.</p>
+     #{/if}
+    <p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
+     il tipo orario attribuito alla parte conclusiva del contratto.</p>
+  </div>
+  
+  <div class="alert alert-danger">
+    <p><strong>Attenzione!!!</strong></p>
+    <p>La modifica delle date del contratto se attuata nel passato potrebbe causare il ricalcolo della situazione del dipendente
+    relativamente al contratto selezionato. Anticipare o posticipare la data di inizo del contratto, per esempio, 
+    comporterebbe un cambiamento dei progressivi mensili del mese interessato ma di conseguenza anche dei riepiloghi mensili fino ad oggi.
+    <p>
+    <p>Nel caso di ricalcoli necessari ePAS effettuerà un riepilogo delle modifiche necessarie e chiederà un comando di conferma.</p> 
+  </div>
+
+
+  <div id="modifyContract">
+	#{form @Contracts.update(), class:'form-horizontal' } 
+	  
+	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
+
+		#{if recomputeFrom }
+			#{f.simpleView label:'beginContract', value:beginContract?.format(), name:'beginContract', hidden:true /}
+			#{f.simpleView label:'expireContract', value:expireContract?.format(), name:'expireContract', hidden:true /}
+			#{f.simpleView label:'endContract', value:endContract?.format(), name:'endContract', hidden:true /}
+			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
+			<input type="hidden" name="confirmed" value="true" />
+			
+ 	        <div class="alert alert-danger">
+ 	          #{if changeBegin}
+ 	            <em>Modifica data iniziale:</em> ePAS effettuerà il ricalcolo di 
+ 	                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}.
+ 	          #{/if}
+	          #{else}
+		          #{if onlyRecap}
+		           <em>Scorciamento del contratto:</em> ePAS effettuerà l'aggiornamento del 
+		               riepilogo mensile al ${recomputeFrom.format()}.
+		          #{/if}
+		          #{else}
+		            <em>Prolungamento del contratto:</em> ePAS effettuerà il ricalcolo di
+		                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}.
+		          #{/else}
+	          #{/else}
+	        </div>
+			<div class="text-center">
+	  			<input class="btn btn-primary" type="submit" value="Conferma"/>
+				<a class="btn" data-dismiss="modal">Annulla</a>
+			</div>
+		#{/if}
+		
+		#{else}
+			#{f.date 'beginContract', value:beginContract?.format() /}
+	    	#{f.date 'expireContract', value:expireContract?.format() /}
+	    	#{f.date 'endContract', value:endContract?.format() /}
+	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
+	    	
+	    	#{ifError 'contract.crossValidationFailed'} 
+	    	<div class="alert alert-danger">
+	    	  #{error 'contract.crossValidationFailed' /}
+	    	</div>
+	    	#{/ifError}
+	    	
+	    	<div class="text-center">
+	  			<input class="btn btn-primary" type="submit" value="Modifica"/>
+	  			<a class="btn" data-dismiss="modal">Indietro</a>
+			</div>
+	    	
+		#{/else}
+	#{/form}
+
+  </div>
+
+</div>

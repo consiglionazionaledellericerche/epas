@@ -1,0 +1,24 @@
+*{
+   label:
+   value:
+   biglabel (optional) più spazio per i label
+   
+   
+   hidden: (optional) un campo hidden col valore value
+   name: (optional) il nome del campo hidden
+}*
+<div class="form-group #{if _value == null}text-muted #{/if}">
+    <label class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-3#{/else}">${_label.label()}</label>
+
+    <div class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-6#{/else}">
+        <p class="form-control-static">
+        #{if _value == null} <span class="text-muted"></span> #{/if}
+        #{else}
+            ${_value}
+        #{/else}
+        </p>
+    </div>
+</div>
+#{if _hidden}
+  #{if _value}<input type="hidden" name="${_name}" value="${_value}" />#{/if}
+#{/if}

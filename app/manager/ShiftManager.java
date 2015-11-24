@@ -1,19 +1,20 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
+import dao.PersonShiftDayDao;
+import dao.ShiftDao;
 import helpers.BadRequest;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -38,26 +39,19 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
-
 import play.Logger;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
-import dao.PersonDayDao;
-import dao.PersonMonthRecapDao;
-import dao.PersonShiftDayDao;
-import dao.ShiftDao;
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 
 /**

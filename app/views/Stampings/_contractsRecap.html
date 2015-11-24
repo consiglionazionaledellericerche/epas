@@ -1,19 +1,12 @@
 
   
-#{list items:psDto.contractMonths, as:'mese'} 
-  <div class="panel-group" id="accordion_contract_recap${mese.contract.value.id}">
-    
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion_contract_recap${mese.contract.value.id}" href="#contract_recap${mese.contract.value.id}">
-            Riepilogo ore  ${mese.value.contractDescription}</strong>
-          </a>
-        </h4>
-      </div>
-      <div id="contract_recap${mese.contract.value.id}" class="panel-collapse collapse in">
-        <div class="panel-body">
-   		  
+#{list items:psDto.contractMonths, as:'mese'}
+
+ #{accordionGroup 'monthRecaps'}
+ 
+  #{accordionItem ('accordion_contract_recap'+mese.contract.value.id), parent:'monthRecaps', 
+                  title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'primary'} 
+     		  
    		  <!-- solo last in month -->
  		  #{if mese.contract.isLastInMonth((int)psDto.month, (int)psDto.year)}
  		    <p>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong></p> 
@@ -142,11 +135,13 @@
 		
 		</table>
 			
-        </div>
-      </div>
-    </div>
-  </div>
+  #{/accordionItem}
+  #{/accordionGroup}
+ 
+  
 
   #{/list}
+  
+   
 
 

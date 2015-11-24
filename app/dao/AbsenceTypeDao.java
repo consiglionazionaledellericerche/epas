@@ -1,21 +1,5 @@
 package dao;
 
-import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
-
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-
-import models.AbsenceType;
-import models.Person;
-import models.query.QAbsence;
-import models.query.QAbsenceType;
-
-import org.bouncycastle.util.Strings;
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -24,6 +8,18 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
+import helpers.ModelQuery;
+import helpers.ModelQuery.SimpleResults;
+import models.AbsenceType;
+import models.Person;
+import models.query.QAbsence;
+import models.query.QAbsenceType;
+import org.bouncycastle.util.Strings;
+import org.joda.time.LocalDate;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -84,8 +80,7 @@ public class AbsenceTypeDao extends DaoBase{
 		final JPQLQuery query = getQueryFactory().from(absence)
 				.join(absence.absenceType, absenceType)
 				.groupBy(absenceType)
-				.orderBy(absence.count().desc())
-				.limit(20);
+				.orderBy(absence.count().desc());
 
 		return query.list(absenceType);
 	} 
@@ -133,7 +128,8 @@ public class AbsenceTypeDao extends DaoBase{
 	/**
 	 * 
 	 * @param date
-	 * @return la lista di codici di assenza che sono validi da una certa data in poi, ordinati per codice di assenza crescente
+	 * @return la lista di codici di assenza che sono validi da una certa data in poi
+	 *  ordinati per codice di assenza crescente
 	 */
 	public List<AbsenceType> getAbsenceTypeFromEffectiveDate(
 			LocalDate date) {

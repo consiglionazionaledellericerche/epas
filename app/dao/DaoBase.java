@@ -1,10 +1,10 @@
 package dao;
 
-import javax.persistence.EntityManager;
-
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
+
+import javax.persistence.EntityManager;
 
 /**
  * @author marco

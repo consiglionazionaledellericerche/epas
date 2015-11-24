@@ -3,19 +3,10 @@
  */
 package helpers.attestati;
 
+import com.google.common.collect.Lists;
+import controllers.Security;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateUtility;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import manager.ConfGeneralManager;
 import models.Absence;
 import models.Competence;
@@ -23,7 +14,6 @@ import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
@@ -32,13 +22,17 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import play.Logger;
 
-import com.google.common.collect.Lists;
-
-import controllers.Security;
-import dao.PersonDao;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST
@@ -112,7 +106,7 @@ public class AttestatiClient {
 		public Map<String, String> getCookies() { return cookies; }
 		public Integer getYear() {return this.year;}
 		public Integer getMonth() {return this.month;}
-		public String getNamedMonth() {return DateUtility.getName(this.month);}
+		public String getNamedMonth() {return DateUtility.fromIntToStringMonth(this.month);}
 	}
 
 
@@ -193,7 +187,7 @@ public class AttestatiClient {
 
 		try {
 			listaDipendentiResponse = connection
-					.data("sede_id", office.code.toString())
+					.data("sede_id", office.codeId)
 					.data("anno", year.toString())
 					.data("mese", month.toString())
 					.userAgent(CLIENT_USER_AGENT)
@@ -279,7 +273,7 @@ public class AttestatiClient {
 		.data("matr", dipendente.getMatricola())
 		.data("anno", year.toString())
 		.data("mese", month.toString())
-		.data("sede_id", office.code.toString())
+		.data("sede_id", office.codeId)
 		.method(Method.POST);
 
 		int codAssAssoCounter = 0;

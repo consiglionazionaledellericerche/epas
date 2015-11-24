@@ -1,20 +1,18 @@
 package models.dto;
 
-import java.util.List;
-
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
+import java.util.List;
+
 
 public class HorizontalWorkingTime {
 

@@ -1,38 +1,5 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import manager.CompetenceManager;
-import manager.ConsistencyManager;
-import manager.recaps.PersonCompetenceRecap;
-import manager.recaps.competence.PersonMonthCompetenceRecap;
-import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
-import models.Competence;
-import models.CompetenceCode;
-import models.Contract;
-import models.Office;
-import models.Person;
-import models.Role;
-import models.TotalOvertime;
-import models.User;
-
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.i18n.Messages;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -40,7 +7,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
@@ -52,6 +18,35 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.ModelQuery.SimpleResults;
+import manager.CompetenceManager;
+import manager.ConsistencyManager;
+import manager.SecureManager;
+import manager.recaps.PersonCompetenceRecap;
+import manager.recaps.competence.PersonMonthCompetenceRecap;
+import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
+import models.Competence;
+import models.CompetenceCode;
+import models.Contract;
+import models.Office;
+import models.Person;
+import models.Role;
+import models.TotalOvertime;
+import models.User;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.i18n.Messages;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
+
+import javax.inject.Inject;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
@@ -64,6 +59,8 @@ public class Competences extends Controller{
 	private static PersonMonthCompetenceRecapFactory personMonthCompetenceRecapFactory;
 	@Inject
 	private static OfficeDao officeDao;
+	@Inject
+	private static SecureManager secureManager;
 	@Inject
 	private static CompetenceManager competenceManager;
 	@Inject
@@ -120,7 +117,7 @@ public class Competences extends Controller{
 	public static void showCompetences(Integer year, Integer month, Long officeId, 
 			String name, String codice, Integer page){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			
@@ -293,7 +290,7 @@ public class Competences extends Controller{
 
 	public static void totalOvertimeHours(int year, Long officeId){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());		
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());		
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
@@ -336,7 +333,7 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(Long officeId, String name){
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -426,7 +423,7 @@ public class Competences extends Controller{
 	public static void approvedCompetenceInYear(int year, boolean onlyDefined, Long officeId) {
 
 		
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 		Preconditions.checkState(!offices.isEmpty());
 		
 		Office office;
