@@ -1,5 +1,9 @@
 package models;
 
+import models.base.BaseModel;
+import models.enumerate.Troubles;
+import org.hibernate.envers.Audited;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -7,11 +11,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
-import models.enumerate.Troubles;
-
-import org.hibernate.envers.Audited;
 
 @Audited
 @Entity

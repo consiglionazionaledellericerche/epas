@@ -1,10 +1,9 @@
 package dao.wrapper;
 
-import it.cnr.iit.epas.DateInterval;
-import models.ContractWorkingTimeType;
-
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import it.cnr.iit.epas.DateInterval;
+import models.ContractWorkingTimeType;
 
 public class WrapperContractWorkingTimeType implements IWrapperContractWorkingTimeType{
 	

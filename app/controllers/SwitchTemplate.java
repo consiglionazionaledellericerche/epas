@@ -1,7 +1,6 @@
 package controllers;
 
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -16,6 +15,7 @@ public class SwitchTemplate extends Controller{
 		Integer month = Integer.parseInt(session.get("monthSelected"));
 		Integer day = Integer.parseInt(session.get("daySelected"));
 		Long personId = Long.parseLong(session.get("personSelected"));
+		Long officeId = Long.parseLong(session.get("officeSelected"));
 
 		session.put("actionSelected", action);
 
@@ -27,6 +27,10 @@ public class SwitchTemplate extends Controller{
 		if(action.equals("Stampings.personStamping")) {
 
 			Stampings.personStamping(personId, year, month);
+		}
+		
+		if(action.equals("Contracts.personContracts")) {
+			Contracts.personContracts(personId);
 		}
 
 		if(action.equals("PersonMonths.trainingHours")) {
@@ -44,6 +48,12 @@ public class SwitchTemplate extends Controller{
 			Vacations.show(year);
 		}
 
+		if(action.equals("VacationsAdmin.list")) {
+
+			VacationsAdmin.list(year, officeId);
+		}
+
+
 		if(action.equals("Persons.changePassword")) {
 
 			Persons.changePassword();
@@ -54,9 +64,19 @@ public class SwitchTemplate extends Controller{
 			Absences.absences(year, month);
 		}
 
-		if(action.equals("YearlyAbsences.absencesPerPerson")) {
+		if(action.equals("Absences.absencesPerPerson")) {
 
-			YearlyAbsences.absencesPerPerson(year);
+			Absences.absencesPerPerson(year);
+		}
+		
+		if(action.equals("Absences.showGeneralMonthlyAbsences")) {
+
+			Absences.showGeneralMonthlyAbsences(year, month, null, null);
+		}
+
+		if(action.equals("Absences.yearlyAbsences")) {
+
+			Absences.yearlyAbsences(personId, year);
 		}
 
 		if(action.equals("Competences.competences")) {
@@ -86,12 +106,12 @@ public class SwitchTemplate extends Controller{
 
 		if(action.equals("Stampings.missingStamping")) {
 
-			Stampings.missingStamping(year, month);
+			Stampings.missingStamping(year, month, officeId);
 		}
 
 		if(action.equals("Stampings.dailyPresence")) {
 
-			Stampings.dailyPresence(year, month, day);
+			Stampings.dailyPresence(year, month, day, officeId);
 		}
 
 		if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
@@ -107,16 +127,6 @@ public class SwitchTemplate extends Controller{
 		if(action.equals("UploadSituation.show")) {
 
 			UploadSituation.show();
-		}
-
-		if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
-
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
-		}
-
-		if(action.equals("YearlyAbsences.yearlyAbsences")) {
-
-			YearlyAbsences.yearlyAbsences(personId, year);
 		}
 
 		if(action.equals("Absences.manageAttachmentsPerCode")) {
@@ -229,6 +239,22 @@ public class SwitchTemplate extends Controller{
 		}
 
 		session.put("personSelected", personId);
+
+		executeAction(action);
+	}
+	
+	public static void updateOffice(Long officeId) throws Throwable {
+
+		String action = session.get("actionSelected");
+		if (action == null) {
+			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+			Secure.login();
+		}
+		if (officeId == null) {	
+			Application.index();	
+		}
+
+		session.put("officeSelected", officeId);
 
 		executeAction(action);
 

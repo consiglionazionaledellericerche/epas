@@ -1,31 +1,26 @@
 package controllers;
 
-import static play.modules.pdf.PDF.renderPDF;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
+import manager.SecureManager;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
 import models.Person;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import javax.inject.Inject;
+import java.util.List;
 
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
+import static play.modules.pdf.PDF.renderPDF;
 
 @With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
@@ -37,7 +32,7 @@ public class PrintTags extends Controller{
 	@Inject
 	private static PersonStampingRecapFactory stampingsRecapFactory;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static IWrapperFactory wrapperFactory;
 
@@ -61,13 +56,12 @@ public class PrintTags extends Controller{
 
 	public static void listPersonForPrintTags(int year, int month){
 
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-
 		LocalDate date = new LocalDate(year, month,1);
 
-		List<Person> personList = personDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
-				date, date.dayOfMonth().withMaximumValue(), true).list();
+		List<Person> personList = personDao.list(
+				Optional.<String>absent(), 
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
 		render(personList, date, year, month);
 	}

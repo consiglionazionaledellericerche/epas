@@ -1,14 +1,7 @@
 package manager;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -22,7 +15,12 @@ import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
+import org.joda.time.LocalDate;
 import play.db.jpa.JPAPlugin;
+
+import javax.inject.Inject;
+import java.util.List;
+
 
 /**
  * Manager per Contract.
@@ -183,17 +181,13 @@ public class ContractManager {
 	 * 
 	 * @param contract
 	 */
-	public final void properContractUpdate(final Contract contract) {
+	public final void properContractUpdate(final Contract contract, final LocalDate from) {
 
 		buildVacationPeriods(contract);
 		updateContractWorkingTimeType(contract);
 		updateContractStampProfile(contract);
-		
-		//Ricalcoli dall'inizio del contratto.
-		// TODO: l'update dovrebbe ricevere un parametro dateFrom nel quale
-		// impostare la data dalla quale effettuare i ricalcoli. 
-		// Se ne deve occupare il chiamante.
-		recomputeContract(contract, Optional.<LocalDate>absent(), true);
+
+		recomputeContract(contract, Optional.fromNullable(from), true);
 	}
 
 	/**
@@ -209,21 +203,28 @@ public class ContractManager {
 			final Contract contract, final Optional<LocalDate> dateFrom, 
 			final boolean newContract) {
 
-		// (0) Definisco l'intervallo su cui operare
-		// Decido la data inizio
-		LocalDate initUse = new LocalDate(confGeneralManager
-			.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office));
-		
-		LocalDate startDate = contract.beginContract;
-		if (startDate.isBefore(initUse)) {
-			startDate = initUse;
+		IWrapperContract wContract = wrapperFactory.create(contract);
+		LocalDate startDate = wContract.getContractDatabaseInterval().getBegin();
+		if (dateFrom.isPresent() && dateFrom.get().isAfter(startDate)) {
+			startDate = dateFrom.get();
 		}
-
-		if (dateFrom.isPresent()) {
-			if (startDate.isBefore(dateFrom.get())) {
-				startDate = dateFrom.get();
-			}
-		}
+//		// (0) Definisco l'intervallo su cui operare
+//		I
+//		//la data inizio
+//		LocalDate initUse = new LocalDate(confGeneralManager
+//			.getFieldValue(Parameter.INIT_USE_PROGRAM, contract.person.office));
+//		
+//		LocalDate startDate = contract.beginContract;
+//		if (startDate.isBefore(initUse)) {
+//			startDate = initUse;
+//		}
+//
+//		if (dateFrom.isPresent()) {
+//			if (startDate.isBefore(dateFrom.get())) {
+//				startDate = dateFrom.get();
+//			}
+//		}
+//		// D
 	
 		if (!newContract) {
 			//Distruggere i riepiloghi
@@ -234,7 +235,7 @@ public class ContractManager {
 			JPAPlugin.startTx(false);
 		}
 		
-		consistencyManager.updatePersonSituation(contract.person.id, startDate);
+		consistencyManager.updateContractSituation(contract, startDate);
 	}
 	
 	private void destroyContractMonthRecap(final Contract contract) {
@@ -482,6 +483,20 @@ public class ContractManager {
 			contract.sourceDateMealTicket = contract.sourceDateResidual;
 		}
 		contract.save();
+	}
+	
+	public final void cleanResidualInitialization(final Contract contract) {
+		contract.sourceVacationLastYearUsed = 0;
+		contract.sourceVacationCurrentYearUsed = 0;
+		contract.sourcePermissionUsed = 0;
+		contract.sourceRemainingMinutesCurrentYear = 0;
+		contract.sourceRemainingMinutesLastYear = 0;
+		contract.sourceRecoveryDayUsed = 0;
+		contract.sourceRemainingMealTicket = 0;
+	}
+	
+	public final void cleanMealTicketInitialization(final Contract contract) {
+		contract.sourceDateMealTicket = contract.sourceDateResidual;
 	}
 
 }

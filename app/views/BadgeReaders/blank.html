@@ -1,0 +1,51 @@
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'Nuovo Lettore Badge'}
+
+  <div class="alert alert-success" role="alert">
+  Inserisci i dati del nuovo <strong>lettore badge</strong>. 
+  </div>
+
+  <div id="badgeReaderData">
+
+	#{form action:@save(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#badgeReaderList',
+	    'data-async-error':'#badgeReaderData'}
+      
+	    #{f.input 'badgeReader.code', required:true /}
+	    #{f.input 'badgeReader.description' /}
+	    #{f.input 'badgeReader.location' /}
+	    
+	    #{f.selectModel 'badgeReader.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
+	  	
+	  	#{f.input 'user.username' /}
+	  	#{f.input 'user.password', type:'password' /}
+	  	
+    	#{b.buttons}
+          #{b.cancel @index() /}
+          #{b.save /}
+        #{/b.buttons}
+        <div class="alert alert-warning" role="alert">
+    		<strong>Note:</strong> Soltanto gli amministratori tecnici della sede afferente potranno
+    		accedere e modificare i dati di questo client, comprese le sue credenziali di accesso (password). 
+      	</div>
+	#{/form}
+	
+  </div>
+  
+  *{  
+  #{if institute.seats.empty}
+   #{secure.checkAction 'Institutes.delete'}
+    #{accordionGroup 'delete'}
+     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questo istituto', open:false, color:'danger'}
+	  
+	  <div class="text-danger center">
+	    E' possibile eliminare <strong>${institute.name}</strong> poichè non ha alcuna sede associata inserita.<br><br>
+		<a class="btn btn-danger" href=@{delete(institute.id)}><i class="fa fa-trash"></i>Elimina</a> 
+	  </div>
+	  
+     #{/accordionItem}
+    #{/accordionGroup }  
+   #{/secure.checkAction}
+  #{/if}
+  }*
+  
+#{/modalAsync}

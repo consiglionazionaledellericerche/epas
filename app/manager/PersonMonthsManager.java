@@ -1,17 +1,13 @@
 package manager;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Optional;
+import dao.PersonMonthRecapDao;
 import models.Person;
 import models.PersonMonthRecap;
-
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
-import dao.PersonMonthRecapDao;
+import javax.inject.Inject;
+import java.util.List;
 
 public class PersonMonthsManager {
 

@@ -5,6 +5,7 @@
   _offset (optional): numero celle della griglia dell'offset (ex. col-md-offset-6)
   _color  (optional): default(info) colori bootstrap 3
   _fluid  (optional): pannello dentro un container-fluid
+  _row	  (optional): che abbia una riga propria
   
 }*
 %{
@@ -16,6 +17,7 @@
   }
 }%
 #{if _fluid}<div class="container-fluid">#{/if} 
+#{if _row}<div class="row">#{/if}
 <div class="col-${_device}-${_dim} #{if _offset}col-${_device}-offset-${_offset}#{/if}" >
   <div class="panel panel-${_color}">
 	<div class="panel-heading">
@@ -26,4 +28,5 @@
     </div>
   </div>
 </div>
+#{if _row}</div>#{/if}
 #{if _fluid}</div>#{/if}

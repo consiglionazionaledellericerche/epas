@@ -1,20 +1,16 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import models.Office;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-import models.query.QRole;
-
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import models.Role;
+import models.query.QRole;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * 
@@ -52,6 +48,13 @@ public class RoleDao extends DaoBase {
 				.where(role.name.eq(name));
 		return query.singleResult(role);
 	}
+	
+	public List<Role> getRolesByNames(ImmutableList<String> roles) {
+		QRole role = QRole.role;
+		final JPQLQuery query = getQueryFactory()
+				.from(role).where(role.name.in(roles));
+		return query.list(role);
+	}
 
 	/**
 	 * La lista dei ruoli di sistema.
@@ -65,6 +68,6 @@ public class RoleDao extends DaoBase {
 		roleList.add(getRoleByName(Role.REST_CLIENT));
 		
 		return roleList;
-		
 	}
+	
 }

@@ -1,27 +1,24 @@
 package controllers;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.ContractDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
+
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.ExportToYaml;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.PersonDayManager;
+import manager.SecureManager;
+
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
@@ -30,16 +27,25 @@ import models.StampType;
 import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
+
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
 
 @Slf4j
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
 
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonDao personDao;
 	@Inject
@@ -179,12 +185,12 @@ public class Administration extends Controller {
 			}
 		}
 	}
-	//private final static Logger log = LoggerFactory.getLogger(Administration.class);
 
 	public static void utilities(){
 
 		final List<Person> personList = personDao.list(
-				Optional.<String>absent(),officeDao.getOfficeAllowed(Security.getUser().get()), 
+				Optional.<String>absent(), 
+				secureManager.officesWriteAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 
@@ -267,7 +273,7 @@ public class Administration extends Controller {
 			
 
 			person = Person.findById(person.id);
-			
+
 			log.info("Rimozione timbrature disaccoppiate per {} ...", person.fullName());
 			List<PersonDay> persondays = personDayDao
 					.getPersonDayInPeriod(person, begin, Optional.of(end));
@@ -284,9 +290,6 @@ public class Administration extends Controller {
 			}
 			
 			log.info("... rimosse {} timbrature disaccoppiate.", count);
-			
-			
-			
 		}
 		
 		flash.success("Esecuzione terminata");
@@ -301,6 +304,7 @@ public class Administration extends Controller {
 		
 		for(Contract contract : contracts) {
 			contractManager.buildVacationPeriods(contract);
+
 			log.info("Il contratto di {} iniziato il {} non è stato ripristinato con i piani ferie corretti.",
 				contract.person.fullName(), contract.beginContract);
 		}

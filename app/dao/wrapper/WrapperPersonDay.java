@@ -1,10 +1,13 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import dao.ContractDao;
+import dao.PersonDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import manager.PersonManager;
 import models.Contract;
 import models.ContractStampProfile;
@@ -12,17 +15,10 @@ import models.ContractWorkingTimeType;
 import models.PersonDay;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import dao.ContractDao;
-import dao.PersonDayDao;
+import java.util.List;
 
 /**
  * @author alessandro

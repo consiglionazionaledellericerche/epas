@@ -1,7 +1,12 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Lists;
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,16 +17,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
-import com.google.common.collect.Lists;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
  
  
@@ -32,54 +29,60 @@ public class Office extends BaseModel{
  
 	private static final long serialVersionUID = -8689432709728656660L;
 
-	@Required
-	@Column(name = "name")
+    @Required
+    @Unique
+    @NotNull
+    @Column(nullable = false)
     public String name;
+
+    //Codice della sede, per esempio per la sede di Pisa è "044000"
+    @Unique
+    @Column(nullable = false)
+    public String code;
+
+    //sedeId, serve per l'invio degli attestati, per esempio per la sede di Pisa è "223400"
+    @Required
+    @Unique
+    @NotNull
+    @Column(name = "code_id",nullable = false)
+    public String codeId;
     
-    @Column(name = "contraction")
-    public String contraction;
-    
-    @Column(name = "address")
-    public String address = "";
-    
-    @Column(name = "code")
-    public Integer code;
+    @Column
+    public String address;
     
     @Column(name="joining_date")
     public LocalDate joiningDate;
     
-    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
-    public List<Office> subOffices = new ArrayList<Office>();
-    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="office_id")
-    public Office office;
+    @JoinColumn(name="institute_id")
+    public Institute institute;
     
-    //@OneToMany(mappedBy="restOwner", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-    //public List<User> restUsers = new ArrayList<User>();
-     
-    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
-    public List<Person> persons = new ArrayList<Person>();
+    public boolean headQuarter = false;
     
-    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
-    public List<ConfGeneral> confGeneral = new ArrayList<ConfGeneral>();
+    @OneToMany(mappedBy="owner", cascade = {CascadeType.REMOVE})
+    public List<BadgeReader> badgeReaders = Lists.newArrayList();
     
     @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
-    public List<ConfYear> confYear = new ArrayList<ConfYear>();
+    public List<Person> persons = Lists.newArrayList();
+    
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
+    public List<ConfGeneral> confGeneral =  Lists.newArrayList();
+    
+    @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
+    public List<ConfYear> confYear =  Lists.newArrayList();
     
     @NotAudited
     @OneToMany(mappedBy="office", cascade = {CascadeType.REMOVE})
     public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+
+    @NotAudited
+	@OneToMany(mappedBy="office")
+	public List<WorkingTimeType> workingTimeType = Lists.newArrayList();
     
     @NotAudited
 	@OneToMany(mappedBy="office")
-	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
-    
-    @NotAudited
-	@OneToMany(mappedBy="office")
-	public List<TotalOvertime> totalOvertimes = new ArrayList<TotalOvertime>();
-    
-    
+	public List<TotalOvertime> totalOvertimes = Lists.newArrayList();
+
     @Transient
     private Boolean isEditable = null;
     
@@ -96,17 +99,4 @@ public class Office extends BaseModel{
 	public String toString() {
 		return getLabel();
 	}
-
-	@Transient
-	public List<WorkingTimeType> getEnabledWorkingTimeType() {
-		
-		List<WorkingTimeType> enabledWttList = new ArrayList<WorkingTimeType>();
-		for(WorkingTimeType wtt: this.workingTimeType) {
-			
-			if(wtt.disabled == false)
-				enabledWttList.add(wtt);
-		}
-		return enabledWttList;
-	}
-	
 }

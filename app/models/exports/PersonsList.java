@@ -3,10 +3,10 @@
  */
 package models.exports;
 
+import models.Person;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import models.Person;
 
 /**
  * @author arianna

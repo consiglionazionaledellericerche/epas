@@ -1,8 +1,14 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
+import models.base.BaseModel;
+import models.enumerate.JustifiedTimeAtWork;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+import play.data.validation.Required;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,19 +20,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import models.base.BaseModel;
-import models.enumerate.JustifiedTimeAtWork;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 /**
  *
  * @author dario

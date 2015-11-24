@@ -1,7 +1,12 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.MoreObjects;
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,17 +17,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
-import com.google.common.base.MoreObjects;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Audited
@@ -37,6 +33,7 @@ public class User extends BaseModel{
 	@Required
 	public String username;
 
+	@Required
 	public String password;
 
 	@NotAudited
@@ -59,6 +56,20 @@ public class User extends BaseModel{
 	public String recoveryToken;
 
 	@Override
+	public String getLabel() {
+		if (this.person != null) {
+			return  this.person.fullName() + " - " + this.person.office.name;
+		}
+		else if (this.badgeReader != null) {
+			return this.badgeReader.code;
+			
+		} else {
+			return this.username;
+		}
+		
+	}
+	
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 				.add("id", this.id)
@@ -76,6 +87,15 @@ public class User extends BaseModel{
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Se l'user il super amministratore 
+	 * TODO: definire la logica più dettagliata se necessario.
+	 * @return
+	 */
+	public boolean isSuperAdmin() {
+		return username.equals("admin") || username.equals("developer");
 	}
 
 }

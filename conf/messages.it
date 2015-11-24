@@ -1,3 +1,4 @@
+absenceType = Codice assenza
 absenceType.code= Codice d'assenza
 absenceType.certificateCode= Codice per attestati di presenza
 absenceType.description= Descrizione codice
@@ -8,12 +9,22 @@ absenceType.justifiedTimeAtWork= Tempo di lavoro giustificato
 absenceType.consideredWeekEnd= Utilizzabile nei weekend/festivi
 absenceType.qualifications= Utilizzabile per i livelli
 
+absenceFile=Allegato
+
 absenceTypeGroup.label= Etichetta gruppo
 absenceTypeGroup.accumulationType= Accumulo valori
 absenceTypeGroup.limitInMinute= Limite accumulo
 absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
+
+adminPassword= Password Amministratore
+adminPasswordRetype= Reinserire Password
+
+badgeReader.code=Nome 
+badgeReader.description=Descrizione 
+badgeReader.location=Location
+badgeReader.owner=Sede Afferente
 
 views.common.true=vero
 views.common.false=falso
@@ -43,6 +54,9 @@ secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 passwordSuccessfullyChanged = Password modificata con successo
 
+pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
+name=Nome
+
 Month.1=Gennaio
 Month.2=Febbraio
 Month.3=Marzo
@@ -60,6 +74,34 @@ child.name= Nome
 child.surname= Cognome
 child.bornDate= Data di Nascita
 
+crud.cancel=Indietro
+crud.save=Salva
+crud.delete=Elimina
+
+dateOfPatron= Data del Patrono
+
+dateFrom=Dal
+dateTo=Fino Al
+
+emailToContact= Indirizzo email dell&#39;amministrazione
+
+Institutes.blank=Nuovo istituto
+Institutes.delete=Elimina istituto
+institute.name=Nome
+institute.code=Sigla
+institute.cds= Centro di spesa
+
+lunchPauseStart= Inizio pausa pranzo
+lunchPauseEnd= Fine pausa pranzo
+
+Offices.blank=Nuova sede
+office.name=Nome
+office.code= Codice
+office.codeId= Sede Id
+office.address=Indirizzo
+office.joiningDate= Data di affiliazione
+office.headQuarter=Sede principale
+
 person.surname=Cognome
 person.name=Nome
 person.number=Matricola
@@ -75,14 +117,32 @@ person.qualification= Livello
 person.office= Sede
 person.isPersonInCharge= Responsabile gruppo di lavoro
 
+personQualification= Livello
+
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto
+contract.endContract=Terminato Il
 contract.onCertificate=In attestati
+beginContract=Inizio contratto
+expireContract=Fine contratto
+onCertificate=In attestati
+endContract= Scadenza Contratto
+
+sourceDateResidual=Data inizializzazione
+contract.sourceDateResidual=Data inizializzazione
+contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
+contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)
+contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
+contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
+contract.sourcePermissionUsed=Permessi utilizzati anno corrente
+contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
+contract.sourceRemainingMealTicket=Buoni pasto residui
 
 contractStampProfile.fixedworkingtime= Timbratura Default
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede 
+wtt= Tipo Orario
 
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti
@@ -106,7 +166,24 @@ modifierType= Calcolo Orario
 
 stamping.note= Note
 
+uro.office=Sede
+uro.user= Utente
+uro.role= Ruolo
+
 user.username= Username
+user.password= Password
+
+stampType= Causale
+note= Note
+time= Ore
+time.popover= Formato richiesto HHMM (HH ore, MM minuti)
+invalid.time=Formato del tempo errato.
+way= Verso
+
+report=Descrizione problema
+month= Mese (se presente)
+year= Anno (se presente)
+day= Giorno (se presente)
 
 ########################
 # Messaggi di validazione
@@ -161,9 +238,9 @@ JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 or
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
 
-########################################
+###########################################################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
-########################################
+###########################################################################
 
 absenceType.code.popover= Codice di assenza
 
@@ -196,12 +273,14 @@ absenceTypeGroup.accumulationBehaviour.popover= Comportamento da tenere al raggi
 
 absenceTypeGroup.replacingAbsenceType.description= Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)
 
-stampType= Causale
-stamping.stampType= Causale
-note= Note
-stampingHour= Ore
-stampingMinute= Minuti
-hourStamping= Ore
-stampingWay= Verso
-stampingWay.popover= Il verso della timbratura
-hourStamping.popover= Formato richiesto HHMM (HH ore, MM minuti)
+emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
+
+institute.cds.popover= Codice univoco del centro di spesa (per l&#39;IIT è 044)
+institute.code.popover= Sigla Istituto - Es. IIT,IBBR,ISAFOM etc.
+
+lunchPauseStart.popover= Inserire l&#39;orario nel formato hh:mm
+lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
+
+office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
+office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
+office.joiningDate.popover= Data di affiliazione della sede

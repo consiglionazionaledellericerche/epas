@@ -2,14 +2,14 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Presenza Giornaliera'  /}
 
-<div class="container-fluid">
+#{set breadcrumbs:['Presenza giornaliera':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:'Presenza giornaliera ' + day + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+</div>
 
-  <div class="panel panel-info col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-      <div class="panel-heading">
-        <h3 class="panel-title text-center">Presenza giornaliera del ${day} &{'views.tags.display.date.month.' + month} ${year} </h3>
-      </div>
-      <div class="panel-body">
-
+<div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
 	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
 	      <tr>
 			<th>Nome</th>
@@ -94,8 +94,4 @@
 		</tr>	
 		#{/list}
 	  </table>
-	  
-	</div>
-  </div>	<!-- end panel -->
-
 </div>

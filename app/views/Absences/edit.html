@@ -1,94 +1,105 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Modifica assenza in data ' 
-+ absence.personDay.date.format() + ' per ' + absence.personDay.person.name + ' ' + absence.personDay.person.surname /}
+#{modalAsync id:'modalAbsence', button:'Salva', 
+  title:'Assenza ' + absence.absenceType.code + ' in data ' + dateFrom.format() 
+           + ' per ' + absence.personDay.person.fullname }
 
-<div class="container-fluid">
+#{tabs}
+  #{tabItem id:'editAbs', title:'Riepilogo', active:true /}
+  #{tabItem id:'attach', title:'Allegato' /}
+  #{tabItem id:'deleteAbs', title:'Elimina' /}
+#{/tabs}
 
-#{form @Absences.update(), enctype:'multipart/form-data'}
-	
-	<input type="hidden" name="absence.id" value="${absence.id}"/>
+<br>
 
-	<table class="table table-hover table-form">
-	  <tr>
-	      <td class="lab"><strong>Nuovo<br>Codice</strong></td>
-	      <td>
-	        <div class="container-fluid" style="padding-left:0px;">
-	          <div class="col-sm-6" style="padding-left:0px; padding-bottom:10px;">
-	            <input name="absenceCode" type="text" id="absenceCode" value="${absence.absenceType.code}"/><br>
-	          </div>
-	          <div class="col-sm-6" style="padding-left:0px;">
-			    #{select 'code', value: '', class:'col-xs-12', id:'assenzaFrequente', 
-			    style:'margin-bottom: 10px;', onchange:'Change();'}
-			      <option value="">Codici più usati</option>
-			      #{list items: frequentAbsenceTypeList, as:'absenceType'} 
-		           #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
-			      #{/list}
-			    #{/select}
-				<br>
-		     #{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();',select2Table:''}
-		      <option>Tutti i codici</option>
-		      #{list allCodes}
-		        #{option _.code}${_.label()}#{/option}
- 		      #{/list}
- 		   	#{/select}
-		      </div>
-	        </div>
-	        		
-	      </td>
-      </tr>
-    
-      <tr>
-        <td class="lab"><strong>Fino a</strong></td>
-        <td><input name="dateTo" value="${absence.personDay.date?.format()}" type="text" datepicker /></td>
-	  </tr>
-	
-	  <tr>
-	    <td class="lab"><strong>Allegato</strong></td>
-	    <td>
-	      <input type="file" name="file">
-	    </td>
-	  </tr>
+#{tabContent}
+
+  #{tabContentItem id:'editAbs', active:true}
+ 
+	 #{list items:historyAbsence, as:'state'}
+	   #{if state.typeIsAdd() }
+	    <form class="form-horizontal">
+	    #{f.view 'Dipendente', value:absence.personDay.person.fullname /}
+	    #{f.view 'Data', value:absence.personDay.date /}
+	 	#{f.view 'Codice', value:absence.absenceType.code /}
+	 	#{f.view 'Allegato', value:absence.absenceFile.exists() /}
+	 	#{f.view 'Inserita il', value:state.formattedRevisionDate() /}
+	 	#{f.view 'Amministratore', value:state.formattedOwner() /}
+	 	</form> 
+	   #{/if}
+	 #{/list}
+	 
+	 #{if absence.absenceFile.exists() }
+	 	<div class="alert alert-warning center">
+	 	  Apri allegato <a href="@{Absences.downloadAttachment(absence.id)}">
+						<span class="glyphicon glyphicon-envelope"></span>
+					</a>
+	 	</div>
+	 #{/if}
+  #{/tabContentItem}
+
+  #{tabContentItem id:'attach'}
+ 
+	  <div class="alert alert-success center">
+		 <p>Allega un file all'assenza 
+		   con codice ${absence.absenceType.code} del <strong>${absence.personDay.date.format()}</strong>
+		 </p>
+	  </div>
 	  
-	  <tr>
-	    <td class="lab"><strong>Buono Mensa</strong></td>
-	    <td>
-		    #{if absence.absenceType.code.equals("92")}
-			    calcolato<input type="radio" name="mealTicket" value="calcolato" #{if !absence.personDay.isTicketForcedByAdmin } checked="checked" #{/if}/>
-		  		No <input type="radio" name="mealTicket" value="no" 			 #{if absence.personDay.isTicketForcedByAdmin && !absence.personDay.isTicketAvailable } checked="checked" #{/if}/>
-		  		Sì <input type="radio" name="mealTicket" value="si" 			 #{if absence.personDay.isTicketForcedByAdmin && absence.personDay.isTicketAvailable } checked="checked" #{/if}/>
-			#{/if}
-			#{else}
-			   calcolato<input type="radio" name="mealTicket" value="calcolato" checked="checked" disabled/>	<!-- in questo caso sempre calcolato -->
-		  		No <input type="radio" name="mealTicket" value="no" disabled/>
-		  		Sì <input type="radio" name="mealTicket" value="si" disabled/>
-			#{/else}
-	    </td>
-	  </tr>
-	</table>
-	<div class="center">
-	  <input class="btn btn-primary" type="submit" value="Aggiorna"/>
-	</div>
-	#{/form}
-	<br>
-    <div class="well">
-
-		  <p>Lasciando vuoto il campo <em>Nuovo Codice</em> si elimineranno tutte le assenze con codice ${absence.absenceType.code} presenti nella finestra temporale specificata</p>
-		  <p>Inserendo nel campo <em>Nuovo Codice</em> un codice diverso da ${absence.absenceType.code} verranno 
-		    <ul>
-		      <li>eliminate tutte le assenze con codice ${absence.absenceType.code} presenti nella finestra temporale specificata</li>
-		      <li>inserite le assenze con codice <em>Nuovo Codice</em> nei giorni appartenenti alla finestra temporale specificata</li>
-		      <li><p class="text-error">N.B. in caso di errore in fase di inserimento nuovi codici, la rimozione delle assenze con codice ${absence.absenceType.code} non verrà ripristinata (si potrà comunque procedere al loro reinserimento mediante la form di Inserimento assenze)</p></li>
-		    </ul>
-		  </p>
-		  <p>Nel campo <strong>Fino a</strong> si può specificare fino a quando si vuole modificare/rimuovere un'assenza (di default, contenendo il giorno per cui si è cliccato, verrà modificata/rimossa solo per quel giorno)</p>
-		  <p class="text-info">
-		    <em>N.B. e' possibile forzare il buono mensa esclusivamente modificando assenze con codice 92 (missione)</em>
-		  </p>
+	 #{form action:@Absences.addAttach(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#absenceData', enctype:'multipart/form-data'}
+		
+		<input type="hidden" name="absence.id" value="${absence.id}"/>
 	
-    </div>
-    
+	    #{f.input 'absenceFile', type:'file' /}
+	
+	    #{b.buttons center:true}   
+	      #{b.submit 'Allega', color:'primary', fa:'envelope' /}
+	    #{/b.buttons}
+	  #{/form}
+	  
+	  #{if absence.absenceFile.exists() }  
+		
+	 	<div class="alert alert-danger center">
+	 	  <p><strong>Attenzione!!!</strong> 
+	 	  Associato a questa assenza esiste già un allegato che verrà sovrascritto
+	 	  <a href="@{Absences.downloadAttachment(absence.id)}">
+		  <span class="glyphicon glyphicon-envelope"></span></a>
+		  </p>
+		  <p>
+		  Per rimuovere questo allegato clicca <a href="@{Absences.removeAttach(absence.id)}"> qui</a>
+		  </p>
+	 	</div>
+	  #{/if}  
+  #{/tabContentItem} 
+ 
+  #{tabContentItem id:'deleteAbs'}
+	  <div class="alert alert-danger center">
+		   <p>Cliccando su elimina si elimineranno tutte le assenze con codice ${absence.absenceType.code} 
+	       presenti nella finestra temporale specificata fino a <strong>Fino A</strong>
+	       </p>
+	  </div>
+	
+	  #{form action:@Absences.delete(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#absenceData'}
+		
+		<input type="hidden" name="absence.id" value="${absence.id}"/>
+	
+	    #{f.view 'absence.absenceType.code', label:'Codice', value:absence.absenceType.label()  /}
+		
+	    #{f.view 'dateFrom', value:dateFrom.format() /}
+	    #{f.date 'dateTo', value:dateTo.format() /}
+	    
+	    *{ #{f.input 'absenceFile', type:'file' /} }*
+	
+	    #{b.buttons center:true}   
+	      #{b.submit 'Elimina', color:'danger', fa:'trash' /}
+	    #{/b.buttons}
+	  #{/form}
+	  
+  #{/tabContentItem}
+   
+#{/tabContent}
 
 
-</div>
-
-
+#{/modalAsync}

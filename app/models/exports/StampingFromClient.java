@@ -5,7 +5,6 @@ package models.exports;
 
 import models.BadgeReader;
 import models.StampType;
-
 import org.joda.time.LocalDateTime;
 
 /**

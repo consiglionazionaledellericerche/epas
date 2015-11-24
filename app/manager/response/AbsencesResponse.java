@@ -1,12 +1,10 @@
 package manager.response;
 
-import helpers.rest.JacksonModule;
-import models.Absence;
-
-import org.joda.time.LocalDate;
-
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.google.common.base.Function;
+import helpers.rest.JacksonModule;
+import models.Absence;
+import org.joda.time.LocalDate;
 
 @JsonFilter(JacksonModule.FILTER)
 public class AbsencesResponse {

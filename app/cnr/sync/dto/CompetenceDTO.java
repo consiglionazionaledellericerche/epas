@@ -1,8 +1,7 @@
 package cnr.sync.dto;
 
-import models.Competence;
-
 import com.google.common.base.Function;
+import models.Competence;
 
 public class CompetenceDTO {
 	public int year;

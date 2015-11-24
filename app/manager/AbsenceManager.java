@@ -6,14 +6,29 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import dao.*;
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
+import dao.ContractDao;
+import dao.PersonChildrenDao;
+import dao.PersonDayDao;
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
+import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.CheckMessage;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import models.*;
+import models.Absence;
+import models.AbsenceType;
+import models.Contract;
+import models.Person;
+import models.PersonChildren;
+import models.PersonDay;
+import models.PersonReperibilityDay;
+import models.PersonShiftDay;
+import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
@@ -833,6 +848,9 @@ public class AbsenceManager {
 
 			for(Absence absence : absenceList){
 				if(absence.absenceType.code.equals(absenceType.code)) {
+					if( absence.absenceFile.exists()) {
+						absence.absenceFile.getFile().delete();
+					}
 					absence.delete();
 					pd.absences.remove(absence);
 					pd.isTicketForcedByAdmin = false;

@@ -11,7 +11,15 @@ import it.cnr.iit.epas.DateUtility;
 import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.*;
+import models.AbsenceType;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Person;
+import models.PersonDay;
+import models.StampModificationType;
+import models.StampModificationTypeCode;
+import models.StampType;
+import models.Stamping;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -59,7 +67,6 @@ public class PersonStampingRecap {
 	public List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
 	
 	//Template
-	public String month_capitalized;	//FIXME toglierlo e metterlo nel messages
 	public int numberOfInOut = 0;
 
 	/**
@@ -180,8 +187,6 @@ public class PersonStampingRecap {
 		
 		this.basedWorkingDays = personManager.basedWorkingDays(personDays);
 		this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
-
-		this.month_capitalized = DateUtility.fromIntToStringMonth(month);
-
+		
 	}
 }

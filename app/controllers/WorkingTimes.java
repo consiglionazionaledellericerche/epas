@@ -1,19 +1,20 @@
 package controllers;
 
-import play.data.validation.Error;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import dao.ContractDao;
+import dao.OfficeDao;
+import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperWorkingTimeType;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.ContractManager;
+import manager.SecureManager;
 import manager.WorkingTimeTypeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -21,9 +22,7 @@ import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -32,24 +31,19 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-
-import dao.ContractDao;
-import dao.OfficeDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
-import dao.wrapper.IWrapperWorkingTimeType;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class WorkingTimes extends Controller{
 
 	@Inject 
 	private static OfficeDao officeDao;
+	@Inject
+	private static SecureManager secureManager;
 	@Inject
 	private static SecurityRules rules;
 	@Inject
@@ -72,7 +66,7 @@ public class WorkingTimes extends Controller{
 			office = officeDao.getOfficeById(officeId);
 		}
 		
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
 		if(office == null) {
 			//TODO se offices è vuota capire come comportarsi
 			office = offices.iterator().next();
@@ -148,14 +142,6 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 
-		IWrapperOffice wOffice = wrapperFactory.create(office);
-
-		if(!wOffice.isSeat()) {
-
-			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
-			WorkingTimes.manageWorkingTime(null);
-		}
-
 		rules.checkIfPermitted(office);
 
 		HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
@@ -204,12 +190,6 @@ public class WorkingTimes extends Controller{
 			manageWorkingTime(wtt.office.id);
 		}
 		
-
-		if(!wrapperFactory.create(wtt.office).isSeat()) {
-
-			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
-			manageWorkingTime(null);
-		}
 
 		rules.checkIfPermitted(wtt.office);
 
@@ -346,13 +326,7 @@ public class WorkingTimes extends Controller{
 
 		rules.checkIfPermitted(office);
 
-		List<WorkingTimeType> wttDefault = workingTimeTypeDao.getDefaultWorkingTimeType();
-		List<WorkingTimeType> wttAllowed = office.getEnabledWorkingTimeType(); 
-
-		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
-		wttList.addAll(wttDefault);
-		wttList.addAll(wttAllowed);
-
+		List<WorkingTimeType> wttList = workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
 		wttList.remove(wtt);
 
 		render(wtt, wttList, office);

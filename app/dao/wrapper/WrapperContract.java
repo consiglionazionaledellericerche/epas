@@ -1,23 +1,20 @@
 package dao.wrapper;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import manager.ConfGeneralManager;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import java.util.List;
 
 /**
  * @author marco
@@ -67,7 +64,10 @@ public class WrapperContract implements IWrapperContract {
 			}
 		}
 		return true;
-		
+	}
+	
+	public boolean isActive() {
+		return DateUtility.isDateIntoInterval(LocalDate.now(), getContractDateInterval());
 	}
 
 	/**
@@ -98,10 +98,11 @@ public class WrapperContract implements IWrapperContract {
 	 */
 	@Override
 	public DateInterval getContractDateInterval() {
-		if (value.endContract != null)
+		if (value.endContract != null) {
 			return new DateInterval(value.beginContract, value.endContract);
-		else
+		} else {
 			return new DateInterval(value.beginContract, value.expireContract);
+		}
 	}
 	
 	/**
@@ -238,6 +239,7 @@ public class WrapperContract implements IWrapperContract {
 		return candidate;
 	}
 	
+
 	@Override
 	public boolean monthRecapMissing(YearMonth yearMonth) {
 

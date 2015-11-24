@@ -259,11 +259,11 @@ div.datepicker {
 
 /* CSS Tabellone Timbrature */
 
-/* tabella default */
+/* tabella default 
 table{ border: 1px solid #aaa; }
 th { background: #eee}
 td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
-
+*/
 /* tabellone timbrature */
 table#tabellonetimbrature{
 		font-size: small;
@@ -377,3 +377,26 @@ tfoot input {
    padding: 3px;
    box-sizing: border-box;
 }
+
+/* -----------------------------------------------------*/
+/* VOGLIO UNA VITA COLORATA BELLA, FANCULO QUESTA CELLA *//*      <<======  AHAHAHAHAH.......STANZINO.... */
+/* -----------------------------------------------------*/
+
+.list-group-item-grey{ background-color: #EAEAEA; }
+
+.btn ,i{ vertical-align: middle; }
+
+.data-select-bar{
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+/*
+div.form-group .form-control-static {
+    background: rgb(245,245,245);
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+    text-align: center;
+}
+*/
+

@@ -3,38 +3,61 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
+import dao.history.HistoryValue;
+import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.PersonTags;
+import helpers.Web;
+import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
+import manager.SecureManager;
 import manager.StampingManager;
 import manager.recaps.personStamping.PersonStampingDayRecap;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
-import models.*;
+import models.Institute;
+import models.Office;
+import models.Person;
+import models.PersonDay;
+import models.StampType;
+import models.Stamping;
+import models.User;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import play.data.binding.As;
-import play.data.validation.*;
+import play.data.validation.CheckWith;
+import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-@With( {RequestInit.class, Resecure.class} )
+
+/**
+ * @author alessandro
+ *
+ */
+@Slf4j
+@With({RequestInit.class, Resecure.class})
 public class Stampings extends Controller {
 
 	@Inject
@@ -50,7 +73,7 @@ public class Stampings extends Controller {
 	@Inject
 	private static PersonDayDao personDayDao;
 	@Inject
-	private static OfficeDao officeDao;
+	private static SecureManager secureManager;
 	@Inject
 	private static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
 	@Inject
@@ -59,14 +82,24 @@ public class Stampings extends Controller {
 	private static WrapperModelFunctionFactory wrapperFunctionFactory;
 	@Inject
 	private static ConsistencyManager consistencyManager;
+	@Inject 
+	private static StampingHistoryDao stampingsHistoryDao;
+	@Inject
+	private static OfficeDao officeDao;
+	
+	
+	/**
+	 * Tabellone timbrature dipendente.
+	 * 
+	 * @param year anno
+	 * @param month mese
+	 */
+	public static void stampings(final Integer year, final Integer month) {
 
-	public static void stampings(Integer year, Integer month) {
-
-		
 		IWrapperPerson person = wrapperFactory
 				.create(Security.getUser().get().person);
 
-		if(! person.isActiveInMonth(new YearMonth(year, month))) {
+		if (!person.isActiveInMonth(new YearMonth(year, month))) {
 			flash.error("Non esiste situazione mensile per il mese di %s %s", 
 					DateUtility.fromIntToStringMonth(month), year);
 
@@ -77,23 +110,20 @@ public class Stampings extends Controller {
 		PersonStampingRecap psDto = stampingsRecapFactory
 				.create(person.getValue(), year, month);
 		       
-		render(psDto) ;
+		render(psDto);
 	}
 
 
-	public static void personStamping(Long personId, int year, int month) {
+	/**
+	 * Tabellone timbrature amministratore.
+	 * 
+	 * @param personId dipendente
+	 * @param year anno
+	 * @param month mese
+	 */
+	public static void personStamping(final Long personId, 
+			final int year, final int month) {
 
-		if (personId == null) {
-			personId = Security.getUser().get().person.getId();
-			year = LocalDate.now().getYear();
-			month = LocalDate.now().getMonthOfYear();
-		}
-		if (year == 0 || month == 0) {
-
-			year = LocalDate.now().getYear();
-			month = LocalDate.now().getMonthOfYear();
-		}
-		
 		Person person = personDao.getPersonById(personId);
 		Preconditions.checkNotNull(person); 
 		
@@ -101,10 +131,10 @@ public class Stampings extends Controller {
 		
 		IWrapperPerson wPerson = wrapperFactory.create(person);
 		
-		if(! wPerson.isActiveInMonth(new YearMonth(year,month) )) {
+		if (!wPerson.isActiveInMonth(new YearMonth(year, month))) {
 			
 			flash.error("Non esiste situazione mensile per il mese di %s", 
-					person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+					person.fullName(), DateUtility.fromIntToStringMonth(month));
 			
 			YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
 			personStamping(personId, last.getYear(), last.getMonthOfYear());
@@ -114,137 +144,90 @@ public class Stampings extends Controller {
 
 		render(psDto) ;
 
-
 	}
 
-	public static void createStamp(@Required Long personId, 
-			@Required Integer year, @Required Integer month, @Required Integer day){
+	public static void blank(@Required Long personId, @Required LocalDate date) {
 
 		Person person = personDao.getPersonById(personId);
 
-		rules.checkIfPermitted(person.office);
-
-		LocalDate date = new LocalDate(year,month,day);
-
-		PersonDay personDay = new PersonDay(person, date);
-
-		render(person, personDay);
-	}
-
-
-	public static void insert(@Valid @Required Long personId, 
-			@Required Integer year, @Required Integer month, @Required Integer day,
-			@Required boolean stampingWay, Stamping stamping, @Required String hourStamping,
-			String note) {
-
-		Person person = Person.em().getReference(Person.class, personId);
-
-		rules.checkIfPermitted(person.office);
-
-		LocalDate date = new LocalDate(year,month,day);
-
-		if( date.isAfter(new LocalDate()) ) 
-		{
-			flash.error("Non si può inserire una timbratura futura!!!");
-			Stampings.personStamping(personId, year, month);
-		}
-
-		LocalDateTime time = stampingManager.buildStampingDateTime(year, month, day, hourStamping);
-
-		if(time == null) {
-			flash.error("Inserire un valore valido per l'ora timbratura. Operazione annullata");
-			Stampings.personStamping(personId, year, month);
-		}
-
-		PersonDay personDay = 	personDayDao.getPersonDay(person, date).orNull();
-
-		if(personDay == null){
-			personDay = new PersonDay(person, date);
-			personDay.save();
-		}
-
-		stampingManager.addStamping(personDay, time, note, stamping.stampType, stampingWay, true);
-
-		consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+		Preconditions.checkState(!date.isAfter(LocalDate.now()));
 		
+		rules.checkIfPermitted(person.office);
 
-		Stampings.personStamping(personId, year, month);
-	}
-
-	public static void edit(@Required Long stampingId) {
-
-		Stamping stamping = stampingDao.getStampingById(stampingId);
-
-		if (stamping == null) {
-			notFound();
-		}
-
-		rules.checkIfPermitted(stamping.personDay.person.office);
-
-		boolean stampingWay = stamping.way.equals(Stamping.WayType.in) ? true : false;
-
-		render(stamping, stampingWay);
+		render(person, date);
 	}
 	
-	public static void editEmployee(@Required Long stampingId) {
+	public static void edit(Long stampingId) {
 
 		Stamping stamping = stampingDao.getStampingById(stampingId);
-
+		
 		if (stamping == null) {
 			notFound();
 		}
-
-		rules.checkIfPermitted(stamping.personDay.person);
-
-		render(stamping);
-	}
-
-	public static void update(Stamping stamping, boolean stampingWay,@Required @Min(0) @Max(59) Integer stampingMinute,
-							  @Required @Min(0) @Max(23)Integer stampingHour) {
-
-//		TODO implementare validazione sulla finestra del modale
-
-		if(Validation.hasError("stampingHour") || Validation.hasError("stampingMinute")){
-			flash.error("Indicare un orario Valido!   Operazione annulata");
-			personStamping(stamping.personDay.person.id, stamping.personDay.date.getYear(),
-					stamping.personDay.date.getMonthOfYear());
-		}
-		if(!stamping.isPersistent()){
-			notFound();
-			personStamping(stamping.personDay.person.id, stamping.personDay.date.getYear(),
-					stamping.personDay.date.getMonthOfYear());
-		}
-
+		
+		List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
+				.stampings(stampingId);
+	
 		rules.checkIfPermitted(stamping.personDay.person.office);
+		
+		render(stamping, historyStamping);
+	}
+	
+	public static void save(@Required Person person, @Required LocalDate date,
+			Stamping stamping, @Required @NotNull Boolean way, @CheckWith (StringIsTime.class) String time,
+			String note, StampType stampType) {
+		
+		Preconditions.checkState(!date.isAfter(LocalDate.now()));
+		
+		PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
+		
+		rules.checkIfPermitted(person.office);
 
-		stamping.way = stampingWay ? Stamping.WayType.in : Stamping.WayType.out;
+		if (!stamping.isPersistent()) {
+			stamping = new Stamping(personDay, null);
+		} 
+		
+		if (Validation.hasErrors()) {
+			
+			response.status = 400;
+			flash.error(Web.msgHasErrors());
+			
+			List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
+			if (stamping.isPersistent()) {
+				historyStamping = stampingsHistoryDao.stampings(stamping.id);
+			}
+			
+			render("@edit", stamping, time, way, stampType, historyStamping);
+			//log.warn("validation errors for {}: {}", institute,
+			//		validation.errorsMap());
+		} 
 
-		stamping.date = stamping.date.withHourOfDay(stampingHour);
-		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
-
-		stamping.markedByAdmin= true;
-
+		personDay.save();
+		stamping.date = stampingManager.deparseStampingDateTime(date, time);
+		stamping.stampType = stampType.isPersistent() ? stampType : null;
+		stamping.markedByAdmin = true;
+		stamping.way = way ? Stamping.WayType.in : Stamping.WayType.out;
+		stamping.note = note;
 		stamping.save();
 
-		consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
+		personDay.stampings.add(stamping);
+		personDay.save();
+		//stamping.save();
 
-		flash.success("Timbratura per il giorno %s per %s aggiornata.",
-				PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.fullName());
+		consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
-		personStamping(stamping.personDay.person.id,
-				stamping.personDay.date.getYear(),
-				stamping.personDay.date.getMonthOfYear());
+		flash.success(Web.msgSaved(Institute.class));
+
+		Stampings.personStamping(person.id,
+				date.getYear(), date.getMonthOfYear());
+
 	}
-
+	
 	public static void delete(Long id){
 
 		final Stamping stamping = stampingDao.getStampingById(id);
 
-		if(stamping == null) {
-			flash.error("Timbratura specificata inesistente");
-			// TODO scegliere un redirect più furbo
-			personStamping(Security.getUser().get().person.id,LocalDate.now().getYear(),LocalDate.now().getMonthOfYear());
-		}
+		Preconditions.checkState(stamping != null);
 
 		rules.checkIfPermitted(stamping.personDay.person);
 
@@ -253,9 +236,10 @@ public class Stampings extends Controller {
 
 		consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
-		flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(personDay.date));
+		flash.success("Timbratura rimossa correttamente.");
 
-		personStamping(personDay.person.id, personDay.date.getYear(), personDay.date.getMonthOfYear());
+		personStamping(personDay.person.id, personDay.date.getYear(), 
+				personDay.date.getMonthOfYear());
 	}
 	
 	
@@ -289,59 +273,88 @@ public class Stampings extends Controller {
 	}
 
 	/**
-	 * Controller che attua la verifica di timbrature mancanti per il mese selezionato per tutte quelle persone
-	 * che avevano almeno un contratto attivo in tale mese
-	 * @param year
-	 * @param month
+	 * Timbrature mancanti per le persone attive della sede.
+	 * 
+	 * @param year anno 
+	 * @param month mese
+	 * @param officeId sede
 	 */
-	public static void missingStamping(int year, int month) {
+	public static void missingStamping(final int year, final int month, 
+			final Long officeId) {
 
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		LocalDate monthEnd = new LocalDate(year, month, 1)
+		.dayOfMonth().withMaximumValue();
 
-		List<Person> activePersons = 
-				personDao.list(Optional.<String>absent(), officeDao.getOfficeAllowed(Security.getUser().get()), 
-						false, monthBegin, monthEnd, true).list();
+		List<Person> activePersons = personDao.list(Optional.<String>absent(),
+				Sets.newHashSet(office), false, monthBegin, monthEnd, true)
+				.list();
 
-		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
+		List<PersonTroublesInMonthRecap> missingStampings = 
+				Lists.newArrayList();
 
-		for(Person person : activePersons) {
+		for (Person person : activePersons) {
 			
-			PersonTroublesInMonthRecap pt = personTroubleRecapFactory.create(person, monthBegin, monthEnd);
+			PersonTroublesInMonthRecap pt = personTroubleRecapFactory
+					.create(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
-		render(month, year, missingStampings);
+		render(month, year, office, offices, missingStampings);
 	}
 
 	/**
-	 * Controller che renderizza la presenza giornaliera dei dipendenti visibili all'amministratore.
-	 * @param year
-	 * @param month
-	 * @param day
+	 * Presenza giornaliera dei dipendenti visibili all'amministratore.
+	 * 
+	 * @param year anno
+	 * @param month mese
+	 * @param day giorno
+	 * @param officeId sede
 	 */
-	public static void dailyPresence(Integer year, Integer month, Integer day) {
+	public static void dailyPresence(final Integer year, final Integer month, 
+			final Integer day, final Long officeId) {
 
-		LocalDate dayPresence = new LocalDate(year, month, day);
+		Set<Office> offices = secureManager
+				.officesReadAllowed(Security.getUser().get());
+		if (offices.isEmpty()) {
+			forbidden();
+		}
+		Office office = officeDao.getOfficeById(officeId);
+		notFoundIfNull(office);
+		rules.checkIfPermitted(office);
+		
+		LocalDate date = new LocalDate(year, month, day);
 
-		List<Person> activePersonsInDay = personDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, dayPresence, dayPresence, true).list();
+		List<Person> activePersonsInDay = personDao.list(
+				Optional.<String>absent(), Sets.newHashSet(office),
+				false, date, date, true).list();
 
-		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
+		int numberOfInOut = stampingManager
+				.maxNumberOfStampingsInMonth(date, activePersonsInDay);
 
-		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+		List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
 
-		daysRecap = stampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
+		daysRecap = stampingManager.populatePersonStampingDayRecapList(
+				activePersonsInDay, date, numberOfInOut);
 
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-
-		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
+		render(daysRecap, year, month, day, numberOfInOut, office, offices);
 	}
 
 	public static void holidaySituation(int year) {
 
-		List<Person> simplePersonList = personDao.list(Optional.<String>absent(),
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
-				new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), false).list();
+		List<Person> simplePersonList = personDao.list(
+				Optional.<String>absent(),
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, new LocalDate(year, 1, 1), 
+				new LocalDate(year, 12, 31), false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)
@@ -386,21 +399,23 @@ public class Stampings extends Controller {
 
 	public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day){
 
-		if(!Security.getUser().get().person.isPersonInCharge)
+		if(!Security.getUser().get().person.isPersonInCharge) {
 			forbidden();
-		LocalDate dayPresence = new LocalDate(year, month, day);
+		}
+		
+		LocalDate date = new LocalDate(year, month, day);
 
 		User user = Security.getUser().get();
 
 		List<Person> people = user.person.people;
-		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(year, month, day, people);
+		int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 
-		daysRecap = stampingManager.populatePersonStampingDayRecapList(people, dayPresence, numberOfInOut);
+		daysRecap = stampingManager
+				.populatePersonStampingDayRecapList(people, date, numberOfInOut);
 
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
+		render(daysRecap, year, month, day, numberOfInOut);
 
 
 	}

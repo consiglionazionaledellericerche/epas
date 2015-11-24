@@ -1,37 +1,34 @@
 package controllers;
 
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import dao.ConfYearDao;
+import dao.OfficeDao;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ConfYearManager.MessageResult;
+import manager.SecureManager;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
 import models.enumerate.Parameter;
-
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
-import dao.ConfYearDao;
-import dao.OfficeDao;
+import javax.inject.Inject;
+import java.util.Set;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Configurations extends Controller{
 
 	@Inject
 	private static OfficeDao officeDao;
+	@Inject
+	private static SecureManager secureManager;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
 	@Inject
@@ -50,7 +47,7 @@ public class Configurations extends Controller{
 
 		Office office = null;
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesSystemAdminAllowed(Security.getUser().get());
 		if(officeId != null) {
 			office = officeDao.getOfficeById(officeId);			
 		}
@@ -123,7 +120,7 @@ public class Configurations extends Controller{
 	public static void showConfYear(Long officeId){
 
 		Office office = null;
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesSystemAdminAllowed(Security.getUser().get());
 		if(officeId != null){
 			office = officeDao.getOfficeById(officeId);
 		}
@@ -204,7 +201,7 @@ public class Configurations extends Controller{
 	
 		Office office = null;
 
-		Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
+		Set<Office> offices = secureManager.officesSystemAdminAllowed(Security.getUser().get());
 		if(officeId != null) {
 			office = officeDao.getOfficeById(officeId);			
 		}

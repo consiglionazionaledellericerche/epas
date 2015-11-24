@@ -1,14 +1,9 @@
 package controllers;
 
 
-import java.lang.reflect.InvocationTargetException;
-
-import javax.inject.Inject;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
-
 import dao.UserDao;
 import manager.ConfGeneralManager;
 import models.User;
@@ -19,12 +14,17 @@ import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
+import javax.inject.Inject;
+import java.lang.reflect.InvocationTargetException;
+
+
 public class Security extends Secure.Security {
 
 	@Inject
 	private static UserDao userDao;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
+
 
 	/* Client rest */
 
@@ -137,7 +137,7 @@ public class Security extends Secure.Security {
 		//Cache.set(username, user, CACHE_DURATION);
 		return Optional.of(user);
 	}
-
+	
 	static String connected() {
 		if (request == null){
 			return null;

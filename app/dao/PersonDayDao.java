@@ -1,9 +1,11 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.JPQLQueryFactory;
 import models.Person;
 import models.PersonDay;
 import models.query.QAbsence;
@@ -12,16 +14,11 @@ import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 
 /**
@@ -66,6 +63,38 @@ public class PersonDayDao extends DaoBase {
 				.where(personDay.person.eq(person).and(personDay.date.eq(date)));
 		
 		return Optional.fromNullable(query.singleResult(personDay));
+	}
+	
+	/**
+	 * Cerca il personDay se non esiste ne crea una copia.
+	 * @param person
+	 * @param date
+	 * @return
+	 */
+	public PersonDay getOrBuildPersonDay(Person person, LocalDate date) {
+		
+		Optional<PersonDay> optPersonDay = getPersonDay(person, date);
+		if (optPersonDay.isPresent()) {
+			return optPersonDay.get();
+		} 
+		PersonDay personDay = new PersonDay(person, date);
+		return personDay;
+	}
+	
+	/**
+	 * Cerca il personDay se non esiste lo crea e lo persiste.
+	 * @param person
+	 * @param date
+	 * @return
+	 */
+	public PersonDay getOrCreateAndPersistPersonDay(Person person, LocalDate date) {
+		
+		Optional<PersonDay> optPersonDay = getPersonDay(person, date);
+		if (optPersonDay.isPresent()) {
+			return optPersonDay.get();
+		} 
+		PersonDay personDay = new PersonDay(person, date);
+		return personDay;
 	}
 	
 	/**

@@ -3,16 +3,18 @@
  label (optional) default to arg.name
  description (optional) default to null
  required (optional) default to false
+ biglabel (optional) più spazio per i label
 }*
 #{field _arg}%{
   if (_body) {
     _body.setProperty('field', field)
   }
 }%<div class='form-group #{if field.error}has-error has-feedback#{/if}'>
-		<label for="${field.id}" class="col-sm-3 control-label">
+		<label for="${field.id}" class="#{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else} control-label">
+		
 		#{if _label}${_label}#{/if} #{else}&{field.name}#{/else}#{if _required}*#{/if}
 		</label>
-			<div class="col-sm-6">
+			<div class="#{if _biglabel}col-sm-4#{/if}#{else}col-sm-6#{/else}">
 			#{doBody /}
 			#{if field.error}
 			#{if _feedback}<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>#{/if}

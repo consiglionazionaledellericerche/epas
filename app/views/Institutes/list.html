@@ -1,0 +1,116 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
+
+<div class="container">
+	
+	#{form action:@Institutes.list(), class:'form-inline', method:'GET',
+    'data-reload':'#results', autocomplete:'off'}
+
+    <div class="row">
+     <div class="col-sm-3">
+        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label(), inline:true /}
+     </div>
+     <div class="col-sm-1">
+        <button type="submit" name="_filter" class="btn btn-primary">
+            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+        </button>
+     </div>
+    </div>
+	#{/form}
+	
+	#{secure.checkAction 'Institutes.blank'}
+	  #{b.actions}
+	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
+	      <i class="fa fa-plus"></i> &{'Institutes.blank'}
+	    </a>
+      #{/b.actions}
+    #{/secure.checkAction}
+	
+	<div id="instituteList"> <!-- per il risultato della modale asincrona -->
+	
+	<section id="results">
+    #{paginate results} 
+	   
+	   #{list items:results.results, as:'item'}
+	   <ul class="list-group">
+		 <li class="list-group-item list-group-item-grey">
+		   <div class="pull-right btn-group">
+		     #{secure.checkAction 'Offices.blank'}
+	            <a class="btn btn-sm btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalInsertOffice">
+	            <i class="fa fa-plus"></i> Aggiungi sede</a>
+              #{/secure.checkAction}
+		   </div>
+			  <h4 style="color: black">	
+	            <i class="fa fa-university"></i>
+	             <a data-async-modal="#modalEditInstitute" class="list-group-item-heading"
+			    	href="@{edit(item.id)}">
+				    ${item.name}
+	    	    </a>
+	    	    
+	          </h4>
+	          
+	      </li>      
+          #{list items:item.seats, as:'seat'}
+          
+           <li class="list-group-item  list-group-item-bianco">
+             <h4><a class="list-group-item-heading" href="@{Offices.edit(seat.id)}">
+			    <i class="fa fa-cogs"></i> ${seat.name} 
+    	        </a></h4>
+           
+             <div class="list-group-item-text">
+              ${seat.address}
+             </div>
+             <div class="list-group-item-text">
+              ${seat.code}
+             </div>
+             
+             <div class="list-group-item-text">
+               <span class="label label-primary">Amministratore Tecnico</span>
+               #{list items:seat.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('tecnicalAdmin') && uro.user.person }
+                  <span class="label label-info">${uro.user.person.fullname}</span>
+                 #{/if}
+               #{/list}
+               <br>
+               <span class="label label-primary">Amministratori Personale</span>
+               #{list items:seat.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('personnelAdmin') && uro.user.person }
+                  <span class="label label-success">${uro.user.person.fullname}</span>
+                 #{/if}
+                 #{if uro.role.name.equals('personnelAdminMini') && uro.user.person }
+                  <span class="label label-warning">${uro.user.person.fullname}</span>
+                 #{/if}
+               #{/list}
+               <br>
+               <span class="label label-primary">Lettori Badge</span>
+               #{list items:seat.usersRolesOffices, as:'uro'}
+                 #{if uro.role.name.equals('badgeReader') }
+                  <span class="label label-danger">${uro.user.username}</span>
+                 #{/if}
+               #{/list}
+             </div>
+     	   </li>
+	          
+	      #{/list}
+	    </ul>
+	     
+	   #{/list}
+	        #{/paginate} 
+     </section>
+     </div>
+
+    <a href="@{Import.officeList()}" class="btn btn-default">
+        <i class="fa fa-cloud-download text-primary"> Importa Sedi</i>
+    </a>
+
+</div>
+
+
+
+<div id="modalEditInstitute" class="modal container" tabindex="-1"></div>
+
+<div id="modalInsertOffice" class="modal container" tabindex="-1"></div>
+
+<!-- <a class="btn btn-primary pull-right" href="@\{Import.officeList()}">Importa da Perseo</a>	 -->

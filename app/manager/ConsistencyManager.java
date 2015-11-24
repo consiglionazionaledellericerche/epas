@@ -1,14 +1,20 @@
 package manager;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.cache.StampTypeManager;
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
@@ -26,7 +32,6 @@ import models.Stamping.WayType;
 import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
-
 import org.apache.commons.mail.EmailException;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -34,29 +39,19 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.db.jpa.JPA;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.IWrapperPersonDay;
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class ConsistencyManager {
 
 	@Inject
-	public ConsistencyManager(OfficeDao officeDao, 
+	public ConsistencyManager(SecureManager secureManager, 
+			OfficeDao officeDao,
 			PersonManager personManager,
 			PersonDao personDao, 
 			PersonDayManager personDayManager,
@@ -69,6 +64,7 @@ public class ConsistencyManager {
 			VacationsRecapFactory vacationsFactory,
 			ConfGeneralManager confGeneralManager) {
 
+		this.secureManager = secureManager;
 		this.officeDao = officeDao;
 		this.personManager = personManager;
 		this.personDao = personDao;
@@ -87,6 +83,7 @@ public class ConsistencyManager {
 
 	private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
 
+	private final SecureManager secureManager;
 	private final OfficeDao officeDao;
 	private final PersonManager personManager;
 	private final PersonDao personDao;
@@ -113,8 +110,8 @@ public class ConsistencyManager {
 	public void fixPersonSituation(Optional<Person> person ,Optional<User> user,
 			LocalDate fromDate, boolean sendMail, boolean onlyRecap){
 
-		Set<Office> offices = user.isPresent() ? 
-				officeDao.getOfficeAllowed(user.get()) 
+		Set<Office> offices = user.isPresent() ?
+				secureManager.officesWriteAllowed(user.get()) 
 				: Sets.newHashSet(officeDao.getAllOffices());
 
 				//  (0) Costruisco la lista di persone su cui voglio operare
@@ -169,15 +166,21 @@ public class ConsistencyManager {
 	 * @param from
 	 */
 	public void updatePersonSituation(Long personId, LocalDate from) {
-		updatePersonSituationEngine(personId, from, false);
+		updatePersonSituationEngine(personId, from, Optional.<LocalDate>absent(), false);
+	}
+	
+	public void updateContractSituation(Contract contract, LocalDate from) {
+		
+		LocalDate to = wrapperFactory.create(contract).getContractDatabaseInterval().getEnd();
+		updatePersonSituationEngine(contract.person.id, from, Optional.fromNullable(to), false);
 	}
 	
 	public void updatePersonRecaps(Long personId, LocalDate from) {
-		updatePersonSituationEngine(personId, from, true);
+		updatePersonSituationEngine(personId, from, Optional.<LocalDate>absent(), true);
 	}
 
 	
-	private void updatePersonSituationEngine(Long personId, LocalDate from, 
+	private void updatePersonSituationEngine(Long personId, LocalDate from, Optional<LocalDate> to,
 			boolean updateOnlyRecaps) {
 		
 		final Person person = personDao.fetchPersonForComputation(personId, 
@@ -195,7 +198,9 @@ public class ConsistencyManager {
 
 		//Gli intervalli di ricalcolo dei person day.
 		LocalDate lastPersonDayToCompute = LocalDate.now();
-		
+		if (to.isPresent() && to.get().isBefore(lastPersonDayToCompute)) {
+			lastPersonDayToCompute = to.get();
+		}
 		LocalDate date = personFirstDateForEpasComputation(person,
 				Optional.fromNullable(from));
 				
@@ -391,40 +396,41 @@ public class ConsistencyManager {
 								.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
 
 				//timbratura chiusura giorno precedente
-				Stamping correctStamp = new Stamping();
-				correctStamp.date = new LocalDateTime(previous.date.getYear(), 
-						previous.date.getMonthOfYear(), previous.date.getDayOfMonth(), 23, 59);
-
-				correctStamp.way = WayType.out;
-				correctStamp.markedByAdmin = false;
-				correctStamp.stampModificationType = smtMidnight;
-				correctStamp.note = 
+				Stamping exitStamp = new Stamping(previous, 
+						new LocalDateTime(previous.date.getYear(), previous.date.getMonthOfYear(),
+								previous.date.getDayOfMonth(), 23, 59));
+				
+				exitStamp.way = WayType.out;
+				exitStamp.markedByAdmin = false;
+				exitStamp.stampModificationType = smtMidnight;
+				exitStamp.note = 
 						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-				correctStamp.personDay = previous;
-				correctStamp.save();
-				previous.stampings.add(correctStamp);
+				exitStamp.personDay = previous;
+				exitStamp.save();
+				previous.stampings.add(exitStamp);
 				previous.save();
 
 				populatePersonDay(wrapperFactory.create(previous));
 
 				//timbratura apertura giorno attuale
-				Stamping newEntranceStamp = new Stamping();
-				newEntranceStamp.date = new LocalDateTime(pd.getValue().date.getYear(),
-						pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(),0,0);
+				Stamping enterStamp = new Stamping(pd.getValue(), 
+						new LocalDateTime(pd.getValue().date.getYear(),
+						pd.getValue().date.getMonthOfYear(), 
+						pd.getValue().date.getDayOfMonth(), 0, 0) );
+				
+				enterStamp.way = WayType.in;
+				enterStamp.markedByAdmin = false;
 
-				newEntranceStamp.way = WayType.in;
-				newEntranceStamp.markedByAdmin = false;
-
-				newEntranceStamp.stampModificationType = smtMidnight;
+				enterStamp.stampModificationType = smtMidnight;
 
 
 
-				newEntranceStamp.note = 
+				enterStamp.note = 
 						"Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-				newEntranceStamp.personDay = pd.getValue();
-				newEntranceStamp.save();
+				
+				enterStamp.save();
 
-				pd.getValue().stampings.add( newEntranceStamp );
+				pd.getValue().stampings.add( enterStamp );
 				pd.getValue().save();
 			}
 		}

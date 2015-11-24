@@ -1,22 +1,21 @@
 package helpers;
 
-import java.util.List;
-
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-
-import play.db.jpa.JPA;
-
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 import com.mysema.query.types.Expression;
+import play.db.jpa.JPA;
+
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * @author marco
  *
  */
+@Deprecated
 public final class ModelQuery {
 	
 	/**
@@ -24,6 +23,7 @@ public final class ModelQuery {
 	 *
 	 * @param <T>
 	 */
+	 @Deprecated
 	public static class SimpleResults<T> {
 		private final Expression<T> e;
 		private final JPQLQuery query;

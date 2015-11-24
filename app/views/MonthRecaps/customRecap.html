@@ -2,34 +2,11 @@
 #{set header: 'navbar' /}
 #{set title: 'ePAS - Riepilogo Danila'  /}
 
- <!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
- <!-- risolto nel branch PersonUserPermssion -->
-<div class="container-fluid">
-	<div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-		#{form action:@MonthRecaps.customRecap(), role:'form',
-		class:'form-inline', method:'GET', autocomplete:'off'}
-		<div class="form-group">
-			<label class="hidden-xs hidden-sm" for="dip">Sede</label> 
-			<input type="hidden" name="year" value="${year}" />
-			<input type="hidden" name="month" value="${month}" /> 
-			<select name="officeId" class="form-control" id="dip" 
-			onChange="javascript:this.form.submit()"> 
-			#{list items:offices, as:'officeItem'}
-				<option value="${officeItem.id}" 
-				    #{if officeItem.id.equals(office.id) } selected="selected"#{/if} >
-					${officeItem.name}
-				</option>
-			#{/list}
-			</select>
-		</div>
-
-		<button type="submit" class="btn btn-default">Invio</button>
-		#{/form}
-	</div>
-</div>
-<!-- FINE FILTRO OFFICE -->
-
-<div class="container-fluid">
+ #{set breadcrumbs:['Riepilogo mensile':null] /}
+ 
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:'Riepilogo mensile ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
  <table class="table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
    <thead>

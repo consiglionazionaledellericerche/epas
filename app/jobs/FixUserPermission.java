@@ -3,7 +3,11 @@ package jobs;
 import com.google.common.collect.Lists;
 import injection.StaticInject;
 import manager.OfficeManager;
-import models.*;
+import models.Office;
+import models.Person;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
@@ -97,7 +101,7 @@ public class FixUserPermission {
 			for(UsersRolesOffices uro : p.user.usersRolesOffices ) {
 				//Rimuovo ruolo role se non appartiene più all'office
 				if(uro.role.name.equals(employeeRole.name)){
-					if(uro.office.code.equals(p.office.code)) {
+					if(uro.office.codeId.equals(p.office.codeId)) {
 						exist = true;
 					}
 					else {
