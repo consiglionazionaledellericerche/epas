@@ -8,7 +8,7 @@
 		
 		<ul id="nav-year" class="nav navbar-nav">
         	<li class="dropdown">
-          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span></a>
+          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}<span class="caret"></span></span></a>
           	  <ul class="dropdown-menu">         	  
           	   #{list items:navYears, as:'year'}
           	   	<li><a href="?year=${year}&month=${currentData.month}&personId=${currentData.personId}&officeId=${currentData.officeId}">${year}</a></li>           	
@@ -22,7 +22,7 @@
 #{if switchMonth}
       	  <ul id="nav-month" class="nav navbar-nav">
         	<li class="dropdown">
-          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span></a>
+          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}<span class="caret"></span></span></a>
           	  <ul class="dropdown-menu">
           	  #{list items:1..12, as:'month'}
             	<li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.day}">&{'Month.'+month}</a></li>
@@ -53,7 +53,7 @@
   	#{form @SwitchTemplate.updatePerson(), 
   	  class: 'navbar-form navbar-left my-navbar-form', 
   	  onChange:'javascript:this.form.submit()' }
-  	  
+
 	 	<div class="form-group">
 	    <!-- Lista persone -->
 	    #{select 'personId', value:session.get("personSelected"), 
@@ -68,7 +68,7 @@
 #{if switchOffice}
   #{form @SwitchTemplate.updateOffice(),  
       class: 'navbar-form navbar-left my-navbar-form', 
-  	  onChange:'javascript:this.form.submit()' }}
+  	  onChange:'javascript:this.form.submit()' }
 
 		<div class="form-group">
 			    #{select 'officeId', value:session.get("officeSelected"), 
