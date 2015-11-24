@@ -1,21 +1,14 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-
-import dao.ContractDao;
-import dao.PersonChildrenDao;
-import dao.PersonDao;
-import dao.UserDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
@@ -37,16 +30,25 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
-import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import javax.inject.Inject;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import dao.ContractDao;
+import dao.PersonChildrenDao;
+import dao.PersonDao;
+import dao.UserDao;
+import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 
 @Slf4j
@@ -110,11 +112,28 @@ public class Contracts extends Controller {
 		render(person, contractList, contractStampProfileList);
 	}
 	
-	public static void modifyContract(Long contractId) {
+//	public static void modifyContract(Long contractId) {
+//		
+//		Contract contract = contractDao.getContractById(contractId);
+//		notFoundIfNull(contract);
+//		rules.checkIfPermitted(contract.person.office);
+//		
+//		IWrapperContract wrappedContract = wrapperFactory.create(contract);
+//		
+//		LocalDate beginContract = contract.beginContract;
+//		LocalDate expireContract = contract.expireContract;
+//		LocalDate endContract = contract.endContract;
+//		boolean onCertificate = contract.onCertificate;
+//
+//		render(wrappedContract, beginContract, expireContract, endContract, onCertificate);
+//	}
+	
+	public static void edit(Long contractId) {
 		
 		Contract contract = contractDao.getContractById(contractId);
 		notFoundIfNull(contract);
 		rules.checkIfPermitted(contract.person.office);
+		Person person = contract.person;
 		
 		IWrapperContract wrappedContract = wrapperFactory.create(contract);
 		
@@ -123,10 +142,11 @@ public class Contracts extends Controller {
 		LocalDate endContract = contract.endContract;
 		boolean onCertificate = contract.onCertificate;
 
-		render(wrappedContract, beginContract, expireContract, endContract, onCertificate);
+		render(person, contract,
+				wrappedContract, beginContract, expireContract, endContract, onCertificate);
 	}
 
-	public static void updateContract(@Valid Contract contract, @Required LocalDate beginContract, 
+	public static void update(@Valid Contract contract, @Required LocalDate beginContract, 
 			@Valid LocalDate expireContract, @Valid LocalDate endContract, boolean onCertificate,
 			boolean confirmed) {
 
@@ -150,7 +170,7 @@ public class Contracts extends Controller {
 			if (expireContract!=null && endContract!=null && !endContract.isBefore(beginContract)) {
 				validation.addError("endContract", 
 						"non può essere successivo alla scadenza del contratto");
-			}
+			}			
 		}
 		
 		if (validation.hasErrors()) {
@@ -160,12 +180,9 @@ public class Contracts extends Controller {
 			
 			log.warn("validation errors: {}", validation.errorsMap());
 			
-			render("@modifyContract", wrappedContract, beginContract, expireContract,
+			render("@edit", contract, wrappedContract, beginContract, expireContract,
 					endContract, onCertificate);
 		}
-		
-		//Salvo la situazione precedente
-		DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 		
 		//Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
 		contract.beginContract = beginContract;
@@ -173,10 +190,14 @@ public class Contracts extends Controller {
 		contract.endContract = endContract;
 		contract.onCertificate = onCertificate;
 		if (!contractManager.isProperContract(contract)) {
-			flash.error("Il contratto si interseca con altri contratti della persona. "
-					+ "Controllare le date di inizio e fine. Operazione annullata.");
-			Contracts.personContracts(contract.person.id);
+			validation.addError("contract.crossValidationFailed", "Il contratto non può intersecarsi"
+					+ " con altri contratti del dipendente.");
+			render("@edit", contract, wrappedContract, beginContract, expireContract,
+					endContract, onCertificate);
 		}
+
+		//Salvo la situazione precedente
+		DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 		
 		//Se non ho avuto conferma la data da cui ricalcolare
 		boolean changeBegin = false;
@@ -214,7 +235,7 @@ public class Contracts extends Controller {
 				}
 				
 				response.status = 400;
-				render("@modifyContract", wrappedContract, beginContract, expireContract,
+				render("@edit", contract, wrappedContract, beginContract, expireContract,
 						endContract, onCertificate, changeBegin, changeEnd, recomputeFrom, recomputeTo, onlyRecap);
 			}
 		}
@@ -229,28 +250,8 @@ public class Contracts extends Controller {
 		flash.success("Aggiornato contratto per il dipendente %s %s", 
 				contract.person.name, contract.person.surname);
 
-		Contracts.personContracts(contract.person.id);
+		Contracts.edit(contract.id);
 
-	}
-	
-	public static void edit(@Valid Contract contract) {
-		
-		notFoundIfNull(contract);
-		
-		rules.checkIfPermitted(contract.person.office);
-		
-		//Contract contract = contractDao.getContractById(contractId);
-		notFoundIfNull(contract);
-		rules.checkIfPermitted(contract.person.office);
-		
-		IWrapperContract wrappedContract = wrapperFactory.create(contract);
-		
-		LocalDate beginContract = contract.beginContract;
-		LocalDate expireContract = contract.expireContract;
-		LocalDate endContract = contract.endContract;
-		boolean onCertificate = contract.onCertificate;
-
-		render(wrappedContract, beginContract, expireContract, endContract, onCertificate);
 	}
 	
 	public static void insert(Person person){
@@ -272,46 +273,67 @@ public class Contracts extends Controller {
 
 		rules.checkIfPermitted(contract.person.office);
 
-		if (contract.beginContract == null) {
 
-			flash.error("Errore nel fornire il parametro data inizio contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			//edit(person.id);
-		}
-		if (Validation.hasErrors()) {
-
-			flash.error("Errore nel fornire il parametro data fine contratto. "
-					+ "Inserire la data nel corretto formato aaaa-mm-gg");
-			//edit(person.id);
-		}
-
-		//Tipo orario
-		if (wtt == null) {
-			flash.error("Errore nel fornire il parametro tipo orario. "
-					+ "Operazione annullata.");
-			//edit(person.id);
-		}
-
-		//Creazione nuovo contratto
-//		Contract contract = new Contract();
-//		contract.beginContract = dataInizio;
-//		contract.expireContract = dataFine;
-//		contract.onCertificate = onCertificate;
-//		contract.person = person;
-		
-		if (!contractManager.properContractCreate(contract, wtt)) {
-			flash.error("Errore durante la creazione del contratto. "
-					+ "Assicurarsi di inserire date valide e che non si "
-					+ "sovrappongono con altri contratti della person");
-			params.flash(); // add http parameters to the flash scope
-			//edit(person.id);
+		if (!validation.hasErrors()) {
+			
+			if (contract.expireContract!=null 
+					&& contract.expireContract.isBefore(contract.beginContract)) {
+				validation.addError("contract.expireContract", 
+						"non può precedere l'inizio del contratto.");
+			
+			} else if (!contractManager.properContractCreate(contract, wtt)) {
+				validation.addError("contract.beginContract", "i contratti non possono sovrapporsi.");
+				if (contract.expireContract != null) {
+					validation.addError("contract.expireContract", "i contratti non possono sovrapporsi.");
+				}
+			}
+			
 		}
 		
-//		flash.success("Il contratto per %s %s è stato correttamente salvato", 
-//				person.name, person.surname);
+		if (validation.hasErrors()) {
+			
+			response.status = 400;
+			flash.error(Web.msgHasErrors());
+			
+			log.warn("validation errors: {}", validation.errorsMap());
+			
+			render("@insert", contract, wtt);
+		}
+		
+		flash.success("Contratto inserito correttamente");
 
-		//edit(person.id);
+		Contracts.personContracts(contract.person.id);
 	}
+	
+	public static void delete(Long contractId){
+
+		Contract contract = contractDao.getContractById(contractId);
+		
+		notFoundIfNull(contract);
+
+		rules.checkIfPermitted(contract.person.office);
+
+		render(contract);
+	}
+
+	public static void deleteConfirmed(Long contractId){
+
+		Contract contract = contractDao.getContractById(contractId);
+		
+		notFoundIfNull(contract);
+
+		rules.checkIfPermitted(contract.person.office);
+
+		for(ContractStampProfile csp : contract.contractStampProfile){
+			csp.delete();
+		}
+
+		contract.delete();
+
+		flash.error("Contratto eliminato con successo.");
+		edit(contract.person.id);
+	}
+
 
 	public static void updateContractWorkingTimeType(Long id){
 
@@ -450,69 +472,108 @@ public class Contracts extends Controller {
 	public static void updateSourceContract(Long contractId){
 
 		Contract contract = contractDao.getContractById(contractId);
-		
 		notFoundIfNull(contract);
-
 		rules.checkIfPermitted(contract.person.office);
-		
+
 		IWrapperContract wContract = wrapperFactory.create(contract);
+		if (contract.sourceDateResidual == null) {
+			contractManager.cleanResidualInitialization(contract);
+		}
+		if (contract.sourceDateMealTicket == null) {
+			contractManager.cleanMealTicketInitialization(contract);
+		}
 		
-		LocalDate dateForInit = wContract.dateForInitialization();
+		IWrapperOffice wOffice = wrapperFactory.create(contract.person.office);
+		IWrapperPerson wPerson = wrapperFactory.create(contract.person);
 		
-		render(contract, dateForInit);
+		render(contract, wContract, wOffice, wPerson);
 	}
 	
-	public static void approveAutomatedSource(Long contractId) {
+//	public static void approveAutomatedSource(Long contractId) {
+//		
+//		Contract contract = contractDao.getContractById(contractId);
+//		
+//		notFoundIfNull(contract);
+//		
+//		rules.checkIfPermitted(contract.person.office);
+//		
+//		contract.sourceByAdmin = true;
+//		contract.save();
+//		
+//		flash.success("Operazione conclusa con successo.");
+//		
+//		//list(null);
+//		
+//	}
+	
+	public static void saveResidualSourceContract(@Valid Contract contract, 
+			@Valid @Required LocalDate sourceDateResidual, boolean confirmed) {
 		
-		Contract contract = contractDao.getContractById(contractId);
-		
-		notFoundIfNull(contract);
-		
-		rules.checkIfPermitted(contract.person.office);
-		
-		contract.sourceByAdmin = true;
-		contract.save();
-		
-		flash.success("Operazione conclusa con successo.");
-		
-		//list(null);
-		
-	}
-
-
-	public static void saveSourceContract(Contract contract, boolean onlyMealTicket) {
-
 		notFoundIfNull(contract);
 
 		rules.checkIfPermitted(contract.person.office);
 		
 		IWrapperContract wContract = wrapperFactory.create(contract);
+		IWrapperOffice wOffice = wrapperFactory.create(contract.person.office);
+		IWrapperPerson wPerson = wrapperFactory.create(contract.person);
 		
-		if( !onlyMealTicket && contract.sourceDateResidual != null 
-				&& contract.sourceDateResidual.isBefore(wContract.dateForInitialization())){
+		if (!validation.hasErrors()) {
+			if (sourceDateResidual.isBefore(wContract.dateForInitialization())) {
+				validation.addError("sourceDateResidual", 
+						"deve essere uguale o successiva a " + wContract.dateForInitialization());
+			}
+		}
+		
+		if (validation.hasErrors()) {
+			response.status = 400;
+			flash.error(Web.msgHasErrors());
 			
-			flash.error("Data inizializzazione non valida");
-			//edit(contract.person.id);
+			log.warn("validation errors: {}", validation.errorsMap());
+			
+			render("@updateSourceContract", 
+					contract, wContract, wPerson, wOffice, sourceDateResidual);
 		}
-
-		contract.sourceByAdmin = true;
-
-		contractManager.saveSourceContract(contract);
-
-		//Ricalcolo valori dalla nuova data inizializzazione.
-		if (!onlyMealTicket) {
-			consistencyManager.updatePersonSituation(contract.person.id, 
-					contract.sourceDateResidual);
-		} else {
-			//modifico solo i buoni pasto quindi ricalcolo solo i riepiloghi
-			consistencyManager.updatePersonRecaps(contract.person.id, 
-					contract.sourceDateResidual);
+		
+		if (!confirmed) {
+			boolean recap = true;
+			render("@updateSourceContract", 
+					contract, wContract, wPerson, wOffice, sourceDateResidual, recap);
 		}
-		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
-
-		//edit(contract.person.id);
+		
+		
+		Contracts.edit(contract.id);
 
 	}
+
+//
+//	public static void saveSourceContract(Contract contract, boolean onlyMealTicket) {
+//
+//				
+//		if( !onlyMealTicket && contract.sourceDateResidual != null 
+//				&& contract.sourceDateResidual.isBefore(wContract.dateForInitialization())){
+//			
+//			flash.error("Data inizializzazione non valida");
+//			//edit(contract.person.id);
+//		}
+//
+//		contract.sourceByAdmin = true;
+//
+//		contractManager.saveSourceContract(contract);
+//
+//		//Ricalcolo valori dalla nuova data inizializzazione.
+//		if (!onlyMealTicket) {
+//			consistencyManager.updatePersonSituation(contract.person.id, 
+//					contract.sourceDateResidual);
+//		} else {
+//			//modifico solo i buoni pasto quindi ricalcolo solo i riepiloghi
+//			consistencyManager.updatePersonRecaps(contract.person.id, 
+//					contract.sourceDateResidual);
+//		}
+//		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
+//
+//		//edit(contract.person.id);
+//
+//	}
 
 
 	

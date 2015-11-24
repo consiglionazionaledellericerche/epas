@@ -390,3 +390,6 @@ tfoot input {
   margin-top: 2em;
   margin-bottom: 2em;
 }
+
+/* */
+.breadcrumb { background-color: #E6E6E6; }

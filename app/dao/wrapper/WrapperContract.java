@@ -239,6 +239,7 @@ public class WrapperContract implements IWrapperContract {
 		return candidate;
 	}
 	
+
 	@Override
 	public boolean monthRecapMissing(YearMonth yearMonth) {
 
