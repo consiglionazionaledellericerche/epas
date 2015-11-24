@@ -1,86 +1,21 @@
 #{extends 'Wizard/wizard.html' /}
 
-#{form @Wizard.setOffice(),role:'form'}
-<input type="hidden" name="stepIndex" value="${currentStep.index}"/>
-<fieldset>
+#{form @Wizard.setOffice(),class:'form-horizontal'}
+#{f.hidden 'stepIndex', value:currentStep.index/}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Istituto</em></h2></legend>
 
-  <div class="row">
-    #{field 'area'}
-    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Nome Area</label>
-      <input class="form-control" placeholder="Es. Area CNR Pisa" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}
-      <span class="help-block">${field.error}</span>
-      #{/if}
-    </div>
-    #{/field}
-    
-  </div>
+#{f.input 'institute.name',value:properties.getProperty('instituteName') /}
+#{f.input 'institute.cds',popover:true,value:properties.getProperty('instituteCds') /}
+#{f.input 'institute.code',popover:true,value:properties.getProperty('instituteCode') /}
 
-  <legend class="col-xs-12 col-sm-6 col-sm-offset-3"></legend>
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Sede</em></h2></legend>
 
-  <div class="row">
-    #{field 'institute'}
-    <div class='form-group col-sm-4 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Nome Istituto</label>
-      <input class="form-control" placeholder="Es. Istituto di Informatica e Telematica" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
+#{f.input 'office.name',value:properties.getProperty('officeName') /}
+#{f.input 'office.code',popover:true,value:properties.getProperty('officeCode') /}
+#{f.input 'office.codeId',popover:true,value:properties.getProperty('officeCodeId') /}
+#{f.input 'office.address',value:properties.getProperty('officeAddress') /}
+#{f.date 'office.joiningDate',popover:true,value:properties.getProperty('officeJoiningDate') /}
 
-    #{field 'institute_contraction'}
-    <div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Sigla Istituto</label>
-      <input class="form-control" placeholder="Es. IIT" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-  </div>
-
-  <legend class="col-xs-12 col-sm-6 col-sm-offset-3"></legend>
-
-  <div class="row">
-
-    #{field 'seat'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Nome Sede</label>
-      <input class="form-control" placeholder="Es. IIT - Pisa" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-    #{field 'seat_address'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Indirizzo</label>
-      <input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-    #{field 'seat_code'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Codice Sede</label>
-      <input class="form-control" placeholder="Es. 12345" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-    #{field 'seat_affiliation_date'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data affiliazione</label>
-      <div class="input-group">
-        <input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-      </div>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-  </div>
-
-  <legend id="bottom_line" class="col-sm-12"></legend>
-
-  <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
-</fieldset>
+<legend id="bottom_line" class="col-sm-12"></legend>
+#{b.submit 'Invia', class:'col-sm-2 col-sm-offset-5', /}
 #{/form}

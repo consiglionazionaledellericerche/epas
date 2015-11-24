@@ -390,6 +390,13 @@ tfoot input {
   margin-top: 2em;
   margin-bottom: 2em;
 }
+/*
+div.form-group .form-control-static {
+    background: rgb(245,245,245);
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+    text-align: center;
+}
+*/
 
-/* */
-.breadcrumb { background-color: #E6E6E6; }
