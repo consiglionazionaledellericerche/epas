@@ -47,6 +47,18 @@ $(function($) {
     });
     e.preventDefault();
   });
+
+  /**
+   * Per impostare il tag da visualizzare quando ricarica la pagina.
+   */
+  $(document.body).on('submit', 'form[data-anchor]', function(e) {
+	    e.preventDefault();
+	    var $form = $(this);
+	    var url = $form.attr('action') + $form.data('anchor');
+	    $form.removeAttr('data-anchor');
+	    $form.attr('action', url).submit();
+  });
+  
   /**
    * Author: Marco
    */

@@ -1,8 +1,14 @@
 *{
   arg array of string
+  noHome:
+  container:
 }*
+#{if _container}<div class="container">#{/if}
+
 <ul class="breadcrumb">
+     #{if _noHome}#{/if}#{else}
     <li><a href="@{Application.index()}"><i class="icon-home"></i> ${'Home'.label()}</a> <span class="divider"></span></li>
+     #{/else}
 #{list items:_arg, as:'item'}
     #{if item_isLast}
     <li class="active">${item.key.label()}</li>
@@ -12,3 +18,4 @@
     #{/else}
 #{/list}
 </ul>
+#{if _container}</div>#{/if}
