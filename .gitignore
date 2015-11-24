@@ -21,3 +21,5 @@ lib/
 /.settings
 /docs/_build
 /scrap.jpage
+/.pydevproject
+/fabfile.pyc
