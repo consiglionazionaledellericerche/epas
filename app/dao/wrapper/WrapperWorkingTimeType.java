@@ -10,6 +10,7 @@ import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -50,14 +51,16 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		LocalDate today = new LocalDate();
 
-		List<Contract> activeContract = contractManager.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = 
+				contractDao.getActiveContractsInPeriod(today, Optional.fromNullable(today));
 
 		for(Contract contract : activeContract) {
 
 			if( !contract.person.office.id.equals(officeId))
 				continue;
 
-			ContractWorkingTimeType current = contractManager.getContractWorkingTimeTypeFromDate(contract, today);
+			ContractWorkingTimeType current = contractManager
+					.getContractWorkingTimeTypeFromDate(contract, today);
 			if(current.workingTimeType.id.equals(value.id))
 				contractList.add(contract);
 		}
@@ -77,7 +80,8 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		LocalDate today = new LocalDate();
 
-		List<Contract> activeContract = contractManager.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = 
+				contractDao.getActiveContractsInPeriod(today, Optional.fromNullable(today));
 
 		for(Contract contract : activeContract) {
 

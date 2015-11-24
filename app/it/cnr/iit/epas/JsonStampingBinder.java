@@ -3,26 +3,13 @@
  */
 package it.cnr.iit.epas;
 
-import injection.StaticInject;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import lombok.extern.slf4j.Slf4j;
-import models.BadgeReader;
-import models.Office;
-import models.Person;
-import models.StampType;
-import models.exports.StampingFromClient;
-
 import org.joda.time.LocalDateTime;
-
-import play.Logger;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -35,6 +22,17 @@ import dao.BadgeReaderDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.StampingDao;
+import injection.StaticInject;
+import lombok.extern.slf4j.Slf4j;
+import models.BadgeReader;
+import models.Office;
+import models.Person;
+import models.StampType;
+import models.User;
+import models.exports.StampingFromClient;
+import play.Logger;
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 
 /**
@@ -61,11 +59,18 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	 */
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,	
-			Class actualClass, Type genericType) throws Exception {
+			@SuppressWarnings("rawtypes") Class actualClass, Type genericType) throws Exception {
 		
-		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
 			
+			Optional<User> user = Security.getUser();
+			if (!user.isPresent()) {
+				log.info("StampingFromClient: {}, {}, {}, {}, {}", name, 
+						annotations, value, actualClass, genericType);
+				
+				log.info("StampingFromClient: l'user non presente");
+				return null;
+			}
 			Set<Office> offices = officeDao.getOfficeAllowed(Security.getUser().get());
 			Person person = null;
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
