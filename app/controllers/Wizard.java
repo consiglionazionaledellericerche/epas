@@ -7,21 +7,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
-import javax.inject.Inject;
-
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.WorkingTimeTypeDao;
+
 import helpers.validators.StringIsTime;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
@@ -36,6 +25,9 @@ import models.Role;
 import models.User;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -46,6 +38,15 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.libs.Codec;
 import play.mvc.Controller;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+
+import javax.inject.Inject;
+
 
 /**
  * @author daniele
@@ -74,7 +75,7 @@ public class Wizard extends Controller {
   public static final String PROPERTIES_KEY = "properties";
   public static final int LAST_STEP = 4;
 
-  private final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
+  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
 
   public static class WizardStep {
     public final int index;
@@ -142,13 +143,12 @@ public class Wizard extends Controller {
       Cache.safeAdd(PROPERTIES_KEY, properties, "10mn");
     }
 
-    int stepsCompleted = Collections2.filter(steps,
-            new Predicate<WizardStep>() {
-              @Override
-              public boolean apply(WizardStep step) {
-                return step.completed;
-              }
-            }).size();
+    int stepsCompleted = Collections2.filter(steps, new Predicate<WizardStep>() {
+      @Override
+      public boolean apply(WizardStep step) {
+        return step.completed;
+      }
+    }).size();
 
     percent = stepsCompleted * (100 / steps.size());
 
@@ -189,7 +189,8 @@ public class Wizard extends Controller {
   // Step 1 del Wizard, cambio password Admin.
   public static void changeAdminPsw(int stepIndex, @Required String adminPassword,
                                     @Required @Equals(value = "adminPassword",
-                                            message = "Le password non corrispondono") String adminPasswordRetype) {
+                                            message = "Le password non corrispondono")
+                                    String adminPasswordRetype) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -287,10 +288,11 @@ public class Wizard extends Controller {
   }
 
   // STEP 4 Creazione Profilo per l'amministratore
-  public static void seatManagerRole(int stepIndex, Person person,
-                                     @Required int qualification, @Required LocalDate beginContract,
-                                     LocalDate endContract, @Required String managerPassword,
-                                     @Required @Equals(value = "managerPassword", message = "Le password non corrispondono")
+  public static void seatManagerRole(int stepIndex, Person person, @Required int qualification,
+                                     @Required LocalDate beginContract, LocalDate endContract,
+                                     @Required String managerPassword,
+                                     @Required @Equals(value = "managerPassword",
+                                             message = "Le password non corrispondono")
                                      String managerPasswordRetype) {
 
     validation.required(person.name);
@@ -366,22 +368,22 @@ public class Wizard extends Controller {
       Logger.error("Impossibile caricare il file Wizard_Properties.conf durante il Wizard");
     }
 
-    //      Creazione admin
+    //  Creazione admin
     User adminUser = new User();
     adminUser.username = Role.ADMIN;
     adminUser.password = Codec.hexMD5(properties.getProperty("adminPassword"));
     adminUser.save();
 
-    //		 Creazione Istituto e Sede
+    //  Creazione Istituto e Sede
 
-    //		Istituto
+    //  Istituto
     final Institute institute = new Institute();
     institute.name = properties.getProperty("instituteName");
     institute.cds = properties.getProperty("instituteCds");
     institute.code = properties.getProperty("instituteCode");
     institute.save();
 
-    //		Sede
+    //  Sede
     final Office office = new Office();
     office.name = properties.getProperty("officeName");
     office.code = properties.getProperty("officeCode");
@@ -409,9 +411,6 @@ public class Wizard extends Controller {
 
     confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, office,
             Optional.fromNullable(LocalDate.now().toString()));
-
-//    LocalDate dayMonth = DateUtility.dayMonth(properties.getProperty("dateOfPatron"),
-//            Optional.<String>absent());
 
     confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office,
             Optional.fromNullable(dateOfPatron.get(0)));
@@ -444,7 +443,7 @@ public class Wizard extends Controller {
     person.email = properties.getProperty("personnelAdminEmail");
 
     person.qualification = qualificationDao.getQualification(Optional
-            .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
+                    .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
             Optional.<Long>absent(), false).get(0);
 
     if (properties.containsKey("personnelAdminNumber")) {
