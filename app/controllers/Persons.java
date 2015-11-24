@@ -105,7 +105,7 @@ public class Persons extends Controller {
 		List<Person> simplePersonList = personDao.listFetched(
 				Optional.fromNullable(name),
 				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, null, null, false).list();
+				false, null, null, false, false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)

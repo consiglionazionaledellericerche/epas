@@ -18,10 +18,17 @@ absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
+badge.begin= Inzio
+badge.end= Fine
+badge.code= Numero badge
+
 badgeReader.code=Nome 
+badgeReader.id=id
 badgeReader.description=Descrizione 
 badgeReader.location=Location
 badgeReader.owner=Sede Afferente
+BadgeReader.blank= Nuovo lettore badge
+BadgeReader.join= Badge e lettori badge
 
 views.common.true=vero
 views.common.false=falso
@@ -105,6 +112,7 @@ person.currentVacationPeriod= Ferie
 person.qualification= Livello
 person.office= Sede
 person.isPersonInCharge= Responsabile gruppo di lavoro
+person.badge= Numero badge
 
 contract.beginContract=Inizio contratto
 contract.expireContract=Fine contratto

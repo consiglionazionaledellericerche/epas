@@ -36,6 +36,14 @@
 	   #{list items:results.results, as:'item'}
 	   
 		 <li class="list-group-item list-group-item-grey">
+		 <div class="pull-right btn-group">
+		 #{b.actions}
+	     <a href="@{manageBadgesIntoBadgeReaders(item.id)}">
+	      <i class="fa fa-magic"></i> &{'BadgeReader.join'}
+	     </a>
+         #{/b.actions}
+		 
+		 </div>
 		   <h4 style="color: black">	
 	         <i class="fa fa-credit-card"></i>
 	         <a class="list-group-item-heading" href="@{edit(item.id)}">
