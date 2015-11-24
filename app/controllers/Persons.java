@@ -289,36 +289,7 @@ public class Persons extends Controller {
 
 		render(person, cwtt, wtt);
 	}
-
-	public static void deleteContract(Long contractId){
-
-		Contract contract = contractDao.getContractById(contractId);
-		
-		notFoundIfNull(contract);
-
-		rules.checkIfPermitted(contract.person.office);
-
-		render(contract);
-	}
-
-	public static void deleteContractConfirmed(Long contractId){
-
-		Contract contract = contractDao.getContractById(contractId);
-		
-		notFoundIfNull(contract);
-
-		rules.checkIfPermitted(contract.person.office);
-
-		for(ContractStampProfile csp : contract.contractStampProfile){
-			csp.delete();
-		}
-
-		contract.delete();
-
-		flash.error("Contratto eliminato con successo.");
-		edit(contract.person.id);
-	}
-
+	
 	public static void changePassword(){
 		User user = Security.getUser().get();
 		notFoundIfNull(user);
