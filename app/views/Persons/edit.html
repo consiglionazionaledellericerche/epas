@@ -2,6 +2,9 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Modifica ' + person.fullname /}
 
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 #{persons.personsTabs activeAction:'edit' /}
 
