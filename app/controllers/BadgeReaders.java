@@ -65,12 +65,6 @@ public class BadgeReaders extends Controller {
 		render(results, name);
 	}
 	
-	public static void show(Long id) {
-		final BadgeReader badgeReader = BadgeReader.findById(id);
-		notFoundIfNull(badgeReader);
-		render(badgeReader);
-	}
-
 	public static void edit(Long id) {
 		
 		final BadgeReader badgeReader = badgeReaderDao.byId(id);
