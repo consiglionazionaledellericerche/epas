@@ -16,9 +16,15 @@ public final class Dipendente implements Comparable<Dipendente> {
 	private final Person person;
 
 	public Dipendente(final Person person, final String nomeCognome) {
-		this.matricola = person.number == null ? "" : person.number.toString();
+
+		if (person != null) {
+			this.matricola = person.number == null ? "" : person.number.toString();
+		} else {
+			this.matricola = "";
+		}
 		this.cognomeNome = nomeCognome;
 		this.person = person;
+		
 	}
 
 	public String getMatricola() { return matricola; }

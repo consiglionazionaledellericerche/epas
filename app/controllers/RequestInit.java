@@ -66,6 +66,8 @@ public class RequestInit extends Controller {
 	public static class ItemsPermitted {
 
 		public boolean isEmployee = false;
+		
+		public boolean isDeveloper = false;
 
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
@@ -90,13 +92,23 @@ public class RequestInit extends Controller {
 
 			for(Role role : roles) {
 
-				if (role.name.equals(Role.EMPLOYEE)) {
+				if (role.name.equals(Role.ADMIN)) {
+					this.viewPerson = true;
+					this.viewOffice = true;
+					this.viewWorkingTimeType = true;
+					
+				} else if (role.name.equals(Role.DEVELOPER)) {
+					this.isDeveloper = true;
+					this.viewPerson = true;
+					this.viewOffice = true;
+					this.viewWorkingTimeType = true;
+					
+				} else if (role.name.equals(Role.EMPLOYEE)) {
 					this.isEmployee = true;
 				}
 				
-				if (role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
-						role.name.equals(Role.PERSONNEL_ADMIN) || 
-						role.name.equals(Role.DEVELOPER)) {
+				if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI) || 
+						role.name.equals(Role.PERSONNEL_ADMIN) ) {
 					this.viewPerson = true;
 					this.viewPersonDay = true;
 					this.viewOffice = true;
@@ -106,8 +118,7 @@ public class RequestInit extends Controller {
 					this.viewAbsenceType = true;
 				}
 				
-				if (role.name.equals(Role.PERSONNEL_ADMIN) || 
-						role.name.equals(Role.DEVELOPER)) {
+				if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN) ) {
 					this.editCompetence = true;
 					this.uploadSituation = true;
 					this.editCompetenceCode = true;
@@ -143,6 +154,14 @@ public class RequestInit extends Controller {
 		public boolean isConfigurationVisible() {
 
 			return viewOffice || viewWorkingTimeType || viewAbsenceType;
+		}
+		
+		/**
+		 * Se l'user ha i permessi per vedere Tools.
+		 * @return
+		 */
+		public boolean isToolsVisible() {
+			return isDeveloper;
 		}
 		
 	}
@@ -255,10 +274,12 @@ public class RequestInit extends Controller {
 			return stampingDao.findAll();
 		}
 		
-		public ImmutableList<String> getAllDays() {
-			final ImmutableList<String> days = ImmutableList.of(
-					  "lunedì", "martedì", "mercoledì", "giovedì", 
-					  "venerdì", "sabato", "domenica");
+		public List<String> getAllDays() {
+			LocalDate date = LocalDate.now();
+			List<String> days = Lists.newArrayList();
+			for(int day = 1; day < 8; day++) {
+				days.add(date.withDayOfWeek(day).dayOfWeek().getAsText());
+			}
 			return days;		  
 		}
 	
@@ -397,25 +418,13 @@ public class RequestInit extends Controller {
 		}		
 
 		/**
-		 *  years per la gestione dinamica degli anni(provvisorio) 
-		 *  //FIXME la lista degli anni andrebbe presa in funzione della persona selezionata 
-		 *  // e della action richiesta, non in funzione del primo office allowed (??).
+		 * Quando si fa merge con BadgeReader ci sarà la versione aggiornata.
 		 */
 		List<Integer> years = Lists.newArrayList();
-		Integer actualYear = new LocalDate().getYear();
-
-		Optional<LocalDate> dateBeginProgram = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM,
-				officeDao.getOfficeAllowed(user.get()).iterator().next());
-
-		Integer yearBeginProgram = dateBeginProgram.get().getYear();
-		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
-
-		while(yearBeginProgram <= actualYear+1){
-			years.add(yearBeginProgram);
-			Logger.trace("injectMenu -> aggiunto %s alla lista", yearBeginProgram);
-			yearBeginProgram++;
-		}
-
+		years.add(2016);
+		years.add(2015);
+		years.add(2014);
+		years.add(2013);
 		renderArgs.put("navYears", years);
 
 	}
@@ -639,11 +648,17 @@ public class RequestInit extends Controller {
 			}
 			
 			if(action.equals("MonthRecaps.showRecaps")) {
-
 				renderArgs.put("switchMonth",  true);
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDownAdministration");
 				return "MonthRecaps.showRecaps";
+			}
+			
+			if(action.equals("MonthRecaps.customRecap")) {
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDownAdministration");
+				return "MonthRecaps.customRecap";
 			}
 		}
 

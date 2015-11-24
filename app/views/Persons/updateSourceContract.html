@@ -4,8 +4,7 @@
 <div class="container-fluid">
 
 #{if contract.sourceDateResidual != null && contract.sourceByAdmin == false}
-
-<div class="alert alert-danger">
+  <div class="alert alert-danger">
 	I valori iniziali sottostanti sono stati creati automaticamente da ePAS, impostando a zero ogni campo. 
 	Inserire i valori effettivi e cliccare su <em>Salva</em>, oppure cliccare su <strong>Approva</strong> per 
 	validare l'inizializzazione automatica e non visualizzare più questo messaggio. 
@@ -15,79 +14,118 @@
   	  <input class="btn btn-default" type="submit" value="Approva"/>
     </div>
     #{/form}
-    
+  </div>  
 #{/if}
-</div>
 
-#{form @Persons.saveSourceContract()}
-  <input type="hidden" name="contract.id" value="${contract.id}" />
 
-  <table class="table table-condensed table-hover table-form">
-	<tr>
-	  <td class="lab"><strong>Data Inizializzazione (aaaa-mm-gg)</strong> </td>
-	  <td><input name="contract.sourceDateResidual" type="text" datepicker value="${contract.sourceDateResidual.format()}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Residuo anno passato (in minuti)</td>
-	  <td><input name="contract.sourceRemainingMinutesLastYear" type="text" value="${contract.sourceRemainingMinutesLastYear}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Residuo anno corrente (in minuti)</td>
-	  <td><input name="contract.sourceRemainingMinutesCurrentYear" type="text" value="${contract.sourceRemainingMinutesCurrentYear}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Ferie utilizzate anno passato</td>
-	  <td><input name="contract.sourceVacationLastYearUsed" type="text" value="${contract.sourceVacationLastYearUsed}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Ferie utilizzate anno corrente</td>
-	  <td><input name="contract.sourceVacationCurrentYearUsed" type="text" value="${contract.sourceVacationCurrentYearUsed}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Permessi utilizzati anno corrente</td>
-	  <td><input name="contract.sourcePermissionUsed" type="text" value="${contract.sourcePermissionUsed}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Riposi compensativi effettuati anno corrente</td>
-	  <td><input name="contract.sourceRecoveryDayUsed" type="text" value="${contract.sourceRecoveryDayUsed}" /></td>
-	</tr>
-	<tr>
-	  <td class="lab">Buoni pasto residui</td>
-	  <td><input name="contract.sourceRemainingMealTicket" type="text" value="${contract.sourceRemainingMealTicket}" /></td>
-	</tr>
-  </table>
-  <div class="center">
-  	<input class="btn btn-primary" type="submit" value="Salva"/>
-  </div>
-#{/form}
+	<div class="alert alert-danger">
+	  <p><p><i class="fa fa-info"></i>  
+	  	  Per questo contratto iniziato in data <strong>${contract.beginContract.format()}</strong>	
+  		  la possibilità di definire come data di inizializzazione una data precedente a <strong>${dateForInit.format()}</strong> è disabilitata.<br>
+  		  Se si desidera definire una nuova inizializzazione scegliere una data uguale o successiva a <strong>${dateForInit.format()}</strong>
+  	  </p>
+	</div>
+
+
+#{panel title:'Inizializzazione Intera', dim:12, fluid:false, color:'info'}
+	  <div class="alert alert-success">
+		<p>
+          	Tramite questa form è possibile inizializzare la situazione di una persona in un momento arbitrario del contratto selezionato.
+  		  </p> 
+  		  <p>
+  		  Inserire la situazione della persona alla fine della giornata specificata nel campo <strong>Data Inizializzazione</strong>.<br>
+  	 	  Una volta definiti i dati il software provvederà a ricalcolare i ripiloghi annuali della persona utilizzando i dati di inizializzazione e i dati presenti nel database 
+  		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
+  		  </p>
+  		  #{if contract.sourceDateResidual == null }
+  		   <p><i class="fa fa-info"></i> 
+  		     L'informazione sui buoni pasto residui è indipendente e può essere impostata anche in un secondo momento.
+  		   </p>
+  		  #{/if}
+	  </div>
+
+      #{form @Persons.saveSourceContract()}
+	    <input type="hidden" name="contract.id" value="${contract.id}" />
+	
+	    <table class="table table-condensed table-hover table-form">
+		<tr>
+		  <td class="lab"><strong>Data Inizializzazione (aaaa-mm-gg)</strong> </td>
+		  <td><input name="contract.sourceDateResidual" type="text" datepicker value="${contract.sourceDateResidual.format()}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Residuo anno passato (in minuti)</td>
+		  <td><input name="contract.sourceRemainingMinutesLastYear" type="text" value="${contract.sourceRemainingMinutesLastYear}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Residuo anno corrente (in minuti)</td>
+		  <td><input name="contract.sourceRemainingMinutesCurrentYear" type="text" value="${contract.sourceRemainingMinutesCurrentYear}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Ferie utilizzate anno passato</td>
+		  <td><input name="contract.sourceVacationLastYearUsed" type="text" value="${contract.sourceVacationLastYearUsed}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Ferie utilizzate anno corrente</td>
+		  <td><input name="contract.sourceVacationCurrentYearUsed" type="text" value="${contract.sourceVacationCurrentYearUsed}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Permessi utilizzati anno corrente</td>
+		  <td><input name="contract.sourcePermissionUsed" type="text" value="${contract.sourcePermissionUsed}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Riposi compensativi effettuati anno corrente</td>
+		  <td><input name="contract.sourceRecoveryDayUsed" type="text" value="${contract.sourceRecoveryDayUsed}" /></td>
+		</tr>
+		#{if contract.sourceDateMealTicket == null}
+		<tr>
+		  <td class="lab">Buoni pasto residui</td>
+		  <td><input name="contract.sourceRemainingMealTicket" type="text" value="${contract.sourceRemainingMealTicket}" /></td>
+		</tr>
+		#{/if}
+		
+		
+
+	    </table>
+	    <div class="center">
+	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
+	    </div>
+      #{/form}
+    #{/panel}
+    
+#{if contract.sourceDateResidual }    
+    #{panel title:'Inizializzazione del residuo buoni pasto', dim:12, fluid:false, color:'info'}
+       
+       <div class="alert alert-success">
+		  <p>
+          	Tramite questa form è possibile inizializzare esclusivamente il <strong>residuo buoni pasto</strong> in un momento arbitrario del contratto selezionato.  
+  		  </p> 
+       </div>
+    
+    
+       #{form @Persons.saveSourceContract()}
+	    <input type="hidden" name="contract.id" value="${contract.id}" />
+	    <input type="hidden" name="onlyMealTicket" value="true" />
+	
+	    <table class="table table-condensed table-hover table-form">
+		<tr>
+		  <td class="lab"><strong>Data Inizializzazione buoni pasto (aaaa-mm-gg)</strong> </td>
+		  <td><input name="contract.sourceDateMealTicket" type="text" datepicker value="${contract.sourceDateMealTicket.format()}" /></td>
+		</tr>
+		<tr>
+		  <td class="lab">Buoni pasto residui</td>
+		  <td><input name="contract.sourceRemainingMealTicket" type="text" value="${contract.sourceRemainingMealTicket}" /></td>
+		</tr>
+	    </table>
+	    <div class="center">
+	  	  <input class="btn btn-primary" type="submit" value="Salva"/>
+	    </div>
+      #{/form}
+    #{/panel}
+#{/if}
 
 <br>
 
 
- 
-
-	<h3>Guida alla definizione dell'inizializzazione</h3>
-  
-          <p>
-          	Tramite questa form è possibile inizializzare la situazione di una persona in un momento arbitrario del contratto selezionato.
-  			Questa procedura si rende necessaria nei casi in cui:
-  			<ol>
-  			  <li> Il database ePAS non contenga una informazione completa sulla persona, ad esempio la persona è stata inserita successivamente a trasferimento 
-  			  dopo l'installazione del presente software.
-  			  </li>  
-  			  <li>La procedura di migrazione dal vecchio software orologio ha prodotto una situazione incompleta o non sufficientemente congrua per la persona
-  			  (in quanto gli algoritmi di calcolo del tempo di lavoro e dei residui sono stati reimplementati con nuova logica diversa dalla precedente).
-  			  </li>
-  			</ol>
-  		  </p> 
-  		  <p>
-  		  Inserire la situazione della persona alla fine della giornata specificata nel campo <strong>Data Inizializzazione</strong>.
-  	 	  Una volta definiti i dati il software provvederà a ricalcolare i ripiloghi annuali della persona utilizzando i dati di inizializzazione e i dati presenti nel database 
-  		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
-  		  </p>
-  		  
-  		  <p><i class="fa fa-exclamation-triangle"></i> Impostare una data di inizializzazione uguale o successiva a ${dateForInit.format()}.</p>
-  		  
 
 
  

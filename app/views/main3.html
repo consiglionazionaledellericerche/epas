@@ -12,7 +12,7 @@
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/cerulean/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker3.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css">
@@ -125,53 +125,48 @@
               <ul class="dropdown-menu">
                 
                 #{if ip.viewPerson }
-                  <li><a href="@{Persons.list()}">Lista Persone</a></li> 
+                  <li><a href="@{Persons.list()}">Lista Persone</a></li>
+                  <li class="divider"></li> 
                 #{/if}
                 
-                #{if ip.isEmployeeVisible()}
-                <li class="divider"></li>
-                
-	                #{if ip.viewPersonDay }
-	                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
-	                   session.get("yearSelected"), 
-	                   session.get("monthSelected"))}">Timbrature</a></li> 
-	                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
-	                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
-	                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
-	                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
-	                  <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> 
-	                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
-	                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
-	                  <li class="divider"></li>
-	                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
-	                  <li class="divider"></li>
-	                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
-	                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
-	                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-	                   session.get("monthSelected"))}">Assenze</a></li>
-	                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
-	                  
-	                  <li class="divider"></li>
-	                  
-	                #{/if}
+                #{if ip.viewPersonDay }
+                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
+                   session.get("yearSelected"), 
+                   session.get("monthSelected"))}">Timbrature</a></li> 
+                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
+                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
+                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
+                  <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> 
+                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
+                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
+                  <li class="divider"></li>
+                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
+                  <li class="divider"></li>
+                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
+                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+                   session.get("monthSelected"))}">Assenze</a></li>
+                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+                  
+                  <li class="divider"></li>
+	            #{/if}
 	                
-	                #{if ip.viewCompetence }
+	            #{if ip.viewCompetence }
 	                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
 	                  session.get("monthSelected"))}">Competenze</a></li>
 	                <li class="divider"></li>
-	                #{/if}
+	            #{/if}
 	                
-	                #{if ip.uploadSituation }
+	            #{if ip.uploadSituation }
 	                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
-	                #{/if}
-	                
 	                <li class="divider"></li>
-	                #{if ip.viewPerson }
+	            #{/if}
+	                
+	            #{if ip.viewPersonDay }
 	                  <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"), 
 	                   session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
-	        		#{/if}
-        		
-        		#{/if}
+	        	#{/if}
         		
               </ul>
             </li>
@@ -221,6 +216,18 @@
 	                   session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
 	                <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"), 
 	                   session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
+          		</ul>
+          	</li>
+          </ul>
+          #{/if}
+          
+          #{if ip.isToolsVisible()}
+          <ul class="nav navbar-nav">
+          	<li class="dropdown">
+          		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-medkit"></i></i>
+          		Tools <b class="caret"></b></a>
+          		<ul class="dropdown-menu">
+          			<li><a href="@{Administration.utilities()}">Utilities</a></li>
           		</ul>
           	</li>
           </ul>

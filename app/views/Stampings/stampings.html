@@ -8,7 +8,7 @@
     
     html, body {
 		background-color: white;
-	}
+	}me
 	
 	#page_content {
 		padding-top: 70px;
@@ -82,7 +82,7 @@
     <thead>
 	<tr>
 		<th class="group-single">Giorno</th>
-		<th class="group-single">Buono<br>mensa</th>
+		<th class="group-single">Buono<br>pasto</th>
 		
 		<th class="invisible"></th>
 		
@@ -149,9 +149,9 @@
 				#{/elseif}
 					
 				#{if stampingTemplate.date!=null}
-				 <a data-toggle="modal" href="@{Stampings.editEmployee(stampingTemplate.stampingId)}" data-modal=".my-modal">
+				 *{ <a data-toggle="modal" href="@{Stampings.editEmployee(stampingTemplate.stampingId)}" data-modal=".my-modal">
 			  		${stampingTemplate.hour}
-				</a>
+				</a>  }* ${stampingTemplate.hour}
 				#{/if}
 				#{elseif stampingTemplate.pairPosition.equals("center")}
 				    <abbr title="Timbratura di servizio mancante" class="initialism"><i class="icon-warning-sign"></i></abbr>
