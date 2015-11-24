@@ -115,6 +115,7 @@ expireContract=Fine contratto
 onCertificate=In attestati
 endContract=Terminato Il
 
+sourceDateResidual=Data inizializzazione
 contract.sourceDateResidual=Data inizializzazione
 contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
 contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)

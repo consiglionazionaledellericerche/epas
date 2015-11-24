@@ -56,7 +56,7 @@ public class WorkingTimeType extends BaseModel {
 	@OneToMany(mappedBy="workingTimeType")
 	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
 	
-	@Required
+	//@Required
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "office_id")
 	public Office office;

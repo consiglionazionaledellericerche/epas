@@ -484,5 +484,19 @@ public class ContractManager {
 		}
 		contract.save();
 	}
+	
+	public final void cleanResidualInitialization(final Contract contract) {
+		contract.sourceVacationLastYearUsed = 0;
+		contract.sourceVacationCurrentYearUsed = 0;
+		contract.sourcePermissionUsed = 0;
+		contract.sourceRemainingMinutesCurrentYear = 0;
+		contract.sourceRemainingMinutesLastYear = 0;
+		contract.sourceRecoveryDayUsed = 0;
+		contract.sourceRemainingMealTicket = 0;
+	}
+	
+	public final void cleanMealTicketInitialization(final Contract contract) {
+		contract.sourceDateMealTicket = contract.sourceDateResidual;
+	}
 
 }
