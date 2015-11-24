@@ -1,0 +1,25 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione badge'  /}
+
+#{set breadcrumbs:['Lista persone':@Persons.list(), 'Gestione Badge':null] /}
+
+<div class="container">
+
+#{breadcrumbs breadcrumbs /}
+
+#{panel title:'Gestisci associazione badge' , color:'primary'}
+	<div class="alert alert-warning" role="alert">
+    		Gestione badge di <strong>${badge.person.fullname}</strong>
+	</div>
+	#{form @Badges.delete(), class:'form-horizontal', 
+    	method:'POST'}
+		#{f.input 'badge.code', readonly:true /}
+		#{f.input 'badge.badgeReader', readonly:true /}
+	  #{b.buttons}
+	     #{b.delete /}
+	  #{/b.buttons}
+	#{/form}
+#{/panel}
+
+</div>
