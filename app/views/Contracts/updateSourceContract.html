@@ -46,7 +46,7 @@
 
 	  *{ 'data-anchor':'#sourceRes' }*
       #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
-      'data-async':'#sourceRes', 'data-async-error':'#sourceRes'}
+      'data-async':'#sourceRes', 'data-async-error':'#sourceRes', 'data-spinner':'#defaultSpinner'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
 
 		#{if success}

@@ -19,6 +19,11 @@ $(function($) {
       contentType = false;
       formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449
     }
+    
+    var spinner = $form.data('spinner');
+    var $spinner = $(spinner);
+    $spinner.removeClass('hidden');
+    $spinner.addClass('visible');
     //        $form.find(':input').prop("readonly", true);
     //        var bgcolor = $form.css('background-color');
     //        $form.css('backround-color', '#e0e0e0');
@@ -42,6 +47,8 @@ $(function($) {
         //bootbox.alert('Si è verificato un errore: '+ error);
       } // else segnala l'errore in qualche modo.
     }).always(function() {
+      $spinner.removeClass('visible');
+      $spinner.addClass('hidden');
       //        	$form.find(':input').prop('readonly', true);
       //        	$form.css('background-color', bgcolor);
     });
