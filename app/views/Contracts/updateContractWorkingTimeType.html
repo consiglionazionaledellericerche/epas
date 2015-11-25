@@ -29,18 +29,10 @@
 <div class="alert alert-info">
   <p>Utilizzare questa form per definire il nuovo periodo di tipo orario selezionando la data di inizio e la data di fine periodo.</p>
   <p>Lasciando vuoto il campo <strong>&{'cwtt.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
-  
-  <p>Data inizio contratto: <strong>${contract.beginContract.format()}</strong></p>
-  <p>Data fine contratto: 
-  <strong>
-    #{if contract.expireContract}${contract.expireContract.format()}#{/if}
-    #{else}<em>Indeterminato</em>#{/else}
-  </strong>
-  </p>
   <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
 </div>
 
-#{form action:@Contracts.changeTypeOfContractWorkingTimeType(), class:'form-horizontal',
+#{form action:@Contracts.saveContractWorkingTimeType(), class:'form-horizontal',
 		'data-async':'#updateWtt', 'data-async-error':'#updateWtt', 'data-spinner':'#defaultSpinner' }
 	
 	#{f.hidden 'cwtt.contract.id' /}

@@ -494,23 +494,18 @@ when
      	"Persons.deletePersonConfirmed",
         
         "Contracts.personContracts",
-        "Contracts.edit",
         "Contracts.insert",
         "Contracts.save",
-        "Contracts.modifyContract",
-        "Contracts.updateContract",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
         
         "Contracts.updateSourceContract",
-     	"Contracts.saveSourceContract",
-     	"Contracts.approveAutomatedSource",
-        
-        "Contracts.splitContractWorkingTimeType",
+     	"Contracts.saveResidualSourceContract",
+     	"Contracts.saveMealTicketSourceContract",
+
         "Contracts.updateContractWorkingTimeType",
-        "Contracts.changeTypeOfContractWorkingTimeType",
-        "Contracts.deleteContractWorkingTimeType",
-        
-        "Persons.deleteContract",
-        "Persons.deleteContractConfirmed",
+        "Contracts.saveContractWorkingTimeType",
      	
      	"Persons.childrenList",
      	"Persons.editChild",
@@ -614,24 +609,19 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
-     	"Contracts.personContracts",
-     	"Contracts.edit",
+        "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
-     	"Contracts.modifyContract",
-     	"Contracts.updateContract",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
+        
+        "Contracts.updateSourceContract",
+     	"Contracts.saveResidualSourceContract",
+     	"Contracts.saveMealTicketSourceContract",
 
-		"Contracts.updateSourceContract",
-     	"Contracts.saveSourceContract",
-     	"Contracts.approveAutomatedSource",
-
-     	"Contracts.splitContractWorkingTimeType",
-     	"Contracts.updateContractWorkingTimeType",
-     	"Contracts.changeTypeOfContractWorkingTimeType",
-     	"Contracts.deleteContractWorkingTimeType",
-     	
-     	"Persons.deleteContract",
-     	"Persons.deleteContractConfirmed",
+        "Contracts.updateContractWorkingTimeType",
+        "Contracts.saveContractWorkingTimeType",
      	
      	"Persons.childrenList",
      	"Persons.editChild",

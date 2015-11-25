@@ -306,20 +306,10 @@ public class Contracts extends Controller {
 
   /**
    * Rimozione contratto.
+   * 
    * @param contractId contractId
    */
   public static void delete(Long contractId) {
-
-    Contract contract = contractDao.getContractById(contractId);
-
-    notFoundIfNull(contract);
-
-    rules.checkIfPermitted(contract.person.office);
-
-    render(contract);
-  }
-
-  public static void deleteConfirmed(Long contractId) {
 
     Contract contract = contractDao.getContractById(contractId);
 
@@ -353,97 +343,7 @@ public class Contracts extends Controller {
     render(wrappedContract, contract, cwtt);
   }
 
-  /**
-   * Divide il periodo tipo orario in due periodi.
-   * 
-   * @param cwtt
-   * @param splitDate
-   */
-  public static void splitContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt,
-      @Required LocalDate splitDate) {
-
-    notFoundIfNull(cwtt);
-
-    rules.checkIfPermitted(cwtt.contract.person.office);
-
-    Contract contract = cwtt.contract;
-    IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
-
-    if (!validation.hasErrors()) {
-
-      // errori particolari
-
-      if (!DateUtility.isDateIntoInterval(splitDate,
-          new DateInterval(cwtt.beginDate, cwtt.endDate))) {
-        validation.addError("splitDate", "riechiesta entro l'intervallo");
-      } else if (splitDate.isEqual(cwtt.beginDate)) {
-        validation.addError("splitDate", "non può essere il primo giorno dell'intervallo");
-      }
-    }
-
-    if (validation.hasErrors()) {
-
-      response.status = 400;
-      flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
-
-      render("@updateContractWorkingTimeType", cwtt, wrappedContract, contract, splitDate);
-    }
-
-    // agire
-    contractWorkingTimeTypeManager.saveSplitContractWorkingTimeType(cwtt, splitDate);
-
-    flash.success("Operazione eseguita.");
-
-    personContracts(contract.person.id);
-  }
-
-  /**
-   * Elimina il periodo tipo orario. Non può essere rimosso il primo tipo orario.
-   * 
-   * @param cwtt periodo tipo orario da rimuovere
-   */
-  public static void deleteContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt) {
-
-    notFoundIfNull(cwtt);
-
-    rules.checkIfPermitted(cwtt.contract.person.office);
-
-    Contract contract = cwtt.contract;
-
-    IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
-
-    if (validation.hasErrors()) {
-
-      response.status = 400;
-      flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
-
-      render("@updateContractWorkingTimeType", cwtt, wrappedContract, contract);
-    }
-
-    List<ContractWorkingTimeType> contractsWtt =
-        Lists.newArrayList(contract.contractWorkingTimeType);
-
-    Collections.sort(contractsWtt);
-    int index = contractsWtt.indexOf(cwtt);
-    Preconditions.checkState(index > 0);
-
-    ContractWorkingTimeType previous = contractsWtt.get(index - 1);
-    contractWorkingTimeTypeManager.deleteContractWorkingTimeType(contract, cwtt, previous);
-
-    // Ricalcolo a partire dall'inizio del periodo che ho eliminato.
-    contractManager.recomputeContract(cwtt.contract, 
-        Optional.fromNullable(cwtt.beginDate), false, false);
-
-    flash.success("Operazione eseguita.");
-
-    personContracts(contract.person.id);
-  }
-
-  public static void changeTypeOfContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt, 
+  public static void saveContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt, 
       boolean confirmed) {
     
     notFoundIfNull(cwtt);
