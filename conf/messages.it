@@ -146,6 +146,10 @@ wtt.description= Nome Tipo Orario
 wtt.office=Sede 
 wtt= Tipo Orario
 
+cwtt.workingTimeType= Tipo Orario
+cwtt.beginDate= Data Inizio
+cwtt.endDate= Data Fine
+
 PDFReport.thDays=Num. di giorni
 PDFReport.thReqHour=Num. di ore spettanti
 PDFReport.thAppHour =Num. di ore approvate
