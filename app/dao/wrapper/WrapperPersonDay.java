@@ -239,7 +239,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 		}
 
 		if( getPersonDayContract().isPresent() ) {
-
+		    
 			for(ContractWorkingTimeType cwtt : 
 				this.getPersonDayContract().get().contractWorkingTimeType ) {
 
@@ -255,7 +255,6 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 
 			}
 		}
-
 		return Optional.absent();
 	}
 	

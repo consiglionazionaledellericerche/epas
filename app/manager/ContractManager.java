@@ -2,11 +2,14 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -14,12 +17,15 @@ import models.ContractWorkingTimeType;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import models.enumerate.Parameter;
+
 import org.joda.time.LocalDate;
+
 import play.db.jpa.JPAPlugin;
 
-import javax.inject.Inject;
+import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**
@@ -170,7 +176,7 @@ public class ContractManager {
 
     recomputeContract(contract, Optional.fromNullable(from), true, onlyRecaps);
   }
-
+  
   /**
    * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
    * 
@@ -212,7 +218,6 @@ public class ContractManager {
     for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
       cmr.delete();
     }
-    // contract = contractDao.getContractById(contract.id);
     contract.save();
   }
 
@@ -450,5 +455,145 @@ public class ContractManager {
   public final void cleanMealTicketInitialization(final Contract contract) {
     contract.sourceDateMealTicket = contract.sourceDateResidual;
   }
+  
+  /**
+   * L'impatto di un nuovo periodo tipo orario sul contratto.
+   * @param contract
+   * @param cwtt
+   * @return
+   */
+  public final List<ContractWorkingTimeType> changedRecap(Contract contract, 
+      ContractWorkingTimeType cwtt, boolean persist) {
+    
+    boolean recomputeBeginSet = false;
+    
+    //copia di sicurezza
+    List<ContractWorkingTimeType> originals = Lists.newArrayList();
+    for (ContractWorkingTimeType cwttOriginal :contract.contractWorkingTimeType) {
+      originals.add(cwttOriginal);
+    }
+    Collections.sort(originals);
+    
+    //riepilogo delle modifiche
+    DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
+    List<ContractWorkingTimeType> cwttList = Lists.newArrayList();
+    ContractWorkingTimeType previous = null;
+    
+    List<ContractWorkingTimeType> toRemove = Lists.newArrayList();
+    
+    for (ContractWorkingTimeType oldCwtt : originals) {
+      DateInterval oldInterval = new DateInterval(oldCwtt.beginDate, oldCwtt.endDate);
+
+      //non cambia il tipo orario nessuna modifica su quel oldCwtt
+      if (cwtt.workingTimeType.id.equals(oldCwtt.workingTimeType.id)) {        
+        previous = insertIntoList(previous, oldCwtt, cwttList);
+        if (previous.id == null || !previous.id.equals(oldCwtt.id)) {
+          toRemove.add(oldCwtt);
+        }
+        continue;
+      }
+      DateInterval intersection = DateUtility.intervalIntersection(cwttInterval, oldInterval);
+      //non si intersecano nessuna modifica su quel oldCwtt
+      if (intersection == null) {
+        previous = insertIntoList(previous, oldCwtt, cwttList);
+        if (previous.id == null || !previous.id.equals(oldCwtt.id)) {
+          toRemove.add(oldCwtt);
+        }
+        continue;
+      }
+      
+      //si sovrappongono e sono diversi
+      toRemove.add(oldCwtt);
+      
+      ContractWorkingTimeType cwttIntersect = new ContractWorkingTimeType();
+      cwttIntersect.contract = contract;
+      cwttIntersect.beginDate = intersection.getBegin();
+      cwttIntersect.endDate = intersection.getEnd();
+      cwttIntersect.workingTimeType = cwtt.workingTimeType;
+       
+      //Parte iniziale old
+      if (oldCwtt.beginDate.isBefore(cwttIntersect.beginDate)) {
+        ContractWorkingTimeType cwttOldBeginRemain = new ContractWorkingTimeType();
+        cwttOldBeginRemain.contract = contract;
+        cwttOldBeginRemain.beginDate = oldCwtt.beginDate;
+        cwttOldBeginRemain.endDate = cwttIntersect.beginDate.minusDays(1);
+        cwttOldBeginRemain.workingTimeType = oldCwtt.workingTimeType;
+        previous = insertIntoList(previous, cwttOldBeginRemain, cwttList); 
+      }
+      
+      if (!recomputeBeginSet) {
+        cwttIntersect.recomputeFrom = cwttIntersect.beginDate;
+      }
+      previous = insertIntoList(previous, cwttIntersect, cwttList);
+      
+      //Parte finale old
+      if (cwttIntersect.endDate != null) {
+        ContractWorkingTimeType cwttOldEndRemain = new ContractWorkingTimeType();
+        cwttOldEndRemain.contract = contract;
+        cwttOldEndRemain.beginDate = cwttIntersect.endDate.plusDays(1);
+        cwttOldEndRemain.workingTimeType = oldCwtt.workingTimeType;
+        if (oldCwtt.endDate != null) {
+          if (cwttIntersect.endDate.isBefore(oldCwtt.endDate)) {
+            cwttOldEndRemain.endDate = oldCwtt.endDate;
+            previous = insertIntoList(previous, cwttOldEndRemain, cwttList); 
+          }
+        } else {
+          if (cwttIntersect.endDate != null && !DateUtility.isInfinity(cwttIntersect.endDate)) {
+            cwttOldEndRemain.endDate = oldCwtt.endDate;
+            previous = insertIntoList(previous, cwttOldEndRemain, cwttList); 
+          }
+        }
+      }
+      
+    }
+    
+    if (persist) {
+      contract.refresh();
+      for (ContractWorkingTimeType cwttRemoved : toRemove) {
+        cwttRemoved.delete();
+        contract.contractWorkingTimeType.remove(cwttRemoved);
+        contract.save();
+      }
+      for (ContractWorkingTimeType cwttInsert : cwttList) {
+        //if (cwttInsert.isPersistent()) {
+          cwttInsert.save();
+          contract.contractWorkingTimeType.add(cwttInsert);
+          contract.save();
+          
+        //}
+      }
+      contract.save();
+      JPAPlugin.closeTx(false);
+      JPAPlugin.startTx(false);
+    }
+    
+    return cwttList;
+
+  }
+  
+  /**
+   * Inserisce il periodo nella lista. Ritorna l'ultimo periodo inserito.
+   * @param previous
+   * @param present
+   * @param cwttList
+   * @return
+   */
+  private ContractWorkingTimeType insertIntoList(ContractWorkingTimeType previous, 
+      ContractWorkingTimeType present, List<ContractWorkingTimeType> cwttList) {
+    if (present.endDate != null && DateUtility.isInfinity(present.endDate)) {
+      present.endDate = null;
+    }
+    if (previous != null && previous.workingTimeType.id == present.workingTimeType.id)  {
+      previous.endDate = present.endDate; 
+      if (present.recomputeFrom != null) {
+        previous.recomputeFrom = present.recomputeFrom;
+      }
+      return previous;
+    } else {
+      cwttList.add(present);
+      return present;
+    } 
+  }
+
 
 }
