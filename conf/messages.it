@@ -21,10 +21,14 @@ absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
+administrations= Amministrazione
+
 badgeReader.code=Nome 
 badgeReader.description=Descrizione 
 badgeReader.location=Location
 badgeReader.owner=Sede Afferente
+
+configurations= Configurazione
 
 views.common.true=vero
 views.common.false=falso

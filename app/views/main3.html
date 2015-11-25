@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="//cdn.datatables.net/colreorder/1.1.3/css/dataTables.colReorder.min.css" />
 
     <link href='//fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}"> 
+    <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}">
 
     #{stylesheet 'select2-bootstrap.min.css'/}
     #{stylesheet 'bootstrap-modal.css'/}
@@ -36,28 +36,28 @@
     #{stylesheet 'my-bootstrap3.css'/}
 
 	#{get 'moreStyles' /}
-	
-	
+
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
-    
+
+
     <!-- All JavaScript at the bottom, except for Modernizr / Respond.
 	<!-- Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries -->
 	<!-- For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-    
+
   </head>
-  
-  <body #{if header.equals('clock') } onload="startTime()" #{/if} >	
-	  
+
+  <body #{if header.equals('clock') } onload="startTime()" #{/if} >
+
    <div id="wrapper">
 
     #{if header.equals('navbar') }
-    
+
     <!-- Fixed navbar -->
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container-fluid">
@@ -70,34 +70,34 @@
           </button>
           <a id="google-font" class="navbar-brand" href="#">
           ePAS
- 	      
- 	      <!-- 
+
+ 	      <!--
           <small class="visible-xs">XS</small>
           <small class="visible-sm">SM</small>
           <small class="visible-md">MD</small>
           <small class="visible-lg">LG</small>
            -->
-          
+
           </a>
         </div>
-        
-        
+
+
         <div class="collapse navbar-collapse">
-        
-          #{if ip.isEmployeeVisible() }	
+
+          #{if ip.isEmployeeVisible() }
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDownEmployee") }
             <li class="dropdown active">
             #{/if}
             #{else}
-            <li class="dropdown">  
+            <li class="dropdown">
             #{/else}
-            
+
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
-          	  <div class="visible-lg-inline visible-xs-inline">	${session.username}</div></a>
+          	  <div class="visible-lg-inline visible-xs-inline">	${session.username}<span class="caret"></span></div></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
-            
+
             	<li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
             	<li><a href="@{Absences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
             	<li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
@@ -111,84 +111,84 @@
               </ul>
             </li>
           </ul>
-          
+
           #{/if}
           #{else}
-            
+
           #{/else}
-          
+
           #{if ip.isAdministrationVisible() }
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDownAdministration") }
             <li class="dropdown active">
             #{/if}
             #{else}
-            <li class="dropdown">  
+            <li class="dropdown">
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
-          		<div class="visible-xs-inline visible-md-inline visible-lg-inline"> Amministrazione</div></a>
+          		<div class="visible-xs-inline visible-md-inline visible-lg-inline"> &{'administrations'}<span class="caret"></span></div></a>
               <ul class="dropdown-menu">
-                
+
                 #{if ip.viewPerson }
                   <li><a href="@{Persons.list()}">Lista Persone</a></li>
-                  <li class="divider"></li> 
+                  <li class="divider"></li>
                 #{/if}
-                
+
                 #{if ip.viewPersonDay }
-                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
-                   session.get("yearSelected"), 
-                   session.get("monthSelected"))}">Timbrature</a></li> 
-                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
+                  <li><a href="@{Stampings.personStamping(session.get("personSelected"),
+                   session.get("yearSelected"),
+                   session.get("monthSelected"))}">Timbrature</a></li>
+                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"),
                    session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a></li>
-                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
+                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"),
                    session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a></li>
-                  
-                  *{ <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> }* 
-                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
+
+                  *{ <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> }*
+                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
                    session.get("monthSelected"))}">Stampa Cartellino</a></li>
                   <li class="divider"></li>
                   <li><a href="@{Charts.indexCharts()}">Utility</a></li>
                   <li class="divider"></li>
-                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
+                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
                    session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
                   <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
                    session.get("monthSelected"))}">Assenze</a></li>
                   <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
-                  
+
                   <li class="divider"></li>
 	            #{/if}
-	                
+
 	            #{if ip.viewCompetence }
-	                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
+	                <li><a href="@{Competences.showCompetences(session.get("yearSelected"),
 	                  session.get("monthSelected"))}">Competenze</a></li>
 	                <li class="divider"></li>
 	            #{/if}
-	                
+
 	            #{if ip.uploadSituation }
 	                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
 	                <li class="divider"></li>
 	            #{/if}
-	                
+
 	            #{if ip.viewPersonDay }
-	                  <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"), 
+	                  <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
 	                   session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
 	        	#{/if}
-        		
+
               </ul>
             </li>
           </ul>
           #{/if}
-          
+
           #{if ip.isConfigurationVisible() }
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDownConfiguration") }
             <li class="dropdown active">
             #{/if}
             #{else}
-            <li class="dropdown">  
+            <li class="dropdown">
             #{/else}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-          	  <div class="visible-xs-inline visible-md-inline visible-lg-inline">	Configurazione</div></a>
+          	  <div class="visible-xs-inline visible-md-inline visible-lg-inline">&{'configurations'}<span class="caret"></span></div></a>
               <ul class="dropdown-menu">
                 #{if ip.viewOffice }
                   <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
@@ -212,22 +212,22 @@
             </li>
           </ul>
           #{/if}
-          
+
           #{if isPersonInCharge}
           <ul class="nav navbar-nav">
           	<li class="dropdown">
           		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-users"></i>
           		Gestione gruppo <b class="caret"></b></a>
           		<ul class="dropdown-menu">
-          			<li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), 
+          			<li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"),
 	                   session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
-	                <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"), 
+	                <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"),
 	                   session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
           		</ul>
           	</li>
           </ul>
           #{/if}
-          
+
           #{if ip.isToolsVisible()}
           <ul class="nav navbar-nav">
           	<li class="dropdown">
@@ -240,94 +240,94 @@
           </ul>
           #{/if}
 
-		  #{include '/menu.html' /}          
-      
+		  #{include '/menu.html' /}
+
 		  <ul class="nav navbar-nav navbar-right">
-		  
+
 		    <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring"></i></a>
               <ul class="dropdown-menu">
 			    #{if ip.viewPerson }
-			     <li> 
+			     <li>
   		  		   <a href="@{ReportCentre.generateReport(session.get("actionSelected"), session.get("personSelected"), session.get("monthSelected"), session.get("yearSelected"), session.get("daySelected"))}" data-async-modal="#defaultModal">
 			  		<i class="fa fa-bug"></i> Segnala un problema
 			 	   </a>
 			     </li>
-			    #{/if}              
-                <li> 
+			    #{/if}
+                <li>
   		  		   <a href="@{Faq.faq()}">
 			  		<i class="fa fa-comment-o"> FAQ</i>
 			 	   </a>
 			    </li>
 			  </ul>
-            </li>      
-					  	
-		  
-		  
+            </li>
+
+
+
       	    #{if session.contains("sudo.username")}
-      	    
+
       	      #{if loginResponse != null}
 			  <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	        <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-      	      </li>      	      
+      	      </li>
      	      #{/if}
-     	      
+
      	      <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
                 <ul class="dropdown-menu">
-      	         <li> 
+      	         <li>
   		  		   <a href="@{Administrators.restoreUser()}"></i>
 			  		Torna chi eri
 			 	   </a>
 			     </li>
 				</ul>
 			  </li>
-            
+
   		    #{/if}
-  		  
-  		  
-  		  
+
+
+
   		    #{else}
     	      #{if session.username}
-      		  
+
       		    #{if !ip.isEmployeeVisible()}
       		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
-      	        </li>      			
+      	        </li>
       		    #{/if}
       		    #{if loginResponse != null}
       	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
       	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
       	        </li>
       	        #{/if}
-  
+
     	        <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-out"></i></a>
                 <ul class="dropdown-menu">
-      	         <li> 
+      	         <li>
   		  		   <a href="@{secure.logout()}"></i>
 			  		Esci
 			 	   </a>
 			     </li>
 				</ul>
 			  </li>
-   	      
+
     	      #{/if}
-  		  
+
   		    #{/else}
   		  </ul>
-  		  
-  		  
+
+
   		  <div class="clearfix">
           #{get 'pagemenu' /}
           </div>
-          
-  		  
-  		  
-  		  
-  		  
-  		  
-  		  <!-- flash error icon 
+
+
+
+
+
+
+  		  <!-- flash error icon
           <div class=container>
             #{if flash.error}
               <ul class="nav navbar-nav navbar-right">
@@ -341,15 +341,15 @@
             #{/if}
           </div>
           -->
-      
-      
+
+
         </div>
-        
+
       </div>
     </div> <!-- End Fixed navbar -->
-    
+
     #{/if}
-    
+
     #{if header.equals('banner') }
     <!-- Banner -->
 	<div id="banner">
@@ -357,12 +357,12 @@
       <img class="img-responsive pull-right hidden-xs" src="/public/images/logo.jpg" alt="alt">
     </div>
 	#{/if}
-	
 
-	
+
+
     <!-- Begin page content -->
     <div class="container-fluid" id="page_content">
-      
+
       <!-- do layout -->
       #{doLayout /}
 
@@ -377,7 +377,7 @@
         <div class="popover-content">
           #{if flash.error.equals('secure.error')}
             <strong>&{'secure.error'}</strong>
-          #{/if} 
+          #{/if}
           #{else}
           <strong>${flash.error}</strong>
           #{/else}
@@ -400,14 +400,14 @@
         </div>
       </div>
      #{/if}
-     
+
      <div id="defaultModal" class="modal container" tabindex="-1"></div>
-    
-       
+
+
     </div>
-    
-   
-      
+
+
+
    </div>
 
    <footer>
@@ -420,7 +420,7 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js"></script>	<!-- per combodate xeditable -->
@@ -437,13 +437,13 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
 
     <script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
-    
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
     #{script 'bootstrap-modal.js' /}
     #{script 'bootstrap-modalmanager.js' /}
     #{script 'script.js' /}
     #{script 'list-select.min.js' /}
-      
+
     #{include '_myModal.html' /}
 	#{get 'moreScripts' /}
   </body>
