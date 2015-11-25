@@ -1,3 +1,7 @@
+#{modalAsync id:'modalAbsence', button:'Salva',
+title:'Nuovo codice assenza in data ' + dateFrom.format()
++ ' per ' + person.fullname }
+
 <div class="modal-header hidden-xs">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
   <h4 id="modificaCodiceCompetenza">Modifica codice ${code.code} ${code.description}</h4> 
@@ -31,3 +35,5 @@
 #{/form}
 
 </div>
+
+#{/modalAsync}

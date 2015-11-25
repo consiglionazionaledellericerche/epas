@@ -93,6 +93,14 @@ footer p {
 	font-size: 200%;
 }
 
+#defaultSpinner {
+	position: fixed;
+  	top: 60px;
+  	right: 100px;
+  	display: block;
+  	left: auto;	
+}
+
 .flash-panel {
 	border: 1px solid;
 	text-align: center;
