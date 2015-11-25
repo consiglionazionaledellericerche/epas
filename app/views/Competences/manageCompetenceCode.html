@@ -2,11 +2,13 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione Codici competenze' /}
 
+<div class="container col-lg-6 col-lg-offset-3">
 
-<div class="container">
+  #{b.buttons center:true}
+    #{b.link @Competences.insertCompetenceCode(), color:'primary'
+  , title:messages.get('competenceCode.new'),fa:'plus', modal:'#modalCompetenceCode' /}
+  #{/b.buttons}
 
-
-<p class="lead" id="nuovoCodiceCompetenza"><a href="@{Competences.insertCompetenceCode}" data-modal=".my-modal">Nuovo codice competenza</a></p>
 <div class="span10">
 <table class="table table-striped" id="tabellaCodiciCompetenza">
 	<tr>
@@ -18,7 +20,7 @@
 	#{list items:compCodeList, as:'compCode'}
 	
 	<tr>
-		<td><a href="@{Competences.edit(compCode.id)}" data-modal=".my-modal">${compCode.code}</a></td>
+		<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
 		<td>${compCode.codeToPresence}</td>
 		<td>${compCode.description}</td>
 		
@@ -28,5 +30,4 @@
 </div>
 </div>
 
-
-#{include '_myModal.html' /}
+<div id="modalCompetenceCode" class="modal container" tabindex="-1"></div>

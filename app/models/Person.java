@@ -48,8 +48,7 @@ import play.data.validation.Unique;
  */
 @Entity
 @Audited
-@Table(name = "persons", uniqueConstraints = {@UniqueConstraint(columnNames = {"badgenumber", "office_id"})})
-
+@Table(name = "persons")
 public class Person extends MutableModel implements Comparable<Person> {
 
   private static final long serialVersionUID = -2293369685203872207L;
