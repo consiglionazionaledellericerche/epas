@@ -2,13 +2,12 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione Codici competenze' /}
 
-<div class="container">
+<div class="container col-lg-6 col-lg-offset-3">
 
-<p class="lead" id="nuovoCodiceCompetenza">
-  <a href="@{Competences.insertCompetenceCode}" data-async-modal="#modalCompetenceCode" >
-    Nuovo codice competenza
-  </a>
-</p>
+  #{b.buttons center:true}
+    #{b.link @Competences.insertCompetenceCode(), color:'primary'
+  , title:messages.get('competenceCode.new'),fa:'plus', modal:'#modalCompetenceCode' /}
+  #{/b.buttons}
 
 <div class="span10">
 <table class="table table-striped" id="tabellaCodiciCompetenza">
