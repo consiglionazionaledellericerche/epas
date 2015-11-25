@@ -1,7 +1,9 @@
 package models;
 
 import models.base.BaseModel;
+
 import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 
 import javax.persistence.Column;
@@ -10,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 
 /**
@@ -36,20 +39,23 @@ public class ContractWorkingTimeType extends BaseModel implements Comparable<Con
 	@Column(name="begin_date")
 	public LocalDate beginDate;
 	
-
 	@Column(name="end_date")
 	public LocalDate endDate;
+	
+	@Transient
+	public LocalDate recomputeFrom = null;
 	
 	/**
 	 * Comparator ContractWorkingTimeType
 	 */
 	public int compareTo(ContractWorkingTimeType compareCwtt)
 	{
-		if (beginDate.isBefore(compareCwtt.beginDate))
+		if (beginDate.isBefore(compareCwtt.beginDate)) {
 			return -1;
-		else if (beginDate.isAfter(compareCwtt.beginDate))
+		} else if (beginDate.isAfter(compareCwtt.beginDate)) {
 			return 1;
-		else
-			return 0; 
+		} else {
+			return 0;
+		}
 	}
 }

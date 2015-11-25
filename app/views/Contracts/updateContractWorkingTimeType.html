@@ -19,16 +19,17 @@
   </tr>
   #{list items:contract.contractWorkingTimeType, as:'cwttItem'}
   <tr>
-    <td>${cwttItem.beginDate}</td>
-	<td>#{if cwttItem.endDate} ${cwttItem.endDate} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+    <td>${cwttItem.beginDate.format()}</td>
+	<td>#{if cwttItem.endDate} ${cwttItem.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
 	<td>${cwttItem.workingTimeType.description}</td>
   </tr>
   #{/list}
 </table>
 
 <div class="alert alert-info">
-Il software richiede che per ogni giorno di contratto sia specificato uno e uno solo tipo di orario.
-  Con questa procedura guidata è possibile definire in modo sicuro il tipo orario per ogni singolo periodo del contratto
+  <p>Utilizzare questa form per definire il nuovo periodo di tipo orario selezionando la data di inizio e la data di fine periodo.</p>
+  <p>Lasciando vuoto il campo <strong>&{'cwtt.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
+  
   <p>Data inizio contratto: <strong>${contract.beginContract.format()}</strong></p>
   <p>Data fine contratto: 
   <strong>
@@ -41,16 +42,53 @@ Il software richiede che per ogni giorno di contratto sia specificato uno e uno 
 
 #{form action:@Contracts.changeTypeOfContractWorkingTimeType(), class:'form-horizontal',
 		'data-async':'#updateWtt', 'data-async-error':'#updateWtt', 'data-spinner':'#defaultSpinner' }
-		
-	        #{f.hidden 'cwtt.contract.id' /}
-	        #{f.date 'cwtt.beginDate', value:cwtt.beginDate?.format(), required:true /}
-	        #{f.date 'cwtt.endDate', value:cwtt.endDate?.format() /}
-	        #{f.selectModel 'cwtt.workingTimeType', 	
-	        items:templateUtility.getEnabledWorkingTimeTypeForOffice(cwtt.contract.person.office), required:true /}
-	        
-	        #{b.buttons center:true}
-	            #{b.submit 'Applica'/}
-	        #{/b.buttons}
+	
+	#{f.hidden 'cwtt.contract.id' /}
+	
+	#{if !confirmed}	
+		 #{f.date 'cwtt.beginDate', value:cwtt.beginDate?.format(), required:true /}
+		 #{f.date 'cwtt.endDate', value:cwtt.endDate?.format() /}
+		 #{f.selectModel 'cwtt.workingTimeType', 	
+		      items:templateUtility.getEnabledWorkingTimeTypeForOffice(cwtt.contract.person.office), required:true /}
+		 #{b.buttons center:true}
+		   #{b.submit 'Applica'/}
+		 #{/b.buttons}
+	#{/if}
+	#{else}
+	      #{f.hidden 'confirmed' /}
+		  #{f.simpleView 'cwtt.beginDate', value:cwtt.beginDate?.format(), hidden:true /}
+		  #{f.simpleView 'cwtt.endDate', value:cwtt.endDate?.format(), hidden:true /}
+		  #{f.simpleView 'cwtt.workingTimeType' /}
+		  #{f.hidden 'cwtt.workingTimeType.id' /}
+		  
+		  #{alert color:'danger'}
+		    <p>Nuova configurazione</p>
+		    <table class="table table-bordered table-condensed center">
+			  <tr>
+			    <th>Dal</th>
+			    <th>Al</th>
+				<th>Tip Orario</th>
+			  </tr>
+			  #{list items:cwttRecaps, as:'cwttRecap'}
+			  <tr>
+			    <td>${cwttRecap.beginDate.format()}</td>
+				<td>#{if cwttRecap.endDate} ${cwttRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+				<td>${cwttRecap.workingTimeType.description}</td>
+			  </tr>
+			  #{/list}
+		  	</table>
+		    #{if recomputeFrom != null}
+	 	        <p>ePAS effettuerà il ricalcolo di tutti i dati del dipendente 
+	 	        dal <strong>${recomputeFrom.format()}</strong>
+	 	        al <strong>${recomputeTo.format()}</strong> 
+	 	        per un totale di <strong>${days}</strong> giorni.</p>			
+	 	    #{/if}
+		  #{/alert}
+		  #{b.buttons center:true}
+		   #{b.submit 'Conferma'/}
+		 #{/b.buttons}
+	#{/else}
+	 
 #{/form}
 
 

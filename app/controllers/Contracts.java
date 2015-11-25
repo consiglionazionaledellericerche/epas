@@ -476,44 +476,43 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(cwtt.workingTimeType.office);
     
     //riepilogo delle modifiche
-    DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-    List<ContractWorkingTimeType> cwttList = Lists.newArrayList();
-
-    for (ContractWorkingTimeType oldCwtt : contract.contractWorkingTimeType) {
-      DateInterval oldInterval = new DateInterval(oldCwtt.beginDate, oldCwtt.endDate);
-      
-      if (cwtt.workingTimeType.id.equals(oldCwtt.workingTimeType.id)) {
-        cwttList.add(oldCwtt);
-        continue;
+    List<ContractWorkingTimeType> cwttRecaps = contractManager.changedRecap(contract, cwtt, false);
+    LocalDate recomputeFrom = null;
+    LocalDate recomputeTo = wrappedContract.getContractDateInterval().getEnd();
+    for (ContractWorkingTimeType item : cwttRecaps) {
+      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
+        recomputeFrom = item.recomputeFrom;
       }
-      if (DateUtility.intervalIntersection(cwttInterval, oldInterval) == null) {
-        cwttList.add(oldCwtt);
-        continue;
+    }
+    if (recomputeFrom != null) {
+      if (recomputeTo.isAfter(LocalDate.now())) {
+        recomputeTo = LocalDate.now();
       }
-      
-      //si sovrappone e sono diversi
-      
-       
+      if (recomputeFrom.isBefore(wrappedContract.getContractDatabaseInterval().getBegin())) {
+        recomputeFrom = wrappedContract.getContractDatabaseInterval().getBegin();
+      }
     }
     
-    
     if (!confirmed) {
-      
-      updateContractWorkingTimeType(contract.id);
+      confirmed = true;
+      int days = 0;
+      if (recomputeFrom != null) {
+        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
+      }
+      render("@updateContractWorkingTimeType", contract, cwtt, cwttRecaps, confirmed, 
+          recomputeFrom, recomputeTo, days);
     } else {
+      
+      contractManager.changedRecap(contract, cwtt, true);
+      contract = contractDao.getContractById(contract.id);
+      contract.person.refresh();
+      if (recomputeFrom != null) {
+        contractManager.recomputeContract(contract, 
+            Optional.fromNullable(recomputeFrom), false, false);
+      }
       //todo il messaggio di conferma nel flash.
       updateContractWorkingTimeType(contract.id);
     }
-    
-    //check sul permesso wtt.office
-//
-//    // Ricalcolo valori
-//    contractManager.recomputeContract(cwtt.contract, 
-//        Optional.fromNullable(cwtt.beginDate), false, false);
-//
-//    flash.success("Operazione eseguita.");
-//
-    //personContracts(cwtt.contract.person.id);
 
   }
 
