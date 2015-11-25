@@ -21,10 +21,19 @@ absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
+administrations= Amministrazione
+
 badgeReader.code=Nome 
 badgeReader.description=Descrizione 
 badgeReader.location=Location
 badgeReader.owner=Sede Afferente
+
+configurations= Configurazione
+
+competenceCode.code= Codice Competenza
+competenceCode.codeToPresence= Codice per attestato di presenza
+competenceCode.description= Descrizione
+competenceCode.new= Nuovo codice di competenza
 
 views.common.true=vero
 views.common.false=falso
@@ -90,6 +99,8 @@ Institutes.delete=Elimina istituto
 institute.name=Nome
 institute.code=Sigla
 institute.cds= Centro di spesa
+
+logout= Esci
 
 lunchPauseStart= Inizio pausa pranzo
 lunchPauseEnd= Fine pausa pranzo
@@ -166,6 +177,8 @@ PDFReport.thIncompleteTime=Orario incompleto
 
 qualification=Livello
 
+restoreUser= Torna chi eri
+
 office=Sede
 
 modifierType= Calcolo Orario
@@ -191,9 +204,9 @@ month= Mese (se presente)
 year= Anno (se presente)
 day= Giorno (se presente)
 
-########################
+###########################
 # Messaggi di validazione
-########################
+###########################
 
 validation.required=Obbligatorio
 validation.minSize=Lunghezza minima %2$d
