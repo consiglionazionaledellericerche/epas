@@ -22,6 +22,7 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.ModelQuery.SimpleResults;
+import helpers.Web;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,9 +43,9 @@ import models.TotalOvertime;
 import models.User;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -266,27 +267,29 @@ public class Competences extends Controller {
 
   public static void insertCompetenceCode() {
 
-    CompetenceCode code = new CompetenceCode();
-    render(code);
+    render("@edit");
   }
 
   public static void edit(Long competenceCodeId) {
 
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
-    render(code);
+    CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+    render(competenceCode);
   }
 
-  public static void save(Long competenceCodeId) {
+  public static void save(@Valid final CompetenceCode competenceCode) {
 
-    String codice = params.get("codice");
-    String descrizione = params.get("descrizione");
-    String codiceAtt = params.get("codiceAttPres");
-    if (competenceManager.setNewCompetenceCode(competenceCodeId, codice, descrizione, codiceAtt)) {
-      flash.success(String.format("Codice %s aggiunto con successo", codice));
-    } else {
-      flash.error(String.format("Il codice competenza %s è già presente nel database. Cambiare nome al codice.", codice));
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      flash.error(Web.msgHasErrors());
+
+      render("@edit",competenceCode);
     }
-    Application.indexAdmin();
+    competenceCode.save();
+
+    flash.success(String.format("Codice %s aggiunto con successo", competenceCode.code));
+//    competenceManager.setNewCompetenceCode(competenceCodeId, codice, descrizione, codiceAtt);
+
+    manageCompetenceCode();
   }
 
   public static void totalOvertimeHours(int year, Long officeId) {

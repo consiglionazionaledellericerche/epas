@@ -30,6 +30,11 @@ badgeReader.owner=Sede Afferente
 
 configurations= Configurazione
 
+competenceCode.code= Codice Competenza
+competenceCode.codeToPresence= Codice per attestato di presenza
+competenceCode.description= Descrizione
+competenceCode.new= Nuovo codice di competenza
+
 views.common.true=vero
 views.common.false=falso
 
