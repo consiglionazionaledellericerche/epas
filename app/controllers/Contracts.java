@@ -57,7 +57,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 @With({Resecure.class, RequestInit.class})
 public class Contracts extends Controller {
   
-  final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYY");
+  private final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYY");
 
   @Inject
   private static PersonDao personDao;
@@ -98,7 +98,7 @@ public class Contracts extends Controller {
   }
   
   /**
-   * Edit contratto.
+   * Edit date e on certificate contratto.
    * @param contractId contractId
    */
   public static void edit(Long contractId) {
@@ -120,7 +120,7 @@ public class Contracts extends Controller {
   }
 
   /**
-   * Aggiornamento contratto.
+   * Aggiornamento date e on certificate contratto.
    * @param contract contract
    * @param beginContract inizio
    * @param expireContract scadenza
@@ -165,6 +165,9 @@ public class Contracts extends Controller {
           onCertificate);
     }
 
+    // Salvo la situazione precedente
+    DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
+
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
     contract.beginContract = beginContract;
     contract.expireContract = expireContract;
@@ -177,62 +180,56 @@ public class Contracts extends Controller {
           onCertificate);
     }
 
-    // Salvo la situazione precedente
-    DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
-
-    // Se non ho avuto conferma la data da cui ricalcolare
+    // Riepilogo modifiche
     boolean changeBegin = false;
     boolean changeEnd = false;
     boolean onlyRecap = false;
     LocalDate recomputeFrom = null;
-    if (!confirmed) {
-      DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
-      if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
-        changeBegin = true;
-        if (newInterval.getBegin().isBefore(LocalDate.now())) {
-          recomputeFrom = newInterval.getBegin();
-        }
-      }
-      if (recomputeFrom == null) {
-        if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
-          changeEnd = true;
-          // scorcio allora solo riepiloghi
-          if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
-            onlyRecap = true;
-            recomputeFrom = newInterval.getEnd();
-          }
-          // allungo ma se inglobo passato allora ricalcolo
-          if (newInterval.getEnd().isAfter(previousInterval.getEnd())
-              && previousInterval.getEnd().isBefore(LocalDate.now())) {
-            recomputeFrom = previousInterval.getEnd();
-          }
-        }
-      }
-      if (recomputeFrom != null) {
 
-        LocalDate recomputeTo = newInterval.getEnd();
-        if (!recomputeTo.isBefore(LocalDate.now())) {
-          recomputeTo = LocalDate.now();
-        }
-
-        response.status = 400;
-        render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-            onCertificate, changeBegin, changeEnd, recomputeFrom, recomputeTo, onlyRecap);
+    DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
+    if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
+      changeBegin = true;
+      if (newInterval.getBegin().isBefore(LocalDate.now())) {
+        recomputeFrom = newInterval.getBegin();
       }
     }
+    if (recomputeFrom == null) {
+      if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
+        changeEnd = true;
+        // scorcio allora solo riepiloghi
+        if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
+          onlyRecap = true;
+          recomputeFrom = newInterval.getEnd();
+        }
+        // allungo ma se inglobo passato allora ricalcolo
+        if (newInterval.getEnd().isAfter(previousInterval.getEnd())
+            && previousInterval.getEnd().isBefore(LocalDate.now())) {
+          recomputeFrom = previousInterval.getEnd();
+        }
+      }
+    }
+    if (!confirmed && recomputeFrom != null) {
+      LocalDate recomputeTo = newInterval.getEnd();
+      if (!recomputeTo.isBefore(LocalDate.now())) {
+        recomputeTo = LocalDate.now();
+      }
+      int days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
 
-    // Conferma ricevuta
-    if (recomputeFrom != null) {
+      response.status = 400;
+      render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
+          onCertificate, changeBegin, changeEnd, recomputeFrom, recomputeTo, days, onlyRecap);
+    }
+    if (recomputeFrom != null) {  
       contractManager.properContractUpdate(contract, recomputeFrom, false);
+      contract.save();
+      boolean success = true;
+      confirmed = false;
+      Person person = contract.person;
+      render("@edit", person, contract, wrappedContract, beginContract, expireContract, endContract,
+          onCertificate, success);
     }
-
-    contract.save();
-
-    flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name,
-        contract.person.surname);
-
+    
     Contracts.edit(contract.id);
-
   }
 
   /**

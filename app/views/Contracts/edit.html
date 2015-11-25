@@ -11,17 +11,28 @@
 
 <div class="container">
 
-  <div class="alert alert-info">
-  	<p>Utilizzare questa form per modificare le date del contratto.</p>
-  	#{if wrappedContract.value.sourceDateResidual}
-    <p>Per questo contratto è stata definita la data di inizializzazione 
-       <strong>${wrappedContract.value.sourceDateResidual.format()}</strong>,
-       sarà pertanto impossibile spostare la data di inizio del contratto successivamente a quella data.</p>
-     #{/if}
-    <p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
-     il tipo orario attribuito alla parte conclusiva del contratto.</p>
-  </div>
+   
+  #{alert color:'info'}
   
+  	<p>Utilizzare questa form per modificare le date del contratto.</p>
+  	
+  	<p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
+     il tipo orario attribuito alla parte conclusiva del contratto.
+     </p>
+     
+     <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+  #{/alert}
+
+  #{if wrappedContract.value.sourceDateResidual}  
+  #{alert color:'info'}
+       <p>Per questo contratto è stata definita la data di inizializzazione 
+       <strong>${wrappedContract.value.sourceDateResidual.format()}</strong>,
+       sarà pertanto impossibile spostare la data di inizio del contratto successivamente a quella data. In caso di necessità
+       rimuovere 
+       </p>
+  #{/alert}
+  #{/if}
+  *{    
   <div class="alert alert-danger">
     <p><strong>Attenzione!!!</strong></p>
     <p>La modifica delle date del contratto se attuata nel passato potrebbe causare il ricalcolo della situazione del dipendente
@@ -30,24 +41,33 @@
     <p>
     <p>Nel caso di ricalcoli necessari ePAS effettuerà un riepilogo delle modifiche necessarie e chiederà un comando di conferma.</p> 
   </div>
-
+  }*
 
   <div id="modifyContract">
-	#{form @Contracts.update(), class:'form-horizontal' } 
+	#{form @Contracts.update(), class:'form-horizontal', 
+	'data-async':'#modifyContract', 'data-async-error':'#modifyContract', 
+	'data-spinner':'#defaultSpinner' } 
+	  
+	  #{if success}
+	    #{alert color:'warning', dismissible:true}
+	      Contratto aggiornato con successo.
+	    #{/alert}
+	  #{/if}
 	  
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 
 		#{if recomputeFrom }
-			#{f.simpleView label:'beginContract', value:beginContract?.format(), name:'beginContract', hidden:true /}
-			#{f.simpleView label:'expireContract', value:expireContract?.format(), name:'expireContract', hidden:true /}
-			#{f.simpleView label:'endContract', value:endContract?.format(), name:'endContract', hidden:true /}
+			#{f.simpleView 'beginContract', value:beginContract?.format(), hidden:true /}
+			#{f.simpleView 'expireContract', value:expireContract?.format(), hidden:true /}
+			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			<input type="hidden" name="confirmed" value="true" />
 			
  	        <div class="alert alert-danger">
  	          #{if changeBegin}
  	            <em>Modifica data iniziale:</em> ePAS effettuerà il ricalcolo di 
- 	                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}.
+ 	                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}
+ 	                per un totale di <strong>${days}</strong> giorni.
  	          #{/if}
 	          #{else}
 		          #{if onlyRecap}
@@ -56,7 +76,8 @@
 		          #{/if}
 		          #{else}
 		            <em>Prolungamento del contratto:</em> ePAS effettuerà il ricalcolo di
-		                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}.
+		                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()} 
+		                per un totale di <strong>${days}</strong> giorni.
 		          #{/else}
 	          #{/else}
 	        </div>
@@ -84,6 +105,8 @@
 			</div>
 	    	
 		#{/else}
+		
+
 	#{/form}
 
   </div>
