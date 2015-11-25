@@ -180,11 +180,13 @@ public class Contracts extends Controller {
           onCertificate);
     }
 
-    // Riepilogo modifiche
+    //riepilogo delle modifiche
+    boolean initMissing = false;
     boolean changeBegin = false;
-    boolean changeEnd = false;
-    boolean onlyRecap = false;
+    boolean reduceEnd = false;          //onlyRecap
+    boolean incrementEndInPast = false;
     LocalDate recomputeFrom = null;
+    LocalDate recomputeTo = null;
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
     if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
@@ -195,41 +197,52 @@ public class Contracts extends Controller {
     }
     if (recomputeFrom == null) {
       if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
-        changeEnd = true;
         // scorcio allora solo riepiloghi
         if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
-          onlyRecap = true;
+          reduceEnd = true;
           recomputeFrom = newInterval.getEnd();
         }
         // allungo ma se inglobo passato allora ricalcolo
         if (newInterval.getEnd().isAfter(previousInterval.getEnd())
             && previousInterval.getEnd().isBefore(LocalDate.now())) {
+          incrementEndInPast = true;
           recomputeFrom = previousInterval.getEnd();
         }
       }
     }
-    if (!confirmed && recomputeFrom != null) {
-      LocalDate recomputeTo = newInterval.getEnd();
+    if (recomputeFrom != null) {
+      recomputeTo = newInterval.getEnd();
       if (!recomputeTo.isBefore(LocalDate.now())) {
         recomputeTo = LocalDate.now();
       }
-      int days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
+    }
+    if (wrappedContract.initializationMissing()) {
+      initMissing = true;
+      recomputeFrom = null;
+    }
 
+    //conferma 
+    if (!confirmed) {
+      confirmed = true;
+      int days = 0;
+      if (recomputeFrom != null) {
+        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
+      }
       response.status = 400;
       render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-          onCertificate, changeBegin, changeEnd, recomputeFrom, recomputeTo, days, onlyRecap);
-    }
-    if (recomputeFrom != null) {  
-      contractManager.properContractUpdate(contract, recomputeFrom, false);
-      contract.save();
+          onCertificate, changeBegin, reduceEnd, incrementEndInPast, initMissing, 
+          recomputeFrom, recomputeTo, days);
+    } else {
+      if (recomputeFrom != null) {  
+        contractManager.properContractUpdate(contract, recomputeFrom, false);
+      }
       boolean success = true;
       confirmed = false;
       Person person = contract.person;
       render("@edit", person, contract, wrappedContract, beginContract, expireContract, endContract,
           onCertificate, success);
     }
-    
-    Contracts.edit(contract.id);
+
   }
 
   /**
@@ -476,24 +489,6 @@ public class Contracts extends Controller {
     render(contract, wContract, wOffice, wPerson);
   }
 
-  // public static void approveAutomatedSource(Long contractId) {
-  //
-  // Contract contract = contractDao.getContractById(contractId);
-  //
-  // notFoundIfNull(contract);
-  //
-  // rules.checkIfPermitted(contract.person.office);
-  //
-  // contract.sourceByAdmin = true;
-  // contract.save();
-  //
-  // flash.success("Operazione conclusa con successo.");
-  //
-  // //list(null);
-  //
-  // }
-
-
   /**
    * Salva l'inizializzazione. 
    * @param contract contract
@@ -501,7 +496,7 @@ public class Contracts extends Controller {
    * @param confirmed step di conferma ricevuta
    */
   public static void saveResidualSourceContract(@Valid final Contract contract,
-      @Valid @Required final LocalDate sourceDateResidual, boolean confirmed) {
+      @Valid final LocalDate sourceDateResidual, boolean confirmed) {
 
     notFoundIfNull(contract);
 
@@ -512,9 +507,19 @@ public class Contracts extends Controller {
     IWrapperPerson wPerson = wrapperFactory.create(contract.person);
 
     if (!validation.hasErrors()) {
-      if (sourceDateResidual.isBefore(wContract.dateForInitialization())) {
+      if (sourceDateResidual != null && 
+          sourceDateResidual.isBefore(wContract.dateForInitialization())) {
         validation.addError("sourceDateResidual",
             "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
+      }
+      if (sourceDateResidual != null &&
+          sourceDateResidual.isAfter(wContract.getContractDateInterval().getEnd())) {
+        validation.addError("sourceDateResidual",
+            "deve essere precedente o uguale alla fine del contratto");
+      }
+      if (sourceDateResidual == null && contract.sourceDateResidual == null) {
+        validation.addError("sourceDateResidual",
+            "per definire l'inizializzazione è obbligatorio questo campo");
       }
     }
 
@@ -526,12 +531,37 @@ public class Contracts extends Controller {
 
       render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateResidual);
     }
-
+    
     LocalDate recomputeFrom = sourceDateResidual;
     LocalDate recomputeTo = wContract.getContractDateInterval().getEnd();
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
     }
+    //eliminazione inizializzazione.
+    if (sourceDateResidual == null) {
+      contractManager.cleanResidualInitialization(contract);
+      boolean removeMandatory = false;
+      boolean removeUnnecessary = false;
+      if (contract.beginContract.isBefore(wContract.dateForInitialization())) {
+        removeMandatory = true;
+      } else {
+        removeUnnecessary = true;
+        recomputeFrom = contract.beginContract;
+      }
+      if (!confirmed) {
+        confirmed = true;
+        int days = 0;
+        if (recomputeFrom != null) {
+          days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
+        }
+        render("@updateSourceContract", contract, wContract, wPerson, wOffice,
+          confirmed, removeMandatory, removeUnnecessary, recomputeFrom, recomputeTo, days);
+      } else {
+        //calcoli
+      }
+    }
+
+    //configurazione inizializzazione
     if (!confirmed) {
       confirmed = true;
       int days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
@@ -546,16 +576,16 @@ public class Contracts extends Controller {
       render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateResidual,
           confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
     
-    } 
-        
-    // Conferma ricevuta
-    contract.sourceDateResidual = sourceDateResidual;
-    contractManager.setSourceContractProperly(contract);
-    contractManager.properContractUpdate(contract, recomputeFrom, false);
-    boolean success = true;
-    confirmed = false;
-    render("@updateSourceContract", sourceDateResidual, contract, confirmed, 
-        success, wContract, wOffice, wPerson);
+    } else {
+      contract.sourceDateResidual = sourceDateResidual;
+      contractManager.setSourceContractProperly(contract);
+      contractManager.properContractUpdate(contract, recomputeFrom, false);
+      boolean success = true;
+      confirmed = false;
+      render("@updateSourceContract", sourceDateResidual, contract, confirmed, 
+          success, wContract, wOffice, wPerson);
+    }
+
   }
 
   /**
