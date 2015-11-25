@@ -346,8 +346,11 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
+    
+    ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+    cwtt.contract = contract;
 
-    render(wrappedContract, contract);
+    render(wrappedContract, contract, cwtt);
   }
 
   /**
@@ -440,27 +443,77 @@ public class Contracts extends Controller {
     personContracts(contract.person.id);
   }
 
-  public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt,
-      WorkingTimeType newWtt) {
-
+  public static void changeTypeOfContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt, 
+      boolean confirmed) {
+    
     notFoundIfNull(cwtt);
-    notFoundIfNull(newWtt);
-
+    notFoundIfNull(cwtt.contract);
+    
     rules.checkIfPermitted(cwtt.contract.person.office);
-    rules.checkIfPermitted(newWtt.office);
-
+       
+    IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
     Contract contract = cwtt.contract;
+    
+    if (!validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(cwtt.beginDate, wrappedContract.getContractDateInterval())) {
+        validation.addError("cwtt.beginDate", "deve appartenere al contratto");
+      }
+      if (cwtt.endDate != null && 
+          !DateUtility.isDateIntoInterval(cwtt.endDate, wrappedContract.getContractDateInterval())) {
+        validation.addError("cwtt.endDate", "deve appartenere al contratto");
+      }
+    }
+    
+    if (validation.hasErrors()) {
+      response.status = 400;
+      flash.error(Web.msgHasErrors());
 
-    cwtt.workingTimeType = newWtt;
-    cwtt.save();
+      log.warn("validation errors: {}", validation.errorsMap());
 
-    // Ricalcolo valori
-    contractManager.recomputeContract(cwtt.contract, 
-        Optional.fromNullable(cwtt.beginDate), false, false);
+      render("@updateContractWorkingTimeType", cwtt, contract);
+    }
+    
+    rules.checkIfPermitted(cwtt.workingTimeType.office);
+    
+    //riepilogo delle modifiche
+    DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
+    List<ContractWorkingTimeType> cwttList = Lists.newArrayList();
 
-    flash.success("Operazione eseguita.");
-
-    personContracts(contract.person.id);
+    for (ContractWorkingTimeType oldCwtt : contract.contractWorkingTimeType) {
+      DateInterval oldInterval = new DateInterval(oldCwtt.beginDate, oldCwtt.endDate);
+      
+      if (cwtt.workingTimeType.id.equals(oldCwtt.workingTimeType.id)) {
+        cwttList.add(oldCwtt);
+        continue;
+      }
+      if (DateUtility.intervalIntersection(cwttInterval, oldInterval) == null) {
+        cwttList.add(oldCwtt);
+        continue;
+      }
+      
+      //si sovrappone e sono diversi
+      
+       
+    }
+    
+    
+    if (!confirmed) {
+      
+      updateContractWorkingTimeType(contract.id);
+    } else {
+      //todo il messaggio di conferma nel flash.
+      updateContractWorkingTimeType(contract.id);
+    }
+    
+    //check sul permesso wtt.office
+//
+//    // Ricalcolo valori
+//    contractManager.recomputeContract(cwtt.contract, 
+//        Optional.fromNullable(cwtt.beginDate), false, false);
+//
+//    flash.success("Operazione eseguita.");
+//
+    //personContracts(cwtt.contract.person.id);
 
   }
 

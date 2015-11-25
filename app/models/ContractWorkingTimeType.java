@@ -32,7 +32,7 @@ public class ContractWorkingTimeType extends BaseModel implements Comparable<Con
 	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
-
+    @Required
 	@Column(name="begin_date")
 	public LocalDate beginDate;
 	
