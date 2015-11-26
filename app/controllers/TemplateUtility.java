@@ -18,6 +18,7 @@ import dao.WorkingTimeTypeDao;
 import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
 import models.AbsenceType;
+import models.BadgeReader;
 import models.Institute;
 import models.Office;
 import models.Person;
@@ -38,248 +39,255 @@ import java.util.Set;
 
 /**
  * Metodi usabili nel template.
+ * 
  * @author alessandro
  *
  */
 public class TemplateUtility {
-	
 
-	private final SecureManager secureManager;
-	private final OfficeDao officeDao;
-	private final PersonDao personDao;
-	private final QualificationDao qualificationDao;
-	private final AbsenceTypeDao absenceTypeDao;
-	private final StampingDao stampingDao;
-	private final RoleDao roleDao;
-	private final BadgeReaderDao badgeReaderDao;
-	private final WorkingTimeTypeDao workingTimeTypeDao;
 
-	@Inject
-	public TemplateUtility(SecureManager secureManager,
-			OfficeDao officeDao, PersonDao personDao,
-			QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
-			StampingDao stampingDao, RoleDao roleDao, BadgeReaderDao badgeReaderDao, 
-			WorkingTimeTypeDao workingTimeTypeDao) {
-		
-				this.secureManager = secureManager;
-				this.officeDao = officeDao;
-				this.personDao = personDao;
-				this.qualificationDao = qualificationDao;
-				this.absenceTypeDao = absenceTypeDao;
-				this.stampingDao = stampingDao;
-				this.roleDao = roleDao;
-				this.badgeReaderDao = badgeReaderDao;
-				this.workingTimeTypeDao = workingTimeTypeDao;
-	}
+  private final SecureManager secureManager;
+  private final OfficeDao officeDao;
+  private final PersonDao personDao;
+  private final QualificationDao qualificationDao;
+  private final AbsenceTypeDao absenceTypeDao;
+  private final StampingDao stampingDao;
+  private final RoleDao roleDao;
+  private final BadgeReaderDao badgeReaderDao;
+  private final WorkingTimeTypeDao workingTimeTypeDao;
+  
 
-	
-	/**
-	 * @param month numero mese nel formato stringa (ex: "1")
-	 * @return il nome del mese
-	 */
-	public final String monthName(final String month) {
+  @Inject
+  public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
+      QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
+      RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao) {
 
-		return DateUtility.fromIntToStringMonth(Integer.parseInt(month));
-	}
+    this.secureManager = secureManager;
+    this.officeDao = officeDao;
+    this.personDao = personDao;
+    this.qualificationDao = qualificationDao;
+    this.absenceTypeDao = absenceTypeDao;
+    this.stampingDao = stampingDao;
+    this.roleDao = roleDao;
+    this.badgeReaderDao = badgeReaderDao;
+    this.workingTimeTypeDao = workingTimeTypeDao;
+  }
 
-	/**
-	 * @param month numero mese formato integer (ex: 1)
-	 * @return il nome del mese
-	 */
-	public final String monthName(final Integer month) {
 
-		return DateUtility.fromIntToStringMonth(month);
-	}
+  /**
+   * @param month numero mese nel formato stringa (ex: "1")
+   * @return il nome del mese
+   */
+  public final String monthName(final String month) {
 
-	/**
-	 * @param month mese di partenza
-	 * @return mese successivo a mese di partenza
-	 */
-	public final int computeNextMonth(final int month) {
-		if (month == DateUtility.DECEMBER) {
-			return DateUtility.JANUARY;
-		}
-		return month + 1;
-	}
+    return DateUtility.fromIntToStringMonth(Integer.parseInt(month));
+  }
 
-	/**
-	 * 
-	 * @param month mese di partenza
-	 * @param year anno di partenza
-	 * @return anno successivo al mese/anno di partenza
-	 */
-	public final int computeNextYear(final int month, final int year){
-		if (month == DateUtility.DECEMBER) {
-			return year + 1;
-		}
-		return year;
-	}
+  /**
+   * @param month numero mese formato integer (ex: 1)
+   * @return il nome del mese
+   */
+  public final String monthName(final Integer month) {
 
-	/**
-	 * @param month mese di partenza
-	 * @return mese precedente a mese di partenza
-	 */
-	public final int computePreviousMonth(final int month){
-		if (month == DateUtility.JANUARY) {
-			return DateUtility.DECEMBER;
-		}
-		return month - 1;
-	}
+    return DateUtility.fromIntToStringMonth(month);
+  }
 
-	/**
-	 * 
-	 * @param month mese di partenza
-	 * @param year anno di partenza
-	 * @return anno precedente al mese/anno di partenza
-	 */
-	public final int computePreviousYear(final int month, final int year){
-		if (month == DateUtility.JANUARY) {
-			return year - 1;
-		}
-		return year;
-	}
+  /**
+   * @param month mese di partenza
+   * @return mese successivo a mese di partenza
+   */
+  public final int computeNextMonth(final int month) {
+    if (month == DateUtility.DECEMBER) {
+      return DateUtility.JANUARY;
+    }
+    return month + 1;
+  }
 
-	//Liste di utilità per i template
+  /**
+   * 
+   * @param month mese di partenza
+   * @param year anno di partenza
+   * @return anno successivo al mese/anno di partenza
+   */
+  public final int computeNextYear(final int month, final int year) {
+    if (month == DateUtility.DECEMBER) {
+      return year + 1;
+    }
+    return year;
+  }
 
-	public Set<Office> officesAllowed() { 
-		return secureManager.officesWriteAllowed(Security.getUser().get());
-	}
+  /**
+   * @param month mese di partenza
+   * @return mese precedente a mese di partenza
+   */
+  public final int computePreviousMonth(final int month) {
+    if (month == DateUtility.JANUARY) {
+      return DateUtility.DECEMBER;
+    }
+    return month - 1;
+  }
 
-	public List<Qualification> getAllQualifications() {
-		return qualificationDao.findAll();
-	}
+  /**
+   * 
+   * @param month mese di partenza
+   * @param year anno di partenza
+   * @return anno precedente al mese/anno di partenza
+   */
+  public final int computePreviousYear(final int month, final int year) {
+    if (month == DateUtility.JANUARY) {
+      return year - 1;
+    }
+    return year;
+  }
 
-	public List<AbsenceType> getCertificateAbsenceTypes() {
-		return absenceTypeDao.certificateTypes();
-	}
-	
-	public List<StampType> getAllStampTypes(){
-		return stampingDao.findAll();
-	}
-	
-	public ImmutableList<String> getAllDays() {
-		return ImmutableList.of(
-				  "lunedì", "martedì", "mercoledì", "giovedì", 
-				  "venerdì", "sabato", "domenica");
-	}
-	
-	public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
-		return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office); 
-	}
-	
-	/**
-	 * Gli user associati a tutte le persone appartenenti all'istituto.
-	 * @param institute
-	 * @return
-	 */
-	public List<User> usersInInstitute(Institute institute) {
-		
-		Set<Office> offices = Sets.newHashSet();
-		offices.addAll(institute.seats);
-		
-		List<Person> personList = personDao.listPerseo(Optional.<String>absent(), 
-				offices, false, LocalDate.now(), LocalDate.now(), true).list();
+  // Liste di utilità per i template
 
-		List<User> users = Lists.newArrayList();
-		for(Person person : personList) {
-			users.add(person.user);
-		}
-		
-		return users;
-	}
-	
-	public List<Role> rolesAssignable(Office office) {
-		
-		List roles = Lists.newArrayList();
+  public Set<Office> officesAllowed() {
+    return secureManager.officesWriteAllowed(Security.getUser().get());
+  }
 
-		// TODO: i ruoli impostabili sull'office dipendono da chi esegue la richiesta...
-		// e vanno spostati nel secureManager.
-		Optional<User> user = Security.getUser();
-		if(user.isPresent()) {
-			roles.add(roleDao.getRoleByName(Role.TECNICAL_ADMIN));
-			roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
-			roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
-			return roles;
-		}
-		return roles;
-	}
-	
-	/**
-	 * Gli uffici che l'user può assegnare come owner ai BadgeReader.
-	 * Il super admin può assegnarlo ad ogni ufficio.
-	 * @return
-	 */
-	public List<Office> officeForBadgeReaders() {
-		
-		List<Office> offices = Lists.newArrayList();
-		
-		Optional<User> user = Security.getUser();
-		
-		//se admin tutti, altrimenti gli office di cui si ha tecnicalAdmin
-		// TODO: spostare nel sucureManager
-		if(!user.isPresent()) {
-			return offices;
-		}
+  public List<Qualification> getAllQualifications() {
+    return qualificationDao.findAll();
+  }
 
-		if(user.get().isSuperAdmin()) {
-			return officeDao.getAllOffices();
-		}
-		
-		for(UsersRolesOffices uro : user.get().usersRolesOffices) {
-			if(uro.role.name.equals(Role.TECNICAL_ADMIN)) {
-				offices.add(uro.office);
-			}
-		}
-		return offices;
-	}
-	
-	/**
-	 * Gli account di tutti i badgeReader non ancora assegnati ad office.
-	 * @param office
-	 * @return
-	 */
-	public List<User> badgeReaderUserForOffice(Office office) {
-		
-		List<User> users = Lists.newArrayList();
-		
-		List<User> badgeReaders = badgeReaderDao.usersBadgeReader();
-		for (User user : badgeReaders) {
-			boolean insert = true;
-			for (UsersRolesOffices uro : user.usersRolesOffices) {
-				if (uro.office.id.equals(office.id)) {
-					insert = false;
-					break;
-				}
-			}
-			if (insert) {
-				users.add(user);
-			}
-		}
-		return users;
-	}
-	
-	/**
-	 * I codici di assenza ordinati dai più utilizzati.
-	 * @return
-	 */
-	public List<AbsenceType> frequentAbsenceTypeList() {
+  public List<AbsenceType> getCertificateAbsenceTypes() {
+    return absenceTypeDao.certificateTypes();
+  }
 
-		Optional<AbsenceType> ferCode = absenceTypeDao.getAbsenceTypeByCode(
-				AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
-		Preconditions.checkState(ferCode.isPresent());
-		
-		return FluentIterable.from(Lists.newArrayList(ferCode.get()))
-				.append(absenceTypeDao.getFrequentTypes()).toList();
-	}
-	
-	/**
-	 * I codici di assenza attivi ordinati per codice. 
-	 * 
-	 * @param date
-	 * @return
-	 */
-	public List<AbsenceType> allAbsenceCodes(LocalDate date) {
-		return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
-	}
-	
+  public List<StampType> getAllStampTypes() {
+    return stampingDao.findAll();
+  }
+
+  public ImmutableList<String> getAllDays() {
+    return ImmutableList.of("lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato",
+        "domenica");
+  }
+
+  public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
+    return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
+  }
+  
+  public List<BadgeReader> getAllBadgeReader(Person person){
+    return badgeReaderDao.getBadgeReaderByOffice(person.office);
+  }
+
+  /**
+   * Gli user associati a tutte le persone appartenenti all'istituto.
+   * 
+   * @param institute
+   * @return
+   */
+  public List<User> usersInInstitute(Institute institute) {
+
+    Set<Office> offices = Sets.newHashSet();
+    offices.addAll(institute.seats);
+
+    List<Person> personList = personDao.listPerseo(Optional.<String>absent(), offices, false,
+        LocalDate.now(), LocalDate.now(), true).list();
+
+    List<User> users = Lists.newArrayList();
+    for (Person person : personList) {
+      users.add(person.user);
+    }
+
+    return users;
+  }
+
+  public List<Role> rolesAssignable(Office office) {
+
+    List roles = Lists.newArrayList();
+
+    // TODO: i ruoli impostabili sull'office dipendono da chi esegue la richiesta...
+    // e vanno spostati nel secureManager.
+    Optional<User> user = Security.getUser();
+    if (user.isPresent()) {
+      roles.add(roleDao.getRoleByName(Role.TECNICAL_ADMIN));
+      roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+      roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
+      return roles;
+    }
+    return roles;
+  }
+
+  /**
+   * Gli uffici che l'user può assegnare come owner ai BadgeReader. Il super admin può assegnarlo ad
+   * ogni ufficio.
+   * 
+   * @return
+   */
+  public List<Office> officeForBadgeReaders() {
+
+    List<Office> offices = Lists.newArrayList();
+
+    Optional<User> user = Security.getUser();
+
+    // se admin tutti, altrimenti gli office di cui si ha tecnicalAdmin
+    // TODO: spostare nel sucureManager
+    if (!user.isPresent()) {
+      return offices;
+    }
+
+    if (user.get().isSuperAdmin()) {
+      return officeDao.getAllOffices();
+    }
+
+    for (UsersRolesOffices uro : user.get().usersRolesOffices) {
+      if (uro.role.name.equals(Role.TECNICAL_ADMIN)) {
+        offices.add(uro.office);
+      }
+    }
+    return offices;
+  }
+
+  /**
+   * Gli account di tutti i badgeReader non ancora assegnati ad office.
+   * 
+   * @param office
+   * @return
+   */
+  public List<User> badgeReaderUserForOffice(Office office) {
+
+    List<User> users = Lists.newArrayList();
+
+    List<User> badgeReaders = badgeReaderDao.usersBadgeReader();
+    for (User user : badgeReaders) {
+      boolean insert = true;
+      for (UsersRolesOffices uro : user.usersRolesOffices) {
+        if (uro.office.id.equals(office.id)) {
+          insert = false;
+          break;
+        }
+      }
+      if (insert) {
+        users.add(user);
+      }
+    }
+    return users;
+  }
+
+  /**
+   * I codici di assenza ordinati dai più utilizzati.
+   * 
+   * @return
+   */
+  public List<AbsenceType> frequentAbsenceTypeList() {
+
+    Optional<AbsenceType> ferCode = absenceTypeDao
+        .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
+    Preconditions.checkState(ferCode.isPresent());
+
+    return FluentIterable.from(Lists.newArrayList(ferCode.get()))
+        .append(absenceTypeDao.getFrequentTypes()).toList();
+  }
+
+  /**
+   * I codici di assenza attivi ordinati per codice.
+   * 
+   * @param date
+   * @return
+   */
+  public List<AbsenceType> allAbsenceCodes(LocalDate date) {
+    return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
+  }
+
 }

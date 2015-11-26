@@ -1,0 +1,28 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Associazione badge ai lettori badge'  /}
+
+#{set breadcrumbs:['Lista persone':@Persons.list(), 'Assegna Badge':null] /}
+
+<div class="container">
+
+#{breadcrumbs breadcrumbs /}
+
+#{panel title:'Associa badge alla persona' , color:'primary'}	  
+    <div class="alert alert-warning" role="alert">
+    	Specificare il numero badge da associare a <strong>${person.fullname}</strong>
+    </div>
+    #{form action:@allocateBadge(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }	
+		    #{f.hidden 'person.id' /}
+		    #{f.input 'badge.code', required:true /}
+		    
+		    #{f.selectModels 'badgeReader', items:templateUtility.getAllBadgeReader(person), required:true /} 
+			
+	  #{b.buttons}
+	     #{b.save /}
+	  #{/b.buttons}
+	#{/form}
+#{/panel}
+</div>
+    
