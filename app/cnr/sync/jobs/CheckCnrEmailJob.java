@@ -1,24 +1,25 @@
 package cnr.sync.jobs;
 
-import cnr.sync.manager.SyncManager;
 import models.Office;
 import models.Person;
+
+import cnr.sync.manager.SyncManager;
 import play.jobs.Job;
 
 import javax.inject.Inject;
 
 //@On("0 10 6 ? * MON")
 //@On("0 40 10 * * ?")
-public class CheckCnrEmailJob extends Job{
-	
-	@Inject
-	static SyncManager syncManager;
+public class CheckCnrEmailJob extends Job {
 
-	public void doJob() {
-		if (Office.count() == 0 || Person.count() == 0)
-			return;
-		
-		syncManager.syncronizeCnrEmail();
+  @Inject
+  static SyncManager syncManager;
 
-	}
+  public void doJob() {
+    if (Office.count() == 0 || Person.count() == 0)
+      return;
+
+    syncManager.syncronizeCnrEmail();
+
+  }
 }

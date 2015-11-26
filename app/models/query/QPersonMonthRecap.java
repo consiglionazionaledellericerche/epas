@@ -1,18 +1,15 @@
 package models.query;
 
-import com.mysema.query.types.Path;
-import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.DatePath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.NumberPath;
-import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.PersonMonthRecap;
 
-import javax.annotation.Generated;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
+import com.mysema.query.types.path.*;
+
+import com.mysema.query.types.PathMetadata;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**

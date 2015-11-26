@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
  * Mark class in order to participate to static injection.
  *
  * @author marco
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

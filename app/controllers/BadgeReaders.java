@@ -4,15 +4,20 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import com.mysema.query.SearchResults;
+
 import dao.BadgeReaderDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+
 import helpers.Web;
+
 import manager.BadgeManager;
 import manager.SecureManager;
+
 import models.Badge;
 import models.BadgeReader;
 import models.Office;
@@ -20,9 +25,12 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+
 import net.sf.oval.constraint.MinLength;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -31,232 +39,233 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 
-@With( {Resecure.class, RequestInit.class})
+
+@With({Resecure.class, RequestInit.class})
 public class BadgeReaders extends Controller {
 
-	private static final Logger log = LoggerFactory.getLogger(BadgeReaders.class);
+  private static final Logger log = LoggerFactory.getLogger(BadgeReaders.class);
 
-	@Inject
-	private static BadgeReaderDao badgeReaderDao;
-	@Inject
-	private static SecurityRules rules;
-	@Inject
-	private static RoleDao roleDao;
-	@Inject
-	private static PersonDao personDao;
-	@Inject
-	private static SecureManager secureManager;
-	@Inject
-	private static WrapperModelFunctionFactory wrapperFunctionFactory;
-	@Inject
-	private static BadgeManager badgeManager;
+  @Inject
+  private static BadgeReaderDao badgeReaderDao;
+  @Inject
+  private static SecurityRules rules;
+  @Inject
+  private static RoleDao roleDao;
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static SecureManager secureManager;
+  @Inject
+  private static WrapperModelFunctionFactory wrapperFunctionFactory;
+  @Inject
+  private static BadgeManager badgeManager;
 
-	public static void index() {
-		flash.keep();
-		list(null);
-	}
+  public static void index() {
+    flash.keep();
+    list(null);
+  }
 
-	public static void list(String name){
+  public static void list(String name) {
 
-		SearchResults<?> results = badgeReaderDao.badgeReaders(
-				Optional.<String>fromNullable(name)).listResults();
+    SearchResults<?> results = badgeReaderDao.badgeReaders(
+            Optional.<String>fromNullable(name)).listResults();
 
-		render(results, name);
-	}
-
-
-	public static void show(Long id) {
-		final BadgeReader badgeReader = BadgeReader.findById(id);
-		notFoundIfNull(badgeReader);
-		render(badgeReader);
-	}
+    render(results, name);
+  }
 
 
-	public static void edit(Long id) {
+  public static void show(Long id) {
+    final BadgeReader badgeReader = BadgeReader.findById(id);
+    notFoundIfNull(badgeReader);
+    render(badgeReader);
+  }
 
-		final BadgeReader badgeReader = badgeReaderDao.byId(id);
-		notFoundIfNull(badgeReader);
 
-		final User user = badgeReader.user;
+  public static void edit(Long id) {
 
-		final Set<Badge> badgeList = badgeReader.badges;
-		String name = "";
-		List<Person> simplePersonList = personDao.listFetched(
-				Optional.fromNullable(name),
-				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, null, null, false, true).list();
+    final BadgeReader badgeReader = badgeReaderDao.byId(id);
+    notFoundIfNull(badgeReader);
 
-		List<IWrapperPerson> personList = FluentIterable
-				.from(simplePersonList)
-				.transform(wrapperFunctionFactory.person()).toList();
+    final User user = badgeReader.user;
 
-		render(badgeReader, user, badgeList, personList);		
+    final Set<Badge> badgeList = badgeReader.badges;
+    String name = "";
+    List<Person> simplePersonList = personDao.listFetched(
+            Optional.fromNullable(name),
+            secureManager.officesReadAllowed(Security.getUser().get()),
+            false, null, null, false, true).list();
 
-	}
+    List<IWrapperPerson> personList = FluentIterable
+            .from(simplePersonList)
+            .transform(wrapperFunctionFactory.person()).toList();
 
-	public static void blank() {
+    render(badgeReader, user, badgeList, personList);
 
-		render();
-	}
+  }
 
-	public static void updateInfo(@Valid BadgeReader badgeReader) {
+  public static void blank() {
 
-		if (Validation.hasErrors()) {
-			response.status = 400;
-			log.warn("validation errors for {}: {}", badgeReader,
-					validation.errorsMap());
-			flash.error(Web.msgHasErrors());
-			render("@edit", badgeReader);
-		}
+    render();
+  }
 
-		rules.checkIfPermitted(badgeReader.owner);
+  public static void updateInfo(@Valid BadgeReader badgeReader) {
 
-		badgeReader.save();
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", badgeReader,
+              validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@edit", badgeReader);
+    }
 
-		flash.success(Web.msgSaved(BadgeReader.class));
-		edit(badgeReader.id);
-	}
+    rules.checkIfPermitted(badgeReader.owner);
 
-	public static void changePassword(Long id, 
-			@MinLength(5) @Required String newPass) {
+    badgeReader.save();
 
-		final BadgeReader badgeReader = BadgeReader.findById(id);
-		notFoundIfNull(badgeReader);
+    flash.success(Web.msgSaved(BadgeReader.class));
+    edit(badgeReader.id);
+  }
 
-		if (Validation.hasErrors()) {
-			response.status = 400;
-			log.warn("validation errors for {}: {}", badgeReader,
-					validation.errorsMap());
-			flash.error(Web.msgHasErrors());
-			render("@edit", badgeReader, newPass);
-		}
+  public static void changePassword(Long id,
+                                    @MinLength(5) @Required String newPass) {
 
-		Codec codec = new Codec();
-		badgeReader.user.password = codec.hexMD5(newPass);
-		flash.success(Web.msgSaved(BadgeReader.class));
-		edit(id);
+    final BadgeReader badgeReader = BadgeReader.findById(id);
+    notFoundIfNull(badgeReader);
 
-	}
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", badgeReader,
+              validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@edit", badgeReader, newPass);
+    }
 
-	public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
+    Codec codec = new Codec();
+    badgeReader.user.password = codec.hexMD5(newPass);
+    flash.success(Web.msgSaved(BadgeReader.class));
+    edit(id);
 
-		if (Validation.hasErrors()) {
-			response.status = 400;
-			log.warn("validation errors for {}: {}", badgeReader,
-					validation.errorsMap());
-			flash.error(Web.msgHasErrors());
-			render("@blank", badgeReader);
-		} 
-		if (user.password.length() < 5) { 
-			response.status = 400;
-			validation.addError("user.password", 
-					"almeno 5 caratteri");
-			render("@blank", badgeReader, user);
-		}
+  }
 
-		Codec codec = new Codec();
-		user.password = codec.hexMD5(user.password);
-		user.save();
-		badgeReader.user = user;
-		badgeReader.save();
-		flash.success(Web.msgSaved(BadgeReader.class));
-		index();
-	}
+  public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
 
-	public static void delete(Long id) {
-		final BadgeReader badgeReader = BadgeReader.findById(id);
-		notFoundIfNull(badgeReader);
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", badgeReader,
+              validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@blank", badgeReader);
+    }
+    if (user.password.length() < 5) {
+      response.status = 400;
+      validation.addError("user.password",
+              "almeno 5 caratteri");
+      render("@blank", badgeReader, user);
+    }
 
-		//if(badgeReader.seats.isEmpty()) {
-		badgeReader.delete();
-		flash.success(Web.msgDeleted(BadgeReader.class));
-		index();
-		//}
-		flash.error(Web.msgHasErrors());
-		index();
-	}
+    Codec codec = new Codec();
+    user.password = codec.hexMD5(user.password);
+    user.save();
+    badgeReader.user = user;
+    badgeReader.save();
+    flash.success(Web.msgSaved(BadgeReader.class));
+    index();
+  }
 
-	public static void joinOffice(Long officeId) {
+  public static void delete(Long id) {
+    final BadgeReader badgeReader = BadgeReader.findById(id);
+    notFoundIfNull(badgeReader);
 
-		final Office office = Office.findById(officeId);
-		notFoundIfNull(office);
+    //if(badgeReader.seats.isEmpty()) {
+    badgeReader.delete();
+    flash.success(Web.msgDeleted(BadgeReader.class));
+    index();
+    //}
+    flash.error(Web.msgHasErrors());
+    index();
+  }
 
-		//Lista tutti i badgeReader ancora non associati a office
-		List<BadgeReader> badgeReaderList = Lists.newArrayList();
+  public static void joinOffice(Long officeId) {
 
-		UsersRolesOffices uro = new UsersRolesOffices();
-		uro.office = office;
-		uro.role = roleDao.getRoleByName(Role.BADGE_READER);
+    final Office office = Office.findById(officeId);
+    notFoundIfNull(office);
 
-		render(uro,  badgeReaderList);
-	}
+    //Lista tutti i badgeReader ancora non associati a office
+    List<BadgeReader> badgeReaderList = Lists.newArrayList();
 
-	public static void saveJoinOffice(@Valid UsersRolesOffices uro) {
+    UsersRolesOffices uro = new UsersRolesOffices();
+    uro.office = office;
+    uro.role = roleDao.getRoleByName(Role.BADGE_READER);
 
-		if (Validation.hasErrors()) {
-			response.status = 400;
-			log.warn("validation errors for {}: {}", uro,
-					validation.errorsMap());
-			flash.error(Web.msgHasErrors());
-			render("@blank", uro);
-		} 
+    render(uro, badgeReaderList);
+  }
 
-		rules.checkIfPermitted(uro.office);
+  public static void saveJoinOffice(@Valid UsersRolesOffices uro) {
 
-		uro.save();
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", uro,
+              validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@blank", uro);
+    }
 
-		flash.success("Lettore Badge associato correttamente.");
-		flash.keep();
-		Offices.edit(uro.office.id);
-	}
+    rules.checkIfPermitted(uro.office);
 
-	public static void unjoinOffice(Long uroId) {
+    uro.save();
 
-		UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
-		notFoundIfNull(uro);
+    flash.success("Lettore Badge associato correttamente.");
+    flash.keep();
+    Offices.edit(uro.office.id);
+  }
 
-		rules.checkIfPermitted(uro.office);
+  public static void unjoinOffice(Long uroId) {
 
-		uro.delete();
+    UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
+    notFoundIfNull(uro);
 
-		flash.success("Operazione avvenuta con successo.");
+    rules.checkIfPermitted(uro.office);
 
-		Offices.edit(uro.office.id);
-	}
+    uro.delete();
 
-	public static void manageBadgesIntoBadgeReaders(Long id){
-		BadgeReader badgeReader = BadgeReader.findById(id);		
-		render(badgeReader);
-	}
-	
-	public static void allocateBadges(BadgeReader badgeReader, @Valid String inizio, 
-			@Valid String fine){
-		if(validation.hasErrors()){
-			log.warn("validation errors: {}", validation.errorsMap());
-			flash.error(Web.msgHasErrors());
-			render("@list");
-		}
-		if(new Integer(inizio) > new Integer(fine)){
-			log.warn("Estremi errati");
-			flash.error("L'estremo inferiore è maggiore di quello superiore. Correggere");
-			index();
-		}
-		Map<Integer, Boolean> map = Maps.newHashMap();
-		//BadgeReader badgeReader = badgeReaderDao.byId(id);
-		map = badgeManager.reportAssociateBadge(inizio, fine, badgeReader);
-		int contatore = 0;
-		for(Integer i : map.keySet()){
-			if(map.get(i).booleanValue())
-				contatore++;
-		}
-		flash.success("Inseriti per il lettore %s, %s badge a fronte dei %s richiesti", 
-				badgeReader.code, contatore, map.size());
-		render("@list");
-	}
+    flash.success("Operazione avvenuta con successo.");
+
+    Offices.edit(uro.office.id);
+  }
+
+  public static void manageBadgesIntoBadgeReaders(Long id) {
+    BadgeReader badgeReader = BadgeReader.findById(id);
+    render(badgeReader);
+  }
+
+  public static void allocateBadges(BadgeReader badgeReader, @Valid String inizio,
+                                    @Valid String fine) {
+    if (validation.hasErrors()) {
+      log.warn("validation errors: {}", validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@list");
+    }
+    if (new Integer(inizio) > new Integer(fine)) {
+      log.warn("Estremi errati");
+      flash.error("L'estremo inferiore è maggiore di quello superiore. Correggere");
+      index();
+    }
+    Map<Integer, Boolean> map = Maps.newHashMap();
+    //BadgeReader badgeReader = badgeReaderDao.byId(id);
+    map = badgeManager.reportAssociateBadge(inizio, fine, badgeReader);
+    int contatore = 0;
+    for (Integer i : map.keySet()) {
+      if (map.get(i).booleanValue())
+        contatore++;
+    }
+    flash.success("Inseriti per il lettore %s, %s badge a fronte dei %s richiesti",
+            badgeReader.code, contatore, map.size());
+    render("@list");
+  }
 }

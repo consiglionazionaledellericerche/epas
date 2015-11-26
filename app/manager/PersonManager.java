@@ -1,10 +1,7 @@
 package manager;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
@@ -20,32 +17,36 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
+
 import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
-import models.User;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-import play.libs.Codec;
 
-import javax.inject.Inject;
-import javax.persistence.Query;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.persistence.Query;
+
 @Slf4j
 public class PersonManager {
 
+  private final UserDao userDao;
+  private final ContractDao contractDao;
+  private final PersonDao personDao;
+  private final PersonDayDao personDayDao;
+  private final PersonDayManager personDayManager;
+  private final IWrapperFactory wrapperFactory;
+  private final AbsenceDao absenceDao;
+  private final ConfGeneralManager confGeneralManager;
   @Inject
   public PersonManager(ContractDao contractDao,
                        PersonChildrenDao personChildrenDao, PersonDao personDao,
@@ -61,15 +62,6 @@ public class PersonManager {
     this.confGeneralManager = confGeneralManager;
     this.userDao = userDao;
   }
-
-  private final UserDao userDao;
-  private final ContractDao contractDao;
-  private final PersonDao personDao;
-  private final PersonDayDao personDayDao;
-  private final PersonDayManager personDayManager;
-  private final IWrapperFactory wrapperFactory;
-  private final AbsenceDao absenceDao;
-  private final ConfGeneralManager confGeneralManager;
 
   /**
    * Se il giorno è festivo per la persona

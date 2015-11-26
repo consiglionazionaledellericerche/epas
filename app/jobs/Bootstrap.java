@@ -6,8 +6,11 @@ import com.google.common.io.Resources;
 import dao.UserDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.ConsistencyManager;
+
 import models.Contract;
 import models.Person;
 import models.Qualification;
@@ -31,13 +34,13 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
-import javax.inject.Inject;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**
@@ -60,33 +63,6 @@ public class Bootstrap extends Job<Void> {
   static ConsistencyManager consistencyManager;
   @Inject
   static UserDao userDao;
-
-  public static class DatasetImport implements Work {
-
-    private DatabaseOperation operation;
-    private final URL url;
-
-    public DatasetImport(DatabaseOperation operation, URL url) {
-      this.operation = operation;
-      this.url = url;
-    }
-
-    @Override
-    public void execute(Connection connection) {
-      try {
-        //org.dbunit.dataset.datatype.DefaultDataTypeFactory
-        IDataSet dataSet = new FlatXmlDataSetBuilder()
-                .setColumnSensing(true).build(url);
-        operation.execute(new H2Connection(connection, ""), dataSet);
-      } catch (DataSetException e) {
-        e.printStackTrace();
-      } catch (DatabaseUnitException e) {
-        e.printStackTrace();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    }
-  }
 
   public void doJob() throws IOException {
 
@@ -140,7 +116,7 @@ public class Bootstrap extends Job<Void> {
         log.info("Bootstrap contract scan: il contratto di {} iniziato il {} non è initializationMissing",
                 person.fullName(), contract.get().beginContract);
                 /*
-				Contract c = contract.get();
+                Contract c = contract.get();
 				c.sourceDateResidual = new LocalDate(wcontract.dateForInitialization());
 				c.sourcePermissionUsed = 0;
 				c.sourceRecoveryDayUsed = 0;
@@ -151,7 +127,7 @@ public class Bootstrap extends Job<Void> {
 				c.sourceVacationLastYearUsed = 0;
 				c.sourceByAdmin = false;
 				c.save();
-				
+
 				consistencyManager.updatePersonSituation(person.id, c.sourceDateResidual);
 				*/
       }
@@ -180,5 +156,32 @@ public class Bootstrap extends Job<Void> {
       //BOH
     }
 
+  }
+
+  public static class DatasetImport implements Work {
+
+    private final URL url;
+    private DatabaseOperation operation;
+
+    public DatasetImport(DatabaseOperation operation, URL url) {
+      this.operation = operation;
+      this.url = url;
+    }
+
+    @Override
+    public void execute(Connection connection) {
+      try {
+        //org.dbunit.dataset.datatype.DefaultDataTypeFactory
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+                .setColumnSensing(true).build(url);
+        operation.execute(new H2Connection(connection, ""), dataSet);
+      } catch (DataSetException e) {
+        e.printStackTrace();
+      } catch (DatabaseUnitException e) {
+        e.printStackTrace();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
   }
 }
