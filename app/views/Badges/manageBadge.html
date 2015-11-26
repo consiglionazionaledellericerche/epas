@@ -14,12 +14,20 @@
 	</div>
 	#{form @Badges.delete(), class:'form-horizontal', 
     	method:'POST'}
-		#{f.input 'badge.code', readonly:true /}
+		#{f.input 'badge.code'/}
 		#{f.input 'badge.badgeReader', readonly:true /}
-	  #{b.buttons}
-	     #{b.delete /}
+	  #{b.buttons center:true}
+	     #{b.delete  /}
 	  #{/b.buttons}
+	  
 	#{/form}
+	#{form @Badges.edit(), class:'form-horizontal'}  
+	#{b.buttons center:true}   
+	     #{b.edit /}
+	#{/b.buttons}
+	#{/form}
+	  
+	
 #{/panel}
 
 </div>

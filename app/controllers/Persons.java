@@ -29,6 +29,7 @@ import manager.OfficeManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
+import models.BadgeReader;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -105,7 +106,7 @@ public class Persons extends Controller {
 		List<Person> simplePersonList = personDao.listFetched(
 				Optional.fromNullable(name),
 				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, null, null, false, false).list();
+				false, null, null, false).list();
 
 		List<IWrapperPerson> personList = FluentIterable
 				.from(simplePersonList)

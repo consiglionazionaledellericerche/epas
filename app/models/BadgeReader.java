@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import java.util.Set;
 
@@ -24,40 +25,41 @@ import java.util.Set;
  *
  */
 @Entity
-@Table(name="badge_readers")
+@Table(name = "badge_readers")
 @Audited
 public class BadgeReader extends BaseModel {
 
-	private static final long serialVersionUID = -3508739971079270193L;
+  private static final long serialVersionUID = -3508739971079270193L;
 
-	@Unique
-	@NotNull
-	@Required
-	public String code;
-	
-	public String description;
-	
-	public String location;
-	
-	@OneToOne (optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	public User user;
+  @Unique
+  @NotNull
+  @Required
+  public String code;
 
-	@OneToMany(mappedBy="badgeReader")
-	public Set<Badge> badges = Sets.newHashSet();
-	
-	@Required
-	@NotNull
-	@ManyToOne
-	@JoinColumn(name = "office_owner_id")
-	public Office owner;
-	
-	
-	
-	public boolean enabled = true;
-	
-	@Override
-	public String toString(){
-	  return this.code;
-	}
+  public String description;
+
+  public String location;
+
+  @OneToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
+  public User user;
+
+  @OrderBy("code ASC")
+  @OneToMany(mappedBy = "badgeReader")
+  public Set<Badge> badges = Sets.newHashSet();
+
+  @Required
+  @NotNull
+  @ManyToOne
+  @JoinColumn(name = "office_owner_id")
+  public Office owner;
+
+
+
+  public boolean enabled = true;
+
+  @Override
+  public String toString() {
+    return this.code;
+  }
 }

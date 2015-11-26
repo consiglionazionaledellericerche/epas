@@ -101,5 +101,14 @@ public class Badges extends Controller {
     Badge badge = badgeDao.byId(id);
     render(badge);
   }
+  
+  /**
+   * 
+   * @param id del badge che si vuole editare.
+   */
+  public static void edit(Long id){
+    Badge badge = badgeDao.byId(id);
+    render(badge);
+  }
 
 }
