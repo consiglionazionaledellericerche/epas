@@ -23,6 +23,8 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
+import models.base.IPeriodTarget;
+
 import play.data.validation.Required;
 
 
@@ -31,7 +33,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Table(name = "contracts")
-public class Contract extends BaseModel {
+public class Contract extends BaseModel implements IPeriodTarget {
 
   private static final long serialVersionUID = -4472102414284745470L;
 

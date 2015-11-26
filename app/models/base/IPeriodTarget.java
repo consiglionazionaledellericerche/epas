@@ -7,14 +7,12 @@ import models.Contract;
 import org.joda.time.LocalDate;
 
 /**
- * Il modello è un valore di un periodo.
+ * Il modello è il target del periodo. EX. Contract
  * 
  * @author alessandro
  *
  * @param <T>
  */
-public interface IPeriodValue<T extends BaseModel> {
-  
-  public Long getPeriodValueId();
+public interface IPeriodTarget<T extends BaseModel> {
   
 }

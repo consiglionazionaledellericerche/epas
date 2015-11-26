@@ -63,11 +63,11 @@
 			    <th>Al</th>
 				<th>Tip Orario</th>
 			  </tr>
-			  #{list items:cwttRecaps, as:'cwttRecap'}
+			  #{list items:periodRecaps, as:'periodRecap'}
 			  <tr>
-			    <td>${cwttRecap.beginDate.format()}</td>
-				<td>#{if cwttRecap.endDate} ${cwttRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-				<td>${cwttRecap.workingTimeType.description}</td>
+			    <td>${periodRecap.begin.format()}</td>
+				<td>#{if periodRecap.end.present} ${periodRecap.end.get().format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+				<td>${periodRecap.value.description}</td>
 			  </tr>
 			  #{/list}
 		  	</table>
