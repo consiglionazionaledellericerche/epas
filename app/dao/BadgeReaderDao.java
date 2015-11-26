@@ -11,16 +11,17 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 import models.BadgeReader;
+import models.Office;
 import models.User;
 import models.query.QBadgeReader;
 import models.query.QUser;
-
-import javax.persistence.EntityManager;
 import java.util.List;
+import javax.persistence.EntityManager;
+
 
 /**
  * 
- * @author dario
+ * @author dario.
  *
  */
 public class BadgeReaderDao extends DaoBase {
@@ -107,6 +108,17 @@ public class BadgeReaderDao extends DaoBase {
 				.where(user.badgeReader.isNotNull())
 				.orderBy(user.badgeReader.code.asc())
 				.list(user);
+	}
+	
+	/**
+	 * 
+	 * @param office
+	 * @return la lista di badgeReader di cui l'ufficio è proprietario.
+	 */
+	public List<BadgeReader> getBadgeReaderByOffice(Office office){
+		final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+		final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.owner.eq(office));
+		return query.list(badgeReader);
 	}
 
 }
