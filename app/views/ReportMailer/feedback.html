@@ -1,0 +1,35 @@
+<html>
+<head><title>&{'feedback.subject'}</title></head>
+<body>
+<p>
+Descrizione: <br>
+${data.note}
+</p>
+
+<p>URL: <a href="${data.url}">${data.url}</a></p>
+
+#{if user.present}
+<p>
+Utente: ${user.get()}
+</p>
+#{/if}
+
+<p>User Agent:
+${data.browser.userAgent}
+</p>
+
+<div>
+Session:
+<dl>
+#{list items:session.all(), as:'item'}
+ <dt>${item.key}</dt><dd>${item.value}</dd>
+#{/list}
+</dl>
+</div>
+
+<p>
+Cordiali saluti, <br>
+&{'site.staff'}
+</p>
+</body>
+</html>
