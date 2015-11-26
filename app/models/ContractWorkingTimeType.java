@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,38 +46,7 @@ public class ContractWorkingTimeType extends PeriodModel {
   @JoinColumn(name = "working_time_type_id")
   public WorkingTimeType workingTimeType;
 
-  @Required
-  @Column(name = "begin_date")
-  public LocalDate beginDate;
-
-  @Column(name = "end_date")
-  public LocalDate endDate;
-
-  @Override
-  public LocalDate getBegin() {
-    return this.beginDate;
-  }
-  
-  @Override
-  public void setBegin(LocalDate begin) {
-    this.beginDate = begin;
-    
-  }
-
-  @Override
-  public Optional<LocalDate> getEnd() {
-    return Optional.fromNullable(this.endDate);
-  }
-
-  // FIXME: non riesco a impostare il generico Optional<LocalDate>
-  @Override
-  public void setEnd(Optional end) {
-    if (end.isPresent()) {
-      this.endDate = (LocalDate)end.get();
-    } else {
-      this.endDate = null;
-    }
-  }
+ 
   
   @Override
   public IPeriodValue getValue() {
@@ -84,25 +54,15 @@ public class ContractWorkingTimeType extends PeriodModel {
   }
 
   @Override
-  public List<PeriodModel> orderedPeriods() {
-    List<PeriodModel> list = Lists.newArrayList();
-    for (ContractWorkingTimeType cwtt : this.contract.contractWorkingTimeType) {
-      list.add(cwtt);
-    }
-    Collections.sort(list);
-    return list;
+  public Collection<ContractWorkingTimeType> periods() {
+    return this.contract.contractWorkingTimeType;
   }
   
   @Override
   public void setValue(IPeriodValue value) {
     this.workingTimeType = (WorkingTimeType)value;
   }
-
-  @Override
-  public PeriodModel newInstance() {
-    return new ContractWorkingTimeType();
-  }
-
+  
   @Override
   public IPeriodTarget getTarget() {
     return this.contract;
@@ -111,7 +71,11 @@ public class ContractWorkingTimeType extends PeriodModel {
   @Override
   public void setTarget(IPeriodTarget target) {
     this.contract = (Contract)target;
-    
+  }
+
+  @Override
+  public ContractWorkingTimeType getPeriod() {
+    return this;
   }
 
 
