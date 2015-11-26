@@ -3,6 +3,7 @@ package models.base;
 import com.google.common.base.Optional;
 
 import models.Contract;
+import models.ContractWorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -13,26 +14,22 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 @MappedSuperclass
-public abstract class PeriodModel extends BaseModel {
-
-  /**
-   * Il contratto dell'IPeriodModel.
-   * @return
-   */
-  public abstract Contract getContract();
+public abstract class PeriodModel extends BaseModel implements IPeriodModel,  Comparable<PeriodModel> {
   
   /**
-   * L'inizio del periodo.
-   * 
-   * @return
+   * Contiene l'informazione se all'interno del periodo vi è la prima data da ricalcolare.
    */
-  public abstract LocalDate getBegin();
+  public LocalDate recomputeFrom; 
   
-  /**
-   * La fine del periodo.
-   * 
-   * @return
-   */
-  public abstract Optional<LocalDate> getEnd();
+  @Override
+  public int compareTo(PeriodModel o) {
+    if (getBegin().isBefore(o.getBegin())) {
+      return -1;
+    } else if (getBegin().isAfter(o.getBegin())) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
   
 }

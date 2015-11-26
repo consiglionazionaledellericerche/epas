@@ -1,11 +1,30 @@
 package it.cnr.iit.epas;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
 import org.joda.time.LocalDate;
 
 public class DateInterval {
 
 	private LocalDate begin;
 	private LocalDate end;
+	
+	/**
+	 * Costruttore con end optional.
+	 * @param begin
+	 * @param end
+	 */
+	public DateInterval(LocalDate begin, Optional<LocalDate> end) {
+	  Preconditions.checkArgument(begin != null);
+	  this.begin = begin;
+	  if (end.isPresent()) {
+	    Preconditions.checkArgument(!begin.isAfter(end.get()));
+	    this.end = end.get();
+	  } else {
+	    this.end = null;
+	  }
+	}
 
 	public DateInterval(LocalDate date1, LocalDate date2){
 
