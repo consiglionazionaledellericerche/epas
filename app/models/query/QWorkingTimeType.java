@@ -44,6 +44,8 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
 
     public final QOffice office;
 
+    public final NumberPath<Long> periodValueId = createNumber("periodValueId", Long.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

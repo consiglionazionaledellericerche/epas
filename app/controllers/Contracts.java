@@ -26,6 +26,8 @@ import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
+import models.base.IPeriodModel;
+import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -368,10 +370,10 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(cwtt.workingTimeType.office);
 
     //riepilogo delle modifiche
-    List<ContractWorkingTimeType> cwttRecaps = contractManager.changedRecap(contract, cwtt, false);
+    List<PeriodModel> periodRecaps = contractManager.changedRecap(contract, (IPeriodModel)cwtt, false); 
     LocalDate recomputeFrom = null;
     LocalDate recomputeTo = wrappedContract.getContractDateInterval().getEnd();
-    for (ContractWorkingTimeType item : cwttRecaps) {
+    for (PeriodModel item : periodRecaps) {
       if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
         recomputeFrom = item.recomputeFrom;
       }
@@ -391,8 +393,8 @@ public class Contracts extends Controller {
       if (recomputeFrom != null) {
         days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       }
-      render("@updateContractWorkingTimeType", contract, cwtt, cwttRecaps, confirmed,
-              recomputeFrom, recomputeTo, days);
+      render("@updateContractWorkingTimeType", contract, cwtt, periodRecaps, confirmed, 
+          recomputeFrom, recomputeTo, days);
     } else {
 
       contractManager.changedRecap(contract, cwtt, true);

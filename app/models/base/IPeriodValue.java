@@ -6,7 +6,6 @@ package models.base;
  * @author alessandro
  */
 public interface IPeriodValue<T extends BaseModel> {
-
-  T getValue();
-
+  
+  public Long getPeriodValueId();
 }

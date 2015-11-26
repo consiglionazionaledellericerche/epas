@@ -1,13 +1,19 @@
 package models;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
-import models.base.IPeriodModel;
+import models.base.IPeriodTarget;
+import models.base.IPeriodValue;
 import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,8 +31,7 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name = "contracts_working_time_types")
-public class ContractWorkingTimeType extends PeriodModel implements
-        Comparable<ContractWorkingTimeType>, IPeriodModel {
+public class ContractWorkingTimeType extends PeriodModel {
 
   private static final long serialVersionUID = 3730183716240278997L;
 
@@ -47,39 +52,67 @@ public class ContractWorkingTimeType extends PeriodModel implements
   @Column(name = "end_date")
   public LocalDate endDate;
 
-  @Transient
-  public LocalDate recomputeFrom = null;
-
-
-  /**
-   * Comparator ContractWorkingTimeType.
-   */
-  @Override
-  public int compareTo(ContractWorkingTimeType compareCwtt) {
-    if (beginDate.isBefore(compareCwtt.beginDate)) {
-      return -1;
-    } else if (beginDate.isAfter(compareCwtt.beginDate)) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
-
-  @Override
-  public Contract getContract() {
-    return this.contract;
-  }
-
-
   @Override
   public LocalDate getBegin() {
     return this.beginDate;
   }
-
+  
+  @Override
+  public void setBegin(LocalDate begin) {
+    this.beginDate = begin;
+    
+  }
 
   @Override
   public Optional<LocalDate> getEnd() {
     return Optional.fromNullable(this.endDate);
   }
+
+  // FIXME: non riesco a impostare il generico Optional<LocalDate>
+  @Override
+  public void setEnd(Optional end) {
+    if (end.isPresent()) {
+      this.endDate = (LocalDate)end.get();
+    } else {
+      this.endDate = null;
+    }
+  }
+  
+  @Override
+  public IPeriodValue getValue() {
+    return this.workingTimeType;
+  }
+
+  @Override
+  public List<PeriodModel> orderedPeriods() {
+    List<PeriodModel> list = Lists.newArrayList();
+    for (ContractWorkingTimeType cwtt : this.contract.contractWorkingTimeType) {
+      list.add(cwtt);
+    }
+    Collections.sort(list);
+    return list;
+  }
+  
+  @Override
+  public void setValue(IPeriodValue value) {
+    this.workingTimeType = (WorkingTimeType)value;
+  }
+
+  @Override
+  public PeriodModel newInstance() {
+    return new ContractWorkingTimeType();
+  }
+
+  @Override
+  public IPeriodTarget getTarget() {
+    return this.contract;
+  }
+
+  @Override
+  public void setTarget(IPeriodTarget target) {
+    this.contract = (Contract)target;
+    
+  }
+
+
 }
