@@ -16,13 +16,18 @@ import java.util.List;
 
 public class OfficeConsumer {
 
-  private final String URL_BASE = Play.configuration.getProperty("perseo.base");
-  private final String OFFICE_ENDPOINT = Play.configuration.getProperty("perseo.rest.departments");
+  private static final String URL_BASE = Play.configuration.getProperty("perseo.base");
+  private static final String OFFICE_ENDPOINT = Play.configuration
+      .getProperty("perseo.rest.departments");
 
+  /**
+   * @return Return a list of all Office from Perseo registry
+   * @throws IllegalStateException if the request fail.
+   */
   public ListenableFuture<List<OfficeDTO>> getOffices() throws IllegalStateException {
 
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
-            .listenInPoolThread(WS.url(URL_BASE + OFFICE_ENDPOINT + "list").getAsync());
+        .listenInPoolThread(WS.url(URL_BASE + OFFICE_ENDPOINT + "list").getAsync());
 
     return Futures.transform(future, new Function<WS.HttpResponse, List<OfficeDTO>>() {
       @Override
@@ -31,10 +36,9 @@ public class OfficeConsumer {
           throw new IllegalStateException("not found");
         }
         return new Gson().fromJson(response.getJson(),
-                new TypeToken<List<OfficeDTO>>() {
-                }.getType());
+            new TypeToken<List<OfficeDTO>>() {
+            }.getType());
       }
     });
   }
-
 }

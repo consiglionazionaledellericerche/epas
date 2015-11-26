@@ -8,7 +8,7 @@
   #{breadcrumbs breadcrumbs /}
   #{title title:'Riepilogo mensile ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
- <table class="datatable-test table table-striped table-bordered table-condensed" cellspacing="0" width="100%">
+ <table class="dt-responsive table table-striped table-hover" width="100%" datatable>
    <thead>
       <tr>
           <th>Nome</th>
@@ -22,18 +22,6 @@
       </tr>
    </thead>
  
-   <tfoot>
-      <tr>
-          <th>Nome</th>
-		  <th>Monte ore <br>anno passato</th>
-		  <th>Monte ore <br>anno corrente</th>
-		  <th>Buoni residui</th>
-		  <th>Progressivo</th>
-		  <th>Ore Lavorate</th>
-		  <th>Riposi</th>
-		  <th>Straordinari</th>
-      </tr>
-   </tfoot>
    <tbody>
    		
    		#{list items:recaps, as:'recap'}
