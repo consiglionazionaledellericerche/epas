@@ -153,4 +153,9 @@ public class Contract extends BaseModel implements IPeriodTarget {
     return Lists.newArrayList(contractWorkingTimeType);
   }
 
+  @Override
+  public Contract getValue() {
+    return this;
+  }
+
 }

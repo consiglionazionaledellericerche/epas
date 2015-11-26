@@ -17,6 +17,7 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import manager.cache.StampTypeManager;
 import manager.recaps.vacation.VacationsRecap;
@@ -33,6 +34,9 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.base.IPeriodModel;
+import models.base.IPeriodTarget;
+import models.base.PeriodModel;
 import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
@@ -664,4 +668,5 @@ public class ConsistencyManager {
     return cmr;
 
   }
+  
 }
