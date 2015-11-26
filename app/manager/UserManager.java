@@ -6,7 +6,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
+import dao.UserDao;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.Person;
+import models.User;
+
 import org.joda.time.LocalDate;
+
+import play.libs.Codec;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -15,24 +24,18 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dao.UserDao;
-import lombok.extern.slf4j.Slf4j;
-import models.Person;
-import models.User;
-import play.libs.Codec;
-
 /**
  * Created by daniele on 13/10/15.
  */
 @Slf4j
 public class UserManager {
 
+  private final UserDao userDao;
+
   @Inject
   public UserManager(UserDao userDao) {
     this.userDao = userDao;
   }
-
-  private final UserDao userDao;
 
   /**
    * Return generated token for the recovery password procedure

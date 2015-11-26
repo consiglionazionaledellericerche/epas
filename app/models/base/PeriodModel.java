@@ -6,15 +6,15 @@ import models.Contract;
 import models.ContractWorkingTimeType;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
-import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
 
 @MappedSuperclass
+
 public abstract class PeriodModel extends BaseModel implements IPeriodModel,  Comparable<PeriodModel> {
   
   /**

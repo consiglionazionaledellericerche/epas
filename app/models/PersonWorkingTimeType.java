@@ -1,7 +1,9 @@
 package models;
 
 import models.base.BaseModel;
+
 import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 
 import javax.persistence.Column;
@@ -13,7 +15,6 @@ import javax.persistence.Table;
 
 
 /**
- * 
  * @author dario
  * @author alessandro
  */
@@ -21,23 +22,23 @@ import javax.persistence.Table;
 @Table(name = "persons_working_time_types")
 public class PersonWorkingTimeType extends BaseModel {
 
-	private static final long serialVersionUID = 4762746376542370546L;
+  private static final long serialVersionUID = 4762746376542370546L;
 
-	@Required
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="person_id")
-	public Person person;
-	
-	@Required
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="working_time_type_id")
-	public WorkingTimeType workingTimeType;
-	
+  @Required
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "person_id")
+  public Person person;
 
-	@Column(name="begin_date")
-	public LocalDate beginDate;
-	
+  @Required
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "working_time_type_id")
+  public WorkingTimeType workingTimeType;
 
-	@Column(name="end_date")
-	public LocalDate endDate;
+
+  @Column(name = "begin_date")
+  public LocalDate beginDate;
+
+
+  @Column(name = "end_date")
+  public LocalDate endDate;
 }

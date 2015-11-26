@@ -2,7 +2,6 @@ package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Days;
@@ -19,16 +18,12 @@ import java.util.List;
 
 public class DateUtility {
 
-  final static int MINUTE_IN_HOUR = 60;
-
   public final static int DECEMBER = 12;
   public final static int JANUARY = 1;
-
+  final static int MINUTE_IN_HOUR = 60;
   final static LocalDate MAX_DATE = new LocalDate(9999, 12, 1);
 
   /**
-   * 
-   * @param year
    * @return il giorno in cui cade la pasqua
    */
   private static final LocalDate findEaster(int year) {
@@ -61,22 +56,22 @@ public class DateUtility {
   }
 
   /**
-   * 
+   *
    * @param officePatron
    * @param date
    * @return
    */
   public static boolean isGeneralHoliday(final Optional<MonthDay> officePatron,
-      final LocalDate date) {
+                                         final LocalDate date) {
 
     LocalDate easter = findEaster(date.getYear());
     LocalDate easterMonday = easter.plusDays(1);
     if (date.getDayOfMonth() == easter.getDayOfMonth()
-        && date.getMonthOfYear() == easter.getMonthOfYear()) {
+            && date.getMonthOfYear() == easter.getMonthOfYear()) {
       return true;
     }
     if (date.getDayOfMonth() == easterMonday.getDayOfMonth()
-        && date.getMonthOfYear() == easterMonday.getMonthOfYear()) {
+            && date.getMonthOfYear() == easterMonday.getMonthOfYear()) {
       return true;
     }
     // if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
@@ -115,7 +110,7 @@ public class DateUtility {
     if (officePatron.isPresent()) {
 
       return (date.getMonthOfYear() == officePatron.get().getMonthOfYear()
-          && date.getDayOfMonth() == officePatron.get().getDayOfMonth());
+              && date.getDayOfMonth() == officePatron.get().getDayOfMonth());
     }
 
     /**
@@ -130,9 +125,9 @@ public class DateUtility {
 
   /**
    * @param begin data iniziale
-   * @param end data finale
+   * @param end   data finale
    * @return lista di tutti i giorni fisici contenuti nell'intervallo [begin,end] estremi compresi,
-   *         escluse le general holiday
+   * escluse le general holiday
    */
   public static List<LocalDate> getGeneralWorkingDays(final LocalDate begin, final LocalDate end) {
 
@@ -149,8 +144,7 @@ public class DateUtility {
 
 
   /**
-   * 
-   * @param date data
+   * @param date     data
    * @param interval intervallo
    * @return true se la data ricade nell'intervallo estremi compresi
    */
@@ -167,11 +161,8 @@ public class DateUtility {
   }
 
   /**
-   * 
-   * @param inter1
-   * @param inter2
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
-   *         intersezione vuota
+   * intersezione vuota
    */
   public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2) {
     if (inter1 == null || inter2 == null) {
@@ -204,24 +195,22 @@ public class DateUtility {
   }
 
   /**
-   * 
    * @param inter l'intervallo
-   * @return conta il numero di giorni appartenenti 
-   * all'intervallo estremi compresi
+   * @return conta il numero di giorni appartenenti all'intervallo estremi compresi
    */
   public static int daysInInterval(final DateInterval inter) {
 
 
     int days = Days.daysBetween(inter.getBegin(), inter.getEnd()).getDays() + 1;
-    
+
     //controllo compatibilità con vecchio algoritmo.
     if (inter.getBegin().getYear() == inter.getEnd().getYear()) {
       int oldDays = inter.getEnd().getDayOfYear() - inter.getBegin().getDayOfYear() + 1;
       Preconditions.checkState(days == oldDays);
     }
-    
+
     return days;
-    
+
   }
 
   public static int monthsInInterval(final DateInterval inter) {
@@ -229,11 +218,10 @@ public class DateUtility {
   }
 
   /**
-   * 
-   * @param first il primo intervallo
+   * @param first  il primo intervallo
    * @param second il secondo intervallo
    * @return true se il primo intervallo e' contenuto nel secondo intervallo (estremi compresi),
-   *         false altrimenti
+   * false altrimenti
    */
   public static boolean isIntervalIntoAnother(final DateInterval first, final DateInterval second) {
 
@@ -242,7 +230,7 @@ public class DateUtility {
     }
     return true;
   }
-  
+
   /**
    * @return la data infinito
    */
@@ -259,9 +247,7 @@ public class DateUtility {
   }
 
 
-
   /**
-   * 
    * @param monthNumber mese da formattare
    * @return il nome del mese con valore monthNumber, null in caso di argomento non valido
    */
@@ -303,7 +289,7 @@ public class DateUtility {
 
 
   /**
-   * @param date data
+   * @param date    data
    * @param pattern : default dd/MM
    * @return effettua il parsing di una stringa che contiene solo giorno e Mese
    */
@@ -332,7 +318,7 @@ public class DateUtility {
    */
   public static LocalDate getMonthLastDay(final YearMonth yearMonth) {
     return new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1).dayOfMonth()
-        .withMaximumValue();
+            .withMaximumValue();
   }
 
   /**
@@ -350,9 +336,8 @@ public class DateUtility {
   }
 
   /**
-   * 
    * @param begin orario di ingresso
-   * @param end orario di uscita
+   * @param end   orario di uscita
    * @return minuti lavorati
    */
   public static Integer getDifferenceBetweenLocalTime(final LocalTime begin, final LocalTime end) {
@@ -364,7 +349,7 @@ public class DateUtility {
       int hourEnd = end.getHourOfDay();
       int minuteEnd = end.getMinuteOfHour();
       timeToMinute =
-          ((MINUTE_IN_HOUR * hourEnd + minuteEnd) - (MINUTE_IN_HOUR * hourBegin + minuteBegin));
+              ((MINUTE_IN_HOUR * hourEnd + minuteEnd) - (MINUTE_IN_HOUR * hourBegin + minuteBegin));
     }
 
     return timeToMinute;

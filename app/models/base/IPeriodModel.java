@@ -1,8 +1,7 @@
 package models.base;
 
-import com.google.common.base.Optional;
 
-import models.Contract;
+import com.google.common.base.Optional;
 
 import org.joda.time.LocalDate;
 
@@ -10,10 +9,8 @@ import java.util.List;
 
 /**
  * Il modello è un periodo del contratto con un valore.
- * 
- * @author alessandro
  *
- * @param <T>
+ * @author alessandro
  */
 public interface IPeriodModel<T extends PeriodModel> {
   

@@ -1,6 +1,7 @@
 package db;
 
 import com.google.common.io.Resources;
+
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -9,6 +10,7 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+
 import play.Play;
 import play.Play.Mode;
 import play.db.jpa.JPA;

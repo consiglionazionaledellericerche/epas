@@ -251,7 +251,7 @@ public class Competences extends Controller {
     competence.save();
 
     log.info("saved id={} (person={}) code={} (value={})", competence.id, competence.person,
-                    competence.competenceCode.code, competence.valueApproved);
+            competence.competenceCode.code, competence.valueApproved);
 
     consistencyManager.updatePersonSituation(competence.person.id,
             new LocalDate(competence.year, competence.month, 1));
@@ -282,7 +282,7 @@ public class Competences extends Controller {
       response.status = 400;
       flash.error(Web.msgHasErrors());
 
-      render("@edit",competenceCode);
+      render("@edit", competenceCode);
     }
     competenceCode.save();
 

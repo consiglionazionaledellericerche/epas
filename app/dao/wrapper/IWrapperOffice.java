@@ -6,14 +6,14 @@ import org.joda.time.LocalDate;
 
 /**
  * Office potenziato.
- * 
- * @author alessandro	
+ *
+ * @author alessandro
  */
 public interface IWrapperOffice extends IWrapperModel<Office> {
 
-	/**
-	 * @return la data di installazione della sede. 
-	 */
-	LocalDate initDate();
-	
+  /**
+   * @return la data di installazione della sede.
+   */
+  LocalDate initDate();
+
 }
