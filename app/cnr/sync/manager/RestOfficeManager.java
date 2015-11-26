@@ -5,30 +5,32 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
+import dao.OfficeDao;
+
+import manager.OfficeManager;
+
+import models.Institute;
+import models.Office;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cnr.sync.dto.InstituteDTO;
+import cnr.sync.dto.OfficeDTO;
+import play.data.validation.Validation;
 
 import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import cnr.sync.dto.InstituteDTO;
-import cnr.sync.dto.OfficeDTO;
-import dao.OfficeDao;
-import manager.OfficeManager;
-import models.Institute;
-import models.Office;
-import play.data.validation.Validation;
-
 public class RestOfficeManager {
 
+  private final static Logger log = LoggerFactory.getLogger(RestOfficeManager.class);
   @Inject
   private OfficeDao officeDao;
   @Inject
   private OfficeManager officeManager;
-
-  private final static Logger log = LoggerFactory.getLogger(RestOfficeManager.class);
 
   public int saveImportedSeats(Collection<OfficeDTO> officeDTOList) {
 

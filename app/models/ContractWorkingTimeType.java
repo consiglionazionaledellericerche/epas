@@ -26,7 +26,7 @@ import javax.persistence.Transient;
 
 /**
  * Un periodo contrattuale.
- * 
+ *
  * @author alessandro
  */
 @Entity
@@ -36,20 +36,20 @@ public class ContractWorkingTimeType extends PeriodModel {
   private static final long serialVersionUID = 3730183716240278997L;
 
   @Required
-  @ManyToOne(fetch=FetchType.LAZY)
-  @JoinColumn(name="contract_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "contract_id")
   public Contract contract;
 
   @Required
-  @ManyToOne(fetch=FetchType.LAZY)
-  @JoinColumn(name="working_time_type_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "working_time_type_id")
   public WorkingTimeType workingTimeType;
 
   @Required
-  @Column(name="begin_date")
+  @Column(name = "begin_date")
   public LocalDate beginDate;
 
-  @Column(name="end_date")
+  @Column(name = "end_date")
   public LocalDate endDate;
 
   @Override

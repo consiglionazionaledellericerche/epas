@@ -15,8 +15,11 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
+
 import it.cnr.iit.epas.DateUtility;
+
 import manager.SecureManager;
+
 import models.AbsenceType;
 import models.BadgeReader;
 import models.Institute;
@@ -32,16 +35,15 @@ import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
 
-import javax.inject.Inject;
-
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 /**
  * Metodi usabili nel template.
- * 
- * @author alessandro
  *
+ * @author alessandro
  */
 public class TemplateUtility {
 
@@ -55,12 +57,12 @@ public class TemplateUtility {
   private final RoleDao roleDao;
   private final BadgeReaderDao badgeReaderDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
-  
+
 
   @Inject
   public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
-      QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
-      RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao) {
+                         QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
+                         RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -104,9 +106,8 @@ public class TemplateUtility {
   }
 
   /**
-   * 
    * @param month mese di partenza
-   * @param year anno di partenza
+   * @param year  anno di partenza
    * @return anno successivo al mese/anno di partenza
    */
   public final int computeNextYear(final int month, final int year) {
@@ -128,9 +129,8 @@ public class TemplateUtility {
   }
 
   /**
-   * 
    * @param month mese di partenza
-   * @param year anno di partenza
+   * @param year  anno di partenza
    * @return anno precedente al mese/anno di partenza
    */
   public final int computePreviousYear(final int month, final int year) {
@@ -160,22 +160,19 @@ public class TemplateUtility {
 
   public ImmutableList<String> getAllDays() {
     return ImmutableList.of("lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato",
-        "domenica");
+            "domenica");
   }
 
   public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
     return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
   }
-  
-  public List<BadgeReader> getAllBadgeReader(Person person){
+
+  public List<BadgeReader> getAllBadgeReader(Person person) {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
 
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
-   * 
-   * @param institute
-   * @return
    */
   public List<User> usersInInstitute(Institute institute) {
 
@@ -183,7 +180,7 @@ public class TemplateUtility {
     offices.addAll(institute.seats);
 
     List<Person> personList = personDao.listPerseo(Optional.<String>absent(), offices, false,
-        LocalDate.now(), LocalDate.now(), true).list();
+            LocalDate.now(), LocalDate.now(), true).list();
 
     List<User> users = Lists.newArrayList();
     for (Person person : personList) {
@@ -212,8 +209,6 @@ public class TemplateUtility {
   /**
    * Gli uffici che l'user può assegnare come owner ai BadgeReader. Il super admin può assegnarlo ad
    * ogni ufficio.
-   * 
-   * @return
    */
   public List<Office> officeForBadgeReaders() {
 
@@ -241,9 +236,6 @@ public class TemplateUtility {
 
   /**
    * Gli account di tutti i badgeReader non ancora assegnati ad office.
-   * 
-   * @param office
-   * @return
    */
   public List<User> badgeReaderUserForOffice(Office office) {
 
@@ -267,24 +259,19 @@ public class TemplateUtility {
 
   /**
    * I codici di assenza ordinati dai più utilizzati.
-   * 
-   * @return
    */
   public List<AbsenceType> frequentAbsenceTypeList() {
 
     Optional<AbsenceType> ferCode = absenceTypeDao
-        .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
+            .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
     Preconditions.checkState(ferCode.isPresent());
 
     return FluentIterable.from(Lists.newArrayList(ferCode.get()))
-        .append(absenceTypeDao.getFrequentTypes()).toList();
+            .append(absenceTypeDao.getFrequentTypes()).toList();
   }
 
   /**
    * I codici di assenza attivi ordinati per codice.
-   * 
-   * @param date
-   * @return
    */
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);

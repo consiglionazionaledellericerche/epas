@@ -2,7 +2,9 @@ package models.base;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+
 import models.User;
+
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
@@ -19,57 +21,55 @@ import javax.persistence.Transient;
 
 /**
  * @author marco
- *
  */
 @Entity
 @RevisionEntity(ExtendedRevisionListener.class)
-@Table(name="revinfo")
+@Table(name = "revinfo")
 public class Revision {
 
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @RevisionNumber
-    @Column(name="rev")
-    public int id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @RevisionNumber
+  @Column(name = "rev")
+  public int id;
 
-    @RevisionTimestamp
-    @Column(name="revtstmp")
-    public long timestamp;
+  @RevisionTimestamp
+  @Column(name = "revtstmp")
+  public long timestamp;
+  @ManyToOne(optional = true)
+  public User owner;
+  // ip address
+  public String ipaddress;
 
-    @Transient
-    public LocalDateTime getRevisionDate() {
-    	return new LocalDateTime(timestamp);
+  @Transient
+  public LocalDateTime getRevisionDate() {
+    return new LocalDateTime(timestamp);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+
+    if (o instanceof Revision) {
+      final Revision other = (Revision) o;
+      return id == other.id;
+    } else {
+      return false;
     }
+  }
 
-	@ManyToOne(optional=true)
-	public User owner;
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
 
-	// ip address
-	public String ipaddress;
-
-    @Override
-    public boolean equals(Object o) {
-
-    	if (o instanceof Revision) {
-    		final Revision other = (Revision) o;
-    		return id == other.id;
-    	} else {
-    		return false;
-    	}
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this)
-				.add("id", id)
-				.add("date", getRevisionDate())
-				.add("owner", owner)
-				.add("ipaddress", ipaddress)
-				.omitNullValues()
-				.toString();
-	}
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+            .add("id", id)
+            .add("date", getRevisionDate())
+            .add("owner", owner)
+            .add("ipaddress", ipaddress)
+            .omitNullValues()
+            .toString();
+  }
 }

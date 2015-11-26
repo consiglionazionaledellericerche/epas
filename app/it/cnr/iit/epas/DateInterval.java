@@ -7,68 +7,65 @@ import org.joda.time.LocalDate;
 
 public class DateInterval {
 
-	private LocalDate begin;
-	private LocalDate end;
-	
-	/**
-	 * Costruttore con end optional.
-	 * @param begin
-	 * @param end
-	 */
-	public DateInterval(LocalDate begin, Optional<LocalDate> end) {
-	  Preconditions.checkArgument(begin != null);
-	  this.begin = begin;
-	  if (end.isPresent()) {
-	    Preconditions.checkArgument(!begin.isAfter(end.get()));
-	    this.end = end.get();
-	  } else {
-	    this.end = DateUtility.setInfinity();
-	  }
-	}
+  private LocalDate begin;
+  private LocalDate end;
 
-	public DateInterval(LocalDate date1, LocalDate date2){
+  /**
+   * Costruttore con end optional.
+   * @param begin
+   * @param end
+   */
+  public DateInterval(LocalDate begin, Optional<LocalDate> end) {
+    Preconditions.checkArgument(begin != null);
+    this.begin = begin;
+    if (end.isPresent()) {
+      Preconditions.checkArgument(!begin.isAfter(end.get()));
+      this.end = end.get();
+    } else {
+      this.end = DateUtility.setInfinity();
+    }
+  }
 
-		if(date1==null)
-			date1 = DateUtility.setInfinity();
-		if(date2==null)
-			date2 = DateUtility.setInfinity();
+  public DateInterval(LocalDate date1, LocalDate date2) {
 
-		//Non applico il riferimento ma costruisco nuovi oggetti
-		LocalDate date1Copy = new LocalDate(date1);
-		LocalDate date2Copy = new LocalDate(date2);
+    if (date1 == null)
+      date1 = DateUtility.setInfinity();
+    if (date2 == null)
+      date2 = DateUtility.setInfinity();
 
-		if(date1.isAfter(date2)){
-			this.begin = date2Copy;
-			this.end = date1Copy;
-		}
-		else{
-			this.begin = date1Copy;
-			this.end = date2Copy;
-		}
-	}
+    //Non applico il riferimento ma costruisco nuovi oggetti
+    LocalDate date1Copy = new LocalDate(date1);
+    LocalDate date2Copy = new LocalDate(date2);
 
-	public LocalDate getBegin(){
-		return begin;
-	}
+    if (date1.isAfter(date2)) {
+      this.begin = date2Copy;
+      this.end = date1Copy;
+    } else {
+      this.begin = date1Copy;
+      this.end = date2Copy;
+    }
+  }
 
-	public LocalDate getEnd(){
-		return end;
-	}
+  public LocalDate getBegin() {
+    return begin;
+  }
 
-	public boolean isClosed(){
+  public LocalDate getEnd() {
+    return end;
+  }
 
-		if(DateUtility.isInfinity(this.end))
-			return false;
-		return true;
+  public boolean isClosed() {
 
-	}
+    if (DateUtility.isInfinity(this.end))
+      return false;
+    return true;
 
-	@Override
-	public String toString() {
-		return "[" + this.begin.toString() + "," + this.getEnd().toString() + "]";
-	}
+  }
 
-
+  @Override
+  public String toString() {
+    return "[" + this.begin.toString() + "," + this.getEnd().toString() + "]";
+  }
 
 
 }
