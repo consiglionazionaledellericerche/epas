@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package models;
 
 import com.google.common.collect.Sets;
@@ -22,7 +20,7 @@ import java.util.Set;
 
 
 /**
- * @author cristian
+ * @author cristian.
  *
  */
 @Entity
@@ -57,4 +55,9 @@ public class BadgeReader extends BaseModel {
 	
 	
 	public boolean enabled = true;
+	
+	@Override
+	public String toString(){
+	  return this.code;
+	}
 }

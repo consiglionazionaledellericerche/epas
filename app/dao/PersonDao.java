@@ -74,7 +74,7 @@ public final class PersonDao extends DaoBase{
 		
 		JPQLQuery query = personQuery( Optional.<String>absent(), offices, false, 
 				beginMonth, endMonth, true, Optional.<CompetenceCode>absent(),
-				Optional.<Person>absent()); 
+				Optional.<Person>absent(), false); 
 		
 		return ModelQuery.simpleResults( query, person ).list();
 	}
@@ -104,7 +104,7 @@ public final class PersonDao extends DaoBase{
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
 						onlyOnCertificate, Optional.<CompetenceCode>absent(),
-						Optional.<Person>absent()),
+						Optional.<Person>absent(), false),
 				//Expression
 				person);
 	}
@@ -134,7 +134,7 @@ public final class PersonDao extends DaoBase{
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
 						onlyOnCertificate, Optional.<CompetenceCode>absent(),
-						Optional.<Person>absent()),
+						Optional.<Person>absent(), false),
 				//Expression
 				person);
 	}
@@ -158,14 +158,15 @@ public final class PersonDao extends DaoBase{
 			Set<Office> offices,
 			boolean onlyTechnician, 
 			LocalDate start, LocalDate end, 
-			boolean onlyOnCertificate) {
+			boolean onlyOnCertificate,
+			boolean withBadge) {
 
 		final QPerson person = QPerson.person;
 
 		JPQLQuery query = personQuery(name, offices, onlyTechnician, 
 				Optional.fromNullable(start), Optional.fromNullable(end), 
 				onlyOnCertificate, Optional.<CompetenceCode>absent(),
-				Optional.<Person>absent());
+				Optional.<Person>absent(), withBadge);
 		
 		SimpleResults<Person> result = ModelQuery.simpleResults( 
 				//JPQLQuery
@@ -209,7 +210,7 @@ public final class PersonDao extends DaoBase{
 		return ModelQuery.simpleResults(
 				personQuery(name, offices, onlyTechnician, 
 						Optional.fromNullable(start), Optional.fromNullable(end), 
-						true, Optional.fromNullable(compCode), personInCharge), person);
+						true, Optional.fromNullable(compCode), personInCharge, false), person);
 
 	}
 
@@ -548,7 +549,8 @@ public final class PersonDao extends DaoBase{
 			boolean onlyTechnician, 
 			Optional<LocalDate> start, Optional<LocalDate> end,
 			boolean onlyOnCertificate, 
-			Optional<CompetenceCode> compCode) {
+			Optional<CompetenceCode> compCode,
+			boolean withBadge) {
 		
 		final BooleanBuilder condition = new BooleanBuilder();
 		
@@ -558,6 +560,7 @@ public final class PersonDao extends DaoBase{
 		filterOnlyOnCertificate(condition, onlyOnCertificate);
 		filterContract(condition, start, end);
 		filterCompetenceCodeEnabled(condition, compCode);
+		filterWithBadge(condition, withBadge);
 		
 		return injectedQuery.where(condition);
 		
@@ -583,7 +586,8 @@ public final class PersonDao extends DaoBase{
 			Optional<LocalDate> start, Optional<LocalDate> end,
 			boolean onlyOnCertificate, 
 			Optional<CompetenceCode> compCode,
-			Optional<Person> personInCharge) {
+			Optional<Person> personInCharge,
+			boolean withBadge) {
 		
 		final QPerson person = QPerson.person;
 		final QContract contract = QContract.contract;
@@ -609,7 +613,7 @@ public final class PersonDao extends DaoBase{
 		filterOnlyOnCertificate(condition, onlyOnCertificate);
 		filterContract(condition, start, end);
 		filterCompetenceCodeEnabled(condition, compCode);
-		
+		filterWithBadge(condition, withBadge);
 		return query.where(condition);
 	}
 	
@@ -685,6 +689,19 @@ public final class PersonDao extends DaoBase{
 		if (compCode.isPresent()) {
 			final QPerson person = QPerson.person;
 			condition.and(person.competenceCode.contains(compCode.get()));
+		}
+	}
+	
+	/**
+	 * Filtro sulla possibilità di inserire nella lista le persone con badge associati
+	 * 
+	 * @param condition
+	 * @param value
+	 */
+	private void filterWithBadge(BooleanBuilder condition, boolean value){
+		if(value){
+			final QPerson person = QPerson.person;
+			condition.and(person.badges.isNotEmpty());
 		}
 	}
 	
@@ -802,7 +819,7 @@ public final class PersonDao extends DaoBase{
 		
 		lightQuery = personQuery(lightQuery,
 				Optional.<String>absent(), offices, false, 
-				beginMonth, endMonth, true, Optional.<CompetenceCode>absent()); 
+				beginMonth, endMonth, true, Optional.<CompetenceCode>absent(), false); 
 		
 		QBean<PersonLite> bean = Projections.bean( PersonLite.class, person.id, 
 				person.name, person.surname);
