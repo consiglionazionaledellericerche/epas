@@ -55,32 +55,8 @@
 		  #{f.simpleView 'cwtt.workingTimeType' /}
 		  #{f.hidden 'cwtt.workingTimeType.id' /}
 		  
-		  #{alert color:'danger'}
-		    <p>Nuova configurazione</p>
-		    <table class="table table-bordered table-condensed center">
-			  <tr>
-			    <th>Dal</th>
-			    <th>Al</th>
-				<th>Tip Orario</th>
-			  </tr>
-			  #{list items:periodRecaps, as:'periodRecap'}
-			  <tr>
-			    <td>${periodRecap.begin.format()}</td>
-				<td>#{if periodRecap.end.present} ${periodRecap.end.get().format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-				<td>${periodRecap.value.description}</td>
-			  </tr>
-			  #{/list}
-		  	</table>
-		    #{if recomputeFrom != null}
-	 	        <p>ePAS effettuerà il ricalcolo di tutti i dati del dipendente 
-	 	        dal <strong>${recomputeFrom.format()}</strong>
-	 	        al <strong>${recomputeTo.format()}</strong> 
-	 	        per un totale di <strong>${days}</strong> giorni.</p>			
-	 	    #{/if}
-		  #{/alert}
-		  #{b.buttons center:true}
-		   #{b.submit 'Conferma'/}
-		 #{/b.buttons}
+		  #{recomputeRecap recomputeRecap:recomputeRecap /}
+		 
 	#{/else}
 	 
 #{/form}
