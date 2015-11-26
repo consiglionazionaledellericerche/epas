@@ -24,28 +24,22 @@ public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTime
 
     public static final QContractWorkingTimeType contractWorkingTimeType = new QContractWorkingTimeType("contractWorkingTimeType");
 
-    public final models.base.query.QPeriodModel _super;
-
-    //inherited
-    public final DatePath<org.joda.time.LocalDate> begin;
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
     public final DatePath<org.joda.time.LocalDate> beginDate = createDate("beginDate", org.joda.time.LocalDate.class);
 
     public final QContract contract;
 
-    //inherited
-    public final SimplePath<com.google.common.base.Optional<org.joda.time.LocalDate>> end;
-
     public final DatePath<org.joda.time.LocalDate> endDate = createDate("endDate", org.joda.time.LocalDate.class);
 
     //inherited
-    public final SimplePath<Object> entityId;
+    public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited
-    public final NumberPath<Long> id;
+    public final NumberPath<Long> id = _super.id;
 
     //inherited
-    public final BooleanPath persistent;
+    public final BooleanPath persistent = _super.persistent;
 
     public final QWorkingTimeType workingTimeType;
 
@@ -67,13 +61,7 @@ public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTime
 
     public QContractWorkingTimeType(Class<? extends ContractWorkingTimeType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this._super = new models.base.query.QPeriodModel(type, metadata, inits);
-        this.begin = _super.begin;
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
-        this.end = _super.end;
-        this.entityId = _super.entityId;
-        this.id = _super.id;
-        this.persistent = _super.persistent;
         this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType"), inits.get("workingTimeType")) : null;
     }
 

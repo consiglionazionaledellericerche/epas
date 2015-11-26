@@ -17,6 +17,8 @@ import models.ContractWorkingTimeType;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.base.IPeriodModel;
+import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
@@ -456,131 +458,133 @@ public class ContractManager {
   /**
    * L'impatto di un nuovo periodo tipo orario sul contratto.
    */
-  public final List<ContractWorkingTimeType> changedRecap(Contract contract,
-                                                          ContractWorkingTimeType cwtt, boolean persist) {
 
+  public final List<PeriodModel> changedRecap(Contract contract, 
+      IPeriodModel period, boolean persist) {
     boolean recomputeBeginSet = false;
 
     //copia di sicurezza
-    List<ContractWorkingTimeType> originals = Lists.newArrayList();
-    for (ContractWorkingTimeType cwttOriginal : contract.contractWorkingTimeType) {
-      originals.add(cwttOriginal);
-    }
-    Collections.sort(originals);
 
+    List<PeriodModel> originals = period.orderedPeriods();
+//    for (IPeriodModel periodsOriginal : period.orderedPeriods()) {
+//      originals.add(periodsOriginal);
+//    }
+//    Collections.sort(originals);
+    
     //riepilogo delle modifiche
-    DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-    List<ContractWorkingTimeType> cwttList = Lists.newArrayList();
-    ContractWorkingTimeType previous = null;
-
-    List<ContractWorkingTimeType> toRemove = Lists.newArrayList();
-
-    for (ContractWorkingTimeType oldCwtt : originals) {
-      DateInterval oldInterval = new DateInterval(oldCwtt.beginDate, oldCwtt.endDate);
+    DateInterval periodInterval = new DateInterval(period.getBegin(), period.getEnd());
+    List<PeriodModel> periodList = Lists.newArrayList();
+    PeriodModel previous = null;
+    
+    List<PeriodModel> toRemove = Lists.newArrayList();
+    
+    for (PeriodModel oldPeriod : originals) {
+      DateInterval oldInterval = new DateInterval(oldPeriod.getBegin(), oldPeriod.getEnd());
 
       //non cambia il tipo orario nessuna modifica su quel oldCwtt
-      if (cwtt.workingTimeType.id.equals(oldCwtt.workingTimeType.id)) {
-        previous = insertIntoList(previous, oldCwtt, cwttList);
-        if (previous.id == null || !previous.id.equals(oldCwtt.id)) {
-          toRemove.add(oldCwtt);
+      if (period.getValue().getPeriodValueId().equals(oldPeriod.getValue().getPeriodValueId())) {        
+        previous = insertIntoList(previous, oldPeriod, periodList);
+        if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
+          toRemove.add(oldPeriod);
         }
         continue;
       }
-      DateInterval intersection = DateUtility.intervalIntersection(cwttInterval, oldInterval);
+      DateInterval intersection = DateUtility.intervalIntersection(periodInterval, oldInterval);
       //non si intersecano nessuna modifica su quel oldCwtt
       if (intersection == null) {
-        previous = insertIntoList(previous, oldCwtt, cwttList);
-        if (previous.id == null || !previous.id.equals(oldCwtt.id)) {
-          toRemove.add(oldCwtt);
+        previous = insertIntoList(previous, oldPeriod, periodList);
+        if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
+          toRemove.add(oldPeriod);
         }
         continue;
       }
 
       //si sovrappongono e sono diversi
-      toRemove.add(oldCwtt);
-
-      ContractWorkingTimeType cwttIntersect = new ContractWorkingTimeType();
-      cwttIntersect.contract = contract;
-      cwttIntersect.beginDate = intersection.getBegin();
-      cwttIntersect.endDate = intersection.getEnd();
-      cwttIntersect.workingTimeType = cwtt.workingTimeType;
-
+      toRemove.add(oldPeriod);
+      
+      PeriodModel periodIntersect = period.newInstance();
+      periodIntersect.setTarget(contract);
+      periodIntersect.setBegin(intersection.getBegin());
+      periodIntersect.setEnd(Optional.fromNullable(intersection.getEnd()));
+      periodIntersect.setValue(period.getValue());
+       
       //Parte iniziale old
-      if (oldCwtt.beginDate.isBefore(cwttIntersect.beginDate)) {
-        ContractWorkingTimeType cwttOldBeginRemain = new ContractWorkingTimeType();
-        cwttOldBeginRemain.contract = contract;
-        cwttOldBeginRemain.beginDate = oldCwtt.beginDate;
-        cwttOldBeginRemain.endDate = cwttIntersect.beginDate.minusDays(1);
-        cwttOldBeginRemain.workingTimeType = oldCwtt.workingTimeType;
-        previous = insertIntoList(previous, cwttOldBeginRemain, cwttList);
+      if (oldPeriod.getBegin().isBefore(periodIntersect.getBegin())) {
+        PeriodModel periodOldBeginRemain = period.newInstance();
+        periodOldBeginRemain.setTarget(contract);
+        periodOldBeginRemain.setBegin(oldPeriod.getBegin());
+        periodOldBeginRemain.setEnd(Optional.fromNullable(periodIntersect.getBegin().minusDays(1)));
+        periodOldBeginRemain.setValue(oldPeriod.getValue());
+        previous = insertIntoList(previous, periodOldBeginRemain, periodList); 
       }
 
       if (!recomputeBeginSet) {
-        cwttIntersect.recomputeFrom = cwttIntersect.beginDate;
+        periodIntersect.recomputeFrom = periodIntersect.getBegin();
       }
-      previous = insertIntoList(previous, cwttIntersect, cwttList);
 
+      previous = insertIntoList(previous, periodIntersect, periodList);
+      
       //Parte finale old
-      if (cwttIntersect.endDate != null) {
-        ContractWorkingTimeType cwttOldEndRemain = new ContractWorkingTimeType();
-        cwttOldEndRemain.contract = contract;
-        cwttOldEndRemain.beginDate = cwttIntersect.endDate.plusDays(1);
-        cwttOldEndRemain.workingTimeType = oldCwtt.workingTimeType;
-        if (oldCwtt.endDate != null) {
-          if (cwttIntersect.endDate.isBefore(oldCwtt.endDate)) {
-            cwttOldEndRemain.endDate = oldCwtt.endDate;
-            previous = insertIntoList(previous, cwttOldEndRemain, cwttList);
+      if (periodIntersect.getEnd().isPresent()) {
+        PeriodModel periodOldEndRemain = period.newInstance();
+        periodOldEndRemain.setTarget(contract);
+        periodOldEndRemain.setBegin(((LocalDate)periodIntersect.getEnd().get()).plusDays(1));
+        periodOldEndRemain.setValue(oldPeriod.getValue());
+        if (oldPeriod.getEnd().isPresent()) {
+          if (((LocalDate)periodIntersect.getEnd().get())
+              .isBefore((LocalDate)oldPeriod.getEnd().get())) {
+            periodOldEndRemain.setEnd(oldPeriod.getEnd());
+            previous = insertIntoList(previous, periodOldEndRemain, periodList); 
           }
         } else {
-          if (cwttIntersect.endDate != null && !DateUtility.isInfinity(cwttIntersect.endDate)) {
-            cwttOldEndRemain.endDate = oldCwtt.endDate;
-            previous = insertIntoList(previous, cwttOldEndRemain, cwttList);
-          }
+          periodOldEndRemain.setEnd(oldPeriod.getEnd());
+          previous = insertIntoList(previous, periodOldEndRemain, periodList); 
         }
       }
 
     }
 
     if (persist) {
-      contract.refresh();
-      for (ContractWorkingTimeType cwttRemoved : toRemove) {
-        cwttRemoved.delete();
-        contract.contractWorkingTimeType.remove(cwttRemoved);
-        contract.save();
-      }
-      for (ContractWorkingTimeType cwttInsert : cwttList) {
-        //if (cwttInsert.isPersistent()) {
-        cwttInsert.save();
-        contract.contractWorkingTimeType.add(cwttInsert);
-        contract.save();
-
-        //}
-      }
-      contract.save();
-      JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
+//      contract.refresh();
+//      for (ContractWorkingTimeType cwttRemoved : toRemove) {
+//        cwttRemoved.delete();
+//        contract.contractWorkingTimeType.remove(cwttRemoved);
+//        contract.save();
+//      }
+//      for (ContractWorkingTimeType cwttInsert : periodList) {
+//        //if (cwttInsert.isPersistent()) {
+//          cwttInsert.save();
+//          contract.contractWorkingTimeType.add(cwttInsert);
+//          contract.save();
+//          
+//        //}
+//      }
+//      contract.save();
+//      JPAPlugin.closeTx(false);
+//      JPAPlugin.startTx(false);
     }
 
-    return cwttList;
+    
+    return periodList;
 
   }
 
   /**
    * Inserisce il periodo nella lista. Ritorna l'ultimo periodo inserito.
    */
-  private ContractWorkingTimeType insertIntoList(ContractWorkingTimeType previous,
-                                                 ContractWorkingTimeType present, List<ContractWorkingTimeType> cwttList) {
-    if (present.endDate != null && DateUtility.isInfinity(present.endDate)) {
-      present.endDate = null;
-    }
-    if (previous != null && previous.workingTimeType.id == present.workingTimeType.id) {
-      previous.endDate = present.endDate;
+
+  private PeriodModel insertIntoList(PeriodModel previous, 
+      PeriodModel present, List<PeriodModel> periodList) {
+    
+    if (previous != null 
+        && previous.getValue().getPeriodValueId() == present.getValue().getPeriodValueId())  {
+      previous.setEnd(present.getEnd()); 
       if (present.recomputeFrom != null) {
         previous.recomputeFrom = present.recomputeFrom;
       }
       return previous;
     } else {
-      cwttList.add(present);
+      periodList.add(present);
       return present;
     }
   }
