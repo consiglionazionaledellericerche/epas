@@ -7,28 +7,31 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
+
 import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.ContractStampProfileManager;
-import manager.ContractWorkingTimeTypeManager;
 import manager.EmailManager;
 import manager.OfficeManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -40,8 +43,11 @@ import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+
 import net.sf.oval.constraint.MinLength;
+
 import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -50,12 +56,13 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
-import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 
 @Slf4j
@@ -93,8 +100,6 @@ public class Persons extends Controller {
 	private static IWrapperFactory wrapperFactory;
 	@Inject
 	private static ConfGeneralManager confGeneralManager;
-	@Inject
-	private static ContractWorkingTimeTypeManager contractWorkingTimeTypeManager;
 	@Inject
 	private static PersonChildrenDao personChildrenDao;
 	@Inject
