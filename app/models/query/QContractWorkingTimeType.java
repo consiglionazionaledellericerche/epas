@@ -26,11 +26,13 @@ public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTime
 
     public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
-    public final DatePath<org.joda.time.LocalDate> beginDate = createDate("beginDate", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final QContract contract;
 
-    public final DatePath<org.joda.time.LocalDate> endDate = createDate("endDate", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
