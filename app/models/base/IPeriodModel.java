@@ -74,7 +74,7 @@ public interface IPeriodModel<T extends PeriodModel> {
   
 
   /**
-   * La lista dei periodi.
+   * La lista dei periodi del target.
    * @return
    */
   Collection<IPeriodModel> periods();

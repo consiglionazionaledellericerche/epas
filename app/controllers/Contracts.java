@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
 import manager.PeriodManager;
+import manager.recaps.recomputation.RecomputeRecap;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -374,44 +375,76 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(cwtt.workingTimeType.office);
 
     //riepilogo delle modifiche
-    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false); 
-    LocalDate recomputeFrom = null;
-    LocalDate recomputeTo = wrappedContract.getContractDateInterval().getEnd();
-    for (PeriodModel item : periodRecaps) {
-      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
-        recomputeFrom = item.recomputeFrom;
-      }
-    }
-    if (recomputeFrom != null) {
-      if (recomputeTo.isAfter(LocalDate.now())) {
-        recomputeTo = LocalDate.now();
-      }
-      if (recomputeFrom.isBefore(wrappedContract.getContractDatabaseInterval().getBegin())) {
-        recomputeFrom = wrappedContract.getContractDatabaseInterval().getBegin();
-      }
-    }
+    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
+    RecomputeRecap recomputeRecap = 
+        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
 
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+    
     if (!confirmed) {
       confirmed = true;
-      int days = 0;
-      if (recomputeFrom != null) {
-        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
-      }
-      render("@updateContractWorkingTimeType", contract, cwtt, periodRecaps, confirmed, 
-          recomputeFrom, recomputeTo, days);
+      render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
     } else {
 
       periodManager.updatePeriods(contract, cwtt, true);
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
-      if (recomputeFrom != null) {
+      if (recomputeRecap.needRecomputation) {
         contractManager.recomputeContract(contract,
-                Optional.fromNullable(recomputeFrom), false, false);
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
       }
       //todo il messaggio di conferma nel flash.
       updateContractWorkingTimeType(contract.id);
     }
 
+  }
+  
+  /**
+   * Costruisce il recomputeRecap.
+   * 
+   * @param begin begin del target
+   * @param end end del target
+   * @param periods i nuovi periods del target
+   * @return
+   */
+  private static RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
+      List<PeriodModel> periods) {
+    
+    RecomputeRecap recomputeRecap = new RecomputeRecap();
+    
+    recomputeRecap.needRecomputation = true;
+    
+    recomputeRecap.periods = periods;
+    recomputeRecap.recomputeFrom = LocalDate.now().plusDays(1);
+    recomputeRecap.recomputeTo = end;
+    for (PeriodModel item : periods) {
+      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
+        recomputeRecap.recomputeFrom = item.recomputeFrom;
+      }
+    }
+    
+    if (recomputeRecap.recomputeTo.isPresent()){
+      if(recomputeRecap.recomputeTo.get().isAfter(LocalDate.now())) {
+        recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
+      }
+      if (recomputeRecap.recomputeFrom.isBefore(begin)) {
+        recomputeRecap.recomputeFrom = begin;
+      }
+    }
+    
+    if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+      recomputeRecap.needRecomputation = false;
+    }
+    
+    
+    if (recomputeRecap.recomputeFrom != null) {
+      recomputeRecap.days = DateUtility.daysInInterval(new DateInterval(recomputeRecap.recomputeFrom,
+          recomputeRecap.recomputeTo));
+    }
+    
+    return recomputeRecap;
+    
   }
 
   /**
