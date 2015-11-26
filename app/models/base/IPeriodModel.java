@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 
 import org.joda.time.LocalDate;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,6 +14,12 @@ import java.util.List;
  * @author alessandro
  */
 public interface IPeriodModel<T extends PeriodModel> {
+
+  /**
+   * Il periodo.
+   * @return
+   */
+  T getPeriod();
   
   /**
    * Il target del periodo.
@@ -70,7 +77,7 @@ public interface IPeriodModel<T extends PeriodModel> {
    * La lista dei periodi.
    * @return
    */
-  List<IPeriodModel> orderedPeriods();
+  Collection<IPeriodModel> periods();
   
   /**
    * Una nuova istanza del tipo PeriodModel.
