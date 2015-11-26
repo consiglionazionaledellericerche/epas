@@ -21,7 +21,7 @@
    #{tabContentItem id:'vacationLastYear', active:activeVacationLastYear}
    
       #{accordionGroup 'recapVacationLast'} 
-        #{accordionItem 'itemRecapVacationLast', parent:'recapVacationLast', title:'Riepilogo giorni di ferie del ' + (vacationsRecap.year-1), open:true, color:'info'}
+        #{accordionItem 'itemRecapVacationLast', parent:'recapVacationLast', title:'Riepilogo giorni di ferie del ' + (vacationsRecap.year-1), open:true}
 	      <p>Totali: <strong>${vacationsRecap.vacationDaysLastYearAccrued}</strong></p>
 	      <p>Usufruiti: <strong>${vacationsRecap.vacationDaysLastYearUsed}</strong></p>
 	      <p>Rimanenti: <strong>${vacationsRecap.vacationDaysLastYearNotYetUsed }</strong> da utilizzare entro il <strong>${vacationsRecap.dateExpireLastYear.format()}</strong></p>
@@ -37,7 +37,7 @@
    
    
       #{accordionGroup 'datesVacationCurrent'}
-        #{accordionItem 'itemDatesVacationCurrent', parent:'datesVacationCurrent', title:'Date e codici ferie del ' + vacationsRecap.year, open:true, color:'info'}
+        #{accordionItem 'itemDatesVacationCurrent', parent:'datesVacationCurrent', title:'Date e codici ferie del ' + vacationsRecap.year, open:true}
 
 		      
 	      <div class="col-md-8 col-md-offset-2">
@@ -70,8 +70,8 @@
    #{tabContentItem id:'vacationCurrentYear', active:activeVacationCurrentYear}
       
       #{accordionGroup 'recapVacationCurrent'}
-        #{accordionItem 'itemRecapVacationCurrent', parent:'recapVacationCurrent', title:'Riepilogo giorni di ferie del ' + vacationsRecap.year, open:true, color:'info'}
-	      *{ #{panel title:'Riepilogo giorni di ferie del ' + vacationsRecap.year, dim:12, color:'info'} }*
+        #{accordionItem 'itemRecapVacationCurrent', parent:'recapVacationCurrent', title:'Riepilogo giorni di ferie del ' + vacationsRecap.year, open:true }
+	      *{ #{panel title:'Riepilogo giorni di ferie del ' + vacationsRecap.year, dim:12 } }*
 	      <p>Totali: <strong>${vacationsRecap.vacationDaysCurrentYearTotal}</strong></p>
 	      <p>Maturati:  <strong>${vacationsRecap.vacationDaysCurrentYearAccrued}</strong></p>
 	      <p>Usufruiti: <strong>${vacationsRecap.vacationDaysCurrentYearUsed}</strong></p>
@@ -89,7 +89,7 @@
       #{/accordionGroup}
 
       #{accordionGroup 'datesVacationCurrent'}
-      #{accordionItem 'itemDatesVacationCurrent', parent:'datesVacationCurrent', title:'Date e codici ferie del ' + vacationsRecap.year, open:true, color:'info'}
+      #{accordionItem 'itemDatesVacationCurrent', parent:'datesVacationCurrent', title:'Date e codici ferie del ' + vacationsRecap.year, open:true }
 	 
 	 
 	  
@@ -122,7 +122,7 @@
    #{tabContentItem id:'permission', active:activePermission}
    
     #{accordionGroup 'recapPermissionCurrent'}
-        #{accordionItem 'itemRecapPermissionCurrent', parent:'recapPermissionCurrent', title:'Riepilogo permessi legge del ' + vacationsRecap.year, open:true, color:'info'}
+        #{accordionItem 'itemRecapPermissionCurrent', parent:'recapPermissionCurrent', title:'Riepilogo permessi legge del ' + vacationsRecap.year, open:true }
 
 	      <p>Totali: <strong>${vacationsRecap.permissionCurrentYearTotal}</strong></p>
 	      <p>Maturati:  <strong>${vacationsRecap.permissionCurrentYearAccrued}</strong></p>
@@ -142,7 +142,7 @@
       #{/accordionGroup}
    
       #{accordionGroup 'datesPermissionCurrent'}
-        #{accordionItem 'itemDatesPermissionCurrent', parent:'datesPermissionCurrent', title:'Date permessi legge del ' + vacationsRecap.year, open:true, color:'info'}
+        #{accordionItem 'itemDatesPermissionCurrent', parent:'datesPermissionCurrent', title:'Date permessi legge del ' + vacationsRecap.year, open:true }
 	      <div class="col-md-8 col-md-offset-2">
 	      <table class="table table-condensed table-hover">
 		   <thead>
