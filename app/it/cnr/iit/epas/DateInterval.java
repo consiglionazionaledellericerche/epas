@@ -22,7 +22,7 @@ public class DateInterval {
 	    Preconditions.checkArgument(!begin.isAfter(end.get()));
 	    this.end = end.get();
 	  } else {
-	    this.end = null;
+	    this.end = DateUtility.setInfinity();
 	  }
 	}
 
