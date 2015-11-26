@@ -73,66 +73,34 @@
 			<th>Numero badge</th>
 			<th>Elimina</th>			
 	  </tr>
-	  #{list items:personList, as:'person'}
-	  #{if person.currentContract.present}
+	  #{list items:badgeReader.badges, as:'badge'}
+	  
 	  <tr>
-	  	<td class="alignLeft success">${person.value.fullname}</td>
-	  	<td>${person.value.office.name}</td>
+	  	<td class="alignLeft success">${badge.person.fullname}</td>
+	  	<td>${badge.person.office.name}</td>
 	  	<td>
-	  	#{list items:person.value.badges, as:'badge'}
-	  		<li>${badge.code} associato a <strong>${badge.badgeReader.code}</strong></li>
-	  	#{/list}
+	
+		  		<li>${badge.code} associato a <strong>${badge.badgeReader.code}</strong></li>
+		  	
+	  	
 	  	</td>
 	  	<td>
-	  	#{list items:person.value.badges, as:'badge'}
+	  	
 	  		<li><a class="btn btn-danger btn-xs" href="@{Badges.delete(badge.id)}">Elimina associazione</a></li>
-	  	#{/list}
+	  	
 	  	</td>
 	  </tr>	         
-	  #{/if}          
+	            
 	  #{/list}
 	  </table>
 	  
-	  <div class="alert alert-warning" role="alert">
-    	La lista delle persone NON attive presenti in anagrafica con associato il badge 
-      </div>
-	  <table class="table table-hover">
-	  <tr class="warning">
-			<th>Nome</th>
-			<th>Istituto</th>
-			<th>Numero badge</th>
-			<th>Elimina</th>			
-	  </tr>
-	  #{list items:personList, as:'person'}
-	  #{if !person.currentContract.present}
-	  <tr>
-	  	<td>${person.value.fullname}</td>
-	  	<td>${person.value.office.name}</td>
-	  	<td>
-	  	
-	  	#{list items:person.value.badges, as:'badge'}
-	  		<li>${badge.code} associato a <strong>${badge.badgeReader.code}</strong></li>
-	  	#{/list}
-	  	
-	  	</td>
-	  	<td>
-	  	#{list items:person.value.badges, as:'badge'}
-	  		<li><a class="btn btn-danger btn-xs" href="@{Badges.delete(badge.id)}">Elimina associazione</a></li>
-	  	#{/list}
-	  	</td>
-	  </tr>	         
-	  #{/if}          
-	  #{/list}
-	  </table>
+	  
 	 #{/accordionItem}
   #{/accordionGroup}
   
   #{/tabContentItem} 
   
-#{/tabContent}
-  
-  
-  
+#{/tabContent}  
   
   
   
