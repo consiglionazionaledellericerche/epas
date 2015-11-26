@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel implements IPeriodModel,  Comparable<PeriodModel> {
@@ -19,6 +20,7 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel,  Co
   /**
    * Contiene l'informazione se all'interno del periodo vi è la prima data da ricalcolare.
    */
+  @Transient
   public LocalDate recomputeFrom; 
   
   @Override

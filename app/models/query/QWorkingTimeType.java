@@ -1,19 +1,15 @@
 package models.query;
 
-import com.mysema.query.types.Path;
-import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.ListPath;
-import com.mysema.query.types.path.NumberPath;
-import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.WorkingTimeType;
 
-import javax.annotation.Generated;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
+import com.mysema.query.types.path.*;
+
+import com.mysema.query.types.PathMetadata;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -47,6 +43,8 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
     public final BooleanPath mealTicketEnabled = createBoolean("mealTicketEnabled");
 
     public final QOffice office;
+
+    public final NumberPath<Long> periodValueId = createNumber("periodValueId", Long.class);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
