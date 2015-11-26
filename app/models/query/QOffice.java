@@ -1,20 +1,15 @@
 package models.query;
 
-import com.mysema.query.types.Path;
-import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.DatePath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.ListPath;
-import com.mysema.query.types.path.NumberPath;
-import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.Office;
 
-import javax.annotation.Generated;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
+import com.mysema.query.types.path.*;
+
+import com.mysema.query.types.PathMetadata;
+import javax.annotation.Generated;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -54,8 +49,6 @@ public class QOffice extends EntityPathBase<Office> {
     public final QInstitute institute;
 
     public final DatePath<org.joda.time.LocalDate> joiningDate = createDate("joiningDate", org.joda.time.LocalDate.class);
-
-    public final StringPath label = createString("label");
 
     public final StringPath name = createString("name");
 

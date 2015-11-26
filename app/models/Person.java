@@ -9,9 +9,16 @@ import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
+import models.base.MutableModel;
+
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import play.data.binding.As;
+import play.data.validation.Email;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import java.util.List;
 import java.util.Set;
@@ -28,23 +35,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-
-import models.base.MutableModel;
-import play.data.binding.As;
-import play.data.validation.Email;
-import play.data.validation.Required;
-import play.data.validation.Unique;
 
 /**
  * @author cristian
  */
 
 /**
- * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le 
- * informazioni della persona in fase di personDao.list.
- * Necessaria comunque la join con le relazioni OneToOne. 
+ * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le informazioni della
+ * persona in fase di personDao.list. Necessaria comunque la join con le relazioni OneToOne.
  */
 @Entity
 @Audited
@@ -91,8 +90,8 @@ public class Person extends MutableModel implements Comparable<Person> {
   public Long oldId;
 
   /**
-   * Internal ID: server per l'identificazione univoca della persona nella
-   * sincronizzazione con Perseo (Person.id di Perseo)
+   * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con
+   * Perseo (Person.id di Perseo)
    */
   @Unique
   public Integer iId;
@@ -114,8 +113,8 @@ public class Person extends MutableModel implements Comparable<Person> {
   public boolean wantEmail;
 
   /**
-   * i successivi due campi servono per la nuova relazione tra Person e Person
-   * relativa ai responsabili
+   * i successivi due campi servono per la nuova relazione tra Person e Person relativa ai
+   * responsabili
    */
   @OneToMany(mappedBy = "personInCharge")
   @OrderBy("surname")
@@ -133,7 +132,7 @@ public class Person extends MutableModel implements Comparable<Person> {
   public boolean isPersonInCharge;
 
   /**
-   *  relazione con i turni
+   * relazione con i turni
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
@@ -188,7 +187,8 @@ public class Person extends MutableModel implements Comparable<Person> {
   ;
 
   /**
-   * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
+   * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
+   * una certa competenza
    */
   @NotAudited
   @ManyToMany(cascade = {CascadeType.REFRESH})
@@ -215,8 +215,7 @@ public class Person extends MutableModel implements Comparable<Person> {
   public Office office;
 
   /**
-   * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge
-   * alla tabella badges.
+   * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge alla tabella badges.
    */
   @Deprecated
   @As(binder = NullStringBinder.class)

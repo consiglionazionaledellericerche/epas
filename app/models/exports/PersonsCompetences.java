@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package models.exports;
 
@@ -10,13 +10,12 @@ import java.util.List;
 
 /**
  * @author arianna
- *
  */
 public class PersonsCompetences {
 
-	public List<Competence> competences = new ArrayList<Competence>();
-	
-	public PersonsCompetences(List<Competence> competences) {
-		this.competences = competences;
-	}
+  public List<Competence> competences = new ArrayList<Competence>();
+
+  public PersonsCompetences(List<Competence> competences) {
+    this.competences = competences;
+  }
 }

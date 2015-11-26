@@ -1,25 +1,25 @@
 package manager;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
 import dao.BadgeDao;
-import dao.BadgeReaderDao;
+
 import models.Badge;
 import models.BadgeReader;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
 public class BadgeManager {
+
+  private final BadgeDao badgeDao;
 
   @Inject
   public BadgeManager(BadgeDao badgeDao) {
     this.badgeDao = badgeDao;
   }
-
-  private final BadgeDao badgeDao;
 
   private boolean associateBadge(BadgeReader badgeReader, Integer number) {
     String numero = number + "";
@@ -35,15 +35,14 @@ public class BadgeManager {
   }
 
   /**
-   * 
-   * @param inizio il numero inziale di badge 
-   * @param fine il numero finale di badge
+   * @param inizio      il numero inziale di badge
+   * @param fine        il numero finale di badge
    * @param badgeReader il lettore di badge
    * @return una mappa contenente come chiavi i numeri di badge e come valori il booleano che
-   *     determina se tale badge è stato salvato oppure no.
+   * determina se tale badge è stato salvato oppure no.
    */
   public Map<Integer, Boolean> reportAssociateBadge(String inizio, String fine,
-      BadgeReader badgeReader) {
+                                                    BadgeReader badgeReader) {
     Map<Integer, Boolean> map = Maps.newHashMap();
     Integer begin = new Integer(inizio);
     Integer end = new Integer(fine);

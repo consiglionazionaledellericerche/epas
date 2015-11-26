@@ -12,11 +12,13 @@ import dao.RoleDao;
 import dao.WorkingTimeTypeDao;
 
 import helpers.validators.StringIsTime;
+
 import manager.ConfGeneralManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.PersonManager;
 import manager.UserManager;
+
 import models.Contract;
 import models.Institute;
 import models.Office;
@@ -25,9 +27,11 @@ import models.Role;
 import models.User;
 import models.WorkingTimeType;
 import models.enumerate.Parameter;
+
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -54,6 +58,10 @@ import javax.inject.Inject;
 //@With( {Resecure.class})
 public class Wizard extends Controller {
 
+  public static final String STEPS_KEY = "steps";
+  public static final String PROPERTIES_KEY = "properties";
+  public static final int LAST_STEP = 4;
+  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
   @Inject
   private static OfficeManager officeManager;
   @Inject
@@ -70,34 +78,6 @@ public class Wizard extends Controller {
   private static PersonManager personManager;
   @Inject
   private static UserManager userManager;
-
-  public static final String STEPS_KEY = "steps";
-  public static final String PROPERTIES_KEY = "properties";
-  public static final int LAST_STEP = 4;
-
-  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
-
-  public static class WizardStep {
-    public final int index;
-    public final String name;
-    public final String template;
-    public boolean completed = false;
-
-    WizardStep(String name, String template, int index) {
-      this.name = name;
-      this.template = template;
-      this.index = index;
-    }
-
-    public void complete() {
-      completed = true;
-    }
-
-    public static WizardStep of(String name, String template, int index) {
-      return new WizardStep(name, template, index);
-    }
-
-  }
 
   public static List<WizardStep> createSteps() {
     return ImmutableList
@@ -501,6 +481,28 @@ public class Wizard extends Controller {
     }
 
     redirect(Play.ctxPath + "/");
+  }
+
+  public static class WizardStep {
+    public final int index;
+    public final String name;
+    public final String template;
+    public boolean completed = false;
+
+    WizardStep(String name, String template, int index) {
+      this.name = name;
+      this.template = template;
+      this.index = index;
+    }
+
+    public static WizardStep of(String name, String template, int index) {
+      return new WizardStep(name, template, index);
+    }
+
+    public void complete() {
+      completed = true;
+    }
+
   }
 
 }

@@ -42,6 +42,13 @@ import java.util.Map;
 public class CompetenceManager {
 
 
+  private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
+  private final CompetenceCodeDao competenceCodeDao;
+  private final OfficeDao officeDao;
+  private final PersonDayDao personDayDao;
+  private final CompetenceDao competenceDao;
+  private final IWrapperFactory wrapperFactory;
+  private final PersonDayManager personDayManager;
   @Inject
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
                            OfficeDao officeDao, CompetenceDao competenceDao,
@@ -54,15 +61,6 @@ public class CompetenceManager {
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
   }
-
-  private final static Logger log = LoggerFactory.getLogger(CompetenceManager.class);
-
-  private final CompetenceCodeDao competenceCodeDao;
-  private final OfficeDao officeDao;
-  private final PersonDayDao personDayDao;
-  private final CompetenceDao competenceDao;
-  private final IWrapperFactory wrapperFactory;
-  private final PersonDayManager personDayManager;
 
   /**
    * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili

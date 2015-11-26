@@ -1,10 +1,9 @@
 package dao;
 
-import javax.persistence.EntityManager;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -12,6 +11,8 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import models.Badge;
 import models.BadgeReader;
 import models.query.QBadge;
+
+import javax.persistence.EntityManager;
 
 public class BadgeDao extends DaoBase {
 
@@ -21,8 +22,7 @@ public class BadgeDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param code il codice del badge.
+   * @param code        il codice del badge.
    * @param badgeReader opzionale
    * @return l'oggetto badge identificato dal codice code passato come parametro.
    */
@@ -39,7 +39,6 @@ public class BadgeDao extends DaoBase {
   }
 
   /**
-   * 
    * @param id identificativo del badge richiesto
    * @return il badge con identificativo passato come parametro.
    */

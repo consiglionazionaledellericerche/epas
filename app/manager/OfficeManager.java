@@ -6,12 +6,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
-import org.joda.time.LocalDate;
-
-import java.util.Set;
-
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+
 import models.ConfGeneral;
 import models.Office;
 import models.Role;
@@ -19,9 +16,17 @@ import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.Parameter;
 
+import org.joda.time.LocalDate;
+
+import java.util.Set;
+
 public class OfficeManager {
 
 
+  private final UsersRolesOfficesDao usersRolesOfficesDao;
+  private final RoleDao roleDao;
+  private final ConfGeneralManager confGeneralManager;
+  private final ConfYearManager confYearManager;
   @Inject
   public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
                        RoleDao roleDao, ConfGeneralManager confGeneralManager,
@@ -31,11 +36,6 @@ public class OfficeManager {
     this.confGeneralManager = confGeneralManager;
     this.confYearManager = confYearManager;
   }
-
-  private final UsersRolesOfficesDao usersRolesOfficesDao;
-  private final RoleDao roleDao;
-  private final ConfGeneralManager confGeneralManager;
-  private final ConfYearManager confYearManager;
 
   /**
    * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.

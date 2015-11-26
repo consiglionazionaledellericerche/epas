@@ -1,11 +1,10 @@
-
 package controllers;
 
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import controllers.Resecure.NoCheck;
+
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -14,13 +13,16 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.StampingDao;
 import dao.UsersRolesOfficesDao;
+
 import manager.SecureManager;
+
 import models.Office;
 import models.Role;
 import models.User;
+
 import org.joda.time.LocalDate;
 
-import play.Logger;
+import controllers.Resecure.NoCheck;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -28,24 +30,21 @@ import play.mvc.Http;
 
 import java.util.List;
 import java.util.Set;
-import javax.inject.Inject;
 
+import javax.inject.Inject;
 
 
 /**
  * @author cristian.
- *
  */
 public class RequestInit extends Controller {
 
   @Inject
-  static OfficeDao officeDao;
-  @Inject
   protected static SecureManager secureManager;
   @Inject
-  static PersonDao personDao;
+  static OfficeDao officeDao;
   @Inject
-  private static UsersRolesOfficesDao uroDao;
+  static PersonDao personDao;
   @Inject
   static QualificationDao qualificationDao;
   @Inject
@@ -56,152 +55,14 @@ public class RequestInit extends Controller {
   static RoleDao roleDao;
   @Inject
   static TemplateUtility templateUtility;
-
-  /**
-   * Oggetto che modella i permessi abilitati per l'user TODO: esportare questa classe in un nuovo
-   * file che modella la view.
-   * 
-   * @param user
-   */
-  public static class ItemsPermitted {
-
-    public boolean isEmployee = false;
-
-    public boolean isDeveloper = false;
-
-    public boolean viewPerson = false;
-    public boolean viewPersonDay = false;
-    public boolean viewOffice = false;
-    public boolean viewCompetence = false;
-    public boolean editCompetence = false;
-    public boolean uploadSituation = false;
-    public boolean viewWorkingTimeType = false;
-    public boolean editWorkingTimeType = false;
-    public boolean viewAbsenceType = false;
-    public boolean editAbsenceType = false;
-    public boolean viewCompetenceCode = false;
-    public boolean editCompetenceCode = false;
-
-
-    
-    public ItemsPermitted(Optional<User> user) {
-
-      if (!user.isPresent()) {
-        return;
-      }
-
-      List<Role> roles = uroDao.getUserRole(user.get());
-
-      for (Role role : roles) {
-
-        if (role.name.equals(Role.ADMIN)) {
-          this.viewPerson = true;
-          this.viewOffice = true;
-          this.viewWorkingTimeType = true;
-
-        } else if (role.name.equals(Role.DEVELOPER)) {
-          this.isDeveloper = true;
-          this.viewPerson = true;
-          this.viewOffice = true;
-          this.viewWorkingTimeType = true;
-
-        } else if (role.name.equals(Role.EMPLOYEE)) {
-          this.isEmployee = true;
-        }
-
-        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI)
-            || role.name.equals(Role.PERSONNEL_ADMIN)) {
-          this.viewPerson = true;
-          this.viewPersonDay = true;
-          this.viewOffice = true;
-          this.viewCompetence = true;
-          this.viewWorkingTimeType = true;
-          this.viewCompetenceCode = true;
-          this.viewAbsenceType = true;
-        }
-
-        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN)) {
-          this.editCompetence = true;
-          this.uploadSituation = true;
-          this.editCompetenceCode = true;
-          this.editAbsenceType = true;
-          this.editWorkingTimeType = true;
-        }
-      }
-    }
-
-    /**
-     * Se l'user può vedere il menu del Employee.
-     * 
-     * @return
-     */
-    public boolean isEmployeeVisible() {
-      return isEmployee;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Amministrazione.
-     * 
-     * @return
-     */
-    public boolean isAdministrationVisible() {
-
-      return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Configurazione.
-     * 
-     * @return
-     */
-    public boolean isConfigurationVisible() {
-
-      return viewOffice || viewWorkingTimeType || viewAbsenceType;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Tools.
-     * 
-     * @return
-     */
-    public boolean isToolsVisible() {
-      return isDeveloper;
-    }
-
-  }
-
-  /**
-   * Contiene i dati di sessione raccolti per il template.
-   * 
-   * @author alessandro
-   *
-   */
-  public static class CurrentData {
-    public final Integer year;
-    public final Integer month;
-    public final Integer day;
-    public final Long personId;
-    public final Long officeId;
-
-    CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId) {
-      this.year = year;
-      this.month = month;
-      this.day = day;
-      this.personId = personId;
-      this.officeId = officeId;
-    }
-
-    public String getMonthLabel() {
-      return Messages.get("Month." + month);
-    }
-  }
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
 
   @Before(priority = 1)
   static void injectUtility() {
 
     renderArgs.put("templateUtility", templateUtility);
   }
-
 
   @Before(priority = 1)
   @NoCheck
@@ -331,7 +192,7 @@ public class RequestInit extends Controller {
     try {
 
       Integer dayLenght =
-          new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
+              new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
       renderArgs.put("dayLenght", dayLenght);
     } catch (Exception e) {
 
@@ -349,12 +210,11 @@ public class RequestInit extends Controller {
 
 
     renderArgs.put("currentData", new CurrentData(year, month, day,
-        Long.valueOf(session.get("personSelected")), Long.valueOf(session.get("officeSelected"))));
+            Long.valueOf(session.get("personSelected")), Long.valueOf(session.get("officeSelected"))));
 
   }
 
   private static String computeActionSelected(String action) {
-
 
 
     if (action.startsWith("Stampings.")) {
@@ -691,6 +551,133 @@ public class RequestInit extends Controller {
     }
 
     return session.get("actionSelected");
+  }
+
+  /**
+   * Oggetto che modella i permessi abilitati per l'user TODO: esportare questa classe in un nuovo
+   * file che modella la view.
+   */
+  public static class ItemsPermitted {
+
+    public boolean isEmployee = false;
+
+    public boolean isDeveloper = false;
+
+    public boolean viewPerson = false;
+    public boolean viewPersonDay = false;
+    public boolean viewOffice = false;
+    public boolean viewCompetence = false;
+    public boolean editCompetence = false;
+    public boolean uploadSituation = false;
+    public boolean viewWorkingTimeType = false;
+    public boolean editWorkingTimeType = false;
+    public boolean viewAbsenceType = false;
+    public boolean editAbsenceType = false;
+    public boolean viewCompetenceCode = false;
+    public boolean editCompetenceCode = false;
+
+
+    public ItemsPermitted(Optional<User> user) {
+
+      if (!user.isPresent()) {
+        return;
+      }
+
+      List<Role> roles = uroDao.getUserRole(user.get());
+
+      for (Role role : roles) {
+
+        if (role.name.equals(Role.ADMIN)) {
+          this.viewPerson = true;
+          this.viewOffice = true;
+          this.viewWorkingTimeType = true;
+
+        } else if (role.name.equals(Role.DEVELOPER)) {
+          this.isDeveloper = true;
+          this.viewPerson = true;
+          this.viewOffice = true;
+          this.viewWorkingTimeType = true;
+
+        } else if (role.name.equals(Role.EMPLOYEE)) {
+          this.isEmployee = true;
+        }
+
+        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI)
+                || role.name.equals(Role.PERSONNEL_ADMIN)) {
+          this.viewPerson = true;
+          this.viewPersonDay = true;
+          this.viewOffice = true;
+          this.viewCompetence = true;
+          this.viewWorkingTimeType = true;
+          this.viewCompetenceCode = true;
+          this.viewAbsenceType = true;
+        }
+
+        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN)) {
+          this.editCompetence = true;
+          this.uploadSituation = true;
+          this.editCompetenceCode = true;
+          this.editAbsenceType = true;
+          this.editWorkingTimeType = true;
+        }
+      }
+    }
+
+    /**
+     * Se l'user può vedere il menu del Employee.
+     */
+    public boolean isEmployeeVisible() {
+      return isEmployee;
+    }
+
+    /**
+     * Se l'user ha i permessi per vedere Amministrazione.
+     */
+    public boolean isAdministrationVisible() {
+
+      return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
+    }
+
+    /**
+     * Se l'user ha i permessi per vedere Configurazione.
+     */
+    public boolean isConfigurationVisible() {
+
+      return viewOffice || viewWorkingTimeType || viewAbsenceType;
+    }
+
+    /**
+     * Se l'user ha i permessi per vedere Tools.
+     */
+    public boolean isToolsVisible() {
+      return isDeveloper;
+    }
+
+  }
+
+  /**
+   * Contiene i dati di sessione raccolti per il template.
+   *
+   * @author alessandro
+   */
+  public static class CurrentData {
+    public final Integer year;
+    public final Integer month;
+    public final Integer day;
+    public final Long personId;
+    public final Long officeId;
+
+    CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId) {
+      this.year = year;
+      this.month = month;
+      this.day = day;
+      this.personId = personId;
+      this.officeId = officeId;
+    }
+
+    public String getMonthLabel() {
+      return Messages.get("Month." + month);
+    }
   }
 
 }
