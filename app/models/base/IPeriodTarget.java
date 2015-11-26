@@ -6,6 +6,8 @@ import models.Contract;
 
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 /**
  * Il modello è il target del periodo. EX. Contract
  * 
@@ -14,5 +16,6 @@ import org.joda.time.LocalDate;
  * @param <T>
  */
 public interface IPeriodTarget<T extends BaseModel> {
-  
+
+  T getValue();
 }

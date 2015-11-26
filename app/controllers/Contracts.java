@@ -20,6 +20,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
+import manager.PeriodManager;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -27,6 +28,7 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
 import models.base.IPeriodModel;
+import models.base.IPeriodTarget;
 import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
@@ -62,6 +64,8 @@ public class Contracts extends Controller {
   private static ContractDao contractDao;
   @Inject
   private static IWrapperFactory wrapperFactory;
+  @Inject
+  private static PeriodManager periodManager;
 
   /**
    * I contratti del dipendente.
@@ -370,7 +374,7 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(cwtt.workingTimeType.office);
 
     //riepilogo delle modifiche
-    List<PeriodModel> periodRecaps = contractManager.changedRecap(contract, (IPeriodModel)cwtt, false); 
+    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false); 
     LocalDate recomputeFrom = null;
     LocalDate recomputeTo = wrappedContract.getContractDateInterval().getEnd();
     for (PeriodModel item : periodRecaps) {
@@ -397,7 +401,7 @@ public class Contracts extends Controller {
           recomputeFrom, recomputeTo, days);
     } else {
 
-      contractManager.changedRecap(contract, cwtt, true);
+      periodManager.updatePeriods(contract, cwtt, true);
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
       if (recomputeFrom != null) {

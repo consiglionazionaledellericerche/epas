@@ -2,20 +2,25 @@ package models.base;
 
 import com.google.common.base.Optional;
 
-import models.Contract;
 import models.ContractWorkingTimeType;
 
 import org.joda.time.LocalDate;
 
-import javax.persistence.MappedSuperclass;
+import play.data.validation.Required;
 
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 @MappedSuperclass
+public abstract class PeriodModel extends BaseModel implements IPeriodModel, Comparable<PeriodModel> {
+  
+  @Required
+  @Column(name = "begin_date")
+  public LocalDate beginDate;
 
-public abstract class PeriodModel extends BaseModel implements IPeriodModel,  Comparable<PeriodModel> {
+  @Column(name = "end_date")
+  public LocalDate endDate;
   
   /**
    * Contiene l'informazione se all'interno del periodo vi è la prima data da ricalcolare.
@@ -24,10 +29,52 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel,  Co
   public LocalDate recomputeFrom; 
   
   @Override
-  public int compareTo(PeriodModel o) {
-    if (getBegin().isBefore(o.getBegin())) {
+  public LocalDate getBegin() {
+    return this.beginDate;
+  }
+  
+  @Override
+  public void setBegin(LocalDate begin) {
+    this.beginDate = begin;
+    
+  }
+
+  @Override
+  public Optional<LocalDate> getEnd() {
+    return Optional.fromNullable(this.endDate);
+  }
+  
+
+  @Override
+  public PeriodModel newInstance() {
+    Class superClass = this.getClass();
+    Object o;
+    try {
+      o = superClass.newInstance();
+      return (PeriodModel)o;
+    } catch (InstantiationException | IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+    
+  }
+
+  // FIXME: non riesco a impostare il generico Optional<LocalDate>
+  @Override
+  public void setEnd(Optional end) {
+    if (end.isPresent()) {
+      this.endDate = (LocalDate)end.get();
+    } else {
+      this.endDate = null;
+    }
+  }
+  
+  @Override
+  public int compareTo(PeriodModel other) {
+    if (getBegin().isBefore(other.getBegin())) {
       return -1;
-    } else if (getBegin().isAfter(o.getBegin())) {
+    } else if (getBegin().isAfter(other.getBegin())) {
       return 1;
     } else {
       return 0;
