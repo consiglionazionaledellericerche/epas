@@ -1,25 +1,26 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+
+import dao.ContractDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
+
 import helpers.Web;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-import manager.ConfGeneralManager;
-import manager.ConsistencyManager;
+
 import manager.ContractManager;
-import manager.ContractStampProfileManager;
-import manager.ContractWorkingTimeTypeManager;
-import manager.EmailManager;
-import manager.OfficeManager;
-import manager.PersonManager;
-import manager.SecureManager;
-import manager.UserManager;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -34,23 +35,12 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import java.util.List;
 
-import dao.ContractDao;
-import dao.PersonChildrenDao;
-import dao.PersonDao;
-import dao.UserDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
 
 
 @Slf4j
@@ -71,8 +61,6 @@ public class Contracts extends Controller {
   private static ContractDao contractDao;
   @Inject
   private static IWrapperFactory wrapperFactory;
-  @Inject
-  private static ContractWorkingTimeTypeManager contractWorkingTimeTypeManager;
 
   /**
    * I contratti del dipendente.
