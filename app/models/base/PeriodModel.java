@@ -31,7 +31,11 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel, Com
       return 0;
     }
     return beginDate.compareTo(other.beginDate);
-
+  }
+  
+  @Override
+  public LocalDate calculatedEnd() {
+    return endDate;
   }
 
 }

@@ -93,11 +93,13 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
+  // TODO: trasformare in begin_date
   @Required
   @NotNull
   @Column(name = "begin_contract")
   public LocalDate beginContract;
 
+  // TODO: trasformare in end_date
   @Column(name = "expire_contract")
   public LocalDate expireContract;
 
@@ -126,10 +128,6 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   public boolean onCertificate = true;
 
-
-//	public void setSourceDateResidual(String date){
-//		this.sourceDateResidual = new LocalDate(date);
-//	}
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
@@ -165,10 +163,20 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
-    // TODO da implementare
-    return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
+     
+    if (type.equals(ContractWorkingTimeType.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
+    }
+    return null;
   }
 
+  @Override
+  public LocalDate calculatedEnd() {
+    if (this.endContract != null) {
+      return this.endContract;
+    } 
+    return this.expireContract;
+  }
 
 
 }
