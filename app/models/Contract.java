@@ -1,8 +1,12 @@
 package models;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 import models.base.BaseModel;
 
@@ -11,6 +15,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -27,7 +32,9 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
-import models.base.IPeriodTarget;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
 
 import play.data.validation.Required;
 
@@ -37,7 +44,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Table(name = "contracts")
-public class Contract extends BaseModel implements IPeriodTarget {
+public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
 
@@ -153,9 +160,14 @@ public class Contract extends BaseModel implements IPeriodTarget {
     return Lists.newArrayList(contractWorkingTimeType);
   }
 
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertiesInPeriodOwner#periods(java.lang.Object)
+   */
   @Override
-  public BaseModel getValue() {
-    return this;
+  public Collection<IPropertyInPeriod> periods(Object type) {
+    // TODO da implementare
+    return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
   }
 
 
