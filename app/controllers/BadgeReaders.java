@@ -16,7 +16,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 
 import manager.BadgeManager;
-import manager.SecureManager;
 
 import models.Badge;
 import models.BadgeReader;
@@ -37,12 +36,12 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
 
 import javax.inject.Inject;
 

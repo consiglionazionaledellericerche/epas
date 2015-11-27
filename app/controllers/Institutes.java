@@ -20,7 +20,7 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import javax.inject.Inject;
+import javax.inject.Inject;   
 
 @With({Resecure.class, RequestInit.class})
 public class Institutes extends Controller {

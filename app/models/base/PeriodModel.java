@@ -1,16 +1,14 @@
 package models.base;
 
-import com.google.common.base.Optional;
-
-import models.ContractWorkingTimeType;
-
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+
+import play.data.validation.Required;
 
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel implements IPeriodModel, Comparable<PeriodModel> {

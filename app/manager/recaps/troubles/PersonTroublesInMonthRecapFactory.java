@@ -1,14 +1,12 @@
 package manager.recaps.troubles;
 
-import dao.PersonDayInTroubleDao;
-
-import manager.PersonManager;
-
-import models.Person;
+import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 
-import javax.inject.Inject;
+import dao.PersonDayInTroubleDao;
+import manager.PersonManager;
+import models.Person;
 
 public class PersonTroublesInMonthRecapFactory {
 

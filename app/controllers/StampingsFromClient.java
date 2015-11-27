@@ -4,6 +4,8 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
+import controllers.Resecure.BasicAuth;
+
 import dao.PersonDao;
 
 import it.cnr.iit.epas.JsonStampingBinder;
@@ -16,11 +18,11 @@ import models.AbsenceType;
 import models.exports.AbsenceFromClient;
 import models.exports.StampingFromClient;
 
-import controllers.Resecure.BasicAuth;
 import play.data.binding.As;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import javax.inject.Inject;

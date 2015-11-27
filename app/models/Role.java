@@ -1,18 +1,18 @@
 package models;
 
-import com.google.common.collect.Lists;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
+import com.google.common.collect.Lists;
+
+import models.base.BaseModel;
 
 @Entity
 @Audited

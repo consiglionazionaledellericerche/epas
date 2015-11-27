@@ -1,23 +1,21 @@
 package manager;
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import models.Absence;
 import models.Office;
 import models.VacationPeriod;
 import models.enumerate.Parameter;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
 
 public class VacationManager {
 

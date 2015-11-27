@@ -1,9 +1,13 @@
 package manager;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
@@ -12,13 +16,7 @@ import models.ConfYear;
 import models.Office;
 import models.enumerate.Parameter;
 import models.query.QConfYear;
-
-import org.joda.time.LocalDate;
-
 import play.cache.Cache;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 public class ConfYearManager {
 

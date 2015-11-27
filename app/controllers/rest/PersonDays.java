@@ -1,37 +1,33 @@
 package controllers.rest;
 
-import com.google.common.base.Optional;
+import java.util.List;
 
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
-
-import helpers.JsonResponse;
-
-import it.cnr.iit.epas.DateUtility;
-
-import models.Absence;
-import models.Contract;
-import models.ContractMonthRecap;
-import models.Person;
-import models.PersonDay;
-import models.Stamping;
+import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
+import com.google.common.base.Optional;
 
 import cnr.sync.dto.PersonDayDTO;
 import cnr.sync.dto.PersonMonthDTO;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.Security;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.wrapper.IWrapperFactory;
+import helpers.JsonResponse;
+import it.cnr.iit.epas.DateUtility;
+import models.Absence;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Person;
+import models.PersonDay;
+import models.Stamping;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 public class PersonDays extends Controller {

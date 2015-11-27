@@ -1,12 +1,15 @@
 package dao;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -16,10 +19,6 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QUser;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * @author dario

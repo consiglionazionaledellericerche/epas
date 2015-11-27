@@ -5,6 +5,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import controllers.Resecure.NoCheck;
+
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -22,7 +24,6 @@ import models.User;
 
 import org.joda.time.LocalDate;
 
-import controllers.Resecure.NoCheck;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;

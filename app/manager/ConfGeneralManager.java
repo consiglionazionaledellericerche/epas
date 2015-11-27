@@ -1,9 +1,16 @@
 package manager;
 
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
@@ -12,16 +19,7 @@ import models.ConfGeneral;
 import models.Office;
 import models.enumerate.Parameter;
 import models.query.QConfGeneral;
-
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
-
 import play.cache.Cache;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 public class ConfGeneralManager {
 

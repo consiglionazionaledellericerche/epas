@@ -1,24 +1,23 @@
 package manager;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
+import java.util.Comparator;
+import java.util.List;
 
-import dao.AbsenceDao;
-
-import models.Absence;
-import models.AbsenceType;
-import models.Person;
-import models.enumerate.JustifiedTimeAtWork;
+import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.List;
+import com.google.common.base.Optional;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
-import javax.inject.Inject;
+import dao.AbsenceDao;
+import models.Absence;
+import models.AbsenceType;
+import models.Person;
+import models.enumerate.JustifiedTimeAtWork;
 
 public class YearlyAbsencesManager {
 

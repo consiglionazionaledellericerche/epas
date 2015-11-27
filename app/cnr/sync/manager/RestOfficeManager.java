@@ -1,28 +1,25 @@
 package cnr.sync.manager;
 
+import java.util.Collection;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
-import dao.OfficeDao;
-
-import manager.OfficeManager;
-
-import models.Institute;
-import models.Office;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cnr.sync.dto.InstituteDTO;
 import cnr.sync.dto.OfficeDTO;
+import dao.OfficeDao;
+import manager.OfficeManager;
+import models.Institute;
+import models.Office;
 import play.data.validation.Validation;
-
-import java.util.Collection;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 public class RestOfficeManager {
 
