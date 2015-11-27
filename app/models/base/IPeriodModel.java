@@ -20,8 +20,8 @@ public interface IPeriodModel extends Model {
   LocalDate getBeginDate();
 
   /**
-   * Imposta la fine del periodo.
-   * @param end la data di fine del periodo
+   * Imposta l'inizio del periodo.
+   * @param begin l'inizio del periodo
    */
   void setBeginDate(LocalDate begin);
 
@@ -38,5 +38,10 @@ public interface IPeriodModel extends Model {
    */
   void setEndDate(LocalDate end);
 
+  /**
+   * L'effettiva data fine nel caso di periodi complessi.
+   * @return
+   */
+  LocalDate calculatedEnd();
 
 }

@@ -48,9 +48,11 @@ public class PeriodManager {
     boolean recomputeBeginSet = false;
 
     //copia dei periodi ordinata
+    // TODO: periods() deve prendere il tipo quando ci sarà, e andranno modificate tutte 
+    // le implementazioni
     List<IPropertyInPeriod> originals = Lists.newArrayList();
     for (IPropertyInPeriod originalPeriod :
-        propertyInPeriod.getOwner().periods(propertyInPeriod.getType()) ) {
+        propertyInPeriod.getOwner().periods(propertyInPeriod.getClass()) ) {
       originals.add(originalPeriod);
     }
     Collections.sort(originals);
@@ -93,7 +95,6 @@ public class PeriodManager {
       //Parte iniziale old
       if (oldPeriod.getBeginDate().isBefore(periodIntersect.getBeginDate())) {
         IPropertyInPeriod periodOldBeginRemain = oldPeriod.newInstance();
-        //periodOldBeginRemain.setTarget(target);
         periodOldBeginRemain.setBeginDate(oldPeriod.getBeginDate());
         periodOldBeginRemain.setEndDate(periodIntersect.getBeginDate().minusDays(1));
         previous = insertIntoList(previous, periodOldBeginRemain, periodList);
