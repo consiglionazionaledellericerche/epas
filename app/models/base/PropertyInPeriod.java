@@ -30,9 +30,11 @@ public abstract class PropertyInPeriod extends PeriodModel implements IPropertyI
   // TODO da verificare
   public PropertyInPeriod newInstance() {
     Class<?> superClass = this.getClass();
-    Object obj = null;
+    PropertyInPeriod obj = null;
     try {
-      obj = superClass.newInstance();
+      obj = (PropertyInPeriod)superClass.newInstance();
+      obj.setOwner(this.getOwner());
+      obj.setValue(this.getValue());
       return (PropertyInPeriod)obj;
     } catch (InstantiationException | IllegalAccessException e) {
       // TODO Auto-generated catch block

@@ -17,6 +17,7 @@ import models.base.PeriodModel;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 
 import java.util.List;
 
@@ -86,10 +87,8 @@ public class PeriodManager {
       toRemove.add(oldPeriod);
 
       IPropertyInPeriod periodIntersect = propertyInPeriod.newInstance();
-      //periodIntersect.setTarget(target);
       periodIntersect.setBeginDate(intersection.getBegin());
       periodIntersect.setEndDate(intersection.getEnd());
-      periodIntersect.setValue(propertyInPeriod.getValue());
 
       //Parte iniziale old
       if (oldPeriod.getBeginDate().isBefore(periodIntersect.getBeginDate())) {
@@ -97,7 +96,6 @@ public class PeriodManager {
         //periodOldBeginRemain.setTarget(target);
         periodOldBeginRemain.setBeginDate(oldPeriod.getBeginDate());
         periodOldBeginRemain.setEndDate(periodIntersect.getBeginDate().minusDays(1));
-        periodOldBeginRemain.setValue(oldPeriod.getValue());
         previous = insertIntoList(previous, periodOldBeginRemain, periodList);
       }
 
@@ -110,9 +108,7 @@ public class PeriodManager {
       //Parte finale old
       if (periodIntersect.getEndDate() != null) {
         IPropertyInPeriod periodOldEndRemain = oldPeriod.newInstance();
-        //periodOldEndRemain.setTarget(target);
         periodOldEndRemain.setBeginDate((periodIntersect.getEndDate()).plusDays(1));
-        periodOldEndRemain.setValue(oldPeriod.getValue());
         if (oldPeriod.getEndDate() != null) {
           if (periodIntersect.getEndDate()
               .isBefore(oldPeriod.getEndDate())) {
@@ -128,21 +124,14 @@ public class PeriodManager {
     }
 
     if (persist) {
-      //JPA.em().refresh(propertyInPeriod.getParent());
       for (IPropertyInPeriod periodRemoved : toRemove) {
         periodRemoved._delete();
-        periodRemoved.getOwner().periods(periodRemoved.getType()).remove(periodRemoved);
       }
-      //propertyInPeriod.getParent()._save();
       for (IPropertyInPeriod periodInsert : periodList) {
         periodInsert._save();
-        periodInsert.getOwner().periods(periodInsert.getType()).add(periodInsert);
-        //propertyInPeriod.getParent()._save();
       }
       propertyInPeriod.getOwner()._save();
       JPA.em().flush();
-//      JPAPlugin.closeTx(false);
-//      JPAPlugin.startTx(false);
     }
 
 
