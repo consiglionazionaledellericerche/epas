@@ -46,8 +46,6 @@
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
     
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
-    <i class="icon-search icon-large"></i>
     <input type="hidden" name="officeId" value="${office.id}"/>
 
 #{/form}
@@ -56,17 +54,21 @@
 
  <section id="results"> 
 
-  <table class="table table-condensed table-hover center">
-	<tr>
-		<th>Nome</th>
-		#{list tableRecapCompetence.columnKeySet()}
-		<th>${_}</th>
-		#{/list}
-	</tr>
+  <table class="table table-condensed table-hover table-bordered center" datatable >
+		<thead>
+		<tr>
+			<th>Nome</th>
+			#{list tableRecapCompetence.columnKeySet()}
+			<th>${_}</th>
+			#{/list}
+		</tr>
+		</thead>
+		<tbody>
+
 	#{list tableRecapCompetence.rowMap().entrySet(),as:'entry'}
 	<tr>
 		<td>
-		  <a data-toggle="modal" href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-modal=".my-modal"> 
+		  <a href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-async-modal="#updateCompetenceModal">
 		    ${entry.getKey().name} ${entry.getKey().surname}
 		  </a>
 		</td>
@@ -77,10 +79,11 @@
 		#{/list}
 	</tr>	
 	#{/list}
+		</tbody>
   </table>
  </section> 
 </div>
 
-#{include '_myModal.html' /}
+<div id="updateCompetenceModal" class="modal container" tabindex="-1"></div>
 
 

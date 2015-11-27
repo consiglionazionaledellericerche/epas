@@ -1,12 +1,17 @@
-
 package models;
 
 import com.google.common.collect.Sets;
+
 import models.base.BaseModel;
+
 import net.sf.oval.constraint.NotNull;
+
 import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 import play.data.validation.Unique;
+
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,13 +21,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import java.util.Set;
-
 
 
 /**
  * @author cristian.
- *
  */
 @Entity
 @Table(name = "badge_readers")
@@ -44,6 +46,7 @@ public class BadgeReader extends BaseModel {
   @JoinColumn(name = "user_id")
   public User user;
 
+
   @OrderBy("code ASC")
   @OneToMany(mappedBy = "badgeReader")
   public Set<Badge> badges = Sets.newHashSet();
@@ -53,6 +56,7 @@ public class BadgeReader extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "office_owner_id")
   public Office owner;
+
 
 
 

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package models.exports;
 
@@ -10,13 +10,12 @@ import java.util.List;
 
 /**
  * @author arianna
- *
  */
 public class PersonsList {
 
-	public List<Person> persons = new ArrayList<Person>();
-	
-	public PersonsList(List<Person> persons) {
-		this.persons = persons;
-	}
+  public List<Person> persons = new ArrayList<Person>();
+
+  public PersonsList(List<Person> persons) {
+    this.persons = persons;
+  }
 }

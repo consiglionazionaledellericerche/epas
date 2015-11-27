@@ -1,30 +1,36 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+
+import dao.ContractDao;
+import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
+
 import helpers.Web;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-import manager.ConfGeneralManager;
-import manager.ConsistencyManager;
+
 import manager.ContractManager;
-import manager.ContractStampProfileManager;
-import manager.ContractWorkingTimeTypeManager;
-import manager.EmailManager;
-import manager.OfficeManager;
-import manager.PersonManager;
-import manager.SecureManager;
-import manager.UserManager;
+import manager.PeriodManager;
+import manager.recaps.recomputation.RecomputeRecap;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
+import models.base.IPeriodModel;
+import models.base.IPeriodTarget;
+import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -36,27 +42,15 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import java.util.List;
 
-import dao.ContractDao;
-import dao.PersonChildrenDao;
-import dao.PersonDao;
-import dao.UserDao;
-import dao.WorkingTimeTypeDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
+import javax.inject.Inject;
 
 
 @Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Contracts extends Controller {
-  
+
   private final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYY");
 
   @Inject
@@ -72,10 +66,11 @@ public class Contracts extends Controller {
   @Inject
   private static IWrapperFactory wrapperFactory;
   @Inject
-  private static ContractWorkingTimeTypeManager contractWorkingTimeTypeManager;
+  private static PeriodManager periodManager;
 
   /**
    * I contratti del dipendente.
+   *
    * @param personId personId
    */
   public static void personContracts(final Long personId) {
@@ -86,19 +81,20 @@ public class Contracts extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
 
-    List<IWrapperContract> contractList = 
-        FluentIterable.from(contractDao.getPersonContractList(person))
-            .transform(wrapperFunctionFactory.contract()).toList();
+    List<IWrapperContract> contractList =
+            FluentIterable.from(contractDao.getPersonContractList(person))
+                    .transform(wrapperFunctionFactory.contract()).toList();
 
     List<ContractStampProfile> contractStampProfileList = contractDao
-        .getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
+            .getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
 
 
     render(person, contractList, contractStampProfileList);
   }
-  
+
   /**
    * Edit date e on certificate contratto.
+   *
    * @param contractId contractId
    */
   public static void edit(Long contractId) {
@@ -116,21 +112,22 @@ public class Contracts extends Controller {
     boolean onCertificate = contract.onCertificate;
 
     render(person, contract, wrappedContract, beginContract, expireContract, endContract,
-        onCertificate);
+            onCertificate);
   }
 
   /**
    * Aggiornamento date e on certificate contratto.
-   * @param contract contract
-   * @param beginContract inizio
+   *
+   * @param contract       contract
+   * @param beginContract  inizio
    * @param expireContract scadenza
-   * @param endContract terminazione
-   * @param onCertificate in attestati
-   * @param confirmed step di conferma
+   * @param endContract    terminazione
+   * @param onCertificate  in attestati
+   * @param confirmed      step di conferma
    */
   public static void update(@Valid Contract contract, @Required LocalDate beginContract,
-      @Valid LocalDate expireContract, @Valid LocalDate endContract, boolean onCertificate,
-      boolean confirmed) {
+                            @Valid LocalDate expireContract, @Valid LocalDate endContract, boolean onCertificate,
+                            boolean confirmed) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -139,9 +136,9 @@ public class Contracts extends Controller {
 
     if (!validation.hasErrors()) {
       if (contract.sourceDateResidual != null
-          && contract.sourceDateResidual.isBefore(beginContract)) {
+              && contract.sourceDateResidual.isBefore(beginContract)) {
         validation.addError("beginContract",
-            "non può essere successiva alla data di inizializzazione");
+                "non può essere successiva alla data di inizializzazione");
       }
       if (expireContract != null && expireContract.isBefore(beginContract)) {
         validation.addError("expireContract", "non può precedere l'inizio del contratto.");
@@ -162,7 +159,7 @@ public class Contracts extends Controller {
       log.warn("validation errors: {}", validation.errorsMap());
 
       render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-          onCertificate);
+              onCertificate);
     }
 
     // Salvo la situazione precedente
@@ -175,9 +172,9 @@ public class Contracts extends Controller {
     contract.onCertificate = onCertificate;
     if (!contractManager.isProperContract(contract)) {
       validation.addError("contract.crossValidationFailed",
-          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
+              "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-          onCertificate);
+              onCertificate);
     }
 
     //riepilogo delle modifiche
@@ -204,7 +201,7 @@ public class Contracts extends Controller {
         }
         // allungo ma se inglobo passato allora ricalcolo
         if (newInterval.getEnd().isAfter(previousInterval.getEnd())
-            && previousInterval.getEnd().isBefore(LocalDate.now())) {
+                && previousInterval.getEnd().isBefore(LocalDate.now())) {
           incrementEndInPast = true;
           recomputeFrom = previousInterval.getEnd();
         }
@@ -230,23 +227,24 @@ public class Contracts extends Controller {
       }
       response.status = 400;
       render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-          onCertificate, changeBegin, reduceEnd, incrementEndInPast, initMissing, 
-          recomputeFrom, recomputeTo, days);
+              onCertificate, changeBegin, reduceEnd, incrementEndInPast, initMissing,
+              recomputeFrom, recomputeTo, days);
     } else {
-      if (recomputeFrom != null) {  
+      if (recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeFrom, false);
       }
       boolean success = true;
       confirmed = false;
       Person person = contract.person;
       render("@edit", person, contract, wrappedContract, beginContract, expireContract, endContract,
-          onCertificate, success);
+              onCertificate, success);
     }
 
   }
 
   /**
    * Nuovo contratto.
+   *
    * @param person person
    */
   public static void insert(Person person) {
@@ -263,8 +261,9 @@ public class Contracts extends Controller {
 
   /**
    * Salva nuovo contratto.
+   *
    * @param contract contract
-   * @param wtt il tipo orario
+   * @param wtt      il tipo orario
    */
   public static void save(@Valid Contract contract, @Valid WorkingTimeType wtt) {
 
@@ -277,7 +276,7 @@ public class Contracts extends Controller {
     if (!validation.hasErrors()) {
 
       if (contract.expireContract != null
-          && contract.expireContract.isBefore(contract.beginContract)) {
+              && contract.expireContract.isBefore(contract.beginContract)) {
         validation.addError("contract.expireContract", "non può precedere l'inizio del contratto.");
 
       } else if (!contractManager.properContractCreate(contract, wtt)) {
@@ -306,7 +305,7 @@ public class Contracts extends Controller {
 
   /**
    * Rimozione contratto.
-   * 
+   *
    * @param contractId contractId
    */
   public static void delete(Long contractId) {
@@ -336,34 +335,34 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    
+
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
     cwtt.contract = contract;
 
     render(wrappedContract, contract, cwtt);
   }
 
-  public static void saveContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt, 
-      boolean confirmed) {
-    
+  public static void saveContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt,
+                                                 boolean confirmed) {
+
     notFoundIfNull(cwtt);
     notFoundIfNull(cwtt.contract);
-    
+
     rules.checkIfPermitted(cwtt.contract.person.office);
-       
+
     IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
     Contract contract = cwtt.contract;
-    
+
     if (!validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(cwtt.beginDate, wrappedContract.getContractDateInterval())) {
         validation.addError("cwtt.beginDate", "deve appartenere al contratto");
       }
-      if (cwtt.endDate != null && 
-          !DateUtility.isDateIntoInterval(cwtt.endDate, wrappedContract.getContractDateInterval())) {
+      if (cwtt.endDate != null &&
+              !DateUtility.isDateIntoInterval(cwtt.endDate, wrappedContract.getContractDateInterval())) {
         validation.addError("cwtt.endDate", "deve appartenere al contratto");
       }
     }
-    
+
     if (validation.hasErrors()) {
       response.status = 400;
       flash.error(Web.msgHasErrors());
@@ -372,54 +371,84 @@ public class Contracts extends Controller {
 
       render("@updateContractWorkingTimeType", cwtt, contract);
     }
-    
+
     rules.checkIfPermitted(cwtt.workingTimeType.office);
-    
+
     //riepilogo delle modifiche
-    List<ContractWorkingTimeType> cwttRecaps = contractManager.changedRecap(contract, cwtt, false);
-    LocalDate recomputeFrom = null;
-    LocalDate recomputeTo = wrappedContract.getContractDateInterval().getEnd();
-    for (ContractWorkingTimeType item : cwttRecaps) {
-      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
-        recomputeFrom = item.recomputeFrom;
-      }
-    }
-    if (recomputeFrom != null) {
-      if (recomputeTo.isAfter(LocalDate.now())) {
-        recomputeTo = LocalDate.now();
-      }
-      if (recomputeFrom.isBefore(wrappedContract.getContractDatabaseInterval().getBegin())) {
-        recomputeFrom = wrappedContract.getContractDatabaseInterval().getBegin();
-      }
-    }
+    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
+    RecomputeRecap recomputeRecap = 
+        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
     
     if (!confirmed) {
       confirmed = true;
-      int days = 0;
-      if (recomputeFrom != null) {
-        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
-      }
-      render("@updateContractWorkingTimeType", contract, cwtt, cwttRecaps, confirmed, 
-          recomputeFrom, recomputeTo, days);
+      render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
     } else {
-      
-      contractManager.changedRecap(contract, cwtt, true);
+
+      periodManager.updatePeriods(contract, cwtt, true);
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
-      if (recomputeFrom != null) {
-        contractManager.recomputeContract(contract, 
-            Optional.fromNullable(recomputeFrom), false, false);
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
       }
       //todo il messaggio di conferma nel flash.
       updateContractWorkingTimeType(contract.id);
     }
 
   }
+  
+  /**
+   * Costruisce il recomputeRecap.
+   * 
+   * @param begin begin del target
+   * @param end end del target
+   * @param periods i nuovi periods del target
+   * @return
+   */
+  private static RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
+      List<PeriodModel> periods) {
+    
+    RecomputeRecap recomputeRecap = new RecomputeRecap();
+    
+    recomputeRecap.needRecomputation = true;
+    
+    recomputeRecap.periods = periods;
+    recomputeRecap.recomputeFrom = LocalDate.now().plusDays(1);
+    recomputeRecap.recomputeTo = end;
+    for (PeriodModel item : periods) {
+      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
+        recomputeRecap.recomputeFrom = item.recomputeFrom;
+      }
+    }
+    
+    if (recomputeRecap.recomputeTo.isPresent()){
+      if(recomputeRecap.recomputeTo.get().isAfter(LocalDate.now())) {
+        recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
+      }
+      if (recomputeRecap.recomputeFrom.isBefore(begin)) {
+        recomputeRecap.recomputeFrom = begin;
+      }
+    }
+    
+    if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+      recomputeRecap.needRecomputation = false;
+    }
+    
+    
+    if (recomputeRecap.recomputeFrom != null) {
+      recomputeRecap.days = DateUtility.daysInInterval(new DateInterval(recomputeRecap.recomputeFrom,
+          recomputeRecap.recomputeTo));
+    }
+    
+    return recomputeRecap;
+    
+  }
 
   /**
    * Pagina aggiornamento dati iniziali del contratto.
-   * 
-   * @param contractId
    */
   public static void updateSourceContract(Long contractId) {
 
@@ -442,13 +471,14 @@ public class Contracts extends Controller {
   }
 
   /**
-   * Salva l'inizializzazione. 
-   * @param contract contract
+   * Salva l'inizializzazione.
+   *
+   * @param contract           contract
    * @param sourceDateResidual nuova data inizializzazione
-   * @param confirmed step di conferma ricevuta
+   * @param confirmed          step di conferma ricevuta
    */
   public static void saveResidualSourceContract(@Valid final Contract contract,
-      @Valid final LocalDate sourceDateResidual, boolean confirmed) {
+                                                @Valid final LocalDate sourceDateResidual, boolean confirmed) {
 
     notFoundIfNull(contract);
 
@@ -459,19 +489,19 @@ public class Contracts extends Controller {
     IWrapperPerson wPerson = wrapperFactory.create(contract.person);
 
     if (!validation.hasErrors()) {
-      if (sourceDateResidual != null && 
-          sourceDateResidual.isBefore(wContract.dateForInitialization())) {
+      if (sourceDateResidual != null &&
+              sourceDateResidual.isBefore(wContract.dateForInitialization())) {
         validation.addError("sourceDateResidual",
-            "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
+                "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
       }
       if (sourceDateResidual != null &&
-          sourceDateResidual.isAfter(wContract.getContractDateInterval().getEnd())) {
+              sourceDateResidual.isAfter(wContract.getContractDateInterval().getEnd())) {
         validation.addError("sourceDateResidual",
-            "deve essere precedente o uguale alla fine del contratto");
+                "deve essere precedente o uguale alla fine del contratto");
       }
       if (sourceDateResidual == null && contract.sourceDateResidual == null) {
         validation.addError("sourceDateResidual",
-            "per definire l'inizializzazione è obbligatorio questo campo");
+                "per definire l'inizializzazione è obbligatorio questo campo");
       }
     }
 
@@ -483,7 +513,7 @@ public class Contracts extends Controller {
 
       render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateResidual);
     }
-    
+
     LocalDate recomputeFrom = sourceDateResidual;
     LocalDate recomputeTo = wContract.getContractDateInterval().getEnd();
     if (recomputeTo.isAfter(LocalDate.now())) {
@@ -507,7 +537,7 @@ public class Contracts extends Controller {
           days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
         }
         render("@updateSourceContract", contract, wContract, wPerson, wOffice,
-          confirmed, removeMandatory, removeUnnecessary, recomputeFrom, recomputeTo, days);
+                confirmed, removeMandatory, removeUnnecessary, recomputeFrom, recomputeTo, days);
       } else {
         //calcoli
       }
@@ -524,30 +554,31 @@ public class Contracts extends Controller {
       } else {
         sourceUpdate = true;
       }
-      
+
       render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateResidual,
-          confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
-    
+              confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
+
     } else {
       contract.sourceDateResidual = sourceDateResidual;
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
       boolean success = true;
       confirmed = false;
-      render("@updateSourceContract", sourceDateResidual, contract, confirmed, 
-          success, wContract, wOffice, wPerson);
+      render("@updateSourceContract", sourceDateResidual, contract, confirmed,
+              success, wContract, wOffice, wPerson);
     }
 
   }
 
   /**
-   * Salva l'inizializzazione. 
-   * @param contract contract
+   * Salva l'inizializzazione.
+   *
+   * @param contract             contract
    * @param sourceDateMealTicket nuova data inizializzazione
-   * @param confirmed step di conferma ricevuta
+   * @param confirmed            step di conferma ricevuta
    */
   public static void saveMealTicketSourceContract(@Valid final Contract contract,
-      @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmed) {
+                                                  @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmed) {
 
     notFoundIfNull(contract);
 
@@ -563,7 +594,7 @@ public class Contracts extends Controller {
     if (!validation.hasErrors()) {
       if (sourceDateMealTicket.isBefore(wContract.dateForInitialization())) {
         validation.addError("sourceDateResidual",
-            "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
+                "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
       }
     }
 
@@ -591,21 +622,21 @@ public class Contracts extends Controller {
       } else {
         sourceUpdate = true;
       }
-      
+
       render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateMealTicket,
-          confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, months);
-    
-    } 
-        
+              confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, months);
+
+    }
+
     // Conferma ricevuta
     contract.sourceDateMealTicket = sourceDateMealTicket;
     contractManager.setSourceContractProperly(contract);
     contractManager.properContractUpdate(contract, recomputeFrom, true);
     boolean success = true;
     confirmed = false;
-    render("@updateSourceContract", sourceDateMealTicket, contract, confirmed, 
-        success, wContract, wOffice, wPerson);
+    render("@updateSourceContract", sourceDateMealTicket, contract, confirmed,
+            success, wContract, wOffice, wPerson);
   }
 
-  
+
 }

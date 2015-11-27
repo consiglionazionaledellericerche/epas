@@ -4,8 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 import java.util.List;
 import java.util.Set;
@@ -23,6 +27,8 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
+import models.base.IPeriodTarget;
+
 import play.data.validation.Required;
 
 
@@ -31,7 +37,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Table(name = "contracts")
-public class Contract extends BaseModel {
+public class Contract extends BaseModel implements IPeriodTarget {
 
   private static final long serialVersionUID = -4472102414284745470L;
 
@@ -107,21 +113,19 @@ public class Contract extends BaseModel {
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
   public List<MealTicket> mealTickets;
-
-  @Transient
-  private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
-
-
-//	public void setSourceDateResidual(String date){
-//		this.sourceDateResidual = new LocalDate(date);
-//	}
-
   /**
    * I contratti con onCertificate = true sono quelli dei dipendenti CNR e corrispondono a quelli
    * con l'obbligo dell'attestato di presenza da inviare a Roma
    */
   @Required
   public boolean onCertificate = true;
+
+
+//	public void setSourceDateResidual(String date){
+//		this.sourceDateResidual = new LocalDate(date);
+//	}
+  @Transient
+  private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
   @Override
   public String toString() {
@@ -144,10 +148,14 @@ public class Contract extends BaseModel {
 
   /**
    * Conversione della lista dei contractWorkingtimeType da Set a List.
-   * @return
    */
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
     return Lists.newArrayList(contractWorkingTimeType);
+  }
+
+  @Override
+  public Contract getValue() {
+    return this;
   }
 
 }

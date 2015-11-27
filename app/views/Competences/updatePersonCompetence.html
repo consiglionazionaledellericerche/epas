@@ -1,30 +1,35 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Abilita competenze per ' + person.name + ' ' + person.surname /}
+#{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname }
+<div id="updateCompetenceModal" class="col-xs-8 col-xs-offset-2">
+  #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#updateCompetenceModal'}
 
-<div class="container-fluid center">
-#{form @Competences.saveNewCompetenceConfiguration()}
-<input type="hidden" name="personId" value="${person.id}"/>
-<table class="table table-condensed table-hover table-form">
+  <input type="hidden" name="personId" value="${person.id}"/>
+  <table class="table table-striped table-hover" >
 
-#{list items:pcr.totalCompetenceCode, as:'comp'}
-<tr>
-	<td>
-	#{if pcr.personActiveCompetence.contains(comp)}
-		Sì <input type="radio" value="true" name="competence.${comp.code}" checked="checked"/> 
-		No <input type="radio" value="false" name="competence.${comp.code}"/>
-	#{/if}
-	#{else}
-		Sì <input type="radio" value="true" name="competence.${comp.code}"/>
-		No <input type="radio" value="false" checked="checked" name="competence.${comp.code}"/>
-	#{/else}
-	</td>
-	<td>${comp.description}</td>
-</tr>
-#{/list}
+    #{list items:pcr.totalCompetenceCode, as:'comp'}
+    <tr>
+      <td>${comp.description}</td>
+      <td>
+        #{if pcr.personActiveCompetence.contains(comp)}
+        Sì <input type="radio" value="true" name="competence.${comp.code}" checked="checked"/>
+        No <input type="radio" value="false" name="competence.${comp.code}"/>
+        #{/if}
+        #{else}
+        Sì <input type="radio" value="true" name="competence.${comp.code}"/>
+        No <input type="radio" value="false" checked="checked" name="competence.${comp.code}"/>
+        #{/else}
+      </td>
 
-</table>
-  <div class="buttoncenter">
-    <input type="submit" class="btn btn-primary"id="saveCompetence" value="Ok"/>
-  </div>
-#{/form}
+    </tr>
+    #{/list}
+
+  </table>
+
+  #{b.buttons center:true}
+  #{b.submit 'Ok'/}
+  #{/b.buttons}
+
+  #{/form}
 </div>
+#{/modalAsync}

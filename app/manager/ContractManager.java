@@ -17,6 +17,8 @@ import models.ContractWorkingTimeType;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.base.IPeriodModel;
+import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
@@ -30,9 +32,8 @@ import javax.inject.Inject;
 
 /**
  * Manager per Contract.
- * 
- * @author alessandro
  *
+ * @author alessandro
  */
 public class ContractManager {
 
@@ -43,16 +44,16 @@ public class ContractManager {
 
   /**
    * Constructor.
-   * 
+   *
    * @param confGeneralManager {@link ConfGeneralManager}
    * @param consistencyManager {@link ConsistencyManager}
-   * @param vacationCodeDao {@link VacationCodeDao}
-   * @param wrapperFactory {@link IWrapperFactory}
+   * @param vacationCodeDao    {@link VacationCodeDao}
+   * @param wrapperFactory     {@link IWrapperFactory}
    */
   @Inject
   public ContractManager(final ConfGeneralManager confGeneralManager,
-      final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
-      final IWrapperFactory wrapperFactory) {
+                         final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
+                         final IWrapperFactory wrapperFactory) {
 
     this.confGeneralManager = confGeneralManager;
     this.consistencyManager = consistencyManager;
@@ -62,6 +63,7 @@ public class ContractManager {
 
   /**
    * Check di contratto valido con gli altri contratti della persona.
+   *
    * @param contract contract
    * @return esito
    */
@@ -75,7 +77,7 @@ public class ContractManager {
       }
 
       if (DateUtility.intervalIntersection(contractInterval,
-          wrapperFactory.create(c).getContractDateInterval()) != null) {
+              wrapperFactory.create(c).getContractDateInterval()) != null) {
         return false;
       }
     }
@@ -84,14 +86,14 @@ public class ContractManager {
 
   /**
    * Check di date valide singolo contratto.
-   * 
+   *
    * @param contract contract
    * @return esito
    */
   public final boolean contractCrossFieldValidation(final Contract contract) {
 
     if (contract.expireContract != null
-        && contract.expireContract.isBefore(contract.beginContract)) {
+            && contract.expireContract.isBefore(contract.beginContract)) {
       return false;
     }
 
@@ -100,7 +102,7 @@ public class ContractManager {
     }
 
     if (contract.expireContract != null && contract.endContract != null
-        && contract.expireContract.isBefore(contract.endContract)) {
+            && contract.expireContract.isBefore(contract.endContract)) {
       return false;
     }
 
@@ -113,9 +115,9 @@ public class ContractManager {
 
   /**
    * Costruisce il contratto in modo sicuro e effettua il calcolo.
-   * 
+   *
    * @param contract contract
-   * @param wtt il tipo orarii
+   * @param wtt      il tipo orarii
    * @return esito costruzione
    */
   public final boolean properContractCreate(final Contract contract, final WorkingTimeType wtt) {
@@ -162,13 +164,13 @@ public class ContractManager {
 
   /**
    * Costruisce il contratto in modo sicuro e effettua il calcolo dalla data from.
-   * 
-   * @param contract contract
-   * @param from da quando effettuare il ricalcolo.
+   *
+   * @param contract   contract
+   * @param from       da quando effettuare il ricalcolo.
    * @param onlyRecaps ricalcolare solo i riepiloghi mensili.
    */
-  public final void properContractUpdate(final Contract contract, final LocalDate from, 
-      final boolean onlyRecaps) {
+  public final void properContractUpdate(final Contract contract, final LocalDate from,
+                                         final boolean onlyRecaps) {
 
     buildVacationPeriods(contract);
     updateContractWorkingTimeType(contract);
@@ -176,25 +178,26 @@ public class ContractManager {
 
     recomputeContract(contract, Optional.fromNullable(from), true, onlyRecaps);
   }
-  
+
   /**
    * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
-   * 
+   *
    * @param contract contratto su cui effettuare il ricalcolo.
    * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. Se null ricalcola
    *        dall'inizio del contratto. newContract: indica se il ricalcolo è relativo ad un nuvo
    *        contratto ad uno già esistente
    */
-  
+
   /**
    * Ricalcolo del contratto a partire dalla data from.
-   * @param contract contract
-   * @param dateFrom dateFrom
+   *
+   * @param contract    contract
+   * @param dateFrom    dateFrom
    * @param newContract se il contratto è nuovo (non ho strutture da ripulire)
-   * @param onlyRecaps ricalcolare solo i riepiloghi mensili.
+   * @param onlyRecaps  ricalcolare solo i riepiloghi mensili.
    */
   public final void recomputeContract(final Contract contract, final Optional<LocalDate> dateFrom,
-      final boolean newContract, final boolean onlyRecaps) {
+                                      final boolean newContract, final boolean onlyRecaps) {
 
     IWrapperContract wContract = wrapperFactory.create(contract);
     LocalDate startDate = wContract.getContractDatabaseInterval().getBegin();
@@ -222,7 +225,7 @@ public class ContractManager {
   }
 
   private VacationPeriod buildVacationPeriod(final Contract contract,
-      final VacationCode vacationCode, final LocalDate beginFrom, final LocalDate endTo) {
+                                             final VacationCode vacationCode, final LocalDate beginFrom, final LocalDate endTo) {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
     vacationPeriod.contract = contract;
@@ -236,8 +239,6 @@ public class ContractManager {
   /**
    * Costruisce la struttura dei periodi ferie associati al contratto applicando la normativa
    * vigente.
-   * 
-   * @param contract
    */
   public void buildVacationPeriods(final Contract contract) {
 
@@ -260,9 +261,9 @@ public class ContractManager {
       // Tempo indeterminato, creo due vacation 3 anni più infinito
 
       contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginContract,
-          contract.beginContract.plusYears(3).minusDays(1)));
+              contract.beginContract.plusYears(3).minusDays(1)));
       contract.vacationPeriods
-          .add(buildVacationPeriod(contract, v28, contract.beginContract.plusYears(3), null));
+              .add(buildVacationPeriod(contract, v28, contract.beginContract.plusYears(3), null));
 
     } else {
 
@@ -271,15 +272,15 @@ public class ContractManager {
         // Tempo determinato più lungo di 3 anni
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginContract,
-            contract.beginContract.plusYears(3).minusDays(1)));
+                contract.beginContract.plusYears(3).minusDays(1)));
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v28,
-            contract.beginContract.plusYears(3), contract.expireContract));
+                contract.beginContract.plusYears(3), contract.expireContract));
 
       } else {
 
         contract.vacationPeriods.add(
-            buildVacationPeriod(contract, v26, contract.beginContract, contract.expireContract));
+                buildVacationPeriod(contract, v26, contract.beginContract, contract.expireContract));
       }
     }
   }
@@ -298,7 +299,7 @@ public class ContractManager {
     for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
       DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
       if (DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(),
-          cwttInterval) == null) {
+              cwttInterval) == null) {
         toDelete.add(cwtt);
       }
     }
@@ -310,7 +311,7 @@ public class ContractManager {
 
     // Conversione a List per avere il metodo get()
     final List<ContractWorkingTimeType> cwttList =
-        Lists.newArrayList(contract.contractWorkingTimeType);
+            Lists.newArrayList(contract.contractWorkingTimeType);
 
     // Sistemo il primo
     ContractWorkingTimeType first = cwttList.get(0);
@@ -331,7 +332,6 @@ public class ContractManager {
    * dei periodi di stampProfile. (1)Eliminare i periodi non più appartenenti al contratto
    * (2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
    * (3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
-   * 
    */
   private void updateContractStampProfile(final Contract contract) {
     // Aggiornare i periodi stampProfile
@@ -341,7 +341,7 @@ public class ContractManager {
     for (ContractStampProfile csp : contract.contractStampProfile) {
       DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
       if (DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(),
-          cspInterval) == null) {
+              cspInterval) == null) {
         toDelete.add(csp);
       }
     }
@@ -370,13 +370,13 @@ public class ContractManager {
 
   /**
    * Il ContractWorkingTimeType associato ad un contratto in una specifica data.
-   * 
+   *
    * @param contract il contratto di cui prelevare il ContractWorkingTimeType
-   * @param date la data in cui controllare il ContractWorkingTimeType
+   * @param date     la data in cui controllare il ContractWorkingTimeType
    * @return il ContractWorkingTimeType di un contratto ad una data specifica
    */
   public final ContractWorkingTimeType getContractWorkingTimeTypeFromDate(final Contract contract,
-      final LocalDate date) {
+                                                                          final LocalDate date) {
 
     for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
 
@@ -391,9 +391,6 @@ public class ContractManager {
 
   /**
    * Conversione della lista dei contractStampProfile da Set a List.
-   * 
-   * @param contract
-   * @return
    */
   public final List<ContractStampProfile> getContractStampProfileAsList(final Contract contract) {
 
@@ -402,7 +399,7 @@ public class ContractManager {
 
   /**
    * Sistema l'inizializzazione impostando i valori corretti se mancanti.
-   * 
+   *
    * @param contract contract
    */
   public final void setSourceContractProperly(final Contract contract) {
@@ -436,6 +433,7 @@ public class ContractManager {
 
   /**
    * Azzera l'inizializzazione del contratto.
+   *
    * @param contract contract
    */
   public final void cleanResidualInitialization(final Contract contract) {
@@ -450,150 +448,11 @@ public class ContractManager {
 
   /**
    * Azzera l'inizializzazione del buono pasto.
+   *
    * @param contract contract
    */
   public final void cleanMealTicketInitialization(final Contract contract) {
     contract.sourceDateMealTicket = contract.sourceDateResidual;
   }
-  
-  /**
-   * L'impatto di un nuovo periodo tipo orario sul contratto.
-   * @param contract
-   * @param cwtt
-   * @return
-   */
-  public final List<ContractWorkingTimeType> changedRecap(Contract contract, 
-      ContractWorkingTimeType cwtt, boolean persist) {
-    
-    boolean recomputeBeginSet = false;
-    
-    //copia di sicurezza
-    List<ContractWorkingTimeType> originals = Lists.newArrayList();
-    for (ContractWorkingTimeType cwttOriginal :contract.contractWorkingTimeType) {
-      originals.add(cwttOriginal);
-    }
-    Collections.sort(originals);
-    
-    //riepilogo delle modifiche
-    DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-    List<ContractWorkingTimeType> cwttList = Lists.newArrayList();
-    ContractWorkingTimeType previous = null;
-    
-    List<ContractWorkingTimeType> toRemove = Lists.newArrayList();
-    
-    for (ContractWorkingTimeType oldCwtt : originals) {
-      DateInterval oldInterval = new DateInterval(oldCwtt.beginDate, oldCwtt.endDate);
-
-      //non cambia il tipo orario nessuna modifica su quel oldCwtt
-      if (cwtt.workingTimeType.id.equals(oldCwtt.workingTimeType.id)) {        
-        previous = insertIntoList(previous, oldCwtt, cwttList);
-        if (previous.id == null || !previous.id.equals(oldCwtt.id)) {
-          toRemove.add(oldCwtt);
-        }
-        continue;
-      }
-      DateInterval intersection = DateUtility.intervalIntersection(cwttInterval, oldInterval);
-      //non si intersecano nessuna modifica su quel oldCwtt
-      if (intersection == null) {
-        previous = insertIntoList(previous, oldCwtt, cwttList);
-        if (previous.id == null || !previous.id.equals(oldCwtt.id)) {
-          toRemove.add(oldCwtt);
-        }
-        continue;
-      }
-      
-      //si sovrappongono e sono diversi
-      toRemove.add(oldCwtt);
-      
-      ContractWorkingTimeType cwttIntersect = new ContractWorkingTimeType();
-      cwttIntersect.contract = contract;
-      cwttIntersect.beginDate = intersection.getBegin();
-      cwttIntersect.endDate = intersection.getEnd();
-      cwttIntersect.workingTimeType = cwtt.workingTimeType;
-       
-      //Parte iniziale old
-      if (oldCwtt.beginDate.isBefore(cwttIntersect.beginDate)) {
-        ContractWorkingTimeType cwttOldBeginRemain = new ContractWorkingTimeType();
-        cwttOldBeginRemain.contract = contract;
-        cwttOldBeginRemain.beginDate = oldCwtt.beginDate;
-        cwttOldBeginRemain.endDate = cwttIntersect.beginDate.minusDays(1);
-        cwttOldBeginRemain.workingTimeType = oldCwtt.workingTimeType;
-        previous = insertIntoList(previous, cwttOldBeginRemain, cwttList); 
-      }
-      
-      if (!recomputeBeginSet) {
-        cwttIntersect.recomputeFrom = cwttIntersect.beginDate;
-      }
-      previous = insertIntoList(previous, cwttIntersect, cwttList);
-      
-      //Parte finale old
-      if (cwttIntersect.endDate != null) {
-        ContractWorkingTimeType cwttOldEndRemain = new ContractWorkingTimeType();
-        cwttOldEndRemain.contract = contract;
-        cwttOldEndRemain.beginDate = cwttIntersect.endDate.plusDays(1);
-        cwttOldEndRemain.workingTimeType = oldCwtt.workingTimeType;
-        if (oldCwtt.endDate != null) {
-          if (cwttIntersect.endDate.isBefore(oldCwtt.endDate)) {
-            cwttOldEndRemain.endDate = oldCwtt.endDate;
-            previous = insertIntoList(previous, cwttOldEndRemain, cwttList); 
-          }
-        } else {
-          if (cwttIntersect.endDate != null && !DateUtility.isInfinity(cwttIntersect.endDate)) {
-            cwttOldEndRemain.endDate = oldCwtt.endDate;
-            previous = insertIntoList(previous, cwttOldEndRemain, cwttList); 
-          }
-        }
-      }
-      
-    }
-    
-    if (persist) {
-      contract.refresh();
-      for (ContractWorkingTimeType cwttRemoved : toRemove) {
-        cwttRemoved.delete();
-        contract.contractWorkingTimeType.remove(cwttRemoved);
-        contract.save();
-      }
-      for (ContractWorkingTimeType cwttInsert : cwttList) {
-        //if (cwttInsert.isPersistent()) {
-          cwttInsert.save();
-          contract.contractWorkingTimeType.add(cwttInsert);
-          contract.save();
-          
-        //}
-      }
-      contract.save();
-      JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
-    }
-    
-    return cwttList;
-
-  }
-  
-  /**
-   * Inserisce il periodo nella lista. Ritorna l'ultimo periodo inserito.
-   * @param previous
-   * @param present
-   * @param cwttList
-   * @return
-   */
-  private ContractWorkingTimeType insertIntoList(ContractWorkingTimeType previous, 
-      ContractWorkingTimeType present, List<ContractWorkingTimeType> cwttList) {
-    if (present.endDate != null && DateUtility.isInfinity(present.endDate)) {
-      present.endDate = null;
-    }
-    if (previous != null && previous.workingTimeType.id == present.workingTimeType.id)  {
-      previous.endDate = present.endDate; 
-      if (present.recomputeFrom != null) {
-        previous.recomputeFrom = present.recomputeFrom;
-      }
-      return previous;
-    } else {
-      cwttList.add(present);
-      return present;
-    } 
-  }
-
 
 }

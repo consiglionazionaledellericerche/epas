@@ -1,74 +1,76 @@
 package cnr.sync.controllers;
 
 
+import com.google.common.collect.Lists;
+
 import cnr.sync.consumers.PeopleConsumer;
 import cnr.sync.dto.PersonDTO;
 import cnr.sync.dto.SimplePersonDTO;
-import com.google.common.collect.Lists;
 import play.mvc.Controller;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import javax.inject.Inject;
 
-public class ConsumerTest extends Controller{
 
-	@Inject
-	static PeopleConsumer peopleConsumer;
+public class ConsumerTest extends Controller {
 
-	private static PersonDTO person(int iid){
+  @Inject
+  static PeopleConsumer peopleConsumer;
 
-		PersonDTO personDTO = new PersonDTO();
+  private static PersonDTO person(int iid) {
 
-		try {
-			personDTO = peopleConsumer.getPerson(iid).get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    PersonDTO personDTO = new PersonDTO();
 
-		return personDTO;
-	}
+    try {
+      personDTO = peopleConsumer.getPerson(iid).get();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
-	private static List<SimplePersonDTO> people(){
+    return personDTO;
+  }
 
-		List<SimplePersonDTO> people = Lists.newArrayList();
+  private static List<SimplePersonDTO> people() {
 
-		try {
-			people = peopleConsumer.getPeople().get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    List<SimplePersonDTO> people = Lists.newArrayList();
 
-		return people;
+    try {
+      people = peopleConsumer.getPeople().get();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
-	}
+    return people;
 
-	//	public static void syncPeople(){
-	//
-	//		List<SimplePersonDTO> perseoPeople = people();
-	//		
-	//		List<Integer> ids = FluentIterable.from(perseoPeople).transform(
-	//				new Function<SimplePersonDTO, Integer>() {
-	//					@Override
-	//					public Integer apply(SimplePersonDTO input) {
-	//						return input.id;
-	//					}	
-	//				}).toList();
-	//
-	//		
-	//
-	//		flash.success("chiamata la syncPeople()");
-	//
-	//		Offices.showOffices();
-	//	}
+  }
+
+  //	public static void syncPeople(){
+  //
+  //		List<SimplePersonDTO> perseoPeople = people();
+  //
+  //		List<Integer> ids = FluentIterable.from(perseoPeople).transform(
+  //				new Function<SimplePersonDTO, Integer>() {
+  //					@Override
+  //					public Integer apply(SimplePersonDTO input) {
+  //						return input.id;
+  //					}
+  //				}).toList();
+  //
+  //
+  //
+  //		flash.success("chiamata la syncPeople()");
+  //
+  //		Offices.showOffices();
+  //	}
 
 }
