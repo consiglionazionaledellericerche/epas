@@ -141,7 +141,7 @@ public class ContractDao extends DaoBase {
     if (contract.isPresent())
       condition.and(csp.contract.eq(contract.get()));
     final JPQLQuery query = getQueryFactory().from(csp)
-            .where(condition).orderBy(csp.startFrom.asc());
+            .where(condition).orderBy(csp.beginDate.asc());
     return query.list(csp);
 
   }

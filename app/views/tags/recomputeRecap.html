@@ -20,8 +20,8 @@
 		  </tr>
 		  #{list items:_recomputeRecap.periods, as:'periodRecap'}
 		  <tr>
-		    <td>${periodRecap.begin.format()}</td>
-			<td>#{if periodRecap.end.present} ${periodRecap.end.get().format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+		    <td>${periodRecap.beginDate.format()}</td>
+			<td>#{if periodRecap.endDate != null} ${periodRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
 			<td>${periodRecap.value.description}</td>
 		  </tr>
 		  #{/list}

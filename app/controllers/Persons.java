@@ -18,12 +18,9 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
-import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
-import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
 
@@ -83,20 +80,13 @@ public class Persons extends Controller {
   @Inject
   private static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
-  private static PersonManager personManager;
-  @Inject
   private static ContractDao contractDao;
   @Inject
   private static UserDao userDao;
   @Inject
   private static IWrapperFactory wrapperFactory;
   @Inject
-  private static ConfGeneralManager confGeneralManager;
-  @Inject
   private static PersonChildrenDao personChildrenDao;
-  @Inject
-  private static ConsistencyManager consistencyManager;
-
 
 	public static void list(String name){
 		

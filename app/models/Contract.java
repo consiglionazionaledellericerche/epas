@@ -1,5 +1,19 @@
 package models;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
+
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -15,27 +29,15 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import models.base.BaseModel;
-import models.base.IPeriodTarget;
-import play.data.validation.Required;
-
 
 /**
  * @author dario
  */
 @Entity
 @Table(name = "contracts")
-public class Contract extends BaseModel implements IPeriodTarget {
+public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
-
 
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
@@ -82,11 +84,13 @@ public class Contract extends BaseModel implements IPeriodTarget {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
+  // TODO: trasformare in begin_date
   @Required
   @NotNull
   @Column(name = "begin_contract")
   public LocalDate beginContract;
 
+  // TODO: trasformare in end_date
   @Column(name = "expire_contract")
   public LocalDate expireContract;
 
@@ -102,7 +106,7 @@ public class Contract extends BaseModel implements IPeriodTarget {
 
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
-  @OrderBy("startFrom")
+  @OrderBy("beginDate")
   public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
   @NotAudited
@@ -115,10 +119,6 @@ public class Contract extends BaseModel implements IPeriodTarget {
   @Required
   public boolean onCertificate = true;
 
-
-//	public void setSourceDateResidual(String date){
-//		this.sourceDateResidual = new LocalDate(date);
-//	}
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
@@ -148,11 +148,26 @@ public class Contract extends BaseModel implements IPeriodTarget {
     return Lists.newArrayList(contractWorkingTimeType);
   }
 
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertiesInPeriodOwner#periods(java.lang.Object)
+   */
   @Override
-  public BaseModel getValue() {
-    return this;
+  public Collection<IPropertyInPeriod> periods(Object type) {
+     
+    if (type.equals(ContractWorkingTimeType.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
+    }
+    return null;
   }
 
+  @Override
+  public LocalDate calculatedEnd() {
+    if (this.endContract != null) {
+      return this.endContract;
+    } 
+    return this.expireContract;
+  }
 
 
 }

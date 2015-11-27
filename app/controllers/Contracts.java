@@ -28,7 +28,7 @@ import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
-import models.base.PeriodModel;
+import models.base.IPropertyInPeriod;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -334,19 +334,19 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(cwtt.workingTimeType.office);
 
     //riepilogo delle modifiche
-    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
-    RecomputeRecap recomputeRecap = 
-        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cwtt, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
-    
+
     if (!confirmed) {
       confirmed = true;
       render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
     } else {
 
-      periodManager.updatePeriods(contract, cwtt, true);
+      periodManager.updatePeriods(cwtt, true);
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
       if (recomputeRecap.needRecomputation) {
@@ -358,7 +358,7 @@ public class Contracts extends Controller {
     }
 
   }
-  
+
   public static void updateContractStampProfile(Long id) {
 
     Contract contract = contractDao.getContractById(id);
@@ -404,7 +404,7 @@ public class Contracts extends Controller {
     }
 
     //riepilogo delle modifiche
-    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, csp, false);
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(csp, false);
     RecomputeRecap recomputeRecap = 
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
@@ -416,7 +416,7 @@ public class Contracts extends Controller {
       render("@updateContractStampProfile", contract, csp, confirmed, recomputeRecap);
     } else {
 
-      periodManager.updatePeriods(contract, csp, true);
+      periodManager.updatePeriods(csp, true);
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
       if (recomputeRecap.needRecomputation) {
