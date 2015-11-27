@@ -57,7 +57,6 @@ public class PeriodManager {
     }
     Collections.sort(originals);
 
-    //riepilogo delle modifiche
     DateInterval periodInterval = new DateInterval(period.getBegin(), period.getEnd());
     List<PeriodModel> periodList = Lists.newArrayList();
     PeriodModel previous = null;
@@ -68,7 +67,7 @@ public class PeriodManager {
       DateInterval oldInterval = new DateInterval(oldPeriod.getBegin(), oldPeriod.getEnd());
 
       //non cambia il tipo orario nessuna modifica su quel oldCwtt
-      if (period.getValue().getPeriodValueId().equals(oldPeriod.getValue().getPeriodValueId())) {        
+      if (period.periodValueEquals(oldPeriod)) {        
         previous = insertIntoList(previous, oldPeriod, periodList);
         if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
           toRemove.add(oldPeriod);
@@ -157,8 +156,7 @@ public class PeriodManager {
   private PeriodModel insertIntoList(PeriodModel previous, 
       PeriodModel present, List<PeriodModel> periodList) {
     
-    if (previous != null 
-        && previous.getValue().getPeriodValueId() == present.getValue().getPeriodValueId())  {
+    if (previous != null && previous.periodValueEquals(present))  {
       previous.setEnd(present.getEnd()); 
       if (present.recomputeFrom != null) {
         previous.recomputeFrom = present.recomputeFrom;
