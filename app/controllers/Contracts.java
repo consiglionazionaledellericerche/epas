@@ -29,7 +29,8 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
 import models.base.IPeriodModel;
-import models.base.IPeriodTarget;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
@@ -218,7 +219,7 @@ public class Contracts extends Controller {
       recomputeFrom = null;
     }
 
-    //conferma 
+    //conferma
     if (!confirmed) {
       confirmed = true;
       int days = 0;
@@ -375,19 +376,19 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(cwtt.workingTimeType.office);
 
     //riepilogo delle modifiche
-    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
-    RecomputeRecap recomputeRecap = 
-        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cwtt, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
-    
+
     if (!confirmed) {
       confirmed = true;
       render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
     } else {
 
-      periodManager.updatePeriods(contract, cwtt, true);
+      periodManager.updatePeriods(cwtt, true);
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
       if (recomputeRecap.needRecomputation) {
@@ -399,7 +400,7 @@ public class Contracts extends Controller {
     }
 
   }
-  
+
   public static void updateContractStampProfile(Long id) {
 
     Contract contract = contractDao.getContractById(id);
@@ -415,7 +416,7 @@ public class Contracts extends Controller {
     render(wrappedContract, contract, csp);
   }
 
-  public static void saveContractStampProfile(@Valid ContractStampProfile csp, 
+  public static void saveContractStampProfile(@Valid ContractStampProfile csp,
       boolean confirmed) {
 
     notFoundIfNull(csp);
@@ -449,12 +450,12 @@ public class Contracts extends Controller {
 //
 //    //riepilogo delle modifiche
 //    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
-//    RecomputeRecap recomputeRecap = 
-//        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+//    RecomputeRecap recomputeRecap =
+//        buildRecap(wrappedContract.getContractDateInterval().getBegin(),
 //            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
 //
 //    recomputeRecap.initMissing = wrappedContract.initializationMissing();
-//    
+//
 //    if (!confirmed) {
 //      confirmed = true;
 //      render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);

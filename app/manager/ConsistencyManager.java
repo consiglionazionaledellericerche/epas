@@ -35,7 +35,7 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.base.IPeriodModel;
-import models.base.IPeriodTarget;
+import models.base.IPropertiesInPeriodOwner;
 import models.base.PeriodModel;
 import models.User;
 import models.enumerate.AbsenceTypeMapping;
