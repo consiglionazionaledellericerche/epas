@@ -16,6 +16,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.cache.StampTypeManager;
+import manager.recaps.recomputation.RecomputeRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 
 import models.base.BaseModel;
@@ -31,6 +32,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+/**
+ * Manager per la gestione dei periodi.
+ * 
+ * @author alessandro
+ *
+ */
 public class PeriodManager {
   
   @Inject
@@ -41,10 +48,10 @@ public class PeriodManager {
   /**
    * Inserisce il nuovo period all'interno dei periodi in target.
    * 
-   * @param target il modello contenente la lista di periodi
-   * @param period il periodo da inserire
+   * @param target il modello contenente la lista di periodi (ex. Contract)
+   * @param period il periodo da inserire (ex.ContractWorkingTimeType)
    * @param persist true persiste la nuova lista di periodi.
-   * @return
+   * @return la nuova lista dei periodi
    */
   public final List<PeriodModel> updatePeriods(IPeriodTarget target, 
       IPeriodModel period, boolean persist) {
@@ -66,7 +73,7 @@ public class PeriodManager {
     for (PeriodModel oldPeriod : originals) {
       DateInterval oldInterval = new DateInterval(oldPeriod.getBegin(), oldPeriod.getEnd());
 
-      //non cambia il tipo orario nessuna modifica su quel oldCwtt
+      //non cambia il valore del periodo nessuna modifica su quel oldPeriod
       if (period.periodValueEquals(oldPeriod)) {        
         previous = insertIntoList(previous, oldPeriod, periodList);
         if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
@@ -75,7 +82,7 @@ public class PeriodManager {
         continue;
       }
       DateInterval intersection = DateUtility.intervalIntersection(periodInterval, oldInterval);
-      //non si intersecano nessuna modifica su quel oldCwtt
+      //non si intersecano nessuna modifica su quel oldPeriiod
       if (intersection == null) {
         previous = insertIntoList(previous, oldPeriod, periodList);
         if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
@@ -137,11 +144,9 @@ public class PeriodManager {
       }
       target.getValue().save();
       for (IPeriodModel periodInsert : periodList) {
-        //if (cwttInsert.isPersistent()) {
         periodInsert.getPeriod().save();
         periodInsert.periods().add(periodInsert);
         target.getValue().save();
-        //}
       }
       target.getValue().save();
       JPAPlugin.closeTx(false);
@@ -153,6 +158,14 @@ public class PeriodManager {
 
   }
 
+  /**
+   * Inserisce un periodo nella nuova lista ordinata. Se il periodo precedente ha lo stesso valore
+   * effettua la merge.
+   * @param previous previous
+   * @param present present 
+   * @param periodList periodList
+   * @return l'ultimo periodo della lista
+   */
   private PeriodModel insertIntoList(PeriodModel previous, 
       PeriodModel present, List<PeriodModel> periodList) {
     
@@ -166,6 +179,53 @@ public class PeriodManager {
       periodList.add(present);
       return present;
     }
+  }
+  
+  /**
+   * Costruisce il riepilogo delle modifiche da effettuare.
+   * 
+   * @param begin begin del target
+   * @param end end del target
+   * @param periods i nuovi periods del target
+   * @return il riepilogo dei ricalcoli da effettuare.
+   */
+  public RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
+      List<PeriodModel> periods) {
+    
+    RecomputeRecap recomputeRecap = new RecomputeRecap();
+    
+    recomputeRecap.needRecomputation = true;
+    
+    recomputeRecap.periods = periods;
+    recomputeRecap.recomputeFrom = LocalDate.now().plusDays(1);
+    recomputeRecap.recomputeTo = end;
+    for (PeriodModel item : periods) {
+      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
+        recomputeRecap.recomputeFrom = item.recomputeFrom;
+      }
+    }
+    
+    if (recomputeRecap.recomputeTo.isPresent()) {
+      if (recomputeRecap.recomputeTo.get().isAfter(LocalDate.now())) {
+        recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
+      }
+      if (recomputeRecap.recomputeFrom.isBefore(begin)) {
+        recomputeRecap.recomputeFrom = begin;
+      }
+    }
+    
+    if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+      recomputeRecap.needRecomputation = false;
+    }
+    
+    
+    if (recomputeRecap.recomputeFrom != null) {
+      recomputeRecap.days = DateUtility.daysInInterval(
+          new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
+    }
+    
+    return recomputeRecap;
+    
   }
   
 }

@@ -377,7 +377,7 @@ public class Contracts extends Controller {
     //riepilogo delle modifiche
     List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
     RecomputeRecap recomputeRecap = 
-        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
@@ -471,54 +471,6 @@ public class Contracts extends Controller {
 //      updateContractWorkingTimeType(contract.id);
 //    }
 
-  }
-  
-  
-  /**
-   * Costruisce il recomputeRecap.
-   * 
-   * @param begin begin del target
-   * @param end end del target
-   * @param periods i nuovi periods del target
-   * @return
-   */
-  private static RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
-      List<PeriodModel> periods) {
-    
-    RecomputeRecap recomputeRecap = new RecomputeRecap();
-    
-    recomputeRecap.needRecomputation = true;
-    
-    recomputeRecap.periods = periods;
-    recomputeRecap.recomputeFrom = LocalDate.now().plusDays(1);
-    recomputeRecap.recomputeTo = end;
-    for (PeriodModel item : periods) {
-      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
-        recomputeRecap.recomputeFrom = item.recomputeFrom;
-      }
-    }
-    
-    if (recomputeRecap.recomputeTo.isPresent()){
-      if(recomputeRecap.recomputeTo.get().isAfter(LocalDate.now())) {
-        recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
-      }
-      if (recomputeRecap.recomputeFrom.isBefore(begin)) {
-        recomputeRecap.recomputeFrom = begin;
-      }
-    }
-    
-    if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
-      recomputeRecap.needRecomputation = false;
-    }
-    
-    
-    if (recomputeRecap.recomputeFrom != null) {
-      recomputeRecap.days = DateUtility.daysInInterval(new DateInterval(recomputeRecap.recomputeFrom,
-          recomputeRecap.recomputeTo));
-    }
-    
-    return recomputeRecap;
-    
   }
 
   /**
