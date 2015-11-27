@@ -1,0 +1,32 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'updateContractStampProfile' /}
+
+<div class="container" id="updateWtt">
+
+#{panel title:'Configurazione Attuale', color:'primary'}
+<table class="table table-bordered table-condensed center">
+  <tr>
+    <th>Dal</th>
+    <th>Al</th>
+	<th>Tip Orario</th>
+  </tr>
+  #{list items:contract.contractStampProfile, as:'cspItem'}
+  <tr>
+    <td>${cspItem.startFrom.format()}</td>
+	<td>#{if cspItem.endTo} ${cspItem.endTo.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+	<td>${cspItem.fixedworkingtime}</td>
+  </tr>
+  #{/list}
+</table>
+#{/panel}
+
+
+</div>
