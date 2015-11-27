@@ -400,6 +400,80 @@ public class Contracts extends Controller {
 
   }
   
+  public static void updateContractStampProfile(Long id) {
+
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    ContractStampProfile csp = new ContractStampProfile();
+    csp.contract = contract;
+
+    render(wrappedContract, contract, csp);
+  }
+
+  public static void saveContractStampProfile(@Valid ContractStampProfile csp, 
+      boolean confirmed) {
+
+    notFoundIfNull(csp);
+    notFoundIfNull(csp.contract);
+
+    rules.checkIfPermitted(csp.contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(csp.contract);
+    Contract contract = csp.contract;
+
+    if (!validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(csp.startFrom, wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.startFrom", "deve appartenere al contratto");
+      }
+      if (csp.endTo != null &&
+              !DateUtility.isDateIntoInterval(csp.endTo, wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.endTo", "deve appartenere al contratto");
+      }
+    }
+
+    if (validation.hasErrors()) {
+      response.status = 400;
+      flash.error(Web.msgHasErrors());
+
+      log.warn("validation errors: {}", validation.errorsMap());
+
+      render("@updateContractWorkingTimeType", csp, contract);
+    }
+
+//    rules.checkIfPermitted(cwtt.workingTimeType.office);
+//
+//    //riepilogo delle modifiche
+//    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
+//    RecomputeRecap recomputeRecap = 
+//        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+//            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
+//
+//    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+//    
+//    if (!confirmed) {
+//      confirmed = true;
+//      render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
+//    } else {
+//
+//      periodManager.updatePeriods(contract, cwtt, true);
+//      contract = contractDao.getContractById(contract.id);
+//      contract.person.refresh();
+//      if (recomputeRecap.needRecomputation) {
+//        contractManager.recomputeContract(contract,
+//            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+//      }
+//      //todo il messaggio di conferma nel flash.
+//      updateContractWorkingTimeType(contract.id);
+//    }
+
+  }
+  
+  
   /**
    * Costruisce il recomputeRecap.
    * 
