@@ -3,29 +3,20 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.wrapper.IWrapperFactory;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.cache.StampTypeManager;
 import manager.recaps.recomputation.RecomputeRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
 
-import models.base.BaseModel;
 import models.base.IPeriodModel;
-import models.base.IPeriodTarget;
+import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
+import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
 import java.util.List;
@@ -34,49 +25,52 @@ import javax.inject.Inject;
 
 /**
  * Manager per la gestione dei periodi.
- * 
+ *
  * @author alessandro
  *
  */
 public class PeriodManager {
-  
+
   @Inject
   public PeriodManager() {
-    
+
   }
-  
+
   /**
    * Inserisce il nuovo period all'interno dei periodi in target.
-   * 
-   * @param target il modello contenente la lista di periodi (ex. Contract)
-   * @param period il periodo da inserire (ex.ContractWorkingTimeType)
+   *
+   * @param propertyInPeriod il periodo da inserire (ex.ContractWorkingTimeType)
    * @param persist true persiste la nuova lista di periodi.
    * @return la nuova lista dei periodi
    */
-  public final List<PeriodModel> updatePeriods(IPeriodTarget target, 
-      IPeriodModel period, boolean persist) {
+  public final List<IPropertyInPeriod> updatePeriods(
+      IPropertyInPeriod propertyInPeriod, boolean persist) {
     boolean recomputeBeginSet = false;
 
     //copia dei periodi ordinata
-    List<PeriodModel> originals = Lists.newArrayList();
-    for (Object originalPeriod : period.periods() ) {
-      originals.add((PeriodModel)originalPeriod);
+    // TODO: periods() deve prendere il tipo quando ci sarà, e andranno modificate tutte 
+    // le implementazioni
+    List<IPropertyInPeriod> originals = Lists.newArrayList();
+    for (IPropertyInPeriod originalPeriod :
+      propertyInPeriod.getOwner().periods(propertyInPeriod.getClass()) ) {
+      originals.add(originalPeriod);
     }
     Collections.sort(originals);
 
-    DateInterval periodInterval = new DateInterval(period.getBegin(), period.getEnd());
-    List<PeriodModel> periodList = Lists.newArrayList();
-    PeriodModel previous = null;
-    
-    List<PeriodModel> toRemove = Lists.newArrayList();
-    
-    for (PeriodModel oldPeriod : originals) {
-      DateInterval oldInterval = new DateInterval(oldPeriod.getBegin(), oldPeriod.getEnd());
+    DateInterval periodInterval =
+        new DateInterval(propertyInPeriod.getBeginDate(), propertyInPeriod.getEndDate());
+    List<IPropertyInPeriod> periodList = Lists.newArrayList();
+    IPropertyInPeriod previous = null;
+
+    List<IPropertyInPeriod> toRemove = Lists.newArrayList();
+
+    for (IPropertyInPeriod oldPeriod : originals) {
+      DateInterval oldInterval = new DateInterval(oldPeriod.getBeginDate(), oldPeriod.getEndDate());
 
       //non cambia il valore del periodo nessuna modifica su quel oldPeriod
-      if (period.periodValueEquals(oldPeriod)) {        
+      if (propertyInPeriod.periodValueEquals(oldPeriod)) {
         previous = insertIntoList(previous, oldPeriod, periodList);
-        if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
+        if (previous == null || !previous.equals(oldPeriod)) {
           toRemove.add(oldPeriod);
         }
         continue;
@@ -85,7 +79,7 @@ public class PeriodManager {
       //non si intersecano nessuna modifica su quel oldPeriiod
       if (intersection == null) {
         previous = insertIntoList(previous, oldPeriod, periodList);
-        if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
+        if (previous == null || !previous.equals(oldPeriod)) {
           toRemove.add(oldPeriod);
         }
         continue;
@@ -93,68 +87,56 @@ public class PeriodManager {
 
       //si sovrappongono e sono diversi
       toRemove.add(oldPeriod);
-      
-      PeriodModel periodIntersect = period.newInstance();
-      periodIntersect.setTarget(target);
-      periodIntersect.setBegin(intersection.getBegin());
-      periodIntersect.setEnd(Optional.fromNullable(intersection.getEnd()));
-      periodIntersect.setValue(period.getValue());
-       
+
+      IPropertyInPeriod periodIntersect = propertyInPeriod.newInstance();
+      periodIntersect.setBeginDate(intersection.getBegin());
+      periodIntersect.setEndDate(intersection.getEnd());
+
       //Parte iniziale old
-      if (oldPeriod.getBegin().isBefore(periodIntersect.getBegin())) {
-        PeriodModel periodOldBeginRemain = period.newInstance();
-        periodOldBeginRemain.setTarget(target);
-        periodOldBeginRemain.setBegin(oldPeriod.getBegin());
-        periodOldBeginRemain.setEnd(Optional.fromNullable(periodIntersect.getBegin().minusDays(1)));
-        periodOldBeginRemain.setValue(oldPeriod.getValue());
-        previous = insertIntoList(previous, periodOldBeginRemain, periodList); 
+      if (oldPeriod.getBeginDate().isBefore(periodIntersect.getBeginDate())) {
+        IPropertyInPeriod periodOldBeginRemain = oldPeriod.newInstance();
+        periodOldBeginRemain.setBeginDate(oldPeriod.getBeginDate());
+        periodOldBeginRemain.setEndDate(periodIntersect.getBeginDate().minusDays(1));
+        previous = insertIntoList(previous, periodOldBeginRemain, periodList);
       }
 
       if (!recomputeBeginSet) {
-        periodIntersect.recomputeFrom = periodIntersect.getBegin();
+        periodIntersect.setRecomputeFrom(periodIntersect.getBeginDate());
         recomputeBeginSet = true;
       }
 
       previous = insertIntoList(previous, periodIntersect, periodList);
-      
+
       //Parte finale old
-      if (periodIntersect.getEnd().isPresent()) {
-        PeriodModel periodOldEndRemain = period.newInstance();
-        periodOldEndRemain.setTarget(target);
-        periodOldEndRemain.setBegin(((LocalDate)periodIntersect.getEnd().get()).plusDays(1));
-        periodOldEndRemain.setValue(oldPeriod.getValue());
-        if (oldPeriod.getEnd().isPresent()) {
-          if (((LocalDate)periodIntersect.getEnd().get())
-              .isBefore((LocalDate)oldPeriod.getEnd().get())) {
-            periodOldEndRemain.setEnd(oldPeriod.getEnd());
-            previous = insertIntoList(previous, periodOldEndRemain, periodList); 
+      if (periodIntersect.getEndDate() != null) {
+        IPropertyInPeriod periodOldEndRemain = oldPeriod.newInstance();
+        periodOldEndRemain.setBeginDate((periodIntersect.getEndDate()).plusDays(1));
+        if (oldPeriod.getEndDate() != null) {
+          if (periodIntersect.getEndDate()
+              .isBefore(oldPeriod.getEndDate())) {
+            periodOldEndRemain.setEndDate(oldPeriod.getEndDate());
+            previous = insertIntoList(previous, periodOldEndRemain, periodList);
           }
         } else {
-          periodOldEndRemain.setEnd(oldPeriod.getEnd());
-          previous = insertIntoList(previous, periodOldEndRemain, periodList); 
+          periodOldEndRemain.setEndDate(oldPeriod.getEndDate());
+          previous = insertIntoList(previous, periodOldEndRemain, periodList);
         }
       }
 
     }
 
     if (persist) {
-      target.getValue().refresh();
-      for (IPeriodModel periodRemoved : toRemove) {
-        periodRemoved.getPeriod().delete();
-        periodRemoved.periods().remove(periodRemoved);
+      for (IPropertyInPeriod periodRemoved : toRemove) {
+        periodRemoved._delete();
       }
-      target.getValue().save();
-      for (IPeriodModel periodInsert : periodList) {
-        periodInsert.getPeriod().save();
-        periodInsert.periods().add(periodInsert);
-        target.getValue().save();
+      for (IPropertyInPeriod periodInsert : periodList) {
+        periodInsert._save();
       }
-      target.getValue().save();
-      JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
+      propertyInPeriod.getOwner()._save();
+      JPA.em().flush();
     }
 
-    
+
     return periodList;
 
   }
@@ -163,17 +145,17 @@ public class PeriodManager {
    * Inserisce un periodo nella nuova lista ordinata. Se il periodo precedente ha lo stesso valore
    * effettua la merge.
    * @param previous previous
-   * @param present present 
+   * @param present present
    * @param periodList periodList
    * @return l'ultimo periodo della lista
    */
-  private PeriodModel insertIntoList(PeriodModel previous, 
-      PeriodModel present, List<PeriodModel> periodList) {
-    
+  private IPropertyInPeriod insertIntoList(IPropertyInPeriod previous,
+      IPropertyInPeriod present, List<IPropertyInPeriod> periodList) {
+
     if (previous != null && previous.periodValueEquals(present))  {
-      previous.setEnd(present.getEnd()); 
-      if (present.recomputeFrom != null) {
-        previous.recomputeFrom = present.recomputeFrom;
+      previous.setEndDate(present.getEndDate());
+      if (present.getRecomputeFrom() != null) {
+        previous.setRecomputeFrom(present.getRecomputeFrom());
       }
       return previous;
     } else {
@@ -181,31 +163,31 @@ public class PeriodManager {
       return present;
     }
   }
-  
+
   /**
    * Costruisce il riepilogo delle modifiche da effettuare.
-   * 
+   *
    * @param begin begin del target
    * @param end end del target
    * @param periods i nuovi periods del target
    * @return il riepilogo dei ricalcoli da effettuare.
    */
   public RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
-      List<PeriodModel> periods) {
-    
+      List<IPropertyInPeriod> periods) {
+
     RecomputeRecap recomputeRecap = new RecomputeRecap();
-    
+
     recomputeRecap.needRecomputation = true;
-    
+
     recomputeRecap.periods = periods;
     recomputeRecap.recomputeFrom = LocalDate.now().plusDays(1);
     recomputeRecap.recomputeTo = end;
-    for (PeriodModel item : periods) {
-      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
-        recomputeRecap.recomputeFrom = item.recomputeFrom;
+    for (IPropertyInPeriod item : periods) {
+      if (item.getRecomputeFrom() != null && item.getRecomputeFrom().isBefore(LocalDate.now())) {
+        recomputeRecap.recomputeFrom = item.getRecomputeFrom();
       }
     }
-    
+
     if (recomputeRecap.recomputeTo.isPresent()) {
       if (recomputeRecap.recomputeTo.get().isAfter(LocalDate.now())) {
         recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
@@ -214,14 +196,15 @@ public class PeriodManager {
         recomputeRecap.recomputeFrom = begin;
       }
     }
-    
-   setDays(recomputeRecap);
-   
-   setNeedRecap(recomputeRecap);
-    
+
+    setDays(recomputeRecap);
+
+    setNeedRecap(recomputeRecap);
+
     return recomputeRecap;
+
   }
-  
+
   /**
    * Quando modifico le date del target. 
    * 
@@ -232,7 +215,7 @@ public class PeriodManager {
    */
   public RecomputeRecap buildTargetRecap(DateInterval previousInterval, 
       DateInterval newInterval, boolean initMissing) {
-    
+
     RecomputeRecap recomputeRecap = new RecomputeRecap();
 
     if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
@@ -248,7 +231,7 @@ public class PeriodManager {
         }
         // allungo ma se inglobo passato allora ricalcolo
         if (newInterval.getEnd().isAfter(previousInterval.getEnd())
-                && previousInterval.getEnd().isBefore(LocalDate.now())) {
+            && previousInterval.getEnd().isBefore(LocalDate.now())) {
           recomputeRecap.recomputeFrom = previousInterval.getEnd();
         }
       }
@@ -263,14 +246,14 @@ public class PeriodManager {
       recomputeRecap.initMissing = true;
       recomputeRecap.recomputeFrom = null;
     }
-    
+
     setDays(recomputeRecap);
-    
+
     setNeedRecap(recomputeRecap);
-    
+
     return recomputeRecap;
   }
-  
+
   /**
    * 
    * @param recomputeRecap
@@ -285,7 +268,7 @@ public class PeriodManager {
       recomputeRecap.days = 0;
     }
   }
-  
+
   private void setNeedRecap(RecomputeRecap recomputeRecap) {
     if (recomputeRecap.recomputeFrom == null || 
         recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
@@ -295,5 +278,5 @@ public class PeriodManager {
     }
 
   }
-  
+
 }

@@ -1,16 +1,16 @@
 package models;
 
-import java.util.Collection;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PropertyInPeriod;
+
+import play.data.validation.Required;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import models.base.IPeriodTarget;
-import models.base.PeriodModel;
-import play.data.validation.Required;
 
 
 /**
@@ -20,7 +20,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Table(name = "contracts_working_time_types")
-public class ContractWorkingTimeType extends PeriodModel {
+public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {
 
   private static final long serialVersionUID = 3730183716240278997L;
 
@@ -34,44 +34,49 @@ public class ContractWorkingTimeType extends PeriodModel {
   @JoinColumn(name = "working_time_type_id")
   public WorkingTimeType workingTimeType;
 
- 
-  
   @Override
   public Object getValue() {
     return this.workingTimeType;
   }
 
   @Override
-  public Collection<ContractWorkingTimeType> periods() {
-    return this.contract.contractWorkingTimeType;
-  }
-  
-  @Override
   public void setValue(Object value) {
     this.workingTimeType = (WorkingTimeType)value;
   }
-  
-  @Override
-  public IPeriodTarget getTarget() {
+
+  public IPropertiesInPeriodOwner getOwner() {
     return this.contract;
   }
 
-  @Override
-  public void setTarget(IPeriodTarget target) {
-    this.contract = (Contract)target;
-  }
-
-  @Override
-  public ContractWorkingTimeType getPeriod() {
-    return this;
+  public void setOwner(IPropertiesInPeriodOwner owner) {
+    this.contract = (Contract)owner;
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof ContractWorkingTimeType) {
-      return this.workingTimeType.id == (((ContractWorkingTimeType) otherValue).workingTimeType.id); 
+      return this.workingTimeType.id == (((ContractWorkingTimeType) otherValue).workingTimeType.id);
     }
     return false;
+  }
+
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertyInPeriod#getType()
+   */
+  @Override
+  public Object getType() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertyInPeriod#setType(java.lang.Object)
+   */
+  @Override
+  public void setType(Object value) {
+    // TODO Auto-generated method stub
+
   }
 
 

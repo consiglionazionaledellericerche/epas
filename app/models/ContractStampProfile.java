@@ -2,13 +2,10 @@ package models;
 
 import com.google.common.collect.Range;
 
-import models.base.BaseModel;
-import models.base.IPeriodTarget;
-import models.base.PeriodModel;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.PropertyInPeriod;
 
 import org.joda.time.LocalDate;
-
-import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +15,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "contract_stamp_profiles")
-public class ContractStampProfile extends PeriodModel {
+public class ContractStampProfile extends PropertyInPeriod {
 
   private static final long serialVersionUID = 3503562995113282540L;
 
@@ -57,19 +54,25 @@ public class ContractStampProfile extends PeriodModel {
   }
 
   @Override
-  public PeriodModel getPeriod() {
+  public IPropertiesInPeriodOwner getOwner() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public IPeriodTarget getTarget() {
+  public void setOwner(IPropertiesInPeriodOwner target) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Object getType() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public void setTarget(IPeriodTarget target) {
+  public void setType(Object value) {
     // TODO Auto-generated method stub
     
   }
@@ -90,12 +93,6 @@ public class ContractStampProfile extends PeriodModel {
   public boolean periodValueEquals(Object otherValue) {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  public Collection periods() {
-    // TODO Auto-generated method stub
-    return null;
   }
 
 }
