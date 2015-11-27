@@ -13,6 +13,9 @@ ALTER TABLE office_history  ALTER COLUMN code SET DATA TYPE text USING code::tex
 ALTER TABLE office_history  RENAME COLUMN code TO code_id;
 ALTER TABLE office_history  ADD COLUMN code text;
 
+ALTER TABLE contracts ADD COLUMN begin_date DATE;
+ALTER TABLE contracts ADD COLUMN end_date DATE;
+
 # ---!Downs
 
 ALTER TABLE absence_types DROP CONSTRAINT absence_code_unique;
@@ -27,3 +30,6 @@ ALTER TABLE institutes_history DROP COLUMN cds;
 ALTER TABLE office_history DROP COLUMN code;
 ALTER TABLE office_history RENAME COLUMN code_id TO code;
 ALTER TABLE office_history ALTER COLUMN code SET DATA TYPE integer USING code::integer;
+
+ALTER TABLE contracts DROP COLUMN begin_date;
+ALTER TABLE contracts DROP COLUMN end_date;

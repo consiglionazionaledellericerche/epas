@@ -22,17 +22,12 @@ import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
-import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.ContractStampProfileManager;
 import manager.EmailManager;
 import manager.OfficeManager;
-import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
-
-import models.BadgeReader;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -58,6 +53,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -90,8 +86,6 @@ public class Persons extends Controller {
   @Inject
   private static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
-  private static PersonManager personManager;
-  @Inject
   private static ContractDao contractDao;
   @Inject
   private static ContractStampProfileManager contractStampProfileManager;
@@ -100,12 +94,7 @@ public class Persons extends Controller {
   @Inject
   private static IWrapperFactory wrapperFactory;
   @Inject
-  private static ConfGeneralManager confGeneralManager;
-  @Inject
   private static PersonChildrenDao personChildrenDao;
-  @Inject
-  private static ConsistencyManager consistencyManager;
-
 
 	public static void list(String name){
 		
