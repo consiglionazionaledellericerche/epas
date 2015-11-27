@@ -1,24 +1,22 @@
 package jobs;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import com.google.common.collect.Lists;
 
+import injection.StaticInject;
 import manager.OfficeManager;
-
 import models.Office;
 import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-
-import injection.StaticInject;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.test.Fixtures;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @StaticInject
 public class FixUserPermission {

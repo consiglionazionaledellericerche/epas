@@ -32,8 +32,6 @@ import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
 
-import models.BadgeReader;
-
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -58,6 +56,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;

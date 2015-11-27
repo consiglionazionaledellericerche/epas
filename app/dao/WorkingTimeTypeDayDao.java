@@ -1,8 +1,12 @@
 package dao;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -10,11 +14,6 @@ import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeTypeDay;
-
-import org.joda.time.LocalDate;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * @author dario

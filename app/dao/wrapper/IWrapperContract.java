@@ -1,17 +1,16 @@
 package dao.wrapper;
 
-import com.google.common.base.Optional;
-
-import it.cnr.iit.epas.DateInterval;
-
-import models.Contract;
-import models.ContractMonthRecap;
-import models.ContractWorkingTimeType;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import java.util.List;
+import com.google.common.base.Optional;
+
+import it.cnr.iit.epas.DateInterval;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.ContractWorkingTimeType;
 
 public interface IWrapperContract extends IWrapperModel<Contract> {
 

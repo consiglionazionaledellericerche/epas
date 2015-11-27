@@ -1,5 +1,16 @@
 package manager;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -16,14 +27,11 @@ import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.CheckMessage;
-
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
@@ -37,20 +45,8 @@ import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import play.db.jpa.Blob;
 import play.libs.Mail;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 /**

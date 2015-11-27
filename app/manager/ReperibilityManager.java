@@ -1,5 +1,17 @@
 package manager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
@@ -12,11 +24,8 @@ import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
-
 import helpers.BadRequest;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -28,7 +37,6 @@ import models.PersonReperibilityType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
-
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.Dur;
@@ -37,21 +45,8 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.i18n.Messages;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
 
 /**
  * @author Arianna e Dario

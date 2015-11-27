@@ -1,12 +1,12 @@
 package dao.history;
 
+import org.hibernate.envers.RevisionType;
+import org.joda.time.LocalDateTime;
+
 import com.google.common.base.Function;
 
 import models.base.BaseModel;
 import models.base.Revision;
-
-import org.hibernate.envers.RevisionType;
-import org.joda.time.LocalDateTime;
 
 /**
  * @author marco

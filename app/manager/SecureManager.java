@@ -1,5 +1,10 @@
 package manager;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -8,16 +13,10 @@ import com.google.common.collect.ImmutableList;
 
 import dao.RoleDao;
 import dao.wrapper.IWrapperFactory;
-
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 public class SecureManager {
 

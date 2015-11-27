@@ -1,5 +1,8 @@
 package cnr.sync.consumers;
 
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -11,14 +14,9 @@ import com.google.gson.reflect.TypeToken;
 import cnr.sync.Deserializers.PersonDeserializer;
 import cnr.sync.dto.PersonDTO;
 import cnr.sync.dto.SimplePersonDTO;
-
 import models.Person;
-
 import play.Play;
 import play.libs.WS;
-
-import java.util.List;
-import java.util.Set;
 
 public class PeopleConsumer {
 

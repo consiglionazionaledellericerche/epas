@@ -1,7 +1,13 @@
 package it.cnr.iit.epas;
 
-import dao.wrapper.IWrapperFactory;
+import java.io.PrintWriter;
+import java.util.List;
 
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
+import dao.wrapper.IWrapperFactory;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -14,15 +20,7 @@ import models.PersonMonthRecap;
 import models.Qualification;
 import models.Stamping;
 import models.VacationCode;
-
-import org.joda.time.LocalDate;
-
 import play.Logger;
-
-import java.io.PrintWriter;
-import java.util.List;
-
-import javax.inject.Inject;
 
 public class ExportToYaml {
 

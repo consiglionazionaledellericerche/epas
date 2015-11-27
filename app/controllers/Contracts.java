@@ -28,8 +28,6 @@ import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.WorkingTimeType;
-import models.base.IPeriodModel;
-import models.base.IPeriodTarget;
 import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
@@ -40,6 +38,7 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;

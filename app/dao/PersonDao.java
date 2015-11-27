@@ -1,9 +1,17 @@
 package dao;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -11,16 +19,12 @@ import com.mysema.query.types.Projections;
 import com.mysema.query.types.QBean;
 
 import dao.filter.QFilters;
-
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
-
 import it.cnr.iit.epas.DateInterval;
-
 import models.BadgeReader;
-
 import models.CompetenceCode;
 import models.Contract;
 import models.Office;
@@ -39,15 +43,6 @@ import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * DAO per le person.
