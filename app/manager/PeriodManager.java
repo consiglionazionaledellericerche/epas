@@ -112,6 +112,7 @@ public class PeriodManager {
 
       if (!recomputeBeginSet) {
         periodIntersect.recomputeFrom = periodIntersect.getBegin();
+        recomputeBeginSet = true;
       }
 
       previous = insertIntoList(previous, periodIntersect, periodList);
@@ -219,7 +220,7 @@ public class PeriodManager {
     }
     
     
-    if (recomputeRecap.recomputeFrom != null) {
+    if (recomputeRecap.recomputeFrom != null && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.days = DateUtility.daysInInterval(
           new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
     }
