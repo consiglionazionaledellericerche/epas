@@ -12,14 +12,24 @@
 	<div class="alert alert-warning" role="alert">
     		Gestione badge di <strong>${badge.person.fullname}</strong>
 	</div>
-	#{form @Badges.delete(), class:'form-horizontal', 
-    	method:'POST'}
+	#{form action:@allocateBadge(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }	 
 		#{f.input 'badge.code', readonly:true /}
 		#{f.input 'badge.badgeReader', readonly:true /}
-	  #{b.buttons}
-	     #{b.delete /}
-	  #{/b.buttons}
+	    	
+	  #{b.actions center:true}
+	<a class="btn btn-primary" href="@{edit(badge.id)}" data-async-modal="#modalInsertBadgeReader">
+	      <i class="fa fa-plus"></i> &{'badge.edit'}
+	</a>
+	<a class="btn btn-danger" href="@{delete(badge.id)}" data-async-modal="#modalInsertBadgeReader">
+	      <i class="fa fa-minus"></i> &{'badge.delete'}
+	</a>
+	  #{/b.actions}
+    
 	#{/form}
+		
 #{/panel}
 
 </div>
+
+<div id="modalInsertBadgeReader" class="modal container" tabindex="-1"></div>

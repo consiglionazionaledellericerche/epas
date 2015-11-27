@@ -32,6 +32,8 @@ import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
 
+import models.BadgeReader;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -104,12 +106,13 @@ public class Persons extends Controller {
   @Inject
   private static ConsistencyManager consistencyManager;
 
-  public static void list(String name) {
 
-    List<Person> simplePersonList = personDao.listFetched(
-            Optional.fromNullable(name),
-            secureManager.officesReadAllowed(Security.getUser().get()),
-            false, null, null, false, false).list();
+	public static void list(String name){
+		
+		List<Person> simplePersonList = personDao.listFetched(
+				Optional.fromNullable(name),
+				secureManager.officesReadAllowed(Security.getUser().get()),
+				false, null, null, false).list();
 
     List<IWrapperPerson> personList = FluentIterable
             .from(simplePersonList)

@@ -1,0 +1,21 @@
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'Modifica numero Badge'}
+
+#{panel title:'Modifica numero badge' , color:'primary'}
+	<div class="alert alert-warning" role="alert">
+    		In questa form si può cambiare il numero del badge per <strong>${person.fullname}</strong>
+	</div>
+	#{form action:@updateBadge(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }	 
+		#{f.input 'badge.code'/}
+		#{f.input 'badge.badgeReader', disabled:true /}
+		#{f.hidden 'reader.id' /}
+		#{f.hidden 'person.id' /}
+	    
+		<div class="container-fluid center">
+		   <input class="btn btn-primary" type="submit" value="Salva" />
+		</div>      
+	#{/form}
+		
+#{/panel}
+
+#{/modalAsync}

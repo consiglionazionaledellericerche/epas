@@ -22,6 +22,9 @@ absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 badge.begin= Inzio
 badge.end= Fine
 badge.code= Numero badge
+badge.badgeReader= Lettore badge associato
+badge.edit= Modifica
+badge.delete= Elimina
 
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password

@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 
@@ -45,6 +46,8 @@ public class BadgeReader extends BaseModel {
   @JoinColumn(name = "user_id")
   public User user;
 
+
+  @OrderBy("code ASC")
   @OneToMany(mappedBy = "badgeReader")
   public Set<Badge> badges = Sets.newHashSet();
 
@@ -53,6 +56,8 @@ public class BadgeReader extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "office_owner_id")
   public Office owner;
+
+
 
 
   public boolean enabled = true;
