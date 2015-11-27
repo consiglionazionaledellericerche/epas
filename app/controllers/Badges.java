@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -106,9 +107,43 @@ public class Badges extends Controller {
    * 
    * @param id del badge che si vuole editare.
    */
-  public static void edit(Long id){
+  public static void edit(Long id) {
     Badge badge = badgeDao.byId(id);
-    render(badge);
+    Person person = badge.person;
+    BadgeReader reader = badge.badgeReader;
+    render(badge, person, reader);
+  }
+  
+  /**
+   * 
+   * @param badge il badge di cui si vuole cambiare il code.
+   */
+  public static void updateBadge(Badge badge, Person person, BadgeReader reader) {
+    Optional<Badge> existingBadge = badgeDao.byCode(badge.code, 
+        Optional.fromNullable(badge.badgeReader));
+    if (existingBadge.isPresent()) {
+      flash.error("E' già esistente un badge con codice %s. Inserire altro codice.", badge.code);
+      render("@edit");
+    } else {      
+      
+      person.badges.remove(badge);
+      Set<Badge> badgeList = person.badges;
+      for(Badge b : badgeList){
+        if(b.badgeReader == reader){
+          b.delete();
+          person.save();
+          Badge newBadge = new Badge();
+          newBadge.badgeReader = reader;
+          newBadge.code = badge.code;
+          newBadge.person = person;
+          newBadge.save();
+        }
+          
+      }     
+      
+      flash.success("Modificato codice del badge di %s", person.fullName());
+      Persons.list(null);
+    }
   }
 
 }
