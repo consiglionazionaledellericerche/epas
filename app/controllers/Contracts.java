@@ -124,9 +124,9 @@ public class Contracts extends Controller {
    * @param onCertificate  in attestati
    * @param confirmed      step di conferma
    */
-  public static void update(@Valid Contract contract, @Required LocalDate beginContract,
-                            @Valid LocalDate expireContract, @Valid LocalDate endContract, boolean onCertificate,
-                            boolean confirmed) {
+  public static void update(@Valid Contract contract, @Required LocalDate beginContract, 
+      @Valid LocalDate expireContract, @Valid LocalDate endContract, 
+      boolean onCertificate, boolean confirmed) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -176,61 +176,21 @@ public class Contracts extends Controller {
               onCertificate);
     }
 
-    //riepilogo delle modifiche
-    boolean initMissing = false;
-    boolean changeBegin = false;
-    boolean reduceEnd = false;          //onlyRecap
-    boolean incrementEndInPast = false;
-    LocalDate recomputeFrom = null;
-    LocalDate recomputeTo = null;
-
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
-    if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
-      changeBegin = true;
-      if (newInterval.getBegin().isBefore(LocalDate.now())) {
-        recomputeFrom = newInterval.getBegin();
-      }
-    }
-    if (recomputeFrom == null) {
-      if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
-        // scorcio allora solo riepiloghi
-        if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
-          reduceEnd = true;
-          recomputeFrom = newInterval.getEnd();
-        }
-        // allungo ma se inglobo passato allora ricalcolo
-        if (newInterval.getEnd().isAfter(previousInterval.getEnd())
-                && previousInterval.getEnd().isBefore(LocalDate.now())) {
-          incrementEndInPast = true;
-          recomputeFrom = previousInterval.getEnd();
-        }
-      }
-    }
-    if (recomputeFrom != null) {
-      recomputeTo = newInterval.getEnd();
-      if (!recomputeTo.isBefore(LocalDate.now())) {
-        recomputeTo = LocalDate.now();
-      }
-    }
-    if (wrappedContract.initializationMissing()) {
-      initMissing = true;
-      recomputeFrom = null;
-    }
-
+    RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval, 
+        wrappedContract.initializationMissing());
+    
     //conferma 
     if (!confirmed) {
       confirmed = true;
-      int days = 0;
-      if (recomputeFrom != null) {
-        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
-      }
       response.status = 400;
       render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-              onCertificate, changeBegin, reduceEnd, incrementEndInPast, initMissing,
-              recomputeFrom, recomputeTo, days);
+              onCertificate, recomputeRecap);
     } else {
-      if (recomputeFrom != null) {
-        contractManager.properContractUpdate(contract, recomputeFrom, false);
+      if (recomputeRecap.recomputeFrom != null) {
+        contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
+      } else {
+        contractManager.properContractUpdate(contract, LocalDate.now(), false);
       }
       boolean success = true;
       confirmed = false;
@@ -376,7 +336,7 @@ public class Contracts extends Controller {
     //riepilogo delle modifiche
     List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
     RecomputeRecap recomputeRecap = 
-        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
@@ -399,51 +359,77 @@ public class Contracts extends Controller {
 
   }
   
-  /**
-   * Costruisce il recomputeRecap.
-   * 
-   * @param begin begin del target
-   * @param end end del target
-   * @param periods i nuovi periods del target
-   * @return
-   */
-  private static RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
-      List<PeriodModel> periods) {
-    
-    RecomputeRecap recomputeRecap = new RecomputeRecap();
-    
-    recomputeRecap.needRecomputation = true;
-    
-    recomputeRecap.periods = periods;
-    recomputeRecap.recomputeFrom = LocalDate.now().plusDays(1);
-    recomputeRecap.recomputeTo = end;
-    for (PeriodModel item : periods) {
-      if (item.recomputeFrom != null && item.recomputeFrom.isBefore(LocalDate.now())) {
-        recomputeRecap.recomputeFrom = item.recomputeFrom;
+  public static void updateContractStampProfile(Long id) {
+
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    ContractStampProfile csp = new ContractStampProfile();
+    csp.contract = contract;
+
+    render(wrappedContract, contract, csp);
+  }
+
+  public static void saveContractStampProfile(@Valid ContractStampProfile csp, 
+      boolean confirmed) {
+
+    notFoundIfNull(csp);
+    notFoundIfNull(csp.contract);
+
+    rules.checkIfPermitted(csp.contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(csp.contract);
+    Contract contract = csp.contract;
+
+    if (!validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(csp.startFrom, wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.startFrom", "deve appartenere al contratto");
+      }
+      if (csp.endTo != null &&
+              !DateUtility.isDateIntoInterval(csp.endTo, wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.endTo", "deve appartenere al contratto");
       }
     }
-    
-    if (recomputeRecap.recomputeTo.isPresent()){
-      if(recomputeRecap.recomputeTo.get().isAfter(LocalDate.now())) {
-        recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
-      }
-      if (recomputeRecap.recomputeFrom.isBefore(begin)) {
-        recomputeRecap.recomputeFrom = begin;
-      }
+
+    if (validation.hasErrors()) {
+      response.status = 400;
+      flash.error(Web.msgHasErrors());
+
+      log.warn("validation errors: {}", validation.errorsMap());
+
+      render("@updateContractWorkingTimeType", csp, contract);
     }
-    
-    if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
-      recomputeRecap.needRecomputation = false;
-    }
-    
-    
-    if (recomputeRecap.recomputeFrom != null) {
-      recomputeRecap.days = DateUtility.daysInInterval(new DateInterval(recomputeRecap.recomputeFrom,
-          recomputeRecap.recomputeTo));
-    }
-    
-    return recomputeRecap;
-    
+
+//    rules.checkIfPermitted(cwtt.workingTimeType.office);
+//
+//    //riepilogo delle modifiche
+//    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
+//    RecomputeRecap recomputeRecap = 
+//        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+//            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
+//
+//    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+//    
+//    if (!confirmed) {
+//      confirmed = true;
+//      render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
+//    } else {
+//
+//      periodManager.updatePeriods(contract, cwtt, true);
+//      contract = contractDao.getContractById(contract.id);
+//      contract.person.refresh();
+//      if (recomputeRecap.needRecomputation) {
+//        contractManager.recomputeContract(contract,
+//            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+//      }
+//      //todo il messaggio di conferma nel flash.
+//      updateContractWorkingTimeType(contract.id);
+//    }
+
   }
 
   /**

@@ -1,14 +1,16 @@
 package models.base;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import com.google.common.base.Optional;
+
+import it.cnr.iit.epas.DateUtility;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
 import play.data.validation.Required;
+
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel implements IPeriodModel, Comparable<PeriodModel> {
@@ -44,7 +46,7 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel, Com
   // FIXME: non riesco a impostare il generico Optional<LocalDate>
   @Override
   public void setEnd(Optional end) {
-    if (end.isPresent()) {
+    if (end.isPresent() && !DateUtility.isInfinity((LocalDate)end.get())) {
       this.endDate = (LocalDate)end.get();
     } else {
       this.endDate = null;
