@@ -72,30 +72,11 @@
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			<input type="hidden" name="confirmed" value="true" />
 			
-			#{alert color:'danger'}			
-	 	      #{if recomputeFrom != null}
-	 	        #{if changeBegin}
-	 	            <em>Modifica data iniziale:</em> ePAS effettuerà il ricalcolo di 
-	 	                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}
-	 	                per un totale di <strong>${days}</strong> giorni.
-	 	        #{/if}
-		        #{if reduceEnd}
-			         <em>Scorciamento del contratto:</em> ePAS effettuerà l'aggiornamento del 
-			               riepilogo mensile al ${recomputeFrom.format()}.
-			    #{/if}
-			    #{if incrementEndInPast}
-			         <em>Prolungamento del contratto:</em> ePAS effettuerà il ricalcolo di
-			                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()} 
-			                per un totale di <strong>${days}</strong> giorni.
-			    #{/if} 
-			  #{/if}
-			  #{if initMissing}
-				    Il contratto così configurato necessiterà di inizializzazione.
-	 	      #{/if}
-	        #{/alert}
-			<div class="text-center">
-	  			<input class="btn btn-primary" type="submit" value="Conferma"/>
-			</div>
+			#{recomputeRecap recomputeRecap:recomputeRecap /}
+			
+			#{b.buttons center:true}
+			   #{b.submit 'Conferma'/}
+			#{/b.buttons}
 		#{/else}
 		
 

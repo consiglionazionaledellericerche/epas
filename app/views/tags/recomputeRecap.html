@@ -1,33 +1,48 @@
  *{
     recomputeRecap: il recap delle modifiche
  }*
+ #{if _recomputeRecap.initMissing}
+  %{ color = 'danger' }%
+ #{/if}
+ #{else}
+  %{ color = 'warning' }%
+ #{/else}
  
- #{if _recomputeRecap.needRecomputation }
-			  #{alert color:'danger'}
-			    <p>Nuova configurazione</p>
-			    <table class="table table-bordered table-condensed center">
-				  <tr>
-				    <th>Dal</th>
-				    <th>Al</th>
-					<th>Tip Orario</th>
-				  </tr>
-				  #{list items:_recomputeRecap.periods, as:'periodRecap'}
-				  <tr>
-				    <td>${periodRecap.begin.format()}</td>
-					<td>#{if periodRecap.end.present} ${periodRecap.end.get().format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-					<td>${periodRecap.value.description}</td>
-				  </tr>
-				  #{/list}
-			  	</table>
-			    <p>
+ #{alert color:color } 
+	 
+	 #{if !_recomputeRecap.periods.empty }
+	    <p>Nuova configurazione</p>
+	    <table class="table table-bordered table-condensed center">
+		  <tr>
+		    <th>Dal</th>
+		    <th>Al</th>
+			<th>Valore</th>
+		  </tr>
+		  #{list items:_recomputeRecap.periods, as:'periodRecap'}
+		  <tr>
+		    <td>${periodRecap.begin.format()}</td>
+			<td>#{if periodRecap.end.present} ${periodRecap.end.get().format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+			<td>${periodRecap.value.description}</td>
+		  </tr>
+		  #{/list}
+	  	</table>
+	#{/if}
+	
+	#{if _recomputeRecap.initMissing}
+	  <p>Finchè non verrà inserita l'inizializzazione non verranno effettuati i ricalcoli.>
+	#{/if}
+	#{else}  
+	    #{if _recomputeRecap.needRecomputation }
+			  <p>
 			        ePAS effettuerà il ricalcolo di tutti i dati del dipendente 
 		 	        dal <strong>${_recomputeRecap.recomputeFrom.format()}</strong>
 		 	        al <strong>${_recomputeRecap.recomputeTo.get().format()}</strong> 
 		 	        per un totale di <strong>${_recomputeRecap.days}</strong> giorni.
-		 	    </p>			
-		 	    
-			  #{/alert}
-			  #{b.buttons center:true}
-			   #{b.submit 'Conferma'/}
-			 #{/b.buttons}
-#{/if}
+		 	  </p>			
+		#{/if}	
+		#{else}
+		      <p>Per questa modifica non sono necessari ricalcoli.</p>
+		#{/else} 
+	#{/else}
+  #{/alert}
+
