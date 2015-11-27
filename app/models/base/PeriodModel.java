@@ -36,7 +36,6 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel, Com
   @Override
   public void setBegin(LocalDate begin) {
     this.beginDate = begin;
-    
   }
 
   @Override
@@ -44,6 +43,26 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel, Com
     return Optional.fromNullable(this.endDate);
   }
   
+  // FIXME: non riesco a impostare il generico Optional<LocalDate>
+  @Override
+  public void setEnd(Optional end) {
+    if (end.isPresent()) {
+      this.endDate = (LocalDate)end.get();
+    } else {
+      this.endDate = null;
+    }
+  }
+
+  @Override
+  public int compareTo(PeriodModel other) {
+    if (getBegin().isBefore(other.getBegin())) {
+      return -1;
+    } else if (getBegin().isAfter(other.getBegin())) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 
   @Override
   public PeriodModel newInstance() {
@@ -60,25 +79,6 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel, Com
     
   }
 
-  // FIXME: non riesco a impostare il generico Optional<LocalDate>
-  @Override
-  public void setEnd(Optional end) {
-    if (end.isPresent()) {
-      this.endDate = (LocalDate)end.get();
-    } else {
-      this.endDate = null;
-    }
-  }
-  
-  @Override
-  public int compareTo(PeriodModel other) {
-    if (getBegin().isBefore(other.getBegin())) {
-      return -1;
-    } else if (getBegin().isAfter(other.getBegin())) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
+
   
 }

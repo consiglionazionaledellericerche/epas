@@ -2,8 +2,6 @@ package models;
 
 import models.base.BaseModel;
 
-import models.base.IPeriodValue;
-
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -31,7 +29,7 @@ import javax.persistence.Transient;
 @Entity
 @Audited
 @Table(name="working_time_types")
-public class WorkingTimeType extends BaseModel implements IPeriodValue {
+public class WorkingTimeType extends BaseModel {
 
   private static final long serialVersionUID = -3443521979786226461L;
 
@@ -122,12 +120,6 @@ public class WorkingTimeType extends BaseModel implements IPeriodValue {
     return equal;
 
   }
-
-  @Override
-  public Long getPeriodValueId() {
-    return this.id;
-  }
-
 
 }
 

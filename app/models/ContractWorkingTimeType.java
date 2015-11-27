@@ -1,28 +1,17 @@
 package models;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
 import models.base.IPeriodTarget;
-import models.base.IPeriodValue;
 import models.base.PeriodModel;
-
-import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 
 /**
@@ -49,7 +38,7 @@ public class ContractWorkingTimeType extends PeriodModel {
  
   
   @Override
-  public IPeriodValue getValue() {
+  public Object getValue() {
     return this.workingTimeType;
   }
 
@@ -59,7 +48,7 @@ public class ContractWorkingTimeType extends PeriodModel {
   }
   
   @Override
-  public void setValue(IPeriodValue value) {
+  public void setValue(Object value) {
     this.workingTimeType = (WorkingTimeType)value;
   }
   
@@ -76,6 +65,14 @@ public class ContractWorkingTimeType extends PeriodModel {
   @Override
   public ContractWorkingTimeType getPeriod() {
     return this;
+  }
+
+  @Override
+  public boolean periodValueEquals(Object otherValue) {
+    if (otherValue instanceof ContractWorkingTimeType) {
+      return this.workingTimeType.id == (((ContractWorkingTimeType) otherValue).workingTimeType.id); 
+    }
+    return false;
   }
 
 
