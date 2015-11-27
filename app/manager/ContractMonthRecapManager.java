@@ -1,5 +1,12 @@
 package manager;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -10,12 +17,9 @@ import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import manager.cache.CompetenceCodeManager;
-
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -25,13 +29,6 @@ import models.ContractWorkingTimeType;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
 import models.enumerate.Parameter;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * @author alessandro

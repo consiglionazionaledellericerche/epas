@@ -1,5 +1,17 @@
 package manager;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
@@ -12,14 +24,10 @@ import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
-
 import helpers.BadRequest;
-
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -36,7 +44,6 @@ import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
-
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
@@ -45,22 +52,9 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import play.Logger;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
 
 
 /**

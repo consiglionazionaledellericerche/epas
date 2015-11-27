@@ -1,8 +1,8 @@
 package models.exports;
 
-import models.Person;
-
 import org.joda.time.LocalDate;
+
+import models.Person;
 
 public class AbsenceFromClient {
 

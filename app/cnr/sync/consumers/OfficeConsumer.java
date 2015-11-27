@@ -1,5 +1,7 @@
 package cnr.sync.consumers;
 
+import java.util.List;
+
 import com.google.common.base.Function;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
@@ -10,8 +12,6 @@ import com.google.gson.Gson;
 import cnr.sync.dto.OfficeDTO;
 import play.Play;
 import play.libs.WS;
-
-import java.util.List;
 
 
 public class OfficeConsumer {

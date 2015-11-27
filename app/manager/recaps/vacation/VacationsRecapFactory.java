@@ -1,5 +1,11 @@
 package manager.recaps.vacation;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -7,19 +13,11 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import manager.ConfYearManager;
 import manager.VacationManager;
 import manager.cache.AbsenceTypeManager;
-
 import models.Absence;
 import models.Contract;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 public class VacationsRecapFactory {
 

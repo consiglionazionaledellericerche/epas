@@ -1,0 +1,19 @@
+#{modalAsync id:'modalInsertInstitute', button:'Elimina', title:'Modifica numero Badge'}
+
+#{panel title:'Elimina badge' , color:'danger'}
+	<div class="alert alert-warning" role="alert">
+    		Cliccando su "elimina" si cancellerà l'occorrenza del badge ${badge.code} per <strong>${badge.person.fullname}</strong>
+	</div>
+	#{form action:@deleteBadge(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }	 
+		
+		#{f.hidden 'badge.id' /}
+	    
+		<div class="container-fluid center">
+		   <input class="btn btn-danger" type="submit" value="Elimina" />
+		</div>      
+	#{/form}
+		
+#{/panel}
+
+#{/modalAsync}

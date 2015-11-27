@@ -3,6 +3,8 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
+import controllers.Resecure.NoCheck;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -21,18 +23,19 @@ import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
-import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.Play;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;

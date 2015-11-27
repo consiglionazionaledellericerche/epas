@@ -1,15 +1,5 @@
 package controllers;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 import com.google.common.base.Optional;
 
 import dao.BadgeDao;
@@ -29,6 +19,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -52,14 +43,22 @@ public class Badges extends Controller {
     notFoundIfNull(badge);
 
     // if(badgeReader.seats.isEmpty()) {
-    badge.delete();
-    flash.success(Web.msgDeleted(Badge.class));
-    BadgeReaders.list(null);
-    // }
-    flash.error(Web.msgHasErrors());
-    BadgeReaders.list(null);
+    render(badge);
   }
 
+  /**
+   * 
+   * @param badge l'oggetto badge che si vuole eliminare.
+   */
+  public static void deleteBadge(Badge badge) {
+    //final Badge badge = Badge.findById(id);
+    badge.delete();
+    flash.success(Web.msgDeleted(Badge.class));
+    Persons.list(null);
+    // }
+    flash.error(Web.msgHasErrors());
+    Persons.list(null);
+  }
   /**
    * @param id della persona a cui si intende assegnare il nuovo badge.
    */

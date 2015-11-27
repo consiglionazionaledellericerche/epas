@@ -1,11 +1,11 @@
 package models.base;
 
-import org.joda.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+
+import org.joda.time.LocalDateTime;
 
 @MappedSuperclass
 public abstract class MutableModel extends BaseModel {

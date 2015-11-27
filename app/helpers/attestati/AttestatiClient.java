@@ -3,33 +3,6 @@
  */
 package helpers.attestati;
 
-import com.google.common.collect.Lists;
-
-import dao.PersonDao;
-
-import it.cnr.iit.epas.DateUtility;
-
-import manager.ConfGeneralManager;
-
-import models.Absence;
-import models.Competence;
-import models.Office;
-import models.Person;
-import models.PersonMonthRecap;
-import models.enumerate.Parameter;
-
-import org.joda.time.LocalDate;
-import org.jsoup.Connection;
-import org.jsoup.Connection.Method;
-import org.jsoup.Connection.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import controllers.Security;
-import play.Logger;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -40,6 +13,29 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+import org.jsoup.Connection;
+import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import com.google.common.collect.Lists;
+
+import controllers.Security;
+import dao.PersonDao;
+import it.cnr.iit.epas.DateUtility;
+import manager.ConfGeneralManager;
+import models.Absence;
+import models.Competence;
+import models.Office;
+import models.Person;
+import models.PersonMonthRecap;
+import models.enumerate.Parameter;
+import play.Logger;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST con il sistema degli

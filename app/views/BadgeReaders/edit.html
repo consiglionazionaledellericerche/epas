@@ -86,7 +86,8 @@
 	  	</td>
 	  	<td>
 	  	
-	  		<li><a class="btn btn-danger btn-xs" href="@{Badges.delete(badge.id)}">Elimina associazione</a></li>
+	  		<li><a class="btn btn-danger btn-xs" href="@{Badges.delete(badge.id)}" 
+	  		data-async-modal="#modalInsertBadgeReader">Elimina associazione</a></li>
 	  	
 	  	</td>
 	  </tr>	         
@@ -120,3 +121,5 @@
   }*
 
 </div>
+
+<div id="modalInsertBadgeReader" class="modal container" tabindex="-1"></div>

@@ -1,5 +1,9 @@
 package manager.recaps.vacation;
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -8,23 +12,16 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import manager.ConfYearManager;
 import manager.VacationManager;
 import manager.cache.AbsenceTypeManager;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.enumerate.AbsenceTypeMapping;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
 
 
 /**

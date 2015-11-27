@@ -1,26 +1,24 @@
 package dao;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import it.cnr.iit.epas.DateInterval;
-
 import models.Contract;
 import models.MealTicket;
 import models.Office;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * DAO per i MealTicket.
