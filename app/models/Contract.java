@@ -154,8 +154,10 @@ public class Contract extends BaseModel implements IPeriodTarget {
   }
 
   @Override
-  public Contract getValue() {
+  public BaseModel getValue() {
     return this;
   }
+
+
 
 }
