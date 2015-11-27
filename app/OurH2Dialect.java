@@ -1,5 +1,3 @@
-
-
 import java.sql.Types;
 
 //This is to address the mapping exception when using uuid data type in PostgreSQL with Hibernate
@@ -7,9 +5,9 @@ import java.sql.Types;
 //This makes the assumption that no other fields types will be using the java.sql.Types.OTHER data type
 public class OurH2Dialect extends org.hibernate.dialect.H2Dialect {
 
-	public OurH2Dialect() {
-		super();
-		registerColumnType(Types.OTHER, "varchar");
-		registerHibernateType(Types.OTHER, "string");
-	}
+  public OurH2Dialect() {
+    super();
+    registerColumnType(Types.OTHER, "varchar");
+    registerHibernateType(Types.OTHER, "string");
+  }
 }

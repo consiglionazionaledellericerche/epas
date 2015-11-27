@@ -9,22 +9,32 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import com.google.common.base.Optional;
 
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.PersonDao;
+
 import helpers.Web;
+
 import models.Badge;
 import models.BadgeReader;
 import models.Person;
-import play.data.validation.Required;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 @With({Resecure.class, RequestInit.class})
 public class Badges extends Controller {
-  
+
   private static final Logger log = LoggerFactory.getLogger(Badges.class);
 
   @Inject
@@ -35,7 +45,6 @@ public class Badges extends Controller {
   private static BadgeDao badgeDao;
 
   /**
-   * 
    * @param id del badge che si intende eliminare.
    */
   public static void delete(Long id) {
@@ -52,7 +61,6 @@ public class Badges extends Controller {
   }
 
   /**
-   * 
    * @param id della persona a cui si intende assegnare il nuovo badge.
    */
   public static void joinPersonToBadge(Long id) {
@@ -63,39 +71,39 @@ public class Badges extends Controller {
 
   /**
    * controller che gestisce la vista di allocazione badge per la persona.
-   * @param badge il badge
+   *
+   * @param badge       il badge
    * @param badgeReader il badge reader
-   * @param person la persona
+   * @param person      la persona
    */
-  public static void allocateBadge(Badge badge, 
-      List<Long> badgeReader, Person person) {
-    
+  public static void allocateBadge(Badge badge,
+                                   List<Long> badgeReader, Person person) {
+
 //    if (validation.hasErrors()) {
 //      flash.error(Web.msgHasErrors());
 //      render("@joinPersonToBadge", badge, badgeReader, person);
 //    }   
-   
+
     for (Long id : badgeReader) {
       BadgeReader br = badgeReaderDao.byId(id);
-      Optional<Badge> check = badgeDao.byCode(badge.code, 
-          Optional.fromNullable(br));
+      Optional<Badge> check = badgeDao.byCode(badge.code,
+              Optional.fromNullable(br));
       if (check.isPresent()) {
         flash.error("Al lettore %s è già associato un badge "
-            + "con identificativo %s", br.code, badge.code);
+                + "con identificativo %s", br.code, badge.code);
         render("@joinPersonToBadge", badge, badgeReader, person);
       }
       badge.person = person;
       badge.badgeReader = br;
       badge.save();
-     
+
     }
-    flash.success("Associato il badge %s a %s per i lettori selezionati", 
-        badge.code, person.fullName());
+    flash.success("Associato il badge %s a %s per i lettori selezionati",
+            badge.code, person.fullName());
     Persons.list(null);
   }
-  
+
   /**
-   * 
    * @param id del badge su cui si vuole fare operazioni.
    */
   public static void manageBadge(Long id) {
@@ -122,14 +130,14 @@ public class Badges extends Controller {
     Optional<Badge> existingBadge = badgeDao.byCode(badge.code, 
         Optional.fromNullable(badge.badgeReader));
     if (existingBadge.isPresent()) {
-      flash.error("E' già esistente un badge con codice %s. Inserire altro codice.", badge.code);
-      render("@edit");
-    } else {      
+      flash.error("E' già esistente un badge con codice %s. "
+          + "Inserire altro codice per %s", badge.code, person.fullName());
       
+    } else {      
       person.badges.remove(badge);
       Set<Badge> badgeList = person.badges;
-      for(Badge b : badgeList){
-        if(b.badgeReader == reader){
+      for (Badge b : badgeList) {
+        if (b.badgeReader == reader) {
           b.delete();
           person.save();
           Badge newBadge = new Badge();
@@ -139,11 +147,10 @@ public class Badges extends Controller {
           newBadge.save();
         }
           
-      }     
-      
+      }      
       flash.success("Modificato codice del badge di %s", person.fullName());
-      Persons.list(null);
     }
+    Persons.list(null);
   }
 
 }

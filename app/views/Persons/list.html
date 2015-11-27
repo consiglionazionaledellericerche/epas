@@ -146,7 +146,6 @@
 		  <tr>
 			<th>&{'person.name'}</th>
 			<th>&{'person.number'}</th>
-			<th>&{'person.badgeNumber'}</th>
 			<th>&{'person.qualification'}</th>
 	        <th>&{'user.username'}</th>
 			<th>&{'person.email'}</th>
@@ -161,7 +160,6 @@
 		   <tr>
 			<td class="personName alignLeft"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
 			<td><font color="#808080">${person.value.number}</font></td>
-			<td><font color="#000000">${person.value.badgeNumber}</font></td>
 			<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
 	        <td class="alignLeft">${person.value.user.username}</td>
 	        <td><font color="#808080">${person.value.email}</font></td>

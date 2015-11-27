@@ -4,15 +4,20 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import com.mysema.query.SearchResults;
+
 import dao.BadgeReaderDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+
 import helpers.Web;
+
 import manager.BadgeManager;
 import manager.SecureManager;
+
 import models.Badge;
 import models.BadgeReader;
 import models.Office;
@@ -20,9 +25,12 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+
 import net.sf.oval.constraint.MinLength;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -36,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 
+import javax.inject.Inject;
 
 
 @With({Resecure.class, RequestInit.class})
@@ -51,7 +60,7 @@ public class BadgeReaders extends Controller {
   private static RoleDao roleDao;
   @Inject
   private static PersonDao personDao;
-  
+
   @Inject
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
@@ -73,6 +82,7 @@ public class BadgeReaders extends Controller {
 
     render(results, name);
   }
+
 
   /**
    * 
@@ -102,15 +112,14 @@ public class BadgeReaders extends Controller {
     List<IWrapperPerson> personList =
         FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
 
-
     render(badgeReader, user, badgeList, personList);
 
   }
 
   public static void blank() {
-
     render();
   }
+
 
   /**
    * 
@@ -126,12 +135,12 @@ public class BadgeReaders extends Controller {
     }
 
     rules.checkIfPermitted(badgeReader.owner);
-
     badgeReader.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
     edit(badgeReader.id);
   }
+
 
   /**
    * @param id identificativo del badge reader.
@@ -139,9 +148,9 @@ public class BadgeReaders extends Controller {
    */
   public static void changePassword(Long id, @MinLength(5) @Required String newPass) {
 
+
     final BadgeReader badgeReader = BadgeReader.findById(id);
     notFoundIfNull(badgeReader);
-
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
@@ -163,6 +172,7 @@ public class BadgeReaders extends Controller {
    */
   public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
 
+
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
@@ -175,6 +185,7 @@ public class BadgeReaders extends Controller {
       render("@blank", badgeReader, user);
     }
 
+
     Codec codec = new Codec();
     user.password = codec.hexMD5(user.password);
     user.save();
@@ -183,6 +194,7 @@ public class BadgeReaders extends Controller {
     flash.success(Web.msgSaved(BadgeReader.class));
     index();
   }
+
 
   /**
    * 
@@ -220,11 +232,13 @@ public class BadgeReaders extends Controller {
     render(uro, badgeReaderList);
   }
 
+
   /**
    * 
    * @param uro userRoleOffice a cui associare il lettore.
    */
   public static void saveJoinOffice(@Valid UsersRolesOffices uro) {
+
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -242,6 +256,7 @@ public class BadgeReaders extends Controller {
     Offices.edit(uro.office.id);
   }
 
+
   /**
    * 
    * @param uroId da cui togliere la regola per il lettore badge.
@@ -250,9 +265,7 @@ public class BadgeReaders extends Controller {
 
     UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
     notFoundIfNull(uro);
-
     rules.checkIfPermitted(uro.office);
-
     uro.delete();
 
     flash.success("Operazione avvenuta con successo.");
@@ -260,10 +273,12 @@ public class BadgeReaders extends Controller {
     Offices.edit(uro.office.id);
   }
 
+
   public static void manageBadgesIntoBadgeReaders(Long id) {
     BadgeReader badgeReader = BadgeReader.findById(id);
     render(badgeReader);
   }
+
 
   /**
    * 

@@ -9,7 +9,7 @@
   #{breadcrumbs breadcrumbs /}
    
   #{accordionGroup 'info'}
-    #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true, color:'info'}
+    #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true}
   	  <div class="alert alert-success" role="alert">
     	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
       </div>
@@ -33,7 +33,7 @@
   #{/accordionGroup}  
   
    #{accordionGroup 'ammi'}
-    #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true, color:'info'}
+    #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true}
   
     <div class="row">
       <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.blank(office.id)}" data-async-modal="#modalInsertUro">
@@ -105,7 +105,7 @@
   #{/accordionGroup}   
 
   #{accordionGroup 'badge'}
-    #{accordionItem 'badgeReader', parent:'badge', title:'Lettori Badge Abilitati', open:true, color:'info'}
+    #{accordionItem 'badgeReader', parent:'badge', title:'Lettori Badge Abilitati', open:true }
       
       <div class="row">
         <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{BadgeReaders.joinOffice(office.id)}" 

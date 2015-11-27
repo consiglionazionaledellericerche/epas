@@ -11,16 +11,22 @@ import models.WorkingTimeType;
 
 /**
  * @author marco
- *
  */
 public interface IWrapperFactory {
 
-	IWrapperPerson create(Person person);
-	IWrapperContract create(Contract contract);
-	IWrapperWorkingTimeType create(WorkingTimeType wtt);
-	IWrapperCompetenceCode create(CompetenceCode cc);
-	IWrapperOffice create(Office office);
-	IWrapperPersonDay create(PersonDay pd);
-	IWrapperContractMonthRecap create(ContractMonthRecap cmr);
-	IWrapperContractWorkingTimeType create(ContractWorkingTimeType cwtt);
+  IWrapperPerson create(Person person);
+
+  IWrapperContract create(Contract contract);
+
+  IWrapperWorkingTimeType create(WorkingTimeType wtt);
+
+  IWrapperCompetenceCode create(CompetenceCode cc);
+
+  IWrapperOffice create(Office office);
+
+  IWrapperPersonDay create(PersonDay pd);
+
+  IWrapperContractMonthRecap create(ContractMonthRecap cmr);
+
+  IWrapperContractWorkingTimeType create(ContractWorkingTimeType cwtt);
 }

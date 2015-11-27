@@ -22,7 +22,6 @@ body {
     height: 100%;
     margin-bottom:  -70px;
     background: white;
-   
 }
 
 #page_content{
@@ -167,14 +166,14 @@ footer p {
 
 #nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
 	padding-right: 2px;
-	padding-left: 4px;
+	padding-left: 2px;
 }
 
 #nav-year .badge, #nav-month .badge {
-	background-color: white;
+	background-color: #FFFFFF; /* bianco */
 	font-size: 1.1em;
 	display: inline;
-    color: #555555;
+    color: #033C73; /* blu scuro */
 }
 
 .my-navbar-form {

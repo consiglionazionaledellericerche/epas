@@ -11,6 +11,7 @@
 
 <div class="container" id="updateWtt">
 
+#{panel title:'Configurazione Attuale', color:'primary'}
 <table class="table table-bordered table-condensed center">
   <tr>
     <th>Dal</th>
@@ -25,6 +26,7 @@
   </tr>
   #{/list}
 </table>
+#{/panel}
 
 <div class="alert alert-info">
   <p>Utilizzare questa form per definire il nuovo periodo di tipo orario selezionando la data di inizio e la data di fine periodo.</p>
@@ -53,32 +55,8 @@
 		  #{f.simpleView 'cwtt.workingTimeType' /}
 		  #{f.hidden 'cwtt.workingTimeType.id' /}
 		  
-		  #{alert color:'danger'}
-		    <p>Nuova configurazione</p>
-		    <table class="table table-bordered table-condensed center">
-			  <tr>
-			    <th>Dal</th>
-			    <th>Al</th>
-				<th>Tip Orario</th>
-			  </tr>
-			  #{list items:cwttRecaps, as:'cwttRecap'}
-			  <tr>
-			    <td>${cwttRecap.beginDate.format()}</td>
-				<td>#{if cwttRecap.endDate} ${cwttRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-				<td>${cwttRecap.workingTimeType.description}</td>
-			  </tr>
-			  #{/list}
-		  	</table>
-		    #{if recomputeFrom != null}
-	 	        <p>ePAS effettuerà il ricalcolo di tutti i dati del dipendente 
-	 	        dal <strong>${recomputeFrom.format()}</strong>
-	 	        al <strong>${recomputeTo.format()}</strong> 
-	 	        per un totale di <strong>${days}</strong> giorni.</p>			
-	 	    #{/if}
-		  #{/alert}
-		  #{b.buttons center:true}
-		   #{b.submit 'Conferma'/}
-		 #{/b.buttons}
+		  #{recomputeRecap recomputeRecap:recomputeRecap /}
+		 
 	#{/else}
 	 
 #{/form}
