@@ -1,12 +1,11 @@
 package cnr.sync.jobs;
 
-import models.Office;
-import models.Person;
+import javax.inject.Inject;
 
 import cnr.sync.manager.SyncManager;
+import models.Office;
+import models.Person;
 import play.jobs.Job;
-
-import javax.inject.Inject;
 
 //@On("0 10 6 ? * MON")
 //@On("0 40 10 * * ?")

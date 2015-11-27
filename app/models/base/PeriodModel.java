@@ -4,8 +4,6 @@ import com.google.common.base.Optional;
 
 import it.cnr.iit.epas.DateUtility;
 
-import models.ContractWorkingTimeType;
-
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;

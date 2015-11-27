@@ -1,18 +1,17 @@
 package dao;
 
-import com.google.inject.Provider;
+import java.util.List;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Person;
 import models.PersonChildren;
 import models.query.QPersonChildren;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 
 /**

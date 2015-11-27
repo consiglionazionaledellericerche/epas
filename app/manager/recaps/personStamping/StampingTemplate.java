@@ -1,15 +1,14 @@
 package manager.recaps.personStamping;
 
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+
 import manager.PersonDayManager;
 import manager.cache.StampTypeManager;
-
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 /**
  * Oggetto che modella la singola timbratura nelle viste personStamping e stampings.

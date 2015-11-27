@@ -1,10 +1,9 @@
-import models.Person;
-
 import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import controllers.shib.MockShibboleth;
+import models.Person;
 import play.Logger;
 import play.mvc.Http;
 import play.mvc.Http.Response;

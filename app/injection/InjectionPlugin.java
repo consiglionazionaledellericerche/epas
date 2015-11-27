@@ -1,19 +1,19 @@
 package injection;
 
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import play.Play;
 import play.PlayPlugin;
 import play.inject.BeanSource;
-
-import java.util.Set;
 
 /**
  * @author marco

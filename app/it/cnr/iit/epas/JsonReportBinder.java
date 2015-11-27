@@ -1,19 +1,18 @@
 package it.cnr.iit.epas;
 
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import org.apache.commons.codec.binary.Base64;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import models.exports.ReportFromJson;
-
-import org.apache.commons.codec.binary.Base64;
-
 import play.Logger;
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 public class JsonReportBinder implements TypeBinder<ReportFromJson> {
 

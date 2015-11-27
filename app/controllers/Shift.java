@@ -1,10 +1,14 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import controllers.Resecure.BasicAuth;
 
 import dao.AbsenceDao;
 import dao.PersonDao;
@@ -36,14 +40,12 @@ import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import org.slf4j.LoggerFactory;
 
-import controllers.Resecure.BasicAuth;
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
-import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 import play.mvc.With;
 

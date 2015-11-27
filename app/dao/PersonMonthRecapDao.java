@@ -1,8 +1,14 @@
 package dao;
 
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -12,13 +18,6 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * @author dario
