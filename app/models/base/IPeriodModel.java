@@ -64,13 +64,20 @@ public interface IPeriodModel<T extends PeriodModel> {
    * Il valore del periodo. 
    * @return
    */
-  IPeriodValue getValue();
+  Object getValue();
   
   /**
    * Imposta il valore del periodo. 
    * @return
    */
-  void setValue(IPeriodValue value);
+  void setValue(Object value);
+  
+  /**
+   * Se il valore di otherValue è lo stesso del value del periodo.
+   * @param other
+   * @return
+   */
+  boolean periodValueEquals(Object otherValue);
   
 
   /**

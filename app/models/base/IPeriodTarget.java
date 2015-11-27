@@ -18,4 +18,5 @@ import java.util.List;
 public interface IPeriodTarget<T extends BaseModel> {
 
   T getValue();
+
 }
