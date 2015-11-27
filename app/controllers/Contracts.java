@@ -125,9 +125,9 @@ public class Contracts extends Controller {
    * @param onCertificate  in attestati
    * @param confirmed      step di conferma
    */
-  public static void update(@Valid Contract contract, @Required LocalDate beginContract,
-                            @Valid LocalDate expireContract, @Valid LocalDate endContract, boolean onCertificate,
-                            boolean confirmed) {
+  public static void update(@Valid Contract contract, @Required LocalDate beginContract, 
+      @Valid LocalDate expireContract, @Valid LocalDate endContract, 
+      boolean onCertificate, boolean confirmed) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -177,61 +177,21 @@ public class Contracts extends Controller {
               onCertificate);
     }
 
-    //riepilogo delle modifiche
-    boolean initMissing = false;
-    boolean changeBegin = false;
-    boolean reduceEnd = false;          //onlyRecap
-    boolean incrementEndInPast = false;
-    LocalDate recomputeFrom = null;
-    LocalDate recomputeTo = null;
-
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
-    if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
-      changeBegin = true;
-      if (newInterval.getBegin().isBefore(LocalDate.now())) {
-        recomputeFrom = newInterval.getBegin();
-      }
-    }
-    if (recomputeFrom == null) {
-      if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
-        // scorcio allora solo riepiloghi
-        if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
-          reduceEnd = true;
-          recomputeFrom = newInterval.getEnd();
-        }
-        // allungo ma se inglobo passato allora ricalcolo
-        if (newInterval.getEnd().isAfter(previousInterval.getEnd())
-                && previousInterval.getEnd().isBefore(LocalDate.now())) {
-          incrementEndInPast = true;
-          recomputeFrom = previousInterval.getEnd();
-        }
-      }
-    }
-    if (recomputeFrom != null) {
-      recomputeTo = newInterval.getEnd();
-      if (!recomputeTo.isBefore(LocalDate.now())) {
-        recomputeTo = LocalDate.now();
-      }
-    }
-    if (wrappedContract.initializationMissing()) {
-      initMissing = true;
-      recomputeFrom = null;
-    }
-
+    RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval, 
+        wrappedContract.initializationMissing());
+    
     //conferma 
     if (!confirmed) {
       confirmed = true;
-      int days = 0;
-      if (recomputeFrom != null) {
-        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
-      }
       response.status = 400;
       render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
-              onCertificate, changeBegin, reduceEnd, incrementEndInPast, initMissing,
-              recomputeFrom, recomputeTo, days);
+              onCertificate, recomputeRecap);
     } else {
-      if (recomputeFrom != null) {
-        contractManager.properContractUpdate(contract, recomputeFrom, false);
+      if (recomputeRecap.recomputeFrom != null) {
+        contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
+      } else {
+        contractManager.properContractUpdate(contract, LocalDate.now(), false);
       }
       boolean success = true;
       confirmed = false;
