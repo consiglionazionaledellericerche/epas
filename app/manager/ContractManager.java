@@ -144,8 +144,8 @@ public class ContractManager {
 
     ContractStampProfile csp = new ContractStampProfile();
     csp.contract = contract;
-    csp.startFrom = contract.beginContract;
-    csp.endTo = contract.expireContract;
+    csp.beginDate = contract.beginContract;
+    csp.endDate = contract.expireContract;
     csp.fixedworkingtime = false;
     csp.save();
     contract.contractStampProfile.add(csp);
@@ -339,7 +339,7 @@ public class ContractManager {
     List<ContractStampProfile> toDelete = Lists.newArrayList();
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     for (ContractStampProfile csp : contract.contractStampProfile) {
-      DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
+      DateInterval cspInterval = new DateInterval(csp.beginDate, csp.endDate);
       if (DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(),
               cspInterval) == null) {
         toDelete.add(csp);
@@ -356,13 +356,13 @@ public class ContractManager {
 
     // Sistemo il primo
     ContractStampProfile first = cspList.get(0);
-    first.startFrom = wrappedContract.getContractDateInterval().getBegin();
+    first.beginDate = wrappedContract.getContractDateInterval().getBegin();
     first.save();
     // Sistemo l'ultimo
     ContractStampProfile last = cspList.get(contract.contractStampProfile.size() - 1);
-    last.endTo = wrappedContract.getContractDateInterval().getEnd();
-    if (DateUtility.isInfinity(last.endTo)) {
-      last.endTo = null;
+    last.endDate = wrappedContract.getContractDateInterval().getEnd();
+    if (DateUtility.isInfinity(last.endDate)) {
+      last.endDate = null;
     }
     last.save();
     contract.save();

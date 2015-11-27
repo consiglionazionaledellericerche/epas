@@ -82,6 +82,7 @@
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
 			<th>Data terminazione<br>esperienza</th>
+			<th>Gestisci</th>
 		</tr>
         #{list items:contractList, as:'contract'}
 
@@ -197,6 +198,11 @@
 			  </a>
 			</td>
 			}*
+			<td>
+			#{b.buttons center:true}
+          	  #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+        	#{/b.buttons}
+			</td>
 		</tr>
 	    #{/if}
 	  #{/list}

@@ -3,7 +3,6 @@ package controllers;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
@@ -17,25 +16,18 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
-import manager.ContractStampProfileManager;
 import manager.EmailManager;
 import manager.OfficeManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
 
-import models.BadgeReader;
-
 import models.Contract;
-import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
@@ -58,6 +50,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -93,8 +86,6 @@ public class Persons extends Controller {
   private static PersonManager personManager;
   @Inject
   private static ContractDao contractDao;
-  @Inject
-  private static ContractStampProfileManager contractStampProfileManager;
   @Inject
   private static UserDao userDao;
   @Inject
@@ -435,119 +426,6 @@ public class Persons extends Controller {
 
     childrenList(person.id);
   }
-
-  public static void updateContractStampProfile(Long id) {
-
-    ContractStampProfile contract = contractDao.getContractStampProfileById(id);
-    if (contract == null) {
-
-      flash.error("Contratto inesistente. Operazione annullata.");
-      list(null);
-    }
-
-    rules.checkIfPermitted(contract.contract.person.office);
-
-    List<String> listTipo = Lists.newArrayList();
-
-    listTipo.add("Timbratura automatica");
-    listTipo.add("Timbratura manuale");
-
-    render(contract, listTipo);
-  }
-
-  public static void changeTypeOfContractStampProfile(
-          ContractStampProfile contract, String newtipo) {
-
-    if (contract == null || newtipo == null) {
-
-      flash.error("Impossibile completare la richiesta, controllare i log.");
-      Application.indexAdmin();
-    }
-
-    rules.checkIfPermitted(contract.contract.person.office);
-
-    if (newtipo.equals("Timbratura automatica")) {
-      contract.fixedworkingtime = true;
-    } else {
-      contract.fixedworkingtime = false;
-    }
-
-    contract.save();
-
-    contractManager.recomputeContract(contract.contract,
-            Optional.fromNullable(contract.startFrom), false, false);
-
-    flash.success("Cambiata correttamente tipologia di timbratura "
-            + "per il periodo a %s.", newtipo);
-
-    edit(contract.contract.person.id);
-
-  }
-
-  public static void splitContractStampProfile(ContractStampProfile contract, LocalDate splitDate) {
-    if (contract == null) {
-
-      flash.error("Impossibile completare la richiesta, controllare i log.");
-      Application.indexAdmin();
-    }
-
-    rules.checkIfPermitted(contract.contract.person.office);
-
-    if (validation.hasError("splitDate")) {
-
-      flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
-      edit(contract.contract.person.id);
-    }
-
-    if (!DateUtility.isDateIntoInterval(splitDate, new DateInterval(contract.startFrom, contract.endTo))) {
-
-      flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
-      edit(contract.contract.person.id);
-    }
-    DateInterval first = new DateInterval(contract.startFrom, splitDate.minusDays(1));
-    if (!DateUtility.isIntervalIntoAnother(first, wrapperFactory.create(contract.contract).getContractDateInterval())) {
-      flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
-      edit(contract.contract.person.id);
-    }
-
-    contractStampProfileManager.splitContractStampProfile(contract, splitDate);
-    flash.success("Tipo timbratura suddivisa in due sottoperiodi con valore %s.", contract.fixedworkingtime);
-    edit(contract.contract.person.id);
-
-  }
-
-  public static void deleteContractStampProfile(Long contractStampProfileId) {
-    ContractStampProfile csp = contractDao.getContractStampProfileById(contractStampProfileId);
-    if (csp == null) {
-
-      flash.error("Impossibile completare la richiesta, controllare i log.");
-      Application.indexAdmin();
-    }
-
-    rules.checkIfPermitted(csp.contract.person.office);
-
-    Contract contract = csp.contract;
-
-    int index = contractManager.getContractStampProfileAsList(contract).indexOf(csp);
-    if (contractManager.getContractStampProfileAsList(contract).size() < index) {
-
-      flash.error("Impossibile completare la richiesta, controllare i log.");
-      edit(csp.contract.person.id);
-    }
-    ContractStampProfile previous = contractManager.getContractStampProfileAsList(contract).get(index - 1);
-    contractStampProfileManager.deleteContractStampProfile(contract, index, csp);
-
-    //Ricalcolo i valori
-    contractManager.recomputeContract(previous.contract,
-            Optional.fromNullable(csp.startFrom), false, false);
-
-    flash.success("Tipologia di timbratura eliminata correttamente. "
-            + "Tornati alla precedente che ha timbratura automatica "
-            + "con valore: %s", previous.fixedworkingtime);
-
-    edit(csp.contract.person.id);
-  }
-
 
   public static void modifySendEmail(Long personId) {
 

@@ -215,11 +215,9 @@ public class PeriodManager {
       }
     }
     
-    if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
-      recomputeRecap.needRecomputation = false;
-    }
-
-    recomputeRecap.days = days(recomputeRecap);
+   setDays(recomputeRecap);
+   
+   setNeedRecap(recomputeRecap);
     
     return recomputeRecap;
   }
@@ -266,7 +264,9 @@ public class PeriodManager {
       recomputeRecap.recomputeFrom = null;
     }
     
-    recomputeRecap.days = days(recomputeRecap);
+    setDays(recomputeRecap);
+    
+    setNeedRecap(recomputeRecap);
     
     return recomputeRecap;
   }
@@ -276,13 +276,24 @@ public class PeriodManager {
    * @param recomputeRecap
    * @return
    */
-  private int days(RecomputeRecap recomputeRecap) {
+  private void setDays(RecomputeRecap recomputeRecap) {
     if (recomputeRecap.recomputeFrom != null && 
         !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
-      return DateUtility.daysInInterval(
+      recomputeRecap.days = DateUtility.daysInInterval(
           new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
+    } else {
+      recomputeRecap.days = 0;
     }
-    return 0;
+  }
+  
+  private void setNeedRecap(RecomputeRecap recomputeRecap) {
+    if (recomputeRecap.recomputeFrom == null || 
+        recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+      recomputeRecap.needRecomputation = false;
+    } else {
+      recomputeRecap.needRecomputation = true;
+    }
+
   }
   
 }
