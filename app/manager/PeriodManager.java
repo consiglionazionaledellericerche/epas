@@ -218,15 +218,71 @@ public class PeriodManager {
     if (recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.needRecomputation = false;
     }
-    
-    
-    if (recomputeRecap.recomputeFrom != null && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
-      recomputeRecap.days = DateUtility.daysInInterval(
-          new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
-    }
+
+    recomputeRecap.days = days(recomputeRecap);
     
     return recomputeRecap;
+  }
+  
+  /**
+   * Quando modifico le date del target. 
+   * 
+   * @param previousInterval l'intervallo del target precedente
+   * @param newInterval l'intervallo del target nuovo
+   * @param initMissing se col nuovo intervallo manca l'inizializzazione del target
+   * @return
+   */
+  public RecomputeRecap buildTargetRecap(DateInterval previousInterval, 
+      DateInterval newInterval, boolean initMissing) {
     
+    RecomputeRecap recomputeRecap = new RecomputeRecap();
+
+    if (!newInterval.getBegin().isEqual(previousInterval.getBegin())) {
+      if (newInterval.getBegin().isBefore(LocalDate.now())) {
+        recomputeRecap.recomputeFrom = newInterval.getBegin();
+      }
+    }
+    if (recomputeRecap.recomputeFrom == null) {
+      if (!newInterval.getEnd().isEqual(previousInterval.getEnd())) {
+        // scorcio allora solo riepiloghi
+        if (newInterval.getEnd().isBefore(previousInterval.getEnd())) {
+          recomputeRecap.recomputeFrom = newInterval.getEnd();
+        }
+        // allungo ma se inglobo passato allora ricalcolo
+        if (newInterval.getEnd().isAfter(previousInterval.getEnd())
+                && previousInterval.getEnd().isBefore(LocalDate.now())) {
+          recomputeRecap.recomputeFrom = previousInterval.getEnd();
+        }
+      }
+    }
+    if (recomputeRecap.recomputeFrom != null) {
+      recomputeRecap.recomputeTo = Optional.fromNullable(newInterval.getEnd());
+      if (!recomputeRecap.recomputeTo.get().isBefore(LocalDate.now())) {
+        recomputeRecap.recomputeTo = Optional.fromNullable(LocalDate.now());
+      }
+    }
+    if (initMissing) {
+      recomputeRecap.initMissing = true;
+      recomputeRecap.recomputeFrom = null;
+    }
+    
+    recomputeRecap.days = days(recomputeRecap);
+    
+    return recomputeRecap;
+  }
+  
+  /**
+   * 
+   * @param recomputeRecap
+   * @return
+   */
+  private int days(RecomputeRecap recomputeRecap) {
+    if (recomputeRecap.recomputeFrom != null && 
+        !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+      return DateUtility.daysInInterval(
+          new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
+    }
+    return 0;
   }
   
 }
