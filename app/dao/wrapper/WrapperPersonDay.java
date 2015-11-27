@@ -209,7 +209,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 
     for (ContractStampProfile csp : contract.get().contractStampProfile) {
 
-      DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
+      DateInterval cspInterval = new DateInterval(csp.beginDate, csp.endDate);
 
       if (DateUtility.isDateIntoInterval(this.value.date, cspInterval)) {
         this.isFixedTimeAtWorkk = csp.fixedworkingtime;

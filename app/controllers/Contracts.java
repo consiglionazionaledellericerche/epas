@@ -375,8 +375,7 @@ public class Contracts extends Controller {
     render(wrappedContract, contract, csp);
   }
 
-  public static void saveContractStampProfile(@Valid ContractStampProfile csp, 
-      boolean confirmed) {
+  public static void saveContractStampProfile(@Valid ContractStampProfile csp, boolean confirmed) {
 
     notFoundIfNull(csp);
     notFoundIfNull(csp.contract);
@@ -387,12 +386,12 @@ public class Contracts extends Controller {
     Contract contract = csp.contract;
 
     if (!validation.hasErrors()) {
-      if (!DateUtility.isDateIntoInterval(csp.startFrom, wrappedContract.getContractDateInterval())) {
-        validation.addError("csp.startFrom", "deve appartenere al contratto");
+      if (!DateUtility.isDateIntoInterval(csp.beginDate, wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.beginDate", "deve appartenere al contratto");
       }
-      if (csp.endTo != null &&
-              !DateUtility.isDateIntoInterval(csp.endTo, wrappedContract.getContractDateInterval())) {
-        validation.addError("csp.endTo", "deve appartenere al contratto");
+      if (csp.endDate != null &&
+              !DateUtility.isDateIntoInterval(csp.endDate, wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.endDate", "deve appartenere al contratto");
       }
     }
 
@@ -402,34 +401,32 @@ public class Contracts extends Controller {
 
       log.warn("validation errors: {}", validation.errorsMap());
 
-      render("@updateContractWorkingTimeType", csp, contract);
+      render("@updateContractStampProfile", csp, contract);
     }
 
-//    rules.checkIfPermitted(cwtt.workingTimeType.office);
-//
-//    //riepilogo delle modifiche
-//    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, cwtt, false);
-//    RecomputeRecap recomputeRecap = 
-//        buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
-//            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
-//
-//    recomputeRecap.initMissing = wrappedContract.initializationMissing();
-//    
-//    if (!confirmed) {
-//      confirmed = true;
-//      render("@updateContractWorkingTimeType", contract, cwtt, confirmed, recomputeRecap);
-//    } else {
-//
-//      periodManager.updatePeriods(contract, cwtt, true);
-//      contract = contractDao.getContractById(contract.id);
-//      contract.person.refresh();
-//      if (recomputeRecap.needRecomputation) {
-//        contractManager.recomputeContract(contract,
-//            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
-//      }
-//      //todo il messaggio di conferma nel flash.
-//      updateContractWorkingTimeType(contract.id);
-//    }
+    //riepilogo delle modifiche
+    List<PeriodModel> periodRecaps = periodManager.updatePeriods(contract, csp, false);
+    RecomputeRecap recomputeRecap = 
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+    
+    if (!confirmed) {
+      confirmed = true;
+      render("@updateContractStampProfile", contract, csp, confirmed, recomputeRecap);
+    } else {
+
+      periodManager.updatePeriods(contract, csp, true);
+      contract = contractDao.getContractById(contract.id);
+      contract.person.refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+      //todo il messaggio di conferma nel flash.
+      updateContractStampProfile(contract.id);
+    }
 
   }
 
@@ -463,8 +460,8 @@ public class Contracts extends Controller {
    * @param sourceDateResidual nuova data inizializzazione
    * @param confirmed          step di conferma ricevuta
    */
-  public static void saveResidualSourceContract(@Valid final Contract contract,
-                                                @Valid final LocalDate sourceDateResidual, boolean confirmed) {
+  public static void saveResidualSourceContract(@Valid final Contract contract, 
+      @Valid final LocalDate sourceDateResidual, boolean confirmed) {
 
     notFoundIfNull(contract);
 
@@ -563,8 +560,8 @@ public class Contracts extends Controller {
    * @param sourceDateMealTicket nuova data inizializzazione
    * @param confirmed            step di conferma ricevuta
    */
-  public static void saveMealTicketSourceContract(@Valid final Contract contract,
-                                                  @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmed) {
+  public static void saveMealTicketSourceContract(@Valid final Contract contract, 
+      @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmed) {
 
     notFoundIfNull(contract);
 
