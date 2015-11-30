@@ -113,9 +113,9 @@ public class Persons extends Controller {
   public static void save(@Valid @Required Person person,
                           @Valid Contract contract) {
 
-    if (contract.expireContract != null
-            && !contract.expireContract.isAfter(contract.beginContract)) {
-      Validation.addError("contract.expireContract",
+    if (contract.endDate != null
+            && !contract.endDate.isAfter(contract.beginDate)) {
+      Validation.addError("contract.endDate",
               "Dev'essere successivo all'inizio del contratto");
     }
 

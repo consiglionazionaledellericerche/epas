@@ -113,7 +113,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     //Non stesso contratto
-    // TODO: (equivalente a caso this.value.equals(begincontract)
+    // TODO: (equivalente a caso this.value.equals(beginDate)
     if (!DateUtility.isDateIntoInterval(candidate.date,
             factory.create(this.getPersonDayContract().get()).getContractDateInterval())) {
       return;

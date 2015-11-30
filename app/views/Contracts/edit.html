@@ -48,8 +48,8 @@
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 		<!-- Form input -->
 		#{if !confirmed }
-			#{f.date 'beginContract', value:beginContract?.format() /}
-	    	#{f.date 'expireContract', value:expireContract?.format() /}
+			#{f.date 'beginDate', value:beginDate?.format() /}
+	    	#{f.date 'endDate', value:endDate?.format() /}
 	    	#{f.date 'endContract', value:endContract?.format() /}
 	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
 	    	
@@ -66,8 +66,8 @@
 		<!-- Form di conferma -->
 		#{else}
 		
-			#{f.simpleView 'beginContract', value:beginContract?.format(), hidden:true /}
-			#{f.simpleView 'expireContract', value:expireContract?.format(), hidden:true /}
+			#{f.simpleView 'beginDate', value:beginDate?.format(), hidden:true /}
+			#{f.simpleView 'endDate', value:endDate?.format(), hidden:true /}
 			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			<input type="hidden" name="confirmed" value="true" />

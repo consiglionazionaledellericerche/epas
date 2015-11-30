@@ -323,12 +323,12 @@ public class ExportToYaml {
     for (Contract c : person.contracts) {
       out = out + getFormattedHeader("Contract", "c" + c.id);
       out = out + getFormattedProperty("person", "person" + person.id);
-      if (c.beginContract != null)
-        out = out + getFormattedProperty("beginContract", "'" + c.beginContract + "'");
+      if (c.beginDate != null)
+        out = out + getFormattedProperty("beginDate", "'" + c.beginDate + "'");
       if (c.endContract != null)
         out = out + getFormattedProperty("endContract", "'" + c.endContract + "'");
-      if (c.expireContract != null)
-        out = out + getFormattedProperty("expireContract", "'" + c.expireContract + "'");
+      if (c.endDate != null)
+        out = out + getFormattedProperty("endDate", "'" + c.endDate + "'");
       out = out + getFormattedProperty("onCertificate", c.onCertificate + "");
     }
     return out;

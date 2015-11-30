@@ -11,8 +11,8 @@
 		        'data-async':'#page_content', 'data-async-error':'#insertContract'}
 	
 	  <input type="hidden" name="contract.person.id" value="${contract.person.id}"/>
-	  #{f.date 'contract.beginContract', required:true /}
-	  #{f.date 'contract.expireContract' /}
+	  #{f.date 'contract.beginDate', required:true /}
+	  #{f.date 'contract.endDate' /}
 	  *{ #{f.date 'contract.endContract' /} }*
 	  #{f.booleanRadio 'contract.onCertificate' /}
 	  

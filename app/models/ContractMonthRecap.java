@@ -179,7 +179,7 @@ public class ContractMonthRecap extends BaseModel {
     LocalDate beginMonth = new LocalDate(this.year, this.month, 1);
     LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
     DateInterval monthInterval = new DateInterval(beginMonth, endMonth);
-    LocalDate endContract = this.contract.expireContract;
+    LocalDate endContract = this.contract.endDate;
     if (this.contract.endContract != null) {
       endContract = this.contract.endContract;
     }

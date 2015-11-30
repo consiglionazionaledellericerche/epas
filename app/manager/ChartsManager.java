@@ -335,17 +335,17 @@ public class ChartsManager {
       String situazione = "";
       List<Contract> contractList = personDao.getContractList(p, beginDate, endDate);
 
-      LocalDate beginContract = null;
+      LocalDate beginDateAUX = null;
       if (contractList.isEmpty())
         contractList.addAll(p.contracts);
 
       for (Contract contract : contractList) {
-        if (beginContract != null && beginContract.equals(contract.beginContract)) {
+        if (beginDateAUX != null && beginDateAUX.equals(contract.beginDate)) {
           log.error("Due contratti uguali nella stessa lista di contratti per {} : come è possibile!?!?", p.getFullname());
 
         } else {
           IWrapperContract c = wrapperFactory.create(contract);
-          beginContract = contract.beginContract;
+          beginDateAUX = contract.beginDate;
           YearMonth actual = new YearMonth(year, 1);
           YearMonth last = new YearMonth(year, 12);
           while (!actual.isAfter(last)) {

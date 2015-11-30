@@ -170,7 +170,7 @@ public class Administration extends Controller {
       Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
       if (contract.isPresent()) {
-        if (contract.get().sourceDateResidual == null && contract.get().beginContract.isBefore(initUse)) {
+        if (contract.get().sourceDateResidual == null && contract.get().beginDate.isBefore(initUse)) {
           Contract c = contract.get();
           c.sourceDateResidual = initUse.minusDays(1);
           c.sourcePermissionUsed = 0;
@@ -307,7 +307,7 @@ public class Administration extends Controller {
       contractManager.buildVacationPeriods(contract);
 
       log.info("Il contratto di {} iniziato il {} non è stato ripristinato con i piani ferie corretti.",
-              contract.person.fullName(), contract.beginContract);
+              contract.person.fullName(), contract.beginDate);
     }
 
     utilities();

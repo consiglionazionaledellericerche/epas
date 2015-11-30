@@ -29,10 +29,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-
-/**
- * @author dario
- */
 @Entity
 @Table(name = "contracts")
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
@@ -84,16 +80,6 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
-  // TODO: trasformare in begin_date
-  @Required
-  @NotNull
-  @Column(name = "begin_contract")
-  public LocalDate beginContract;
-
-  // TODO: trasformare in end_date
-  @Column(name = "expire_contract")
-  public LocalDate expireContract;
-
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
   @Column(name = "end_contract")
@@ -112,10 +98,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
   public List<MealTicket> mealTickets;
-  /**
-   * I contratti con onCertificate = true sono quelli dei dipendenti CNR e corrispondono a quelli
-   * con l'obbligo dell'attestato di presenza da inviare a Roma
-   */
+
   @Required
   public boolean onCertificate = true;
 
@@ -124,8 +107,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Override
   public String toString() {
-    return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
-            id, person.id, beginContract, expireContract, endContract);
+    return String.format("Contract[%d] - person.id = %d, "
+        + "beginDate = %s, endDate = %s, endContract = %s",
+            id, person.id, beginDate, endDate, endContract);
   }
 
   /**
@@ -169,7 +153,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     if (this.endContract != null) {
       return this.endContract;
     } 
-    return this.expireContract;
+    return this.endDate;
   }
 
 

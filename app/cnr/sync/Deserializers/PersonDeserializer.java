@@ -1,11 +1,5 @@
 package cnr.sync.Deserializers;
 
-import java.lang.reflect.Type;
-
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -15,6 +9,12 @@ import com.google.gson.JsonParseException;
 
 import models.Contract;
 import models.Person;
+
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.lang.reflect.Type;
 
 public class PersonDeserializer implements JsonDeserializer<Person> {
 
@@ -65,7 +65,7 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
       for (JsonElement je : contracts) {
         JsonObject jcontract = (JsonObject) je;
         Contract contract = new Contract();
-        contract.beginContract = LocalDate.parse(jcontract.get("beginContract").getAsString(), dtf);
+        contract.beginDate = LocalDate.parse(jcontract.get("beginContract").getAsString(), dtf);
       }
       JsonObject contact = contacts.iterator().next().getAsJsonObject();
       person.telephone = contact.get("telephone").getAsString();

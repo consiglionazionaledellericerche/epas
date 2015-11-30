@@ -12,9 +12,9 @@
 		#{list items:contractList, as:'contract'}
 		<tr>
 			<td>${contract.person.surname} ${contract.person.name}</td>
-			<td>${contract.beginContract?.format()}</td>
+			<td>${contract.beginDate?.format()}</td>
 			<td>
-				${contract.expireContract?.format()}
+				${contract.endDate?.format()}
 			</td>
 		</tr>
 		#{/list}

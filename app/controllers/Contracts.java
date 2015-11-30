@@ -105,12 +105,12 @@ public class Contracts extends Controller {
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
-    LocalDate beginContract = contract.beginContract;
-    LocalDate expireContract = contract.expireContract;
+    LocalDate beginDate = contract.beginDate;
+    LocalDate endDate = contract.endDate;
     LocalDate endContract = contract.endContract;
     boolean onCertificate = contract.onCertificate;
 
-    render(person, contract, wrappedContract, beginContract, expireContract, endContract,
+    render(person, contract, wrappedContract, beginDate, endDate, endContract,
             onCertificate);
   }
 
@@ -118,14 +118,14 @@ public class Contracts extends Controller {
    * Aggiornamento date e on certificate contratto.
    *
    * @param contract       contract
-   * @param beginContract  inizio
-   * @param expireContract scadenza
+   * @param beginDate  inizio
+   * @param endDate scadenza
    * @param endContract    terminazione
    * @param onCertificate  in attestati
    * @param confirmed      step di conferma
    */
-  public static void update(@Valid Contract contract, @Required LocalDate beginContract, 
-      @Valid LocalDate expireContract, @Valid LocalDate endContract, 
+  public static void update(@Valid Contract contract, @Required LocalDate beginDate, 
+      @Valid LocalDate endDate, @Valid LocalDate endContract, 
       boolean onCertificate, boolean confirmed) {
 
     notFoundIfNull(contract);
@@ -135,17 +135,17 @@ public class Contracts extends Controller {
 
     if (!validation.hasErrors()) {
       if (contract.sourceDateResidual != null
-              && contract.sourceDateResidual.isBefore(beginContract)) {
-        validation.addError("beginContract",
+              && contract.sourceDateResidual.isBefore(beginDate)) {
+        validation.addError("beginDate",
                 "non può essere successiva alla data di inizializzazione");
       }
-      if (expireContract != null && expireContract.isBefore(beginContract)) {
-        validation.addError("expireContract", "non può precedere l'inizio del contratto.");
+      if (endDate != null && endDate.isBefore(beginDate)) {
+        validation.addError("endDate", "non può precedere l'inizio del contratto.");
       }
-      if (endContract != null && endContract.isBefore(beginContract)) {
+      if (endContract != null && endContract.isBefore(beginDate)) {
         validation.addError("endContract", "non può precedere l'inizio del contratto.");
       }
-      if (expireContract != null && endContract != null && !endContract.isBefore(beginContract)) {
+      if (endDate != null && endContract != null && !endContract.isBefore(beginDate)) {
         validation.addError("endContract", "non può essere successivo alla scadenza del contratto");
       }
     }
@@ -157,7 +157,7 @@ public class Contracts extends Controller {
 
       log.warn("validation errors: {}", validation.errorsMap());
 
-      render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
+      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
               onCertificate);
     }
 
@@ -165,14 +165,14 @@ public class Contracts extends Controller {
     DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
-    contract.beginContract = beginContract;
-    contract.expireContract = expireContract;
+    contract.beginDate = beginDate;
+    contract.endDate = endDate;
     contract.endContract = endContract;
     contract.onCertificate = onCertificate;
     if (!contractManager.isProperContract(contract)) {
       validation.addError("contract.crossValidationFailed",
               "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
-      render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
+      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
               onCertificate);
     }
 
@@ -184,7 +184,7 @@ public class Contracts extends Controller {
     if (!confirmed) {
       confirmed = true;
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginContract, expireContract, endContract,
+      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
               onCertificate, recomputeRecap);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
@@ -195,7 +195,7 @@ public class Contracts extends Controller {
       boolean success = true;
       confirmed = false;
       Person person = contract.person;
-      render("@edit", person, contract, wrappedContract, beginContract, expireContract, endContract,
+      render("@edit", person, contract, wrappedContract, beginDate, endDate, endContract,
               onCertificate, success);
     }
 
@@ -234,14 +234,14 @@ public class Contracts extends Controller {
 
     if (!validation.hasErrors()) {
 
-      if (contract.expireContract != null
-              && contract.expireContract.isBefore(contract.beginContract)) {
-        validation.addError("contract.expireContract", "non può precedere l'inizio del contratto.");
+      if (contract.endDate != null
+              && contract.endDate.isBefore(contract.beginDate)) {
+        validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
 
       } else if (!contractManager.properContractCreate(contract, wtt)) {
-        validation.addError("contract.beginContract", "i contratti non possono sovrapporsi.");
-        if (contract.expireContract != null) {
-          validation.addError("contract.expireContract", "i contratti non possono sovrapporsi.");
+        validation.addError("contract.beginDate", "i contratti non possono sovrapporsi.");
+        if (contract.endDate != null) {
+          validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");
         }
       }
 
@@ -506,11 +506,11 @@ public class Contracts extends Controller {
       contractManager.cleanResidualInitialization(contract);
       boolean removeMandatory = false;
       boolean removeUnnecessary = false;
-      if (contract.beginContract.isBefore(wContract.dateForInitialization())) {
+      if (contract.beginDate.isBefore(wContract.dateForInitialization())) {
         removeMandatory = true;
       } else {
         removeUnnecessary = true;
-        recomputeFrom = contract.beginContract;
+        recomputeFrom = contract.beginDate;
       }
       if (!confirmed) {
         confirmed = true;

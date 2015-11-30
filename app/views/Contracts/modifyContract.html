@@ -31,8 +31,8 @@
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 
 		#{if recomputeFrom }
-			#{f.simpleView label:'beginContract', value:beginContract?.format(), name:'beginContract', hidden:true /}
-			#{f.simpleView label:'expireContract', value:expireContract?.format(), name:'expireContract', hidden:true /}
+			#{f.simpleView label:'beginDate', value:beginDate?.format(), name:'beginDate', hidden:true /}
+			#{f.simpleView label:'endDate', value:endDate?.format(), name:'endDate', hidden:true /}
 			#{f.simpleView label:'endContract', value:endContract?.format(), name:'endContract', hidden:true /}
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			<input type="hidden" name="confirmed" value="true" />
@@ -61,8 +61,8 @@
 		#{/if}
 		
 		#{else}
-			#{f.date 'beginContract', value:beginContract?.format() /}
-	    	#{f.date 'expireContract', value:expireContract?.format() /}
+			#{f.date 'beginDate', value:beginDate?.format() /}
+	    	#{f.date 'endDate', value:endDate?.format() /}
 	    	#{f.date 'endContract', value:endContract?.format() /}
 	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
 	    	
