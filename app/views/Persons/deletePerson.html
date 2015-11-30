@@ -2,6 +2,10 @@
 #{set header:'navbar' /}
 #{set title: 'Eliminazione ' + person.fullname /}
 
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
 #{persons.personsTabs activeAction:'deletePerson' /}
 
 <div class="container">		<!-- Container dati personali e di contatto -->
