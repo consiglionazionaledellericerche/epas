@@ -22,7 +22,9 @@
 		  <tr>
 		    <td>${periodRecap.beginDate.format()}</td>
 			<td>#{if periodRecap.endDate != null} ${periodRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-			<td>${periodRecap.value.description}</td>
+			<td>
+				&{periodRecap.label}
+			</td>
 		  </tr>
 		  #{/list}
 	  	</table>

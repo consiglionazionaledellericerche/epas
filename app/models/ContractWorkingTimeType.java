@@ -76,7 +76,11 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   @Override
   public void setType(Object value) {
     // TODO Auto-generated method stub
-
+  }
+  
+  @Override
+  public String getLabel() {
+    return this.workingTimeType.description;
   }
 
 
