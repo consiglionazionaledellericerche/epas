@@ -193,8 +193,8 @@ public class ContractManager {
   public final void recomputeContract(final Contract contract, final Optional<LocalDate> dateFrom,
                                       final boolean newContract, final boolean onlyRecaps) {
 
-    IWrapperContract wContract = wrapperFactory.create(contract);
-    LocalDate startDate = wContract.getContractDatabaseInterval().getBegin();
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+    LocalDate startDate = wrContract.getContractDatabaseInterval().getBegin();
     if (dateFrom.isPresent() && dateFrom.get().isAfter(startDate)) {
       startDate = dateFrom.get();
     }

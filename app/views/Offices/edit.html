@@ -43,14 +43,14 @@
     <div id="uroList">
 
 	<h4>Amministratore tecnico</h4>    
-    #{if wOffice.tecnicalAdmins.empty }
+    #{if wrOffice.tecnicalAdmins.empty }
       <div class="alert alert-danger">
         Non è stato ancora impostato alcun amministratore tecnico!
       </div>
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wOffice.tecnicalAdmins, as:'uroAdmin'}
+	       #{list items:wrOffice.tecnicalAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
 	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
@@ -63,14 +63,14 @@
     #{/else}
     
     <h4>Amministratore del personale</h4>
-    #{if wOffice.personnelAdmins.empty }
+    #{if wrOffice.personnelAdmins.empty }
       <div class="alert alert-danger">
         Non è stato ancora impostato alcun amministratore del personale!
       </div>
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wOffice.personnelAdmins, as:'uroAdmin'}
+	       #{list items:wrOffice.personnelAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
 	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
@@ -83,10 +83,10 @@
     #{/else}
 	
 	
-    #{if !wOffice.miniAdmins.empty }
+    #{if !wrOffice.miniAdmins.empty }
       <h4>Amministratore del personale sola lettura</h4>    
 	    <ul class="list-group">
-	       #{list items:wOffice.miniAdmins, as:'uroAdmin'}
+	       #{list items:wrOffice.miniAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
 	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >

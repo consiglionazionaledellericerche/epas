@@ -39,12 +39,7 @@
 	'data-async':'#modifyContract', 'data-async-error':'#modifyContract', 
 	'data-spinner':'#defaultSpinner' } 
 	  
-	  #{if success}
-	    #{alert color:'warning', dismissible:true}
-	      Contratto aggiornato con successo.
-	    #{/alert}
-	  #{/if}
-	  
+	    
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 		<!-- Form input -->
 		#{if !confirmed }

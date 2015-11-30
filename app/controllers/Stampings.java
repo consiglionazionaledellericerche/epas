@@ -138,9 +138,9 @@ public class Stampings extends Controller {
 
     rules.checkIfPermitted(person.office);
 
-    IWrapperPerson wPerson = wrapperFactory.create(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-    if (!wPerson.isActiveInMonth(new YearMonth(year, month))) {
+    if (!wrPerson.isActiveInMonth(new YearMonth(year, month))) {
 
       flash.error("Non esiste situazione mensile per il mese di %s",
               person.fullName(), DateUtility.fromIntToStringMonth(month));
@@ -225,7 +225,7 @@ public class Stampings extends Controller {
 
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
-    flash.success(Web.msgSaved(Institute.class));
+    flash.success(Web.msgSaved(Stampings.class));
 
     Stampings.personStamping(person.id,
             date.getYear(), date.getMonthOfYear());

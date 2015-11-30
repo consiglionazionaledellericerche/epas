@@ -95,56 +95,7 @@ footer p {
 #defaultSpinner {
 	position: fixed;
   	top: 60px;
-  	right: 100px;
-  	display: block;
-  	left: auto;	
-}
-
-.flash-panel {
-	border: 1px solid;
-	text-align: center;
-	padding: 0;
-}
-
-.flash-panel p{
-	padding: 0;
-	padding-top: 7px;
-}
-
-#flash-error, #flash-success {
- 	position: fixed;
-  	top: 50px;
-  	right: 100px;
-  	display: block;
-  	left: auto;	
-}
-
-#flash-error {
-	background-color: lightpink;
-}
-
-#flash-error h3 {
-	background-color: red;
-	color: white;
-	text-align: center;
-}
-
-#flash-success div.arrow {
-	border-bottom-color: red;
-}
-
-#flash-success {
-	background-color: lightgreen;
-}
-
-#flash-success h3 {
-	background-color: green;
-	color: white;
-	text-align: center;
-}
-
-#flash-success div.arrow {
-	border-bottom-color: green;
+	display: block;
 }
 
 #banner {
