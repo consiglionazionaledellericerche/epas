@@ -13,21 +13,15 @@
 </style>
 #{/set}
 
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{persons.personsTabs activeAction:'childrenList' /}
 <input type="hidden" name="person.id" value="${person.id}" />
+<div class="container">	
+#{panel title:'Figli di '+person.getFullname(), color:'primary'}
 
-<ul class="nav nav-tabs">
-  <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici di ${person.getFullname()}</a></li>
-  <li class="active"><a href="@{Persons.childrenList(person.id)}#">Gestione figli di ${person.getFullname()}</a></li>
-  #{if person.isPersonInCharge}
-  	<li><a href="@{Persons.workGroup(person.id)}">Assegna gruppo di lavoro</a></li>
-  #{/if}
-</ul>
-
-<div class="panel panel-primary col-sm-6 col-sm-offset-3" id="content" >
-  <div class="panel-heading">
-      <h3>Figli di ${person.getFullname()}</h3>
-  </div>
-<div class="panel-body">
 #{if (person.personChildren.isEmpty())}
    <h4>Nessun figlio in anagrafica</h4>
 #{/if}
@@ -63,7 +57,8 @@
 <legend></legend>
 <a href="@{Persons.insertChild(person.id)}" role="button" class="btn btn-primary col-xs-offset-4 col-xs-3">Inserisci nuovo figlio</a>
 
-</div>
-</div>
 
+#{/panel}
+
+</div>
 #{include '_myModal.html' /}
