@@ -19,9 +19,12 @@
       <a href="@{Persons.workGroup(person.id)}">Gruppo Di Lavoro</a>
     </li>
     #{/if}
+    <li #{if _activeAction.equals("badge")} class="active" #{/if}>
+      <a href="@{Badges.joinPersonToBadge(person.id)}">Badge</a>
+    </li>
     <li #{if _activeAction.equals("childrenList")} class="active" #{/if}>
       <a href="@{Persons.childrenList(person.id)}">Figli</a>
-    </li>
+    </li>    
     <li #{if _activeAction.equals("deletePerson")} class="active" #{/if}>
       <a href="@{Persons.deletePerson(person.id)}">Elimina</a>
     </li>
