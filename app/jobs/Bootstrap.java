@@ -106,14 +106,14 @@ public class Bootstrap extends Job<Void> {
         continue;
       }
 
-      IWrapperContract wcontract = wrapperFactory.create(contract.get());
-      if (wcontract.initializationMissing()) {
+      IWrapperContract wrContract = wrapperFactory.create(contract.get());
+      if (wrContract.initializationMissing()) {
 
         log.info("Bootstrap contract scan: il contratto di {} iniziato il {} non è initializationMissing",
                 person.fullName(), contract.get().beginDate);
                 /*
                 Contract c = contract.get();
-				c.sourceDateResidual = new LocalDate(wcontract.dateForInitialization());
+				c.sourceDateResidual = new LocalDate(wrContract.dateForInitialization());
 				c.sourcePermissionUsed = 0;
 				c.sourceRecoveryDayUsed = 0;
 				c.sourceRemainingMealTicket = 0;

@@ -154,6 +154,8 @@ expireContract=Fine contratto
 onCertificate=In attestati
 endContract= Scadenza Contratto
 
+Contract=Contratto
+contract=Contratto
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 contract.sourceDateResidual=Data inizializzazione
@@ -166,6 +168,7 @@ contract.sourcePermissionUsed=Permessi utilizzati anno corrente
 contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
 contract.sourceRemainingMealTicket=Buoni pasto residui
 
+ContractStampProfile=Periodo Presenza Automatica
 contractStampProfile.fixedworkingtime=Presenza Automatica
 csp.beginDate= Data Inizio
 csp.endDate= Data Fine
@@ -175,6 +178,7 @@ wtt.description= Nome Tipo Orario
 wtt.office=Sede 
 wtt= Tipo Orario
 
+ContractWorkingTimeType=Periodo Tipo Orario
 cwtt.workingTimeType= Tipo Orario
 cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
@@ -225,6 +229,15 @@ day= Giorno (se presente)
 
 true=Si
 false=No
+
+notify.error =Attenzione
+notify.success =Ok
+crud.hasErrors =Occorre correggere gli errori riportati.
+crud.created=&{%s} creato con successo
+crud.saved=&{%s} salvato con successo
+crud.deleted=&{%s} cancellato con successo
+crud.modified=&{%s} modificato con successo
+crud.cancelled=Operazione annullata.
 
 ###########################
 # Messaggi di validazione
