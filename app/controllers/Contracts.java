@@ -152,7 +152,7 @@ public class Contracts extends Controller {
     if (validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -194,9 +194,7 @@ public class Contracts extends Controller {
 
       flash.success(Web.msgSaved(Contract.class));
       confirmed = false;
-      Person person = contract.person;
-      render("@edit", person, contract, wrappedContract, beginDate, endDate, endContract,
-              onCertificate);
+      edit(contract.id);
     }
 
   }
@@ -250,7 +248,7 @@ public class Contracts extends Controller {
     if (validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -334,7 +332,7 @@ public class Contracts extends Controller {
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -419,7 +417,7 @@ public class Contracts extends Controller {
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -515,7 +513,7 @@ public class Contracts extends Controller {
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -574,8 +572,7 @@ public class Contracts extends Controller {
       flash.success(Web.msgSaved(Contract.class));
       
       confirmed = false;
-      render("@updateSourceContract", sourceDateResidual, contract, confirmed,
-              wrContract, wrOffice, wrPerson);
+      updateSourceContract(contract.id);
     }
 
   }
@@ -610,7 +607,7 @@ public class Contracts extends Controller {
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -648,8 +645,7 @@ public class Contracts extends Controller {
     flash.success(Web.msgSaved(Contract.class));
     
     confirmed = false;
-    render("@updateSourceContract", sourceDateMealTicket, contract, confirmed,
-            wrContract, wrOffice, wrPerson);
+    updateSourceContract(contract.id);
   }
 
 
