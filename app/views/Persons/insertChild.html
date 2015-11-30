@@ -15,6 +15,10 @@ form > legend{
 }
 </style>
 #{/set}
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):@Persons.edit(person.id), 'Nuovo figlio':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
 
 <div class="panel panel-primary col-md-6 col-md-offset-3" id="content" >
   <div class="panel-heading">
