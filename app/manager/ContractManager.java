@@ -86,17 +86,17 @@ public class ContractManager {
    */
   public final boolean contractCrossFieldValidation(final Contract contract) {
 
-    if (contract.expireContract != null
-            && contract.expireContract.isBefore(contract.beginContract)) {
+    if (contract.endDate != null
+            && contract.endDate.isBefore(contract.beginDate)) {
       return false;
     }
 
-    if (contract.endContract != null && contract.endContract.isBefore(contract.beginContract)) {
+    if (contract.endContract != null && contract.endContract.isBefore(contract.beginDate)) {
       return false;
     }
 
-    if (contract.expireContract != null && contract.endContract != null
-            && contract.expireContract.isBefore(contract.endContract)) {
+    if (contract.endDate != null && contract.endContract != null
+            && contract.endDate.isBefore(contract.endContract)) {
       return false;
     }
 
@@ -129,8 +129,8 @@ public class ContractManager {
     buildVacationPeriods(contract);
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-    cwtt.beginDate = contract.beginContract;
-    cwtt.endDate = contract.expireContract;
+    cwtt.beginDate = contract.beginDate;
+    cwtt.endDate = contract.endDate;
     cwtt.workingTimeType = wtt;
     cwtt.contract = contract;
     cwtt.save();
@@ -138,8 +138,8 @@ public class ContractManager {
 
     ContractStampProfile csp = new ContractStampProfile();
     csp.contract = contract;
-    csp.beginDate = contract.beginContract;
-    csp.endDate = contract.expireContract;
+    csp.beginDate = contract.beginDate;
+    csp.endDate = contract.endDate;
     csp.fixedworkingtime = false;
     csp.save();
     contract.contractStampProfile.add(csp);
@@ -250,31 +250,31 @@ public class ContractManager {
     VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
     VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
 
-    if (contract.expireContract == null) {
+    if (contract.endDate == null) {
 
       // Tempo indeterminato, creo due vacation 3 anni più infinito
 
-      contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginContract,
-              contract.beginContract.plusYears(3).minusDays(1)));
+      contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
+              contract.beginDate.plusYears(3).minusDays(1)));
       contract.vacationPeriods
-              .add(buildVacationPeriod(contract, v28, contract.beginContract.plusYears(3), null));
+              .add(buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null));
 
     } else {
 
-      if (contract.expireContract.isAfter(contract.beginContract.plusYears(3).minusDays(1))) {
+      if (contract.endDate.isAfter(contract.beginDate.plusYears(3).minusDays(1))) {
 
         // Tempo determinato più lungo di 3 anni
 
-        contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginContract,
-                contract.beginContract.plusYears(3).minusDays(1)));
+        contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
+                contract.beginDate.plusYears(3).minusDays(1)));
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v28,
-                contract.beginContract.plusYears(3), contract.expireContract));
+                contract.beginDate.plusYears(3), contract.endDate));
 
       } else {
 
         contract.vacationPeriods.add(
-                buildVacationPeriod(contract, v26, contract.beginContract, contract.expireContract));
+                buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate));
       }
     }
   }

@@ -36,9 +36,9 @@
         #{/alert}
       #{/if}
       #{panel title:'Validità', color:'default', dim:8, offset:2, row:true}
-        <p>Data Inizio: <strong>${contract.value.beginContract.format()}</strong></p>
+        <p>Data Inizio: <strong>${contract.value.beginDate.format()}</strong></p>
         <p>Data Fine: <strong>
-        #{if contract.value.expireContract}${contract.value.expireContract.format()}#{/if}
+        #{if contract.value.endDate}${contract.value.endDate.format()}#{/if}
         #{else}<em>Indeterminato</em>#{/else}</strong>
         </p>
         #{if contract.value.endContract}
@@ -99,10 +99,10 @@
 			   #{if contract.monthRecapMissing() }
 			    mancariep
 			  #{/if}}*
-			  ${contract.value.beginContract.format()}
+			  ${contract.value.beginDate.format()}
 			</td>
 			
-			<td>${contract.value.expireContract.format()}</td>
+			<td>${contract.value.endDate.format()}</td>
 			
 			<td>${contract.value.endContract}</td>
 			

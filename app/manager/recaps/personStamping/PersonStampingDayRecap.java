@@ -202,7 +202,7 @@ public class PersonStampingDayRecap {
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {
         // se è precedente all'inizio del contratto lo ignoro
-        if (contract.beginContract.isAfter(pd.date)) {
+        if (contract.beginDate.isAfter(pd.date)) {
           this.ignoreDay = true;
         }
 
@@ -213,7 +213,7 @@ public class PersonStampingDayRecap {
           this.ignoreDay = true;
         }
 
-        if (contract.beginContract.isEqual(pd.date)) {
+        if (contract.beginDate.isEqual(pd.date)) {
           this.firstDay = true;
         }
       }

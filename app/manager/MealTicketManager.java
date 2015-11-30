@@ -115,7 +115,7 @@ public class MealTicketManager {
         pastDate = ticketToChange.date;
       }
       ticketToChange.contract = contract;
-      ticketToChange.date = contract.beginContract;
+      ticketToChange.date = contract.beginDate;
       ticketToChange.save();
       mealTicketsTransfered++;
     }

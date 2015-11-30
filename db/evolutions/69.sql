@@ -16,8 +16,8 @@ ALTER TABLE office_history  ADD COLUMN code text;
 ALTER TABLE contract_stamp_profiles RENAME COLUMN start_from TO begin_date;
 ALTER TABLE contract_stamp_profiles RENAME COLUMN end_to TO end_date;
 
-ALTER TABLE contracts ADD COLUMN begin_date DATE;
-ALTER TABLE contracts ADD COLUMN end_date DATE;
+ALTER TABLE contracts RENAME COLUMN begin_contract TO begin_date;
+ALTER TABLE contracts RENAME COLUMN expire_contract TO end_date;
 
 # ---!Downs
 
@@ -37,5 +37,5 @@ ALTER TABLE office_history ALTER COLUMN code SET DATA TYPE integer USING code::i
 ALTER TABLE contract_stamp_profiles RENAME COLUMN begin_date TO start_from;
 ALTER TABLE contract_stamp_profiles RENAME COLUMN end_date TO end_to;
 
-ALTER TABLE contracts DROP COLUMN begin_date;
-ALTER TABLE contracts DROP COLUMN end_date;
+ALTER TABLE contracts RENAME COLUMN begin_date TO begin_contract;
+ALTER TABLE contracts RENAME COLUMN end_date TO expire_contract;

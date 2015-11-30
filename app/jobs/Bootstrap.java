@@ -110,7 +110,7 @@ public class Bootstrap extends Job<Void> {
       if (wcontract.initializationMissing()) {
 
         log.info("Bootstrap contract scan: il contratto di {} iniziato il {} non è initializationMissing",
-                person.fullName(), contract.get().beginContract);
+                person.fullName(), contract.get().beginDate);
                 /*
                 Contract c = contract.get();
 				c.sourceDateResidual = new LocalDate(wcontract.dateForInitialization());

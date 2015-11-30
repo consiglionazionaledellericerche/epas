@@ -209,7 +209,7 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
 
     final JPQLQuery query = getQueryFactory().from(contract).where(contract.person.eq(person))
-        .orderBy(contract.beginContract.desc());
+        .orderBy(contract.beginDate.desc());
 
     List<Contract> contracts = query.list(contract);
     if (contracts.size() == 0) {
@@ -230,7 +230,7 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
 
     final JPQLQuery query = getQueryFactory().from(contract).where(contract.person.eq(c.person))
-        .orderBy(contract.beginContract.desc());
+        .orderBy(contract.beginDate.desc());
 
     List<Contract> contracts = query.list(contract);
 
@@ -253,13 +253,13 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
 
     BooleanBuilder conditions =
-        new BooleanBuilder(contract.person.eq(person).and(contract.beginContract.loe(toDate)));
+        new BooleanBuilder(contract.person.eq(person).and(contract.beginDate.loe(toDate)));
 
-    conditions.andAnyOf(contract.endContract.isNull().and(contract.expireContract.isNull()),
-        contract.endContract.isNull().and(contract.expireContract.goe(fromDate)),
+    conditions.andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
+        contract.endContract.isNull().and(contract.endDate.goe(fromDate)),
         contract.endContract.isNotNull().and(contract.endContract.goe(fromDate)));
 
-    return getQueryFactory().from(contract).where(conditions).orderBy(contract.beginContract.asc())
+    return getQueryFactory().from(contract).where(conditions).orderBy(contract.beginDate.asc())
         .list(contract);
   }
 
@@ -695,13 +695,13 @@ public final class PersonDao extends DaoBase {
 
     if (end.isPresent()) {
 
-      condition.and(contract.beginContract.loe(end.get()));
+      condition.and(contract.beginDate.loe(end.get()));
     }
 
     if (start.isPresent()) {
 
-      condition.andAnyOf(contract.endContract.isNull().and(contract.expireContract.isNull()),
-          contract.expireContract.isNotNull().and(contract.expireContract.goe(start.get())),
+      condition.andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
+          contract.endDate.isNotNull().and(contract.endDate.goe(start.get())),
           contract.endContract.isNotNull().and(contract.endContract.goe(start.get())));
     }
   }
@@ -796,12 +796,12 @@ public final class PersonDao extends DaoBase {
     JPQLQuery query2 = getQueryFactory().from(contract).leftJoin(contract.contractMonthRecaps)
         .fetch().leftJoin(contract.contractStampProfile).fetch()
         .leftJoin(contract.contractWorkingTimeType, cwtt).fetch()
-        .orderBy(contract.beginContract.asc()).distinct();
+        .orderBy(contract.beginDate.asc()).distinct();
     List<Contract> contracts = query2.where(condition).list(contract);
 
     // fetch contract multiple bags (1) vacation periods
     JPQLQuery query2b = getQueryFactory().from(contract).leftJoin(contract.vacationPeriods, vp)
-        .fetch().orderBy(contract.beginContract.asc()).orderBy(vp.beginFrom.asc()).distinct();
+        .fetch().orderBy(contract.beginDate.asc()).orderBy(vp.beginFrom.asc()).distinct();
     contracts = query2b.where(condition).list(contract);
     // TODO: riportare a List tutte le relazioni uno a molti di contract
     // e inserire singolarmente la fetch.

@@ -179,7 +179,7 @@ public class WrapperPerson implements IWrapperPerson {
     Preconditions.checkState(lastContract.isPresent());
 
     YearMonth current = YearMonth.now();
-    YearMonth contractBegin = new YearMonth(lastContract.get().beginContract);
+    YearMonth contractBegin = new YearMonth(lastContract.get().beginDate);
 
     if (contractBegin.isAfter(current)) {
       //vado in avanti
@@ -214,10 +214,10 @@ public class WrapperPerson implements IWrapperPerson {
     boolean hasPassToIndefinite = false;
 
     for (Contract contract : orderedContractInYear) {
-      if (contract.expireContract != null)
+      if (contract.endDate != null)
         hasDefinite = true;
 
-      if (hasDefinite && contract.expireContract == null)
+      if (hasDefinite && contract.endDate == null)
         hasPassToIndefinite = true;
     }
 

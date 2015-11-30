@@ -124,7 +124,7 @@
 				#{list items:contractsWithVacationsProblems, as:'contract'}
 				<li><a href="@{Persons.edit(contract.person.id)}">Contratto
 						di ${contract.person.surname} ${contract.person.name} iniziato il
-						${contract.beginContract}</a></li> #{/list}
+						${contract.beginDate}</a></li> #{/list}
 			</ul>
 			<p>Tali errori potrebbero derivare dalla mancanza di dati di
 				inizializzazione inerenti il contratto.</p>

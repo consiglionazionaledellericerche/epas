@@ -34,8 +34,8 @@
       <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
     </div>
     <div class="panel-body">
-      #{f.date 'contract.beginContract',view:'year',required:'true'/} 
-      #{f.date 'contract.expireContract',view:'year'/} 
+      #{f.date 'contract.beginDate',view:'year',required:'true'/} 
+      #{f.date 'contract.endDate',view:'year'/} 
       #{f.checkbox 'contract.onCertificate',title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
 
       <p>

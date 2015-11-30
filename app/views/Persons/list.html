@@ -31,8 +31,8 @@
 		<th>&{'person.name'}</th>
 		<th>&{'person.number'}</th>
 		<th>&{'person.badgeNumber'}</th>
-		<th>&{'contract.beginContract'}</th>
-		<th>&{'contract.expireContract'}</th>
+		<th>&{'contract.beginDate'}</th>
+		<th>&{'contract.endDate'}</th>
 		<th>&{'person.currentWorkingTimeType'}</th>
 		<th>&{'person.currentVacationPeriod'}</th>
 		<th>&{'person.qualification'}</th>
@@ -65,8 +65,8 @@
 			<a href="@{Badges.joinPersonToBadge(person.value.id)}"><font color="#337ab7"><i class="fa fa-credit-card"></i> Assegna badge</font></a>
 			#{/else}
 		</td>
-		<td><font color="#000000">${person.currentContract.get().beginContract?.format()}</font></td>
-		<td><font color="#000000">${person.currentContract.get().expireContract?.format()}</font></td>
+		<td><font color="#000000">${person.currentContract.get().beginDate?.format()}</font></td>
+		<td><font color="#000000">${person.currentContract.get().endDate?.format()}</font></td>
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
