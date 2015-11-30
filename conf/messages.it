@@ -166,7 +166,10 @@ contract.sourcePermissionUsed=Permessi utilizzati anno corrente
 contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
 contract.sourceRemainingMealTicket=Buoni pasto residui
 
-contractStampProfile.fixedworkingtime= Timbratura Default
+contractStampProfile.fixedworkingtime=Presenza Automatica
+csp.beginDate= Data Inizio
+csp.endDate= Data Fine
+csp.fixedworkingtime=Presenza Automatica
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede 
@@ -218,6 +221,10 @@ report=Descrizione problema
 month= Mese (se presente)
 year= Anno (se presente)
 day= Giorno (se presente)
+
+
+true=Si
+false=No
 
 ###########################
 # Messaggi di validazione

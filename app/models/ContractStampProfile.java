@@ -55,14 +55,12 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public IPropertiesInPeriodOwner getOwner() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.contract;
   }
 
   @Override
-  public void setOwner(IPropertiesInPeriodOwner target) {
-    // TODO Auto-generated method stub
-    
+  public void setOwner(IPropertiesInPeriodOwner owner) {
+    this.contract = (Contract)owner; 
   }
 
   @Override
@@ -79,20 +77,27 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public Object getValue() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.fixedworkingtime;
   }
 
   @Override
   public void setValue(Object value) {
-    // TODO Auto-generated method stub
+    this.fixedworkingtime = (Boolean)value;
     
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
-    // TODO Auto-generated method stub
+    if (otherValue instanceof ContractStampProfile) {
+      return this.fixedworkingtime == 
+          ((ContractStampProfile) otherValue).fixedworkingtime;
+    }
     return false;
+  }
+  
+  @Override
+  public String getLabel() {
+    return this.fixedworkingtime + "";
   }
 
 }
