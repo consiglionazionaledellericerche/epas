@@ -507,11 +507,10 @@ when
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
      	
-     	"Persons.childrenList",
+     	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
-     	"Persons.removeChild",
      	"Persons.deleteChild",
      	
      	"Persons.workGroup",
@@ -623,11 +622,10 @@ when
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
      	
-     	"Persons.childrenList",
+     	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
-     	"Persons.removeChild",
      	"Persons.deleteChild",
      	
      	"Persons.workGroup",

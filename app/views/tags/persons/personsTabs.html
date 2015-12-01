@@ -22,8 +22,8 @@
     <li #{if _activeAction.equals("badge")} class="active" #{/if}>
       <a href="@{Badges.joinPersonToBadge(person.id)}">Badge</a>
     </li>
-    <li #{if _activeAction.equals("childrenList")} class="active" #{/if}>
-      <a href="@{Persons.childrenList(person.id)}">Figli</a>
+    <li #{if _activeAction.equals("children")} class="active" #{/if}>
+      <a href="@{Persons.children(person.id)}">Figli</a>
     </li>    
     <li #{if _activeAction.equals("deletePerson")} class="active" #{/if}>
       <a href="@{Persons.deletePerson(person.id)}">Elimina</a>
