@@ -1,0 +1,26 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Eliminazione contratto per ' + contract.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'delete' /}
+
+<div class="container">		<!-- Container dati personali e di contatto -->
+  <div class="alert alert-danger text-center">
+    <p>Rimozione del contratto di <strong>${contract.person.fullname}</strong>
+    iniziato in data <strong>${contract.beginDate.format()}</strong> 
+    dal software ePAS.</p>
+	<p>Attenzione!!! Questa operazione non potrà essere annullata.</p>
+	<p>
+	<a href="@{Contracts.delete(contract.id, true)}">
+      <input value="Conferma Elimina" class="btn btn-danger" type="button">
+    </a>
+    </p>
+  </div> 
+</div>
+
+
