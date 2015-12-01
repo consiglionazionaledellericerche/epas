@@ -265,7 +265,7 @@ public class TemplateUtility {
     Optional<AbsenceType> ferCode = absenceTypeDao
             .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
     Preconditions.checkState(ferCode.isPresent());
-
+    
     return FluentIterable.from(Lists.newArrayList(ferCode.get()))
             .append(absenceTypeDao.getFrequentTypes()).toList();
   }

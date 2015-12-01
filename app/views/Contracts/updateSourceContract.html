@@ -127,7 +127,7 @@
        </div>
        
        #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
-      'data-async':'#page_content', 'data-async-error':'#sourceMeal'}
+      'data-async':'#page_content', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
 		
 	    #{if !confirmedMeal}
