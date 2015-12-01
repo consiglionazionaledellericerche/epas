@@ -13,7 +13,7 @@
 
 
 
-#{panel title:'Associa badge alla persona' , color:'primary'}	  
+#{panel title:'Associa badge' , color:'primary'}	  
     <div class="alert alert-warning" role="alert">
     	Specificare il numero badge da associare a <strong>${person.fullname}</strong>
     </div>
@@ -28,6 +28,22 @@
 	     #{b.save  /}
 	  #{/b.buttons}
 	#{/form}
+#{/panel}
+
+#{panel title:'Lista badge' , color:'primary'}	
+    #{if person.badges.size() > 0}
+		<div class="alert alert-warning" role="alert">
+    		Lista badge già associati a <strong>${person.fullname}</strong>
+    	</div>
+    	#{list items:person.badges, as:'badge'}
+	  		<li><strong>${badge.code}</strong> associato al lettore <strong>${badge.badgeReader.code}</strong></li>
+	  	#{/list}
+	#{/if}
+	#{else}
+		<div class="alert alert-warning" role="alert">
+    		Non ci sono altri badge associati a <strong>${person.fullname}</strong>
+    	</div>
+	#{/else}
 #{/panel}
 </div>
     
