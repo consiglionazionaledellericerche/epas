@@ -10,74 +10,71 @@
 
   #{persons.personsTabs activeAction:'personContracts' /}
 <div class="container">  
-  
-  <div class="text-center">
-   <p>
-    <a class="btn btn-success" href="@{Contracts.insert('person.id':person.id)}" data-async-modal="#defaultModal">
-      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto
-    </a>
-   </p>
-  </div>
-
-  #{list items:contractList, as:'contract'}
+ 	
+  #{panel title:'Configurazione ePAS Attuale', color:'primary'}
 	
-	#{if contract.isActive()}
-	
-	#{panel title:'Contratto Attuale', color:'primary'}
-      
-      #{if contract.initializationMissing() }
+    #{if wrCurrentContract == null }
+      <strong>Il dipendente attualmente non ha un contratto attivo.</strong>
+    #{/if}
+    #{else}  
+      #{if wrCurrentContract.initializationMissing() }
         #{alert color:'danger', center:true}
-	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione poichè ePAS 
+	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale necessita di inizializzazione poichè ePAS 
 	    	potrebbe non disporre di tutta l'informazione necessaria.
 	      </p>
 	      #{b.buttons center:true}
-	        #{b.link @Contracts.updateSourceContract(contract.value.id), color:'danger', title:'Inizializza'/}
+	        #{b.link @Contracts.updateSourceContract(wrCurrentContract.value.id), color:'danger', title:'Inizializza'/}
 	      #{/b.buttons}
         #{/alert}
       #{/if}
-      #{panel title:'Validità', color:'default', dim:8, offset:2, row:true}
-        <p>Data Inizio: <strong>${contract.value.beginDate.format()}</strong></p>
-        <p>Data Fine: <strong>
-        #{if contract.value.endDate}${contract.value.endDate.format()}#{/if}
-        #{else}<em>Indeterminato</em>#{/else}</strong>
-        </p>
-        #{if contract.value.endContract}
-          <p>Terminato il: <strong>${contract.value.endContract.format()}</strong></p>
-        #{/if}
-      #{/panel}
+      
+      <form class='form-horizontal'>
+      <!-- Inizio contratto -->
+      #{f.view 'Inizio Contratto', label:'Inizio Contratto', value:wrCurrentContract.value.beginDate.format() /}
 
-      #{panel title:'Orari di lavoro', color:'default', dim:8, offset:2, row:true}
-        <table class="table table-condensed table-hover">
-            <tr class="info">
-		    <th class="col-md-4">Dal</th>
-		    <th class="col-md-4">Al</th>
-		    <th class="col-md-4">Tipo Orario</th>
-		  </tr>
-        #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
-			  <tr>
-			    <td>${wtt.beginDate.format()}</td>
-			    <td>
-			    #{if wtt.endDate}${wtt.endDate}#{/if}
-        		#{else}<em>Indeterminato</em>#{/else}
-        		</td>
-			    <td>${wtt.workingTimeType.description}</td>
-			  </tr>
-		#{/list}
-		</table>
-	  #{/panel}
-		
-		#{b.buttons center:true}
-          #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
-        #{/b.buttons}
-	
+      <!-- Scadenza contratto -->
+      #{if wrCurrentContract.value.endDate}
+        #{f.view 'Fine Contratto', label:'Fine Contratto', value:wrCurrentContract.value.endDate.format() /}
+      #{/if}
+      #{else}
+        #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Indeterminato' /}
+      #{/else}
+      
+      <!-- Terminazione contratto -->
+      #{if wrCurrentContract.value.endContract}
+        #{f.view 'Terminazione Contratto', label:'Terminazione Contratto', value:wrCurrentContract.value.endContract.format() /}
+      #{/if}
+      
+      #{f.view 'In Attestati', value:wrCurrentContract.value.onCertificate /}
+   
+      <!-- Tipo Orario -->
+      #{f.view 'Tipo Orario', value:wrPerson.currentWorkingTimeType.get() /}
+      
+      <!-- Piano Ferie -->
+      #{f.view 'Piano Ferie', value:wrPerson.currentVacationPeriod.get().vacationCode.description /}
+      
+      #{f.view 'Presenza Automatica', value:wrPerson.currentContractStampProfile.get().fixedworkingtime /}
+      </form>
+      #{alert color:'info'}
+        E' possibile modificare la configurazione attuale del dipendente attraverso le funzionalità 
+        raggiungibili da <strong>Gestisci contratto</strong>. 
+      #{/alert}
+    #{/else}
         
 	#{/panel} 
-  	#{/if}
+  	
   	  
- #{/list}	
 
-	#{panel title:'Altri Contratti', color:'primary'}
-  	  <table class="table table-hover center table-list-contract">
+
+	#{panel title:'Gestisci Contratti', color:'primary'}
+	   <div class="text-center">
+        <p>
+          <a class="btn btn-success" href="@{Contracts.insert('person.id':person.id)}" data-async-modal="#defaultModal">
+            <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto
+          </a>
+        </p>
+      </div>
+  	  <table class="table table-hover">
 		<tr class="warning">
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
@@ -85,168 +82,22 @@
 			<th>Gestisci</th>
 		</tr>
         #{list items:contractList, as:'contract'}
-
-  	    #{if !contract.isActive()}
  		<tr>
-			<td>
-			  *{
-			  #{if contract.noRelevant() }
-			    irrilevante
-			  #{/if}
-			   #{if contract.initializationMissing() }
-			    mancainit
-			  #{/if}
-			   #{if contract.monthRecapMissing() }
-			    mancariep
-			  #{/if}}*
-			  ${contract.value.beginDate.format()}
-			</td>
+			<td>${contract.value.beginDate.format()}</td>
 			
-			<td>${contract.value.endDate.format()}</td>
+			<td>#{if contract.value.endDate != null} ${contract.value.endDate.format()} #{/if}
+			    #{else}<em>Indeterminato</em>#{/else}
+			</td>
 			
 			<td>${contract.value.endContract}</td>
 			
-			*{
-			<td>
-			  
-			  #{list items:contract.value.contractWorkingTimeType, as:'wtt'}
-			  
-			    <a data-popover
-	    		data-trigger="hover" data-toggle="popover" 
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="
-	    		${(
-	    		'Inizio Periodo: <strong>'+wtt.beginDate.format()+'</strong>'+
-	    		'<br>Fine Periodo: <strong>'+wtt.endDate.format()+'</strong>'
-	    		).escape()}"
-	    		title="Periodo validità orario">
-	    		
-	    		  <h4><span class="label label-default">${wtt.workingTimeType.description}</span></h4>
-	    		
-	    		</a>
-	    		
-			  #{/list}
-			  
-			  <a href="@{Contracts.updateContractWorkingTimeType(contract.value.id)}" data-async-modal="#defaultModal">
-			    <i class="fa fa-pencil-square-o"></i> Modifica
-			  </a>
-			</td>
-			
-			<td>
-			  #{if contract.value.onCertificate == true}
-				<i class="fa fa-check-square-o"></i>
-			  #{/if}
-			  #{else}
-				<i class="fa fa-square-o"></i>
-			  #{/else}
-			</td>
-			
-			<td>
-			  <a href="@{Contracts.modifyContract(contract.value.id)}" data-async-modal="#defaultModal">
-			    <i class="fa fa-pencil-square-o"></i> Modifica
-			  </a>
-			</td>
-			
-			<td>
-			  <a href="@{Persons.deleteContract(contract.value.id)}" data-async-modal="#defaultModal">
-			    <input value="Elimina" class="btn btn-sm btn-danger" type="button">
-			  </a>
-			</td>
-			
-			 <td class="span4" style="text-align: center;">
-			 
-			 #{if contract.value.sourceDateResidual != null && contract.value.sourceByAdmin == false }
-				<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="Questa inizializzazione non è ancora stata approvata dall'amministratore"></span>
-			 #{/if}
-			 
-			 #{if contract.value.sourceDateResidual!=null}
-			     Situazione alla data
-			     <strong class="text-error">${contract.value.sourceDateResidual.format()}</strong><br>
-			   #{if contract.value.sourceRemainingMinutesLastYear>0 }
-			     Residuo ${contract.value.sourceDateResidual.getYear()-1} 
-			     <strong class="text-error">${contract.value.sourceRemainingMinutesLastYear}</strong><br>
-			   #{/if}
-			   #{if contract.value.sourceRemainingMinutesCurrentYear>0}
-			     Residuo ${contract.value.sourceDateResidual.getYear()} 
-			     <strong class="text-error">${contract.value.sourceRemainingMinutesCurrentYear}</strong><br>
-			   #{/if}
-			   #{if contract.value.sourceVacationLastYearUsed>0}
-			     Ferie usate ${contract.value.sourceDateResidual.getYear()-1}
-			     <strong class="text-error">${contract.value.sourceVacationLastYearUsed}</strong><br>
-			   #{/if}
-			   #{if contract.value.sourceVacationCurrentYearUsed>0}
-			     Ferie usate ${contract.value.sourceDateResidual.getYear()} 
-			     <strong class="text-error">${contract.value.sourceVacationCurrentYearUsed}</strong><br>
-			   #{/if}
-			   #{if contract.value.sourcePermissionUsed>0}
-			     Permessi usati ${contract.value.sourceDateResidual.getYear()} 
-			     <strong class="text-error">${contract.value.sourcePermissionUsed}</strong><br>
-			   #{/if}
-			   #{if contract.value.sourceRecoveryDayUsed!=null && contract.value.sourceRecoveryDayUsed>0}
-			     Riposi compensativi usati ${contract.value.sourceDateResidual.getYear()} 
-			     <strong class="text-error">${contract.value.sourceRecoveryDayUsed}</strong><br>
-			   #{/if}
-			   #{if contract.value.sourceRemainingMealTicket!=null && contract.value.sourceRemainingMealTicket>0}
-			     Buoni pasto residui
-			   <strong class="text-error">${contract.value.sourceRemainingMealTicket}</strong><br>
-			   #{/if}
-			 #{/if}  
-
-			  <a class="btn btn-small" href="@{Contracts.updateSourceContract(contract.value.id)}" 
-			    data-async-modal="#defaultModal">Definisci Inizializzazione
-			  </a>
-			</td>
-			}*
 			<td>
 			#{b.buttons center:true}
           	  #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
         	#{/b.buttons}
 			</td>
 		</tr>
-	    #{/if}
 	  #{/list}
 	  </table>
 	#{/panel}
-
-   *{
-   #{panel title:'Presenza Automatica', color:'primary'}
-	  	<table class="table table-hover center table-list-contract">
-	  		<tr>
-	  			<th class="warning">Da</th>
-	  			<th class="warning">A</th>
-	  			<th class="warning">Presenza automatica</th>
-	  			<th class="warning">Modifica presenza automatica</th>
-	  			<th class="warning">Elimina periodo</th>
-	  		</tr>
-	  		#{list items:contractStampProfileList, as:'contractStampProfile'}
-	  		<tr>  			
-	  			<td><h4><span class="label label-default">${contractStampProfile.startFrom.format()}</span></h4></td>
-	  			<td><h4><span class="label label-default">${contractStampProfile.endTo.format()}</span></h4></td>
-	  			<td>
-	  				#{if contractStampProfile.fixedworkingtime == true}
-	  					<i class="fa fa-check-square-o"></i>
-	  				#{/if}
-	  				#{else}
-	  					<i class="fa fa-square-o"></i>
-	  				#{/else}
-	  			</td>
-	  			
-	  			<td>
-	  				<a href="@{Persons.updateContractStampProfile(contractStampProfile.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
-	  			</td>
-	  			<td>
-	  			#{form @Persons.deleteContractStampProfile() }
-	  				#{if contractStampProfileList.indexOf(contractStampProfile) > 0}
-	  					<input type="hidden" name="contractStampProfile.id" value="${contractStampProfile.id}" />
-	  					<a href="@{Persons.deleteContractStampProfile(contractStampProfile.id)}" style="color:red;"><i style="color:red;" class="fa fa-trash-o"></i>Elimina</a>
-	  					
-	  				#{/if}
-	  			#{/form}
-	  			</td>
-	  		</tr>
-	  		#{/list}
-	  	</table>
-     #{/panel}
-    }*
 </div>

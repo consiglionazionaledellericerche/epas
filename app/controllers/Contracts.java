@@ -78,16 +78,19 @@ public class Contracts extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
     rules.checkIfPermitted(person.office);
 
+    IWrapperContract wrCurrentContract = null;
+    if (wrPerson.getCurrentContract().isPresent()) {
+      wrCurrentContract = wrapperFactory.create(wrPerson.getCurrentContract().get());
+    }
     List<IWrapperContract> contractList =
             FluentIterable.from(contractDao.getPersonContractList(person))
                     .transform(wrapperFunctionFactory.contract()).toList();
 
-    List<ContractStampProfile> contractStampProfileList = contractDao.getPersonContractStampProfile(
-        Optional.fromNullable(person), Optional.<Contract>absent());
-
-    render(person, contractList, contractStampProfileList);
+    
+    render(person, wrPerson, wrCurrentContract, contractList);
   }
 
   /**
@@ -183,7 +186,7 @@ public class Contracts extends Controller {
     if (!confirmed) {
       confirmed = true;
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
+      render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
               onCertificate, recomputeRecap);
     } else {
       if (recomputeRecap.recomputeFrom != null) {

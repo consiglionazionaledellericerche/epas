@@ -145,12 +145,11 @@ person.badge= Numero badge
 
 personQualification= Livello
 
-contract.beginContract=Inizio contratto
-contract.expireContract=Fine contratto
+beginDate=Data Inizio
+endDate=Data Fine
+
 contract.endContract=Terminato Il
 contract.onCertificate=In attestati
-beginContract=Inizio contratto
-expireContract=Fine contratto
 onCertificate=In attestati
 endContract= Scadenza Contratto
 
