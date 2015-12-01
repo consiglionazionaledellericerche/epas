@@ -53,7 +53,7 @@
       'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
 
-	    #{if !confirmed}
+	    #{if !confirmedResidual}
 	    	<!-- Form di input -->			
 		    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
 		    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
@@ -68,7 +68,7 @@
 		#{/if}
 		#{else}
 			<!-- Form di conferma -->			
-			#{f.hidden 'confirmed', value:true /}
+			#{f.hidden 'confirmedResidual', value:true /}
 			#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
 			#{f.simpleView 'contract.sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
 			#{f.simpleView 'contract.sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
@@ -130,7 +130,7 @@
       'data-async':'#page_content', 'data-async-error':'#sourceMeal'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
 		
-	    #{if !confirmed}
+	    #{if !confirmedMeal}
 		    #{f.date 'sourceDateMealTicket', value:contract.sourceDateMealTicket?.format(), biglabel:true  /}
 		    #{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
 		    #{b.buttons center:true}
@@ -139,7 +139,7 @@
 		#{/if}
 		#{else}
 			
-			#{f.hidden 'confirmed', value:true /}
+			#{f.hidden 'confirmedMeal', value:true /}
 			#{f.simpleView 'sourceDateMealTicket', value:sourceDateMealTicket.format(), biglabel:true, hidden:true /}
 			#{f.simpleView 'contract.sourceRemainingMealTicket', biglabel:true, hidden:true /}
 			

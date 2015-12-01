@@ -147,7 +147,8 @@ personQualification= Livello
 
 beginDate=Data Inizio
 endDate=Data Fine
-
+contract.beginDate=Inizio Contratto
+contract.endDate=Fine Contratto
 contract.endContract=Terminato Il
 contract.onCertificate=In attestati
 onCertificate=In attestati
