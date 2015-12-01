@@ -61,24 +61,35 @@ public class AbsenceTypeDao extends DaoBase {
             .map(absenceType, absence.count());
   }
 
+  /**
+   * I tipi assenza ordinata da quelli più frequenti.
+   * 
+   * @return lista assenze ordinata per utilizzo.
+   */
   public List<AbsenceType> getFrequentTypes() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
     final QAbsence absence = QAbsence.absence;
 
-    final JPQLQuery query = getQueryFactory().from(absence)
-            .join(absence.absenceType, absenceType)
-            .groupBy(absenceType)
-            .orderBy(absence.count().desc());
+    //TRICK selezionare anche quelle mai usate: http://stackoverflow.com/
+    //questions/4076098/how-to-select-rows-with-no-matching-entry-in-another-table
+    
+    final JPQLQuery query = getQueryFactory().from(absenceType)
+        .leftJoin(absenceType.absences, absence)
+        .where(absence.id.isNull().or(absence.id.isNotNull()))
+        .groupBy(absenceType)
+        .orderBy(absence.count().desc());
+    
+    return query.list(absenceType); 
 
-    return query.list(absenceType);
   }
 
   public List<AbsenceType> certificateTypes() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
 
-    return getQueryFactory().from(absenceType).where(absenceType.internalUse.eq(false)).list(absenceType);
+    return getQueryFactory().from(absenceType)
+        .where(absenceType.internalUse.eq(false)).list(absenceType);
   }
 
   public SimpleResults<AbsenceType> getAbsences(Optional<String> name) {
