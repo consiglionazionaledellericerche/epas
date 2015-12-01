@@ -1,15 +1,9 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -23,9 +17,16 @@ import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
 
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 
 /**
- * @author dario
+ * @author dario.
  */
 public class PersonDayDao extends DaoBase {
 
@@ -35,8 +36,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
-   * @param personDayId
-   * @return
+   * @param personDayId l'id del personday
+   * @return il personday relativo all'id passato come parametro.
    */
   public PersonDay getPersonDayById(Long personDayId) {
 
@@ -49,8 +50,10 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
-   * @return il personDay relativo al giorno e alla persona passati come parametro. E' optional
-   * perchè potrebbe non esistere
+   *  
+   * @param person la persona 
+   * @param date la data
+   * @return un personday se esiste per quella persona in quella data.
    */
   public Optional<PersonDay> getPersonDay(Person person, LocalDate date) {
 
@@ -86,6 +89,7 @@ public class PersonDayDao extends DaoBase {
       return optPersonDay.get();
     }
     PersonDay personDay = new PersonDay(person, date);
+    personDay.create();
     return personDay;
   }
 
@@ -105,7 +109,7 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
-   * @return tutti i personDay relativi alla persona person passata come parametro
+   * @return tutti i personDay relativi alla persona person passata come parametro.
    */
   public List<PersonDay> getAllPersonDay(Person person) {
 
@@ -124,8 +128,8 @@ public class PersonDayDao extends DaoBase {
    * @param orderedDesc   true se si vuole ordinamento decrescente
    */
   private List<PersonDay> getPersonDaysFetched(Person person,
-                                               LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences,
-                                               boolean orderedDesc, boolean onlyIsTicketAvailable) {
+           LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences,
+           boolean orderedDesc, boolean onlyIsTicketAvailable) {
 
     final QPersonDay personDay = QPersonDay.personDay;
     final QStamping stamping = QStamping.stamping;
@@ -189,11 +193,10 @@ public class PersonDayDao extends DaoBase {
 
 
   /**
-   *
-   * @param person
-   * @param begin
-   * @param end
-   * @return
+   * @param person la persona
+   * @param begin la data inizio da cui cercare
+   * @param end la data fino a cui cercare
+   * @return la lista dei personday presenti in un intervallo temporale.
    */
   public List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin,
                                               Optional<LocalDate> end) {
@@ -203,12 +206,10 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
-   *
-   * @param person
-   * @param begin
-   * @param end
-   * @param orderedDesc
-   * @return
+   * @param person la persona di cui si vogliono i personday
+   * @param begin la data di inizio da cui cercare i personday
+   * @param end la data di fine (opzionale)
+   * @return la lista dei personday ordinati decrescenti.
    */
   public List<PersonDay> getPersonDayInPeriodDesc(Person person, LocalDate begin,
                                                   Optional<LocalDate> end) {
@@ -217,20 +218,6 @@ public class PersonDayDao extends DaoBase {
             false, true, false);
   }
 
-//	/**
-//	 * 
-//	 * @param person
-//	 * @param begin
-//	 * @param end
-//	 * @param ordered
-//	 * @return
-//	 */
-//	public List<PersonDay> getPersonDayInPeriodForAbsences(Person person, LocalDate begin, 
-//			Optional<LocalDate> end){
-//		
-//		return getPersonDaysFetched(person, begin, end, 
-//				true, false, false);
-//	}
 
   /**
    * La lista dei PersonDay appartenenti al mese anno. Ordinati in modo crescente.
