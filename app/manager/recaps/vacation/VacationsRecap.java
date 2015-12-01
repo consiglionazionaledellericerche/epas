@@ -36,7 +36,7 @@ public class VacationsRecap {
   public Person person;
   public int year;
   public Contract contract = null;
-  public IWrapperContract wcontract = null;
+  public IWrapperContract wrContract = null;
   public DateInterval activeContractInterval = null;
   public LocalDate accruedDate;
   public int vacationDaysLastYearUsed = 0;
@@ -98,8 +98,8 @@ public class VacationsRecap {
     this.year = year;
 
     this.contract = contract;
-    this.wcontract = wrapperFactory.create(contract);
-    this.activeContractInterval = wcontract.getContractDateInterval();
+    this.wrContract = wrapperFactory.create(contract);
+    this.activeContractInterval = wrContract.getContractDateInterval();
 
     initDataStructures(otherAbsences, dateAsToday);
 
@@ -124,17 +124,17 @@ public class VacationsRecap {
     // (sono indipendenti dal database)
 
     this.vacationDaysLastYearAccrued = vacationManager
-            .getVacationAccruedYear(wcontract, year - 1, Optional.<LocalDate>absent(), postPartum);
+            .getVacationAccruedYear(wrContract, year - 1, Optional.<LocalDate>absent(), postPartum);
     this.permissionCurrentYearAccrued = vacationManager
-            .getPermissionAccruedYear(wcontract, year, accruedDate);
+            .getPermissionAccruedYear(wrContract, year, accruedDate);
     this.vacationDaysCurrentYearAccrued = vacationManager
-            .getVacationAccruedYear(wcontract, year, accruedDate, postPartum);
+            .getVacationAccruedYear(wrContract, year, accruedDate, postPartum);
 
     //(5) Calcolo ferie e permessi totali per l'anno corrente
     this.permissionCurrentYearTotal = vacationManager
-            .getPermissionAccruedYear(wcontract, year, Optional.<LocalDate>absent());
+            .getPermissionAccruedYear(wrContract, year, Optional.<LocalDate>absent());
     this.vacationDaysCurrentYearTotal = vacationManager
-            .getVacationAccruedYear(wcontract, year, Optional.<LocalDate>absent(), postPartum);
+            .getVacationAccruedYear(wrContract, year, Optional.<LocalDate>absent(), postPartum);
 
     //(6) Calcolo ferie e permessi non ancora utilizzati per l'anno corrente e per l'anno precedente
     // (sono funzione di quanto calcolato precedentemente)
@@ -148,7 +148,7 @@ public class VacationsRecap {
     }
 
     //Anno corrente
-    if (this.wcontract.isDefined()) {
+    if (this.wrContract.isDefined()) {
       //per i detereminati considero le maturate
       //(perchè potrebbero decidere di cambiare contratto)
       this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearAccrued
@@ -222,15 +222,15 @@ public class VacationsRecap {
 
     // Gli intervalli su cui predere le assenze nel db
     this.previousYearInterval = DateUtility
-            .intervalIntersection(wcontract.getContractDatabaseInterval(),
+            .intervalIntersection(wrContract.getContractDatabaseInterval(),
                     new DateInterval(new LocalDate(this.year - 1, 1, 1),
                             new LocalDate(this.year - 1, 12, 31)));
     this.requestYearInterval = DateUtility
-            .intervalIntersection(wcontract.getContractDatabaseInterval(),
+            .intervalIntersection(wrContract.getContractDatabaseInterval(),
                     new DateInterval(new LocalDate(this.year, 1, 1),
                             new LocalDate(this.year, 12, 31)));
     this.nextYearInterval = DateUtility
-            .intervalIntersection(wcontract.getContractDatabaseInterval(),
+            .intervalIntersection(wrContract.getContractDatabaseInterval(),
                     new DateInterval(new LocalDate(this.year + 1, 1, 1),
                             new LocalDate(this.year + 1, 12, 31)));
 

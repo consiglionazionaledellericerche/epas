@@ -124,7 +124,7 @@ public class ContractMonthRecapManager {
                                                             Optional<ContractMonthRecap> recapPreviousMonth, YearMonth yearMonth,
                                                             LocalDate calcolaFinoA, List<Absence> otherCompensatoryRest) {
 
-    IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
+    IWrapperContract wrContract = wrapperFactory.create(cmr.contract);
     Contract contract = cmr.contract;
 
     //TODO: controllare che in otherCompensatoryRest ci siano solo riposi compensativi.
@@ -174,7 +174,7 @@ public class ContractMonthRecapManager {
 
     //////////////////////////////////////////////////////////////////////////
     //Inizio Algoritmo
-    cmr.wcontract = wrapperFactory.create(contract);
+    cmr.wrContract = wrapperFactory.create(contract);
     cmr.person = contract.person;
     cmr.qualifica = cmr.person.qualification.qualification;
 
@@ -229,7 +229,7 @@ public class ContractMonthRecapManager {
 
     setMealTicketsInformation(cmr, validDataForMealTickets);
     setPersonDayInformation(cmr, validDataForPersonDay);
-    setPersonMonthInformation(cmr, wcontract,
+    setPersonMonthInformation(cmr, wrContract,
             validDataForCompensatoryRest, otherCompensatoryRest);
 
     //Imputazioni
@@ -496,11 +496,11 @@ public class ContractMonthRecapManager {
    *                                     le simulazioni di inserimento assenze).
    */
   private void setPersonMonthInformation(ContractMonthRecap cmr,
-                                         IWrapperContract wcontract, DateInterval validDataForCompensatoryRest,
+                                         IWrapperContract wrContract, DateInterval validDataForCompensatoryRest,
                                          List<Absence> otherCompensatoryRest) {
 
     //gli straordinari li assegno solo all'ultimo contratto attivo del mese
-    if (wcontract.isLastInMonth(cmr.month, cmr.year)) {
+    if (wrContract.isLastInMonth(cmr.month, cmr.year)) {
 
       CompetenceCode s1 = competenceCodeManager.getCompetenceCode("S1");
       CompetenceCode s2 = competenceCodeManager.getCompetenceCode("S2");
@@ -552,7 +552,7 @@ public class ContractMonthRecapManager {
 
           LocalDate date = riposo.date;
           for (ContractWorkingTimeType cwtt :
-                  wcontract.getValue().contractWorkingTimeType) {
+                  wrContract.getValue().contractWorkingTimeType) {
 
             if (DateUtility.isDateIntoInterval(date,
                     wrapperFactory.create(cwtt).getDateInverval())) {

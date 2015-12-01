@@ -35,8 +35,9 @@ $(function($) {
     }).done(function(data, status) {
       $target.replaceWith($(target, data));
       // TODO: verificare se occorre fare unwrap
-      $(target).parent().initepas();
+      $('body').initepas();
       // disattiva la modale sopra (se c'è).
+      
       $form.parents('.modal').modal('hide');
     }).fail(function(xhr, status, error) {
       if (xhr.status == 400) {
@@ -65,6 +66,8 @@ $(function($) {
 	    $form.removeAttr('data-anchor');
 	    $form.attr('action', url).submit();
   });
+  
+  PNotify.prototype.options.styling = "fontawesome";
   
   /**
    * Author: Marco
@@ -95,6 +98,20 @@ $(function($) {
   $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
   $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
   $.fn.initepas = function() {
+	  
+	$('[data-notify]', this).each(function() {
+	  var $this = $(this);
+	  var title = $this.data('notify')
+	  var text = $this.text();
+	  var type = $this.data('notify-type');
+	  new PNotify({
+		  title: title,
+		  text: text,
+		  type: type,
+		  remove: true
+	  });
+	});  
+
     //$(':input[data-selectize]', this).select2({allowClear:true});
     $(':input[select2]', this).select2({
       allowClear: true,

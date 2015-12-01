@@ -63,9 +63,9 @@ public class Offices extends Controller {
     final Office office = Office.findById(id);
     notFoundIfNull(office);
 
-    IWrapperOffice wOffice = wrapperFactory.create(office);
+    IWrapperOffice wrOffice = wrapperFactory.create(office);
 
-    render(office, wOffice);
+    render(office, wrOffice);
   }
 
   public static void blank(Long instituteId) {
@@ -84,8 +84,8 @@ public class Offices extends Controller {
       log.warn("validation errors for {}: {}", office,
               validation.errorsMap());
       flash.error(Web.msgHasErrors());
-      IWrapperOffice wOffice = wrapperFactory.create(office);
-      render("@edit", office, wOffice);
+      IWrapperOffice wrOffice = wrapperFactory.create(office);
+      render("@edit", office, wrOffice);
     } else {
       office.save();
       flash.success(Web.msgSaved(Office.class));

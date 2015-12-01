@@ -295,12 +295,12 @@ public class CompetenceManager {
             (person, new YearMonth(year, month));
     for (Contract contract : monthContracts) {
 
-      IWrapperContract wContract = wrapperFactory.create(contract);
+      IWrapperContract wrContract = wrapperFactory.create(contract);
 
-      if (wContract.isLastInMonth(month, year)) {
+      if (wrContract.isLastInMonth(month, year)) {
 
         Optional<ContractMonthRecap> recap =
-                wContract.getContractMonthRecap(new YearMonth(year, month));
+                wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent()) {
           /**
            * FIXME: in realtà bisogna controllare che la persona nell'arco

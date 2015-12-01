@@ -448,14 +448,14 @@ public class Competences extends Controller {
 
       //Filtro tipologia del primo contratto nel mese della competenza
       if (onlyDefined) {
-        IWrapperPerson wperson = wrapperFactory.create(competence.person);
-        Optional<Contract> firstContract = wperson.getFirstContractInMonth(year, competence.month);
+        IWrapperPerson wrPerson = wrapperFactory.create(competence.person);
+        Optional<Contract> firstContract = wrPerson.getFirstContractInMonth(year, competence.month);
         if (!firstContract.isPresent())
           continue;    //questo errore andrebbe segnalato, competenza senza che esista contratto
 
-        IWrapperContract wcontract = wrapperFactory.create(firstContract.get());
+        IWrapperContract wrContract = wrapperFactory.create(firstContract.get());
 
-        if (!wcontract.isDefined()) {
+        if (!wrContract.isDefined()) {
           continue;    //scarto la competence.
         }
 

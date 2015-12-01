@@ -251,11 +251,11 @@ public class Persons extends Controller {
 
     rules.checkIfPermitted(person.office);
 
-    IWrapperPerson wPerson = wrapperFactory.create(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-    Preconditions.checkState(wPerson.getCurrentVacationPeriod().isPresent());
+    Preconditions.checkState(wrPerson.getCurrentVacationPeriod().isPresent());
 
-    VacationPeriod vp = wPerson.getCurrentVacationPeriod().get();
+    VacationPeriod vp = wrPerson.getCurrentVacationPeriod().get();
     render(person, vp);
   }
 
@@ -267,11 +267,11 @@ public class Persons extends Controller {
 
     rules.checkIfPermitted(person.office);
 
-    IWrapperPerson wPerson = wrapperFactory.create(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-    Preconditions.checkState(wPerson.getCurrentContractWorkingTimeType().isPresent());
+    Preconditions.checkState(wrPerson.getCurrentContractWorkingTimeType().isPresent());
 
-    ContractWorkingTimeType cwtt = wPerson.getCurrentContractWorkingTimeType().get();
+    ContractWorkingTimeType cwtt = wrPerson.getCurrentContractWorkingTimeType().get();
 
     WorkingTimeType wtt = cwtt.workingTimeType;
 
