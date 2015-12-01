@@ -64,6 +64,7 @@ public class Badges extends Controller {
    */
   public static void joinPersonToBadge(Long id) {
     Person person = personDao.getPersonById(id);
+    
     Badge badge = new Badge();
     render(person, badge);
   }
@@ -78,10 +79,14 @@ public class Badges extends Controller {
   public static void allocateBadge(Badge badge,
                                    List<Long> badgeReader, Person person) {
 
-//    if (validation.hasErrors()) {
-//      flash.error(Web.msgHasErrors());
-//      render("@joinPersonToBadge", badge, badgeReader, person);
-//    }   
+    if (badge.code == null) {
+      flash.error("Popolare correttamente il campo numero badge");
+      joinPersonToBadge(person.id);
+    }
+    if (badgeReader == null || badgeReader.size() == 0) {
+      flash.error("Inserire almeno un lettore badge a cui associare il badge");
+      joinPersonToBadge(person.id);
+    }
 
     for (Long id : badgeReader) {
       BadgeReader br = badgeReaderDao.byId(id);

@@ -1,17 +1,9 @@
 package dao;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -19,11 +11,14 @@ import com.mysema.query.types.Projections;
 import com.mysema.query.types.QBean;
 
 import dao.filter.QFilters;
+
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+
 import it.cnr.iit.epas.DateInterval;
+
 import models.BadgeReader;
 import models.CompetenceCode;
 import models.Contract;
@@ -43,6 +38,15 @@ import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 /**
  * DAO per le person.
@@ -428,21 +432,23 @@ public final class PersonDao extends DaoBase {
   /**
    * FIXME: usare la nuova struttura dati sui badge.
    * 
-   * @param badgeNumber
-   * @return la persona associata al badgeNumber passato come parametro
+   * @param badgeNumber il numero badge.
+   * @return la persona associata al badgeNumber passato come parametro.
    */
   @Deprecated
   public Person getPersonByBadgeNumber(String badgeNumber, Optional<Set<Office>> offices) {
 
     final BooleanBuilder condition = new BooleanBuilder();
     final QPerson person = QPerson.person;
+    final QBadge badge = QBadge.badge;
     if (offices.isPresent()) {
       condition.and(person.office.in(offices.get()));
     }
-
-    condition.and(person.badgeNumber.eq(badgeNumber));
-
-    final JPQLQuery query = getQueryFactory().from(person).where(condition);
+    
+    condition.and(badge.code.eq(badgeNumber));
+    final JPQLQuery query = getQueryFactory().from(person)
+        .leftJoin(person.badges, badge).where(condition);
+    
 
     return query.singleResult(person);
   }
@@ -455,8 +461,8 @@ public final class PersonDao extends DaoBase {
 
   /**
    * 
-   * @param type
-   * @return la lista di persone in reperibilità con tipo type
+   * @param type il tipo della reperibilità.
+   * @return la lista di persone in reperibilità con tipo type.
    */
   public List<Person> getPersonForReperibility(Long type) {
 
