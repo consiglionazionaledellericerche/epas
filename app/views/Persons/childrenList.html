@@ -2,16 +2,7 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione figli di ' + person.getFullname() /}
 
-#{set 'moreStyles'}
-<style type="text/css">
-#content{
-  margin-top: 5em;
-}
-.panel-body{
-  padding-top: 3em;
-}
-</style>
-#{/set}
+
 
 #{set breadcrumbs:['Lista Persone':@Persons.list(), 
   (person.fullname):null] /}

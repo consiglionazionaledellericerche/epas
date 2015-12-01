@@ -2,13 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Associazione badge ai lettori badge'  /}
 
-#{set breadcrumbs:['Lista persone':@Persons.list(), 'Assegna Badge':null] /}
+#{set breadcrumbs:['Lista persone':@Persons.list(),
+  (person.fullname):null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{persons.personsTabs activeAction:'badge' /}
 
 <div class="container">
 
-#{breadcrumbs breadcrumbs /}
 
-#{persons.personsTabs activeAction:'badge' /}
 
 #{panel title:'Associa badge alla persona' , color:'primary'}	  
     <div class="alert alert-warning" role="alert">
