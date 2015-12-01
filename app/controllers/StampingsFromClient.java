@@ -43,7 +43,7 @@ public class StampingsFromClient extends Controller {
   static PersonDao personDao;
 
   /**
-   * Aggiunge una timbratura ad una persona
+   * Aggiunge una timbratura ad una persona.
    */
   @BasicAuth
   public static String create(@As(binder = JsonStampingBinder.class) StampingFromClient body) {
@@ -62,10 +62,11 @@ public class StampingsFromClient extends Controller {
   }
 
   /**
-   * Inserimento timbratura senza ricalcolo
+   * Inserimento timbratura senza ricalcolo.
    */
   @BasicAuth
-  public static String createNotRecompute(@As(binder = JsonStampingBinder.class) StampingFromClient body) {
+  public static String createNotRecompute(@As(binder = JsonStampingBinder.class) 
+      StampingFromClient body) {
 
     //rulesssssssssssssss
 
@@ -82,7 +83,7 @@ public class StampingsFromClient extends Controller {
 
 
   /**
-   * Inseriemento di assenza con ricalcolo
+   * Inseriemento di assenza con ricalcolo.
    */
   @BasicAuth
   public static void absence(AbsenceFromClient body) {

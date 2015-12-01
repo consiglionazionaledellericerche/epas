@@ -239,18 +239,18 @@ public final class PersonDao extends DaoBase {
     List<Contract> contracts = query.list(contract);
 
     final int indexOf = contracts.indexOf(c);
-    if (indexOf + 1 < contracts.size())
+    if (indexOf + 1 < contracts.size()) {
       return contracts.get(indexOf + 1);
-    else
+    } else {
       return null;
+    }
   }
 
   /**
-   *
-   * @param person
-   * @param begin
-   * @param end
-   * @return la lista di contratti che soddisfa le seguenti condizioni:
+   * @param person la persona di cui si vogliono i contratti
+   * @param fromDate la data di inizio da cui cercare
+   * @param toDate la data di fine in cui cercare
+   * @return la lista di contratti che soddisfa le seguenti condizioni.
    */
   public List<Contract> getContractList(Person person, LocalDate fromDate, LocalDate toDate) {
 
@@ -271,10 +271,10 @@ public final class PersonDao extends DaoBase {
    * Ritorna la lista dei person day della persona nella finestra temporale specificata ordinati per
    * data con ordinimento crescente.
    * 
-   * @param person
-   * @param interval
-   * @param onlyWithMealTicket
-   * @return
+   * @param person la persona di cui si chiedono i personday
+   * @param interval l'intervallo dei personday
+   * @param onlyWithMealTicket se con i mealticket associati
+   * @return la lista dei personday che soddisfano i parametri
    */
   public List<PersonDay> getPersonDayIntoInterval(Person person, DateInterval interval,
       boolean onlyWithMealTicket) {
@@ -296,9 +296,8 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
-   * @param personId
-   * @return la persona corrispondente all'id passato come parametro
+   * @param personId l'id della persona.
+   * @return la persona corrispondente all'id passato come parametro.
    */
   public Person getPersonById(Long personId) {
 
@@ -314,9 +313,8 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
-   * @param personId
-   * @return la persona corrispondente alla email
+   * @param email  della persona
+   * @return la persona corrispondente alla email.
    */
   @Deprecated // email non è un campo univoco... decidere
   public Person getPersonByEmail(String email) {
@@ -329,10 +327,10 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
-   * @param number
-   * @return la persona corrispondente alla matricola passata come parametro
+   * @param number la matricola passata come parametro.
+   * @return la persona corrispondente alla matricola passata come parametro.
    */
+  @Deprecated
   public Person getPersonByNumber(Integer number, Optional<Set<Office>> officeList) {
 
     final BooleanBuilder condition = new BooleanBuilder();
@@ -353,8 +351,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
-   * @return la lista di persone che hanno una matricola associata
+   * @return la lista di persone che hanno una matricola associata.
    */
   public List<Person> getPersonsByNumber() {
 
@@ -367,9 +364,8 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
-   * @param email
-   * @return la persona che ha associata la mail email
+   * @param email la mail della persona.
+   * @return la persona che ha associata la mail email.
    */
   public Optional<Person> byEmail(String email) {
 
@@ -381,6 +377,10 @@ public final class PersonDao extends DaoBase {
   }
 
 
+  /**
+   * @param eppn il parametro eppn per autenticazione via shibboleth.
+   * @return la persona se esiste associata al parametro eppn.
+   */
   public Optional<Person> byEppn(String eppn) {
 
     final QPerson person = QPerson.person;
@@ -391,9 +391,8 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param perseoId
-   * @return la persona identificata dall'id con cui è salvata sul db di perseo
+   * @param perseoId l'id della persona sull'applicazione perseo.
+   * @return la persona identificata dall'id con cui è salvata sul db di perseo.
    */
   public Person getPersonByPerseoId(Integer perseoId) {
 
@@ -405,8 +404,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
-   * @param oldId
+   * @param oldId il vecchio id.
    * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
    */
   public Person getPersonByOldID(Long oldId, Optional<Set<Office>> offices) {
@@ -425,38 +423,41 @@ public final class PersonDao extends DaoBase {
     return query.singleResult(person);
   }
 
+  /**
+   * 
+   * @param oldId  il vecchio id.
+   * @return la persona associata al vecchio id presente nella vecchia anagrafica.
+   */
   public Person getPersonByOldID(Long oldId) {
     return getPersonByOldID(oldId, Optional.<Set<Office>>absent());
   }
 
   /**
-   * FIXME: usare la nuova struttura dati sui badge.
    * 
    * @param badgeNumber il numero badge.
    * @return la persona associata al badgeNumber passato come parametro.
    */
-  @Deprecated
-  public Person getPersonByBadgeNumber(String badgeNumber, Optional<Set<Office>> offices) {
+  public Person getPersonByBadgeNumber(String badgeNumber, Optional<BadgeReader> badgeReader) {
 
     final BooleanBuilder condition = new BooleanBuilder();
     final QPerson person = QPerson.person;
     final QBadge badge = QBadge.badge;
-    if (offices.isPresent()) {
-      condition.and(person.office.in(offices.get()));
+    final JPQLQuery query = getQueryFactory().from(person)
+        .leftJoin(person.badges, badge);
+    if (badgeReader.isPresent()) {
+      condition.and(badge.badgeReader.eq(badgeReader.get()));
     }
     
     condition.and(badge.code.eq(badgeNumber));
-    final JPQLQuery query = getQueryFactory().from(person)
-        .leftJoin(person.badges, badge).where(condition);
+    query.where(condition);
     
 
     return query.singleResult(person);
   }
 
-  // FIXME: usare la nuova struttura dati sui badge.
-  @Deprecated
+
   public Person getPersonByBadgeNumber(String badgeNumber) {
-    return getPersonByBadgeNumber(badgeNumber, Optional.<Set<Office>>absent());
+    return getPersonByBadgeNumber(badgeNumber, Optional.<BadgeReader>absent());
   }
 
   /**
