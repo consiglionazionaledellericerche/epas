@@ -14,7 +14,8 @@
 		#{f.hidden 'office.institute.id' /}
 				
         #{f.input 'office.name', required:true /}
-        #{f.input 'office.code', required:true /}
+        #{f.input 'office.codeId', required:true, popover:true /}
+        #{f.input 'office.code', popover:true /}
         #{f.input 'office.address'/}
         #{f.booleanRadio 'office.headQuarter'/}
         
