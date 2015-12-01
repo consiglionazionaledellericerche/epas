@@ -35,9 +35,30 @@
 		<div class="alert alert-warning" role="alert">
     		Lista badge già associati a <strong>${person.fullname}</strong>
     	</div>
-    	#{list items:person.badges, as:'badge'}
-	  		<li><strong>${badge.code}</strong> associato al lettore <strong>${badge.badgeReader.code}</strong></li>
-	  	#{/list}
+    	<table class="table table-hover">
+	  		<tr class="warning">
+				<th>Istituto</th>
+				<th>Lettore associato</th>
+				<th>Numero badge</th>
+				<th>Elimina</th>			
+	  		</tr>
+	  	
+        #{list items:person.badges, as:'badge'}
+    	<tr>
+    	<td>${badge.person.office.name}</td>
+	  	<td>${badge.badgeReader.code}</td>
+	  	<td>${badge.code}</td>
+	  	<td>
+	  	
+	  		<li><a class="btn btn-danger btn-xs" href="@{Badges.delete(badge.id)}" 
+	  		data-async-modal="#modalInsertBadgeReader">Elimina associazione</a></li>
+	  	
+	  	</td>
+    	</tr>
+    	#{/list}
+    	</table>
+	  		
+	  	
 	#{/if}
 	#{else}
 		<div class="alert alert-warning" role="alert">
@@ -47,3 +68,4 @@
 #{/panel}
 </div>
     
+<div id="modalInsertBadgeReader" class="modal container" tabindex="-1"></div>

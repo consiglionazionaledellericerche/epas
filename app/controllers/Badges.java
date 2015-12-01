@@ -104,7 +104,7 @@ public class Badges extends Controller {
     }
     flash.success("Associato il badge %s a %s per i lettori selezionati",
             badge.code, person.fullName());
-    Persons.list(null);
+    joinPersonToBadge(person.id);
   }
 
   /**
