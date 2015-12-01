@@ -30,6 +30,7 @@
   #{stylesheet 'bootstrap-modal.css'/}
   #{stylesheet 'bootstrap-modal-bs3patch.css'/}
   #{stylesheet 'my-bootstrap3.css'/}
+  #{stylesheet 'pnotify.custom.min.css'/}
 
   #{get 'moreStyles' /}
 
@@ -324,38 +325,14 @@
     <!-- do layout -->
     #{doLayout /}
 
-    <!-- Altri componenti html -->
     #{if flash.error}
-    <div id="flash-error" class="popover bottom">
-      <div class="arrow"></div>
-      <h3 class="popover-title"><strong>Notifica</strong>
-        <button id="buttonError" type="button" class="close" aria-hidden="true">&times;</button>
-      </h3>
-      <div class="popover-content">
-        #{if flash.error.equals('secure.error')}
-        <strong>&{'secure.error'}</strong>
-        #{/if}
-        #{else}
-        <strong>${flash.error}</strong>
-        #{/else}
+      <div class="sr-only" data-notify="${'notify.error'.label()}" data-notify-type="error">
+        &{flash.error}
       </div>
-    </div>
-    #{/if}
-    #{if flash.success}
-    <div id="flash-success" class="popover bottom">
-      <div class="arrow"></div>
-      <h3 class="popover-title"><strong>Notifica</strong>
-        <button id="buttonSuccess" type="button" class="close" aria-hidden="true">&times;</button>
-      </h3>
-      <div class="popover-content">
-        #{if flash.success.equals('secure.logout')}
-        <strong>&{'secure.logout'}</strong>
-        #{/if}
-        #{else}
-        <strong>${flash.success}</strong>
-        #{/else}
+    #{/if} #{if flash.success}
+      <div class="sr-only" data-notify="${'notify.success'.label()}" data-notify-type="success">
+        &{flash.success}
       </div>
-    </div>
     #{/if}
 
     <div id="defaultModal" class="modal container" tabindex="-1"></div>
@@ -397,6 +374,7 @@
 #{script 'bootstrap-modalmanager.js' /}
 #{script 'script.js' /}
 #{script 'list-select.min.js' /}
+#{script 'pnotify.custom.min.js' /}
 
 #{include '_myModal.html' /}
 #{get 'moreScripts' /}

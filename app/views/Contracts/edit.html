@@ -36,15 +36,10 @@
 
   <div id="modifyContract">
 	#{form @Contracts.update(), class:'form-horizontal', 
-	'data-async':'#modifyContract', 'data-async-error':'#modifyContract', 
+	'data-async':'#page_content', 'data-async-error':'#modifyContract', 
 	'data-spinner':'#defaultSpinner' } 
 	  
-	  #{if success}
-	    #{alert color:'warning', dismissible:true}
-	      Contratto aggiornato con successo.
-	    #{/alert}
-	  #{/if}
-	  
+	    
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 		<!-- Form input -->
 		#{if !confirmed }
@@ -76,6 +71,7 @@
 			
 			#{b.buttons center:true}
 			   #{b.submit 'Conferma'/}
+			   #{b.cancel @edit(contract.id) /}
 			#{/b.buttons}
 		#{/else}
 		

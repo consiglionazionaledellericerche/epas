@@ -396,9 +396,9 @@ public class ChartsManager {
     out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
     out.newLine();
 
-    IWrapperPerson wPerson = wrapperFactory.create(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-    Optional<Contract> contract = wPerson.getCurrentContract();
+    Optional<Contract> contract = wrPerson.getCurrentContract();
 
     Preconditions.checkState(contract.isPresent());
 
@@ -415,7 +415,7 @@ public class ChartsManager {
       return inputStream;
     }
 
-    Optional<WorkingTimeType> wtt = wPerson.getCurrentWorkingTimeType();
+    Optional<WorkingTimeType> wtt = wrPerson.getCurrentWorkingTimeType();
 
     Preconditions.checkState(wtt.isPresent());
 

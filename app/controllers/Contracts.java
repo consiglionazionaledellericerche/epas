@@ -50,8 +50,6 @@ import javax.inject.Inject;
 @With({Resecure.class, RequestInit.class})
 public class Contracts extends Controller {
 
-  private final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYY");
-
   @Inject
   private static PersonDao personDao;
   @Inject
@@ -66,7 +64,9 @@ public class Contracts extends Controller {
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static PeriodManager periodManager;
-
+  
+  private final static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYY");
+  
   /**
    * I contratti del dipendente.
    *
@@ -78,17 +78,19 @@ public class Contracts extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
     rules.checkIfPermitted(person.office);
 
+    IWrapperContract wrCurrentContract = null;
+    if (wrPerson.getCurrentContract().isPresent()) {
+      wrCurrentContract = wrapperFactory.create(wrPerson.getCurrentContract().get());
+    }
     List<IWrapperContract> contractList =
             FluentIterable.from(contractDao.getPersonContractList(person))
                     .transform(wrapperFunctionFactory.contract()).toList();
 
-    List<ContractStampProfile> contractStampProfileList = contractDao
-            .getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
-
-
-    render(person, contractList, contractStampProfileList);
+    
+    render(person, wrPerson, wrCurrentContract, contractList);
   }
 
   /**
@@ -153,7 +155,7 @@ public class Contracts extends Controller {
     if (validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -184,7 +186,7 @@ public class Contracts extends Controller {
     if (!confirmed) {
       confirmed = true;
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
+      render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
               onCertificate, recomputeRecap);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
@@ -192,11 +194,10 @@ public class Contracts extends Controller {
       } else {
         contractManager.properContractUpdate(contract, LocalDate.now(), false);
       }
-      boolean success = true;
+
+      flash.success(Web.msgSaved(Contract.class));
       confirmed = false;
-      Person person = contract.person;
-      render("@edit", person, contract, wrappedContract, beginDate, endDate, endContract,
-              onCertificate, success);
+      edit(contract.id);
     }
 
   }
@@ -250,14 +251,14 @@ public class Contracts extends Controller {
     if (validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
       render("@insert", contract, wtt);
     }
 
-    flash.success("Contratto inserito correttamente");
+    flash.success(Web.msgCreated(Contract.class));
 
     Contracts.personContracts(contract.person.id);
   }
@@ -281,11 +282,15 @@ public class Contracts extends Controller {
 
     contract.delete();
 
-    flash.error("Contratto eliminato con successo.");
+    flash.success(Web.msgDeleted(Contract.class));
+    
     edit(contract.person.id);
   }
 
-
+  /**
+   * Crud gestione periodi tipo orario.
+   * @param id contratto
+   */
   public static void updateContractWorkingTimeType(Long id) {
 
     Contract contract = contractDao.getContractById(id);
@@ -301,8 +306,13 @@ public class Contracts extends Controller {
     render(wrappedContract, contract, cwtt);
   }
 
-  public static void saveContractWorkingTimeType(@Valid ContractWorkingTimeType cwtt,
-                                                 boolean confirmed) {
+  /**
+   * Salva il nuovo periodo orario.
+   * @param cwtt nuovo periodo di orario.
+   * @param confirmed se conferma ricevuta.
+   */
+  public static void saveContractWorkingTimeType(
+      @Valid ContractWorkingTimeType cwtt, boolean confirmed) {
 
     notFoundIfNull(cwtt);
     notFoundIfNull(cwtt.contract);
@@ -313,18 +323,19 @@ public class Contracts extends Controller {
     Contract contract = cwtt.contract;
 
     if (!validation.hasErrors()) {
-      if (!DateUtility.isDateIntoInterval(cwtt.beginDate, wrappedContract.getContractDateInterval())) {
+      if (!DateUtility.isDateIntoInterval(cwtt.beginDate, 
+          wrappedContract.getContractDateInterval())) {
         validation.addError("cwtt.beginDate", "deve appartenere al contratto");
       }
-      if (cwtt.endDate != null &&
-              !DateUtility.isDateIntoInterval(cwtt.endDate, wrappedContract.getContractDateInterval())) {
+      if (cwtt.endDate != null && !DateUtility.isDateIntoInterval(cwtt.endDate, 
+                  wrappedContract.getContractDateInterval())) {
         validation.addError("cwtt.endDate", "deve appartenere al contratto");
       }
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -337,7 +348,8 @@ public class Contracts extends Controller {
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cwtt, false);
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
-            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), 
+            periodRecaps);
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
 
@@ -353,12 +365,18 @@ public class Contracts extends Controller {
         contractManager.recomputeContract(contract,
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
       }
-      //todo il messaggio di conferma nel flash.
+
+      flash.success(Web.msgSaved(ContractWorkingTimeType.class));
+
       updateContractWorkingTimeType(contract.id);
     }
 
   }
 
+  /**
+   * Crud gestione periodi presenza automatica.
+   * @param id contratto
+   */
   public static void updateContractStampProfile(Long id) {
 
     Contract contract = contractDao.getContractById(id);
@@ -374,6 +392,11 @@ public class Contracts extends Controller {
     render(wrappedContract, contract, csp);
   }
 
+  /**
+   * Salva il nuovo periodo presenza automatica.
+   * @param csp nuovo periodo di presenza automatica.
+   * @param confirmed se conferma ricevuta.
+   */
   public static void saveContractStampProfile(@Valid ContractStampProfile csp, boolean confirmed) {
 
     notFoundIfNull(csp);
@@ -385,18 +408,19 @@ public class Contracts extends Controller {
     Contract contract = csp.contract;
 
     if (!validation.hasErrors()) {
-      if (!DateUtility.isDateIntoInterval(csp.beginDate, wrappedContract.getContractDateInterval())) {
+      if (!DateUtility.isDateIntoInterval(csp.beginDate, 
+          wrappedContract.getContractDateInterval())) {
         validation.addError("csp.beginDate", "deve appartenere al contratto");
       }
-      if (csp.endDate != null &&
-              !DateUtility.isDateIntoInterval(csp.endDate, wrappedContract.getContractDateInterval())) {
+      if (csp.endDate != null && !DateUtility.isDateIntoInterval(csp.endDate, 
+                  wrappedContract.getContractDateInterval())) {
         validation.addError("csp.endDate", "deve appartenere al contratto");
       }
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -407,7 +431,8 @@ public class Contracts extends Controller {
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(csp, false);
     RecomputeRecap recomputeRecap = 
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(), 
-            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), periodRecaps);
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()), 
+            periodRecaps);
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
     
@@ -423,7 +448,9 @@ public class Contracts extends Controller {
         contractManager.recomputeContract(contract,
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
       }
-      //todo il messaggio di conferma nel flash.
+
+      flash.success(Web.msgSaved(ContractStampProfile.class));
+      
       updateContractStampProfile(contract.id);
     }
 
@@ -438,7 +465,7 @@ public class Contracts extends Controller {
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
 
-    IWrapperContract wContract = wrapperFactory.create(contract);
+    IWrapperContract wrContract = wrapperFactory.create(contract);
     if (contract.sourceDateResidual == null) {
       contractManager.cleanResidualInitialization(contract);
     }
@@ -446,10 +473,10 @@ public class Contracts extends Controller {
       contractManager.cleanMealTicketInitialization(contract);
     }
 
-    IWrapperOffice wOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wPerson = wrapperFactory.create(contract.person);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
-    render(contract, wContract, wOffice, wPerson);
+    render(contract, wrContract, wrOffice, wrPerson);
   }
 
   /**
@@ -466,18 +493,18 @@ public class Contracts extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    IWrapperContract wContract = wrapperFactory.create(contract);
-    IWrapperOffice wOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wPerson = wrapperFactory.create(contract.person);
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
     if (!validation.hasErrors()) {
-      if (sourceDateResidual != null &&
-              sourceDateResidual.isBefore(wContract.dateForInitialization())) {
-        validation.addError("sourceDateResidual",
-                "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
+      if (sourceDateResidual != null 
+          && sourceDateResidual.isBefore(wrContract.dateForInitialization())) {
+        validation.addError("sourceDateResidual", "deve essere uguale o successiva a " 
+              + wrContract.dateForInitialization().toString(dtf));
       }
-      if (sourceDateResidual != null &&
-              sourceDateResidual.isAfter(wContract.getContractDateInterval().getEnd())) {
+      if (sourceDateResidual != null 
+          && sourceDateResidual.isAfter(wrContract.getContractDateInterval().getEnd())) {
         validation.addError("sourceDateResidual",
                 "deve essere precedente o uguale alla fine del contratto");
       }
@@ -489,15 +516,15 @@ public class Contracts extends Controller {
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
-      render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateResidual);
+      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual);
     }
 
     LocalDate recomputeFrom = sourceDateResidual;
-    LocalDate recomputeTo = wContract.getContractDateInterval().getEnd();
+    LocalDate recomputeTo = wrContract.getContractDateInterval().getEnd();
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
     }
@@ -506,7 +533,7 @@ public class Contracts extends Controller {
       contractManager.cleanResidualInitialization(contract);
       boolean removeMandatory = false;
       boolean removeUnnecessary = false;
-      if (contract.beginDate.isBefore(wContract.dateForInitialization())) {
+      if (contract.beginDate.isBefore(wrContract.dateForInitialization())) {
         removeMandatory = true;
       } else {
         removeUnnecessary = true;
@@ -518,7 +545,7 @@ public class Contracts extends Controller {
         if (recomputeFrom != null) {
           days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
         }
-        render("@updateSourceContract", contract, wContract, wPerson, wOffice,
+        render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
                 confirmed, removeMandatory, removeUnnecessary, recomputeFrom, recomputeTo, days);
       } else {
         //calcoli
@@ -537,17 +564,18 @@ public class Contracts extends Controller {
         sourceUpdate = true;
       }
 
-      render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateResidual,
+      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual,
               confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
 
     } else {
       contract.sourceDateResidual = sourceDateResidual;
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
-      boolean success = true;
+      
+      flash.success(Web.msgSaved(Contract.class));
+      
       confirmed = false;
-      render("@updateSourceContract", sourceDateResidual, contract, confirmed,
-              success, wContract, wOffice, wPerson);
+      updateSourceContract(contract.id);
     }
 
   }
@@ -566,31 +594,32 @@ public class Contracts extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    IWrapperContract wContract = wrapperFactory.create(contract);
-    IWrapperOffice wOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wPerson = wrapperFactory.create(contract.person);
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
     // TODO: per adesso per definire il residuo dei buoni devo avere l'inizializazione generale
     // quando richiesta.
-    Preconditions.checkState(!wContract.initializationMissing());
+    Preconditions.checkState(!wrContract.initializationMissing());
     if (!validation.hasErrors()) {
-      if (sourceDateMealTicket.isBefore(wContract.dateForInitialization())) {
-        validation.addError("sourceDateResidual",
-                "deve essere uguale o successiva a " + wContract.dateForInitialization().toString(dtf));
+      if (sourceDateMealTicket.isBefore(wrContract.dateForInitialization())) {
+        validation.addError("sourceDateResidual", "deve essere uguale o successiva a " 
+            + wrContract.dateForInitialization().toString(dtf));
       }
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
-      render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateMealTicket);
+      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
+          sourceDateMealTicket);
     }
 
     LocalDate recomputeFrom = sourceDateMealTicket;
-    LocalDate recomputeTo = wContract.getContractDateInterval().getEnd();
+    LocalDate recomputeTo = wrContract.getContractDateInterval().getEnd();
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
     }
@@ -605,8 +634,9 @@ public class Contracts extends Controller {
         sourceUpdate = true;
       }
 
-      render("@updateSourceContract", contract, wContract, wPerson, wOffice, sourceDateMealTicket,
-              confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, months);
+      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
+          sourceDateMealTicket, confirmed, 
+          sourceNew, sourceUpdate, recomputeFrom, recomputeTo, months);
 
     }
 
@@ -614,10 +644,11 @@ public class Contracts extends Controller {
     contract.sourceDateMealTicket = sourceDateMealTicket;
     contractManager.setSourceContractProperly(contract);
     contractManager.properContractUpdate(contract, recomputeFrom, true);
-    boolean success = true;
+    
+    flash.success(Web.msgSaved(Contract.class));
+    
     confirmed = false;
-    render("@updateSourceContract", sourceDateMealTicket, contract, confirmed,
-            success, wContract, wOffice, wPerson);
+    updateSourceContract(contract.id);
   }
 
 

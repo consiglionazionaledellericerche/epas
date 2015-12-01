@@ -35,7 +35,7 @@
 </div>
 
 #{form action:@Contracts.saveContractStampProfile(), class:'form-horizontal',
-		'data-async':'#updateCsp', 'data-async-error':'#updateCsp', 'data-spinner':'#defaultSpinner' }
+		'data-async':'#page_content', 'data-async-error':'#updateCsp', 'data-spinner':'#defaultSpinner' }
 	
 	#{f.hidden 'csp.contract.id' /}
 	
@@ -58,6 +58,7 @@
 		  
 		  #{recomputeRecap recomputeRecap:recomputeRecap /}
 		  #{b.buttons center:true}
+		    #{b.cancel @updateContractStampProfile(contract.id) /}
 		    #{b.submit 'Conferma'/}
 		  #{/b.buttons}
 		 

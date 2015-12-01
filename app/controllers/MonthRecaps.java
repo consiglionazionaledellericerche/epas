@@ -136,9 +136,9 @@ public class MonthRecaps extends Controller {
 
     for (Person person : activePersons) {
 
-      IWrapperPerson wPerson = wrapperFactory.create(person);
+      IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-      for (Contract contract : wPerson.getMonthContracts(year, month)) {
+      for (Contract contract : wrPerson.getMonthContracts(year, month)) {
         Optional<VacationsRecap> vr = vacationsFactory.create(year,
                 contract, LocalDate.now(), true, monthEnd);
 

@@ -155,12 +155,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
       return null;
     }
     String s = "";
-    if (date.getHourOfDay() > 10) {
+    if (date.getHourOfDay() > 9) {
       s = s + date.getHourOfDay() + ":";
     } else {
       s = s + "0" + date.getHourOfDay() + ":";
     }
-    if (date.getMinuteOfHour() > 10) {
+    if (date.getMinuteOfHour() > 9) {
       s = s + date.getMinuteOfHour();
     } else {
       s = s + "0" + date.getMinuteOfHour();
