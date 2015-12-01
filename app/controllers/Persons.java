@@ -16,6 +16,8 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+import helpers.Web;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -310,8 +312,14 @@ public class Persons extends Controller {
     changePassword();
   }
 
-  public static void resetPassword(@MinLength(5) @Required String nuovaPassword,
-                                   @MinLength(5) @Required String confermaPassword) throws Throwable {
+  /**
+   * Salva la nuova password.
+   * @param nuovaPassword nuovaPassword
+   * @param confermaPassword confermaPassword
+   * @throws Throwable boh.
+   */
+  public static void resetPassword(@MinLength(5) @Required String nuovaPassword, 
+      @MinLength(5) @Required String confermaPassword) throws Throwable {
 
     User user = Security.getUser().get();
     if (user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now())) {
@@ -335,86 +343,98 @@ public class Persons extends Controller {
     Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
   }
 
-  public static void childrenList(Long personId) {
+  /**
+   * Lista figli del dipendente.
+   * @param personId personId
+   */
+  public static void children(Long personId) {
 
     Person person = personDao.getPersonById(personId);
     render(person);
   }
-
+  
+  /**
+   * Nuovo figlio per il dipendente.
+   * @param personId personId
+   */
   public static void insertChild(Long personId) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    render(person);
+    PersonChildren child = new PersonChildren();
+    child.person = person;
+    render(child);
   }
 
+  /**
+   * Modifica figlio.
+   * @param childId childId
+   */
   public static void editChild(Long childId) {
 
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
-    Person person = child.person;
-
-    render("@insertChild", child, person);
+    render("@insertChild", child);
   }
-
-  public static void removeChild(Long childId) {
-
-    PersonChildren child = personChildrenDao.getById(childId);
-    notFoundIfNull(child);
-    Person person = child.person;
-
-    render(child, person);
-  }
-
-  public static void deleteChild(Long childId) {
+  
+  /**
+   * Rimozione figlio.
+   * @param childId childId.
+   */
+  public static void deleteChild(Long childId, boolean confirmed) {
 
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
     Person person = child.person;
     rules.checkIfPermitted(person.office);
 
-    flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname, person.getFullname());
+    if (!confirmed) {
+      render("@deleteChild", child);
+    }
+    
+    flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", 
+        child.name, child.surname, person.getFullname());
     child.delete();
 
-    childrenList(person.id);
+    children(person.id);
   }
 
 
-  public static void saveChild(@Valid PersonChildren child, Person person) {
+  /**
+   * Salva il figlio.
+   * @param child child
+   */
+  public static void saveChild(@Valid PersonChildren child) {
 
-    Preconditions.checkState(person.isPersistent());
-
-    if (Validation.hasErrors()) {
-      flash.error("Correggere gli errori riportati.");
-      render("@insertChild", person, child);
-    }
-
-    //		Controlli nel caso di un nuovo inserimento
-    if (!child.isPersistent()) {
-      for (PersonChildren p : personChildrenDao.getAllPersonChildren(person)) {
-
-        if (p.name.equals(child.name) && p.surname.equals(child.surname) ||
-                p.name.equals(child.surname) && p.surname.equals(child.name)) {
-          flash.error("%s %s già presente in anagrafica", child.name, child.surname);
-          render("@insertChild", person, child);
+    if (!Validation.hasErrors()) {
+      for (PersonChildren otherChild : personChildrenDao.getAllPersonChildren(child.person)) {
+        
+        if (child.isPersistent() && otherChild.id == child.id) {
+          continue;
         }
-        if (p.bornDate.isBefore(child.bornDate.plusMonths(9)) || p.bornDate.isBefore(child.bornDate.minusMonths(9))) {
-          flash.error("Attenzione: la data di nascita inserita risulta troppo vicina alla data di nascita di un'altro figlio. Verificare!", child.bornDate);
+        
+        if (otherChild.name.equals(child.name) && otherChild.surname.equals(child.surname) ||
+            otherChild.name.equals(child.surname) && otherChild.surname.equals(child.name)) {
+          validation.addError("child.name", "nome e cognome già presenti.");
+          validation.addError("child.surname", "nome e cognome già presenti.");
         }
       }
     }
+    if (Validation.hasErrors()) {
+      //flash.error("Correggere gli errori riportati.");
+      render("@insertChild", child);
+    }
 
-    rules.checkIfPermitted(person.office);
-
-    child.person = person;
+    rules.checkIfPermitted(child.person.office);
     child.save();
 
     log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}",
-            child.name, child.surname, person);
-    flash.success("Salvato figlio nell'anagrafica dei figli di %s", person.getFullname());
+            child.name, child.surname, child.person);
+    
+    flash.success(Web.msgSaved(PersonChildren.class));
 
-    childrenList(person.id);
+    children(child.person.id);
   }
 
   public static void modifySendEmail(Long personId) {
