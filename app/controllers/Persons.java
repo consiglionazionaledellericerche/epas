@@ -409,11 +409,9 @@ public class Persons extends Controller {
 
     if (!Validation.hasErrors()) {
       for (PersonChildren otherChild : personChildrenDao.getAllPersonChildren(child.person)) {
-        
         if (child.isPersistent() && otherChild.id == child.id) {
           continue;
         }
-        
         if (otherChild.name.equals(child.name) && otherChild.surname.equals(child.surname) ||
             otherChild.name.equals(child.surname) && otherChild.surname.equals(child.name)) {
           validation.addError("child.name", "nome e cognome già presenti.");
@@ -422,7 +420,12 @@ public class Persons extends Controller {
       }
     }
     if (Validation.hasErrors()) {
-      //flash.error("Correggere gli errori riportati.");
+      
+      response.status = 400;
+      //flash.error(Web.msgHasErrors());
+
+      log.warn("validation errors: {}", validation.errorsMap());
+
       render("@insertChild", child);
     }
 
