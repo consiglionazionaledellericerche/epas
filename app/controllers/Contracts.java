@@ -74,8 +74,6 @@ public class Contracts extends Controller {
    */
   public static void personContracts(final Long personId) {
 
-    flash.keep();
-
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     IWrapperPerson wrPerson = wrapperFactory.create(person);
@@ -89,7 +87,6 @@ public class Contracts extends Controller {
             FluentIterable.from(contractDao.getPersonContractList(person))
                     .transform(wrapperFunctionFactory.contract()).toList();
 
-    
     render(person, wrPerson, wrCurrentContract, contractList);
   }
 
@@ -268,23 +265,24 @@ public class Contracts extends Controller {
    *
    * @param contractId contractId
    */
-  public static void delete(Long contractId) {
+  public static void delete(Long contractId, boolean confirmed) {
 
     Contract contract = contractDao.getContractById(contractId);
 
     notFoundIfNull(contract);
 
     rules.checkIfPermitted(contract.person.office);
+//    for (ContractStampProfile csp : contract.contractStampProfile) {
+//      csp.delete();
+//    }
 
-    for (ContractStampProfile csp : contract.contractStampProfile) {
-      csp.delete();
+    if (!confirmed) {
+      render("@delete", contract);
     }
 
     contract.delete();
-
     flash.success(Web.msgDeleted(Contract.class));
-    
-    edit(contract.person.id);
+    Persons.edit(contract.person.id);
   }
 
   /**
@@ -487,7 +485,7 @@ public class Contracts extends Controller {
    * @param confirmed          step di conferma ricevuta
    */
   public static void saveResidualSourceContract(@Valid final Contract contract, 
-      @Valid final LocalDate sourceDateResidual, boolean confirmed) {
+      @Valid final LocalDate sourceDateResidual, boolean confirmedResidual) {
 
     notFoundIfNull(contract);
 
@@ -539,22 +537,22 @@ public class Contracts extends Controller {
         removeUnnecessary = true;
         recomputeFrom = contract.beginDate;
       }
-      if (!confirmed) {
-        confirmed = true;
+      if (!confirmedResidual) {
+        confirmedResidual = true;
         int days = 0;
         if (recomputeFrom != null) {
           days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
         }
         render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
-                confirmed, removeMandatory, removeUnnecessary, recomputeFrom, recomputeTo, days);
+            confirmedResidual, removeMandatory, removeUnnecessary, recomputeFrom, recomputeTo, days);
       } else {
         //calcoli
       }
     }
 
     //configurazione inizializzazione
-    if (!confirmed) {
-      confirmed = true;
+    if (!confirmedResidual) {
+      confirmedResidual = true;
       int days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       boolean sourceNew = false;
       boolean sourceUpdate = false;
@@ -565,7 +563,7 @@ public class Contracts extends Controller {
       }
 
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual,
-              confirmed, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
+          confirmedResidual, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
 
     } else {
       contract.sourceDateResidual = sourceDateResidual;
@@ -574,7 +572,6 @@ public class Contracts extends Controller {
       
       flash.success(Web.msgSaved(Contract.class));
       
-      confirmed = false;
       updateSourceContract(contract.id);
     }
 
@@ -588,7 +585,7 @@ public class Contracts extends Controller {
    * @param confirmed            step di conferma ricevuta
    */
   public static void saveMealTicketSourceContract(@Valid final Contract contract, 
-      @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmed) {
+      @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmedMeal) {
 
     notFoundIfNull(contract);
 
@@ -623,8 +620,8 @@ public class Contracts extends Controller {
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
     }
-    if (!confirmed) {
-      confirmed = true;
+    if (!confirmedMeal) {
+      confirmedMeal = true;
       int months = DateUtility.monthsInInterval(new DateInterval(recomputeFrom, recomputeTo));
       boolean sourceNew = false;
       boolean sourceUpdate = false;
@@ -635,7 +632,7 @@ public class Contracts extends Controller {
       }
 
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
-          sourceDateMealTicket, confirmed, 
+          sourceDateMealTicket, confirmedMeal, 
           sourceNew, sourceUpdate, recomputeFrom, recomputeTo, months);
 
     }
@@ -646,8 +643,7 @@ public class Contracts extends Controller {
     contractManager.properContractUpdate(contract, recomputeFrom, true);
     
     flash.success(Web.msgSaved(Contract.class));
-    
-    confirmed = false;
+
     updateSourceContract(contract.id);
   }
 
