@@ -62,7 +62,7 @@ import javax.inject.Inject;
 @With({Resecure.class, RequestInit.class})
 public class Persons extends Controller {
 
-  //	private final static String USERNAME_SESSION_KEY = "username";
+
   @Inject
   private static UserManager userManager;
   @Inject
@@ -90,20 +90,27 @@ public class Persons extends Controller {
   @Inject
   private static PersonChildrenDao personChildrenDao;
 
-	public static void list(String name){
-		
-		List<Person> simplePersonList = personDao.listFetched(
-				Optional.fromNullable(name),
-				secureManager.officesReadAllowed(Security.getUser().get()),
-				false, null, null, false).list();
+  /**
+   * il metodo per ritornare la lista delle persone.
+   * 
+   * @param name l'eventuale nome su cui restringere la ricerca.
+   */
+  public static void list(String name) {
 
-    List<IWrapperPerson> personList = FluentIterable
-            .from(simplePersonList)
-            .transform(wrapperFunctionFactory.person()).toList();
+    List<Person> simplePersonList = personDao
+        .listFetched(Optional.fromNullable(name),
+            secureManager.officesReadAllowed(Security.getUser().get()), false, null, null, false)
+        .list();
+
+    List<IWrapperPerson> personList =
+        FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
     render(personList);
 
   }
 
+  /**
+   * metodo che gestisce la pagina di inserimento persona.
+   */
   public static void insertPerson() {
 
     Person person = new Person();
@@ -112,13 +119,15 @@ public class Persons extends Controller {
     render(person, contract);
   }
 
-  public static void save(@Valid @Required Person person,
-                          @Valid Contract contract) {
+  /**
+   * metodo che salva la persona inserita con il suo contratto.
+   * @param person la persona da inserire
+   * @param contract il contratto associato alla persona
+   */
+  public static void save(@Valid @Required Person person, @Valid Contract contract) {
 
-    if (contract.endDate != null
-            && !contract.endDate.isAfter(contract.beginDate)) {
-      Validation.addError("contract.endDate",
-              "Dev'essere successivo all'inizio del contratto");
+    if (contract.endDate != null && !contract.endDate.isAfter(contract.beginDate)) {
+      Validation.addError("contract.endDate", "Dev'essere successivo all'inizio del contratto");
     }
 
     if (Validation.hasErrors()) {
@@ -137,12 +146,12 @@ public class Persons extends Controller {
 
     contract.person = person;
 
-    WorkingTimeType wtt = workingTimeTypeDao
-            .workingTypeTypeByDescription("Normale", Optional.<Office>absent());
+    WorkingTimeType wtt =
+        workingTimeTypeDao.workingTypeTypeByDescription("Normale", Optional.<Office>absent());
 
     if (!contractManager.properContractCreate(contract, wtt)) {
-      flash.error("Errore durante la creazione del contratto. "
-              + "Assicurarsi di inserire date valide.");
+      flash.error(
+          "Errore durante la creazione del contratto. " + "Assicurarsi di inserire date valide.");
       params.flash(); // add http parameters to the flash scope
       edit(person.id);
     }
@@ -159,6 +168,10 @@ public class Persons extends Controller {
     list(null);
   }
 
+  /**
+   * metodo per visualizzare e modificare le informazioni di una persona.
+   * @param personId l'id della persona da modificare
+   */
   public static void edit(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -169,13 +182,16 @@ public class Persons extends Controller {
     render(person);
   }
 
+  /**
+   * il metodo che permette il salvataggio delle informazioni modificate di una persona.
+   * @param person la persona da modificare
+   */
   public static void update(@Valid Person person) {
 
     notFoundIfNull(person);
 
     if (Validation.hasErrors()) {
-      log.warn("validation errors for {}: {}", person,
-              validation.errorsMap());
+      log.warn("validation errors for {}: {}", person, validation.errorsMap());
       flash.error("Correggere gli errori indicati.");
       Validation.keep();
       edit(person.id);
@@ -192,6 +208,10 @@ public class Persons extends Controller {
     edit(person.id);
   }
 
+  /**
+   * metodo che permette la cancellazione di una persona.
+   * @param personId l'id della persona da cancellare
+   */
   public static void deletePerson(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -204,6 +224,10 @@ public class Persons extends Controller {
   }
 
 
+  /**
+   * il metodo che svolge l'effettiva cancellazione della persona.
+   * @param personId l'id della persona da cancellare
+   */
   @SuppressWarnings("deprecation")
   public static void deletePersonConfirmed(Long personId) {
 
@@ -238,13 +262,17 @@ public class Persons extends Controller {
 
     person.delete();
 
-    flash.success("La persona %s %s eliminata dall'anagrafica"
-            + " insieme a tutti i suoi dati.", person.name, person.surname);
+    flash.success("La persona %s %s eliminata dall'anagrafica" + " insieme a tutti i suoi dati.",
+        person.name, person.surname);
 
     list(null);
 
   }
 
+  /**
+   * metodo che mostra la situazione delle ferie secondo il corrente piano ferie
+   * @param personId l'id della persona di cui si intende vedere la situazione
+   */
   public static void showCurrentVacation(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -261,6 +289,10 @@ public class Persons extends Controller {
     render(person, vp);
   }
 
+  /**
+   * metoto che mostra l'attuale contratto e orario di lavoro associato della persona.
+   * @param personId l'id della persona di cui si intendono vedere queste informazioni
+   */
   public static void showCurrentContractWorkingTimeType(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -287,9 +319,11 @@ public class Persons extends Controller {
   }
 
   public static void savePassword(@Required String vecchiaPassword,
-                                  @MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword) {
+      @MinLength(5) @Required String nuovaPassword,
+      @MinLength(5) @Required String confermaPassword) {
 
-    User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional.fromNullable(Hashing.md5().hashString(vecchiaPassword, Charsets.UTF_8).toString()));
+    User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional
+        .fromNullable(Hashing.md5().hashString(vecchiaPassword, Charsets.UTF_8).toString()));
 
     if (user == null) {
       flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
@@ -298,7 +332,7 @@ public class Persons extends Controller {
 
     if (validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
       flash.error("Tutti i campi devono essere valorizzati. "
-              + "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
+          + "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
       changePassword();
     }
 
@@ -314,11 +348,12 @@ public class Persons extends Controller {
 
   /**
    * Salva la nuova password.
+   * 
    * @param nuovaPassword nuovaPassword
    * @param confermaPassword confermaPassword
    * @throws Throwable boh.
    */
-  public static void resetPassword(@MinLength(5) @Required String nuovaPassword, 
+  public static void resetPassword(@MinLength(5) @Required String nuovaPassword,
       @MinLength(5) @Required String confermaPassword) throws Throwable {
 
     User user = Security.getUser().get();
@@ -329,7 +364,7 @@ public class Persons extends Controller {
 
     if (validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
       flash.error("Tutti i campi devono essere valorizzati. "
-              + "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
+          + "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
       LostPassword.lostPasswordRecovery(user.recoveryToken);
     }
 
@@ -345,6 +380,7 @@ public class Persons extends Controller {
 
   /**
    * Lista figli del dipendente.
+   * 
    * @param personId personId
    */
   public static void children(Long personId) {
@@ -352,9 +388,10 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     render(person);
   }
-  
+
   /**
    * Nuovo figlio per il dipendente.
+   * 
    * @param personId personId
    */
   public static void insertChild(Long personId) {
@@ -369,6 +406,7 @@ public class Persons extends Controller {
 
   /**
    * Modifica figlio.
+   * 
    * @param childId childId
    */
   public static void editChild(Long childId) {
@@ -377,9 +415,10 @@ public class Persons extends Controller {
     notFoundIfNull(child);
     render("@insertChild", child);
   }
-  
+
   /**
    * Rimozione figlio.
+   * 
    * @param childId childId.
    */
   public static void deleteChild(Long childId, boolean confirmed) {
@@ -392,9 +431,9 @@ public class Persons extends Controller {
     if (!confirmed) {
       render("@deleteChild", child);
     }
-    
-    flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", 
-        child.name, child.surname, person.getFullname());
+
+    flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname,
+        person.getFullname());
     child.delete();
 
     children(person.id);
@@ -403,6 +442,7 @@ public class Persons extends Controller {
 
   /**
    * Salva il figlio.
+   * 
    * @param child child
    */
   public static void saveChild(@Valid PersonChildren child) {
@@ -412,17 +452,17 @@ public class Persons extends Controller {
         if (child.isPersistent() && otherChild.id == child.id) {
           continue;
         }
-        if (otherChild.name.equals(child.name) && otherChild.surname.equals(child.surname) ||
-            otherChild.name.equals(child.surname) && otherChild.surname.equals(child.name)) {
+        if (otherChild.name.equals(child.name) && otherChild.surname.equals(child.surname)
+            || otherChild.name.equals(child.surname) && otherChild.surname.equals(child.name)) {
           validation.addError("child.name", "nome e cognome già presenti.");
           validation.addError("child.surname", "nome e cognome già presenti.");
         }
       }
     }
     if (Validation.hasErrors()) {
-      
+
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
+      // flash.error(Web.msgHasErrors());
 
       log.warn("validation errors: {}", validation.errorsMap());
 
@@ -432,9 +472,9 @@ public class Persons extends Controller {
     rules.checkIfPermitted(child.person.office);
     child.save();
 
-    log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}",
-            child.name, child.surname, child.person);
-    
+    log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}", child.name, child.surname,
+        child.person);
+
     flash.success(Web.msgSaved(PersonChildren.class));
 
     children(child.person.id);
@@ -457,7 +497,8 @@ public class Persons extends Controller {
     rules.checkIfPermitted(person.office);
     person.wantEmail = wantEmail;
     person.save();
-    flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name, person.surname);
+    flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name,
+        person.surname);
     edit(person.id);
   }
 
@@ -465,8 +506,9 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     Set<Office> offices = Sets.newHashSet();
     offices.add(person.office);
-    List<Person> people = personDao.list(Optional.<String>absent(),
-            offices, false, LocalDate.now(), LocalDate.now(), true).list();
+    List<Person> people = personDao
+        .list(Optional.<String>absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
+        .list();
     render(people, person);
   }
 
@@ -493,7 +535,8 @@ public class Persons extends Controller {
 
     supervisor.save();
     person.save();
-    flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name, supervisor.surname);
+    flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name,
+        supervisor.surname);
     workGroup(supervisor.id);
   }
 
