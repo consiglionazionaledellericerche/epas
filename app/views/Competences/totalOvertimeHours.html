@@ -1,15 +1,17 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Monte ore straordinario'  /}
+
+#{competences.competencesTabs activeAction:'totalOvertimeHours' /}
  
  <div class="container">
-#{competences.competencesTabs activeAction:'totalOvertimeHours' /}
-  
   
   #{panel title:'Definizione Monte Ore anno ' + year + ' ' + office.name , color:primary}
 		#{alert color:'info'}
-	    <p><em>Inserire un incremento (segno +) o una diminuizione (segno -) 
-          rispetto al totale già disponibile <strong>prima</strong> del numero di ore da inserire</em>
+		<p>Gestione del monte ore per straordinari per la sede <strong>${office.name}</strong></p>
+	    <p>
+	      Per aumentare il monte ore inserire il valore da sommare preceduto dal segno +.<br>
+	      Per diminuire il monte ore inserire il valore da sottrarre preceduto dal segno -.
         </p>
    		#{/alert}
    		

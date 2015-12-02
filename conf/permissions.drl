@@ -304,13 +304,6 @@ when
         "MonthRecaps.customRecap",
         
         /* Vecchio permesso viewPersonDay */
-        /* credo che siano comunque da filtrare sull'office 
- 		   per cui andrebbero cambiate le action e inserite
- 		   in viewPersonDay_InOffice */	
- 		"Absences.manageAttachmentsPerCode",
- 		"Absences.showGeneralMonthlyAbsences",
-        "Absences.yearlyAbsences",
- 		
  		"MonthRecaps.show",
  		
  		"Stampings.missingStamping",
@@ -353,6 +346,9 @@ when
         "Absences.zipAttachment",
         "Absences.absenceInPeriod",
 		"Absences.showPersonMonthlyAbsences",
+		"Absences.showGeneralMonthlyAbsences",
+		"Absences.manageAttachmentsPerCode",
+        "Absences.yearlyAbsences",
 		 
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -413,11 +409,15 @@ when
        "Stampings.personHolidaySituation",	
        
        /* Vecchio permesso viewPersonDay */
+   	    "Absences.absenceInPeriod",
+	    "Absences.showPersonMonthlyAbsences",
+	    "Absences.showGeneralMonthlyAbsences",
+        "Absences.yearlyAbsences",
         "Absences.manageAttachmentsPerPerson",
+        "Absences.manageAttachmentsPerCode",
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
-	    "Absences.absenceInPeriod",
-	    "Absences.showPersonMonthlyAbsences",
+
 		
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
