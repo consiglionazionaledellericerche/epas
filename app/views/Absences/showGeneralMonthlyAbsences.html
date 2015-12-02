@@ -12,12 +12,12 @@
   #{title title:'Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 </div>
 
-<div class="container-fluid">
+<div class="container">
   
   		  <table class="table table-striped table-bordered table-condensed" width="100%" datatable>
   		    <thead>
 				<tr>
-					<th>Nome</th>
+					<th class="col-md-2">Nome</th>
 					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
 					#{if !col.code.equals("Totale") }
 						<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>

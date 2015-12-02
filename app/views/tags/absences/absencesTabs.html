@@ -21,7 +21,7 @@
       <a href="@{Absences.manageAttachmentsPerPerson(personId, year, month)}">Allegati Per Persona</a>
     </li>
     <li #{if _activeAction.equals("absenceInPeriod")} class="active" #{/if}>
-      <a href="@{Absences.absenceInPeriod()}">Assenze Nel Periodo</a>
+      <a href="@{Absences.absenceInPeriod(personId)}">Assenze Nel Periodo</a>
     </li>
   </ul>
 </div>

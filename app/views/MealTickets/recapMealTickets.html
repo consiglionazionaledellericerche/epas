@@ -6,10 +6,13 @@
  
 #{/set}
 
+#{set breadcrumbs:['Timbrature mancanti':null] /}
+ 
 <div class="container">
-  
-  <div id="container-fluid-nav-tabs" class="container-fluid">
 
+#{breadcrumbs breadcrumbs /}
+
+#{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
   
   
     <!-- Ultimi inseriti -->
@@ -51,7 +54,6 @@
     #{/if}
 
   
-    <div class="col-md-12">
       <table class="table table-bordered center" datatable>
         <thead>
         <tr>
@@ -66,8 +68,7 @@
 	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td>
-	  	       <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}"
-	  	       data-modal=".my-modal-large">
+	  	       <a href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}" >
 		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
 	  	    <td>${recap.buoniPastoDalMesePrecedente}</td>
@@ -92,27 +93,15 @@
 	  	  #{/list}
 	  	</tbody>	
 	  </table>
-    </div>
-  </div>    
   
   <!-- Lista degli istituti che non hanno attiva la data inizio utilizzo -->
-  <div id="container-fluid-nav-tabs" class="container-fluid">
-	  <div class="alert alert-danger">
-	    #{if officesNoMealTicketConf.size() > 0}
-	    	<p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per le seguenti sedi di
-	    	cui si detengono i diritti di amministrazione:</p>
-	    	#{list items:officesNoMealTicketConf, as:'office'}
-	    		<ul>
-	    		  <li>${office.name}</li>
-	    		</ul>
-	    	#{/list}
-	    	<p>Per impostarla contattare l'amministratore tecnico della sede oppure epas@iit.cnr.it</p> 
-	    	
-	    #{/if} 
-	  </div>
-  </div>
-    
+  #{if !officeStartDate.present}
+    #{alert color:'danger'}
+      <p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per questo istituto. 
+	  <p>Per impostarla contattare l'amministratore tecnico della sede oppure epas@iit.cnr.it</p>
+    #{/alert}
+  #{/if}
   
 </div>
 
-#{include '_myModal_large.html' /}
+<div id="modalStamping" class="modal container" tabindex="-1"></div>

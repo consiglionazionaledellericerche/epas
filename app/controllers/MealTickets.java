@@ -8,6 +8,7 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -59,52 +60,57 @@ public class MealTickets extends Controller {
   @Inject
   private static ContractDao contractDao;
   @Inject
+  private static OfficeDao officeDao;
+  @Inject
   private static ConsistencyManager consistencyManager;
   @Inject
   private static SecureManager secureManager;
   @Inject
   private static ConfGeneralManager confGeneralManager;
+  
+  /**
+   * I riepiloghi buoni pasto dei dipendenti dell'office per il mese selezionato.
+   * @param year year
+   * @param month month
+   * @param officeId officeId
+   * @param blockIdsAdded x
+   * @param personIdAdded x
+   */
+  public static void recapMealTickets(int year, int month, Long officeId, 
+      List<Integer> blockIdsAdded, Long personIdAdded) {
 
-  public static void recapMealTickets(int year, int month,
-                                      List<Integer> blockIdsAdded, Long personIdAdded) {
-
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
     List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
-            .getPersonMealticket(
-                    new YearMonth(year, month),
-                    Optional.<Integer>absent(), Optional.<String>absent(),
-                    secureManager.officesReadAllowed(Security.getUser().get()));
+            .getPersonMealticket(new YearMonth(year, month), Optional.<Integer>absent(), 
+                Optional.<String>absent(), Sets.newHashSet(office));
 
-    // Lista degli istituti allowed che non hanno data inizio mealTicket
-    List<Office> officesNoMealTicketConf = Lists.newArrayList();
-    for (Office office : secureManager.officesReadAllowed(Security.getUser().get())) {
-      Optional<LocalDate> officeStartDate = confGeneralManager
-              .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-      if (!officeStartDate.isPresent()) {
-        officesNoMealTicketConf.add(office);
-      }
-    }
+    //La data inizio utilizzo dei buoni pasto.
+    Optional<LocalDate> officeStartDate = confGeneralManager
+        .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
 
-    //Riepilogo buoni inseriti nella precedente action
-    if (personIdAdded != null && blockIdsAdded != null) {
-      Person personAdded = personDao.getPersonById(personIdAdded);
-      Preconditions.checkNotNull(personAdded);
-      Preconditions.checkArgument(personAdded.isPersistent());
+//    //Riepilogo buoni inseriti nella precedente action
+//    if (personIdAdded != null && blockIdsAdded != null) {
+//      Person personAdded = personDao.getPersonById(personIdAdded);
+//      Preconditions.checkNotNull(personAdded);
+//      Preconditions.checkArgument(personAdded.isPersistent());
+//
+//      List<BlockMealTicket> blockAdded = null;
+//      List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
+//      blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
+//
+//      render(monthRecapList, blockAdded, personAdded, officesNoMealTicketConf);
+//    }
 
-      List<BlockMealTicket> blockAdded = null;
-      List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
-      blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
-
-      render(monthRecapList, blockAdded, personAdded, officesNoMealTicketConf);
-    }
-
-    render(monthRecapList, officesNoMealTicketConf);
+    render(monthRecapList, officeStartDate, year, month);
   }
 
   private static void recapMealTickets(List<Integer> blockIdsAdded,
                                        Long personIdAdded) {
 
     recapMealTickets(LocalDate.now().getYear(),
-            LocalDate.now().getMonthOfYear(), blockIdsAdded, personIdAdded);
+            LocalDate.now().getMonthOfYear(), null, blockIdsAdded, personIdAdded);
   }
 
   public static void quickBlocksInsert(Long personId) {
@@ -162,11 +168,10 @@ public class MealTickets extends Controller {
   }
 
 
-  public static void submitPersonMealTicket(Long personId,
-                                            String name, Integer page, Integer max,
-                                            Integer codeBlock1, Integer dimBlock1, LocalDate expireDate1,
-                                            Integer codeBlock2, Integer dimBlock2, LocalDate expireDate2,
-                                            Integer codeBlock3, Integer dimBlock3, LocalDate expireDate3) {
+  public static void submitPersonMealTicket(Long personId, String name, Integer page, Integer max, 
+      Integer codeBlock1, Integer dimBlock1, LocalDate expireDate1,
+      Integer codeBlock2, Integer dimBlock2, LocalDate expireDate2,
+      Integer codeBlock3, Integer dimBlock3, LocalDate expireDate3) {
 
     //Controllo dei parametri
     Person person = personDao.getPersonById(personId);

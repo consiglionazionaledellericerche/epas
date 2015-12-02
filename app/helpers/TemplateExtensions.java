@@ -11,6 +11,8 @@ import com.google.gson.Gson;
 
 import injection.StaticInject;
 
+import models.base.BaseModel;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.ReadablePeriod;
@@ -123,6 +125,9 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String label(Object obj) {
+    if (obj instanceof BaseModel) {
+      return ((BaseModel)obj).getLabel();
+    }
     return obj.toString();
   }
   
