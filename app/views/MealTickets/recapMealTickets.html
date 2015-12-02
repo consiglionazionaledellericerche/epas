@@ -6,7 +6,9 @@
 
 #{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
   
-  
+    *{
+    // TODO ripristinare se serve il pannello di riepilgo dei buoni inseriti nell'ultima action.
+    }*   
     <!-- Ultimi inseriti -->
     #{if blockAdded != null }
     <div class="col-md-12 center">
@@ -14,8 +16,7 @@
   	  <div class="alert alert-success alert-dismissible fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
         <strong>Buoni Pasto correttamente inseriti per la persona 
-          <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(personAdded.id)}"
-	  	       data-modal=".my-modal-large">	  	      
+          <a href="@{MealTickets.quickBlocksInsert(personAdded.id)}" data-async-modal="#defaultModal">	  	      
 	  	     ${personAdded.surname} ${personAdded.name}</a>
 	  	  </a>
 	  	</strong>
@@ -60,7 +61,7 @@
 	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td>
-	  	       <a href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}" >
+	  	       <a href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}" data-async-modal="#defaultModal">
 		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
 	  	    <td>${recap.buoniPastoDalMesePrecedente}</td>
@@ -96,4 +97,3 @@
   
 </div>
 
-<div id="modalStamping" class="modal container" tabindex="-1"></div>

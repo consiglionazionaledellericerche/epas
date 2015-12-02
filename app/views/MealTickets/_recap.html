@@ -1,0 +1,76 @@
+     
+     #{alert color:'info'}
+         <p><strong>Riepilogo contratto</strong></p>
+		 <!-- Recap current contract -->
+		 Intervallo considerato per buoni pasto:
+		   Dal <strong>${recap.getMealTicketInterval().getBegin()?.format()}</strong>
+		 #{if recap.getMealTicketInterval().isClosed() }
+		   A <strong>${recap.getMealTicketInterval().getEnd()?.format()}</strong>
+		 #{/if}
+		 #{if recap.getSourcedInInterval()}<br>Buoni pasto da inizializzazione <strong>${recap.getSourcedInInterval()}</strong>#{/if}
+		 <br>Buoni pasto consegnati <strong>${recap.getMealTicketsReceivedOrdered().size()}</strong>
+	     <br>Buoni pasto consumati <strong>${recap.getPersonDayMapped().size()}</strong>
+	     <br>Buoni pasto residui in questo momento: <strong>${recap.getSourcedInInterval() + recap.getMealTicketsReceivedOrdered().size() - recap.getPersonDayMapped().size()}</strong>
+	 #{/alert}
+	 
+	 
+	 
+	 #{if recap.isMealTicketRunOut() }
+		 #{alert color:'danger'}
+		    La persona ha esaurito i buoni pasto in data ${recap.getDateRunOut()?.format()}<br>
+		 #{/alert}   
+	 #{/if}
+	 #{if recap.isMealTicketExpired() }
+	   <!-- Implementare meglio prima di renderizzare questo alert 
+	   <strong>ATTENZIONE:</strong> La persona ha usufruito di 
+	   buonipasto scaduti in data ${recap.getDateExpire()}
+	   --> 
+	 #{/if}
+	 
+	 
+	 #{if recapPrevious != null && recapPrevious.getRemaining() > 0}
+	   <br>
+	   <h2><i class="fa fa-exclamation-triangle text-danger"></i></h2>
+	    <strong>Attenzione!!!</strong> dal contratto precedente 
+	    (terminato in data <strong>${recapPrevious.getContract().getContractDateInterval().getEnd()}</strong>)
+	    sono rimasti <strong>${recapPrevious.getRemaining()}</strong>
+	    buoni pasto inutilizzati!!!
+	    
+	    <table class="table center">
+	      <tr>
+	        <th>Codice Blocco</th>
+	        <th>Buoni<br>Usati</th>
+	        <th>Buoni<br>Rimanenti</th>
+	        <th>Rimozione</th>
+	      </tr>
+	      #{list items:recapPrevious.getBlockMealTicketReceived(), as:'block'}
+	        #{if block.getRemaining() > 0 }
+	         <tr style="background-color: white;">
+		        <td>
+		          <h4><strong>${block.codeBlock}</strong></h4>
+		        </td>
+		        
+		        <td>
+		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
+		        </td>
+		        
+		        <td>
+		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
+		        </td>
+    
+		        <td>
+		        #{form @MealTickets.deletePersonMealTicket() }
+		    	  <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
+	        	  <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
+		  		#{/form}
+		        </td>
+		      </tr>
+	        #{/if}
+	      #{/list}
+	    </table>
+	    
+	    <br>
+	    Se desideri trasferirli al nuovo contratto <a href="@{MealTickets.mealTicketsLegacy(recap.contract.id, name, page, max)}">clicca qui.</a>
+	 #{/if} 
+	 <!-- Recap previous contract -->
+   
