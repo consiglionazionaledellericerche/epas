@@ -382,6 +382,7 @@ public class RequestInit extends Controller {
 
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Absences.showGeneralMonthlyAbsences";
       }

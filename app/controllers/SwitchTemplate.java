@@ -72,7 +72,7 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("Absences.showGeneralMonthlyAbsences")) {
 
-      Absences.showGeneralMonthlyAbsences(year, month, null, null);
+      Absences.showGeneralMonthlyAbsences(year, month, officeId);
     }
 
     if (action.equals("Absences.yearlyAbsences")) {

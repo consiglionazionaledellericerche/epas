@@ -414,11 +414,12 @@ public class Competences extends Controller {
    */
   public static void getOvertimeInYear(int year) throws IOException {
 
-    Office office = Security.getUser().get().person.office;
+    
     List<Person> personList = personDao
         .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"), 
             Optional.fromNullable(""),
-            Sets.newHashSet(office), false, new LocalDate(year, 1, 1),
+            secureManager.officesReadAllowed(Security.getUser().get()),
+            false, new LocalDate(year, 1, 1),
             new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
             Optional.<Person>absent()).list();
 

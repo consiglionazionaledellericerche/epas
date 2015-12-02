@@ -2,27 +2,14 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-#{set breadcrumbs:['Assenze Annuali':null] /}
- 
+
+  
+#{absences.absencesTabs activeAction:'yearlyAbsences' /}
+  
 <div class="container">
-  #{breadcrumbs breadcrumbs /}
+
+  #{title title:'Assenze Annuali ' + person.fullname + ' '+ year, administration:true /}
   
-  #{absences.absencesTabs activeAction:'yearlyAbsences' /}
-  
-  #{title title:'Assenze Annuali ' + year, administration:true /}
-
-*{   
-<div id="container-fluid-nav-tabs" class="container-fluid">
-  <ul class="nav nav-tabs">
-    <li><a href="@{Absences.showGeneralMonthlyAbsences(year,  session.get("monthSelected"))}">Assenze Mensili</a></li>
-    <li class="active"><a href="@{Absences.yearlyAbsences(personId, month)}">Assenze Annuali</a></li>
-    <li><a href="@{Absences.manageAttachmentsPerCode(year, session.get("monthSelected"))}">Allegati Per Codice Assenza</a></li>
-    <li><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, session.get("monthSelected"))}">Allegati Per Persona</a></li>
-    <li><a href="@{Absences.absenceInPeriod()}">Assenze in periodo</a></li>
-  </ul>
-</div> }*
-
-
 	  <table class="table table-bordered table-hover table-condensed">
 	
 		<!--  Riga di intestazione -->

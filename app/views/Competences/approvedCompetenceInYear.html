@@ -2,15 +2,20 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Competenze pagate'  /}
 
-<div class="container">
+#{competences.competencesTabs activeAction:'approvedCompetenceInYear' /}
 
-      #{competences.competencesTabs activeAction:'approvedCompetenceInYear' /}
-   
+<div class="container">
+ 
+ #{alert color:'info'}
+ <p> Visualizza le competenze assegnate nell'anno da tutti i dipendenti. E' possibile filtrare
+ il risultato per i soli contratti a tempo determinato.
+ </p>
+ #{/alert}  
    #{if onlyDefined}
-     <a href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Tutti</a> 
+     <a class="btn btn-primary" href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Tutti</a> 
    #{/if}
    #{else}
-     <a href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Solo Determinati</a>
+     <a class="btn btn-primary" href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Solo Determinati</a>
    #{/else} 
 
   <table class="table">

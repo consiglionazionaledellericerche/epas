@@ -2,17 +2,11 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-#{set breadcrumbs:['Assenze Mensili':null] /}
- 
-<div class="container">
-  #{breadcrumbs breadcrumbs /}
-  
-  #{absences.absencesTabs activeAction:'showGeneralMonthlyAbsences' /}
-  
-  #{title title:'Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
-</div>
+#{absences.absencesTabs activeAction:'showGeneralMonthlyAbsences' /}
 
 <div class="container">
+
+ #{title title:'Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
   
   		  <table class="table table-striped table-bordered table-condensed" width="100%" datatable>
   		    <thead>

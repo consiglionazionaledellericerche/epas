@@ -2,15 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-#{set breadcrumbs:['Allegati per persona':null] /}
+#{absences.absencesTabs activeAction:'manageAttachmentsPerPerson' /}
  
 <div class="container">
-  #{breadcrumbs breadcrumbs /}
   
-  #{absences.absencesTabs activeAction:'manageAttachmentsPerPerson' /}
-  
-  #{title title:'Allegati per persona ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+  #{title title:'Allegati ' + person.fullname + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
+	#{if personAbsenceListWithFile.empty}
+	  Non ci sono allegati inseriti per questo mese.
+	#{/if}
+	#{else}
 		<ul class="icons-ul">
 			#{list items:personAbsenceListWithFile, as:'personAbsence'}
 				<li class="distanziato"> 
@@ -19,4 +20,5 @@
 				</li>
 			#{/list}
 		</ul>
+	#{/else}	
 </div>

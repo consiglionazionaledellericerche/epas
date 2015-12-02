@@ -2,15 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Esporta competenze'  /}
 
-<div class="container">
 
 #{competences.competencesTabs activeAction:'exportCompetences' /}
+
+<div class="container">
 
 #{panel title:'Esporta in formato .csv la situazione annuale degli straordinari' }
  <div class="text-center"> 
  	  #{form @Competences.getOvertimeInYear() }
        Anno per straordinari <input type="number" name="year"/><br><br>
-       <input class="btn btn-primary" type="submit" value="Calcola straordinari"/>
+       <input class="btn btn-primary" type="submit" value="Esporta straordinari"/>
      #{/form}    
  </div>    
 #{/panel}

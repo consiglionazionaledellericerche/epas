@@ -9,6 +9,8 @@
   #{panel title:'Assegna competenze ' + templateUtility.monthName(month) + ' ' + year, color:'primary' }
 	
     #{alert color:'info'}
+          <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
+          tabella sottostante e cliccare sul valore attualmente assegnato.<p>
           <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>, 
           quelli per straordinari e turni in <strong>ore</strong>.</p>
     #{/alert}
@@ -21,9 +23,9 @@
     <input type="hidden" name="officeId" value="${office.id}"/>
     
 
-        #{f.text 'name', 'data-autochange':true, value:name, autofocus:true,
+        #{f.input 'name', label:'Filtro nome', 'data-autochange':true, value:name, autofocus:true,
             placeholder:'search'.label() /}
-        #{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
+        #{f.selectModel 'competenceCode', label:'Codice da assegnare', items:competenceCodeList,
     		value:wrCompetenceCode.value /}
     
     #{/form}
