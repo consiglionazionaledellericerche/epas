@@ -44,5 +44,11 @@ public class CompetenceCode extends BaseModel {
   public String toString() {
     return String.format("CompetenceCode[%d] - description = %s", id, description);
   }
+  
+  @Override
+  public String getLabel() {
+    return this.code + " - " + this.description;
+  }
+  
 
 }

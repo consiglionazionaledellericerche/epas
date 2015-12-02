@@ -2,34 +2,17 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Esporta competenze'  /}
 
-
-<div id="container-fluid-nav-tabs" class="container-fluid">
-
-<ul class="nav nav-tabs">
-  <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected") )}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(session.get("yearSelected") )}">Monte ore</a></li>
-  <li class="active"><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-  <li><a href="@{Competences.approvedCompetenceInYear(year, true)}">Competenza Assegnate nell'anno</a></li>
-</ul>
-
-</div>
-
 <div class="container">
 
+#{competences.competencesTabs activeAction:'exportCompetences' /}
 
-  <div class="panel panel-primary text-center">
-    <div class="panel-heading">
-      <h3 class="panel-title">Esporta in formato .csv la situazione annuale degli straordinari</h3>
-    </div>
-    <div class="panel-body">
-  	  #{form @Competences.getOvertimeInYear()}
-        Anno per straordinari <input type="number" name="year"/><br><br>
-        <input class="btn btn-primary" type="submit" value="Calcola straordinari"/>
-      #{/form}    
-    </div>
-  </div>
-
-  
-
+#{panel title:'Esporta in formato .csv la situazione annuale degli straordinari' }
+ <div class="text-center"> 
+ 	  #{form @Competences.getOvertimeInYear() }
+       Anno per straordinari <input type="number" name="year"/><br><br>
+       <input class="btn btn-primary" type="submit" value="Calcola straordinari"/>
+     #{/form}    
+ </div>    
+#{/panel}
+ 
 </div>

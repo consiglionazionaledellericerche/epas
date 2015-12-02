@@ -15,6 +15,8 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperModel;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -31,6 +33,7 @@ import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.base.BaseModel;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
@@ -57,12 +60,14 @@ public class TemplateUtility {
   private final RoleDao roleDao;
   private final BadgeReaderDao badgeReaderDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
+  private final IWrapperFactory wrapperFactory;
 
 
   @Inject
   public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
-                         QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
-                         RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao) {
+      QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
+      RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao, 
+      IWrapperFactory wrapperFactory) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -73,6 +78,7 @@ public class TemplateUtility {
     this.roleDao = roleDao;
     this.badgeReaderDao = badgeReaderDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
+    this.wrapperFactory = wrapperFactory;
   }
 
 
@@ -276,5 +282,12 @@ public class TemplateUtility {
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
   }
-
+  
+  /**
+   * L'istanza del wrapperFactory disponibile nei template.
+   * @return wrapperFactory
+   */
+  public IWrapperFactory getWrapperFactory() {
+    return this.wrapperFactory;
+  }
 }

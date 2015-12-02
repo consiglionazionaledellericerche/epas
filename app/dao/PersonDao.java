@@ -176,29 +176,29 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * La lista delle persone abilitate alla competenza compCode. E che superano i filtri dei
+   * La lista delle persone abilitate alla competenza competenceCode. E che superano i filtri dei
    * parametri.
    * 
-   * @param compCode
-   * @param name
-   * @param offices
-   * @param onlyTechnician
-   * @param start
-   * @param end
-   * @return
+   * @param competenceCode codice competenza
+   * @param name name 
+   * @param offices offices
+   * @param onlyTechnician solo tecnologhi
+   * @param start attivi da
+   * @param end attivi a
+   * @return model query delle persone selezionte.
    */
-  public SimpleResults<Person> listForCompetence(CompetenceCode compCode, Optional<String> name,
-      Set<Office> offices, boolean onlyTechnician, LocalDate start, LocalDate end,
-      Optional<Person> personInCharge) {
+  public PerseoSimpleResults<Person> listForCompetence(CompetenceCode competenceCode, 
+      Optional<String> name, Set<Office> offices, boolean onlyTechnician, 
+      LocalDate start, LocalDate end, Optional<Person> personInCharge) {
 
     Preconditions.checkState(!offices.isEmpty());
-    Preconditions.checkNotNull(compCode);
+    Preconditions.checkNotNull(competenceCode);
 
     final QPerson person = QPerson.person;
 
-    return ModelQuery.simpleResults(personQuery(name, offices, onlyTechnician,
+    return PerseoModelQuery.wrap(personQuery(name, offices, onlyTechnician,
         Optional.fromNullable(start), Optional.fromNullable(end), true,
-        Optional.fromNullable(compCode), personInCharge), person);
+        Optional.fromNullable(competenceCode), personInCharge), person);
 
   }
 

@@ -87,17 +87,22 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("Competences.showCompetences")) {
 
-      Competences.showCompetences(year, month, null, null, null, null);
+      Competences.showCompetences(year, month, officeId, null, null, null);
     }
 
     if (action.equals("Competences.totalOvertimeHours")) {
 
-      Competences.totalOvertimeHours(year, null);
+      Competences.totalOvertimeHours(year, officeId);
     }
 
     if (action.equals("Competences.enabledCompetences")) {
 
-      Competences.enabledCompetences(null, null);
+      Competences.enabledCompetences(officeId);
+    }
+    
+    if (action.equals("Competences.approvedCompetenceInYear")) {
+
+      Competences.approvedCompetenceInYear(year, false, officeId);
     }
 
     if (action.equals("Competences.exportCompetences")) {
@@ -151,7 +156,7 @@ public class SwitchTemplate extends Controller {
     }
     if (action.equals("MealTickets.recapMealTickets")) {
 
-      MealTickets.recapMealTickets(year, month, null, null);
+      MealTickets.recapMealTickets(year, month, officeId, null, null);
     }
 
 

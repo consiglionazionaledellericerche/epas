@@ -508,14 +508,12 @@ public class Absences extends Controller {
     render(personAbsenceListWithFile, year, month, person);
   }
 
-  public static void absenceInPeriod(Person person,
-                                     LocalDate from,
-                                     LocalDate to) {
+  public static void absenceInPeriod(Long personId, LocalDate from, LocalDate to) {
 
-    //		Se la persona non è specificata si usa l'utente attualmente connesso
-    if (!person.isPersistent())
-      person = Security.getUser().get().person;
-    //		Se le date non sono specificate imposto il giorno corrente
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    //Se le date non sono specificate imposto il giorno corrente
     if (from == null || to == null) {
       from = LocalDate.now();
       to = LocalDate.now();
