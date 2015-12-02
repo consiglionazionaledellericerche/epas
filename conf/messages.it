@@ -226,10 +226,6 @@ month= Mese (se presente)
 year= Anno (se presente)
 day= Giorno (se presente)
 
-
-true=Si
-false=No
-
 notify.error =Attenzione
 notify.success =Ok
 crud.hasErrors =Occorre correggere gli errori riportati.
