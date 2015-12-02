@@ -2,10 +2,9 @@
 #{set header: 'navbar' /}
 #{set title: 'ePAS - Riepilogo Mensile'  /}
 
-#{set breadcrumbs:['Riepilogo mensile':null] /}
- 
+
 <div class="container">
-  #{breadcrumbs breadcrumbs /}
+
   #{title title:'Riepilogo mensile ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
  <table class="dt-responsive table table-striped table-hover" width="100%" datatable>

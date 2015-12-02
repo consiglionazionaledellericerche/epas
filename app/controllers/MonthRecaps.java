@@ -61,11 +61,6 @@ public class MonthRecaps extends Controller {
    */
   public static void showRecaps(int year, int month, Long officeId) {
 
-    Set<Office> offices = secureManager
-            .officesReadAllowed(Security.getUser().get());
-    if (offices.isEmpty()) {
-      forbidden();
-    }
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -74,8 +69,7 @@ public class MonthRecaps extends Controller {
     LocalDate monthEnd = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
 
     List<Person> simplePersonList = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesReadAllowed(Security.getUser().get()),
+            Optional.<String>absent(), Sets.newHashSet(office),
             false, monthBegin, monthEnd, false).list();
 
     List<IWrapperPerson> personList = FluentIterable

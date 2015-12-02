@@ -367,7 +367,7 @@ public class RequestInit extends Controller {
       }
 
       if (action.equals("Absences.absenceInPeriod")) {
-
+        renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Absences.absenceInPeriod";
       }
