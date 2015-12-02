@@ -79,6 +79,11 @@ public class SwitchTemplate extends Controller {
 
       Absences.yearlyAbsences(personId, year);
     }
+    
+    if (action.equals("Absences.absenceInPeriod")) {
+
+      Absences.absenceInPeriod(personId, null, null);
+    }
 
     if (action.equals("Competences.competences")) {
 
@@ -157,6 +162,16 @@ public class SwitchTemplate extends Controller {
     if (action.equals("MealTickets.recapMealTickets")) {
 
       MealTickets.recapMealTickets(year, month, officeId, null, null);
+    }
+    
+    if (action.equals("MonthRecaps.showRecaps")) {
+      
+      MonthRecaps.showRecaps(year, month, officeId);
+    }
+    
+    if (action.equals("MonthRecaps.customRecap")) {
+      
+      MonthRecaps.customRecap(year, month, officeId);
     }
 
 
