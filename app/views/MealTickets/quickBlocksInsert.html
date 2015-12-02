@@ -1,226 +1,25 @@
-<div class="modal-header center">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Inserimento rapido Buoni Pasto ${recap.contract.person.surname} ${recap.contract.person.name}</h4>
-</div>
+#{modalAsync title:('Gestione Buoni Pasto ' + person.fullname) }
+           
 
-<!-- Start Body -->
-<div class="modal-body">
-
-  <div class="container-fluid">
- 	
-    <div class="well">
-       <p><span class="badge">1</span><strong>Riepilogo contratto</strong></p>
-	 <!-- Recap current contract -->
-	 Intervallo considerato per buoni pasto:
-	   Da <strong>${recap.getMealTicketInterval().getBegin()?.format()}</strong>
-	 #{if recap.getMealTicketInterval().isClosed() }
-	   A <strong>${recap.getMealTicketInterval().getEnd()?.format()}</strong>
-	 #{/if}
-	 
-	 <br>
-	 Buoni pasto consegnati <strong>${recap.getMealTicketsReceivedOrdered().size()}</strong>
-	 <br>
-	 Buoni pasto consumati <strong>${recap.getPersonDayMapped().size()}</strong>
-	 <br>
-	 
-	 #{if recap.isMealTicketRunOut() }
-	    La persona ha esaurito i buoni pasto in data ${recap.getDateRunOut()?.format()}<br>
-	 #{/if}
-	 #{if recap.isMealTicketExpired() }
-	   <!-- Implementare meglio prima di renderizzare questo alert 
-	   <strong>ATTENZIONE:</strong> La persona ha usufruito di 
-	   buonipasto scaduti in data ${recap.getDateExpire()}
-	   --> 
-	 #{/if}
-	 
-	 
-	 #{if recapPrevious != null && recapPrevious.getRemaining() > 0}
-	   <br>
-	   <h2><i class="fa fa-exclamation-triangle text-danger"></i></h2>
-	    <strong>Attenzione!!!</strong> dal contratto precedente 
-	    (terminato in data <strong>${recapPrevious.getContract().getContractDateInterval().getEnd()}</strong>)
-	    sono rimasti <strong>${recapPrevious.getRemaining()}</strong>
-	    buoni pasto inutilizzati!!!
-	    
-	    <table class="table center">
-	      <tr>
-	        <th>Codice Blocco</th>
-	        <th>Buoni<br>Usati</th>
-	        <th>Buoni<br>Rimanenti</th>
-	        <th>Rimozione</th>
-	      </tr>
-	      #{list items:recapPrevious.getBlockMealTicketReceived(), as:'block'}
-	        #{if block.getRemaining() > 0 }
-	         <tr style="background-color: white;">
-		        <td>
-		          <h4><strong>${block.codeBlock}</strong></h4>
-		        </td>
-		        
-		        <td>
-		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
-		        </td>
-		        
-		        <td>
-		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
-		        </td>
-    
-		        <td>
-		        #{form @MealTickets.deletePersonMealTicket() }
-		    	  <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
-	        	  <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
-		  		#{/form}
-		        </td>
-		      </tr>
-	        #{/if}
-	      #{/list}
-	    </table>
-	    
-	    <br>
-	    Se desideri trasferirli al nuovo contratto <a href="@{MealTickets.mealTicketsLegacy(recap.contract.id, name, page, max)}">clicca qui.</a>
-	 #{/if} 
-	 <!-- Recap previous contract -->
-    </div>
-   
-    <div class="well">
- 		
-        <p><span class="badge">1</span><strong> Inserisci blocchi buoni pasto (fino ad un massimo di 3 alla volta)</strong></p>
-	    #{form @MealTickets.submitPersonMealTicket() }
-		  <input type="hidden" name="personId" value="${recap.contract.person.id}"/>
-		  <input type="hidden" name="name" value="${name}"/>
-		  <input type="hidden" name="page" value="${page}"/>
-		  <input type="hidden" name="max" value="${max}"/>	      
-		  
-		  <table class="table table-bordered center">
-		    <tr>
-		      <th>Codice Blocco</th>
-		      <th>Dimensione<br>Blocco</th>
-		      <th>Data Scadenza</th>
-		      <th>Data Attribuzione</th>
-		      <th>Amministratore Assegnatario</th>
-		    </tr>
-		    <!-- blocco1 -->
-		    <tr  style="background-color: white;">
-		      <td>
-		        <input type="number" name="codeBlock1"/>		      
-		      </td>
-		      <td>
-		        #{select 'dimBlock1'}
-	              #{option 22}${22}#{/option}
-	              #{option 23}${23}#{/option}
-		        #{/select}
-		      </td>
-		      <td>
-		        <input name="expireDate1" type="text" 
-		        datepicker value="${expireDate?.format()}"/>
-		      </td>
-		      <td>
-		        ${today?.format()}
-		      </td>
-		      <td>${admin.person.name} ${admin.person.surname}</td>
-		    </tr>
-		    <!-- blocco2 -->
-		    <tr  style="background-color: white;">
-		      <td>
-		        <input type="number" name="codeBlock2"/>		      
-		      </td>
-		      <td>
-		        #{select 'dimBlock2'}
-	              #{option 22}${22}#{/option}
-	              #{option 23}${23}#{/option}
-		        #{/select}
-		      </td>
-		      <td>
-		        <input name="expireDate2" type="text" 
-		        datepicker value="${expireDate?.format()}"/>
-		      </td>
-		      <td>
-		        ${today?.format()}
-		      </td>
-		      <td>${admin.person.name} ${admin.person.surname}</td>
-		    </tr>
-		    <!-- blocco3 -->
-		    <tr style="background-color: white;">
-		      <td>
-		        <input type="number" name="codeBlock3"/>		      
-		      </td>
-		      <td>
-		        #{select 'dimBlock3'}
-	              #{option 22}${22}#{/option}
-	              #{option 23}${23}#{/option}
-		        #{/select}
-		      </td>
-		      <td>
-		        <input name="expireDate3" type="text" 
-		        datepicker value="${expireDate?.format()}"/>
-		      </td>
-		       <td>
-		        ${today?.format()}
-		      </td>
-		      <td>${admin.person.name} ${admin.person.surname}</td>
-		    </tr>
-		  </table>
-		  <div class="center">
-		    <button type="submit" class="btn btn-sm btn-primary">Salva</button>
-		  </div>
-		#{/form}
-    </div>
-		
-    <div class="well">
-      #{list items:2015..2014, as:'year'}
-		<p><span class="badge">2</span><strong> Riepilogo blocchi assegnati ${year}</strong></p>
-		 <table class="table center">
-		    <tr>
-		      <th>Codice Blocco</th>
-		      <th>Buoni<br>Usati</th>
-		      <th>Buoni<br>Rimanenti</th>
-		      <th>Data scadenza</th>
-		      <th>Rimozione</th>
-		    </tr>
-
-		    #{list items:recap.getBlockMealTicketReceivedInYear(year), as:'block'}
-		      <tr style="background-color: white;">
-		        <td>
-		          <h4><strong>${block.codeBlock}</strong></h4>
-		        </td>
-		        <td>
-		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
-		        </td>
-		        <td>
-		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
-		        </td>
-		        <td>${block.getExpireDate()?.format()}</td>
-		        <td>
-		        
-		    	  <div class="delete-confirmed">
-		    	    <button type="submit" class="btn btn-sm btn-danger delete-first"><span class="glyphicon glyphicon-trash"></span></button>
-		    	    
-				    <div class="delete" style="display: none">
-				      
-				      #{form @MealTickets.deletePersonMealTicket() }
-		    	      <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
-		    	  
- 			    	  <input type="hidden" name="name" value="${name}"/>
-		    	      <input type="hidden" name="page" value="${page}"/>
-		    	      <input type="hidden" name="max" value="${max}"/>
-		    	      
-		    	      <button type="submit" class="btn btn-sm btn-danger">Sei sicuro??</button>
-		    	      
-	        	      #{/form}   
-		    	    </div>
-		    	  </div>
-		  		
-		        </td>
-		      </tr>
-		    #{/list}
-		   
-		    
-		  </table>
-		#{/list}  
-    </div>
-        
-  </div>      
-	 
+  #{tabs}
+      #{tabItem id:'riepilogo', title:'Riepilogo', active:true /}
+      #{tabItem id:'insert', title:'Inserisci' /}
+  #{/tabs}
+    <br>
   
-</div>
+  #{tabContent}
+	<!-- Riepilogo e eliminazione dei blocchi precedentemente inseriti -->
+   #{tabContentItem id:'riepilogo', active:true}
+   	#{include './_recap.html' /}
+   	#{include './_delete.html' /}
+   #{/tabContentItem}
 
-
+   <!-- Nuovi blocchi-->
+   #{tabContentItem id:'insert'}
+    #{include './_insert.html' /}
+   #{/tabContentItem}
+   
+   
+  #{/tabContent} 
+        
+#{/modalAsync}

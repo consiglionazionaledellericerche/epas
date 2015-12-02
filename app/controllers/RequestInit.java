@@ -515,6 +515,7 @@ public class RequestInit extends Controller {
         renderArgs.put("dropDown", "dropDownAdministration");
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
         return "MealTickets.recapMealTickets";
       }
     }

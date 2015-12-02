@@ -54,6 +54,15 @@ public class BlockMealTicket {
     }
     return count;
   }
+  
+  /**
+   * Il giorno di attribuzione del blocco.
+   */
+  public LocalDate getDate() {
+    if (this.getDimBlock() > 0)
+      return this.mealTickets.get(0).date;
+    return null;
+  }
 
   /**
    * Il giorno di scadenza dei buoni appartenenti al blocchetto.
