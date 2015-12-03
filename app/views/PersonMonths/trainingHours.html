@@ -2,30 +2,6 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Ore Formazione'  /}
 
-#{set 'moreStyles'}
-
-<style>
-    
-  p {
-	display: inline-block;
-	color: black;
-	font-size: 1.2em;
-  }
-  
-  p span {
-    display: inline-block; 
-    color: black; 
-    font-size: .8em;
-  }
-  
-  #before-table {
-  	margin-bottom: 10px;
-  }
-
-</style>
-
-#{/set}
-
 <div class="container">
 
 <div class="panel panel-primary">
@@ -67,9 +43,9 @@
 					      <span><b>Da:</b> ${pm.fromDate?.format()}</span>
 					      <span><b>A:</b> ${pm.toDate?.format()}</span>
 					    </p>
-						<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target=".my-modal"><i class="fa fa-pencil"></i></a>
+						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-modal-async="#defaultModal"><i class="fa fa-pencil"></i></a>
 						
-						<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" data-target=".my-modal" ><span class="glyphicon glyphicon-trash"></span></i></a>
+						<a href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" data-modal-async="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
 					  </li>
 					#{/if}
 					#{else}
@@ -83,7 +59,7 @@
 		</td>
 		<td>
 			#{if mese == today.getMonthOfYear() && year == today.getYear()}
-				<a data-toggle="modal" data-placement="bottom" title="Inserisci ore di formazione" href="@{PersonMonths.insertTrainingHours(mese, year)}" data-target=".my-modal">Inserisci ore di formazione</a>
+				<a href="@{PersonMonths.insertTrainingHours(mese, year)}" data-async-modal="#defaultModal">Inserisci ore di formazione</a>
 			#{/if}
 			
 		</td>
@@ -108,7 +84,7 @@
       <h3 class="text-right"><i class="fa fa-pencil"></i></h3>
     </div>
   	<div class="col-xs-11">
-  	  <a data-toggle="modal" data-placement="bottom" href="@{PersonMonths.insertTrainingHoursPreviousMonth()}" data-target=".my-modal">
+  	  <a href="@{PersonMonths.insertTrainingHoursPreviousMonth()}" data-modal-async="#defaultModal">
   	  Modifica ore di formazione del mese precedente se non ancora approvate</a>
   	</div>
     
@@ -117,20 +93,6 @@
 
 
 </div>
-
-
-<div class="modal fade my-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-center">
-    
-    <div class="modal-content">
-             
-    </div><!-- /.modal-content -->
-           
-    
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
 
 
 

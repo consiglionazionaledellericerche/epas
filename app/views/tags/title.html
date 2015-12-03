@@ -27,13 +27,9 @@
 }%
 <div class="row">
 #{if _fluid}<div class="container-fluid">#{/if} 
-<div class="col-${_device}-${_dim} #{if _offset}col-${_device}-offset-${_offset}#{/if}" >
-  <div class="panel panel-${_color}">
-	<div class="panel-heading">
-	  <h3 class="panel-title">${_title}</h3>
-	</div>
-  </div>
-</div>
+
+	  <h3>${_title}</h3>
+	  <br>
 #{if _fluid}</div>#{/if}
 
 </div>

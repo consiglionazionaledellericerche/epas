@@ -1,13 +1,16 @@
+#{modalAsync title:('Inserisci ore di formazione') }
 
-<div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Ore di formazione di &{'views.tags.display.date.month.' +month} ${year}</h4>
-</div>
+#{alert color:'info}
+  <p>
+           Tramite questa form è possibile specificare quante e quali ore di formazione sono state effettuate nel corso del mese.
+          	Occorre specificare il periodo nel quale tali ore sono state svolte selezionando giorno di inizio e fine del periodo temporale 
+          	e la quantità di ore effettuate.      
+   </p>
+          	
+  			<em>Es.: se si vuole specificare che dal 4 al 5 del mese sono state effettuate 8 ore di formazione, occorrerà selezionare come 
+  			giorno di inizio il 4, come giorno di fine il 5 e scrivere nel campo "quantità" il valore 8.</em>   
 
-<!-- Start Body -->
-<div class="modal-body">
-
-
+#{/alert}
 
 <div class="panel-group" id="accordion_important">
   <div class="panel panel-primary">
@@ -22,13 +25,7 @@
       <div class="panel-body">
    		
    		
-          	Tramite questa form è possibile specificare quante e quali ore di formazione sono state effettuate nel corso del mese.
-          	Occorre specificare il periodo nel quale tali ore sono state svolte selezionando giorno di inizio e fine del periodo temporale 
-          	e la quantità di ore effettuate.      
-          	<br>
           	
-  			<em>Es.: se si vuole specificare che dal 4 al 5 del mese sono state effettuate 8 ore di formazione, occorrerà selezionare come 
-  			giorno di inizio il 4, come giorno di fine il 5 e scrivere nel campo "quantità" il valore 8.</em>   
       </div>
     </div>
   </div>
@@ -78,6 +75,6 @@
 </div>
 
 
+#{/modalAsync}
 
 
-</div> <!-- End Body -->
