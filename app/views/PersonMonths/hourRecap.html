@@ -27,15 +27,11 @@
 #{/set}
 
 <div class="container">
-
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h3 class="panel-title text-center">Riepilogo ore ${year}</h3>
-    </div>
-    <div class="panel-body">
+  
+  #{title title:('Riepilogo Ore ' + year) /}
 
     <table class="table hour-recap table-condensed center">
-    <tr>
+    <tr class="warning">
 	  <th rowspan=2>Mese</th>
 	  <th rowspan=2>Ore<br>Lavorate</th>
 	  <th colspan=3>Monte ore inizio mese</th>
@@ -45,15 +41,15 @@
 	  <th colspan=3>Monte ore fine mese</th>
 	</tr>
 	<tr>
-		<th>Anno<br>passato</th>
-		<th>Anno<br>corrente</th>
-		<th>Totale</th>
+		<th class="warning">Anno<br>passato</th>
+		<th class="warning">Anno<br>corrente</th>
+		<th class="warning">Totale</th>
 		
 		
 		
-		<th>Anno<br>passato</th>
-		<th>Anno<br>corrente</th>
-		<th>Totale</th>
+		<th class="warning">Anno<br>passato</th>
+		<th class="warning">Anno<br>corrente</th>
+		<th class="warning">Totale</th>
 	</tr>
 	
 	#{list items:recaps, as:'recap'}
@@ -91,7 +87,6 @@
 	#{/list}
 	
     </table>
-    </div>
-  </div>  
+
 </div>
 
