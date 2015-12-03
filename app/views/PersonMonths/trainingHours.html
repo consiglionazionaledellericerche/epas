@@ -4,22 +4,16 @@
 
 <div class="container">
 
-<div class="panel panel-primary">
-	<div class="panel-heading">
-	  <h3 class="panel-title text-center">Ore di formazione ${person.surname} ${person.name} per l'anno ${year}</h3>
-	</div>
-  	<div class="panel-body">
+#{title title:('Ore di formazione ' + year + ' ' + person.fullname ) /}
+
+    #{alert color:'info'}
+     <p>Le ore di formazione possono essere inserite solo per il mese selezionabile.</p> 
+  	 <p>Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
   	
-  	<div class="col-xs-1">
-      <h3 class="text-right text-danger"><i class="fa fa-info-circle"></i></h3>
-    </div>
-  	<div class="col-xs-11" id="before-table">
-  	  Le ore di formazione possono essere inserite solo per il mese selezionabile.<br> 
-  	            Nel momento in cui l'amministratore le approva non potranno più essere modificate.
-  	</div>
+    #{/alert}
   	
     <table class="table table-condensed center">
-	  <tr class="info">
+	  <tr class="warning">
 		<th>Mese</th>
 		<th>Ore di formazione</th>
 		<th>Modifica</th>
@@ -28,26 +22,32 @@
 	  </tr>
 	
 	
-	  #{list items:mesi, as: 'mese'}
+	  #{list items:1..12, as: 'mese'}
 	  <tr>
 		<td class="warning">&{'views.tags.display.date.month.' +mese}</td>
+		
+		
+		<!-- Modifica -->
 		<td>
 			<ul class="list-group">			
-			#{list items:pmList, as: 'pm'}
+			#{list items:personMonthRecapList, as: 'pm'}
 				#{if pm != null}
-				  #{if pm.month == mese}	
-					#{if mese == today.getMonthOfYear() || (mese == today.minusMonths(1).getMonthOfYear() && pm.hoursApproved == false)}		
+				  #{if pm.month == mese}
+				    <!-- mese attuale o precedente-->	
+					#{if mese == today.getMonthOfYear()  || (mese == today.minusMonths(1).getMonthOfYear() && pm.hoursApproved == false)}		
+						
 					  <li class="list-group-item list-group-item-info" >
 					    <p>
 					      <span class="label label-success">${pm.trainingHours} ore</span>
 					      <span><b>Da:</b> ${pm.fromDate?.format()}</span>
 					      <span><b>A:</b> ${pm.toDate?.format()}</span>
 					    </p>
-						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-modal-async="#defaultModal"><i class="fa fa-pencil"></i></a>
+						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-async-modal="#defaultModal"><i class="fa fa-pencil"></i></a>
 						
-						<a href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" data-modal-async="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
+						<a href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
 					  </li>
 					#{/if}
+					<!-- mesi passati -->
 					#{else}
 					  <li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate?.format()}</u> <b>A:</b> <u>${pm.toDate?.format()}</u></li>	
 					#{/else}
@@ -57,12 +57,18 @@
 			#{/list}
 			</ul>
 		</td>
+		
+		
+		<!-- Inserimento -->
 		<td>
 			#{if mese == today.getMonthOfYear() && year == today.getYear()}
 				<a href="@{PersonMonths.insertTrainingHours(mese, year)}" data-async-modal="#defaultModal">Inserisci ore di formazione</a>
 			#{/if}
 			
 		</td>
+		
+		
+		<!-- Approvazione -->
 		<td>
 			#{if pm != null && pm.month == mese }
 				#{if mese == today.getMonthOfYear() || mese == today.minusMonths(1).getMonthOfYear()}
@@ -79,17 +85,10 @@
 	  </tr>
 	  #{/list}
     </table>
-    
-    <div class="col-xs-1">
-      <h3 class="text-right"><i class="fa fa-pencil"></i></h3>
-    </div>
-  	<div class="col-xs-11">
-  	  <a href="@{PersonMonths.insertTrainingHoursPreviousMonth()}" data-modal-async="#defaultModal">
-  	  Modifica ore di formazione del mese precedente se non ancora approvate</a>
-  	</div>
-    
-  </div>
-</div>
+	
+	    
+  	  <a href="@{PersonMonths.insertTrainingHoursPreviousMonth()}" data-async-modal="#defaultModal">
+  	  Inserisci ore di formazione del mese precedente se non ancora approvate.</a>
 
 
 </div>

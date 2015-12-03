@@ -1,83 +1,57 @@
+#{modalAsync title:'Ore formazione ' + templateUtility.monthName(month) + ' ' + year}
 
-<div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Ore di formazione di &{'views.tags.display.date.month.' +month} ${year}</h4>
-</div>
-
-<!-- Start Body -->
-<div class="modal-body">
-
-
-
-<div class="panel-group" id="accordion_important">
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion_important" href="#important">
-          <span class="glyphicon glyphicon-exclamation-sign"></span> Importante
-        </a>
-      </h4>
-    </div>
-    <div id="important" class="panel-collapse collapse out">
-      <div class="panel-body">
-   		
-   		
-          	Tramite questa form è possibile specificare quante e quali ore di formazione sono state effettuate nel corso del mese.
-          	Occorre specificare il periodo nel quale tali ore sono state svolte selezionando giorno di inizio e fine del periodo temporale 
-          	e la quantità di ore effettuate.      
-          	<br>
-          	
-  			<em>Es.: se si vuole specificare che dal 4 al 5 del mese sono state effettuate 8 ore di formazione, occorrerà selezionare come 
-  			giorno di inizio il 4, come giorno di fine il 5 e scrivere nel campo "quantità" il valore 8.</em>   
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="container-fluid center">
-#{form @PersonMonths.saveTrainingHours(), role:'form', class:'form-horizontal'}
-  
-  <input name="personId" type="hidden" value="${person.id}"/>
-  <input name="month" type="hidden" value="${month}"/>
-  <input name="year" type="hidden" value="${year}"/>
+	#{if personMonthSituationId != null}
+		#{alert color:'info'}
+		       	<p>Modifica le ore di formazione nel periodo precedentemente inserito.</p>
+		#{/alert}
+	#{/if}
+	#{else}
+		#{alert color:'info'}
+		       	<p>Tramite questa form è possibile specificare le ore di formazione effettuate nel corso del mese selezinato.</p>
+		        <p>Occorre specificare il periodo nel quale tali ore sono state svolte selezionando giorno di inizio e fine del periodo temporale 
+		          	e la quantità di ore effettuate.</p>      
+		
+		#{/alert}   
+	#{/else}
 	
-		<div class="form-group">
-         <label for="begin" class="col-xs-4 control-label">Giorno Inizio</label>
-         <div class="col-xs-8">
-           #{select 'begin',  class:'form-control', id: 'begin'} 
-		     #{list items:1..max, as:'i'}
-		       #{option i}${i}#{/option}
-			 #{/list}
-		  #{/select}	
-         </div>
-        </div>
-        
-        <div class="form-group">
-         <label for="end" class="col-xs-4 control-label">Giorno fine</label>
-         <div class="col-xs-8">
-           #{select 'end',  class:'form-control', id: 'end'} 
-		     #{list items:1..max, as:'i'}
-		       #{option i}${i}#{/option}
-			 #{/list}
-		  #{/select}	
-         </div>
-        </div>
-        
-        <div class="form-group">
-         <label for="value" class="col-xs-4 control-label">Quantità</label>
-         <div class="col-xs-8">
-           <input type="number" class="form-control" name="value" id="value" placeholder="Quantità">
-         </div>  
-        </div>
-        
+	
+	
+	<div id="insertHour">
+	#{form @PersonMonths.saveTrainingHours(), class:'form-horizontal', 'data-async':'#page_content',
+			    'data-async-error':'#insertHour', 'data-spinner':'#defaultSpinner'}
 	  
-		<button type="submit" class="btn btn-primary" value="Ok">Ok</button>
-#{/form}
+	  <input name="personId" type="hidden" value="${person.id}"/>
+	  <input name="month" type="hidden" value="${month}"/>
+	  <input name="year" type="hidden" value="${year}"/>
+	  #{if personMonthSituationId != null}
+	  		<input name="personMonthSituationId" type="hidden" value="${personMonthSituationId}"/>
+	  		<input name="begin" type="hidden" value="${begin}"/>
+			<input name="end" type="hidden" value="${end}"/>		
+			#{f.simpleView 'Dal', value:dateFrom.format() /}
+			#{f.simpleView 'Al', value:dateTo.format() /}  
+	  #{/if}
+	  #{else}
+	     #{f.input 'begin', label:'Giorno Iniziale', type:'number', required:'true' /}
+	     #{f.input 'end', label:'Giorno Finale', type:'number', required:'true' /}
+	  #{/else}
+	
+	  #{f.input 'value', label:'Quantità', type:'number', required:'true' /}
+	  
+	  #{b.buttons center:'true'}
+	    <button type="submit" class="btn btn-primary" value="Ok">Invio</button>
+	  #{/b.buttons}
+	  
+	#{/form}
+	</div>
+	
+	#{if personMonthSituationId == null}
+		#{alert color:'warning'}
+		        <p>  	
+		  			<strong>Esempio: </strong><em>se si vuole specificare che dal 4 al 5 del mese sono state effettuate 8 ore di formazione, occorrerà selezionare come 
+		  			giorno di inizio il 4, come giorno di fine il 5 e scrivere nel campo "quantità" il valore 8.</em>
+		  		</p>	
+		#{/alert}
+	#{/if}
 
-</div>
 
-
-
-
-</div> <!-- End Body -->
+#{/modalAsync}

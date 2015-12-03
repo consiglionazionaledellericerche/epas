@@ -33,15 +33,19 @@ public class PersonMonthRecapDao extends DaoBase {
   /**
    * @return la lista di personMonthRecap relativa all'anno year per la persona person
    */
-  public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person, Integer year, Optional<Integer> month, Optional<Boolean> hoursApproved) {
+  public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person, 
+      Integer year, Optional<Integer> month, Optional<Boolean> hoursApproved) {
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
     final BooleanBuilder condition = new BooleanBuilder();
-    if (month.isPresent())
+    if (month.isPresent()) {
       condition.and(personMonthRecap.month.eq(month.get()));
-    if (hoursApproved.isPresent())
+    }
+    if (hoursApproved.isPresent()) {
       condition.and(personMonthRecap.hoursApproved.eq(hoursApproved.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(personMonthRecap)
-            .where(condition.and(personMonthRecap.person.eq(person).and(personMonthRecap.year.eq(year))));
+            .where(condition.and(personMonthRecap.person.eq(person)
+                .and(personMonthRecap.year.eq(year))));
     return query.list(personMonthRecap);
   }
 

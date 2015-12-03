@@ -55,11 +55,14 @@ public class PersonMonthsManager {
    * @return un Insertable che verifica se esiste già un periodo contenente delle ore di formazione
    * per la persona person
    */
-  public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month, LocalDate beginDate, LocalDate endDate) {
-    List<PersonMonthRecap> pmList = personMonthRecapDao.getPersonMonthRecaps(person, year, month, beginDate, endDate);
+  public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month, 
+      LocalDate beginDate, LocalDate endDate) {
+    List<PersonMonthRecap> pmList = personMonthRecapDao
+        .getPersonMonthRecaps(person, year, month, beginDate, endDate);
     Insertable rr = new Insertable(true, "");
     if (pmList != null && pmList.size() > 0) {
-      rr.message = "Esiste un periodo di ore di formazione che contiene uno o entrambi i giorni specificati.";
+      rr.message = "Esiste un periodo di ore di formazione "
+          + "che contiene uno o entrambi i giorni specificati.";
       rr.result = false;
 
     }
@@ -72,7 +75,9 @@ public class PersonMonthsManager {
    */
   public Insertable checkIfAlreadySend(Person person, int year, int month) {
     Insertable rr = new Insertable(true, "");
-    List<PersonMonthRecap> list = personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
+    List<PersonMonthRecap> list = personMonthRecapDao
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+            Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
 
     if (list.size() > 0) {
       rr.message = "Impossibile inserire ore di formazione per il mese precedente poichè gli attestati per quel mese sono già stati inviati";
