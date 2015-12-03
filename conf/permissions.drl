@@ -503,7 +503,8 @@ when
         "Contracts.updateSourceContract",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
-
+		"Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
      	
@@ -618,7 +619,8 @@ when
         "Contracts.updateSourceContract",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
-
+		"Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
      	
