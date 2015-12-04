@@ -1,21 +1,29 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Periodi associati a contratti attivi per ' + wtt.label()/}
+#{modalAsync title:('Periodi associati a contratti attivi - ' + wtt.description) }
 
-<div class="container-fluid">
-
-	<table class="table table-condensed table-hover">
-		<tr>
+  #{alert color:'info'}
+    
+    <p>Elenco dei periodi in cui è stato associato il tipo orario <strong>${wtt.description}</strong>
+     per le persone attualmente attive di <strong>${office.name}</strong> 
+    .</p>
+    
+  #{/alert}
+	<table class="table table-condensed table-hover" datatable>
+	  <thead>
+		<tr class="warning">
 			<th>Nome</th>
-			<th>Da</th>
-			<th>A</th>
+			<th>Dal</th>
+			<th>Al</th>
 		</tr>
-		#{list items:cwttList, as:'cwtt'}
+	  </thead>
+	  <tbody>	
+        #{list items:cwttList, as:'cwtt'}
 		<tr>
 			<td>${cwtt.contract.person.surname} ${cwtt.contract.person.name}</td>
-			<td>${cwtt.beginDate?.format()}</td>
-			<td>${cwtt.endDate?.format()}</td>
+			<td data-order="cwtt.beginDate">${cwtt.beginDate?.format()}</td>
+			<td data-order="cwtt.endDate">${cwtt.endDate?.format()}</td>
 		</tr>
 		#{/list}
+	  </tbody>
 	</table>
-	
-</div>
+
+#{/modalAsync}

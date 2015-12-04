@@ -506,6 +506,11 @@ public class RequestInit extends Controller {
         renderArgs.put("dropDown", "dropDownConfiguration");
         return "WorkingTimes.manageWorkingTime";
       }
+      if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
+        renderArgs.put("switchOffice", true);
+        renderArgs.put("dropDown", "dropDownConfiguration");
+        return "WorkingTimes.manageOfficeWorkingTime";
+      }
     }
 
     if (action.startsWith("MealTickets.")) {
