@@ -181,10 +181,14 @@
               #{if ip.viewOffice }
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
               <li><a href="@{BadgeReaders.list()}">Lettori Badge</a></li>
-              <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
+              
               #{/if}
               #{if ip.viewWorkingTimeType}
-              <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
+
+              <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
+
+              <li><a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Lavoro</a></li>
+
               #{/if}
               #{if ip.viewCompetenceCode}
               <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>

@@ -67,24 +67,32 @@ public class WorkingTimes extends Controller {
   @Inject
   private static ContractManager contractManager;
 
+  /**
+   * Gestione dei tipi orario.
+   * @param officeId sede
+   */
   public static void manageWorkingTime(Long officeId) {
 
-    Office office = null;
-    if (officeId != null) {
-      office = officeDao.getOfficeById(officeId);
-    }
-
-    Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
-    if (office == null) {
-      //TODO se offices è vuota capire come comportarsi
-      office = offices.iterator().next();
-    }
-
+    Office  office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
     List<IWrapperWorkingTimeType> wttDefault = FluentIterable
             .from(workingTimeTypeDao.getDefaultWorkingTimeType())
             .transform(wrapperFunctionFactory.workingTimeType()).toList();
+
+    render(wttDefault, office);
+  }
+  
+  /**
+   * Gestione dei tipi orario particolari.
+   * @param officeId sede
+   */
+  public static void manageOfficeWorkingTime(Long officeId) {
+
+    Office  office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
     List<IWrapperWorkingTimeType> wttAllowed = FluentIterable
             .from(office.workingTimeType)
@@ -100,42 +108,49 @@ public class WorkingTimes extends Controller {
       }
     }
 
-    render(wttDefault, wttAllowedEnabled, wttAllowedDisabled, office, offices);
+    render(wttAllowedEnabled, wttAllowedDisabled, office);
   }
+  
+  
 
+  /**
+   * I contratti attivi che per quella sede hanno quel tipo orario.
+   * 
+   * @param wttId orario
+   * @param officeId sede
+   */
   public static void showContract(Long wttId, Long officeId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-    if (wtt == null) {
-
-      flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-      WorkingTimes.manageWorkingTime(null);
-    }
-
+    notFoundIfNull(wtt);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
     rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(office);
 
-    List<Contract> contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(officeId);
+    List<Contract> contractList = wrapperFactory.create(wtt)
+        .getAssociatedActiveContract(officeId);
 
-    render(wtt, contractList);
+    render(wtt, contractList, office);
 
   }
 
   public static void showContractWorkingTimeType(Long wttId, Long officeId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-    if (wtt == null) {
-
-      flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-      WorkingTimes.manageWorkingTime(null);
-    }
-
+    notFoundIfNull(wtt);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
     rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(office);
 
     IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
 
     List<ContractWorkingTimeType> cwttList = wwtt.getAssociatedPeriodInActiveContract(officeId);
 
-    render(wtt, cwttList);
+    render(wtt, cwttList, office);
 
   }
 
@@ -184,7 +199,7 @@ public class WorkingTimes extends Controller {
 
     flash.success("Orario creato con successo.");
 
-    manageWorkingTime(office.id);
+    manageOfficeWorkingTime(office.id);
 
   }
 
@@ -253,19 +268,15 @@ public class WorkingTimes extends Controller {
   public static void delete(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-    if (wtt == null) {
-
-      flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-      manageWorkingTime(null);
-    }
-
+    notFoundIfNull(wtt);
     rules.checkIfPermitted(wtt.office);
 
     //Prima di cancellare il tipo orario controllo che non sia associato ad alcun contratto
     if (contractDao.getAssociatedContract(wtt).size() > 0) {
 
-      flash.error("Impossibile eliminare il tipo orario %s perchè associato ad almeno un contratto. Operazione annullata", wtt.description);
-      WorkingTimes.manageWorkingTime(wtt.office.id);
+      flash.error("Impossibile eliminare il tipo orario selezionato perchè "
+          + "associato ad almeno un contratto. Operazione annullata");
+      WorkingTimes.manageOfficeWorkingTime(wtt.office.id);
     }
 
     for (WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
@@ -273,43 +284,43 @@ public class WorkingTimes extends Controller {
     }
     wtt.delete();
 
-    flash.success("Eliminato orario di lavoro denominato %s.", wtt.description);
-    WorkingTimes.manageWorkingTime(wtt.office.id);
+    flash.success("Tipo orario eliminato.");
+    WorkingTimes.manageOfficeWorkingTime(wtt.office.id);
 
   }
 
+  /**
+   * Abilita/Disabilita il tipo orario.
+   * @param wttId tipo orario
+   */
   public static void toggleWorkingTimeTypeEnabled(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-    if (wtt == null) {
-
-      flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-      manageWorkingTime(null);
-    }
+    notFoundIfNull(wtt);
     rules.checkIfPermitted(wtt.office);
 
     IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
 
-
     //Prima di disattivarlo controllo che non sia associato ad alcun contratto attivo
     if (wtt.disabled == false && wwtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
 
-      flash.error("Impossibile eliminare il tipo orario %s perchè attualmente associato ad almeno un contratto attivo. Operazione annullata", wtt.description);
-      manageWorkingTime(wtt.office.id);
+      flash.error("Impossibile eliminare il tipo orario selezionato perchè "
+          + "attualmente associato ad almeno un contratto attivo.");
+      manageOfficeWorkingTime(wtt.office.id);
     }
 
     if (wtt.disabled) {
 
       wtt.disabled = false;
       wtt.save();
-      flash.success("Riattivato orario di lavoro denominato %s.", wtt.description);
-      manageWorkingTime(wtt.office.id);
+      flash.success("Riattivato correttamente orario di lavoro.");
+      manageOfficeWorkingTime(wtt.office.id);
     } else {
 
       wtt.disabled = true;
       wtt.save();
-      flash.success("Disattivato orario di lavoro denominato %s.", wtt.description);
-      manageWorkingTime(wtt.office.id);
+      flash.success("Disattivato orario di lavoro.");
+      manageOfficeWorkingTime(wtt.office.id);
     }
 
   }

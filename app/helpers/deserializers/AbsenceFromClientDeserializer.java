@@ -30,6 +30,9 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
   @Inject
   private static PersonDao personDao;
 
+  /**
+   * Deserializza il JSON proveniente dal SolariAbsence Client per imporare le assenze romane.
+   */
   @Override
   public AbsenceFromClient deserialize(JsonElement json, Type arg1,
                                        JsonDeserializationContext arg2) throws JsonParseException {
@@ -56,13 +59,6 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
       if (tipo.equals("matricolaCNR")) {
         Integer matricola = Integer.parseInt(matricolaFirma);
         person = personDao.getPersonByNumber(matricola);
-      } else if (tipo.equals("matricolaBadge")) {
-        String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
-        person = personDao.getPersonByBadgeNumber(badgeNumber);
-      } else if (tipo.equals("idTabellaINT")) {
-        Long oldId = Long.parseLong(
-                matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3).trim());
-        person = personDao.getPersonByOldID(oldId);
       }
 
       if (person != null) {

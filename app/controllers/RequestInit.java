@@ -502,9 +502,14 @@ public class RequestInit extends Controller {
     if (action.startsWith("WorkingTimes.")) {
 
       if (action.equals("WorkingTimes.manageWorkingTime")) {
-
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownConfiguration");
         return "WorkingTimes.manageWorkingTime";
+      }
+      if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
+        renderArgs.put("switchOffice", true);
+        renderArgs.put("dropDown", "dropDownConfiguration");
+        return "WorkingTimes.manageOfficeWorkingTime";
       }
     }
 
@@ -576,11 +581,15 @@ public class RequestInit extends Controller {
                 || role.name.equals(Role.PERSONNEL_ADMIN)) {
           this.viewPerson = true;
           this.viewPersonDay = true;
-          this.viewOffice = true;
+         // this.viewOffice = true;
           this.viewCompetence = true;
           this.viewWorkingTimeType = true;
           this.viewCompetenceCode = true;
           this.viewAbsenceType = true;
+        }
+        
+        if(role.name.equals(Role.TECNICAL_ADMIN)){
+          this.viewOffice = true;
         }
 
         if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN)) {

@@ -19,7 +19,11 @@ import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 
+import it.cnr.iit.epas.NullStringBinder;
+
 import models.base.BaseModel;
+
+import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -39,6 +43,7 @@ public class Office extends BaseModel {
 
   //Codice della sede, per esempio per la sede di Pisa è "044000"
   @Unique
+  @As(binder = NullStringBinder.class)
   @Column(nullable = false)
   public String code;
 
