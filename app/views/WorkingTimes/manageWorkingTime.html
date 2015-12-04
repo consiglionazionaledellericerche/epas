@@ -1,110 +1,89 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione tipi orario'  /}
-#{set breadcrumbs:['Tipi Orario':null] /}
+*{ #{set breadcrumbs:['Tipi Orario':null] /} }*
  
-#{set 'moreStyles'}
-  <style>
-  	#table-wtt th, #table-wtt td {
-  		max-width: 40px;
-  	}
-  	
-  	#table-wtt input[type=number] {
-  		max-width: 60px;
-  	}
-  	
-  	#table-wtt td.item {
-  		font-size: .9em;
-  	}
-
-  </style>
-#{/set}
-
 <div class="container">
-#{breadcrumbs breadcrumbs /}
+*{ #{breadcrumbs breadcrumbs /} }*
 
-<div class="container-fluid">
- <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@WorkingTimes.manageWorkingTime(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-      </div>
-</div>
+#{title title:'Gestione Dei Tipi Orario' /}
 
-#{panel title:'Tipi orario CNR', dim:12, fluid:true, color:'success'}
-  	
-  	<div class="alert alert-success" role="alert">
-   	  I <strong>tipi orario predefiniti</strong> possono essere assegnati ad ogni dipendente di ogni sede.<br>
-   	  Non possono essere modificati o aggiunti ma possono essere presi ad esempio da parte degli amministratori
-   	  del personale per creare nuovi tipi orario particolari per le sedi amministrate. 
-   </div>
+#{tabs}
+  #{tabItem id:'default', title:'Tipi Predefiniti', active:true /}
+  #{tabItem id:'particolari', title:'Tipi Particolari' /}
+#{/tabs}
+
+<br>
+
+#{tabContent}
+
+  #{tabContentItem id:'default', active:true}
   
-    <table class="table table-hover">
-      <tr>
-         <th class="center">Descrizione</th>
-         <th class="center">Orizzontale</th>
-         <th class="center">Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
-         <th class="center">Periodi associati<br>a contratti attivi</th> 
-         <!-- 	
-         <th class="center">Cambia orario<br>a tutti</th>
-          -->
-      </tr>
-      #{list items:wttDefault, as:'wtt'}
-      <tr>
-        <td>
-          #{if wtt.value.horizontal}
-          <a href="@{WorkingTimes.showHorizontal(wtt.value.id)}">${wtt.value.description}</a>
-          #{/if}
-          #{else}
-          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">${wtt.value.description}</a>
-          #{/else}
-          
-        </td>
-        <td> 
-        #{if wtt.value.horizontal} Si #{/if}
-        #{else} No#{/else}
-        </td>
-        <td class="center">
-          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-modal=".my-modal">
-            ${wtt.getAssociatedActiveContract(office.id).size()}
-    	  </a>    
-        </td>
-        <td class="center">
-          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-modal=".my-modal">
-            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
-          </a>
-        </td>
-        <!-- 
-        <td class="center">
-          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
-            Cambia
-    	  </a>
-        </td>
-         -->
-       </tr>	
-       #{/list}
-	</table>
-  #{/panel}
-
+	  #{panel title:'Tipi Orario Predefiniti CNR', dim:12, fluid:true, color:'primary'}
+	  	
+	  	<div class="alert alert-info" role="alert">
+	   	  I <strong>tipi orario predefiniti</strong> possono essere assegnati ad ogni dipendente di ogni sede.<br>
+	   	  Non possono essere modificati o aggiunti ma possono essere presi ad esempio da parte degli amministratori
+	   	  del personale per creare nuovi tipi orario particolari per le sedi amministrate. 
+	   </div>
+	  
+	    <table class="table table-hover">
+	      <tr>
+	         <th>Descrizione</th>
+	         <th>Orizzontale</th>
+	         <th>Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
+	         <th>Periodi associati<br>a contratti attivi</th> 
+	         <!-- 	
+	         <th class="center">Cambia orario<br>a tutti</th>
+	          -->
+	      </tr>
+	      #{list items:wttDefault, as:'wtt'}
+	      <tr>
+	        <td>
+	          #{if wtt.value.horizontal}
+	          <a href="@{WorkingTimes.showHorizontal(wtt.value.id)}">${wtt.value.description}</a>
+	          #{/if}
+	          #{else}
+	          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">${wtt.value.description}</a>
+	          #{/else}
+	          
+	        </td>
+	        <td> 
+	        #{if wtt.value.horizontal} Si #{/if}
+	        #{else} No#{/else}
+	        </td>
+	        <td>
+	          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+	            ${wtt.getAssociatedActiveContract(office.id).size()}
+	    	  </a>    
+	        </td>
+	        <td>
+	          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+	            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+	          </a>
+	        </td>
+	        <!-- 
+	        <td class="center">
+	          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
+	            Cambia
+	    	  </a>
+	        </td>
+	         -->
+	       </tr>	
+	       #{/list}
+		</table>
+	  #{/panel}
   
-
-  #{panel title:'Tipi Orario particolari per ' + office.name, dim:12, fluid:true}
   
-   <!-- Nuovo -->
+  #{/tabContentItem}
+  
+  
+  
+  #{tabContentItem id:'particolari'}
+  
+	  #{panel title:'Tipi Orario particolari per ' + office.name, dim:12, fluid:true}
+	  
+	   <!-- Nuovo -->
         <p> 
 			<a href="@{WorkingTimes.insertWorkingTime(office.id)}">
 		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
@@ -216,31 +195,40 @@
 			    #{/list}
 			</table>
 		#{/if}	
-			
-  #{/panel}
-	
-
-
-  #{panel title:'Guida alla modifica dei tipi orario', dim:12, color:'warning', fluid:true}
-  
-		<p class="text-danger"><strong><em>Modifica di un tipo orario esistente</em></strong></p>
-		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
-		In caso di necessità seguire la seguente procedura:
-		<ul>
-		 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
-		 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
-		 <li>Attribuire il nuovo tipo orario ad ogni dipendente interessato tramite le procedure fornite 
-		 nella sezione amministrativa lista persone e modifica dati dipendente.</li>
-		</ul>
+				
+	  #{/panel}
 		
-		<p><strong class="text-danger"><em>Eliminare o disabilitare tipi orario</em></strong><br>
-		E' possibile eliminare o disabilitare i tipi orario che non si vuole più associare ad alcun dipendente.<br>
-		<strong>Eliminare:</strong> La procedura di eliminazione permette di eliminare i tipi orario creati in modo erroneo 
-		oppure mai utilizzati in alcun contratto presente in ePAS (anche terminato).<br>
-		<strong>Disabilitare:</strong> La procedura di disabilita permette di nascondere 
-		i tipi orario usati in passato e che non si vogliono più associare ad alcun dipendente.
-		</p>  
- #{/panel}
+	
+	
+	  #{panel title:'Guida alla modifica dei tipi orario', dim:12, color:'warning', fluid:true}
+	  
+			<p class="text-danger"><strong><em>Modifica di un tipo orario esistente</em></strong></p>
+			Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
+			In caso di necessità seguire la seguente procedura:
+			<ul>
+			 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
+			 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
+			 <li>Attribuire il nuovo tipo orario ad ogni dipendente interessato tramite le procedure fornite 
+			 nella sezione amministrativa lista persone e modifica dati dipendente.</li>
+			</ul>
+			
+			<p><strong class="text-danger"><em>Eliminare o disabilitare tipi orario</em></strong><br>
+			E' possibile eliminare o disabilitare i tipi orario che non si vuole più associare ad alcun dipendente.<br>
+			<strong>Eliminare:</strong> La procedura di eliminazione permette di eliminare i tipi orario creati in modo erroneo 
+			oppure mai utilizzati in alcun contratto presente in ePAS (anche terminato).<br>
+			<strong>Disabilitare:</strong> La procedura di disabilita permette di nascondere 
+			i tipi orario usati in passato e che non si vogliono più associare ad alcun dipendente.
+			</p>  
+	 #{/panel}
+  
+  #{/tabContentItem}
+
+#{/tabContent}  
+
+
+  
+
+  
  
  </div>
 	

@@ -2,6 +2,11 @@ package models.base;
 
 import com.google.common.base.MoreObjects;
 
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperModel;
+
+import models.Person;
+
 import play.db.jpa.GenericModel;
 
 import javax.persistence.GeneratedValue;
@@ -31,11 +36,24 @@ public abstract class BaseModel extends GenericModel {
 
   @Transient
   public String getLabel() {
-    return "";
+    return this.toString();
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).add("id", id).toString();
+  }
+  
+  /**
+   * Costruisce una istanza del wrapper se esiste.
+   * @param wrapperFactory wrapperFactory
+   * @return wrapper model 
+   */
+  @Transient
+  public IWrapperModel getWrapper(IWrapperFactory wrapperFactory) {
+    if (this instanceof Person) {
+      return wrapperFactory.create((Person)this);
+    }
+    return null;
   }
 }

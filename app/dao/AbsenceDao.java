@@ -63,7 +63,7 @@ public class AbsenceDao extends DaoBase {
    * booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
    */
   public List<Absence> getAbsencesInPeriod(Optional<Person> person,
-                                           LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment) {
+      LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment) {
 
     final QAbsence absence = QAbsence.absence;
 

@@ -220,98 +220,56 @@ public class RequestInit extends Controller {
 
     if (action.startsWith("Stampings.")) {
 
-      switch (action) {
-        case "Stampings.stampings":
-          renderArgs.put("switchMonth", true);
-          renderArgs.put("switchYear", true);
-          renderArgs.put("dropDown", "dropDownEmployee");
-          return "Stampings.stampings";
-        // break;
-        case "Stampings.personStamping":
-          renderArgs.put("switchMonth", true);
-          renderArgs.put("switchYear", true);
-          renderArgs.put("switchPerson", true);
-          renderArgs.put("dropDown", "dropDownAdministration");
-          return "Stampings.personStamping";
-        // break;
-        case "Stampings.missingStamping":
-          renderArgs.put("switchMonth", true);
-          renderArgs.put("switchYear", true);
-          renderArgs.put("switchOffice", true);
-          renderArgs.put("dropDown", "dropDownAdministration");
-          return "Stampings.missingStamping";
-        // break;
-        case "Stampings.holidaySituation":
-          renderArgs.put("switchYear", true);
-          renderArgs.put("dropDown", "dropDownAdministration");
-          return "Stampings.holidaySituation";
-        // break;
-        case "Stampings.dailyPresence":
-          renderArgs.put("switchDay", true);
-          renderArgs.put("switchMonth", true);
-          renderArgs.put("switchYear", true);
-          renderArgs.put("switchOffice", true);
-          renderArgs.put("dropDown", "dropDownAdministration");
-          return "Stampings.dailyPresence";
-        // break;
-        case "Stampings.dailyPresenceForPersonInCharge":
-          renderArgs.put("switchDay", true);
-          renderArgs.put("switchMonth", true);
-          renderArgs.put("switchYear", true);
-          return "Stampings.dailyPresenceForPersonInCharge";
-        // break;
+
+      if (action.equals("Stampings.stampings")) {
+
+        renderArgs.put("switchMonth", true);
+        renderArgs.put("switchYear", true);
+        renderArgs.put("dropDown", "dropDownEmployee");
+        return "Stampings.stampings";
       }
 
-      //
-      // if(action.equals("Stampings.stampings")) {
-      //
-      // renderArgs.put("switchMonth", true);
-      // renderArgs.put("switchYear", true);
-      // renderArgs.put("dropDown", "dropDownEmployee");
-      // return "Stampings.stampings";
-      // }
-      //
-      // if(action.equals("Stampings.personStamping")) {
-      //
-      // renderArgs.put("switchMonth", true);
-      // renderArgs.put("switchYear", true);
-      // renderArgs.put("switchPerson", true);
-      // renderArgs.put("dropDown", "dropDownAdministration");
-      // return "Stampings.personStamping";
-      // }
-      //
-      // if(action.equals("Stampings.missingStamping")) {
-      //
-      // renderArgs.put("switchMonth", true);
-      // renderArgs.put("switchYear", true);
-      // renderArgs.put("switchOffice", true);
-      // renderArgs.put("dropDown", "dropDownAdministration");
-      // return "Stampings.missingStamping";
-      // }
-      //
-      // if(action.equals("Stampings.holidaySituation")) {
-      // renderArgs.put("switchYear", true);
-      // renderArgs.put("dropDown", "dropDownAdministration");
-      // return "Stampings.holidaySituation";
-      // }
-      //
-      // if(action.equals("Stampings.dailyPresence")) {
-      //
-      // renderArgs.put("switchDay", true);
-      // renderArgs.put("switchMonth", true);
-      // renderArgs.put("switchYear", true);
-      // renderArgs.put("switchOffice", true);
-      // renderArgs.put("dropDown", "dropDownAdministration");
-      // return "Stampings.dailyPresence";
-      // }
-      //
-      // if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
-      //
-      // renderArgs.put("switchDay", true);
-      // renderArgs.put("switchMonth", true);
-      // renderArgs.put("switchYear", true);
-      // return "Stampings.dailyPresenceForPersonInCharge";
-      // }
+      if (action.equals("Stampings.personStamping")) {
+
+        renderArgs.put("switchMonth", true);
+        renderArgs.put("switchYear", true);
+        renderArgs.put("switchPerson", true);
+        renderArgs.put("dropDown", "dropDownAdministration");
+        return "Stampings.personStamping";
+      }
+
+      if (action.equals("Stampings.missingStamping")) {
+
+        renderArgs.put("switchMonth", true);
+        renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
+        renderArgs.put("dropDown", "dropDownAdministration");
+        return "Stampings.missingStamping";
+      }
+
+      if (action.equals("Stampings.holidaySituation")) {
+        renderArgs.put("switchYear", true);
+        renderArgs.put("dropDown", "dropDownAdministration");
+        return "Stampings.holidaySituation";
+      }
+
+      if (action.equals("Stampings.dailyPresence")) {
+
+        renderArgs.put("switchDay", true);
+        renderArgs.put("switchMonth", true);
+        renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
+        renderArgs.put("dropDown", "dropDownAdministration");
+        return "Stampings.dailyPresence";
+      }
+
+      if (action.equals("Stampings.dailyPresenceForPersonInCharge")) {
+
+        renderArgs.put("switchDay", true);
+        renderArgs.put("switchMonth", true);
+        renderArgs.put("switchYear", true);
+        return "Stampings.dailyPresenceForPersonInCharge";
+      }
     }
 
     if (action.startsWith("PersonMonths.")) {
@@ -409,7 +367,7 @@ public class RequestInit extends Controller {
       }
 
       if (action.equals("Absences.absenceInPeriod")) {
-
+        renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Absences.absenceInPeriod";
       }
@@ -424,6 +382,7 @@ public class RequestInit extends Controller {
 
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Absences.showGeneralMonthlyAbsences";
       }
@@ -451,6 +410,7 @@ public class RequestInit extends Controller {
 
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Competences.showCompetences";
       }
@@ -465,14 +425,22 @@ public class RequestInit extends Controller {
       if (action.equals("Competences.totalOvertimeHours")) {
 
         renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Competences.totalOvertimeHours";
       }
 
       if (action.equals("Competences.enabledCompetences")) {
-
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Competences.enabledCompetences";
+      }
+      
+      if (action.equals("Competences.approvedCompetenceInYear")) {
+        renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
+        renderArgs.put("dropDown", "dropDownAdministration");
+        return "Competences.approvedCompetenceInYear";
       }
 
       if (action.equals("Competences.exportCompetences")) {
@@ -534,7 +502,7 @@ public class RequestInit extends Controller {
     if (action.startsWith("WorkingTimes.")) {
 
       if (action.equals("WorkingTimes.manageWorkingTime")) {
-
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownConfiguration");
         return "WorkingTimes.manageWorkingTime";
       }
@@ -547,6 +515,7 @@ public class RequestInit extends Controller {
         renderArgs.put("dropDown", "dropDownAdministration");
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
+        renderArgs.put("switchOffice", true);
         return "MealTickets.recapMealTickets";
       }
     }

@@ -2,56 +2,21 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Competenze pagate'  /}
 
-<div id="container-fluid-nav-tabs" class="container-fluid">
-
-<ul class="nav nav-tabs">
-  <li><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
-  <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-  <li class="active"><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenze Assegnate nell'anno</a></li>
-</ul>
-
-</div>
+#{competences.competencesTabs activeAction:'approvedCompetenceInYear' /}
 
 <div class="container">
-
-  <div class="container-fluid">
-  <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@Competences.approvedCompetenceInYear(), role:'form', class:'form-inline', 
-	    method:'GET'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	      
-	      <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="c">Solo Determinati </label>
-	        #{if onlyDefined}
-	          <input type="checkbox" name="onlyDefined" value="true" checked/>
-	        #{/if}
-	        #{else}
-	          <input type="checkbox" name="onlyDefined" value="true"/>
-	        #{/else}
-	         
-	      </div>
-	      
-	      <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="y">Anno </label>
-	        <input class="form-control" type="text" name="year" value="${year}" id="y"/>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-  </div>
-  </div>
+ 
+ #{alert color:'info'}
+ <p> Visualizza le competenze assegnate nell'anno da tutti i dipendenti. E' possibile filtrare
+ il risultato per i soli contratti a tempo determinato.
+ </p>
+ #{/alert}  
+   #{if onlyDefined}
+     <a class="btn btn-primary" href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Tutti</a> 
+   #{/if}
+   #{else}
+     <a class="btn btn-primary" href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Solo Determinati</a>
+   #{/else} 
 
   <table class="table">
     <tr>

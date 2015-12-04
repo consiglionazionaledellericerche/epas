@@ -140,7 +140,7 @@
               <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
                 session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
               <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-                session.get("monthSelected"))}">Assenze</a></li>
+                session.get("monthSelected"), session.get("officeSelected"))}">Assenze</a></li>
               <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
 
               <li class="divider"></li>
@@ -148,7 +148,7 @@
 
               #{if ip.viewCompetence }
               <li><a href="@{Competences.showCompetences(session.get("yearSelected"),
-                session.get("monthSelected"))}">Competenze</a></li>
+                session.get("monthSelected"), session.get("officeSelected"))}">Competenze</a></li>
               <li class="divider"></li>
               #{/if}
 
@@ -159,7 +159,7 @@
 
               #{if ip.viewPersonDay }
               <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
-                session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
+                session.get("monthSelected"), session.get("officeSelected") )}">Gestione Buoni Pasto</a></li>
               #{/if}
 
             </ul>
@@ -184,8 +184,11 @@
               
               #{/if}
               #{if ip.viewWorkingTimeType}
+
               <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
-              <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
+
+              <li><a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Lavoro</a></li>
+
               #{/if}
               #{if ip.viewCompetenceCode}
               <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
