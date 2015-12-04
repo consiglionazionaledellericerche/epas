@@ -6,6 +6,7 @@ import dao.MealTicketDao;
 import dao.PersonDao;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import manager.MealTicketManager;
 
@@ -31,6 +32,8 @@ public class MealTicketRecap {
   private List<MealTicket> mealTicketsReceivedOrdered = Lists.newArrayList();
 
   private int remaining = 0;
+  
+  private int sourcedInInterval = 0;
 
   private DateInterval mealTicketInterval = null;
 
@@ -48,7 +51,7 @@ public class MealTicketRecap {
     this.mealTicketManager = mealTicketManager;
     this.contract = contract;
 
-    this.mealTicketInterval = dateInterval;
+    this.mealTicketInterval = new DateInterval(dateInterval.getBegin(), LocalDate.now());
 
     this.personDaysMealTickets = personDao.getPersonDayIntoInterval(
             contract.person, this.mealTicketInterval, true);
@@ -56,6 +59,10 @@ public class MealTicketRecap {
     this.mealTicketsReceivedOrdered = mealTicketDao
             .getMealTicketAssignedToPersonIntoInterval(contract, this.mealTicketInterval);
 
+    if (contract.sourceDateMealTicket != null && DateUtility
+        .isDateIntoInterval(contract.sourceDateMealTicket.plusDays(1), this.mealTicketInterval)) {
+      this.sourcedInInterval = contract.sourceRemainingMealTicket;
+    }
     //MAPPING
     //init lazy variable
     for (MealTicket mealTicket : this.mealTicketsReceivedOrdered) {
@@ -115,6 +122,10 @@ public class MealTicketRecap {
 
   public List<PersonDay> getPersonDayMapped() {
     return this.personDaysMealTickets;
+  }
+  
+  public int getSourcedInInterval() {
+    return this.sourcedInInterval;
   }
 
   public List<MealTicket> getMealTicketsReceivedOrdered() {

@@ -67,19 +67,14 @@ public class WorkingTimes extends Controller {
   @Inject
   private static ContractManager contractManager;
 
+  /**
+   * Gestione dei tipi orario. 
+   * @param officeId sede
+   */
   public static void manageWorkingTime(Long officeId) {
 
-    Office office = null;
-    if (officeId != null) {
-      office = officeDao.getOfficeById(officeId);
-    }
-
-    Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
-    if (office == null) {
-      //TODO se offices è vuota capire come comportarsi
-      office = offices.iterator().next();
-    }
-
+    Office  office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
     List<IWrapperWorkingTimeType> wttDefault = FluentIterable
@@ -100,23 +95,29 @@ public class WorkingTimes extends Controller {
       }
     }
 
-    render(wttDefault, wttAllowedEnabled, wttAllowedDisabled, office, offices);
+    render(wttDefault, wttAllowedEnabled, wttAllowedDisabled, office);
   }
 
+  /**
+   * I contratti attivi che per quella sede hanno quel tipo orario.
+   * 
+   * @param wttId orario
+   * @param officeId sede
+   */
   public static void showContract(Long wttId, Long officeId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-    if (wtt == null) {
-
-      flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
-      WorkingTimes.manageWorkingTime(null);
-    }
-
+    notFoundIfNull(wtt);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
     rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(office);
 
-    List<Contract> contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(officeId);
+    List<Contract> contractList = wrapperFactory.create(wtt)
+        .getAssociatedActiveContract(officeId);
 
-    render(wtt, contractList);
+    render(wtt, contractList, office);
 
   }
 

@@ -169,6 +169,7 @@ contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
 contract.sourceRemainingMealTicket=Buoni pasto residui
 
 ContractStampProfile=Periodo Presenza Automatica
+ContractStampProfile=Periodo Presenza Automatica
 contractStampProfile.fixedworkingtime=Presenza Automatica
 csp.beginDate= Data Inizio
 csp.endDate= Data Fine
