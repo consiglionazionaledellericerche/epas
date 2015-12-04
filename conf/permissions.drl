@@ -265,7 +265,24 @@ when
 		"Institutes.save",
 		"Institutes.delete",
 
-		"Offices.list"
+		"Offices.list",
+		"Offices.edit",
+		"Offices.save",
+		"BadgeReaders.edit",
+		"BadgeReaders.list",
+		"BadgeReaders.joinOffice",
+		"BadgeReaders.saveJoinOffice",
+	    "BadgeReaders.unjoinOffice",
+	    "BadgeReaders.index",
+		
+		"Badges.joinPersonToBadge",
+		"Badges.allocateBadge",
+		"Badges.delete",
+		"Badges.deleteBadge",
+		
+		"Administrators.blank",
+		"Administrators.save",
+		"Administrators.delete"
 		
         ), target == null, granted == false)
 then
@@ -281,7 +298,23 @@ when
  
  	   "Institutes.edit",
  	   "Institutes.save",
-	   "Institutes.delete"
+	   "Institutes.delete",
+	   "Offices.edit",
+	   "Offices.save",
+	   "Administrators.blank",
+	   "Administrators.delete",
+	   "Administrators.save",
+	   "BadgeReaders.edit",
+	   "BadgeReaders.joinOffice",
+	   "BadgeReaders.saveJoinOffice",
+	   "BadgeReaders.unjoinOffice",
+	   "BadgeReaders.index",
+	   
+	   "Badges.joinPersonToBadge",
+	   "Badges.allocateBadge",
+	   "Badges.delete",
+	   "Badges.deleteBadge"
+	   
 	   
        ), target == $o, granted == false)
 then
@@ -590,7 +623,12 @@ when
      	"Configurations.saveConfGeneral",
      	"Configurations.savePatron",
      	"Configurations.saveConfYear",
-		"Configurations.savePastYearVacationLimit"
+		"Configurations.savePastYearVacationLimit",
+		
+		"Badges.joinPersonToBadge",
+		"Badges.allocateBadge",
+		"Badges.delete",
+		"Badges.deleteBadge"
         
         ), target == null, granted == false)
 then
@@ -713,7 +751,12 @@ when
      	"Configurations.saveConfGeneral",
      	"Configurations.savePatron",
      	"Configurations.saveConfYear",
-		"Configurations.savePastYearVacationLimit"
+		"Configurations.savePastYearVacationLimit",
+		
+		"Badges.joinPersonToBadge",
+		"Badges.allocateBadge",
+		"Badges.delete",
+		"Badges.deleteBadge"
                
        ), target == $o, granted == false)
 then
