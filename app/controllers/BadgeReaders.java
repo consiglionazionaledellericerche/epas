@@ -99,18 +99,15 @@ public class BadgeReaders extends Controller {
    */
   public static void edit(Long id) {
 
+    
     final BadgeReader badgeReader = badgeReaderDao.byId(id);
     notFoundIfNull(badgeReader);
-
+    rules.checkIfPermitted(badgeReader.owner);
     final User user = badgeReader.user;
-
+    final User userLogged = Security.getUser().get();
     final Set<Badge> badgeList = badgeReader.badges;
 
-    List<Person> simplePersonList = personDao.getPeopleFromBadgeReader(badgeReader).list();
-
-    List<IWrapperPerson> personList =
-        FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
-
+    final List<Person> personList = personDao.getPeopleOfSameOffice(userLogged, badgeReader);
     render(badgeReader, user, badgeList, personList);
 
   }
