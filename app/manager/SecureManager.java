@@ -122,4 +122,10 @@ public class SecureManager {
     return getOfficeAllowed(user, roles);
 
   }
+  
+  public Set<Office> officesBadgeAllowed(User user){
+    ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN);
+    
+    return getOfficeAllowed(user, roles);
+  }
 }
