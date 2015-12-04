@@ -159,6 +159,10 @@ public class SwitchTemplate extends Controller {
 
       WorkingTimes.manageWorkingTime(officeId);
     }
+    if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
+
+      WorkingTimes.manageOfficeWorkingTime(officeId);
+    }
     if (action.equals("MealTickets.recapMealTickets")) {
 
       MealTickets.recapMealTickets(year, month, officeId);
