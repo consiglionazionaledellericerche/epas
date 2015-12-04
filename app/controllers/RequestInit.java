@@ -502,7 +502,7 @@ public class RequestInit extends Controller {
     if (action.startsWith("WorkingTimes.")) {
 
       if (action.equals("WorkingTimes.manageWorkingTime")) {
-
+        renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownConfiguration");
         return "WorkingTimes.manageWorkingTime";
       }
