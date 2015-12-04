@@ -91,7 +91,9 @@ public class PeriodManager {
       IPropertyInPeriod periodIntersect = propertyInPeriod.newInstance();
       periodIntersect.setBeginDate(intersection.getBegin());
       periodIntersect.setEndDate(intersection.getEnd());
-
+      if (DateUtility.isInfinity(periodIntersect.getEndDate())) {
+        periodIntersect.setEndDate(null);
+      }
       //Parte iniziale old
       if (oldPeriod.getBeginDate().isBefore(periodIntersect.getBeginDate())) {
         IPropertyInPeriod periodOldBeginRemain = oldPeriod.newInstance();

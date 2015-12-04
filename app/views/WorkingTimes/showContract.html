@@ -1,22 +1,30 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Cotratti attivi associati a ' + wtt.description /}
+#{modalAsync title:('Persone Attive con ' + wtt.description) }
 
-<div class="container-fluid">
-
-	<table class="table table-condensed table-hover">
-		<tr>
+  #{alert color:'info'}
+    
+    <p>Elenco delle persone di <strong>${office.name}</strong> 
+    con attualmente associato l'orario <strong>${wtt.description}</strong>.</p>
+    
+  #{/alert}
+	<table class="table table-condensed table-hover" datatable>
+	  <thead>
+		<tr class="warning">
 			<th>Nome</th>
-			<th>Inizio</th>
-			<th>Fine</th>
+			<th>Inizio Contratto</th>
+			<th>Fine Contratto</th>
 		</tr>
+	  </thead>
+	  <tbody>	
 		#{list items:contractList, as:'contract'}
 		<tr>
 			<td>${contract.person.surname} ${contract.person.name}</td>
-			<td>${contract.beginDate?.format()}</td>
-			<td>
+			<td  data-order="${contract.beginDate}">${contract.beginDate?.format()}</td>
+			<td data-order="${contract.endDate}">
 				${contract.endDate?.format()}
 			</td>
 		</tr>
 		#{/list}
+	  </tbody>
 	</table>
-</div>
+
+#{/modalAsync}

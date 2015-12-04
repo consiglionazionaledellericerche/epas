@@ -16,6 +16,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 
 import manager.BadgeManager;
+import manager.SecureManager;
 
 import models.Badge;
 import models.BadgeReader;
@@ -58,10 +59,7 @@ public class BadgeReaders extends Controller {
   @Inject
   private static RoleDao roleDao;
   @Inject
-  private static PersonDao personDao;
-
-  @Inject
-  private static WrapperModelFunctionFactory wrapperFunctionFactory;
+  private static SecureManager secureManager;
   @Inject
   private static BadgeManager badgeManager;
 
@@ -99,19 +97,16 @@ public class BadgeReaders extends Controller {
    */
   public static void edit(Long id) {
 
+    
     final BadgeReader badgeReader = badgeReaderDao.byId(id);
     notFoundIfNull(badgeReader);
-
+    rules.checkIfPermitted(badgeReader.owner);
     final User user = badgeReader.user;
-
+    final User userLogged = Security.getUser().get();
     final Set<Badge> badgeList = badgeReader.badges;
 
-    List<Person> simplePersonList = personDao.getPeopleFromBadgeReader(badgeReader).list();
-
-    List<IWrapperPerson> personList =
-        FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
-
-    render(badgeReader, user, badgeList, personList);
+    final Set<Office> officeSet = secureManager.officesBadgeAllowed(userLogged);
+    render(badgeReader, user, badgeList, officeSet);
 
   }
 

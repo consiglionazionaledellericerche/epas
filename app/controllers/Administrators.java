@@ -38,25 +38,18 @@ public class Administrators extends Controller {
 
   @Inject
   private static SecurityRules rules;
-//	@Inject
-//	private static SecureManager secureManager;
 
   @Inject
   private static OfficeDao officeDao;
-  //	@Inject
-//	private static RoleDao roleDao;
   @Inject
   private static PersonDao personDao;
-
-  //	@Inject
-//	private static IWrapperFactory wrapperFactory;
-//	@Inject
-//	private static OfficeManager officeManager;
-//	@Inject
-//	private static UsersRolesOfficesDao usersRolesOfficesDao;
   @Inject
   private static UserDao userDao;
 
+  /**
+   * metodo che ritorna la form di inserimento amministratore per la sede passata per parametro.
+   * @param officeId l'id della sede a cui associare amministratore e ruolo.
+   */
   public static void blank(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);

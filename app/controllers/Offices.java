@@ -23,6 +23,8 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import security.SecurityRules;
+
 import javax.inject.Inject;
 
 @With({Resecure.class, RequestInit.class})
@@ -35,6 +37,8 @@ public class Offices extends Controller {
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static RoleDao roleDao;
+  @Inject
+  private static SecurityRules rules;
 
   public static void index() {
     flash.keep();
@@ -72,9 +76,11 @@ public class Offices extends Controller {
    * @param id dell'istituto da modificare
    */
   public static void edit(Long id) {
+    
+    
     final Office office = Office.findById(id);
     notFoundIfNull(office);
-
+    rules.checkIfPermitted(office);
     IWrapperOffice wrOffice = wrapperFactory.create(office);
 
     render(office, wrOffice);
@@ -105,7 +111,11 @@ public class Offices extends Controller {
               validation.errorsMap());
       flash.error(Web.msgHasErrors());
       IWrapperOffice wrOffice = wrapperFactory.create(office);
-      render("@edit", office, wrOffice);
+      if(!office.isPersistent()) {
+        render("@blank", office, wrOffice);
+      } else {
+        render("@edit", office, wrOffice);
+      }
     } else {
       office.save();
       flash.success(Web.msgSaved(Office.class));

@@ -46,8 +46,6 @@ import javax.inject.Inject;
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
   @Inject
-  private static BadgeReaderDao badgeReaderDao;
-  @Inject
   private static StampingDao stampingDao;
   @Inject
   private static PersonDao personDao;
@@ -75,6 +73,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       }
       Set<Office> offices = secureManager
               .officesBadgeReaderAllowed(Security.getUser().get());
+      
       BadgeReader badgeReader = Security.getUser().get().badgeReader;
       Person person = null;
 
@@ -84,6 +83,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       StampingFromClient stamping = new StampingFromClient();
 
+      // FIXME questa parte del lettore è sbagliata ed inutile. L'identificazione è via basicAuth
       if (jsonObject.has("lettore")) {
         String badgeReaderCode = jsonObject.get("lettore").getAsString();
         if (!Strings.isNullOrEmpty(badgeReaderCode)) {
@@ -209,9 +209,15 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
           //Rimuove tutti gli eventuali 0 iniziali alla stringa
           // http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
           String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
-
+          
+          if (Security.getUser().get().badgeReader == null) {
+            log.warn("L'user autenticato come badgeReader "
+                + "non ha una istanza badgeReader valida associata.");
+                
+            return null;
+          }
           person = personDao.getPersonByBadgeNumber(badgeNumber, 
-              Optional.fromNullable(badgeReader));
+              Security.getUser().get().badgeReader);
           
           if (person != null) {
             stamping.personId = person.id;

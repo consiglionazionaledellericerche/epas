@@ -61,25 +61,37 @@ public class Configurations extends Controller {
       office = offices.iterator().next();
     }
 
-    ConfGeneral initUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
+    ConfGeneral initUseProgram = confGeneralManager
+        .getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
 
-    ConfGeneral dayOfPatron = confGeneralManager.getConfGeneral(Parameter.DAY_OF_PATRON, office);
-    ConfGeneral monthOfPatron = confGeneralManager.getConfGeneral(Parameter.MONTH_OF_PATRON, office);
+    ConfGeneral dayOfPatron = confGeneralManager
+        .getConfGeneral(Parameter.DAY_OF_PATRON, office);
+    ConfGeneral monthOfPatron = confGeneralManager
+        .getConfGeneral(Parameter.MONTH_OF_PATRON, office);
 
-    ConfGeneral webStampingAllowed = confGeneralManager.getConfGeneral(Parameter.WEB_STAMPING_ALLOWED, office);
-    ConfGeneral addressesAllowed = confGeneralManager.getConfGeneral(Parameter.ADDRESSES_ALLOWED, office);
+    ConfGeneral webStampingAllowed = confGeneralManager
+        .getConfGeneral(Parameter.WEB_STAMPING_ALLOWED, office);
+    ConfGeneral addressesAllowed = confGeneralManager
+        .getConfGeneral(Parameter.ADDRESSES_ALLOWED, office);
 
-    ConfGeneral urlToPresence = confGeneralManager.getConfGeneral(Parameter.URL_TO_PRESENCE, office);
-    ConfGeneral userToPresence = confGeneralManager.getConfGeneral(Parameter.USER_TO_PRESENCE, office);
-    ConfGeneral passwordToPresence = confGeneralManager.getConfGeneral(Parameter.PASSWORD_TO_PRESENCE, office);
+    ConfGeneral urlToPresence = confGeneralManager
+        .getConfGeneral(Parameter.URL_TO_PRESENCE, office);
+    ConfGeneral userToPresence = confGeneralManager
+        .getConfGeneral(Parameter.USER_TO_PRESENCE, office);
+    ConfGeneral passwordToPresence = confGeneralManager
+        .getConfGeneral(Parameter.PASSWORD_TO_PRESENCE, office);
 
-    ConfGeneral numberOfViewingCouple = confGeneralManager.getConfGeneral(Parameter.NUMBER_OF_VIEWING_COUPLE, office);
+    ConfGeneral numberOfViewingCouple = confGeneralManager
+        .getConfGeneral(Parameter.NUMBER_OF_VIEWING_COUPLE, office);
 
-    ConfGeneral dateStartMealTicket = confGeneralManager.getConfGeneral(Parameter.DATE_START_MEAL_TICKET, office);
+    ConfGeneral dateStartMealTicket = confGeneralManager
+        .getConfGeneral(Parameter.DATE_START_MEAL_TICKET, office);
     ConfGeneral sendEmail = confGeneralManager.getConfGeneral(Parameter.SEND_EMAIL, office);
 
-    render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, addressesAllowed, urlToPresence, userToPresence,
-            passwordToPresence, numberOfViewingCouple, dateStartMealTicket, sendEmail, offices, office);
+    render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, 
+        addressesAllowed, urlToPresence, userToPresence,
+            passwordToPresence, numberOfViewingCouple, dateStartMealTicket, 
+            sendEmail, offices, office);
 
   }
 

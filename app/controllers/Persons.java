@@ -177,7 +177,7 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    //rules.checkIfPermitted(person.office);
 
     render(person);
   }
