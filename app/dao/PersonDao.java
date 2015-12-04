@@ -67,28 +67,6 @@ public final class PersonDao extends DaoBase {
     super(queryFactory, emp);
   }
 
-
-
-  /**
-   * 
-   * @param user l'utente di cui si intendono trovare le persone appartenenti allo stesso ufficio
-   * @param badgeReader il lettore badge appartenente a un certo ufficio
-   * @return la lista delle persone appartenenti allo stesso ufficio dell'user.
-   *     Usata per i technical admin quando c'è da vedere la lista delle persone 
-   *     a cui possono assegnare o togliere un badge.
-   */
-  public List<Person> getPeopleOfSameOffice(User user, BadgeReader badgeReader) {
-    final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(person);
-    BooleanBuilder condition = new BooleanBuilder();
-    if (user.username.equals("developer") || user.username.equals("admin")) {
-      condition.and(person.office.eq(badgeReader.owner));
-    } else {
-      condition.and(person.office.eq(user.person.office)); 
-    }
-    
-    return query.where(condition).list(person);
-  }
   /**
    * 
    * @param offices la lista degli uffici
