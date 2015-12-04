@@ -111,7 +111,11 @@ public class Offices extends Controller {
               validation.errorsMap());
       flash.error(Web.msgHasErrors());
       IWrapperOffice wrOffice = wrapperFactory.create(office);
-      render("@edit", office, wrOffice);
+      if(!office.isPersistent()) {
+        render("@blank", office, wrOffice);
+      } else {
+        render("@edit", office, wrOffice);
+      }
     } else {
       office.save();
       flash.success(Web.msgSaved(Office.class));
