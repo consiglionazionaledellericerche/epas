@@ -462,27 +462,21 @@ public final class PersonDao extends DaoBase {
    * @param badgeNumber il numero badge.
    * @return la persona associata al badgeNumber passato come parametro.
    */
-  public Person getPersonByBadgeNumber(String badgeNumber, Optional<BadgeReader> badgeReader) {
+  
+  /**
+   * Il proprietario del badge.
+   * @param badgeNumber codice del badge
+   * @param badgeReader badge reader
+   * @return il proprietario del badge
+   */
+  public Person getPersonByBadgeNumber(String badgeNumber, BadgeReader badgeReader) {
 
-    final BooleanBuilder condition = new BooleanBuilder();
     final QPerson person = QPerson.person;
     final QBadge badge = QBadge.badge;
-    final JPQLQuery query = getQueryFactory().from(person)
-        .leftJoin(person.badges, badge);
-    if (badgeReader.isPresent()) {
-      condition.and(badge.badgeReader.eq(badgeReader.get()));
-    }
-    
-    condition.and(badge.code.eq(badgeNumber));
-    query.where(condition);
-    
-
-    return query.singleResult(person);
-  }
-
-
-  public Person getPersonByBadgeNumber(String badgeNumber) {
-    return getPersonByBadgeNumber(badgeNumber, Optional.<BadgeReader>absent());
+    return getQueryFactory().from(person)
+        .leftJoin(person.badges, badge)
+        .where(badge.badgeReader.eq(badgeReader).and(badge.code.eq(badgeNumber)))
+        .singleResult(person);
   }
 
   /**
