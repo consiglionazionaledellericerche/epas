@@ -1,0 +1,176 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione tipi orario'  /}
+*{ #{set breadcrumbs:['Tipi Orario':null] /} }*
+ 
+<div class="container">
+#{title title:'Gestione Dei Tipi Orario' /}
+</div>
+
+#{workingTime.workingTimeTabs activeAction:'manageOfficeWorkingTime' /}
+ 
+<div class="container">
+  
+	 
+	  #{panel title:'Tipi Orario Particolari per ' + office.name}
+	  
+	   <!-- Nuovo -->
+	   <div class="text-center">
+        <p>
+          <a class="btn btn-success" href="@{WorkingTimes.insertWorkingTime(office.id)}">
+            <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
+          </a>
+        </p>
+        </div>
+        
+        #{tabs}
+  				#{tabItem id:'attivi', title:'Attivi', active:true /}
+  				#{tabItem id:'inattivi', title:'Disattivati' /}
+		#{/tabs}
+		<br>
+		#{tabContent}
+  		  #{tabContentItem id:'attivi', active:true}
+
+	        #{if wttAllowedEnabled.empty}
+	        <div class="alert alert-info">
+	          Non è presente alcun orario particolare attivo per l'istituto amministrato <strong>${office.name}</strong>
+	        </div>
+	        #{/if}
+	        #{else}
+
+			    <table class="table table-condensed table-hover">
+			        <tr class="warning">
+			          <th>Descrizione</th>
+			          <th class="center">Contratti attivi<br>attualmente associati</th>
+			          <th class="center">Periodi associati<br>a contratti attivi</th> 
+			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			          <!-- <th class="center">Cambia orario<br>a tutti</th>  -->
+			        </tr>
+				    #{list items:wttAllowedEnabled, as:'wtt'}
+				      <tr>
+				        <td>
+				          #{if wtt.value.horizontal}
+	          				 <a href="@{WorkingTimes.showHorizontal(wtt.value.id)}" data-async-modal="#defaultModal">${wtt.value.description}</a>
+	          			  #{/if}
+	                      #{else}
+	                         <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-async-modal="#defaultModal">${wtt.value.description}</a>
+	                      #{/else}
+				        </td>
+				        
+				        <!-- contratti attualmente attivi con wtt -->
+				        <td  class="center">
+				          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+				            ${wtt.getAssociatedActiveContract(office.id).size()}
+				    	  </a>    
+				    	  #{if wtt.getAssociatedActiveContract(office.id).size() == 0 }
+				    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
+				    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
+				    	    </a>
+				    	  #{/if }
+				        </td>
+				        
+				        <!-- periodi associati a contratti attualmente attivi con wtt -->
+				        <td class="center">
+			                <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+			                  ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+			                </a>
+				        </td>
+				        
+				        <!-- contratti associati con wtt (storico) -->
+				        <td class="center">
+				          ${wtt.getAssociatedContract().size()}
+				          #{if wtt.getAssociatedContract().size() == 0 }
+				    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
+				    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+				    	    </a>
+				    	  #{/if}
+				    	</td>
+				    	<!-- 
+				        <td class="center">
+				          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
+			                Cambia
+			    	      </a>
+						</td>
+						 -->
+				      </tr>	
+				    #{/list}
+				</table>
+			
+  			
+		    #{/else}	
+		#{/tabContentItem}
+  		
+  		#{tabContentItem id:'inattivi'}
+		
+		    #{if wttAllowedDisabled.empty}
+	        <div class="alert alert-info">
+	          Non è presente alcun orario particolare disattivato per l'istituto amministrato <strong>${office.name}</strong>
+	        </div>
+	        #{/if}
+			#{else}
+	
+			    <table class="table table-condensed table-hover">
+			        <tr class="warning">
+			          <th>Descrizione</th>
+			          <th class="center">Sede</th>
+			          <th class="center">Riattiva</th>
+			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			        </tr>
+				    #{list items:wttAllowedDisabled, as:'wtt'}
+				      <tr>
+	
+				        <td>
+				          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-async-modal="#defaultModal">
+						    ${wtt.value.description}			    
+						  </a>
+				        </td>
+	
+				        <td class="center">${wtt.value.office.name}</td>
+	
+				        <td class="center">
+				          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
+				    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
+				    	  </a>
+				        </td>
+	
+				        <td  class="center">
+				          ${wtt.getAssociatedContract().size()}
+				          #{if wtt.getAssociatedContract().size() == 0 }
+				    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
+				    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+				    	    </a>
+				    	  #{/if}
+				    	</td>
+				      </tr>	
+				    #{/list}
+				</table>
+			#{/else}	
+		  #{/tabContentItem}
+		#{/tabContent}
+				
+	  #{/panel}
+		
+	
+	
+	  #{panel title:'Guida alla modifica dei tipi orario'}
+	  
+			<p><strong>Modifica di un tipo orario esistente</strong></p>
+			Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
+			In caso di necessità seguire la seguente procedura:
+			<ul>
+			 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
+			 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
+			 <li>Attribuire il nuovo tipo orario ad ogni dipendente interessato tramite le procedure fornite 
+			 nella sezione amministrativa lista persone e modifica dati dipendente.</li>
+			</ul>
+			
+			<p><strong>Eliminare o disabilitare tipi orario</strong></p>
+			E' possibile eliminare o disabilitare i tipi orario che non si vuole più associare ad alcun dipendente.<br>
+			<strong>Eliminare:</strong> La procedura di eliminazione permette di eliminare i tipi orario creati in modo erroneo 
+			oppure mai utilizzati in alcun contratto presente in ePAS (anche terminato).<br>
+			<strong>Disabilitare:</strong> La procedura di disabilita permette di nascondere 
+			i tipi orario usati in passato e che non si vogliono più associare ad alcun dipendente.
+			</p>  
+	 #{/panel}
+ 
+ </div>

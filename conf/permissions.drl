@@ -203,6 +203,7 @@ when
      	"Contracts.personContracts",
      	
      	"WorkingTimes.manageWorkingTime",
+     	"WorkingTimes.manageOfficeWorkingTime",
      	"WorkingTimes.showHorizontal",
      	"WorkingTimes.showContract",
      	"WorkingTimes.showContractWorkingTimeType"          
@@ -237,6 +238,7 @@ when
         "Contracts.personContracts",
         
         "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showHorizontal",
      	"WorkingTimes.showContract",
      	"WorkingTimes.showContractWorkingTimeType"             
@@ -415,6 +417,7 @@ when
         
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
@@ -488,6 +491,7 @@ when
         
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
