@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import security.SecurityRules;
+
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +36,8 @@ public class Badges extends Controller {
   private static BadgeReaderDao badgeReaderDao;
   @Inject
   private static BadgeDao badgeDao;
+  @Inject
+  private static SecurityRules rules;
 
   /**
    * @param id del badge che si intende eliminare.
@@ -51,20 +55,21 @@ public class Badges extends Controller {
    * @param badge l'oggetto badge che si vuole eliminare.
    */
   public static void deleteBadge(Badge badge) {
-    //final Badge badge = Badge.findById(id);
+    
+    Long id = badge.person.id;
     badge.delete();
     flash.success(Web.msgDeleted(Badge.class));
-    Persons.list(null);
-    // }
+    joinPersonToBadge(id);
+    
     flash.error(Web.msgHasErrors());
-    Persons.list(null);
+    joinPersonToBadge(id);
   }
   /**
    * @param id della persona a cui si intende assegnare il nuovo badge.
    */
   public static void joinPersonToBadge(Long id) {
     Person person = personDao.getPersonById(id);
-    
+    rules.checkIfPermitted(person.office);
     Badge badge = new Badge();
     render(person, badge);
   }
