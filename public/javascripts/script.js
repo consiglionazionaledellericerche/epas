@@ -132,9 +132,10 @@ $(function($) {
       container: 'body'
     });
     this.find('[datatable]').DataTable({
+      "pageLength": 15,
       "lengthMenu": [
-        [10, 25, 50, 100, -1],
-        [10, 25, 50, 100, "Tutti"]
+        [10,15,20, 25, 50, 100, -1],
+        [10,15,20, 25, 50, 100, "Tutti"]
       ],
       "language": {
         "url": "/public/i18n/DataTablesItalian.json"

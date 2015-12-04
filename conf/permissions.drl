@@ -299,6 +299,11 @@ when
         
         /* Vecchio permesso viewPerson */
         "Persons.list",
+        "Persons.edit",
+        "Persons.children",
+
+        "Badges.joinPersonToBadge",
+        
         "MealTickets.recapMealTickets",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
@@ -349,6 +354,8 @@ when
 		"Absences.showGeneralMonthlyAbsences",
 		"Absences.manageAttachmentsPerCode",
         "Absences.yearlyAbsences",
+
+        "Contracts.personContracts",
 		 
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -400,6 +407,7 @@ when
  $c: PermissionCheck(action in (
  	
  	   /* Vecchio permesso viewPerson */
+ 	   "Persons.edit",
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
        
@@ -418,7 +426,8 @@ when
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
 
-		
+		"Contracts.personContracts",
+
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
         "Charts.whichAbsenceInYear",
