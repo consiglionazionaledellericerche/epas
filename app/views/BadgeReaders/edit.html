@@ -11,6 +11,7 @@
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
   #{tabItem id:'people', title:'Lista badge' /}
+  #{tabItem id:'join', title:'Assegna badge' /}
 #{/tabs}
    
 #{tabContent}
@@ -18,7 +19,7 @@
   #{tabContentItem id:'info', active:true}
     #{accordionGroup 'info'}
     #{accordionItem 'badgeReader', parent:'info', title:'Informazioni', open:true, color:'primary'}
-  	  <div class="alert alert-success" role="alert">
+  	  <div class="alert alert-info" role="alert">
     	Modifica i dati del lettore <strong>${badgeReader.code}</strong>
       </div>
 		#{form action:@updateInfo(), method:'POST', autocomplete:false,
@@ -63,7 +64,7 @@
   #{tabContentItem id:'people'}
     #{accordionGroup 'people'}
     #{accordionItem 'badgeReader', parent:'info', title:'Lista badge associati', open:true, color:'primary'}
-  	  <div class="alert alert-success" role="alert">
+  	  <div class="alert alert-info" role="alert">
     	La lista delle persone attive presenti in anagrafica con associato il badge 
       </div>
 	  <table class="table table-hover">
@@ -90,6 +91,38 @@
 	  		data-async-modal="#modalInsertBadgeReader">Elimina associazione</a></li>
 	  	
 	  	</td>
+	  </tr>	         
+	            
+	  #{/list}
+	  </table>
+	  
+	  
+	 #{/accordionItem}
+  #{/accordionGroup}
+  
+  #{/tabContentItem} 
+  
+    #{tabContentItem id:'join'}
+    #{accordionGroup 'people'}
+    #{accordionItem 'badgeReader', parent:'info', title:'Lista badge associati', open:true, color:'primary'}
+  	  <div class="alert alert-info" role="alert">
+    	Associazione delle persone al lettore <strong>${badgeReader.code}</strong> tramite badge 
+      </div>
+	  <table class="table table-hover">
+	  <tr class="warning">
+			<th>Nome</th>
+			<th>Istituto</th>
+			<th>Associa badge</th>
+						
+	  </tr>
+	  #{list items:personList, as:'person'}
+	  
+	  <tr>
+	  	<td class="alignLeft success">${person.fullname}</td>
+	  	<td>${person.office.name}</td>
+	  	<td>	
+		  		<a href="@{Badges.joinPersonToBadge(person.id)}"><i class="fa fa-credit-card"></i> Assegna</a>	  	
+	  	</td>	  	
 	  </tr>	         
 	            
 	  #{/list}

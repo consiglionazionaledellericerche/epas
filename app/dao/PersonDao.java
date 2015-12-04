@@ -25,6 +25,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.User;
 import models.query.QBadge;
 import models.query.QContract;
 import models.query.QContractStampProfile;
@@ -68,6 +69,32 @@ public final class PersonDao extends DaoBase {
 
 
 
+  /**
+   * 
+   * @param user l'utente di cui si intendono trovare le persone appartenenti allo stesso ufficio
+   * @param badgeReader il lettore badge appartenente a un certo ufficio
+   * @return la lista delle persone appartenenti allo stesso ufficio dell'user.
+   *     Usata per i technical admin quando c'è da vedere la lista delle persone 
+   *     a cui possono assegnare o togliere un badge.
+   */
+  public List<Person> getPeopleOfSameOffice(User user, BadgeReader badgeReader) {
+    final QPerson person = QPerson.person;
+    JPQLQuery query = getQueryFactory().from(person);
+    BooleanBuilder condition = new BooleanBuilder();
+    if (user.username.equals("developer") || user.username.equals("admin")) {
+      condition.and(person.office.eq(badgeReader.owner));
+    } else {
+      condition.and(person.office.eq(user.person.office)); 
+    }
+    
+    return query.where(condition).list(person);
+  }
+  /**
+   * 
+   * @param offices la lista degli uffici
+   * @param yearMonth l'oggetto anno/mese
+   * @return la lista delle persone di un certo ufficio attive in quell'anno/mese.
+   */
   public List<Person> getActivePersonInMonth(Set<Office> offices, YearMonth yearMonth) {
     final QPerson person = QPerson.person;
     int year = yearMonth.getYear();
@@ -140,7 +167,6 @@ public final class PersonDao extends DaoBase {
 
   /**
    * Permette la fetch automatica di tutte le informazioni delle persone filtrate.
-   * 
    * TODO: e' usata solo in Persons.list ma se serve in altri metodi rendere parametrica la funzione
    * PersonDao.list.
    * 
@@ -150,7 +176,6 @@ public final class PersonDao extends DaoBase {
    * @param start da quando iniziare la ricerca
    * @param end quando terminare la ricerca
    * @param onlyOnCertificate true se voglio solo gli strutturati, false altrimenti
-   * @param badgeReader opzionale 
    * @return la lista delle persone trovate con queste retrizioni
    */
   public SimpleResults<Person> listFetched(Optional<String> name, Set<Office> offices,
@@ -205,8 +230,8 @@ public final class PersonDao extends DaoBase {
   /**
    * L'ultimo contratto inserito in ordine di data inizio. (Tendenzialmente quello attuale)
    * 
-   * @param person
-   * @return
+   * @param person la persona di cui si richiede il contratto
+   * @return l'ultimo contratto in ordine temporale.
    */
   public Optional<Contract> getLastContract(Person person) {
 
@@ -480,9 +505,8 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param type
-   * @return la lista di persone che hanno come tipo turno quello passato come parametro
+   * @param type il tipo di turno
+   * @return la lista di persone che hanno come tipo turno quello passato come parametro.
    */
   public List<Person> getPersonForShift(String type) {
 
@@ -498,28 +522,9 @@ public final class PersonDao extends DaoBase {
     return query.list(person);
   }
 
-  /**
-   * 
-   * @param badgeReader il lettore badge su cui verificare chi timbra
-   * @return la lista di persone che hanno un badge che timbra nel badgereader passato come parametro
-   */
-  public SimpleResults<Person> getPeopleFromBadgeReader(BadgeReader badgeReader){
-    final QPerson person = QPerson.person;
-    final QBadge badge = QBadge.badge;
-    final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.badges, badge)
-        .where(badge.badgeReader.eq(badgeReader).and(badge.person.eq(person)))            
-        .orderBy(person.surname.asc());
-    SimpleResults<Person> result = ModelQuery.simpleResults(
-        // JPQLQuery
-        query,
-        // Expression
-        person);
-    return result;
-  }
 
   /**
-   * 
-   * @return il responsabile per la persona passata come parametro
+   * @return il responsabile per la persona passata come parametro.
    */
   public Person getPersonInCharge(Person p) {
     final QPerson person = QPerson.person;
@@ -654,7 +659,8 @@ public final class PersonDao extends DaoBase {
             .leftJoin(person.contracts, contract).fetch()
             .leftJoin(person.user, QUser.user)
             .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
-            .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+            .leftJoin(person.personHourForOvertime, 
+                QPersonHourForOvertime.personHourForOvertime).fetch()
             .leftJoin(person.personShift, QPersonShift.personShift).fetch()
             .leftJoin(person.qualification).fetch()
             .orderBy(person.surname.asc(), person.name.asc())
@@ -691,7 +697,7 @@ public final class PersonDao extends DaoBase {
   /**
    * Filtro sulle date contrattuali.
    * 
-   * @param condition
+   * @param condition il booleanbuilder contenente eventuali altre condizioni
    * @param start absent() no limit
    * @param end absent() no limit
    */
