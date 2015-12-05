@@ -28,6 +28,8 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
+    public final ListPath<models.BadgeSystem, QBadgeSystem> badgeSystems = this.<models.BadgeSystem, QBadgeSystem>createList("badgeSystems", models.BadgeSystem.class, QBadgeSystem.class, PathInits.DIRECT2);
+
     public final StringPath code = createString("code");
 
     public final StringPath description = createString("description");

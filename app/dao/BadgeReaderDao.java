@@ -14,23 +14,25 @@ import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
 import models.BadgeReader;
+import models.BadgeSystem;
 import models.Office;
 import models.User;
 import models.query.QBadgeReader;
+import models.query.QBadgeSystem;
 import models.query.QUser;
 
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
-
 /**
- * @author dario.
+ * 
+ * @author alessandro
+ *
  */
 public class BadgeReaderDao extends DaoBase {
 
-  public static final Splitter TOKEN_SPLITTER = Splitter.on(' ')
-          .trimResults().omitEmptyStrings();
+  public static final Splitter TOKEN_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   @Inject
   BadgeReaderDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -44,8 +46,7 @@ public class BadgeReaderDao extends DaoBase {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
-    final JPQLQuery query = getQueryFactory().from(badgeReader)
-            .where(badgeReader.id.eq(id));
+    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.id.eq(id));
     return query.singleResult(badgeReader);
   }
 
@@ -56,26 +57,36 @@ public class BadgeReaderDao extends DaoBase {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
-    final JPQLQuery query = getQueryFactory().from(badgeReader)
-            .where(badgeReader.code.eq(code));
+    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.code.eq(code));
     return query.singleResult(badgeReader);
   }
 
   /**
-   * Gli istituti che contengono sede sulle quali l'user ha il ruolo role.
+   * Il simple result dei badgeReaders-
+   * 
+   * @param name
+   * @param badgeSystem
+   * @return
    */
-  public PerseoSimpleResults<BadgeReader> badgeReaders(Optional<String> name) {
+  public PerseoSimpleResults<BadgeReader> badgeReaders(Optional<String> name,
+      Optional<BadgeSystem> badgeSystem) {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+    final QBadgeSystem qBadgeSystem = QBadgeSystem.badgeSystem;
 
+    final JPQLQuery query = getQueryFactory()
+        .from(badgeReader);
+    
     final BooleanBuilder condition = new BooleanBuilder();
     if (name.isPresent()) {
       condition.and(matchBadgeReaderName(badgeReader, name.get()));
     }
+    if (badgeSystem.isPresent()) {
+      query.leftJoin(badgeReader.badgeSystems, qBadgeSystem);
+      condition.and(badgeReader.badgeSystems.contains(qBadgeSystem));
+    }
 
-    final JPQLQuery query = getQueryFactory()
-            .from(badgeReader)
-            .where(condition);
+    query.where(condition);
 
     return PerseoModelQuery.wrap(query, badgeReader);
 
@@ -97,12 +108,8 @@ public class BadgeReaderDao extends DaoBase {
 
     final QUser user = QUser.user;
 
-    return getQueryFactory()
-            .from(user)
-            .leftJoin(user.badgeReader)
-            .where(user.badgeReader.isNotNull())
-            .orderBy(user.badgeReader.code.asc())
-            .list(user);
+    return getQueryFactory().from(user).leftJoin(user.badgeReader)
+        .where(user.badgeReader.isNotNull()).orderBy(user.badgeReader.code.asc()).list(user);
   }
 
   /**

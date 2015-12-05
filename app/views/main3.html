@@ -180,7 +180,8 @@
             <ul class="dropdown-menu">
               #{if ip.viewOffice }
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
-              <li><a href="@{BadgeReaders.list()}">Lettori Badge</a></li>
+              <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
+              <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
               
               #{/if}
               #{if ip.viewWorkingTimeType}

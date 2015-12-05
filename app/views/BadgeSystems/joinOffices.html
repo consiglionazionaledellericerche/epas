@@ -1,0 +1,22 @@
+#{modalAsync title:'BadgeSystems.joinOffices' }
+
+
+  #{alert color:'info'}
+   Impostale sedi abilitate su ${badgeSystem.name}.
+  #{/alert}
+	  	  
+      #{form action:@saveOffices(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }			
+
+		  #{f.hidden 'badgeSystem.id' /}
+		  #{f.view 'badgeSystem' /}				
+	      
+	      #{f.selectMultipleModel 'badgeSystem.offices',
+           values:allOffices, placeholder:'Tutte le sedi' /}
+ 	  	
+	      #{b.buttons}
+	        #{b.save /}
+	      #{/b.buttons}
+		#{/form}
+  
+#{/modalAsync}

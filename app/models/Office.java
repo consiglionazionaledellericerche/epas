@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -68,6 +69,9 @@ public class Office extends BaseModel {
 
   @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
   public List<BadgeReader> badgeReaders = Lists.newArrayList();
+  
+  @ManyToMany(mappedBy = "offices")
+  public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<Person> persons = Lists.newArrayList();

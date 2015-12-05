@@ -32,14 +32,26 @@ adminPasswordRetype= Reinserire Password
 
 administrations= Amministrazione
 
+badgeReader=Sorgente Timbrature
+badgeReaders= Sorgenti Timbrature
 badgeReader.code=Nome 
 badgeReader.id=id
 badgeReader.description=Descrizione 
 badgeReader.location=Location
 badgeReader.owner=Sede Afferente
+badgeReader.badgeSystems=Badge Systems
 
-BadgeReader.blank= Nuovo lettore badge
-BadgeReader.join= Badge e lettori badge
+BadgeReader.blank= Nuova Sorgente Timbrature
+BadgeReaders.joinBadgeSystems= Gestisci Associazioni
+
+badgeSystems= Badge Systems
+badgeSystem = Badge System
+badgeSystem.name=Nome 
+badgeSystem.description=Descrizione 
+badgeSystem.owner=Sede Afferente
+
+BadgeSystems.blank= Nuovo Badge System
+BadgeSystems.joinOffices= Gestisci Associazioni
 
 configurations= Configurazione
 

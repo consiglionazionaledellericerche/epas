@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
+import dao.BadgeSystemDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -24,6 +25,7 @@ import manager.SecureManager;
 
 import models.AbsenceType;
 import models.BadgeReader;
+import models.BadgeSystem;
 import models.Institute;
 import models.Office;
 import models.Person;
@@ -61,13 +63,14 @@ public class TemplateUtility {
   private final BadgeReaderDao badgeReaderDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final IWrapperFactory wrapperFactory;
+  private final BadgeSystemDao badgeSystemDao;
 
 
   @Inject
   public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
       QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao, 
-      IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -79,6 +82,7 @@ public class TemplateUtility {
     this.badgeReaderDao = badgeReaderDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
+    this.badgeSystemDao = badgeSystemDao;
   }
 
 
@@ -151,7 +155,7 @@ public class TemplateUtility {
   public Set<Office> officesAllowed() {
     return secureManager.officesWriteAllowed(Security.getUser().get());
   }
-
+  
   public List<Qualification> getAllQualifications() {
     return qualificationDao.findAll();
   }
@@ -261,6 +265,16 @@ public class TemplateUtility {
       }
     }
     return users;
+  }
+  
+  /**
+   * Tutti i badge system.
+   * @return
+   */
+  public List<BadgeSystem> allBadgeSystem() {
+    
+    return badgeSystemDao.badgeSystems(Optional.<String>absent(), 
+        Optional.<BadgeReader>absent()).list();
   }
 
   /**

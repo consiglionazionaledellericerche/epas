@@ -6,8 +6,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import com.mysema.query.SearchResults;
+import com.mysql.jdbc.CachedResultSetMetaData;
 
 import dao.BadgeReaderDao;
+import dao.BadgeSystemDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperPerson;
@@ -20,6 +22,7 @@ import manager.SecureManager;
 
 import models.Badge;
 import models.BadgeReader;
+import models.BadgeSystem;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -55,6 +58,8 @@ public class BadgeReaders extends Controller {
   @Inject
   private static BadgeReaderDao badgeReaderDao;
   @Inject
+  private static BadgeSystemDao badgeSystemDao;
+  @Inject
   private static SecurityRules rules;
   @Inject
   private static RoleDao roleDao;
@@ -75,7 +80,8 @@ public class BadgeReaders extends Controller {
   public static void list(String name) {
 
     SearchResults<?> results =
-        badgeReaderDao.badgeReaders(Optional.<String>fromNullable(name)).listResults();
+        badgeReaderDao.badgeReaders(Optional.<String>fromNullable(name),
+            Optional.<BadgeSystem>absent()).listResults();
 
     render(results, name);
   }
@@ -101,12 +107,11 @@ public class BadgeReaders extends Controller {
     final BadgeReader badgeReader = badgeReaderDao.byId(id);
     notFoundIfNull(badgeReader);
     rules.checkIfPermitted(badgeReader.owner);
-    final User user = badgeReader.user;
-    final User userLogged = Security.getUser().get();
-    final Set<Badge> badgeList = badgeReader.badges;
 
-    final Set<Office> officeSet = secureManager.officesBadgeAllowed(userLogged);
-    render(badgeReader, user, badgeList, officeSet);
+    SearchResults<?> results = badgeSystemDao.badgeSystems(Optional.<String>absent(),
+        Optional.fromNullable(badgeReader)).listResults();
+    
+    render(badgeReader, results);
 
   }
 
@@ -207,102 +212,25 @@ public class BadgeReaders extends Controller {
     index();
   }
 
-  /**
-   * 
-   * @param officeId identificativo dell'ufficio a cui associare il lettore.
-   */
-  public static void joinOffice(Long officeId) {
-
-    final Office office = Office.findById(officeId);
-    notFoundIfNull(office);
-
-    // Lista tutti i badgeReader ancora non associati a office
-    List<BadgeReader> badgeReaderList = Lists.newArrayList();
-
-    UsersRolesOffices uro = new UsersRolesOffices();
-    uro.office = office;
-    uro.role = roleDao.getRoleByName(Role.BADGE_READER);
-
-    render(uro, badgeReaderList);
+  public static void joinBadgeSystems(Long badgeReaderId) {
+    final BadgeReader badgeReader = badgeReaderDao.byId(badgeReaderId);
+    notFoundIfNull(badgeReader);
+    
+    // TODO: controlli??
+    render("@joinBadgeSystems", badgeReader);
   }
-
-
-  /**
-   * 
-   * @param uro userRoleOffice a cui associare il lettore.
-   */
-  public static void saveJoinOffice(@Valid UsersRolesOffices uro) {
-
-
-    if (Validation.hasErrors()) {
-      response.status = 400;
-      log.warn("validation errors for {}: {}", uro, validation.errorsMap());
-      flash.error(Web.msgHasErrors());
-      render("@blank", uro);
-    }
-
-    rules.checkIfPermitted(uro.office);
-
-    uro.save();
-
-    flash.success("Lettore Badge associato correttamente.");
-    flash.keep();
-    Offices.edit(uro.office.id);
+  
+  public static void saveBadgeSystems(@Valid BadgeReader badgeReader) {
+    
+    
+    // TODO check della fattibilità
+    
+    flash.success(Web.msgSaved(BadgeReader.class));
+    badgeReader.save();
+    
+    edit(badgeReader.id);
+    
   }
-
-
-  /**
-   * 
-   * @param uroId da cui togliere la regola per il lettore badge.
-   */
-  public static void unjoinOffice(Long uroId) {
-
-    UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
-    notFoundIfNull(uro);
-    rules.checkIfPermitted(uro.office);
-    uro.delete();
-
-    flash.success("Operazione avvenuta con successo.");
-
-    Offices.edit(uro.office.id);
-  }
-
-
-  public static void manageBadgesIntoBadgeReaders(Long id) {
-    BadgeReader badgeReader = BadgeReader.findById(id);
-    render(badgeReader);
-  }
-
-
-  /**
-   * 
-   * @param badgeReader l'oggetto badgereader a cui associare i badge.
-   * @param inizio il numero di badge iniziale da associare.
-   * @param fine il numero di badge finale da associare.
-   */
-  public static void allocateBadges(BadgeReader badgeReader, @Valid String inizio,
-      @Valid String fine) {
-    if (validation.hasErrors()) {
-      log.warn("validation errors: {}", validation.errorsMap());
-      flash.error(Web.msgHasErrors());
-      render("@list");
-    }
-    if (new Integer(inizio) > new Integer(fine)) {
-      log.warn("Estremi errati");
-      flash.error("L'estremo inferiore è maggiore di quello superiore. Correggere");
-      index();
-    }
-    Map<Integer, Boolean> map = Maps.newHashMap();
-    // BadgeReader badgeReader = badgeReaderDao.byId(id);
-    map = badgeManager.reportAssociateBadge(inizio, fine, badgeReader);
-    int contatore = 0;
-    for (Integer i : map.keySet()) {
-      if (map.get(i).booleanValue() ) {
-        contatore++;
-      }
-    }
-    flash.success("Inseriti per il lettore %s, %s badge a fronte dei %s richiesti",
-        badgeReader.code, contatore, map.size());
-    render("@list");
-  }
+  
+ 
 }
