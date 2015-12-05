@@ -259,10 +259,17 @@ when
 
         "Institutes.list",
         "Institutes.index",
-        
-        "BadgeReaders.edit",
-		"BadgeReaders.list",
+
 	    "BadgeReaders.index",
+	    "BadgeReaders.list",
+	    "BadgeReaders.blank",
+	    "BadgeReaders.save",
+        "BadgeReaders.edit",
+		
+	    "BadgeSystems.index",
+	    "BadgeSystems.list",
+	    "BadgeSystems.blank",
+	    "BadgeSystems.save",
         
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
@@ -279,6 +286,11 @@ when
 		"Badges.delete",
 		"BadgeReaders.joinBadgeSystems",
 		"BadgeReaders.saveBadgeSystems",
+		
+		"BadgeSystems.edit",
+		"BadgeSystems.updateInfo",
+		"BadgeSystems.joinOffices",
+	   "BadgeSystems.saveOffices",
 	
 		"Administrators.blank",
 		"Administrators.save",
@@ -310,7 +322,12 @@ when
 	   "BadgeReaders.changePassword",
 	   "BadgeReaders.save",	
 	   "BadgeReaders.joinBadgeSystems",
-	   "BadgeReaders.saveBadgeSystems"
+	   "BadgeReaders.saveBadgeSystems",
+	   
+	   "BadgeSystems.updateInfo",
+	   "BadgeSystems.edit",
+	   "BadgeSystems.joinOffices",
+	   "BadgeSystems.saveOffices"
 	   
        ), target == $o, granted == false)
 then
