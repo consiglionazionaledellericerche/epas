@@ -37,41 +37,11 @@
 		#{/form}
 	#{/panel}
   #{/tabContentItem} 
-  
-   
-  #{tabContentItem id:'badgeReaders'}
-	
-	 #{alert color:'info'}
-      <p>Le &{'badgeReaders'} a associati al &{'badgeSystem'} ${badgeSystem.name}.</p>
-    #{/alert}
-	
-	<section id="results">
-    #{paginate badgeReadersResults} 
-	   <ul class="list-group">
-	   #{list items:badgeReadersResults.results, as:'item'}
-	   
-		 <li class="list-group-item list-group-item-grey">
-		 
-		   <h4 style="color: black">	
-	         <i class="fa fa-database"></i>
-			    ${item.code}
-	       </h4>
-	       <div class="container">
-	       Istituto Responsabile della &{'badgeReader'} <strong>${item.owner.name}</strong>
-	     </li>
-	    
-	   #{/list}
-	   </ul>
-    #{/paginate} 
-    </section> 
- 
-	 
-  #{/tabContentItem} 
-  
+    
   #{tabContentItem id:'offices'}
   
    #{alert color:'info'}
-      <p>Le sedi abilitate su ${badgeSystem.name}.</p>
+      <p>Le <strong>sedi abilitate</strong> su <strong>${badgeSystem.name}</strong>.</p>
     #{/alert}
 	 
 	  #{secure.checkAction 'BadgeSystems.joinOffices'}
@@ -100,6 +70,35 @@
     
   
   #{/tabContentItem}
+  
+  #{tabContentItem id:'badgeReaders'}
+	
+	 #{alert color:'info'}
+      <p>Le <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> associate al &{'badgeSystem'} <strong>${badgeSystem.name}</strong>.</p>
+    #{/alert}
+	
+	<section id="results">
+    #{paginate badgeReadersResults} 
+	   <ul class="list-group">
+	   #{list items:badgeReadersResults.results, as:'item'}
+	   
+		 <li class="list-group-item list-group-item-grey">
+		 
+		   <h4 style="color: black">	
+	         <i class="fa fa-database"></i>
+			    ${item.code}
+	       </h4>
+	       <div class="container">
+	       Istituto Responsabile della &{'badgeReader'} <strong>${item.owner.name}</strong>
+	     </li>
+	    
+	   #{/list}
+	   </ul>
+    #{/paginate} 
+    </section> 
+ 
+	 
+  #{/tabContentItem} 
   
   
    
