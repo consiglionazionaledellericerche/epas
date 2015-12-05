@@ -86,7 +86,7 @@ public class BadgeReaderDao extends DaoBase {
       condition.and(badgeReader.badgeSystems.contains(qBadgeSystem));
     }
 
-    query.where(condition);
+    query.where(condition).distinct();
 
     return PerseoModelQuery.wrap(query, badgeReader);
 

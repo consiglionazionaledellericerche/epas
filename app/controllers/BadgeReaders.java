@@ -1,39 +1,26 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import com.mysema.query.SearchResults;
-import com.mysql.jdbc.CachedResultSetMetaData;
 
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
-import dao.PersonDao;
 import dao.RoleDao;
-import dao.wrapper.IWrapperPerson;
-import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.Web;
 
 import manager.BadgeManager;
 import manager.SecureManager;
 
-import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
-import models.Office;
-import models.Person;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
-
-import net.sf.oval.constraint.MinLength;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -42,10 +29,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -145,22 +128,26 @@ public class BadgeReaders extends Controller {
    * @param id identificativo del badge reader.
    * @param newPass nuova password da associare al lettore.
    */
-  public static void changePassword(Long id, @MinLength(5) @Required String newPass) {
+  public static void changePassword(@Valid User user,
+      @MinSize(5) @Required String newPass) {
 
-
-    final BadgeReader badgeReader = BadgeReader.findById(id);
-    notFoundIfNull(badgeReader);
+    notFoundIfNull(user.badgeReader);
+    BadgeReader badgeReader = user.badgeReader;
+    rules.checkIfPermitted(badgeReader.owner);
+    
     if (Validation.hasErrors()) {
       response.status = 400;
-      log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
+      log.warn("validation errors for {}: {}", user, validation.errorsMap());
       flash.error(Web.msgHasErrors());
-      render("@edit", badgeReader, newPass);
+      render("@edit", badgeReader);
     }
 
     Codec codec = new Codec();
-    badgeReader.user.password = codec.hexMD5(newPass);
+    user.password = codec.hexMD5(newPass);
+    user.save();
+    
     flash.success(Web.msgSaved(BadgeReader.class));
-    edit(id);
+    edit(badgeReader.id);
 
   }
 
@@ -171,7 +158,8 @@ public class BadgeReaders extends Controller {
    */
   public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
 
-
+    rules.checkIfPermitted(badgeReader.owner);
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
@@ -202,6 +190,8 @@ public class BadgeReaders extends Controller {
   public static void delete(Long id) {
     final BadgeReader badgeReader = BadgeReader.findById(id);
     notFoundIfNull(badgeReader);
+    
+    rules.checkIfPermitted(badgeReader.owner);
 
     // if(badgeReader.seats.isEmpty()) {
     badgeReader.delete();

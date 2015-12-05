@@ -104,33 +104,7 @@
     #{/accordionItem}
   #{/accordionGroup}   
 
-  #{accordionGroup 'badge'}
-    #{accordionItem 'badgeReader', parent:'badge', title:'Lettori Badge Abilitati', open:true }
-      
-      <div class="row">
-        <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{BadgeReaders.joinOffice(office.id)}" 
-          data-async-modal="#modalJoinOffice">
-        <i class="fa fa-plus"></i> Associa Lettore Badge </a>
-	  </div>
-      <ul class="list-group">
-        #{list items:office.usersRolesOffices, as:'uro'}
-          #{if uro.role.name.equals('badgeReader') }
-            <li class="list-group-item list-group-item-info">
-	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{BadgeReaders.unjoinOffice(uro.id)}" >
-		          <i class="fa fa-trash"></i> Rimuovi</a>
-	            </div>
-	            ${uro.user.badgeReader.code}
-	        </li> 
-          #{/if}
-        #{/list}
-      
-      </ul>
-               
-    #{/accordionItem}
-  #{/accordionGroup}  
-             
-  
+    
   <br>
   
   #{if office.persons.empty}
