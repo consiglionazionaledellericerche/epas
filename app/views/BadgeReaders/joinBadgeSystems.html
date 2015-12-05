@@ -1,0 +1,22 @@
+#{modalAsync title:'BadgeReaders.joinBadgeSystems' }
+
+
+    #{alert color:'info'}
+     Imposta i &{'badgeSystems'} di ${badgeReader.code}.
+    #{/alert}
+	  	  
+    #{form action:@saveBadgeSystems(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }			
+
+		  #{f.hidden 'badgeReader.id' /}
+		  #{f.view 'badgeReader' /}				
+	      
+	      #{f.selectMultipleModel 'badgeReader.badgeSystems',
+           values:templateUtility.allBadgeSystem(), placeholder:'Tutti i badge system' /}
+ 	  	
+	      #{b.buttons}
+	        #{b.save /}
+	      #{/b.buttons}
+	#{/form}
+  
+#{/modalAsync}
