@@ -12,7 +12,7 @@
   #{tabItem id:'info', title:'Riepilogo', active:true /}
   #{tabItem id:'badgeSystems', title:'badgeSystems' /}
 #{/tabs}
-   
+<br>
 #{tabContent}
 
   #{tabContentItem id:'info', active:true}
@@ -44,8 +44,8 @@
 		    class:'form form-horizontal' }
 			
 
-		  #{f.hidden 'badgeReader.id' /}				
-		  #{f.view 'user.username' /}
+		  #{f.hidden 'user.id', value:badgeReader.user.id /}				
+		  #{f.view 'badgeReader.user.username' /}
 	  	  #{f.input 'newPass', type:'password', label:'Nuova password' /} 
 	
 	      #{b.buttons}
@@ -56,23 +56,22 @@
   
   #{/tabContentItem}
   
-  #{tabContentItem id:'badgeSystems', active:true}
-    
-    
-    
-    
-    #{secure.checkAction 'BadgeReaders.joinBadgeSystems'}
-	  #{b.actions}
-	    <a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}" data-async-modal="#defaultModal">
-	      <i class="fa fa-plus"></i> &{'BadgeReaders.joinBadgeSystems'}
-	    </a>
-      #{/b.actions}
-    #{/secure.checkAction}
+  #{tabContentItem id:'badgeSystems'}
     
     #{alert color:'info'}
       <p>I &{'badgeSystems'} a associati alla &{'badgeReader'} ${badgeReader.code}.</p>
     #{/alert}
-    <Section id="results">
+    
+    *{ TODO il target }*
+    #{secure.checkAction 'BadgeReaders.joinBadgeSystems'}
+	   <div class="text-center">
+	    <a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}" data-async-modal="#defaultModal">
+	      &{'BadgeReaders.joinBadgeSystems'}
+	    </a>
+       </div>
+    #{/secure.checkAction}
+    
+    <section id="results">
     #{paginate results} 
 	   <ul class="list-group">
 	   #{list items:results.results, as:'item'}
@@ -86,7 +85,13 @@
 	    	 
 	       </h4>
 	       <div class="container">
-	       Istituto Responsabile del Badge System <strong>${item.owner.name}</strong>
+	       <p>Istituto Responsabile del Badge System <strong>${item.owner.name}</strong></p>
+	       #{list items:item.badgeReaders, as:'badgeReader'}
+		       <p><i class="fa fa-database"></i> ${badgeReader.code}</p>
+		       #{/list}
+		       #{list items:item.offices, as:'office'}
+		       <p><i class="fa fa-institution"></i> ${office.name}</p>
+		       #{/list}
 	       <br>
 	       
 	       </div>
