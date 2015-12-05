@@ -7,7 +7,16 @@
 
 	
 	#{alert color:'info'}
-	  <p>Il badge System</p>
+	  <p>Tutti i codici badge associati a un <strong class="text-primary">&{'badgeSystem'} 
+	  	<i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i></strong>
+	  </p> 
+	  
+	  <p>
+	  1) Sono abilitati a timbrare nelle medesime <strong class="text-primary">&{'badgeReaders'} <i class="fa fa-database"></i></strong>
+	  </p>
+	  <p>
+	  2) Possono essere attribuiti ai dipendenti delle <strong class="text-primary">Sedi Abilitate <i class="fa fa-institution"></i></strong>
+	  </p>
 	#{/alert}
 	
 	#{form action:@BadgeSystems.list(), class:'form-inline', method:'GET',
@@ -51,9 +60,13 @@
 	    	 </a>
 	       </h4>
 	       <div class="container">
-	       Istituto Responsabile del Badge System <strong>${item.owner.name}</strong>
-	       <br>
-	       Badge Associati <strong>${item.badges.size()}</strong>
+		       <p>Istituto Responsabile del Badge System <strong>${item.owner.name}</strong></p>
+		       #{list items:item.badgeReaders, as:'badgeReader'}
+		       <p><i class="fa fa-database"></i> ${badgeReader.code}</p>
+		       #{/list}
+		       #{list items:item.offices, as:'office'}
+		       <p><i class="fa fa-institution"></i> ${office.name}</p>
+		       #{/list}
 	       </div>
 	     </li>
 	    

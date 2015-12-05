@@ -164,14 +164,14 @@ public class BadgeSystems extends Controller {
     
     List<Office> allOffices = officeDao.allOffices().list();
     
-    // TODO: controlli??
+    rules.checkIfPermitted(badgeSystem.owner);
+    
     render("@joinOffices", badgeSystem, allOffices);
   }
   
   public static void saveOffices(@Valid BadgeSystem badgeSystem) {
     
-    
-    // TODO check della fattibilità
+    rules.checkIfPermitted(badgeSystem.owner);
     
     flash.success(Web.msgSaved(BadgeSystem.class));
     

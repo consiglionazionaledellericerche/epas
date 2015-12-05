@@ -13,6 +13,7 @@
   #{tabItem id:'offices', title:'Sedi Abilitate'/}
   #{tabItem id:'badgeReaders', title:'badgeReaders'/}
 #{/tabs}
+<br>
    
 #{tabContent}
 
@@ -53,9 +54,7 @@
 		 
 		   <h4 style="color: black">	
 	         <i class="fa fa-database"></i>
-	         <a class="list-group-item-heading" href="@{edit(item.id)}">
 			    ${item.code}
-	    	 </a>
 	       </h4>
 	       <div class="container">
 	       Istituto Responsabile della &{'badgeReader'} <strong>${item.owner.name}</strong>
@@ -70,18 +69,20 @@
   #{/tabContentItem} 
   
   #{tabContentItem id:'offices'}
-	 
-	  #{secure.checkAction 'BadgeSystems.joinOffices'}
-		  #{b.actions}
-		    <a class="btn btn-success" href="@{joinOffices(badgeSystem.id)}" data-async-modal="#defaultModal">
-		      <i class="fa fa-plus"></i> &{'BadgeSystems.joinOffices'}
-		    </a>
-	      #{/b.actions}
-	  #{/secure.checkAction}
-	    
-    #{alert color:'info'}
+  
+   #{alert color:'info'}
       <p>Le sedi abilitate su ${badgeSystem.name}.</p>
     #{/alert}
+	 
+	  #{secure.checkAction 'BadgeSystems.joinOffices'}
+	    <div class="text-center">
+		    <a class="btn btn-success" href="@{joinOffices(badgeSystem.id)}" data-async-modal="#defaultModal">
+		     &{'BadgeSystems.joinOffices'}
+		    </a>
+		</div>
+	  #{/secure.checkAction}
+	    
+    
     
 	   <ul class="list-group">
 	   #{list items:badgeSystem.offices, as:'item'}

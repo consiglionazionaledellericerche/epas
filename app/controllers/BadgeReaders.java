@@ -213,17 +213,18 @@ public class BadgeReaders extends Controller {
   }
 
   public static void joinBadgeSystems(Long badgeReaderId) {
+    
     final BadgeReader badgeReader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(badgeReader);
     
-    // TODO: controlli??
+    rules.checkIfPermitted(badgeReader.owner);
+
     render("@joinBadgeSystems", badgeReader);
   }
   
   public static void saveBadgeSystems(@Valid BadgeReader badgeReader) {
     
-    
-    // TODO check della fattibilità
+    rules.checkIfPermitted(badgeReader.owner);
     
     flash.success(Web.msgSaved(BadgeReader.class));
     badgeReader.save();
