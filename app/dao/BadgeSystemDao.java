@@ -73,18 +73,19 @@ public class BadgeSystemDao extends DaoBase {
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
     final QBadgeReader qBadgeReader = QBadgeReader.badgeReader;
 
-    final JPQLQuery query = getQueryFactory()
+    JPQLQuery query = getQueryFactory()
         .from(badgeSystem);
-
-    
+  
     final BooleanBuilder condition = new BooleanBuilder();
-    if (name.isPresent()) {
-      condition.and(matchBadgeSystemName(badgeSystem, name.get()));
-    }
     
     if (badgeReader.isPresent()) {
-      query.leftJoin(badgeSystem.badgeReaders, qBadgeReader);
-      condition.and(badgeSystem.badgeReaders.contains(qBadgeReader));
+      query = getQueryFactory()
+          .from(qBadgeReader)
+          .rightJoin(qBadgeReader.badgeSystems, badgeSystem);
+      condition.and(qBadgeReader.eq(badgeReader.get()));
+    } 
+    if (name.isPresent()) {
+      condition.and(matchBadgeSystemName(badgeSystem, name.get()));
     }
 
     query.where(condition).distinct();
