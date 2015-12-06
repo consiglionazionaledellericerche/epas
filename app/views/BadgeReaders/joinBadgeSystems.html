@@ -2,7 +2,12 @@
 
 
     #{alert color:'info'}
-     Imposta i &{'badgeSystems'} di ${badgeReader.code}.
+     <p>
+     Imposta i <strong><i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> 
+     di <strong>${badgeReader.code}</strong>.
+     </p>
+     <p>Tutti i badge associati ai &{'badgeSystem'} selezionati saranno abilitati a timbrare alla &{'badgeReader'} ${badgeReader.code}. 
+     </p>
     #{/alert}
 	  	  
     #{form action:@saveBadgeSystems(), method:'POST', autocomplete:false,

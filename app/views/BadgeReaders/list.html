@@ -51,17 +51,8 @@
 	   
 		 <li class="list-group-item list-group-item-grey">
 		 
-		   <h4 style="color: black">	
-	         <i class="fa fa-database"></i>
-	         <a class="list-group-item-heading" href="@{edit(item.id)}">
-			    ${item.code}
-	    	 </a>
-	       </h4>
-	       <div class="container">
-	       Istituto Responsabile del Client <strong>${item.owner.name}</strong>
-	       <br>
-	       Badge Associati <strong>${item.badges.size()}</strong>
-	       </div>
+		   #{badgeReader.item item:item, edit:'true' /}
+		  
 	     </li>
 	    
 	   #{/list}

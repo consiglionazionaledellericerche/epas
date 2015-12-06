@@ -1,7 +1,7 @@
 #{modalAsync id:'modalInsertInstitute', button:'Salva', title:'BadgeReader.blank' }
 
-<div class="alert alert-success" role="alert">
-  Inserisci i dati della nuova <strong>&{'BadgeReader.blank'}</strong>.
+<div class="alert alert-info" role="alert">
+  Inserisci i dati della nuova <strong><i class="fa fa-database"></i> &{'badgeReader'}</strong>.
 </div>
 
 <div id="badgeReaderData">
@@ -26,9 +26,8 @@
 
   #{alert color:'info'}
     <p>
-    <strong>Note:</strong> Soltanto gli amministratori tecnici della sede afferente potranno
-    gestire questo client, compresa la modifica delle sue credenziali di accesso e l'aggregazione del
-    client ai badge system.
+    <strong>Note:</strong> Soltanto gli amministratori tecnici della sede resposabile potranno
+    gestire questa &{'badgeReader'}, fra cui la modifica delle credenziali di accesso e l'associazione con i &{'badgeSystems'}.
     </p>
   #{/alert}
   #{/form}
