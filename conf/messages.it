@@ -38,7 +38,7 @@ badgeReader.code=Nome
 badgeReader.id=id
 badgeReader.description=Descrizione 
 badgeReader.location=Location
-badgeReader.owner=Sede Afferente
+badgeReader.owner=Sede Responsabile
 badgeReader.badgeSystems=Badge Systems
 
 BadgeReader.blank= Nuova Sorgente Timbrature
