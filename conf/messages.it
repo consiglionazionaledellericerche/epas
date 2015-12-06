@@ -39,18 +39,18 @@ badgeReader.id=id
 badgeReader.description=Descrizione 
 badgeReader.location=Location
 badgeReader.owner=Sede Responsabile
-badgeReader.badgeSystems=Badge Systems
+badgeReader.badgeSystems=Gruppi Badge
 
 BadgeReader.blank= Nuova Sorgente Timbrature
 BadgeReaders.joinBadgeSystems= Gestisci Associazioni
 
-badgeSystems= Badge Systems
-badgeSystem = Badge System
+badgeSystems= Gruppi Badge
+badgeSystem = Gruppo Badge
 badgeSystem.name=Nome 
 badgeSystem.description=Descrizione 
-badgeSystem.owner=Sede Afferente
+badgeSystem.owner=Sede Responsabile
 
-BadgeSystems.blank= Nuovo Badge System
+BadgeSystems.blank= Nuovo Gruppo Badge
 BadgeSystems.joinOffices= Gestisci Associazioni
 
 configurations= Configurazione
