@@ -1,7 +1,7 @@
 #{modalAsync id:'modalInsertInstitute', button:'Salva', title:'BadgeSystem.blank' }
 
-<div class="alert alert-success" role="alert">
-  Inserisci i dati del nuovo <strong>&{'BadgeSystem.blank'}</strong>.
+<div class="alert alert-info" role="alert">
+  Inserisci i dati del nuovo <strong><i class="fa fa-credit-card"></i> &{'badgeSystem'}</strong>.
 </div>
 
 <div id="badgeSystemData">
@@ -22,8 +22,8 @@
 
   #{alert color:'info'}
     <p>
-    <strong>Note:</strong> Soltanto gli amministratori tecnici della sede afferente potranno
-    abilitare l'utilizzo di questo badge system alle sedi che ne utilizzano i badge.
+    <strong>Note:</strong> Soltanto gli amministratori tecnici della &{'badgeSystem.owner'} potranno
+    abilitare l'utilizzo di questo &{'badgeSystem'} alle sedi che ne utilizzano i badge.
     </p>
   #{/alert}
   #{/form}
