@@ -1,0 +1,38 @@
+*{ item: il badgeSystem
+   edit: se voglio il link a edit 
+
+}*
+
+		   <h4 style="color: black">
+		   <i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i>
+		   #{if _edit}
+		     <a class="list-group-item-heading" href="@{edit(_item.id)}">
+			    ${_item.name}
+	    	 </a>
+		   #{/if}
+		   #{else}
+		     ${_item.name}	         
+		   #{/else}
+	       </h4>
+	       <div class="container">
+	       
+	       <p>
+	         <strong><i class="fa fa-shield"></i> Sede Responsabile</strong>
+	         <span class="label label-primary">${_item.owner.name}</span>
+	       </p>
+	       
+	       <p>
+	       <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> 
+           #{list items:_item.badgeReaders, as:'badgeReader'}
+             <span class="label label-primary">${badgeReader.code}</span>
+           #{/list}
+           </p>
+           
+           <p>
+	       <strong><i class="fa fa-institution"></i> Sedi Abilitate</strong>
+		   #{list items:_item.offices, as:'office'}
+		       <span class="label label-primary">${office.name}</span>
+		   #{/list}
+	       <br>
+	       
+	       </div>

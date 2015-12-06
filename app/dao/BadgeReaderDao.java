@@ -75,7 +75,7 @@ public class BadgeReaderDao extends DaoBase {
     final QBadgeSystem qBadgeSystem = QBadgeSystem.badgeSystem;
 
     JPQLQuery query = getQueryFactory()
-        .from(badgeReader);
+        .from(badgeReader);    
     
     final BooleanBuilder condition = new BooleanBuilder();
     
