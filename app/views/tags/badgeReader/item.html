@@ -22,19 +22,20 @@
 	       </p>
 	       
 	       <p>
-	       <strong><i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> 
+	       <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> 
            #{list items:_item.badgeSystems, as:'badgeSystem'}
              <span class="label label-primary">${badgeSystem.name}</span>
            #{/list}
            </p>
            
-           *{
            <p>
 	       <strong><i class="fa fa-institution"></i> Sedi Abilitate</strong>
+	       TODO *{
 		   #{list items:_item.offices, as:'office'}
 		       <span class="label label-primary">${office.name}</span>
 		   #{/list}
+		   }*
 	       <br>
-	       }*
+	       
 	       
 	       </div>
