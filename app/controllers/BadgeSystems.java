@@ -210,13 +210,14 @@ public class BadgeSystems extends Controller {
     
     rules.checkIfPermitted(badgeSystem.office);
     
-    List<Person> activePersons = personDao.list(Optional.<String>absent(), 
+    List<Person> activePersons = Lists.newArrayList();
+    if (!validation.hasError("badgeSystem")) {
+      activePersons = personDao.list(Optional.<String>absent(), 
         Sets.newHashSet(badgeSystem.office), false, LocalDate.now(), LocalDate.now(), true).list();
+    }
     
     if (validation.hasErrors()) {
-
       response.status = 400;
-      
       render("@joinBadges", badgeSystem, code, person, activePersons, personFixed);
     }
     

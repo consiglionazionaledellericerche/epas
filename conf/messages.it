@@ -22,6 +22,7 @@ absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 badge.begin= Inzio
 badge.end= Fine
 badge.code= Numero badge
+code=Codice
 badge.badgeReader= Lettore badge associato
 badge.edit= Modifica
 badge.delete= Elimina
@@ -138,6 +139,8 @@ office.codeId= Sede Id
 office.address=Indirizzo
 office.joiningDate= Data di affiliazione
 office.headQuarter=Sede principale
+
+person=Persona
 
 person.surname=Cognome
 person.name=Nome
