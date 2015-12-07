@@ -46,15 +46,9 @@ public class BadgeSystem extends BaseModel {
   @ManyToMany(mappedBy = "badgeSystems")
   public List<BadgeReader> badgeReaders = Lists.newArrayList();
   
-  @ManyToMany
-  public List<Office> offices = Lists.newArrayList();
-  
-  @Required
-  @NotNull
   @ManyToOne
-  @JoinColumn(name = "office_owner_id")
-  public Office owner;
-
+  public Office office;
+  
   public boolean enabled = true;
  
   @Override

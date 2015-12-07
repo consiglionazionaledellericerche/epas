@@ -47,4 +47,6 @@ public class BadgeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(badge).where(badge.id.eq(id));
     return query.singleResult(badge);
   }
+  
+  
 }

@@ -70,7 +70,7 @@ public class Office extends BaseModel {
   @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
   public List<BadgeReader> badgeReaders = Lists.newArrayList();
   
-  @ManyToMany(mappedBy = "offices")
+  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})

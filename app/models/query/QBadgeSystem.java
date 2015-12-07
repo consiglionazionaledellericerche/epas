@@ -42,9 +42,7 @@ public class QBadgeSystem extends EntityPathBase<BadgeSystem> {
 
     public final StringPath name = createString("name");
 
-    public final ListPath<models.Office, QOffice> offices = this.<models.Office, QOffice>createList("offices", models.Office.class, QOffice.class, PathInits.DIRECT2);
-
-    public final QOffice owner;
+    public final QOffice office;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -67,7 +65,7 @@ public class QBadgeSystem extends EntityPathBase<BadgeSystem> {
 
     public QBadgeSystem(Class<? extends BadgeSystem> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.owner = inits.isInitialized("owner") ? new QOffice(forProperty("owner"), inits.get("owner")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }
