@@ -20,7 +20,7 @@
        <br>
     #{/secure.checkAction}
 
-    #{if person.badges.size() > 0}
+    #{if badges.size() > 0}
 		<div class="alert alert-info" role="alert">
     		Lista badge già associati a <strong>${person.fullname}</strong>.
     	</div>
@@ -31,7 +31,7 @@
 				<th>Elimina</th>			
 	  		</tr>
 	  	
-        #{list items:person.badges, as:'badge'}
+        #{list items:badges, as:'badge'}
     	<tr>
 	  	<td>${badge.badgeSystem.name}</td>
 	  	<td>${badge.code}</td>

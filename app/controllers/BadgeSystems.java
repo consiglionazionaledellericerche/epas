@@ -9,21 +9,15 @@ import com.mysema.query.SearchResults;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 
 import helpers.Web;
 
-import manager.SecureManager;
-
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
-import models.Office;
 import models.Person;
-import models.User;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +25,12 @@ import org.slf4j.LoggerFactory;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -56,8 +48,6 @@ public class BadgeSystems extends Controller {
   private static BadgeDao badgeDao;
   @Inject
   private static SecurityRules rules;
-  @Inject
-  private static OfficeDao officeDao;
   @Inject 
   private static PersonDao personDao;
 
@@ -103,7 +93,21 @@ public class BadgeSystems extends Controller {
     SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.<String>absent(),
         Optional.fromNullable(badgeSystem)).listResults();
     
-    List<Badge> badges = badgeSystemDao.badges(badgeSystem);
+    List<Badge> allBadges = badgeSystemDao.badges(badgeSystem);
+    List<Badge> badges = Lists.newArrayList();
+    // FIXME: metodo non efficiente.
+    for (Badge badge : allBadges) {
+      boolean toPick = true;
+      // TODO: al posto di questo for usare una mappa
+      for (Badge picked : badges) {
+        if (badge.badgeSystem.equals(picked.badgeSystem) && badge.code.equals(picked.code)) {
+          toPick = false;
+        }
+      }
+      if (toPick) {
+        badges.add(badge);
+      }
+    }
     
     List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
   
@@ -390,7 +394,23 @@ public class BadgeSystems extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person.office);
     rules.checkIfPermitted(person.office);
-    render(person);
+    
+    // FIXME: metodo non efficiente.
+    List<Badge> badges = Lists.newArrayList();
+    for (Badge badge : person.badges) {
+      boolean toPick = true;
+      // TODO: al posto di questo for usare una mappa
+      for (Badge picked : badges) {
+        if (badge.badgeSystem.equals(picked.badgeSystem) && badge.code.equals(picked.code)) {
+          toPick = false;
+        }
+      }
+      if (toPick) {
+        badges.add(badge);
+      }
+    }
+
+    render(person, badges);
   }
   
   public static void deleteBadgePerson(Long badgeId) {
