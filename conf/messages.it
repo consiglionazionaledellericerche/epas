@@ -48,10 +48,10 @@ badgeSystems= Gruppi Badge
 badgeSystem = Gruppo Badge
 badgeSystem.name=Nome 
 badgeSystem.description=Descrizione 
-badgeSystem.owner=Sede Responsabile
+badgeSystem.office=Sede
 
 BadgeSystems.blank= Nuovo Gruppo Badge
-BadgeSystems.joinOffices= Gestisci Associazioni
+BadgeSystems.joinBadges= Associa Badge
 
 configurations= Configurazione
 

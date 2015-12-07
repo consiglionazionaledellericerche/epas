@@ -26,14 +26,13 @@ public class BadgeDao extends DaoBase {
    * @param badgeReader opzionale
    * @return l'oggetto badge identificato dal codice code passato come parametro.
    */
-  public Optional<Badge> byCode(String code, Optional<BadgeReader> badgeReader) {
+  public Optional<Badge> byCode(String code, BadgeReader badgeReader) {
     final QBadge badge = QBadge.badge;
-    final BooleanBuilder condition = new BooleanBuilder();
-    if (badgeReader.isPresent()) {
-      condition.and(badge.badgeReader.eq(badgeReader.get()));
-    }
-    condition.and(badge.code.eq(code));
-    final JPQLQuery query = getQueryFactory().from(badge).where(condition);
+
+    final JPQLQuery query = getQueryFactory()
+        .from(badge)
+        .where(badge.code.eq(code)
+        .and(badge.badgeReader.eq(badgeReader)));
 
     return Optional.fromNullable(query.singleResult(badge));
   }

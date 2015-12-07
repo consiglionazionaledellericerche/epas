@@ -20,7 +20,7 @@
     </li>
     #{/if}
     <li #{if _activeAction.equals("badge")} class="active" #{/if}>
-      <a href="@{Badges.joinPersonToBadge(person.id)}">Badge</a>
+      <a href="@{BadgeSystems.personBadges(person.id)}">Badge</a>
     </li>
     <li #{if _activeAction.equals("children")} class="active" #{/if}>
       <a href="@{Persons.children(person.id)}">Figli</a>

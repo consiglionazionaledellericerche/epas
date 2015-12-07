@@ -1,0 +1,55 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Associazione badge ai lettori badge'  /}
+
+#{set breadcrumbs:['Lista persone':@Persons.list(),
+  (person.fullname):null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{persons.personsTabs activeAction:'badge' /}
+
+<div class="container">
+
+    #{secure.checkAction 'BadgeSystems.joinBadges'}
+	   <div class="text-center">
+	    <a class="btn btn-success" href="@{joinBadgesPerson(person.id)}" data-async-modal="#modalInsertBadge">
+	      Nuovo Badge ${person.fullname}
+	    </a>
+       </div>
+       <br>
+    #{/secure.checkAction}
+
+    #{if person.badges.size() > 0}
+		<div class="alert alert-info" role="alert">
+    		Lista badge già associati a <strong>${person.fullname}</strong>.
+    	</div>
+    	<table class="table table-hover">
+	  		<tr class="warning">
+				<th>&{'badgeSystem'}</th>
+				<th><i class="fa fa-credit-card"></i> Codice</th>
+				<th>Elimina</th>			
+	  		</tr>
+	  	
+        #{list items:person.badges, as:'badge'}
+    	<tr>
+	  	<td>${badge.badgeSystem.name}</td>
+	  	<td>${badge.code}</td>
+	  	<td>
+	  		<a class="btn btn-danger btn-xs" href="@{BadgeSystems.deleteBadgePerson(badge.id)}" 
+	  		data-async-modal="#defaultModal">Rimuovi</a>
+	  	</td>
+    	</tr>
+    	#{/list}
+    	</table>
+	  		
+	  	
+	#{/if}
+	#{else}
+		<div class="alert alert-warning" role="alert">
+    		Non ci sono badge associati a <strong>${person.fullname}</strong>.
+    	</div>
+	#{/else}
+</div>
+    
+<div id="modalInsertBadge" class="modal container" tabindex="-1"></div>
