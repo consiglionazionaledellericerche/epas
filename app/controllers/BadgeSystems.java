@@ -69,7 +69,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * 
-   * @param id identificativo del lettore badge.
+   * @param id identificativo del gruppo badge.
    */
   public static void show(Long id) {
     final BadgeSystem badgeSystem = BadgeSystem.findById(id);
@@ -79,13 +79,13 @@ public class BadgeSystems extends Controller {
 
   /**
    * 
-   * @param id identificativo del lettore badge.
+   * @param id identificativo del gruppo badge.
    */
   public static void edit(Long id) {
 
     final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
-    rules.checkIfPermitted(badgeSystem.owner);
+    rules.checkIfPermitted(badgeSystem.office);
     
     SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.<String>absent(),
         Optional.fromNullable(badgeSystem)).listResults();
@@ -112,7 +112,7 @@ public class BadgeSystems extends Controller {
       render("@edit", badgeSystem);
     }
 
-    rules.checkIfPermitted(badgeSystem.owner);
+    rules.checkIfPermitted(badgeSystem.office);
     badgeSystem.save();
 
     flash.success(Web.msgSaved(BadgeSystem.class));
@@ -156,30 +156,6 @@ public class BadgeSystems extends Controller {
     // }
     flash.error(Web.msgHasErrors());
     index();
-  }
-  
-  public static void joinOffices(Long badgeSystemId) {
-    final BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
-    notFoundIfNull(badgeSystem);
-    
-    List<Office> allOffices = officeDao.allOffices().list();
-    
-    rules.checkIfPermitted(badgeSystem.owner);
-    
-    render("@joinOffices", badgeSystem, allOffices);
-  }
-  
-  public static void saveOffices(@Valid BadgeSystem badgeSystem) {
-    
-    rules.checkIfPermitted(badgeSystem.owner);
-    
-    flash.success(Web.msgSaved(BadgeSystem.class));
-    
-    // TODO la generazione degli uro con ruolo badgeReader
-    badgeSystem.save();
-    
-    edit(badgeSystem.id);
-    
   }
   
 }

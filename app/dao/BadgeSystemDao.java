@@ -103,16 +103,4 @@ public class BadgeSystemDao extends DaoBase {
     return nameCondition.or(badgeSystem.name.startsWithIgnoreCase(name));
   }
 
-  /**
-   * @return la lista di badgeSystem di cui l'ufficio è proprietario.
-   */
-  public List<BadgeSystem> byOffice(Office office) {
-	  
-    final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
-
-    return getQueryFactory()
-    		.from(badgeSystem)
-    		.where(badgeSystem.owner.eq(office)).list(badgeSystem);
-  }
-
 }

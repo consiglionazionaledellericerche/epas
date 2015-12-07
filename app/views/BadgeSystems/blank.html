@@ -13,19 +13,13 @@
   #{f.input 'badgeSystem.name', required:true /}
   #{f.input 'badgeSystem.description' /}
   
-  #{f.selectModel 'badgeSystem.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
+  #{f.selectModel 'badgeSystem.office', items:templateUtility.officeForBadgeReaders(), required:true /}
 
   #{b.buttons center:true}
     #{b.cancel @index() /}
     #{b.save /}
   #{/b.buttons}
 
-  #{alert color:'info'}
-    <p>
-    <strong>Note:</strong> Soltanto gli amministratori tecnici della &{'badgeSystem.owner'} potranno
-    abilitare l'utilizzo di questo &{'badgeSystem'} alle sedi che ne utilizzano i badge.
-    </p>
-  #{/alert}
   #{/form}
 
 </div>

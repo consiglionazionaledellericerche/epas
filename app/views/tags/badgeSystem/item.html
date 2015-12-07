@@ -17,8 +17,8 @@
 	       <div class="container">
 	       
 	       <p>
-	         <strong><i class="fa fa-shield"></i> Sede Responsabile</strong>
-	         <span class="label label-primary">${_item.owner.name}</span>
+	         <strong><i class="fa fa-shield"></i> Sede</strong>
+	         <span class="label label-primary">${_item.office.name}</span>
 	       </p>
 	       
 	       <p>
@@ -27,12 +27,6 @@
              <span class="label label-primary">${badgeReader.code}</span>
            #{/list}
            </p>
-           
-           <p>
-	       <strong><i class="fa fa-institution"></i> Sedi Abilitate</strong>
-		   #{list items:_item.offices, as:'office'}
-		       <span class="label label-primary">${office.name}</span>
-		   #{/list}
 	       <br>
 	       
 	       </div>

@@ -86,8 +86,8 @@
                <br>
                <span class="label label-primary">Lettori Badge</span>
                #{list items:seat.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('badgeReader') }
-                  <span class="label label-danger">${uro.user.username}</span>
+                 #{if uro.role.name.equals('badgeReader') && uro.user.badgeReader != null }
+                  <span class="label label-danger">${uro.user.badgeReader.code}</span>
                  #{/if}
                #{/list}
              </div>

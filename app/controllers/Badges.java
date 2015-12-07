@@ -2,28 +2,36 @@ package controllers;
 
 import com.google.common.base.Optional;
 
-import dao.BadgeDao;
+import com.mysema.query.SearchResults;
+
 import dao.BadgeReaderDao;
-import dao.PersonDao;
+import dao.BadgeSystemDao;
+import dao.RoleDao;
 
 import helpers.Web;
 
-import models.Badge;
+import manager.BadgeManager;
+import manager.SecureManager;
+
 import models.BadgeReader;
-import models.Person;
+import models.BadgeSystem;
+import models.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.data.validation.MinSize;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
+import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
 
-import java.util.List;
-import java.util.Set;
-
 import javax.inject.Inject;
+
 
 @With({Resecure.class, RequestInit.class})
 public class Badges extends Controller {
@@ -31,135 +39,189 @@ public class Badges extends Controller {
   private static final Logger log = LoggerFactory.getLogger(Badges.class);
 
   @Inject
-  private static PersonDao personDao;
-  @Inject
   private static BadgeReaderDao badgeReaderDao;
   @Inject
-  private static BadgeDao badgeDao;
+  private static BadgeSystemDao badgeSystemDao;
   @Inject
   private static SecurityRules rules;
+  @Inject
+  private static RoleDao roleDao;
+  @Inject
+  private static SecureManager secureManager;
+  @Inject
+  private static BadgeManager badgeManager;
 
-  /**
-   * @param id del badge che si intende eliminare.
-   */
-  public static void delete(Long id) {
-    final Badge badge = Badge.findById(id);
-    notFoundIfNull(badge);
-
-    // if(badgeReader.seats.isEmpty()) {
-    render(badge);
+  public static void index() {
+    flash.keep();
+    list(null);
   }
 
   /**
    * 
-   * @param badge l'oggetto badge che si vuole eliminare.
+   * @param name nome del lettore badge su cui si vuole filtrare.
    */
-  public static void deleteBadge(Badge badge) {
-    
-    Long id = badge.person.id;
-    badge.delete();
-    flash.success(Web.msgDeleted(Badge.class));
-    joinPersonToBadge(id);
-    
-    flash.error(Web.msgHasErrors());
-    joinPersonToBadge(id);
-  }
-  /**
-   * @param id della persona a cui si intende assegnare il nuovo badge.
-   */
-  public static void joinPersonToBadge(Long id) {
-    Person person = personDao.getPersonById(id);
-    rules.checkIfPermitted(person.office);
-    Badge badge = new Badge();
-    render(person, badge);
+  public static void list(String name) {
+
+    SearchResults<?> results =
+        badgeReaderDao.badgeReaders(Optional.<String>fromNullable(name),
+            Optional.<BadgeSystem>absent()).listResults();
+
+    render(results, name);
   }
 
-  /**
-   * controller che gestisce la vista di allocazione badge per la persona.
-   *
-   * @param badge       il badge
-   * @param badgeReader il badge reader
-   * @param person      la persona
-   */
-  public static void allocateBadge(Badge badge,
-                                   List<Long> badgeReader, Person person) {
 
-    if (badge.code == null) {
-      flash.error("Popolare correttamente il campo numero badge");
-      joinPersonToBadge(person.id);
-    }
-    if (badgeReader == null || badgeReader.size() == 0) {
-      flash.error("Inserire almeno un lettore badge a cui associare il badge");
-      joinPersonToBadge(person.id);
-    }
-
-    for (Long id : badgeReader) {
-      BadgeReader br = badgeReaderDao.byId(id);
-      Optional<Badge> check = badgeDao.byCode(badge.code,
-              Optional.fromNullable(br));
-      if (check.isPresent()) {
-        flash.error("Al lettore %s è già associato un badge "
-                + "con identificativo %s", br.code, badge.code);
-        render("@joinPersonToBadge", badge, badgeReader, person);
-      }
-      badge.person = person;
-      badge.badgeReader = br;
-      badge.save();
-
-    }
-    flash.success("Associato il badge %s a %s per i lettori selezionati",
-            badge.code, person.fullName());
-    joinPersonToBadge(person.id);
-  }
-
-  /**
-   * @param id del badge su cui si vuole fare operazioni.
-   */
-  public static void manageBadge(Long id) {
-    Badge badge = badgeDao.byId(id);
-    render(badge);
-  }
-  
   /**
    * 
-   * @param id del badge che si vuole editare.
+   * @param id identificativo del lettore badge.
+   */
+  public static void show(Long id) {
+    final BadgeReader badgeReader = BadgeReader.findById(id);
+    notFoundIfNull(badgeReader);
+    render(badgeReader);
+  }
+
+  /**
+   * 
+   * @param id identificativo del lettore badge.
    */
   public static void edit(Long id) {
-    Badge badge = badgeDao.byId(id);
-    Person person = badge.person;
-    BadgeReader reader = badge.badgeReader;
-    render(badge, person, reader);
-  }
-  
-  /**
-   * 
-   * @param badge il badge di cui si vuole cambiare il code.
-   */
-  public static void updateBadge(Badge badge, Person person, BadgeReader reader) {
-    Optional<Badge> existingBadge = badgeDao.byCode(badge.code, 
-        Optional.fromNullable(badge.badgeReader));
-    if (existingBadge.isPresent()) {
-      flash.error("E' già esistente un badge con codice %s. "
-          + "Inserire altro codice per %s", badge.code, person.fullName());
-      
-    } else {      
-      person.badges.remove(badge);
-      Set<Badge> badgeList = person.badges;
-      for (Badge b : badgeList) {
-        if (b.badgeReader == reader) {
-          b.delete();
-          person.save();
-          Badge newBadge = new Badge();
-          newBadge.badgeReader = reader;
-          newBadge.code = badge.code;
-          newBadge.person = person;
-          newBadge.save();
-        }
-          
-      }      
-      flash.success("Modificato codice del badge di %s", person.fullName());
-    }
-    Persons.list(null);
+
+    
+    final BadgeReader badgeReader = badgeReaderDao.byId(id);
+    notFoundIfNull(badgeReader);
+    rules.checkIfPermitted(badgeReader.owner);
+
+    SearchResults<?> results = badgeSystemDao.badgeSystems(Optional.<String>absent(),
+        Optional.fromNullable(badgeReader)).listResults();
+    
+    render(badgeReader, results);
+
   }
 
+  public static void blank() {
+    render();
+  }
+
+
+  /**
+   * 
+   * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
+   */
+  public static void updateInfo(@Valid BadgeReader badgeReader) {
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@edit", badgeReader);
+    }
+
+    rules.checkIfPermitted(badgeReader.owner);
+    badgeReader.save();
+
+    flash.success(Web.msgSaved(BadgeReader.class));
+    edit(badgeReader.id);
+  }
+
+
+  /**
+   * @param id identificativo del badge reader.
+   * @param newPass nuova password da associare al lettore.
+   */
+  public static void changePassword(@Valid User user,
+      @MinSize(5) @Required String newPass) {
+
+    notFoundIfNull(user.badgeReader);
+    BadgeReader badgeReader = user.badgeReader;
+    rules.checkIfPermitted(badgeReader.owner);
+    
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", user, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@edit", badgeReader);
+    }
+
+    Codec codec = new Codec();
+    user.password = codec.hexMD5(newPass);
+    user.save();
+    
+    flash.success(Web.msgSaved(BadgeReader.class));
+    edit(badgeReader.id);
+
+  }
+
+  /**
+   * 
+   * @param badgeReader l'oggetto badge reader da salvare.
+   * @param user l'utente creato a partire dal badge reader.
+   */
+  public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
+
+    rules.checkIfPermitted(badgeReader.owner);
+    
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@blank", badgeReader);
+    }
+    if (user.password.length() < 5) {
+      response.status = 400;
+      validation.addError("user.password", "almeno 5 caratteri");
+      render("@blank", badgeReader, user);
+    }
+
+
+    Codec codec = new Codec();
+    user.password = codec.hexMD5(user.password);
+    user.save();
+    badgeReader.user = user;
+    badgeReader.save();
+    flash.success(Web.msgSaved(BadgeReader.class));
+    index();
+  }
+
+
+  /**
+   * 
+   * @param id identificativo del badge reader da eliminare.
+   */
+  public static void delete(Long id) {
+    final BadgeReader badgeReader = BadgeReader.findById(id);
+    notFoundIfNull(badgeReader);
+    
+    rules.checkIfPermitted(badgeReader.owner);
+
+    // if(badgeReader.seats.isEmpty()) {
+    badgeReader.delete();
+    flash.success(Web.msgDeleted(BadgeReader.class));
+    index();
+    // }
+    flash.error(Web.msgHasErrors());
+    index();
+  }
+
+  public static void joinBadgeSystems(Long badgeReaderId) {
+    
+    final BadgeReader badgeReader = badgeReaderDao.byId(badgeReaderId);
+    notFoundIfNull(badgeReader);
+    
+    rules.checkIfPermitted(badgeReader.owner);
+
+    render("@joinBadgeSystems", badgeReader);
+  }
+  
+  public static void saveBadgeSystems(@Valid BadgeReader badgeReader) {
+    
+    rules.checkIfPermitted(badgeReader.owner);
+    
+    flash.success(Web.msgSaved(BadgeReader.class));
+    badgeReader.save();
+    
+    edit(badgeReader.id);
+    
+  }
+  
+ 
 }
