@@ -2,7 +2,7 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sede'  /}
 
-#{set breadcrumbs:['badgeSystems':@BadgeSystems.list(), ('Configura Sorgente '+ badgeSystem.name):null] /}
+#{set breadcrumbs:['badgeSystems':@BadgeSystems.list(), ('Configura '+ badgeSystem.name):null] /}
  
 <div class="container">
 
@@ -10,8 +10,8 @@
   
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
-  #{tabItem id:'offices', title:'Sedi Abilitate'/}
-  #{tabItem id:'badgeReaders', title:'badgeReaders'/}
+  #{tabItem id:'badges', title:'Badge'/}
+  #{tabItem id:'advanced', title:'Avanzate'/}
 #{/tabs}
 <br>
    
@@ -28,20 +28,16 @@
 		  #{f.hidden 'badgeSystem.id' /}				
 		  #{f.input 'badgeSystem.name', required:true /}
 	      #{f.input 'badgeSystem.description' /}
-	    
-	      #{f.selectModel 'badgeSystem.office', 
-	      items:templateUtility.officeForBadgeReaders(), required:true /}
+		  
+		  #{f.view 'badgeSystem.office', value:badgeSystem.office.name /}	    
  	  	
 	      #{b.buttons center:'true'}
 	        #{b.save /}
 	      #{/b.buttons}
 		#{/form}
 	#{/panel}
-  #{/tabContentItem} 
-  
-  #{tabContentItem id:'badgeReaders'}
 	
-	 #{alert color:'info'}
+	#{alert color:'info'}
       <p>Le <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> associate al &{'badgeSystem'} <strong>${badgeSystem.name}</strong>.</p>
     #{/alert}
 	
@@ -51,7 +47,6 @@
 	   #{list items:badgeReadersResults.results, as:'item'}
 	   
 		 <li class="list-group-item list-group-item-grey">
-		 
 		  #{badgeReader.item item:item /}
 	     </li>
 	    
@@ -59,11 +54,114 @@
 	   </ul>
     #{/paginate} 
     </section> 
- 
-	 
+	
   #{/tabContentItem} 
   
   
+  #{tabContentItem id:'badges'}
+	
+	#{secure.checkAction 'BadgeSystems.joinBadges'}
+	   <div class="text-center">
+	    <a class="btn btn-success" href="@{joinBadges(badgeSystem.id)}" data-async-modal="#defaultModal">
+	      &{'BadgeSystems.joinBadges'} ${badgeSystem.name}
+	    </a>
+       </div>
+       <br>
+    #{/secure.checkAction}
+	
+	#{alert color:'info'}
+      <p><strong>Lista dei Badge</strong> attualmente assegnati nel &{'badgeSystem'} <strong>${badgeSystem.name}</strong>.</p>
+    #{/alert}
+    
+    #{if badges.empty}
+		Nessun codice badge assegnato.      
+    #{/if}
+    #{else}
+       <table datatable class="table table-bordered table-hover">
+         <thead>
+           <tr>
+             <th>Nome</th>
+             <th><i class="fa fa-credit-card"></i> Codice Badge</th>
+             <th>Etichetta</th>
+             <th>Elimina</th>
+           </tr>
+         </thead>
+         <tbody>
+         #{list items:badges, as:'badge'}
+         <tr>
+           <td>${badge.person.fullname}</td>
+           <td>${badge.code}</td>
+           <td>
+           #{if badge.code.equals(badge.person.number+"") }
+             <span class="label label-info">Matricola</span>
+           #{/if}
+           #{if badge.code.equals(badge.person.badgeNumber) }
+             <span class="label label-success">Old</span>
+           #{/if}
+           </td>
+           <td>
+           <a class="btn btn-danger btn-xs" href="@{BadgeSystems.deleteBadge(badge.id)}" 
+	  		data-async-modal="#defaultModal">Rimuovi</a>
+           </td>
+         </tr>
+          
+         #{/list}
+       </tbody>
+       </table>
+    #{/else}
+ 
+  #{/tabContentItem}   
+	 
+  
+  
+  #{tabContentItem id:'advanced'}
+    
+    #{panel title:'Associa Matricole'}
+      #{alert color:'info'}
+       <div class="text-center"> 
+        <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
+         la matricola come codice badge.</p>
+         <a class="btn btn-primary" href="@{joinPersonNumbers(badgeSystem.id)}">
+	      Associa Matricole
+	    </a>
+       </div>
+      #{/alert}
+    #{/panel}
+  
+    #{panel title:'Vecchi Codici'}
+  	#{if !personsOldBadge.empty}
+    #{alert color:'info'}
+      <div class="text-center">
+        <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
+         tutti i codici badge della precedente gestione badge.</p>
+         <a class="btn btn-primary" href="@{joinOldBadgeNumbers(badgeSystem.id)}">
+	      Associa Tutti i Vecchi Codici
+	    </a>
+      </div>
+    #{/alert}
+    <div class="col-md-6 col-md-offset-3">
+      <table class="table">
+        <thead>
+           <tr>
+             <th>Nome</th>
+             <th><i class="fa fa-credit-card"></i> Vecchio Codice</th>
+           </tr>
+         </thead>
+         <tbody>
+         #{list items:personsOldBadge, as:'personOldBadge'}
+         <tr>
+           <td>${personOldBadge.fullname}</td>
+           <td>${personOldBadge.badgeNumber}</td>
+         </tr>
+          
+         #{/list}
+        </tbody>
+      </table>
+      </div>
+    #{/if}
+    #{/panel}
+  
+  #{/tabContentItem} 
    
   
 #{/tabContent}  

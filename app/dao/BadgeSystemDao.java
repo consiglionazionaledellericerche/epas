@@ -3,6 +3,7 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -13,9 +14,12 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
+import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Office;
+import models.Person;
+import models.query.QBadge;
 import models.query.QBadgeReader;
 import models.query.QBadgeSystem;
 
@@ -101,6 +105,23 @@ public class BadgeSystemDao extends DaoBase {
       nameCondition.and(badgeSystem.name.containsIgnoreCase(token));
     }
     return nameCondition.or(badgeSystem.name.startsWithIgnoreCase(name));
+  }
+  
+  /**
+   * Tutti i badge di badgeSystem ordinati per codice badge (e persona).
+   * @param badgeSystem
+   * @return
+   */
+  public List<Badge> badges(BadgeSystem badgeSystem) {
+    
+    final QBadge badge = QBadge.badge;
+    
+    JPQLQuery query = getQueryFactory()
+        .from(badge)
+        .where(badge.badgeSystem.eq(badgeSystem))
+        .orderBy(badge.code.asc()).orderBy(badge.person.id.asc());
+    return query.list(badge);
+    
   }
 
 }

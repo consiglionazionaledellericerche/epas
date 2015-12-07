@@ -1,12 +1,16 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import com.mysema.query.SearchResults;
 
+import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.OfficeDao;
+import dao.PersonDao;
 
 import helpers.Web;
 
@@ -16,13 +20,18 @@ import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Office;
+import models.Person;
 import models.User;
 
+import org.hibernate.exception.ConstraintViolationException;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -44,9 +53,13 @@ public class BadgeSystems extends Controller {
   @Inject
   private static BadgeReaderDao badgeReaderDao;
   @Inject
+  private static BadgeDao badgeDao;
+  @Inject
   private static SecurityRules rules;
   @Inject
   private static OfficeDao officeDao;
+  @Inject 
+  private static PersonDao personDao;
 
   public static void index() {
     flash.keep();
@@ -89,8 +102,12 @@ public class BadgeSystems extends Controller {
     
     SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.<String>absent(),
         Optional.fromNullable(badgeSystem)).listResults();
+    
+    List<Badge> badges = badgeSystemDao.badges(badgeSystem);
+    
+    List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
   
-    render(badgeSystem, badgeReadersResults);
+    render(badgeSystem, badgeReadersResults, badges, personsOldBadge);
 
   }
 
@@ -157,5 +174,265 @@ public class BadgeSystems extends Controller {
     flash.error(Web.msgHasErrors());
     index();
   }
+  
+  public static void joinBadges(Long badgeSystemId) {
+    
+    final BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
+    notFoundIfNull(badgeSystem);
+    
+    rules.checkIfPermitted(badgeSystem.office);
+
+    List<Person> activePersons = personDao.list(Optional.<String>absent(), 
+        Sets.newHashSet(badgeSystem.office), false, LocalDate.now(), LocalDate.now(), true).list();
+    
+    render("@joinBadges", badgeSystem, activePersons);
+  }
+
+  public static void joinBadgesPerson(Long personId) {
+    
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.office);
+    
+    boolean personFixed = true;
+    
+    BadgeSystem badgeSystem = null;
+    if (!person.office.badgeSystems.isEmpty()) {
+      badgeSystem = person.office.badgeSystems.get(0);
+    }
+    
+    render("@joinBadges", person, badgeSystem, personFixed);
+    
+  }
+  
+  public static void saveBadges(@Valid BadgeSystem badgeSystem, @Required String code, 
+      @Valid Person person, boolean personFixed) {
+    
+    rules.checkIfPermitted(badgeSystem.office);
+    
+    List<Person> activePersons = personDao.list(Optional.<String>absent(), 
+        Sets.newHashSet(badgeSystem.office), false, LocalDate.now(), LocalDate.now(), true).list();
+    
+    if (validation.hasErrors()) {
+
+      response.status = 400;
+      
+      render("@joinBadges", badgeSystem, code, person, activePersons, personFixed);
+    }
+    
+    List<Badge> violatedBadges = Lists.newArrayList();
+    List<Badge> validBadges = Lists.newArrayList();
+    
+    for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
+      Badge badge = new Badge();
+      badge.person = person;
+      badge.code = code;
+      badge.badgeSystem = badgeSystem;
+      badge.badgeReader = badgeReader;
+      
+      Optional<Badge> alreadyExists = alreadyExists(badge);
+      if (alreadyExists.isPresent()) {
+        if (!alreadyExists.get().person.equals(badge.person)) {
+          violatedBadges.add(alreadyExists.get());
+        }
+      } else {
+        validBadges.add(badge);
+      }
+    }
+    
+    if (!violatedBadges.isEmpty()) {
+      validation.addError("code", "già assegnato in almeno una sorgente timbrature.");
+      response.status = 400;
+      render("@joinBadges", badgeSystem, code, person, activePersons, violatedBadges, personFixed);
+    }
+    
+    for (Badge badge : validBadges) {
+      badge.save();
+    }
+
+    flash.success(Web.msgSaved(Badge.class));
+    if (personFixed) {
+      personBadges(person.id);
+    }
+    edit(badgeSystem.id);
+  }
+  
+  /**
+   * TODO: spostare nel manager o nel wrapper.
+   * @param badge
+   * @return
+   */
+  private static Optional<Badge> alreadyExists(Badge badge) {
+    Optional<Badge> old = badgeDao.byCode(badge.code, badge.badgeReader); 
+    if (!old.isPresent()) {
+      return Optional.<Badge>absent();
+    } else {
+      return old;
+    } 
+  }
+
+  /**
+   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.badgeNumber 
+   * @param badgeSystem
+   */
+  public static void joinOldBadgeNumbers(Long badgeSystemId) {
+    
+    BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
+    notFoundIfNull(badgeSystem);
+    rules.checkIfPermitted(badgeSystem.office);
+    
+    List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
+    
+    int personsInError = 0;
+    
+    for (Person person : personsOldBadge) {
+       
+      List<Badge> violatedBadges = Lists.newArrayList();
+      List<Badge> validBadges = Lists.newArrayList();
+      
+      for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
+        Badge badge = new Badge();
+        badge.person = person;
+        badge.code = person.badgeNumber.replaceFirst("^0+(?!$)", "");
+        badge.badgeSystem = badgeSystem;
+        badge.badgeReader = badgeReader;
+        
+        Optional<Badge> alreadyExists = alreadyExists(badge);
+        if (alreadyExists.isPresent()) {
+          violatedBadges.add(alreadyExists.get());
+        } else {
+          validBadges.add(badge);
+        }
+      }
+
+      if (!violatedBadges.isEmpty()) {
+        // segnalare il caso in modo più puntuale?
+        personsInError++;
+      } else {
+        for (Badge badge : validBadges) {
+          badge.save();
+        }
+        //person.badgeNumber = null;
+        //person.save();
+      }
+    }
+    
+    if (personsInError == 0) {
+      flash.success("Operazione completata con successo.");
+    } else {
+      flash.error("Operazione completata ma per %s dipendenti non è stato possibile "
+          + "inserire il badge a causa di conflitto codici.", personsInError);
+    }
+    
+    edit(badgeSystem.id);
+    
+  }
+  
+  /**
+   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number
+   * @param badgeSystem
+   */
+  public static void joinPersonNumbers(Long badgeSystemId) {
+    
+    BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
+    notFoundIfNull(badgeSystem);
+    rules.checkIfPermitted(badgeSystem.office);
+    
+    List<Person> personsOldBadge = personDao.activeWithNumber(badgeSystem.office);
+    
+    int personsInError = 0;
+    
+    for (Person person : personsOldBadge) {
+       
+      List<Badge> violatedBadges = Lists.newArrayList();
+      List<Badge> validBadges = Lists.newArrayList();
+      
+      for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
+        Badge badge = new Badge();
+        badge.person = person;
+        badge.code = (person.number+"").replaceFirst("^0+(?!$)", "");
+        badge.badgeSystem = badgeSystem;
+        badge.badgeReader = badgeReader;
+        
+        Optional<Badge> alreadyExists = alreadyExists(badge);
+        if (alreadyExists.isPresent()) {
+          violatedBadges.add(alreadyExists.get());
+        } else {
+          validBadges.add(badge);
+        }
+      }
+
+      if (!violatedBadges.isEmpty()) {
+        // segnalare il caso in modo più puntuale?
+        personsInError++;
+      } else {
+        for (Badge badge : validBadges) {
+          badge.save();
+        }
+        //person.badgeNumber = null;
+        //person.save();
+      }
+    }
+    
+    if (personsInError == 0) {
+      flash.success("Operazione completata con successo.");
+    } else {
+      flash.error("Operazione completata ma per %s dipendenti non è stato possibile "
+          + "inserire il badge a causa di conflitto codici.", personsInError);
+    }
+    
+    edit(badgeSystem.id);
+  }
+  
+  public static void personBadges(Long personId) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person.office);
+    rules.checkIfPermitted(person.office);
+    render(person);
+  }
+  
+  public static void deleteBadgePerson(Long badgeId) {
+    
+    final Badge badge = badgeDao.byId(badgeId);
+    notFoundIfNull(badge);
+    rules.checkIfPermitted(badge.badgeSystem.office);
+    
+    boolean personFixed = true;
+    boolean confirmed = true;
+    render("@delete", badge, personFixed, confirmed);  
+    
+  }
+  
+  public static void deleteBadge(Long badgeId, boolean confirmed, boolean personFixed) {
+    
+    final Badge badge = badgeDao.byId(badgeId);
+    notFoundIfNull(badge);
+    rules.checkIfPermitted(badge.badgeSystem.office);
+    if (!confirmed) {
+      confirmed = true; 
+      render("@delete", badge, confirmed);  
+    }
+    
+    for (Badge badgeToRemove : badge.person.badges) {
+      if (badgeToRemove.badgeSystem.equals(badge.badgeSystem) 
+          && badgeToRemove.code.equals(badge.code)) {
+        
+        badgeToRemove.delete();
+        }
+      }
+    
+    flash.success("Badge Rimosso con successo");
+    
+    if (personFixed) {
+      personBadges(badge.person.id);
+    }
+    
+    edit(badge.badgeSystem.id);
+    
+  }
+  
+  
+  
   
 }

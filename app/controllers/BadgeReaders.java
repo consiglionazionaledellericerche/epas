@@ -10,7 +10,6 @@ import dao.RoleDao;
 
 import helpers.Web;
 
-import manager.BadgeManager;
 import manager.SecureManager;
 
 import models.BadgeReader;
@@ -48,8 +47,6 @@ public class BadgeReaders extends Controller {
   private static RoleDao roleDao;
   @Inject
   private static SecureManager secureManager;
-  @Inject
-  private static BadgeManager badgeManager;
 
   public static void index() {
     flash.keep();
