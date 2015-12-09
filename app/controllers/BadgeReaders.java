@@ -10,6 +10,7 @@ import com.mysema.query.SearchResults;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 
 import helpers.Web;
 
@@ -19,7 +20,9 @@ import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Person;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +57,8 @@ public class BadgeReaders extends Controller {
   private static SecurityRules rules;
   @Inject
   private static RoleDao roleDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
   @Inject
   private static SecureManager secureManager;
 
@@ -120,10 +125,14 @@ public class BadgeReaders extends Controller {
 
     //elimino la sorgente se non è associata ad alcun gruppo.
     if(badgeReader.badgeSystems.isEmpty()) {
+      
       badgeReader.delete();
+      
+      // FIXME: issue della rimozione user delle persone che riferiscono lo storico.
+      badgeReader.user.delete();
+
       flash.success(Web.msgDeleted(BadgeSystem.class));
       
-      // TODO: eliminare gli uro e l'user.
       index();
     }
     flash.error("Per poter eliminare il gruppo è necessario che non sia associato ad alcuna"
@@ -238,7 +247,7 @@ public class BadgeReaders extends Controller {
     
     //Costruisco un pò di strutture dati di utilità....
     Set<BadgeSystem> badgeSystemsAdd = Sets.newHashSet();
-    //Set<BadgeSystem> badgeSystemsRemove = Sets.newHashSet();
+    Set<BadgeSystem> badgeSystemsRemove = Sets.newHashSet();
     Set<BadgeSystem> badgeSystemsRemain = Sets.newHashSet();
     List<Badge> badgesDefinitelyToRemove = Lists.newArrayList();
     List<Badge> badgesToRemove = Lists.newArrayList();
@@ -248,9 +257,9 @@ public class BadgeReaders extends Controller {
           badgeSystemsRemain.add(badge.badgeSystem);
         }
       } else {
-//        if (!badgeSystemsRemove.contains(badge.badgeSystem)) {
-//          badgeSystemsRemove.add(badge.badgeSystem);
-//        }
+        if (!badgeSystemsRemove.contains(badge.badgeSystem)) {
+          badgeSystemsRemove.add(badge.badgeSystem);
+        }
         if (badge.badgeSystem.badgeReaders.size() == 1) {
           badgesDefinitelyToRemove.add(badge);
         }
@@ -259,7 +268,7 @@ public class BadgeReaders extends Controller {
      
     }
     for (BadgeSystem badgeSystem : badgeReader.badgeSystems) {
-      if (!badgeSystemsRemain.contains(badgeSystem)) { //&& !badgeSystemsRemove.contains(badgeSystem)) {
+      if (!badgeSystemsRemain.contains(badgeSystem)) {
         badgeSystemsAdd.add(badgeSystem);
       }
     }
@@ -312,16 +321,43 @@ public class BadgeReaders extends Controller {
     for (Badge badge : badgesToSave) {
       badge.save();
     }
+    
+    // I RUOLI
+    
+    Role role = roleDao.getRoleByName(Role.BADGE_READER);
 
+    for (BadgeSystem badgeSystem : badgeSystemsRemove) {
+      Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.user,
+          role, badgeSystem.office);
+      if (uro.isPresent()) {
+        uro.get().delete();
+        log.info("UserRoleOffice rimosso: {}", uro); 
+      } else {
+        log.warn("L'userRoleOffice da rimuovere {} {} {} avrebbe dovuto esistere.", 
+            badgeReader.code, role.name, badgeSystem.office);
+      }
+    }
+    for (BadgeSystem badgeSystem : badgeSystemsAdd) {
+      Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.user,
+          role, badgeSystem.office);
+      if (!uro.isPresent()) {
+        UsersRolesOffices uroNew = new UsersRolesOffices();
+        uroNew.office = badgeSystem.office;
+        uroNew.role = role;
+        uroNew.user = badgeReader.user;
+        uroNew.save();
+        log.info("UserRoleOffice creato: {}", uroNew); 
+      } else {
+        log.warn("L'userRoleOffice da inserire {} {} {} esisteva già.", 
+            badgeReader.code, role.name, badgeSystem.office);
+      }
+    }
+    
     flash.success(Web.msgSaved(BadgeReader.class));
     index();
     
   }
-//
-//  private static String key(Badge badge) {
-//    String key = badge.badgeReader.id+"-"+badge.code; 
-//    return key;
-//  }
+
 
   
  
