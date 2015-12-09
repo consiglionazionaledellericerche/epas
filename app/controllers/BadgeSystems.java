@@ -149,18 +149,20 @@ public class BadgeSystems extends Controller {
    * @param user l'utente creato a partire dal badge reader.
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
-
-
+    
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeSystem, validation.errorsMap());
       flash.error(Web.msgHasErrors());
       render("@blank", badgeSystem);
     }
+    
+    rules.checkIfPermitted(badgeSystem.office);
 
     badgeSystem.save();
     
-    edit(badgeSystem.id);
+    index();
   }
 
   /**
@@ -170,14 +172,17 @@ public class BadgeSystems extends Controller {
   public static void delete(Long id) {
     final BadgeSystem badgeSystem = BadgeSystem.findById(id);
     notFoundIfNull(badgeSystem);
+    rules.checkIfPermitted(badgeSystem.office);
 
-    // if(badgeSystem.seats.isEmpty()) {
-    badgeSystem.delete();
-    flash.success(Web.msgDeleted(BadgeSystem.class));
-    index();
-    // }
-    flash.error(Web.msgHasErrors());
-    index();
+    //elimino il gruppo se non è associato ad alcuna sorgente.
+    if(badgeSystem.badgeReaders.isEmpty()) {
+      badgeSystem.delete();
+      flash.success(Web.msgDeleted(BadgeSystem.class));
+      index();
+    }
+    flash.error("Per poter eliminare il gruppo è necessario che non sia associato ad alcuna"
+        + "sorgente timbrature");
+    edit(badgeSystem.id);
   }
   
   public static void joinBadges(Long badgeSystemId) {

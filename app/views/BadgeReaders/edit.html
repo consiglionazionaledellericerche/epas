@@ -11,6 +11,7 @@
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
   #{tabItem id:'badgeSystems', title:'badgeSystems' /}
+  #{tabItem id:'delete', title:'Elimina'/}
 #{/tabs}
 <br>
 #{tabContent}
@@ -90,24 +91,27 @@
     
   
   #{/tabContentItem}
+  
+  #{tabContentItem id:'delete'} 
+  
+    #{if badgeReader.badgeSystems.empty }
+   	<div class="text-danger center">
+   	  #{alert color:'danger'}
+	    <p>E' possibile eliminare la &{'badgeReader'} <strong>${badgeReader.code}</strong> poichè non è associata ad
+	    alcun &{'badgeSystem'}.</p>
+		<a class="btn btn-danger" href=@{BadgeReaders.delete(badgeReader.id)}>Elimina</a>
+	  #{/alert} 
+	</div>
+	#{/if}
+	#{else}
+	  #{alert color:'info'}
+	    <p>E' possibile eliminare una &{'badgeReader'} solo nel caso in cui non sia associato ad alcun &{'badgeSystem'}</p>
+	  #{/alert}
+	#{/else}
+
+  #{/tabContentItem}
 #{/tabContent}  
-  
-  
-  
-  *{  
-  #{if office.persons.empty}
-   #{secure.checkAction 'Office.delete', target:office}
-    #{accordionGroup 'delete'}
-     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
-	  <div class="text-danger center">
-	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
-		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
-	  </div>
-     #{/accordionItem}
-    #{/accordionGroup }  
-   #{/secure.checkAction}
-  #{/if}
-  }*
+ 
 
 </div>
 

@@ -6,9 +6,10 @@
 		   <h4 style="color: black">
 		   <i class="fa fa-database"></i>
 		   #{if _edit}
-		     <a class="list-group-item-heading" href="@{edit(_item.id)}">
-			    ${_item.code}
-	    	 </a>
+		      #{secure.checkAction 'BadgeReaders.edit', target:_item.owner}
+		        <a class="list-group-item-heading" href="@{edit(_item.id)}">
+		      #{/secure.checkAction}
+		      ${_item.code}</a>
 		   #{/if}
 		   #{else}
 		     ${_item.code}	         

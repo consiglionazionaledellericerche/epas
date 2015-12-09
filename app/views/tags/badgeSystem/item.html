@@ -5,14 +5,16 @@
 
 		   <h4 style="color: black">
 		   <i class="fa fa-credit-card"></i>
-		   #{if _edit}
-		     <a class="list-group-item-heading" href="@{edit(_item.id)}">
-			    ${_item.name}
-	    	 </a>
-		   #{/if}
-		   #{else}
+		   
+		   	#{if _edit}
+		     #{secure.checkAction 'BadgeSystems.edit', target:_item.office}
+		       <a class="list-group-item-heading" href="@{edit(_item.id)}">
+		     #{/secure.checkAction}
+		     ${_item.name}</a></em>
+		   	#{/if}
+		   	#{else}
 		     ${_item.name}	         
-		   #{/else}
+		   	#{/else}
 	       </h4>
 	       <div class="container">
 	       
