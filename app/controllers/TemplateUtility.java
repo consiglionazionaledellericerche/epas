@@ -276,6 +276,21 @@ public class TemplateUtility {
     return badgeSystemDao.badgeSystems(Optional.<String>absent(), 
         Optional.<BadgeReader>absent()).list();
   }
+  
+  /**
+   * 
+   * @param office
+   * @return
+   */
+  public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
+    List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList(); 
+    for (BadgeSystem badgeSystem : office.badgeSystems) {
+       if (!badgeSystem.badgeReaders.isEmpty()) {
+         configuredBadgeSystem.add(badgeSystem);
+       }
+    }
+    return configuredBadgeSystem;
+  }
 
   /**
    * I codici di assenza ordinati dai più utilizzati.
