@@ -43,6 +43,7 @@ public class VacationManager {
 		Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year); 
 
 		LocalDate expireDate = LocalDate.now()
+		        .withYear(year)
 				.withMonthOfYear(monthExpiryVacationPastYear)
 				.withDayOfMonth(dayExpiryVacationPastYear);
 		return expireDate;
