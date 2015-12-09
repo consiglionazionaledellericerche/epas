@@ -22,10 +22,15 @@
 	       </p>
 	       
 	       <p>
-	       <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> 
-           #{list items:_item.badgeReaders, as:'badgeReader'}
+	       <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong>
+	       #{if _item.badgeReaders.empty}
+			<i class="fa fa-times text-danger"></i> <em class="text-danger">Da configurare!!!</em></p>
+	       #{/if}
+	       #{else}
+	         #{list items:_item.badgeReaders, as:'badgeReader'}
              <span class="label label-primary">${badgeReader.code}</span>
-           #{/list}
+             #{/list}
+	       #{/else} 
            </p>
 	       
 	       </div>

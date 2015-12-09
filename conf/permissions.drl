@@ -289,8 +289,11 @@ when
 		
 		"BadgeSystems.edit",
 		"BadgeSystems.updateInfo",
-		"BadgeSystems.joinOffices",
-	   "BadgeSystems.saveOffices",
+		"BadgeSystems.joinBadges",
+	    "BadgeSystems.saveBadges",
+	    "BadgeSystems.deleteBadge",
+	    "BadgeSystems.joinPersonNumbers",
+  		"BadgeSystems.joinOldBadgeNumbers",
 	
 		"Administrators.blank",
 		"Administrators.save",
@@ -326,8 +329,11 @@ when
 	   
 	   "BadgeSystems.updateInfo",
 	   "BadgeSystems.edit",
-	   "BadgeSystems.joinOffices",
-	   "BadgeSystems.saveOffices"
+	   "BadgeSystems.joinBadges",
+	   "BadgeSystems.saveBadges",
+	   "BadgeSystems.deleteBadge",
+	   "BadgeSystems.joinPersonNumbers",
+  	   "BadgeSystems.joinOldBadgeNumbers"
 	   
        ), target == $o, granted == false)
 then
@@ -397,6 +403,8 @@ when
 		"Absences.showGeneralMonthlyAbsences",
 		"Absences.manageAttachmentsPerCode",
         "Absences.yearlyAbsences",
+        
+        "BadgeSystems.personBadges",
 		 
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -466,7 +474,8 @@ when
         "Absences.manageAttachmentsPerCode",
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
-
+		
+		"BadgeSystems.personBadges",
 		
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -638,10 +647,10 @@ when
      	"Configurations.saveConfYear",
 		"Configurations.savePastYearVacationLimit",
 		
-		"Badges.joinPersonToBadge",
-		"Badges.allocateBadge",
-		"Badges.delete",
-		"Badges.deleteBadge"
+		"BadgeSystems.joinBadgesPerson",
+		"BadgeSystems.saveBadges",
+		"BadgeSystems.deleteBadgePerson",
+		"BadgeSystems.deleteBadge"
         
         ), target == null, granted == false)
 then
@@ -766,10 +775,10 @@ when
      	"Configurations.saveConfYear",
 		"Configurations.savePastYearVacationLimit",
 		
-		"Badges.joinPersonToBadge",
-		"Badges.allocateBadge",
-		"Badges.delete",
-		"Badges.deleteBadge"
+		"BadgeSystems.joinBadgesPerson",
+		"BadgeSystems.saveBadges",
+		"BadgeSystems.deleteBadgePerson",
+		"BadgeSystems.deleteBadge"
                
        ), target == $o, granted == false)
 then

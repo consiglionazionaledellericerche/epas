@@ -233,50 +233,54 @@ public class BadgeReaders extends Controller {
     // TODO:
     //creare gli uro mancanti, cancellare quelli non più usati
     
-    
+    //Costruisco un pò di strutture dati di utilità....
+    Set<BadgeSystem> badgeSystemsAdd = Sets.newHashSet();
+    //Set<BadgeSystem> badgeSystemsRemove = Sets.newHashSet();
+    Set<BadgeSystem> badgeSystemsRemain = Sets.newHashSet();
     List<Badge> badgesDefinitelyToRemove = Lists.newArrayList();
     List<Badge> badgesToRemove = Lists.newArrayList();
-    Set<BadgeSystem> badgeSystemsToRemove = Sets.newHashSet();
-    //rimuovere i badge non più usati
     for (Badge badge : badgeReader.badges) {
-      //rimozione
-      if (!badgeReader.badgeSystems.contains(badge.badgeSystem)) {
-        badgesToRemove.add(badge);
+      if (badgeReader.badgeSystems.contains(badge.badgeSystem)) {
+        if (badgeSystemsRemain.contains(badge.badgeSystem)) {
+          badgeSystemsRemain.add(badge.badgeSystem);
+        }
+      } else {
+//        if (!badgeSystemsRemove.contains(badge.badgeSystem)) {
+//          badgeSystemsRemove.add(badge.badgeSystem);
+//        }
         if (badge.badgeSystem.badgeReaders.size() == 1) {
           badgesDefinitelyToRemove.add(badge);
         }
-        if (!badgeSystemsToRemove.contains(badge.badgeSystem)) {
-          badgeSystemsToRemove.add(badge.badgeSystem);
-        }
-        continue;
+        badgesToRemove.add(badge);
+      }
+     
+    }
+    for (BadgeSystem badgeSystem : badgeReader.badgeSystems) {
+      if (!badgeSystemsRemain.contains(badgeSystem)) { //&& !badgeSystemsRemove.contains(badgeSystem)) {
+        badgeSystemsAdd.add(badgeSystem);
       }
     }
-
+ 
     List<Badge> violatedBadges = Lists.newArrayList();
     List<Badge> badgesToSave = Lists.newArrayList();
 
-    for (BadgeSystem badgeSystem : badgeReader.badgeSystems) {
-      // Per ogni badge System ora associato
-      if (badgeSystemsToRemove.contains(badgeSystem)) {
-        continue;
-      }
+    for (BadgeSystem badgeSystem : badgeSystemsAdd) {
+    
       // Prendere i codici del badge system
       Set<String> codes = Sets.newHashSet();
-      for (Badge oldBadge : badgeSystem.badges) {
-        if (!codes.contains(oldBadge.code)) {
-         codes.add(oldBadge.code);
-
+      for (Badge otherBadge : badgeSystem.badges) {
+        if (!codes.contains(otherBadge.code)) {
+          codes.add(otherBadge.code);
           Badge badge = new Badge();
-          badge.person = oldBadge.person;
+          badge.person = otherBadge.person;
           badge.badgeSystem = badgeSystem;
           badge.badgeReader = badgeReader;
-          badge.code = oldBadge.code;
+          badge.code = otherBadge.code;
          
           //Controllare che esistano nel badgeReader
           Optional<Badge> alreadyExists = BadgeSystems.alreadyExists(badge);
           if (alreadyExists.isPresent()) {
-            if (!badgeSystemsToRemove.contains(alreadyExists.get().badgeSystem) 
-                && !alreadyExists.get().person.equals(badge.person)) {
+            if (!alreadyExists.get().person.equals(badge.person)) {
               violatedBadges.add(badge);
               violatedBadges.add(alreadyExists.get());
             }
@@ -310,11 +314,11 @@ public class BadgeReaders extends Controller {
     index();
     
   }
-
-  private static String key(Badge badge) {
-    String key = badge.badgeReader.id+"-"+badge.code; 
-    return key;
-  }
+//
+//  private static String key(Badge badge) {
+//    String key = badge.badgeReader.id+"-"+badge.code; 
+//    return key;
+//  }
 
   
  
