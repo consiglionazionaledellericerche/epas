@@ -8,12 +8,16 @@
 
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
+  	#{if ip.isAdministrationVisible()}
     <li #{if _activeAction.equals("edit")} class="active" #{/if}>
       <a href="@{Persons.edit(person.id)}">Dati Anagrafici</a>
     </li>
+    #{/if}
+    #{if ip.isAdministrationVisible()}
     <li #{if _activeAction.equals("personContracts")} class="active" #{/if}>
       <a href="@{Contracts.personContracts(person.id)}">Dati Contrattuali</a>
     </li>
+    #{/if}
     #{if person.isPersonInCharge}
     <li #{if _activeAction.equals("workGroup")} class="active" #{/if}>
       <a href="@{Persons.workGroup(person.id)}">Gruppo Di Lavoro</a>
@@ -22,12 +26,16 @@
     <li #{if _activeAction.equals("badge")} class="active" #{/if}>
       <a href="@{Badges.joinPersonToBadge(person.id)}">Badge</a>
     </li>
+    #{if ip.isAdministrationVisible()}
     <li #{if _activeAction.equals("children")} class="active" #{/if}>
       <a href="@{Persons.children(person.id)}">Figli</a>
     </li>    
+    #{/if}
+    #{if ip.isAdministrationVisible()}
     <li #{if _activeAction.equals("deletePerson")} class="active" #{/if}>
       <a href="@{Persons.deletePerson(person.id)}">Elimina</a>
     </li>
+    #{/if}
   </ul>
 </div>
 <br>
