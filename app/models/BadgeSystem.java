@@ -46,6 +46,7 @@ public class BadgeSystem extends BaseModel {
   @ManyToMany(mappedBy = "badgeSystems")
   public List<BadgeReader> badgeReaders = Lists.newArrayList();
   
+  @Required
   @ManyToOne
   public Office office;
   

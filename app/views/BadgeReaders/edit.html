@@ -5,8 +5,9 @@
 #{set breadcrumbs:['badgeReaders':@BadgeReaders.list(), ('Configura '+ badgeReader.code):null] /}
  
 <div class="container">
+#{breadcrumbs breadcrumbs, noHome:'true' /}
 
-  #{breadcrumbs breadcrumbs, noHome:'true' /}
+#{title title:'Configurazione ' + badgeReader.code /}
   
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
