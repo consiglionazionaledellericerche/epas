@@ -160,88 +160,8 @@ public class BadgeSystems extends Controller {
 
     badgeSystem.save();
     
-    //creare gli uro mancanti, cancellare quelli non più usati
-    
-    List<Badge> badgesToRemove = Lists.newArrayList();
-    List<Badge> badgesToSave = Lists.newArrayList();
-    
-    HashMap<String, String> codesMap = Maps.newHashMap();
-    for (Badge badge : badgeSystem.badges) {
-      if (!codesMap.containsKey(badge.code)) {
-        codesMap.put(badge.code, badge.code);
-      }
-    }
-    
-    HashMap<String, Badge> badgesMap = Maps.newHashMap();
-    HashMap<Long, Person> personsMap = Maps.newHashMap(); 
-    //rimuovere i badge non più usati
-    for (Badge badge : badgeSystem.badges) {
-      //rimozione
-      if (!badgeSystem.badgeReaders.contains(badge.badgeReader)) {
-        badgesToRemove.add(badge);
-        continue;
-      }
-      if (!badgesMap.containsKey(key(badge))) {
-        badgesMap.put(key(badge), badge);
-      }
-      if (!personsMap.containsKey(badge.person.id)) {
-        personsMap.put(badge.person.id, badge.person);
-      }
-    }
-    
-    List<Badge> violatedBadges = Lists.newArrayList();
-    List<Badge> validBadges = Lists.newArrayList();
-    
-    //Aggiungere quelli che non ci sono
-    for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
-      for (Person person : personsMap.values()) {
-        for (String code : codesMap.values()) {
-          Badge badge = new Badge();
-          badge.person = person;
-          badge.badgeSystem = badgeSystem;
-          badge.badgeReader = badgeReader;
-          badge.code = code;
-          if (!badgesMap.containsKey(key(badge))) {
-            //Provo a inserirlo
-            Optional<Badge> alreadyExists = alreadyExists(badge);
-            if (alreadyExists.isPresent()) {
-              if (!alreadyExists.get().person.equals(badge.person)) {
-                violatedBadges.add(alreadyExists.get());
-              }
-            } else {
-              validBadges.add(badge);
-            }
-            badgesToSave.add(badge);
-          }
-        }
-      }
-    }
-    
-    if (violatedBadges.isEmpty()) {
-      for (Badge badge : badgesToRemove) {
-        badge.delete();
-      }
-      for (Badge badge : badgesToSave) {
-        badge.save();
-      }
-      flash.success(Web.msgSaved(BadgeSystem.class));
-      index();
-    } else {
-      flash.error("Non si può fare");
-      index();
-    }
-    
-    
-    
-    
-    
-    
+    edit(badgeSystem.id);
   }
-  
-  private static String key(Badge badge) {
-    return badge.badgeReader.id+"-"+badge.badgeSystem.id+"-"+badge.code+"-"+badge.person; 
-  }
-
 
   /**
    * 
@@ -348,7 +268,7 @@ public class BadgeSystems extends Controller {
    * @param badge
    * @return
    */
-  private static Optional<Badge> alreadyExists(Badge badge) {
+  public static Optional<Badge> alreadyExists(Badge badge) {
     Optional<Badge> old = badgeDao.byCode(badge.code, badge.badgeReader); 
     if (!old.isPresent()) {
       return Optional.<Badge>absent();
