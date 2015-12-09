@@ -2,9 +2,14 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Associazione badge ai lettori badge'  /}
 
+#{if ip.isAdministrationVisible()}
 #{set breadcrumbs:['Lista persone':@Persons.list(),
   (person.fullname):null] /}
-
+#{/if}
+#{else}
+#{set breadcrumbs:['Lettori badge':@BadgeReaders.list(),
+  (person.fullname):null] /}
+#{/else}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 #{persons.personsTabs activeAction:'badge' /}
