@@ -263,13 +263,10 @@ when
 	    "BadgeReaders.index",
 	    "BadgeReaders.list",
 	    "BadgeReaders.blank",
-	    "BadgeReaders.save",
-        "BadgeReaders.edit",
 		
 	    "BadgeSystems.index",
 	    "BadgeSystems.list",
 	    "BadgeSystems.blank",
-	    "BadgeSystems.save",
         
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
@@ -279,14 +276,16 @@ when
 		"Offices.list",
 		"Offices.edit",
 		"Offices.save",
-		
+
+		"BadgeReaders.save",	
+		"BadgeReaders.edit",		
 	    "BadgeReaders.updateInfo",
 	    "BadgeReaders.changePassword",
-		"BadgeReaders.save",	
-		"Badges.delete",
 		"BadgeReaders.joinBadgeSystems",
 		"BadgeReaders.saveBadgeSystems",
+		"BadgeReaders.delete",
 		
+		"BadgeSystems.save",
 		"BadgeSystems.edit",
 		"BadgeSystems.updateInfo",
 		"BadgeSystems.joinBadges",
@@ -294,6 +293,7 @@ when
 	    "BadgeSystems.deleteBadge",
 	    "BadgeSystems.joinPersonNumbers",
   		"BadgeSystems.joinOldBadgeNumbers",
+  		"BadgeSystems.delete",
 	
 		"Administrators.blank",
 		"Administrators.save",
@@ -320,20 +320,23 @@ when
 	   "Administrators.delete",
 	   "Administrators.save",
 	   
+	   "BadgeReaders.save",	
 	   "BadgeReaders.edit",
 	   "BadgeReaders.updateInfo",	
 	   "BadgeReaders.changePassword",
-	   "BadgeReaders.save",	
 	   "BadgeReaders.joinBadgeSystems",
 	   "BadgeReaders.saveBadgeSystems",
-	   
-	   "BadgeSystems.updateInfo",
+	   "BadgeReaders.delete",
+		
+	   "BadgeSystems.save",	   
 	   "BadgeSystems.edit",
+	   "BadgeSystems.updateInfo",
 	   "BadgeSystems.joinBadges",
 	   "BadgeSystems.saveBadges",
 	   "BadgeSystems.deleteBadge",
 	   "BadgeSystems.joinPersonNumbers",
-  	   "BadgeSystems.joinOldBadgeNumbers"
+  	   "BadgeSystems.joinOldBadgeNumbers",
+  	   "BadgeSystems.delete"
 	   
        ), target == $o, granted == false)
 then

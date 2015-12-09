@@ -12,6 +12,7 @@
   #{tabItem id:'info', title:'Riepilogo', active:true /}
   #{tabItem id:'badges', title:'Badge'/}
   #{tabItem id:'advanced', title:'Avanzate'/}
+  #{tabItem id:'delete', title:'Elimina'/}
 #{/tabs}
 <br>
    
@@ -161,26 +162,28 @@
     #{/if}
     #{/panel}
   
-  #{/tabContentItem} 
+  #{/tabContentItem}
+  
+  #{tabContentItem id:'delete'} 
+  
+    #{if badgeSystem.badgeReaders.empty }
+   	<div class="text-danger center">
+   	  #{alert color:'danger'}
+	    <p>E' possibile eliminare il &{'badgeSystem'} <strong>${badgeSystem.name}</strong> poichè non è associato ad
+	    alcuna &{'badgeReader'}.</p>
+		<a class="btn btn-danger" href=@{BadgeSystems.delete(badgeSystem.id)}>Elimina</a>
+	  #{/alert} 
+	</div>
+	#{/if}
+	#{else}
+	  #{alert color:'info'}
+	    <p>E' possibile eliminare un &{'badgeSystem'} solo nel caso in cui non sia associato ad alcuna &{'badgeReader'}</p>
+	  #{/alert}
+	#{/else}
+  
+  #{/tabContentItem}
    
   
 #{/tabContent}  
-  
-  
-  
-  *{  
-  #{if office.persons.empty}
-   #{secure.checkAction 'Office.delete', target:office}
-    #{accordionGroup 'delete'}
-     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
-	  <div class="text-danger center">
-	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
-		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
-	  </div>
-     #{/accordionItem}
-    #{/accordionGroup }  
-   #{/secure.checkAction}
-  #{/if}
-  }*
 
 </div>

@@ -108,6 +108,29 @@ public class BadgeReaders extends Controller {
     render();
   }
 
+  /**
+   * 
+   * @param id identificativo del badge reader da eliminare.
+   */
+  public static void delete(Long id) {
+    
+    final BadgeReader badgeReader = BadgeReader.findById(id);
+    notFoundIfNull(badgeReader);
+    rules.checkIfPermitted(badgeReader.owner);
+
+    //elimino la sorgente se non è associata ad alcun gruppo.
+    if(badgeReader.badgeSystems.isEmpty()) {
+      badgeReader.delete();
+      flash.success(Web.msgDeleted(BadgeSystem.class));
+      
+      // TODO: eliminare gli uro e l'user.
+      index();
+    }
+    flash.error("Per poter eliminare il gruppo è necessario che non sia associato ad alcuna"
+        + "sorgente timbrature");
+    edit(badgeReader.id);
+  }
+
 
   /**
    * 
@@ -185,26 +208,6 @@ public class BadgeReaders extends Controller {
     badgeReader.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
-    index();
-  }
-
-
-  /**
-   * 
-   * @param id identificativo del badge reader da eliminare.
-   */
-  public static void delete(Long id) {
-    final BadgeReader badgeReader = BadgeReader.findById(id);
-    notFoundIfNull(badgeReader);
-    
-    rules.checkIfPermitted(badgeReader.owner);
-
-    // if(badgeReader.seats.isEmpty()) {
-    badgeReader.delete();
-    flash.success(Web.msgDeleted(BadgeReader.class));
-    index();
-    // }
-    flash.error(Web.msgHasErrors());
     index();
   }
 
