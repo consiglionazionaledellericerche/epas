@@ -1,10 +1,23 @@
 *{
-  title: required
+  title: il titolo
+  noTitle: se non voglio il title (l'header in alto)
 }* %{ (_arg) && (_button = _arg); }%
-<div class="modal-header center">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>&{_title}</h3>
-</div>
+
+
+
+#{if _noTitle}
+
+#{/if}
+#{else}
+	<div class="modal-header center">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	    <h3>&{_title}</h3>
+	</div>
+#{/else}
+
 <div class="modal-body">
+  #{if _noTitle}
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+  #{/if}
   #{doBody /}
 </div>
