@@ -1,104 +1,104 @@
 package controllers;
 
-import static play.modules.pdf.PDF.renderPDF;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
+import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import manager.SecureManager;
 import manager.recaps.personStamping.PersonStampingRecap;
 import manager.recaps.personStamping.PersonStampingRecapFactory;
+
 import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.List;
 
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
+import javax.inject.Inject;
 
-@With( {Resecure.class, RequestInit.class} )
-public class PrintTags extends Controller{
-	
-	@Inject
-	private static PersonDao personDao;
-	@Inject
-	private static SecurityRules rules;
-	@Inject
-	private static PersonStampingRecapFactory stampingsRecapFactory;
-	@Inject
-	private static OfficeDao officeDao;
-	@Inject
-	private static IWrapperFactory wrapperFactory;
+@With({Resecure.class, RequestInit.class})
+public class PrintTags extends Controller {
 
-	public static void showTag(Long personId, int month, int year){
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static SecurityRules rules;
+  @Inject
+  private static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  private static SecureManager secureManager;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
 
-		Preconditions.checkNotNull(personId);
-		Person person = personDao.getPersonById(personId);
+  public static void showTag(Long personId, int month, int year) {
 
-		Preconditions.checkNotNull(person);
-		
-		rules.checkIfPermitted(person.office);
-		
-		PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
+    Preconditions.checkNotNull(personId);
+    Person person = personDao.getPersonById(personId);
 
-		String titolo = "Situazione presenze mensile " +  
-				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
-				person.surname + " " + person.name;
+    Preconditions.checkNotNull(person);
 
-		renderPDF(psDto, titolo) ;		
-	}
+    rules.checkIfPermitted(person.office);
 
-	public static void listPersonForPrintTags(int year, int month){
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
-		rules.checkIfPermitted(Security.getUser().get().person.office);
+    String titolo = "Situazione presenze mensile " +
+            DateUtility.fromIntToStringMonth(month) + " " + year + " di " +
+            person.surname + " " + person.name;
 
-		LocalDate date = new LocalDate(year, month,1);
+    renderPDF(psDto, titolo);
+  }
 
-		List<Person> personList = personDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, 
-				date, date.dayOfMonth().withMaximumValue(), true).list();
+  public static void listPersonForPrintTags(int year, int month) {
 
-		render(personList, date, year, month);
-	}
+    LocalDate date = new LocalDate(year, month, 1);
 
-	public static void showPersonTag(Integer year, Integer month){
+    List<Person> personList = personDao.list(
+            Optional.<String>absent(),
+            secureManager.officesReadAllowed(Security.getUser().get()),
+            false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
-		Optional<User> currentUser = Security.getUser();
-		Preconditions.checkState(currentUser.isPresent());
-		Preconditions.checkNotNull(currentUser.get().person);
-		
-		IWrapperPerson person = wrapperFactory
-				.create(Security.getUser().get().person);
-		
-		
-		if(! person.isActiveInMonth(new YearMonth(year,month)) ) {
+    render(personList, date, year, month);
+  }
 
-			flash.error("La persona %s non ha contratto attivo nel mese selezionato",
-					person.getValue().fullName());
-			render("@redirectToIndex");
-		}
+  public static void showPersonTag(Integer year, Integer month) {
 
-		PersonStampingRecap psDto = stampingsRecapFactory
-				.create(person.getValue(), year, month);
+    Optional<User> currentUser = Security.getUser();
+    Preconditions.checkState(currentUser.isPresent());
+    Preconditions.checkNotNull(currentUser.get().person);
 
-		// FIXME: spostare nel template
-		String titolo = "Situazione presenze mensile " +  
-				DateUtility.fromIntToStringMonth(month) + " " + year + " di " + 
-				person.getValue().fullName();
+    IWrapperPerson person = wrapperFactory
+            .create(Security.getUser().get().person);
 
-		renderPDF(psDto, titolo) ;
 
-	}
+    if (!person.isActiveInMonth(new YearMonth(year, month))) {
+
+      flash.error("La persona %s non ha contratto attivo nel mese selezionato",
+              person.getValue().fullName());
+      render("@redirectToIndex");
+    }
+
+    PersonStampingRecap psDto = stampingsRecapFactory
+            .create(person.getValue(), year, month);
+
+    // FIXME: spostare nel template
+    String titolo = "Situazione presenze mensile " +
+            DateUtility.fromIntToStringMonth(month) + " " + year + " di " +
+            person.getValue().fullName();
+
+    renderPDF(psDto, titolo);
+
+  }
 
 }

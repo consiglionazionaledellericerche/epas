@@ -37,7 +37,7 @@
 		<tr>
 			<td>Limite utilizzo residui dell'anno precedente per i livelli da 1 a 3</td>
 			<td>
-			#{select 'residuiAnnoPrecedente13', value: templateUtility.monthNameByString(monthExpireRecoveryDaysOneThree.fieldValue), class:'col-xs-12', id:'residuiAnnoPrecedente13', 
+			#{select 'residuiAnnoPrecedente13', value: templateUtility.monthName(monthExpireRecoveryDaysOneThree.fieldValue), class:'col-xs-12', id:'residuiAnnoPrecedente13', 
 		    style:'margin-bottom: 10px;', onclick:'Change();'}
 		    #{list items: mesi, as:'mese'} 
 	           #{option mese}${mese} #{/option}
@@ -48,7 +48,7 @@
 		<tr>
 			<td>Limite utilizzo residui dell'anno precedente per i livelli da 4 a 9</td>
 			<td>
-			#{select 'residuiAnnoPrecedente49', value: templateUtility.monthNameByString(monthExpireRecoveryDaysFourNine.fieldValue), class:'col-xs-12', id:'residuiAnnoPrecedente49', 
+			#{select 'residuiAnnoPrecedente49', value: templateUtility.monthName(monthExpireRecoveryDaysFourNine.fieldValue), class:'col-xs-12', id:'residuiAnnoPrecedente49', 
 		    style:'margin-bottom: 10px;', onclick:'Change();'}
 		    #{list items: mesi, as:'mese'} 
 	           #{option mese}${mese} #{/option}

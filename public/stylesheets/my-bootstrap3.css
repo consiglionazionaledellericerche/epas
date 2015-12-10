@@ -22,7 +22,6 @@ body {
     height: 100%;
     margin-bottom:  -70px;
     background: white;
-   
 }
 
 #page_content{
@@ -93,51 +92,10 @@ footer p {
 	font-size: 200%;
 }
 
-.flash-panel {
-	border: 1px solid;
-	text-align: center;
-	padding: 0;
-}
-
-.flash-panel p{
-	padding: 0;
-	padding-top: 7px;
-}
-
-#flash-error, #flash-success {
- 	position: fixed;
-  	top: 50px;
-  	right: 100px;
-  	display: block;
-  	left: auto;	
-}
-
-#flash-error {
-	background-color: lightpink;
-}
-
-#flash-error h3 {
-	background-color: red;
-	color: white;
-	text-align: center;
-}
-
-#flash-success div.arrow {
-	border-bottom-color: red;
-}
-
-#flash-success {
-	background-color: lightgreen;
-}
-
-#flash-success h3 {
-	background-color: green;
-	color: white;
-	text-align: center;
-}
-
-#flash-success div.arrow {
-	border-bottom-color: green;
+#defaultSpinner {
+	position: fixed;
+  	top: 60px;
+	display: block;
 }
 
 #banner {
@@ -159,12 +117,14 @@ footer p {
 
 #nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
 	padding-right: 2px;
-	padding-left: 4px;
+	padding-left: 2px;
 }
 
 #nav-year .badge, #nav-month .badge {
-	background-color: white;
+	background-color: #FFFFFF; /* bianco */
 	font-size: 1.1em;
+	display: inline;
+    color: #033C73; /* blu scuro */
 }
 
 .my-navbar-form {
@@ -259,11 +219,11 @@ div.datepicker {
 
 /* CSS Tabellone Timbrature */
 
-/* tabella default */
+/* tabella default 
 table{ border: 1px solid #aaa; }
 th { background: #eee}
 td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
-
+*/
 /* tabellone timbrature */
 table#tabellonetimbrature{
 		font-size: small;
@@ -354,26 +314,39 @@ table#tabellonetimbrature td {border: 1px solid #bbb;}
 	font-size:large;
 }
 
-
-/* ----- Datepicker Default reset --------
-
-Sosvrascrive le regole
-table{ border: 1px solid #aaa; }
-th { background: #eee}
-td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
-*/
-
-.datepicker th,td {
-	background: #FFFFFF;
-}
-
-.datepicker table{
-	border:none;
-}
-
 /* Data tables */
 tfoot input {
    width: 100%;
    padding: 3px;
    box-sizing: border-box;
+}
+
+/* -----------------------------------------------------*/
+/* VOGLIO UNA VITA COLORATA BELLA, FANCULO QUESTA CELLA *//*      <<======  AHAHAHAHAH.......STANZINO.... */
+/* -----------------------------------------------------*/
+
+.list-group-item-grey{ background-color: #EAEAEA; }
+
+.btn ,i{ vertical-align: middle; }
+
+.data-select-bar{
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+/*
+div.form-group .form-control-static {
+    background: rgb(245,245,245);
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+    text-align: center;
+}
+*/
+table[datatable] {
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+}
+
+table[datatable] > thead > tr > th:hover{
+  background: #F9F9F9;
 }

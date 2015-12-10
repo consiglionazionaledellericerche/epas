@@ -1,0 +1,58 @@
+    #{panel title:'Elenco dei blocchi assegnati negli ultimi due anni.', color:'primary'}  
+
+	  <table class="table center">
+		    <tr class="warning">
+		      <th>Codice</th>
+		      <th>Attribuito il</th>
+		      <th>Scadenza</th>
+		      *{
+		      <th>Usati</th>
+		      <th>Rimanenti</th>
+		      }*
+		      <th>Rimozione</th>
+		    </tr>
+	          
+      #{list items:today.year..(today.year-1), as:'year'}
+		
+		    #{list items:recap.getBlockMealTicketReceivedInYear(year), as:'block'}
+		      <tr style="background-color: white;">
+		        <td>
+		          <strong>${block.codeBlock}</strong>
+		        </td>
+		        <td>${block.getDate()?.format()}</td>
+		        <td>${block.getExpireDate()?.format()}</td>
+		        *{
+		        <td>
+		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
+		        </td>
+		        <td>
+		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
+		        </td>
+		        }*
+		        
+		        <td>
+		        
+		    	  <div class="delete-confirmed">
+		    	    <button type="submit" class="btn btn-sm btn-danger delete-first"><span class="glyphicon glyphicon-trash"></span></button>
+		    	    
+				    <div class="delete" style="display: none">
+				      
+				      #{form @MealTickets.deletePersonMealTicket() }
+		    	      <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
+		    	  
+ 			    	  <input type="hidden" name="name" value="${name}"/>
+		    	      <input type="hidden" name="page" value="${page}"/>
+		    	      <input type="hidden" name="max" value="${max}"/>
+		    	      
+		    	      <button type="submit" class="btn btn-sm btn-danger">Sei sicuro??</button>
+		    	      
+	        	      #{/form}   
+		    	    </div>
+		    	  </div>
+		  		
+		        </td>
+		      </tr>
+		    #{/list}
+		#{/list}  
+      </table>
+    #{/panel}

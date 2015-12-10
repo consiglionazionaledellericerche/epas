@@ -1,173 +1,158 @@
 package controllers;
 
 
-import java.lang.reflect.InvocationTargetException;
-
-import javax.inject.Inject;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
 
 import dao.UserDao;
+
 import manager.ConfGeneralManager;
+
 import models.User;
 import models.enumerate.Parameter;
+
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
+import java.lang.reflect.InvocationTargetException;
+
+import javax.inject.Inject;
+
+
 public class Security extends Secure.Security {
 
-	@Inject
-	private static UserDao userDao;
-	@Inject
-	private static ConfGeneralManager confGeneralManager;
+  public final static String REST = "rest";
+  public final static String STAMPINGS_CREATE = "stampingsCreate";
+
 
 	/* Client rest */
-
-	public final static String REST = "rest";
+  public final static String DEVELOPER = "developer";
 
 	/* lettore badge */
-
-	public final static String STAMPINGS_CREATE = "stampingsCreate";
+  public final static String EMPLOYEE = "employee";
 
 	/* Sviluppatore */
-
-	public final static String DEVELOPER = "developer";
+  public final static String VIEW_PERSON = "viewPerson";
 
 	/* Dipendente */
-
-	public final static String EMPLOYEE = "employee";
+  public final static String EDIT_PERSON = "editPerson"; //per adesso utilizzato anche per la nuova gestione dei ticket
 
 	/* Amministratore Personale */
-
-	public final static String VIEW_PERSON = "viewPerson";
-	public final static String EDIT_PERSON = "editPerson"; //per adesso utilizzato anche per la nuova gestione dei ticket
-
-
-	public final static String VIEW_PERSON_DAY = "viewPersonDay";
-	public final static String EDIT_PERSON_DAY = "editPersonDay";
-
-	public final static String VIEW_COMPETENCE = "viewCompetence";
-	public final static String EDIT_COMPETENCE = "editCompetence";
-
-	public final static String UPLOAD_SITUATION = "uploadSituation";
+  public final static String VIEW_PERSON_DAY = "viewPersonDay";
+  public final static String EDIT_PERSON_DAY = "editPersonDay";
+  public final static String VIEW_COMPETENCE = "viewCompetence";
+  public final static String EDIT_COMPETENCE = "editCompetence";
+  public final static String UPLOAD_SITUATION = "uploadSituation";
+  public final static String VIEW_ABSENCE_TYPE = "viewAbsenceType";
+  public final static String EDIT_ABSENCE_TYPE = "editAbsenceType";
 
 
 	/* Amministratore ePAS */
+  public final static String VIEW_CONFIGURATION = "viewConfiguration";
+  public final static String EDIT_CONFIGURATION = "editConfiguration";
+  public final static String VIEW_OFFICE = "viewOffice";
+  public final static String EDIT_OFFICE = "editOffice";
+  public final static String VIEW_WORKING_TIME_TYPE = "viewWorkingTimeType";
+  public final static String EDIT_WORKING_TIME_TYPE = "editWorkingTimeType";
+  public final static String VIEW_COMPETENCE_CODE = "viewCompetenceCode";
+  public final static String EDIT_COMPETENCE_CODE = "editCompetenceCode";
+  public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
+  public final static String EDIT_ADMINISTRATOR = "editAdministrator";
+  public final static String VIEW_REPERIBILITY = "viewReperibility";
+  public final static String MANAGE_REPERIBILITY = "manageReperibility";
+  public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+  public final static String CACHE_DURATION = "30mn";
 
-	public final static String VIEW_ABSENCE_TYPE = "viewAbsenceType";
-	public final static String EDIT_ABSENCE_TYPE = "editAbsenceType";
+  //FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
+  @Inject
+  private static UserDao userDao;
+  @Inject
+  private static ConfGeneralManager confGeneralManager;
 
-	public final static String VIEW_CONFIGURATION = "viewConfiguration";
-	public final static String EDIT_CONFIGURATION = "editConfiguration";
+  /**
+   * @return true se è autenticato, false altrimenti.
+   */
+  static boolean authenticate(String username, String password) {
+    Logger.trace("Richiesta autenticazione di %s", username);
 
-	public final static String VIEW_OFFICE = "viewOffice";
-	public final static String EDIT_OFFICE = "editOffice";
+    User user = userDao.getUserByUsernameAndPassword(username, Optional.fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
 
-	public final static String VIEW_WORKING_TIME_TYPE = "viewWorkingTimeType";
-	public final static String EDIT_WORKING_TIME_TYPE = "editWorkingTimeType";
+    if (user != null) {
+      Cache.set(username, user, CACHE_DURATION);
+      Cache.set("userId", user.id, CACHE_DURATION);
 
-	public final static String VIEW_COMPETENCE_CODE = "viewCompetenceCode";
-	public final static String EDIT_COMPETENCE_CODE = "editCompetenceCode";
+      Logger.info("user %s successfully logged in from ip %s", user.username,
+              Http.Request.current().remoteAddress);
 
-	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
-	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
+      return true;
+    }
 
-	public final static String VIEW_REPERIBILITY = "viewReperibility";
-	public final static String MANAGE_REPERIBILITY = "manageReperibility";
-	
-	//FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
+    // Oops
+    Logger.info("Failed login for %s ", username);
+    flash.put("username", username);
+    flash.error("Login failed");
+    return false;
+  }
 
-	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+  private static Optional<User> getUser(String username) {
 
-	public final static String CACHE_DURATION = "30mn";
+    if (username == null || username.isEmpty()) {
+      Logger.trace("getUSer failed for username %s", username);
+      return Optional.<User>absent();
+    }
+    Logger.trace("Richiesta getUser(), username=%s", username);
 
-	/**
-	 * @param username
-	 * @param password
-	 * @return true se è autenticato, false altrimenti.
-	 */
-	static boolean authenticate(String username, String password) {
-		Logger.trace("Richiesta autenticazione di %s",username);
+    //cache
+    //User user = (User)Cache.get(username);
+    //if(user!=null)
+    //	return Optional.of(user);
 
-		User user = userDao.getUserByUsernameAndPassword(username, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
+    //db
+    User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
 
-		if(user != null){
-			Cache.set(username, user, CACHE_DURATION);
-			Cache.set("userId", user.id, CACHE_DURATION);
+    Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
+    if (user == null) {
+      Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
+      return Optional.<User>absent();
+    }
+    //Cache.set(username, user, CACHE_DURATION);
+    return Optional.of(user);
+  }
 
-			Logger.info("user %s successfully logged in from ip %s", user.username,
-					Http.Request.current().remoteAddress);
-			
-			return true;
-		}
+  static String connected() {
+    if (request == null) {
+      return null;
+    }
+    if (request.user != null) {
+      return request.user;
+    } else {
+      return Secure.Security.connected();
+    }
+  }
 
-		// Oops
-		Logger.info("Failed login for %s ", username);
-		flash.put("username", username);
-		flash.error("Login failed");
-		return false;
-	}
+  public static Optional<User> getUser() {
+    return getUser(connected());
+  }
 
-	private static Optional<User> getUser(String username){
+  static Object invoke(String m, Object... args) throws Throwable {
 
-		if (username == null || username.isEmpty()) {
-			Logger.trace("getUSer failed for username %s", username);
-			return Optional.<User>absent();
-		}
-		Logger.trace("Richiesta getUser(), username=%s", username);
+    try {
+      return Java.invokeChildOrStatic(Security.class, m, args);
+    } catch (InvocationTargetException e) {
+      throw e.getTargetException();
+    }
+  }
 
-		//cache
-		//User user = (User)Cache.get(username);
-		//if(user!=null)
-		//	return Optional.of(user);
-
-		//db
-		User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
-		
-		Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
-		if (user == null){
-			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-			return Optional.<User>absent();
-		}
-		//Cache.set(username, user, CACHE_DURATION);
-		return Optional.of(user);
-	}
-
-	static String connected() {
-		if (request == null){
-			return null;
-		}
-		if (request.user != null) {
-			return request.user;
-		} else {
-			return Secure.Security.connected();
-		}
-	}
-
-	public static Optional<User> getUser() {
-		return getUser(connected());
-	}
-
-	static Object invoke(String m, Object... args) throws Throwable {
-
-		try {
-			return Java.invokeChildOrStatic(Security.class, m, args);       
-		} catch(InvocationTargetException e) {
-			throw e.getTargetException();
-		}
-	}
-	
-	public static boolean checkForWebstamping(){
-		if("true".equals(Play.configuration.getProperty(Clocks.SKIP_IP_CHECK))){
-			return true;
-		}
-		String remoteAddress = Http.Request.current().remoteAddress;
-		return !confGeneralManager.containsValue(
-				Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
-	}
+  public static boolean checkForWebstamping() {
+    if ("true".equals(Play.configuration.getProperty(Clocks.SKIP_IP_CHECK))) {
+      return true;
+    }
+    String remoteAddress = Http.Request.current().remoteAddress;
+    return !confGeneralManager.containsValue(
+            Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
+  }
 }

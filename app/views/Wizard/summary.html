@@ -1,275 +1,58 @@
 #{extends 'Wizard/wizard.html' /}
 
-#{form @Wizard.summary(),class:'form-horizontal',role:'form'}
-<input type="hidden" name="stepIndex" value="${currentStep.index}"/>
+#{form @Wizard.summary(),class:'form-horizontal col-sm-8 col-sm-offset-2'}
+#{f.hidden 'stepIndex', value:currentStep.index/}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Password Amministratore</em>
+</h2></legend>
 
-<div class="page-header col-sm-8 col-sm-offset-2">
-	<h1>Configurazione Ufficio</h1>
-</div>
+#{f.view 'Utente Admin',value:'admin' /}
+#{f.view 'adminPassword',value:properties.getProperty('adminPassword') /}
 
-#{field 'area'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Nome Area</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Istituto</em></h2></legend>
 
-#{field 'institute'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Nome Istituto</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+#{f.view 'institute.name',value:properties.getProperty('instituteName') /}
+#{f.view 'institute.cds',value:properties.getProperty('instituteCds') /}
+#{f.view 'institute.code',value:properties.getProperty('instituteCode') /}
 
-#{field 'institute_contraction'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Sigla Istituto</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Sede</em></h2></legend>
 
-#{field 'seat'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Nome sede</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+#{f.view 'office.name',value:properties.getProperty('officeName') /}
+#{f.view 'office.code',value:properties.getProperty('officeCode') /}
+#{f.view 'office.codeId',value:properties.getProperty('officeCodeId') /}
+#{f.view 'office.address',value:properties.getProperty('officeAddress') /}
+#{f.view 'office.joiningDate',value:properties.getProperty('officeJoiningDate') /}
 
-#{field 'seat_address'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Indirizzo sede</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Configurazione Generale</em></h2></legend>
 
-#{field 'seat_code'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Codice sede</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+#{f.view 'dateOfPatron',value:properties.getProperty('dateOfPatron') /}
+#{f.view 'lunchPauseStart',value:properties.getProperty('lunchPauseStart') /}
+#{f.view 'lunchPauseEnd', value:properties.getProperty('lunchPauseEnd') /}
+#{f.view 'emailToContact',value:properties.getProperty('emailToContact') /}
 
-#{field 'seat_affiliation_date'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Data affiliazione sede</label>
-	<div class="col-sm-3">
-		<input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Amministratore della Sede</em>
+</h2></legend>
 
-<div class="page-header col-sm-8 col-sm-offset-2">
-	<h1>Configurazione Generale</h1>
-</div>
+#{f.view 'person.name',value:properties.getProperty('personnelAdminName') /}
+#{f.view 'person.surname',value:properties.getProperty('personnelAdminSurname') /}
+#{f.view 'person.birthday',value:properties.getProperty('personnelAdminBirthday') /}
+#{f.view 'person.email',value:properties.getProperty('personnelAdminEmail') /}
+#{f.view 'person.number',value:properties.getProperty('personnelAdminNumber') /}
+#{f.view 'qualification',value:properties.getProperty('personnelAdminQualification') /}
 
-#{field 'date_of_patron'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Data Patrono</label>
-	<div class="col-sm-3">
-		<input datepicker-month class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+<legend class="col-sm-8 col-sm-offset-2"><h3 class="text-center"><em>Dati contrattuali</em></h3>
+</legend>
 
-#{field 'lunch_pause_start'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Inizio pausa pranzo</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+#{f.view 'beginDate',value:properties.getProperty('personnelAdminbeginDate') /}
+#{f.view 'endContract',value:properties.getProperty('personnelAdminEndContract') /}
 
-#{field 'lunch_pause_end'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Fine pausa pranzo</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+<legend class="col-sm-8 col-sm-offset-2"><h3 class="text-center"><em>Password d'accesso amministratore</em>
+</h3></legend>
 
-#{field 'email_to_contact'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Indirizzo email dell'amministrazione</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-<div class="page-header col-sm-8 col-sm-offset-2">
-	<h1>Creazione ruolo Amministratore</h1>
-</div>
-
-#{field 'manager_surname'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Cognome Amministratore</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_name'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Nome Amministratore</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_qualification'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Livello qualifica</label>
-	<div class="col-sm-3">
-		#{select field.id, value:properties.getProperty(field.name), id:field.id,class:'form-control'}
-		#{list items:1..9, as:'i'}
-		#{option i}${i}#{/option}
-		#{/list}
-		#{/select}
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_badge_number'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Numero badge Amministratore</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_registration_number'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Numero matricola Amministratore</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_birthday'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Data di Nascita Amministratore</label>
-	<div class="col-sm-3">
-		<input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_email'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Email Amministratore</label>
-	<div class="col-sm-3">
-		<input class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_contract_begin'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Data inizio contratto Amministratore</label>
-	<div class="col-sm-3">
-		<input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_contract_end'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Data fine contratto Amministratore</label>
-	<div class="col-sm-3">
-		<input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_username'}
-<div class='form-group #{if field.error}has-error#{/if}' >
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Scelta Username</label>
-	<div class="col-sm-3">
-		#{select field.id, id:field.id,value:properties.getProperty(field.name),class:'form-control'}
-		#{/select}
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_password'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Password</label>
-	<div class="col-sm-3">
-		<input  class="form-control" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
-
-#{field 'manager_password_retype'}
-<div class='form-group #{if field.error}has-error#{/if}'>
-	<label class="control-label col-sm-3 col-sm-offset-2" for="${field.id}">Reinserire la password</label>
-	<div class="col-sm-3">
-		<input class="form-control" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty("manager_password")}' required>
-		#{if field.error}<span class="help-block">${field.error}</span>#{/if}
-	</div>
-</div>
-#{/field}
+#{f.view 'managerUser' /}
+#{f.view 'managerPassword',value:properties.getProperty('personnelAdminPassword') /}
 
 <legend id="bottom_line" class="col-sm-12"></legend>
+#{b.submit 'Conferma', class:'col-sm-4 col-sm-offset-4 btn-success', /}
 
-  <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
 #{/form}
 
-#{set 'moreScripts'}
-<script type="text/javascript">
- $(document).ready( function (){
-
-   generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
-  $("#manager_username").val('${properties.getProperty('manager_username')}');
-
-  $('#manager_surname').change(function(){
-    generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
-  });
-
-  $('#manager_name').change(function(){
-     generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
-  });
-
-});
-</script>
-#{/set}

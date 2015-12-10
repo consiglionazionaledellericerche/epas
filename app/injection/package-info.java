@@ -1,5 +1,4 @@
 /**
  * @author marco
- *
  */
 package injection;

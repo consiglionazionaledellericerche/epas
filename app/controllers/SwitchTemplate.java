@@ -6,233 +6,284 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 @With(RequestInit.class)
-public class SwitchTemplate extends Controller{
+public class SwitchTemplate extends Controller {
 
-	public static final String USERNAME_SESSION_KEY = "username";
+  public static final String USERNAME_SESSION_KEY = "username";
 
-	private static void executeAction(String action) {
+  private static void executeAction(String action) {
 
-		Integer year = Integer.parseInt(session.get("yearSelected"));
-		Integer month = Integer.parseInt(session.get("monthSelected"));
-		Integer day = Integer.parseInt(session.get("daySelected"));
-		Long personId = Long.parseLong(session.get("personSelected"));
+    Integer year = Integer.parseInt(session.get("yearSelected"));
+    Integer month = Integer.parseInt(session.get("monthSelected"));
+    Integer day = Integer.parseInt(session.get("daySelected"));
+    Long personId = Long.parseLong(session.get("personSelected"));
+    Long officeId = Long.parseLong(session.get("officeSelected"));
 
-		session.put("actionSelected", action);
+    session.put("actionSelected", action);
 
-		if(action.equals("Stampings.stampings")) {
+    if (action.equals("Stampings.stampings")) {
 
-			Stampings.stampings(year, month);
-		}
+      Stampings.stampings(year, month);
+    }
 
-		if(action.equals("Stampings.personStamping")) {
+    if (action.equals("Stampings.personStamping")) {
 
-			Stampings.personStamping(personId, year, month);
-		}
+      Stampings.personStamping(personId, year, month);
+    }
 
-		if(action.equals("PersonMonths.trainingHours")) {
+    if (action.equals("Contracts.personContracts")) {
+      Contracts.personContracts(personId);
+    }
 
-			PersonMonths.trainingHours(year);
-		}
+    if (action.equals("PersonMonths.trainingHours")) {
 
-		if(action.equals("PersonMonths.hourRecap")) {
+      PersonMonths.trainingHours(year);
+    }
 
-			PersonMonths.hourRecap(year);
-		}
+    if (action.equals("PersonMonths.hourRecap")) {
 
-		if(action.equals("Vacations.show")) {
+      PersonMonths.hourRecap(year);
+    }
 
-			Vacations.show(year);
-		}
+    if (action.equals("Vacations.show")) {
 
-		if(action.equals("Persons.changePassword")) {
+      Vacations.show(year);
+    }
 
-			Persons.changePassword();
-		}
+    if (action.equals("VacationsAdmin.list")) {
 
-		if(action.equals("Absences.absences")) {
+      VacationsAdmin.list(year, officeId);
+    }
 
-			Absences.absences(year, month);
-		}
 
-		if(action.equals("YearlyAbsences.absencesPerPerson")) {
+    if (action.equals("Persons.changePassword")) {
 
-			YearlyAbsences.absencesPerPerson(year);
-		}
+      Persons.changePassword();
+    }
 
-		if(action.equals("Competences.competences")) {
+    if (action.equals("Absences.absences")) {
 
-			Competences.competences(year, month);
-		}
+      Absences.absences(year, month);
+    }
 
-		if(action.equals("Competences.showCompetences")) {
+    if (action.equals("Absences.absencesPerPerson")) {
 
-			Competences.showCompetences(year, month, null, null,  null,  null);
-		}
+      Absences.absencesPerPerson(year);
+    }
 
-		if(action.equals("Competences.totalOvertimeHours")) {
+    if (action.equals("Absences.showGeneralMonthlyAbsences")) {
 
-			Competences.totalOvertimeHours(year, null);
-		}
+      Absences.showGeneralMonthlyAbsences(year, month, officeId);
+    }
 
-		if(action.equals("Competences.enabledCompetences")) {
+    if (action.equals("Absences.yearlyAbsences")) {
 
-			Competences.enabledCompetences(null, null);
-		}
+      Absences.yearlyAbsences(personId, year);
+    }
+    
+    if (action.equals("Absences.absenceInPeriod")) {
 
-		if(action.equals("Competences.exportCompetences")) {
+      Absences.absenceInPeriod(personId, null, null);
+    }
 
-			Competences.exportCompetences();
-		}
+    if (action.equals("Competences.competences")) {
 
-		if(action.equals("Stampings.missingStamping")) {
+      Competences.competences(year, month);
+    }
 
-			Stampings.missingStamping(year, month);
-		}
+    if (action.equals("Competences.showCompetences")) {
 
-		if(action.equals("Stampings.dailyPresence")) {
+      Competences.showCompetences(year, month, officeId, null, null, null);
+    }
 
-			Stampings.dailyPresence(year, month, day);
-		}
+    if (action.equals("Competences.totalOvertimeHours")) {
 
-		if(action.equals("Stampings.dailyPresenceForPersonInCharge")) {
+      Competences.totalOvertimeHours(year, officeId);
+    }
 
-			Stampings.dailyPresenceForPersonInCharge(year, month, day);
-		}
-		
-		if(action.equals("Competences.monthlyOvertime")) {
+    if (action.equals("Competences.enabledCompetences")) {
 
-			Competences.monthlyOvertime(year, month, null, null);
-		}
+      Competences.enabledCompetences(officeId);
+    }
+    
+    if (action.equals("Competences.approvedCompetenceInYear")) {
 
-		if(action.equals("UploadSituation.show")) {
+      Competences.approvedCompetenceInYear(year, false, officeId);
+    }
 
-			UploadSituation.show();
-		}
+    if (action.equals("Competences.exportCompetences")) {
 
-		if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
+      Competences.exportCompetences();
+    }
 
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
-		}
+    if (action.equals("Stampings.missingStamping")) {
 
-		if(action.equals("YearlyAbsences.yearlyAbsences")) {
+      Stampings.missingStamping(year, month, officeId);
+    }
 
-			YearlyAbsences.yearlyAbsences(personId, year);
-		}
+    if (action.equals("Stampings.dailyPresence")) {
 
-		if(action.equals("Absences.manageAttachmentsPerCode")) {
+      Stampings.dailyPresence(year, month, day, officeId);
+    }
 
-			Absences.manageAttachmentsPerCode(year, month);
-		}
+    if (action.equals("Stampings.dailyPresenceForPersonInCharge")) {
 
-		if(action.equals("Absences.manageAttachmentsPerPerson")) {
+      Stampings.dailyPresenceForPersonInCharge(year, month, day);
+    }
 
-			Absences.manageAttachmentsPerPerson(personId, year, month);
-		}
+    if (action.equals("Competences.monthlyOvertime")) {
 
-		if(action.equals("Absences.absenceInPeriod")) {
+      Competences.monthlyOvertime(year, month, null, null);
+    }
 
-			Absences.absenceInPeriod(null,null,null);
-		}
+    if (action.equals("UploadSituation.show")) {
 
-		if(action.equals("WorkingTimes.manageWorkingTime")) {
+      UploadSituation.show();
+    }
 
-			WorkingTimes.manageWorkingTime(null);
-		}
-		if(action.equals("MealTickets.recapMealTickets")) {
-			
-			MealTickets.recapMealTickets(year, month, null, null);
-		}
+    if (action.equals("Absences.manageAttachmentsPerCode")) {
 
+      Absences.manageAttachmentsPerCode(year, month);
+    }
 
-	}
+    if (action.equals("Absences.manageAttachmentsPerPerson")) {
 
-	public static void updateDay(Integer day) throws Throwable {
+      Absences.manageAttachmentsPerPerson(personId, year, month);
+    }
 
-		String action = session.get("actionSelected");
-		if( action==null ) {
+    if (action.equals("Absences.absenceInPeriod")) {
 
-			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-			Secure.login();
-		}
+      Absences.absenceInPeriod(null, null, null);
+    }
 
-		if(day == null || day < 1 || day > 31) {
+    if (action.equals("WorkingTimes.manageWorkingTime")) {
 
-			Application.index();	
-		}
+      WorkingTimes.manageWorkingTime(officeId);
+    }
+    if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
 
-		executeAction(action);
+      WorkingTimes.manageOfficeWorkingTime(officeId);
+    }
+    if (action.equals("MealTickets.recapMealTickets")) {
 
-	}
+      MealTickets.recapMealTickets(year, month, officeId);
+    }
+    
+    if (action.equals("MonthRecaps.showRecaps")) {
+      
+      MonthRecaps.showRecaps(year, month, officeId);
+    }
+    
+    if (action.equals("MonthRecaps.customRecap")) {
+      
+      MonthRecaps.customRecap(year, month, officeId);
+    }
 
 
-	public static void updateMonth(Integer month) throws Throwable {
+  }
 
-		String action = session.get("actionSelected");
-		if( action==null ) {
+  public static void updateDay(Integer day) throws Throwable {
 
-			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-			Secure.login();
-		}
+    String action = session.get("actionSelected");
+    if (action == null) {
 
-		if(month == null || month < 1 || month > 12) {
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
 
-			Application.index();	
-		}
+    if (day == null || day < 1 || day > 31) {
 
-		session.put("monthSelected", month);
+      Application.index();
+    }
 
-		executeAction(action);
+    executeAction(action);
 
-	}
+  }
 
-	// esempio se si volesse utilizzare l'anno nei parametri.
-	public static int currentYear() {
-		Integer year = request.params.get("year", Integer.class);
-		if (year == null) {
-			return LocalDate.now().getYear();
-		} else {
-			return year;
-		}
-	}
 
-	public static void updateYear(Integer year) throws Throwable {
-		String action = session.get("actionSelected");
-		if( action==null ) {
+  public static void updateMonth(Integer month) throws Throwable {
 
-			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-			Secure.login();
-		}
+    String action = session.get("actionSelected");
+    if (action == null) {
 
-		if(year == null ) {	/* TODO check bound year */
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
 
-			Application.index();	
-		}
+    if (month == null || month < 1 || month > 12) {
 
-		session.put("yearSelected", year);
+      Application.index();
+    }
 
-		executeAction(action);
+    session.put("monthSelected", month);
 
-	}
+    executeAction(action);
 
-	public static void updatePerson(Long personId) throws Throwable {
+  }
 
-		String action = session.get("actionSelected");
-		if( action==null ) {
+  // esempio se si volesse utilizzare l'anno nei parametri.
+  public static int currentYear() {
+    Integer year = request.params.get("year", Integer.class);
+    if (year == null) {
+      return LocalDate.now().getYear();
+    } else {
+      return year;
+    }
+  }
 
-			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-			Secure.login();
-		}
+  public static void updateYear(Integer year) throws Throwable {
+    String action = session.get("actionSelected");
+    if (action == null) {
 
-		if(personId == null ) {	
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
 
-			Application.index();	
-		}
+    if (year == null) {	/* TODO check bound year */
 
-		session.put("personSelected", personId);
+      Application.index();
+    }
 
-		executeAction(action);
+    session.put("yearSelected", year);
 
-	}
+    executeAction(action);
+
+  }
+
+  public static void updatePerson(Long personId) throws Throwable {
+
+    String action = session.get("actionSelected");
+    if (action == null) {
+
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
+
+    if (personId == null) {
+
+      Application.index();
+    }
+
+    session.put("personSelected", personId);
+
+    executeAction(action);
+  }
+
+  public static void updateOffice(Long officeId) throws Throwable {
+
+    String action = session.get("actionSelected");
+    if (action == null) {
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
+    if (officeId == null) {
+      Application.index();
+    }
+
+    session.put("officeSelected", officeId);
+
+    executeAction(action);
+
+  }
 
 
 }

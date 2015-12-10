@@ -8,23 +8,22 @@ import com.mysema.query.jpa.impl.JPAQueryFactory;
 
 /**
  * @author marco
- *
  */
 public abstract class DaoBase {
 
-	protected final JPQLQueryFactory queryFactory;
-	protected final Provider<EntityManager> emp;
+  protected final JPQLQueryFactory queryFactory;
+  protected final Provider<EntityManager> emp;
 
-	DaoBase(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
-		this.emp = emp;
-		this.queryFactory = new JPAQueryFactory(this.emp);
-	}
+  DaoBase(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+    this.emp = emp;
+    this.queryFactory = new JPAQueryFactory(this.emp);
+  }
 
-	protected JPQLQueryFactory getQueryFactory() {
-		return this.queryFactory;
-	}
+  protected JPQLQueryFactory getQueryFactory() {
+    return this.queryFactory;
+  }
 
-	protected EntityManager getEntityManager() {
-		return emp.get();
-	}
+  protected EntityManager getEntityManager() {
+    return emp.get();
+  }
 }

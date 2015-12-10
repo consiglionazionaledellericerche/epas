@@ -1,180 +1,144 @@
 package controllers;
 
-import java.util.List;
+import com.google.common.base.Optional;
 
-import javax.inject.Inject;
-
-import manager.ConfGeneralManager;
-import manager.ConfYearManager;
-import manager.OfficeManager;
-import models.Office;
-import models.Role;
-
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.data.validation.Validation;
-import play.mvc.Controller;
-import play.mvc.With;
-
-import com.google.common.collect.FluentIterable;
+import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
-import dao.wrapper.function.WrapperModelFunctionFactory;
 
-@With( {Resecure.class, RequestInit.class})
+import helpers.Web;
+
+import models.Institute;
+import models.Office;
+import models.Role;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import play.data.validation.Valid;
+import play.data.validation.Validation;
+import play.mvc.Controller;
+import play.mvc.With;
+
+import security.SecurityRules;
+
+import javax.inject.Inject;
+
+@With({Resecure.class, RequestInit.class})
 public class Offices extends Controller {
-	
-	@Inject
-	private static OfficeDao officeDao;
-	@Inject
-	private static WrapperModelFunctionFactory wrapperFunctionFactory;
-	@Inject
-	private static RoleDao roleDao;
-	@Inject
-	private static IWrapperFactory wrapperFactory;
-	@Inject
-	private static OfficeManager officeManager;
-	@Inject
-	private static ConfGeneralManager confGeneralManager;
-	@Inject
-	private static ConfYearManager confYearManager;
 
-	public static void showOffices(){
+  private static final Logger log = LoggerFactory.getLogger(Offices.class);
+  @Inject
+  private static OfficeDao officeDao;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
+  @Inject
+  private static RoleDao roleDao;
+  @Inject
+  private static SecurityRules rules;
 
-		List<IWrapperOffice> allAreas = FluentIterable
-				.from(officeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
-		
-		Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+  public static void index() {
+    flash.keep();
+    list(null);
+  }
 
-		render(allAreas, roleAdmin, roleAdminMini);
-	}
+  /**
+   * il metodo che gestisce la lista degli istituti.
+   * @param name l'eventuale parametro su cui filtrare gli istituti
+   */
+  public static void list(String name) {
 
-	public static void insertArea() {
-		render();
-	}
+    //la lista di institutes su cui si ha tecnical admin in almeno un office
 
-	public static void insertInstitute(Long areaId) {
+    SearchResults<?> results = officeDao.institutes(
+            Optional.<String>fromNullable(name),
+            Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
+            .listResults();
 
-		Office area = officeDao.getOfficeById(areaId);
+    render(results, name);
+  }
 
-		IWrapperOffice wArea = wrapperFactory.create(area);
+  /**
+   * metodo che gestisce la visualizzazione dei dati di un istituto.
+   * @param id dell'istituto da visualizzare
+   */
+  public static void show(Long id) {
+    final Office office = Office.findById(id);
+    notFoundIfNull(office);
+    render(office);
+  }
 
-		if(area==null || !wArea.isArea()) {
-			flash.error("L'area specificata è inesistente. Operazione annullata.");
-			Offices.showOffices();
-		}
+  /**
+   * metodo che gestisce la modifica di un office.
+   * @param id dell'istituto da modificare
+   */
+  public static void edit(Long id) {
+    
+    
+    final Office office = Office.findById(id);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    IWrapperOffice wrOffice = wrapperFactory.create(office);
 
-		render("@editInstitute",area);
-	}
+    render(office, wrOffice);
+  }
 
-	public static void saveInstitute(Office area,@Valid Office institute,@Required String contraction) {
+  /**
+   * metodo che visualizza le informazioni di un istituto.
+   * @param instituteId id dell'istituto da visualizzare
+   */
+  public static void blank(Long instituteId) {
+    final Institute institute = Institute.findById(instituteId);
+    notFoundIfNull(institute);
+    final Office office = new Office();
+    office.institute = institute;
 
-		if(Validation.hasErrors()){
-			flash.error("Valorizzare correttamente i campi, operazione annullata.");
-			Offices.showOffices();
-		}
+    render(office);
+  }
 
-		IWrapperOffice wArea = wrapperFactory.create(area);
+  /**
+   * metodo che salva le informazioni per un office.
+   * @param office la sede da salvare
+   */
+  public static void save(@Valid Office office) {
 
-		if(!area.isPersistent() || !wArea.isArea()) {
-			flash.error("L'area specificata è inesistente. Operazione annullata.");
-			Offices.showOffices();
-		}
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", office,
+              validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      IWrapperOffice wrOffice = wrapperFactory.create(office);
+      if(!office.isPersistent()) {
+        render("@blank", office, wrOffice);
+      } else {
+        render("@edit", office, wrOffice);
+      }
+    } else {
+      office.save();
+      flash.success(Web.msgSaved(Office.class));
+      Institutes.index();
+    }
+  }
 
-		institute.contraction = contraction;
-		institute.office = area;
+  /**
+   * metodo che cancella una sede.
+   * @param id della sede da cancellare
+   */
+  public static void delete(Long id) {
 
-		if(officeDao.checkForDuplicate(institute)){
-			flash.error("Parametri già utilizzati in un altro istituto,verificare.");
-			Offices.showOffices();
-		}
+    final Office office = Office.findById(id);
+    notFoundIfNull(office);
 
-		institute.save();
+    // TODO: if( nessuna persona nella sede?? ) {
+    office.delete();
+    flash.success(Web.msgDeleted(Institute.class));
+    Institutes.index();
+    //}
+    flash.error(Web.msgHasErrors());
+    Institutes.index();
+  }
 
-		officeManager.setSystemUserPermission(institute);
-
-		flash.success("Istituto %s con sigla %s correttamente inserito", institute.name, institute.contraction);
-		Offices.showOffices();
-	}
-
-	public static void insertSeat(Long instituteId) {
-		Office institute = officeDao.getOfficeById(instituteId);
-		if(institute==null) {
-			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
-			Offices.showOffices();
-		}
-
-		render("@editSeat",institute);
-	}
-
-	public static void saveSeat(Office institute,@Valid Office seat,@Required int code) {
-
-		if(Validation.hasErrors()){
-			flash.error("Valorizzare correttamente tutti i campi! operazione annullata.");
-			Offices.showOffices();
-		}
-
-		if(!institute.isPersistent()) {
-			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
-			Offices.showOffices();
-		}
-
-		seat.code = code;
-
-		if(officeDao.checkForDuplicate(seat)){
-			flash.error("Parametri già utilizzati in un'altra sede,verificare.");
-			Offices.showOffices();
-		}
-
-		seat.office = institute;
-
-		final boolean newSeat = !seat.isPersistent();
-
-		seat.save();
-
-		if(newSeat){
-			confGeneralManager.buildOfficeConfGeneral(seat, false);
-
-			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear() - 1, false);
-			confYearManager.buildOfficeConfYear(seat, LocalDate.now().getYear(), false);
-
-			officeManager.setSystemUserPermission(seat);
-		}
-
-		flash.success("Sede correttamente inserita: %s",seat.name);
-		Offices.showOffices();
-	}
-
-	public static void editSeat(Long seatId){
-
-		Office seat = officeDao.getOfficeById(seatId);
-
-		if(seat==null) {
-			flash.error("La sede selezionata non esiste. Operazione annullata.");
-			Offices.showOffices();
-		}
-		Office institute = seat.office;
-
-		render(seat,institute);
-	}
-
-	public static void editInstitute(Long instituteId){
-
-		Office institute = officeDao.getOfficeById(instituteId);
-
-		if(institute==null) {
-			flash.error("L'istituto selezionato non esiste. Operazione annullata.");
-			Offices.showOffices();
-		}
-
-		Office area = institute.office;
-
-		render(area,institute);
-	}
 }

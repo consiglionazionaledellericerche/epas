@@ -28,6 +28,8 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
+    public final ListPath<models.BadgeSystem, QBadgeSystem> badgeSystems = this.<models.BadgeSystem, QBadgeSystem>createList("badgeSystems", models.BadgeSystem.class, QBadgeSystem.class, PathInits.DIRECT2);
+
     public final StringPath code = createString("code");
 
     public final StringPath description = createString("description");
@@ -41,6 +43,8 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
     public final NumberPath<Long> id = _super.id;
 
     public final StringPath location = createString("location");
+
+    public final QOffice owner;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -65,6 +69,7 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public QBadgeReader(Class<? extends BadgeReader> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.owner = inits.isInitialized("owner") ? new QOffice(forProperty("owner"), inits.get("owner")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }
 

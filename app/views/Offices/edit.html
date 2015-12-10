@@ -1,0 +1,125 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sede'  /}
+
+#{set breadcrumbs:['Istituti':@Institutes.list(), 'Configura sede':null] /}
+ 
+<div class="container">
+
+  #{breadcrumbs breadcrumbs /}
+   
+  #{accordionGroup 'info'}
+    #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true}
+  	  <div class="alert alert-success" role="alert">
+    	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
+      </div>
+		#{form action:@save(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }
+			
+	 		#{f.hidden 'office.id' /}
+	        #{f.hidden 'office.institute.id' /}
+
+	        #{f.input 'office.name', required:true /}
+	        #{f.input 'office.codeId', required:true, popover:true /}
+	        #{f.input 'office.code',popover:true /}
+	        #{f.input 'office.address'/}
+	        #{f.booleanRadio 'office.headQuarter'/}
+	
+	    	#{b.buttons}
+	          #{b.save /}
+	        #{/b.buttons}
+		#{/form}
+    #{/accordionItem}
+  #{/accordionGroup}  
+  
+   #{accordionGroup 'ammi'}
+    #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true}
+  
+    <div class="row">
+      <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.blank(office.id)}" data-async-modal="#modalInsertUro">
+      <i class="fa fa-plus"></i> Nuovo amministratore </a>
+	</div>
+
+    <div id="uroList">
+
+	<h4>Amministratore tecnico</h4>    
+    #{if wrOffice.tecnicalAdmins.empty }
+      <div class="alert alert-danger">
+        Non è stato ancora impostato alcun amministratore tecnico!
+      </div>
+    #{/if}
+    #{else}
+	    <ul class="list-group">
+	       #{list items:wrOffice.tecnicalAdmins, as:'uroAdmin'}
+	         <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${uroAdmin.user.person.fullname}
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/else}
+    
+    <h4>Amministratore del personale</h4>
+    #{if wrOffice.personnelAdmins.empty }
+      <div class="alert alert-danger">
+        Non è stato ancora impostato alcun amministratore del personale!
+      </div>
+    #{/if}
+    #{else}
+	    <ul class="list-group">
+	       #{list items:wrOffice.personnelAdmins, as:'uroAdmin'}
+	         <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${uroAdmin.user.person.fullname}
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/else}
+	
+	
+    #{if !wrOffice.miniAdmins.empty }
+      <h4>Amministratore del personale sola lettura</h4>    
+	    <ul class="list-group">
+	       #{list items:wrOffice.miniAdmins, as:'uroAdmin'}
+	         <li class="list-group-item list-group-item-info">
+	            <div class="pull-right btn-group">
+	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
+		          <i class="fa fa-trash"></i> Rimuovi</a>
+	            </div>
+	            ${uroAdmin.user.person.fullname}
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/if}
+    
+    </div> <!-- fine uroData -->
+
+  
+    #{/accordionItem}
+  #{/accordionGroup}   
+
+    
+  <br>
+  
+  #{if office.persons.empty}
+   #{secure.checkAction 'Office.delete', target:office}
+    #{accordionGroup 'delete'}
+     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
+	  <div class="text-danger center">
+	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
+		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
+	  </div>
+     #{/accordionItem}
+    #{/accordionGroup }  
+   #{/secure.checkAction}
+  #{/if}
+
+</div>
+
+<div id="modalInsertUro" class="modal container" tabindex="-1"></div>

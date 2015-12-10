@@ -1,6 +1,60 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.base.Verify;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.QualificationDao;
+import dao.history.AbsenceHistoryDao;
+import dao.history.HistoryValue;
+
+import helpers.Web;
+
 import it.cnr.iit.epas.DateUtility;
+
+import manager.AbsenceManager;
+import manager.SecureManager;
+import manager.YearlyAbsencesManager;
+import manager.recaps.YearlyAbsencesRecap;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
+
+import models.Absence;
+import models.AbsenceType;
+import models.AbsenceTypeGroup;
+import models.Office;
+import models.Person;
+import models.Qualification;
+import models.User;
+import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.QualificationMapping;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
+import play.db.jpa.Blob;
+import play.mvc.Controller;
+import play.mvc.With;
+
+import security.SecurityRules;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,285 +69,256 @@ import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-import manager.AbsenceManager;
-import manager.response.AbsenceInsertReport;
-import manager.response.AbsencesResponse;
-import models.Absence;
-import models.AbsenceType;
-import models.AbsenceTypeGroup;
-import models.Person;
-import models.PersonDay;
-import models.Qualification;
-import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.QualificationMapping;
 
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
+@With({Resecure.class, RequestInit.class})
+public class Absences extends Controller {
 
-import play.Logger;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.db.jpa.Blob;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
+  @Inject
+  private static SecurityRules rules;
+  @Inject
+  private static AbsenceTypeDao absenceTypeDao;
+  @Inject
+  private static QualificationDao qualificationDao;
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static AbsenceDao absenceDao;
+  @Inject
+  private static AbsenceManager absenceManager;
+  @Inject
+  private static SecureManager secureManager;
+  @Inject
+  private static OfficeDao officeDao;
+  @Inject
+  private static AbsenceHistoryDao absenceHistoryDao;
+  @Inject
+  private static YearlyAbsencesManager yearlyAbsencesManager;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.base.Verify;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Range;
+  /**
+   * Le assenze della persona nel mese.
+   *
+   * @param year  anno richiesto
+   * @param month mese richiesto
+   */
+  public static void absences(final int year, final int month) {
+    Person person = Security.getUser().get().person;
+    YearMonth yearMonth = new YearMonth(year, month);
+    Map<AbsenceType, Long> absenceTypeInMonth =
+            absenceTypeDao.getAbsenceTypeInPeriod(person,
+                    DateUtility.getMonthFirstDay(yearMonth), Optional
+                            .fromNullable(DateUtility.getMonthLastDay(yearMonth)));
 
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.QualificationDao;
+    render(absenceTypeInMonth, year, month);
+  }
 
+  public static void absenceInMonth(String absenceCode, int year, int month) {
+    Person person = Security.getUser().get().person;
+    YearMonth yearMonth = new YearMonth(year, month);
 
-@With( {Resecure.class, RequestInit.class} )
-public class Absences extends Controller{
+    List<Absence> absences = absenceDao.getAbsenceByCodeInPeriod(
+            Optional.fromNullable(person),
+            Optional.fromNullable(absenceCode),
+            DateUtility.getMonthFirstDay(yearMonth),
+            DateUtility.getMonthLastDay(yearMonth),
+            Optional.<JustifiedTimeAtWork>absent(),
+            false,
+            true);
 
-	@Inject
-	private static SecurityRules rules;
-	@Inject
-	private static AbsenceTypeDao absenceTypeDao;
-	@Inject
-	private static QualificationDao qualificationDao;
-	@Inject
-	private static PersonDao personDao;
-	@Inject
-	private static AbsenceDao absenceDao;
-	@Inject
-	private static AbsenceManager absenceManager;
-	@Inject
-	private static OfficeDao officeDao;
+    List<LocalDate> dateAbsences = FluentIterable.from(absences)
+            .transform(AbsenceManager.AbsenceToDate.INSTANCE).toList();
 
-	public static void absences(int year, int month) {
-		Person person = Security.getUser().get().person;
-		YearMonth yearMonth = new YearMonth(year,month);
-		Map<AbsenceType,Long> absenceTypeInMonth = 
-				absenceTypeDao.getAbsenceTypeInPeriod(person,
-						DateUtility.getMonthFirstDay(yearMonth), 
-						Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
+    render(dateAbsences, absenceCode);
+  }
 
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(absenceTypeInMonth, year, month, month_capitalized);
-	}
+  public static void manageAbsenceCode() {
 
-	public static void absenceInMonth(String absenceCode, int year, int month){
-		Person person = Security.getUser().get().person;
-		YearMonth yearMonth = new YearMonth(year,month);
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    render(absenceTypes);
+  }
 
-		List<Absence> absences = absenceDao.getAbsenceByCodeInPeriod(
-				Optional.fromNullable(person), 
-				Optional.fromNullable(absenceCode), 
-				DateUtility.getMonthFirstDay(yearMonth), 
-				DateUtility.getMonthLastDay(yearMonth),
-				Optional.<JustifiedTimeAtWork>absent(),
-				false, 
-				true);
+  public static void insertCode() {
 
-		List<LocalDate> dateAbsences = FluentIterable.from(absences)
-				.transform(AbsenceManager.AbsenceToDate.INSTANCE).toList();
+    render("@editCode");
+  }
 
-		render(dateAbsences, absenceCode);
-	}
+  public static void editCode(@Required Long absenceCodeId) {
 
-	public static void manageAbsenceCode(){
-		
-		List<AbsenceType> absenceTypes = AbsenceType.findAll();
-		render(absenceTypes);
-	}
+    AbsenceType absenceType = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
+    AbsenceTypeGroup absenceTypeGroup = absenceType.absenceTypeGroup;
 
-	public static void insertCode(){
+    boolean tecnologi = false;
+    boolean tecnici = false;
 
-		render("@editCode");
-	}
-	
-	public static void saveCode(@Valid AbsenceType absenceType,
-			AbsenceTypeGroup absenceTypeGroup,boolean tecnologi,boolean tecnici){
-		
+    for (Qualification q : absenceType.qualifications) {
+      tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
+      tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
+    }
+
+    render(absenceType, absenceTypeGroup, tecnologi, tecnici);
+  }
+
+  public static void saveCode(@Valid AbsenceType absenceType,
+                              AbsenceTypeGroup absenceTypeGroup, boolean tecnologi, boolean tecnici) {
+
 //		FIXME capire come mai senza il falsh.clear si sovrappongono i messaggi
-		flash.clear();
-		if (validation.hasErrors()){
-			flash.error("Correggere gli errori indicati");
-			render("@editCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
-		}
-		Logger.info("tecnologi  %s - tecnici %s", tecnologi,tecnici);
-		
-		if (!(tecnologi || tecnici)){
-			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-			render("@editCode",absenceType,absenceTypeGroup,tecnologi,tecnici);
-		}
-		
-		absenceType.qualifications.clear();
-		Range<Integer> qualifiche;
-		if(tecnologi && tecnici){
-			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
-		}
-		else if(tecnologi){
-			qualifiche = QualificationMapping.TECNOLOGI.getRange();
-		}
-		else{
-			qualifiche = QualificationMapping.TECNICI.getRange();
-		}
+    flash.clear();
+    if (validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@editCode", absenceType, absenceTypeGroup, tecnologi, tecnici);
+    }
+    Logger.info("tecnologi  %s - tecnici %s", tecnologi, tecnici);
 
-		for(int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++){
-			Qualification q = qualificationDao.byQualification(i).orNull();
-			absenceType.qualifications.add(q);
-		}
+    if (!(tecnologi || tecnici)) {
+      flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+      render("@editCode", absenceType, absenceTypeGroup, tecnologi, tecnici);
+    }
 
-		if(!Strings.isNullOrEmpty(absenceTypeGroup.label) && !absenceType.isPersistent()){
-			absenceType.absenceTypeGroup = absenceTypeGroup;
-			absenceTypeGroup.save();
-		}
-		
-		absenceType.save();
-		Logger.info("Inserito/modificato codice di assenza %s", absenceType.code);
-		flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
+    absenceType.qualifications.clear();
+    Range<Integer> qualifiche;
+    if (tecnologi && tecnici) {
+      qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
+    } else if (tecnologi) {
+      qualifiche = QualificationMapping.TECNOLOGI.getRange();
+    } else {
+      qualifiche = QualificationMapping.TECNICI.getRange();
+    }
 
-		manageAbsenceCode();
-	}
+    for (int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++) {
+      Qualification q = qualificationDao.byQualification(i).orNull();
+      absenceType.qualifications.add(q);
+    }
 
-	public static void create(@Required Long personId, @Valid @NotNull LocalDate date) {
+    if (!Strings.isNullOrEmpty(absenceTypeGroup.label) && !absenceType.isPersistent()) {
+      absenceType.absenceTypeGroup = absenceTypeGroup;
+      absenceTypeGroup.save();
+    }
 
-		if (validation.hasErrors()){
-			flash.error(validation.errors().toString());
-			render();
-		}
+    absenceType.save();
+    Logger.info("Inserito/modificato codice di assenza %s", absenceType.code);
+    flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
 
-		Person person = personDao.getPersonById(personId);
-		Preconditions.checkNotNull(person);
+    manageAbsenceCode();
+  }
 
-		rules.checkIfPermitted(person.office);
+  public static void blank(@Required Long personId, @Valid @NotNull LocalDate dateFrom) {
 
-		List<AbsenceType> frequentAbsenceTypeList = absenceTypeDao.getFrequentTypes();
-		List<AbsenceType> allCodes = absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
+    if (validation.hasErrors()) {
+      flash.error(validation.errors().toString());
+      render();
+    }
 
-		PersonDay personDay = new PersonDay(person, date);
-		render(personDay, frequentAbsenceTypeList, allCodes);
-	}
+    Person person = personDao.getPersonById(personId);
+    Preconditions.checkNotNull(person);
 
-	public static void insert(@Required Person person, 
-			@NotNull LocalDate dateFrom,
-			LocalDate dateTo,
-			@Required String absenceCode, 
-			Blob file){
+    rules.checkIfPermitted(person.office);
+    LocalDate dateTo = dateFrom;
 
-		Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
+    render(person, dateFrom, dateTo);
+  }
 
-		if(!absenceType.isPresent()){
-			flash.error("Codice di assenza %s inesistente!", absenceCode);
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
-		}
+  public static void save(@Required @Valid Person person,
+                          @Required LocalDate dateFrom, @Required LocalDate dateTo,
+                          @Valid AbsenceType absenceType,
+                          Blob file) {
 
-		if(!person.isPersistent()){
-			flash.error("Persona specificata inesistente!");
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
-		}
+    if (Validation.hasErrors()) {
 
-		rules.checkIfPermitted(person.office);
+      response.status = 400;
+      //flash.error(Web.msgHasErrors());
 
-		AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(person, dateFrom,Optional.fromNullable(dateTo), 
-				absenceType.get(), Optional.fromNullable(file), Optional.<String>absent(), Optional.<Integer>absent());
+      render("@blank", person, dateFrom, dateTo);
+    }
 
-		//Verifica errori generali nel periodo specificato
-		if(air.hasWarningOrDaysInTrouble()){
+    rules.checkIfPermitted(person.office);
 
-			flash.error(String.format(air.getWarnings().iterator().next() + 
-					" - %s",air.getDatesInTrouble()));
-		}
+    AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(
+            person, dateFrom, Optional.fromNullable(dateTo),
+            absenceType, Optional.fromNullable(file),
+            Optional.<String>absent(), Optional.<Integer>absent());
 
-		//Verifica degli errori sui singoli giorni
-		if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+    //Verifica errori generali nel periodo specificato
+    if (air.hasWarningOrDaysInTrouble()) {
 
-			Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+      flash.error(String.format(air.getWarnings().iterator().next() +
+              " - %s", air.getDatesInTrouble()));
+    }
 
-			for(AbsencesResponse ar : air.getAbsences()){
-				errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
-			}
-			flash.error(errors.toString());
-		}
-		
-		//Verifica per eventuali giorni di reperibilità
-		if(air.getAbsenceInReperibilityOrShift() > 0){
-			flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
-		}
+    //Verifica degli errori sui singoli giorni
+    if (air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()) {
 
-		if(air.getTotalAbsenceInsert() > 0){
-			flash.success("Inserite %s assenze con codice %s", 
-					air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
-		}
+      Multimap<String, LocalDate> errors = ArrayListMultimap.create();
 
-		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
-	}
+      for (AbsencesResponse ar : air.getAbsences()) {
+        errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+      }
+      flash.error(errors.toString());
+    }
 
-	public static void editCode(@Required Long absenceCodeId){
+    //Verifica per eventuali giorni di reperibilità
+    if (air.getAbsenceInReperibilityOrShift() > 0) {
+      flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s",
+              air.datesInReperibilityOrShift());
+    }
 
-		AbsenceType absenceType = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
-		AbsenceTypeGroup absenceTypeGroup = absenceType.absenceTypeGroup;
-		
-		boolean tecnologi = false;
-		boolean tecnici = false;
+    //Messaggio di inserimento
+    if (air.getTotalAbsenceInsert() > 0) {
+      flash.success("Inserite %s assenze con codice %s",
+              air.getTotalAbsenceInsert(),
+              air.getAbsences().iterator().next().getAbsenceCode());
+    }
 
-		for(Qualification q : absenceType.qualifications){
-			tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
-			tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
-		}
-		
-		render(absenceType,absenceTypeGroup,tecnologi,tecnici);
-	}
-
-	public static void edit(@Required Long absenceId) {
-		Logger.debug("Edit absence called for absenceId=%d", absenceId);
-
-		Absence absence = absenceDao.getAbsenceById(absenceId);
-
-		Verify.verify(absence != null,"Assenza specificata inesistente!");
-
-		rules.checkIfPermitted(absence.personDay.person.office);
-
-		List<AbsenceType> frequentAbsenceTypeList = absenceTypeDao.getFrequentTypes();
-		List<AbsenceType> allCodes = absenceTypeDao.getAbsenceTypeFromEffectiveDate(absence.personDay.date);
-
-		render(absence, frequentAbsenceTypeList, allCodes);				
-	}
+    Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+  }
 
 
-	public static void update(@Required Absence absence,@Valid LocalDate dateTo,
-			@Required String absenceCode, Blob file, String mealTicket){
+  public static void edit(@Required Long absenceId) {
 
-		Verify.verify(absence.isPersistent(),"Assenza specificata inesistente!");
+    Absence absence = absenceDao.getAbsenceById(absenceId);
 
-		rules.checkIfPermitted(absence.personDay.person.office);
+    Verify.verify(absence != null, "Assenza specificata inesistente!");
 
-		if(file != null && file.exists()){
-			Logger.debug("ricevuto file di tipo: %s", file.type());
-		}
+    rules.checkIfPermitted(absence.personDay.person.office);
 
-		Person person = absence.personDay.person;
-		LocalDate dateFrom =  absence.personDay.date;	
+    List<HistoryValue<Absence>> historyAbsence = absenceHistoryDao
+            .absences(absenceId);
 
-		if(dateTo != null && dateTo.isBefore(dateFrom)){
-			flash.error("Errore nell'inserimento del campo Fino a, inserire una data valida. Operazione annullata");
-		}
-		if(flash.contains("error")){
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
-		}
 
-		//Logica
-		int deleted = absenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
+    LocalDate dateFrom = absence.personDay.date;
+    LocalDate dateTo = absence.personDay.date;
 
-		if(deleted > 0){
-			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
-		}
+    render(absence, dateFrom, dateTo, historyAbsence);
+  }
 
+
+  public static void delete(@Required Absence absence, @Valid LocalDate dateTo
+            /*@Required String absenceCode, Blob absencefile, String mealTicket*/) {
+
+    Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
+
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+//		if(absencefile != null && absencefile.exists()){
+//			Logger.debug("ricevuto file di tipo: %s", absencefile.type());
+//		}
+
+    Person person = absence.personDay.person;
+    LocalDate dateFrom = absence.personDay.date;
+
+    if (dateTo != null && dateTo.isBefore(dateFrom)) {
+      flash.error("Errore nell'inserimento del campo Fino a, inserire una data valida. Operazione annullata");
+    }
+    if (flash.contains("error")) {
+      Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+    }
+
+    //Logica
+    int deleted = absenceManager.removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
+
+    if (deleted > 0) {
+      flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
+    }
+
+		/*
 		//Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
 		if(!absenceCode.isEmpty()){
 
@@ -305,7 +330,7 @@ public class Absences extends Controller{
 			}
 
 			AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(person, dateFrom, Optional.fromNullable(dateTo),
-					absenceType.get(),Optional.fromNullable(file), Optional.fromNullable(mealTicket), Optional.<Integer>absent());
+					absenceType.get(),Optional.fromNullable(absencefile), Optional.fromNullable(mealTicket), Optional.<Integer>absent());
 
 			//Verifica errori generali nel periodo specificato
 			if(air.hasWarningOrDaysInTrouble()){
@@ -335,182 +360,342 @@ public class Absences extends Controller{
 						absence.absenceType.code,absenceCode,air.getTotalAbsenceInsert());
 			}
 		} 
-			
-		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
-	}
+		
+		*/
 
-	public static class AttachmentsPerCodeRecap {
+    Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+  }
 
-		List<Absence> absenceSameType = new ArrayList<Absence>();
+  public static void addAttach(@Required Absence absence, Blob absenceFile) {
 
-		public String getCode() {
-			return absenceSameType.get(0).absenceType.code;
-		}
+    Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
 
-	}
+    rules.checkIfPermitted(absence.personDay.person.office);
 
-	public static void manageAttachmentsPerCode(Integer year, Integer month){
+    if (absenceFile != null) {
+      absence.absenceFile = absenceFile;
+      absence.save();
 
-		LocalDate beginMonth = new LocalDate(year, month, 1);
+      flash.success("File allegato con successo.");
+    }
 
-		//Prendere le assenze ordinate per tipo
-		List<Absence> absenceList = absenceDao.getAbsencesInPeriod(
-				Optional.<Person>absent(), beginMonth, 
-				Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+    Stampings.personStamping(absence.personDay.person.id,
+            absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
 
-		List<AttachmentsPerCodeRecap> attachmentRecapList = new ArrayList<AttachmentsPerCodeRecap>();
-		AttachmentsPerCodeRecap currentRecap = new AttachmentsPerCodeRecap();
-		AbsenceType currentAbt = null;
+  }
 
-		for(Absence abs : absenceList) {
+  public static void removeAttach(@Required Long absenceId) {
 
-			if(currentAbt == null) {
+    Absence absence = absenceDao.getAbsenceById(absenceId);
 
-				currentAbt = abs.absenceType;
-			}
-			else if( !currentAbt.code.equals(abs.absenceType.code) ) {
+    Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
 
-				//finalizza tipo
-				if( currentRecap.absenceSameType.size() > 0 )		/* evitato con la query abs.absenceFile is not null */
-					attachmentRecapList.add(currentRecap);
-				currentRecap = new AttachmentsPerCodeRecap();
-				//nuovo tipo
-				currentAbt = abs.absenceType;
-			}
-			if(abs.absenceFile.get() != null) {
+    absence.absenceFile.getFile().delete();
 
-				currentRecap.absenceSameType.add(abs);
-			}
-		}
+    absence.save();
 
-		//finalizza ultimo tipo
-		if( currentRecap.absenceSameType.size() > 0 )
-			attachmentRecapList.add(currentRecap);
+    flash.success("File allegato rimosso con successo.");
 
-		render(attachmentRecapList, year, month);
-	}
+    Stampings.personStamping(absence.personDay.person.id,
+            absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
 
+  }
 
-	public static void downloadAttachment(long id){
+  /**
+   * Gli allegati alle assenze nel mese. Bisogna renderlo parametrico alla sede.
+   * TODO per sede.
+   * @param year anno 
+   * @param month mese
+   */
+  public static void manageAttachmentsPerCode(Integer year, Integer month) {
 
-		Logger.debug("Assenza con id: %d", id);
-		Absence absence = absenceDao.getAbsenceById(id); 
-		notFoundIfNull(absence);
+    LocalDate beginMonth = new LocalDate(year, month, 1);
 
-		rules.checkIfPermitted(absence.personDay.person.office);
+    //Prendere le assenze ordinate per tipo
+    List<Absence> absenceList = absenceDao.getAbsencesInPeriod(
+            Optional.<Person>absent(), beginMonth,
+            Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
 
-		response.setContentTypeIfNotSet(absence.absenceFile.type());
-		Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
-		renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
-	}
+    List<AttachmentsPerCodeRecap> attachmentRecapList = new ArrayList<AttachmentsPerCodeRecap>();
+    AttachmentsPerCodeRecap currentRecap = new AttachmentsPerCodeRecap();
+    AbsenceType currentAbt = null;
 
-	public static void zipAttachment(String code, Integer year, Integer month) throws IOException{
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-		FileOutputStream fos = new FileOutputStream("attachment"+'-'+code+".zip");
-		ZipOutputStream zos = new ZipOutputStream(fos);
+    for (Absence abs : absenceList) {
 
+      if (currentAbt == null) {
 
-		List<Absence> absList = absenceDao.getAbsenceByCodeInPeriod(
-				Optional.<Person>absent(),Optional.fromNullable(code), 
-				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
-				Optional.<JustifiedTimeAtWork>absent(), true, false);
-		byte[] buffer = new byte[1024];
+        currentAbt = abs.absenceType;
+      } else if (!currentAbt.code.equals(abs.absenceType.code)) {
 
-		for(Absence abs : absList){
-			try {
+        //finalizza tipo
+        /* evitato con la query abs.absenceFile is not null */
+        if (currentRecap.absenceSameType.size() > 0)		
+          attachmentRecapList.add(currentRecap);
+        currentRecap = new AttachmentsPerCodeRecap();
+        //nuovo tipo
+        currentAbt = abs.absenceType;
+      }
+      if (abs.absenceFile.get() != null) {
 
-				FileInputStream fis = new FileInputStream(abs.absenceFile.getFile());
+        currentRecap.absenceSameType.add(abs);
+      }
+    }
 
-				zos.putNextEntry(new ZipEntry(abs.absenceFile.getFile().getName()));
+    //finalizza ultimo tipo
+    if (currentRecap.absenceSameType.size() > 0)
+      attachmentRecapList.add(currentRecap);
 
-				int length;
-				while ((length = fis.read(buffer)) >= 0) {
-					zos.write(buffer, 0, length);
-				}
+    render(attachmentRecapList, year, month);
+  }
 
-				zos.closeEntry();
+  public static void downloadAttachment(long id) {
 
-				fis.close();
-			} catch (IOException e) {
+    Logger.debug("Assenza con id: %d", id);
+    Absence absence = absenceDao.getAbsenceById(id);
+    notFoundIfNull(absence);
 
-				e.printStackTrace();
-			}
-		}	
+    rules.checkIfPermitted(absence.personDay.person.office);
 
-		zos.close();
+    response.setContentTypeIfNotSet(absence.absenceFile.type());
+    Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
+    renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
+  }
 
-		renderBinary(new File("attachment"+'-'+code+".zip"));
-	}
+  public static void zipAttachment(String code, Integer year, Integer month) throws IOException {
+    rules.checkIfPermitted(Security.getUser().get().person.office);
+    FileOutputStream fos = new FileOutputStream("attachment" + '-' + code + ".zip");
+    ZipOutputStream zos = new ZipOutputStream(fos);
 
 
-	public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month){
-		Person person = personDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
-		if(person == null){
-			flash.error("Persona inesistente");
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
-		}
-		rules.checkIfPermitted(person.office);
-		List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
-		List<Absence> personAbsenceList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), new LocalDate(year, month,1), Optional.fromNullable(new LocalDate(year, month,1).dayOfMonth().withMaximumValue()), false);
+    List<Absence> absList = absenceDao.getAbsenceByCodeInPeriod(
+            Optional.<Person>absent(), Optional.fromNullable(code),
+            new LocalDate(year, month, 1),
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+            Optional.<JustifiedTimeAtWork>absent(), true, false);
+    byte[] buffer = new byte[1024];
 
-		for(Absence abs : personAbsenceList){
-			if (abs.absenceFile.get() != null){
-				personAbsenceListWithFile.add(abs);
-			}
-		}
-		render(personAbsenceListWithFile, year, month, person);
-	}	
+    for (Absence abs : absList) {
+      try {
 
-	public static void absenceInPeriod(Person person,
-			LocalDate from,
-			LocalDate to){
+        FileInputStream fis = new FileInputStream(abs.absenceFile.getFile());
 
-		//		Se la persona non è specificata si usa l'utente attualmente connesso
-		if(!person.isPersistent())
-			person = Security.getUser().get().person;
-		//		Se le date non sono specificate imposto il giorno corrente
-		if(from == null || to == null){
-			from = LocalDate.now();
-			to = LocalDate.now();
-		}
+        zos.putNextEntry(new ZipEntry(abs.absenceFile.getFile().getName()));
 
-		List<Absence> missioni = Lists.newArrayList();
-		List<Absence> ferie = Lists.newArrayList();
-		List<Absence> riposiCompensativi = Lists.newArrayList();
-		List<Absence> altreAssenze = Lists.newArrayList();
+        int length;
+        while ((length = fis.read(buffer)) >= 0) {
+          zos.write(buffer, 0, length);
+        }
 
-		List<Person> personList = personDao.list(Optional.<String>absent(), 
-				officeDao.getOfficeAllowed(Security.getUser().get()), false, from, to, true).list();
+        zos.closeEntry();
 
-		if(from.isAfter(to)){
-			flash.error("Intervallo non valido (%s - %s)", from,to);
-			render(personList, person, from, to, missioni, ferie, riposiCompensativi, altreAssenze);
-		}
+        fis.close();
+      } catch (IOException e) {
 
-		rules.checkIfPermitted(person.office);
+        e.printStackTrace();
+      }
+    }
 
-		List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
-				Optional.<String>absent(), from, to, Optional.of(JustifiedTimeAtWork.AllDay), false, false);
+    zos.close();
 
-		for(Absence abs : absenceList){
-			if(AbsenceTypeMapping.MISSIONE.is(abs.absenceType)){
-				missioni.add(abs);
-			}
-			else if(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(abs.absenceType) ||
-					AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(abs.absenceType) || 
-					AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(abs.absenceType)){
-				ferie.add(abs);
-			}
-			else if(AbsenceTypeMapping.RIPOSO_COMPENSATIVO.is(abs.absenceType)){
-				riposiCompensativi.add(abs);
-			}
-			else
-				altreAssenze.add(abs);
-		}
-		render(personList, person, absenceList, from, to, missioni, ferie, riposiCompensativi, altreAssenze, person.id);
+    renderBinary(new File("attachment" + '-' + code + ".zip"));
+  }
 
-	}
+  /**
+   * Gli allegati del dipendente nel mese selezionato.
+   * 
+   * @param personId dipendente
+   * @param year anno
+   * @param month mese
+   */
+  public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month) {
+
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    rules.checkIfPermitted(person.office);
+    
+    List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
+    List<Absence> personAbsenceList = absenceDao
+        .getAbsencesInPeriod(Optional.fromNullable(person), new LocalDate(year, month, 1), 
+            Optional.fromNullable(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()), 
+            false);
+
+    for (Absence abs : personAbsenceList) {
+      if (abs.absenceFile.get() != null) {
+        personAbsenceListWithFile.add(abs);
+      }
+    }
+    render(personAbsenceListWithFile, year, month, person);
+  }
+
+  /**
+   * Vista delle assenze nel periodo.
+   * @param personId dipendente
+   * @param from da 
+   * @param to a
+   */
+  public static void absenceInPeriod(Long personId, LocalDate from, LocalDate to) {
+
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    rules.checkIfPermitted(person.office);
+    
+    //Se le date non sono specificate imposto il giorno corrente
+    if (from == null || to == null) {
+      from = LocalDate.now();
+      to = LocalDate.now();
+    }
+
+    List<Absence> missioni = Lists.newArrayList();
+    List<Absence> ferie = Lists.newArrayList();
+    List<Absence> riposiCompensativi = Lists.newArrayList();
+    List<Absence> altreAssenze = Lists.newArrayList();
+
+    List<Person> personList = personDao.list(Optional.<String>absent(),
+        secureManager.officesReadAllowed(Security.getUser().get()), 
+        false, from, to, true).list();
+
+    if (from.isAfter(to)) {
+      flash.error("Intervallo non valido (%s - %s)", from, to);
+      render(personList, person, from, to, missioni, ferie, riposiCompensativi, altreAssenze);
+    }
+
+    rules.checkIfPermitted(person.office);
+
+    List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person),
+            Optional.<String>absent(), from, to, 
+            Optional.of(JustifiedTimeAtWork.AllDay), false, false);
+
+    for (Absence abs : absenceList) {
+      if (AbsenceTypeMapping.MISSIONE.is(abs.absenceType)) {
+        missioni.add(abs);
+      } else if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(abs.absenceType) 
+          || AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(abs.absenceType) 
+          || AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(abs.absenceType)) {
+        ferie.add(abs);
+      } else if (AbsenceTypeMapping.RIPOSO_COMPENSATIVO.is(abs.absenceType)) {
+        riposiCompensativi.add(abs);
+      } else {
+        altreAssenze.add(abs);
+      }
+    }
+    render(personList, person, absenceList, from, to, missioni, ferie, 
+        riposiCompensativi, altreAssenze, person.id);
+
+  }
+
+  /**
+   * Le assenze effettuate nell'anno dalla persona.
+   * @param personId persona
+   * @param year anno
+   */
+  public static void yearlyAbsences(Long personId, int year) {
+
+    Person  person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+
+    rules.checkIfPermitted(person.office);
+    YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+        person, year, absenceDao.getYearlyAbsence(person, year));
+    render(yearlyAbsencesRecap, year, personId, person);
+
+  }
+
+  /**
+   * Le assenze effettuate nel mese dei dipendenti della sede.
+   * @param year year
+   * @param month month
+   * @param officeId sede
+   */
+  public static void showGeneralMonthlyAbsences(int year, int month, Long officeId) {
+
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable
+        .create(yearlyAbsencesManager.PersonNameComparator, 
+            yearlyAbsencesManager.AbsenceCodeComparator);
+    AbsenceType abt = new AbsenceType();
+    abt.code = "Totale";
+
+    List<Person> persons = personDao.list(
+            Optional.<String>absent(),
+            Sets.newHashSet(office),
+            false, new LocalDate(year, month, 1),
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+
+    LocalDate begin = new LocalDate(year, month, 1);
+    LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+    tableMonthlyAbsences = yearlyAbsencesManager
+        .populateMonthlyAbsencesTable(persons, abt, begin, end);
+    int numberOfDifferentAbsenceType = tableMonthlyAbsences.columnKeySet().size();
+    
+    render(tableMonthlyAbsences, year, month, office, numberOfDifferentAbsenceType);
+
+  }
+
+  /**
+   * @param year Render della pagina absencePerPerson.html che riassume le assenze annuali di una
+   *             persona
+   */
+
+  public static void absencesPerPerson(Integer year) {
+
+    //controllo sui parametri
+    Optional<User> currentUser = Security.getUser();
+    if (!currentUser.isPresent() || currentUser.get().person == null) {
+      flash.error("Accesso negato.");
+      renderTemplate("Application/indexAdmin.html");
+    }
+    User user = currentUser.get();
+    //rendering
+    if (year == null) {
+      LocalDate now = new LocalDate();
+      YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+              user.person, now.getYear(), absenceDao.getYearlyAbsence(user.person, now.getYear()));
+      render(yearlyAbsencesRecap);
+    } else {
+      YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
+              user.person, year.intValue(), absenceDao.getYearlyAbsence(user.person, year.intValue()));
+      render(yearlyAbsencesRecap);
+    }
+  }
+
+  public static void showPersonMonthlyAbsences(Long personId, Integer year, 
+      Integer month, String absenceTypeCode) throws InstantiationException, IllegalAccessException {
+
+    LocalDate monthBegin = new LocalDate(year, month, 1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+
+    rules.checkIfPermitted(person.office);
+    List<Absence> absenceToRender = new ArrayList<Absence>();
+
+    if (absenceTypeCode.equals("Totale")) {
+      absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
+              Optional.fromNullable(person), Optional.<String>absent(),
+              monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+    } else {
+      absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
+              Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
+              monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+    }
+
+    render(person, absenceToRender);
+  }
+
+  public static class AttachmentsPerCodeRecap {
+
+    List<Absence> absenceSameType = new ArrayList<Absence>();
+
+    public String getCode() {
+      return absenceSameType.get(0).absenceType.code;
+    }
+
+  }
 
 }

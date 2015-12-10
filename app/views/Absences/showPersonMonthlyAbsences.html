@@ -1,0 +1,24 @@
+#{modalAsync id:'modalAbsence',  
+  title:'Assenze mensili per ' + person.surname + ' ' + person.name }
+
+<div class="container-fluid">
+
+<table class="table table-bordered table-condensed">
+	<tr>
+		<th class="warning">Giorno del mese</th>
+		<th class="warning">Codice</th>
+		<th class="warning">Descrizione</th>
+	</tr>
+
+	#{list items:absenceToRender, as:'ab'}
+	<tr>
+		<td>${ab.personDay.date.getDayOfMonth()}</td>
+		<td>${ab.absenceType.code}</td>
+		<td>${ab.absenceType.description}</td>
+	</tr>
+	#{/list}
+
+</table>
+
+</div>
+#{/modalAsync}

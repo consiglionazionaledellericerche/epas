@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fileset-config file-format-version="1.2.0" simple-config="true" sync-formatter="false">
+  <fileset name="all" enabled="true" check-config-name="Google Checks" local="false">
+    <file-match-pattern match-pattern="." include-pattern="true"/>
+  </fileset>
+  <filter name="DerivedFiles" enabled="true"/>
+  <filter name="FilesFromPackage" enabled="true">
+    <filter-data value="app/models/base/query"/>
+    <filter-data value="app/models/query"/>
+    <filter-data value="app/play"/>
+    <filter-data value="docviewer"/>
+    <filter-data value="play-lombok-1.2.3"/>
+    <filter-data value="fastergt-1.8"/>
+    <filter-data value="secure"/>
+    <filter-data value="shibboleth-1.2"/>
+  </filter>
+</fileset-config>

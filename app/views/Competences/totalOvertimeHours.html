@@ -1,51 +1,22 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Monte ore straordinario'  /}
-  
-<div id="container-fluid-nav-tabs" class="container-fluid">
-  <ul class="nav nav-tabs">
-    <li><a href="@{Competences.showCompetences(year, session.get("monthSelected"), office.id )}">Assegna Competenze</a></li>
-    <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
-    <li class="active"><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
-    <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-    <li><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenza Assegnate nell'anno</a></li>
-  </ul>
-</div>
 
-<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
-<div class="container-fluid">
- <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@Competences.totalOvertimeHours(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <input type="hidden" name="year" value="${year}"/>
-	        
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-      </div>
-</div>
-<!-- FINE FILTRO OFFICE -->
-
-<div class="container-fluid">
-
-  <div class="panel panel-info col-xs-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
-      <div class="panel-heading">
-        <h3 class="panel-title">Modifica del monte ore di straordinario del ${year}</h3>
-      </div>
-      <div class="panel-body">
+#{competences.competencesTabs activeAction:'totalOvertimeHours' /}
  
+ <div class="container">
+ 
+ #{title title:'Monte Ore ' + year + ' per Straordinari ' + office.name, color:'primary' /}
+  
+  
+		#{alert color:'info'}
+		<p>Gestione del monte ore per straordinari per la sede <strong>${office.name}</strong></p>
+	    <p>
+	      Per aumentare il monte ore inserire il valore da sommare preceduto dal segno +.<br>
+	      Per diminuire il monte ore inserire il valore da sottrarre preceduto dal segno -.
+        </p>
+   		#{/alert}
+   		
         #{form @Competences.saveOvertime()}
 
           <input type="hidden" name="year" value="${year}"/>
@@ -75,18 +46,12 @@
 		    <input type="text" name="numeroOre"/>
             <input type="submit" value="Salva"/>
 		  </div>	    	    
-    
-          <br>
-          <p class="text-info"><i class="fa fa-exclamation-circle fa-lg"></i> <em>Inserire un incremento (segno +) o una diminuizione (segno -) 
-          rispetto al totale già disponibile <strong>prima</strong> del numero di ore da inserire</em>
-          </p>
   
         #{/form}
- 
-      </div>
-  </div>
+  
+
 </div>
 
 
-    
+
     

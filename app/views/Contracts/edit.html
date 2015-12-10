@@ -1,0 +1,83 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + wrappedContract.value.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (wrappedContract.value.person.fullname):@Contracts.personContracts(wrappedContract.value.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'edit' /}
+
+<div class="container">
+
+   
+  #{alert color:'info'}
+  
+  	<p>Utilizzare questa form per modificare le date del contratto.</p>
+  	
+  	<p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
+     il tipo orario attribuito alla parte conclusiva del contratto.
+     </p>
+     
+     <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari 
+     verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+  #{/alert}
+
+  #{if wrappedContract.value.sourceDateResidual}  
+  #{alert color:'info'}
+       <p>Per questo contratto è stata definita la data di inizializzazione 
+       <strong>${wrappedContract.value.sourceDateResidual.format()}</strong>,
+       sarà pertanto impossibile spostare la data di inizio del contratto successivamente a quella data. <br>
+       In caso di necessità rimuovere o modificare tale inizializzazione. 
+       </p>
+  #{/alert}
+  #{/if}
+
+  <div id="modifyContract">
+	#{form @Contracts.update(), class:'form-horizontal', 
+	'data-async':'#page_content', 'data-async-error':'#modifyContract', 
+	'data-spinner':'#defaultSpinner' } 
+	  
+	    
+	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
+		<!-- Form input -->
+		#{if !confirmed }
+			#{f.date 'beginDate', value:beginDate?.format() /}
+	    	#{f.date 'endDate', value:endDate?.format() /}
+	    	#{f.date 'endContract', value:endContract?.format() /}
+	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
+	    	
+	    	#{ifError 'contract.crossValidationFailed'} 
+	    	<div class="alert alert-danger">
+	    	  #{error 'contract.crossValidationFailed' /}
+	    	</div>
+	    	#{/ifError}
+	    	
+	    	<div class="text-center">
+	  			<input class="btn btn-primary" type="submit" value="Modifica"/>
+			</div>
+		#{/if}
+		<!-- Form di conferma -->
+		#{else}
+		
+			#{f.simpleView 'beginDate', value:beginDate?.format(), hidden:true /}
+			#{f.simpleView 'endDate', value:endDate?.format(), hidden:true /}
+			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
+			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
+			<input type="hidden" name="confirmed" value="true" />
+			
+			#{recomputeRecap recomputeRecap:recomputeRecap /}
+			
+			#{b.buttons center:true}
+			   #{b.submit 'Conferma'/}
+			   #{b.cancel @edit(contract.id) /}
+			#{/b.buttons}
+		#{/else}
+		
+
+	#{/form}
+
+  </div>
+
+</div>

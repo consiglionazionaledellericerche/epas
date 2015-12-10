@@ -1,14 +1,12 @@
 package models.enumerate;
 
 /**
- * 
  * @author dario
- *
  */
 public enum AutoDeclareAbsences {
 
-	no,
-	yesToAll,
-	levelOneThree,
-	levelFourEight
+  no,
+  yesToAll,
+  levelOneThree,
+  levelFourEight
 }

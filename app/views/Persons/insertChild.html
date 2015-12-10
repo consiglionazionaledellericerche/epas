@@ -1,37 +1,38 @@
-#{extends 'main3.html' /}
-#{set header:'navbar' /}
-#{set title: 'ePAS - Gestione figli di ' + person.getFullname() /}
+%{
+  if(child.persistent) 
+    modaltitle = 'Modifica figlio per ' + child.person.fullname;
+  else
+    modaltitle = 'Inserisci figlio per ' + child.person.fullname;
+}%
+  
+#{modalAsync id:'defaultModal', title:modaltitle }
 
-#{set 'moreStyles'}
-<style type="text/css">
-#content{
-  margin-top: 5em;
-}
-.panel-body{
-  padding-top: 3em;
-}
-form > legend{
-  margin-top: 2em;
-}
-</style>
-#{/set}
-
-<div class="panel panel-default col-md-6 col-md-offset-3" id="content" >
-  <div class="panel-heading">
-    <h3>Inserimento/Modifica figlio per ${person.getFullname()}</h3>
+  <div id="insertChild">
+    #{alert color:'info'}
+	  Inserire i dati del figlio. 
+	#{/alert}
+	
+	#{form @Persons.saveChild(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#insertChild'}
+	
+	  #{if child.persistent }
+	    <input type="hidden" name="child.id" value="${child.id}"/>
+	  #{/if}
+	  #{else}
+	  	<input type="hidden" name="child.person.id" value="${child.person.id}"/>
+	  #{/else}
+	  
+	  #{f.input 'child.name'/}
+	  #{f.input 'child.surname'/}
+	  #{f.date 'child.bornDate',view:'year'/}
+	  
+	  #{b.buttons center:true}
+	   #{if child.persistent }<input class="text-center btn btn-primary" type="submit" value="Modifica" />#{/if}
+	   #{else}<input class="text-center btn btn-primary" type="submit" value="Inserisci" />#{/else}
+	  #{/b.buttons}  
+	
+	#{/form}
   </div>
-<div class="panel-body">
+  
+#{/modalAsync}	
 
-#{form @Persons.saveChild(),class:'form-horizontal'}
-<input type="hidden" name="person.id" value="${person?.id}"/>
-<input type="hidden" name="child.id" value="${child?.id}"/>
-
-#{f.input 'child.name'/}
-#{f.input 'child.surname'/}
-#{f.date 'child.bornDate',view:'year'/}
-<legend></legend>
-<button type="submit" class="btn btn-primary col-sm-4 col-sm-offset-4">Salva</button>
-
-#{/form}
-</div>
-</div>

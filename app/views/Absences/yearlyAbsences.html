@@ -1,0 +1,67 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+
+  
+#{absences.absencesTabs activeAction:'yearlyAbsences' /}
+  
+<div class="container">
+
+  #{title title:'Assenze Annuali ' + person.fullname + ' '+ year, administration:true /}
+  
+	  <table class="table table-bordered table-hover table-condensed">
+	
+		<!--  Riga di intestazione -->
+		<tr>
+			<th rowspan="2">Mese</th>
+			<th colspan="31">Giorni</th>
+		</tr>
+			
+			#{list items:1..31, as: 'i'}
+			  <th>${i}</th>
+			#{/list}
+			
+			
+		<!-- Contenuto tabella assenze annuali -->
+		#{list items:yearlyAbsencesRecap.absenceTable.rowMap(), as: 'month'}
+		<tr>
+			
+			<td class="warning">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
+			#{list items:yearlyAbsencesRecap.absenceTable.columnKeySet(), as: 'col'}
+			  <td>${month.getValue().get(col)}</td>
+	        #{/list}
+		</tr>
+	    #{/list}
+	  </table>
+	   <div class="alert alert-info" role="alert">
+	   <p>Nella tabella sottostante vengono conteggiate solo le assenze <strong>giornaliere</strong>.<br>
+	   Quelle orarie, visibili nel calendario annuale qui sopra, vengono omesse poichè non sono veri e proprio giorni di
+	   totale assenza dal lavoro.</p>
+	   
+	   </div>
+       <div class="col-md-8 col-md-offset-2">
+	   <table class="table table-hover table-condensed table-striped">
+		<tr class="info">
+			<th>Codice assenza</th>
+			<th>Descrizione</th>
+			<th>Totale</th>			
+		</tr>
+		#{list items:yearlyAbsencesRecap.absenceSummary.entrySet(), as: 'entry'}
+		<tr>
+			#{if entry.getKey().justifiedTimeAtWork.minutes == null}
+				<td>${entry.getKey().code}</td>     
+				<td>${entry.getKey().description}</td>	
+				<td>${entry.getValue()}</td>
+			#{/if}
+		</tr>
+	    #{/list}
+		<tr>
+			<td>TOTALE</td>
+			<td></td>
+			<td>${yearlyAbsencesRecap.totalAbsence - yearlyAbsencesRecap.totalHourlyAbsence}</td>
+		</tr>
+	  </table>
+      </div>
+</div>
+

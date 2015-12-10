@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package models;
 
@@ -9,10 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import models.base.BaseModel;
-
 import org.joda.time.LocalDate;
 
+import models.base.BaseModel;
 import play.data.validation.Required;
 
 
@@ -24,23 +23,23 @@ import play.data.validation.Required;
 @Table(name = "person_shift_shift_type")
 public class PersonShiftShiftType extends BaseModel {
 
-	private static final long serialVersionUID = -4476838239881674080L;
+  private static final long serialVersionUID = -4476838239881674080L;
 
-	@Required
-	@ManyToOne
-	@JoinColumn(name="personshifts_id")
-	public PersonShift personShift;
-	
-	@Required
-	@ManyToOne
-	@JoinColumn(name="shifttypes_id")
-	public ShiftType shiftType;
-	
+  @Required
+  @ManyToOne
+  @JoinColumn(name = "personshifts_id")
+  public PersonShift personShift;
 
-	@Column(name="begin_date")
-	public LocalDate beginDate;
-	
+  @Required
+  @ManyToOne
+  @JoinColumn(name = "shifttypes_id")
+  public ShiftType shiftType;
 
-	@Column(name="end_date")
-	public LocalDate endDate;
+
+  @Column(name = "begin_date")
+  public LocalDate beginDate;
+
+
+  @Column(name = "end_date")
+  public LocalDate endDate;
 }

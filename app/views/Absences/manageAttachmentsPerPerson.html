@@ -2,25 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-<div id="container-fluid-nav-tabs" class="container-fluid">
-
-<ul class="nav nav-tabs">
-  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year, month)}">Assenze Mensili</a></li>
-  <li><a href="@{YearlyAbsences.yearlyAbsences(session.get("personSelected"), year)}">Assenze Annuali</a></li>
-  <li><a href="@{Absences.manageAttachmentsPerCode(year, month)}">Gestione Allegati Per Codice</a></li>
-  <li class="active"><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, month)}">Allegati Per Persona</a></li>
-  <li><a href="@{Absences.absenceInPeriod()}">Assenze in periodo</a></li>
-</ul>
-
-</div>
-
+#{absences.absencesTabs activeAction:'manageAttachmentsPerPerson' /}
+ 
 <div class="container">
+  
+  #{title title:'Allegati ' + person.fullname + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
-   <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title text-center">Allegati Assenze di ${person.name} ${person.surname} &{'views.tags.display.date.month.' + month} ${year} </h3>
-      </div>
-      <div class="panel-body">
+	#{if personAbsenceListWithFile.empty}
+	  Non ci sono allegati inseriti per questo mese.
+	#{/if}
+	#{else}
 		<ul class="icons-ul">
 			#{list items:personAbsenceListWithFile, as:'personAbsence'}
 				<li class="distanziato"> 
@@ -29,7 +20,5 @@
 				</li>
 			#{/list}
 		</ul>
-     </div>
-   </div>
-   
+	#{/else}	
 </div>

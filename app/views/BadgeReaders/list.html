@@ -1,0 +1,67 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
+
+<div class="container">
+	#{title title:'Sorgenti Timbrature' /}
+
+	
+	#{alert color:'info'}
+	  <p>Le <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> sono tutti i punti di raccolta di timbrature. <br>
+	  <p>All'interno di una &{'badgeReader'} è garantita l'univocità dei codici badge.<br> 
+	  <p>Una &{'badgeReader'} corrisponde ad un client Rest che invia periodicamente a ePAS le timbrature memorizzate  
+	  tramite autenticazione sicura.</p>
+	  <p>Ogni &{'badgeReader'} deve essere associata ad uno o più <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'} 
+	  	</strong> 
+	  	per poter essere operativa.
+	  </p>
+	#{/alert}
+	
+	#{form action:@BadgeReaders.list(), class:'form-inline', method:'GET',
+    'data-reload':'#results', autocomplete:'off'}
+
+    <div class="row">
+     <div class="col-sm-3">
+        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label(), inline:true /}
+     </div>
+     <div class="col-sm-1">
+        <button type="submit" name="_filter" class="btn btn-primary">
+            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+        </button>
+     </div>
+    </div>
+	#{/form}
+
+	
+	#{secure.checkAction 'BadgeReaders.blank'}
+	  #{b.actions}
+	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalInsertBadgeReader">
+	      <i class="fa fa-plus"></i> &{'BadgeReader.blank'}
+	    </a>
+      #{/b.actions}
+    #{/secure.checkAction}
+	
+	<div id="badgeReaderList"> <!-- per il risultato della modale asincrona -->
+	
+	<section id="results">
+    #{paginate results} 
+	   <ul class="list-group">
+	   #{list items:results.results, as:'item'}
+	   
+		 <li class="list-group-item list-group-item-grey">
+		 
+		   #{badgeReader.item item:item, edit:'true' /}
+		  
+	     </li>
+	    
+	   #{/list}
+	   </ul>
+    #{/paginate} 
+     </section>
+     </div>
+</div>
+
+
+
+<div id="modalInsertBadgeReader" class="modal container" tabindex="-1"></div>

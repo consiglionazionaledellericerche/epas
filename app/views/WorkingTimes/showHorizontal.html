@@ -1,14 +1,8 @@
-#{extends 'main3.html' /}
-#{set header:'navbar' /}
-#{set title: 'Visualizza Tipo Orario ' + horizontalPattern.name  /}
+#{modalAsync noTitle:'true' }
 
-#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(), 'Visualizza':null] /}
- 
-<div class="container">
-
-#{breadcrumbs breadcrumbs /}
-
-  <div class="col-md-10 col-md-offset-1">
+<div class="text-center">
+#{title title:'Visualizza Tipo Orario ' + horizontalPattern.name /}
+</div>
 	 
 	  #{workingTime.legend tempoALavoro:'true', wttTips:'false' /}			  
 	  
@@ -74,7 +68,4 @@
 		
 		#{/if}	
 	  	
-  </div>
-
-  
-</div>
+#{/modalAsync}

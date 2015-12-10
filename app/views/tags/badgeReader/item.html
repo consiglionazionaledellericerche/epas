@@ -1,0 +1,32 @@
+*{ item: il badgeReader
+   edit: se voglio il link a edit 
+
+}*
+
+		   <h4 style="color: black">
+		   <i class="fa fa-database"></i>
+		   #{if _edit}
+		      #{secure.checkAction 'BadgeReaders.edit', target:_item.owner}
+		        <a class="list-group-item-heading" href="@{edit(_item.id)}">
+		      #{/secure.checkAction}
+		      ${_item.code}</a>
+		   #{/if}
+		   #{else}
+		     ${_item.code}	         
+		   #{/else}
+	       </h4>
+	       <div class="container">
+	       
+	       <p>
+	         <strong><i class="fa fa-shield"></i> Sede Responsabile</strong>
+	         <span class="label label-primary">${_item.owner.name}</span>
+	       </p>
+	       
+	       <p>
+	       <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> 
+           #{list items:_item.badgeSystems, as:'badgeSystem'}
+             <span class="label label-primary">${badgeSystem.name}</span><span class="label label-info">${badgeSystem.office.name}</span>
+           #{/list}
+           </p>
+	       
+	       </div>
