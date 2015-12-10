@@ -2,6 +2,7 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 
 import com.mysema.query.BooleanBuilder;
@@ -25,7 +26,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.User;
 import models.query.QBadge;
 import models.query.QContract;
 import models.query.QContractStampProfile;
@@ -504,6 +504,41 @@ public final class PersonDao extends DaoBase {
     return query.singleResult(person);
   }
 
+  /**
+   * Le persone attive della sede con il vecchio campo person.badgeNumber popolato.
+   *
+   * @return persone
+   */
+  public List<Person> activeWithBadgeNumber(Office office) {
+
+    final QPerson person = QPerson.person;
+
+    JPQLQuery query = personQuery(Optional.<String>absent(), Sets.newHashSet(office), false,
+        Optional.fromNullable(LocalDate.now()), Optional.fromNullable(LocalDate.now()),
+        true, Optional.<CompetenceCode>absent(), Optional.<Person>absent())
+        .where(person.badgeNumber.isNotNull().and(person.badgeNumber.isNotEmpty()));
+
+    return ModelQuery.simpleResults(query, person).list();
+  }
+
+  /**
+   * Le persone attive della sede con il campo matricola popolato.
+   *
+   * @return persone
+   */
+  public List<Person> activeWithNumber(Office office) {
+
+    final QPerson person = QPerson.person;
+
+    JPQLQuery query = personQuery(Optional.<String>absent(), Sets.newHashSet(office), false,
+        Optional.fromNullable(LocalDate.now()), Optional.fromNullable(LocalDate.now()),
+        true, Optional.<CompetenceCode>absent(), Optional.<Person>absent())
+        .where(person.number.isNotNull());
+
+    return ModelQuery.simpleResults(query, person).list();
+
+  }
+
 
   /**
    * La query per la ricerca delle persone. Versione con JPQLQuery injettata per selezionare le
@@ -549,7 +584,6 @@ public final class PersonDao extends DaoBase {
    * @param onlyOnCertificate true se si chiedono solo gli strutturati, false altrimenti
    * @param compCode il codice di competenza
    * @param personInCharge il responsabile della persona
-   * @param badgeReader il lettore badge su cui timbra
    * @return la lista delle persone corrispondente ai criteri di ricerca
    */
   private JPQLQuery personQuery(Optional<String> name, Set<Office> offices, boolean onlyTechnician,

@@ -1,15 +1,19 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SimplePath;
+import com.mysema.query.types.path.StringPath;
+
 import models.Badge;
 
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -27,6 +31,8 @@ public class QBadge extends EntityPathBase<Badge> {
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final QBadgeReader badgeReader;
+
+    public final QBadgeSystem badgeSystem;
 
     public final StringPath code = createString("code");
 
@@ -60,6 +66,7 @@ public class QBadge extends EntityPathBase<Badge> {
     public QBadge(Class<? extends Badge> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
+        this.badgeSystem = inits.isInitialized("badgeSystem") ? new QBadgeSystem(forProperty("badgeSystem"), inits.get("badgeSystem")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

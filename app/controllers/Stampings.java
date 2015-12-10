@@ -34,7 +34,6 @@ import manager.recaps.personStamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 
-import models.Institute;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -51,7 +50,6 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -199,7 +197,7 @@ public class Stampings extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {

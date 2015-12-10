@@ -21,8 +21,6 @@ import dao.QualificationDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 
-import helpers.Web;
-
 import it.cnr.iit.epas.DateUtility;
 
 import manager.AbsenceManager;
@@ -53,7 +51,6 @@ import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.io.File;
@@ -224,7 +221,7 @@ public class Absences extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       render("@blank", person, dateFrom, dateTo);
     }

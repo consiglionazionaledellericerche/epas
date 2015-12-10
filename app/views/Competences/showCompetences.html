@@ -8,6 +8,16 @@
 <div class="container">
   #{title title:'Assegna competenze ' + templateUtility.monthName(month) + ' ' + year, color:'primary' /}
 
+  #{alert color:'info'}
+  <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
+    tabella sottostante e cliccare sul valore attualmente assegnato.
+
+  <p>
+
+  <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>,
+    quelli per straordinari e turni in <strong>ore</strong>.</p>
+  #{/alert}
+
     <!-- form paginata --> 
     #{form action:@showCompetences(), class:'form-horizontal', method:'GET',
           'data-reload':'#results', autocomplete:'off'}
@@ -22,13 +32,16 @@
     		value:wrCompetenceCode.value /}
     
     #{/form}
-	
-	#{alert color:'info'}
-          <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
-          tabella sottostante e cliccare sul valore attualmente assegnato.<p>
-          <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>, 
-          quelli per straordinari e turni in <strong>ore</strong>.</p>
-    #{/alert}
+
+
+  #{alert color:'warning'}
+  <strong>Totale competenze ${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}
+    assegnate nel mese per ${office.name}</strong>
+  <a data-tooltip data-toggle="tooltip" data-placement="right"
+     title="Per aggiornare questo valore ricaricare la pagina">
+    <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
+  </a>
+  #{/alert}
     
     <section id="results">
    	#{paginate results} 
@@ -66,32 +79,30 @@
 	    #{/list}
 	    </table>      
 	    #{/paginate}
-	    
-	    <strong>Totale competenze ${wrCompetenceCode.value.code} assegnate nel mese per ${office.name}</strong>
-		<a data-tooltip data-toggle="tooltip" data-placement="right" 
-		   title="Per aggiornare questo valore ricaricare la pagina">
-		  <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
-		</a>	      
 
-	  </section>   
-      	      
-  #{panel title:'Riepilogo straordinari ' + office.name, color:'primary' }
-      <table class="table table-condensed table-hover">
-        <tr>
+
+    </section>
+  <br>
+
+  #{alert color:'info'}
+  <h4><strong>Riepilogo straordinari ${office.name}</strong></h4>
+
+  <table class="table table-condensed">
+
+    <tr>
           <td>
             Totale ore di straordinario pagate a ${templateUtility.monthName(month)} (S1+S2+S3) 
           </td>
-          <td class="success"><strong>${totaleOreStraordinarioMensile}</strong></td>
+      <td><strong>${totaleOreStraordinarioMensile}</strong></td>
         </tr>
         <tr>
           <td>Totale ore di straordinario pagate nell'anno</td>
-          <td class="success"><strong>${totaleOreStraordinarioAnnuale}</strong></td>
+          <td><strong>${totaleOreStraordinarioAnnuale}</strong></td>
         </tr>
         <tr>
           <td>Totale monte ore nell'anno ${year}</td>
-          <td class="success"><strong>${totaleMonteOre}</strong></td>
+          <td><strong>${totaleMonteOre}</strong></td>
         </tr>
       </table>
-#{/panel}
-  
+  #{/alert}
 </div> <!-- end container-fluid -->
