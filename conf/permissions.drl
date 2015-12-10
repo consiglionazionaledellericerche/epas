@@ -52,7 +52,7 @@ when
      	"Absences.absenceInMonth",
      	
      	/* Assenze annuali */
-     	"YearlyAbsences.absencesPerPerson",
+     	"Absences.absencesPerPerson",
      	
      	/* Ferie */
      	"Vacations.show",
@@ -100,7 +100,11 @@ when
      	/* Timbrature web */
      	"Clocks.daySituation",
      	"Clocks.webStamping",
-     	"Clocks.insertWebStamping"   	
+     	"Clocks.insertWebStamping",
+     	
+     	/*Possibilità di inviare report*/
+     	"ReportCentre.generateReport",
+     	"ReportCentre.sendProblem"   	
      	
        ), target == null, granted == false)
 then
@@ -138,7 +142,7 @@ end
 /*******************************************************************************
  * Azioni utente DEVELOPER
  ******************************************************************************/
-rule developer
+rule Developer
 when
  $uro: UsersRolesOffices()
  Role(name == "developer") from $uro.role
@@ -150,7 +154,7 @@ end
 /*******************************************************************************
  * Azioni utente ADMIN
  ******************************************************************************/
-rule admin_Generic
+rule Admin_Generic
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "admin") from $uro.role
@@ -165,9 +169,9 @@ when
         "Offices.insertArea",
         "Offices.showOffices",
         
-        "Administrators.insertNewAdministrator",
-        "Administrators.saveNewAdministrator",
-        "Administrators.deleteAdministrator",
+        "Administrators.blank",
+        "Administrators.save",
+        "Administrators.delete",
         "Administrators.deleteSelfAsAdministrator",
         "Administrators.insertAccountSystem",
         "Administrators.saveAccountSystem",
@@ -196,7 +200,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Contracts.personContracts",
+     	
      	"WorkingTimes.manageWorkingTime",
+     	"WorkingTimes.manageOfficeWorkingTime",
      	"WorkingTimes.showHorizontal",
      	"WorkingTimes.showContract",
      	"WorkingTimes.showContractWorkingTimeType"          
@@ -206,7 +213,7 @@ when
  $c.grant();
 end
 
-rule admin_InOffice
+rule Admin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -228,7 +235,10 @@ when
         "Persons.deletePerson",
         "Persons.deletePersonConfirmed",
         
+        "Contracts.personContracts",
+        
         "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showHorizontal",
      	"WorkingTimes.showContract",
      	"WorkingTimes.showContractWorkingTimeType"             
@@ -239,10 +249,106 @@ then
 end
 
 /*******************************************************************************
+ * Azioni utente con ruolo TECNICAL_ADMIN
+ ******************************************************************************/
+rule TecnicalAdmin_Generic
+when 
+ $uro: UsersRolesOffices()
+ $p: Role(name == "tecnicalAdmin") from $uro.role
+ $c: PermissionCheck(action in (
+
+        "Institutes.list",
+        "Institutes.index",
+
+	    "BadgeReaders.index",
+	    "BadgeReaders.list",
+	    "BadgeReaders.blank",
+		
+	    "BadgeSystems.index",
+	    "BadgeSystems.list",
+	    "BadgeSystems.blank",
+        
+        /* duplicate prima di avere il contesto office */
+		"Institutes.edit",
+		"Institutes.save",
+		"Institutes.delete",
+
+		"Offices.list",
+		"Offices.edit",
+		"Offices.save",
+
+		"BadgeReaders.save",	
+		"BadgeReaders.edit",		
+	    "BadgeReaders.updateInfo",
+	    "BadgeReaders.changePassword",
+		"BadgeReaders.joinBadgeSystems",
+		"BadgeReaders.saveBadgeSystems",
+		"BadgeReaders.delete",
+		
+		"BadgeSystems.save",
+		"BadgeSystems.edit",
+		"BadgeSystems.updateInfo",
+		"BadgeSystems.joinBadges",
+	    "BadgeSystems.saveBadges",
+	    "BadgeSystems.deleteBadge",
+	    "BadgeSystems.joinPersonNumbers",
+  		"BadgeSystems.joinOldBadgeNumbers",
+  		"BadgeSystems.delete",
+	
+		"Administrators.blank",
+		"Administrators.save",
+		"Administrators.delete"
+		
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule TecnicalAdmin_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "tecnicalAdmin") from $uro.role
+ $c: PermissionCheck(action in (
+ 
+ 	   "Institutes.edit",
+ 	   "Institutes.save",
+	   "Institutes.delete",
+	   "Offices.edit",
+	   "Offices.save",
+	   "Administrators.blank",
+	   "Administrators.delete",
+	   "Administrators.save",
+	   
+	   "BadgeReaders.save",	
+	   "BadgeReaders.edit",
+	   "BadgeReaders.updateInfo",	
+	   "BadgeReaders.changePassword",
+	   "BadgeReaders.joinBadgeSystems",
+	   "BadgeReaders.saveBadgeSystems",
+	   "BadgeReaders.delete",
+		
+	   "BadgeSystems.save",	   
+	   "BadgeSystems.edit",
+	   "BadgeSystems.updateInfo",
+	   "BadgeSystems.joinBadges",
+	   "BadgeSystems.saveBadges",
+	   "BadgeSystems.deleteBadge",
+	   "BadgeSystems.joinPersonNumbers",
+  	   "BadgeSystems.joinOldBadgeNumbers",
+  	   "BadgeSystems.delete"
+	   
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*******************************************************************************
  * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
  ******************************************************************************/
 
-rule alLeastPersonnelAdminMini_Generic
+rule AtLeastPersonnelAdminMini_Generic
 when 
  $uro: UsersRolesOffices()
  $p: Role(name in ("personnelAdmin","personnelAdminMini")) from $uro.role
@@ -255,19 +361,11 @@ when
         "MonthRecaps.customRecap",
         
         /* Vecchio permesso viewPersonDay */
-        /* credo che siano comunque da filtrare sull'office 
- 		   per cui andrebbero cambiate le action e inserite
- 		   in viewPersonDay_InOffice */	
- 		"Absences.manageAttachmentsPerCode",
- 		
  		"MonthRecaps.show",
  		
  		"Stampings.missingStamping",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
-        
-        "YearlyAbsences.showGeneralMonthlyAbsences",
-        "YearlyAbsences.yearlyAbsences",
         
         /* Vecchio permesso viewCompetence */
         "Competences.exportCompetences",
@@ -277,8 +375,12 @@ when
         /* Vecchio permesso viewOffice 
          *  In questo caso le action non sono inserite all'interno della regola
          *  InOffice poichè i filtri sono all'interno delle stesse action.
+         *  TODO rifattorizzare tutte le action di Institutes e Offices
          */
         "Offices.showOffices",
+        "Institutes.list",
+        
+        
         "Configurations.showConfGeneral",
         "Configurations.showConfYear",
         
@@ -300,7 +402,13 @@ when
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
         "Absences.absenceInPeriod",
-		
+		"Absences.showPersonMonthlyAbsences",
+		"Absences.showGeneralMonthlyAbsences",
+		"Absences.manageAttachmentsPerCode",
+        "Absences.yearlyAbsences",
+        
+        "BadgeSystems.personBadges",
+		 
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
         "Charts.whichAbsenceInYear",
@@ -322,7 +430,7 @@ when
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
         
-        "YearlyAbsences.showPersonMonthlyAbsences",
+       
         
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -333,6 +441,7 @@ when
         
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
@@ -343,7 +452,7 @@ then
  $c.grant();
 end
 
-rule alLeastPersonnelAdminMini_InOffice
+rule AtLeastPersonnelAdminMini_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -360,10 +469,16 @@ when
        "Stampings.personHolidaySituation",	
        
        /* Vecchio permesso viewPersonDay */
+   	    "Absences.absenceInPeriod",
+	    "Absences.showPersonMonthlyAbsences",
+	    "Absences.showGeneralMonthlyAbsences",
+        "Absences.yearlyAbsences",
         "Absences.manageAttachmentsPerPerson",
+        "Absences.manageAttachmentsPerCode",
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
-	    "Absences.absenceInPeriod",
+		
+		"BadgeSystems.personBadges",
 		
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -382,13 +497,15 @@ when
         "PrintTags.showTag",
 		
         "Stampings.personStamping",
+        "Stampings.dailyPresence",
+        "Stampings.missingStamping",
         
         "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
         
-        "YearlyAbsences.showPersonMonthlyAbsences",
+
         
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -399,6 +516,7 @@ when
         
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
@@ -413,7 +531,7 @@ end
  * Azioni utente con ruolo solo PERSONNEL_ADMIN
  ******************************************************************************/
 
-rule onlyForPersonnelAdmin_Generic
+rule OnlyForPersonnelAdmin_Generic
 when 
  $uro: UsersRolesOffices()
  $p: Role(name == "personnelAdmin") from $uro.role
@@ -437,27 +555,25 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
         
-        "Persons.insertContract",
-        "Persons.saveContract",
-        "Persons.modifyContract",
-        "Persons.updateContract",
-        "Persons.deleteContract",
-        "Persons.deleteContractConfirmed",
+        "Contracts.personContracts",
+        "Contracts.insert",
+        "Contracts.save",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
         
-        "Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.approveAutomatedSource",
+        "Contracts.updateSourceContract",
+     	"Contracts.saveResidualSourceContract",
+     	"Contracts.saveMealTicketSourceContract",
+		"Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
+        "Contracts.updateContractWorkingTimeType",
+        "Contracts.saveContractWorkingTimeType",
      	
-     	"Persons.updateContractWorkingTimeType",
-     	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
-     	"Persons.deleteContractWorkingTimeType",
-     	
-     	"Persons.childrenList",
+     	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
-     	"Persons.removeChild",
      	"Persons.deleteChild",
      	
      	"Persons.workGroup",
@@ -478,15 +594,16 @@ when
         "MealTickets.quickBlocksInsert",
         
         /* Vecchio permesso editPersonDay */
-		"Absences.create",
-     	"Absences.insert",
+		"Absences.blank",
+     	"Absences.save",
      	"Absences.edit",
-     	"Absences.update",
+     	"Absences.delete",
+     	"Absences.addAttach",
+     	"Absences.removeAttach",
         
-        "Stampings.createStamp",
-       	"Stampings.insert",
+        "Stampings.blank",
        	"Stampings.edit",
-     	"Stampings.update",
+     	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
@@ -531,14 +648,19 @@ when
      	"Configurations.saveConfGeneral",
      	"Configurations.savePatron",
      	"Configurations.saveConfYear",
-		"Configurations.savePastYearVacationLimit"
+		"Configurations.savePastYearVacationLimit",
+		
+		"BadgeSystems.joinBadgesPerson",
+		"BadgeSystems.saveBadges",
+		"BadgeSystems.deleteBadgePerson",
+		"BadgeSystems.deleteBadge"
         
         ), target == null, granted == false)
 then
  $c.grant();
 end
 
-rule onlyForPersonnelAdmin_InOffice
+rule OnlyForPersonnelAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -554,27 +676,25 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
-     	"Persons.insertContract",
-        "Persons.saveContract",
-        "Persons.modifyContract",
-     	"Persons.updateContract",
-     	"Persons.deleteContract",
-     	"Persons.deleteContractConfirmed",
+        "Contracts.personContracts",
+        "Contracts.insert",
+        "Contracts.save",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
+        
+        "Contracts.updateSourceContract",
+     	"Contracts.saveResidualSourceContract",
+     	"Contracts.saveMealTicketSourceContract",
+		"Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
+        "Contracts.updateContractWorkingTimeType",
+        "Contracts.saveContractWorkingTimeType",
      	
-     	"Persons.updateSourceContract",
-     	"Persons.saveSourceContract",
-     	"Persons.approveAutomatedSource",
-     	
-     	"Persons.updateContractWorkingTimeType",
-     	"Persons.changeTypeOfContractWorkingTimeType",
-     	"Persons.splitContractWorkingTimeType",
-     	"Persons.deleteContractWorkingTimeType",
-     	
-     	"Persons.childrenList",
+     	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
-     	"Persons.removeChild",
      	"Persons.deleteChild",
      	
      	"Persons.workGroup",
@@ -595,15 +715,16 @@ when
         "MealTickets.quickBlocksInsert",
         
         /* Vecchio permesso editPersonDay */
-        "Absences.create",
-     	"Absences.insert",
+ 		"Absences.blank",
+     	"Absences.save",
      	"Absences.edit",
-     	"Absences.update",
+     	"Absences.delete",
+     	"Absences.addAttach",
+     	"Absences.removeAttach",
      	
-       	"Stampings.createStamp",
-       	"Stampings.insert",
+       	"Stampings.blank",
        	"Stampings.edit",
-     	"Stampings.update",
+     	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	
@@ -655,7 +776,12 @@ when
      	"Configurations.saveConfGeneral",
      	"Configurations.savePatron",
      	"Configurations.saveConfYear",
-		"Configurations.savePastYearVacationLimit"
+		"Configurations.savePastYearVacationLimit",
+		
+		"BadgeSystems.joinBadgesPerson",
+		"BadgeSystems.saveBadges",
+		"BadgeSystems.deleteBadgePerson",
+		"BadgeSystems.deleteBadge"
                
        ), target == $o, granted == false)
 then
@@ -666,7 +792,7 @@ end
  * Azioni utente con ruolo BADGE_READER
  ******************************************************************************/
 
-rule stampings_create
+rule Stampings_create
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "badgeReader") from $uro.role
@@ -683,7 +809,7 @@ when
  $c.grant();
 end
 
-rule stampings_create_InOffice
+rule Stampings_create_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -703,7 +829,7 @@ end
 /*******************************************************************************
  * Azioni utente con ruolo REST_CLIENT
  ******************************************************************************/
-rule rest
+rule Rest
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "restClient") from $uro.role
@@ -721,7 +847,7 @@ then
  $c.grant();
 end
 
-rule rest_inOffice
+rule Rest_inOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
@@ -754,7 +880,7 @@ then
 end
 */
 
-rule manageShift
+rule ManageShift
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "shiftManager") from $uro.role
@@ -773,7 +899,7 @@ then
  $c.grant();
 end
 
-rule manageReperibility
+rule ManageReperibility
 when
  $uro: UsersRolesOffices()
  $p: Role(name == "reperibilityManager") from $uro.role

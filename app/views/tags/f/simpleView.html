@@ -1,0 +1,31 @@
+*{
+   biglabel (optional) più spazio per i label
+   hidden: (optional) un campo hidden col valore value
+   value: nel caso di localdate passare il format()
+   
+}*
+#{field _arg}
+%{
+  if( _value == null) {
+    _value = field.value;
+  }
+
+}%
+	#{if _hidden}
+	<input type="hidden" name="${field.name}" value="${_value}"/>
+	#{/if}
+	<div class="form-group">
+	    <label class="#{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else} control-label">&{field.name}</label>
+	
+	    <div class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-6#{/else}">
+	        <p class="form-control-static">
+	        #{if _value == null} <span class="text-muted"></span> #{/if}
+	        #{else}
+	           ${_value.label()}
+	        #{/else}
+	        </p>
+	    </div>
+	</div>
+#{/field}
+
+

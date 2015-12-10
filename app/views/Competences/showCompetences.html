@@ -2,204 +2,104 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assegna competenze'  /}
 
-<div id="container-fluid-nav-tabs" class="container-fluid">
 
-<ul class="nav nav-tabs">
-  <li class="active"><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
-  <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-  <li><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenza Assegnate nell'anno</a></li>
-</ul>
+#{competences.competencesTabs activeAction:'showCompetences' /}
 
-</div>
+<div class="container">
+  #{title title:'Assegna competenze ' + templateUtility.monthName(month) + ' ' + year, color:'primary' /}
 
-<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
-<div class="container-fluid">
- <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@Competences.showCompetences(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        <input type="hidden" name="year" value="${year}"/>
-	        <input type="hidden" name="month" value="${month}"/>
-	        
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-      </div>
-</div>
-<!-- FINE FILTRO OFFICE -->
+	#{alert color:'info'}
+          <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
+          tabella sottostante e cliccare sul valore attualmente assegnato.<p>
+          <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>, 
+          quelli per straordinari e turni in <strong>ore</strong>.</p>
+    #{/alert}
 
-<div class="container-fluid">
-  
-  <div class="col-md-8">
-  
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Assegna competenze &{'views.tags.display.date.month.' + month} ${year} per ${office.name}</h3>
-      </div>
-      <div class="panel-body">
-        <!-- begin Assegna competenze panel body -->
-        
-        <div class="col-xs-5">
-        #{form action:@Competences.showCompetences()	,  
-          method:'GET', autocomplete:'off',
-          'data-reload':'#results'}
-          <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
+    <!-- form paginata --> 
+    #{form action:@showCompetences(), class:'form-horizontal', method:'GET',
+          'data-reload':'#results', autocomplete:'off'}
+	<input type="hidden" name="year" value="${year}"/>
+    <input type="hidden" name="month" value="${month}"/>
+    <input type="hidden" name="officeId" value="${office.id}"/>
     
-          <select name="codice" class="input-medium">
-            #{list items:competenceCodeList, as:'activeCode'}
-              <option value="${activeCode.code}" #{if activeCode.code.equals(codice) } selected="selected" #{/if} >${activeCode.code}</option>
-            #{/list}
-	      </select>
-          <i class="icon-search icon-large"></i>
-      
-          <input type="hidden" name="year" value="${year}"/>
-	      <input type="hidden" name="month" value="${month}"/>
-	      <input type="hidden" name="officeId" value="${office.id}"/>
-        #{/form}
-        </div>
 
-        <section id="results">
-
-          <div class="col-xs-7">
-            <ul class="pagination">
-              #{if simpleResults.totalPage > 0}
-	  	        #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-	  	          #{if simpleResults.page==indexPage}
-	  	            <li class="active"><a href="#">${indexPage+1}</a></li>
-	  	          #{/if}
-	  	          #{else}
-	  	            <li><a href="@{Competences.showCompetences(year, month, office.id, name, codice, indexPage)}">${indexPage+1}</a></li>
-	  	          #{/else}
-		        #{/list}
-		      #{/if}  
-		      #{else}
-	            <br>
-	          #{/else}   
-            </ul>
-		  </div>
-
-  		  <div class="col-xs-12">
-          <table class="table table-hover">
-	        <tr class="warning">
-	          <th>Nome e cognome</th>
-	          <th>${competenceCode.value.description} ${competenceCode.value.code}</th>
-	        </tr>
+        #{f.input 'name', label:'Filtro nome', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label() /}
+        #{f.selectModel 'competenceCode', label:'Codice da assegnare', items:competenceCodeList,
+    		value:wrCompetenceCode.value /}
+    
+    #{/form}
 	
-	        #{list items:activePersons, as:'person'}
+	
+    
+    #{alert color:'warning'}
+    <strong>Totale competenze ${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code} assegnate nel mese per ${office.name}</strong>
+		<a data-tooltip data-toggle="tooltip" data-placement="right" 
+		   title="Per aggiornare questo valore ricaricare la pagina">
+		  <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
+		</a>	      
+    #{/alert}
+    
+    <section id="results">
+   	#{paginate results} 
+	   
+	   <table class="table table-hover table-bordered">
+	     <tr class="warning">
+	       <th>Nome e cognome</th>
+	       <th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th>
+	     </tr>
+		
+		
+	   #{list items:results.results, as:'person'}
+	    <tr>
+	       %{ wrPerson = person.getWrapper(templateUtility.wrapperFactory); }%
+   
+           <td class="person">${person.fullname}</td>
+           <td>
+           
+    	      #{if wrCompetenceCode.value.code.equals('S1')}
+    	        (${wrPerson.getPositiveResidualInMonth(year,month)})
+             #{/if}
+           
+             <a 
+             #{if editCompetence} data-x-editable href="#" data-type="number" 
+             data-pk="${wrPerson.competence(wrCompetenceCode.value,year,month).id}" data-name="value"
+     	     data-url="@{updateCompetence()}" 
+     	     data-title="Modifica ${wrCompetenceCode.value.description} per ${person.fullname}"
+     	  	 #{/if}
+     	     >
+   	 	     ${wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved}
+    	    </a>
 
-	          <tr>
-	            <td class="person">${person.value.name} ${person.value.surname}</td>
-	            <td>
-	            
-	     	      #{if competenceCode.value.code.equals('S1')}
-	     	        (${person.getPositiveResidualInMonth(year,month)})
-	              #{/if}
-	            
-	              <a 
-	              #{if editCompetence} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
-		     	    data-url="@{updateCompetence()}" 
-		     	    data-title="Modifica ${competenceCode.value.description} per ${person.value.name} ${person.value.surname}"
-		     	  #{/if}
-		     	  >
-	    	 	  ${person.competence(competenceCode.value,year,month).valueApproved}
-	     	    </a>
-
-	            </td>
-	          </tr>
-
-	        #{/list}
-	      </table>
-	      
-	      
-	      <strong>Totale competenze ${competenceCode.value.code} assegnate nel mese per ${office.name}</strong>
-		  <a data-tooltip data-toggle="tooltip" data-placement="right" title="Per aggiornare questo valore ricaricare la pagina">
-		    <strong>${competenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
-		  </a>	      
-
-		  </div>
-		  
-        </section>
-        
-        
-        
-        <!-- end Assegna Competenze panel body -->
-      </div>
-    </div>
+           </td>
+         </tr>
+	    #{/list}
+	    </table>      
+	    #{/paginate}
+	    
+	    
+	  </section>   
+  <br>
   
-  </div> <!-- end col-md-8 -->
-
-
-  <div class="col-md-4">
-   <div class="panel-group" id="collapseInfo">
-    <div class="panel panel-info	">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#collapseInfo" href="#collapseInfoContent">
-            Riepilogo Straordinari ${office.name}
-          </a>
-        </h4>
-      </div>
-      <div id="collapseInfoContent" class="panel-collapse collapse in">
-        <div class="panel-body">
-          <table class="table table-condensed table-hover">
-            <tr>
-              <td>
-                Totale ore di straordinario pagate a 
-                <span class="capitalized">&{'views.tags.display.date.month.' + month}</span>
-                <br>
-                (S1+S2+S3) 
-              </td>
-              <td class="success"><strong>${totaleOreStraordinarioMensile}</strong></td>
-            </tr>
-            <tr>
-              <td>Totale ore di straordinario pagate nell'anno</td>
-              <td class="success"><strong>${totaleOreStraordinarioAnnuale}</strong></td>
-            </tr>
-            <tr>
-              <td>Totale monte ore nell'anno ${year}</td>
-              <td class="success"><strong>${totaleMonteOre}</strong></td>
-            </tr>
-          </table>
-        </div>
-        
-      </div>   
-    </div> 
-   </div> <!-- end accordion Info -->
+  #{alert color:'info'}
+  <h4><strong>Riepilogo straordinari ${office.name}</strong></h4>
   
-  </div> <!-- end col-md-4 --> 
-  
-  <div class="col-md-4">
-   <div class="panel-group" id="collapseInfo2">
-    <div class="panel panel-info	">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#collapseInfo2" href="#collapseInfoContent2">
-            <i class="fa fa-info fa-lg"></i> Note
-          </a>
-        </h4>
-      </div>
-      <div id="collapseInfoContent2" class="panel-collapse collapse in">
-        <div class="panel-body">
-           <p>I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
-        </div>
-        
-      </div>   
-    </div> 
-   </div> <!-- end accordion Info -->
-  
-  </div> <!-- end col-md-4 --> 
-
+  	<table class="table table-condensed">
+     
+        <tr>
+          <td>
+            Totale ore di straordinario pagate a ${templateUtility.monthName(month)} (S1+S2+S3) 
+          </td>
+          <td><strong>${totaleOreStraordinarioMensile}</strong></td>
+        </tr>
+        <tr>
+          <td>Totale ore di straordinario pagate nell'anno</td>
+          <td><strong>${totaleOreStraordinarioAnnuale}</strong></td>
+        </tr>
+        <tr>
+          <td>Totale monte ore nell'anno ${year}</td>
+          <td><strong>${totaleMonteOre}</strong></td>
+        </tr>
+      </table>
+	#{/alert}  
 </div> <!-- end container-fluid -->

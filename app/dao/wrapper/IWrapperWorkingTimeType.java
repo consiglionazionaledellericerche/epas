@@ -8,12 +8,12 @@ import models.WorkingTimeType;
 
 public interface IWrapperWorkingTimeType extends IWrapperModel<WorkingTimeType> {
 
-	List<Contract> getAssociatedActiveContract(Long officeId);
+  List<Contract> getAssociatedActiveContract(Long officeId);
 
-	List<ContractWorkingTimeType> getAssociatedPeriodInActiveContract(
-			Long officeId);
+  List<ContractWorkingTimeType> getAssociatedPeriodInActiveContract(
+          Long officeId);
 
-	List<Contract> getAssociatedContract();
-	
+  List<Contract> getAssociatedContract();
+
 
 }

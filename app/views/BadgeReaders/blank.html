@@ -1,0 +1,37 @@
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'BadgeReader.blank' }
+
+<div class="alert alert-info" role="alert">
+  Inserisci i dati della nuova <strong><i class="fa fa-database"></i> &{'badgeReader'}</strong>.
+</div>
+
+<div id="badgeReaderData">
+
+  #{form action:@save(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#badgeReaderList',
+  'data-async-error':'#badgeReaderData'}
+
+  #{f.input 'badgeReader.code', required:true /}
+  #{f.input 'badgeReader.description' /}
+  #{f.input 'badgeReader.location' /}
+
+  #{f.selectModel 'badgeReader.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
+
+  #{f.input 'user.username' /}
+  #{f.input 'user.password', type:'password' /}
+
+  #{b.buttons center:true}
+    #{b.cancel @index() /}
+    #{b.save /}
+  #{/b.buttons}
+
+  #{alert color:'info'}
+    <p>
+    <strong>Note:</strong> Soltanto gli amministratori tecnici della sede resposabile potranno
+    gestire questa &{'badgeReader'}, fra cui la modifica delle credenziali di accesso e l'associazione con i &{'badgeSystems'}.
+    </p>
+  #{/alert}
+  #{/form}
+
+</div>
+
+#{/modalAsync}

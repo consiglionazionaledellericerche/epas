@@ -1,9 +1,12 @@
 #{field _arg}
+%{
+value = _value == null ? field.value : _value;
+}%
 <div class='form-group #{if field.error}has-error has-feedback#{/if}'>
-    <div class="col-sm-offset-3 col-sm-6">
-        <div class="checkbox">
+    <div class="#{if !_noLabel}col-sm-offset-3#{/if} col-sm-6">
+        <div class="checkbox#{if _inline}-inline#{/if}">
             <label>
-                <input #{if _class}class=${_class} #{/if}name="${field.name}" type="checkbox"#{if field.value == true} checked#{/if}#{if _title} title='${_title}'#{/if}#{if _disabled} disabled#{/if}/>
+                <input #{if _class}class=${_class} #{/if}name="${field.name}" type="checkbox"#{if _value} checked#{/if}#{if _title} title='${_title}'#{/if}#{if _disabled} disabled#{/if}/>
 				#{if _label}${_label}#{/if}#{else}&{field.name}#{/else}
                 <input name="${field.name}" type="hidden"  />
             </label>

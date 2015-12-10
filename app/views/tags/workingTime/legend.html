@@ -5,13 +5,8 @@
      sogliaPomeridiana
 }*   
 
-
-
-#{accordionGroup 'info'}
-
-
 	#{if _tempoALavoro}
-    #{accordionItem 'orario', parent:'info', title:'Tempo a lavoro', open:true, color:'info'}
+     #{panel title:'Tempo a lavoro'}
       <p>
         <strong>Tempo di lavoro giornaliero</strong><br>
         La quantità di tempo in minuti che il dipendente deve effettuare per ogni giorno della settimana.
@@ -19,21 +14,21 @@
            <br>Nei giorni impostati come festivi questa quantità viene automaticamente impostata a 0.
         #{/if}
       </p>
-    #{/accordionItem}
+     #{/panel}
     #{/if}
     
     #{if _buonoPastoAbilitato}
-    #{accordionItem 'buonoPastoAbilitato', parent:'info', title:'Buono pasto abilitato', open:true, color:'danger'}
+     #{panel title:'Buono Pasto Abilitato'}
       <p>
         Nel caso di <strong>calcolo buono pasto abilitato</strong> per il tipo orario è possibile specificare le condizioni 
         di ottenimento del buono nel caso dei giorni non festivi.<br>
         
       </p>
-    #{/accordionItem}
+     #{/panel}
     #{/if}
     
     #{if _buonoPasto}
-    #{accordionItem 'buonoPasto', parent:'info', title:'Attribuzione buoni pasto', open:true, color:'danger'}
+     #{panel title:'Attribuzione Buoni Pasto'}
       <p>
         <strong>Tempo di lavoro minimo per diritto a usufruire del buono pasto</strong><br>
         La quantità di lavoro minima che il dipendente deve aver lavorato per poter usufruire del buono pasto. 
@@ -48,16 +43,15 @@
         #{/if}
         
       </p>
-    #{/accordionItem}
-     #{/if}
+     #{/panel}
+    #{/if}
     
     #{if _sogliaPomeridiana}
-    #{accordionItem 'buonoPastoSoglia', parent:'info', title:'Soglia pomeridiana per attribuzione buoni pasto', open:true, color:'danger'}
- 
+     #{panel title:'Soglia pomeridiana per attribuzione buoni pasto'}
       <p>
         <strong><em>Soglia pomeridiana per buono pasto e lavoro minimo per buono pasto dopo soglia pomeridiana </em></strong><br>
-        Permette di aggiungere una ulteriore restrizione sulla attribuzione del buono pasto 
+        Permette di aggiungere una ulteriore restrizione sulla attribuzione del buono pasto.
       </p>
-    #{/accordionItem}
-     #{/if}
-#{/accordionGroup} 
+      <p>La quantità minima di minuti da effettuare dopo la soglia oraria impostata.</p>
+     #{/panel}
+    #{/if}

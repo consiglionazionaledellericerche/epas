@@ -5,6 +5,6 @@ import models.ContractWorkingTimeType;
 
 public interface IWrapperContractWorkingTimeType extends IWrapperModel<ContractWorkingTimeType> {
 
-	public DateInterval getDateInverval();
+  public DateInterval getDateInverval();
 
 }

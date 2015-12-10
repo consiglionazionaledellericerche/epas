@@ -1,0 +1,25 @@
+#{modalAsync title: 'Riporta segnalazione'}
+
+  <div id="report">
+    #{form @ReportCentre.sendProblem(), class:'form-horizontal', 
+    'data-async':'#page_content', 'data-async-error':'#report', method:'POST'}
+    	<div class="alert alert-info" role="alert">
+    		Compila il campo "descrizione problema" specificando l'errore riscontrato e fornendo più dettagli possibile.<br>
+    		Verrà inviata una mail a <strong>epas@iit.cnr.it</strong> con la segnalazione effettuata.
+    	</div>
+    	<input type="hidden" name="userId" value="${userLogged.id}"/>
+    	<input type="hidden" name="actionInfected" value="${actionInfected}"/>
+    	#{if month != null}
+    		#{f.input 'month', readonly:true /}
+    	#{/if}
+    	#{if year != null}
+    		#{f.input 'year', readonly:true /}
+    	#{/if}
+    	#{if day}
+    		#{f.input 'day', readonly:true /}
+    	#{/if}
+    	#{f.textArea 'report' /}
+    	#{b.submit 'Invia segnalazione' /}
+    #{/form}
+ </div>
+#{/modalAsync}

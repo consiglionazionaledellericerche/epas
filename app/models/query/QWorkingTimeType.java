@@ -35,6 +35,8 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final BooleanPath horizontal = createBoolean("horizontal");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 

@@ -28,6 +28,8 @@ public class QBadge extends EntityPathBase<Badge> {
 
     public final QBadgeReader badgeReader;
 
+    public final QBadgeSystem badgeSystem;
+
     public final StringPath code = createString("code");
 
     //inherited
@@ -60,6 +62,7 @@ public class QBadge extends EntityPathBase<Badge> {
     public QBadge(Class<? extends Badge> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
+        this.badgeSystem = inits.isInitialized("badgeSystem") ? new QBadgeSystem(forProperty("badgeSystem"), inits.get("badgeSystem")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

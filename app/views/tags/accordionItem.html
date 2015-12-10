@@ -3,13 +3,23 @@
    title:  il titolo, richiesto
    open:   se true (default false) rende aperto il pannello.
    color:  per specificare i colori bootstrap dei panel (default: default)
+   
+   dim:    dimensione per md
+   offset: offest per md
+   row:	   su una riga nuova	
 }*
 %{ 
   open = _open ?: false
   if (!_color) {
-    _color = 'info';
+    _color = 'primary';
   }
+  if (!_dim) {
+    _dim = 12;
+  }  
 }%
+#{if _row}<div class="row">#{/if}
+
+<div class="col-md-${_dim} #{if _offset}col-md-offset-${_offset}#{/if}">
 <div class="panel panel-${_color}">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -24,3 +34,5 @@
       </div>
     </div>
 </div>
+</div>
+#{if _row}</div>#{/if}

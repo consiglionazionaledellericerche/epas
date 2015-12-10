@@ -1,403 +1,387 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" type="image/png" href="@{'/public/favicon.ico'}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="shortcut icon" type="image/png" href="@{'/public/favicon.ico'}">
 
-    <title>#{get 'title' /}</title>
+  <title>#{get 'title' /}</title>
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/cerulean/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker3.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+  <!-- Bootstrap core CSS -->
+  #{stylesheet 'bootstrap-production/css/bootstrap.min.css'/}
 
-    <link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" />
-    <link rel="stylesheet" href="//cdn.datatables.net/responsive/1.0.6/css/dataTables.responsive.css" />
-    <link rel="stylesheet" href="//cdn.datatables.net/colreorder/1.1.3/css/dataTables.colReorder.min.css" />
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker3.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 
-    <link href='//fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}"> 
+  <link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" />
+  <link rel="stylesheet" href="//cdn.datatables.net/responsive/1.0.6/css/dataTables.responsive.css" />
+  <link rel="stylesheet" href="//cdn.datatables.net/colreorder/1.1.3/css/dataTables.colReorder.min.css" />
 
-    #{stylesheet 'select2-bootstrap.min.css'/}
-    *{#{stylesheet 'bootstrap-modal.css'/}}*
-    *{#{stylesheet 'bootstrap-modal-bs3patch.css'/}}*
-    #{stylesheet 'my-bootstrap3.css'/}
+  <link href='//fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}">
 
-	#{get 'moreStyles' /}
-	
-	
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    
-    <!-- All JavaScript at the bottom, except for Modernizr / Respond.
-	<!-- Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries -->
-	<!-- For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
+  #{stylesheet 'select2-bootstrap.min.css'/}
+  #{stylesheet 'bootstrap-modal.css'/}
+  #{stylesheet 'bootstrap-modal-bs3patch.css'/}
+  #{stylesheet 'my-bootstrap3.css'/}
+  #{stylesheet 'pnotify.custom.min.css'/}
+
+  #{get 'moreStyles' /}
+
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- All JavaScript at the bottom, except for Modernizr / Respond.
+<!-- Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries -->
+  <!-- For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-    
-  </head>
-  
-  <body #{if header.equals('clock') } onload="startTime()" #{/if} >	
-	  
-   <div id="wrapper">
 
-    #{if header.equals('navbar') }
-    
-    <!-- Fixed navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a id="google-font" class="navbar-brand" href="#">
+</head>
+
+<body #{if header.equals('clock') } onload="startTime()" #{/if} >
+
+<div id="wrapper">
+
+  #{if header.equals('navbar') }
+
+  <!-- Fixed navbar -->
+  <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="google-font" class="navbar-brand" href="#">
           ePAS
- 	      
- 	      <!-- 
-          <small class="visible-xs">XS</small>
-          <small class="visible-sm">SM</small>
-          <small class="visible-md">MD</small>
-          <small class="visible-lg">LG</small>
-           -->
-          
-          </a>
-        </div>
-        
-        
-        <div class="collapse navbar-collapse">
-        
-          #{if ip.isEmployeeVisible() }	
-          <ul class="nav navbar-nav">
-            #{if dropDown.equals("dropDownEmployee") }
-            <li class="dropdown active">
-            #{/if}
-            #{else}
-            <li class="dropdown">  
-            #{/else}
-            
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
-          		${session.username} <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
-            
-            	<li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
-            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
-            	<li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
-            	<li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
-            	<li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
-            	<li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
-            	<li class="divider"></li>
-            	<li><a href="@{PrintTags.showPersonTag(session.get("yearSelected"), session.get("monthSelected"))}">Stampa cartellino presenze</a></li>
-            	<li class="divider"></li>
-            	<li><a href="@{Persons.changePassword()}">Gestione password</a></li>
-              </ul>
-            </li>
-          </ul>
-          
-          #{/if}
-          #{else}
-            
-          #{/else}
-          
-          #{if ip.isAdministrationVisible() }
-          <ul class="nav navbar-nav">
-            #{if dropDown.equals("dropDownAdministration") }
-            <li class="dropdown active">
-            #{/if}
-            #{else}
-            <li class="dropdown">  
-            #{/else}
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
-          		Amministrazione <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                
-                #{if ip.viewPerson }
-                  <li><a href="@{Persons.list()}">Lista Persone</a></li>
-                  <li class="divider"></li> 
-                #{/if}
-                
-                #{if ip.viewPersonDay }
-                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
-                   session.get("yearSelected"), 
-                   session.get("monthSelected"))}">Timbrature</a></li> 
-                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
-                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
-                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
-                  <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> 
-                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
-                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
-                  <li class="divider"></li>
-                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
-                  <li class="divider"></li>
-                  <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"), 
-                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
-                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-                   session.get("monthSelected"))}">Assenze</a></li>
-                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
-                  
-                  <li class="divider"></li>
-	            #{/if}
-	                
-	            #{if ip.viewCompetence }
-	                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
-	                  session.get("monthSelected"))}">Competenze</a></li>
-	                <li class="divider"></li>
-	            #{/if}
-	                
-	            #{if ip.uploadSituation }
-	                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
-	                <li class="divider"></li>
-	            #{/if}
-	                
-	            #{if ip.viewPersonDay }
-	                  <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"), 
-	                   session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
-	        	#{/if}
-        		
-              </ul>
-            </li>
-          </ul>
-          #{/if}
-          
-          #{if ip.isConfigurationVisible() }
-          <ul class="nav navbar-nav">
-            #{if dropDown.equals("dropDownConfiguration") }
-            <li class="dropdown active">
-            #{/if}
-            #{else}
-            <li class="dropdown">  
-            #{/else}
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-          		Configurazione <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                #{if ip.viewOffice }
-                  <li><a href="@{Offices.showOffices()}">Sedi e Amministratori</a></li>
-                  <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
-                #{/if}
-                #{if ip.viewWorkingTimeType}
-                  <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
-                #{/if}
-                #{if ip.viewCompetenceCode}
-                <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
-                #{/if}
-                #{if ip.viewAbsenceType}
-                <li><a href="@{Absences.manageAbsenceCode()}">Codici Assenze</a></li>
-                #{/if}
-                <!--<li><a href="#">Codici Assenze</a></li>
-                <li><a href="#">Codici Competenze</a></li>
-                <li><a href="#">Parametri</a></li>
-                -->
-              </ul>
-            </li>
-          </ul>
-          #{/if}
-          
-          #{if isPersonInCharge}
-          <ul class="nav navbar-nav">
-          	<li class="dropdown">
-          		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-users"></i>
-          		Gestione gruppo <b class="caret"></b></a>
-          		<ul class="dropdown-menu">
-          			<li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), 
-	                   session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
-	                <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"), 
-	                   session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
-          		</ul>
-          	</li>
-          </ul>
-          #{/if}
-          
-          #{if ip.isToolsVisible()}
-          <ul class="nav navbar-nav">
-          	<li class="dropdown">
-          		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-medkit"></i></i>
-          		Tools <b class="caret"></b></a>
-          		<ul class="dropdown-menu">
-          			<li><a href="@{Administration.utilities()}">Utilities</a></li>
-          		</ul>
-          	</li>
-          </ul>
-          #{/if}
+          <!--
+           <small class="visible-xs">XS</small>
+           <small class="visible-sm">SM</small>
+           <small class="visible-md">MD</small>
+           <small class="visible-lg">LG</small>
+            -->
+        </a>
+      </div>
 
-		  #{include '/menu.html' /}          
-      
+      <div class="collapse navbar-collapse">
 
-      	  #{if session.contains("sudo.username")}
-      	    <ul class="nav navbar-nav navbar-right">
-      	    
-      	      #{if loginResponse != null}
-      	      <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
-      	        <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-      	      </li>
-      	      #{/if}
-      	      
-      	      <li><a href="@{Administrators.restoreUser()}"><span class="glyphicon glyphicon-log-out"></span> Torna chi eri</a></li>
-            
+        #{if ip.isEmployeeVisible() }
+        <ul class="nav navbar-nav">
+          #{if dropDown.equals("dropDownEmployee") }
+          <li class="dropdown active">
+            #{/if}
+            #{else}
+          <li class="dropdown">
+            #{/else}
+
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
+              <div class="visible-lg-inline visible-xs-inline">	${session.username}<span class="caret"></span></div></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
+
+              <li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
+              <li><a href="@{Absences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
+              <li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
+              <li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
+              <li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
+              <li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
+              <li class="divider"></li>
+              <li><a href="@{PrintTags.showPersonTag(session.get("yearSelected"), session.get("monthSelected"))}">Stampa cartellino presenze</a></li>
+              <li class="divider"></li>
+              <li><a href="@{Persons.changePassword()}">Gestione password</a></li>
             </ul>
-  		  #{/if}
-  		  
-  		  
-  		  
-  		  #{else}
-    	    #{if session.username}
-      		  <ul class="nav navbar-nav navbar-right">
-      		  
-      		    #{if !ip.isEmployeeVisible()}
-      		    <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
-      	        </li>
-      		    #{/if}
-      		    #{if loginResponse != null}
-      	        <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
-      	          <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-      	        </li>
-      	        #{/if}
-      		
-     		    #{if ip.viewPerson }
-	   	        <li><a href="@{Faq.faq()}"><i class="fa fa-comment-o"></i> FAQ</a></li>
-      	        #{/if}
-    	    
-    	        <li><a href="@{secure.logout()}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-    	      </ul>
-    	    #{/if}
-  		  
-  		  #{/else}
-  		  
-  		  
-  		  
-  		  
-  		  <div class="clearfix">
+          </li>
+        </ul>
+        #{/if}
+
+        #{if ip.isAdministrationVisible() }
+        <ul class="nav navbar-nav">
+          #{if dropDown.equals("dropDownAdministration") }
+          <li class="dropdown active">
+            #{/if}
+            #{else}
+          <li class="dropdown">
+            #{/else}
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
+              <div class="visible-xs-inline visible-md-inline visible-lg-inline"> &{'administrations'}<span class="caret"></span></div></a>
+            <ul class="dropdown-menu">
+
+              #{if ip.viewPerson }
+              <li><a href="@{Persons.list()}">Lista Persone</a></li>
+              <li class="divider"></li>
+              #{/if}
+
+              #{if ip.viewPersonDay }
+              <li><a href="@{Stampings.personStamping(session.get("personSelected"),
+                session.get("yearSelected"),
+                session.get("monthSelected"))}">Timbrature</a></li>
+              <li><a href="@{Stampings.missingStamping(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a></li>
+              <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a></li>
+
+              *{ <li><a href="@{Stampings.holidaySituation(session.get("yearSelected"))}">Presenza Festiva</a></li> }*
+              <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
+                session.get("monthSelected"))}">Stampa Cartellino</a></li>
+              <li class="divider"></li>
+              <li><a href="@{Charts.indexCharts()}">Utility</a></li>
+              <li class="divider"></li>
+              <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
+              <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("officeSelected"))}">Assenze</a></li>
+              <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
+
+              <li class="divider"></li>
+              #{/if}
+
+              #{if ip.viewCompetence }
+              <li><a href="@{Competences.showCompetences(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("officeSelected"))}">Competenze</a></li>
+              <li class="divider"></li>
+              #{/if}
+
+              #{if ip.uploadSituation }
+              <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
+              <li class="divider"></li>
+              #{/if}
+
+              #{if ip.viewPersonDay }
+              <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("officeSelected") )}">Gestione Buoni Pasto</a></li>
+              #{/if}
+
+            </ul>
+          </li>
+        </ul>
+        #{/if}
+
+        #{if ip.isConfigurationVisible() }
+        <ul class="nav navbar-nav">
+          #{if dropDown.equals("dropDownConfiguration") }
+          <li class="dropdown active">
+            #{/if}
+            #{else}
+          <li class="dropdown">
+            #{/else}
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
+              <div class="visible-xs-inline visible-md-inline visible-lg-inline">&{'configurations'}<span class="caret"></span></div></a>
+            <ul class="dropdown-menu">
+              #{if ip.viewOffice }
+              <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
+              <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
+              <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
+              
+              #{/if}
+              #{if ip.viewWorkingTimeType}
+
+              <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
+
+              <li><a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Lavoro</a></li>
+
+              #{/if}
+              #{if ip.viewCompetenceCode}
+              <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
+              #{/if}
+              #{if ip.viewAbsenceType}
+              <li><a href="@{Absences.manageAbsenceCode()}">Codici Assenze</a></li>
+              #{/if}
+              <!--<li><a href="#">Codici Assenze</a></li>
+              <li><a href="#">Codici Competenze</a></li>
+              <li><a href="#">Parametri</a></li>
+              -->
+            </ul>
+          </li>
+        </ul>
+        #{/if}
+
+        #{if isPersonInCharge}
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-users"></i>
+              Gestione gruppo <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"),
+                session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
+              <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"),
+                session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
+            </ul>
+          </li>
+        </ul>
+        #{/if}
+
+        #{if ip.isToolsVisible()}
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-medkit"></i></i>
+              Tools <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{Administration.utilities()}">Utilities</a></li>
+            </ul>
+          </li>
+        </ul>
+        #{/if}
+
+        #{include '/menu.html' /}
+
+        <ul class="nav navbar-nav navbar-right">
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring"></i></a>
+            <ul class="dropdown-menu">
+              #{if ip.viewPerson }
+              <li>
+                <a href="@{ReportCentre.generateReport(session.get("actionSelected"), session.get("personSelected"), session.get("monthSelected"), session.get("yearSelected"), session.get("daySelected"))}" data-async-modal="#defaultModal">
+                <i class="fa fa-bug"></i> Segnala un problema
+                </a>
+              </li>
+              #{/if}
+              <li>
+                <a href="@{Faq.faq()}">
+                  <i class="fa fa-comment-o"> FAQ</i>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+
+
+          #{if session.contains("sudo.username")}
+
+          #{if loginResponse != null}
+          <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
+            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
+          </li>
+          #{/if}
+          <li>
+            <a href="@{Administrators.restoreUser()}">
+             &{'restoreUser'}&nbsp<i class="fa fa-sign-out"></i>
+            </a>
+          </li>
+          #{/if}
+
+          #{elseif session.username}
+
+          #{if !ip.isEmployeeVisible()}
+          <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS" >
+            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
+          </li>
+          #{/if}
+          #{if loginResponse != null}
+          <li  data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR" >
+            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
+          </li>
+          #{/if}
+
+          <li>
+            <a href="@{secure.logout()}">
+              &{'logout'}&nbsp<i class="fa fa-sign-out"></i>
+            </a>
+          </li>
+          #{/elseif}
+        </ul>
+
+        <div class="clearfix">
           #{get 'pagemenu' /}
-          </div>
-          
-  		  
-  		  
-  		  
-  		  
-  		  
-  		  <!-- flash error icon 
+        </div>
+
+        <!-- flash error icon
           <div class=container>
             #{if flash.error}
               <ul class="nav navbar-nav navbar-right">
-      	        <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: red;"></i></a></li>
+                <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: red;"></i></a></li>
               </ul>
             #{/if}
             #{if flash.success}
               <ul class="nav navbar-nav navbar-right">
-      	        <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: green;"></i></a></li>
+                <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: green;"></i></a></li>
               </ul>
             #{/if}
           </div>
           -->
-      
-      
-        </div>
-        
       </div>
-    </div> <!-- End Fixed navbar -->
-    
-    #{/if}
-    
-    #{if header.equals('banner') }
-    <!-- Banner -->
-	<div id="banner">
-      <img class="img-responsive" src="/public/images/time_banner.jpg" alt="alt">
-      <img class="img-responsive pull-right hidden-xs" src="/public/images/logo.jpg" alt="alt">
     </div>
-	#{/if}
-	
+  </div> <!-- End Fixed navbar -->
 
-	
-    <!-- Begin page content -->
-    <div class="container-fluid" id="page_content">
-      
-      <!-- do layout -->
-      #{doLayout /}
+  #{/if}
 
-    </div>
-    
-    <!-- Altri componenti html -->
+  #{if header.equals('banner') }
+  <!-- Banner -->
+  <div id="banner">
+    <img class="img-responsive" src="/public/images/time_banner.jpg" alt="alt">
+    <img class="img-responsive pull-right hidden-xs" src="/public/images/logo.jpg" alt="alt">
+  </div>
+  #{/if}
+
+  <!-- Begin page content -->
+  <div class="container-fluid" id="page_content">
+
+    <!-- do layout -->
+    #{doLayout /}
+
     #{if flash.error}
-      <div id="flash-error" class="popover bottom">
-        <div class="arrow"></div>
-        <h3 class="popover-title"><strong>Notifica</strong>
-          <button id="buttonError" type="button" class="close" aria-hidden="true">&times;</button>
-        </h3>
-        <div class="popover-content">
-          #{if flash.error.equals('secure.error')}
-            <strong>&{'secure.error'}</strong>
-          #{/if} 
-          #{else}
-          <strong>${flash.error}</strong>
-          #{/else}
-        </div>
+      <div class="sr-only" data-notify="${'notify.error'.label()}" data-notify-type="error">
+        &{flash.error}
+      </div>
+    #{/if} #{if flash.success}
+      <div class="sr-only" data-notify="${'notify.success'.label()}" data-notify-type="success">
+        &{flash.success}
       </div>
     #{/if}
-    #{if flash.success}
-      <div id="flash-success" class="popover bottom">
-        <div class="arrow"></div>
-        <h3 class="popover-title"><strong>Notifica</strong>
-          <button id="buttonSuccess" type="button" class="close" aria-hidden="true">&times;</button>
-        </h3>
-        <div class="popover-content">
-        	#{if flash.success.equals('secure.logout')}
-        		<strong>&{'secure.logout'}</strong>
-        	#{/if}
-        	#{else}
-          		<strong>${flash.success}</strong>
-          	#{/else}
-        </div>
-      </div>
-    #{/if}  
-      
-   </div>
 
-   <footer>
-     <div class="container-fluid">
-       <p>Created with <a href="http://www.playframework.org">play framework</a> and really inspired from the "orologio" application developed by Pasquale Lazzareschi</p>
-     </div>
-   </footer>
+    <div id="defaultModal" class="modal container" tabindex="-1"></div>
 
+    <i id="defaultSpinner" class="fa fa-circle-o-notch fa-3x fa-spin hidden"></i>
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js"></script>	<!-- per combodate xeditable -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
-    <script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-    <script src="//cdn.datatables.net/responsive/1.0.6/js/dataTables.responsive.min.js"></script>
-    <script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
-    <script src="//cdn.datatables.net/colreorder/1.1.3/js/dataTables.colReorder.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/js/bootstrap-datepicker.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/locales/bootstrap-datepicker.it.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
-    
-    <script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
-    *{#{script 'bootstrap-modal.js' /}}*
-    *{#{script 'bootstrap-modalmanager.js' /}}*
-    #{script 'script.js' /}
+  </div>
+</div>
 
-    #{include './feedback.html' /}  
-	#{get 'moreScripts' /}
-  </body>
+<footer>
+  <div class="container-fluid">
+    <p>Created with <a href="http://www.playframework.org">play framework</a> and really inspired from the "orologio" application developed by Pasquale Lazzareschi</p>
+  </div>
+</footer>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js"></script>	<!-- per combodate xeditable -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/responsive/1.0.6/js/dataTables.responsive.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+<script src="//cdn.datatables.net/colreorder/1.1.3/js/dataTables.colReorder.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/js/bootstrap-datepicker.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/locales/bootstrap-datepicker.it.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
+
+<script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
+#{script 'bootstrap-modal.js' /}
+#{script 'bootstrap-modalmanager.js' /}
+#{script 'script.js' /}
+#{script 'list-select.min.js' /}
+#{script 'pnotify.custom.min.js' /}
+
+#{include '_myModal.html' /}
+#{get 'moreScripts' /}
+</body>
 </html>

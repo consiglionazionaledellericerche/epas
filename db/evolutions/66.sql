@@ -11,3 +11,4 @@ UPDATE stampings_history SET marked_by_employee = FALSE;
 DELETE FROM stamp_modification_types where code = 'md';
 ALTER TABLE stampings_history DROP COLUMN marked_by_employee;
 ALTER TABLE stampings DROP COLUMN marked_by_employee;
+

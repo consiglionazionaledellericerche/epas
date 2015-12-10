@@ -1,57 +1,87 @@
 package models;
 
-import javax.persistence.Column;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PropertyInPeriod;
+
+import play.data.validation.Required;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import models.base.BaseModel;
-
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 
 /**
- * 
+ * Un periodo contrattuale.
+ *
  * @author alessandro
  */
 @Entity
 @Table(name = "contracts_working_time_types")
-public class ContractWorkingTimeType extends BaseModel implements Comparable<ContractWorkingTimeType> {
+public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {
 
-	private static final long serialVersionUID = 3730183716240278997L;
+  private static final long serialVersionUID = 3730183716240278997L;
 
-	@Required
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="contract_id")
-	public Contract contract;
-	
-	@Required
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="working_time_type_id")
-	public WorkingTimeType workingTimeType;
-	
+  @Required
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "contract_id")
+  public Contract contract;
 
-	@Column(name="begin_date")
-	public LocalDate beginDate;
-	
+  @Required
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "working_time_type_id")
+  public WorkingTimeType workingTimeType;
 
-	@Column(name="end_date")
-	public LocalDate endDate;
-	
-	/**
-	 * Comparator ContractWorkingTimeType
-	 */
-	public int compareTo(ContractWorkingTimeType compareCwtt)
-	{
-		if (beginDate.isBefore(compareCwtt.beginDate))
-			return -1;
-		else if (beginDate.isAfter(compareCwtt.beginDate))
-			return 1;
-		else
-			return 0; 
-	}
+  @Override
+  public Object getValue() {
+    return this.workingTimeType;
+  }
+
+  @Override
+  public void setValue(Object value) {
+    this.workingTimeType = (WorkingTimeType)value;
+  }
+
+  public IPropertiesInPeriodOwner getOwner() {
+    return this.contract;
+  }
+
+  public void setOwner(IPropertiesInPeriodOwner owner) {
+    this.contract = (Contract)owner;
+  }
+
+  @Override
+  public boolean periodValueEquals(Object otherValue) {
+    if (otherValue instanceof ContractWorkingTimeType) {
+      return this.workingTimeType.id == (((ContractWorkingTimeType) otherValue).workingTimeType.id);
+    }
+    return false;
+  }
+
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertyInPeriod#getType()
+   */
+  @Override
+  public Object getType() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertyInPeriod#setType(java.lang.Object)
+   */
+  @Override
+  public void setType(Object value) {
+    // TODO Auto-generated method stub
+  }
+  
+  @Override
+  public String getLabel() {
+    return this.workingTimeType.description;
+  }
+
+
 }

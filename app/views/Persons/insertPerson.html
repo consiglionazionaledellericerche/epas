@@ -3,8 +3,15 @@
 #{set title: 'ePAS - Inserimento nuova persona' /}
 
 <div class="container">
+
+  #{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  ('Inserimento Dipendente'):null] /}
+  #{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+  #{title title:'Inserimento Dipendente' /} 
+
   #{form @Persons.save(),class:'form-horizontal'}
-  <div class="panel panel-default">
+  <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
     </div>
@@ -13,11 +20,10 @@
       #{f.input 'person.surname',required:'true'/}
       #{f.input 'person.name',required:'true'/}
       #{f.input 'person.number',type:'number'/}
-      #{f.input 'person.badgeNumber'/}
       #{f.input 'person.email',required:'true'/}
 
       #{f.selectModel 'person.qualification', items:templateUtility.allQualifications, required:'true'/}
-      #{f.selectModel 'person.office', items:templateUtility.allOfficesAllowed, required:'true'/}
+      #{f.selectModel 'person.office', items:templateUtility.officesAllowed(), required:'true'/}
 
       #{f.checkbox 'person.wantEmail'/}
 
@@ -30,14 +36,14 @@
     </div>
   </div>
 
-  <div class="panel panel-default">
+  <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
     </div>
     <div class="panel-body">
-      #{f.date 'contract.beginContract',view:'year',required:'true'/} 
-      #{f.date 'contract.expireContract',view:'year'/} 
-      #{f.checkbox 'contract.onCertificate',title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
+      #{f.date 'contract.beginDate',view:'year',required:'true'/} 
+      #{f.date 'contract.endDate',view:'year'/} 
+      #{f.checkbox 'contract.onCertificate', title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
 
       <p>
         Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
@@ -48,7 +54,7 @@
     </div>
   </div>
 
-  <div class="panel panel-default">
+  <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="badge">3</span> Altre informazioni (opzionali)</h3>
     </div>
@@ -62,27 +68,6 @@
     </div>
   </div>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title"><span class="badge">4</span>Username</h3>
-    </div>
-    <div class="panel-body">
-
-      #{field 'user.username'}
-      <div class='form-group #{if field.error}has-error#{/if}' >
-        <label class="col-sm-3 control-label" for="${field.id}">Scelta Username*</label>
-        <div class="col-sm-6">
-          #{select field.name, id:field.id,value:field.value,class:'form-control'} 
-          #{/select}
-        </div>
-        #{if field.error}
-        <span class="help-block col-sm-3">&{field.error}</span>
-        #{/if}
-      </div>
-      #{/field}
-
-    </div>
-  </div>
   <div class="container-fluid center">
     <input class="btn btn-primary" type="submit" value="Salva" />
     <a href="@{Persons.list()}" class="btn btn-default" role="button">Annulla</a>
@@ -90,22 +75,4 @@
   #{/form}
 </div>    
 
-#{set 'moreScripts'}
-<script type="text/javascript">
-
-  $(document).ready( function (){
-
-    generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
-
-    $('#person\\_surname').change(function(){
-      generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
-    });
-
-    $('#person\\_name').change(function(){
-      generateUserName($("#person\\_name"),$("#person\\_surname"),$("#user\\_username"));
-    });
-
-  });
-</script>
-#{/set}
 

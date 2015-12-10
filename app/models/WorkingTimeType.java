@@ -13,11 +13,10 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
+import models.base.BaseModel;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -25,103 +24,101 @@ import play.data.validation.Unique;
 /**
  * @author cristian
  * @author dario
- * 
  */
 @Entity
 @Audited
 @Table(name="working_time_types")
 public class WorkingTimeType extends BaseModel {
 
-	private static final long serialVersionUID = -3443521979786226461L;
-	
-	@Required
-	@Column(nullable=false)
-	@Unique("office")
-	public String description;
-	
-	@Required
-	public Boolean horizontal;
+  private static final long serialVersionUID = -3443521979786226461L;
 
-	/**
-	 * True se il tipo di orario corrisponde ad un "turno di lavoro"
-	 * false altrimenti 
-	 */
-	public boolean shift = false;
+  @Required
+  @Column(nullable = false)
+  @Unique("office")
+  public String description;
 
-	@Column(name="meal_ticket_enabled")
-	public boolean mealTicketEnabled = true;	//inutile
+  @Required
+  public Boolean horizontal;
 
-	@NotAudited
-	@OneToMany(mappedBy="workingTimeType")
-	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
+  /**
+   * True se il tipo di orario corrisponde ad un "turno di lavoro" false altrimenti
+   */
+  public boolean shift = false;
 
-	@NotAudited
-	@OneToMany(mappedBy="workingTimeType")
-	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
-	
-	@Required
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name = "office_id")
-	public Office office;
+  @Column(name = "meal_ticket_enabled")
+  public boolean mealTicketEnabled = true;    //inutile
 
-	@Column(name="disabled")
-	public boolean disabled = false;
+  @NotAudited
+  @OneToMany(mappedBy = "workingTimeType")
+  public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
 
-	@OneToMany( mappedBy = "workingTimeType", fetch = FetchType.EAGER)
-	@OrderBy("dayOfWeek")
-	public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
+  @NotAudited
+  @OneToMany(mappedBy = "workingTimeType")
+  public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
 
-	@Override
-	public String toString() {
-		return description;
-	}
-	
-	@Transient
-	public boolean horizontalEuristic() {
-		
-		Integer workingTime = null;
-		Integer mealTicketTime = null;
-		Integer breakTicketTime = null;
-		Integer afternoonThreshold = null;
-		Integer afternoonThresholdTime = null;
-		
-		boolean equal = true;
-		
-		for(WorkingTimeTypeDay wttd : this.workingTimeTypeDays) {
-			
-			if( wttd.holiday ) {
-				continue;
-			}
-			
-			if (workingTime == null) {
-				workingTime = wttd.workingTime;
-				mealTicketTime = wttd.mealTicketTime;
-				breakTicketTime = wttd.breakTicketTime;
-				afternoonThreshold = wttd.ticketAfternoonThreshold;
-				afternoonThresholdTime = wttd.ticketAfternoonWorkingTime;
-				continue;
-			}
+  //@Required
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id")
+  public Office office;
 
-			if ( !workingTime.equals(wttd.workingTime) ) {
-				equal = false;
-			} 
-			if ( !mealTicketTime.equals(wttd.mealTicketTime) ) {
-				equal = false;
-			}
-			if ( !breakTicketTime.equals(wttd.breakTicketTime) ) {
-				equal = false;
-			}
-			if ( !afternoonThreshold.equals(wttd.ticketAfternoonThreshold) ) {
-				equal = false;
-			}
-			if ( !afternoonThresholdTime.equals(wttd.ticketAfternoonWorkingTime) ) {
-				equal = false;
-			}
-		}
-		
-		return equal;
-		
-	}
+  @Column(name = "disabled")
+  public boolean disabled = false;
+
+  @OneToMany(mappedBy = "workingTimeType", fetch = FetchType.EAGER)
+  @OrderBy("dayOfWeek")
+  public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
+
+  @Override
+  public String toString() {
+    return description;
+  }
+
+  @Transient
+  public boolean horizontalEuristic() {
+
+    Integer workingTime = null;
+    Integer mealTicketTime = null;
+    Integer breakTicketTime = null;
+    Integer afternoonThreshold = null;
+    Integer afternoonThresholdTime = null;
+
+    boolean equal = true;
+
+    for (WorkingTimeTypeDay wttd : this.workingTimeTypeDays) {
+
+      if (wttd.holiday) {
+        continue;
+      }
+
+      if (workingTime == null) {
+        workingTime = wttd.workingTime;
+        mealTicketTime = wttd.mealTicketTime;
+        breakTicketTime = wttd.breakTicketTime;
+        afternoonThreshold = wttd.ticketAfternoonThreshold;
+        afternoonThresholdTime = wttd.ticketAfternoonWorkingTime;
+        continue;
+      }
+
+      if (!workingTime.equals(wttd.workingTime)) {
+        equal = false;
+      }
+      if (!mealTicketTime.equals(wttd.mealTicketTime)) {
+        equal = false;
+      }
+      if (!breakTicketTime.equals(wttd.breakTicketTime)) {
+        equal = false;
+      }
+      if (!afternoonThreshold.equals(wttd.ticketAfternoonThreshold)) {
+        equal = false;
+      }
+      if (!afternoonThresholdTime.equals(wttd.ticketAfternoonWorkingTime)) {
+        equal = false;
+      }
+    }
+
+    return equal;
+
+  }
 
 }
 

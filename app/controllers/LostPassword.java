@@ -2,110 +2,78 @@ package controllers;
 
 import dao.PersonDao;
 import dao.UserDao;
+
+import manager.EmailManager;
+import manager.UserManager;
+
 import models.Person;
 import models.User;
-import org.apache.commons.mail.SimpleEmail;
+
 import org.joda.time.LocalDate;
-import play.Logger;
-import play.Play;
-import play.libs.Mail;
+
+import play.data.validation.Email;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 
 import javax.inject.Inject;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 
-public class LostPassword extends Controller{
-	
-	@Inject
-	private static PersonDao personDao;
-	@Inject
-	private static UserDao userDao;
-	
-	
-	private static final String RECOVERY_PATH = "lostpassword/lostpasswordrecovery?token=";
-	private static final String USERNAME = "username";
+public class LostPassword extends Controller {
 
-	
-	private static String getRecoveryBaseUrl() {
-		String baseUrl = Play.configuration.getProperty("application.baseUrl");
-		if (!baseUrl.endsWith("/")) {
-			baseUrl = baseUrl + "/";
-		}
-		return baseUrl + RECOVERY_PATH;
-	}
-	
-	public static void sendTokenRecoveryPassword(String email) throws Throwable
-	{
-		if(email==null || email.equals("") || !email.contains("@"))
-		{
-			flash.error("Fornire un indirizzo email valido, operazione annullata.");
-			LostPassword.lostPassword();
-		}
+  private static final String USERNAME = "username";
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static UserDao userDao;
+  @Inject
+  private static UserManager userManager;
+  @Inject
+  private static EmailManager emailManager;
 
-		Person person = personDao.byEmail(email).orNull();
-		if(person==null)
-		{
-			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
-			LostPassword.lostPassword();
-		}
-		
-		//generate random token
-		SecureRandom random = new SecureRandom();
-		String token = new BigInteger(130, random).toString(32);
-		
-		//Person person = contactData.person;
-		person.user.recoveryToken = token;
-		person.user.expireRecoveryToken = new LocalDate();
-		person.user.save();
+  public static void sendTokenRecoveryPassword(@Email String email) throws Throwable {
+    if (Validation.hasErrors()) {
+      flash.error("Fornire un indirizzo email valido, operazione annullata.");
+      LostPassword.lostPassword();
+    }
 
-		String message = "Utente: " + person.user.username + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: " + getRecoveryBaseUrl() + token;
+    Person person = personDao.byEmail(email).orNull();
+    if (person == null) {
 
-		SimpleEmail simpleEmail = new SimpleEmail();
+      flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
+      LostPassword.lostPassword();
+    }
 
-		simpleEmail.addTo(email);
-		simpleEmail.setSubject("ePas Recupero Password");
-		simpleEmail.setMsg(message);
+    userManager.generateRecoveryToken(person);
+    emailManager.recoveryPasswordMail(person);
 
-		Mail.send(simpleEmail);
+    flash.success("E' stata inviata una mail all'indirizzo %s. "
+                    + "Completare la procedura di recovery password entro la data di oggi."
+            , person.email);
+    Secure.login();
+  }
 
-		Logger.info("Messaggio recovery password spedito è: %s", message);
-		
-		flash.success("E' stata inviata una mail all'indirizzo %s. "
-				+ "Completare la procedura di recovery password entro la data di oggi."
-				,person.email);
-		Secure.login();
-	}
-	
-	public static void lostPasswordRecovery(String token) throws Throwable
-	{
-		if(token==null || token.equals(""))
-		{
-			flash.error("Accesso non autorizzato. Operazione annullata.");
-			Secure.login();
-		}
-		
-		User user = userDao.getUserByRecoveryToken(token);
-		if(user==null)
-		{
-			flash.error("Accesso non autorizzato. Operazione annullata.");
-			Secure.login();
-		}
-		if(!user.expireRecoveryToken.equals(LocalDate.now()))
-		{
-			flash.error("La procedura di recovery password è scaduta. Operazione annullata.");
-			Secure.login();
-		}
-		
-		session.put(USERNAME, user.username);
-		
-		render();
-	}
-	
-	
-	public static void lostPassword()
-	{
-		render();
-	}
+  public static void lostPasswordRecovery(String token) throws Throwable {
+    if (token == null || token.equals("")) {
+      flash.error("Accesso non autorizzato. Operazione annullata.");
+      Secure.login();
+    }
+
+    User user = userDao.getUserByRecoveryToken(token);
+    if (user == null) {
+      flash.error("Accesso non autorizzato. Operazione annullata.");
+      Secure.login();
+    }
+    if (!user.expireRecoveryToken.equals(LocalDate.now())) {
+      flash.error("La procedura di recovery password è scaduta. Operazione annullata.");
+      Secure.login();
+    }
+
+    session.put(USERNAME, user.username);
+
+    render();
+  }
+
+  public static void lostPassword() {
+    render();
+  }
 
 }

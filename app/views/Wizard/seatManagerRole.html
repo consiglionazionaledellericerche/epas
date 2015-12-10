@@ -1,163 +1,37 @@
 #{extends 'Wizard/wizard.html' /}
 
-#{form @Wizard.seatManagerRole(),role:'form'}
-<input type="hidden" name="stepIndex" value="${currentStep.index}"/>
-<fieldset>
+#{form @Wizard.seatManagerRole(),class:'form-horizontal'}
+#{f.hidden 'stepIndex', value:currentStep.index/}
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Amministratore della Sede</em>
+</h2></legend>
 
-  <div class="page-header col-sm-6 col-sm-offset-3">
-    <h1><small>Amministratore della Sede</small></h1>
-  </div>
+#{f.input 'person.name',required:true,value:properties.getProperty('personnelAdminName') /}
+#{f.input 'person.surname',required:true,value:properties.getProperty('personnelAdminSurname') /}
+#{f.date 'person.birthday',view:'year',value:properties.getProperty('personnelAdminBirthday') /}
+#{f.input 'person.email',required:true,value:properties.getProperty('personnelAdminEmail') /}
+#{f.input 'person.number',type:'number',value:properties.getProperty('personnelAdminNumber') /}
 
-  <div class="row">
-    #{field 'manager_surname'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Cognome</label>
-      <input class="form-control" placeholder="Cognome" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}
-      <span class="help-block">${field.error}</span>
-      #{/if}
-    </div>
-    #{/field}
+#{f.edit 'qualification'}
+  #{select field.id, value:properties.getProperty('personnelAdminQualification'),class:'form-control'}
+  #{list items:1..8}
+    #{option _}Livello ${_}#{/option}
+  #{/list}
+  #{/select}
+#{/f.edit}
 
-    #{field 'manager_name'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Nome</label>
-      <input class="form-control" placeholder="Nome" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-      #{if field.error}
-      <span class="help-block">${field.error}</span>
-      #{/if}
-    </div>
-    #{/field}
-  </div>
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Dati contrattuali</em></h2>
+</legend>
 
-  <div class="row">
-    #{field 'manager_qualification'}
-    <div class='form-group col-sm-3 col-sm-offset-3' >
-      <label class="control-label" for="${field.id}">Livello qualifica</label>
-      #{select field.id, value:properties.getProperty(field.name), id:field.id,class:'form-control'}
-      #{list items:1..9, as:'i'}
-      #{option i}${i}#{/option}
-      #{/list}
-      #{/select}
-    </div>
-    #{/field}
+#{f.date 'beginDate',required:true,view:'year',value:properties.getProperty('personnelAdminbeginDate') /}
+#{f.date 'endContract',view:'year',value:properties.getProperty('personnelAdminEndContract') /}
 
-    #{field 'manager_birthday'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data di Nascita</label>
-      <div class="input-group">
-        <input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-      </div>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-  </div>
+<legend class="col-sm-8 col-sm-offset-2"><h2 class="text-center"><em>Scelta password d'accesso</em>
+</h2></legend>
 
-  <div class="row">
-    #{field 'manager_badge_number'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Numero badge</label>
-      <input class="form-control" placeholder="num. badge" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
+#{f.input 'managerPassword',type:'password',required:true,value:properties.getProperty('personnelAdminPassword'),placeholder:'Password' /}
+#{f.input 'managerPasswordRetype',type:'password',required:true,value:properties.getProperty('personnelAdminPassword'),placeholder:'Ridigita  Password' /}
 
-    #{field 'manager_registration_number'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Matricola</label>
-      <input class="form-control" placeholder="num. matricola" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-  </div>
 
-  <div class="row">
-    #{field 'manager_contract_begin'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data inizio contratto</label>
-      <div class="input-group">
-        <input datepicker-year class="form-control" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-      </div>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-    #{field 'manager_contract_end'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data termine contratto</label>
-      <div class="input-group">
-        <input datepicker-year class="form-control"  id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-      </div>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-  </div>
-  <div class="row">
-    #{field 'manager_email'}
-    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Indirizzo email</label>
-      <input class="form-control" placeholder="tua@email.it" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-  </div>
-
-  <div class="page-header col-sm-6 col-sm-offset-3">
-    <h1><small>Username e Password</small></h1>
-  </div>
-
-  #{field 'manager_username'}
-  <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}' >
-    <label class="control-label" for="${field.id}">Scelta Username</label>
-    #{select field.id, id:field.id,class:'form-control'}
-    #{/select}
-    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-  </div>
-  #{/field}
-
-  #{field 'manager_password'}
-  <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
-    <label class="control-label" for="${field.id}">Password</label>
-    <input  class="form-control" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty(field.name)}' required>
-    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-  </div>
-  #{/field}
-
-  #{field 'manager_password_retype'}
-  <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
-    <label class="control-label" for="${field.id}">Reinserire la password</label>
-    <input class="form-control" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty("manager_password")}' required>
-    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-  </div>
-  #{/field}
-
-  <legend id="bottom_line" class="col-sm-12"></legend>
-
-  <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
-
-</fieldset>
+<legend id="bottom_line" class="col-sm-12"></legend>
+#{b.submit 'Invia', class:'col-sm-2 col-sm-offset-5', /}
 #{/form}
-
-#{set 'moreScripts'}
-<script type="text/javascript">
-
- $(document).ready( function (){
-
-   generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
-  $("#manager_username").val('${properties.getProperty('manager_username')}');
-
-  $('#manager_surname').change(function(){
-    generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
-  });
-
-  $('#manager_name').change(function(){
-     generateUserName($("#manager_name"),$("#manager_surname"),$("#manager_username"));
-  });
-
-});
-</script>
-#{/set}

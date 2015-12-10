@@ -1,0 +1,70 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'updateContractStampProfile' /}
+
+<div class="container" id="updateCsp">
+
+#{panel title:'Configurazione Attuale', color:'primary'}
+<table class="table table-bordered table-condensed center">
+  <tr>
+    <th>Dal</th>
+    <th>Al</th>
+	<th>Presenza Automatica</th>
+  </tr>
+  #{list items:contract.contractStampProfile, as:'cspItem'}
+  <tr>
+    <td>${cspItem.beginDate.format()}</td>
+	<td>#{if cspItem.endDate} ${cspItem.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+	<td>&{cspItem.fixedworkingtime}</td>
+  </tr>
+  #{/list}
+</table>
+#{/panel}
+
+<div class="alert alert-info">
+  <p>Utilizzare questa form per definire il nuovo periodo di presenza automatica selezionando la data di inizio e la data di fine periodo.</p>
+  <p>Lasciando vuoto il campo <strong>&{'csp.endDate'}</strong> la nuova configurazione verrà applicata fino alla fine del contratto.<p>
+  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+</div>
+
+#{form action:@Contracts.saveContractStampProfile(), class:'form-horizontal',
+		'data-async':'#page_content', 'data-async-error':'#updateCsp', 'data-spinner':'#defaultSpinner' }
+	
+	#{f.hidden 'csp.contract.id' /}
+	
+	#{if !confirmed}	
+		 #{f.date 'csp.beginDate', value:csp.beginDate?.format(), required:true /}
+		 #{f.date 'csp.endDate', value:csp.endDate?.format() /}
+		 #{f.booleanRadio 'csp.fixedworkingtime' /}
+		 
+		 #{b.buttons center:true}
+		   #{b.submit 'Applica'/}
+		 #{/b.buttons}
+	#{/if}
+	#{else}
+	      #{f.hidden 'confirmed' /}
+		  #{f.simpleView 'csp.beginDate', value:csp.beginDate?.format(), hidden:true /}
+		  #{f.simpleView 'csp.endDate', value:csp.endDate?.format(), hidden:true /}
+		  
+		  #{f.simpleView 'csp.fixedworkingtime', value:csp.fixedworkingtime, hidden:true /}
+
+		  
+		  #{recomputeRecap recomputeRecap:recomputeRecap /}
+		  #{b.buttons center:true}
+		    #{b.cancel @updateContractStampProfile(contract.id) /}
+		    #{b.submit 'Conferma'/}
+		  #{/b.buttons}
+		 
+	#{/else}
+	 
+#{/form}
+
+
+</div>

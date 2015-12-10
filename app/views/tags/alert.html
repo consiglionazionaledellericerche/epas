@@ -1,0 +1,13 @@
+*{
+  color: default
+  center
+  dismissible:
+}*  
+
+<div class="alert alert-#{if _color}${_color}#{/if}#{else}warning#{/else}#{if _center} text-center#{/if}" 
+  #{if _dismissible}alert-dismissible" role="alert"#{/if} >
+  #{if _dismissible}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  #{/if}
+  #{doBody /}
+</div>

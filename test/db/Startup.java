@@ -13,13 +13,13 @@ import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 
+import com.google.common.io.Resources;
+
 import play.Play;
 import play.Play.Mode;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-
-import com.google.common.io.Resources;
 
 /**
  * @author cristian

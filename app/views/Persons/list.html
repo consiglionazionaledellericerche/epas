@@ -12,28 +12,33 @@
   #{set switchUser:true /}
 #{/secure.checkAction}
 
-<div class="row">
-    <a class="btn btn-success col-xs-offset-5 col-xs-2" href="@{Persons.insertPerson}"><i class="fa fa-user-plus"></i> Inserisci una nuova persona </a>
-</div>
+<div class="container">
+#{title title:'Lista Del Personale' /}
 
-<h3 class="margin-bottom">Lista del Personale Attivo</h3>
+#{tabs}
+  #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
+  #{tabItem id:'nonAttivo', title:'Personale Non Attivo' /}
+#{/tabs} 
+ 
+ #{tabContent}
 
-<table class="table table-striped table-hover table-condensed center" datatable>
+  #{tabContentItem id:'attivo', active:true}
+    <p>
+	<div class="text-center">
+	    <a class="btn btn-success" href="@{Persons.insertPerson}"><i class="fa fa-user-plus"></i> Inserisci una nuova persona </a>
+	</div>
+    </p>
+    <table class="table table-striped table-hover table-condensed center" datatable>
     <thead>
 	  <tr>
 		<th>&{'person.name'}</th>
 		<th>&{'person.number'}</th>
-		<th>&{'person.badgeNumber'}</th>
-		<th>&{'contract.beginContract'}</th>
-		<th>&{'contract.expireContract'}</th>
+		<th>&{'contract.beginDate'}</th>
+		<th>&{'contract.endDate'}</th>
 		<th>&{'person.currentWorkingTimeType'}</th>
 		<th>&{'person.currentVacationPeriod'}</th>
 		<th>&{'person.qualification'}</th>
 		<th>&{'contractStampProfile.fixedworkingtime'}</th>
-        <th>&{'user.username'}</th>
-		<th>&{'person.email'}</th>
-		<th>&{'person.telephone'}</th>
-		<th>Dati<br> Iniziali</th>
 		<th>&{'person.wantEmail'}</th>
 		#{if switchUser}<th></th>#{/if}
 	  </tr>
@@ -49,13 +54,12 @@
 		<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="mancano i riepiloghi"></span>
 		#{/if}
 		<td><font color="#000000">${person.value.number}</font></td>
-		<td><font color="#000000">${person.value.badgeNumber}</font></td>
-		<td><font color="#000000">${person.currentContract.get().beginContract?.format()}</font></td>
-		<td><font color="#000000">${person.currentContract.get().expireContract?.format()}</font></td>
+		<td data-order="${person.currentContract.get().beginDate}"><font color="#000000">${person.currentContract.get().beginDate?.format()}</font></td>
+		<td data-order="${person.currentContract.get().endDate}"><font color="#000000">${person.currentContract.get().endDate?.format()}</font></td>
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
-		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal-large">
+		    <a href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-async-modal="#defaultModal">
 		      ${person.currentWorkingTimeType.get().description}
 		    </a>
 		  #{/if}
@@ -63,7 +67,7 @@
 
 		<td>
 		  #{if person.currentVacationPeriod.present }
-		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal-large">
+		     <a href="@{Persons.showCurrentVacation(person.value.id)}" data-async-modal="#defaultModal">
 		        ${person.currentVacationPeriod.get().vacationCode.description}
 		     </a>
 		  #{/if}
@@ -75,33 +79,7 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>
-        <td class="alignLeft">${person.value.user.username}</td>
-		<td class="alignLeft"><font color="#000000">${person.value.email}</font></td>
-		<td>
-		 <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover"
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="${(
-	    		'<br>Telefono: <strong>'+person.value.telephone+'</strong>').escape()}"
-	    		title="Contatti ${person.value.fullname}"><i class="fa fa-phone"></i></a>
-		</td>
-
-		<!-- Inizializzazione ePAS -->
-		<td class=" 
-		#{if person.currentContractInitializationMissing()}
-		  danger
-		#{/if}
-		">
-		 #{if person.currentContract.get().sourceDateResidual != null}
-		   <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Modifica</a>
-		   #{if person.currentContract.get().sourceByAdmin == false} <i class="fa fa-exclamation-triangle"></i> #{/if}
-    	 #{/if}
-		 #{else}
-	       <a href="@{Persons.updateSourceContract(person.currentContract.get().id)}" data-modal=".my-modal-large">Definisci</a>
-		 #{/else}
-		</td>
-
+		
 		<!-- Invio email -->
 		<td>
 		  #{if person.value.wantEmail}
@@ -119,43 +97,48 @@
 
 	#{/list}
 	</tbody>
-  </table>
+    </table>
 
-  <h3 class="margin-bottom margin-top-2">Lista del Personale Non Attivo</h3>
+  #{/tabContentItem}
 
-<table class="table table-striped table-hover table-condensed center" width="100%" datatable>
-    <thead>
-	  <tr>
-		<th>&{'person.name'}</th>
-		<th>&{'person.number'}</th>
-		<th>&{'person.badgeNumber'}</th>
-		<th>&{'person.qualification'}</th>
-        <th>&{'user.username'}</th>
-		<th>&{'person.email'}</th>
-		#{if switchUser}<th></th>#{/if}
-	  </tr>
-	</thead>
-	<tbody>
-	 #{list items:personList, as:'person'}
-	 #{if person.currentContract.present}
-	  #{/if}
-	  #{else}
-	   <tr>
-		<td class="personName alignLeft"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
-		<td><font color="#808080">${person.value.number}</font></td>
-		<td><font color="#000000">${person.value.badgeNumber}</font></td>
-		<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
-        <td class="alignLeft">${person.value.user.username}</td>
-        <td><font color="#808080">${person.value.email}</font></td>
-		#{if switchUser}
-		  <td>
-			<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
-		  </td>
-		#{/if}
-	   </tr>
-	  #{/else}
-	#{/list}
-	</tbody>
-  </table>
+  #{tabContentItem id:'nonAttivo'}
+	
+	<br>
+	<table class="table table-striped table-hover table-condensed center" width="100%" datatable>
+	    <thead>
+		  <tr>
+			<th>&{'person.name'}</th>
+			<th>&{'person.number'}</th>
+			<th>&{'person.qualification'}</th>
+	        <th>&{'user.username'}</th>
+			<th>&{'person.email'}</th>
+			#{if switchUser}<th></th>#{/if}
+		  </tr>
+		</thead>
+		<tbody>
+		 #{list items:personList, as:'person'}
+		 #{if person.currentContract.present}
+		  #{/if}
+		  #{else}
+		   <tr>
+			<td class="personName alignLeft"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
+			<td><font color="#808080">${person.value.number}</font></td>
+			<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
+	        <td class="alignLeft">${person.value.user.username}</td>
+	        <td><font color="#808080">${person.value.email}</font></td>
+			#{if switchUser}
+			  <td>
+				<a class="btn btn-warning btn-xs" href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+			  </td>
+			#{/if}
+		   </tr>
+		  #{/else}
+		#{/list}
+		</tbody>
+	  </table>
+  
+  #{/tabContentItem}
+   
+#{/tabContent}
 
-#{include '_myModal_large.html' /}
+</div>

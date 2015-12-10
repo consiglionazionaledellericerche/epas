@@ -14,26 +14,26 @@ public enum StampModificationTypeCode {
   6 | d    | Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)
   7 | md   | Timbratura modificata dal dipendente
 	*/
-	
-	
-	
-    FOR_DAILY_LUNCH_TIME("p"),
-    FOR_MIN_LUNCH_TIME("e"),
-    MARKED_BY_ADMIN("m"),
-    TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT("x"),
-    ACTUAL_TIME_AT_WORK("f"),
-    FIXED_WORKINGTIME("d"),
-    MARKED_BY_EMPLOYEE("md");
-    
-    
-    private String code;
-    
-    private StampModificationTypeCode(String code) {
-            this.code = code;
-    }
-    
-    public String getCode() {
-            return code;
-    }
+
+
+
+  FOR_DAILY_LUNCH_TIME("p"),
+  FOR_MIN_LUNCH_TIME("e"),
+  MARKED_BY_ADMIN("m"),
+  TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT("x"),
+  ACTUAL_TIME_AT_WORK("f"),
+  FIXED_WORKINGTIME("d"),
+  MARKED_BY_EMPLOYEE("md");
+
+
+  private String code;
+
+  private StampModificationTypeCode(String code) {
+    this.code = code;
+  }
+
+  public String getCode() {
+    return code;
+  }
 
 }

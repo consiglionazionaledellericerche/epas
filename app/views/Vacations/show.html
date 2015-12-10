@@ -2,19 +2,16 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Ferie e permessi' /}
 
-<!-- container pagina ferie -->
-<div class="row-fluid container">
+
+<div class="container">
+
+#{title title:('Ferie e Permessi ' + session.get("yearSelected")) /}
+
    
    #{list items:vacationsRecapList, as:'vacationsRecap'}
 	
-	<div class="container col-xs-12 col-md-6">
-	<!-- panel Ferie -->
-	<div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Ferie</h3>
-      </div>
-      <div class="panel-body">
-      
+	#{panel title:'Ferie', dim:6, color:'primary' }
+	     
       <table class="table table-bordered table-hover">
       <tr class="warning">
         <th>Anno</th>
@@ -32,7 +29,7 @@
         <!-- utilizzate -->
         <td>
 		  #{if vacationsRecap.vacationDaysLastYearUsed != 0 } 
-           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-target="#myModal3">
+           <a href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
 			${vacationsRecap.vacationDaysLastYearUsed}
 		  </a>
 		  #{/if}
@@ -41,7 +38,7 @@
 	    <!-- residue (maturate) -->
         <td>${vacationsRecap.vacationDaysLastYearNotYetUsed} 
            (${vacationsRecap.vacationDaysLastYearNotYetUsed}) </td>
-        </td>
+
       </tr>
       
       <!-- Ferie Current year -->
@@ -53,7 +50,7 @@
         <!-- utilizzate -->
         <td>
 		  #{if vacationsRecap.vacationDaysCurrentYearUsed != 0 } 
-           <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
+           <a href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
 			${vacationsRecap.vacationDaysCurrentYearUsed}
 		  </a>
 		  #{/if}
@@ -62,22 +59,14 @@
 	    <!-- residue (maturate) -->
         <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed} 
            (${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed}) </td>
-        </td>
+
       </tr>
   	</table>
-      
-      </div>
-    </div> <!-- end panel Ferie -->
-	</div>
+  	
+	#{/panel}
 	
-	<div class="container col-xs-12 col-md-6">
-	<!-- panel Permessi -->
-	<div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Permessi legge 937/77</h3>
-      </div>
-      <div class="panel-body">
-      
+	#{panel title:'Permessi legge 937/77', dim:6, color:'primary' }
+	      
       <table class="table table-bordered table-hover">
       <tr class="warning">
         <th>Anno</th>
@@ -93,7 +82,7 @@
         <!-- utilizzate -->
         <td>
 		  #{if vacationsRecap.permissionUsed != 0 } 
-           <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
+           <a href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
 			${vacationsRecap.permissionUsed}
 		  </a>
 		  #{/if}
@@ -102,68 +91,37 @@
 	    <!-- residue (maturate) -->
         <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed} 
            (${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}) </td>
-        </td>
       </tr>
   	</table>
       
-      
-      </div>
-    </div>  <!-- end panel Permessi -->
-    </div>
+	#{/panel}      
+    
+    <div class="col-md-12">
 	
-</div>
-	
-<div class="row-fluid container">
-    <div class="container col-xs-12 col-md-6">	
-	<!-- panel Piani -->
-	<div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Piani ferie associati contratto</h3>
-      </div>
-      <div class="panel-body">
-      
-      <table class="table table-bordered table-hover center">
-    <tr class="info">
-      <th>Descrizione</th>
-      <th>Data inizio</th>
-      <th>Data fine</th>
-    </tr>
-    
-    #{list items: vacationsRecap.contract.vacationPeriods, as: 'vp'}
-    <tr>
-      <td>${vp.vacationCode.description}</td>
-      <td>${vp.beginFrom}</td>
-      <td>${vp.endTo}</td>
-    </tr>
-    #{/list}
-    
-    </table>
-      
-      
-      </div>
-    </div> <!-- end panel Piani -->
+	  <p>I <strong>Piani Ferie</strong> attualmente associati sono i seguenti:<br></p>
+	     <table class="table center">
+	    <tr class="info">
+	      <th>Dal</th>
+	      <th>Al</th>
+	      <th>Valore</th>
+	    </tr>
+	    
+	    #{list items: vacationsRecap.contract.vacationPeriods, as: 'vp'}
+	    <tr>
+	      <td>${vp.beginFrom.format()}</td>
+	      <td>
+	        #{if vp.endTo}${vp.endTo.format()}#{/if}#{else}<em>Indeterminato</em>#{/else}
+	      </td>
+	      <td>${vp.vacationCode.description}</td>
+	    </tr>
+	    #{/list}
+	    
+	    </table>
+	  
+		
     </div>
-    
     #{/list}
 </div>
-
-      
- 
-
-<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-center">
-    
-    <div class="modal-content">
-             
-    </div><!-- /.modal-content -->
-           
-    
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
-
-
 
 
 

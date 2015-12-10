@@ -1,0 +1,28 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   personId = session.get("personSelected"); }%
+   
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("showGeneralMonthlyAbsences")} class="active" #{/if}>
+      <a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected"))}">Assenze Mensili</a>
+    </li>
+    <li #{if _activeAction.equals("yearlyAbsences")} class="active" #{/if}>
+      <a href="@{Absences.yearlyAbsences(session.get("personSelected"), session.get("yearSelected"))}">Assenze Annuali</a>
+    </li>
+    <li #{if _activeAction.equals("manageAttachmentsPerCode")} class="active" #{/if}>
+      <a href="@{Absences.manageAttachmentsPerCode(session.get("yearSelected"), session.get("monthSelected"))}">Allegati Per Codice Assenza</a>
+    </li>
+    <li #{if _activeAction.equals("manageAttachmentsPerPerson")} class="active" #{/if}>
+      <a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Allegati Per Persona</a>
+    </li>
+    <li #{if _activeAction.equals("absenceInPeriod")} class="active" #{/if}>
+      <a href="@{Absences.absenceInPeriod(session.get("personSelected"))}">Assenze Nel Periodo</a>
+    </li>
+  </ul>
+</div>
+<br>

@@ -12,14 +12,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 
-public class LocalDateDeserializer implements JsonDeserializer<LocalDate>{
+public class LocalDateDeserializer implements JsonDeserializer<LocalDate> {
 
-	final static DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
-	
-	@Override
-	public LocalDate deserialize(JsonElement arg0, Type arg1,
-			JsonDeserializationContext arg2) throws JsonParseException {
-		
-		return LocalDate.parse(arg0.getAsString(), dtf);
-	}
+  final static DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
+
+  @Override
+  public LocalDate deserialize(JsonElement arg0, Type arg1,
+                               JsonDeserializationContext arg2) throws JsonParseException {
+
+    return LocalDate.parse(arg0.getAsString(), dtf);
+  }
 }

@@ -1,0 +1,26 @@
+#{modalAsync id:'defaultModal', title:('Nuovo contratto per ' + contract.person.fullname) }
+
+  <div id="insertContract">
+	<div class="alert alert-info">
+	Inserire i dati per il nuovo contratto. Il nuovo contratto non può sovrapporsi del tutto o in parte
+	ad altri contratti inseriti per il dipendente.
+	In caso di tempo indeterminato lasciare vuoto il campo <em>Fine Contratto</em>.
+	</div>
+	
+	#{form @Contracts.save(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#insertContract'}
+	
+	  <input type="hidden" name="contract.person.id" value="${contract.person.id}"/>
+	  #{f.date 'contract.beginDate', required:true /}
+	  #{f.date 'contract.endDate' /}
+	  *{ #{f.date 'contract.endContract' /} }*
+	  #{f.booleanRadio 'contract.onCertificate' /}
+	  
+	  #{f.selectModel 'wtt', items:templateUtility.getEnabledWorkingTimeTypeForOffice(contract.person.office) /}
+	  <div class="text-center">
+	    <input class="btn btn-primary" type="submit" value="Inserisci" />
+	  </div>
+	
+	#{/form}
+  </div>
+#{/modalAsync}

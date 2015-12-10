@@ -1,33 +1,23 @@
-<div class="modal-header hidden-xs">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 id="modificaCodiceCompetenza">Modifica codice ${code.code} ${code.description}</h4> 
+%{
+title= competenceCode != null ? ('Modifica codice ' + competenceCode.code +' - '+ competenceCode.description)
+: messages.get('competenceCode.new');
+}%
+#{modalAsync id:'modalCompetenceCode', title: title }
+<div id="absenceCodeData">
+  #{form action:@Competences.save(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+
+  #{f.hidden 'competenceCode.id' /}
+
+  #{f.input 'competenceCode.code'/}
+  #{f.input 'competenceCode.codeToPresence'/}
+  #{f.input 'competenceCode.description'/}
+
+  #{b.buttons center:true}
+    #{b.submit 'Inserisci'/}
+  #{/b.buttons}
+
+  #{/form}
 </div>
-
-<div class="modal-body">
-
-#{form @Competences.save()}
-<table class="table table-condensed table-form table-hover">
-		<tr>
-			<td class="lab"><b>Codice</b></td>
-			<td><input type="text" name="codice" value="${code.code}" /></td>
-		</tr>
-		<tr>
-			<td class="lab"><b>Codice per attestato<br> di presenza</b></td> 
-			<td><input type="text" name="codiceAttPres" value="${code.codeToPresence}" /></td>
-		</tr>
-		
-		<tr>
-			<td class="lab">Descrizione</td> 
-			<td><input type="text" name="descrizione" value="${code.description}"/></td>
-		</tr>
-
-
-</table>
-
-
-<div class="container-fluid center">
-      <input class="btn btn-primary" type="submit" value="Ok" />      
-</div>
-#{/form}
-
-</div>
+#{/modalAsync}

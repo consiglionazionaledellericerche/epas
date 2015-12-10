@@ -1,0 +1,25 @@
+#{modalAsync title:'Elimina Badge'}
+  <div class="text-center">
+	#{alert color:'danger'}
+    	<p>Conferma rimozione Badge per <strong>${badge.person.fullname}</strong> 
+    	con codice  <strong>${badge.code}</strong> 
+    	sul &{'badgeSystem'} <strong>${badge.badgeSystem.name}</strong>.</p><br>
+    	
+    	#{form action:@deleteBadge(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }	 
+		
+		#{f.hidden 'badgeId', value:badge.id /}
+		#{f.hidden 'confirmed', value:confirmed /}
+		#{f.hidden 'personFixed', value:personFixed /}
+	    
+		<div class="container-fluid center">
+		   <input class="btn btn-danger" type="submit" value="Elimina" />
+		</div>      
+  	    #{/form}
+    	
+    	
+	#{/alert}
+	
+	
+  </div>
+#{/modalAsync}

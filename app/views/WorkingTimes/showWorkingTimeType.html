@@ -1,12 +1,10 @@
-#{extends 'main3.html' /}
-#{set header:'navbar' /}
-#{set title: 'Tipo Orario ' + wtt.description  /}
+#{modalAsync noTitle:'true' }
 
-<div class="container">
-
-  #{f.input 'wtt.description', disabled:true/}</h3>
-
-  <table id="table-wtt" class="table center table-hover">
+    <div class="text-center">
+      #{title title:'Visualizza Tipo Orario ' + wtt.description /}
+    </div>
+  
+    <table id="table-wtt" class="table center table-hover">
   
     <tr class="info">
 		<th></th>
@@ -87,5 +85,4 @@
   <br>
   
 
-  
-</div>
+#{/modalAsync}

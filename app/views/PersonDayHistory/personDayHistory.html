@@ -1,83 +1,84 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Storico modifiche timbrature e assenze '    /}
+#{modalAsync id:'modalStamping', button:'Salva', 
+  title:('Storico modifiche timbrature e assenze') }
 
 <div class="container-fluid text-center">
 
 
-<h3>Timbrature</h3>
-<!-- Per ogni timbratura una tabella -->
-<div class="well">
-#{list items:historyStampingsList, as:'historyStamping'}
-  <h5>Storico timbratura ore ${historyStamping.get(0).value.formattedHour()} (id=${historyStamping.get(0).value.id})</h5>
-  
-  <table class="table table-condensed table-bordered" >
+#{panel title:'Storia Timbrature', dim:12, fluid:true }
 
-	<tr class="success">
-	  <th>Ora timbratura</th>
-	  <th>Data modifica</th>
-	  <th>Amministratore</th>
-	  <th>Tipo</th>
-	</tr>
+  #{if historyStampingsList.empty } Non ci sono timbrature. #{/if}
+  #{else}
+	#{list items:historyStampingsList, as:'historyStamping'}
+	  <h5>Storico timbratura ore ${historyStamping.get(0).value.formattedHour()} (id=${historyStamping.get(0).value.id})</h5>
 	  
-	#{list items:historyStamping, as:'stamping'}  
-    <tr class="warning">
-      <td>${stamping.value.formattedHour()} ${stamping.value.formattedMark()}</td>
-      <td>${stamping.formattedRevisionDate()}</td>
-      <td>${stamping.formattedOwner()}</td>
-      
-      #{if stamping.typeIsDel()}
-         <td style="color: red;">${stamping.type}</td>
-      #{/if}
-      #{else}
-         <td>${stamping.type}</td>
-      #{/else}
-    </tr>
-    #{/list}
+	  <table class="table table-condensed table-bordered" >
+	
+		<tr class="success">
+		  <th>Ora timbratura</th>
+		  <th>Data modifica</th>
+		  <th>Amministratore</th>
+		  <th>Tipo</th>
+		</tr>
+		  
+		#{list items:historyStamping, as:'stamping'}  
+	    <tr class="warning">
+	      <td>${stamping.value.formattedHour()} ${stamping.value.formattedMark()}</td>
+	      <td>${stamping.formattedRevisionDate()}</td>
+	      <td>${stamping.formattedOwner()}</td>
+	      
+	      #{if stamping.typeIsDel()}
+	         <td style="color: red;">${stamping.type}</td>
+	      #{/if}
+	      #{else}
+	         <td>${stamping.type}</td>
+	      #{/else}
+	    </tr>
+	    #{/list}
+	  </table>
+	#{/list}
+  #{/else}	
+#{/panel}
 
-  </table>
-
-#{/list}
-</div>
-
-<h3>Assenze</h3>
-<!-- Per ogni assenza una tabella -->
-<div class="well">
-#{list items:historyAbsencesList, as:'historyAbsence'}
-  <h5>Storico assenza codice ${historyAbsence.get(0).value.absenceType.code} (id=${historyAbsence.get(0).value.id})</h5>
-  
-  <table class="table table-condensed table-bordered" >
-
-	<tr class="success">
-	  <th>Codice Assenza</th>
-	  <th>Data modifica</th>
-	  <th>Amministratore</th>
-	  <th>Tipo</th>
-	</tr>
+#{panel title:'Storia Assenze', dim:12, fluid:true }
+  #{if historyAbsencesList.empty } Non ci sono assenze. #{/if}
+  #{else}
+    <!-- Per ogni assenza una tabella -->
+	#{list items:historyAbsencesList, as:'historyAbsence'}
+	  <h5>Storico assenza codice ${historyAbsence.get(0).value.absenceType.code} (id=${historyAbsence.get(0).value.id})</h5>
 	  
-	#{list items:historyAbsence, as:'absence'}  
-    <tr class="warning">
-      <td>
-        #{if absence.value.absenceType != null}
-      		${absence.value.absenceType.code}
-      	#{/if}
-      </td>
-      <td>${absence.formattedRevisionDate()}</td>
-      <td>${absence.formattedOwner()}</td>
-      
-      #{if absence.typeIsDel()}
-         <td style="color: red;">${absence.type}</td>
-      #{/if}
-      #{else}
-         <td>${absence.type}</td>
-      #{/else}
-      
-    </tr>
+	  <table class="table table-condensed table-bordered" >
+	
+		<tr class="success">
+		  <th>Codice Assenza</th>
+		  <th>Data modifica</th>
+		  <th>Amministratore</th>
+		  <th>Tipo</th>
+		</tr>
+		  
+		#{list items:historyAbsence, as:'absence'}  
+	    <tr class="warning">
+	      <td>
+	        #{if absence.value.absenceType != null}
+	      		${absence.value.absenceType.code}
+	      	#{/if}
+	      </td>
+	      <td>${absence.formattedRevisionDate()}</td>
+	      <td>${absence.formattedOwner()}</td>
+	      
+	      #{if absence.typeIsDel()}
+	         <td style="color: red;">${absence.type}</td>
+	      #{/if}
+	      #{else}
+	         <td>${absence.type}</td>
+	      #{/else}
+	      
+	    </tr>
+	   #{/list}
+    </table>
     #{/list}
-
-  </table>
-
-#{/list}
-</div>
-
+  #{/else}   
+#{/panel}
 
 </div>
+
+#{/modalAsync}

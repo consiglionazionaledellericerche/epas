@@ -2,32 +2,17 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-<div id="container-fluid-nav-tabs" class="container-fluid">
 
-<ul class="nav nav-tabs">
-  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze Mensili</a></li>
-  <li><a href="@{YearlyAbsences.yearlyAbsences(session.get("personSelected"), session.get("yearSelected"))}">Assenze Annuali</a></li>
-  <li><a href="@{Absences.manageAttachmentsPerCode(session.get("yearSelected"), session.get("monthSelected"))}">Gestione Allegati Per Codice</a></li>
-  <li><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Allegati Per Persona</a></li>
-  <li class="active"><a href="@{Absences.absenceInPeriod()}">Assenze in periodo</a></li>
-</ul>
+#{absences.absencesTabs activeAction:'absenceInPeriod' /}
+<div class="container">
 
-</div>
-
-<div class="container-fluid">
-  <div class="well center">
+  
+  #{title title:'Assenze nel periodo', administration:true /}
+  <div class="text-center">
   #{form @Absences.absenceInPeriod(), class:'form-inline', role:'form'}
-       <div class="form-group">
-        <label class="hidden-xs hidden-sm" for="dip">Dipendente </label>
-        <select name="person.id" class="form-control" id="dip" >
-	        #{list items:personList, as:'personItem'}
-	          <option value="${personItem.id}" #{if personItem.id.equals(person.id) } selected="selected" #{/if} >
-                ${personItem.surname} ${personItem.name}
-	          </option>
-			#{/list}
-	      </select>
-       </div>
        
+       <input type="hidden" name="personId" value="${person.id}"/>
+           
        <div class="form-group">
          <label for="da">Da: </label>
          <input value="${from?.format()}" class="form-control" type="text" name="from" 
@@ -44,8 +29,7 @@
   #{/form}
   </div>
   <br>
-  
-  #{if person != null }
+
   
   <div class="col-xs-12 col-sm-12 col-md-6">
     <div class="panel panel-info">
@@ -53,7 +37,7 @@
         <h3 class="panel-title text-center">Assenze di ${person.name} ${person.surname} nel periodo ${from?.format()} - ${to?.format()}</h3>
       </div>
       <div class="panel-body">
-		<table>
+		<table class="table">
 			<tr>
 				<th>Giorno</th>
 				<th>Assenza</th>
@@ -61,7 +45,7 @@
 			</tr>
 			#{list items:absenceList, as:'absence'}
 			<tr>
-		      <td>${absence.personDay.date}</td>
+		      <td>${absence.personDay.date.format()}</td>
 			  <td>${absence.absenceType.code}</td>
 			  <td>${absence.absenceType.description}</td>
 		 	</tr>				
@@ -77,40 +61,31 @@
         <h3 class="panel-title text-center">Totali giorni d'assenza</h3>
       </div>
       <div class="panel-body">
-		<table>
+		<table class="table">
 			<tr>
 				<th>Codice</th>
 				<th>Numero giorni</th>
 				
 			</tr>
-			#{if ferie.size() > 0}
 			<tr>
 				<td>Ferie</td>
 				<td>${ferie.size()}</td>
 			</tr>
-			#{/if}
-			#{if missioni.size() > 0}
 			<tr>
 				<td>Missioni</td>
 				<td>${missioni.size()}</td>
 			</tr>
-			#{/if}
-			#{if riposiCompensativi.size() > 0}
 			<tr>
 				<td>Riposi Compensativi</td>
 				<td>${riposiCompensativi.size()}</td>
 			</tr>
-			#{/if}
-			#{if altreAssenze.size() > 0}
 			<tr>
 				<td>Altre assenze</td>
 				<td>${altreAssenze.size()}</td>
 			</tr>
-			#{/if}
 		</table>
 	  </div>
 	</div>
   </div>
-  #{/if}
 
 </div>

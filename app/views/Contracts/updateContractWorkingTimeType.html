@@ -1,0 +1,69 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{contracts.editContractTabs activeAction:'updateContractWorkingTimeType' /}
+
+<div class="container" id="updateWtt">
+
+#{panel title:'Configurazione Attuale', color:'primary'}
+<table class="table table-bordered table-condensed center">
+  <tr>
+    <th>Dal</th>
+    <th>Al</th>
+	<th>Tip Orario</th>
+  </tr>
+  #{list items:contract.contractWorkingTimeType, as:'cwttItem'}
+  <tr>
+    <td>${cwttItem.beginDate.format()}</td>
+	<td>#{if cwttItem.endDate} ${cwttItem.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+	<td>${cwttItem.workingTimeType.description}</td>
+  </tr>
+  #{/list}
+</table>
+#{/panel}
+
+<div class="alert alert-info">
+  <p>Utilizzare questa form per definire il nuovo periodo di tipo orario selezionando la data di inizio e la data di fine periodo.</p>
+  <p>Lasciando vuoto il campo <strong>&{'cwtt.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
+  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+</div>
+
+#{form action:@Contracts.saveContractWorkingTimeType(), class:'form-horizontal',
+		'data-async':'#page_content', 'data-async-error':'#updateWtt', 'data-spinner':'#defaultSpinner' }
+	
+	#{f.hidden 'cwtt.contract.id' /}
+	
+	#{if !confirmed}	
+		 #{f.date 'cwtt.beginDate', value:cwtt.beginDate?.format(), required:true /}
+		 #{f.date 'cwtt.endDate', value:cwtt.endDate?.format() /}
+		 #{f.selectModel 'cwtt.workingTimeType', 	
+		      items:templateUtility.getEnabledWorkingTimeTypeForOffice(cwtt.contract.person.office), required:true /}
+		 #{b.buttons center:true}
+		   #{b.submit 'Applica'/}
+		 #{/b.buttons}
+	#{/if}
+	#{else}
+	      #{f.hidden 'confirmed' /}
+		  #{f.simpleView 'cwtt.beginDate', value:cwtt.beginDate?.format(), hidden:true /}
+		  #{f.simpleView 'cwtt.endDate', value:cwtt.endDate?.format(), hidden:true /}
+		  #{f.simpleView 'cwtt.workingTimeType' /}
+		  #{f.hidden 'cwtt.workingTimeType.id' /}
+		  
+		  #{recomputeRecap recomputeRecap:recomputeRecap /}
+		  #{b.buttons center:true}
+		    #{b.cancel @updateContractWorkingTimeType(contract.id) /}
+		    #{b.submit 'Conferma'/}
+		  #{/b.buttons}
+		 
+	#{/else}
+	 
+#{/form}
+
+
+</div>
