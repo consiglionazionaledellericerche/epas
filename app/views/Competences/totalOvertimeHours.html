@@ -5,8 +5,10 @@
 #{competences.competencesTabs activeAction:'totalOvertimeHours' /}
  
  <div class="container">
+ 
+ #{title title:'Monte Ore ' + year + ' per Straordinari ' + office.name, color:'primary' /}
   
-  #{panel title:'Definizione Monte Ore anno ' + year + ' ' + office.name , color:primary}
+  
 		#{alert color:'info'}
 		<p>Gestione del monte ore per straordinari per la sede <strong>${office.name}</strong></p>
 	    <p>
@@ -46,7 +48,7 @@
 		  </div>	    	    
   
         #{/form}
-  #{/panel}
+  
 
 </div>
 
