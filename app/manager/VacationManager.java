@@ -55,10 +55,13 @@ public class VacationManager {
     Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
 
     LocalDate expireDate = LocalDate.now()
-            .withMonthOfYear(monthExpiryVacationPastYear)
-            .withDayOfMonth(dayExpiryVacationPastYear);
+        .withYear(year)
+        .withMonthOfYear(monthExpiryVacationPastYear)
+        .withDayOfMonth(dayExpiryVacationPastYear);
     return expireDate;
   }
+
+  
 
   /**
    * @param year       l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono
