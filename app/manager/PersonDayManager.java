@@ -301,6 +301,7 @@ public class PersonDayManager {
 
     // marcatori: versione con solo e salvataggio del tempo decurtato.
     //e
+    pd.getValue().decurted = null;
     if (workingTimeDecurted < stampingMinutes) {
 
       pd.getValue().decurted = missingTime;
