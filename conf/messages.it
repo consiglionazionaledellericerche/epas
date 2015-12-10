@@ -24,7 +24,7 @@ badge.end= Fine
 badge.code= Numero badge
 badge.badgeReader= Lettore badge associato
 badge.edit= Modifica
-badge.delete= Elimina
+badge.delete= Elimina Badge
 
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
