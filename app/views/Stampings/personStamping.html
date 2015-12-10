@@ -76,10 +76,6 @@
 </style>
 
 #{/set}
-%{
-startTime = System.nanoTime();
-}%
-
 <div class="col-xs-12 col-lg-8">
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
@@ -139,32 +135,23 @@ startTime = System.nanoTime();
     <td class="invisible"></td>
 
     <td class="assenza default-single">
-
-      *{
-      <a href="@{Absences.blank(dayRecap.person.id, dayRecap.personDay.date?.format())}"
-         data-async-modal="#modalAbsence">
-        ___
-      </a>
-      }*
-
       #{secure.link @Absences.blank(dayRecap.person.id, dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
         ___
       #{/secure.link}
 
       #{list items:dayRecap.absences, as:'absence'}
-      <a href="@{Absences.edit(absence.id)}" data-async-modal="#modalAbsence">
-			  <span>
-				     ${absence.absenceType.code} 
+
+      #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
+				     ${absence.absenceType.code}
 				     #{if absence.justifiedMinutes}
 				    	${absence.justifiedMinutes}min
 				  	 #{/if}
-			  </span>
         #{if absence.absenceFile.exists()}
-        <a href="@{Absences.downloadAttachment(absence.id)}">
-          <span class="glyphicon glyphicon-envelope"></span>
-        </a>
+          #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
+          #{/secure.link}
         #{/if}
-      </a>
+      #{/secure.link}
+
       #{/list}
     </td>
 
@@ -180,9 +167,9 @@ startTime = System.nanoTime();
       #{/elseif}
 
       #{if stampingTemplate.date!=null}
-      <a href="@{Stampings.edit(stampingTemplate.stampingId)}" data-async-modal="#modalStamping">
-        ${stampingTemplate.hour}
-      </a>
+        #{secure.link @Stampings.edit(stampingTemplate.stampingId),modal:'#modalStamping'}
+          ${stampingTemplate.hour}
+        #{/secure.link}
       #{/if}
       #{elseif stampingTemplate.pairPosition.equals("center")}
       <abbr title="Timbratura di servizio mancante" class="initialism"><i
@@ -206,10 +193,9 @@ startTime = System.nanoTime();
     #{/list}
     <td class="inserisciTimbratura default-single">
       #{if !dayRecap.future}
-      <a href="@{Stampings.blank(dayRecap.person.id, dayRecap.date.format())}"
-         data-async-modal="#modalStamping">
+      #{secure.link @Stampings.blank(dayRecap.person.id, dayRecap.date.format()),modal:'#modalStamping'}
         +++
-      </a>
+      #{/secure.link}
       #{/if}
     </td>
 
@@ -316,17 +302,6 @@ startTime = System.nanoTime();
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
     #{include './_notes.html' /}
   </div>
-
-  %{
-  endTime = System.nanoTime();
-
-  duration = (endTime - startTime)/1000000;
-
-  }%
-
-
-  <h1>${duration}ms
-
 </div>
 
 
