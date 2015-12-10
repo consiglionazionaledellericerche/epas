@@ -1,5 +1,8 @@
-#{modalAsync title:('Periodi associati a contratti attivi - ' + wtt.description) }
-
+#{modalAsync noTitle:'true' }
+  
+  <div class="text-center">
+  #{title title:'Periodi con Tipo Orario ' + wtt.description /}
+  </div>
   #{alert color:'info'}
     
     <p>Elenco dei periodi in cui è stato associato il tipo orario <strong>${wtt.description}</strong>
