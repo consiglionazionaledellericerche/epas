@@ -224,7 +224,7 @@ public class Absences extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      flash.error(Web.msgHasErrors());
+      //flash.error(Web.msgHasErrors());
 
       render("@blank", person, dateFrom, dateTo);
     }

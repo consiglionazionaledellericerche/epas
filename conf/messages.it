@@ -41,6 +41,7 @@ badgeReader.description=Descrizione
 badgeReader.location=Location
 badgeReader.owner=Sede Responsabile
 badgeReader.badgeSystems=Gruppi Badge
+badgeReader.user.username=Username
 
 BadgeReader.blank= Nuova Sorgente Timbrature
 BadgeReaders.joinBadgeSystems= Gestisci Associazioni
@@ -90,6 +91,7 @@ secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 passwordSuccessfullyChanged = Password modificata con successo
 
+noResultFound=Nessuna corrispondenza trovata.
 pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
 name=Nome
 

@@ -59,6 +59,13 @@ ALTER TABLE badges ADD COLUMN badge_system_id BIGINT;
 ALTER TABLE badges ADD FOREIGN KEY (badge_system_id) REFERENCES badge_systems (id);
 ALTER TABLE badges_history ADD COLUMN badge_system_id BIGINT;
 
+/* Distruggo il prodotto della vecchia evolutione */
+DELETE FROM badges;
+DELETE FROM users_roles_offices WHERE role_id = 6;
+DELETE FROM users_roles_offices uro WHERE uro.id IN (
+	SELECT uro2.id FROM users_roles_offices uro2 LEFT OUTER JOIN roles r ON r.id = uro.role_id 
+	WHERE r.name = 'badgeReader');
+
 # ---!Downs
 
 ALTER TABLE badges_history DROP COLUMN badge_system_id;
