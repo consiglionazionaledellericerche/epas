@@ -12,6 +12,9 @@
   #{set switchUser:true /}
 #{/secure.checkAction}
 
+<div class="container">
+#{title title:'Lista Del Personale' /}
+
 #{tabs}
   #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
   #{tabItem id:'nonAttivo', title:'Personale Non Attivo' /}
@@ -36,9 +39,6 @@
 		<th>&{'person.currentVacationPeriod'}</th>
 		<th>&{'person.qualification'}</th>
 		<th>&{'contractStampProfile.fixedworkingtime'}</th>
-        <th>&{'user.username'}</th>
-		<th>&{'person.email'}</th>
-		<th>&{'person.telephone'}</th>
 		<th>&{'person.wantEmail'}</th>
 		#{if switchUser}<th></th>#{/if}
 	  </tr>
@@ -78,17 +78,6 @@
 		  #{if person.currentContractStampProfile.present && person.currentContractStampProfile.get().fixedworkingtime}
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
-		</td>
-        <td class="alignLeft">${person.value.user.username}</td>
-		<td class="alignLeft"><font color="#000000">${person.value.email}</font></td>
-		<td>
-		 <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover"
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="${(
-	    		'<br>Telefono: <strong>'+person.value.telephone+'</strong>').escape()}"
-	    		title="Contatti ${person.value.fullname}"><i class="fa fa-phone"></i></a>
 		</td>
 		
 		<!-- Invio email -->
@@ -151,3 +140,5 @@
   #{/tabContentItem}
    
 #{/tabContent}
+
+</div>

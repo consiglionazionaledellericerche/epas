@@ -6,7 +6,9 @@
  
 <div class="container">
 
-  #{breadcrumbs breadcrumbs, noHome:'true' /}
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Configurazione ' + badgeSystem.name /}
   
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
@@ -61,14 +63,23 @@
   
   #{tabContentItem id:'badges'}
 	
-	#{secure.checkAction 'BadgeSystems.joinBadges'}
-	   <div class="text-center">
-	    <a class="btn btn-success" href="@{joinBadges(badgeSystem.id)}" data-async-modal="#defaultModal">
-	      &{'BadgeSystems.joinBadges'} ${badgeSystem.name}
-	    </a>
-       </div>
-       <br>
-    #{/secure.checkAction}
+	#{if badgeSystem.badgeReaders.empty}
+	  #{alert color:'info'}
+	    Per rendere operativo questo &{'badgeSystem'} e poter iniziare l'assegnamento dei codici ai dipendenti 
+	    è necessario associarlo ad almeno una 
+	    <a href="@{BadgeReaders.list()}" <strong> <i class="fa fa-database"></i> &{'badgeReader'}</strong></a>
+	  #{/alert}
+	#{/if}
+	#{else}
+		#{secure.checkAction 'BadgeSystems.joinBadges'}
+		   <div class="text-center">
+		    <a class="btn btn-success" href="@{joinBadges(badgeSystem.id)}" data-async-modal="#defaultModal">
+		      &{'BadgeSystems.joinBadges'} ${badgeSystem.name}
+		    </a>
+	       </div>
+	       <br>
+	    #{/secure.checkAction}
+	#{/else}
 	
 	#{alert color:'info'}
       <p><strong>Lista dei Badge</strong> attualmente assegnati nel &{'badgeSystem'} <strong>${badgeSystem.name}</strong>.</p>
@@ -117,6 +128,15 @@
   
   #{tabContentItem id:'advanced'}
     
+    #{if badgeSystem.badgeReaders.empty}
+	  #{alert color:'info'}
+	    Per rendere operativo questo &{'badgeSystem'} e poter iniziare l'assegnamento dei codici ai dipendenti 
+	    è necessario associarlo ad almeno una 
+	    <a href="@{BadgeReaders.list()}" <strong> <i class="fa fa-database"></i> &{'badgeReader'}</strong></a>
+	  #{/alert}
+	#{/if}
+	#{else}
+    
     #{panel title:'Associa Matricole'}
       #{alert color:'info'}
        <div class="text-center"> 
@@ -161,6 +181,8 @@
       </div>
     #{/if}
     #{/panel}
+    
+    #{/else}
   
   #{/tabContentItem}
   
