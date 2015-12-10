@@ -74,24 +74,27 @@
 		</a>	      
 
 	  </section>   
-      	      
-  #{panel title:'Riepilogo straordinari ' + office.name, color:'primary' }
-      <table class="table table-condensed table-hover">
+  <br>
+  
+  #{alert color:'info'}
+  <h4><strong>Riepilogo straordinari ${office.name}</strong></h4>
+  
+  	<table class="table table-condensed">
+     
         <tr>
           <td>
             Totale ore di straordinario pagate a ${templateUtility.monthName(month)} (S1+S2+S3) 
           </td>
-          <td class="success"><strong>${totaleOreStraordinarioMensile}</strong></td>
+          <td><strong>${totaleOreStraordinarioMensile}</strong></td>
         </tr>
         <tr>
           <td>Totale ore di straordinario pagate nell'anno</td>
-          <td class="success"><strong>${totaleOreStraordinarioAnnuale}</strong></td>
+          <td><strong>${totaleOreStraordinarioAnnuale}</strong></td>
         </tr>
         <tr>
           <td>Totale monte ore nell'anno ${year}</td>
-          <td class="success"><strong>${totaleMonteOre}</strong></td>
+          <td><strong>${totaleMonteOre}</strong></td>
         </tr>
       </table>
-#{/panel}
-  
+	#{/alert}  
 </div> <!-- end container-fluid -->

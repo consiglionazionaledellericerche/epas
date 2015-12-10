@@ -480,28 +480,6 @@ public class Persons extends Controller {
     children(child.person.id);
   }
 
-  public static void modifySendEmail(Long personId) {
-
-    Person person = personDao.getPersonById(personId);
-    rules.checkIfPermitted(person.office);
-    render(person);
-  }
-
-  public static void updateSendEmail(Person person, boolean wantEmail) {
-    if (person == null) {
-
-      flash.error("Persona inesistente, operazione annullata");
-      list(null);
-    }
-
-    rules.checkIfPermitted(person.office);
-    person.wantEmail = wantEmail;
-    person.save();
-    flash.success("Cambiata gestione di invio mail al dipendente %s %s", person.name,
-        person.surname);
-    edit(person.id);
-  }
-
   public static void workGroup(Long personId) {
     Person person = personDao.getPersonById(personId);
     Set<Office> offices = Sets.newHashSet();
