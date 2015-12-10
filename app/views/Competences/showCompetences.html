@@ -30,6 +30,14 @@
           quelli per straordinari e turni in <strong>ore</strong>.</p>
     #{/alert}
     
+    #{alert color:'warning'}
+    <strong>Totale competenze ${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code} assegnate nel mese per ${office.name}</strong>
+		<a data-tooltip data-toggle="tooltip" data-placement="right" 
+		   title="Per aggiornare questo valore ricaricare la pagina">
+		  <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
+		</a>	      
+    #{/alert}
+    
     <section id="results">
    	#{paginate results} 
 	   
@@ -67,12 +75,7 @@
 	    </table>      
 	    #{/paginate}
 	    
-	    <strong>Totale competenze ${wrCompetenceCode.value.code} assegnate nel mese per ${office.name}</strong>
-		<a data-tooltip data-toggle="tooltip" data-placement="right" 
-		   title="Per aggiornare questo valore ricaricare la pagina">
-		  <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
-		</a>	      
-
+	    
 	  </section>   
   <br>
   
