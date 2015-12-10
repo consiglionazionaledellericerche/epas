@@ -3,6 +3,13 @@
 #{set title: 'ePAS - Inserimento nuova persona' /}
 
 <div class="container">
+
+  #{set breadcrumbs:['Lista Persone':@Persons.list(),
+  ('Inserimento Dipendente'):null] /}
+  #{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+  #{title title:'Inserimento Dipendente' /} 
+
   #{form @Persons.save(),class:'form-horizontal'}
   <div class="panel panel-primary">
     <div class="panel-heading">

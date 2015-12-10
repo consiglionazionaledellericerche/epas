@@ -162,8 +162,8 @@
     "@navbar-default-toggle-hover-bg": "#ddd",
     "@navbar-default-toggle-icon-bar-bg": "#888",
     "@navbar-default-toggle-border-color": "#ddd",
-    "@navbar-inverse-color": "rgb(4, 70, 135)",
-    "@navbar-inverse-bg": "rgb(4, 70, 135)",
+    "@navbar-inverse-color": "rgb(5, 57, 109)",
+    "@navbar-inverse-bg": "rgb(5, 57, 109)",
     "@navbar-inverse-border": "darken(@navbar-inverse-bg, 10%)",
     "@navbar-inverse-link-color": "rgb(224, 224, 224)",
     "@navbar-inverse-link-hover-color": "#fff",
@@ -378,6 +378,7 @@
     "@blockquote-border-color": "@gray-lighter",
     "@page-header-border-color": "@gray-lighter",
     "@dl-horizontal-offset": "@component-offset-horizontal",
+    "@dl-horizontal-breakpoint": "@grid-float-breakpoint",
     "@hr-border": "@gray-lighter"
   },
   "css": [
@@ -430,5 +431,5 @@
     "scrollspy.js",
     "transition.js"
   ],
-  "customizerUrl": "http://getbootstrap.com/customize/?id=7212bb0f94d6ae4d92b7"
+  "customizerUrl": "http://getbootstrap.com/customize/?id=efbec0ae3828c0b40088"
 }

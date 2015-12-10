@@ -1,24 +1,29 @@
 package models;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import models.base.BaseModel;
+
+import net.sf.oval.constraint.NotNull;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
+
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-
-import org.hibernate.envers.Audited;
-
-import com.google.common.collect.Sets;
-
-import models.base.BaseModel;
-import net.sf.oval.constraint.NotNull;
-import play.data.validation.Required;
-import play.data.validation.Unique;
 
 
 /**
@@ -55,7 +60,8 @@ public class BadgeReader extends BaseModel {
   @JoinColumn(name = "office_owner_id")
   public Office owner;
 
-
+  @ManyToMany
+  public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
 
   public boolean enabled = true;

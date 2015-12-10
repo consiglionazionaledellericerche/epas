@@ -11,7 +11,7 @@
   <title>#{get 'title' /}</title>
 
   <!-- Bootstrap core CSS -->
-  #{stylesheet 'prove/css/bootstrap.min.css'/}
+  #{stylesheet 'bootstrap-production/css/bootstrap.min.css'/}
 
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
@@ -180,7 +180,8 @@
             <ul class="dropdown-menu">
               #{if ip.viewOffice }
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
-              <li><a href="@{BadgeReaders.list()}">Lettori Badge</a></li>
+              <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
+              <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
               
               #{/if}
               #{if ip.viewWorkingTimeType}

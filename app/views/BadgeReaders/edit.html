@@ -2,25 +2,25 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sede'  /}
 
-#{set breadcrumbs:['Lettori Badge':@BadgeReaders.list(), 'Configura Lettore Badge':null] /}
+#{set breadcrumbs:['badgeReaders':@BadgeReaders.list(), ('Configura '+ badgeReader.code):null] /}
  
 <div class="container">
+	#{breadcrumbs breadcrumbs, noHome:'true' /}
 
-  #{breadcrumbs breadcrumbs /}
+	#{title title:'Configurazione ' + badgeReader.code /}
   
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
-  #{tabItem id:'people', title:'Lista badge' /}
-  #{tabItem id:'join', title:'Assegna badge' /}
+	#{tabItem id:'badgeSystems', title:'badgeSystems' /}
+	#{tabItem id:'delete', title:'Elimina'/}
 #{/tabs}
-   
+	<br>
 #{tabContent}
 
   #{tabContentItem id:'info', active:true}
-    #{accordionGroup 'info'}
-    #{accordionItem 'badgeReader', parent:'info', title:'Informazioni', open:true, color:'primary'}
+	#{panel title:'Informazioni', color:'primary'}
   	  <div class="alert alert-info" role="alert">
-    	Modifica i dati del lettore <strong>${badgeReader.code}</strong>
+				Modifica i dati della &{'badgeReader'} <strong>${badgeReader.code}</strong>
       </div>
 		#{form action:@updateInfo(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }			
@@ -36,118 +36,86 @@
 	        #{b.save /}
 	      #{/b.buttons}
 		#{/form}
-    #{/accordionItem}
-    #{/accordionGroup}  
-  
-  #{accordionGroup 'pass'}
-    #{accordionItem 'newPass', parent:'info', title:'Nuova Password', open:true, color:'primary'}
+	#{/panel}
+
+	#{panel title:'Nuova Password', color:'primary'}
   	  <div class="alert alert-danger" role="alert">
-    	Modifica la password di accesso del lettore <strong>${badgeReader.code}</strong>
+				Modifica la password di accesso della &{'badgeReader'} <strong>${badgeReader.code}</strong>
       </div>
 		#{form action:@changePassword(badgeReader.id), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }
-			
 
-		  #{f.hidden 'badgeReader.id' /}				
-		  #{f.view 'user.username' /}
+
+	#{f.hidden 'user.id', value:badgeReader.user.id /}
+	#{f.view 'badgeReader.user.username' /}
 	  	  #{f.input 'newPass', type:'password', label:'Nuova password' /} 
 	
 	      #{b.buttons}
 	        #{b.save /}
 	      #{/b.buttons}
 		#{/form}
-    #{/accordionItem}
-  #{/accordionGroup}  
+	#{/panel}
   
   #{/tabContentItem}
-  
-  #{tabContentItem id:'people'}
-    #{accordionGroup 'people'}
-    #{accordionItem 'badgeReader', parent:'info', title:'Lista badge associati', open:true, color:'primary'}
-  	  <div class="alert alert-info" role="alert">
-    	La lista delle persone attive presenti in anagrafica con associato il badge 
-      </div>
-	  <table class="table table-hover">
-	  <tr class="warning">
-			<th>Nome</th>
-			<th>Istituto</th>
-			<th>Numero badge</th>
-			<th>Elimina</th>			
-	  </tr>
-	  #{list items:badgeReader.badges, as:'badge'}
-	  
-	  <tr>
-	  	<td class="alignLeft success">${badge.person.fullname}</td>
-	  	<td>${badge.person.office.name}</td>
-	  	<td>	
-		  		<li>${badge.code} associato a <strong>${badge.badgeReader.code}</strong></li>	  	
-	  	</td>
-	  	<td>	  	
-	  		<li><a class="btn btn-danger btn-xs" href="@{Badges.delete(badge.id)}" 
-	  		data-async-modal="#modalInsertBadgeReader">Elimina associazione</a></li>	  	
-	  	</td>
-	  </tr>	         
-	            
-	  #{/list}
-	  </table>
-	  
-	  
-	 #{/accordionItem}
-  #{/accordionGroup}
-  
-  #{/tabContentItem} 
-  
-    #{tabContentItem id:'join'}
-    #{accordionGroup 'people'}
-    #{accordionItem 'badgeReader', parent:'info', title:'Associa badge', open:true, color:'primary'}
-  	  	  
-	  #{list items:officeSet, as:'office'}
-	  <div class="alert alert-info" role="alert">
-    	Personale dell'ufficio <strong>${office.name}</strong>  
-      </div>
-      		<table class="table table-hover">
-      		<tr class="warning">
-				<th>Nome</th>
-				<th>Assegna badge</th>			
-	  		</tr>
-	        #{list items:office.persons, as:'person'}
-	        <tr>
-    			<td>${person.fullname}</td>
-	  			<td>
-	  			<a href="@{Badges.joinPersonToBadge(person.id)}"><font color="#337ab7">
-	  			<i class="fa fa-credit-card"></i> Assegna badge</font></a>
-	  			</td>
-	  			
-	  		</tr>
-	        #{/list}
-	        </table>
-	  #{/list}
-	 
-	  
-	  
-	 #{/accordionItem}
-  #{/accordionGroup}
-  
-  #{/tabContentItem} 
-  
-#{/tabContent}  
-  
-  
-  
-  *{  
-  #{if office.persons.empty}
-   #{secure.checkAction 'Office.delete', target:office}
-    #{accordionGroup 'delete'}
-     #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
-	  <div class="text-danger center">
-	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
-		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
-	  </div>
-     #{/accordionItem}
-    #{/accordionGroup }  
-   #{/secure.checkAction}
-  #{/if}
-  }*
+
+	#{tabContentItem id:'badgeSystems'}
+
+
+	*{ TODO il target }*
+	#{secure.checkAction 'BadgeReaders.joinBadgeSystems'}
+	<div class="text-center">
+		<a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}"
+			 data-async-modal="#defaultModal">
+			&{'BadgeReaders.joinBadgeSystems'} ${badgeReader.code}
+		</a>
+	</div>
+	<br>
+	#{/secure.checkAction}
+
+	#{alert color:'info'}
+	<p>La lista dei <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> attualmente
+		associati a <strong>${badgeReader.code}</strong>.</p>
+	#{/alert}
+
+	<section id="results">
+		#{paginate results}
+		<ul class="list-group">
+			#{list items:results.results, as:'item'}
+
+			<li class="list-group-item list-group-item-grey">
+				#{badgeSystem.item item:item /}
+			</li>
+
+			#{/list}
+		</ul>
+		#{/paginate}
+	</section>
+
+
+	#{/tabContentItem}
+
+	#{tabContentItem id:'delete'}
+
+	#{if badgeReader.badgeSystems.empty }
+	<div class="text-danger center">
+		#{alert color:'danger'}
+		<p>E' possibile eliminare la &{'badgeReader'} <strong>${badgeReader.code}</strong> poichè non è
+			associata ad
+			alcun &{'badgeSystem'}.</p>
+		<a class="btn btn-danger" href=@{BadgeReaders.delete(badgeReader.id)}>Elimina</a>
+		#{/alert}
+	</div>
+	#{/if}
+	#{else}
+	#{alert color:'info'}
+	<p>E' possibile eliminare una &{'badgeReader'} solo nel caso in cui non sia associato ad alcun
+		&{'badgeSystem'}</p>
+	#{/alert}
+	#{/else}
+
+	#{/tabContentItem}
+#{/tabContent}
+
 
 </div>
 

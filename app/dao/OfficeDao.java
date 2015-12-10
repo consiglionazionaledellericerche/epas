@@ -62,22 +62,6 @@ public class OfficeDao extends DaoBase {
 
   }
 
-//	/**
-//	 *
-//	 * @param name
-//	 * @return
-//	 */
-//	public Optional<Office> getOfficeByName(String name){
-//
-//		final QOffice office = QOffice.office;
-//
-//		final JPQLQuery query = getQueryFactory().from(office)
-//				.where(office.name.eq(name));
-//
-//		return Optional.fromNullable(query.singleResult(office));
-//	}
-//
-
   /**
    * @return l'ufficio associato al codice passato come parametro
    */
@@ -103,25 +87,7 @@ public class OfficeDao extends DaoBase {
     return Optional.fromNullable(query.singleResult(office));
 
   }
-//
-//	public boolean checkForDuplicate(Office o){
-//
-//		final QOffice office = QOffice.office;
-//
-//		final BooleanBuilder condition = new BooleanBuilder();
-//		condition.or(office.name.equalsIgnoreCase(o.name));
-//
-//		if(o.code!=null){
-//			condition.or(office.code.eq(o.code));
-//		}
-//
-//		if(o.id!=null){
-//			condition.and(office.id.ne(o.id));
-//		}
-//
-//		return getQueryFactory().from(office)
-//				.where(condition).exists();
-//	}
+
 
   private BooleanBuilder matchInstituteName(QInstitute institute, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();
@@ -175,10 +141,26 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
+   * Tutte le sedi. //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
+   * ordinamento sugli istituti.
+   */
+  public PerseoSimpleResults<Office> allOffices() {
+
+    final QOffice office = QOffice.office;
+
+    final JPQLQuery query = getQueryFactory()
+        .from(office)
+        .distinct()
+        .orderBy(office.name.asc());
+
+    return PerseoModelQuery.wrap(query, office);
+
+  }
+
+  /**
    * Le sedi sulle quali l'user ha il ruolo role.
    */
-  public PerseoSimpleResults<Office> offices(Optional<String> name,
-                                             User user, Role role) {
+  public PerseoSimpleResults<Office> offices(Optional<String> name, User user, Role role) {
 
     final QOffice office = QOffice.office;
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;

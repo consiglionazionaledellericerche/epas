@@ -25,32 +25,33 @@
 
 				#{f.checkbox 'person.isPersonInCharge',title:'Selezionare se la persona in questione deve essere un responsabile'/}
 
-				<div class='form-group'>
-					<label class="col-sm-3 control-label">Invio mail</label>
-					<div class="col-sm-6">
-						<a class="btn btn-default" href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal">
-							#{if person.wantEmail}<i class="fa fa-check-square-o"></i> Attivo#{/if}
-							#{else}<i class="fa fa-square-o"></i> Inattivo#{/else}
-						</a>
-					</div>
-				</div>
-				<p>
+	#{f.booleanRadio 'person.wantEmail' /}
+	<div class="col-sm-6 col-sm-offset-3">
+		#{alert color:'info'}
 					Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
 					<strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
 					<strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
 					al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
-				</p>
+		#{/alert}
+	</div>
 
-		#{/panel}
+
+	#{/panel}
 
 		#{panel title:'Altre informazioni', color:'primary'}
 				#{f.input 'person.telephone'/}
 				#{f.date 'person.birthday',view:'year'/}
 				#{f.input 'person.eppn'/}
 
-				<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
+	<div class="col-sm-6 col-sm-offset-3">
+		#{alert color:'info'}
+		<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando
+			attivo.</p>
+		#{/alert}
+	</div>
 
-		#{/panel}
+
+	#{/panel}
 		
 		<div class="container-fluid center">
 		   <input class="btn btn-primary" type="submit" value="Salva" />

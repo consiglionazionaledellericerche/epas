@@ -22,6 +22,7 @@ absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 badge.begin= Inzio
 badge.end= Fine
 badge.code= Numero badge
+code=Codice
 badge.badgeReader= Lettore badge associato
 badge.edit= Modifica
 badge.delete= Elimina Badge
@@ -32,14 +33,27 @@ adminPasswordRetype= Reinserire Password
 
 administrations= Amministrazione
 
+badgeReader=Sorgente Timbrature
+badgeReaders= Sorgenti Timbrature
 badgeReader.code=Nome 
 badgeReader.id=id
 badgeReader.description=Descrizione 
 badgeReader.location=Location
-badgeReader.owner=Sede Afferente
+badgeReader.owner=Sede Responsabile
+badgeReader.badgeSystems=Gruppi Badge
+badgeReader.user.username=Username
 
-BadgeReader.blank= Nuovo lettore badge
-BadgeReader.join= Badge e lettori badge
+BadgeReader.blank= Nuova Sorgente Timbrature
+BadgeReaders.joinBadgeSystems= Gestisci Associazioni
+
+badgeSystems= Gruppi Badge
+badgeSystem = Gruppo Badge
+badgeSystem.name=Nome 
+badgeSystem.description=Descrizione 
+badgeSystem.office=Sede
+
+BadgeSystems.blank= Nuovo Gruppo Badge
+BadgeSystems.joinBadges= Associa Badge
 
 configurations= Configurazione
 
@@ -77,6 +91,7 @@ secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 passwordSuccessfullyChanged = Password modificata con successo
 
+noResultFound=Nessuna corrispondenza trovata.
 pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
 name=Nome
 
@@ -114,6 +129,7 @@ institute.name=Nome
 institute.code=Sigla
 institute.cds= Centro di spesa
 
+link.denied= Permessi insufficenti
 logout= Esci
 
 lunchPauseStart= Inizio pausa pranzo
@@ -126,6 +142,8 @@ office.codeId= Sede Id
 office.address=Indirizzo
 office.joiningDate= Data di affiliazione
 office.headQuarter=Sede principale
+
+person=Persona
 
 person.surname=Cognome
 person.name=Nome

@@ -1,5 +1,19 @@
 package models;
 
+import com.google.common.collect.Lists;
+
+import it.cnr.iit.epas.NullStringBinder;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+
+import play.data.binding.As;
+import play.data.validation.Required;
+import play.data.validation.Unique;
+
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -12,20 +26,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Lists;
-
-import it.cnr.iit.epas.NullStringBinder;
-
-import models.base.BaseModel;
-
-import play.data.binding.As;
-import play.data.validation.Required;
-import play.data.validation.Unique;
 
 
 @Entity
@@ -68,6 +68,9 @@ public class Office extends BaseModel {
 
   @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
   public List<BadgeReader> badgeReaders = Lists.newArrayList();
+
+  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
+  public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<Person> persons = Lists.newArrayList();

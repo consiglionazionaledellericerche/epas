@@ -5,13 +5,15 @@
 #{set 'moreStyles'}
   <style>
     td.alignLeft { text-align: left !important; }
-		#nonAttivo{ margin-top: 4em;		}
   </style>
 #{/set}
 
 #{secure.checkAction 'Administrators.switchUserTo'} 
   #{set switchUser:true /}
 #{/secure.checkAction}
+
+<div class="container">
+	#{title title:'Lista Del Personale' /}
 
 #{tabs}
   #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
@@ -31,17 +33,12 @@
 	  <tr>
 		<th>&{'person.name'}</th>
 		<th>&{'person.number'}</th>
-		<th>&{'person.badgeNumber'}</th>
 		<th>&{'contract.beginDate'}</th>
 		<th>&{'contract.endDate'}</th>
 		<th>&{'person.currentWorkingTimeType'}</th>
 		<th>&{'person.currentVacationPeriod'}</th>
 		<th>&{'person.qualification'}</th>
 		<th>&{'contractStampProfile.fixedworkingtime'}</th>
-        <th>&{'user.username'}</th>
-		<th>&{'person.email'}</th>
-		<th>&{'person.telephone'}</th>
-		<th>Dati<br> Iniziali</th>
 		<th>&{'person.wantEmail'}</th>
 		#{if switchUser}<th></th>#{/if}
 	  </tr>
@@ -57,17 +54,10 @@
 		<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="mancano i riepiloghi"></span>
 		#{/if}
 		<td><font color="#000000">${person.value.number}</font></td>
-		<td>#{if !person.value.badges.isEmpty()}
-				#{list items:person.value.badges, as:'badge'}
-					<a href="@{Badges.manageBadge(badge.id)}">${badge.code}</a><br>
-				#{/list}
-			#{/if}
-			#{else}
-			<a href="@{Badges.joinPersonToBadge(person.value.id)}"><font color="#337ab7"><i class="fa fa-credit-card"></i> Assegna badge</font></a>
-			#{/else}
-		</td>
-		<td><font color="#000000">${person.currentContract.get().beginDate?.format()}</font></td>
-		<td><font color="#000000">${person.currentContract.get().endDate?.format()}</font></td>
+			 <td data-order="${person.currentContract.get().beginDate}"><font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
+			 </td>
+			 <td data-order="${person.currentContract.get().endDate}"><font color="#000000">${person.currentContract.get().endDate?.format()}</font>
+			 </td>
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
@@ -91,34 +81,8 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>
-        <td class="alignLeft">${person.value.user.username}</td>
-		<td class="alignLeft"><font color="#000000">${person.value.email}</font></td>
-		<td>
-		 <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover"
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="${(
-	    		'<br>Telefono: <strong>'+person.value.telephone+'</strong>').escape()}"
-	    		title="Contatti ${person.value.fullname}"><i class="fa fa-phone"></i></a>
-		</td>
 
-		<!-- Inizializzazione ePAS -->
-		<td class=" 
-		#{if person.currentContractInitializationMissing()}
-		  danger
-		#{/if}
-		">
-		 #{if person.currentContract.get().sourceDateResidual != null}
-		   <a href="@{Contracts.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Modifica</a>
-		   #{if person.currentContract.get().sourceByAdmin == false} <i class="fa fa-exclamation-triangle"></i> #{/if}
-    	 #{/if}
-		 #{else}
-	       <a href="@{Contracts.updateSourceContract(person.currentContract.get().id)}" data-async-modal="#defaultModal">Definisci</a>
-		 #{/else}
-		</td>
-
-		<!-- Invio email -->
+			 <!-- Invio email -->
 		<td>
 		  #{if person.value.wantEmail}
 		    <i class="fa fa-check-square-o"></i>
@@ -141,6 +105,7 @@
 
   #{tabContentItem id:'nonAttivo'}
 
+	<br>
 	<table class="table table-striped table-hover table-condensed center" width="100%" datatable>
 	    <thead>
 		  <tr>
@@ -177,3 +142,5 @@
   #{/tabContentItem}
    
 #{/tabContent}
+
+</div>

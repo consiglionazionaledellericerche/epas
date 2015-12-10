@@ -259,6 +259,14 @@ when
 
         "Institutes.list",
         "Institutes.index",
+
+	    "BadgeReaders.index",
+	    "BadgeReaders.list",
+	    "BadgeReaders.blank",
+		
+	    "BadgeSystems.index",
+	    "BadgeSystems.list",
+	    "BadgeSystems.blank",
         
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
@@ -268,20 +276,25 @@ when
 		"Offices.list",
 		"Offices.edit",
 		"Offices.save",
-		"BadgeReaders.blank",
-		"BadgeReaders.save",
-		"BadgeReaders.edit",
-		"BadgeReaders.list",
-		"BadgeReaders.joinOffice",
-		"BadgeReaders.saveJoinOffice",
-	    "BadgeReaders.unjoinOffice",
-	    "BadgeReaders.index",
+
+		"BadgeReaders.save",	
+		"BadgeReaders.edit",		
+	    "BadgeReaders.updateInfo",
+	    "BadgeReaders.changePassword",
+		"BadgeReaders.joinBadgeSystems",
+		"BadgeReaders.saveBadgeSystems",
+		"BadgeReaders.delete",
 		
-		"Badges.joinPersonToBadge",
-		"Badges.allocateBadge",
-		"Badges.delete",
-		"Badges.deleteBadge",
-		
+		"BadgeSystems.save",
+		"BadgeSystems.edit",
+		"BadgeSystems.updateInfo",
+		"BadgeSystems.joinBadges",
+	    "BadgeSystems.saveBadges",
+	    "BadgeSystems.deleteBadge",
+	    "BadgeSystems.joinPersonNumbers",
+  		"BadgeSystems.joinOldBadgeNumbers",
+  		"BadgeSystems.delete",
+	
 		"Administrators.blank",
 		"Administrators.save",
 		"Administrators.delete"
@@ -306,19 +319,24 @@ when
 	   "Administrators.blank",
 	   "Administrators.delete",
 	   "Administrators.save",
-	   "BadgeReaders.blank",
-	   "BadgeReaders.save",
+	   
+	   "BadgeReaders.save",	
 	   "BadgeReaders.edit",
-	   "BadgeReaders.joinOffice",
-	   "BadgeReaders.saveJoinOffice",
-	   "BadgeReaders.unjoinOffice",
-	   "BadgeReaders.index",
-	   
-	   "Badges.joinPersonToBadge",
-	   "Badges.allocateBadge",
-	   "Badges.delete",
-	   "Badges.deleteBadge"
-	   
+	   "BadgeReaders.updateInfo",	
+	   "BadgeReaders.changePassword",
+	   "BadgeReaders.joinBadgeSystems",
+	   "BadgeReaders.saveBadgeSystems",
+	   "BadgeReaders.delete",
+		
+	   "BadgeSystems.save",	   
+	   "BadgeSystems.edit",
+	   "BadgeSystems.updateInfo",
+	   "BadgeSystems.joinBadges",
+	   "BadgeSystems.saveBadges",
+	   "BadgeSystems.deleteBadge",
+	   "BadgeSystems.joinPersonNumbers",
+  	   "BadgeSystems.joinOldBadgeNumbers",
+  	   "BadgeSystems.delete"
 	   
        ), target == $o, granted == false)
 then
@@ -338,11 +356,6 @@ when
         
         /* Vecchio permesso viewPerson */
         "Persons.list",
-        "Persons.edit",
-        "Persons.children",
-
-        "Badges.joinPersonToBadge",
-        
         "MealTickets.recapMealTickets",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
@@ -393,8 +406,8 @@ when
 		"Absences.showGeneralMonthlyAbsences",
 		"Absences.manageAttachmentsPerCode",
         "Absences.yearlyAbsences",
-
-        "Contracts.personContracts",
+        
+        "BadgeSystems.personBadges",
 		 
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
@@ -447,7 +460,6 @@ when
  $c: PermissionCheck(action in (
  	
  	   /* Vecchio permesso viewPerson */
- 	   "Persons.edit",
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
        
@@ -465,9 +477,9 @@ when
         "Absences.manageAttachmentsPerCode",
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
-
-		"Contracts.personContracts",
-
+		
+		"BadgeSystems.personBadges",
+		
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
         "Charts.whichAbsenceInYear",
@@ -638,10 +650,10 @@ when
      	"Configurations.saveConfYear",
 		"Configurations.savePastYearVacationLimit",
 		
-		"Badges.joinPersonToBadge",
-		"Badges.allocateBadge",
-		"Badges.delete",
-		"Badges.deleteBadge"
+		"BadgeSystems.joinBadgesPerson",
+		"BadgeSystems.saveBadges",
+		"BadgeSystems.deleteBadgePerson",
+		"BadgeSystems.deleteBadge"
         
         ), target == null, granted == false)
 then
@@ -766,10 +778,10 @@ when
      	"Configurations.saveConfYear",
 		"Configurations.savePastYearVacationLimit",
 		
-		"Badges.joinPersonToBadge",
-		"Badges.allocateBadge",
-		"Badges.delete",
-		"Badges.deleteBadge"
+		"BadgeSystems.joinBadgesPerson",
+		"BadgeSystems.saveBadges",
+		"BadgeSystems.deleteBadgePerson",
+		"BadgeSystems.deleteBadge"
                
        ), target == $o, granted == false)
 then
