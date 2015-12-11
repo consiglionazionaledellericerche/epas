@@ -12,12 +12,13 @@
 
   #{f.input 'badgeSystem.name', required:true /}
   #{f.input 'badgeSystem.description' /}
-  
-  #{f.selectModel 'badgeSystem.office', items:templateUtility.officeForBadgeReaders(), required:true /}
+
+  #{f.selectModel 'badgeSystem.office', items:templateUtility.officeForBadgeReaders(), required:true
+  /}
 
   #{b.buttons center:true}
-    #{b.cancel @index() /}
-    #{b.save /}
+  #{b.cancel @index() /}
+  #{b.save /}
   #{/b.buttons}
 
   #{/form}

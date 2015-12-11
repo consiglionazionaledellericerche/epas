@@ -38,7 +38,8 @@
 					<td class="warning">${entry.getKey().name} ${entry.getKey().surname}</td>
 					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
 						<td data-order="${entry.getValue().get(col)}">
-						 	<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-async-modal="#modalStamping">
+							<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}"
+								 data-async-modal="#modalStamping">
 						 	${entry.getValue().get(col)}							
 							</a>
 						</td>
@@ -47,7 +48,7 @@
 				#{/list}	
 			</tbody>	
 	      </table>
-</div>   
+</div>
 
 <div id="modalStamping" class="modal container" tabindex="-1"></div>
 

@@ -34,7 +34,6 @@ import manager.recaps.personStamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 
-import models.Institute;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -51,7 +50,6 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.ArrayList;

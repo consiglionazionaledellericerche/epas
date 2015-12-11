@@ -1,51 +1,51 @@
 *{ item: la sede
-   edit: link della modifica 
- }*
+edit: link della modifica
+}*
 
-			<h4>	
-             #{if _edit}
-                <a class="list-group-item-heading" href="@{Offices.edit(_item.id)}">
-			    <i class="fa fa-cogs"></i> ${_item.name} 
-    	        </a>
-    	     #{/if}   
-    	     #{else}
-			    ${_item.name} 
-    	     #{/else}
-    	     </h4>
-    	         
-           
-             <div class="list-group-item-text">
-              <strong><i class="fa fa-map-marker"></i> Indirizzo </strong>
-              <span class="label label-warning">${_item.address}</span>
-             </div>
-             <div class="list-group-item-text">
-              ${_item.code}
-             </div>
-			 <br>
-			              
-             <div class="list-group-item-text">
-               <strong><i class="fa fa-shield"></i> Amministratore Tecnico </strong>
-               #{list items:_item.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('tecnicalAdmin') && uro.user.person }
-                  <span class="label label-info">${uro.user.person.fullname}</span>
-                 #{/if}
-               #{/list}
-               <br>
-               <strong><i class="fa fa-users"></i> Amministratori Personale </strong>
-               #{list items:_item.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('personnelAdmin') && uro.user.person }
-                  <span class="label label-success">${uro.user.person.fullname}</span>
-                 #{/if}
-                 #{if uro.role.name.equals('personnelAdminMini') && uro.user.person }
-                  <span class="label label-warning">${uro.user.person.fullname}</span>
-                 #{/if}
-               #{/list}
-               <br>
-               <br>
-               <strong><i class="fa fa-database"></i> &{'badgeReaders'} </strong>
-               #{list items:_item.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('badgeReader') && uro.user.badgeReader != null }
-                  <span class="label label-primary">${uro.user.badgeReader.code}</span>
-                 #{/if}
-               #{/list}
-             </div>
+<h4>
+  #{if _edit}
+  <a class="list-group-item-heading" href="@{Offices.edit(_item.id)}">
+    <i class="fa fa-cogs"></i> ${_item.name}
+  </a>
+  #{/if}
+  #{else}
+  ${_item.name}
+  #{/else}
+</h4>
+
+
+<div class="list-group-item-text">
+  <strong><i class="fa fa-map-marker"></i> Indirizzo </strong>
+  <span class="label label-warning">${_item.address}</span>
+</div>
+<div class="list-group-item-text">
+  ${_item.code}
+</div>
+<br>
+
+<div class="list-group-item-text">
+  <strong><i class="fa fa-shield"></i> Amministratore Tecnico </strong>
+  #{list items:_item.usersRolesOffices, as:'uro'}
+  #{if uro.role.name.equals('tecnicalAdmin') && uro.user.person }
+  <span class="label label-info">${uro.user.person.fullname}</span>
+  #{/if}
+  #{/list}
+  <br>
+  <strong><i class="fa fa-users"></i> Amministratori Personale </strong>
+  #{list items:_item.usersRolesOffices, as:'uro'}
+  #{if uro.role.name.equals('personnelAdmin') && uro.user.person }
+  <span class="label label-success">${uro.user.person.fullname}</span>
+  #{/if}
+  #{if uro.role.name.equals('personnelAdminMini') && uro.user.person }
+  <span class="label label-warning">${uro.user.person.fullname}</span>
+  #{/if}
+  #{/list}
+  <br>
+  <br>
+  <strong><i class="fa fa-database"></i> &{'badgeReaders'} </strong>
+  #{list items:_item.usersRolesOffices, as:'uro'}
+  #{if uro.role.name.equals('badgeReader') && uro.user.badgeReader != null }
+  <span class="label label-primary">${uro.user.badgeReader.code}</span>
+  #{/if}
+  #{/list}
+</div>

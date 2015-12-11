@@ -26,7 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
- * 
+ *
  * @author alessandro
  *
  */
@@ -63,13 +63,13 @@ public class BadgeReaderDao extends DaoBase {
 
   /**
    * Il simple result dei badgeReaders-
-   * 
+   *
    * @param name
    * @param badgeSystem
    * @return
    */
   public PerseoSimpleResults<BadgeReader> badgeReaders(Optional<String> name,
-      Optional<BadgeSystem> badgeSystem) {
+                                                       Optional<BadgeSystem> badgeSystem) {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
     final QBadgeSystem qBadgeSystem = QBadgeSystem.badgeSystem;
@@ -78,7 +78,7 @@ public class BadgeReaderDao extends DaoBase {
         .from(badgeReader);    
     
     final BooleanBuilder condition = new BooleanBuilder();
-    
+
     if (badgeSystem.isPresent()) {
       query = getQueryFactory()
           .from(qBadgeSystem)
@@ -89,7 +89,7 @@ public class BadgeReaderDao extends DaoBase {
     if (name.isPresent()) {
       condition.and(matchBadgeReaderName(badgeReader, name.get()));
     }
-    
+
     query.where(condition).distinct();
 
     return PerseoModelQuery.wrap(query, badgeReader);
