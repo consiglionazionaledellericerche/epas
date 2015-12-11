@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -45,13 +44,13 @@ public class BadgeSystem extends BaseModel {
 
   @ManyToMany(mappedBy = "badgeSystems")
   public List<BadgeReader> badgeReaders = Lists.newArrayList();
-  
+
   @Required
   @ManyToOne
   public Office office;
-  
+
   public boolean enabled = true;
- 
+
   @Override
   public String toString() {
     return this.name;

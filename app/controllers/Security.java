@@ -25,46 +25,6 @@ import javax.inject.Inject;
 
 public class Security extends Secure.Security {
 
-  public final static String REST = "rest";
-  public final static String STAMPINGS_CREATE = "stampingsCreate";
-
-
-	/* Client rest */
-  public final static String DEVELOPER = "developer";
-
-	/* lettore badge */
-  public final static String EMPLOYEE = "employee";
-
-	/* Sviluppatore */
-  public final static String VIEW_PERSON = "viewPerson";
-
-	/* Dipendente */
-  public final static String EDIT_PERSON = "editPerson"; //per adesso utilizzato anche per la nuova gestione dei ticket
-
-	/* Amministratore Personale */
-  public final static String VIEW_PERSON_DAY = "viewPersonDay";
-  public final static String EDIT_PERSON_DAY = "editPersonDay";
-  public final static String VIEW_COMPETENCE = "viewCompetence";
-  public final static String EDIT_COMPETENCE = "editCompetence";
-  public final static String UPLOAD_SITUATION = "uploadSituation";
-  public final static String VIEW_ABSENCE_TYPE = "viewAbsenceType";
-  public final static String EDIT_ABSENCE_TYPE = "editAbsenceType";
-
-
-	/* Amministratore ePAS */
-  public final static String VIEW_CONFIGURATION = "viewConfiguration";
-  public final static String EDIT_CONFIGURATION = "editConfiguration";
-  public final static String VIEW_OFFICE = "viewOffice";
-  public final static String EDIT_OFFICE = "editOffice";
-  public final static String VIEW_WORKING_TIME_TYPE = "viewWorkingTimeType";
-  public final static String EDIT_WORKING_TIME_TYPE = "editWorkingTimeType";
-  public final static String VIEW_COMPETENCE_CODE = "viewCompetenceCode";
-  public final static String EDIT_COMPETENCE_CODE = "editCompetenceCode";
-  public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
-  public final static String EDIT_ADMINISTRATOR = "editAdministrator";
-  public final static String VIEW_REPERIBILITY = "viewReperibility";
-  public final static String MANAGE_REPERIBILITY = "manageReperibility";
-  public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
   public final static String CACHE_DURATION = "30mn";
 
   //FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
@@ -79,14 +39,15 @@ public class Security extends Secure.Security {
   static boolean authenticate(String username, String password) {
     Logger.trace("Richiesta autenticazione di %s", username);
 
-    User user = userDao.getUserByUsernameAndPassword(username, Optional.fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
+    User user = userDao.getUserByUsernameAndPassword(username, Optional
+        .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
 
     if (user != null) {
       Cache.set(username, user, CACHE_DURATION);
       Cache.set("userId", user.id, CACHE_DURATION);
 
       Logger.info("user %s successfully logged in from ip %s", user.username,
-              Http.Request.current().remoteAddress);
+          Http.Request.current().remoteAddress);
 
       return true;
     }
@@ -153,6 +114,6 @@ public class Security extends Secure.Security {
     }
     String remoteAddress = Http.Request.current().remoteAddress;
     return !confGeneralManager.containsValue(
-            Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
+        Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
   }
 }

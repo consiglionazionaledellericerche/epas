@@ -2,29 +2,29 @@ package security;
 
 import com.google.common.base.MoreObjects;
 
+import lombok.Getter;
+
 /**
  * Seam like check.
  *
  * @author marco
  */
+@Getter
 public class PermissionCheck {
 
-  private final Object target;
-  private final String action;
-  private boolean granted;
+  private final PermissionCheckKey key;
+  private boolean granted = false;
 
   public PermissionCheck(Object target, String action) {
-    this.target = target;
-    this.action = action;
-    granted = false;
-  }
-
-  public Object getTarget() {
-    return target;
+    key = new PermissionCheckKey(target, action);
   }
 
   public String getAction() {
-    return action;
+    return key.getAction();
+  }
+
+  public Object getTarget() {
+    return key.getTarget();
   }
 
   public void grant() {
@@ -35,15 +35,11 @@ public class PermissionCheck {
     this.granted = false;
   }
 
-  public boolean isGranted() {
-    return granted;
-  }
-
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).omitNullValues()
-            .add("action", action)
-            .add("target", target)
+        .add("action", getAction())
+        .add("target", getTarget())
             .addValue(granted ? "GRANTED" : "DENIED").toString();
   }
 }

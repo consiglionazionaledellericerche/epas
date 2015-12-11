@@ -5,16 +5,22 @@
 <div class="container">
 	#{title title:'Sorgenti Timbrature' /}
 
-	
+
 	#{alert color:'info'}
-	  <p>Le <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> sono tutti i punti di raccolta di timbrature. <br>
-	  <p>All'interno di una &{'badgeReader'} è garantita l'univocità dei codici badge.<br> 
-	  <p>Una &{'badgeReader'} corrisponde ad un client Rest che invia periodicamente a ePAS le timbrature memorizzate  
-	  tramite autenticazione sicura.</p>
-	  <p>Ogni &{'badgeReader'} deve essere associata ad uno o più <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'} 
-	  	</strong> 
-	  	per poter essere operativa.
-	  </p>
+	<p>Le <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> sono tutti i punti di
+		raccolta di timbrature. <br>
+
+	<p>All'interno di una &{'badgeReader'} è garantita l'univocità dei codici badge.<br>
+
+	<p>Una &{'badgeReader'} corrisponde ad un client Rest che invia periodicamente a ePAS le
+		timbrature memorizzate
+		tramite autenticazione sicura.</p>
+
+	<p>Ogni &{'badgeReader'} deve essere associata ad uno o più <strong><i
+			class="fa fa-credit-card"></i> &{'badgeSystems'}
+	</strong>
+		per poter essere operativa.
+	</p>
 	#{/alert}
 	
 	#{form action:@BadgeReaders.list(), class:'form-inline', method:'GET',
@@ -50,8 +56,8 @@
 	   #{list items:results.results, as:'item'}
 	   
 		 <li class="list-group-item list-group-item-grey">
-		 
-		   #{badgeReader.item item:item, edit:'true' /}
+
+			 #{badgeReader.item item:item, edit:'true' /}
 		  
 	     </li>
 	    
