@@ -19,6 +19,7 @@
 				#{f.input 'person.name'/}
 				#{f.input 'person.number',type:'number'/}
 				#{f.input 'person.email'/}
+				#{f.input 'person.user.username', disabled:true /}
 
 				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
 				#{f.selectModel 'person.office',items:templateUtility.officesAllowed() /}
