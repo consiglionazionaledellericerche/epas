@@ -40,6 +40,10 @@ public class PersonMonths extends Controller {
   @Inject
   private static PersonMonthsManager personMonthsManager;
 
+  /**
+   * metodo che renderizza la visualizzazione delle ore di formazione.
+   * @param year l'anno
+   */
   public static void hourRecap(int year) {
 
     Optional<User> user = Security.getUser();
@@ -62,9 +66,9 @@ public class PersonMonths extends Controller {
     List<IWrapperContractMonthRecap> recaps = Lists.newArrayList();
     YearMonth actual = new YearMonth(year, 1);
     YearMonth last = new YearMonth(year, 12);
-    IWrapperContract c = wrapperFactory.create(contract.get());
+    IWrapperContract con = wrapperFactory.create(contract.get());
     while (!actual.isAfter(last)) {
-      Optional<ContractMonthRecap> recap = c.getContractMonthRecap(actual);
+      Optional<ContractMonthRecap> recap = con.getContractMonthRecap(actual);
       if (recap.isPresent()) {
         recaps.add(wrapperFactory.create(recap.get()));
       }
@@ -112,9 +116,8 @@ public class PersonMonths extends Controller {
    * @param month mese 
    * @param year anno
    */
-  public static void saveTrainingHours(@Valid @Min(0) Integer begin,
-                                       @Min(0) @Valid Integer end,
-                                       @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
+  public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end, 
+      @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
     
     Person person = Security.getUser().get().person;
     
@@ -128,7 +131,8 @@ public class PersonMonths extends Controller {
       }
       if (validation.hasErrors()) {
         response.status = 400;
-        render("@insertTrainingHours", person, month, year, begin, end, value, personMonthSituationId);
+        render("@insertTrainingHours", 
+            person, month, year, begin, end, value, personMonthSituationId);
       }
       pm.trainingHours = value;
       pm.save();
@@ -203,6 +207,9 @@ public class PersonMonths extends Controller {
     
   }
   
+  /**
+   * metodo che renderizza la visualizzazione della form per l'inserimento delle ore di formazione.
+   */
   public static void insertTrainingHoursPreviousMonth() {
 
     Person person = Security.getUser().get().person;
@@ -244,11 +251,16 @@ public class PersonMonths extends Controller {
     LocalDate dateFrom = new LocalDate(year, month, begin);
     LocalDate dateTo = new LocalDate(year, month, end);
     
-    render("@insertTrainingHours",  dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value
-       );
+    render("@insertTrainingHours",  
+        dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value);
   }
 
 
+  /**
+   * metodo che renderizza la form di conferma cancellazione di ore di formazione.
+   * @param personId l'id della persona
+   * @param personMonthRecapId l'id del personMonthRecap
+   */
   public static void deleteTrainingHours(Long personId, Long personMonthRecapId) {
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
     if (pm == null) {
@@ -260,6 +272,10 @@ public class PersonMonths extends Controller {
   }
 
 
+  /**
+   * metodo che cancella dal db le ore di formazione specificate.
+   * @param personMonthRecapId l'id delle ore di formazione da cancellare
+   */
   public static void deleteTrainingHoursConfirmed(Long personMonthRecapId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
