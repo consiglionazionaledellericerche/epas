@@ -13,7 +13,7 @@
 #{/secure.checkAction}
 
 <div class="container">
-#{title title:'Lista Del Personale' /}
+	#{title title:'Lista Del Personale' /}
 
 #{tabs}
   #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
@@ -54,8 +54,10 @@
 		<span class="glyphicon glyphicon-warning-sign" aria-hidden="true" title="mancano i riepiloghi"></span>
 		#{/if}
 		<td><font color="#000000">${person.value.number}</font></td>
-		<td data-order="${person.currentContract.get().beginDate}"><font color="#000000">${person.currentContract.get().beginDate?.format()}</font></td>
-		<td data-order="${person.currentContract.get().endDate}"><font color="#000000">${person.currentContract.get().endDate?.format()}</font></td>
+			 <td data-order="${person.currentContract.get().beginDate}"><font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
+			 </td>
+			 <td data-order="${person.currentContract.get().endDate}"><font color="#000000">${person.currentContract.get().endDate?.format()}</font>
+			 </td>
 
 		<td>
 		  #{if person.currentWorkingTimeType.present}
@@ -79,8 +81,8 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}
 		</td>
-		
-		<!-- Invio email -->
+
+			 <!-- Invio email -->
 		<td>
 		  #{if person.value.wantEmail}
 		    <i class="fa fa-check-square-o"></i>
@@ -102,7 +104,7 @@
   #{/tabContentItem}
 
   #{tabContentItem id:'nonAttivo'}
-	
+
 	<br>
 	<table class="table table-striped table-hover table-condensed center" width="100%" datatable>
 	    <thead>

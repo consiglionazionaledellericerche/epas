@@ -2,7 +2,6 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import com.mysema.query.SearchResults;
@@ -19,7 +18,6 @@ import manager.SecureManager;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
-import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -34,10 +32,8 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -104,7 +100,7 @@ public class BadgeReaders extends Controller {
 
     SearchResults<?> results = badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.fromNullable(badgeReader)).listResults();
-    
+
     render(badgeReader, results);
 
   }
@@ -114,25 +110,24 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   * 
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
-    
+
     final BadgeReader badgeReader = BadgeReader.findById(id);
     notFoundIfNull(badgeReader);
     rules.checkIfPermitted(badgeReader.owner);
 
     //elimino la sorgente se non è associata ad alcun gruppo.
-    if(badgeReader.badgeSystems.isEmpty()) {
-      
+    if (badgeReader.badgeSystems.isEmpty()) {
+
       badgeReader.delete();
-      
+
       // FIXME: issue della rimozione user delle persone che riferiscono lo storico.
       badgeReader.user.delete();
 
       flash.success(Web.msgDeleted(BadgeSystem.class));
-      
+
       index();
     }
     flash.error("Per poter eliminare il gruppo è necessario che non sia associato ad alcuna"
@@ -167,12 +162,12 @@ public class BadgeReaders extends Controller {
    * @param newPass nuova password da associare al lettore.
    */
   public static void changePassword(@Valid User user,
-      @MinSize(5) @Required String newPass) {
+                                    @MinSize(5) @Required String newPass) {
 
     notFoundIfNull(user.badgeReader);
     BadgeReader badgeReader = user.badgeReader;
     rules.checkIfPermitted(badgeReader.owner);
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", user, validation.errorsMap());
@@ -183,7 +178,7 @@ public class BadgeReaders extends Controller {
     Codec codec = new Codec();
     user.password = codec.hexMD5(newPass);
     user.save();
-    
+
     flash.success(Web.msgSaved(BadgeReader.class));
     edit(badgeReader.id);
 
@@ -197,7 +192,7 @@ public class BadgeReaders extends Controller {
   public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
 
     rules.checkIfPermitted(badgeReader.owner);
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
@@ -225,26 +220,26 @@ public class BadgeReaders extends Controller {
    * @param badgeReaderId
    */
   public static void joinBadgeSystems(Long badgeReaderId) {
-    
+
     final BadgeReader badgeReader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(badgeReader);
-    
+
     rules.checkIfPermitted(badgeReader.owner);
 
     render("@joinBadgeSystems", badgeReader);
   }
-  
+
   /**
    * Salva la nuova associazione.
    * @param badgeReader.
    */
   public static void saveBadgeSystems(@Valid BadgeReader badgeReader, boolean confirmed) {
-    
+
     rules.checkIfPermitted(badgeReader.owner);
-    
+
     // TODO:
     //creare gli uro mancanti, cancellare quelli non più usati
-    
+
     //Costruisco un pò di strutture dati di utilità....
     Set<BadgeSystem> badgeSystemsAdd = Sets.newHashSet();
     Set<BadgeSystem> badgeSystemsRemove = Sets.newHashSet();
@@ -265,19 +260,19 @@ public class BadgeReaders extends Controller {
         }
         badgesToRemove.add(badge);
       }
-     
+
     }
     for (BadgeSystem badgeSystem : badgeReader.badgeSystems) {
       if (!badgeSystemsRemain.contains(badgeSystem)) {
         badgeSystemsAdd.add(badgeSystem);
       }
     }
- 
+
     List<Badge> violatedBadges = Lists.newArrayList();
     List<Badge> badgesToSave = Lists.newArrayList();
 
     for (BadgeSystem badgeSystem : badgeSystemsAdd) {
-    
+
       // Prendere i codici del badge system
       Set<String> codes = Sets.newHashSet();
       for (Badge otherBadge : badgeSystem.badges) {
@@ -288,7 +283,7 @@ public class BadgeReaders extends Controller {
           badge.badgeSystem = badgeSystem;
           badge.badgeReader = badgeReader;
           badge.code = otherBadge.code;
-         
+
           //Controllare che esistano nel badgeReader
           Optional<Badge> alreadyExists = BadgeSystems.alreadyExists(badge);
           if (alreadyExists.isPresent()) {
@@ -308,12 +303,12 @@ public class BadgeReaders extends Controller {
       render("@joinBadgeSystems", badgeReader, violatedBadges);
       index();
     }
-    
+
     if (!badgesDefinitelyToRemove.isEmpty() && !confirmed) {
       response.status = 400;
       render("@joinBadgeSystems", badgeReader, badgesDefinitelyToRemove);
     }
-    
+
     badgeReader.save();
     for (Badge badge : badgesToRemove) {
       badge.delete();
@@ -321,9 +316,9 @@ public class BadgeReaders extends Controller {
     for (Badge badge : badgesToSave) {
       badge.save();
     }
-    
+
     // I RUOLI
-    
+
     Role role = roleDao.getRoleByName(Role.BADGE_READER);
 
     for (BadgeSystem badgeSystem : badgeSystemsRemove) {
@@ -331,9 +326,9 @@ public class BadgeReaders extends Controller {
           role, badgeSystem.office);
       if (uro.isPresent()) {
         uro.get().delete();
-        log.info("UserRoleOffice rimosso: {}", uro); 
+        log.info("UserRoleOffice rimosso: {}", uro);
       } else {
-        log.warn("L'userRoleOffice da rimuovere {} {} {} avrebbe dovuto esistere.", 
+        log.warn("L'userRoleOffice da rimuovere {} {} {} avrebbe dovuto esistere.",
             badgeReader.code, role.name, badgeSystem.office);
       }
     }
@@ -346,19 +341,17 @@ public class BadgeReaders extends Controller {
         uroNew.role = role;
         uroNew.user = badgeReader.user;
         uroNew.save();
-        log.info("UserRoleOffice creato: {}", uroNew); 
+        log.info("UserRoleOffice creato: {}", uroNew);
       } else {
-        log.warn("L'userRoleOffice da inserire {} {} {} esisteva già.", 
+        log.warn("L'userRoleOffice da inserire {} {} {} esisteva già.",
             badgeReader.code, role.name, badgeSystem.office);
       }
     }
-    
+
     flash.success(Web.msgSaved(BadgeReader.class));
     index();
-    
+
   }
 
 
-  
- 
 }

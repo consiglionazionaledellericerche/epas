@@ -88,7 +88,7 @@ public class OfficeDao extends DaoBase {
 
   }
 
-  
+
   private BooleanBuilder matchInstituteName(QInstitute institute, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();
     for (String token : TOKEN_SPLITTER.split(name)) {
@@ -139,20 +139,19 @@ public class OfficeDao extends DaoBase {
     return PerseoModelQuery.wrap(query, institute);
 
   }
-  
+
   /**
-   * Tutte le sedi.
-   * //TODO sarebbe meglio usare la offices definita sotto in modo da avere un ordinamento sugli
-   * istituti.
+   * Tutte le sedi. //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
+   * ordinamento sugli istituti.
    */
   public PerseoSimpleResults<Office> allOffices() {
 
     final QOffice office = QOffice.office;
 
     final JPQLQuery query = getQueryFactory()
-            .from(office)
-            .distinct()
-            .orderBy(office.name.asc());
+        .from(office)
+        .distinct()
+        .orderBy(office.name.asc());
 
     return PerseoModelQuery.wrap(query, office);
 

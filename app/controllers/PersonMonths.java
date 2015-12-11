@@ -10,7 +10,6 @@ import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
 import manager.PersonMonthsManager;
-import manager.PersonMonthsManager.Insertable;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -18,16 +17,13 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.User;
 
-import org.drools.definition.type.Position;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -116,9 +112,9 @@ public class PersonMonths extends Controller {
    * @param month mese 
    * @param year anno
    */
-  public static void saveTrainingHours(@Valid @Min(0) Integer begin, 
-      @Min(0) @Valid Integer end, 
-      @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
+  public static void saveTrainingHours(@Valid @Min(0) Integer begin,
+                                       @Min(0) @Valid Integer end,
+                                       @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
     
     Person person = Security.getUser().get().person;
     
@@ -173,7 +169,7 @@ public class PersonMonths extends Controller {
             "valore troppo alto");
       }
     }
-    
+
     if (validation.hasErrors()) {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);

@@ -25,7 +25,7 @@ badge.code= Numero badge
 code=Codice
 badge.badgeReader= Lettore badge associato
 badge.edit= Modifica
-badge.delete= Elimina
+badge.delete= Elimina Badge
 
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
@@ -129,6 +129,7 @@ institute.name=Nome
 institute.code=Sigla
 institute.cds= Centro di spesa
 
+link.denied= Permessi insufficenti
 logout= Esci
 
 lunchPauseStart= Inizio pausa pranzo
