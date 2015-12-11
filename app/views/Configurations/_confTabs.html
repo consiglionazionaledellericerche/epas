@@ -1,5 +1,5 @@
 <ul class="nav nav-tabs">
   <li #{if name.equals("confGeneral")} class="active" #{/if} ><a href="@{Configurations.showConfGeneral()}">Parametri Generali</a></li>
   <li #{if name.equals("confYear")   } class="active" #{/if} ><a href="@{Configurations.showConfYear()}">Parametri Annuali</a></li>
-  <li #{if name.equals("confPeriod") } class="active" #{/if} ><a href="@{Configurations.showConfPeriod()}">Parametri Periodici</a></li>
+  *{<li #{if name.equals("confPeriod") } class="active" #{/if} ><a href="@{Configurations.showConfPeriod()}">Parametri Periodici</a></li>}*
 </ul>

@@ -146,11 +146,11 @@
 				     #{if absence.justifiedMinutes}
 				    	${absence.justifiedMinutes}min
 				  	 #{/if}
-        #{if absence.absenceFile.exists()}
-          #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
-          #{/secure.link}
-        #{/if}
       #{/secure.link}
+      #{if absence.absenceFile.exists()}
+        #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
+        #{/secure.link}
+      #{/if}
 
       #{/list}
     </td>
