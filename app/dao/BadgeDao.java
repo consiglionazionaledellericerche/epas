@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -32,7 +31,7 @@ public class BadgeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory()
         .from(badge)
         .where(badge.code.eq(code)
-        .and(badge.badgeReader.eq(badgeReader)));
+            .and(badge.badgeReader.eq(badgeReader)));
 
     return Optional.fromNullable(query.singleResult(badge));
   }
@@ -46,6 +45,6 @@ public class BadgeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(badge).where(badge.id.eq(id));
     return query.singleResult(badge);
   }
-  
-  
+
+
 }

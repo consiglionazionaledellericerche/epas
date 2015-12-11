@@ -17,7 +17,6 @@ import dao.RoleDao;
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperModel;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -35,7 +34,6 @@ import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-import models.base.BaseModel;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
@@ -68,9 +66,9 @@ public class TemplateUtility {
 
   @Inject
   public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
-      QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
-      RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao, 
-      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
+                         QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
+                         RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
+                         IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -155,7 +153,7 @@ public class TemplateUtility {
   public Set<Office> officesAllowed() {
     return secureManager.officesWriteAllowed(Security.getUser().get());
   }
-  
+
   public List<Qualification> getAllQualifications() {
     return qualificationDao.findAll();
   }
@@ -266,28 +264,27 @@ public class TemplateUtility {
     }
     return users;
   }
-  
+
   /**
    * Tutti i badge system.
-   * @return
    */
   public List<BadgeSystem> allBadgeSystem() {
-    
-    return badgeSystemDao.badgeSystems(Optional.<String>absent(), 
+
+    return badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.<BadgeReader>absent()).list();
   }
-  
+
   /**
-   * 
+   *
    * @param office
    * @return
    */
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
-    List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList(); 
+    List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
-       if (!badgeSystem.badgeReaders.isEmpty()) {
-         configuredBadgeSystem.add(badgeSystem);
-       }
+      if (!badgeSystem.badgeReaders.isEmpty()) {
+        configuredBadgeSystem.add(badgeSystem);
+      }
     }
     return configuredBadgeSystem;
   }

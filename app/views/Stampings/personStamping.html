@@ -5,312 +5,308 @@
 #{set 'moreStyles'}
 
 <style>
-    
-    html, body {
-		background-color: white;
-	}
-	
-	#page_content {
-		padding-top: 70px;
-	}
-	
-	.col-xs-12, .col-sm-12, .col-md-6  {
-		padding-left: 4px;
-		padding-right: 4px;
-	} 
-	
-	.panel-success>.panel-heading {
-		color: black;
-		background-color: grey;
-		border-color: #dddddd;
-	}
-	
-	.col-xs-10, .col-xs-2 {	/* tabelle riepilogo responsive */
-		border: 1px solid lightgrey;
-		padding-top: 3px;
-		padding-bottom: 3px;
-	}
-	
-	.col-xs-2 {
-		text-align: center;
-	}
-	
-	.container {
-		margin-left: 0;
-		margin-right: 0;
-	}
-	
-	#page_content {
-		widht: 100%;
-	}
-	
-@media (max-width: 767px) {
 
-	#tabellonetimbrature {
-	   font-size: 10px !important; 
-	   /* min-width: 600px; */
-	}
-	
-	#padre {
-	   /* min-width: 640px; */
-	}
-	
-	.container {
-		margin-left: 0px;
-		padding-left: 0px;
-		margin-right: 0px;
-		padding-right: 0px;
-		
-	}
-	
-	footer {
-		display: none;
-	}
-	
-	#riepiloghi {
-	    font-size: 12px !important; 
-	}
-	
-}
+  html, body {
+  background-color: white;
+  }
+
+  #page_content {
+  padding-top: 70px;
+  }
+
+  .col-xs-12, .col-sm-12, .col-md-6 {
+  padding-left: 4px;
+  padding-right: 4px;
+  }
+
+  .panel-success>.panel-heading {
+  color: black;
+  background-color: grey;
+  border-color: #dddddd;
+  }
+
+  .col-xs-10, .col-xs-2 { /* tabelle riepilogo responsive */
+  border: 1px solid lightgrey;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  }
+
+  .col-xs-2 {
+  text-align: center;
+  }
+
+  .container {
+  margin-left: 0;
+  margin-right: 0;
+  }
+
+  #page_content {
+  widht: 100%;
+  }
+
+  @media (max-width: 767px) {
+
+  #tabellonetimbrature {
+  font-size: 10px !important;
+  /* min-width: 600px; */
+  }
+
+  #padre {
+  /* min-width: 640px; */
+  }
+
+  .container {
+  margin-left: 0px;
+  padding-left: 0px;
+  margin-right: 0px;
+  padding-right: 0px;
+
+  }
+
+  footer {
+  display: none;
+  }
+
+  #riepiloghi {
+  font-size: 12px !important;
+  }
+
+  }
 
 </style>
 
 #{/set}
+<div class="col-xs-12 col-lg-8">
+  <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 
+    <tr>
+      <th class="group-single">Giorno</th>
+      <th class="group-single">Buono<br>pasto</th>
 
-  <div class="col-xs-12 col-lg-8">
-    <table id="tabellonetimbrature" class="table table-bordered table-condensed">
-      
-      
-      <tr>
-		<th class="group-single">Giorno</th>
-		<th class="group-single">Buono<br>pasto</th>
-		
-		<th class="invisible"></th>
-		
-		<th class="group-single">Codice <br>assenza</th>
-		
-		
-		
-		#{list items:1..psDto.numberOfInOut, as:'i'}
-			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
-			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
-		#{/list}
-		
-		
-		<th class="group-single">Inserisci<br>timbratura</th>
-		
-		<th class="invisible"></th>
-		
-		<th class="group-single">Tempo<br>lavoro</th>
-		<th class="group-single">Diffe-<br/>renza</th>
-		<th class="group-single">Progres-<br/>sivo</th>		
-		<th class="group-single">Tipo<br>Orario</th>
-		<th class="group-single">Note</th>
-	  </tr>
-      
-       
-	  
-	  #{list items:psDto.daysRecap, as:'dayRecap'}
-	    
-	  	<tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
+      <th class="invisible"></th>
 
-	  	<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
-	  	   #{if dayRecap.firstDay }F#{/if}
-	      <a href="@{PersonDayHistory.personDayHistory(dayRecap.personDayId)}" data-async-modal="#modalStamping">
-		     ${dayRecap.date.shortDayName()}
-          </a>
-	    </td>
-		
-        <td class="default-single">
-		#{if dayRecap.mealTicket.equals("NO")}
-		  <span class="glyphicon glyphicon-ban-circle"></span>
-		#{/if} 
-		#{if dayRecap.mealTicket.equals("NOT_YET")}
-		  <span class="glyphicon glyphicon-remove"></span>
-		#{/if} 
-		#{if dayRecap.mealTicket.equals("YES")}
-		  <span class="glyphicon glyphicon-ok"></span>
-		#{/if} 
-		</td>
+      <th class="group-single">Codice <br>assenza</th>
 
-		<td class="invisible"></td>
-		
-		<td class="assenza default-single">
-		  <a href="@{Absences.blank(dayRecap.person.id, dayRecap.personDay.date?.format())}" 
-		    data-async-modal="#modalAbsence">
-		  ___
-		  </a>
-		  
-		  #{list items:dayRecap.absences, as:'absence'}
-		    <a href="@{Absences.edit(absence.id)}" data-async-modal="#modalAbsence">
-			  <span>
-				     ${absence.absenceType.code} 
+
+      #{list items:1..psDto.numberOfInOut, as:'i'}
+      <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
+      <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
+      #{/list}
+
+
+      <th class="group-single">Inserisci<br>timbratura</th>
+
+      <th class="invisible"></th>
+
+      <th class="group-single">Tempo<br>lavoro</th>
+      <th class="group-single">Diffe-<br/>renza</th>
+      <th class="group-single">Progres-<br/>sivo</th>
+      <th class="group-single">Tipo<br>Orario</th>
+      <th class="group-single">Note</th>
+    </tr>
+
+
+    #{list items:psDto.daysRecap, as:'dayRecap'}
+
+    <tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
+
+    <td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
+      #{if dayRecap.firstDay }F#{/if}
+
+      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDayId), modal:'#modalStamping'}
+        ${dayRecap.date.shortDayName()}
+      #{/secure.link}
+
+    </td>
+
+    <td class="default-single">
+      #{if dayRecap.mealTicket.equals("NO")}
+      <span class="glyphicon glyphicon-ban-circle"></span>
+      #{/if}
+      #{if dayRecap.mealTicket.equals("NOT_YET")}
+      <span class="glyphicon glyphicon-remove"></span>
+      #{/if}
+      #{if dayRecap.mealTicket.equals("YES")}
+      <span class="glyphicon glyphicon-ok"></span>
+      #{/if}
+    </td>
+
+    <td class="invisible"></td>
+
+    <td class="assenza default-single">
+      #{secure.link @Absences.blank(dayRecap.person.id, dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
+        ___
+      #{/secure.link}
+
+      #{list items:dayRecap.absences, as:'absence'}
+
+      #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
+				     ${absence.absenceType.code}
 				     #{if absence.justifiedMinutes}
 				    	${absence.justifiedMinutes}min
 				  	 #{/if}
-			  </span>
-			  #{if absence.absenceFile.exists()}
-			    <a href="@{Absences.downloadAttachment(absence.id)}">
-					<span class="glyphicon glyphicon-envelope"></span>
-				</a>
-			  #{/if}
-			</a>
-		  #{/list}	
-		</td>
-		
-		#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
-		  #{if stampingTemplate.colour.equals("in")}
-			<td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
-		  #{/if}
-		  #{elseif stampingTemplate.colour.equals("out")}
-		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
-		  #{/elseif}
-		  #{elseif stampingTemplate.colour.equals("warn")}
-		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
-	      #{/elseif}
-					
-		  #{if stampingTemplate.date!=null}
-		    <a href="@{Stampings.edit(stampingTemplate.stampingId)}" data-async-modal="#modalStamping">
-			  ${stampingTemplate.hour}
-			</a>
-		  #{/if}
-		  #{elseif stampingTemplate.pairPosition.equals("center")}
-		    <abbr title="Timbratura di servizio mancante" class="initialism"><i class="icon-warning-sign"></i></abbr>
-		  #{/elseif}
+      #{/secure.link}
+      #{if absence.absenceFile.exists()}
+        #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
+        #{/secure.link}
+      #{/if}
 
-		  #{ifnot stampingTemplate.identifier.equals("")}
-			<strong>${stampingTemplate.identifier}</strong>
-		  #{/ifnot}	
-		  #{ifnot stampingTemplate.markedByAdminCode.equals("")}
-			<strong>${stampingTemplate.markedByAdminCode}</strong>
-		  #{/ifnot}	
-		  #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
-			<strong>${stampingTemplate.markedByEmployeeCode}</strong>
-		  #{/ifnot}	
-		  #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
-			<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-		  #{/ifnot}	
-		  <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
-		  </td>
-	    #{/list}
-	    <td class="inserisciTimbratura default-single">
-        #{if !dayRecap.future}
-		    <a href="@{Stampings.blank(dayRecap.person.id, dayRecap.date.format())}" 
-		    data-async-modal="#modalStamping">
-		      +++
-		    </a>
-		#{/if}    
-		</td>
-		
-		<td class="invisible"></td>
-		
-	    <td class="tempoLavoro default-single">
-		 
-		  ${dayRecap.workTime}
-		  #{if dayRecap.personDay.decurted != null}
-			  <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover" 
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="${(
+      #{/list}
+    </td>
+
+    #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+    #{if stampingTemplate.colour.equals("in")}
+    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
+      #{/if}
+      #{elseif stampingTemplate.colour.equals("out")}
+    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
+      #{/elseif}
+      #{elseif stampingTemplate.colour.equals("warn")}
+    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
+      #{/elseif}
+
+      #{if stampingTemplate.date!=null}
+        #{secure.link @Stampings.edit(stampingTemplate.stampingId),modal:'#modalStamping'}
+          ${stampingTemplate.hour}
+        #{/secure.link}
+      #{/if}
+      #{elseif stampingTemplate.pairPosition.equals("center")}
+      <abbr title="Timbratura di servizio mancante" class="initialism"><i
+              class="icon-warning-sign"></i></abbr>
+      #{/elseif}
+
+      #{ifnot stampingTemplate.identifier.equals("")}
+      <strong>${stampingTemplate.identifier}</strong>
+      #{/ifnot}
+      #{ifnot stampingTemplate.markedByAdminCode.equals("")}
+      <strong>${stampingTemplate.markedByAdminCode}</strong>
+      #{/ifnot}
+      #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
+      <strong>${stampingTemplate.markedByEmployeeCode}</strong>
+      #{/ifnot}
+      #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
+      <strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+      #{/ifnot}
+      <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
+    </td>
+    #{/list}
+    <td class="inserisciTimbratura default-single">
+      #{if !dayRecap.future}
+      #{secure.link @Stampings.blank(dayRecap.person.id, dayRecap.date.format()),modal:'#modalStamping'}
+        +++
+      #{/secure.link}
+      #{/if}
+    </td>
+
+    <td class="invisible"></td>
+
+    <td class="tempoLavoro default-single">
+
+      ${dayRecap.workTime}
+      #{if dayRecap.personDay.decurted != null}
+      <a href="#" data-popover
+         data-trigger="hover" data-toggle="popover"
+         data-placement="bottom"
+         data-html="true"
+         data-content="${(
 	    		'Tempo Totale Timbrature: <strong>'+dayRecap.stampingWorkingTime+'</strong>'+
 	    		'<br>Tempo Sottratto Per Pausa Pranzo: <strong>'+dayRecap.personDay.decurted+' minuti</strong>').escape()}"
-	    		title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
-			  </a>
-		  #{/if}
-		  #{else}
-		     
-		  #{/else}
-		  
-		  
-		  #{ifnot dayRecap.todayLunchTimeCode.equals("")}
-		    <strong>${dayRecap.todayLunchTimeCode}</strong>
-		  #{/ifnot}
-		  #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
-		  	<strong>${dayRecap.fixedWorkingTimeCode}</strong>
-		  #{/ifnot}	
-		  #{ifnot dayRecap.exitingNowCode.equals("")}
-		    <strong>${dayRecap.exitingNowCode}</strong>
-		  #{/ifnot}
-		  
-		  <!-- toggle holidayWork-->
-		  #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
-		    #{if dayRecap.personDay.acceptedHolidayWorkingTime }
-		    <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
-			#{/if}
-			#{else}
-			<a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
-			#{/else}  
-			
-		  #{/if}
-		  
-		</td>	
-			
-		#{if dayRecap.differenceNegative}
-		  <td class="differenza  default-single" style="color: red;">${dayRecap.difference}</td>
-		#{/if}
-		#{else}
-		  <td class="differenza default-single">&nbsp;${dayRecap.difference}</td>
-		#{/else}
-			
-		#{if dayRecap.progressiveNegative}
-		  <td class="progressivo default-single" style="color: red;">${dayRecap.progressive}</td>
-		#{/if}
-		#{else}
-		  <td class="progressivo default-single">&nbsp;${dayRecap.progressive}</td>
-		#{/else}
-												
-	    <td class="default-single">
-	      #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
-	        <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover" 
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="${(
+         title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
+      </a>
+      #{/if}
+      #{else}
+
+      #{/else}
+
+
+      #{ifnot dayRecap.todayLunchTimeCode.equals("")}
+      <strong>${dayRecap.todayLunchTimeCode}</strong>
+      #{/ifnot}
+      #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
+      <strong>${dayRecap.fixedWorkingTimeCode}</strong>
+      #{/ifnot}
+      #{ifnot dayRecap.exitingNowCode.equals("")}
+      <strong>${dayRecap.exitingNowCode}</strong>
+      #{/ifnot}
+
+      <!-- toggle holidayWork-->
+      #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
+      #{if dayRecap.personDay.acceptedHolidayWorkingTime }
+      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
+      #{/if}
+      #{else}
+      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
+      #{/else}
+
+      #{/if}
+
+    </td>
+
+    #{if dayRecap.differenceNegative}
+    <td class="differenza  default-single" style="color: red;">${dayRecap.difference}</td>
+    #{/if}
+    #{else}
+    <td class="differenza default-single">&nbsp;${dayRecap.difference}</td>
+    #{/else}
+
+    #{if dayRecap.progressiveNegative}
+    <td class="progressivo default-single" style="color: red;">${dayRecap.progressive}</td>
+    #{/if}
+    #{else}
+    <td class="progressivo default-single">&nbsp;${dayRecap.progressive}</td>
+    #{/else}
+
+    <td class="default-single">
+      #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
+      <a href="#" data-popover
+         data-trigger="hover" data-toggle="popover"
+         data-placement="bottom"
+         data-html="true"
+         data-content="${(
 	    		'Tempo Lavoro: <strong>'+dayRecap.workingTime+'</strong>'+
 	    		'<br>Tempo lavoro per buono pasto: <strong>'+dayRecap.mealTicketTime+'</strong>'+
 	    		'<br>Durata minima intervallo pranzo: <strong>'+dayRecap.breakTicketTime+'</strong>'+
 	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.timeMealFrom+' - ' +dayRecap.timeMealTo+'</strong>'+
 	    		' (estremi compresi)').escape()}"
-	    		title="Info orario giornaliero">${dayRecap.workingTimeTypeDescription}</a>
-	      #{/if}
-	      
-	      
-	    </td>
-	    <td class="default-single note">
-	    #{if dayRecap.note.size != 0}
-	    
-	    	<a href="#" class="btn btn-small note" data-popover
-	    		data-trigger="hover" data-toggle="popover" 
-	    		data-placement="right"
-	    		data-html="true"
-	    		data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
-	    		title="Info timbrature">Info</a>    
-	    
-	    #{/if}
-	    </td>
-		
-	  </tr>
-	  #{/list}
-    </table>
+         title="Info orario giornaliero">${dayRecap.workingTimeTypeDescription}</a>
+      #{/if}
+
+
+    </td>
+    <td class="default-single note">
+      #{if dayRecap.note.size != 0}
+
+      <a href="#" class="btn btn-small note" data-popover
+         data-trigger="hover" data-toggle="popover"
+         data-placement="right"
+         data-html="true"
+         data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
+         title="Info timbrature">Info</a>
+
+      #{/if}
+    </td>
+
+    </tr>
+    #{/list}
+  </table>
+</div>
+
+<div id="riepiloghi">
+
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+    #{include './_alerts.html' /}
+    #{include './_contractsRecap.html' /}
   </div>
 
-  <div id="riepiloghi">
-  
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
-      #{include './_alerts.html' /}
-      #{include './_contractsRecap.html' /}
-  </div>
-  
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
     #{include './_notes.html' /}
   </div>
-  
-  </div>
+</div>
 
 
 <div id="modalStamping" class="modal container" tabindex="-1"></div>
 
 <div id="modalAbsence" class="modal container" tabindex="-1"></div>
+
+

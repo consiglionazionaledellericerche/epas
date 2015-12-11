@@ -74,7 +74,6 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       Set<Office> offices = secureManager
               .officesBadgeReaderAllowed(Security.getUser().get());
       
-      BadgeReader badgeReader = Security.getUser().get().badgeReader;
       Person person = null;
 
       JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
@@ -83,18 +82,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       StampingFromClient stamping = new StampingFromClient();
 
-      // FIXME questa parte del lettore è sbagliata ed inutile. L'identificazione è via basicAuth
-      if (jsonObject.has("lettore")) {
-        String badgeReaderCode = jsonObject.get("lettore").getAsString();
-        if (!Strings.isNullOrEmpty(badgeReaderCode)) {
-          //BadgeReader badgeReader = badgeReaderDao.byCode(badgeReaderCode);
-          if (badgeReader == null) {
-            //Logger.warn("Lettore di badge con codice %s non presente 
-            //sul database/sconosciuto", badgeReaderCode);
-          }
-          stamping.badgeReader = badgeReader;
-        }
-      }
+      stamping.badgeReader = Security.getUser().get().badgeReader;
 
       Integer inOut = jsonObject.get("operazione").getAsInt();
       if (inOut != null) {

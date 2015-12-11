@@ -3,7 +3,6 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -17,8 +16,6 @@ import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
-import models.Office;
-import models.Person;
 import models.query.QBadge;
 import models.query.QBadgeReader;
 import models.query.QBadgeSystem;
@@ -28,14 +25,12 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
- * 
  * @author alessandro
- *
  */
 public class BadgeSystemDao extends DaoBase {
 
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ')
-          .trimResults().omitEmptyStrings();
+      .trimResults().omitEmptyStrings();
 
   @Inject
   BadgeSystemDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -50,7 +45,7 @@ public class BadgeSystemDao extends DaoBase {
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
 
     final JPQLQuery query = getQueryFactory().from(badgeSystem)
-            .where(badgeSystem.id.eq(id));
+        .where(badgeSystem.id.eq(id));
     return query.singleResult(badgeSystem);
   }
 
@@ -62,32 +57,32 @@ public class BadgeSystemDao extends DaoBase {
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
 
     final JPQLQuery query = getQueryFactory().from(badgeSystem)
-            .where(badgeSystem.name.eq(name));
+        .where(badgeSystem.name.eq(name));
     return query.singleResult(badgeSystem);
   }
 
   /**
-   * 
+   *
    * @param name
    * @return
    */
-  public PerseoSimpleResults<BadgeSystem> badgeSystems(Optional<String> name, 
-      Optional<BadgeReader> badgeReader) {
+  public PerseoSimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
+                                                       Optional<BadgeReader> badgeReader) {
 
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
     final QBadgeReader qBadgeReader = QBadgeReader.badgeReader;
 
     JPQLQuery query = getQueryFactory()
         .from(badgeSystem);
-  
+
     final BooleanBuilder condition = new BooleanBuilder();
-    
+
     if (badgeReader.isPresent()) {
       query = getQueryFactory()
           .from(qBadgeReader)
           .rightJoin(qBadgeReader.badgeSystems, badgeSystem);
       condition.and(qBadgeReader.eq(badgeReader.get()));
-    } 
+    }
     if (name.isPresent()) {
       condition.and(matchBadgeSystemName(badgeSystem, name.get()));
     }
@@ -106,22 +101,20 @@ public class BadgeSystemDao extends DaoBase {
     }
     return nameCondition.or(badgeSystem.name.startsWithIgnoreCase(name));
   }
-  
+
   /**
    * Tutti i badge di badgeSystem ordinati per codice badge (e persona).
-   * @param badgeSystem
-   * @return
    */
   public List<Badge> badges(BadgeSystem badgeSystem) {
-    
+
     final QBadge badge = QBadge.badge;
-    
+
     JPQLQuery query = getQueryFactory()
         .from(badge)
         .where(badge.badgeSystem.eq(badgeSystem))
         .orderBy(badge.code.asc()).orderBy(badge.person.id.asc());
     return query.list(badge);
-    
+
   }
 
 }

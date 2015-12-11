@@ -19,7 +19,8 @@ global models.User currentOperator;
 *
 */
 
-rule AnyUser when
+rule AnyUser
+when
   $c: PermissionCheck(action in (
      	"Application.index",
      	"Version.showVersion"
@@ -36,7 +37,7 @@ end
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
-  $r: Role(name == "employee") from $uro.role
+  Role(name == Role.EMPLOYEE) from $uro.role
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administrators.restoreUser",
@@ -140,113 +141,45 @@ end
   
 
 /*******************************************************************************
- * Azioni utente DEVELOPER
+ * Azioni ruolo DEVELOPER e ADMIN
  ******************************************************************************/
-rule Developer
+rule systemUsers
+salience 1
+activation-group 'admin'
 when
  $uro: UsersRolesOffices()
- Role(name == "developer") from $uro.role
+ Role(name in (Role.DEVELOPER,Role.ADMIN)) from $uro.role
  $c: PermissionCheck( granted == false)
 then
  $c.grant();
 end
 
 /*******************************************************************************
- * Azioni utente ADMIN
+ * Azioni non permesse per il ruolo ADMIN
  ******************************************************************************/
-rule Admin_Generic
+rule revokeToAdmin
+salience 2
+activation-group 'admin'
 when
  $uro: UsersRolesOffices()
- $p: Role(name == "admin") from $uro.role
- $c: PermissionCheck(action in (
- 
- 		"Offices.editSeat",
-        "Offices.saveSeat",
-        "Offices.insertSeat",
-        "Offices.saveInstitute",
-        "Offices.editInstitute",
-        "Offices.insertInstitute",
-        "Offices.insertArea",
-        "Offices.showOffices",
-        
-        "Administrators.blank",
-        "Administrators.save",
-        "Administrators.delete",
-        "Administrators.deleteSelfAsAdministrator",
-        "Administrators.insertAccountSystem",
-        "Administrators.saveAccountSystem",
-        "Administrators.deleteAccountSystem",
-
-		/* duplicate */
-		"Configurations.showConfGeneral",
-		"Configurations.showConfYear",
-		"Configurations.showConfPeriod",
-        "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear",
-        "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear",
-		"Configurations.savePastYearVacationLimit",
-		"Configurations.savePatron",
-
-        "Import.officeList",
-
-        "Persons.list",
-        "Persons.edit",
-        "Persons.update",
-        "Persons.save",
-        "Persons.insertPerson",
-     	"Persons.insertUsername",
-     	"Persons.updateUsername",
-        "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed",
-     	
-     	"Contracts.personContracts",
-     	
-     	"WorkingTimes.manageWorkingTime",
-     	"WorkingTimes.manageOfficeWorkingTime",
-     	"WorkingTimes.showHorizontal",
-     	"WorkingTimes.showContract",
-     	"WorkingTimes.showContractWorkingTimeType"          
-
- 		), target == null, granted == false)
- then
- $c.grant();
-end
-
-rule Admin_InOffice
-when
- $uro: UsersRolesOffices()
- $o: Office( usersRolesOffices contains $uro)
- $p: Role(name == "admin") from $uro.role
- $c: PermissionCheck(action in (
- 	
- 	    "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear",
-        "Configurations.insertNewConfYear",
-        "Configurations.saveNewConfYear",
-        "Configurations.savePastYearVacationLimit",
-        "Configurations.savePatron",
-        
-        "Persons.edit",
-        "Persons.update",
-        "Persons.save",
-        "Persons.insertUsername",
-        "Persons.updateUsername",
-        "Persons.deletePerson",
-        "Persons.deletePersonConfirmed",
-        
-        "Contracts.personContracts",
-        
-        "WorkingTimes.manageWorkingTime",
-        "WorkingTimes.manageOfficeWorkingTime",
-        "WorkingTimes.showHorizontal",
-     	"WorkingTimes.showContract",
-     	"WorkingTimes.showContractWorkingTimeType"             
-               
-       ), target == $o, granted == false)
+ Role(name == Role.ADMIN) from $uro.role
+ $c: PermissionCheck(
+    action.startsWith("Absences.")
+    || action.startsWith("Administration.")
+    || action.startsWith("Charts.")
+    || action.startsWith("MonthRecaps.")
+    || action.startsWith("Competences.")
+    || action.startsWith("MealTickets.")
+    || action.startsWith("PrintTags.")
+    || action.startsWith("PersonMonths.")
+    || action.startsWith("Stampings.")
+    || action.startsWith("UploadSituation.")
+    || action.startsWith("Vacations.")
+    || action.startsWith("VacationsAdmin."))
 then
- $c.grant();
+ $c.revoke();
 end
+
 
 /*******************************************************************************
  * Azioni utente con ruolo TECNICAL_ADMIN
@@ -254,7 +187,7 @@ end
 rule TecnicalAdmin_Generic
 when 
  $uro: UsersRolesOffices()
- $p: Role(name == "tecnicalAdmin") from $uro.role
+ Role(name == Role.TECNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
         "Institutes.list",
@@ -308,7 +241,7 @@ rule TecnicalAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Role(name == "tecnicalAdmin") from $uro.role
+ Role(name == Role.TECNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
  
  	   "Institutes.edit",
@@ -351,7 +284,7 @@ end
 rule AtLeastPersonnelAdminMini_Generic
 when 
  $uro: UsersRolesOffices()
- $p: Role(name in ("personnelAdmin","personnelAdminMini")) from $uro.role
+ Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
         
         /* Vecchio permesso viewPerson */
@@ -393,6 +326,8 @@ when
         /* Vecchio permesso viewPerson */
         "Persons.showCurrentVacation",
         "Persons.showCurrentContractWorkingTimeType",
+
+        "PersonDayHistory.personDayHistory",
         
         "Stampings.holidaySituation",
         "Stampings.personHolidaySituation",
@@ -456,7 +391,7 @@ rule AtLeastPersonnelAdminMini_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Role(name in ("personnelAdmin","personnelAdminMini")) from $uro.role
+ Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
  	
  	   /* Vecchio permesso viewPerson */
@@ -534,7 +469,7 @@ end
 rule OnlyForPersonnelAdmin_Generic
 when 
  $uro: UsersRolesOffices()
- $p: Role(name == "personnelAdmin") from $uro.role
+ Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
  		
  		/* Vecchio permesso editPerson */
@@ -664,7 +599,7 @@ rule OnlyForPersonnelAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Role(name == "personnelAdmin") from $uro.role
+ Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
  		
  		/* Vecchio permesso editPerson */
@@ -795,7 +730,7 @@ end
 rule Stampings_create
 when
  $uro: UsersRolesOffices()
- $p: Role(name == "badgeReader") from $uro.role
+ Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
  
  		/* duplicate */
@@ -813,7 +748,7 @@ rule Stampings_create_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- $p: Role(name == "badgeReader") from $uro.role
+ Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
  
  		"StampingsFromClient.create",

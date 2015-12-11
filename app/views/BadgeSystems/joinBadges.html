@@ -1,56 +1,57 @@
 #{modalAsync title:'BadgeSystems.joinBadges' }
 
-  <div id="joinBadge">
-    #{alert color:'info'}
-      #{if personFixed}
-        <p>Nuovo badge per <strong>${person.fullname}</strong></p>
-        #{if templateUtility.getConfiguredBadgeSystems(person.office).empty }
-        <p><strong>Attenzione!!!</strong> Non sono configurati &{'badgeSystems'} per la sede ${person.office.name}. 
-        Contattare contattare l'amministratore tecnico. </p>
-        #{/if} 
-        
-      #{/if}
-      #{else}
-        <p>Nuovo badge di <strong><i class="fa fa-credit-card"></i> &{'badgeSystem'}</strong></p>
-      #{/else}
-    #{/alert}
-	  	  
-    #{form action:@saveBadges(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#page_content',
-		    'data-async-error':'#joinBadge' }			
-				
-		#{f.hidden 'personFixed' /}		
-				
-		#{if personFixed }
-		  #{f.hidden 'person.id' /}
-		  #{f.view 'person' /}
-		  #{f.selectModel 'badgeSystem', items:templateUtility.getConfiguredBadgeSystems(person.office),
-		   value:badgeSystem, placeholder:'Tutti i gruppi badge' /}
-		#{/if}
-		#{else}
-		  #{f.hidden 'badgeSystem.id' /}
-		  #{f.view 'badgeSystem' /}				
-	      #{f.selectModel 'person', items:activePersons, value:person, 
-	      	placeholder:'Tutti i dipendenti' /}
-		#{/else}
- 	  	
- 	  	#{f.input 'code', value:code, required:true /}		  
- 	  	  	
- 	  	#{if violatedBadges}
- 	  	    #{alert color:'danger'}
- 	  	    <p>Impossibile completare l'operazione. Il codice selezionato è già attribuito in almeno
- 	  	    una delle sorgenti timbrature abilitate al gruppo di badge.</p>
- 	  	    #{list items:violatedBadges, as:'badge'}
- 	  	      ${badge.person.fullname} ${badge.code} - ${badge.badgeReader.code} <br>
- 	  	    #{/list}
- 	  	    #{/alert}
- 	  	#{/if}	
- 	  	  	
- 	  	  	
-	      #{b.buttons}
-	        #{b.save /}
-	      #{/b.buttons}
-	#{/form}
-  </div>
-  
+<div id="joinBadge">
+  #{alert color:'info'}
+  #{if personFixed}
+  <p>Nuovo badge per <strong>${person.fullname}</strong></p>
+  #{if templateUtility.getConfiguredBadgeSystems(person.office).empty }
+  <p><strong>Attenzione!!!</strong> Non sono configurati &{'badgeSystems'} per la sede
+    ${person.office.name}.
+    Contattare contattare l'amministratore tecnico. </p>
+  #{/if}
+
+  #{/if}
+  #{else}
+  <p>Nuovo badge di <strong><i class="fa fa-credit-card"></i> &{'badgeSystem'}</strong></p>
+  #{/else}
+  #{/alert}
+
+  #{form action:@saveBadges(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#joinBadge' }
+
+  #{f.hidden 'personFixed' /}
+
+  #{if personFixed }
+  #{f.hidden 'person.id' /}
+  #{f.view 'person' /}
+  #{f.selectModel 'badgeSystem', items:templateUtility.getConfiguredBadgeSystems(person.office),
+  value:badgeSystem, placeholder:'Tutti i gruppi badge' /}
+  #{/if}
+  #{else}
+  #{f.hidden 'badgeSystem.id' /}
+  #{f.view 'badgeSystem' /}
+  #{f.selectModel 'person', items:activePersons, value:person,
+  placeholder:'Tutti i dipendenti' /}
+  #{/else}
+
+  #{f.input 'code', value:code, required:true /}
+
+  #{if violatedBadges}
+  #{alert color:'danger'}
+  <p>Impossibile completare l'operazione. Il codice selezionato è già attribuito in almeno
+    una delle sorgenti timbrature abilitate al gruppo di badge.</p>
+  #{list items:violatedBadges, as:'badge'}
+  ${badge.person.fullname} ${badge.code} - ${badge.badgeReader.code} <br>
+  #{/list}
+  #{/alert}
+  #{/if}
+
+
+  #{b.buttons}
+  #{b.save /}
+  #{/b.buttons}
+  #{/form}
+</div>
+
 #{/modalAsync}

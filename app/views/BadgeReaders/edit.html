@@ -5,22 +5,22 @@
 #{set breadcrumbs:['badgeReaders':@BadgeReaders.list(), ('Configura '+ badgeReader.code):null] /}
  
 <div class="container">
-#{breadcrumbs breadcrumbs, noHome:'true' /}
+	#{breadcrumbs breadcrumbs, noHome:'true' /}
 
-#{title title:'Configurazione ' + badgeReader.code /}
+	#{title title:'Configurazione ' + badgeReader.code /}
   
 #{tabs}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
-  #{tabItem id:'badgeSystems', title:'badgeSystems' /}
-  #{tabItem id:'delete', title:'Elimina'/}
+	#{tabItem id:'badgeSystems', title:'badgeSystems' /}
+	#{tabItem id:'delete', title:'Elimina'/}
 #{/tabs}
-<br>
+	<br>
 #{tabContent}
 
   #{tabContentItem id:'info', active:true}
-    #{panel title:'Informazioni', color:'primary'}
+	#{panel title:'Informazioni', color:'primary'}
   	  <div class="alert alert-info" role="alert">
-    	Modifica i dati della &{'badgeReader'} <strong>${badgeReader.code}</strong>
+				Modifica i dati della &{'badgeReader'} <strong>${badgeReader.code}</strong>
       </div>
 		#{form action:@updateInfo(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }			
@@ -36,83 +36,86 @@
 	        #{b.save /}
 	      #{/b.buttons}
 		#{/form}
-	  #{/panel}
-      
-      #{panel title:'Nuova Password', color:'primary'}
+	#{/panel}
+
+	#{panel title:'Nuova Password', color:'primary'}
   	  <div class="alert alert-danger" role="alert">
-    	Modifica la password di accesso della &{'badgeReader'} <strong>${badgeReader.code}</strong>
+				Modifica la password di accesso della &{'badgeReader'} <strong>${badgeReader.code}</strong>
       </div>
 		#{form action:@changePassword(badgeReader.id), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }
-			
 
-		  #{f.hidden 'user.id', value:badgeReader.user.id /}				
-		  #{f.view 'badgeReader.user.username' /}
+
+	#{f.hidden 'user.id', value:badgeReader.user.id /}
+	#{f.view 'badgeReader.user.username' /}
 	  	  #{f.input 'newPass', type:'password', label:'Nuova password' /} 
 	
 	      #{b.buttons}
 	        #{b.save /}
 	      #{/b.buttons}
 		#{/form}
-    #{/panel}
+	#{/panel}
   
   #{/tabContentItem}
-  
-  #{tabContentItem id:'badgeSystems'}
-    
-    
-    
-    *{ TODO il target }*
-    #{secure.checkAction 'BadgeReaders.joinBadgeSystems'}
-	   <div class="text-center">
-	    <a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}" data-async-modal="#defaultModal">
-	      &{'BadgeReaders.joinBadgeSystems'} ${badgeReader.code}
-	    </a>
-       </div>
-       <br>
-    #{/secure.checkAction}
-    
-    #{alert color:'info'}
-      <p>La lista dei <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> attualmente associati a <strong>${badgeReader.code}</strong>.</p>
-    #{/alert}
-    
-    <section id="results">
-    #{paginate results} 
-	   <ul class="list-group">
-	   #{list items:results.results, as:'item'}
-	   
-		 <li class="list-group-item list-group-item-grey">
-		   #{badgeSystem.item item:item /}
-	     </li>
-	    
-	   #{/list}
-	   </ul>
-    #{/paginate} 
-    </section> 
-    
-  
-  #{/tabContentItem}
-  
-  #{tabContentItem id:'delete'} 
-  
-    #{if badgeReader.badgeSystems.empty }
-   	<div class="text-danger center">
-   	  #{alert color:'danger'}
-	    <p>E' possibile eliminare la &{'badgeReader'} <strong>${badgeReader.code}</strong> poichè non è associata ad
-	    alcun &{'badgeSystem'}.</p>
+
+	#{tabContentItem id:'badgeSystems'}
+
+
+	*{ TODO il target }*
+	#{secure.checkAction 'BadgeReaders.joinBadgeSystems'}
+	<div class="text-center">
+		<a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}"
+			 data-async-modal="#defaultModal">
+			&{'BadgeReaders.joinBadgeSystems'} ${badgeReader.code}
+		</a>
+	</div>
+	<br>
+	#{/secure.checkAction}
+
+	#{alert color:'info'}
+	<p>La lista dei <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> attualmente
+		associati a <strong>${badgeReader.code}</strong>.</p>
+	#{/alert}
+
+	<section id="results">
+		#{paginate results}
+		<ul class="list-group">
+			#{list items:results.results, as:'item'}
+
+			<li class="list-group-item list-group-item-grey">
+				#{badgeSystem.item item:item /}
+			</li>
+
+			#{/list}
+		</ul>
+		#{/paginate}
+	</section>
+
+
+	#{/tabContentItem}
+
+	#{tabContentItem id:'delete'}
+
+	#{if badgeReader.badgeSystems.empty }
+	<div class="text-danger center">
+		#{alert color:'danger'}
+		<p>E' possibile eliminare la &{'badgeReader'} <strong>${badgeReader.code}</strong> poichè non è
+			associata ad
+			alcun &{'badgeSystem'}.</p>
 		<a class="btn btn-danger" href=@{BadgeReaders.delete(badgeReader.id)}>Elimina</a>
-	  #{/alert} 
+		#{/alert}
 	</div>
 	#{/if}
 	#{else}
-	  #{alert color:'info'}
-	    <p>E' possibile eliminare una &{'badgeReader'} solo nel caso in cui non sia associato ad alcun &{'badgeSystem'}</p>
-	  #{/alert}
+	#{alert color:'info'}
+	<p>E' possibile eliminare una &{'badgeReader'} solo nel caso in cui non sia associato ad alcun
+		&{'badgeSystem'}</p>
+	#{/alert}
 	#{/else}
 
-  #{/tabContentItem}
-#{/tabContent}  
- 
+	#{/tabContentItem}
+#{/tabContent}
+
 
 </div>
 

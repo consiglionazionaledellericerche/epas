@@ -3,61 +3,63 @@
 #{set title: 'ePAS - Gestione sedi'  /}
 
 <div class="container">
-	#{title title:'Badge System' /}
+  #{title title:'Badge System' /}
 
-	
-	#{alert color:'info'}
-	  <p>In un <strong><i class="fa fa-credit-card"></i> &{'badgeSystem'}</strong>
-	  tutti i badge:
-	  </p> 
-	  
-	  <p>
-	  <ul>
-	  <li>sono abilitati a timbrare nelle medesime <strong> <i class="fa fa-database"></i> &{'badgeReaders'}</strong></li>
-	  <li>possono essere attribuiti ai soli dipendenti delle <strong><i class="fa fa-institution"></i> Sedi Abilitate</strong></li>
-	  </ul>
-	#{/alert}
-	
-	#{form action:@BadgeSystems.list(), class:'form-inline', method:'GET',
-    'data-reload':'#results', autocomplete:'off'}
 
-    <div class="row">
-     <div class="col-sm-3">
-        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
-            placeholder:'search'.label(), inline:true /}
-     </div>
-     <div class="col-sm-1">
-        <button type="submit" name="_filter" class="btn btn-primary">
-            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
-        </button>
-     </div>
+  #{alert color:'info'}
+  <p>In un <strong><i class="fa fa-credit-card"></i> &{'badgeSystem'}</strong>
+    tutti i badge:
+  </p>
+
+  <p>
+  <ul>
+    <li>sono abilitati a timbrare nelle medesime <strong> <i class="fa fa-database"></i>
+      &{'badgeReaders'}</strong></li>
+    <li>possono essere attribuiti ai soli dipendenti delle <strong><i class="fa fa-institution"></i>
+      Sedi Abilitate</strong></li>
+  </ul>
+  #{/alert}
+
+  #{form action:@BadgeSystems.list(), class:'form-inline', method:'GET',
+  'data-reload':'#results', autocomplete:'off'}
+
+  <div class="row">
+    <div class="col-sm-3">
+      #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
+      placeholder:'search'.label(), inline:true /}
     </div>
-	#{/form}
+    <div class="col-sm-1">
+      <button type="submit" name="_filter" class="btn btn-primary">
+        <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+      </button>
+    </div>
+  </div>
+  #{/form}
 
-	
-	#{secure.checkAction 'BadgeSystems.blank'}
-	  #{b.actions}
-	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#defaultModal">
-	      <i class="fa fa-plus"></i> &{'BadgeSystems.blank'}
-	    </a>
-      #{/b.actions}
-    #{/secure.checkAction}
-	
-	<div id="badgeSystemList"> <!-- per il risultato della modale asincrona -->
-	
-	<section id="results">
-    #{paginate results} 
-	   <ul class="list-group">
-	   #{list items:results.results, as:'item'}
-	     
-		 <li class="list-group-item list-group-item-grey">
-		   #{badgeSystem.item item:item, edit:'true' /}
-		 </li>
-	    
-	   #{/list}
-	   </ul>
-    #{/paginate} 
-     </section>
-     </div>
+
+  #{secure.checkAction 'BadgeSystems.blank'}
+  #{b.actions}
+  <a class="btn btn-success" href="@{blank()}" data-async-modal="#defaultModal">
+    <i class="fa fa-plus"></i> &{'BadgeSystems.blank'}
+  </a>
+  #{/b.actions}
+  #{/secure.checkAction}
+
+  <div id="badgeSystemList"> <!-- per il risultato della modale asincrona -->
+
+    <section id="results">
+      #{paginate results}
+      <ul class="list-group">
+        #{list items:results.results, as:'item'}
+
+        <li class="list-group-item list-group-item-grey">
+          #{badgeSystem.item item:item, edit:'true' /}
+        </li>
+
+        #{/list}
+      </ul>
+      #{/paginate}
+    </section>
+  </div>
 </div>
 
