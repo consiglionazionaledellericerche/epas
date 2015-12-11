@@ -160,6 +160,7 @@ person.qualification= Livello
 person.office= Sede
 person.isPersonInCharge= Responsabile gruppo di lavoro
 person.badge= Numero badge
+person.user.username= Username in ePAS
 
 personQualification= Livello
 
