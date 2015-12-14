@@ -9,14 +9,17 @@ WORKDIR /tmp
 
 RUN apt-get update && \
     apt-get install -y postgresql-client \
+    cron \
     locales && \
     apt-get clean && \
-    rm -r /var/lib/apt/lists/*
+    rm -r /var/lib/apt/lists/* && \
+    sed -e '/pam_loginuid.so/ s/^#*/#/' -i /etc/pam.d/cron
 
 # Set the locale
 RUN sed -i -e 's/# it_IT.UTF-8 UTF-8/it_IT.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen && \
     dpkg-reconfigure --frontend=noninteractive locales
+
 
 RUN useradd -m epas
 WORKDIR /home/epas
@@ -39,9 +42,6 @@ RUN play precompile
 
 USER root
 VOLUME ["/home/epas/epas/logs", "/home/epas/epas/data/attachments", "/home/epas/epas/backups"]
-
-#Fix for crontab 
-#RUN sed -e '/pam_loginuid.so/ s/^#*/#/' -i /etc/pam.d/cron
 
 ENTRYPOINT ["/home/epas/epas/docker_conf/init"]
 
