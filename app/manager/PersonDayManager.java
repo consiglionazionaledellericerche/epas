@@ -795,13 +795,17 @@ public class PersonDayManager {
     //		return false;
   }
 
-
   /**
-   * la lista delle timbrature del person day modificata con (1) l'inserimento di una timbratura
-   * null nel caso in cui esistano due timbrature consecutive di ingresso o di uscita, mettendo tale
-   * timbratura nulla in mezzo alle due (2) l'inserimento di una timbratura di uscita fittizia nel
-   * caso di today per calcolare il tempo di lavoro provvisorio (3) l'inserimento di timbrature null
-   * per arrivare alla dimensione del numberOfInOut
+   * La lista delle timbrature del personDay modificata con: <br>
+   *  (1) l'inserimento di una timbratura null nel caso in cui esistano due timbrature consecutive 
+   *      di ingresso o di uscita, mettendo tale timbratura nulla in mezzo alle due <br>
+   *  (2) l'inserimento di una timbratura di uscita fittizia nel caso di today 
+   *      per calcolare il tempo di lavoro provvisorio <br>
+   *  (3) l'inserimento di timbrature null per arrivare alla dimensione del numberOfInOut
+   * @param pd personDay
+   * @param numberOfInOut numero minimo di coppie  da visualizzare.
+   * @param today se siamo nel giorno attuale.
+   * @return lista di stampings per il template.
    */
   public List<Stamping> getStampingsForTemplate(PersonDay pd, int numberOfInOut, boolean today) {
 
@@ -812,15 +816,12 @@ public class PersonDayManager {
       Collections.sort(pd.stampings);
 
       for (Stamping stamping : pd.stampings) {
-        if (stamping.stampType != null && stamping.stampType.identifier.equals("s"))
-          continue;
-        if (stamping.isIn()) {
-          lastStampingIsIn = true;
-          continue;
-        }
         if (stamping.isOut()) {
           lastStampingIsIn = false;
-          continue;
+        } else {
+          if (stamping.stampType == null || !stamping.stampType.identifier.equals("s")) {
+            lastStampingIsIn = true;
+          }
         }
       }
       if (lastStampingIsIn) {
