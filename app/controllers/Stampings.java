@@ -402,7 +402,6 @@ public class Stampings extends Controller {
 
   }
 
-
   public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
     if (!Security.getUser().get().person.isPersonInCharge) {

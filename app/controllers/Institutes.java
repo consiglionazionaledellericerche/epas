@@ -20,7 +20,7 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import javax.inject.Inject;   
+import javax.inject.Inject;
 
 @With({Resecure.class, RequestInit.class})
 public class Institutes extends Controller {
@@ -40,8 +40,8 @@ public class Institutes extends Controller {
   public static void list(String name) {
 
     SearchResults<?> results = officeDao.institutes(Optional.<String>fromNullable(name),
-            Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
-            .listResults();
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
+        .listResults();
 
     render(results, name);
   }
@@ -63,7 +63,7 @@ public class Institutes extends Controller {
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", institute,
-              validation.errorsMap());
+          validation.errorsMap());
       flash.error(Web.msgHasErrors());
       render("@edit", institute);
     } else {
