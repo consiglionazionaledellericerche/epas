@@ -1,6 +1,7 @@
     #{panel title:'Elenco dei blocchi assegnati negli ultimi due anni.', color:'primary'}  
 
-	  <table class="table center">
+	  <table class="table center" datatable-small>
+	    <thead>
 		    <tr class="warning">
 		      <th>Codice</th>
 		      <th>Attribuito il</th>
@@ -11,14 +12,15 @@
 		      }*
 		      <th>Rimozione</th>
 		    </tr>
-	          
-      #{list items:today.year..(today.year-1), as:'year'}
+	     </thead>
+	     <tbody>     
+         #{list items:today.year..(today.year-1), as:'year'}
 		
 		    #{list items:recap.getBlockMealTicketReceivedInYear(year), as:'block'}
-		      <tr style="background-color: white;">
+		      <tr>
 		        <td>
-		          <strong>${block.codeBlock}</strong>
-		        </td>
+		          <strong>${block.codeBlock}</strong> (1-22)
+		        </td> 
 		        <td>${block.getDate()?.format()}</td>
 		        <td>${block.getExpireDate()?.format()}</td>
 		        *{
@@ -53,6 +55,7 @@
 		        </td>
 		      </tr>
 		    #{/list}
-		#{/list}  
+		  #{/list}  
+		  </tbody>
       </table>
     #{/panel}
