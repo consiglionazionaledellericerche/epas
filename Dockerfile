@@ -1,4 +1,4 @@
-FROM criluc/play1:1.4.0
+FROM criluc/play1:1.4.0-patched
 
 ENV LANG it_IT.UTF-8
 ENV LANGUAGE it:en
