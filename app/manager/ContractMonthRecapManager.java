@@ -170,6 +170,7 @@ public class ContractMonthRecapManager {
       //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
       //in source
       cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
+      cmr.buoniPastoDalMesePrecedente = 0;
     }
 
     //////////////////////////////////////////////////////////////////////////
