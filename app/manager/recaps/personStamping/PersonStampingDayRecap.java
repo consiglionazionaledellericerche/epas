@@ -75,17 +75,35 @@ public class PersonStampingDayRecap {
 
   public List<String> note = new ArrayList<String>();
 
-  public PersonStampingDayRecap(PersonDayManager personDayManager,
-                                PersonManager personManager,
+  /**
+   * Dto contentente l'informazione su un giorno lavorativo da visualizzare nel tabellone 
+   * timbrature.
+   * @param personDayManager.
+   * @param personManager.
+   * @param stampingTemplateFactory.
+   * @param stampTypeManager.
+   * @param wrapperFactory.
+   * @param workingTimeTypeDao.
+   * @param confGeneralManager.
+   * @param pd.
+   * @param numberOfInOut.
+   * @param monthContracts.
+   */
+  public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
                                 StampingTemplateFactory stampingTemplateFactory,
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
-                                WorkingTimeTypeDao workingTimeTypeDao, ConfGeneralManager confGeneralManager,
-                                PersonDay pd, int numberOfInOut, Optional<List<Contract>> monthContracts) {
+                                WorkingTimeTypeDao workingTimeTypeDao, 
+                                ConfGeneralManager confGeneralManager, PersonDay pd, 
+                                int numberOfInOut, Optional<List<Contract>> monthContracts) {
 
     this.stampingTemplateFactory = stampingTemplateFactory;
     this.personDay = pd;
     this.personDayId = pd.id;
 
+    if (pd.isToday()) {
+      System.out.println("Si aprono le danze.");
+    }
+    
     if (pd.isPersistent()) {
       this.holiday = pd.isHoliday;
     } else {
