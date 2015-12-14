@@ -451,7 +451,7 @@ public class ConsistencyManager {
       if (!yearMonthFrom.isAfter(endContractYearMonth)) {
 
         if (contract.vacationPeriods.isEmpty()) {
-          log.info("No vacation period {}", contract.toString());
+          log.error("No vacation period {}", contract.toString());
           continue;
         }
 
