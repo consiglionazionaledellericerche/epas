@@ -11,8 +11,9 @@
 		      </td>
 		      <td>
 		        #{select ('dimBlock'+_id)}
-	              #{option 22}${22}#{/option}
-	              #{option 23}${23}#{/option}
+		          #{list items:23..1, as:'val'}
+	                #{option val}${val}#{/option}
+	              #{/list}
 		        #{/select}
 		      </td>
 		      <td>
