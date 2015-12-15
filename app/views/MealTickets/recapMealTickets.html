@@ -2,9 +2,17 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
+#{set breadcrumbs:[recapMealTickets:null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{mealTickets.mealTicketsTabs activeAction:'recapMealTickets' /}
+
 <div class="container">
 
-#{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+  #{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year + ' ' + office.name, administration:true /}
+
+
   
     *{
     // TODO ripristinare se serve il pannello di riepilgo dei buoni inseriti nell'ultima action.
@@ -61,7 +69,7 @@
 	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td>
-	  	       <a href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}" data-async-modal="#defaultModal">
+	  	       <a href="@{MealTickets.personMealTickets(recap.contract.person.id)}">
 		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
 	  	    <td>${recap.buoniPastoDalMesePrecedente}</td>

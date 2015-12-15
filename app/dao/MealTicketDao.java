@@ -1,24 +1,28 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import it.cnr.iit.epas.DateInterval;
+
+import manager.MealTicketManager.MealTicketOrder;
+
 import models.Contract;
 import models.MealTicket;
 import models.Office;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
+
+import org.joda.time.LocalDate;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 /**
  * DAO per i MealTicket.
@@ -31,24 +35,33 @@ public class MealTicketDao extends DaoBase {
   MealTicketDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
-
+  
   /**
-   * Ritorna la lista di mealTickt assegnati alla persona nella finestra temporale specificata.
-   * Ordinati per data di scadenza con ordinamento crescente e per codice blocco con ordinamento
-   * crescente.
+   * mealTickt assegnati alla persona nella finestra temporale specificata.<br>
+   * Ordinati per data di scadenza (in base a expireDateOrder) e per codice blocco.
+   * @param contract contratto
+   * @param interval intervallo
+   * @param expireDateOrder true asc, false desc
+   * @return lista di buoni pasto.
    */
   public List<MealTicket> getMealTicketAssignedToPersonIntoInterval(
-          Contract c, DateInterval interval) {
+          Contract contract, DateInterval interval, MealTicketOrder order) {
 
     final QMealTicket mealTicket = QMealTicket.mealTicket;
 
     final JPQLQuery query = getQueryFactory()
-            .from(mealTicket)
-            .where(mealTicket.contract.id.eq(c.id))
-            .where(mealTicket.date.goe(interval.getBegin()))
-            .where(mealTicket.date.loe(interval.getEnd()))
-            .orderBy(mealTicket.expireDate.asc())
-            .orderBy(mealTicket.block.asc());
+        .from(mealTicket)
+        .where(mealTicket.contract.eq(contract))
+        .where(mealTicket.date.goe(interval.getBegin()))
+        .where(mealTicket.date.loe(interval.getEnd()));
+    
+    if (order.equals(MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC)) {
+      query.orderBy(mealTicket.expireDate.asc());
+    } else if (order.equals(MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC)) {
+      query.orderBy(mealTicket.date.desc());
+    }
+    
+    query.orderBy(mealTicket.code.asc());
 
     return query.list(mealTicket);
   }
@@ -73,8 +86,9 @@ public class MealTicketDao extends DaoBase {
 
     List<LocalDate> date = query.list(qmt.expireDate);
 
-    if (date.size() == 0)
+    if (date.size() == 0) {
       return null;
+    }
 
     return date.get(0);
 
@@ -97,24 +111,20 @@ public class MealTicketDao extends DaoBase {
 
 
   }
-
+  
   /**
-   * La lista di buoni pasto inseriti nei blocchi passati per argomento.
+   * I buoni pasto del blocco ordinati per codice asc.
+   * @param codeBlock il codice del blocco.
+   * @return la lista dei meal tickets nel blocco.
    */
-  public List<MealTicket> getMealTicketsInCodeBlockIds(List<Integer> codeBlockIds) {
+  public List<MealTicket> getMealTicketsInCodeBlock(Integer codeBlock) {
 
     final QMealTicket mealTicket = QMealTicket.mealTicket;
 
     final JPQLQuery query = getQueryFactory()
             .from(mealTicket)
+            .where(mealTicket.block.eq(codeBlock))
             .orderBy(mealTicket.code.asc());
-
-    final BooleanBuilder condition = new BooleanBuilder();
-    for (Integer block : codeBlockIds) {
-      condition.or(mealTicket.block.eq(block));
-    }
-
-    query.where(condition);
 
     return query.list(mealTicket);
 
