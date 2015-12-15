@@ -172,6 +172,16 @@ public class MealTickets extends Controller {
    * @param dimBlock3 dim3
    * @param expireDate3 data3
    */
+  
+  /**
+   * Aggiunta di un blocchetto alla persona.
+   * @param personId persona.
+   * @param codeBlock codice blocco.
+   * @param ticketNumberFrom dal codice
+   * @param ticketNumberTo al codice
+   * @param deliveryDate data consegna
+   * @param expireDate data scadenza
+   */
   public static void submitPersonMealTicket(Long personId, @Required Integer codeBlock, 
       @Required Integer ticketNumberFrom, @Required Integer ticketNumberTo, 
       @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
