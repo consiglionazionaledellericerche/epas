@@ -10,8 +10,6 @@ import models.Stamping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Oggetto che modella la singola timbratura nelle viste personStamping e stampings.
@@ -67,8 +65,8 @@ public class StampingTemplate {
 
     //timbratura di servizio
     this.identifier = "";
-    if (stamping.stampType != null && stamping.stampType.identifier != null) {
-      this.identifier = stamping.stampType.identifier;
+    if (stamping.stampType != null) {
+      this.identifier = stamping.stampType.getIdentifier();
     }
 
     //timbratura modificata dall'amministatore
@@ -81,7 +79,7 @@ public class StampingTemplate {
 
     //timbratura modificata dal dipendente
     this.markedByEmployeeCode = "";
-    if (stamping.markedByEmployee) {
+    if (stamping.markedByEmployee != null && stamping.markedByEmployee) {
       StampModificationType smt = stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_EMPLOYEE);
       this.markedByEmployeeCode = smt.code;

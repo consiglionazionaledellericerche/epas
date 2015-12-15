@@ -1,87 +1,90 @@
-#{modalAsync id:'modalStamping', button:'Salva', 
-  title:('Modifica timbratura ' + stamping.personDay.date.format() 
-           + ' per ' + stamping.personDay.person.fullname) }
-           
+#{modalAsync id:'modalStamping', button:'Salva',
+title:('Modifica timbratura ' + stamping.personDay.date.format()
++ ' per ' + stamping.personDay.person.fullname) }
+
+#{if stamping.persistent}
+#{tabs}
+#{tabItem id:'edit', title:'Modifica', active:true /}
+#{tabItem id:'delete', title:'Elimina' /}
+#{/tabs}
+<br>
+#{/if}
+
+#{tabContent}
+
+#{tabContentItem id:'edit', active:true}
+<div id="stampingData">
+  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+  class:'form form-horizontal', 'data-async-error':'#stampingData',
+  'data-spinner':'#defaultSpinner'}
+
   #{if stamping.persistent}
-    #{tabs}
-      #{tabItem id:'edit', title:'Modifica', active:true /}
-      #{tabItem id:'delete', title:'Elimina' /}
-    #{/tabs}
-    <br>
+  <div class="alert alert-success center">Modifica i dati della timbratura delle ore
+    ${stamping.formattedHour()}
+  </div>
+
+  <!-- storico ?? -->
+
   #{/if}
- 
-  #{tabContent}
+  #{else}
+  <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
+  #{/else}
 
-   #{tabContentItem id:'edit', active:true}
-   <div id="stampingData">    
-	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
-	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
-	    
-	    #{if stamping.persistent}
-	      <div class="alert alert-success center">Modifica i dati della timbratura delle ore ${stamping.time}</div>
-	      
-	      <!-- storico ?? -->
-	      
-	    #{/if}
-        #{else}
-          <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
-        #{/else}
-           
-        <input type="hidden" name="stamping.id" value="${stamping.id}"/>
+  <input type="hidden" name="stamping.id" value="${stamping.id}"/>
 
-		#{f.hidden 'person.id', value:stamping.personDay.person.id /}
-		#{f.hidden 'date', value:stamping.personDay.date.format() /}
-		#{if stamping.persistent}
-			#{f.input 'time', popover:'true', value:stamping.time/}
-			#{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay /}
-		#{/if}#{else}
-		    #{f.input 'time', popover:'true' /}
-		    #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita' /}
-		#{/else}	
+  #{f.hidden 'person.id', value:stamping.personDay.person.id /}
+  #{f.hidden 'date', value:stamping.personDay.date.format() /}
+  #{if stamping.persistent}
+  #{f.input 'time', popover:'true', value:stamping.formattedHour()/}
+  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay /}
+  #{/if}#{else}
+  #{f.input 'time', popover:'true' /}
+  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita' /}
+  #{/else}
 
-		#{include './_inputStampType.html' /}
-		
-		#{f.input 'stamping.note' /}
+  #{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes, select2:'off' /}
 
-      
-     #{b.buttons center:true}   
+  #{f.input 'stamping.note' /}
 
-      #{if stamping.persistent}
-        #{b.submit 'Aggiorna'/}
-      #{/if}    
-      #{else}
-        #{b.submit 'Inserisci'/}
-      #{/else}
+  #{b.buttons center:true}
 
-     #{/b.buttons}
+  #{if stamping.persistent}
+  #{b.submit 'Aggiorna'/}
+  #{/if}
+  #{else}
+  #{b.submit 'Inserisci'/}
+  #{/else}
 
-	#{/form}
-	
-   </div>
-   #{/tabContentItem}
-  
-   #{tabContentItem id:'delete'}
-   #{if stamping.persistent}
-   
-    <form class="form-horizontal">
-      #{f.view 'time', value:stamping.time/}
-	  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay, disabled:true /}
-      #{list items:historyStamping, as:'state'}
-        
-           #{if state.typeIsAdd() }
-		    #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
-		    #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
-		 	#{f.view 'Amministratore', value:state.formattedOwner() /}
-		   #{/if}
- 	  #{/list}
- 	</form>
-	<div class="alert alert-danger center">
-	    E' possibile eliminare questa timbratura.<br> 
-	   <a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a> 
-	</div>
-   #{/if}
-   #{/tabContentItem} 
-   
-  #{/tabContent} 
-  
+  #{/b.buttons}
+
+  #{/form}
+
+</div>
+#{/tabContentItem}
+
+#{tabContentItem id:'delete'}
+#{if stamping.persistent}
+
+<form class="form-horizontal">
+  #{f.view 'time', value:stamping.formattedHour()/}
+  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay, disabled:true
+  /}
+  #{list items:historyStamping, as:'state'}
+
+  #{if state.typeIsAdd() }
+  #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
+  #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
+  #{f.view 'Amministratore', value:state.formattedOwner() /}
+  #{/if}
+  #{/list}
+</form>
+<div class="alert alert-danger center">
+  E' possibile eliminare questa timbratura.<br>
+  <a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a>
+</div>
+#{/if}
+#{/tabContentItem}
+
+#{/tabContent}
+
 #{/modalAsync}

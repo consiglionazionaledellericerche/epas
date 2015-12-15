@@ -3,6 +3,7 @@ package models;
 import it.cnr.iit.epas.NullStringBinder;
 
 import models.base.BaseModel;
+import models.enumerate.StampTypes;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
@@ -38,9 +39,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @JoinColumn(name = "personDay_id", nullable = false, updatable = false)
   public PersonDay personDay;
 
-  @ManyToOne
-  @JoinColumn(name = "stamp_type_id")
-  public StampType stampType;
+  @Column(name = "stamp_type")
+  @Enumerated(EnumType.STRING)
+  public StampTypes stampType;
 
   @ManyToOne(optional = true)
   @JoinColumn(name = "stamp_modification_type_id")
@@ -115,7 +116,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @Override
   public String toString() {
     return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
-        id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
+        id, personDay.id, way, date, stampType != null ? stampType : "null", stampModificationType != null ? stampModificationType.id : "null");
   }
 
   /**
@@ -147,9 +148,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
       mark = mark + "m";
     }
     if (this.stampType != null) {
-      mark = mark + " " + this.stampType.identifier;
+      mark = mark + " " + this.stampType.getIdentifier();
     }
     return mark;
+  }
+
+  @Transient
+  public boolean getBooleanWay() {
+    return this.way.equals(Stamping.WayType.in) ? true : false;
   }
 
   public enum WayType {
