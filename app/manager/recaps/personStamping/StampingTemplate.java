@@ -1,14 +1,17 @@
 package manager.recaps.personStamping;
 
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
 import manager.PersonDayManager;
 import manager.cache.StampTypeManager;
+
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Oggetto che modella la singola timbratura nelle viste personStamping e stampings.
@@ -30,6 +33,8 @@ public class StampingTemplate {
   public String identifier;
   public String missingExitStampBeforeMidnightCode;
   public boolean valid;
+
+  private static final DateTimeFormatter STAMPING_FORMAT = DateTimeFormat.forPattern("HH:mm");
 
   public StampingTemplate(PersonDayManager personDayManager,
                           StampTypeManager stampTypeManager, Stamping stamping,
@@ -56,10 +61,9 @@ public class StampingTemplate {
 
     this.way = stamping.way.description;
 
-    setHour(stamping.date);
+    this.hour = stamping.date.toString(STAMPING_FORMAT);
 
-    this.insertStampingClass = "insertStamping" +
-            stamping.date.getDayOfMonth() + "-" + index;
+    this.insertStampingClass = "insertStamping" + stamping.date.getDayOfMonth() + "-" + index;
 
     //timbratura di servizio
     this.identifier = "";
@@ -71,7 +75,7 @@ public class StampingTemplate {
     this.markedByAdminCode = "";
     if (stamping.markedByAdmin) {
       StampModificationType smt = stampTypeManager.getStampMofificationType(
-              StampModificationTypeCode.MARKED_BY_ADMIN);
+          StampModificationTypeCode.MARKED_BY_ADMIN);
       this.markedByAdminCode = smt.code;
     }
 
@@ -79,25 +83,25 @@ public class StampingTemplate {
     this.markedByEmployeeCode = "";
     if (stamping.markedByEmployee) {
       StampModificationType smt = stampTypeManager.getStampMofificationType(
-              StampModificationTypeCode.MARKED_BY_EMPLOYEE);
+          StampModificationTypeCode.MARKED_BY_EMPLOYEE);
       this.markedByEmployeeCode = smt.code;
     }
 
     //timbratura di mezzanotte
     this.missingExitStampBeforeMidnightCode = "";
     if (stamping.stampModificationType != null &&
-            stamping.stampModificationType.code.equals(
-                    StampModificationTypeCode
-                            .TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
+        stamping.stampModificationType.code.equals(
+            StampModificationTypeCode
+                .TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
 
       this.missingExitStampBeforeMidnightCode = stamping
-              .stampModificationType.code;
+          .stampModificationType.code;
     }
 
     //timbratura valida (colore cella)
     LocalDate today = new LocalDate();
     LocalDate stampingDate = new LocalDate(this.date.getYear(),
-            this.date.getMonthOfYear(), this.date.getDayOfMonth());
+        this.date.getMonthOfYear(), this.date.getDayOfMonth());
     if (today.isEqual(stampingDate)) {
       this.valid = true;
     } else {
@@ -109,18 +113,8 @@ public class StampingTemplate {
 
   protected void setColor(Stamping stamping) {
     this.colour = stamping.way.description;
-    if (this.valid == false) {
+    if (!this.valid) {
       this.colour = "warn";
     }
-  }
-
-  protected void setHour(LocalDateTime date) {
-    String hour = date.getHourOfDay() + "";
-    if (hour.length() == 1)
-      hour = "0" + hour;
-    String minute = date.getMinuteOfHour() + "";
-    if (minute.length() == 1)
-      minute = "0" + minute;
-    this.hour = hour + ":" + minute;
   }
 }
