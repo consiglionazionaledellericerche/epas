@@ -204,7 +204,6 @@ public class MealTicketManager {
         continue;
       }
 
-      log.info(mealTicket.code);
       //Stesso blocco
       Long previous = Long.parseLong(previousMealTicket.code) + 1;
       Long actual = Long.parseLong(mealTicket.code);
