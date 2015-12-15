@@ -28,6 +28,16 @@ import models.enumerate.Parameter;
  * @author alessandro
  */
 public class MealTicketManager {
+  
+  /**
+   * I tipi di ordinamento per la selezione della lista dei buoni pasto.
+   * @author alessandro
+   *
+   */
+  public static enum MealTicketOrder {
+    ORDER_BY_EXPIRE_DATE_ASC,
+    ORDER_BY_DELIVERY_DATE_DESC
+  }
 
   private final PersonDao personDao;
   private final MealTicketDao mealTicketDao;
@@ -55,12 +65,12 @@ public class MealTicketManager {
    * @param expireDate la data di scadenza dei buoni nel blocco
    * @return la lista di MealTicket appartenenti al blocco.
    */
-  public List<MealTicket> buildBlockMealTicket(
-          Integer codeBlock, Integer dimBlock, LocalDate expireDate) {
+  public List<MealTicket> buildBlockMealTicket(Integer codeBlock, Integer first, Integer last,
+      LocalDate expireDate) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
-    for (int i = 1; i <= dimBlock; i++) {
+    for (int i = first; i <= last; i++) {
 
       MealTicket mealTicket = new MealTicket();
       mealTicket.expireDate = expireDate;
@@ -160,54 +170,26 @@ public class MealTicketManager {
    * nell'intervallo temporale indicato. N.B. la lista di di cui sopra è ordinata per data di
    * scadenza e per codice blocco in ordine ascendente.
    */
-  public List<BlockMealTicket> getBlockMealTicketReceivedIntoInterval(
-          MealTicketRecap recap, DateInterval interval) {
-
-    List<BlockMealTicket> blockList = Lists.newArrayList();
-    BlockMealTicket currentBlock = null;
-
-    for (MealTicket mealTicket : recap.getMealTicketsReceivedOrdered()) {
-      if (DateUtility.isDateIntoInterval(mealTicket.date, interval)) {
-
-        if (currentBlock == null) {
-          currentBlock = new BlockMealTicket(mealTicket.block);
-          currentBlock.mealTickets.add(mealTicket);
-          continue;
-        }
-
-        if (currentBlock.codeBlock.equals(mealTicket.block)) {
-          currentBlock.mealTickets.add(mealTicket);
-          continue;
-        }
-
-        blockList.add(currentBlock);
-        currentBlock = new BlockMealTicket(mealTicket.block);
-        currentBlock.mealTickets.add(mealTicket);
-      }
-    }
-    if (currentBlock != null) {
-      blockList.add(currentBlock);
-    }
-    return blockList;
-
-  }
-
+  
   /**
-   *
-   * @param mealTicket
+   * 
+   * @param mealTicketListOrdered una lista di buoni pasto ordinata per data di scadenza e per 
+   * codice blocco.
+   * @param interval
    * @return
    */
-  public List<BlockMealTicket> getBlockMealTicketFromMealTicketList(
-          List<MealTicket> mealTicketList) {
-
-    //FIXME è lo stesso algoritmo del metodo statico
-    //getBlockMealTicketReceivedIntoInterval della classe
-    //d MealTicketRecap. Renderlo generico.
+  public List<BlockMealTicket> getBlockMealTicketReceivedIntoInterval(
+          List<MealTicket> mealTicketListOrdered, Optional<DateInterval> interval) {
 
     List<BlockMealTicket> blockList = Lists.newArrayList();
     BlockMealTicket currentBlock = null;
 
-    for (MealTicket mealTicket : mealTicketList) {
+    for (MealTicket mealTicket : mealTicketListOrdered) {
+      
+      if (interval.isPresent() 
+          && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
+        continue;
+      }
 
       if (currentBlock == null) {
         currentBlock = new BlockMealTicket(mealTicket.block);
@@ -223,8 +205,8 @@ public class MealTicketManager {
       blockList.add(currentBlock);
       currentBlock = new BlockMealTicket(mealTicket.block);
       currentBlock.mealTickets.add(mealTicket);
-
     }
+
     if (currentBlock != null) {
       blockList.add(currentBlock);
     }

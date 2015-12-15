@@ -90,5 +90,21 @@ public class BlockMealTicket {
       return this.mealTickets.get(0).date;
     return null;
   }
+  
+  /**
+   * Il primo number del blocco.
+   * @return
+   */
+  public int getFirst() {
+    return this.mealTickets.get(0).number;
+  }
+  
+  /**
+   * L'ultimo number del blocco.
+   * @return
+   */
+  public int getLast() {
+    return this.mealTickets.get(this.mealTickets.size()-1).number;
+  }
 
 }

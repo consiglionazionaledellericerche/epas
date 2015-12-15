@@ -289,7 +289,6 @@ when
         
         /* Vecchio permesso viewPerson */
         "Persons.list",
-        "MealTickets.recapMealTickets",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         
@@ -354,6 +353,11 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
+     	
+     	"MealTickets.recapMealTickets",
+     	"MealTickets.personMealTickets",
+     	"MealTickets.returnedMealTickets",
+        "MealTickets.findCodeBlock",
 		
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
@@ -364,8 +368,6 @@ when
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
-        
-       
         
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -399,6 +401,7 @@ when
        "Persons.showCurrentContractWorkingTimeType",
        
        "MealTickets.recapMealTickets",
+       "MealTickets.personMealTickets",
        
        "Stampings.holidaySituation",
        "Stampings.personHolidaySituation",	
@@ -526,7 +529,6 @@ when
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
-        "MealTickets.quickBlocksInsert",
         
         /* Vecchio permesso editPersonDay */
 		"Absences.blank",
@@ -647,7 +649,6 @@ when
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         "MealTickets.mealTicketsLegacy",
-        "MealTickets.quickBlocksInsert",
         
         /* Vecchio permesso editPersonDay */
  		"Absences.blank",
