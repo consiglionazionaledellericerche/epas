@@ -15,6 +15,9 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import lombok.extern.slf4j.Slf4j;
+
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
 import models.Contract;
@@ -27,6 +30,7 @@ import models.enumerate.Parameter;
  *
  * @author alessandro
  */
+@Slf4j
 public class MealTicketManager {
   
   /**
@@ -183,6 +187,7 @@ public class MealTicketManager {
 
     List<BlockMealTicket> blockList = Lists.newArrayList();
     BlockMealTicket currentBlock = null;
+    MealTicket previousMealTicket = null;
 
     for (MealTicket mealTicket : mealTicketListOrdered) {
       
@@ -191,20 +196,27 @@ public class MealTicketManager {
         continue;
       }
 
+      //Primo buono pasto
       if (currentBlock == null) {
+        previousMealTicket = mealTicket;
         currentBlock = new BlockMealTicket(mealTicket.block);
         currentBlock.mealTickets.add(mealTicket);
         continue;
       }
 
-      if (currentBlock.codeBlock.equals(mealTicket.block)) {
+      log.info(mealTicket.code);
+      //Stesso blocco
+      Long previous = Long.parseLong(previousMealTicket.code) + 1;
+      Long actual = Long.parseLong(mealTicket.code);
+      if (previous.equals(actual) ) {
         currentBlock.mealTickets.add(mealTicket);
-        continue;
+      } else {
+        //Nuovo blocco
+        blockList.add(currentBlock);
+        currentBlock = new BlockMealTicket(mealTicket.block);
+        currentBlock.mealTickets.add(mealTicket);
       }
-
-      blockList.add(currentBlock);
-      currentBlock = new BlockMealTicket(mealTicket.block);
-      currentBlock.mealTickets.add(mealTicket);
+      previousMealTicket = mealTicket;
     }
 
     if (currentBlock != null) {
