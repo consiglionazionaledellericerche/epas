@@ -109,13 +109,15 @@
 
     #{list items:psDto.daysRecap, as:'dayRecap'}
 
-    <tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
+    <tr #{if dayRecap.ignoreDay} class="ignore_day" #{
+    /if}>
 
     <td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
       #{if dayRecap.firstDay }F#{/if}
 
-      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDayId), modal:'#modalStamping'}
-        ${dayRecap.date.shortDayName()}
+      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDayId),
+      modal:'#modalStamping'}
+      ${dayRecap.date.shortDayName()}
       #{/secure.link}
 
     </td>
@@ -135,21 +137,22 @@
     <td class="invisible"></td>
 
     <td class="assenza default-single">
-      #{secure.link @Absences.blank(dayRecap.person.id, dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
-        ___
+      #{secure.link @Absences.blank(dayRecap.person.id,
+      dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
+      ___
       #{/secure.link}
 
       #{list items:dayRecap.absences, as:'absence'}
 
       #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
-				     ${absence.absenceType.code}
-				     #{if absence.justifiedMinutes}
-				    	${absence.justifiedMinutes}min
-				  	 #{/if}
+      ${absence.absenceType.code}
+      #{if absence.justifiedMinutes}
+      ${absence.justifiedMinutes}min
+      #{/if}
       #{/secure.link}
       #{if absence.absenceFile.exists()}
-        #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
-        #{/secure.link}
+      #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
+      #{/secure.link}
       #{/if}
 
       #{/list}
@@ -167,9 +170,9 @@
       #{/elseif}
 
       #{if stampingTemplate.date!=null}
-        #{secure.link @Stampings.edit(stampingTemplate.stampingId),modal:'#modalStamping'}
-          ${stampingTemplate.hour}
-        #{/secure.link}
+      #{secure.link @Stampings.edit(stampingTemplate.stampingId),modal:'#modalStamping'}
+      ${stampingTemplate.hour}
+      #{/secure.link}
       #{/if}
       #{elseif stampingTemplate.pairPosition.equals("center")}
       <abbr title="Timbratura di servizio mancante" class="initialism"><i
@@ -193,8 +196,9 @@
     #{/list}
     <td class="inserisciTimbratura default-single">
       #{if !dayRecap.future}
-      #{secure.link @Stampings.blank(dayRecap.person.id, dayRecap.date.format()),modal:'#modalStamping'}
-        +++
+      #{secure.link @Stampings.blank(dayRecap.person.id,
+      dayRecap.date.format()),modal:'#modalStamping'}
+      +++
       #{/secure.link}
       #{/if}
     </td>
