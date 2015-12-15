@@ -109,8 +109,7 @@
 
     #{list items:psDto.daysRecap, as:'dayRecap'}
 
-    <tr #{if dayRecap.ignoreDay} class="ignore_day" #{
-    /if}>
+    <tr #{if dayRecap.ignoreDay} class="ignore_day" #{/if}>
 
     <td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
       #{if dayRecap.firstDay }F#{/if}
