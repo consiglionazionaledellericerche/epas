@@ -7,8 +7,7 @@
 		function preventBack(){window.history.forward();}
 		setTimeout("preventBack()", 0);
 		window.onunload=function(){null};
-	</script>
-	<script>
+
 		function startTime()
 		{
 			var today=new Date();
@@ -48,26 +47,26 @@
 	<tr>
 		<th class="group-single">Giorno</th>
 		<th class="group-single">Buono<br>mensa</th>
-		
+
 		<th class="invisible"></th>
-		
+
 		<th class="group-single">Codice <br>assenza</th>
-		
+
 
 		#{list items:1..numberOfInOut, as:'i'}
 			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
 			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
-		
+
 		<th class="invisible"></th>
-		
+
 		<th class="group-single">Tempo<br>lavoro</th>
 		<th class="group-single">Diffe-</div><br/>renza</th>
-		<th class="group-single">Progres-<br/>sivo</th>		
+		<th class="group-single">Progres-<br/>sivo</th>
 		<th class="group-single hidden-xs hidden-sm">Tipo<br>Orario</th>
 		<th class="group-single hidden-xs hidden-sm">Note</th>
 	</tr>
-	
+
 
 	<tr>
 			<td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
@@ -77,13 +76,13 @@
             <td class="default-single">
 			#{if dayRecap.mealTicket.equals("NO")}
 			  <span class="glyphicon glyphicon-ban-circle"></span>
-			#{/if} 
+			#{/if}
 			#{if dayRecap.mealTicket.equals("NOT_YET")}
 			  <span class="glyphicon glyphicon-remove"></span>
-			#{/if} 
+			#{/if}
 			#{if dayRecap.mealTicket.equals("YES")}
 			  <span class="glyphicon glyphicon-ok"></span>
-			#{/if} 
+			#{/if}
 			</td>
 
 			<td class="invisible"></td>
@@ -91,11 +90,11 @@
 			<td class="assenza default-single">
 				#{list items:dayRecap.absences, as:'absence'}
 				 	${absence.absenceType.code}
-				 #{/list}	
+				 #{/list}
 			</td>
-			
-			
-	        
+
+
+
 			#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 				#{if stampingTemplate.colour.equals("in")}
 				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
@@ -106,7 +105,7 @@
 				#{elseif stampingTemplate.colour.equals("warn")}
 				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
 				#{/elseif}
-					
+
 				#{if stampingTemplate.date!=null}
 				  ${stampingTemplate.hour}
 				#{/if}
@@ -116,19 +115,19 @@
 
 				#{ifnot stampingTemplate.identifier.equals("")}
 					<strong>${stampingTemplate.identifier}</strong>
-				#{/ifnot}	
+				#{/ifnot}
 				#{ifnot stampingTemplate.markedByAdminCode.equals("")}
 					<strong>${stampingTemplate.markedByAdminCode}</strong>
-				#{/ifnot}	
+				#{/ifnot}
 				#{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
 					<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-				#{/ifnot}	
-				<!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
+				#{/ifnot}
+				<!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
 				</td>
 			#{/list}
-			
+
 			<td class="invisible"></td>
-	       			
+
 			<td class="tempoLavoro default-single">
 				${dayRecap.workTime}
 				#{ifnot dayRecap.todayLunchTimeCode.equals("")}
@@ -136,32 +135,32 @@
 				#{/ifnot}
 				#{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
 					<strong>${dayRecap.fixedWorkingTimeCode}</strong>
-				#{/ifnot}	
+				#{/ifnot}
 				#{ifnot dayRecap.exitingNowCode.equals("")}
 					<strong>${dayRecap.exitingNowCode}</strong>
 				#{/ifnot}
-			</td>	
-			
+			</td>
+
 			#{if dayRecap.differenceNegative}
 			  <td class="differenza default-single" style="color: red;">${dayRecap.difference}</td>
 			#{/if}
 			#{else}
 				<td class="differenza default-single">&nbsp;${dayRecap.difference}</td>
 			#{/else}
-			
+
 			#{if dayRecap.progressiveNegative}
 			  <td class="progressivo default-single" style="color: red;">${dayRecap.progressive}</td>
 			#{/if}
 			#{else}
 			  <td class="progressivo default-single">&nbsp;${dayRecap.progressive}</td>
 			#{/else}
-												
-		
-	        
+
+
+
 	        <td class="default-single hidden-xs hidden-sm">
 	        #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
 	        <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover" 
+	    		data-trigger="hover" data-toggle="popover"
 	    		data-placement="bottom"
 	    		data-html="true"
 	    		data-content="${(
@@ -172,8 +171,8 @@
 	    		' (estremi compresi)').escape()}"
 	    		title="Info orario giornaliero">${dayRecap.workingTimeTypeDescription}</a>
 	        #{/if}
-	      
-	      
+
+
 	    </td>
 	        <td class="default-single hidden-xs hidden-sm">
 	        #{list items:dayRecap.note, as:'n'}
@@ -182,15 +181,14 @@
 	    	</td>
 	</tr>
     </table>
- </div> 
+ </div>
 
-<a href="@{Clocks.webStamping(dayRecap.personDay.id,"in")}" class="btn btn-lg btn-default col-xs-offset-3" data-modal=".my-modal">
-	<i class="fa fa-sign-in text-success"> Timbratura di ingresso</i>
+<a href="@{Clocks.webStamping(dayRecap.personDay.id,"in")}" class="btn btn-lg btn-default col-xs-offset-3" data-async-modal="#defaultModal">
+	<i class="fa fa-sign-in text-success"> &{'stamping.in'}</i>
 </a>
 
-<a href="@{Clocks.webStamping(dayRecap.personDay.id,"out")}" class="btn btn-lg btn-default col-xs-offset-1" data-modal=".my-modal">
-	<i class="fa fa-sign-out text-primary"> Timbratura di uscita</i>
+<a href="@{Clocks.webStamping(dayRecap.personDay.id,"out")}" class="btn btn-lg btn-default col-xs-offset-1" data-async-modal="#defaultModal">
+	<i class="fa fa-sign-out text-primary"> &{'stamping.out'}</i>
 </a>
- 
+
 </div>
-#{include '_myModal.html' /}

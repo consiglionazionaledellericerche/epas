@@ -87,6 +87,7 @@ views.tags.display.date.month.9=Settembre
 views.tags.display.date.month.10=Ottobre
 views.tags.display.date.month.11=Novembre
 views.tags.display.date.month.12=Dicembre
+
 secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 passwordSuccessfullyChanged = Password modificata con successo
@@ -236,6 +237,9 @@ modifierType= Calcolo Orario
 
 stamping.note= Note
 
+stamping.in= Timbratura di ingresso
+stamping.out= Timbratura di uscita
+
 uro.office=Sede
 uro.user= Utente
 uro.role= Ruolo
@@ -244,6 +248,7 @@ user.username= Username
 user.password= Password
 
 stampType= Causale
+stamping.stampType= Causale Timbratura
 note= Note
 time= Ore
 time.popover= Formato richiesto HHMM (HH ore, MM minuti)
@@ -315,6 +320,17 @@ JustifiedTimeAtWork.Nothing= Niente
 JustifiedTimeAtWork.TimeToComplete= Quello che manca
 JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
+
+StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
+StampTypes.VISITA_MEDICA= Visita Medica
+StampTypes.PERMESSO_SINDACALE= Permesso Sindacale
+StampTypes.INCARICO_DI_INSEGNAMENTO= Incarico di Insegnamento
+StampTypes.DIRITTO_ALLO_STUDIO= Diritto allo Studio
+StampTypes.MOTIVI_PERSONALI= Motivi Personali
+StampTypes.REPERIBILITA= Reperibilità
+StampTypes.INTRAMOENIA= Intramoenia
+StampTypes.GUARDIA_MEDICA= Guardia Medica
+StampTypes.PAUSA_PRANZO= Pausa Pranzo
 
 
 ###########################################################################

@@ -6,27 +6,23 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import controllers.Security;
-
-import dao.BadgeReaderDao;
 import dao.PersonDao;
 import dao.StampingDao;
-
-import injection.StaticInject;
 
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 
-import models.BadgeReader;
 import models.Office;
 import models.Person;
-import models.StampType;
 import models.User;
+import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDateTime;
 
+import controllers.Security;
+import injection.StaticInject;
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
@@ -58,7 +54,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
    */
   @Override
   public Object bind(String name, Annotation[] annotations, String value,
-                     @SuppressWarnings("rawtypes") Class actualClass, 
+                     @SuppressWarnings("rawtypes") Class actualClass,
                      Type genericType) throws Exception {
 
     try {
@@ -66,17 +62,17 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       Optional<User> user = Security.getUser();
       if (!user.isPresent()) {
         log.info("StampingFromClient: {}, {}, {}, {}, {}", name,
-                annotations, value, actualClass, genericType);
+            annotations, value, actualClass, genericType);
 
         log.info("StampingFromClient: l'user non presente");
         return null;
       }
       Set<Office> offices = secureManager
-              .officesBadgeReaderAllowed(Security.getUser().get());
-      
+          .officesBadgeReaderAllowed(Security.getUser().get());
+
       Person person = null;
 
-      JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
+      final JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 
       Logger.debug("jsonObject = %s", jsonObject);
 
@@ -84,20 +80,21 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       stamping.badgeReader = Security.getUser().get().badgeReader;
 
-      Integer inOut = jsonObject.get("operazione").getAsInt();
+      final Integer inOut = jsonObject.get("operazione").getAsInt();
       if (inOut != null) {
         stamping.inOut = inOut;
       }
 
       if (jsonObject.has("causale") && !jsonObject.get("causale").isJsonNull()) {
-        String causale = jsonObject.get("causale").getAsString();
+        final String causale = jsonObject.get("causale").getAsString();
         if (!Strings.isNullOrEmpty(causale)) {
-          StampType stampType = stampingDao.getStampTypeByCode(causale);
-          if (stampType == null) {
+          stamping.stampType = StampTypes.byCode(causale);
+
+          if (stamping.stampType == null) {
             throw new IllegalArgumentException(String
-                    .format("Causale con codice %s sconosciuta.", causale));
+                .format("Causale con codice %s sconosciuta.", causale));
           }
-          stamping.stampType = stampType;
+
         }
       }
 
@@ -120,7 +117,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       for (int i = 0; i < tipoMatricola.size(); i++) {
         String tipo = tipoMatricola.get(i).getAsString();
-        Logger.trace("Il tipo di matricolaFirma che sto controllando per la matricola %s e': %s", 
+        Logger.trace("Il tipo di matricolaFirma che sto controllando per la matricola %s e': %s",
             matricolaFirma, tipo);
 
         /**
@@ -169,7 +166,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
 
           //Controlla sul campo person oldId
-          person = personDao.getPersonByOldID(intMatricolaFirmaAsLong, 
+          person = personDao.getPersonByOldID(intMatricolaFirmaAsLong,
               Optional.fromNullable(offices));
           if (person != null) {
             stamping.personId = person.id;
@@ -197,16 +194,16 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
           //Rimuove tutti gli eventuali 0 iniziali alla stringa
           // http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
           String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
-          
+
           if (Security.getUser().get().badgeReader == null) {
             log.warn("L'user autenticato come badgeReader "
                 + "non ha una istanza badgeReader valida associata.");
-                
+
             return null;
           }
-          person = personDao.getPersonByBadgeNumber(badgeNumber, 
+          person = personDao.getPersonByBadgeNumber(badgeNumber,
               Security.getUser().get().badgeReader);
-          
+
           if (person != null) {
             stamping.personId = person.id;
             break;
@@ -219,7 +216,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       if (stamping.personId == null) {
         log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
-                + " matricolaFirma={}. Controllare il database.", matricolaFirma);
+            + " matricolaFirma={}. Controllare il database.", matricolaFirma);
         return null;
       }
 
@@ -233,8 +230,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         stamping.dateTime = date;
       } else {
         Logger.warn("Uno dei parametri relativi alla data è risultato nullo. "
-            + "Impossibile crearla. StampingFromClient: %s, %s, %s, %s, %s",
-                name, annotations, value, actualClass, genericType);
+                + "Impossibile crearla. StampingFromClient: %s, %s, %s, %s, %s",
+            name, annotations, value, actualClass, genericType);
         return null;
       }
 
@@ -244,7 +241,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
 
     } catch (Exception e) {
-      Logger.error(e, "Problem during binding StampingFromClient: %s, %s, %s, %s, %s", 
+      Logger.error(e, "Problem during binding StampingFromClient: %s, %s, %s, %s, %s",
           name, annotations, value, actualClass, genericType);
       return null;
     }
