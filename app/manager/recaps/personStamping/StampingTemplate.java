@@ -34,7 +34,7 @@ public class StampingTemplate {
   public String missingExitStampBeforeMidnightCode;
   public boolean valid;
 
-  private static final DateTimeFormatter STAMPING_FORMAT = DateTimeFormat.forPattern("HH:mm");
+  private static final String STAMPING_FORMAT = "HH:mm";
 
   public StampingTemplate(PersonDayManager personDayManager,
                           StampTypeManager stampTypeManager, Stamping stamping,
