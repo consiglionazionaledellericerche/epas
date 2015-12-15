@@ -30,7 +30,7 @@ badge.delete= Elimina Badge
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
-
+administrator=Amministratore
 administrations= Amministrazione
 
 badgeReader=Sorgente Timbrature
@@ -107,6 +107,15 @@ Month.9=Settembre
 Month.10=Ottobre
 Month.11=Novembre
 Month.12=Dicembre
+
+mealTicket=Buono Pasto
+recapMealTickets=Riepilogo Buoni Pasto
+codeBlock=Codice Blocco
+ticketNumberFrom=Dal Numero
+ticketNumberTo=Al Numero
+deliveryDate=Consegnato il
+expireDate=Data Scadenza
+
 
 child.name= Nome
 child.surname= Cognome
