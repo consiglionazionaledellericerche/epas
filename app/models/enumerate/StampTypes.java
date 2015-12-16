@@ -74,12 +74,4 @@ public enum StampTypes {
     return null;
   }
 
-  public String getLabel() {
-    return this.description;
-  }
-
-  public String toString() {
-    return getLabel();
-  }
-
 }

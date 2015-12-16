@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 
 /**
@@ -93,7 +92,6 @@ public class Stampings extends Controller {
   private static StampingHistoryDao stampingsHistoryDao;
   @Inject
   private static OfficeDao officeDao;
-
 
   /**
    * Tabellone timbrature dipendente.
@@ -153,36 +151,38 @@ public class Stampings extends Controller {
 
   }
 
-  public static void blank(@Required Long personId, @Required LocalDate date) {
+  public static void blank(@Required Person person, @Required LocalDate date) {
 
-    Person person = personDao.getPersonById(personId);
+    if (!person.isPersistent()) {
+      notFound();
+    }
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     rules.checkIfPermitted(person.office);
 
-    render(person, date);
+    render("@edit", person, date);
   }
 
-  public static void edit(Long stampingId) {
+  public static void edit(@Valid Stamping stamping) {
 
-    Stamping stamping = stampingDao.getStampingById(stampingId);
-
-    if (stamping == null) {
+    if (!stamping.isPersistent()) {
       notFound();
     }
 
-    List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
-        .stampings(stampingId);
+    final List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
+        .stampings(stamping.id);
 
     rules.checkIfPermitted(stamping.personDay.person.office);
 
-    render(stamping, historyStamping);
+    final Person person = stamping.personDay.person;
+    final LocalDate date = stamping.personDay.date;
+
+    render(stamping, person, date, historyStamping);
   }
 
   public static void save(@Required Person person, @Required LocalDate date,
-                          Stamping stamping, @Required @NotNull Boolean way,
-                          @CheckWith(StringIsTime.class) String time ) {
+                          @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
@@ -191,29 +191,24 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(person.office);
 
     if (!stamping.isPersistent()) {
-      stamping = new Stamping(personDay, null);
+      stamping.personDay = personDay;
     }
 
     if (Validation.hasErrors()) {
-
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
 
+      log.info(validation.errorsMap().toString());
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {
         historyStamping = stampingsHistoryDao.stampings(stamping.id);
       }
 
-      render("@edit", stamping, time, way, historyStamping);
-      //log.warn("validation errors for {}: {}", institute,
-      //		validation.errorsMap());
+      render("@edit", stamping, person, date, time, historyStamping);
     }
 
     personDay.save();
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
     stamping.markedByAdmin = true;
-    stamping.way = way ? Stamping.WayType.in : Stamping.WayType.out;
-//    stamping.save();
 
     personDay.stampings.add(stamping);
     personDay.save();

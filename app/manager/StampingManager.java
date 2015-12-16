@@ -166,7 +166,6 @@ public class StampingManager {
     stamping.markedByAdmin = stampingFromClient.markedByAdmin;
     stamping.way = stampingFromClient.inOut == 0 ? WayType.in : WayType.out;
     stamping.stampType = stampingFromClient.stampType;
-    stamping.badgeReader = stampingFromClient.badgeReader;
     stamping.personDay = personDay;
     stamping.save();
 

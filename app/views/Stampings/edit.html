@@ -1,8 +1,10 @@
-#{modalAsync id:'modalStamping', button:'Salva',
-title:('Modifica timbratura ' + stamping.personDay.date.format()
-+ ' per ' + stamping.personDay.person.fullname) }
+%{
+Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
+}%
+#{modalAsync id:'modalStamping',
+title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
 
-#{if stamping.persistent}
+#{if stamping}
 #{tabs}
 #{tabItem id:'edit', title:'Modifica', active:true /}
 #{tabItem id:'delete', title:'Elimina' /}
@@ -18,41 +20,37 @@ title:('Modifica timbratura ' + stamping.personDay.date.format()
   class:'form form-horizontal', 'data-async-error':'#stampingData',
   'data-spinner':'#defaultSpinner'}
 
-  #{if stamping.persistent}
-  <div class="alert alert-success center">Modifica i dati della timbratura delle ore
-    ${stamping.formattedHour()}
-  </div>
-
-  <!-- storico ?? -->
-
+  #{if stamping?.persistent}
+    #{alert color:'info',center:true}
+      Modifica i dati della timbratura delle ore ${stamping.formattedHour()}
+    #{/alert}
+    <!-- storico ?? -->
   #{/if}
   #{else}
-  <div class="alert alert-success center">Inserisci i dati della nuova timbratura.</div>
+    #{alert color:'info',center:true}
+     Inserisci i dati della nuova timbratura
+    #{/alert}
   #{/else}
 
-  <input type="hidden" name="stamping.id" value="${stamping.id}"/>
+  #{f.hidden 'person.id', value:person.id /}
+  #{f.hidden 'date', value:date.format() /}
 
-  #{f.hidden 'person.id', value:stamping.personDay.person.id /}
-  #{f.hidden 'date', value:stamping.personDay.date.format() /}
-  #{if stamping.persistent}
-  #{f.input 'time', popover:'true', value:stamping.formattedHour()/}
-  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay /}
-  #{/if}#{else}
-  #{f.input 'time', popover:'true' /}
-  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita' /}
-  #{/else}
+  #{if stamping?.persistent}
+    #{f.hidden 'stamping.id', value:stamping.id /}
+  #{/if}
 
-  #{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes, select2:'off' /}
-
+  #{f.input 'time', popover:'true', value:stamping?.formattedHour(), required:true/}
+  #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
+  #{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes /}
   #{f.input 'stamping.note' /}
 
   #{b.buttons center:true}
 
-  #{if stamping.persistent}
-  #{b.submit 'Aggiorna'/}
+  #{if stamping?.persistent}
+    #{b.submit 'Aggiorna'/}
   #{/if}
   #{else}
-  #{b.submit 'Inserisci'/}
+    #{b.submit 'Inserisci'/}
   #{/else}
 
   #{/b.buttons}
@@ -63,19 +61,16 @@ title:('Modifica timbratura ' + stamping.personDay.date.format()
 #{/tabContentItem}
 
 #{tabContentItem id:'delete'}
-#{if stamping.persistent}
-
+#{if stamping?.persistent}
 <form class="form-horizontal">
   #{f.view 'time', value:stamping.formattedHour()/}
-  #{f.booleanRadio 'way', true:'Ingresso', false:'Uscita', value:stamping.booleanWay, disabled:true
-  /}
+  #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, disabled:true /}
   #{list items:historyStamping, as:'state'}
-
-  #{if state.typeIsAdd() }
-  #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
-  #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
-  #{f.view 'Amministratore', value:state.formattedOwner() /}
-  #{/if}
+    #{if state.typeIsAdd() }
+      #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
+      #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
+      #{f.view 'Inserita da', value:state.formattedOwner() /}
+    #{/if}
   #{/list}
 </form>
 <div class="alert alert-danger center">
