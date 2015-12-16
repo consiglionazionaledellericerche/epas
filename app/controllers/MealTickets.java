@@ -211,29 +211,33 @@ public class MealTickets extends Controller {
     //Controllo dei parametri
     
     
-    List<MealTicket> ticketToAdd = Lists.newArrayList();
-    ticketToAdd.addAll(mealTicketManager
+    List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
+    ticketToAddOrdered.addAll(mealTicketManager
         .buildBlockMealTicket(codeBlock, ticketNumberFrom, ticketNumberTo, expireDate));
 
+    List<MealTicket> ticketsError = Lists.newArrayList();
+    
     //Controllo esistenza
-    for (MealTicket mealTicket : ticketToAdd) {
+    for (MealTicket mealTicket : ticketToAddOrdered) {
 
       MealTicket exist = mealTicketDao.getMealTicketByCode(mealTicket.code);
       if (exist != null) {
-
-        flash.error("Il buono pasto con codice %s risulta già "
-            + "essere assegnato alla persona %s %s in data %s."
-                + " L'Operazione è annullata",
-                mealTicket.code, person.name, 
-                person.surname, exist.date);
-        personMealTickets(person.id);
+        
+        ticketsError.add(exist);
       }
+    }
+    if (!ticketsError.isEmpty()) {
+      
+      List<BlockMealTicket> blocksError = mealTicketManager
+          .getBlockMealTicketReceivedIntoInterval(ticketsError, Optional.<DateInterval>absent());
+      render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo, 
+          deliveryDate, expireDate, admin, blocksError);
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();
 
     //Persistenza
-    for (MealTicket mealTicket : ticketToAdd) {
+    for (MealTicket mealTicket : ticketToAddOrdered) {
       mealTicket.date = LocalDate.now();
       mealTicket.contract = contractDao.getContract(mealTicket.date, person);
       mealTicket.admin = admin.person;
