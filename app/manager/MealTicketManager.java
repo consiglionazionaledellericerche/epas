@@ -212,19 +212,21 @@ public class MealTicketManager {
         previousMealTicket = mealTicket;
         currentBlock = new BlockMealTicket(mealTicket.block);
         currentBlock.mealTickets.add(mealTicket);
+        currentBlock.contract = mealTicket.contract;
         continue;
       }
 
       //Stesso blocco
       Long previous = Long.parseLong(previousMealTicket.code) + 1;
       Long actual = Long.parseLong(mealTicket.code);
-      if (previous.equals(actual)) {
+      if (previous.equals(actual) && previousMealTicket.contract.equals(mealTicket.contract)) {
         currentBlock.mealTickets.add(mealTicket);
       } else {
         //Nuovo blocco
         blockList.add(currentBlock);
         currentBlock = new BlockMealTicket(mealTicket.block);
         currentBlock.mealTickets.add(mealTicket);
+        currentBlock.contract = mealTicket.contract;
       }
       previousMealTicket = mealTicket;
     }

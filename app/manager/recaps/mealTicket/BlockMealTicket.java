@@ -2,6 +2,7 @@ package manager.recaps.mealTicket;
 
 import com.google.common.collect.Lists;
 
+import models.Contract;
 import models.MealTicket;
 import models.Person;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class BlockMealTicket {
 
+  public Contract contract;
   public Integer codeBlock;
   public List<MealTicket> mealTickets;
 
