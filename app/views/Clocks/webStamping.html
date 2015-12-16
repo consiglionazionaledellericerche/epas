@@ -1,5 +1,5 @@
 %{
-way = wayType.description.equals("in") ? "INGRESSO" : "USCITA";
+  way = wayType.description.equals("in") ? "INGRESSO" : "USCITA";
 }%
 
 #{modalAsync id:'defaultModal', title: ('Nuova timbratura di ' + way + ' in data ' + personDay.date.format() + ' per ' +
@@ -13,10 +13,10 @@ personDay.person.fullname) }
     </p>
 #{/alert}
 
-#{form @Clocks.insertWebStamping(), class:'form-horizontal'}
-	
-<input type="hidden" name="stamping.personDay.id" value="${personDay.id}"/>
-<input type="hidden" name="stamping.way" value="${wayType}"/>
+#{form @Clocks.insertWebStamping(), method:'POST', class:'form-horizontal'}
+
+#{f.hidden 'stamping.personDay.id', value:personDay.id /}
+#{f.hidden 'stamping.way', value:wayType /}
 
 #{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes /}
 #{f.input 'stamping.note' /}

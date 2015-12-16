@@ -9,7 +9,6 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 
 import play.data.binding.As;
-import play.data.validation.InPast;
 import play.data.validation.Required;
 
 import javax.persistence.Column;
@@ -34,7 +33,6 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   private static final long serialVersionUID = -2422323948436157747L;
 
-  @Required
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "personDay_id", nullable = false, updatable = false)
   public PersonDay personDay;
@@ -47,17 +45,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @JoinColumn(name = "stamp_modification_type_id")
   public StampModificationType stampModificationType;
 
-  @Required
-  @InPast
+  @Column (nullable = false)
   public LocalDateTime date;
 
   @Required
   @Enumerated(EnumType.STRING)
   public WayType way;
-
-  @ManyToOne
-  @JoinColumn(name = "badge_reader_id")
-  public BadgeReader badgeReader;
 
   @As(binder = NullStringBinder.class)
   public String note;

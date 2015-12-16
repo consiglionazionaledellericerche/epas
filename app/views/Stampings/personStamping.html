@@ -169,8 +169,8 @@
       #{/elseif}
 
       #{if stampingTemplate.date!=null}
-      #{secure.link @Stampings.edit(stampingTemplate.stampingId),modal:'#modalStamping'}
-      ${stampingTemplate.hour}
+      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping'}
+        ${stampingTemplate.hour}
       #{/secure.link}
       #{/if}
       #{elseif stampingTemplate.pairPosition.equals("center")}
@@ -195,9 +195,8 @@
     #{/list}
     <td class="inserisciTimbratura default-single">
       #{if !dayRecap.future}
-      #{secure.link @Stampings.blank(dayRecap.person.id,
-      dayRecap.date.format()),modal:'#modalStamping'}
-      +++
+      #{secure.link @Stampings.blank('id':dayRecap.person.id,dayRecap.date.format()),modal:'#modalStamping'}
+        +++
       #{/secure.link}
       #{/if}
     </td>

@@ -3,8 +3,6 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
-import controllers.Resecure.NoCheck;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -23,19 +21,19 @@ import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
+import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.Play;
+import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;
@@ -81,7 +79,7 @@ public class Clocks extends Controller {
 
     if (offices.isEmpty()) {
       flash.error("Le timbrature web non sono permesse da questo terminale! "
-              + "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+          + "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
       try {
         Secure.login();
       } catch (Throwable e) {
@@ -105,7 +103,7 @@ public class Clocks extends Controller {
     User user = person.user;
     if (user == null) {
       flash.error("La persona selezionata non dispone di un account valido."
-              + " Contattare l'amministratore");
+          + " Contattare l'amministratore");
       show();
     }
 
@@ -116,7 +114,7 @@ public class Clocks extends Controller {
       if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
-                "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+            "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
         show();
       }
     }
@@ -143,7 +141,7 @@ public class Clocks extends Controller {
       if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
-                "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+            "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
         show();
       }
     }
@@ -161,7 +159,7 @@ public class Clocks extends Controller {
     int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay) + 1;
 
     PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-            .create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
+        .create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
 
     render(user, dayRecap, numberOfInOut);
 
@@ -180,11 +178,11 @@ public class Clocks extends Controller {
   }
 
 
-  public static void insertWebStamping(Stamping stamping) {
+  public static void insertWebStamping(@Valid Stamping stamping) {
 
     rules.checkIfPermitted(stamping.personDay.person);
 
-    User user = Security.getUser().orNull();
+    final User user = Security.getUser().orNull();
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
@@ -193,7 +191,7 @@ public class Clocks extends Controller {
       if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo terminale!" +
-                "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
+            "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
         show();
       }
     }
@@ -203,12 +201,12 @@ public class Clocks extends Controller {
     for (Stamping s : stamping.personDay.stampings) {
 
       if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
-              || (s.way.equals(stamping.way) &&
-              Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2)) {
+          || (s.way.equals(stamping.way) &&
+          Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2)) {
 
         flash.error("Impossibile inserire 2 timbrature così ravvicinate."
-                + "Attendere 1 minuto per timbrature di verso opposto o "
-                + "2 minuti per timbrature dello stesso verso");
+            + "Attendere 1 minuto per timbrature di verso opposto o "
+            + "2 minuti per timbrature dello stesso verso");
         daySituation();
       }
     }
