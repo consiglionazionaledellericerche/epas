@@ -298,7 +298,7 @@ public class Administration extends Controller {
               .getPersonDayInPeriod(person, begin, Optional.of(end));
       int count = 0;
       for (PersonDay pd : persondays) {
-        personDayManager.computeValidStampings(pd);
+        personDayManager.setValidPairStampings(pd);
 
         for (Stamping stamping : pd.stampings) {
           if (!stamping.valid) {
