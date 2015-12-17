@@ -1,28 +1,24 @@
-%{
-  way = wayType.description.equals("in") ? "INGRESSO" : "USCITA";
-}%
-
-#{modalAsync id:'defaultModal', title: ('Nuova timbratura di ' + way + ' in data ' + personDay.date.format() + ' per ' +
-personDay.person.fullname) }
+#{modalAsync id:'defaultModal', title: ('Nuova timbratura di ' + wayType.label() + ' in data ' + today.format() + ' per ' +
+currentPerson.fullname) }
 
 #{alert color:'danger'}
-    <p>La timbratura che si va a inserire è di <strong>${way}</strong>.<br>
-    L'orario della timbratura verrà salvato sulla base del momento in cui sarà premuto il tasto "Timbra".
-    Selezionare la causale qui sotto solo se l'ingresso che si sta facendo ha una causale allegata.
-    Non selezionare la causale se è una timbratura normale.
-    </p>
+<p>La timbratura che si va a inserire è di <strong>&{wayType.label().toUpperCase()}</strong>.<br>
+  L'orario della timbratura verrà salvato sulla base del momento in cui sarà premuto il tasto
+  "Timbra".
+  Selezionare la causale qui sotto solo se l'ingresso che si sta facendo ha una causale allegata.
+  Non selezionare la causale se è una timbratura normale.
+</p>
 #{/alert}
 
 #{form @Clocks.insertWebStamping(), method:'POST', class:'form-horizontal'}
 
-#{f.hidden 'stamping.personDay.id', value:personDay.id /}
-#{f.hidden 'stamping.way', value:wayType /}
+#{f.hidden 'way', value:wayType /}
 
-#{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes /}
-#{f.input 'stamping.note' /}
+#{f.selectEnum 'stampType', items:models.enumerate.StampTypes /}
+#{f.input 'note' /}
 
 #{b.buttons center:true}
-  #{b.submit 'Timbra'/}
+#{b.submit 'Timbra'/}
 #{/b.buttons}
 
 #{/form}

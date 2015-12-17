@@ -45,7 +45,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @JoinColumn(name = "stamp_modification_type_id")
   public StampModificationType stampModificationType;
 
-  @Column (nullable = false)
+  @Column(nullable = false)
   public LocalDateTime date;
 
   @Required
@@ -149,6 +149,17 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @Transient
   public boolean getBooleanWay() {
     return this.way.equals(Stamping.WayType.in) ? true : false;
+  }
+
+  /**
+   * @return Una rappresentazione compatta della timbratura.
+   */
+  @Transient
+  public String getLabel() {
+    String output = formattedHour();
+    output += WayType.in.equals(this.way) ? " Ingr." : " Usc.";
+    output += stampType != null ? " (" + stampType.getIdentifier() + ")" : "";
+    return output;
   }
 
   public enum WayType {

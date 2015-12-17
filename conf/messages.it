@@ -1,3 +1,5 @@
+ADD= Inserimento
+
 absenceFile=Allegato
 absenceType= Codice assenza
 absenceType.certificateCode= Codice per attestati di presenza
@@ -110,6 +112,8 @@ dateTo=Fino Al
 day= Giorno (se presente)
 deliveryDate=Consegnato il
 
+DEL= Eliminazione
+
 emailToContact= Indirizzo email dell&#39;amministrazione
 endContract= Scadenza Contratto
 endDate=Data Fine
@@ -129,6 +133,8 @@ lunchPauseStart= Inizio pausa pranzo
 
 mealTicket=Buono Pasto
 modifierType= Calcolo Orario
+
+MOD= Modifica
 
 Month.10=Ottobre
 Month.11=Novembre
