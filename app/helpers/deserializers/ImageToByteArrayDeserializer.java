@@ -1,14 +1,13 @@
 package helpers.deserializers;
 
-import java.lang.reflect.Type;
-
-import javax.xml.bind.DatatypeConverter;
-
 import com.google.common.base.Verify;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+
+import java.lang.reflect.Type;
+import java.util.Base64;
 
 /**
  * Converte una immagine codificata in image/png dal browser in una array di
@@ -29,7 +28,7 @@ public class ImageToByteArrayDeserializer implements JsonDeserializer<byte[]> {
       JsonDeserializationContext context) throws JsonParseException {
     final String value = json.getAsString();
     Verify.verify(value.startsWith(IMAGE_MAGIK));
-    return DatatypeConverter.parseBase64Binary(value
+    return Base64.getDecoder().decode(value
         .substring(IMAGE_MAGIK.length()));
   }
 }
