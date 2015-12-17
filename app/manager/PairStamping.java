@@ -39,8 +39,10 @@ public class PairStamping {
     timeInPair = 0;
     timeInPair = timeInPair - DateUtility.toMinute(in.date);
     timeInPair = timeInPair + DateUtility.toMinute(out.date);
-
-    if (!out.exitingNow) {
+    
+    //La coppia valida la imposto nel caso di coppia definitiva (non contenente l'uscita fittizia
+    // e se si tratta di una coppia in-out, il caso out-in è usato nel calcolo del buono pasto.
+    if (!out.exitingNow && in.isIn() && out.isOut()) {
       int pairId = SEQUENCE_ID++;
       in.pairId = pairId;
       out.pairId = pairId;
