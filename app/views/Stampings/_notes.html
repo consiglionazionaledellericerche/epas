@@ -15,7 +15,7 @@
    	      #{/if}
    	      #{else}
    	       <tr>
-		    <td class="col-xs-10">Buoni pasto rimanenti dal mese precedente</td>
+		    <td class="col-xs-10">Buoni pasto rimanenti dai mesi precedenti</td>
 		    <td class="col-xs-2 success">${mese.value.buoniPastoDalMesePrecedente}</td>
 		   </tr>
    	      #{/else}
@@ -25,7 +25,7 @@
 		    <td class="col-xs-2 success">${mese.value.buoniPastoConsegnatiNelMese}</td>
 		  </tr>
 		  <tr>
-				<td class="col-xs-10"> Buoni pasto utilizzati</td>
+				<td class="col-xs-10"> Buoni pasto maturati nel mese</td>
 				<td class="col-xs-2 danger">${mese.value.buoniPastoUsatiNelMese}</td>
 		  </tr>
 		  <tr class="warning">

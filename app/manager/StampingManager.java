@@ -203,7 +203,7 @@ public class StampingManager {
         personDay = pd.get();
       }
 
-      personDayManager.computeValidStampings(personDay);
+      personDayManager.setValidPairStampings(personDay);
       daysRecap.add(stampingDayRecapFactory
               .create(personDay, numberOfInOut, Optional.<List<Contract>>absent()));
 
