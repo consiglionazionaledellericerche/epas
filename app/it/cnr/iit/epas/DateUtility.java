@@ -1,7 +1,7 @@
 package it.cnr.iit.epas;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Days;
@@ -13,8 +13,8 @@ import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class DateUtility {
 

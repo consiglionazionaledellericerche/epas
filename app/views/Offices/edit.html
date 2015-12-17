@@ -9,7 +9,7 @@
   #{breadcrumbs breadcrumbs /}
    
   #{accordionGroup 'info'}
-    #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true, color:'info'}
+    #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true}
   	  <div class="alert alert-success" role="alert">
     	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
       </div>
@@ -33,7 +33,7 @@
   #{/accordionGroup}  
   
    #{accordionGroup 'ammi'}
-    #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true, color:'info'}
+    #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true}
   
     <div class="row">
       <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.blank(office.id)}" data-async-modal="#modalInsertUro">
@@ -43,14 +43,14 @@
     <div id="uroList">
 
 	<h4>Amministratore tecnico</h4>    
-    #{if wOffice.tecnicalAdmins.empty }
+    #{if wrOffice.tecnicalAdmins.empty }
       <div class="alert alert-danger">
         Non è stato ancora impostato alcun amministratore tecnico!
       </div>
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wOffice.tecnicalAdmins, as:'uroAdmin'}
+	       #{list items:wrOffice.tecnicalAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
 	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
@@ -63,14 +63,14 @@
     #{/else}
     
     <h4>Amministratore del personale</h4>
-    #{if wOffice.personnelAdmins.empty }
+    #{if wrOffice.personnelAdmins.empty }
       <div class="alert alert-danger">
         Non è stato ancora impostato alcun amministratore del personale!
       </div>
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wOffice.personnelAdmins, as:'uroAdmin'}
+	       #{list items:wrOffice.personnelAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
 	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
@@ -83,10 +83,10 @@
     #{/else}
 	
 	
-    #{if !wOffice.miniAdmins.empty }
+    #{if !wrOffice.miniAdmins.empty }
       <h4>Amministratore del personale sola lettura</h4>    
 	    <ul class="list-group">
-	       #{list items:wOffice.miniAdmins, as:'uroAdmin'}
+	       #{list items:wrOffice.miniAdmins, as:'uroAdmin'}
 	         <li class="list-group-item list-group-item-info">
 	            <div class="pull-right btn-group">
 	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
@@ -102,36 +102,10 @@
 
   
     #{/accordionItem}
-  #{/accordionGroup}   
+  #{/accordionGroup}
 
-  #{accordionGroup 'badge'}
-    #{accordionItem 'badgeReader', parent:'badge', title:'Lettori Badge Abilitati', open:true, color:'info'}
-      
-      <div class="row">
-        <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{BadgeReaders.joinOffice(office.id)}" 
-          data-async-modal="#modalJoinOffice">
-        <i class="fa fa-plus"></i> Associa Lettore Badge </a>
-	  </div>
-      <ul class="list-group">
-        #{list items:office.usersRolesOffices, as:'uro'}
-          #{if uro.role.name.equals('badgeReader') }
-            <li class="list-group-item list-group-item-info">
-	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{BadgeReaders.unjoinOffice(uro.id)}" >
-		          <i class="fa fa-trash"></i> Rimuovi</a>
-	            </div>
-	            ${uro.user.badgeReader.code}
-	        </li> 
-          #{/if}
-        #{/list}
-      
-      </ul>
-               
-    #{/accordionItem}
-  #{/accordionGroup}  
-             
-  
-  <br>
+
+	<br>
   
   #{if office.persons.empty}
    #{secure.checkAction 'Office.delete', target:office}
@@ -149,4 +123,3 @@
 </div>
 
 <div id="modalInsertUro" class="modal container" tabindex="-1"></div>
-<div id="modalJoinOffice" class="modal container" tabindex="-1"></div>

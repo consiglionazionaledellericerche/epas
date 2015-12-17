@@ -24,11 +24,15 @@ public class QContractStampProfile extends EntityPathBase<ContractStampProfile> 
 
     public static final QContractStampProfile contractStampProfile = new QContractStampProfile("contractStampProfile");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPropertyInPeriod _super = new models.base.query.QPropertyInPeriod(this);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final QContract contract;
 
-    public final DatePath<org.joda.time.LocalDate> endTo = createDate("endTo", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -40,8 +44,6 @@ public class QContractStampProfile extends EntityPathBase<ContractStampProfile> 
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
-
-    public final DatePath<org.joda.time.LocalDate> startFrom = createDate("startFrom", org.joda.time.LocalDate.class);
 
     public QContractStampProfile(String variable) {
         this(ContractStampProfile.class, forVariable(variable), INITS);

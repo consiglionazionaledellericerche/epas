@@ -2,27 +2,17 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-#{set breadcrumbs:['Assenze nel periodo':null] /}
 
+#{absences.absencesTabs activeAction:'absenceInPeriod' /}
 <div class="container">
-  #{breadcrumbs breadcrumbs /}
-  
-  #{absences.absencesTabs activeAction:'absenceInPeriod' /}
+
   
   #{title title:'Assenze nel periodo', administration:true /}
   <div class="text-center">
   #{form @Absences.absenceInPeriod(), class:'form-inline', role:'form'}
-       <div class="form-group">
-        <label class="hidden-xs hidden-sm" for="dip">Dipendente </label>
-        <select name="person.id" class="form-control" id="dip" >
-	        #{list items:personList, as:'personItem'}
-	          <option value="${personItem.id}" #{if personItem.id.equals(person.id) } selected="selected" #{/if} >
-                ${personItem.surname} ${personItem.name}
-	          </option>
-			#{/list}
-	      </select>
-       </div>
-       
+
+		<input type="hidden" name="personId" value="${person.id}"/>
+           
        <div class="form-group">
          <label for="da">Da: </label>
          <input value="${from?.format()}" class="form-control" type="text" name="from" 
@@ -41,10 +31,8 @@
   <br>
 
   
-  #{if person != null }
-  
   <div class="col-xs-12 col-sm-12 col-md-6">
-    <div class="panel panel-primary">
+		<div class="panel panel-info">
       <div class="panel-heading">
         <h3 class="panel-title text-center">Assenze di ${person.name} ${person.surname} nel periodo ${from?.format()} - ${to?.format()}</h3>
       </div>
@@ -57,7 +45,7 @@
 			</tr>
 			#{list items:absenceList, as:'absence'}
 			<tr>
-		      <td>${absence.personDay.date}</td>
+		      <td>${absence.personDay.date.format()}</td>
 			  <td>${absence.absenceType.code}</td>
 			  <td>${absence.absenceType.description}</td>
 		 	</tr>				
@@ -67,8 +55,8 @@
 	</div>
   </div>
   
-  <div class="col-xs-12 col-sm-12 col-md-6">	
-	<div class="panel panel-primary">
+  <div class="col-xs-12 col-sm-12 col-md-6">
+		<div class="panel panel-info">
       <div class="panel-heading">
         <h3 class="panel-title text-center">Totali giorni d'assenza</h3>
       </div>
@@ -79,34 +67,25 @@
 				<th>Numero giorni</th>
 				
 			</tr>
-			#{if ferie.size() > 0}
 			<tr>
 				<td>Ferie</td>
 				<td>${ferie.size()}</td>
 			</tr>
-			#{/if}
-			#{if missioni.size() > 0}
 			<tr>
 				<td>Missioni</td>
 				<td>${missioni.size()}</td>
 			</tr>
-			#{/if}
-			#{if riposiCompensativi.size() > 0}
 			<tr>
 				<td>Riposi Compensativi</td>
 				<td>${riposiCompensativi.size()}</td>
 			</tr>
-			#{/if}
-			#{if altreAssenze.size() > 0}
 			<tr>
 				<td>Altre assenze</td>
 				<td>${altreAssenze.size()}</td>
 			</tr>
-			#{/if}
 		</table>
 	  </div>
 	</div>
   </div>
-  #{/if}
 
 </div>

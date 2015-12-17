@@ -10,7 +10,6 @@ import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
 import manager.PersonMonthsManager;
-import manager.PersonMonthsManager.Insertable;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -21,15 +20,15 @@ import models.User;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import play.Logger;
+import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 @With({Resecure.class, RequestInit.class})
 public class PersonMonths extends Controller {
@@ -41,6 +40,10 @@ public class PersonMonths extends Controller {
   @Inject
   private static PersonMonthsManager personMonthsManager;
 
+  /**
+   * metodo che renderizza la visualizzazione delle ore di formazione.
+   * @param year l'anno
+   */
   public static void hourRecap(int year) {
 
     Optional<User> user = Security.getUser();
@@ -63,9 +66,9 @@ public class PersonMonths extends Controller {
     List<IWrapperContractMonthRecap> recaps = Lists.newArrayList();
     YearMonth actual = new YearMonth(year, 1);
     YearMonth last = new YearMonth(year, 12);
-    IWrapperContract c = wrapperFactory.create(contract.get());
+    IWrapperContract con = wrapperFactory.create(contract.get());
     while (!actual.isAfter(last)) {
-      Optional<ContractMonthRecap> recap = c.getContractMonthRecap(actual);
+      Optional<ContractMonthRecap> recap = con.getContractMonthRecap(actual);
       if (recap.isPresent()) {
         recaps.add(wrapperFactory.create(recap.get()));
       }
@@ -75,36 +78,138 @@ public class PersonMonths extends Controller {
     render(recaps, year);
   }
 
+  /**
+   * Le ore di formazione del dipendente nell'anno.
+   * @param year year
+   */
   public static void trainingHours(int year) {
-
-    if (Security.getUser().get().person == null) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
-    }
 
     Person person = Security.getUser().get().person;
 
-    List<Integer> mesi = new ArrayList<Integer>();
-    for (int i = 1; i < 13; i++) {
-      mesi.add(i);
-    }
-
-    List<PersonMonthRecap> pmList = personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.<Integer>absent(), Optional.<Boolean>absent());
+    List<PersonMonthRecap> personMonthRecapList = personMonthRecapDao
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+            Optional.<Integer>absent(), Optional.<Boolean>absent());
+    
     LocalDate today = new LocalDate();
 
-    render(person, year, mesi, pmList, today);
+    render(person, year, personMonthRecapList, today);
 
   }
 
+  /**
+   * CRUD Inserimento le ore di formazione.
+   * @param month month
+   * @param year year
+   */
   public static void insertTrainingHours(int month, int year) {
 
     Person person = Security.getUser().get().person;
-    LocalDate date = new LocalDate(year, month, 1);
-    int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
-
-    render(person, month, year, max);
+    
+    render(person, month, year);
   }
 
+  /**
+   * Salva l'ora di formazione.
+   * @param begin inizio
+   * @param end fine
+   * @param value quantità
+   * @param month mese 
+   * @param year anno
+   */
+  public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end, 
+      @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
+    
+    Person person = Security.getUser().get().person;
+    
+    if (personMonthSituationId != null) {
+      PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+      if (!validation.hasErrors()) {
+        if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
+          validation.addError("value",
+              "valore troppo alto");
+        }
+      }
+      if (validation.hasErrors()) {
+        response.status = 400;
+        render("@insertTrainingHours", 
+            person, month, year, begin, end, value, personMonthSituationId);
+      }
+      pm.trainingHours = value;
+      pm.save();
+      flash.success("Ore di formazione aggiornate.", value);
+
+      PersonMonths.trainingHours(year);
+    
+    }
+
+    if (!validation.hasErrors()) {
+      if (begin == null) {
+        validation.addError("begin", "Richiesto");
+      }
+      if (end == null) {
+        validation.addError("end", "Richiesto");
+      }
+    }
+    if (!validation.hasErrors()) {
+      int endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
+      if (begin > endMonth) {
+        validation.addError("begin",
+            "deve appartenere al mese selezionato");
+      } 
+      if (end > endMonth) {
+        validation.addError("end",
+            "deve appartenere al mese selezionato");
+      }
+    }
+    if (!validation.hasErrors()) {
+      if (begin > end) {
+        validation.addError("begin",
+            "inizio intervallo  non valido");
+      }
+    }
+    if (!validation.hasErrors()) {
+      if (value > 24 * (end - begin + 1)) {
+        validation.addError("value",
+            "valore troppo alto");
+      }
+    }
+
+    if (validation.hasErrors()) {
+      response.status = 400;
+      render("@insertTrainingHours", person, month, year, begin, end, value);
+    }
+    
+    LocalDate beginDate = new LocalDate(year, month, begin);
+    LocalDate endDate = new LocalDate(year, month, end);
+    if (!validation.hasErrors()) {
+      if (!personMonthsManager
+          .checkIfPeriodAlreadyExists(person, year, month, beginDate, endDate).getResult()) {
+        validation.addError("begin",
+            "ore già presenti per l'intervallo selezionato");
+      }
+    }
+    if (!validation.hasErrors()) {
+      if (!personMonthsManager.checkIfAlreadySend(person, year, month).getResult()) {
+        flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
+        trainingHours(year);
+      }
+    }
+    if (validation.hasErrors()) {
+      response.status = 400;
+      render("@insertTrainingHours", person, month, year, begin, end, value);
+    }
+    
+    PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
+    personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
+    flash.success("Salvate %d ore di formazione ", value);
+
+    PersonMonths.trainingHours(year);
+    
+  }
+  
+  /**
+   * metodo che renderizza la visualizzazione della form per l'inserimento delle ore di formazione.
+   */
   public static void insertTrainingHoursPreviousMonth() {
 
     Person person = Security.getUser().get().person;
@@ -123,10 +228,14 @@ public class PersonMonths extends Controller {
     month = date.minusMonths(1).getMonthOfYear();
     year = date.getYear();
 
-    render(person, month, year, max);
+    render("@insertTrainingHours", person, month, year);
   }
 
 
+  /**
+   * Modifica delle ore di formazione.
+   * @param personMonthSituationId id
+   */
   public static void modifyTrainingHours(Long personMonthSituationId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
@@ -134,93 +243,24 @@ public class PersonMonths extends Controller {
     int year = pm.year;
     int month = pm.month;
     Person person = pm.person;
-    LocalDate date = new LocalDate(year, month, 1);
-    int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
-    render(person, pm, max, year, month);
+    
+    int begin = pm.fromDate.getDayOfMonth();
+    int end = pm.toDate.getDayOfMonth();
+    int value = pm.trainingHours;
+    
+    LocalDate dateFrom = new LocalDate(year, month, begin);
+    LocalDate dateTo = new LocalDate(year, month, end);
+    
+    render("@insertTrainingHours",  
+        dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value);
   }
 
 
-  public static void saveTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, int month, int year) {
-    if (validation.hasErrors()) {
-      flash.error("Ci sono errori");
-      Application.indexAdmin();
-      return;
-    }
-
-    Person person = Security.getUser().get().person;
-    if (person == null) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
-    }
-
-    Logger.debug("nome e cognome: %s %s", person.name, person.surname);
-    LocalDate beginDate = new LocalDate(year, month, begin);
-    LocalDate endDate = new LocalDate(year, month, end);
-    Insertable rr = personMonthsManager.checkIfInsertable(begin, end, value, beginDate, endDate);
-    if (rr.getResult() == false) {
-      flash.error(rr.getMessage());
-      PersonMonths.trainingHours(beginDate.getYear());
-    }
-    rr = personMonthsManager.checkIfPeriodAlreadyExists(person, year, month, beginDate, endDate);
-    if (rr.getResult() == false) {
-      flash.error(rr.getMessage());
-      PersonMonths.trainingHours(beginDate.getYear());
-    }
-
-		/* Si cerca di inserire delle ore di formazione per il mese precedente: se le ore di formazione sono già state inviate insieme
-         * agli attestati, il sistema non permette l'inserimento.
-		 * In caso contrario sì
-		 */
-    rr = personMonthsManager.checkIfAlreadySend(person, year, month);
-    if (rr.getResult() == false) {
-      flash.error(rr.getMessage());
-      trainingHours(year);
-    }
-
-    PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
-    personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
-    flash.success("Salvate %d ore di formazione ", value);
-
-    PersonMonths.trainingHours(year);
-  }
-
-
-  public static void updateTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, int month, int year, Long personMonthId) {
-
-    if (validation.hasErrors()) {
-      flash.error("Ci sono errori");
-      Application.indexAdmin();
-      return;
-    }
-
-    LocalDate beginDate = new LocalDate(year, month, begin);
-    LocalDate endDate = new LocalDate(year, month, end);
-
-    Insertable rr = personMonthsManager.checkIfInsertable(begin, end, value, beginDate, endDate);
-    if (rr.getResult() == false) {
-      flash.error(rr.getMessage());
-      PersonMonths.trainingHours(beginDate.getYear());
-    }
-    PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthId);
-    rr = personMonthsManager.checkIfExist(pm);
-    if (rr.getResult() == false) {
-      flash.error(rr.getMessage());
-      PersonMonths.trainingHours(beginDate.getYear());
-    }
-
-    Person person = Security.getUser().get().person;
-    if (person == null || !person.id.equals(pm.person.id)) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
-    }
-
-    personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
-
-    flash.success("Aggiornate ore di formazione per %s %s", person.name, person.surname);
-    PersonMonths.trainingHours(beginDate.getYear());
-  }
-
-
+  /**
+   * metodo che renderizza la form di conferma cancellazione di ore di formazione.
+   * @param personId l'id della persona
+   * @param personMonthRecapId l'id del personMonthRecap
+   */
   public static void deleteTrainingHours(Long personId, Long personMonthRecapId) {
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
     if (pm == null) {
@@ -232,6 +272,10 @@ public class PersonMonths extends Controller {
   }
 
 
+  /**
+   * metodo che cancella dal db le ore di formazione specificate.
+   * @param personMonthRecapId l'id delle ore di formazione da cancellare
+   */
   public static void deleteTrainingHoursConfirmed(Long personMonthRecapId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);

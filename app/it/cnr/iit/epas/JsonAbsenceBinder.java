@@ -3,18 +3,16 @@
  */
 package it.cnr.iit.epas;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import com.google.gson.GsonBuilder;
 
 import helpers.deserializers.AbsenceFromClientDeserializer;
-
-import models.exports.AbsenceFromClient;
-
 import injection.StaticInject;
+import models.exports.AbsenceFromClient;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 
 /**

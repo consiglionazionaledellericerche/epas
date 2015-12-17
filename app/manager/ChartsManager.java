@@ -335,17 +335,17 @@ public class ChartsManager {
       String situazione = "";
       List<Contract> contractList = personDao.getContractList(p, beginDate, endDate);
 
-      LocalDate beginContract = null;
+      LocalDate beginDateAUX = null;
       if (contractList.isEmpty())
         contractList.addAll(p.contracts);
 
       for (Contract contract : contractList) {
-        if (beginContract != null && beginContract.equals(contract.beginContract)) {
+        if (beginDateAUX != null && beginDateAUX.equals(contract.beginDate)) {
           log.error("Due contratti uguali nella stessa lista di contratti per {} : come è possibile!?!?", p.getFullname());
 
         } else {
           IWrapperContract c = wrapperFactory.create(contract);
-          beginContract = contract.beginContract;
+          beginDateAUX = contract.beginDate;
           YearMonth actual = new YearMonth(year, 1);
           YearMonth last = new YearMonth(year, 12);
           while (!actual.isAfter(last)) {
@@ -396,9 +396,9 @@ public class ChartsManager {
     out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
     out.newLine();
 
-    IWrapperPerson wPerson = wrapperFactory.create(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-    Optional<Contract> contract = wPerson.getCurrentContract();
+    Optional<Contract> contract = wrPerson.getCurrentContract();
 
     Preconditions.checkState(contract.isPresent());
 
@@ -415,7 +415,7 @@ public class ChartsManager {
       return inputStream;
     }
 
-    Optional<WorkingTimeType> wtt = wPerson.getCurrentWorkingTimeType();
+    Optional<WorkingTimeType> wtt = wrPerson.getCurrentWorkingTimeType();
 
     Preconditions.checkState(wtt.isPresent());
 

@@ -1,0 +1,19 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   personId = session.get("personSelected"); }%
+   
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("manageWorkingTime")} class="active" #{/if}>
+      <a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Predefiniti</a>
+    </li>
+    <li #{if _activeAction.equals("manageOfficeWorkingTime")} class="active" #{/if}>
+      <a href="@{WorkingTimes.manageOfficeWorkingTime(session.get("officeSelected"))}">Orari Particolari</a>
+    </li>
+  </ul>
+</div>
+<br>

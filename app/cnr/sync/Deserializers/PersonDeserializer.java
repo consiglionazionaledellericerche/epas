@@ -65,7 +65,7 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
       for (JsonElement je : contracts) {
         JsonObject jcontract = (JsonObject) je;
         Contract contract = new Contract();
-        contract.beginContract = LocalDate.parse(jcontract.get("beginContract").getAsString(), dtf);
+        contract.beginDate = LocalDate.parse(jcontract.get("beginContract").getAsString(), dtf);
       }
       JsonObject contact = contacts.iterator().next().getAsJsonObject();
       person.telephone = contact.get("telephone").getAsString();

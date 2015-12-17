@@ -3,17 +3,6 @@
  */
 package models;
 
-import it.cnr.iit.epas.NullStringBinder;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDateTime;
-
-import play.data.binding.As;
-import play.data.validation.InPast;
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -23,6 +12,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDateTime;
+
+import it.cnr.iit.epas.NullStringBinder;
+import models.base.BaseModel;
+import play.data.binding.As;
+import play.data.validation.InPast;
+import play.data.validation.Required;
 
 
 /**
@@ -34,6 +32,8 @@ import javax.persistence.Transient;
 
 public class Stamping extends BaseModel implements Comparable<Stamping> {
 
+  
+  
   private static final long serialVersionUID = -2422323948436157747L;
   @Required
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -56,36 +56,29 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public BadgeReader badgeReader;
   @As(binder = NullStringBinder.class)
   public String note;
-  /**
-   * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente
-   * all'apposita macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di
-   * timbratura poichè la persona in questione non ha potuto effettuare la timbratura (valore =
-   * true)
-   */
+
   @Column(name = "marked_by_admin")
   public Boolean markedByAdmin = false;
-  /**
-   * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
-   * true quando è il dipendente a modificare la propria timbratura
-   */
+
   @Column(name = "marked_by_employee")
   public Boolean markedByEmployee = false;
+  
   /**
-   * true, cella bianca; false, cella gialla
+   * true, cella bianca; false, cella gialla.
    */
   @Transient
   public boolean valid;
-  @Transient
-  public int pairId = 0;
+  
   /**
-   * true, la cella fittizia di uscita adesso
+   * true, la cella fittizia di uscita adesso.
    */
   @Transient
   public boolean exitingNow = false;
-  public Stamping(PersonDay personDay, LocalDateTime time) {
-    this.personDay = personDay;
-    this.date = time;
-  }
+  
+  
+  @Transient
+  public int pairId = 0;
+
 
   @Transient
   public boolean isValid() {
@@ -102,27 +95,45 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     return way.equals(WayType.out);
   }
 
+  /**
+   * Costruttore.
+   * @param personDay personDay
+   * @param time time
+   */
+  public Stamping(PersonDay personDay, LocalDateTime time) {
+    this.personDay = personDay;
+    this.date = time;
+  }
+  
   @Override
   public String toString() {
-    return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
-            id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
+    return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, "
+        + "stampType.id = %s, stampModificationType.id = %s",
+            id, personDay.id, way, date, stampType != null ? stampType.id : "null", 
+                stampModificationType != null ? stampModificationType.id : "null");
   }
 
   /**
-   * Comparator Stamping
+   * Comparator Stamping.
    */
   public int compareTo(Stamping compareStamping) {
-    if (date.isBefore(compareStamping.date))
+    if (date.isBefore(compareStamping.date)) {
       return -1;
-    else if (date.isAfter(compareStamping.date))
+    } else if (date.isAfter(compareStamping.date)) {
       return 1;
-    else
+    } else {
       return 0;
+    }
   }
 
+  /**
+   * Se la timbratura è di servizio.
+   * @return esito.
+   */
   @Transient
   public boolean isServiceStamping() {
-    if (this.stampType != null && this.stampType.identifier != null && this.stampType.identifier.equals("s")) {
+    if (this.stampType != null && this.stampType.identifier != null 
+        && this.stampType.identifier.equals("s")) {
       return true;
     }
     return false;
@@ -157,12 +168,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
       return null;
     }
     String s = "";
-    if (date.getHourOfDay() > 10) {
+    if (date.getHourOfDay() > 9) {
       s = s + date.getHourOfDay() + ":";
     } else {
       s = s + "0" + date.getHourOfDay() + ":";
     }
-    if (date.getMinuteOfHour() > 10) {
+    if (date.getMinuteOfHour() > 9) {
       s = s + date.getMinuteOfHour();
     } else {
       s = s + "0" + date.getMinuteOfHour();

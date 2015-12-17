@@ -214,7 +214,7 @@ public class ConsistencyManager {
       return;
     }
 
-    IWrapperPerson wPerson = wrapperFactory.create(person);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
 
     // Gli intervalli di ricalcolo dei person day.
     LocalDate lastPersonDayToCompute = LocalDate.now();
@@ -240,7 +240,7 @@ public class ConsistencyManager {
 
       while (!date.isAfter(lastPersonDayToCompute)) {
 
-        if (!wPerson.isActiveInDay(date)) {
+        if (!wrPerson.isActiveInDay(date)) {
           date = date.plusDays(1);
           previous = null;
           continue;
@@ -252,18 +252,18 @@ public class ConsistencyManager {
           personDay = new PersonDay(person, date);
         }
 
-        IWrapperPersonDay wPersonDay = wrapperFactory.create(personDay);
+        IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay);
 
         // set previous for progressive
         if (previous != null) {
-          wPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));
+          wrPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));
         }
         // set previous for night stamp
         if (previous != null) {
-          wPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
+          wrPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
         }
 
-        populatePersonDay(wPersonDay);
+        populatePersonDay(wrPersonDay);
 
         previous = personDay;
         date = date.plusDays(1);
@@ -443,19 +443,19 @@ public class ConsistencyManager {
 
     for (Contract contract : person.contracts) {
 
-      IWrapperContract wcontract = wrapperFactory.create(contract);
-      DateInterval contractDateInterval = wcontract.getContractDateInterval();
+      IWrapperContract wrContract = wrapperFactory.create(contract);
+      DateInterval contractDateInterval = wrContract.getContractDateInterval();
       YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
 
       // Se yearMonthFrom non è successivo alla fine del contratto...
       if (!yearMonthFrom.isAfter(endContractYearMonth)) {
 
         if (contract.vacationPeriods.isEmpty()) {
-          log.info("No vacation period {}", contract.toString());
+          log.error("No vacation period {}", contract.toString());
           continue;
         }
 
-        populateContractMonthRecap(wcontract, Optional.fromNullable(yearMonthFrom));
+        populateContractMonthRecap(wrContract, Optional.fromNullable(yearMonthFrom));
       }
     }
   }
@@ -664,4 +664,5 @@ public class ConsistencyManager {
     return cmr;
 
   }
+  
 }

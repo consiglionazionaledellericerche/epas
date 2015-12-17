@@ -1,0 +1,19 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+#{set breadcrumbs:[recapMealTickets:null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{mealTickets.mealTicketsTabs activeAction:'findCodeBlock' /}
+
+<div class="container">
+
+  #{alert color:'warning'}
+    <p><strong>Ricerca nell'elenco dei blocchi inseriti.</strong></p>
+    
+    <p>In fase di implementazione.</p>
+  #{/alert}  
+</div>
+

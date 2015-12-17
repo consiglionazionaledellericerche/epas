@@ -1,9 +1,12 @@
 package dao;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -13,10 +16,6 @@ import models.Stamping;
 import models.query.QStampModificationType;
 import models.query.QStampType;
 import models.query.QStamping;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * @author dario

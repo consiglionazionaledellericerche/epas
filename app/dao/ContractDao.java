@@ -64,9 +64,9 @@ public class ContractDao extends DaoBase {
     QContract contract = QContract.contract;
     final JPQLQuery query = getQueryFactory().from(contract)
             .where(contract.endContract.isNull().andAnyOf(
-                    contract.expireContract.isNull().and(contract.beginContract.loe(end.get())),
-                    contract.expireContract.isNotNull().and(contract.beginContract.loe(end.get()).and(contract.expireContract.goe(begin))))
-                    .or(contract.endContract.isNotNull().and(contract.beginContract.loe(end.get()).and(contract.endContract.goe(begin)))));
+                    contract.endDate.isNull().and(contract.beginDate.loe(end.get())),
+                    contract.endDate.isNotNull().and(contract.beginDate.loe(end.get()).and(contract.endDate.goe(begin))))
+                    .or(contract.endContract.isNotNull().and(contract.beginDate.loe(end.get()).and(contract.endContract.goe(begin)))));
     return query.list(contract);
   }
 
@@ -77,7 +77,7 @@ public class ContractDao extends DaoBase {
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
     final JPQLQuery query = getQueryFactory().from(contract)
-            .where(contract.person.eq(person)).orderBy(contract.beginContract.asc());
+            .where(contract.person.eq(person)).orderBy(contract.beginDate.asc());
     return query.list(contract);
   }
 
@@ -141,7 +141,7 @@ public class ContractDao extends DaoBase {
     if (contract.isPresent())
       condition.and(csp.contract.eq(contract.get()));
     final JPQLQuery query = getQueryFactory().from(csp)
-            .where(condition).orderBy(csp.startFrom.asc());
+            .where(condition).orderBy(csp.beginDate.asc());
     return query.list(csp);
 
   }

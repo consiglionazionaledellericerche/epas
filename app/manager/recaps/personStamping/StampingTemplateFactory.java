@@ -3,7 +3,6 @@ package manager.recaps.personStamping;
 import manager.PersonDayManager;
 import manager.cache.StampTypeManager;
 
-import models.PersonDay;
 import models.Stamping;
 
 import javax.inject.Inject;
@@ -21,13 +20,15 @@ public class StampingTemplateFactory {
   }
 
   /**
-   * @return il riepilogo mensile delle timbrature.
+   * Costruisce l'oggetto che rappresenta una timbratura da visualizzare nel tabellone timbrature.
+   * @param stamping timbratura del BaseModel
+   * @param position la posizione all'interno della sua coppia.
+   * @return la timbratura.
    */
-  public StampingTemplate create(Stamping stamping, int index,
-                                 PersonDay pd, int pairId, String pairPosition) {
+  public StampingTemplate create(Stamping stamping, String position) {
 
     return new StampingTemplate(personDayManager, stampTypeManager,
-            stamping, index, pd, pairId, pairPosition);
+            stamping, position);
   }
 
 }

@@ -1,8 +1,8 @@
 package models.exports;
 
-import models.ShiftType;
-
 import org.joda.time.LocalDate;
+
+import models.ShiftType;
 
 /**
  * Classe di supporto per l'esportazione delle informazioni relative ai turni delle persone: Turni

@@ -1,9 +1,11 @@
 package manager.recaps.personStamping;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -25,19 +27,26 @@ import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -
+ * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -.
  * dailyPresence - clocks
  *
  * @author alessandro
  */
 public class PersonStampingDayRecap {
 
-  private static StampModificationType fixedStampModificationType = null;
+  private static final String MEALTICKET_NOT_YET = "NOT_YET";
+  private static final String MEALTICKET_YES = "YES";
+  private static final String MEALTICKET_NO = "NO";
+  private static final String MEALTICKET_EMPTY = "";
+    
   private final StampingTemplateFactory stampingTemplateFactory;
+  private final PersonDayManager personDayManager;
+  
+  private static StampModificationType fixedStampModificationType = null;
+  
   public PersonDay personDay;
   public Long personDayId;
   public Person person;
@@ -76,19 +85,39 @@ public class PersonStampingDayRecap {
   public boolean progressiveNegative;
   public String workingTimeTypeDescription = "";
 
-  public List<String> note = new ArrayList<String>();
+  public List<String> note = Lists.newArrayList();
 
-  public PersonStampingDayRecap(PersonDayManager personDayManager,
-                                PersonManager personManager,
+  /**
+   * Costruisce l'oggetto contenente un giorno lavorativo da visualizzare nel tabellone 
+   * timbrature.
+   * @param personDayManager injected
+   * @param personManager injected
+   * @param stampingTemplateFactory injected
+   * @param stampTypeManager injected
+   * @param wrapperFactory injected
+   * @param workingTimeTypeDao injected
+   * @param confGeneralManager injected
+   * @param pd personDay
+   * @param numberOfInOut numero di colonne del tabellone a livello mensile.
+   * @param monthContracts il riepiloghi del mese
+   */
+  public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
                                 StampingTemplateFactory stampingTemplateFactory,
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
-                                WorkingTimeTypeDao workingTimeTypeDao, ConfGeneralManager confGeneralManager,
-                                PersonDay pd, int numberOfInOut, Optional<List<Contract>> monthContracts) {
+                                WorkingTimeTypeDao workingTimeTypeDao, 
+                                ConfGeneralManager confGeneralManager, PersonDay pd, 
+                                int numberOfInOut, Optional<List<Contract>> monthContracts) {
 
     this.stampingTemplateFactory = stampingTemplateFactory;
+    this.personDayManager = personDayManager;
+    
     this.personDay = pd;
     this.personDayId = pd.id;
 
+    if (pd.isToday()) {
+      System.out.println("Si aprono le danze.");
+    }
+    
     if (pd.isPersistent()) {
       this.holiday = pd.isHoliday;
     } else {
@@ -96,13 +125,13 @@ public class PersonStampingDayRecap {
     }
 
     this.person = pd.person;
-    setDate(pd.date);
+    setDateInfo(pd.date);
     this.absences = pd.absences;
-
-    List<Stamping> stampingsForTemplate = personDayManager
-            .getStampingsForTemplate(pd, numberOfInOut, today);
-
-    this.setStampingTemplate(stampingsForTemplate, pd);
+    
+    IWrapperPersonDay wrPersonDay = wrapperFactory.create(pd);
+    
+    this.stampingsTemplate = getStampingsTemplate(wrPersonDay, numberOfInOut);
+    this.note.addAll(getStampingsNote(this.stampingsTemplate));
 
     Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(pd.date, pd.person);
 
@@ -131,7 +160,7 @@ public class PersonStampingDayRecap {
     this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
     this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
 
-    if (wrapperFactory.create(pd).isFixedTimeAtWork()) {
+    if (wrPersonDay.isFixedTimeAtWork()) {
 
       // fixed:  worktime, difference, progressive, p
 
@@ -157,17 +186,19 @@ public class PersonStampingDayRecap {
       this.setWorkTime(pd.timeAtWork);
       this.setDifference(pd.difference);
       this.setProgressive(pd.progressive);
+      
     } else if (this.today) {
 
       // not fixed:  worktime, difference, progressive for today
 
-      personDayManager.queSeraSera(wrapperFactory.create(pd));
+      //personDayManager.queSeraSera(wrapperFactory.create(pd));
       this.setWorkTime(pd.timeAtWork);
       this.setDifference(pd.difference);
       this.setProgressive(pd.progressive);
     }
     // worktime, difference, progressive for future
     if (this.future) {
+      
       this.difference = "";
       this.workTime = "";
       this.progressive = "";
@@ -205,7 +236,7 @@ public class PersonStampingDayRecap {
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {
         // se è precedente all'inizio del contratto lo ignoro
-        if (contract.beginContract.isAfter(pd.date)) {
+        if (contract.beginDate.isAfter(pd.date)) {
           this.ignoreDay = true;
         }
 
@@ -216,7 +247,7 @@ public class PersonStampingDayRecap {
           this.ignoreDay = true;
         }
 
-        if (contract.beginContract.isEqual(pd.date)) {
+        if (contract.beginDate.isEqual(pd.date)) {
           this.firstDay = true;
         }
       }
@@ -231,44 +262,46 @@ public class PersonStampingDayRecap {
 
 
   /**
-   *
-   * @param mealTicket
-   * @param todayInProgress
+   * Imposta il valore della colonna buono pasto nel tabellone timbrature.
+   * 
+   * @param mealTicket ottenuto si/no
+   * @param todayInProgress se è il giorno di oggi.
    */
   private void setMealTicket(boolean mealTicket, boolean todayInProgress) {
 
     //Caso di oggi
     if (todayInProgress) {
       if (!mealTicket) {
-        this.mealTicket = "NOT_YET";
+        this.mealTicket = MEALTICKET_NOT_YET;
       } else {
-        this.mealTicket = "YES";
+        this.mealTicket = MEALTICKET_YES;
       }
       return;
     }
     //Casi assenze future (create o cancellate)
     if (this.future && !mealTicket && !this.absences.isEmpty()) {
-      this.mealTicket = "NO";
+      this.mealTicket = MEALTICKET_NO;
       return;
     }
 
     if (this.future && !mealTicket && this.absences.isEmpty()) {
-      this.mealTicket = "";
+      this.mealTicket = MEALTICKET_EMPTY;
       return;
     }
     //Casi generali
     if (!mealTicket) {
-      this.mealTicket = "NO";
+      this.mealTicket = MEALTICKET_NO;
       return;
     }
-    this.mealTicket = "";
+    this.mealTicket = MEALTICKET_EMPTY;
   }
 
   /**
-   *
-   * @param date
+   * Imposta il valore dei campi date, past, today, future.
+   * 
+   * @param date la data.
    */
-  private void setDate(LocalDate date) {
+  private void setDateInfo(LocalDate date) {
 
     LocalDate today = new LocalDate();
     this.date = date;
@@ -293,55 +326,66 @@ public class PersonStampingDayRecap {
   }
 
   /**
+   * Crea le timbrature da visualizzare nel tabellone timbrature. <br>
+   * 1) Riempita di timbrature fittizie nelle celle vuote, fino ad arrivare alla dimensione 
+   *    di numberOfInOut. <br>
+   * 2) Con associato il colore e il tipo di bordatura da visualizzare nel tabellone.   
    *
-   * @param stampings
-   * @param pd
+   * @param wrPersonDay il personDay
+   * @param numberOfInOut numero di timbrature.
+   * @return la lista di timbrature per il template.
    */
-  private void setStampingTemplate(List<Stamping> stampings, PersonDay pd) {
-    StampingTemplate st;
-    int actualPair = 0;
-    this.stampingsTemplate = new ArrayList<StampingTemplate>();
+  private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay, 
+      int numberOfInOut) {
+    
+    List<Stamping> stampings = personDayManager
+        .getStampingsForTemplate(wrPersonDay, numberOfInOut);
+    
+    List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
+    
+    boolean samePair = false;
+    for (Stamping stamping : stampings) {
 
-    for (int i = 0; i < stampings.size(); i++) {
-      Stamping stamping = stampings.get(i);
-
-      //Setto pairId e type
+      //La posizione della timbratura all'interno della sua coppia.
+      String position = "none";
       if (stamping.pairId != 0 && stamping.isIn()) {
-        st = stampingTemplateFactory.create(stamping, i, pd, stamping.pairId, "left");
-        actualPair = stamping.pairId;
+        position = "left";
+        samePair = true;
       } else if (stamping.pairId != 0 && stamping.isOut()) {
-        st = stampingTemplateFactory.create(stamping, i, pd, stamping.pairId, "right");
-        actualPair = 0;
-      } else if (actualPair != 0) {
-        st = stampingTemplateFactory.create(stamping, i, pd, actualPair, "center");
-      } else {
-        st = stampingTemplateFactory.create(stamping, i, pd, 0, "none");
+        position = "right";
+        samePair = false;
+      } else if (samePair) {
+        position = "center";
       }
+      
+      StampingTemplate stampingTemplate = stampingTemplateFactory.create(stamping, position);
 
-      //nuova stamping for template
-      //st = new StampingTemplate(stamping, i, pd, actualPair, actualPosition);
-      this.stampingsTemplate.add(st);
-      if (stamping.note != null && !stamping.note.equals("")) {
-        note.add(st.hour + ": " + stamping.note);
-      }
+      stampingsTemplate.add(stampingTemplate);
     }
+    return stampingsTemplate;
   }
-
+  
   /**
-   *
-   * @param workingTime
+   * La lista delle note in stampingsTemplate.
+   * @param stampingsTemplate le timbrature del giorno.
+   * @return la lista di note
    */
-  private void setWorkingTime(int workingTime) {
-    if (workingTime == 0) {
-      this.workingTime = "";
-    } else {
-      this.workingTime = DateUtility.fromMinuteToHourMinute(workingTime);
+  private List<String> getStampingsNote(List<StampingTemplate> stampingsTemplate) {
+    List<String> note = Lists.newArrayList(); 
+    for (StampingTemplate stampingTemplate : stampingsTemplate) {
+      if (stampingTemplate.stamping.note != null && !stampingTemplate.stamping.note.equals("")) {
+        note.add(stampingTemplate.hour + ": " + stampingTemplate.stamping.note);
+      }
     }
+    return note;
   }
 
+  
+
   /**
+   * Formatta il valore del tempo minimo per il buono pasto. 0 string vuota.
    *
-   * @param mealTicketTime
+   * @param mealTicketTime minuti pausa pranzo.
    */
   private void setMealTicketTime(int mealTicketTime) {
     if (mealTicketTime == 0) {
@@ -352,8 +396,9 @@ public class PersonStampingDayRecap {
   }
 
   /**
+   * Formatta il valore della pausa minima. 0 Stringa vuota.
    *
-   * @param breakTicketTime
+   * @param breakTicketTime minuti pausa miniama
    */
   private void setBreakTicketTime(int breakTicketTime) {
     if (breakTicketTime == 0) {
@@ -364,9 +409,10 @@ public class PersonStampingDayRecap {
   }
 
   /**
+   * Formatta il valore per inizio finestra intervallo pranzo.
    *
-   * @param timeMealFromHour
-   * @param timeMealFromMinute
+   * @param timeMealFromHour ore
+   * @param timeMealFromMinute minuti
    */
   private void setTimeMealFrom(int timeMealFromHour, int timeMealFromMinute) {
     String hour = timeMealFromHour + "";
@@ -381,9 +427,9 @@ public class PersonStampingDayRecap {
   }
 
   /**
-   *
-   * @param timeMealToHour
-   * @param timeMealToMinute
+   * Formatta il valore per fine finestra intervallo pranzo.
+   * @param timeMealToHour ore
+   * @param timeMealToMinute minuti
    */
   private void setTimeMealTo(int timeMealToHour, int timeMealToMinute) {
     String hour = timeMealToHour + "";
@@ -398,8 +444,21 @@ public class PersonStampingDayRecap {
   }
 
   /**
-   *
-   * @param workTime
+   * Formatta il valore del tempo a lavoro previsto dal tipo orario. 0 stringa vuota. 
+   * 
+   * @param workingTime minuti lavorati
+   */
+  private void setWorkingTime(int workingTime) {
+    if (workingTime == 0) {
+      this.workingTime = "";
+    } else {
+      this.workingTime = DateUtility.fromMinuteToHourMinute(workingTime);
+    }
+  }
+  
+  /**
+   * Formatta il valore del tempo lavorato nel giorno (lordo comprensivo di tempo decurtato).
+   * @param workTime minuti lavorati
    */
   private void setWorkTime(int workTime) {
     this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
@@ -410,29 +469,29 @@ public class PersonStampingDayRecap {
   }
 
   /**
-   *
-   * @param difference
+   * Formatta il valore della differenza. Imposta i campi this.difference e this.differenceNegative
+   * 
+   * @param difference minuti di differenza
    */
   private void setDifference(int difference) {
     if (difference < 0) {
-      differenceNegative = true;
-      //difference = difference * -1;
+      this.differenceNegative = true;
     } else {
-      differenceNegative = false;
+      this.differenceNegative = false;
     }
     this.difference = DateUtility.fromMinuteToHourMinute(difference);
   }
 
   /**
-   *
-   * @param progressive
+   * Formatta il valore del progressivo. Imposta i campi this.progressive e 
+   * this.progressiveNegative
+   * @param progressive minuti di progressivo
    */
   private void setProgressive(int progressive) {
     if (progressive < 0) {
-      progressiveNegative = true;
-      //progressive = progressive * -1;
+      this.progressiveNegative = true;
     } else {
-      progressiveNegative = false;
+      this.progressiveNegative = false;
     }
     this.progressive = DateUtility.fromMinuteToHourMinute(progressive);
   }

@@ -1,5 +1,14 @@
 package manager;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.persistence.Query;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -12,29 +21,16 @@ import dao.PersonDayDao;
 import dao.UserDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
-
-import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.persistence.Query;
 
 @Slf4j
 public class PersonManager {

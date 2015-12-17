@@ -3,7 +3,6 @@ package manager.recaps.personStamping;
 import manager.PersonDayManager;
 import manager.cache.StampTypeManager;
 
-import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
@@ -18,6 +17,7 @@ import org.joda.time.LocalDateTime;
  */
 public class StampingTemplate {
 
+  public Stamping stamping;
   public Long stampingId;
   public String colour;
   public int pairId;
@@ -25,20 +25,28 @@ public class StampingTemplate {
   public LocalDateTime date;
   public String way;
   public String hour;
-  public String insertStampingClass;
   public String markedByAdminCode;
   public String markedByEmployeeCode;
   public String identifier;
   public String missingExitStampBeforeMidnightCode;
   public boolean valid;
 
-  public StampingTemplate(PersonDayManager personDayManager,
-                          StampTypeManager stampTypeManager, Stamping stamping,
-                          int index, PersonDay pd, int pairId, String pairPosition) {
-
+  /**
+   * Costruttore per la StampingTemplate.
+   * @param personDayManager injected
+   * @param stampTypeManager injected
+   * @param stamping la timbratura formato BaseModel.
+   * @param position la posizione della timbratura all'interno della sua coppia
+   *        [left, center, right, none] (none per nessuna coppia)
+   */
+  public StampingTemplate(PersonDayManager personDayManager, StampTypeManager stampTypeManager,
+      Stamping stamping, String position) {
+    
+    this.stamping = stamping;
     this.stampingId = stamping.id;
-    this.pairId = pairId;
-    this.pairPosition = pairPosition;
+    this.pairId = stamping.pairId;
+    
+    this.pairPosition = position;
 
     //stamping nulle o exiting now non sono visualizzate
     if (stamping.date == null || stamping.exitingNow) {
@@ -46,7 +54,6 @@ public class StampingTemplate {
       this.markedByAdminCode = "";
       this.markedByEmployeeCode = "";
       this.identifier = "";
-      this.insertStampingClass = "";
       this.missingExitStampBeforeMidnightCode = "";
       this.valid = true;
       setColor(stamping);
@@ -58,9 +65,6 @@ public class StampingTemplate {
     this.way = stamping.way.description;
 
     setHour(stamping.date);
-
-    this.insertStampingClass = "insertStamping" +
-            stamping.date.getDayOfMonth() + "-" + index;
 
     //timbratura di servizio
     this.identifier = "";
@@ -86,9 +90,8 @@ public class StampingTemplate {
 
     //timbratura di mezzanotte
     this.missingExitStampBeforeMidnightCode = "";
-    if (stamping.stampModificationType != null &&
-            stamping.stampModificationType.code.equals(
-                    StampModificationTypeCode
+    if (stamping.stampModificationType != null 
+        && stamping.stampModificationType.code.equals(StampModificationTypeCode
                             .TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
 
       this.missingExitStampBeforeMidnightCode = stamping
@@ -117,11 +120,13 @@ public class StampingTemplate {
 
   protected void setHour(LocalDateTime date) {
     String hour = date.getHourOfDay() + "";
-    if (hour.length() == 1)
+    if (hour.length() == 1) {
       hour = "0" + hour;
+    }
     String minute = date.getMinuteOfHour() + "";
-    if (minute.length() == 1)
+    if (minute.length() == 1) {
       minute = "0" + minute;
+    }
     this.hour = hour + ":" + minute;
   }
 }

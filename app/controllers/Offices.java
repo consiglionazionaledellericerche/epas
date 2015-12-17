@@ -23,6 +23,8 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import security.SecurityRules;
+
 import javax.inject.Inject;
 
 @With({Resecure.class, RequestInit.class})
@@ -35,12 +37,18 @@ public class Offices extends Controller {
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static RoleDao roleDao;
+  @Inject
+  private static SecurityRules rules;
 
   public static void index() {
     flash.keep();
     list(null);
   }
 
+  /**
+   * il metodo che gestisce la lista degli istituti.
+   * @param name l'eventuale parametro su cui filtrare gli istituti
+   */
   public static void list(String name) {
 
     //la lista di institutes su cui si ha tecnical admin in almeno un office
@@ -53,21 +61,35 @@ public class Offices extends Controller {
     render(results, name);
   }
 
+  /**
+   * metodo che gestisce la visualizzazione dei dati di un istituto.
+   * @param id dell'istituto da visualizzare
+   */
   public static void show(Long id) {
     final Office office = Office.findById(id);
     notFoundIfNull(office);
     render(office);
   }
 
+  /**
+   * metodo che gestisce la modifica di un office.
+   * @param id dell'istituto da modificare
+   */
   public static void edit(Long id) {
+    
+    
     final Office office = Office.findById(id);
     notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    IWrapperOffice wrOffice = wrapperFactory.create(office);
 
-    IWrapperOffice wOffice = wrapperFactory.create(office);
-
-    render(office, wOffice);
+    render(office, wrOffice);
   }
 
+  /**
+   * metodo che visualizza le informazioni di un istituto.
+   * @param instituteId id dell'istituto da visualizzare
+   */
   public static void blank(Long instituteId) {
     final Institute institute = Institute.findById(instituteId);
     notFoundIfNull(institute);
@@ -77,6 +99,10 @@ public class Offices extends Controller {
     render(office);
   }
 
+  /**
+   * metodo che salva le informazioni per un office.
+   * @param office la sede da salvare
+   */
   public static void save(@Valid Office office) {
 
     if (Validation.hasErrors()) {
@@ -84,8 +110,12 @@ public class Offices extends Controller {
       log.warn("validation errors for {}: {}", office,
               validation.errorsMap());
       flash.error(Web.msgHasErrors());
-      IWrapperOffice wOffice = wrapperFactory.create(office);
-      render("@edit", office, wOffice);
+      IWrapperOffice wrOffice = wrapperFactory.create(office);
+      if(!office.isPersistent()) {
+        render("@blank", office, wrOffice);
+      } else {
+        render("@edit", office, wrOffice);
+      }
     } else {
       office.save();
       flash.success(Web.msgSaved(Office.class));
@@ -93,6 +123,10 @@ public class Offices extends Controller {
     }
   }
 
+  /**
+   * metodo che cancella una sede.
+   * @param id della sede da cancellare
+   */
   public static void delete(Long id) {
 
     final Office office = Office.findById(id);

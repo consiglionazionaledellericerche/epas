@@ -1,5 +1,12 @@
 package manager;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -10,12 +17,11 @@ import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import manager.MealTicketManager.MealTicketOrder;
 import manager.cache.CompetenceCodeManager;
-
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -25,13 +31,6 @@ import models.ContractWorkingTimeType;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
 import models.enumerate.Parameter;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * @author alessandro
@@ -127,7 +126,7 @@ public class ContractMonthRecapManager {
                                                             Optional<ContractMonthRecap> recapPreviousMonth, YearMonth yearMonth,
                                                             LocalDate calcolaFinoA, List<Absence> otherCompensatoryRest) {
 
-    IWrapperContract wcontract = wrapperFactory.create(cmr.contract);
+    IWrapperContract wrContract = wrapperFactory.create(cmr.contract);
     Contract contract = cmr.contract;
 
     //TODO: controllare che in otherCompensatoryRest ci siano solo riposi compensativi.
@@ -173,11 +172,12 @@ public class ContractMonthRecapManager {
       //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
       //in source
       cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
+      cmr.buoniPastoDalMesePrecedente = 0;
     }
 
     //////////////////////////////////////////////////////////////////////////
     //Inizio Algoritmo
-    cmr.wcontract = wrapperFactory.create(contract);
+    cmr.wrContract = wrapperFactory.create(contract);
     cmr.person = contract.person;
     cmr.qualifica = cmr.person.qualification.qualification;
 
@@ -232,7 +232,7 @@ public class ContractMonthRecapManager {
 
     setMealTicketsInformation(cmr, validDataForMealTickets);
     setPersonDayInformation(cmr, validDataForPersonDay);
-    setPersonMonthInformation(cmr, wcontract,
+    setPersonMonthInformation(cmr, wrContract,
             validDataForCompensatoryRest, otherCompensatoryRest);
 
     //Imputazioni
@@ -476,9 +476,8 @@ public class ContractMonthRecapManager {
       }
 
       //Numero ticket consegnati nel mese
-      cmr.buoniPastoConsegnatiNelMese =
-              mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
-                      cmr.contract, validDataForMealTickets).size();
+      cmr.buoniPastoConsegnatiNelMese = mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
+          cmr.contract, validDataForMealTickets, MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC).size();
     }
 
     //residuo
@@ -499,11 +498,11 @@ public class ContractMonthRecapManager {
    *                                     le simulazioni di inserimento assenze).
    */
   private void setPersonMonthInformation(ContractMonthRecap cmr,
-                                         IWrapperContract wcontract, DateInterval validDataForCompensatoryRest,
+                                         IWrapperContract wrContract, DateInterval validDataForCompensatoryRest,
                                          List<Absence> otherCompensatoryRest) {
 
     //gli straordinari li assegno solo all'ultimo contratto attivo del mese
-    if (wcontract.isLastInMonth(cmr.month, cmr.year)) {
+    if (wrContract.isLastInMonth(cmr.month, cmr.year)) {
 
       CompetenceCode s1 = competenceCodeManager.getCompetenceCode("S1");
       CompetenceCode s2 = competenceCodeManager.getCompetenceCode("S2");
@@ -555,7 +554,7 @@ public class ContractMonthRecapManager {
 
           LocalDate date = riposo.date;
           for (ContractWorkingTimeType cwtt :
-                  wcontract.getValue().contractWorkingTimeType) {
+                  wrContract.getValue().contractWorkingTimeType) {
 
             if (DateUtility.isDateIntoInterval(date,
                     wrapperFactory.create(cwtt).getDateInverval())) {

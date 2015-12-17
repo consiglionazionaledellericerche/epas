@@ -2,11 +2,13 @@
 #{set header:'navbar' /}
 #{set title: 'Creazione nuovo Tipo Orario per ' + office.name  /}
 
-#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(), 'Nuovo tipo orario':null] /}
+#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(office.id), ('Nuovo tipo orario ' + office.name):null]/}
  
 <div class="container">
 
-#{breadcrumbs breadcrumbs /}
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Creazione Nuovo Tipo Orario ' + office.name /}
 
   <div class="col-md-10 col-md-offset-1">
      
@@ -21,11 +23,10 @@
       <input type="hidden" name="office.id" value="${office.id}"/>
   
 	  #{f.input 'horizontalPattern.name', required:'true', label:'Nome Orario' /}  
-	  #{f.view 'office'  /}
-	  
+	  	  
 	  <div class="alert alert-success">
-	   <h4>Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
-	   della settimana ad eccezione dei giorni festivi.</h4>
+	   Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
+	   della settimana ad eccezione dei giorni festivi.
       </div>	 
 	
 	  <!-- Tempo a lavoro -->	 

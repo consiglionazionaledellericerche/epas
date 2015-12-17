@@ -67,6 +67,9 @@ public class Administration extends Controller {
   @Inject
   private static PersonDayManager personDayManager;
 
+  /**
+   * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
+   */
   public static void initializeRomanAbsences() {
 
     //StampType pausa pranzo
@@ -156,6 +159,9 @@ public class Administration extends Controller {
 
   }
 
+  /**
+   * metodo che inizializza le persone della anagrafica.
+   */
   public static void initializePersons() {
 
     //Tutte le persone con contratto iniziato dopo alla data di inizializzazione
@@ -164,28 +170,33 @@ public class Administration extends Controller {
     for (Person person : persons) {
 
       //Configurazione office
-      LocalDate initUse = confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office).orNull();
+      LocalDate initUse = confGeneralManager
+          .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office).orNull();
 
       //Contratto attuale
       Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
       if (contract.isPresent()) {
-        if (contract.get().sourceDateResidual == null && contract.get().beginContract.isBefore(initUse)) {
-          Contract c = contract.get();
-          c.sourceDateResidual = initUse.minusDays(1);
-          c.sourcePermissionUsed = 0;
-          c.sourceRecoveryDayUsed = 0;
-          c.sourceRemainingMealTicket = 0;
-          c.sourceRemainingMinutesCurrentYear = 6000;
-          c.sourceRemainingMinutesLastYear = 0;
-          c.sourceVacationCurrentYearUsed = 0;
-          c.sourceVacationLastYearUsed = 0;
-          c.save();
+        if (contract.get().sourceDateResidual == null 
+            && contract.get().beginDate.isBefore(initUse)) {
+          Contract con = contract.get();
+          con.sourceDateResidual = initUse.minusDays(1);
+          con.sourcePermissionUsed = 0;
+          con.sourceRecoveryDayUsed = 0;
+          con.sourceRemainingMealTicket = 0;
+          con.sourceRemainingMinutesCurrentYear = 6000;
+          con.sourceRemainingMinutesLastYear = 0;
+          con.sourceVacationCurrentYearUsed = 0;
+          con.sourceVacationLastYearUsed = 0;
+          con.save();
         }
       }
     }
   }
 
+  /**
+   * metodo che renderizza la pagina di utilities.
+   */
   public static void utilities() {
 
     final List<Person> personList = personDao.list(
@@ -218,10 +229,14 @@ public class Administration extends Controller {
     utilities();
   }
 
+  /**
+   * metodo che permette la costruzione di codici di assenza e qualifiche a partire da file .yml.
+   */
   public static void buildYaml() {
     //general
     exportToYaml.buildAbsenceTypesAndQualifications(
-            "db/import/absenceTypesAndQualifications" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
+            "db/import/absenceTypesAndQualifications" + DateTime.now()
+            .toString("dd-MM-HH:mm") + ".yml");
 
     exportToYaml.buildCompetenceCodes(
             "db/import/competenceCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
@@ -229,22 +244,25 @@ public class Administration extends Controller {
     exportToYaml.buildVacationCodes(
             "db/import/vacationCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
 
-    //		exportToYaml.buildVacationCodes("conf/vacationCodes.yml");
-
-    //		Yaml yaml = new Yaml();
-
-    //		exportToYaml.writeToYamlFile("Users"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(User.findAll()));
-    //		exportToYaml.writeToYamlFile("Permission"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Permission.findAll()));
-    //		exportToYaml.writeToYamlFile("Roles"+DateTime.now().toString("dd-MM-HH:mm")+".yml", yaml.dump(Role.findAll()));
   }
 
+  /**
+   * metodo che ritorna un controllo sui minuti in eccesso nella tabella delle competenze.
+   */
   public static void updateExceedeMinInCompetenceTable() {
     competenceUtility.updateExceedeMinInCompetenceTable();
     renderText("OK");
   }
 
+  /**
+   * metodo che cancella tutte le timbrature disaccoppiate nell'arco temporale specificato.
+   * @param peopleId l'id della persona
+   * @param begin la data da cui partire
+   * @param end la data in cui finire
+   * @param forAll se il controllo deve essere fatto per tutti
+   */
   public static void deleteUncoupledStampings(List<Long> peopleId,
-                                              @Required LocalDate begin, LocalDate end, boolean forAll) {
+      @Required LocalDate begin, LocalDate end, boolean forAll) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -280,7 +298,7 @@ public class Administration extends Controller {
               .getPersonDayInPeriod(person, begin, Optional.of(end));
       int count = 0;
       for (PersonDay pd : persondays) {
-        personDayManager.computeValidStampings(pd);
+        personDayManager.setValidPairStampings(pd);
 
         for (Stamping stamping : pd.stampings) {
           if (!stamping.valid) {
@@ -298,6 +316,10 @@ public class Administration extends Controller {
     utilities();
   }
 
+  /**
+   * metodo che controlla se ci sono errori nei periodi di ferie.
+   * @param from la data da cui partire
+   */
   public static void fixVacationPeriods(LocalDate from) {
 
     List<Contract> contracts = contractDao
@@ -306,8 +328,8 @@ public class Administration extends Controller {
     for (Contract contract : contracts) {
       contractManager.buildVacationPeriods(contract);
 
-      log.info("Il contratto di {} iniziato il {} non è stato ripristinato con i piani ferie corretti.",
-              contract.person.fullName(), contract.beginContract);
+      log.info("Il contratto di {} iniziato il {} non è stato ripristinato "
+          + "con i piani ferie corretti.",contract.person.fullName(), contract.beginDate);
     }
 
     utilities();

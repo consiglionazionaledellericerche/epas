@@ -72,12 +72,17 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("Absences.showGeneralMonthlyAbsences")) {
 
-      Absences.showGeneralMonthlyAbsences(year, month, null, null);
+      Absences.showGeneralMonthlyAbsences(year, month, officeId);
     }
 
     if (action.equals("Absences.yearlyAbsences")) {
 
       Absences.yearlyAbsences(personId, year);
+    }
+    
+    if (action.equals("Absences.absenceInPeriod")) {
+
+      Absences.absenceInPeriod(personId, null, null);
     }
 
     if (action.equals("Competences.competences")) {
@@ -87,17 +92,22 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("Competences.showCompetences")) {
 
-      Competences.showCompetences(year, month, null, null, null, null);
+      Competences.showCompetences(year, month, officeId, null, null, null);
     }
 
     if (action.equals("Competences.totalOvertimeHours")) {
 
-      Competences.totalOvertimeHours(year, null);
+      Competences.totalOvertimeHours(year, officeId);
     }
 
     if (action.equals("Competences.enabledCompetences")) {
 
-      Competences.enabledCompetences(null, null);
+      Competences.enabledCompetences(officeId);
+    }
+    
+    if (action.equals("Competences.approvedCompetenceInYear")) {
+
+      Competences.approvedCompetenceInYear(year, false, officeId);
     }
 
     if (action.equals("Competences.exportCompetences")) {
@@ -147,11 +157,25 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("WorkingTimes.manageWorkingTime")) {
 
-      WorkingTimes.manageWorkingTime(null);
+      WorkingTimes.manageWorkingTime(officeId);
+    }
+    if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
+
+      WorkingTimes.manageOfficeWorkingTime(officeId);
     }
     if (action.equals("MealTickets.recapMealTickets")) {
 
-      MealTickets.recapMealTickets(year, month, null, null);
+      MealTickets.recapMealTickets(year, month, officeId);
+    }
+    
+    if (action.equals("MonthRecaps.showRecaps")) {
+      
+      MonthRecaps.showRecaps(year, month, officeId);
+    }
+    
+    if (action.equals("MonthRecaps.customRecap")) {
+      
+      MonthRecaps.customRecap(year, month, officeId);
     }
 
 

@@ -36,20 +36,15 @@
 
   <div id="modifyContract">
 	#{form @Contracts.update(), class:'form-horizontal', 
-	'data-async':'#modifyContract', 'data-async-error':'#modifyContract', 
+	'data-async':'#page_content', 'data-async-error':'#modifyContract', 
 	'data-spinner':'#defaultSpinner' } 
 	  
-	  #{if success}
-	    #{alert color:'warning', dismissible:true}
-	      Contratto aggiornato con successo.
-	    #{/alert}
-	  #{/if}
-	  
+	    
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 		<!-- Form input -->
 		#{if !confirmed }
-			#{f.date 'beginContract', value:beginContract?.format() /}
-	    	#{f.date 'expireContract', value:expireContract?.format() /}
+			#{f.date 'beginDate', value:beginDate?.format() /}
+	    	#{f.date 'endDate', value:endDate?.format() /}
 	    	#{f.date 'endContract', value:endContract?.format() /}
 	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
 	    	
@@ -66,36 +61,18 @@
 		<!-- Form di conferma -->
 		#{else}
 		
-			#{f.simpleView 'beginContract', value:beginContract?.format(), hidden:true /}
-			#{f.simpleView 'expireContract', value:expireContract?.format(), hidden:true /}
+			#{f.simpleView 'beginDate', value:beginDate?.format(), hidden:true /}
+			#{f.simpleView 'endDate', value:endDate?.format(), hidden:true /}
 			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			<input type="hidden" name="confirmed" value="true" />
 			
-			#{alert color:'danger'}			
-	 	      #{if recomputeFrom != null}
-	 	        #{if changeBegin}
-	 	            <em>Modifica data iniziale:</em> ePAS effettuerà il ricalcolo di 
-	 	                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()}
-	 	                per un totale di <strong>${days}</strong> giorni.
-	 	        #{/if}
-		        #{if reduceEnd}
-			         <em>Scorciamento del contratto:</em> ePAS effettuerà l'aggiornamento del 
-			               riepilogo mensile al ${recomputeFrom.format()}.
-			    #{/if}
-			    #{if incrementEndInPast}
-			         <em>Prolungamento del contratto:</em> ePAS effettuerà il ricalcolo di
-			                tutti i dati del dipendente dal ${recomputeFrom.format()} al ${recomputeTo.format()} 
-			                per un totale di <strong>${days}</strong> giorni.
-			    #{/if} 
-			  #{/if}
-			  #{if initMissing}
-				    Il contratto così configurato necessiterà di inizializzazione.
-	 	      #{/if}
-	        #{/alert}
-			<div class="text-center">
-	  			<input class="btn btn-primary" type="submit" value="Conferma"/>
-			</div>
+			#{recomputeRecap recomputeRecap:recomputeRecap /}
+			
+			#{b.buttons center:true}
+			   #{b.submit 'Conferma'/}
+			   #{b.cancel @edit(contract.id) /}
+			#{/b.buttons}
 		#{/else}
 		
 

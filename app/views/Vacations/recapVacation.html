@@ -1,11 +1,8 @@
-#{modalAsync title: vacationsRecap.person.fullname + ' Riepilogo ferie e permessi' }
+#{modalAsync title: vacationsRecap.person.fullname + ' - Riepilogo Ferie e Permessi' }
 
   
 <div>
-  *{
-  
-   Quando si riesce a risolvere il problema della dimenzione fissa del modale allora si può
-   riabilitare lo switcher.
+ *{
    #{tabs}
     
     #{tabItem id:'vacationLastYear', title:'Ferie del ' + (vacationsRecap.year-1), active:activeVacationLastYear /}
@@ -19,9 +16,31 @@
    
    <!--  ferie anno passato -->
    #{tabContentItem id:'vacationLastYear', active:activeVacationLastYear}
-   
-      #{accordionGroup 'recapVacationLast'} 
-        #{accordionItem 'itemRecapVacationLast', parent:'recapVacationLast', title:'Riepilogo giorni di ferie del ' + (vacationsRecap.year-1), open:true, color:'info'}
+ 
+       #{panel title:'Ferie Usufruite Competenza ' + (vacationsRecap.year - 1) }
+	      <div class="col-md-8 col-md-offset-2">
+	        <table class="table table-condensed table-hover" datatable>
+				    
+			<thead>
+			  <tr class="warning">
+				 <th class="col-xs-4">Data</th>
+			     <th class="col-xs-2">Codice</th>
+			     <th class="col-xs-6">Descrizione</th>
+			  </tr>
+			</thead>
+			<tbody>
+			#{list items:vacationsRecap.listVacationLastYearUsed(), as:'absence'}
+			    <tr>
+			       <td data-order="${absence.personDay.date}">${absence.personDay.date.format()}</td>
+			       <td>${absence.absenceType.code}</td>
+			       <td>${absence.absenceType.description}</td>
+			    </tr>
+			#{/list}
+			</tbody>
+		    </table>
+          </div>
+	   #{/panel}
+	   #{alert color:'info'}
 	      <p>Totali: <strong>${vacationsRecap.vacationDaysLastYearAccrued}</strong></p>
 	      <p>Usufruiti: <strong>${vacationsRecap.vacationDaysLastYearUsed}</strong></p>
 	      <p>Rimanenti: <strong>${vacationsRecap.vacationDaysLastYearNotYetUsed }</strong> da utilizzare entro il <strong>${vacationsRecap.dateExpireLastYear.format()}</strong></p>
@@ -32,68 +51,16 @@
 				giorni di ferie da inizializzazione ePAS.</p>
 			</div>	
 		  #{/if}
-        #{/accordionItem}
-      #{/accordionGroup}
-   
-   
-      #{accordionGroup 'datesVacationCurrent'}
-        #{accordionItem 'itemDatesVacationCurrent', parent:'datesVacationCurrent', title:'Date e codici ferie del ' + vacationsRecap.year, open:true, color:'info'}
-
-		      
-	      <div class="col-md-8 col-md-offset-2">
-	        <table class="table table-condensed table-hover">
-				    
-			<thead>
-			  <tr>
-				 <th class="col-xs-4">Data</th>
-			     <th class="col-xs-2">Codice</th>
-			     <th class="col-xs-6">Descrizione</th>
-			  </tr>
-			</thead>
-			<tbody>
-			#{list items:vacationsRecap.listVacationLastYearUsed(), as:'absence'}
-			    <tr>
-			       <td>${absence.personDay.date.format()}</td>
-			       <td>${absence.absenceType.code}</td>
-			       <td>${absence.absenceType.description}</td>
-			    </tr>
-			#{/list}
-			</tbody>
-		    </table>
-          </div>
-        #{/accordionItem}
-      #{/accordionGroup}
+      #{/alert}
       
    #{/tabContentItem}
    
    <!--  ferie anno corrente -->
    #{tabContentItem id:'vacationCurrentYear', active:activeVacationCurrentYear}
-      
-      #{accordionGroup 'recapVacationCurrent'}
-        #{accordionItem 'itemRecapVacationCurrent', parent:'recapVacationCurrent', title:'Riepilogo giorni di ferie del ' + vacationsRecap.year, open:true, color:'info'}
-	      *{ #{panel title:'Riepilogo giorni di ferie del ' + vacationsRecap.year, dim:12, color:'info'} }*
-	      <p>Totali: <strong>${vacationsRecap.vacationDaysCurrentYearTotal}</strong></p>
-	      <p>Maturati:  <strong>${vacationsRecap.vacationDaysCurrentYearAccrued}</strong></p>
-	      <p>Usufruiti: <strong>${vacationsRecap.vacationDaysCurrentYearUsed}</strong></p>
-	      <p>Rimanenti: <strong>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed }</strong> da utilizzare entro</p>
-	      <p>Rimanenti maturati: <strong>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed}</strong></p>
-		  #{if vacationsRecap.sourceVacationCurrentYearUsed() > 0}
-		  <div class="alert alert-warning">
-				<p>Sono stati definiti per l'anno ${vacationsRecap.year} 
-				<strong>${vacationsRecap.sourceVacationCurrentYearUsed()}</strong>
-				giorni di ferie da inizializzazione ePAS.</p>
-		  </div>
-		  #{/if}	
-	      *{ #{/panel} }*
-        #{/accordionItem}
-      #{/accordionGroup}
-
-      #{accordionGroup 'datesVacationCurrent'}
-      #{accordionItem 'itemDatesVacationCurrent', parent:'datesVacationCurrent', title:'Date e codici ferie del ' + vacationsRecap.year, open:true, color:'info'}
-	 
-	 
-	  
-	  <table class="table table-condensed table-hover">
+ 
+      #{panel title:'Ferie Usufruite Competenza ' + (vacationsRecap.year) }
+       
+	  <table class="table table-condensed table-hover" datatable>
 	   <thead>
 	   <tr>
 	     <th class="col-xs-4">Data</th>
@@ -104,7 +71,7 @@
 	   <tbody>
 	   #{list items:vacationsRecap.listVacationCurrentYearUsed(), as:'absence'}
 	     <tr>
-	       <td>${absence.personDay.date.format()}</td>
+	       <td data-order="${absence.personDay.date}">${absence.personDay.date.format()}</td>
 	       <td>${absence.absenceType.code}</td>
 	       <td>${absence.absenceType.description}</td>
 	     </tr>
@@ -112,8 +79,19 @@
 	   </tbody>
 	   </table>
 
-      #{/accordionItem}
-      #{/accordionGroup}
+     #{/panel}
+     #{alert color:'info'}
+	      <p>Totali: <strong>${vacationsRecap.vacationDaysCurrentYearTotal}</strong></p>
+	      <p>Maturati:  <strong>${vacationsRecap.vacationDaysCurrentYearAccrued}</strong></p>
+	      <p>Usufruiti: <strong>${vacationsRecap.vacationDaysCurrentYearUsed}</strong></p>
+	      <p>Rimanenti: <strong>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed }</strong></p>
+	      <p>Rimanenti maturati: <strong>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed}</strong></p>
+		  #{if vacationsRecap.sourceVacationCurrentYearUsed() > 0}
+		     	<p>Sono stati definiti per l'anno ${vacationsRecap.year} 
+				<strong>${vacationsRecap.sourceVacationCurrentYearUsed()}</strong>
+				giorni di ferie da inizializzazione ePAS.</p>
+		  #{/if}	
+	  #{/alert}
   
       
    #{/tabContentItem}
@@ -121,30 +99,8 @@
    <!--  permessi -->
    #{tabContentItem id:'permission', active:activePermission}
    
-    #{accordionGroup 'recapPermissionCurrent'}
-        #{accordionItem 'itemRecapPermissionCurrent', parent:'recapPermissionCurrent', title:'Riepilogo permessi legge del ' + vacationsRecap.year, open:true, color:'info'}
-
-	      <p>Totali: <strong>${vacationsRecap.permissionCurrentYearTotal}</strong></p>
-	      <p>Maturati:  <strong>${vacationsRecap.permissionCurrentYearAccrued}</strong></p>
-	      <p>Usufruiti: <strong>${vacationsRecap.permissionUsed}</strong></p>
-	      <p>Rimanenti: <strong>${vacationsRecap.persmissionNotYetUsed }</strong> da utilizzare entro il <strong>${vacationsRecap.requestYearInterval.getEnd().format()}</strong></p>
-	      <p>Rimanenti maturati: <strong>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}</strong></p>
-		  #{if vacationsRecap.sourcePermissionUsed() > 0}
-          <div class="alert alert-warning">
-			<p>Sono stati definiti per l'anno ${vacationsRecap.year} 
-		      <strong>${vacationsRecap.sourcePermissionUsed()}</strong>
-			  giorni di permesso da inizializzazione ePAS.
-			</p>
-		  </div>	
-          #{/if}
-	      
-        #{/accordionItem}
-      #{/accordionGroup}
-   
-      #{accordionGroup 'datesPermissionCurrent'}
-        #{accordionItem 'itemDatesPermissionCurrent', parent:'datesPermissionCurrent', title:'Date permessi legge del ' + vacationsRecap.year, open:true, color:'info'}
-	      <div class="col-md-8 col-md-offset-2">
-	      <table class="table table-condensed table-hover">
+        #{panel title:'Permessi Usufruiti Competenza ' + (vacationsRecap.year) }
+	      <table class="table table-condensed table-hover" datatable>
 		   <thead>
 		   <tr>
 		     <th class="col-xs-4">Data</th>
@@ -155,16 +111,28 @@
 		   <tbody>
 		   #{list items:vacationsRecap.listPermissionUsed(), as:'absence'}
 		      <tr>
-		       <td>${absence.personDay.date.format()}</td>
+		       <td data-order="${absence.personDay.date}">${absence.personDay.date.format()}</td>
 		       <td>${absence.absenceType.code}</td>
 		       <td>${absence.absenceType.description}</td>
 		      </tr>
 		   #{/list}
 		   </tbody>
 		   </table>
-		  </div> 
-	    #{/accordionItem}
-      #{/accordionGroup}
+		#{/panel}
+		
+		#{alert color:'info'}
+	      <p>Totali: <strong>${vacationsRecap.permissionCurrentYearTotal}</strong></p>
+	      <p>Maturati:  <strong>${vacationsRecap.permissionCurrentYearAccrued}</strong></p>
+	      <p>Usufruiti: <strong>${vacationsRecap.permissionUsed}</strong></p>
+	      <p>Rimanenti: <strong>${vacationsRecap.persmissionNotYetUsed }</strong> da utilizzare entro il <strong>${vacationsRecap.requestYearInterval.getEnd().format()}</strong></p>
+	      <p>Rimanenti maturati: <strong>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}</strong></p>
+		  #{if vacationsRecap.sourcePermissionUsed() > 0}
+			<p>Sono stati definiti per l'anno ${vacationsRecap.year} 
+		      <strong>${vacationsRecap.sourcePermissionUsed()}</strong>
+			  giorni di permesso da inizializzazione ePAS.
+			</p>
+          #{/if}
+        #{/alert}  
    #{/tabContentItem}
    
   #{/tabContent}

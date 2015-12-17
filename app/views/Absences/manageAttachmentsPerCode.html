@@ -2,15 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
-#{set breadcrumbs:['Allegati per codice di assenza':null] /}
+#{absences.absencesTabs activeAction:'manageAttachmentsPerCode' /}
  
 <div class="container">
-  #{breadcrumbs breadcrumbs /}
-  
-  #{absences.absencesTabs activeAction:'manageAttachmentsPerCode' /}
-  
+
   #{title title:'Allegati per codici di assenza ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
 
+  #{if attachmentRecapList.empty}
+    Nessun allegato presente per questo mese.
+  #{/if}
+  #{else}
   <table class="table table-hover">   
 		  <tr>
 		  	<th>Codice</th>
@@ -44,5 +45,6 @@
 		  #{/list}
 		
   </table>
+  #{/else}
 
 </div>

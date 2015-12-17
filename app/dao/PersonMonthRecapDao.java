@@ -1,8 +1,14 @@
 package dao;
 
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -12,13 +18,6 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * @author dario
@@ -34,15 +33,19 @@ public class PersonMonthRecapDao extends DaoBase {
   /**
    * @return la lista di personMonthRecap relativa all'anno year per la persona person
    */
-  public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person, Integer year, Optional<Integer> month, Optional<Boolean> hoursApproved) {
+  public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person, 
+      Integer year, Optional<Integer> month, Optional<Boolean> hoursApproved) {
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
     final BooleanBuilder condition = new BooleanBuilder();
-    if (month.isPresent())
+    if (month.isPresent()) {
       condition.and(personMonthRecap.month.eq(month.get()));
-    if (hoursApproved.isPresent())
+    }
+    if (hoursApproved.isPresent()) {
       condition.and(personMonthRecap.hoursApproved.eq(hoursApproved.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(personMonthRecap)
-            .where(condition.and(personMonthRecap.person.eq(person).and(personMonthRecap.year.eq(year))));
+            .where(condition.and(personMonthRecap.person.eq(person)
+                .and(personMonthRecap.year.eq(year))));
     return query.list(personMonthRecap);
   }
 

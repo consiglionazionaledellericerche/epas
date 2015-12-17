@@ -4,13 +4,16 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import models.base.BaseModel;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
 
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -26,21 +29,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import models.base.BaseModel;
-import models.base.IPeriodTarget;
-
-import play.data.validation.Required;
-
-
-/**
- * @author dario
- */
 @Entity
 @Table(name = "contracts")
-public class Contract extends BaseModel implements IPeriodTarget {
+public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
-
 
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
@@ -87,14 +80,6 @@ public class Contract extends BaseModel implements IPeriodTarget {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
-  @Required
-  @NotNull
-  @Column(name = "begin_contract")
-  public LocalDate beginContract;
-
-  @Column(name = "expire_contract")
-  public LocalDate expireContract;
-
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
   @Column(name = "end_contract")
@@ -107,30 +92,24 @@ public class Contract extends BaseModel implements IPeriodTarget {
 
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
-  @OrderBy("startFrom")
+  @OrderBy("beginDate")
   public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
   public List<MealTicket> mealTickets;
-  /**
-   * I contratti con onCertificate = true sono quelli dei dipendenti CNR e corrispondono a quelli
-   * con l'obbligo dell'attestato di presenza da inviare a Roma
-   */
+
   @Required
   public boolean onCertificate = true;
 
-
-//	public void setSourceDateResidual(String date){
-//		this.sourceDateResidual = new LocalDate(date);
-//	}
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 
   @Override
   public String toString() {
-    return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
-            id, person.id, beginContract, expireContract, endContract);
+    return String.format("Contract[%d] - person.id = %d, "
+        + "beginDate = %s, endDate = %s, endContract = %s",
+            id, person.id, beginDate, endDate, endContract);
   }
 
   /**
@@ -152,5 +131,30 @@ public class Contract extends BaseModel implements IPeriodTarget {
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
     return Lists.newArrayList(contractWorkingTimeType);
   }
+
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertiesInPeriodOwner#periods(java.lang.Object)
+   */
+  @Override
+  public Collection<IPropertyInPeriod> periods(Object type) {
+     
+    if (type.equals(ContractWorkingTimeType.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
+    }
+    if (type.equals(ContractStampProfile.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(contractStampProfile);
+    }
+    return null;
+  }
+
+  @Override
+  public LocalDate calculatedEnd() {
+    if (this.endContract != null) {
+      return this.endContract;
+    } 
+    return this.endDate;
+  }
+
 
 }

@@ -9,6 +9,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.gson.Gson;
 
+import injection.StaticInject;
+
+import models.base.BaseModel;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.ReadablePeriod;
@@ -17,7 +21,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-import injection.StaticInject;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.Crypto;
@@ -122,7 +125,18 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String label(Object obj) {
+    if (obj instanceof BaseModel) {
+      return ((BaseModel)obj).getLabel();
+    }
     return obj.toString();
+  }
+  
+  public static String label(Boolean b) {
+    if (b) {
+      return "Si";
+    } else {
+      return "No";
+    }
   }
 
   public static String label(Range<?> obj) {

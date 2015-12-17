@@ -22,21 +22,38 @@ absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 badge.begin= Inzio
 badge.end= Fine
 badge.code= Numero badge
+code=Codice
+badge.badgeReader= Lettore badge associato
+badge.edit= Modifica
+badge.delete= Elimina Badge
 
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
-
+administrator=Amministratore
 administrations= Amministrazione
 
+badgeReader=Sorgente Timbrature
+badgeReaders= Sorgenti Timbrature
 badgeReader.code=Nome 
 badgeReader.id=id
 badgeReader.description=Descrizione 
 badgeReader.location=Location
-badgeReader.owner=Sede Afferente
+badgeReader.owner=Sede Responsabile
+badgeReader.badgeSystems=Gruppi Badge
+badgeReader.user.username=Username
 
-BadgeReader.blank= Nuovo lettore badge
-BadgeReader.join= Badge e lettori badge
+BadgeReader.blank= Nuova Sorgente Timbrature
+BadgeReaders.joinBadgeSystems= Gestisci Associazioni
+
+badgeSystems= Gruppi Badge
+badgeSystem = Gruppo Badge
+badgeSystem.name=Nome 
+badgeSystem.description=Descrizione 
+badgeSystem.office=Sede
+
+BadgeSystems.blank= Nuovo Gruppo Badge
+BadgeSystems.joinBadges= Associa Badge
 
 configurations= Configurazione
 
@@ -74,6 +91,7 @@ secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 passwordSuccessfullyChanged = Password modificata con successo
 
+noResultFound=Nessuna corrispondenza trovata.
 pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
 name=Nome
 
@@ -89,6 +107,15 @@ Month.9=Settembre
 Month.10=Ottobre
 Month.11=Novembre
 Month.12=Dicembre
+
+mealTicket=Buono Pasto
+recapMealTickets=Riepilogo Buoni Pasto
+codeBlock=Codice Blocco
+ticketNumberFrom=Dal Numero
+ticketNumberTo=Al Numero
+deliveryDate=Consegnato il
+expireDate=Data Scadenza
+
 
 child.name= Nome
 child.surname= Cognome
@@ -111,6 +138,7 @@ institute.name=Nome
 institute.code=Sigla
 institute.cds= Centro di spesa
 
+link.denied= Permessi insufficenti
 logout= Esci
 
 lunchPauseStart= Inizio pausa pranzo
@@ -123,6 +151,8 @@ office.codeId= Sede Id
 office.address=Indirizzo
 office.joiningDate= Data di affiliazione
 office.headQuarter=Sede principale
+
+person=Persona
 
 person.surname=Cognome
 person.name=Nome
@@ -139,18 +169,21 @@ person.qualification= Livello
 person.office= Sede
 person.isPersonInCharge= Responsabile gruppo di lavoro
 person.badge= Numero badge
+person.user.username= Username in ePAS
 
 personQualification= Livello
 
-contract.beginContract=Inizio contratto
-contract.expireContract=Fine contratto
+beginDate=Data Inizio
+endDate=Data Fine
+contract.beginDate=Inizio Contratto
+contract.endDate=Fine Contratto
 contract.endContract=Terminato Il
 contract.onCertificate=In attestati
-beginContract=Inizio contratto
-expireContract=Fine contratto
 onCertificate=In attestati
 endContract= Scadenza Contratto
 
+Contract=Contratto
+contract=Contratto
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 contract.sourceDateResidual=Data inizializzazione
@@ -163,12 +196,18 @@ contract.sourcePermissionUsed=Permessi utilizzati anno corrente
 contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
 contract.sourceRemainingMealTicket=Buoni pasto residui
 
-contractStampProfile.fixedworkingtime= Timbratura Default
+ContractStampProfile=Periodo Presenza Automatica
+ContractStampProfile=Periodo Presenza Automatica
+contractStampProfile.fixedworkingtime=Presenza Automatica
+csp.beginDate= Data Inizio
+csp.endDate= Data Fine
+csp.fixedworkingtime=Presenza Automatica
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede 
 wtt= Tipo Orario
 
+ContractWorkingTimeType=Periodo Tipo Orario
 cwtt.workingTimeType= Tipo Orario
 cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
@@ -215,6 +254,15 @@ report=Descrizione problema
 month= Mese (se presente)
 year= Anno (se presente)
 day= Giorno (se presente)
+
+notify.error =Attenzione
+notify.success =Ok
+crud.hasErrors =Occorre correggere gli errori riportati.
+crud.created=&{%s} creato con successo
+crud.saved=&{%s} salvato con successo
+crud.deleted=&{%s} cancellato con successo
+crud.modified=&{%s} modificato con successo
+crud.cancelled=Operazione annullata.
 
 ###########################
 # Messaggi di validazione

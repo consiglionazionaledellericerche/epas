@@ -29,6 +29,11 @@ public class LostPassword extends Controller {
   @Inject
   private static EmailManager emailManager;
 
+  /**
+   * metodo che invia una mail al dipendente che richiede il recupero password.
+   * @param email la mail della persona
+   * @throws Throwable eccezione
+   */
   public static void sendTokenRecoveryPassword(@Email String email) throws Throwable {
     if (Validation.hasErrors()) {
       flash.error("Fornire un indirizzo email valido, operazione annullata.");
@@ -46,11 +51,16 @@ public class LostPassword extends Controller {
     emailManager.recoveryPasswordMail(person);
 
     flash.success("E' stata inviata una mail all'indirizzo %s. "
-                    + "Completare la procedura di recovery password entro la data di oggi."
-            , person.email);
+                    + "Completare la procedura di recovery password entro la data di oggi.", 
+                    person.email);
     Secure.login();
   }
 
+  /**
+   * metodo che renderizza la pagina di recupero password.
+   * @param token il token inviato al dipendente
+   * @throws Throwable eccezione
+   */
   public static void lostPasswordRecovery(String token) throws Throwable {
     if (token == null || token.equals("")) {
       flash.error("Accesso non autorizzato. Operazione annullata.");

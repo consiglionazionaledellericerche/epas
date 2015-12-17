@@ -269,7 +269,7 @@ public class Wizard extends Controller {
 
   // STEP 4 Creazione Profilo per l'amministratore
   public static void seatManagerRole(int stepIndex, Person person, @Required int qualification,
-                                     @Required LocalDate beginContract, LocalDate endContract,
+                                     @Required LocalDate beginDate, LocalDate endContract,
                                      @Required String managerPassword,
                                      @Required @Equals(value = "managerPassword",
                                              message = "Le password non corrispondono")
@@ -295,7 +295,7 @@ public class Wizard extends Controller {
       properties.setProperty("personnelAdminEmail", person.email);
       properties.setProperty("personnelAdminQualification", Integer.toString(qualification));
       properties.setProperty("personnelAdminPassword", managerPassword);
-      properties.setProperty("personnelAdminBeginContract", beginContract.toString(dtf));
+      properties.setProperty("personnelAdminbeginDate", beginDate.toString(dtf));
 
       if (person.number != null) {
         properties.setProperty("personnelAdminNumber", person.number.toString());
@@ -440,15 +440,15 @@ public class Wizard extends Controller {
     Contract contract = new Contract();
 
     LocalDate contractBegin = LocalDate
-            .parse(properties.getProperty("personnelAdminBeginContract"), dtf);
+            .parse(properties.getProperty("personnelAdminbeginDate"), dtf);
 
     LocalDate contractEnd = null;
 
     if (properties.containsKey("personnelAdminEndContract")) {
       contractEnd = LocalDate.parse(properties.getProperty("personnelAdminEndContract"), dtf);
     }
-    contract.beginContract = contractBegin;
-    contract.expireContract = contractEnd;
+    contract.beginDate = contractBegin;
+    contract.endDate = contractEnd;
 
     contract.onCertificate = true;
     contract.person = person;

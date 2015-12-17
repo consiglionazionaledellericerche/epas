@@ -1,15 +1,5 @@
 package models;
 
-import models.base.BaseModel;
-
-import models.base.IPeriodValue;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +13,13 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
+import models.base.BaseModel;
+import play.data.validation.Required;
+import play.data.validation.Unique;
+
 
 /**
  * @author cristian
@@ -31,7 +28,7 @@ import javax.persistence.Transient;
 @Entity
 @Audited
 @Table(name="working_time_types")
-public class WorkingTimeType extends BaseModel implements IPeriodValue {
+public class WorkingTimeType extends BaseModel {
 
   private static final long serialVersionUID = -3443521979786226461L;
 
@@ -122,12 +119,6 @@ public class WorkingTimeType extends BaseModel implements IPeriodValue {
     return equal;
 
   }
-
-  @Override
-  public Long getPeriodValueId() {
-    return this.id;
-  }
-
 
 }
 

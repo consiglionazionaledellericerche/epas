@@ -1,84 +1,47 @@
 package models.base;
 
 
-import com.google.common.base.Optional;
-
 import org.joda.time.LocalDate;
 
-import java.util.List;
+import play.db.Model;
 
 /**
  * Il modello è un periodo del contratto con un valore.
  *
  * @author alessandro
  */
-public interface IPeriodModel<T extends PeriodModel> {
-  
-  /**
-   * Il target del periodo.
-   * @return
-   */
-  IPeriodTarget getTarget();
-  
-  /**
-   * Imposta il target del periodo.
-   * @param target
-   */
-  void setTarget(IPeriodTarget target);
-  
+public interface IPeriodModel extends Model {
+
   /**
    * L'inizio del periodo.
-   * 
-   * @return
+   *
+   * @return l'inizio del periodo
    */
-  LocalDate getBegin();
-  
+  LocalDate getBeginDate();
+
   /**
-   * Imposta la fine del periodo.
-   * @param end
+   * Imposta l'inizio del periodo.
+   * @param begin l'inizio del periodo
    */
-  void setBegin(LocalDate begin);
-  
+  void setBeginDate(LocalDate begin);
+
   /**
    * La fine del periodo.
-   * 
-   * @return
+   *
+   * @return la fine del periodo
    */
-  Optional<LocalDate> getEnd();
-  
+  LocalDate getEndDate();
+
   /**
    * Imposta la fine del periodo.
-   * @param end
+   * @param end la fine del periodo
    */
-  void setEnd(Optional<LocalDate> end);
-  
+  void setEndDate(LocalDate end);
 
   /**
-   * Il valore del periodo. 
+   * L'effettiva data fine nel caso di periodi complessi.
    * @return
    */
-  IPeriodValue getValue();
-  
-  /**
-   * Imposta il valore del periodo. 
-   * @return
-   */
-  void setValue(IPeriodValue value);
-  
-
-  /**
-   * La lista dei periodi.
-   * @return
-   */
-  List<IPeriodModel> orderedPeriods();
-  
-  /**
-   * Una nuova istanza del tipo PeriodModel.
-   * @return
-   */
-  PeriodModel newInstance();
-  
-  
-  
+  LocalDate calculatedEnd();
 
 }

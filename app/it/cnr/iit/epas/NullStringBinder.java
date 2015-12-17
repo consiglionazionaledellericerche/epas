@@ -1,11 +1,11 @@
 package it.cnr.iit.epas;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import com.google.common.base.Strings;
 
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 public class NullStringBinder implements TypeBinder<String> {
 

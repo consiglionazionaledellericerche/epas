@@ -72,12 +72,20 @@ public class PersonStampingRecap {
   public int numberOfInOut = 0;
 
   /**
-   * @param personDayManager
-   * @param personManager
-   * @param yearFactory
-   * @param year
-   * @param month
-   * @param person
+   * Costruisce l'oggetto contenente tutte le informazioni da renderizzare nella pagina 
+   * tabellone timbrature.
+   * 
+   * @param personDayManager personDayManager
+   * @param personDayDao personDayDao
+   * @param mealTicketDao mealTicketDao
+   * @param personManager personManager
+   * @param contractMonthRecapManager contractMonthRecapManager
+   * @param stampingDayRecapFactory stampingDayRecapFactory
+   * @param wrapperFactory wrapperFactory
+   * @param dateUtility dateUtility
+   * @param year year
+   * @param month month
+   * @param person person
    */
   public PersonStampingRecap(PersonDayManager personDayManager,
                              PersonDayDao personDayDao, MealTicketDao mealTicketDao,
@@ -104,11 +112,10 @@ public class PersonStampingRecap {
     this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager
             .getMaximumCoupleOfStampings(personDays));
 
-    //Costruzione dati da renderizzare
-
-    //Contratti del mese
-    List<Contract> monthContracts = wrapperFactory
-            .create(person).getMonthContracts(year, month);
+    //******************************************************************************************
+    // DATI MENSILI
+    //******************************************************************************************
+    List<Contract> monthContracts = wrapperFactory.create(person).getMonthContracts(year, month);
 
     this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
     this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
@@ -122,18 +129,22 @@ public class PersonStampingRecap {
         this.contractMonths.add(wrapperFactory.create(cmr.get()));
       }
     }
+    
+    //******************************************************************************************
+    // DATI SINGOLI GIORNI
+    //******************************************************************************************
 
     //Lista person day contente tutti i giorni fisici del mese
     List<PersonDay> totalPersonDays = personDayManager
             .getTotalPersonDayInMonth(personDays, person, year, month);
 
     LocalDate today = LocalDate.now();
-    //calcolo del valore valid per le stamping del mese (persistere??)
-    for (PersonDay pd : totalPersonDays) {
-      personDayManager.computeValidStampings(pd);
 
-      PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-              .create(pd, this.numberOfInOut, Optional.fromNullable(monthContracts));
+    for (PersonDay pd : totalPersonDays) {
+      personDayManager.setValidPairStampings(pd);
+
+      PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd, this.numberOfInOut, 
+          Optional.fromNullable(monthContracts));
       this.daysRecap.add(dayRecap);
 
       this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
@@ -185,7 +196,8 @@ public class PersonStampingRecap {
       }
     }
 
-    this.numberOfCompensatoryRestUntilToday = personManager.numberOfCompensatoryRestUntilToday(person, year, month);
+    this.numberOfCompensatoryRestUntilToday = personManager
+        .numberOfCompensatoryRestUntilToday(person, year, month);
 
     this.basedWorkingDays = personManager.basedWorkingDays(personDays);
     this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);

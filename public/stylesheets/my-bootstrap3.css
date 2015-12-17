@@ -22,7 +22,6 @@ body {
     height: 100%;
     margin-bottom:  -70px;
     background: white;
-   
 }
 
 #page_content{
@@ -96,56 +95,7 @@ footer p {
 #defaultSpinner {
 	position: fixed;
   	top: 60px;
-  	right: 100px;
-  	display: block;
-  	left: auto;	
-}
-
-.flash-panel {
-	border: 1px solid;
-	text-align: center;
-	padding: 0;
-}
-
-.flash-panel p{
-	padding: 0;
-	padding-top: 7px;
-}
-
-#flash-error, #flash-success {
- 	position: fixed;
-  	top: 50px;
-  	right: 100px;
-  	display: block;
-  	left: auto;	
-}
-
-#flash-error {
-	background-color: lightpink;
-}
-
-#flash-error h3 {
-	background-color: red;
-	color: white;
-	text-align: center;
-}
-
-#flash-success div.arrow {
-	border-bottom-color: red;
-}
-
-#flash-success {
-	background-color: lightgreen;
-}
-
-#flash-success h3 {
-	background-color: green;
-	color: white;
-	text-align: center;
-}
-
-#flash-success div.arrow {
-	border-bottom-color: green;
+	display: block;
 }
 
 #banner {
@@ -167,14 +117,14 @@ footer p {
 
 #nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
 	padding-right: 2px;
-	padding-left: 4px;
+	padding-left: 2px;
 }
 
 #nav-year .badge, #nav-month .badge {
-	background-color: white;
+	background-color: #FFFFFF; /* bianco */
 	font-size: 1.1em;
 	display: inline;
-    color: #555555;
+    color: #033C73; /* blu scuro */
 }
 
 .my-navbar-form {
@@ -399,4 +349,9 @@ table[datatable] {
 
 table[datatable] > thead > tr > th:hover{
   background: #F9F9F9;
+}
+
+span[notAllowed] {
+  color:#808080;
+  cursor: not-allowed;
 }
