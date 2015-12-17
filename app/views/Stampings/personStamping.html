@@ -157,16 +157,16 @@
 
     #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
     #{if stampingTemplate.colour.equals("in")}
-    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
-      #{/if}
-      #{elseif stampingTemplate.colour.equals("out")}
-    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
-      #{/elseif}
-      #{elseif stampingTemplate.colour.equals("warn")}
-    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
-      #{/elseif}
+      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
+    #{/if}
+    #{elseif stampingTemplate.colour.equals("out")}
+      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
+    #{/elseif}
+    #{elseif stampingTemplate.colour.equals("warn")}
+      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
+    #{/elseif}
 
-      #{if stampingTemplate.date!=null}
+    #{if stampingTemplate.date!=null}
         #{secure.link @Stampings.edit(stampingTemplate.stampingId),modal:'#modalStamping'}
           ${stampingTemplate.hour}
         #{/secure.link}
