@@ -1,83 +1,75 @@
-#{modalAsync id:'modalStamping', button:'Salva', 
-  title:('Storico modifiche timbrature e assenze') }
+#{modalAsync id:'modalStamping', button:'Salva',
+title:('Storico modifiche timbrature e assenze') }
 
-<div class="container-fluid text-center">
+<div class="container-fluid">
 
-
-#{panel title:'Storia Timbrature', dim:12, fluid:true }
-
+  #{accordionGroup 'info'}
+  #{accordionItem 'stampings', parent:'info', title:'Storico Timbrature', open:true}
   #{if historyStampingsList.empty } Non ci sono timbrature. #{/if}
   #{else}
-	#{list items:historyStampingsList, as:'historyStamping'}
-	  <h5>Storico timbratura ore ${historyStamping.get(0).value.formattedHour()} (id=${historyStamping.get(0).value.id})</h5>
-	  
-	  <table class="table table-condensed table-bordered" >
-	
-		<tr class="success">
-		  <th>Ora timbratura</th>
-		  <th>Data modifica</th>
-		  <th>Amministratore</th>
-		  <th>Tipo</th>
-		</tr>
-		  
-		#{list items:historyStamping, as:'stamping'}  
-	    <tr class="warning">
-	      <td>${stamping.value.formattedHour()} ${stamping.value.formattedMark()}</td>
-	      <td>${stamping.formattedRevisionDate()}</td>
-	      <td>${stamping.formattedOwner()}</td>
-	      
-	      #{if stamping.typeIsDel()}
-	         <td style="color: red;">${stamping.type}</td>
-	      #{/if}
-	      #{else}
-	         <td>${stamping.type}</td>
-	      #{/else}
-	    </tr>
-	    #{/list}
-	  </table>
-	#{/list}
-  #{/else}	
-#{/panel}
+  #{list items:historyStampingsList, as:'historyStamping'}
+  <h5>Storico timbratura ore ${historyStamping.get(0).value.formattedHour()}
+    (id=${historyStamping.get(0).value.id})</h5>
 
-#{panel title:'Storia Assenze', dim:12, fluid:true }
+  <table class="table table-condensed table-bordered">
+
+    <tr class="success">
+      <th>Timbratura</th>
+      <th>Data modifica</th>
+      <th>Effettuata da</th>
+      <th>Operazione</th>
+    </tr>
+
+    #{list items:historyStamping, as:'stamping'}
+    <tr class="warning">
+      <td>#{ifnot stamping.typeIsDel()}${stamping.value.label}#{/ifnot}</td>
+      <td>${stamping.formattedRevisionDate()}</td>
+      <td>${stamping.formattedOwner()}</td>
+      <td class="${stamping.type}">&{stamping.type}</td>
+    </tr>
+    #{/list}
+  </table>
+  #{/list}
+  #{/else}
+
+  #{/accordionItem}
+  #{/accordionGroup}
+
+  #{accordionGroup 'info'}
+  #{accordionItem 'absences', parent:'info', title:'Storico Assenze', open:true}
   #{if historyAbsencesList.empty } Non ci sono assenze. #{/if}
   #{else}
-    <!-- Per ogni assenza una tabella -->
-	#{list items:historyAbsencesList, as:'historyAbsence'}
-	  <h5>Storico assenza codice ${historyAbsence.get(0).value.absenceType.code} (id=${historyAbsence.get(0).value.id})</h5>
-	  
-	  <table class="table table-condensed table-bordered" >
-	
-		<tr class="success">
-		  <th>Codice Assenza</th>
-		  <th>Data modifica</th>
-		  <th>Amministratore</th>
-		  <th>Tipo</th>
-		</tr>
-		  
-		#{list items:historyAbsence, as:'absence'}  
-	    <tr class="warning">
-	      <td>
-	        #{if absence.value.absenceType != null}
-	      		${absence.value.absenceType.code}
-	      	#{/if}
-	      </td>
-	      <td>${absence.formattedRevisionDate()}</td>
-	      <td>${absence.formattedOwner()}</td>
-	      
-	      #{if absence.typeIsDel()}
-	         <td style="color: red;">${absence.type}</td>
-	      #{/if}
-	      #{else}
-	         <td>${absence.type}</td>
-	      #{/else}
-	      
-	    </tr>
-	   #{/list}
-    </table>
+  <!-- Per ogni assenza una tabella -->
+  #{list items:historyAbsencesList, as:'historyAbsence'}
+  <h5>Storico assenza codice ${historyAbsence.get(0).value.absenceType.code}
+    (id=${historyAbsence.get(0).value.id})</h5>
+
+  <table class="table table-condensed table-bordered">
+
+    <tr class="success">
+      <th>Codice Assenza</th>
+      <th>Data modifica</th>
+      <th>Effettuata da</th>
+      <th>Operazione</th>
+    </tr>
+
+    #{list items:historyAbsence, as:'absence'}
+    <tr class="warning">
+      <td>
+        #{if absence.value.absenceType != null}
+        ${absence.value.absenceType.code}
+        #{/if}
+      </td>
+      <td>${absence.formattedRevisionDate()}</td>
+      <td>${absence.formattedOwner()}</td>
+      <td class="${absence.type}">&{absence.type}</td>
+    </tr>
     #{/list}
-  #{/else}   
-#{/panel}
+  </table>
+  #{/list}
+  #{/else}
+  #{/accordionItem}
+  #{/accordionGroup}
 
 </div>
 
