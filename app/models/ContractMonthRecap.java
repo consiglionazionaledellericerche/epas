@@ -1,18 +1,5 @@
 package models;
 
-import com.google.common.base.Optional;
-
-import dao.wrapper.IWrapperContract;
-
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
-import models.base.BaseModel;
-
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -21,6 +8,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+
+import dao.wrapper.IWrapperContract;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+import models.base.BaseModel;
+import play.data.validation.Required;
 
 @Entity
 @Table(name = "contract_month_recap", uniqueConstraints = {@UniqueConstraint(columnNames = {"year", "month", "contract_id"})})
@@ -168,7 +165,7 @@ public class ContractMonthRecap extends BaseModel {
   @Transient
   public int qualifica;
   @Transient
-  public IWrapperContract wcontract;
+  public IWrapperContract wrContract;
 
   @Transient
   public int getStraordinarioMinuti() {
@@ -182,7 +179,7 @@ public class ContractMonthRecap extends BaseModel {
     LocalDate beginMonth = new LocalDate(this.year, this.month, 1);
     LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
     DateInterval monthInterval = new DateInterval(beginMonth, endMonth);
-    LocalDate endContract = this.contract.expireContract;
+    LocalDate endContract = this.contract.endDate;
     if (this.contract.endContract != null) {
       endContract = this.contract.endContract;
     }

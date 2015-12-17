@@ -4,6 +4,8 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
+import controllers.Resecure.BasicAuth;
+
 import dao.PersonDao;
 
 import it.cnr.iit.epas.JsonStampingBinder;
@@ -16,11 +18,11 @@ import models.AbsenceType;
 import models.exports.AbsenceFromClient;
 import models.exports.StampingFromClient;
 
-import controllers.Resecure.BasicAuth;
 import play.data.binding.As;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import javax.inject.Inject;
@@ -41,7 +43,7 @@ public class StampingsFromClient extends Controller {
   static PersonDao personDao;
 
   /**
-   * Aggiunge una timbratura ad una persona
+   * Aggiunge una timbratura ad una persona.
    */
   @BasicAuth
   public static String create(@As(binder = JsonStampingBinder.class) StampingFromClient body) {
@@ -60,10 +62,11 @@ public class StampingsFromClient extends Controller {
   }
 
   /**
-   * Inserimento timbratura senza ricalcolo
+   * Inserimento timbratura senza ricalcolo.
    */
   @BasicAuth
-  public static String createNotRecompute(@As(binder = JsonStampingBinder.class) StampingFromClient body) {
+  public static String createNotRecompute(@As(binder = JsonStampingBinder.class) 
+      StampingFromClient body) {
 
     //rulesssssssssssssss
 
@@ -80,7 +83,7 @@ public class StampingsFromClient extends Controller {
 
 
   /**
-   * Inseriemento di assenza con ricalcolo
+   * Inseriemento di assenza con ricalcolo.
    */
   @BasicAuth
   public static void absence(AbsenceFromClient body) {

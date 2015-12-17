@@ -1,0 +1,115 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(session.get('yearSelected'), 
+session.get('monthSelected'), session.get('officeSelected')), (person.fullname):null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+#{title title:'Gestione Buoni Pasto ' + person.fullname /}
+
+  #{tabs}
+      #{tabItem id:'insert', title:'Inserimento', active:true /}
+      #{tabItem id:'recap', title:'Riepilogo' /}
+      #{tabItem id:'history', title:'Storico' /}
+  #{/tabs}
+    <br>
+  
+  #{tabContent}
+   <!-- Inserimento -->
+   #{tabContentItem id:'insert', active:true}
+    #{alert color:'info'}
+      <p>Inserisci i dati del nuovo blocco.</p>
+    #{/alert} 		
+        
+    <div id="insertMeal">    
+    #{form @MealTickets.submitPersonMealTicket(), class:'form-horizontal',
+		'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
+	  <input type="hidden" name="personId" value="${recap.contract.person.id}"/>
+	  
+	  #{f.input 'codeBlock', type:'number', required:'true' /}
+	  
+	  #{f.input	'ticketNumberFrom', type:'number', required:'true' /}
+	  #{f.input	'ticketNumberTo', type:'number', required:'true' /}
+	  
+	  #{f.date 'deliveryDate', required:'true' /}
+	  #{f.date 'expireDate', required:'true' /}
+	  #{f.view 'administrator', value:admin.person.fullname /}
+	  
+	  #{if blocksError}
+	    #{alert color:'danger', dismissible:'true'}
+	      <p><strong>Attenzione!!!</strong> L'operazione non è stata effettuata perchè uno o più
+	      dei buoni pasto selezionati sono già stati attribuiti.</p>
+	      <table class="table center">
+		    <tr>
+		      <th>Dipendente</th>
+		      <th>Codice</th>
+		      <th>Consegnato il</th>
+		      <th>Scadenza</th>
+		    </tr>
+		 #{list items:blocksError, as:'block'}
+		   <tr>
+		     <td>${block.contract.person.fullname}</td>
+		     <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td> 
+		     <td>${block.getDate()?.format()}</td>
+		     <td>${block.getExpireDate()?.format()}</td>
+		   </tr>
+		 #{/list}
+      </table>
+	    #{/alert}
+	  #{/if}
+
+	  
+	  <div class="center">
+	    <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+	  </div>
+	
+	  <br>	  
+
+	  #{alert color:'info'}
+	  <p>
+	    <i class="fa fa-thumb-tack"></i>
+	    Gli ultimi 3 inserimenti per <strong>${person.fullname}</strong> sono stati
+	  </p>  
+	  <table class="table center">
+		    <tr>
+		      <th>Codice</th>
+		      <th>Consegnato il</th>
+		      <th>Scadenza</th>
+		    </tr>
+	     %{ int i = 0; }%
+		 #{list items:recap.getBlockMealTicketReceivedDeliveryDesc(), as:'block'}
+		   #{ if i<3 }
+		   <tr>
+		     <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td> 
+		     <td>${block.getDate()?.format()}</td>
+		     <td>${block.getExpireDate()?.format()}</td>
+		   </tr>
+		   #{/if}
+		   %{ i = i + 1; }%
+		 #{/list}
+      </table>
+	  #{/alert}
+
+	#{/form}
+    </div>
+    
+   #{/tabContentItem}
+  
+	<!-- Riepilogo e eliminazione dei blocchi precedentemente inseriti -->
+   #{tabContentItem id:'recap'}
+   	#{include './_recap.html' /}
+   #{/tabContentItem}
+
+   <!-- Nuovi blocchi-->
+   #{tabContentItem id:'history'}
+    #{include './_delete.html' /}    
+   #{/tabContentItem}
+   
+   
+  #{/tabContent} 
+        
+</div>

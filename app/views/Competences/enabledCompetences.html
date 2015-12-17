@@ -2,71 +2,31 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Abilita competenze'  /}
 
+#{competences.competencesTabs activeAction:'enabledCompetences' /}
 
-<div id="container-fluid-nav-tabs" class="container-fluid">
+<div class="container">
 
-<ul class="nav nav-tabs">
-  <li><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
-  <li class="active"><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
-  <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
-  <li><a href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Competenza Assegnate nell'anno</a></li>
-</ul>
+	#{title title:'Competenze abilitate ' + office.name, color:'primary' /}
 
-</div>
- 
-<div class="container-fluid">
+  #{alert color:'info'}
+  <p>Cliccando sul nome del dipendente è possibile attivare o disattivare la possibilità di attribuire ogni specifica competenza.</p>
+  #{/alert}
 
-<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
-<div class="container-fluid">
- <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
-	  #{form action:@Competences.enabledCompetences(), role:'form', class:'form-inline', 
-	    method:'GET', autocomplete:'off',
-	    'data-reload':'#results'}
-	    
-	       <div class="form-group">
-	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
-	        	        	        
-	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
-	            #{list items:offices, as:'officeItem'}
-	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
-	                ${officeItem.name}
-	              </option>
-	            #{/list}
-	        </select>
-	      </div>
-	       
-	      <button type="submit" class="btn btn-default">Invio</button>
-	  #{/form}
-      </div>
-</div>
-<!-- FINE FILTRO OFFICE -->
+  <table class="table table-condensed table-hover table-bordered center" datatable >
+		<thead>
+		<tr>
+			<th>Nome</th>
+			#{list tableRecapCompetence.columnKeySet()}
+			<th>${_}</th>
+			#{/list}
+		</tr>
+		</thead>
+		<tbody>
 
-#{form action:@Competences.enabledCompetences(), class:'form-search',  
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
-    <i class="icon-search icon-large"></i>
-    <input type="hidden" name="officeId" value="${office.id}"/>
-
-#{/form}
-
-<br>
-
- <section id="results"> 
-
-  <table class="table table-condensed table-hover center">
-	<tr>
-		<th>Nome</th>
-		#{list tableRecapCompetence.columnKeySet()}
-		<th>${_}</th>
-		#{/list}
-	</tr>
 	#{list tableRecapCompetence.rowMap().entrySet(),as:'entry'}
 	<tr>
 		<td>
-		  <a data-toggle="modal" href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-modal=".my-modal"> 
+		  <a href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-async-modal="#updateCompetenceModal">
 		    ${entry.getKey().name} ${entry.getKey().surname}
 		  </a>
 		</td>
@@ -77,10 +37,11 @@
 		#{/list}
 	</tr>	
 	#{/list}
+		</tbody>
   </table>
- </section> 
+
 </div>
 
-#{include '_myModal.html' /}
+<div id="updateCompetenceModal" class="modal container" tabindex="-1"></div>
 
 

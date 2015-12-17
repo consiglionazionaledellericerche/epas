@@ -24,9 +24,10 @@ public class QContract extends EntityPathBase<Contract> {
 
     public static final QContract contract = new QContract("contract");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
-    public final DatePath<org.joda.time.LocalDate> beginContract = createDate("beginContract", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final ListPath<models.ContractMonthRecap, QContractMonthRecap> contractMonthRecaps = this.<models.ContractMonthRecap, QContractMonthRecap>createList("contractMonthRecaps", models.ContractMonthRecap.class, QContractMonthRecap.class, PathInits.DIRECT2);
 
@@ -37,9 +38,10 @@ public class QContract extends EntityPathBase<Contract> {
     public final DatePath<org.joda.time.LocalDate> endContract = createDate("endContract", org.joda.time.LocalDate.class);
 
     //inherited
-    public final SimplePath<Object> entityId = _super.entityId;
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
-    public final DatePath<org.joda.time.LocalDate> expireContract = createDate("expireContract", org.joda.time.LocalDate.class);
+    //inherited
+    public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited
     public final NumberPath<Long> id = _super.id;

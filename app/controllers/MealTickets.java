@@ -8,13 +8,17 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
+
+import it.cnr.iit.epas.DateInterval;
+
+import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.MealTicketManager;
-import manager.SecureManager;
 import manager.recaps.mealTicket.BlockMealTicket;
 import manager.recaps.mealTicket.MealTicketRecap;
 import manager.recaps.mealTicket.MealTicketRecapFactory;
@@ -30,8 +34,11 @@ import models.enumerate.Parameter;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -39,6 +46,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class MealTickets extends Controller {
 
@@ -59,55 +67,35 @@ public class MealTickets extends Controller {
   @Inject
   private static ContractDao contractDao;
   @Inject
+  private static OfficeDao officeDao;
+  @Inject
   private static ConsistencyManager consistencyManager;
   @Inject
-  private static SecureManager secureManager;
-  @Inject
   private static ConfGeneralManager confGeneralManager;
+  
+  /**
+   * I riepiloghi buoni pasto dei dipendenti dell'office per il mese selezionato.
+   * @param year year
+   * @param month month
+   * @param officeId officeId
+   */
+  public static void recapMealTickets(int year, int month, Long officeId) {
 
-  public static void recapMealTickets(int year, int month,
-                                      List<Integer> blockIdsAdded, Long personIdAdded) {
-
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
     List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
-            .getPersonMealticket(
-                    new YearMonth(year, month),
-                    Optional.<Integer>absent(), Optional.<String>absent(),
-                    secureManager.officesReadAllowed(Security.getUser().get()));
+            .getPersonMealticket(new YearMonth(year, month), Optional.<Integer>absent(), 
+                Optional.<String>absent(), Sets.newHashSet(office));
 
-    // Lista degli istituti allowed che non hanno data inizio mealTicket
-    List<Office> officesNoMealTicketConf = Lists.newArrayList();
-    for (Office office : secureManager.officesReadAllowed(Security.getUser().get())) {
-      Optional<LocalDate> officeStartDate = confGeneralManager
-              .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-      if (!officeStartDate.isPresent()) {
-        officesNoMealTicketConf.add(office);
-      }
-    }
+    //La data inizio utilizzo dei buoni pasto.
+    Optional<LocalDate> officeStartDate = confGeneralManager
+        .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
 
-    //Riepilogo buoni inseriti nella precedente action
-    if (personIdAdded != null && blockIdsAdded != null) {
-      Person personAdded = personDao.getPersonById(personIdAdded);
-      Preconditions.checkNotNull(personAdded);
-      Preconditions.checkArgument(personAdded.isPersistent());
-
-      List<BlockMealTicket> blockAdded = null;
-      List<MealTicket> mealTicketAdded = mealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
-      blockAdded = mealTicketManager.getBlockMealTicketFromMealTicketList(mealTicketAdded);
-
-      render(monthRecapList, blockAdded, personAdded, officesNoMealTicketConf);
-    }
-
-    render(monthRecapList, officesNoMealTicketConf);
+    render(office, monthRecapList, officeStartDate, year, month);
   }
-
-  private static void recapMealTickets(List<Integer> blockIdsAdded,
-                                       Long personIdAdded) {
-
-    recapMealTickets(LocalDate.now().getYear(),
-            LocalDate.now().getMonthOfYear(), blockIdsAdded, personIdAdded);
-  }
-
-  public static void quickBlocksInsert(Long personId) {
+  
+  public static void personMealTickets(Long personId) {
 
     Person person = personDao.getPersonById(personId);
     Preconditions.checkArgument(person.isPersistent());
@@ -133,13 +121,20 @@ public class MealTickets extends Controller {
       }
     }
 
+    LocalDate deliveryDate = LocalDate.now();
     LocalDate today = LocalDate.now();
+    //TODO mettere nel default.
+    Integer ticketNumberFrom = 1;
+    Integer ticketNumberTo = 22;
+    
     LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
     User admin = Security.getUser().get();
+    
+    
 
-    render(recap, recapPrevious, today, admin, expireDate);
+    render(person, recap, recapPrevious, deliveryDate, admin, expireDate, today, 
+        ticketNumberFrom, ticketNumberTo);
   }
-
 
   public static void mealTicketsLegacy(Long contractId) {
 
@@ -152,71 +147,97 @@ public class MealTickets extends Controller {
     int mealTicketsTransfered = mealTicketManager.mealTicketsLegacy(contract);
 
     if (mealTicketsTransfered == 0) {
-      flash.error("Non e' stato trasferito alcun buono pasto. Riprovare o effettuare una segnalazione.");
+      flash.error("Non e' stato trasferito alcun buono pasto. "
+          + "Riprovare o effettuare una segnalazione.");
     } else {
       flash.success("Trasferiti con successo %s buoni pasto per %s %s",
               mealTicketsTransfered, contract.person.name, contract.person.surname);
     }
 
-    MealTickets.recapMealTickets(null, null);
+    MealTickets.recapMealTickets(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), 
+        contract.person.office.id);
   }
 
 
-  public static void submitPersonMealTicket(Long personId,
-                                            String name, Integer page, Integer max,
-                                            Integer codeBlock1, Integer dimBlock1, LocalDate expireDate1,
-                                            Integer codeBlock2, Integer dimBlock2, LocalDate expireDate2,
-                                            Integer codeBlock3, Integer dimBlock3, LocalDate expireDate3) {
+  /**
+   * Aggiunge i 3 blocchetti inseriti. 
+   * @param personId persona
+   * @param codeBlock1 codice1
+   * @param dimBlock1 dim1
+   * @param expireDate1 data1
+   * @param codeBlock2 codice2
+   * @param dimBlock2 dim2
+   * @param expireDate2 data2
+   * @param codeBlock3 codice3
+   * @param dimBlock3 dim3
+   * @param expireDate3 data3
+   */
+  
+  /**
+   * Aggiunta di un blocchetto alla persona.
+   * @param personId persona.
+   * @param codeBlock codice blocco.
+   * @param ticketNumberFrom dal codice
+   * @param ticketNumberTo al codice
+   * @param deliveryDate data consegna
+   * @param expireDate data scadenza
+   */
+  public static void submitPersonMealTicket(Long personId, @Required Integer codeBlock, 
+      @Required Integer ticketNumberFrom, @Required Integer ticketNumberTo, 
+      @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
 
-    //Controllo dei parametri
     Person person = personDao.getPersonById(personId);
-    if (person == null) {
-
-      flash.error("Impossibile trovare la persona specificata. Operazione annullata");
-      MealTickets.recapMealTickets(null, null);
-    }
-
+    notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-
-    List<MealTicket> ticketToAdd = Lists.newArrayList();
-    List<Integer> blockIdsToAdd = Lists.newArrayList();
-
-    //Blocco1
-    if (codeBlock1 != null && dimBlock1 != null) {
-      ticketToAdd.addAll(mealTicketManager.buildBlockMealTicket(codeBlock1, dimBlock1, expireDate1));
-      blockIdsToAdd.add(codeBlock1);
-    }
-
-    //Blocco2
-    if (codeBlock2 != null && dimBlock2 != null) {
-      ticketToAdd.addAll(mealTicketManager.buildBlockMealTicket(codeBlock2, dimBlock2, expireDate2));
-      blockIdsToAdd.add(codeBlock2);
-    }
-
-    //Blocco3
-    if (codeBlock3 != null && dimBlock3 != null) {
-      ticketToAdd.addAll(mealTicketManager.buildBlockMealTicket(codeBlock3, dimBlock3, expireDate3));
-      blockIdsToAdd.add(codeBlock3);
-    }
-
     User admin = Security.getUser().get();
+    
+    // TODO: spezzare le action....
+    
+    MealTicketRecap recap;
+    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+    Preconditions.checkState(contract.isPresent());
+    // riepilogo contratto corrente
+    Optional<MealTicketRecap> currentRecap = mealTicketFactory.create(contract.get());
+    Preconditions.checkState(currentRecap.isPresent());
+    recap = currentRecap.get();
+ 
+    if (validation.hasErrors()) {
+      response.status = 400;
+      
+      render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo, 
+          deliveryDate, expireDate, admin);
+    }
+    
+    //Controllo dei parametri
+    
+    
+    List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
+    ticketToAddOrdered.addAll(mealTicketManager
+        .buildBlockMealTicket(codeBlock, ticketNumberFrom, ticketNumberTo, expireDate));
 
+    List<MealTicket> ticketsError = Lists.newArrayList();
+    
     //Controllo esistenza
-    for (MealTicket mealTicket : ticketToAdd) {
+    for (MealTicket mealTicket : ticketToAddOrdered) {
 
       MealTicket exist = mealTicketDao.getMealTicketByCode(mealTicket.code);
       if (exist != null) {
-
-        flash.error("Il buono pasto con codice %s risulta già essere assegnato alla persona %s %s in data %s."
-                + " L'Operazione è annullata", mealTicket.code, exist.contract.person.name, exist.contract.person.surname, exist.date);
-        MealTickets.recapMealTickets(null, null);
+        
+        ticketsError.add(exist);
       }
+    }
+    if (!ticketsError.isEmpty()) {
+      
+      List<BlockMealTicket> blocksError = mealTicketManager
+          .getBlockMealTicketReceivedIntoInterval(ticketsError, Optional.<DateInterval>absent());
+      render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo, 
+          deliveryDate, expireDate, admin, blocksError);
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();
 
     //Persistenza
-    for (MealTicket mealTicket : ticketToAdd) {
+    for (MealTicket mealTicket : ticketToAddOrdered) {
       mealTicket.date = LocalDate.now();
       mealTicket.contract = contractDao.getContract(mealTicket.date, person);
       mealTicket.admin = admin.person;
@@ -227,50 +248,76 @@ public class MealTickets extends Controller {
 
     consistencyManager.updatePersonSituation(person.id, LocalDate.now());
 
-    MealTickets.recapMealTickets(blockIdsToAdd, personId);
-
+    flash.success("Il blocco inserito è stato salvato correttamente.");
+    
+    personMealTickets(person.id);
   }
 
-  public static void deletePersonMealTicket(Integer codeBlock,
-                                            String name, Integer page, Integer max) {
+  /**
+   * Rimuove il blocco dal database. 
+   * 
+   * @param codeBlock blocco
+   */
+  public static void deletePersonMealTicket(Long contractId, int codeBlock, 
+      int first, int last, boolean confirmed) {
 
-    //TODO un metodo deletePersonMealTicketConfirmed
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+    
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock);
 
-    if (codeBlock == null) {
-      flash.error("Impossibile trovare il codice blocco specificato. Operazione annullata");
-      MealTickets.recapMealTickets(null, null);
-    }
-    List<Integer> codeBlockIds = Lists.newArrayList();
-    codeBlockIds.add(codeBlock);
-    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlockIds(codeBlockIds);
+    Preconditions.checkState(mealTicketList.size() > 0);
 
-    if (mealTicketList == null || mealTicketList.size() == 0) {
-      flash.error("Il blocco selezionato è inesistente. Operazione annullata");
-      MealTickets.recapMealTickets(null, null);
-    }
-
-    Person person = mealTicketList.get(0).contract.person;
-
-    rules.checkIfPermitted(person.office);
-
+    List<MealTicket> mealTicketToRemove = Lists.newArrayList();
     LocalDate pastDate = LocalDate.now();
-    int deleted = 0;
+    //Controllo di consistenza.
     for (MealTicket mealTicket : mealTicketList) {
+      if (mealTicket.number >= first && mealTicket.number <= last) {
+        if (!mealTicket.contract.equals(contract)) {
+          // un buono nell'intervallo non appartiene al contratto effettivo!!! 
+          //non si dovrebbe verificare.
+          log.error("Il buono pasto {} non appartiene al contratto previsto {}.", 
+              mealTicket.code, contract);
+          throw new IllegalStateException();
+        }
+        mealTicketToRemove.add(mealTicket);
+        if (mealTicket.date.isBefore(pastDate)) {
+          pastDate = mealTicket.date;
+        }
+      }
+    }
 
+    if (!confirmed) {
+      confirmed = true;
+      render(contract, codeBlock, first, last, confirmed);
+    }
+
+    int deleted = 0;
+    for (MealTicket mealTicket : mealTicketToRemove) {
       if (mealTicket.date.isBefore(pastDate)) {
         pastDate = mealTicket.date;
       }
+
       mealTicket.delete();
-      deleted++;
+      deleted++;  
     }
 
-    consistencyManager.updatePersonSituation(person.id, pastDate);
+    consistencyManager.updatePersonSituation(contract.person.id, pastDate);
 
-    flash.success("Rimosso blocco %s con dimensione %s per %s %s", codeBlock, deleted,
-            person.name, person.surname);
+    flash.success("Blocco di %d buoni rimosso correttamente.", deleted);
 
-    MealTickets.recapMealTickets(null, null);
+    personMealTickets(contract.person.id);
   }
 
+  public static void findCodeBlock() {
+    
+    render();
+  }
+  
+  public static void returnedMealTickets(Long officeId) {
+    
+    render();
+  }
 
 }

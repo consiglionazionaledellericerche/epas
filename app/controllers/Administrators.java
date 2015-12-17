@@ -23,6 +23,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import javax.inject.Inject;
@@ -37,25 +38,18 @@ public class Administrators extends Controller {
 
   @Inject
   private static SecurityRules rules;
-//	@Inject
-//	private static SecureManager secureManager;
 
   @Inject
   private static OfficeDao officeDao;
-  //	@Inject
-//	private static RoleDao roleDao;
   @Inject
   private static PersonDao personDao;
-
-  //	@Inject
-//	private static IWrapperFactory wrapperFactory;
-//	@Inject
-//	private static OfficeManager officeManager;
-//	@Inject
-//	private static UsersRolesOfficesDao usersRolesOfficesDao;
   @Inject
   private static UserDao userDao;
 
+  /**
+   * metodo che ritorna la form di inserimento amministratore per la sede passata per parametro.
+   * @param officeId l'id della sede a cui associare amministratore e ruolo.
+   */
   public static void blank(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -70,6 +64,10 @@ public class Administrators extends Controller {
     render(uro);
   }
 
+  /**
+   * metodo che salva il ruolo per l'user_role_office.
+   * @param uro l'user_role_office da salvare
+   */
   public static void save(@Valid UsersRolesOffices uro) {
 
     if (Validation.hasErrors()) {
@@ -90,6 +88,10 @@ public class Administrators extends Controller {
   }
 
 
+  /**
+   * metodo che cancella l'uro specificato.
+   * @param uroId l'id dell'user_role_office
+   */
   public static void delete(Long uroId) {
 
     final UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
@@ -103,109 +105,9 @@ public class Administrators extends Controller {
 
   }
 
-//	public static void deleteSelfAsAdministrator(Long officeId) {
-//
-//		Office office = officeDao.getOfficeById(officeId);
-//		if(office==null) {
-//			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		Person person = Security.getUser().get().person;
-//		render(office, person);
-//
-//	}
-//
-//	public static void insertSystemUro(Long officeId) {
-//
-//		Office office = officeDao.getOfficeById(officeId);
-//		if(office==null) {
-//			flash.error("La sede per la quale si vuole definire l'account di sistema "
-//					+ "è inesistente. Riprovare o effettuare una segnalazione.");
-//			Offices.showOffices(null);
-//		}
-//
-//		List<Role> systemRoles = roleDao.getSystemRolesOffices();
-//
-//		IWrapperOffice wrapperOffice = wrapperFactory.create(office);
-//
-//		render(wrapperOffice, systemRoles);
-//
-//	}
-//
-//	/**
-//	 * Crea un nuovo userRoleOffice di sistema. 
-//	 * Se l'user è già presente utilizza quello. Altrimenti ne viene creato uno
-//	 * nuovo.
-//	 * 
-//	 * @param office
-//	 * @param username
-//	 * @param password
-//	 * @param role
-//	 */
-//	public static void saveSystemUro(Office office, String username, 
-//			String password, Role role) {
-//
-//		Preconditions.checkNotNull(office);
-//		Preconditions.checkState(office.isPersistent());
-//		Preconditions.checkNotNull(role);
-//		Preconditions.checkState(role.isPersistent());
-//
-//		Preconditions.checkState(username != null && username != "");
-//		Preconditions.checkState(password != null && password != "");
-//
-//		User user =	userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
-//		if (user != null) {
-//			if (!user.password.equals(Codec.hexMD5(password))) {
-//				flash.error(username + " è già presente come account di sistema."
-//						+ " Inserire la password corretta o creare un nuovo account si sistema.");
-//				Offices.showOffices(null);
-//			}
-//			if ( !user.isSystemUser() ) {
-//				flash.error("Impossibile utilizzare un user non di sistema.");
-//				Offices.showOffices(null);
-//			}
-//		} else {
-//			user = new User();
-//			user.username = username;
-//			user.password = Codec.hexMD5(password);
-//			user.save();
-//		}
-//				
-//		officeManager.setUro(user, office, role);
-//
-//		flash.success("Associazione account di sistema inserita con successo.");
-//
-//		Offices.showOffices(null);
-//
-//	}
-//
-//	public static void deleteSystemUro(Long systemUroId) {
-//
-//		UsersRolesOffices systemUro = usersRolesOfficesDao.getById(systemUroId);
-//
-//		Preconditions.checkNotNull(systemUro);
-//
-//		//Check Account di sistema
-//		List<Role> systemRoles = roleDao.getSystemRolesOffices();
-//
-//		boolean isSystemRole = false;
-//		for(Role role : systemRoles) 
-//			if(role.name.equals(systemUro.role.name))
-//				isSystemRole = true;
-//
-//		Preconditions.checkState(isSystemRole);
-//
-//		systemUro.delete();
-//		
-//		flash.success("Associazione account di sistema rimossa con successo.");
-//
-//		Offices.showOffices(null);
-//
-//	}
 
   /**
-   * Switch in un'altro user
+   * Switch in un'altro user.
    */
   public static void switchUserTo(long id) {
 

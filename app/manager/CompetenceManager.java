@@ -1,5 +1,19 @@
 package manager;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
@@ -12,9 +26,7 @@ import dao.OfficeDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import helpers.ModelQuery.SimpleResults;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -23,20 +35,6 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 
 public class CompetenceManager {
@@ -297,12 +295,12 @@ public class CompetenceManager {
             (person, new YearMonth(year, month));
     for (Contract contract : monthContracts) {
 
-      IWrapperContract wContract = wrapperFactory.create(contract);
+      IWrapperContract wrContract = wrapperFactory.create(contract);
 
-      if (wContract.isLastInMonth(month, year)) {
+      if (wrContract.isLastInMonth(month, year)) {
 
         Optional<ContractMonthRecap> recap =
-                wContract.getContractMonthRecap(new YearMonth(year, month));
+                wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent()) {
           /**
            * FIXME: in realtà bisogna controllare che la persona nell'arco

@@ -1,23 +1,21 @@
 package manager;
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import models.Absence;
 import models.Office;
 import models.VacationPeriod;
 import models.enumerate.Parameter;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
 
 public class VacationManager {
 
@@ -57,10 +55,13 @@ public class VacationManager {
     Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
 
     LocalDate expireDate = LocalDate.now()
-            .withMonthOfYear(monthExpiryVacationPastYear)
-            .withDayOfMonth(dayExpiryVacationPastYear);
+        .withYear(year)
+        .withMonthOfYear(monthExpiryVacationPastYear)
+        .withDayOfMonth(dayExpiryVacationPastYear);
     return expireDate;
   }
+
+  
 
   /**
    * @param year       l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono
@@ -81,7 +82,7 @@ public class VacationManager {
   /**
    * @return numero di permessi maturati nel periodo yearInterval associati a contract
    */
-  public int getPermissionAccruedYear(IWrapperContract wcontract, int year, Optional<LocalDate> accruedDate) {
+  public int getPermissionAccruedYear(IWrapperContract wrContract, int year, Optional<LocalDate> accruedDate) {
 
     //Calcolo l'intersezione fra l'anno e il contratto attuale
     DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1),
@@ -91,7 +92,7 @@ public class VacationManager {
               accruedDate.get());
     }
     yearInterval = DateUtility.intervalIntersection(yearInterval,
-            wcontract.getContractDateInterval());
+            wrContract.getContractDateInterval());
 
     if (yearInterval == null) {
       return 0;
@@ -100,7 +101,7 @@ public class VacationManager {
     //int days = 0;
     int permissionDays = 0;
 
-    for (VacationPeriod vp : wcontract.getValue().vacationPeriods) {
+    for (VacationPeriod vp : wrContract.getValue().vacationPeriods) {
       int days = 0;
       DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
       DateInterval intersection =
@@ -124,7 +125,7 @@ public class VacationManager {
    * @return il numero di giorni di ferie maturati nell'anno year calcolati a partire dai piani
    * ferie associati al contratto corrente
    */
-  public int getVacationAccruedYear(IWrapperContract wcontract, int year,
+  public int getVacationAccruedYear(IWrapperContract wrContract, int year,
                                     Optional<LocalDate> accruedDate, List<Absence> postPartum) {
 
     LocalDate beginYear = new LocalDate(year, 1, 1);
@@ -138,7 +139,7 @@ public class VacationManager {
               accruedDate.get());
     }
     yearInterval = DateUtility.intervalIntersection(yearInterval,
-            wcontract.getContractDateInterval());
+            wrContract.getContractDateInterval());
 
     if (yearInterval == null) {
       return 0;
@@ -152,7 +153,7 @@ public class VacationManager {
     int totalYearPostPartum = 0;
     int minVacationPeriod = 28;
 
-    for (VacationPeriod vp : wcontract.getValue().vacationPeriods) {
+    for (VacationPeriod vp : wrContract.getValue().vacationPeriods) {
 
       int days = 0;
 
@@ -203,7 +204,7 @@ public class VacationManager {
     // postPartum che abbassano i giorno per ferie maturate.
     if (totalYearPostPartum == 0 && yearInterval.getBegin().equals(beginYear)
             && yearInterval.getEnd().equals(endYear)) {
-      if (DateUtility.isIntervalIntoAnother(yearInterval, wcontract
+      if (DateUtility.isIntervalIntoAnother(yearInterval, wrContract
               .getContractDateInterval()) && minVacationPeriod > vacationDays) {
         vacationDays = minVacationPeriod;
       }

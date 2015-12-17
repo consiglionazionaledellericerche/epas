@@ -1,5 +1,7 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
@@ -29,7 +31,6 @@ import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.binding.As;
-import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 
 import javax.inject.Inject;
@@ -55,11 +56,11 @@ public class Overtimes extends Controller {
   @Inject
   private static CompetenceCodeDao competenceCodeDao;
 
-	/*
-     * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario)
-	 * 
-	 */
 
+
+  /**
+   * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario).
+   */
   public static void getPersonOvertimes() {
     response.accessControl("*");
 
@@ -67,7 +68,8 @@ public class Overtimes extends Controller {
     int year = Integer.parseInt(params.get("year"));
     int month = Integer.parseInt(params.get("month"));
 
-    Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", email, year, month);
+    Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", 
+        email, year, month);
 
     // get the person with the given email
     Person person = personDao.byEmail(email).orNull();
@@ -99,8 +101,8 @@ public class Overtimes extends Controller {
 
   }
 
-  /*
-   * Get the amount of overtimes the supervisor has for personel distribution
+  /**
+   * Get the amount of overtimes the supervisor has for personel distribution.
    */
   public static void getSupervisorTotalOvertimes() {
     response.accessControl("*");
@@ -118,18 +120,25 @@ public class Overtimes extends Controller {
 
 
     PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
-    if (personHourForOvertime == null)
+    if (personHourForOvertime == null) {
       personHourForOvertime = new PersonHourForOvertime(person, 0);
+    }
 
-    Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s", personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
+    Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s", 
+        personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
 
     render(personHourForOvertime);
   }
 
-  /*
-   * Set the overtimes requested by the responsible
+
+  /**
+   * Set the overtimes requested by the responsible.
+   * @param year l'anno
+   * @param month il mese
+   * @param body l'oggetto in cui serializzare quel che recupero dal binder
    */
-  public static void setRequestOvertime(Integer year, Integer month, @As(binder = JsonRequestedOvertimeBinder.class) PersonsCompetences body) {
+  public static void setRequestOvertime(Integer year, Integer month, 
+      @As(binder = JsonRequestedOvertimeBinder.class) PersonsCompetences body) {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
@@ -141,8 +150,12 @@ public class Overtimes extends Controller {
     overtimesManager.setRequestedOvertime(body, year, month);
   }
 
-  /*
-   * Set personnel overtimes requested by the supervisor
+
+  /**
+   * Set personnel overtimes requested by the supervisor.
+   * @param hours
+   * @param email
+   * @throws Exception
    */
   public static void setSupervisorTotalOvertimes(Integer hours, String email) throws Exception {
     response.accessControl("*");
@@ -150,7 +163,8 @@ public class Overtimes extends Controller {
     try {
       Person person = personDao.byEmail(email).orNull();
       if (person == null) {
-        throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", email));
+        throw new IllegalArgumentException(
+            String.format("Person with email = %s doesn't exist", email));
       }
       Logger.debug("Find persons %s with email %s", person.name, email);
 
@@ -163,13 +177,14 @@ public class Overtimes extends Controller {
 
   /**
    * @author arianna crea il file PDF con il resoconto mensile delle ore di straordinario di una
-   * lista di persone identificate con l'email (portale sistorg)
+   *     lista di persone identificate con l'email (portale sistorg)
    *
-   * curl -H "Content-Type: application/json" -X POST -d '[ {"email" :
-   * "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" :
-   * "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
+   *     curl -H "Content-Type: application/json" -X POST -d '[ {"email" :
+   *     "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" :
+   *     "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
    */
-  public static void exportMonthAsPDF(Integer year, Integer month, @As(binder = JsonRequestedPersonsBinder.class) PersonsList body) {
+  public static void exportMonthAsPDF(Integer year, Integer month, 
+      @As(binder = JsonRequestedPersonsBinder.class) PersonsList body) {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
@@ -178,10 +193,12 @@ public class Overtimes extends Controller {
       badRequest();
     }
 
-    Table<String, String, Integer> overtimesMonth = TreeBasedTable.<String, String, Integer>create();
+    Table<String, String, Integer> overtimesMonth = 
+        TreeBasedTable.<String, String, Integer>create();
 
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
-    Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);
+    Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", 
+        competenceCode, competenceCode.code);
 
     overtimesMonth = overtimesManager.buildMonthForExport(body, competenceCode, year, month);
 

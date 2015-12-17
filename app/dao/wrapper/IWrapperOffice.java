@@ -1,8 +1,8 @@
 package dao.wrapper;
 
-import models.Office;
-
 import org.joda.time.LocalDate;
+
+import models.Office;
 
 /**
  * Office potenziato.

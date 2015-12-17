@@ -12,20 +12,16 @@
 
 #{/set}
 
-#{set breadcrumbs:['Ferie E Permessi':null] /}
- 
 <div class="container">
-  #{breadcrumbs breadcrumbs /}
   #{title title:'Ferie e Permessi ' + year, administration:true /}
 </div>  
 
-<div class="container-fluid">
+<div class="container">
 
-	<table 	class="table table-striped table-bordered table-condensed"
-				datatable width="100%">
+	<table 	class="table table-striped table-hover table-bordered table-condensed" datatable width="100%">
 				<thead>
 					<tr>
-						<th>Nome</th>
+						<th class="col-md-3">Nome</th>
 						<th>Ferie Fatte ${year-1}</th>
 						<th>Ferie Fatte ${year}</th>
 						<th>Permessi Fatti ${year}</th>
@@ -125,7 +121,7 @@
 				#{list items:contractsWithVacationsProblems, as:'contract'}
 				<li><a href="@{Persons.edit(contract.person.id)}">Contratto
 						di ${contract.person.surname} ${contract.person.name} iniziato il
-						${contract.beginContract}</a></li> #{/list}
+						${contract.beginDate}</a></li> #{/list}
 			</ul>
 			<p>Tali errori potrebbero derivare dalla mancanza di dati di
 				inizializzazione inerenti il contratto.</p>

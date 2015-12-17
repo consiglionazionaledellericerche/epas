@@ -1,27 +1,16 @@
 package models;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
-import models.base.IPeriodTarget;
-import models.base.IPeriodValue;
-import models.base.PeriodModel;
-
-import org.joda.time.LocalDate;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PropertyInPeriod;
 
 import play.data.validation.Required;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 
 /**
@@ -31,7 +20,7 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name = "contracts_working_time_types")
-public class ContractWorkingTimeType extends PeriodModel {
+public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {
 
   private static final long serialVersionUID = 3730183716240278997L;
 
@@ -45,73 +34,53 @@ public class ContractWorkingTimeType extends PeriodModel {
   @JoinColumn(name = "working_time_type_id")
   public WorkingTimeType workingTimeType;
 
-  @Required
-  @Column(name = "begin_date")
-  public LocalDate beginDate;
-
-  @Column(name = "end_date")
-  public LocalDate endDate;
-
   @Override
-  public LocalDate getBegin() {
-    return this.beginDate;
-  }
-  
-  @Override
-  public void setBegin(LocalDate begin) {
-    this.beginDate = begin;
-    
-  }
-
-  @Override
-  public Optional<LocalDate> getEnd() {
-    return Optional.fromNullable(this.endDate);
-  }
-
-  // FIXME: non riesco a impostare il generico Optional<LocalDate>
-  @Override
-  public void setEnd(Optional end) {
-    if (end.isPresent()) {
-      this.endDate = (LocalDate)end.get();
-    } else {
-      this.endDate = null;
-    }
-  }
-  
-  @Override
-  public IPeriodValue getValue() {
+  public Object getValue() {
     return this.workingTimeType;
   }
 
   @Override
-  public List<PeriodModel> orderedPeriods() {
-    List<PeriodModel> list = Lists.newArrayList();
-    for (ContractWorkingTimeType cwtt : this.contract.contractWorkingTimeType) {
-      list.add(cwtt);
-    }
-    Collections.sort(list);
-    return list;
-  }
-  
-  @Override
-  public void setValue(IPeriodValue value) {
+  public void setValue(Object value) {
     this.workingTimeType = (WorkingTimeType)value;
   }
 
-  @Override
-  public PeriodModel newInstance() {
-    return new ContractWorkingTimeType();
-  }
-
-  @Override
-  public IPeriodTarget getTarget() {
+  public IPropertiesInPeriodOwner getOwner() {
     return this.contract;
   }
 
+  public void setOwner(IPropertiesInPeriodOwner owner) {
+    this.contract = (Contract)owner;
+  }
+
   @Override
-  public void setTarget(IPeriodTarget target) {
-    this.contract = (Contract)target;
-    
+  public boolean periodValueEquals(Object otherValue) {
+    if (otherValue instanceof ContractWorkingTimeType) {
+      return this.workingTimeType.id == (((ContractWorkingTimeType) otherValue).workingTimeType.id);
+    }
+    return false;
+  }
+
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertyInPeriod#getType()
+   */
+  @Override
+  public Object getType() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see models.base.IPropertyInPeriod#setType(java.lang.Object)
+   */
+  @Override
+  public void setType(Object value) {
+    // TODO Auto-generated method stub
+  }
+  
+  @Override
+  public String getLabel() {
+    return this.workingTimeType.description;
   }
 
 

@@ -58,7 +58,7 @@ public class WrapperContract implements IWrapperContract {
       DateInterval cInterval = wrapperFactory.create(contract)
               .getContractDateInterval();
       if (DateUtility.intervalIntersection(monthInterval, cInterval) != null) {
-        if (value.beginContract.isBefore(contract.beginContract)) {
+        if (value.beginDate.isBefore(contract.beginDate)) {
           return false;
         }
       }
@@ -76,7 +76,7 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public boolean isDefined() {
 
-    return this.value.expireContract != null;
+    return this.value.endDate != null;
   }
 
   /**
@@ -95,9 +95,9 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public DateInterval getContractDateInterval() {
     if (value.endContract != null) {
-      return new DateInterval(value.beginContract, value.endContract);
+      return new DateInterval(value.beginDate, value.endContract);
     } else {
-      return new DateInterval(value.beginContract, value.expireContract);
+      return new DateInterval(value.beginDate, value.endDate);
     }
   }
 
@@ -157,7 +157,7 @@ public class WrapperContract implements IWrapperContract {
     if (value.sourceDateResidual != null) {
       return Optional.fromNullable((new YearMonth(value.sourceDateResidual)));
     }
-    return Optional.fromNullable(new YearMonth(value.beginContract));
+    return Optional.fromNullable(new YearMonth(value.beginDate));
   }
 
   /**
@@ -202,7 +202,7 @@ public class WrapperContract implements IWrapperContract {
       return false;
     }
 
-    return value.beginContract.isBefore(dateForInit);
+    return value.beginDate.isBefore(dateForInit);
   }
 
   /**
@@ -215,7 +215,7 @@ public class WrapperContract implements IWrapperContract {
             confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM,
                     value.person.office));
     LocalDate personCreation = new LocalDate(value.person.createdAt);
-    LocalDate candidate = value.beginContract;
+    LocalDate candidate = value.beginDate;
 
     if (candidate.isBefore(officeInstallation)) {
       candidate = officeInstallation;
@@ -266,7 +266,7 @@ public class WrapperContract implements IWrapperContract {
     }
 
     // se il contratto inizia nell'anno non ho bisogno del recap.
-    if (value.beginContract.getYear() == yearToRecap) {
+    if (value.beginDate.getYear() == yearToRecap) {
       return true;
     }
 

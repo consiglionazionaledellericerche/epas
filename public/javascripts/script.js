@@ -35,8 +35,9 @@ $(function($) {
     }).done(function(data, status) {
       $target.replaceWith($(target, data));
       // TODO: verificare se occorre fare unwrap
-      $(target).parent().initepas();
+      $('body').initepas();
       // disattiva la modale sopra (se c'è).
+      
       $form.parents('.modal').modal('hide');
     }).fail(function(xhr, status, error) {
       if (xhr.status == 400) {
@@ -65,6 +66,8 @@ $(function($) {
 	    $form.removeAttr('data-anchor');
 	    $form.attr('action', url).submit();
   });
+  
+  PNotify.prototype.options.styling = "fontawesome";
   
   /**
    * Author: Marco
@@ -95,6 +98,20 @@ $(function($) {
   $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
   $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
   $.fn.initepas = function() {
+	  
+	$('[data-notify]', this).each(function() {
+	  var $this = $(this);
+	  var title = $this.data('notify')
+	  var text = $this.text();
+	  var type = $this.data('notify-type');
+	  new PNotify({
+		  title: title,
+		  text: text,
+		  type: type,
+		  remove: true
+	  });
+	});  
+
     //$(':input[data-selectize]', this).select2({allowClear:true});
     $(':input[select2]', this).select2({
       allowClear: true,
@@ -115,14 +132,26 @@ $(function($) {
       container: 'body'
     });
     this.find('[datatable]').DataTable({
+      "pageLength": 15,
       "lengthMenu": [
-        [10, 25, 50, 100, -1],
-        [10, 25, 50, 100, "Tutti"]
+        [10,15,20, 25, 50, 100, -1],
+        [10,15,20, 25, 50, 100, "Tutti"]
       ],
       "language": {
         "url": "/public/i18n/DataTablesItalian.json"
       }
     });
+    this.find('[datatable-meal]').DataTable({
+    	"order":[[0,"desc"]],
+        "pageLength": 10,
+        "lengthMenu": [
+          [10,15,20, 25, 50, 100, -1],
+          [10,15,20, 25, 50, 100, "Tutti"]
+        ],
+        "language": {
+          "url": "/public/i18n/DataTablesItalian.json"
+        }
+      });
     //Datatables. Se imposto lo scrollX devo ricordarmi di non avere
     //il plugin responsive abilitato sulla tabella(sono incompatibili)
     this.find('.datatable-test').DataTable({
@@ -137,6 +166,7 @@ $(function($) {
         [10, 25, 50, "All"]
       ]
     });
+    this.find('span[notAllowed]').tooltip();
     // Quando ridisegno la datatables devo rieseguire la initepas per inizializzare
     // javascript sulle linee visualizzate per la prima volta. (esempio next page)
     this.find('.datatable-test').on('draw.dt', function() {

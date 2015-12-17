@@ -1,7 +1,13 @@
 package it.cnr.iit.epas;
 
-import dao.wrapper.IWrapperFactory;
+import java.io.PrintWriter;
+import java.util.List;
 
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
+import dao.wrapper.IWrapperFactory;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -14,15 +20,7 @@ import models.PersonMonthRecap;
 import models.Qualification;
 import models.Stamping;
 import models.VacationCode;
-
-import org.joda.time.LocalDate;
-
 import play.Logger;
-
-import java.io.PrintWriter;
-import java.util.List;
-
-import javax.inject.Inject;
 
 public class ExportToYaml {
 
@@ -325,12 +323,12 @@ public class ExportToYaml {
     for (Contract c : person.contracts) {
       out = out + getFormattedHeader("Contract", "c" + c.id);
       out = out + getFormattedProperty("person", "person" + person.id);
-      if (c.beginContract != null)
-        out = out + getFormattedProperty("beginContract", "'" + c.beginContract + "'");
+      if (c.beginDate != null)
+        out = out + getFormattedProperty("beginDate", "'" + c.beginDate + "'");
       if (c.endContract != null)
         out = out + getFormattedProperty("endContract", "'" + c.endContract + "'");
-      if (c.expireContract != null)
-        out = out + getFormattedProperty("expireContract", "'" + c.expireContract + "'");
+      if (c.endDate != null)
+        out = out + getFormattedProperty("endDate", "'" + c.endDate + "'");
       out = out + getFormattedProperty("onCertificate", c.onCertificate + "");
     }
     return out;

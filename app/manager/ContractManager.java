@@ -1,15 +1,19 @@
 package manager;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -17,17 +21,7 @@ import models.ContractWorkingTimeType;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import models.base.IPeriodModel;
-import models.base.PeriodModel;
-
-import org.joda.time.LocalDate;
-
 import play.db.jpa.JPAPlugin;
-
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 /**
@@ -92,17 +86,17 @@ public class ContractManager {
    */
   public final boolean contractCrossFieldValidation(final Contract contract) {
 
-    if (contract.expireContract != null
-            && contract.expireContract.isBefore(contract.beginContract)) {
+    if (contract.endDate != null
+            && contract.endDate.isBefore(contract.beginDate)) {
       return false;
     }
 
-    if (contract.endContract != null && contract.endContract.isBefore(contract.beginContract)) {
+    if (contract.endContract != null && contract.endContract.isBefore(contract.beginDate)) {
       return false;
     }
 
-    if (contract.expireContract != null && contract.endContract != null
-            && contract.expireContract.isBefore(contract.endContract)) {
+    if (contract.endDate != null && contract.endContract != null
+            && contract.endDate.isBefore(contract.endContract)) {
       return false;
     }
 
@@ -135,8 +129,8 @@ public class ContractManager {
     buildVacationPeriods(contract);
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-    cwtt.beginDate = contract.beginContract;
-    cwtt.endDate = contract.expireContract;
+    cwtt.beginDate = contract.beginDate;
+    cwtt.endDate = contract.endDate;
     cwtt.workingTimeType = wtt;
     cwtt.contract = contract;
     cwtt.save();
@@ -144,8 +138,8 @@ public class ContractManager {
 
     ContractStampProfile csp = new ContractStampProfile();
     csp.contract = contract;
-    csp.startFrom = contract.beginContract;
-    csp.endTo = contract.expireContract;
+    csp.beginDate = contract.beginDate;
+    csp.endDate = contract.endDate;
     csp.fixedworkingtime = false;
     csp.save();
     contract.contractStampProfile.add(csp);
@@ -199,8 +193,8 @@ public class ContractManager {
   public final void recomputeContract(final Contract contract, final Optional<LocalDate> dateFrom,
                                       final boolean newContract, final boolean onlyRecaps) {
 
-    IWrapperContract wContract = wrapperFactory.create(contract);
-    LocalDate startDate = wContract.getContractDatabaseInterval().getBegin();
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+    LocalDate startDate = wrContract.getContractDatabaseInterval().getBegin();
     if (dateFrom.isPresent() && dateFrom.get().isAfter(startDate)) {
       startDate = dateFrom.get();
     }
@@ -256,31 +250,31 @@ public class ContractManager {
     VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
     VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
 
-    if (contract.expireContract == null) {
+    if (contract.endDate == null) {
 
       // Tempo indeterminato, creo due vacation 3 anni più infinito
 
-      contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginContract,
-              contract.beginContract.plusYears(3).minusDays(1)));
+      contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
+              contract.beginDate.plusYears(3).minusDays(1)));
       contract.vacationPeriods
-              .add(buildVacationPeriod(contract, v28, contract.beginContract.plusYears(3), null));
+              .add(buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null));
 
     } else {
 
-      if (contract.expireContract.isAfter(contract.beginContract.plusYears(3).minusDays(1))) {
+      if (contract.endDate.isAfter(contract.beginDate.plusYears(3).minusDays(1))) {
 
         // Tempo determinato più lungo di 3 anni
 
-        contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginContract,
-                contract.beginContract.plusYears(3).minusDays(1)));
+        contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
+                contract.beginDate.plusYears(3).minusDays(1)));
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v28,
-                contract.beginContract.plusYears(3), contract.expireContract));
+                contract.beginDate.plusYears(3), contract.endDate));
 
       } else {
 
         contract.vacationPeriods.add(
-                buildVacationPeriod(contract, v26, contract.beginContract, contract.expireContract));
+                buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate));
       }
     }
   }
@@ -339,7 +333,7 @@ public class ContractManager {
     List<ContractStampProfile> toDelete = Lists.newArrayList();
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     for (ContractStampProfile csp : contract.contractStampProfile) {
-      DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
+      DateInterval cspInterval = new DateInterval(csp.beginDate, csp.endDate);
       if (DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(),
               cspInterval) == null) {
         toDelete.add(csp);
@@ -356,13 +350,13 @@ public class ContractManager {
 
     // Sistemo il primo
     ContractStampProfile first = cspList.get(0);
-    first.startFrom = wrappedContract.getContractDateInterval().getBegin();
+    first.beginDate = wrappedContract.getContractDateInterval().getBegin();
     first.save();
     // Sistemo l'ultimo
     ContractStampProfile last = cspList.get(contract.contractStampProfile.size() - 1);
-    last.endTo = wrappedContract.getContractDateInterval().getEnd();
-    if (DateUtility.isInfinity(last.endTo)) {
-      last.endTo = null;
+    last.endDate = wrappedContract.getContractDateInterval().getEnd();
+    if (DateUtility.isInfinity(last.endDate)) {
+      last.endDate = null;
     }
     last.save();
     contract.save();
@@ -454,140 +448,5 @@ public class ContractManager {
   public final void cleanMealTicketInitialization(final Contract contract) {
     contract.sourceDateMealTicket = contract.sourceDateResidual;
   }
-
-  /**
-   * L'impatto di un nuovo periodo tipo orario sul contratto.
-   */
-
-  public final List<PeriodModel> changedRecap(Contract contract, 
-      IPeriodModel period, boolean persist) {
-    boolean recomputeBeginSet = false;
-
-    //copia di sicurezza
-
-    List<PeriodModel> originals = period.orderedPeriods();
-//    for (IPeriodModel periodsOriginal : period.orderedPeriods()) {
-//      originals.add(periodsOriginal);
-//    }
-//    Collections.sort(originals);
-    
-    //riepilogo delle modifiche
-    DateInterval periodInterval = new DateInterval(period.getBegin(), period.getEnd());
-    List<PeriodModel> periodList = Lists.newArrayList();
-    PeriodModel previous = null;
-    
-    List<PeriodModel> toRemove = Lists.newArrayList();
-    
-    for (PeriodModel oldPeriod : originals) {
-      DateInterval oldInterval = new DateInterval(oldPeriod.getBegin(), oldPeriod.getEnd());
-
-      //non cambia il tipo orario nessuna modifica su quel oldCwtt
-      if (period.getValue().getPeriodValueId().equals(oldPeriod.getValue().getPeriodValueId())) {        
-        previous = insertIntoList(previous, oldPeriod, periodList);
-        if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
-          toRemove.add(oldPeriod);
-        }
-        continue;
-      }
-      DateInterval intersection = DateUtility.intervalIntersection(periodInterval, oldInterval);
-      //non si intersecano nessuna modifica su quel oldCwtt
-      if (intersection == null) {
-        previous = insertIntoList(previous, oldPeriod, periodList);
-        if (previous.id == null || !previous.id.equals(oldPeriod.id)) {
-          toRemove.add(oldPeriod);
-        }
-        continue;
-      }
-
-      //si sovrappongono e sono diversi
-      toRemove.add(oldPeriod);
-      
-      PeriodModel periodIntersect = period.newInstance();
-      periodIntersect.setTarget(contract);
-      periodIntersect.setBegin(intersection.getBegin());
-      periodIntersect.setEnd(Optional.fromNullable(intersection.getEnd()));
-      periodIntersect.setValue(period.getValue());
-       
-      //Parte iniziale old
-      if (oldPeriod.getBegin().isBefore(periodIntersect.getBegin())) {
-        PeriodModel periodOldBeginRemain = period.newInstance();
-        periodOldBeginRemain.setTarget(contract);
-        periodOldBeginRemain.setBegin(oldPeriod.getBegin());
-        periodOldBeginRemain.setEnd(Optional.fromNullable(periodIntersect.getBegin().minusDays(1)));
-        periodOldBeginRemain.setValue(oldPeriod.getValue());
-        previous = insertIntoList(previous, periodOldBeginRemain, periodList); 
-      }
-
-      if (!recomputeBeginSet) {
-        periodIntersect.recomputeFrom = periodIntersect.getBegin();
-      }
-
-      previous = insertIntoList(previous, periodIntersect, periodList);
-      
-      //Parte finale old
-      if (periodIntersect.getEnd().isPresent()) {
-        PeriodModel periodOldEndRemain = period.newInstance();
-        periodOldEndRemain.setTarget(contract);
-        periodOldEndRemain.setBegin(((LocalDate)periodIntersect.getEnd().get()).plusDays(1));
-        periodOldEndRemain.setValue(oldPeriod.getValue());
-        if (oldPeriod.getEnd().isPresent()) {
-          if (((LocalDate)periodIntersect.getEnd().get())
-              .isBefore((LocalDate)oldPeriod.getEnd().get())) {
-            periodOldEndRemain.setEnd(oldPeriod.getEnd());
-            previous = insertIntoList(previous, periodOldEndRemain, periodList); 
-          }
-        } else {
-          periodOldEndRemain.setEnd(oldPeriod.getEnd());
-          previous = insertIntoList(previous, periodOldEndRemain, periodList); 
-        }
-      }
-
-    }
-
-    if (persist) {
-//      contract.refresh();
-//      for (ContractWorkingTimeType cwttRemoved : toRemove) {
-//        cwttRemoved.delete();
-//        contract.contractWorkingTimeType.remove(cwttRemoved);
-//        contract.save();
-//      }
-//      for (ContractWorkingTimeType cwttInsert : periodList) {
-//        //if (cwttInsert.isPersistent()) {
-//          cwttInsert.save();
-//          contract.contractWorkingTimeType.add(cwttInsert);
-//          contract.save();
-//          
-//        //}
-//      }
-//      contract.save();
-//      JPAPlugin.closeTx(false);
-//      JPAPlugin.startTx(false);
-    }
-
-    
-    return periodList;
-
-  }
-
-  /**
-   * Inserisce il periodo nella lista. Ritorna l'ultimo periodo inserito.
-   */
-
-  private PeriodModel insertIntoList(PeriodModel previous, 
-      PeriodModel present, List<PeriodModel> periodList) {
-    
-    if (previous != null 
-        && previous.getValue().getPeriodValueId() == present.getValue().getPeriodValueId())  {
-      previous.setEnd(present.getEnd()); 
-      if (present.recomputeFrom != null) {
-        previous.recomputeFrom = present.recomputeFrom;
-      }
-      return previous;
-    } else {
-      periodList.add(present);
-      return present;
-    }
-  }
-
 
 }

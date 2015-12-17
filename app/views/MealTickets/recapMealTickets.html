@@ -2,16 +2,21 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{set 'moreStyles'}
- 
-#{/set}
+#{set breadcrumbs:[recapMealTickets:null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{mealTickets.mealTicketsTabs activeAction:'recapMealTickets' /}
 
 <div class="container">
-  
-  <div id="container-fluid-nav-tabs" class="container-fluid">
+
+  #{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year + ' ' + office.name, administration:true /}
+
 
   
-  
+    *{
+    // TODO ripristinare se serve il pannello di riepilgo dei buoni inseriti nell'ultima action.
+    }*   
     <!-- Ultimi inseriti -->
     #{if blockAdded != null }
     <div class="col-md-12 center">
@@ -19,8 +24,7 @@
   	  <div class="alert alert-success alert-dismissible fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
         <strong>Buoni Pasto correttamente inseriti per la persona 
-          <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(personAdded.id)}"
-	  	       data-modal=".my-modal-large">	  	      
+          <a href="@{MealTickets.quickBlocksInsert(personAdded.id)}" data-async-modal="#defaultModal">	  	      
 	  	     ${personAdded.surname} ${personAdded.name}</a>
 	  	  </a>
 	  	</strong>
@@ -51,7 +55,6 @@
     #{/if}
 
   
-    <div class="col-md-12">
       <table class="table table-bordered center" datatable>
         <thead>
         <tr>
@@ -66,8 +69,7 @@
 	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td>
-	  	       <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(recap.contract.person.id)}"
-	  	       data-modal=".my-modal-large">
+	  	       <a href="@{MealTickets.personMealTickets(recap.contract.person.id)}">
 		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
 	  	    <td>${recap.buoniPastoDalMesePrecedente}</td>
@@ -92,27 +94,14 @@
 	  	  #{/list}
 	  	</tbody>	
 	  </table>
-    </div>
-  </div>    
   
   <!-- Lista degli istituti che non hanno attiva la data inizio utilizzo -->
-  <div id="container-fluid-nav-tabs" class="container-fluid">
-	  <div class="alert alert-danger">
-	    #{if officesNoMealTicketConf.size() > 0}
-	    	<p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per le seguenti sedi di
-	    	cui si detengono i diritti di amministrazione:</p>
-	    	#{list items:officesNoMealTicketConf, as:'office'}
-	    		<ul>
-	    		  <li>${office.name}</li>
-	    		</ul>
-	    	#{/list}
-	    	<p>Per impostarla contattare l'amministratore tecnico della sede oppure epas@iit.cnr.it</p> 
-	    	
-	    #{/if} 
-	  </div>
-  </div>
-    
+  #{if !officeStartDate.present}
+    #{alert color:'danger'}
+      <p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per questo istituto. 
+	  <p>Per impostarla contattare l'amministratore tecnico della sede oppure epas@iit.cnr.it</p>
+    #{/alert}
+  #{/if}
   
 </div>
 
-#{include '_myModal_large.html' /}

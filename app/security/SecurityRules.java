@@ -7,6 +7,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.User;
 
 import org.drools.KnowledgeBase;
@@ -15,32 +17,39 @@ import org.drools.command.CommandFactory;
 import org.drools.event.rule.AfterActivationFiredEvent;
 import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.runtime.StatelessKnowledgeSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.mvc.results.Forbidden;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author marco
  */
 @Singleton
+@Slf4j
 public class SecurityRules {
 
-  private final static Logger log = LoggerFactory.getLogger(SecurityRules.class);
-  private final static String CURRENT_OPERATOR_IDENTIFIER = "currentOperator";
+  private static final String CURRENT_OPERATOR_IDENTIFIER = "currentOperator";
+  /**
+   * Contiene in cache i risultati dei controlli sui permessi sulla richiesta corrente. <b>Nota:</b>
+   * i controlli sono considerati per l'utente corrente.
+   */
   private final Provider<Optional<User>> currentUser;
   private final Provider<String> currentAction;
   private final Provider<KnowledgeBase> knowledge;
+  private final Provider<Map<PermissionCheckKey, Boolean>> checks;
 
   @Inject
   SecurityRules(Provider<Optional<User>> user,
                 @Named("request.action") Provider<String> action,
-                Provider<KnowledgeBase> knowledgeBase) {
+                Provider<KnowledgeBase> knowledgeBase,
+                @Named(SecurityModule.REQUESTS_CHECKS)
+                Provider<Map<PermissionCheckKey, Boolean>> checks) {
     currentUser = user;
     currentAction = action;
     knowledge = knowledgeBase;
+    this.checks = checks;
   }
 
   /**
@@ -76,7 +85,7 @@ public class SecurityRules {
    */
   public boolean check(String action, Object instance) {
     final PermissionCheck check = new PermissionCheck(instance, action);
-    return doCheck(check, currentUser.get().orNull());
+    return doCheck(check);
   }
 
   /**
@@ -91,10 +100,33 @@ public class SecurityRules {
    */
   public boolean checkAction(String action) {
     final PermissionCheck check = new PermissionCheck(null, action);
-    return doCheck(check, currentUser.get().orNull());
+    return doCheck(check);
   }
 
-  private boolean doCheck(final PermissionCheck check, final User user) {
+  /**
+   * Se il check fornito è già stato verificato, viene restituito il precedente già valorizzato,
+   * altrimenti viene creato e valorizzato il nuovo check, salvandolo per le successive iterazioni.
+   *
+   * Ovviamente il risultato della verifica è valida soltanto per la richiesta in corso
+   * (ThreadLocal).
+   *
+   * Questa funzione ha l'effetto collaterale di impostare il check.granted.
+   *
+   * @return true se il check fornito è permesso per lo user fornito.
+   */
+  private boolean doCheck(final PermissionCheck check) {
+    if (checks.get().containsKey(check.getKey())) {
+      return checks.get().get(check.getKey());
+    }
+
+    doCheck(check, currentUser.get().orNull());
+    // salviamo il risultato per le iterazioni successive.
+    // Nota bene: il risultato viene salvato per l'utente corrente.
+    checks.get().put(check.getKey(), check.isGranted());
+    return check.isGranted();
+  }
+
+  private void doCheck(final PermissionCheck check, final User user) {
 
     final StatelessKnowledgeSession session = knowledge.get().newStatelessKnowledgeSession();
     session.addEventListener(new AgendaLogger());
@@ -110,8 +142,8 @@ public class SecurityRules {
     commands.add(CommandFactory.newInsertElements(user.usersRolesOffices));
     session.execute(CommandFactory.newBatchExecution(commands));
 
+
     log.debug("{}", check);
-    return check.isGranted();
   }
 
   private static class AgendaLogger extends DefaultAgendaEventListener {

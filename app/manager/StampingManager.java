@@ -27,13 +27,24 @@ import java.util.List;
 
 public class StampingManager {
 
-  private final static Logger log = LoggerFactory.getLogger(StampingManager.class);
+  private final Logger log = LoggerFactory.getLogger(StampingManager.class);
   private final PersonDayDao personDayDao;
   private final PersonDao personDao;
   private final PersonDayManager personDayManager;
   private final PersonStampingDayRecapFactory stampingDayRecapFactory;
   private final ConsistencyManager consistencyManager;
-  @Inject
+  
+  /**
+   * 
+   * @param stampingDao il dao per cercare le stampings
+   * @param personDayDao il dao per cercare i personday
+   * @param personDao il dao per cercare le persone
+   * @param personDayManager il manager per lavorare sui personday
+   * @param stampingDayRecapFactory il factory per lavorare sugli stampingDayRecap
+   * @param consistencyManager
+   * il costruttore dell'injector.
+   */
+  @Inject  
   public StampingManager(StampingDao stampingDao,
                          PersonDayDao personDayDao,
                          PersonDao personDao,
@@ -48,9 +59,11 @@ public class StampingManager {
     this.consistencyManager = consistencyManager;
   }
 
+
   /**
-   * @return true se all'interno della lista delle timbrature per quel personDay c'è una timbratura
-   * uguale a quella passata come parametro false altrimenti
+   * @param pd il personday
+   * @param stamping la timbratura
+   * @return true se esiste una timbratura nel personday uguale a quella passata.
    */
   private static boolean checkDuplicateStamping(
           PersonDay pd, StampingFromClient stamping) {
@@ -141,8 +154,8 @@ public class StampingManager {
     // Check stamping duplicata
     if (checkDuplicateStamping(personDay, stampingFromClient)) {
       log.info("All'interno della lista di timbrature di {} nel giorno {} "
-                      + "c'è una timbratura uguale a quella passata dallo" +
-                      "stampingsFromClient: {}",
+                      + "c'è una timbratura uguale a quella passata dallo"
+                      + "stampingsFromClient: {}",
               new Object[]{person.getFullname(), personDay.date, stampingFromClient.dateTime});
       return true;
     }
@@ -183,14 +196,14 @@ public class StampingManager {
       Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence);
 
       if (!pd.isPresent()) {
-//				personDay = new PersonDay(person, dayPresence);
-//				personDay.create();
+//      personDay = new PersonDay(person, dayPresence);
+//             personDay.create();
         continue;
       } else {
         personDay = pd.get();
       }
 
-      personDayManager.computeValidStampings(personDay);
+      personDayManager.setValidPairStampings(personDay);
       daysRecap.add(stampingDayRecapFactory
               .create(personDay, numberOfInOut, Optional.<List<Contract>>absent()));
 

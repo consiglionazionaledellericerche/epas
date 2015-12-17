@@ -11,24 +11,24 @@
 
 <div class="container" id="updateSource">
 
-#{if wContract.initializationMissing()}
+#{if wrContract.initializationMissing()}
   <div class="alert alert-danger">
     <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione poichè ePAS 
     potrebbe non disporre di tutta l'informazione necessaria.</p>
     <p>Affinchè la situazione sia configurata correttamente occorre che l'inizio del contratto o la sua
     inizializzazione sia successiva alle seguenti date: <br>
     <ul>
-    <li>all'inserimento in ePAS della sede del dipendente ${contract.person.office.name} avvenuta in data ${wOffice.initDate().format()}</li>
-    <li>all'inserimento in ePAS del dipendente avvenuta in data ${wPerson.value.createdAt.format()}.</li>
+    <li>all'inserimento in ePAS della sede del dipendente ${contract.person.office.name} avvenuta in data ${wrOffice.initDate().format()}</li>
+    <li>all'inserimento in ePAS del dipendente avvenuta in data ${wrPerson.value.createdAt.format()}.</li>
     </ul>
     
-    <p>Pertanto scegliere una data uguale o successiva al <strong>${wContract.dateForInitialization().format()}</strong>.</p>
+    <p>Pertanto scegliere una data uguale o successiva al <strong>${wrContract.dateForInitialization().format()}</strong>.</p>
   </div>
 #{/if}
 #{else}
   <div class="alert alert-success">
    <i class="fa fa-2x fa-check bg-success"></i> Il contratto non necessita di inizializzazione. 
-   <p>Se si desidera definire una nuova inizializzazione scegliere una data uguale o successiva al <strong>${wContract.dateForInitialization().format()}</strong>.</p>
+   <p>Se si desidera definire una nuova inizializzazione scegliere una data uguale o successiva al <strong>${wrContract.dateForInitialization().format()}</strong>.</p>
   </div>
 #{/else}
      
@@ -50,16 +50,10 @@
 	 #{/if}
 	 
       #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
-      'data-async':'#updateSource', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
+      'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
 
-		#{if success}
-		      #{alert dismissible:true}
-		        Inizializzazione inserita con successo ed effettuati i ricalcoli.
-		      #{/alert}
-		#{/if}
-		    	    
-	    #{if !confirmed}
+	    #{if !confirmedResidual}
 	    	<!-- Form di input -->			
 		    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
 		    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
@@ -74,7 +68,7 @@
 		#{/if}
 		#{else}
 			<!-- Form di conferma -->			
-			#{f.hidden 'confirmed', value:true /}
+			#{f.hidden 'confirmedResidual', value:true /}
 			#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
 			#{f.simpleView 'contract.sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
 			#{f.simpleView 'contract.sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
@@ -123,7 +117,7 @@
 	    
       #{/form}
     #{/panel}
-  #{if !wContract.initializationMissing()}  
+  #{if !wrContract.initializationMissing()}  
   <div id="sourceMeal">    
     #{panel title:'Buoni Pasto', color:'primary'}
        <div class="alert alert-info">
@@ -133,16 +127,10 @@
        </div>
        
        #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
-      'data-async':'#sourceMeal', 'data-async-error':'#sourceMeal'}
+      'data-async':'#page_content', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
-       
-       #{if success}
-		      #{alert dismissible:true}
-		        Inizializzazione buoni pasto inserita con successo ed effettuati i ricalcoli.
-		      #{/alert}
-		#{/if}
 		
-	    #{if !confirmed}
+	    #{if !confirmedMeal}
 		    #{f.date 'sourceDateMealTicket', value:contract.sourceDateMealTicket?.format(), biglabel:true  /}
 		    #{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
 		    #{b.buttons center:true}
@@ -151,7 +139,7 @@
 		#{/if}
 		#{else}
 			
-			#{f.hidden 'confirmed', value:true /}
+			#{f.hidden 'confirmedMeal', value:true /}
 			#{f.simpleView 'sourceDateMealTicket', value:sourceDateMealTicket.format(), biglabel:true, hidden:true /}
 			#{f.simpleView 'contract.sourceRemainingMealTicket', biglabel:true, hidden:true /}
 			

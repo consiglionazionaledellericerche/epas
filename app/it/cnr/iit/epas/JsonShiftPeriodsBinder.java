@@ -3,32 +3,30 @@
  */
 package it.cnr.iit.epas;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import dao.PersonDao;
-
-import models.Person;
-import models.ShiftType;
-import models.enumerate.ShiftSlot;
-import models.exports.ShiftPeriod;
-import models.exports.ShiftPeriods;
-
-import org.joda.time.LocalDate;
-
-import injection.StaticInject;
-import play.Logger;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import dao.PersonDao;
+import injection.StaticInject;
+import models.Person;
+import models.ShiftType;
+import models.enumerate.ShiftSlot;
+import models.exports.ShiftPeriod;
+import models.exports.ShiftPeriods;
+import play.Logger;
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 /**
  * @author arianna

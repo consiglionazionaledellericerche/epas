@@ -8,6 +8,7 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -48,18 +49,20 @@ public class WrapperPerson implements IWrapperPerson {
   private final PersonDayDao personDayDao;
   private final PersonMonthRecapDao personMonthRecapDao;
   private final IWrapperFactory wrapperFactory;
-
+  private final CompetenceDao competenceDao;
+  
   private Optional<Contract> currentContract = null;
   private Optional<WorkingTimeType> currentWorkingTimeType = null;
   private Optional<VacationPeriod> currentVacationPeriod = null;
   private Optional<ContractStampProfile> currentContractStampProfile = null;
   private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
+  
 
   @Inject
   WrapperPerson(@Assisted Person person, ContractDao contractDao,
                 CompetenceManager competenceManager, PersonManager personManager,
                 PersonDao personDao, PersonMonthRecapDao personMonthRecapDao,
-                PersonDayDao personDayDao,
+                PersonDayDao personDayDao, CompetenceDao competenceDao,
                 IWrapperFactory wrapperFactory) {
     this.value = person;
     this.contractDao = contractDao;
@@ -68,6 +71,7 @@ public class WrapperPerson implements IWrapperPerson {
     this.personDao = personDao;
     this.personMonthRecapDao = personMonthRecapDao;
     this.personDayDao = personDayDao;
+    this.competenceDao = competenceDao;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -179,7 +183,7 @@ public class WrapperPerson implements IWrapperPerson {
     Preconditions.checkState(lastContract.isPresent());
 
     YearMonth current = YearMonth.now();
-    YearMonth contractBegin = new YearMonth(lastContract.get().beginContract);
+    YearMonth contractBegin = new YearMonth(lastContract.get().beginDate);
 
     if (contractBegin.isAfter(current)) {
       //vado in avanti
@@ -214,10 +218,10 @@ public class WrapperPerson implements IWrapperPerson {
     boolean hasPassToIndefinite = false;
 
     for (Contract contract : orderedContractInYear) {
-      if (contract.expireContract != null)
+      if (contract.endDate != null)
         hasDefinite = true;
 
-      if (hasDefinite && contract.expireContract == null)
+      if (hasDefinite && contract.endDate == null)
         hasPassToIndefinite = true;
     }
 
@@ -339,21 +343,14 @@ public class WrapperPerson implements IWrapperPerson {
   @Override
   public Competence competence(final CompetenceCode code,
                                final int year, final int month) {
-    if (value.competenceCode.contains(code)) {
-      Optional<Competence> o = FluentIterable.from(value.competences)
-              .firstMatch(new Predicate<Competence>() {
-
-                @Override
-                public boolean apply(Competence input) {
-
-                  return input.competenceCode.equals(code)
-                          && input.year == year && input.month == month;
-                }
-
-              });
-      return o.orNull();
+    Optional<Competence> optCompetence = competenceDao.getCompetence(this.value, year, month, code);
+    if (optCompetence.isPresent()) {
+      return optCompetence.get();
     } else {
-      return null;
+      Competence competence = new Competence(this.value, code, year, month);
+      competence.valueApproved = 0;
+      competence.save();
+      return competence;
     }
   }
 

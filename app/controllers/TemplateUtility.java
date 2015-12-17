@@ -9,12 +9,14 @@ import com.google.common.collect.Sets;
 
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
+import dao.BadgeSystemDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -22,6 +24,7 @@ import manager.SecureManager;
 
 import models.AbsenceType;
 import models.BadgeReader;
+import models.BadgeSystem;
 import models.Institute;
 import models.Office;
 import models.Person;
@@ -57,12 +60,15 @@ public class TemplateUtility {
   private final RoleDao roleDao;
   private final BadgeReaderDao badgeReaderDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
+  private final IWrapperFactory wrapperFactory;
+  private final BadgeSystemDao badgeSystemDao;
 
 
   @Inject
   public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
                          QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
-                         RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao) {
+                         RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
+                         IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -73,6 +79,8 @@ public class TemplateUtility {
     this.roleDao = roleDao;
     this.badgeReaderDao = badgeReaderDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
+    this.wrapperFactory = wrapperFactory;
+    this.badgeSystemDao = badgeSystemDao;
   }
 
 
@@ -258,6 +266,30 @@ public class TemplateUtility {
   }
 
   /**
+   * Tutti i badge system.
+   */
+  public List<BadgeSystem> allBadgeSystem() {
+
+    return badgeSystemDao.badgeSystems(Optional.<String>absent(),
+        Optional.<BadgeReader>absent()).list();
+  }
+
+  /**
+   *
+   * @param office
+   * @return
+   */
+  public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
+    List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
+    for (BadgeSystem badgeSystem : office.badgeSystems) {
+      if (!badgeSystem.badgeReaders.isEmpty()) {
+        configuredBadgeSystem.add(badgeSystem);
+      }
+    }
+    return configuredBadgeSystem;
+  }
+
+  /**
    * I codici di assenza ordinati dai più utilizzati.
    */
   public List<AbsenceType> frequentAbsenceTypeList() {
@@ -265,7 +297,7 @@ public class TemplateUtility {
     Optional<AbsenceType> ferCode = absenceTypeDao
             .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
     Preconditions.checkState(ferCode.isPresent());
-
+    
     return FluentIterable.from(Lists.newArrayList(ferCode.get()))
             .append(absenceTypeDao.getFrequentTypes()).toList();
   }
@@ -276,5 +308,12 @@ public class TemplateUtility {
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
   }
-
+  
+  /**
+   * L'istanza del wrapperFactory disponibile nei template.
+   * @return wrapperFactory
+   */
+  public IWrapperFactory getWrapperFactory() {
+    return this.wrapperFactory;
+  }
 }

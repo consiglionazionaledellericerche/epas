@@ -2,6 +2,10 @@
 	activeAction: la action tab attiva
 }*
 
+<div class="container">
+  #{title title:'Gestisci Contratto di ' + contract.person.fullname /}
+</div>
+
 %{ year = session.get("yearSelected");
    month = session.get("monthSelected");
    personId = session.get("personSelected"); }%
@@ -17,8 +21,8 @@
     <li #{if _activeAction.equals("updateContractWorkingTimeType")} class="active" #{/if}>
       <a href="@{Contracts.updateContractWorkingTimeType(contract.id)}">Tipo Orario</a>
     </li>
-    <li #{if _activeAction.equals("childrenList")} class="active" #{/if}>
-      <a href="@{Contracts.edit(contract.id)}">Presenza Automatica</a>
+    <li #{if _activeAction.equals("updateContractStampProfile")} class="active" #{/if}>
+      <a href="@{Contracts.updateContractStampProfile(contract.id)}">Presenza Automatica</a>
     </li>
     <li #{if _activeAction.equals("delete")} class="active" #{/if}>
       <a href="@{Contracts.delete(contract.id)}">Elimina</a>

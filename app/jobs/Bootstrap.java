@@ -1,23 +1,12 @@
 package jobs;
 
-import com.google.common.base.Optional;
-import com.google.common.io.Resources;
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
-import dao.UserDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-
-import lombok.extern.slf4j.Slf4j;
-
-import manager.ConsistencyManager;
-
-import models.Contract;
-import models.Person;
-import models.Qualification;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-import models.WorkingTimeType;
+import javax.inject.Inject;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -28,19 +17,26 @@ import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 
+import com.google.common.base.Optional;
+import com.google.common.io.Resources;
+
+import dao.UserDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import lombok.extern.slf4j.Slf4j;
+import manager.ConsistencyManager;
+import models.Contract;
+import models.Person;
+import models.Qualification;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
+import models.WorkingTimeType;
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
-
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 /**
@@ -110,14 +106,14 @@ public class Bootstrap extends Job<Void> {
         continue;
       }
 
-      IWrapperContract wcontract = wrapperFactory.create(contract.get());
-      if (wcontract.initializationMissing()) {
+      IWrapperContract wrContract = wrapperFactory.create(contract.get());
+      if (wrContract.initializationMissing()) {
 
         log.info("Bootstrap contract scan: il contratto di {} iniziato il {} non è initializationMissing",
-                person.fullName(), contract.get().beginContract);
+                person.fullName(), contract.get().beginDate);
                 /*
                 Contract c = contract.get();
-				c.sourceDateResidual = new LocalDate(wcontract.dateForInitialization());
+				c.sourceDateResidual = new LocalDate(wrContract.dateForInitialization());
 				c.sourcePermissionUsed = 0;
 				c.sourceRecoveryDayUsed = 0;
 				c.sourceRemainingMealTicket = 0;

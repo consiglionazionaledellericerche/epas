@@ -13,6 +13,7 @@ import models.PersonDay;
 import models.Stamping;
 
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +24,7 @@ import javax.inject.Inject;
 /**
  * @author marco
  */
-//@With(Resecure.class)
+@With({Resecure.class,RequestInit.class})
 public class PersonDayHistory extends Controller {
 
   @Inject

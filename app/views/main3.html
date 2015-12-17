@@ -11,7 +11,7 @@
   <title>#{get 'title' /}</title>
 
   <!-- Bootstrap core CSS -->
-  #{stylesheet 'prove/css/bootstrap.min.css'/}
+  #{stylesheet 'bootstrap-production/css/bootstrap.min.css'/}
 
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.css">
@@ -30,6 +30,7 @@
   #{stylesheet 'bootstrap-modal.css'/}
   #{stylesheet 'bootstrap-modal-bs3patch.css'/}
   #{stylesheet 'my-bootstrap3.css'/}
+  #{stylesheet 'pnotify.custom.min.css'/}
 
   #{get 'moreStyles' /}
 
@@ -139,7 +140,7 @@
               <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
                 session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
               <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-                session.get("monthSelected"))}">Assenze</a></li>
+                session.get("monthSelected"), session.get("officeSelected"))}">Assenze</a></li>
               <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
 
               <li class="divider"></li>
@@ -147,7 +148,7 @@
 
               #{if ip.viewCompetence }
               <li><a href="@{Competences.showCompetences(session.get("yearSelected"),
-                session.get("monthSelected"))}">Competenze</a></li>
+                session.get("monthSelected"), session.get("officeSelected"))}">Competenze</a></li>
               <li class="divider"></li>
               #{/if}
 
@@ -158,7 +159,7 @@
 
               #{if ip.viewPersonDay }
               <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
-                session.get("monthSelected") )}">Gestione Buoni Pasto</a></li>
+                session.get("monthSelected"), session.get("officeSelected") )}">Gestione Buoni Pasto</a></li>
               #{/if}
 
             </ul>
@@ -179,11 +180,16 @@
             <ul class="dropdown-menu">
               #{if ip.viewOffice }
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
-              <li><a href="@{BadgeReaders.list()}">Lettori Badge</a></li>
-              <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
+              <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
+              <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
+              
               #{/if}
               #{if ip.viewWorkingTimeType}
-              <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
+
+              <li><a href="@{Configurations.showConfGeneral()}">Parametri</a></li>
+
+              <li><a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Lavoro</a></li>
+
               #{/if}
               #{if ip.viewCompetenceCode}
               <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
@@ -324,38 +330,14 @@
     <!-- do layout -->
     #{doLayout /}
 
-    <!-- Altri componenti html -->
     #{if flash.error}
-    <div id="flash-error" class="popover bottom">
-      <div class="arrow"></div>
-      <h3 class="popover-title"><strong>Notifica</strong>
-        <button id="buttonError" type="button" class="close" aria-hidden="true">&times;</button>
-      </h3>
-      <div class="popover-content">
-        #{if flash.error.equals('secure.error')}
-        <strong>&{'secure.error'}</strong>
-        #{/if}
-        #{else}
-        <strong>${flash.error}</strong>
-        #{/else}
+      <div class="sr-only" data-notify="${'notify.error'.label()}" data-notify-type="error">
+        &{flash.error}
       </div>
-    </div>
-    #{/if}
-    #{if flash.success}
-    <div id="flash-success" class="popover bottom">
-      <div class="arrow"></div>
-      <h3 class="popover-title"><strong>Notifica</strong>
-        <button id="buttonSuccess" type="button" class="close" aria-hidden="true">&times;</button>
-      </h3>
-      <div class="popover-content">
-        #{if flash.success.equals('secure.logout')}
-        <strong>&{'secure.logout'}</strong>
-        #{/if}
-        #{else}
-        <strong>${flash.success}</strong>
-        #{/else}
+    #{/if} #{if flash.success}
+      <div class="sr-only" data-notify="${'notify.success'.label()}" data-notify-type="success">
+        &{flash.success}
       </div>
-    </div>
     #{/if}
 
     <div id="defaultModal" class="modal container" tabindex="-1"></div>
@@ -397,6 +379,7 @@
 #{script 'bootstrap-modalmanager.js' /}
 #{script 'script.js' /}
 #{script 'list-select.min.js' /}
+#{script 'pnotify.custom.min.js' /}
 
 #{include '_myModal.html' /}
 #{get 'moreScripts' /}

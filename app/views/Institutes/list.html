@@ -55,49 +55,14 @@
           #{list items:item.seats, as:'seat'}
           
            <li class="list-group-item  list-group-item-bianco">
-             <h4><a class="list-group-item-heading" href="@{Offices.edit(seat.id)}">
-			    <i class="fa fa-cogs"></i> ${seat.name} 
-    	        </a></h4>
-           
-             <div class="list-group-item-text">
-              ${seat.address}
-             </div>
-             <div class="list-group-item-text">
-              ${seat.code}
-             </div>
-             
-             <div class="list-group-item-text">
-               <span class="label label-primary">Amministratore Tecnico</span>
-               #{list items:seat.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('tecnicalAdmin') && uro.user.person }
-                  <span class="label label-info">${uro.user.person.fullname}</span>
-                 #{/if}
-               #{/list}
-               <br>
-               <span class="label label-primary">Amministratori Personale</span>
-               #{list items:seat.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('personnelAdmin') && uro.user.person }
-                  <span class="label label-success">${uro.user.person.fullname}</span>
-                 #{/if}
-                 #{if uro.role.name.equals('personnelAdminMini') && uro.user.person }
-                  <span class="label label-warning">${uro.user.person.fullname}</span>
-                 #{/if}
-               #{/list}
-               <br>
-               <span class="label label-primary">Lettori Badge</span>
-               #{list items:seat.usersRolesOffices, as:'uro'}
-                 #{if uro.role.name.equals('badgeReader') }
-                  <span class="label label-danger">${uro.user.username}</span>
-                 #{/if}
-               #{/list}
-             </div>
+						 #{office.item item:seat, edit:'true' /}
      	   </li>
 	          
 	      #{/list}
 	    </ul>
 	     
 	   #{/list}
-	        #{/paginate} 
+	 #{/paginate} 
      </section>
      </div>
 

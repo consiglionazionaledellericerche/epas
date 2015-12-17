@@ -15,7 +15,7 @@
    #{tabContentItem id:'edit', active:true}
    <div id="stampingData">    
 	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
-	    class:'form form-horizontal', 'data-async-error':'#stampingData'}
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
 	    
 	    #{if stamping.persistent}
 	      <div class="alert alert-success center">Modifica i dati della timbratura delle ore ${stamping.time}</div>

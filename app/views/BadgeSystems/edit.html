@@ -1,0 +1,219 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sede'  /}
+
+#{set breadcrumbs:['badgeSystems':@BadgeSystems.list(), ('Configura '+ badgeSystem.name):null] /}
+
+<div class="container">
+
+  #{breadcrumbs breadcrumbs, noHome:'true' /}
+
+  #{title title:'Configurazione ' + badgeSystem.name /}
+
+  #{tabs}
+  #{tabItem id:'info', title:'Riepilogo', active:true /}
+  #{tabItem id:'badges', title:'Badge'/}
+  #{tabItem id:'advanced', title:'Avanzate'/}
+  #{tabItem id:'delete', title:'Elimina'/}
+  #{/tabs}
+  <br>
+
+  #{tabContent}
+
+  #{tabContentItem id:'info', active:true}
+  #{panel title:'Informazioni', color:'primary'}
+  <div class="alert alert-info" role="alert">
+    Modifica i dati del &{'badgeSystem'} <strong>${badgeSystem.name}</strong>
+  </div>
+  #{form action:@updateInfo(), method:'POST', autocomplete:false,
+  class:'form form-horizontal' }
+
+  #{f.hidden 'badgeSystem.id' /}
+  #{f.input 'badgeSystem.name', required:true /}
+  #{f.input 'badgeSystem.description' /}
+
+  #{f.view 'badgeSystem.office', value:badgeSystem.office.name /}
+
+  #{b.buttons center:'true'}
+  #{b.save /}
+  #{/b.buttons}
+  #{/form}
+  #{/panel}
+
+  #{alert color:'info'}
+  <p>Le <strong><i class="fa fa-database"></i> &{'badgeReaders'}</strong> associate al
+    &{'badgeSystem'} <strong>${badgeSystem.name}</strong>.</p>
+  #{/alert}
+
+  <section id="results">
+    #{paginate badgeReadersResults}
+    <ul class="list-group">
+      #{list items:badgeReadersResults.results, as:'item'}
+
+      <li class="list-group-item list-group-item-grey">
+        #{badgeReader.item item:item /}
+      </li>
+
+      #{/list}
+    </ul>
+    #{/paginate}
+  </section>
+
+  #{/tabContentItem}
+
+
+  #{tabContentItem id:'badges'}
+
+  #{if badgeSystem.badgeReaders.empty}
+  #{alert color:'info'}
+  Per rendere operativo questo &{'badgeSystem'} e poter iniziare l'assegnamento dei codici ai
+  dipendenti
+  è necessario associarlo ad almeno una
+  <a href="@{BadgeReaders.list()}" <strong> <i class="fa fa-database"></i>
+  &{'badgeReader'}</strong></a>
+  #{/alert}
+  #{/if}
+  #{else}
+  #{secure.checkAction 'BadgeSystems.joinBadges'}
+  <div class="text-center">
+    <a class="btn btn-success" href="@{joinBadges(badgeSystem.id)}"
+       data-async-modal="#defaultModal">
+      &{'BadgeSystems.joinBadges'} ${badgeSystem.name}
+    </a>
+  </div>
+  <br>
+  #{/secure.checkAction}
+  #{/else}
+
+  #{alert color:'info'}
+  <p><strong>Lista dei Badge</strong> attualmente assegnati nel &{'badgeSystem'} <strong>${badgeSystem.name}</strong>.
+  </p>
+  #{/alert}
+
+  #{if badges.empty}
+  Nessun codice badge assegnato.
+  #{/if}
+  #{else}
+  <table datatable class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <th>Nome</th>
+      <th><i class="fa fa-credit-card"></i> Codice Badge</th>
+      <th>Etichetta</th>
+      <th>Elimina</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:badges, as:'badge'}
+    <tr>
+      <td>${badge.person.fullname}</td>
+      <td>${badge.code}</td>
+      <td>
+        #{if badge.code.equals(badge.person.number+"") }
+        <span class="label label-info">Matricola</span>
+        #{/if}
+        #{if badge.code.equals(badge.person.badgeNumber) }
+        <span class="label label-success">Old</span>
+        #{/if}
+      </td>
+      <td>
+        <a class="btn btn-danger btn-xs" href="@{BadgeSystems.deleteBadge(badge.id)}"
+           data-async-modal="#defaultModal">Rimuovi</a>
+      </td>
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+  #{/else}
+
+  #{/tabContentItem}
+
+
+  #{tabContentItem id:'advanced'}
+
+  #{if badgeSystem.badgeReaders.empty}
+  #{alert color:'info'}
+  Per rendere operativo questo &{'badgeSystem'} e poter iniziare l'assegnamento dei codici ai
+  dipendenti
+  è necessario associarlo ad almeno una
+  <a href="@{BadgeReaders.list()}" <strong> <i class="fa fa-database"></i>
+  &{'badgeReader'}</strong></a>
+  #{/alert}
+  #{/if}
+  #{else}
+
+  #{panel title:'Associa Matricole'}
+  #{alert color:'info'}
+  <div class="text-center">
+    <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
+      la matricola come codice badge.</p>
+    <a class="btn btn-primary" href="@{joinPersonNumbers(badgeSystem.id)}">
+      Associa Matricole
+    </a>
+  </div>
+  #{/alert}
+  #{/panel}
+
+  #{panel title:'Vecchi Codici'}
+  #{if !personsOldBadge.empty}
+  #{alert color:'info'}
+  <div class="text-center">
+    <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
+      tutti i codici badge della precedente gestione badge.</p>
+    <a class="btn btn-primary" href="@{joinOldBadgeNumbers(badgeSystem.id)}">
+      Associa Tutti i Vecchi Codici
+    </a>
+  </div>
+  #{/alert}
+  <div class="col-md-6 col-md-offset-3">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Nome</th>
+        <th><i class="fa fa-credit-card"></i> Vecchio Codice</th>
+      </tr>
+      </thead>
+      <tbody>
+      #{list items:personsOldBadge, as:'personOldBadge'}
+      <tr>
+        <td>${personOldBadge.fullname}</td>
+        <td>${personOldBadge.badgeNumber}</td>
+      </tr>
+
+      #{/list}
+      </tbody>
+    </table>
+  </div>
+  #{/if}
+  #{/panel}
+
+  #{/else}
+
+  #{/tabContentItem}
+
+  #{tabContentItem id:'delete'}
+
+  #{if badgeSystem.badgeReaders.empty }
+  <div class="text-danger center">
+    #{alert color:'danger'}
+    <p>E' possibile eliminare il &{'badgeSystem'} <strong>${badgeSystem.name}</strong> poichè non è
+      associato ad
+      alcuna &{'badgeReader'}.</p>
+    <a class="btn btn-danger" href=@{BadgeSystems.delete(badgeSystem.id)}>Elimina</a>
+    #{/alert}
+  </div>
+  #{/if}
+  #{else}
+  #{alert color:'info'}
+  <p>E' possibile eliminare un &{'badgeSystem'} solo nel caso in cui non sia associato ad alcuna
+    &{'badgeReader'}</p>
+  #{/alert}
+  #{/else}
+
+  #{/tabContentItem}
+
+
+  #{/tabContent}
+
+</div>

@@ -23,6 +23,10 @@ public class QPeriodModel extends EntityPathBase<PeriodModel> {
 
     public final QBaseModel _super = new QBaseModel(this);
 
+    public final DatePath<org.joda.time.LocalDate> beginDate = createDate("beginDate", org.joda.time.LocalDate.class);
+
+    public final DatePath<org.joda.time.LocalDate> endDate = createDate("endDate", org.joda.time.LocalDate.class);
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 

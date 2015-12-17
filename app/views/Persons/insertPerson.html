@@ -3,6 +3,13 @@
 #{set title: 'ePAS - Inserimento nuova persona' /}
 
 <div class="container">
+
+  #{set breadcrumbs:['Lista Persone':@Persons.list(),
+  ('Inserimento Dipendente'):null] /}
+  #{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+  #{title title:'Inserimento Dipendente' /} 
+
   #{form @Persons.save(),class:'form-horizontal'}
   <div class="panel panel-primary">
     <div class="panel-heading">
@@ -13,7 +20,6 @@
       #{f.input 'person.surname',required:'true'/}
       #{f.input 'person.name',required:'true'/}
       #{f.input 'person.number',type:'number'/}
-      #{f.input 'person.badgeNumber'/}
       #{f.input 'person.email',required:'true'/}
 
       #{f.selectModel 'person.qualification', items:templateUtility.allQualifications, required:'true'/}
@@ -35,9 +41,9 @@
       <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
     </div>
     <div class="panel-body">
-      #{f.date 'contract.beginContract',view:'year',required:'true'/} 
-      #{f.date 'contract.expireContract',view:'year'/} 
-      #{f.checkbox 'contract.onCertificate',title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
+      #{f.date 'contract.beginDate',view:'year',required:'true'/} 
+      #{f.date 'contract.endDate',view:'year'/} 
+      #{f.checkbox 'contract.onCertificate',value: true, title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
 
       <p>
         Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
