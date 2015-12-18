@@ -133,7 +133,25 @@
 			</p>
           #{/if}
         #{/alert}  
+      
    #{/tabContentItem}
+   
+   #{if !vacationsRecap.postPartum.empty}
+     #{alert color:'danger'}
+       #{if activeVacationCurrentYear }
+         <p>
+            <strong>Periodo Contrattuale Ferie Anno Corrente ${vacationsRecap.year}</strong>: 
+         	Dal ${vacationsRecap.requestYearInterval.begin} al ${vacationsRecap.requestYearInterval.end}
+         </p>
+         <p>
+            <strong>Giorni Periodo Contrattuale</strong>: 
+         </p>
+         			sono state effettuate ${vacationsRecap.postPartum.size()} assenze
+            post partum, che vanno ad influire sulla base dei giorni per il calcolo delle ferie totali.
+         </p>
+       #{/if}
+     #{/alert}	  
+   #{/if}
    
   #{/tabContent}
 

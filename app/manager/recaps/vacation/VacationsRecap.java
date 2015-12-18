@@ -1,27 +1,29 @@
 package manager.recaps.vacation;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import manager.ConfYearManager;
-import manager.VacationManager;
+
 import manager.cache.AbsenceTypeManager;
+import manager.vacations.AccruedComponent;
+import manager.vacations.AccruedDecision;
+import manager.vacations.AccruedDecision.TypeAccrued;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.enumerate.AbsenceTypeMapping;
+
+import org.joda.time.LocalDate;
+
+import java.util.List;
 
 
 /**
@@ -30,30 +32,60 @@ import models.enumerate.AbsenceTypeMapping;
  */
 public class VacationsRecap {
 
+  // DAO E MANAGER
+  
   private final AbsenceTypeManager absenceTypeManager;
   private final AbsenceDao absenceDao;
-  private final VacationManager vacationManager;
+  
+  // DATI DELLA RICHIESTA
+  
   public Person person;
+  public Contract contract;
   public int year;
-  public Contract contract = null;
   public IWrapperContract wrContract = null;
   public DateInterval activeContractInterval = null;
   public LocalDate accruedDate;
-  public int vacationDaysLastYearUsed = 0;
-  public int vacationDaysCurrentYearUsed = 0;
-  public int permissionUsed = 0;
-  public Integer vacationDaysLastYearAccrued = 0;
-  public Integer vacationDaysCurrentYearAccrued = 0;
-  public Integer permissionCurrentYearAccrued = 0;
-  public Integer vacationDaysLastYearNotYetUsed = 0;
-  public Integer vacationDaysCurrentYearNotYetUsed = 0;
-  public Integer persmissionNotYetUsed = 0;
+  
+  // DECISIONI
+  
+  public AccruedDecision decisionsVacationLastYearAccrued;
+  public AccruedDecision decisionsVacationCurrentYearAccrued;
+  public AccruedDecision decisionsPermissionYearAccrued;
+
+  public AccruedDecision decisionsVacationCurrentYearTotal;
+  public AccruedDecision decisionsPermissionYearTotal;
+
+  // TOTALI
   public Integer vacationDaysCurrentYearTotal = 0;
   public Integer permissionCurrentYearTotal = 0;
   public LocalDate dateExpireLastYear;
-  public boolean isExpireLastYear = false;		/* true se le ferie dell'anno passato sono scadute */
-  public boolean isExpireBeforeEndYear = false;	/* true se il contratto termina prima della fine dell'anno richiesto */
-  public boolean isActiveAfterBeginYear = false;	/* true se il contratto inizia dopo l'inizio dell'anno richiesto */
+  
+  // USATE
+  public int vacationDaysLastYearUsed = 0;
+  public int vacationDaysCurrentYearUsed = 0;
+  public int permissionUsed = 0;
+  
+  // MATURATE
+  public Integer vacationDaysLastYearAccrued = 0;
+  public Integer vacationDaysCurrentYearAccrued = 0;
+  public Integer permissionCurrentYearAccrued = 0;
+  
+  // RIMANENTI
+  public Integer vacationDaysLastYearNotYetUsed = 0;
+  public Integer vacationDaysCurrentYearNotYetUsed = 0;
+  public Integer persmissionNotYetUsed = 0;
+  
+  /* true se le ferie dell'anno passato sono scadute */
+  public boolean isExpireLastYear = false;
+  
+  /* true se il contratto termina prima della fine dell'anno richiesto */
+  public boolean isExpireBeforeEndYear = false;
+  
+  /* true se il contratto inizia dopo l'inizio dell'anno richiesto */
+  public boolean isActiveAfterBeginYear = false;
+  
+  // SUPPORTO AL CALCOLO
+  
   private DateInterval previousYearInterval;
   private DateInterval requestYearInterval;
   private DateInterval nextYearInterval;
@@ -67,24 +99,24 @@ public class VacationsRecap {
   private List<Absence> postPartum = Lists.newArrayList();
 
   /**
-   * @param year                   l'anno in considerazione
-   * @param contract               il contratto di cui si vuole calcolare il riepilogo.
-   * @param actualDate             la data specifica dell'anno attuale in cui si desidera
-   *                               fotografare la situazione in termini di ferie e permessi maturati
-   *                               (tipicamente oggi)
-   * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza
-   *                               per l'utilizzo
+   * Il riepilogo annuale per l'anno e il contratto.
+   * 
+   * @param absenceDao injected
+   * @param absenceTypeManager injected
+   * @param year l'anno in considerazione
+   * @param wrContract contratto del riepilogo
+   * @param accruedDate la data specifica in cui si desidera fotografare la situazione
+   * @param dateExpireLastYear la data di scadenza ferie per l'istituto del contratto.
+   * @param considerExpireLastYear se si vuole considerare la scadenza ferie in configurazione
+   * @param otherAbsences assenze extra-db
+   * @param dateAsToday la data di simulazione come se fosse la data di oggi.
    */
-  public VacationsRecap(IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
-                        AbsenceTypeDao absenceTypeDao, AbsenceTypeManager absenceTypeManager,
-                        ConfYearManager confYearManager,
-                        VacationManager vacationManager,
-                        int year, Contract contract, Optional<LocalDate> accruedDate,
-                        boolean considerExpireLastYear, List<Absence> otherAbsences,
-                        Optional<LocalDate> dateAsToday) {
+  public VacationsRecap(AbsenceDao absenceDao, AbsenceTypeManager absenceTypeManager,
+                        int year, IWrapperContract wrContract, Optional<LocalDate> accruedDate,
+                        LocalDate dateExpireLastYear, boolean considerExpireLastYear, 
+                        List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
 
     this.absenceDao = absenceDao;
-    this.vacationManager = vacationManager;
     this.absenceTypeManager = absenceTypeManager;
 
     if (accruedDate.isPresent()) {
@@ -93,12 +125,11 @@ public class VacationsRecap {
       accruedDate = Optional.fromNullable(LocalDate.now());
     }
     this.accruedDate = accruedDate.get();
-
-    this.person = contract.person;
+    this.wrContract = wrContract;
+    this.contract = wrContract.getValue();
+    this.person = wrContract.getValue().person;
     this.year = year;
-
-    this.contract = contract;
-    this.wrContract = wrapperFactory.create(contract);
+    this.dateExpireLastYear = dateExpireLastYear;
     this.activeContractInterval = wrContract.getContractDateInterval();
 
     initDataStructures(otherAbsences, dateAsToday);
@@ -114,7 +145,8 @@ public class VacationsRecap {
     //(3) permessi usati dell'anno richiesto
     permissionUsed = list94RequestYear.size();
 
-    if (this.contract.sourceDateResidual != null && this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null 
+        && this.contract.sourceDateResidual.getYear() == year) {
       vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
       vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
       permissionUsed += this.contract.sourcePermissionUsed;
@@ -123,21 +155,47 @@ public class VacationsRecap {
     //(4) Calcolo ferie e permessi maturati per l'anno passato e l'anno corrente
     // (sono indipendenti dal database)
 
-    this.vacationDaysLastYearAccrued = vacationManager
-            .getVacationAccruedYear(wrContract, year - 1, Optional.<LocalDate>absent(), postPartum);
-    this.permissionCurrentYearAccrued = vacationManager
-            .getPermissionAccruedYear(wrContract, year, accruedDate);
-    this.vacationDaysCurrentYearAccrued = vacationManager
-            .getVacationAccruedYear(wrContract, year, accruedDate, postPartum);
+    AccruedComponent accruedComponent = AccruedComponent.builder()
+        .year(year)
+        .contractDateInterval(wrContract.getContractDateInterval())
+        .accruedDate(accruedDate)
+        .contractVacationPeriod(contract.vacationPeriods)
+        .postPartum(postPartum).build();
 
+    this.decisionsVacationLastYearAccrued = AccruedDecision.builder()
+        .accruedComponent(accruedComponent)
+        .typeAccrued(TypeAccrued.VACATION_LAST_YEAR_TOTAL)
+        .build();
+    
+    this.decisionsPermissionYearAccrued = AccruedDecision.builder()
+        .accruedComponent(accruedComponent)
+        .typeAccrued(TypeAccrued.PERMISSION_CURRENT_YEAR_ACCRUED)
+        .build();
+    
+    this.decisionsVacationCurrentYearAccrued = AccruedDecision.builder()
+        .accruedComponent(accruedComponent)
+        .typeAccrued(TypeAccrued.VACATION_CURRENT_YEAR_ACCRUED)
+        .build();
+    
+    this.vacationDaysLastYearAccrued = 0;
+    this.vacationDaysCurrentYearAccrued = 0;
+    this.permissionCurrentYearAccrued = 0;
+
+    
     //(5) Calcolo ferie e permessi totali per l'anno corrente
-    this.permissionCurrentYearTotal = vacationManager
-            .getPermissionAccruedYear(wrContract, year, Optional.<LocalDate>absent());
-    this.vacationDaysCurrentYearTotal = vacationManager
-            .getVacationAccruedYear(wrContract, year, Optional.<LocalDate>absent(), postPartum);
-
-    //(6) Calcolo ferie e permessi non ancora utilizzati per l'anno corrente e per l'anno precedente
-    // (sono funzione di quanto calcolato precedentemente)
+    this.decisionsPermissionYearTotal = AccruedDecision.builder()
+        .accruedComponent(accruedComponent)
+        .typeAccrued(TypeAccrued.PERMISSION_CURRENT_YEAR_TOTAL)
+        .build();
+            
+    this.decisionsVacationCurrentYearTotal = AccruedDecision.builder()
+        .accruedComponent(accruedComponent)
+        .typeAccrued(TypeAccrued.VACATION_CURRENT_YEAR_TOTAL)
+        .build();
+    
+    //(6) Calcolo ferie e permessi non ancora utilizzati 
+    //    per l'anno corrente e per l'anno precedente
+    //    (sono funzione di quanto calcolato precedentemente)
 
     //Anno passato
     if (!this.accruedDate.isAfter(dateExpireLastYear) || !considerExpireLastYear) {
@@ -166,13 +224,18 @@ public class VacationsRecap {
 
   }
 
+  /**
+   * Lista delle ferie usate nell'anno corrente.
+   * @return lista assenze
+   */
   public List<Absence> listVacationCurrentYearUsed() {
+    
     List<Absence> absences = Lists.newArrayList();
     absences.addAll(list32RequestYear);
     absences.addAll(list31NextYear);
     absences.addAll(list37NextYear);
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null 
+        && this.contract.sourceDateResidual.getYear() == year) {
       vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
       vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
       permissionUsed += this.contract.sourcePermissionUsed;
@@ -181,7 +244,12 @@ public class VacationsRecap {
     return absences;
   }
 
+  /**
+   * Lista delle ferie usate nell'anno passato.
+   * @return lista assenze
+   */
   public List<Absence> listVacationLastYearUsed() {
+    
     List<Absence> absences = Lists.newArrayList();
     absences.addAll(list32PreviouYear);
     absences.addAll(list31RequestYear);
@@ -189,36 +257,55 @@ public class VacationsRecap {
     return absences;
   }
 
+  /**
+   * Lista dei permessi usate nell'anno corrente.
+   * @return lista assenze
+   */
   public List<Absence> listPermissionUsed() {
+    
     return list94RequestYear;
   }
 
+  /**
+   * Ferie usate anno corrente da inizializzazione.
+   * @return numero assenze.
+   */
   public int sourceVacationCurrentYearUsed() {
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    
+    if (this.contract.sourceDateResidual != null 
+        && this.contract.sourceDateResidual.getYear() == year) {
       return this.contract.sourceVacationCurrentYearUsed;
     }
     return 0;
   }
-
+  
+  /**
+   * Ferie usate anno passato da inizializzazione.
+   * @return numero assenze.
+   */
   public int sourceVacationLastYearUsed() {
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    
+    if (this.contract.sourceDateResidual != null 
+        && this.contract.sourceDateResidual.getYear() == year) {
       return this.contract.sourceVacationLastYearUsed;
     }
     return 0;
   }
 
+  /**
+   * Permessi usati anno corrente da inizializzazione.
+   * @return numero assenze.
+   */
   public int sourcePermissionUsed() {
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    
+    if (this.contract.sourceDateResidual != null 
+        && this.contract.sourceDateResidual.getYear() == year) {
       return this.contract.sourcePermissionUsed;
     }
     return 0;
   }
 
-  private void initDataStructures(List<Absence> otherAbsences,
-                                  Optional<LocalDate> dateAsToday) {
+  private void initDataStructures(List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
 
     // Gli intervalli su cui predere le assenze nel db
     this.previousYearInterval = DateUtility
@@ -329,13 +416,11 @@ public class VacationsRecap {
     }
 
     //Vacation Last Year Expired
-    this.dateExpireLastYear = vacationManager
-            .vacationsLastYearExpireDate(year, this.person.office);
     this.isExpireLastYear = false;
     if (this.year < LocalDate.now().getYear()) {
       this.isExpireLastYear = true;
     } else if (this.year == LocalDate.now().getYear()
-            && accruedDate.isAfter(dateExpireLastYear)) {
+            && accruedDate.isAfter(this.dateExpireLastYear)) {
       this.isExpireLastYear = true;
     }
 

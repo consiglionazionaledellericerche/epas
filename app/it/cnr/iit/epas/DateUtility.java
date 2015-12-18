@@ -144,6 +144,7 @@ public class DateUtility {
 
 
   /**
+   * Se la data è contenuta nell'intervallo.
    * @param date     data
    * @param interval intervallo
    * @return true se la data ricade nell'intervallo estremi compresi
@@ -161,8 +162,11 @@ public class DateUtility {
   }
 
   /**
+   * L'intervallo contenente l'intersezione fra inter1 e inter2.
+   * @param inter1 primo intervallo
+   * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
-   * intersezione vuota
+   *         intersezione vuota.
    */
   public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2) {
     if (inter1 == null || inter2 == null) {
@@ -191,15 +195,14 @@ public class DateUtility {
     } else {
       return new DateInterval(inter2.getBegin(), inter1.getEnd());
     }
-
   }
-
+  
   /**
+   * Conta il numero di giorni appartenenti all'intervallo estremi compresi.
    * @param inter l'intervallo
-   * @return conta il numero di giorni appartenenti all'intervallo estremi compresi
+   * @return numero di giorni
    */
   public static int daysInInterval(final DateInterval inter) {
-
 
     int days = Days.daysBetween(inter.getBegin(), inter.getEnd()).getDays() + 1;
 
@@ -218,20 +221,22 @@ public class DateUtility {
   }
 
   /**
+   * Se il primo intervallo è contenuto nel secondo intervallo.
    * @param first  il primo intervallo
    * @param second il secondo intervallo
-   * @return true se il primo intervallo e' contenuto nel secondo intervallo (estremi compresi),
-   * false altrimenti
+   * @return se il primo interllallo è contenuto nel secondo intervallo.
    */
   public static boolean isIntervalIntoAnother(final DateInterval first, final DateInterval second) {
 
-    if (first.getBegin().isBefore(second.getBegin()) || first.getEnd().isAfter(second.getEnd())) {
+    if (first.getBegin().isBefore(second.getBegin()) 
+        || first.getEnd().isAfter(second.getEnd())) {
       return false;
     }
     return true;
   }
 
   /**
+   * La data massima che equivale a infinito.
    * @return la data infinito
    */
   public static LocalDate setInfinity() {
@@ -244,6 +249,15 @@ public class DateUtility {
    */
   public static boolean isInfinity(final LocalDate date) {
     return date.equals(MAX_DATE);
+  }
+  
+  /**
+   * L'intervallo dell'anno.
+   * @param year anno
+   * @return l'intervallo
+   */
+  public static DateInterval getYearInterval(int year) {
+    return new DateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
   }
 
 
