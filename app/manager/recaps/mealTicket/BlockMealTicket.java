@@ -2,6 +2,7 @@ package manager.recaps.mealTicket;
 
 import com.google.common.collect.Lists;
 
+import models.Contract;
 import models.MealTicket;
 import models.Person;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class BlockMealTicket {
 
+  public Contract contract;
   public Integer codeBlock;
   public List<MealTicket> mealTickets;
 
@@ -89,6 +91,22 @@ public class BlockMealTicket {
     if (this.getDimBlock() > 0)
       return this.mealTickets.get(0).date;
     return null;
+  }
+  
+  /**
+   * Il primo number del blocco.
+   * @return
+   */
+  public int getFirst() {
+    return this.mealTickets.get(0).number;
+  }
+  
+  /**
+   * L'ultimo number del blocco.
+   * @return
+   */
+  public int getLast() {
+    return this.mealTickets.get(this.mealTickets.size()-1).number;
   }
 
 }

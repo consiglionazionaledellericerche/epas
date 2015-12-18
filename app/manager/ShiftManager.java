@@ -170,7 +170,7 @@ public class ShiftManager {
             //-----------------------------
             //Logger.debug("Legge le coppie di timbrature valide");
             // legge le coppie di timbrature valide
-            List<PairStamping> pairStampings = personDayManager.getValidPairStamping(personDay.get());
+            List<PairStamping> pairStampings = personDayManager.computeValidPairStampings(personDay.get());
 
             //Logger.debug("Dimensione di pairStampings =%s", pairStampings.size());
 

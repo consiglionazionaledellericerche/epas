@@ -10,32 +10,43 @@ import models.Stamping;
  */
 public class PairStamping {
 
+  /**
+   * Id univoco alla sequenza..
+   */
   private static int SEQUENCE_ID = 1;
+  
   public Stamping in;
   public Stamping out;
-  int pairId;    //for hover template
+  
   int timeInPair = 0;
 
+  /**
+   * Coppia di timbrature per pranzo. CNR centrale.
+   */
   boolean prPair = false;
-
+  
+  /**
+   * Costruisce la coppia di timbrature.
+   * @modify in.pairId e out.pairId se appartengono ad una coppia valida. 
+   * @param in ingresso
+   * @param out uscita
+   */
   public PairStamping(Stamping in, Stamping out) {
+
     this.in = in;
     this.out = out;
 
-    // Vecchio calcolo reintrodotto.
     timeInPair = 0;
     timeInPair = timeInPair - DateUtility.toMinute(in.date);
     timeInPair = timeInPair + DateUtility.toMinute(out.date);
-
-    // TODO: Se si vuole usare le JodaTime assicuriamoci che facciano
-    // per bene il loro lavoro!! In questa implementazione considera anche
-    // i secondi e quindi spesso arrotonda  l'elapsed al minuto inferiore.
-    //timeInPair = Minutes.minutesBetween(in.date, out.date).getMinutes();
-    //
-
-    this.pairId = SEQUENCE_ID++;
-    in.pairId = this.pairId;
-    out.pairId = this.pairId;
+    
+    //La coppia valida la imposto nel caso di coppia definitiva (non contenente l'uscita fittizia
+    // e se si tratta di una coppia in-out, il caso out-in è usato nel calcolo del buono pasto.
+    if (!out.exitingNow && in.isIn() && out.isOut()) {
+      int pairId = SEQUENCE_ID++;
+      in.pairId = pairId;
+      out.pairId = pairId;
+    }
 
     // TODO: decidere se entrambe o almeno una.
     if ((in.stampType != null && in.stampType.identifier.equals("pr"))
