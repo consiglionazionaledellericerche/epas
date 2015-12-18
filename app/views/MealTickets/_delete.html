@@ -1,9 +1,14 @@
-    #{panel title:'Elenco dei blocchi assegnati negli ultimi due anni.', color:'primary'}  
+    #{alert color:'info'}
+      <p>Elenco dei blocchi consegnati a <strong>${recap.contract.person.fullname}</strong>.</p>
+      <p><i class="fa fa-lightbulb-o"></i> Cliccando sui titoli delle colonne è possibile ordinare
+      i blocchi consegnati per <em>Codice Blocco</em>, <em>Data Consegna</em> e <em>Data Scadenza</em> </p>
+    #{/alert} 	
 
-	  <table class="table center">
-		    <tr class="warning">
+	  <table class="table center" datatable-meal>
+	    <thead>
+		    <tr>
 		      <th>Codice</th>
-		      <th>Attribuito il</th>
+		      <th>Consegnato il</th>
 		      <th>Scadenza</th>
 		      *{
 		      <th>Usati</th>
@@ -11,16 +16,15 @@
 		      }*
 		      <th>Rimozione</th>
 		    </tr>
-	          
-      #{list items:today.year..(today.year-1), as:'year'}
-		
-		    #{list items:recap.getBlockMealTicketReceivedInYear(year), as:'block'}
-		      <tr style="background-color: white;">
+	     </thead>
+	     <tbody>     
+ 	      #{list items:recap.getBlockMealTicketReceivedDeliveryDesc(), as:'block'}
+		      <tr>
 		        <td>
-		          <strong>${block.codeBlock}</strong>
-		        </td>
-		        <td>${block.getDate()?.format()}</td>
-		        <td>${block.getExpireDate()?.format()}</td>
+		          <strong>${block.codeBlock}</strong> (${block.first}-${block.last})
+		        </td> 
+		        <td data-order="${block.getDate()}">${block.getDate()?.format()}</td>
+		        <td data-order="${block.getExpireDate()}">${block.getExpireDate()?.format()}</td>
 		        *{
 		        <td>
 		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
@@ -31,28 +35,11 @@
 		        }*
 		        
 		        <td>
-		        
-		    	  <div class="delete-confirmed">
-		    	    <button type="submit" class="btn btn-sm btn-danger delete-first"><span class="glyphicon glyphicon-trash"></span></button>
-		    	    
-				    <div class="delete" style="display: none">
-				      
-				      #{form @MealTickets.deletePersonMealTicket() }
-		    	      <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
-		    	  
- 			    	  <input type="hidden" name="name" value="${name}"/>
-		    	      <input type="hidden" name="page" value="${page}"/>
-		    	      <input type="hidden" name="max" value="${max}"/>
-		    	      
-		    	      <button type="submit" class="btn btn-sm btn-danger">Sei sicuro??</button>
-		    	      
-	        	      #{/form}   
-		    	    </div>
-		    	  </div>
-		  		
-		        </td>
+                  <a class="btn btn-danger btn-xs" 
+                  href="@{MealTickets.deletePersonMealTicket(recap.contract.id, block.codeBlock, block.first, block.last, false)}"
+                  data-async-modal="#defaultModal" >Rimuovi</a>
+                </td>
 		      </tr>
-		    #{/list}
-		#{/list}  
+		  #{/list}  
+		  </tbody>
       </table>
-    #{/panel}

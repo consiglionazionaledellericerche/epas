@@ -74,13 +74,20 @@ public class AbsenceTypeDao extends DaoBase {
     //TRICK selezionare anche quelle mai usate: http://stackoverflow.com/
     //questions/4076098/how-to-select-rows-with-no-matching-entry-in-another-table
     
-    final JPQLQuery query = getQueryFactory().from(absenceType)
-        .leftJoin(absenceType.absences, absence)
-        .where(absence.id.isNull().or(absence.id.isNotNull()))
-        .groupBy(absenceType)
-        .orderBy(absence.count().desc());
-    
-    return query.list(absenceType); 
+    //IVV fallisce. Aggiornare alla macchina docker.
+    try {
+      final JPQLQuery query = getQueryFactory().from(absenceType)
+          .leftJoin(absenceType.absences, absence)
+          .where(absence.id.isNull().or(absence.id.isNotNull()))
+          .groupBy(absenceType)
+          .orderBy(absence.count().desc());
+
+      return query.list(absenceType);
+
+    } catch (Exception e) {
+      return getQueryFactory().from(absenceType)
+          .orderBy(absenceType.code.asc()).list(absenceType);
+    }
 
   }
 

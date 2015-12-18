@@ -19,6 +19,8 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import manager.MealTicketManager.MealTicketOrder;
 import manager.cache.CompetenceCodeManager;
 import models.Absence;
 import models.Competence;
@@ -170,6 +172,7 @@ public class ContractMonthRecapManager {
       //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
       //in source
       cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
+      cmr.buoniPastoDalMesePrecedente = 0;
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -473,9 +476,8 @@ public class ContractMonthRecapManager {
       }
 
       //Numero ticket consegnati nel mese
-      cmr.buoniPastoConsegnatiNelMese =
-              mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
-                      cmr.contract, validDataForMealTickets).size();
+      cmr.buoniPastoConsegnatiNelMese = mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
+          cmr.contract, validDataForMealTickets, MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC).size();
     }
 
     //residuo

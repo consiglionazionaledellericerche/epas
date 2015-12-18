@@ -1,5 +1,6 @@
 package manager.recaps.mealTicket;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.MealTicketDao;
@@ -9,6 +10,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.MealTicketManager;
+import manager.MealTicketManager.MealTicketOrder;
 
 import models.Contract;
 import models.MealTicket;
@@ -19,12 +21,14 @@ import org.joda.time.LocalDate;
 import java.util.List;
 
 /**
+ * Riepilogo buoni pasto di un contratto.
  * @author alessandro
  */
 public class MealTicketRecap {
 
   private final Contract contract;
   private MealTicketManager mealTicketManager;
+  private MealTicketDao mealTicketDao;
   private LocalDate dateExpire = null;
   private LocalDate dateRunOut = null;
 
@@ -46,8 +50,9 @@ public class MealTicketRecap {
    * salvato il numero di buoni pasto rimanenti
    */
   public MealTicketRecap(MealTicketManager mealTicketManager, PersonDao personDao,
-                         MealTicketDao mealTicketDao, Contract contract, DateInterval dateInterval) {
+      MealTicketDao mealTicketDao, Contract contract, DateInterval dateInterval) {
 
+    this.mealTicketDao = mealTicketDao;
     this.mealTicketManager = mealTicketManager;
     this.contract = contract;
 
@@ -56,8 +61,8 @@ public class MealTicketRecap {
     this.personDaysMealTickets = personDao.getPersonDayIntoInterval(
             contract.person, this.mealTicketInterval, true);
 
-    this.mealTicketsReceivedOrdered = mealTicketDao
-            .getMealTicketAssignedToPersonIntoInterval(contract, this.mealTicketInterval);
+    this.mealTicketsReceivedOrdered = mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
+        contract, this.mealTicketInterval, MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC);
 
     if (contract.sourceDateMealTicket != null && DateUtility
         .isDateIntoInterval(contract.sourceDateMealTicket.plusDays(1), this.mealTicketInterval)) {
@@ -137,25 +142,42 @@ public class MealTicketRecap {
   }
 
   /**
-   * Ritorna i blocchi di buoni pasto consegnati alla persona nell anno year ordinati per data di
-   * scadenza e per codice blocco.
-   */
-  public List<BlockMealTicket> getBlockMealTicketReceivedInYear(Integer year) {
-
-    DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
-
-    return mealTicketManager.getBlockMealTicketReceivedIntoInterval(this, yearInterval);
-  }
-
-  /**
    * Ritorna i blocchi di buoni pasto consegnati alla persona nell'intero intervallo del recap,
    * ordinati per data di scadenza e per codice blocco.
    */
   public List<BlockMealTicket> getBlockMealTicketReceived() {
 
-    List<BlockMealTicket> blockList =
-            mealTicketManager.getBlockMealTicketReceivedIntoInterval(this, this.mealTicketInterval);
+    List<BlockMealTicket> blockList = mealTicketManager.getBlockMealTicketReceivedIntoInterval(
+        this.mealTicketsReceivedOrdered, Optional.fromNullable(this.mealTicketInterval));
     return blockList;
   }
+  
+  /**
+   * Ritorna i blocchi di buoni pasto consegnati alla persona nell anno year ordinati per data di
+   * scadenza e per codice blocco.
+   */
+  public List<BlockMealTicket> getBlockMealTicketReceivedInYear(Integer year) {
+
+    DateInterval yearInterval = 
+        new DateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
+
+    return mealTicketManager.getBlockMealTicketReceivedIntoInterval(this.mealTicketsReceivedOrdered,
+        Optional.fromNullable(yearInterval));
+  }
+  
+  /**
+   * I blocchi consegnati del contratto ordinati per data di consegna desc.
+   * @return blocchi.
+   */
+  public List<BlockMealTicket> getBlockMealTicketReceivedDeliveryDesc() {
+    
+    List<MealTicket> mealTicketsOrdered = mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
+        this.contract, this.mealTicketInterval, MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC);
+    
+    return mealTicketManager.getBlockMealTicketReceivedIntoInterval(
+        mealTicketsOrdered, Optional.fromNullable(this.mealTicketInterval));
+  }
+
+
 
 }
