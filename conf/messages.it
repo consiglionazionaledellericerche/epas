@@ -1,103 +1,147 @@
-absenceType = Codice assenza
-absenceType.code= Codice d'assenza
-absenceType.certificateCode= Codice per attestati di presenza
-absenceType.description= Descrizione codice
-absenceType.internalUse= Codice a uso interno
-absenceType.validFrom= Inizio validita'
-absenceType.validTo= Fine validita'
-absenceType.justifiedTimeAtWork= Tempo di lavoro giustificato
-absenceType.consideredWeekEnd= Utilizzabile nei weekend/festivi
-absenceType.qualifications= Utilizzabile per i livelli
+ADD= Inserimento
 
 absenceFile=Allegato
+absenceType= Codice assenza
+absenceType.certificateCode= Codice per attestati di presenza
+absenceType.code= Codice d'assenza
+absenceType.consideredWeekEnd= Utilizzabile nei weekend/festivi
+absenceType.description= Descrizione codice
+absenceType.internalUse= Codice a uso interno
+absenceType.justifiedTimeAtWork= Tempo di lavoro giustificato
+absenceType.qualifications= Utilizzabile per i livelli
+absenceType.validFrom= Inizio validita'
+absenceType.validTo= Fine validita'
 
-absenceTypeGroup.label= Etichetta gruppo
+absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
 absenceTypeGroup.accumulationType= Accumulo valori
+absenceTypeGroup.label= Etichetta gruppo
 absenceTypeGroup.limitInMinute= Limite accumulo
 absenceTypeGroup.minutesExcess= Minuti in eccesso
-absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
-
-badge.begin= Inzio
-badge.end= Fine
-badge.code= Numero badge
-code=Codice
-badge.badgeReader= Lettore badge associato
-badge.edit= Modifica
-badge.delete= Elimina Badge
-
+administrations= Amministrazione
+administrator=Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
-administrator=Amministratore
-administrations= Amministrazione
+badge.badgeReader= Lettore badge associato
+badge.begin= Inzio
+badge.code= Numero badge
+badge.delete= Elimina Badge
+badge.edit= Modifica
+badge.end= Fine
 
-badgeReader=Sorgente Timbrature
-badgeReaders= Sorgenti Timbrature
+badgeReader.badgeSystems=Gruppi Badge
+BadgeReader.blank= Nuova Sorgente Timbrature
 badgeReader.code=Nome
-badgeReader.id=id
 badgeReader.description=Descrizione
+badgeReader.id=id
 badgeReader.location=Location
 badgeReader.owner=Sede Responsabile
-badgeReader.badgeSystems=Gruppi Badge
+BadgeReaders.joinBadgeSystems= Gestisci Associazioni
+badgeReader=Sorgente Timbrature
+badgeReaders= Sorgenti Timbrature
 badgeReader.user.username=Username
 
-BadgeReader.blank= Nuova Sorgente Timbrature
-BadgeReaders.joinBadgeSystems= Gestisci Associazioni
-
-badgeSystems= Gruppi Badge
+badgeSystem.description=Descrizione
 badgeSystem = Gruppo Badge
 badgeSystem.name=Nome
-badgeSystem.description=Descrizione
 badgeSystem.office=Sede
-
 BadgeSystems.blank= Nuovo Gruppo Badge
+badgeSystems= Gruppi Badge
 BadgeSystems.joinBadges= Associa Badge
 
-configurations= Configurazione
+beginDate=Data Inizio
 
+child.bornDate= Data di Nascita
+child.name= Nome
+child.surname= Cognome
+
+codeBlock=Codice Blocco
+
+code=Codice
 competenceCode.code= Codice Competenza
 competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
 
+configurations= Configurazione
+
+contract.beginDate=Inizio Contratto
+contract=Contratto
+Contract=Contratto
+contract.endContract=Terminato Il
+contract.endDate=Fine Contratto
+contract.onCertificate=In attestati
+contract.sourceDateMealTicket=Data inizializzazione
+contract.sourceDateResidual=Data inizializzazione
+contract.sourcePermissionUsed=Permessi utilizzati anno corrente
+contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
+contract.sourceRemainingMealTicket=Buoni pasto residui
+contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)
+contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
+contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
+contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
+
+contractStampProfile.fixedworkingtime=Presenza Automatica
+ContractStampProfile=Periodo Presenza Automatica
+ContractStampProfile=Periodo Presenza Automatica
+ContractWorkingTimeType=Periodo Tipo Orario
+
+crud.cancel=Indietro
+crud.cancelled=Operazione annullata.
+crud.created=&{%s} creato con successo
+crud.deleted=&{%s} cancellato con successo
+crud.delete=Elimina
+crud.hasErrors =Occorre correggere gli errori riportati.
+crud.modified=&{%s} modificato con successo
+crud.saved=&{%s} salvato con successo
+crud.save=Salva
+
+csp.beginDate= Data Inizio
+csp.endDate= Data Fine
+csp.fixedworkingtime=Presenza Automatica
+
+cwtt.beginDate= Data Inizio
+cwtt.endDate= Data Fine
+cwtt.workingTimeType= Tipo Orario
+
+dateFrom=Dal
+dateOfPatron= Data del Patrono
+dateTo=Fino Al
+day= Giorno (se presente)
+deliveryDate=Consegnato il
+
+DEL= Eliminazione
+
+emailToContact= Indirizzo email dell&#39;amministrazione
+endContract= Scadenza Contratto
+endDate=Data Fine
+expireDate=Data Scadenza
+
 feedback.subject =EPAS - Segnalazione utente
 feedback.staff =Lo staff di EPAS
 
+institute.cds= Centro di spesa
+institute.code=Sigla
+institute.name=Nome
+Institutes.blank=Nuovo istituto
+Institutes.delete=Elimina istituto
+invalid.time=Formato del tempo errato.
 
-views.common.true=vero
-views.common.false=falso
+link.denied= Permessi insufficenti
+logout= Esci
+lunchPauseEnd= Fine pausa pranzo
+lunchPauseStart= Inizio pausa pranzo
 
-views.common.yes_or_no.true=
-views.common.yes_or_no.false=NO
+mealTicket=Buono Pasto
+modifierType= Calcolo Orario
 
-views.tags.display.date.format=dd/MM/yyyy
-views.tags.display.date.format.noDay=MM yyyy
-views.tags.display.date.format.onlyTime=%%mm:%%ss
-views.tags.display.date.format.allTime=%%hh:%%mm
-views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
+MOD= Modifica
 
-views.tags.display.date.month.1=Gennaio
-views.tags.display.date.month.2=Febbraio
-views.tags.display.date.month.3=Marzo
-views.tags.display.date.month.4=Aprile
-views.tags.display.date.month.5=Maggio
-views.tags.display.date.month.6=Giugno
-views.tags.display.date.month.7=Luglio
-views.tags.display.date.month.8=Agosto
-views.tags.display.date.month.9=Settembre
-views.tags.display.date.month.10=Ottobre
-views.tags.display.date.month.11=Novembre
-views.tags.display.date.month.12=Dicembre
-secure.error=Oops! Username o password sconosciuti
-secure.logout=Utente correttamente disconnesso
-passwordSuccessfullyChanged = Password modificata con successo
-
-noResultFound=Nessuna corrispondenza trovata.
-pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
-name=Nome
-
+Month.10=Ottobre
+Month.11=Novembre
+Month.12=Dicembre
 Month.1=Gennaio
 Month.2=Febbraio
 Month.3=Marzo
@@ -107,189 +151,144 @@ Month.6=Giugno
 Month.7=Luglio
 Month.8=Agosto
 Month.9=Settembre
-Month.10=Ottobre
-Month.11=Novembre
-Month.12=Dicembre
+month= Mese (se presente)
 
-mealTicket=Buono Pasto
-recapMealTickets=Riepilogo Buoni Pasto
-codeBlock=Codice Blocco
-ticketNumberFrom=Dal Numero
-ticketNumberTo=Al Numero
-deliveryDate=Consegnato il
-expireDate=Data Scadenza
+name=Nome
+noResultFound=Nessuna corrispondenza trovata.
+note= Note
 
+notify.error =Attenzione
+notify.success =Ok
 
-child.name= Nome
-child.surname= Cognome
-child.bornDate= Data di Nascita
-
-crud.cancel=Indietro
-crud.save=Salva
-crud.delete=Elimina
-
-dateOfPatron= Data del Patrono
-
-dateFrom=Dal
-dateTo=Fino Al
-
-emailToContact= Indirizzo email dell&#39;amministrazione
-
-Institutes.blank=Nuovo istituto
-Institutes.delete=Elimina istituto
-institute.name=Nome
-institute.code=Sigla
-institute.cds= Centro di spesa
-
-link.denied= Permessi insufficenti
-logout= Esci
-
-lunchPauseStart= Inizio pausa pranzo
-lunchPauseEnd= Fine pausa pranzo
-
-Offices.blank=Nuova sede
-office.name=Nome
+office.address=Indirizzo
 office.code= Codice
 office.codeId= Sede Id
-office.address=Indirizzo
-office.joiningDate= Data di affiliazione
 office.headQuarter=Sede principale
+office.joiningDate= Data di affiliazione
+office.name=Nome
+Offices.blank=Nuova sede
+office=Sede
 
-person=Persona
+onCertificate=In attestati
 
-person.surname=Cognome
-person.name=Nome
-person.number=Matricola
+pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
+passwordSuccessfullyChanged = Password modificata con successo
+
+PDFReport.thAbsences=Assenza
+PDFReport.thAppHour =Num. di ore approvate
+PDFReport.thBadStampings=Timbrature errate
+PDFReport.thDays=Num. di giorni
+PDFReport.thExceededMin=Minuti accumulati
+PDFReport.thIncompleteTime=Orario incompleto
+PDFReport.thLackTime=Ore mancanti
+PDFReport.thMissingTime=Orario insufficiente
+PDFReport.thMissions=Missione
+PDFReport.thNoStampings=Mancata timbratura
+PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
+
 person.badgeNumber=Numero Badge
-person.telephone=Telefono
+person.badge= Numero badge
+person.birthday=Data di nascita
+person.currentVacationPeriod= Ferie
+person.currentWorkingTimeType= Tipo Orario
 person.email=Email
 person.eppn=Eppn (Per login Shibboleth)
-person.birthday=Data di nascita
-person.wantEmail=Invio Email
-person.currentWorkingTimeType= Tipo Orario
-person.currentVacationPeriod= Ferie
-person.qualification= Livello
-person.office= Sede
 person.isPersonInCharge= Responsabile gruppo di lavoro
-person.badge= Numero badge
-person.user.username= Username in ePAS
-
+person.name=Nome
+person.number=Matricola
+person.office= Sede
+person=Persona
+person.qualification= Livello
 personQualification= Livello
+person.surname=Cognome
+person.telephone=Telefono
+person.user.username= Username in ePAS
+person.wantEmail=Invio Email
 
-beginDate=Data Inizio
-endDate=Data Fine
-contract.beginDate=Inizio Contratto
-contract.endDate=Fine Contratto
-contract.endContract=Terminato Il
-contract.onCertificate=In attestati
-onCertificate=In attestati
-endContract= Scadenza Contratto
+qualification=Livello
 
-Contract=Contratto
-contract=Contratto
+recapMealTickets=Riepilogo Buoni Pasto
+report=Descrizione problema
+restoreUser= Torna chi eri
+
+secure.error=Oops! Username o password sconosciuti
+secure.logout=Utente correttamente disconnesso
+
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
-contract.sourceDateResidual=Data inizializzazione
-contract.sourceDateMealTicket=Data inizializzazione
-contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
-contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)
-contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
-contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
-contract.sourcePermissionUsed=Permessi utilizzati anno corrente
-contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
-contract.sourceRemainingMealTicket=Buoni pasto residui
 
-ContractStampProfile=Periodo Presenza Automatica
-ContractStampProfile=Periodo Presenza Automatica
-contractStampProfile.fixedworkingtime=Presenza Automatica
-csp.beginDate= Data Inizio
-csp.endDate= Data Fine
-csp.fixedworkingtime=Presenza Automatica
+stamping.in= Timbratura di ingresso
+stamping.note= Note
+stamping.out= Timbratura di uscita
+stamping.stampType= Causale Timbratura
+stamping.way= Verso Timbratura
+stampType= Causale
+
+ticketNumberFrom=Dal Numero
+ticketNumberTo=Al Numero
+time= Orario
+
+uro.office=Sede
+uro.role= Ruolo
+uro.user= Utente
+
+user.password= Password
+user.username= Username
+
+views.common.false=falso
+views.common.true=vero
+views.common.yes_or_no.false=NO
+views.common.yes_or_no.true=SI
+
+views.tags.display.date.format.allTime=%%hh:%%mm
+views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
+views.tags.display.date.format=dd/MM/yyyy
+views.tags.display.date.format.noDay=MM yyyy
+views.tags.display.date.format.onlyTime=%%mm:%%ss
+views.tags.display.date.month.10=Ottobre
+views.tags.display.date.month.11=Novembre
+views.tags.display.date.month.12=Dicembre
+views.tags.display.date.month.1=Gennaio
+views.tags.display.date.month.2=Febbraio
+views.tags.display.date.month.3=Marzo
+views.tags.display.date.month.4=Aprile
+views.tags.display.date.month.5=Maggio
+views.tags.display.date.month.6=Giugno
+views.tags.display.date.month.7=Luglio
+views.tags.display.date.month.8=Agosto
+views.tags.display.date.month.9=Settembre
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
 
-ContractWorkingTimeType=Periodo Tipo Orario
-cwtt.workingTimeType= Tipo Orario
-cwtt.beginDate= Data Inizio
-cwtt.endDate= Data Fine
-
-PDFReport.thDays=Num. di giorni
-PDFReport.thReqHour=Num. di ore spettanti
-PDFReport.thAppHour =Num. di ore approvate
-PDFReport.thLackTime=Ore mancanti
-PDFReport.thExceededMin=Minuti accumulati
-
-PDFReport.thNoStampings=Mancata timbratura
-PDFReport.thMissingTime=Orario insufficiente
-PDFReport.thAbsences=Assenza
-PDFReport.thBadStampings=Timbrature errate
-PDFReport.thMissions=Missione
-PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
-PDFReport.thIncompleteTime=Orario incompleto
-
-qualification=Livello
-
-restoreUser= Torna chi eri
-
-office=Sede
-
-modifierType= Calcolo Orario
-
-stamping.note= Note
-
-uro.office=Sede
-uro.user= Utente
-uro.role= Ruolo
-
-user.username= Username
-user.password= Password
-
-stampType= Causale
-note= Note
-time= Ore
-time.popover= Formato richiesto HHMM (HH ore, MM minuti)
-invalid.time=Formato del tempo errato.
-way= Verso
-
-report=Descrizione problema
-month= Mese (se presente)
 year= Anno (se presente)
-day= Giorno (se presente)
 
-notify.error =Attenzione
-notify.success =Ok
-crud.hasErrors =Occorre correggere gli errori riportati.
-crud.created=&{%s} creato con successo
-crud.saved=&{%s} salvato con successo
-crud.deleted=&{%s} cancellato con successo
-crud.modified=&{%s} modificato con successo
-crud.cancelled=Operazione annullata.
 
 ###########################
 # Messaggi di validazione
 ###########################
 
-validation.required=Obbligatorio
-validation.minSize=Lunghezza minima %2$d
-validation.maxSize=Lunghezza massima %2$d
-validation.email=Indirizzo email non valido
-validation.range=Non può essere minore di %2$d o maggiore di %3$d
-validation.min=Non può essere minore di %2$d
-validation.max=Non può essere maggiore di %2$d
-validation.match=Deve corrispondere a %2$s
-validation.isTrue=Deve essere impostato
-validation.equals=Deve essere uguale &{%2$s}
-validation.invalid=Valore non valido
-validation.future=Deve essere futura
 validation.after=Deve essere successiva a %2$s
-validation.past=Deve essere passata
 validation.before=Deve essere precedente a %2$s
+validation.email=Indirizzo email non valido
+validation.equals=Deve essere uguale &{%2$s}
+validation.future=Deve essere futura
+validation.invalid=Valore non valido
+validation.isTrue=Deve essere impostato
+validation.match=Deve corrispondere a %2$s
+validation.max=Non può essere maggiore di %2$d
+validation.maxSize=Lunghezza massima %2$d
+validation.min=Non può essere minore di %2$d
+validation.minSize=Lunghezza minima %2$d
 validation.notFound=Oggetto non trovato per l'id %2$s
-validation.url=Non è un URL valido
+validation.past=Deve essere passata
 validation.phone=Non è un numero di telefono valido
+validation.range=Non può essere minore di %2$d o maggiore di %3$d
+validation.required=Obbligatorio
 validation.unique =Deve essere unico
+validation.url=Non è un URL valido
 
 ########################
 # Enumerati
@@ -319,6 +318,19 @@ JustifiedTimeAtWork.TimeToComplete= Quello che manca
 JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
+StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
+StampTypes.VISITA_MEDICA= Visita Medica
+StampTypes.PERMESSO_SINDACALE= Permesso Sindacale
+StampTypes.INCARICO_DI_INSEGNAMENTO= Incarico di Insegnamento
+StampTypes.DIRITTO_ALLO_STUDIO= Diritto allo Studio
+StampTypes.MOTIVI_PERSONALI= Motivi Personali
+StampTypes.REPERIBILITA= Reperibilità
+StampTypes.INTRAMOENIA= Intramoenia
+StampTypes.GUARDIA_MEDICA= Guardia Medica
+StampTypes.PAUSA_PRANZO= Pausa Pranzo
+
+WayType.in= Ingresso
+WayType.out= Uscita
 
 ###########################################################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
@@ -342,7 +354,7 @@ absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcol
 
 absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
 
-absenceTypeGroup.label.popover= Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli
+absenceTypeGroup.label.popover= Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli 
 (Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)
 
 absenceTypeGroup.accumulationType.popover= Se i valori devono essere sommati per ogni utilizzo. Alla fine del periodo (mese o anno) l'accumulo riparte da zero. (Es. codice 661h2 indicare "Annuale")
@@ -366,3 +378,5 @@ lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
 office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
 office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
 office.joiningDate.popover= Data di affiliazione della sede
+
+time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
