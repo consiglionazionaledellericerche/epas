@@ -17,6 +17,8 @@ import java.lang.annotation.Target;
 import javax.inject.Inject;
 
 /**
+ * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste
+ * ai controller.
  * @author marco
  */
 public class Resecure extends Controller {
@@ -43,19 +45,22 @@ public class Resecure extends Controller {
 
   @Before(priority = 1, unless = {"login", "authenticate", "logout"})
   static void checkAccess() throws Throwable {
-    if (getActionAnnotation(NoCheck.class) != null ||
-            getControllerInheritedAnnotation(NoCheck.class) != null) {
+    if (getActionAnnotation(NoCheck.class) != null
+            || getControllerInheritedAnnotation(NoCheck.class) != null) {
       return;
     } else {
-      if (getActionAnnotation(BasicAuth.class) != null ||
-              getControllerInheritedAnnotation(BasicAuth.class) != null) {
-        if (request.user == null ||
-                !Security.authenticate(request.user, request.password)) {
+      if (getActionAnnotation(BasicAuth.class) != null
+            || getControllerInheritedAnnotation(BasicAuth.class) != null) {
+        if (request.user == null
+            || !Security.authenticate(request.user, request.password)) {
           unauthorized(REALM);
         }
       }
       if (!Security.getUser().isPresent()) {
-        flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
+        flash.put(
+            "url",
+            // seems a good default
+            "GET".equals(request.method) ? request.url : Play.ctxPath + "/");
         Secure.login();
       }
       // Checks

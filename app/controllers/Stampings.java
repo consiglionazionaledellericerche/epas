@@ -259,7 +259,9 @@ public class Stampings extends Controller {
 
     consistencyManager.updatePersonSituation(stamp.personDay.person.id, stamp.personDay.date);
 
-    flash.success("Timbratura per il giorno %s per %s aggiornata.", PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.fullName());
+    flash.success(
+        "Timbratura per il giorno %s per %s aggiornata.",
+        PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.fullName());
 
     Stampings.stampings(stamp.personDay.date.getYear(), stamp.personDay.date.getMonthOfYear());
   }
