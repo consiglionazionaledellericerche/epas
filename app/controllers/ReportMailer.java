@@ -1,6 +1,21 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+
 import helpers.deserializers.InlineStreamHandler;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.User;
+import models.exports.ReportData;
+
+import org.apache.commons.mail.EmailAttachment;
+
+import play.Play;
+import play.mvc.Mailer;
+import play.mvc.Scope;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,19 +23,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
-
-import org.apache.commons.mail.EmailAttachment;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-
-import lombok.extern.slf4j.Slf4j;
-import models.User;
-import models.exports.ReportData;
-import play.Play;
-import play.mvc.Mailer;
-import play.mvc.Scope;
 
 /**
  * Invio delle segnalazioni per email.
@@ -48,7 +50,7 @@ public class ReportMailer extends Mailer {
 
   // default decenti
   private static final String DEFAULT_EMAIL = "epas@iit.cnr.it";
-  private static final String DEFAULT_SUBJECT = "Riscontrata anomalia";
+  private static final String DEFAULT_SUBJECT = "Segnalazione ePAS";
 
   private static final Splitter COMMAS = Splitter.on(',').trimResults()
       .omitEmptyStrings();
@@ -56,9 +58,9 @@ public class ReportMailer extends Mailer {
   /**
    * Costruisce e invia il report agli utenti indicati nella configurazione.
    *
-   * @param data
-   * @param session
-   * @param user
+   * @param data i dati del feedback da inviare
+   * @param session la sessione http corrente
+   * @param user l'eventuale utente loggato
    */
   public static void feedback(ReportData data, Scope.Session session,
       Optional<User> user) {
@@ -72,8 +74,8 @@ public class ReportMailer extends Mailer {
     for (String to : dests) {
       addRecipient(to);
     }
-    if (user.isPresent() && user.get().person != null &&
-        !Strings.isNullOrEmpty(user.get().person.email)) {
+    if (user.isPresent() && user.get().person != null
+        && !Strings.isNullOrEmpty(user.get().person.email)) {
       setReplyTo(user.get().person.email);
     }
     setFrom(Play.configuration.getProperty(EMAIL_FROM, DEFAULT_EMAIL));
@@ -92,10 +94,10 @@ public class ReportMailer extends Mailer {
       html.setName("page.html.gz");
       html.setURL(htmlUrl);
       html.setDisposition(EmailAttachment.ATTACHMENT);
-        addAttachment(html);
+      addAttachment(html);
 
-        URL imgUrl = new URL(null, "inline://image",
-            new InlineStreamHandler(data.getImg(), "image/png"));
+      URL imgUrl =
+          new URL(null, "inline://image", new InlineStreamHandler(data.getImg(), "image/png"));
       EmailAttachment img = new EmailAttachment();
       img.setDescription("Report image");
       img.setName("image.png");

@@ -184,7 +184,7 @@ public class RequestInit extends Controller {
 
       officeId = first.get().id;
     } else {
-      officeId = -1l;
+      officeId = -1L;
     }
 
     session.put("officeSelected", officeId);
@@ -196,7 +196,7 @@ public class RequestInit extends Controller {
               new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
       renderArgs.put("dayLenght", dayLenght);
     } catch (Exception e) {
-
+      //FIXME: perché è previsto il tracciamento di questa eccezione??
     }
 
     // TODO: un metodo per popolare il menu degli anni umano.
@@ -210,8 +210,10 @@ public class RequestInit extends Controller {
     renderArgs.put("navYears", years);
 
 
-    renderArgs.put("currentData", new CurrentData(year, month, day,
-            Long.valueOf(session.get("personSelected")), Long.valueOf(session.get("officeSelected"))));
+    renderArgs.put("currentData",
+        new CurrentData(year, month, day,
+            Long.valueOf(session.get("personSelected")),
+            Long.valueOf(session.get("officeSelected"))));
 
   }
 
@@ -435,7 +437,7 @@ public class RequestInit extends Controller {
         renderArgs.put("dropDown", "dropDownAdministration");
         return "Competences.enabledCompetences";
       }
-      
+
       if (action.equals("Competences.approvedCompetenceInYear")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
@@ -581,14 +583,14 @@ public class RequestInit extends Controller {
                 || role.name.equals(Role.PERSONNEL_ADMIN)) {
           this.viewPerson = true;
           this.viewPersonDay = true;
-         // this.viewOffice = true;
+          // this.viewOffice = true;
           this.viewCompetence = true;
           this.viewWorkingTimeType = true;
           this.viewCompetenceCode = true;
           this.viewAbsenceType = true;
         }
-        
-        if(role.name.equals(Role.TECNICAL_ADMIN)){
+
+        if (role.name.equals(Role.TECNICAL_ADMIN)) {
           this.viewOffice = true;
         }
 
