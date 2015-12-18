@@ -27,7 +27,7 @@ public class Application extends Controller {
 
   public static void index() {
 
-//    	Utenti di sistema (developer,admin)
+    //Utenti di sistema (developer,admin)
     if (Security.getUser().get().person == null) {
 
       Persons.list(null);
