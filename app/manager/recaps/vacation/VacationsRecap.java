@@ -177,9 +177,10 @@ public class VacationsRecap {
         .typeAccrued(TypeAccrued.VACATION_CURRENT_YEAR_ACCRUED)
         .build();
     
-    this.vacationDaysLastYearAccrued = 0;
-    this.vacationDaysCurrentYearAccrued = 0;
-    this.permissionCurrentYearAccrued = 0;
+    this.vacationDaysLastYearAccrued = this.decisionsVacationLastYearAccrued.getTotalAccrued();
+    this.vacationDaysCurrentYearAccrued = 
+        this.decisionsVacationCurrentYearAccrued.getTotalAccrued();
+    this.permissionCurrentYearAccrued = this.decisionsPermissionYearAccrued.getTotalAccrued();
 
     
     //(5) Calcolo ferie e permessi totali per l'anno corrente
@@ -192,6 +193,9 @@ public class VacationsRecap {
         .accruedComponent(accruedComponent)
         .typeAccrued(TypeAccrued.VACATION_CURRENT_YEAR_TOTAL)
         .build();
+    
+    this.vacationDaysCurrentYearTotal = this.decisionsVacationCurrentYearTotal.getTotalAccrued();
+    this.permissionCurrentYearTotal = this.decisionsPermissionYearTotal.getTotalAccrued();
     
     //(6) Calcolo ferie e permessi non ancora utilizzati 
     //    per l'anno corrente e per l'anno precedente

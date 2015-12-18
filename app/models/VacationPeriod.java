@@ -1,6 +1,8 @@
 package models;
 
 
+import it.cnr.iit.epas.DateInterval;
+
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
@@ -13,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 
 @Entity
@@ -40,5 +43,10 @@ public class VacationPeriod extends BaseModel {
 
   @Column(name = "end_to")
   public LocalDate endTo;
+  
+  @Transient
+  public DateInterval getDateInterval(){
+    return new DateInterval(this.beginFrom, this.endTo);
+  }
 
 }
