@@ -19,6 +19,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.cache.StampTypeManager;
+import manager.vacations.VacationManager;
 
 import models.Absence;
 import models.Contract;
