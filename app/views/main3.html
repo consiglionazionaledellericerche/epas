@@ -239,14 +239,7 @@
 
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring"></i></a>
-            <ul class="dropdown-menu">
-              #{if ip.viewPerson }
-              <li>
-                <a href="@{ReportCentre.generateReport(session.get("actionSelected"), session.get("personSelected"), session.get("monthSelected"), session.get("yearSelected"), session.get("daySelected"))}" data-async-modal="#defaultModal">
-                <i class="fa fa-bug"></i> Segnala un problema
-                </a>
-              </li>
-              #{/if}
+            <ul class="dropdown-menu">             
               <li>
                 <a href="@{Faq.faq()}">
                   <i class="fa fa-comment-o"> FAQ</i>
