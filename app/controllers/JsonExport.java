@@ -1,6 +1,3 @@
-/**
- *
- */
 package controllers;
 
 import com.google.common.base.Function;
@@ -11,12 +8,13 @@ import com.google.common.collect.FluentIterable;
 import dao.OfficeDao;
 import dao.PersonDao;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Office;
 import models.Person;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -28,6 +26,7 @@ import javax.inject.Inject;
 /**
  * @author cristian
  */
+@Slf4j
 @With(Resecure.class)
 public class JsonExport extends Controller {
 
@@ -42,22 +41,25 @@ public class JsonExport extends Controller {
     List<Office> offices = officeDao.getAllOffices();
     List<Person> activePersons = personDao.list(Optional.<String>absent(),
             new HashSet<Office>(offices), false, LocalDate.now(), LocalDate.now(), true).list();
-    Logger.debug("activePersons.size() = %d", activePersons.size());
+    log.debug("activePersons.size() = %d", activePersons.size());
 
-    List<PersonInfo> activePersonInfos = FluentIterable.from(activePersons).transform(new Function<Person, PersonInfo>() {
-      @Override
-      public PersonInfo apply(Person person) {
-        return new PersonInfo(
+    List<PersonInfo> activePersonInfos =
+        FluentIterable.from(activePersons).transform(
+            new Function<Person, PersonInfo>() {
+              @Override
+              public PersonInfo apply(Person person) {
+                return new PersonInfo(
                 Joiner.on(" ").skipNulls().join(person.name, person.othersSurnames),
                 Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames),
                 person.user.password);
-      }
-    }).toList();
+              }
+            }
+       ).toList();
 
     renderJSON(activePersonInfos);
   }
 
-  final static class PersonInfo {
+  static final class PersonInfo {
     private final String nome;
     private final String cognome;
     private final String password;
