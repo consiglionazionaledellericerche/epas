@@ -2,10 +2,7 @@ package controllers;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -16,17 +13,13 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.RoleDao;
-import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
-import helpers.ModelQuery.SimpleResults;
 import helpers.Web;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +35,6 @@ import models.CompetenceCode;
 import models.Contract;
 import models.Office;
 import models.Person;
-import models.Role;
 import models.TotalOvertime;
 import models.User;
 
@@ -136,9 +128,9 @@ public class Competences extends Controller {
 
     manageCompetenceCode();
   }
-  
+
   /**
-   * Riepilogo competenze abilitate per la sede.  
+   * Riepilogo competenze abilitate per la sede.
    */
   public static void enabledCompetences(Long officeId) {
 
@@ -152,13 +144,13 @@ public class Competences extends Controller {
             false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
     // TODO: togliere questa storpiaggine.
-    
+
     Table<Person, String, Boolean> tableRecapCompetence = competenceManager
         .getTableForEnabledCompetence(personList);
-    
+
     render(tableRecapCompetence, office);
   }
-  
+
   /**
    * Crud per abilitare le competenze alla persona.
    * @param personId persona
@@ -180,11 +172,11 @@ public class Competences extends Controller {
 
   /**
    * Salva la nuova configurazione delle competenze abilitate per la persona.
-   * 
+   *
    * @param personId personId
    * @param competence mappa con i valori per ogni competenza
    */
-  public static void saveNewCompetenceConfiguration(Long personId, 
+  public static void saveNewCompetenceConfiguration(Long personId,
       Map<String, Boolean> competence) {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -193,7 +185,7 @@ public class Competences extends Controller {
     List<CompetenceCode> competenceCode = competenceCodeDao.getAllCompetenceCode();
     if (competenceManager
         .saveNewCompetenceEnabledConfiguration(competence, competenceCode, person)) {
-      flash.success(String.format("Aggiornate con successo le competenze per %s %s", 
+      flash.success(String.format("Aggiornate con successo le competenze per %s %s",
           person.name, person.surname));
     } else {
       // TODO: ????????????????????
@@ -202,10 +194,10 @@ public class Competences extends Controller {
 
   }
 
-  
+
   /**
    * Riepilgo competenze del dipendente.
-   * 
+   *
    * @param year year
    * @param month month
    */
@@ -245,22 +237,22 @@ public class Competences extends Controller {
 
   /**
    * Competenze assegnate nel mese nell'officeId col codice specificato.
-   * 
+   *
    * @param year year
-   * @param month month 
+   * @param month month
    * @param officeId officeId
    * @param name filtro nome
    * @param competenceCode filtro competenceCode
    * @param page filtro pagina
    */
-  public static void showCompetences(Integer year, Integer month, Long officeId, 
+  public static void showCompetences(Integer year, Integer month, Long officeId,
       String name, CompetenceCode competenceCode, Integer page) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
-    
+
     //Redirect in caso di mese futuro
     LocalDate today = LocalDate.now();
     if (today.getYear() == year && month > today.getMonthOfYear()) {
@@ -271,7 +263,7 @@ public class Competences extends Controller {
     if (page == null) {
       page = 0;
     }
-    
+
     //La lista dei codici competenceCode da visualizzare nella select
     // Ovvero: I codici attualmente attivi per almeno un dipendente di quell'office
     List<CompetenceCode> competenceCodeList = competenceDao.activeCompetenceCode(office);
@@ -294,14 +286,14 @@ public class Competences extends Controller {
       editCompetence = true;
     }
     renderArgs.put("editCompetence", editCompetence);
-    
+
     // Le persone che hanno quella competence attualmente abilitata
     SearchResults<?> results = personDao.listForCompetence(competenceCode,
             Optional.fromNullable(name), Sets.newHashSet(office), false,
             new LocalDate(year, month, 1),
             new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
             Optional.<Person>absent()).listResults();
-    
+
     // TODO: creare quelle che non esistono (meglio eliminare x-editable).
 
     // TODO: mancano da visualizzare le competence assegnate nel mese a quelle
@@ -328,7 +320,7 @@ public class Competences extends Controller {
 
   /**
    * Aggiorna la competenza.
-   * 
+   *
    * @param pk pk
    * @param name name
    * @param value value
@@ -414,9 +406,9 @@ public class Competences extends Controller {
    */
   public static void getOvertimeInYear(int year) throws IOException {
 
-    
+
     List<Person> personList = personDao
-        .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"), 
+        .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"),
             Optional.fromNullable(""),
             secureManager.officesReadAllowed(Security.getUser().get()),
             false, new LocalDate(year, 1, 1),
@@ -430,7 +422,7 @@ public class Competences extends Controller {
   /**
    * Le competence approvate nell'anno alle persone della sede.
    * TODO: implementare un metodo nel manager nel quale spostare la business logic di questa
-   * azione. 
+   * azione.
    * @param year anno
    * @param onlyDefined solo per determinati
    * @param officeId sede
@@ -440,7 +432,7 @@ public class Competences extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
 
     Set<Person> personSet = Sets.newHashSet();
@@ -486,7 +478,7 @@ public class Competences extends Controller {
       } else {
         value = competence.valueApproved;
       }
-      
+
       personCompetences.put(competence.competenceCode, value);
 
       mapPersonCompetenceRecap.put(person, personCompetences);
@@ -496,17 +488,17 @@ public class Competences extends Controller {
 
       if (value != null) {
         value = value + competence.valueApproved;
-      } else { 
+      } else {
         value = competence.valueApproved;
       }
-      
+
       totalValueAssigned.put(competence.competenceCode, value);
     }
     List<IWrapperPerson> personList = FluentIterable
             .from(personSet)
             .transform(wrapperFunctionFactory.person()).toList();
 
-    render(personList, totalValueAssigned, mapPersonCompetenceRecap, 
+    render(personList, totalValueAssigned, mapPersonCompetenceRecap,
         office, year, onlyDefined);
 
   }
