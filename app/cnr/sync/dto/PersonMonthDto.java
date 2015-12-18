@@ -1,6 +1,6 @@
 package cnr.sync.dto;
 
-public class PersonMonthDTO {
+public class PersonMonthDto {
 
   public int progressivoFinaleMese;
   public boolean possibileUtilizzareResiduoAnnoPrecedente;
