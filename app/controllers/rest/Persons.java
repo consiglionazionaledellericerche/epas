@@ -23,7 +23,7 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import cnr.sync.dto.CompetenceDTO;
+import cnr.sync.dto.CompetenceDto;
 import cnr.sync.dto.DayRecap;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -134,8 +134,8 @@ public class Persons extends Controller {
       }
     }
 
-    List<CompetenceDTO> competencesList = FluentIterable.from(competences)
-            .transform(CompetenceDTO.fromCompetence.ISTANCE).toList();
+    List<CompetenceDto> competencesList = FluentIterable.from(competences)
+            .transform(CompetenceDto.FromCompetence.ISTANCE).toList();
 
     renderJSON(competencesList);
   }
