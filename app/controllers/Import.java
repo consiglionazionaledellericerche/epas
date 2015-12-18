@@ -35,7 +35,7 @@ import javax.inject.Inject;
 @With({Resecure.class, RequestInit.class})
 public class Import extends Controller {
 
-  private final static String IMPORTED_OFFICES = "importedOffices";
+  private static final String IMPORTED_OFFICES = "importedOffices";
   @Inject
   private static OfficeDao officeDao;
   @Inject
@@ -52,7 +52,7 @@ public class Import extends Controller {
     try {
       importedOffices = officeConsumer.getOffices().get();
     } catch (IllegalStateException | InterruptedException
-            | ExecutionException e) {
+        | ExecutionException e) {
       flash.error("Impossibile recuperare la lista degli istituti.");
       e.printStackTrace();
     }
@@ -83,18 +83,22 @@ public class Import extends Controller {
       try {
         importedOffices = officeConsumer.getOffices().get();
       } catch (IllegalStateException | InterruptedException | ExecutionException e) {
-        log.warn("Impossibile importare la lista delle sedi dall'anagrafica - {}", e.getStackTrace());
+        log.warn("Impossibile importare la lista delle sedi dall'anagrafica - {}",
+            e.getStackTrace());
       }
     }
 
-    //  Filtro la lista di tutti gli uffici presenti su perseo, lasciando solo i selezionati nella form
-    Collection<OfficeDto> filteredOffices = Collections2.filter(importedOffices,
+    // Filtro la lista di tutti gli uffici presenti su perseo, lasciando solo i
+    // selezionati nella form
+    Collection<OfficeDto> filteredOffices =
+        Collections2.filter(importedOffices,
             new Predicate<OfficeDto>() {
               @Override
               public boolean apply(OfficeDto input) {
                 return offices.contains(input.id);
               }
-            });
+            }
+        );
 
     int synced = restOfficeManager.saveImportedSeats(filteredOffices);
     if (synced == 0) {
@@ -114,17 +118,17 @@ public class Import extends Controller {
 
     Set<Person> importedPeople = Sets.newHashSet();
 
-//		try {
-//			importedPeople = peopleConsumer.seatPeople(seat.code.toString()).get();
-//		} catch (IllegalStateException | InterruptedException
-//				| ExecutionException e) {
-//			flash.error("Impossibile recuperare la lista degli istituti da Perseo");
-//			e.printStackTrace();
-//		}
-//		
-//		for(Person p : importedPeople ){
-//			Logger.info("Persone Importata: %s-%s-%s-%s-%s-%s",p.fullName(),p.birthday,p.email,p.cnr_email,p.number,p.badgeNumber);
-//		}
+    //		try {
+    //			importedPeople = peopleConsumer.seatPeople(seat.code.toString()).get();
+    //		} catch (IllegalStateException | InterruptedException
+    //				| ExecutionException e) {
+    //			flash.error("Impossibile recuperare la lista degli istituti da Perseo");
+    //			e.printStackTrace();
+    //		}
+    //
+    //		for(Person p : importedPeople ){
+    //			Logger.info("Persone Importata: %s-%s-%s-%s-%s-%s",p.fullName(),p.birthday,p.email,p.cnr_email,p.number,p.badgeNumber);
+    //		}
 
   }
 }
