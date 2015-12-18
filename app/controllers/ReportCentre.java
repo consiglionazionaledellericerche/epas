@@ -59,45 +59,8 @@ public class ReportCentre extends Controller {
     ReportMailer.feedback(data, session, Security.getUser());
   }
 
-  public static void generateReport(String actionInfected, Long personId, @Valid Integer month,
-                                    @Valid Integer year, @Valid Integer day) {
-    Person person = personDao.getPersonById(personId);
-    User userLogged = Security.getUser().get();
-    render(userLogged, person, actionInfected, year, month, day);
-  }
+  
 
 
-  public static void sendProblem(Long userId, String report,
-                                 @Valid String month, @Valid String year, String actionInfected) {
-    User user = userDao.getUserByIdAndPassword(userId, Optional.<String>absent());
-    if (user == null)
-      notFound();
-
-    SimpleEmail email = new SimpleEmail();
-    String sender = user.person != null ? user.person.fullName() : user.username;
-    try {
-      email.addTo("epas@iit.cnr.it");
-      //email.setFrom("epas@iit.cnr.it");
-      if (user.person != null && !user.person.email.equals(""))
-        email.addReplyTo(user.person.email);
-      email.setSubject("Segnalazione malfunzionamento ");
-      email.setMsg("E' stata riscontrata una anomalia dalla pagina: " + actionInfected + '\n'
-              + " con mese uguale a: " + month + '\n'
-              + " con anno uguale a: " + year + '\n'
-              + " visitata da: " + sender + '\n'
-              + " in data: " + LocalDate.now() + '\n'
-              + " con il seguente messaggio: " + report);
-      Mail.send(email);
-      flash.success("Mail inviata con successo");
-      Application.index();
-
-    } catch (EmailException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      flash.error("Errore durante l'invio della mail");
-      Application.index();
-    }
-
-  }
-
+  
 }
