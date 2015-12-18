@@ -35,13 +35,14 @@ public class AbsenceFromJson extends Controller {
   @Inject
   private static AbsenceDao absenceDao;
 
-  public static void absenceInPeriod(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo,
-                                     @As(binder = JsonPersonEmailBinder.class) PersonEmailFromJson body) {
+  public static void absenceInPeriod(
+      Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo,
+      Integer dayTo, @As(binder = JsonPersonEmailBinder.class) PersonEmailFromJson body) {
 
     Logger.debug("Received personEmailFromJson %s", body);
-    if (body == null)
+    if (body == null) {
       badRequest();
-
+    }
     Logger.debug("Entrato nel metodo getAbsenceInPeriod...");
     List<PersonPeriodAbsenceCode> personsToRender = new ArrayList<PersonPeriodAbsenceCode>();
 
@@ -62,10 +63,8 @@ public class AbsenceFromJson extends Controller {
   }
 
   /**
-   * metodo esposto per ritornare la lista dei codici di assenza presi
+   * Metodo esposto per ritornare la lista dei codici di assenza presi.
    */
-
-
   public static void frequentAbsence(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo) {
 
     List<FrequentAbsenceCode> frequentAbsenceCodeList = new ArrayList<FrequentAbsenceCode>();

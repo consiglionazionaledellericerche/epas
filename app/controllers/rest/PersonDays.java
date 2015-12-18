@@ -9,8 +9,8 @@ import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 
-import cnr.sync.dto.PersonDayDTO;
-import cnr.sync.dto.PersonMonthDTO;
+import cnr.sync.dto.PersonDayDto;
+import cnr.sync.dto.PersonMonthDto;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.Security;
@@ -62,7 +62,7 @@ public class PersonDays extends Controller {
       JsonResponse.notFound("Non sono presenti informazioni per "
               + person.name + " " + person.surname + " nel giorno " + date);
     }
-    PersonDayDTO pdDTO = generateDayDTO(pd);
+    PersonDayDto pdDTO = generateDayDTO(pd);
     renderJSON(pdDTO);
   }
 
@@ -90,7 +90,7 @@ public class PersonDays extends Controller {
     rules.checkIfPermitted(person);
     List<Contract> monthContracts = wrapperFactory
             .create(person).getMonthContracts(year, month);
-    PersonMonthDTO pmDTO = new PersonMonthDTO();
+    PersonMonthDto pmDTO = new PersonMonthDto();
     for (Contract contract : monthContracts) {
       Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
               .getContractMonthRecap(new YearMonth(year, month));
@@ -110,8 +110,8 @@ public class PersonDays extends Controller {
    * @return il personDayDTO costruito sulla base del personDay passato come parametro da ritornare
    * alle funzioni rest
    */
-  private static PersonDayDTO generateDayDTO(PersonDay pd) {
-    PersonDayDTO pdDTO = new PersonDayDTO();
+  private static PersonDayDto generateDayDTO(PersonDay pd) {
+    PersonDayDto pdDTO = new PersonDayDto();
     pdDTO.buonopasto = pd.isTicketAvailable;
     pdDTO.differenza = pd.difference;
     pdDTO.progressivo = pd.progressive;
@@ -133,8 +133,8 @@ public class PersonDays extends Controller {
    * @return il personMonthDTO costruito sulla base del COntractMonthRecap opzionale passato come
    * parametro da ritornare alle funzioni rest
    */
-  private static PersonMonthDTO generateMonthDTO(ContractMonthRecap cmr) {
-    PersonMonthDTO pmDTO = new PersonMonthDTO();
+  private static PersonMonthDto generateMonthDTO(ContractMonthRecap cmr) {
+    PersonMonthDto pmDTO = new PersonMonthDto();
     pmDTO.buoniMensa = cmr.remainingMealTickets;
     pmDTO.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;
     pmDTO.progressivoFinaleMese = cmr.progressivoFinaleMese;

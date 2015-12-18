@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 
 import cnr.sync.consumers.OfficeConsumer;
 import cnr.sync.consumers.PeopleConsumer;
-import cnr.sync.dto.OfficeDTO;
+import cnr.sync.dto.OfficeDto;
 import cnr.sync.manager.RestOfficeManager;
 
 import dao.OfficeDao;
@@ -47,7 +47,7 @@ public class Import extends Controller {
 
   public static void officeList() {
 
-    List<OfficeDTO> importedOffices = Lists.newArrayList();
+    List<OfficeDto> importedOffices = Lists.newArrayList();
 
     try {
       importedOffices = officeConsumer.getOffices().get();
@@ -77,7 +77,7 @@ public class Import extends Controller {
       officeList();
     }
 
-    List<OfficeDTO> importedOffices = Cache.get(IMPORTED_OFFICES, List.class);
+    List<OfficeDto> importedOffices = Cache.get(IMPORTED_OFFICES, List.class);
 
     if (importedOffices == null) {
       try {
@@ -88,10 +88,10 @@ public class Import extends Controller {
     }
 
     //  Filtro la lista di tutti gli uffici presenti su perseo, lasciando solo i selezionati nella form
-    Collection<OfficeDTO> filteredOffices = Collections2.filter(importedOffices,
-            new Predicate<OfficeDTO>() {
+    Collection<OfficeDto> filteredOffices = Collections2.filter(importedOffices,
+            new Predicate<OfficeDto>() {
               @Override
-              public boolean apply(OfficeDTO input) {
+              public boolean apply(OfficeDto input) {
                 return offices.contains(input.id);
               }
             });

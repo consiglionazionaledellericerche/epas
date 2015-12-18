@@ -5,7 +5,7 @@ import com.google.common.base.MoreObjects;
 
 import models.Institute;
 
-public class InstituteDTO {
+public class InstituteDto {
   public int id;
   public String name;
   public String code;
@@ -13,9 +13,9 @@ public class InstituteDTO {
   public String dismissionDate;
 
   @Override
-  public boolean equals(Object o) {
-    if (o != null && o instanceof InstituteDTO) {
-      final InstituteDTO other = (InstituteDTO) o;
+  public boolean equals(Object obj) {
+    if (obj != null && obj instanceof InstituteDto) {
+      final InstituteDto other = (InstituteDto) obj;
       return cds.equals(other.cds) | code.equals(other.code);
     }
     return false;
@@ -39,15 +39,15 @@ public class InstituteDTO {
             .toString();
   }
 
-  public enum toInstitute implements Function<InstituteDTO, Institute> {
+  public enum ToInstitute implements Function<InstituteDto, Institute> {
     ISTANCE;
 
     @Override
-    public Institute apply(InstituteDTO instituteDTO) {
+    public Institute apply(InstituteDto instituteDto) {
       Institute institute = new Institute();
-      institute.name = instituteDTO.name;
-      institute.code = instituteDTO.code;
-      institute.cds = instituteDTO.cds;
+      institute.name = instituteDto.name;
+      institute.code = instituteDto.code;
+      institute.cds = instituteDto.cds;
       return institute;
     }
   }

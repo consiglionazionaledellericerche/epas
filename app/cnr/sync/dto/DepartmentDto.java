@@ -1,6 +1,6 @@
 package cnr.sync.dto;
 
-public class DepartmentDTO {
+public class DepartmentDto {
 
   public int id;
   public String name;
