@@ -1,7 +1,15 @@
-/**
- *
- */
 package models;
+
+import it.cnr.iit.epas.NullStringBinder;
+
+import models.base.BaseModel;
+import models.enumerate.StampTypes;
+
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDateTime;
+
+import play.data.binding.As;
+import play.data.validation.Required;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,18 +21,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDateTime;
-
-import it.cnr.iit.epas.NullStringBinder;
-import models.base.BaseModel;
-import play.data.binding.As;
-import play.data.validation.InPast;
-import play.data.validation.Required;
-
 
 /**
- * @author cristian
+ * @author cristian.
  */
 @Audited
 @Entity
@@ -32,53 +31,56 @@ import play.data.validation.Required;
 
 public class Stamping extends BaseModel implements Comparable<Stamping> {
 
-  
-  
+
   private static final long serialVersionUID = -2422323948436157747L;
-  @Required
+
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "personDay_id", nullable = false, updatable = false)
   public PersonDay personDay;
-  @ManyToOne
-  @JoinColumn(name = "stamp_type_id")
-  public StampType stampType;
+
+  @Column(name = "stamp_type")
+  @Enumerated(EnumType.STRING)
+  public StampTypes stampType;
+
   @ManyToOne(optional = true)
   @JoinColumn(name = "stamp_modification_type_id")
   public StampModificationType stampModificationType;
-  @Required
-  @InPast
+
+  @Column(nullable = false)
   public LocalDateTime date;
+
   @Required
   @Enumerated(EnumType.STRING)
   public WayType way;
-  @ManyToOne
-  @JoinColumn(name = "badge_reader_id")
-  public BadgeReader badgeReader;
+
   @As(binder = NullStringBinder.class)
   public String note;
-
+  /**
+   * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente
+   * all'apposita macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di
+   * timbratura poichè la persona in questione non ha potuto effettuare la timbratura (valore =
+   * true)
+   */
   @Column(name = "marked_by_admin")
   public Boolean markedByAdmin = false;
-
+  /**
+   * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
+   * true quando è il dipendente a modificare la propria timbratura
+   */
   @Column(name = "marked_by_employee")
   public Boolean markedByEmployee = false;
-  
   /**
    * true, cella bianca; false, cella gialla.
    */
   @Transient
   public boolean valid;
-  
+  @Transient
+  public int pairId = 0;
   /**
-   * true, la cella fittizia di uscita adesso.
+   * true, la cella fittizia di uscita adesso
    */
   @Transient
   public boolean exitingNow = false;
-  
-  
-  @Transient
-  public int pairId = 0;
-
 
   @Transient
   public boolean isValid() {
@@ -97,20 +99,19 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Costruttore.
+   *
    * @param personDay personDay
-   * @param time time
+   * @param time      time
    */
   public Stamping(PersonDay personDay, LocalDateTime time) {
     this.personDay = personDay;
     this.date = time;
   }
-  
+
   @Override
   public String toString() {
-    return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, "
-        + "stampType.id = %s, stampModificationType.id = %s",
-            id, personDay.id, way, date, stampType != null ? stampType.id : "null", 
-                stampModificationType != null ? stampModificationType.id : "null");
+    return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
+        id, personDay.id, way, date, stampType != null ? stampType : "null", stampModificationType != null ? stampModificationType.id : "null");
   }
 
   /**
@@ -126,59 +127,24 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     }
   }
 
-  /**
-   * Se la timbratura è di servizio.
-   * @return esito.
-   */
-  @Transient
-  public boolean isServiceStamping() {
-    if (this.stampType != null && this.stampType.identifier != null 
-        && this.stampType.identifier.equals("s")) {
-      return true;
-    }
-    return false;
-  }
-
   @Transient
   public String formattedHour() {
-    if (this.date != null)
+    if (this.date != null) {
       return date.toString("HH:mm");
-    else
+    } else {
       return "";
+    }
   }
 
+  /**
+   * @return Una rappresentazione compatta della timbratura.
+   */
   @Transient
-  public String formattedMark() {
-    String mark = "";
-    if (this.markedByAdmin != null && this.markedByAdmin == true)
-      mark = mark + "m";
-    if (this.stampType != null)
-      mark = mark + " " + this.stampType.identifier;
-    return mark;
-  }
-
-  @Transient
-  public boolean getBooleanWay() {
-    return this.way.equals(Stamping.WayType.in) ? true : false;
-  }
-
-  @Transient
-  public String getTime() {
-    if (date == null) {
-      return null;
-    }
-    String s = "";
-    if (date.getHourOfDay() > 9) {
-      s = s + date.getHourOfDay() + ":";
-    } else {
-      s = s + "0" + date.getHourOfDay() + ":";
-    }
-    if (date.getMinuteOfHour() > 9) {
-      s = s + date.getMinuteOfHour();
-    } else {
-      s = s + "0" + date.getMinuteOfHour();
-    }
-    return s;
+  public String getLabel() {
+    String output = formattedHour();
+    output += WayType.in.equals(this.way) ? " Ingr." : " Usc.";
+    output += stampType != null ? " (" + stampType.getIdentifier() + ")" : "";
+    return output;
   }
 
   public enum WayType {
@@ -187,7 +153,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
     public String description;
 
-    private WayType(String description) {
+    WayType(String description) {
       this.description = description;
     }
 
@@ -195,4 +161,5 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
       return this.description;
     }
   }
+
 }

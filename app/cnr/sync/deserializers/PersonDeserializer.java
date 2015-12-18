@@ -1,4 +1,4 @@
-package cnr.sync.Deserializers;
+package cnr.sync.deserializers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;

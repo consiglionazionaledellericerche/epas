@@ -30,7 +30,6 @@ import models.Office;
 import models.Person;
 import models.Qualification;
 import models.Role;
-import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
@@ -160,10 +159,6 @@ public class TemplateUtility {
 
   public List<AbsenceType> getCertificateAbsenceTypes() {
     return absenceTypeDao.certificateTypes();
-  }
-
-  public List<StampType> getAllStampTypes() {
-    return stampingDao.findAll();
   }
 
   public ImmutableList<String> getAllDays() {
