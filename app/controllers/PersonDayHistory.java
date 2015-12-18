@@ -80,8 +80,6 @@ public class PersonDayHistory extends Controller {
               .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-
-
     render(historyStampingsList, historyAbsencesList, pd);
   }
 }

@@ -23,7 +23,6 @@ import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.StampType;
 import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
@@ -71,16 +70,6 @@ public class Administration extends Controller {
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
    */
   public static void initializeRomanAbsences() {
-
-    //StampType pausa pranzo
-    StampType st = StampType.find("byCode", "pausaPranzo").first();
-    if (st == null) {
-      st = new StampType();
-      st.code = "pausaPranzo";
-      st.description = "Pausa pranzo";
-      st.identifier = "pr";
-      st.save();
-    }
 
     AbsenceType absenceType = AbsenceType.find("byCode", "PEPE").first();
     if (absenceType == null) {
@@ -177,7 +166,7 @@ public class Administration extends Controller {
       Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
       if (contract.isPresent()) {
-        if (contract.get().sourceDateResidual == null 
+        if (contract.get().sourceDateResidual == null
             && contract.get().beginDate.isBefore(initUse)) {
           Contract con = contract.get();
           con.sourceDateResidual = initUse.minusDays(1);
@@ -200,10 +189,10 @@ public class Administration extends Controller {
   public static void utilities() {
 
     final List<Person> personList = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesWriteAllowed(Security.getUser().get()),
-            false, LocalDate.now(), LocalDate.now(), true)
-            .list();
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, LocalDate.now(), LocalDate.now(), true)
+        .list();
 
     render(personList);
   }
@@ -220,7 +209,7 @@ public class Administration extends Controller {
     LocalDate date = new LocalDate(year, month, 1);
 
     Optional<Person> person = personId == null ? Optional.<Person>absent()
-            : Optional.fromNullable(personDao.getPersonById(personId));
+        : Optional.fromNullable(personDao.getPersonById(personId));
 
     consistencyManager.fixPersonSituation(person, Security.getUser(), date, false, onlyRecap);
 
@@ -235,14 +224,14 @@ public class Administration extends Controller {
   public static void buildYaml() {
     //general
     exportToYaml.buildAbsenceTypesAndQualifications(
-            "db/import/absenceTypesAndQualifications" + DateTime.now()
+        "db/import/absenceTypesAndQualifications" + DateTime.now()
             .toString("dd-MM-HH:mm") + ".yml");
 
     exportToYaml.buildCompetenceCodes(
-            "db/import/competenceCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
+        "db/import/competenceCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
 
     exportToYaml.buildVacationCodes(
-            "db/import/vacationCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
+        "db/import/vacationCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
 
   }
 
@@ -256,13 +245,14 @@ public class Administration extends Controller {
 
   /**
    * metodo che cancella tutte le timbrature disaccoppiate nell'arco temporale specificato.
+   *
    * @param peopleId l'id della persona
-   * @param begin la data da cui partire
-   * @param end la data in cui finire
-   * @param forAll se il controllo deve essere fatto per tutti
+   * @param begin    la data da cui partire
+   * @param end      la data in cui finire
+   * @param forAll   se il controllo deve essere fatto per tutti
    */
   public static void deleteUncoupledStampings(List<Long> peopleId,
-      @Required LocalDate begin, LocalDate end, boolean forAll) {
+                                              @Required LocalDate begin, LocalDate end, boolean forAll) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -282,7 +272,7 @@ public class Administration extends Controller {
     } else {
       // Tutte le persone attive nella finestra speficificata.
       List<Contract> contracts = contractDao
-              .getActiveContractsInPeriod(begin, Optional.fromNullable(end));
+          .getActiveContractsInPeriod(begin, Optional.fromNullable(end));
       for (Contract contract : contracts) {
         people.add(contract.person);
       }
@@ -295,7 +285,7 @@ public class Administration extends Controller {
 
       log.info("Rimozione timbrature disaccoppiate per {} ...", person.fullName());
       List<PersonDay> persondays = personDayDao
-              .getPersonDayInPeriod(person, begin, Optional.of(end));
+          .getPersonDayInPeriod(person, begin, Optional.of(end));
       int count = 0;
       for (PersonDay pd : persondays) {
         personDayManager.setValidPairStampings(pd);
@@ -318,18 +308,19 @@ public class Administration extends Controller {
 
   /**
    * metodo che controlla se ci sono errori nei periodi di ferie.
+   *
    * @param from la data da cui partire
    */
   public static void fixVacationPeriods(LocalDate from) {
 
     List<Contract> contracts = contractDao
-            .getActiveContractsInPeriod(from, Optional.<LocalDate>absent());
+        .getActiveContractsInPeriod(from, Optional.<LocalDate>absent());
 
     for (Contract contract : contracts) {
       contractManager.buildVacationPeriods(contract);
 
       log.info("Il contratto di {} iniziato il {} non è stato ripristinato "
-          + "con i piani ferie corretti.",contract.person.fullName(), contract.beginDate);
+          + "con i piani ferie corretti.", contract.person.fullName(), contract.beginDate);
     }
 
     utilities();

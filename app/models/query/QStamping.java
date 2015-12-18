@@ -1,15 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.PathMetadata;
+import com.mysema.query.types.path.BooleanPath;
+import com.mysema.query.types.path.DateTimePath;
+import com.mysema.query.types.path.EntityPathBase;
+import com.mysema.query.types.path.EnumPath;
+import com.mysema.query.types.path.NumberPath;
+import com.mysema.query.types.path.PathInits;
+import com.mysema.query.types.path.SimplePath;
+import com.mysema.query.types.path.StringPath;
+
 import models.Stamping;
 
+import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
-import com.mysema.query.types.path.*;
-
-import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -49,7 +55,7 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public final QStampModificationType stampModificationType;
 
-    public final QStampType stampType;
+    public final EnumPath<models.enumerate.StampTypes> stampType = createEnum("stampType", models.enumerate.StampTypes.class);
 
     public final EnumPath<Stamping.WayType> way = createEnum("way", Stamping.WayType.class);
 
@@ -74,7 +80,6 @@ public class QStamping extends EntityPathBase<Stamping> {
         this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
         this.personDay = inits.isInitialized("personDay") ? new QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
         this.stampModificationType = inits.isInitialized("stampModificationType") ? new QStampModificationType(forProperty("stampModificationType")) : null;
-        this.stampType = inits.isInitialized("stampType") ? new QStampType(forProperty("stampType")) : null;
     }
 
 }
