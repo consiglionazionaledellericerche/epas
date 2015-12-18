@@ -35,9 +35,9 @@ administrations= Amministrazione
 
 badgeReader=Sorgente Timbrature
 badgeReaders= Sorgenti Timbrature
-badgeReader.code=Nome 
+badgeReader.code=Nome
 badgeReader.id=id
-badgeReader.description=Descrizione 
+badgeReader.description=Descrizione
 badgeReader.location=Location
 badgeReader.owner=Sede Responsabile
 badgeReader.badgeSystems=Gruppi Badge
@@ -48,8 +48,8 @@ BadgeReaders.joinBadgeSystems= Gestisci Associazioni
 
 badgeSystems= Gruppi Badge
 badgeSystem = Gruppo Badge
-badgeSystem.name=Nome 
-badgeSystem.description=Descrizione 
+badgeSystem.name=Nome
+badgeSystem.description=Descrizione
 badgeSystem.office=Sede
 
 BadgeSystems.blank= Nuovo Gruppo Badge
@@ -61,6 +61,9 @@ competenceCode.code= Codice Competenza
 competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
+
+feedback.subject =EPAS - Segnalazione utente
+feedback.staff =Lo staff di EPAS
 
 
 views.common.true=vero
@@ -204,7 +207,7 @@ csp.endDate= Data Fine
 csp.fixedworkingtime=Presenza Automatica
 
 wtt.description= Nome Tipo Orario
-wtt.office=Sede 
+wtt.office=Sede
 wtt= Tipo Orario
 
 ContractWorkingTimeType=Periodo Tipo Orario
@@ -339,7 +342,7 @@ absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcol
 
 absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
 
-absenceTypeGroup.label.popover= Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli 
+absenceTypeGroup.label.popover= Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli
 (Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)
 
 absenceTypeGroup.accumulationType.popover= Se i valori devono essere sommati per ogni utilizzo. Alla fine del periodo (mese o anno) l'accumulo riparte da zero. (Es. codice 661h2 indicare "Annuale")
