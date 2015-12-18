@@ -29,11 +29,12 @@ public class VacationPeriodDecision {
   
   @Builder
   private VacationPeriodDecision(AccruedDecision accruedDecision,
-      VacationPeriod vacationPeriod, DateInterval requestInterval) {
+      VacationPeriod vacationPeriod) {
     
     this.accruedDecision = accruedDecision;
     this.vacationPeriod = vacationPeriod;
-    this.interval = requestInterval;
+    this.interval = DateUtility.intervalIntersection(vacationPeriod.getDateInterval(), 
+        accruedDecision.getRequestInterval());
     this.accruedConverter = AccruedConverter.accruedConverter();
   }
   
@@ -62,7 +63,7 @@ public class VacationPeriodDecision {
     
     if (this.interval != null) {
 
-      this.days = DateUtility.daysInInterval(this.interval)- this.postPartum.size();
+      this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
 
       //calcolo i giorni maturati col metodo di conversione
       if (accruedDecision.getTypeAccrued().equals(TypeAccrued.PERMISSION_CURRENT_YEAR_ACCRUED) 

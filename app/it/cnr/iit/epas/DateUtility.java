@@ -168,32 +168,37 @@ public class DateUtility {
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
    *         intersezione vuota.
    */
-  public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2) {
+  public static DateInterval intervalIntersection(final DateInterval inter1, 
+      final DateInterval inter2) {
+  
     if (inter1 == null || inter2 == null) {
       return null;
     }
-    // ordino
-    if (!inter1.getBegin().isBefore(inter2.getBegin())) {
-      DateInterval aux = new DateInterval(inter1.getBegin(), inter1.getEnd());
-      inter1 = inter2;
-      inter2 = aux;
-    }
-
-
+    
     // un intervallo contenuto nell'altro
     if (isIntervalIntoAnother(inter1, inter2)) {
-      return inter1;
+      return new DateInterval(inter1.getBegin(), inter1.getEnd());
     }
 
     if (isIntervalIntoAnother(inter2, inter1)) {
-      return inter2;
+      return new DateInterval(inter2.getBegin(), inter2.getEnd());
     }
 
+    DateInterval copy1 = new DateInterval(inter1.getBegin(), inter1.getEnd());
+    DateInterval copy2 = new DateInterval(inter2.getBegin(), inter2.getEnd());
+
+    // ordino
+    if (!inter1.getBegin().isBefore(inter2.getBegin())) {
+      DateInterval aux = new DateInterval(inter1.getBegin(), inter1.getEnd());
+      copy1 = inter2;
+      copy2 = aux;
+    }
+ 
     // fine di inter1 si interseca con inizio di inter2
-    if (inter1.getEnd().isBefore(inter2.getBegin())) {
+    if (copy1.getEnd().isBefore(copy2.getBegin())) {
       return null;
     } else {
-      return new DateInterval(inter2.getBegin(), inter1.getEnd());
+      return new DateInterval(copy2.getBegin(), copy1.getEnd());
     }
   }
   

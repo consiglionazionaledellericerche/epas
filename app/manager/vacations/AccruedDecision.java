@@ -78,8 +78,8 @@ public class AccruedDecision {
     for (VacationPeriod vp : accruedComponent.getContractVacationPeriod()) {
       
       VacationPeriodDecision vacationPeriodDecision = VacationPeriodDecision.builder()
+          .accruedDecision(this)
           .vacationPeriod(vp)
-          .requestInterval(this.requestInterval)
           .build()
           .setPostPartumAbsences(accruedComponent.getPostPartum())
           .setAccrued();
