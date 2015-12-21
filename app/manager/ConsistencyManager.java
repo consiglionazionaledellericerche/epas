@@ -19,8 +19,8 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.cache.StampTypeManager;
-import manager.vacations.VacationsRecap;
-import manager.vacations.VacationsRecapFactory;
+import manager.services.vacations.IVacationsRecap;
+import manager.services.vacations.test.TestVacationsService;
 
 import models.Absence;
 import models.AbsenceType;
@@ -70,16 +70,27 @@ public class ConsistencyManager {
   private final StampTypeManager stampTypeManager;
   private final AbsenceDao absenceDao;
   private final AbsenceTypeDao absenceTypeDao;
-  private final VacationsRecapFactory vacationsFactory;
+  private final TestVacationsService vacationsService;
   private final ConfGeneralManager confGeneralManager;
+  
   @Inject
-  public ConsistencyManager(SecureManager secureManager, OfficeDao officeDao,
-                            PersonManager personManager, PersonDao personDao, PersonDayManager personDayManager,
-                            ContractMonthRecapManager contractMonthRecapManager,
-                            PersonDayInTroubleManager personDayInTroubleManager, IWrapperFactory wrapperFactory,
-                            PersonDayDao personDayDao, ConfYearManager confYearManager, StampTypeManager stampTypeManager,
-                            AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, VacationsRecapFactory vacationsFactory,
-                            ConfGeneralManager confGeneralManager) {
+  public ConsistencyManager(SecureManager secureManager, 
+      OfficeDao officeDao,
+      PersonDao personDao,
+      PersonDayDao personDayDao,
+      AbsenceDao absenceDao, 
+      AbsenceTypeDao absenceTypeDao,
+      
+      PersonManager personManager, 
+      PersonDayManager personDayManager,
+      ContractMonthRecapManager contractMonthRecapManager,
+      PersonDayInTroubleManager personDayInTroubleManager, 
+      ConfGeneralManager confGeneralManager,
+      ConfYearManager confYearManager, 
+      StampTypeManager stampTypeManager,
+
+      IWrapperFactory wrapperFactory, 
+      TestVacationsService vacationsService) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -94,7 +105,7 @@ public class ConsistencyManager {
     this.stampTypeManager = stampTypeManager;
     this.absenceDao = absenceDao;
     this.absenceTypeDao = absenceTypeDao;
-    this.vacationsFactory = vacationsFactory;
+    this.vacationsService = vacationsService;
     this.confGeneralManager = confGeneralManager;
   }
 
@@ -490,7 +501,7 @@ public class ConsistencyManager {
    * la stessa procedura dall'inizio del contratto. (Capire se questo caso si verifica mai).
    */
   private void populateContractMonthRecap(IWrapperContract contract,
-                                          Optional<YearMonth> yearMonthFrom) {
+      Optional<YearMonth> yearMonthFrom) {
 
     // Conterrà il riepilogo precedente di quello da costruire all'iterazione n.
     Optional<ContractMonthRecap> previousMonthRecap = Optional.<ContractMonthRecap>absent();
@@ -550,8 +561,8 @@ public class ConsistencyManager {
               new LocalDate(yearMonthToCompute.getYear(), yearMonthToCompute.getMonthOfYear(), 1)
                       .dayOfMonth().withMaximumValue();
 
-      Optional<VacationsRecap> vacationRecap = vacationsFactory.create(yearMonthToCompute.getYear(),
-              contract.getValue(), lastDayInYearMonth, true);
+      Optional<IVacationsRecap> vacationRecap = vacationsService.create(
+          yearMonthToCompute.getYear(), contract.getValue(), lastDayInYearMonth, true);
 
       if (!vacationRecap.isPresent()) {
 
@@ -565,9 +576,10 @@ public class ConsistencyManager {
         return;
       }
 
-      currentMonthRecap.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed;
-      currentMonthRecap.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed;
-      currentMonthRecap.permissionUsed = vacationRecap.get().permissionUsed;
+      currentMonthRecap.vacationLastYearUsed = vacationRecap.get().getVacationDaysLastYearUsed();
+      currentMonthRecap.vacationCurrentYearUsed = 
+          vacationRecap.get().getVacationDaysCurrentYearUsed();
+      currentMonthRecap.permissionUsed = vacationRecap.get().getPermissionUsed();
 
       // (2) RESIDUI
       List<Absence> otherCompensatoryRest = Lists.newArrayList();
@@ -638,8 +650,8 @@ public class ConsistencyManager {
     AbsenceType ab94 = absenceTypeDao
             .getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull();
 
-    DateInterval monthInterSource =
-            new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
+    DateInterval monthInterSource = new DateInterval(
+        contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
     List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab32);
     List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab31);
     List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab37);
