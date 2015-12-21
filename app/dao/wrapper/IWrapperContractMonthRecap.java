@@ -5,6 +5,8 @@ import com.google.common.base.Optional;
 import models.ContractMonthRecap;
 
 /**
+ * Contratto con alcune funzionalità aggiuntive.
+ *
  * @author alessandro
  */
 public interface IWrapperContractMonthRecap extends IWrapperModel<ContractMonthRecap> {

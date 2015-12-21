@@ -2,15 +2,19 @@ package cnr.sync.dto;
 
 import models.Office;
 
-public class OfficeDTO {
+public class OfficeDto {
   public int id;
   public String name;
   public String code;
   public String codeId;
   public boolean isHeadQuarters;
-  public InstituteDTO institute;
+  public InstituteDto institute;
   public String dismissionDate;
 
+  /**
+   * Copia i dati dell'ufficio passato nell'ufficio corrente.
+   * @param office l'ufficio da cui copiare i dati
+   */
   public void copyInto(Office office) {
     office.name = name;
     office.code = code;

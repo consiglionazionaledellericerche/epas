@@ -272,7 +272,7 @@ public class ConfYearManager {
     return new MessageResult(true, "parametro di configurazione correttamente inserito");
   }
 
-  public final static class MessageResult {
+  public static final class MessageResult {
     public boolean result;
     public String message;
 

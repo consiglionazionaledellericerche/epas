@@ -1,22 +1,23 @@
 package it.cnr.iit.epas;
 
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-import org.apache.commons.codec.binary.Base64;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import models.exports.ReportFromJson;
+
+import org.apache.commons.codec.binary.Base64;
+
 import play.Logger;
 import play.data.binding.TypeBinder;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 public class JsonReportBinder implements TypeBinder<ReportFromJson> {
 
-  private final static String IMAGE_MAGIK = "data:image/png;base64,";
+  private static final String IMAGE_MAGIK = "data:image/png;base64,";
 
   public static byte[] decodeImage(String imageDataString) {
     return Base64.decodeBase64(imageDataString);

@@ -1,15 +1,5 @@
 package controllers.rest;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
@@ -17,25 +7,42 @@ import com.google.common.collect.Lists;
 
 import cnr.sync.dto.AbsenceAddedRest;
 import cnr.sync.dto.AbsenceRest;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
+
 import helpers.JsonResponse;
 import helpers.rest.JacksonModule;
+
 import manager.AbsenceManager;
 import manager.cache.AbsenceTypeManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+
 import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
+
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 @With(Resecure.class)
 public class Absences extends Controller {
@@ -101,7 +108,7 @@ public class Absences extends Controller {
         AbsenceAddedRest aar = new AbsenceAddedRest();
         aar.absenceCode = ar.getAbsenceCode();
         aar.date = ar.getDate().toString();
-        aar.isOK = ar.isInsertSucceeded();
+        aar.isOk = ar.isInsertSucceeded();
         aar.reason = ar.getWarning();
         list.add(aar);
       }

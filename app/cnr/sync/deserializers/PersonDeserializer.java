@@ -1,4 +1,4 @@
-package cnr.sync.Deserializers;
+package cnr.sync.deserializers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 public class PersonDeserializer implements JsonDeserializer<Person> {
 
   //	Pattern per il parsing delle date
-  final static DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
+  static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
 
   @Override
   public Person deserialize(JsonElement json, Type arg1,

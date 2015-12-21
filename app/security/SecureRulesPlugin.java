@@ -22,8 +22,8 @@ import java.util.Properties;
  */
 public class SecureRulesPlugin extends PlayPlugin {
 
-  private final static Logger log = LoggerFactory.getLogger(SecureRulesPlugin.class);
-  private final static String FILENAME = "permissions.drl";
+  private static final Logger log = LoggerFactory.getLogger(SecureRulesPlugin.class);
+  private static final String FILENAME = "permissions.drl";
 
   static KnowledgeBase knowledgeBase;
   Long lastModified;

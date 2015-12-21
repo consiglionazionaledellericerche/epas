@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import it.cnr.iit.epas.DateInterval;
+
 import models.ContractWorkingTimeType;
 
 public class WrapperContractWorkingTimeType implements IWrapperContractWorkingTimeType {
@@ -21,7 +22,7 @@ public class WrapperContractWorkingTimeType implements IWrapperContractWorkingTi
   }
 
   /**
-   * L'intervallo temporale del periodo
+   * L'intervallo temporale del periodo.
    */
   @Override
   public DateInterval getDateInverval() {

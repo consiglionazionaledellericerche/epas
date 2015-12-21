@@ -9,11 +9,10 @@ import dao.RoleDao;
 
 import helpers.Web;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Institute;
 import models.Role;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -22,10 +21,9 @@ import play.mvc.With;
 
 import javax.inject.Inject;
 
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Institutes extends Controller {
-
-  private static final Logger log = LoggerFactory.getLogger(Institutes.class);
 
   @Inject
   private static OfficeDao officeDao;

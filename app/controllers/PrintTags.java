@@ -1,5 +1,7 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
@@ -19,9 +21,9 @@ import models.User;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;

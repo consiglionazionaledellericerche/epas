@@ -1,17 +1,5 @@
 package manager;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
@@ -24,10 +12,14 @@ import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
+
 import helpers.BadRequest;
+
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+
 import lombok.extern.slf4j.Slf4j;
+
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -44,6 +36,7 @@ import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
+
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
@@ -52,9 +45,22 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
 import play.Logger;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 
 /**
@@ -63,7 +69,7 @@ import play.i18n.Messages;
 @Slf4j
 public class ShiftManager {
 
-  private final static String codShift = "T1";            // codice dei turni
+  private static final String codShift = "T1";            // codice dei turni
   public static String thNoStampings = Messages.get("PDFReport.thNoStampings");        // nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
   public static String thBadStampings = Messages.get("PDFReport.thBadStampings");    // nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
   public static String thMissingTime = Messages.get("PDFReport.thMissingTime");        //
@@ -495,9 +501,9 @@ public class ShiftManager {
                 Logger.info("Il turno di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personShiftDay.date);
 
 
-								/*absenceDays = (inconsistentAbsence.contains(personName, thAbsences)) ? inconsistentAbsence.get(personName, thAbsences) : new ArrayList<Integer>();
+                /*absenceDays = (inconsistentAbsence.contains(personName, thAbsences)) ? inconsistentAbsence.get(personName, thAbsences) : new ArrayList<Integer>();
                                 absenceDays.add(personShiftDay.date.getDayOfMonth());
-								inconsistentAbsence.put(personName, thAbsences, absenceDays);*/
+                inconsistentAbsence.put(personName, thAbsences, absenceDays);*/
 
                 absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences)) ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();
                 absenceDays.add(personShiftDay.date.toString("dd MMM"));
@@ -688,10 +694,10 @@ public class ShiftManager {
       LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
       Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
 
-			/*int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
-				.setParameter("shiftType", shiftType)
-				.setParameter("dateToRemove", dateToRemove)
-				.executeUpdate(); */
+      /*int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
+        .setParameter("shiftType", shiftType)
+        .setParameter("dateToRemove", dateToRemove)
+        .executeUpdate(); */
       long cancelled = shiftDao.deleteShiftCancelled(shiftType, dateToRemove);
 
       if (cancelled == 1) {
@@ -1056,19 +1062,19 @@ public class ShiftManager {
 
     Logger.debug("month=%s", month);
 
-		/*final QCompetence com = new QCompetence("competence");
-		final JPQLQuery query = getQueryFactory().query();
-		final Competence myCompetence = query
-				.from(com)
-				.where(
-						com.person.eq(person)
-						.and(com.year.eq(year))
-						.and(com.month.lt(month))
-						.and(com.competenceCode.eq(competenceCode))
-						)
-						.orderBy(com.month.desc())
-						.limit(1)
-						.uniqueResult(com);*/
+    /*final QCompetence com = new QCompetence("competence");
+    final JPQLQuery query = getQueryFactory().query();
+    final Competence myCompetence = query
+        .from(com)
+        .where(
+            com.person.eq(person)
+            .and(com.year.eq(year))
+            .and(com.month.lt(month))
+            .and(com.competenceCode.eq(competenceCode))
+            )
+            .orderBy(com.month.desc())
+            .limit(1)
+            .uniqueResult(com);*/
     Competence myCompetence = competenceDao.getLastPersonCompetenceInYear(person, year, month, competenceCode);
 
     //Logger.debug("prendo i minuti in eccesso dal mese %s", myCompetence.getMonth());
@@ -1249,7 +1255,7 @@ public class ShiftManager {
   }
 
   // shift day
-  public final static class SD {
+  public static final class SD {
     Person mattina;
     Person pomeriggio;
 

@@ -127,7 +127,7 @@ public class HorizontalWorkingTime {
    * @param wttd
    * @return
    */
-  private final static String holidayName(final int dayOfWeek) {
+  private static final String holidayName(final int dayOfWeek) {
 
     return LocalDate.now().withDayOfWeek(dayOfWeek).dayOfWeek().getAsText();
   }

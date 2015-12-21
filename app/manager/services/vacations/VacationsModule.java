@@ -9,10 +9,6 @@ public class VacationsModule extends AbstractModule {
   @Override 
   protected void configure() {
     
-    //bind(TransactionLog.class).to(DatabaseTransactionLog.class);
-    //bind(CreditCardProcessor.class).to(PaypalCreditCardProcessor.class);
-    //bind(VacationsService.class).to(RealVacationService.class);
-    
     bind(IVacationsService.class).to(RealVacationsService.class);
     
   }

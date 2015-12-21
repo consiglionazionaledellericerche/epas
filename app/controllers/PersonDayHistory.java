@@ -22,6 +22,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 /**
+ * Controller per la visualizzazione dello storico dei PersonDay.
+ *
  * @author marco
  */
 @With({Resecure.class,RequestInit.class})
@@ -35,9 +37,14 @@ public class PersonDayHistory extends Controller {
   private static AbsenceHistoryDao absenceHistoryDao;
 
 
+  /**
+   * Visualizzazione dello storico dei PersonDay.
+   *
+   * @param personDayId l'id del personDay di cui mostrare lo storico
+   */
   public static void personDayHistory(long personDayId) {
 
-    PersonDay pd = PersonDay.findById(personDayId);
+    final PersonDay pd = PersonDay.findById(personDayId);
 
     List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
             .absences(personDayId);
@@ -80,8 +87,6 @@ public class PersonDayHistory extends Controller {
               .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-
-
     render(historyStampingsList, historyAbsencesList, pd);
   }
 }

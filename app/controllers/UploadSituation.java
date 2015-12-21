@@ -313,13 +313,14 @@ public class UploadSituation extends Controller {
 
     List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
 
-    if (risposteNotOk.isEmpty())
+    if (risposteNotOk.isEmpty()) {
       flash.success("Elaborazione dipendenti effettuata senza errori.");
-    else if (risposteNotOk.size() == 1)
+    } else if (risposteNotOk.size() == 1) {
       flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per 1 dipendente. Controllare l'esito.");
-    else
+    } else {
       flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per %s dipendenti. Controllare l'esito.",
               risposteNotOk.size());
+    }
 
     UploadSituation.processAttestati(null, null, year, month);
 
@@ -373,10 +374,11 @@ public class UploadSituation extends Controller {
 
     List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
 
-    if (risposteNotOk.isEmpty())
+    if (risposteNotOk.isEmpty()) {
       flash.success("Elaborazione dipendente effettuata senza errori.");
-    else
+    } else {
       flash.error("Elaborazione dipendente effettuata. Sono stati riscontrati problemi per 1 dipendente. Controllare l'esito.");
+    }
 
 
     UploadSituation.processAttestati(null, null, year, month);
@@ -483,16 +485,18 @@ public class UploadSituation extends Controller {
 
   private static Set<Dipendente> getDipendenteNonInEpas(int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
     Set<Dipendente> dipendentiNonInEpas = Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
-    if (dipendentiNonInEpas.size() > 0)
+    if (dipendentiNonInEpas.size() > 0) {
       Logger.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. %s", dipendentiNonInEpas);
+    }
 
     return dipendentiNonInEpas;
   }
 
   private static Set<Dipendente> getDipendenteNonInCnr(int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
     Set<Dipendente> dipendentiNonInCNR = Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
-    if (dipendentiNonInCNR.size() > 0)
+    if (dipendentiNonInCNR.size() > 0) {
       Logger.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. %s", dipendentiNonInCNR);
+    }
 
     return dipendentiNonInCNR;
   }

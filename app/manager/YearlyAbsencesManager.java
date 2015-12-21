@@ -1,27 +1,28 @@
 package manager;
 
-import java.util.Comparator;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
+
 public class YearlyAbsencesManager {
 
-  private final static Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
+  private static final Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
   public Comparator<Person> PersonNameComparator = new Comparator<Person>() {
 
     public int compare(Person person1, Person person2) {
@@ -29,8 +30,9 @@ public class YearlyAbsencesManager {
       String name1 = person1.surname.toUpperCase();
       String name2 = person2.surname.toUpperCase();
 
-      if (name1.equals(name2))
+      if (name1.equals(name2)) {
         return person1.name.toUpperCase().compareTo(person2.name.toUpperCase());
+      }
       return name1.compareTo(name2);
 
     }
@@ -80,7 +82,7 @@ public class YearlyAbsencesManager {
   }
 
   /*Non è molto chiaro cosa facesse questa classe innestata all'interno di YearlyAbsences*/
-  public final static class AbsenceTypeDays {
+  public static final class AbsenceTypeDays {
     public String absenceCode;
     public Integer i;
 
@@ -110,25 +112,30 @@ public class YearlyAbsencesManager {
 
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
+      if (this == obj) {
         return true;
-      if (obj == null)
+      }
+      if (obj == null) {
         return false;
-      if (getClass() != obj.getClass())
+      }
+      if (getClass() != obj.getClass()) {
         return false;
+      }
       AbsenceTypeDays other = (AbsenceTypeDays) obj;
       if (absenceCode == null) {
-        if (other.absenceCode != null)
+        if (other.absenceCode != null) {
           return false;
-      } else if (!absenceCode.equals(other.absenceCode))
+        }
+      } else if (!absenceCode.equals(other.absenceCode)) {
         return false;
+      }
       return true;
     }
 
   }
 
   /*Così come non è chiaro cosa ci facesse questa...*/
-  public final static class AbsenceTypeDate {
+  public static final class AbsenceTypeDate {
     public AbsenceType absenceType;
     public LocalDate date;
 

@@ -1,17 +1,5 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
@@ -24,8 +12,11 @@ import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
+
 import helpers.BadRequest;
+
 import lombok.extern.slf4j.Slf4j;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -37,6 +28,7 @@ import models.PersonReperibilityType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
+
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.Dur;
@@ -45,8 +37,21 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
+
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.i18n.Messages;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 /**
  * @author Arianna e Dario
@@ -54,8 +59,8 @@ import play.i18n.Messages;
 @Slf4j
 public class ReperibilityManager {
 
-  private final static String codFr = "207";                            // codice dei turni feriali
-  private final static String codFs = "208";                            // codice dei turni festivi
+  private static final String codFr = "207";                            // codice dei turni feriali
+  private static final String codFs = "208";                            // codice dei turni festivi
   // Label della tabella delle inconsistenze delle reperibilità con le timbrature
   public static String thNoStampings = Messages.get("PDFReport.thNoStampings");  // nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
   public static String thAbsences = Messages.get("PDFReport.thAbsences");                // nome della colonna per i giorni di assenza della tabella delle inconsistenze
@@ -305,13 +310,13 @@ public class ReperibilityManager {
   }
 
 
-	/*
+  /*
      * @param reperibilityType 	- type of a reperibility
-	 * @param startDay			- data di inizio del periodo di reperibilità
-	 * @param endDay			- data di fine del periodo di reperibilità
-	 * @param requestor			- persona che ha richiesto il cambio reperibilità
-	 * @param substitute		- persona che va a sostituire il richiedente nei giorni di reperibilità
-	 */
+   * @param startDay			- data di inizio del periodo di reperibilità
+   * @param endDay			- data di fine del periodo di reperibilità
+   * @param requestor			- persona che ha richiesto il cambio reperibilità
+   * @param substitute		- persona che va a sostituire il richiedente nei giorni di reperibilità
+   */
 
   public void changePersonInReperibilityPeriod(PersonReperibilityType reperibilityType, LocalDate startDay, LocalDate endDay, Person requestor, Person substitute) {
 

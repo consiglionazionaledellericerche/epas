@@ -1,30 +1,32 @@
 package cnr.sync.manager;
 
+import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+
+import cnr.sync.dto.DepartmentDto;
+import cnr.sync.dto.PersonRest;
+
+import dao.OfficeDao;
+import dao.PersonDao;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.Office;
+import models.Person;
+
+import play.Play;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-
-import cnr.sync.dto.DepartmentDTO;
-import cnr.sync.dto.PersonRest;
-import dao.OfficeDao;
-import dao.PersonDao;
-import models.Office;
-import models.Person;
-import play.Play;
-import play.libs.WS;
-import play.libs.WS.HttpResponse;
-
+@Slf4j
 public class SyncManager {
 
-  private final static Logger log = LoggerFactory.getLogger(SyncManager.class);
   private final OfficeDao officeDao;
   private final PersonDao personDao;
   @Inject
@@ -43,8 +45,9 @@ public class SyncManager {
     List<Office> helpList = officeDao.getAllOffices();
     List<Office> officeList = Lists.newArrayList();
     for (Office office : helpList) {
-      if (office.codeId != null)
+      if (office.codeId != null) {
         officeList.add(office);
+      }
     }
     int contatore = 0;
     String url = Play.configuration.getProperty("people.rest");
@@ -55,12 +58,11 @@ public class SyncManager {
       HttpResponse perseoResponse = WS.url(perseoUrl).get();
       Gson gson = new Gson();
 
-      DepartmentDTO dep = gson.fromJson(perseoResponse.getJson(), DepartmentDTO.class);
+      DepartmentDto dep = gson.fromJson(perseoResponse.getJson(), DepartmentDto.class);
       HttpResponse response = WS.url(url + dep.code).get();
 
       List<PersonRest> people = gson.fromJson(response.getJson().toString(),
-              new TypeToken<ArrayList<PersonRest>>() {
-              }.getType());
+              new TypeToken<ArrayList<PersonRest>>() {}.getType());
       for (PersonRest pr : people) {
         if (pr.number == null) {
           log.info("Non esiste matricola per {} {}", pr.firstname, pr.surname);

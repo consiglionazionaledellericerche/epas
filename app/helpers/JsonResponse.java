@@ -5,8 +5,8 @@ import play.mvc.results.RenderJson;
 
 public class JsonResponse {
 
-  private final static String NOT_FOUND = "HTTP 404";
-  private final static String BAD_REQUEST = "HTTP 400";
+  private static final String NOT_FOUND = "HTTP 404";
+  private static final String BAD_REQUEST = "HTTP 400";
 
   public static void notFound() {
     Http.Response.current().status = Http.StatusCode.NOT_FOUND;

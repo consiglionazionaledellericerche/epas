@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
-import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
@@ -49,6 +48,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -81,8 +81,6 @@ public class Persons extends Controller {
   @Inject
   private static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
-  private static ContractDao contractDao;
-  @Inject
   private static UserDao userDao;
   @Inject
   private static IWrapperFactory wrapperFactory;
@@ -91,7 +89,7 @@ public class Persons extends Controller {
 
   /**
    * il metodo per ritornare la lista delle persone.
-   * 
+   *
    * @param name l'eventuale nome su cui restringere la ricerca.
    */
   public static void list(String name) {
@@ -347,7 +345,7 @@ public class Persons extends Controller {
 
   /**
    * Salva la nuova password.
-   * 
+   *
    * @param nuovaPassword nuovaPassword
    * @param confermaPassword confermaPassword
    * @throws Throwable boh.
@@ -379,7 +377,7 @@ public class Persons extends Controller {
 
   /**
    * Lista figli del dipendente.
-   * 
+   *
    * @param personId personId
    */
   public static void children(Long personId) {
@@ -390,7 +388,7 @@ public class Persons extends Controller {
 
   /**
    * Nuovo figlio per il dipendente.
-   * 
+   *
    * @param personId personId
    */
   public static void insertChild(Long personId) {
@@ -405,7 +403,7 @@ public class Persons extends Controller {
 
   /**
    * Modifica figlio.
-   * 
+   *
    * @param childId childId
    */
   public static void editChild(Long childId) {
@@ -417,7 +415,7 @@ public class Persons extends Controller {
 
   /**
    * Rimozione figlio.
-   * 
+   *
    * @param childId childId.
    */
   public static void deleteChild(Long childId, boolean confirmed) {
@@ -441,7 +439,7 @@ public class Persons extends Controller {
 
   /**
    * Salva il figlio.
-   * 
+   *
    * @param child child
    */
   public static void saveChild(@Valid PersonChildren child) {

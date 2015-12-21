@@ -23,9 +23,9 @@ public class PersonTags extends JavaExtensions {
   public static String toHourTime(Integer minutes) {
     int min = Math.abs(minutes % 60);
     int hour = Math.abs(minutes / 60);
-    if ((minutes.intValue() < 0))
-
+    if ((minutes.intValue() < 0)) {
       return String.format("-%02d:%02d", hour, min);
+    }
     return String.format("%02d:%02d", hour, min);
   }
 
@@ -42,11 +42,6 @@ public class PersonTags extends JavaExtensions {
     }
     return "-" + toHourTime(minutes);
   }
-
-//	public static String convertIntToHour(int numberOfCompensatoryRest, Person person){
-//		int timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
-//		return toHourTime(numberOfCompensatoryRest*timeAtWork);
-//	}
 
   public static String toHour(Integer minutes) {
     int hour = Math.abs(minutes / 60);

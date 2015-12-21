@@ -77,7 +77,8 @@ public class Charts extends Controller {
             new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    List<PersonOvertime> poList = chartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
+    List<PersonOvertime> poList =
+        chartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
 
     render(poList, year, month, annoList, meseList);
   }
@@ -104,10 +105,12 @@ public class Charts extends Controller {
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
     Long val = null;
-    Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
-    if (result.isPresent())
+    Optional<Integer> result =
+        competenceDao.valueOvertimeApprovedByMonthAndYear(
+            year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
+    if (result.isPresent()) {
       val = result.get().longValue();
-
+    }
     List<Person> personeProva = personDao.list(
             Optional.<String>absent(),
             secureManager.officesReadAllowed(Security.getUser().get()),
@@ -139,13 +142,13 @@ public class Charts extends Controller {
     absenceCode.add("92");
     absenceCode.add("91");
     absenceCode.add("111");
-//		LocalDate beginYear = new LocalDate(year, 1,1);
-//		LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
+    //LocalDate beginYear = new LocalDate(year, 1,1);
+    //LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()
     // FIXME da rifattorizzare tutta questa parte e renderla funzione dell'office
-    long missioniSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92");
-    long riposiCompensativiSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
-    long malattiaSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
-    long altreSize = 0; //absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
+    long missioniSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92")
+    long riposiCompensativiSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91")
+    long malattiaSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111")
+    long altreSize = 0; //absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear,absenceCode)
 
     render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
 

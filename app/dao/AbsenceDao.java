@@ -69,10 +69,12 @@ public class AbsenceDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
     final JPQLQuery query = getQueryFactory().from(absence);
-    if (person.isPresent())
+    if (person.isPresent()) {
       condition.and(absence.personDay.person.eq(person.get()));
-    if (forAttachment)
+    }
+    if (forAttachment) {
       condition.and(absence.absenceFile.isNotNull().and(absence.absenceType.absenceTypeGroup.isNull()));
+    }
     if (dateTo.isPresent()) {
       condition.and(absence.personDay.date.between(dateFrom, dateTo.get()));
     } else {
@@ -96,8 +98,9 @@ public class AbsenceDao extends DaoBase {
 
     final JPQLQuery query = getQueryFactory().from(absence);
     final BooleanBuilder condition = new BooleanBuilder();
-    if (forAttachment)
+    if (forAttachment) {
       condition.and(absence.absenceFile.isNotNull());
+    }
     if (person.isPresent()) {
       condition.and(absence.personDay.person.eq(person.get()));
     }
@@ -109,8 +112,9 @@ public class AbsenceDao extends DaoBase {
     }
     condition.and(absence.personDay.date.between(from, to));
     query.where(condition);
-    if (ordered)
+    if (ordered) {
       query.orderBy(absence.personDay.date.asc());
+    }
     return query.list(absence);
 
   }
@@ -148,10 +152,11 @@ public class AbsenceDao extends DaoBase {
 
     final JPQLQuery query = getQueryFactory().from(absence)
             .where(absence.personDay.date.between(begin, end).and(absence.absenceType.code.notIn(absenceCode)));
-    if (query.count() != 0)
+    if (query.count() != 0) {
       return query.count();
-    else
+    } else {
       return new Long(0);
+    }
   }
 
   /**
@@ -189,10 +194,11 @@ public class AbsenceDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
     final JPQLQuery query = getQueryFactory().from(absence);
-    if (begin.isPresent())
+    if (begin.isPresent()) {
       condition.and(absence.personDay.date.between(begin.get(), end));
-    else
+    } else {
       condition.and(absence.personDay.date.loe(end));
+    }
     query.where(condition.and(absence.absenceType.eq(abt.absenceTypeGroup.replacingAbsenceType)
             .and(absence.personDay.person.eq(person))));
     query.orderBy(absence.personDay.date.desc());
@@ -322,8 +328,9 @@ public class AbsenceDao extends DaoBase {
   public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab) {
 
     DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, factory.create(contract).getContractDateInterval());
-    if (contractInterInterval == null)
+    if (contractInterInterval == null) {
       return new ArrayList<Absence>();
+    }
 
     List<Absence> absences = getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code),
             contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);

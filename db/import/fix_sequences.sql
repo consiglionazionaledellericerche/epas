@@ -25,7 +25,6 @@ SELECT SETVAL('public.seq_qualifications', COALESCE(MAX(id), 1), MAX(id) IS NOT 
 SELECT SETVAL('public.seq_revinfo', COALESCE(MAX(rev), 1) ) FROM public.revinfo;
 SELECT SETVAL('public.seq_shift_time_table', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.shift_time_table;
 SELECT SETVAL('public.seq_stamp_modification_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.stamp_modification_types;
-SELECT SETVAL('public.seq_stamp_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.stamp_types;
 SELECT SETVAL('public.seq_stampings', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.stampings;
 SELECT SETVAL('public.seq_total_overtime', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.total_overtime;
 SELECT SETVAL('public.seq_users', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.users;

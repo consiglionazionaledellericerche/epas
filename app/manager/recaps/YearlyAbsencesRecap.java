@@ -1,17 +1,18 @@
 package manager.recaps;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import it.cnr.iit.epas.DateUtility;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author alessandro Classe da utilizzare per il rendering delle assenze annuali effettuate da una
@@ -40,8 +41,9 @@ public class YearlyAbsencesRecap {
     int count = 0;
     for (Absence abs : yearlyAbsence) {
       if (abs.absenceType.justifiedTimeAtWork.minutes != null &&
-              abs.absenceType.justifiedTimeAtWork.minutes < JustifiedTimeAtWork.SevenHours.minutes)
+              abs.absenceType.justifiedTimeAtWork.minutes < JustifiedTimeAtWork.SevenHours.minutes) {
         count++;
+      }
     }
     return count;
   }

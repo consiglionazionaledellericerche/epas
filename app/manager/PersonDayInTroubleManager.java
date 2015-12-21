@@ -82,13 +82,13 @@ public class PersonDayInTroubleManager {
   public void fixTrouble(final PersonDay pd, final Troubles cause) {
 
 //		Questo codice schianta se si fa una remove e si continua l'iterazione
-//		
+//
 //		for(PersonDayInTrouble pdt : pd.troubles){
 //			if( pdt.cause.equals(cause)){
 //				pd.troubles.remove(pdt);
 //				pdt.delete();
-//				
-//				log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
+//
+//				log.info("Rimosso PersonDayInTrouble {} - {} - {}",
 //						pd.person.getFullname(), pd.date, cause);
 //			}
 //		}
@@ -228,12 +228,15 @@ public class PersonDayInTroubleManager {
       }
     }
     String incipit = "";
-    if (dateFormat.size() == 0)
+    if (dateFormat.size() == 0) {
       return false;
-    if (dateFormat.size() > 1)
+    }
+    if (dateFormat.size() > 1) {
       incipit = "Nei giorni: ";
-    if (dateFormat.size() == 1)
+    }
+    if (dateFormat.size() == 1) {
       incipit = "Nel giorno: ";
+    }
 
     simpleEmail.setSubject("ePas Controllo timbrature");
     String message = "";
