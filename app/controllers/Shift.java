@@ -210,18 +210,23 @@ public class Shift extends Controller {
 
 
   /**
-   * @author arianna crea una tabella con le eventuali inconsistenze tra le timbrature di un
+   * Crea una tabella con le eventuali inconsistenze tra le timbrature di un
    * turnista e le fasce di orario da rispettare per un determinato turno, in un dato periodo di
-   * tempo (Person, [thNoStampings, thBadStampings, thAbsences], List<gg MMM>)
+   * tempo (Person, [thNoStampings, thBadStampings, thAbsences], List [gg MMM]).
+   *
+   * @author arianna
    */
   @BasicAuth
-  public static void getInconsistencyTimestamps2Timetable(ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
+  public static void getInconsistencyTimestamps2Timetable(
+      ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
 
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
-    Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();
+    Table<Person, String, List<String>> inconsistentAbsence =
+        TreeBasedTable.<Person, String, List<String>>create();
 
     // seleziona le persone nel turno 'shiftType' da inizio a fine mese
-    List<PersonShiftDay> personShiftDays = personShiftDayDao.getPersonShiftDayByTypeAndPeriod(startDate, endDate, shiftType);
+    List<PersonShiftDay> personShiftDays =
+        personShiftDayDao.getPersonShiftDayByTypeAndPeriod(startDate, endDate, shiftType);
 
     //inconsistentAbsence = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
     shiftManager.getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence);
@@ -231,8 +236,10 @@ public class Shift extends Controller {
 
 
   /**
-   * @author arianna crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
-   * dell'anno 'year' (portale sistorg)
+   * Crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
+   * dell'anno 'year' (portale sistorg).
+   *
+   * @author arianna
    */
   @BasicAuth
   public static void exportMonthAsPDF() {

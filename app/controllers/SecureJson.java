@@ -26,8 +26,7 @@ public class SecureJson extends Controller {
   public static void login(@As(binder = AuthInfoBinder.class) AuthInfo body) {
     Logger.trace("Chiamata SecureJson.login, authInfo=%s", body);
 
-    if (body != null &&
-            Security.authenticate(body.getUsername(), body.getPassword())) {
+    if (body != null && Security.authenticate(body.getUsername(), body.getPassword())) {
       // Mark user as connected
       session.put("username", body.getUsername());
       renderJSON("{\"login\":\"ok\"}");
@@ -40,9 +39,11 @@ public class SecureJson extends Controller {
 
   /**
    * Questo metodo deve essere chiamata passando i corretti header http Content-type:
-   * application/json Accept: application/json
+   * application/json Accept: application/json.
    *
+   * <p>
    * Restituisce {"logout" : "ok"} se il logout è andato a buon fine, altrimenti {"logout" : "ko"}
+   * </p>
    */
   public static void logout() {
 

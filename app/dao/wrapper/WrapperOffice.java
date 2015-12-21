@@ -26,12 +26,6 @@ public class WrapperOffice implements IWrapperOffice {
   private final RoleDao roleDao;
   private final ConfGeneralManager confGeneralManager;
 
-  /**
-   *
-   * @param office
-   * @param roleDao
-   * @param confGeneralManager
-   */
   @Inject
   WrapperOffice(@Assisted Office office, RoleDao roleDao, ConfGeneralManager confGeneralManager) {
     value = office;

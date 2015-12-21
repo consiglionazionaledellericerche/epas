@@ -187,9 +187,9 @@ public class ContractMonthRecapManager {
     cmr.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
 
     //Per stampare a video il residuo da inizializzazione se riferito al mese
-    if (contract.sourceDateResidual != null &&
-            contract.sourceDateResidual.getMonthOfYear() == cmr.month &&
-            contract.sourceDateResidual.getYear() == cmr.year) {
+    if (contract.sourceDateResidual != null
+            && contract.sourceDateResidual.getMonthOfYear() == cmr.month
+            && contract.sourceDateResidual.getYear() == cmr.year) {
       cmr.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
     }
 
@@ -365,7 +365,7 @@ public class ContractMonthRecapManager {
     // nel caso dei buoni pasto attribuiti. Valutare
 
     //LocalDate firstDayOfRequestedMonth =
-    //		new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
+    //  new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
     //DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
 
     Optional<LocalDate> dateStartMealTicketInOffice =
@@ -400,8 +400,7 @@ public class ContractMonthRecapManager {
     if (monthInterval != null) {
       validDataForMealTickets = DateUtility
               .intervalIntersection(monthInterval, contractIntervalForMealTicket);
-      //validDataForMealTickets = DateUtility
-      //		.intervalIntersection(validDataForMealTickets, requestInterval);
+
       validDataForMealTickets = DateUtility
               .intervalIntersection(validDataForMealTickets, mealTicketIntervalInOffice);
     }

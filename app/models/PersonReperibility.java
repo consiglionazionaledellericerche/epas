@@ -1,7 +1,6 @@
-/**
- *
- */
 package models;
+
+import lombok.ToString;
 
 import models.base.BaseModel;
 
@@ -25,10 +24,11 @@ import javax.persistence.Table;
 
 
 /**
- * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona
+ * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona.
  *
  * @author cristian
  */
+@ToString
 @Audited
 @Entity
 @Table(name = "person_reperibility")
@@ -60,9 +60,4 @@ public class PersonReperibility extends BaseModel {
 
   public String note;
 
-  @Override
-  public String toString() {
-    return String.format("PersonReperibility[%d] - person.id = %d, startDate = %s, endDate = %s, personReperibilityType.id = %s",
-            id, person.id, startDate, endDate, personReperibilityType != null ? personReperibilityType.id : "null");
-  }
 }

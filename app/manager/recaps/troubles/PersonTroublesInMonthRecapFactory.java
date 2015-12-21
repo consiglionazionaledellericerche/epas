@@ -23,13 +23,6 @@ public class PersonTroublesInMonthRecapFactory {
 
   }
 
-  /**
-   *
-   * @param person
-   * @param month
-   * @param year
-   * @return
-   */
   public PersonTroublesInMonthRecap create(Person person,
                                            LocalDate monthBegin, LocalDate monthEnd) {
 
