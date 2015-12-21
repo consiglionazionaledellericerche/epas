@@ -88,9 +88,9 @@ public class Configurations extends Controller {
         .getConfGeneral(Parameter.DATE_START_MEAL_TICKET, office);
     ConfGeneral sendEmail = confGeneralManager.getConfGeneral(Parameter.SEND_EMAIL, office);
 
-    render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, 
+    render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed,
         addressesAllowed, urlToPresence, userToPresence,
-            passwordToPresence, numberOfViewingCouple, dateStartMealTicket, 
+            passwordToPresence, numberOfViewingCouple, dateStartMealTicket,
             sendEmail, offices, office);
 
   }
@@ -178,12 +178,12 @@ public class Configurations extends Controller {
     ConfYear hourMaxToCalculateWorkTime = confYearManager
         .getByField(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, office, currentYear);
 
-    render(currentYear, previousYear, lastYearDayExpiryVacationPastYear, 
+    render(currentYear, previousYear, lastYearDayExpiryVacationPastYear,
         lastYearMonthExpiryVacationPastYear, lastYearMonthExpireRecoveryDaysOneThree,
-            lastYearMonthExpireRecoveryDaysFourNine, lastYearMaxRecoveryDaysOneThree, 
-            lastYearMaxRecoveryDaysFourNine, lastYearHourMaxToCalculateWorkTime, 
+            lastYearMonthExpireRecoveryDaysFourNine, lastYearMaxRecoveryDaysOneThree,
+            lastYearMaxRecoveryDaysFourNine, lastYearHourMaxToCalculateWorkTime,
             dayExpiryVacationPastYear, monthExpiryVacationPastYear,
-            monthExpireRecoveryDaysOneThree, monthExpireRecoveryDaysFourNine, 
+            monthExpireRecoveryDaysOneThree, monthExpireRecoveryDaysFourNine,
             monthExpireRecoveryDaysFourNine, maxRecoveryDaysOneThree,
             maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, offices, office);
 
@@ -206,8 +206,10 @@ public class Configurations extends Controller {
     }
   }
 
-  //	FIXME al momento uso il campo name passato dall'x-editable per specificare l'anno da cambiare
-//  Ma quando il giorno e mese saranno in un unico parametro, conviene passare direttamente l'id del confyear
+  // FIXME al momento uso il campo name passato dall'x-editable per specificare
+  // l'anno da cambiare
+  // Ma quando il giorno e mese saranno in un unico parametro, conviene passare
+  // direttamente l'id del confyear
   public static void savePastYearVacationLimit(Long pk, String value, String name) {
 
     Office office = officeDao.getOfficeById(pk);

@@ -4,6 +4,6 @@ public class AbsenceAddedRest {
 
   public String absenceCode;
   public String date;
-  public boolean isOK;
+  public boolean isOk;
   public String reason;
 }

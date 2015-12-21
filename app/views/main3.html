@@ -24,13 +24,13 @@
   <link rel="stylesheet" href="//cdn.datatables.net/colreorder/1.1.3/css/dataTables.colReorder.min.css" />
 
   <link href='//fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="@{'/public/feedback-2.0/feedback.min.css'}">
 
   #{stylesheet 'select2-bootstrap.min.css'/}
   #{stylesheet 'bootstrap-modal.css'/}
   #{stylesheet 'bootstrap-modal-bs3patch.css'/}
   #{stylesheet 'my-bootstrap3.css'/}
   #{stylesheet 'pnotify.custom.min.css'/}
+  #{stylesheet 'feedback.min.css'/}
 
   #{get 'moreStyles' /}
 
@@ -182,7 +182,7 @@
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
               <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
               <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
-              
+
               #{/if}
               #{if ip.viewWorkingTimeType}
 
@@ -239,14 +239,7 @@
 
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring"></i></a>
-            <ul class="dropdown-menu">
-              #{if ip.viewPerson }
-              <li>
-                <a href="@{ReportCentre.generateReport(session.get("actionSelected"), session.get("personSelected"), session.get("monthSelected"), session.get("yearSelected"), session.get("daySelected"))}" data-async-modal="#defaultModal">
-                <i class="fa fa-bug"></i> Segnala un problema
-                </a>
-              </li>
-              #{/if}
+            <ul class="dropdown-menu">             
               <li>
                 <a href="@{Faq.faq()}">
                   <i class="fa fa-comment-o"> FAQ</i>
@@ -371,10 +364,10 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2_locale_it.min.js"></script>
-
-<script src="@{'/public/feedback-2.0/feedback.min.js'}"></script>
-
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
+
+#{script 'feedback.min.js'/}
+<script src="@{ReportCentre.javascript()}"></script>
 #{script 'bootstrap-modal.js' /}
 #{script 'bootstrap-modalmanager.js' /}
 #{script 'script.js' /}

@@ -1,6 +1,6 @@
 package cnr.sync.dto;
 
-public class PersonDTO {
+public class PersonDto {
 
   public int id;
   public String createdAt;
@@ -27,5 +27,3 @@ public class PersonDTO {
     public String country;
   }
 }
-
-			

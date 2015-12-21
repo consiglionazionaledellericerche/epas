@@ -1,48 +1,54 @@
 package cnr.sync.manager;
 
-import java.util.Collection;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
-import cnr.sync.dto.InstituteDTO;
-import cnr.sync.dto.OfficeDTO;
+import cnr.sync.dto.InstituteDto;
+import cnr.sync.dto.OfficeDto;
+
 import dao.OfficeDao;
+
+import lombok.extern.slf4j.Slf4j;
+
 import manager.OfficeManager;
+
 import models.Institute;
 import models.Office;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import play.data.validation.Validation;
 
+import java.util.Collection;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+@Slf4j
 public class RestOfficeManager {
 
-  private final static Logger log = LoggerFactory.getLogger(RestOfficeManager.class);
   @Inject
   private OfficeDao officeDao;
   @Inject
   private OfficeManager officeManager;
 
-  public int saveImportedSeats(Collection<OfficeDTO> officeDTOList) {
+  public int saveImportedSeats(Collection<OfficeDto> officeDTOList) {
 
     Preconditions.checkNotNull(officeDTOList);
 
-    Set<InstituteDTO> institutesDTO = Sets.newHashSet();
+    Set<InstituteDto> institutesDto = Sets.newHashSet();
 
     //  Estrazione senza doppioni di tutti gli istituti dalla lista degli uffici
-    for (OfficeDTO office : officeDTOList) {
-      institutesDTO.add(office.institute);
+    for (OfficeDto office : officeDTOList) {
+      institutesDto.add(office.institute);
     }
 
     //  Conversione dei DTO in istituti
-    Set<Institute> institutes = FluentIterable.from(institutesDTO)
-            .transform(InstituteDTO.toInstitute.ISTANCE).toSet();
+    Set<Institute> institutes = FluentIterable.from(institutesDto)
+            .transform(InstituteDto.ToInstitute.ISTANCE).toSet();
 
     for (Institute institute : institutes) {
       institute.validateAndCreate();
@@ -67,12 +73,12 @@ public class RestOfficeManager {
 
     int syncedOffices = 0;
 
-    for (OfficeDTO officeDTO : officeDTOList) {
+    for (OfficeDto officeDto : officeDTOList) {
 
       Office office = new Office();
-      officeDTO.copyInto(office);
+      officeDto.copyInto(office);
 
-      Optional<Institute> institute = officeDao.byCds(officeDTO.institute.cds);
+      Optional<Institute> institute = officeDao.byCds(officeDto.institute.cds);
 
       if (!institute.isPresent()) {
         log.warn("Impossibile trovare l'istituto associato alla sede {} importata da Perseo."
@@ -91,7 +97,7 @@ public class RestOfficeManager {
         Optional<Office> existentSeat = officeDao.byCode(office.code);
         if (existentSeat.isPresent()) {
 
-          officeDTO.copyInto(existentSeat.get());
+          officeDto.copyInto(existentSeat.get());
           existentSeat.get().save();
           syncedOffices++;
           log.info("Sincronizzata sede esistente durante l'import - {}", office.name);

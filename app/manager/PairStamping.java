@@ -3,6 +3,7 @@ package manager;
 import it.cnr.iit.epas.DateUtility;
 
 import models.Stamping;
+import models.enumerate.StampTypes;
 
 /**
  * Classe che modella due stampings logicamente accoppiate nel PersonDay. (una di ingresso ed una di
@@ -49,8 +50,8 @@ public class PairStamping {
     }
 
     // TODO: decidere se entrambe o almeno una.
-    if ((in.stampType != null && in.stampType.identifier.equals("pr"))
-            || (out.stampType != null && out.stampType.identifier.equals("pr"))) {
+    if ((in.stampType != null && in.stampType.equals(StampTypes.PAUSA_PRANZO))
+        || (out.stampType != null && out.stampType.equals(StampTypes.PAUSA_PRANZO))) {
       prPair = true;
     }
   }

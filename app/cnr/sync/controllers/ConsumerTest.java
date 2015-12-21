@@ -4,8 +4,8 @@ package cnr.sync.controllers;
 import com.google.common.collect.Lists;
 
 import cnr.sync.consumers.PeopleConsumer;
-import cnr.sync.dto.PersonDTO;
-import cnr.sync.dto.SimplePersonDTO;
+import cnr.sync.dto.PersonDto;
+import cnr.sync.dto.SimplePersonDto;
 import play.mvc.Controller;
 
 import java.util.List;
@@ -19,9 +19,9 @@ public class ConsumerTest extends Controller {
   @Inject
   static PeopleConsumer peopleConsumer;
 
-  private static PersonDTO person(int iid) {
+  private static PersonDto person(int iid) {
 
-    PersonDTO personDTO = new PersonDTO();
+    PersonDto personDTO = new PersonDto();
 
     try {
       personDTO = peopleConsumer.getPerson(iid).get();
@@ -36,9 +36,9 @@ public class ConsumerTest extends Controller {
     return personDTO;
   }
 
-  private static List<SimplePersonDTO> people() {
+  private static List<SimplePersonDto> people() {
 
-    List<SimplePersonDTO> people = Lists.newArrayList();
+    List<SimplePersonDto> people = Lists.newArrayList();
 
     try {
       people = peopleConsumer.getPeople().get();

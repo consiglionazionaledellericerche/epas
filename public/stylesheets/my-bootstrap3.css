@@ -333,7 +333,7 @@ tfoot input {
   margin-top: 2em;
   margin-bottom: 2em;
 }
-/*
+/* CREA LO SFONDO PER I VALORI NEI TAG view
 div.form-group .form-control-static {
     background: rgb(245,245,245);
     padding: 6px;
@@ -354,4 +354,15 @@ table[datatable] > thead > tr > th:hover{
 span[notAllowed] {
   color:#808080;
   cursor: not-allowed;
+}
+
+/* COLORI PER LE OPERAZIONE NELLA VISTA DELLO STORICO */
+td.ADD{
+  color: #04AD04; /* VERDE */
+}
+td.MOD{
+  color:  blue;
+}
+td.DEL{
+  color: red;
 }

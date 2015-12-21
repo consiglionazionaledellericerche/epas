@@ -1,13 +1,7 @@
 package it.cnr.iit.epas;
 
-import java.io.PrintWriter;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import dao.wrapper.IWrapperFactory;
+
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -20,7 +14,16 @@ import models.PersonMonthRecap;
 import models.Qualification;
 import models.Stamping;
 import models.VacationCode;
+import models.enumerate.StampTypes;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
+
+import java.io.PrintWriter;
+import java.util.List;
+
+import javax.inject.Inject;
 
 public class ExportToYaml {
 
@@ -156,10 +159,10 @@ public class ExportToYaml {
     LocalDate yearStart = new LocalDate(year, 1, 1);
     LocalDate yearEnd = new LocalDate(year, 12, 31);
     List<PersonDay> pdList = PersonDay.find(
-            "Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-            person,
-            yearStart,
-            yearEnd).fetch();
+        "Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+        person,
+        yearStart,
+        yearEnd).fetch();
 
 
     String yearlyAbsences = "";
@@ -174,10 +177,10 @@ public class ExportToYaml {
   private String buildDays(Person person, int year, int month) {
     LocalDate date = new LocalDate(year, month, 1);
     List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date DESC",
-            person,
-            date,
-            date.dayOfMonth().withMaximumValue())
-            .fetch();
+        person,
+        date,
+        date.dayOfMonth().withMaximumValue())
+        .fetch();
     String out = "";
     for (PersonDay pd : pdList) {
       out = out + appendPersonDay(pd);
@@ -282,7 +285,7 @@ public class ExportToYaml {
     out = out + getFormattedProperty("valid", s.valid + "");
     if (s.stampModificationType != null)
       out = out + getFormattedProperty("stampModificationType", s.stampModificationType.code);
-    if (s.stampType != null && s.stampType.identifier.equals("s"))
+    if (s.stampType != null && s.stampType.equals(StampTypes.MOTIVI_DI_SERVIZIO))
       out = out + getFormattedProperty("stampType", "motiviDiServizio");
     return out;
   }
