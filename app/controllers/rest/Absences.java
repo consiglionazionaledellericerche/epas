@@ -101,7 +101,7 @@ public class Absences extends Controller {
         AbsenceAddedRest aar = new AbsenceAddedRest();
         aar.absenceCode = ar.getAbsenceCode();
         aar.date = ar.getDate().toString();
-        aar.isOK = ar.isInsertSucceeded();
+        aar.isOk = ar.isInsertSucceeded();
         aar.reason = ar.getWarning();
         list.add(aar);
       }

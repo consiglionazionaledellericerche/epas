@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 public class Security extends Secure.Security {
 
-  public final static String CACHE_DURATION = "30mn";
+  public static final String CACHE_DURATION = "30mn";
 
   //FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
   @Inject
@@ -70,7 +70,7 @@ public class Security extends Secure.Security {
     //cache
     //User user = (User)Cache.get(username);
     //if(user!=null)
-    //	return Optional.of(user);
+    //  return Optional.of(user);
 
     //db
     User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
@@ -84,6 +84,14 @@ public class Security extends Secure.Security {
     return Optional.of(user);
   }
 
+  /**
+   * Preleva (opzionalmente) l'utente loggato.
+   * @return l'utente correntemente loggato se presente
+   */
+  public static Optional<User> getUser() {
+    return getUser(connected());
+  }
+
   static String connected() {
     if (request == null) {
       return null;
@@ -93,10 +101,6 @@ public class Security extends Secure.Security {
     } else {
       return Secure.Security.connected();
     }
-  }
-
-  public static Optional<User> getUser() {
-    return getUser(connected());
   }
 
   static Object invoke(String m, Object... args) throws Throwable {

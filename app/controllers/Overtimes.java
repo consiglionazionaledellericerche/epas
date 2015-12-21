@@ -15,6 +15,8 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.OvertimesManager;
 
 import models.CompetenceCode;
@@ -36,13 +38,13 @@ import play.mvc.Controller;
 import javax.inject.Inject;
 
 
-/*
+/**
  * @autor arianna
- * 
+ *
  * Implements methods used by sist-org in order
  * to keep overtime information
  */
-
+@Slf4j
 public class Overtimes extends Controller {
 
   @Inject
@@ -68,7 +70,7 @@ public class Overtimes extends Controller {
     int year = Integer.parseInt(params.get("year"));
     int month = Integer.parseInt(params.get("month"));
 
-    Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", 
+    Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d",
         email, year, month);
 
     // get the person with the given email
@@ -124,7 +126,7 @@ public class Overtimes extends Controller {
       personHourForOvertime = new PersonHourForOvertime(person, 0);
     }
 
-    Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s", 
+    Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s",
         personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
 
     render(personHourForOvertime);
@@ -137,7 +139,7 @@ public class Overtimes extends Controller {
    * @param month il mese
    * @param body l'oggetto in cui serializzare quel che recupero dal binder
    */
-  public static void setRequestOvertime(Integer year, Integer month, 
+  public static void setRequestOvertime(Integer year, Integer month,
       @As(binder = JsonRequestedOvertimeBinder.class) PersonsCompetences body) {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
@@ -153,51 +155,44 @@ public class Overtimes extends Controller {
 
   /**
    * Set personnel overtimes requested by the supervisor.
-   * @param hours
-   * @param email
-   * @throws Exception
+   * @param hours ore di straordinario da impostare
+   * @param email email della persona a cui impostare le ore di straordinario
    */
-  public static void setSupervisorTotalOvertimes(Integer hours, String email) throws Exception {
+  public static void setSupervisorTotalOvertimes(Integer hours, String email) {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
-    try {
-      Person person = personDao.byEmail(email).orNull();
-      if (person == null) {
-        throw new IllegalArgumentException(
-            String.format("Person with email = %s doesn't exist", email));
-      }
-      Logger.debug("Find persons %s with email %s", person.name, email);
+    Optional<Person> person = personDao.byEmail(email);
+    notFoundIfNull(person.orNull());
+    log.debug("Find persons %s with email %s", person.get().name, email);
 
-      overtimesManager.setSupervisorOvertime(person, hours);
-    } catch (Exception e) {
-      Logger.error(e, "Problem during findjing person with email.");
-      throw e;
-    }
+    overtimesManager.setSupervisorOvertime(person.get(), hours);
+
   }
 
   /**
-   * @author arianna crea il file PDF con il resoconto mensile delle ore di straordinario di una
-   *     lista di persone identificate con l'email (portale sistorg)
+   * Crea il file PDF con il resoconto mensile delle ore di straordinario di una
+   *     lista di persone identificate con l'email (portale sistorg).
+   * curl -H "Content-Type: application/json" -X POST -d '[ {"email" :
+   *    "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" :
+   *    "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
+   * @author arianna
    *
-   *     curl -H "Content-Type: application/json" -X POST -d '[ {"email" :
-   *     "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" :
-   *     "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
    */
-  public static void exportMonthAsPDF(Integer year, Integer month, 
+  public static void exportMonthAsPDF(Integer year, Integer month,
       @As(binder = JsonRequestedPersonsBinder.class) PersonsList body) {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
-    Logger.debug("update: Received PersonsCompetences %s", body);
+    log.debug("update: Received PersonsCompetences %s", body);
     if (body == null) {
       badRequest();
     }
 
-    Table<String, String, Integer> overtimesMonth = 
+    Table<String, String, Integer> overtimesMonth =
         TreeBasedTable.<String, String, Integer>create();
 
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
-    Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", 
+    log.debug("find  CompetenceCode %s con CompetenceCode.code=%s",
         competenceCode, competenceCode.code);
 
     overtimesMonth = overtimesManager.buildMonthForExport(body, competenceCode, year, month);

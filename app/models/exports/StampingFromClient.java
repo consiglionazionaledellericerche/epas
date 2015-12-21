@@ -4,7 +4,7 @@
 package models.exports;
 
 import models.BadgeReader;
-import models.StampType;
+import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDateTime;
 
@@ -15,7 +15,7 @@ public class StampingFromClient {
 
   public Integer inOut;
   public BadgeReader badgeReader;
-  public StampType stampType;
+  public StampTypes stampType;
   public Long personId;
   public boolean markedByAdmin = false;
   public LocalDateTime dateTime;

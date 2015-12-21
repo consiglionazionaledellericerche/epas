@@ -1,7 +1,7 @@
 package cnr.sync.dto;
 
 
-public class SimplePersonDTO {
+public class SimplePersonDto {
   public int id;
   public String updatedAt;
   public String email;
