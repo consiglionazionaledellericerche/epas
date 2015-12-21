@@ -16,8 +16,8 @@ import lombok.Data;
 
 import manager.PersonManager;
 import manager.SecureManager;
-import manager.vacations.VacationsRecap;
-import manager.vacations.VacationsRecapFactory;
+import manager.services.vacations.IVacationsRecap;
+import manager.services.vacations.IVacationsService;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -29,6 +29,7 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -50,7 +51,7 @@ public class MonthRecaps extends Controller {
   @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static VacationsRecapFactory vacationsFactory;
+  private static IVacationsService vacationsService;
   @Inject
   private static PersonManager personManager;
   @Inject
@@ -133,18 +134,18 @@ public class MonthRecaps extends Controller {
       IWrapperPerson wrPerson = wrapperFactory.create(person);
 
       for (Contract contract : wrPerson.getMonthContracts(year, month)) {
-        Optional<VacationsRecap> vr = vacationsFactory.create(year,
+        Optional<IVacationsRecap> vr = vacationsService.create(year,
                 contract, LocalDate.now(), true, monthEnd);
 
         CustomRecapDTO danilaDto = new CustomRecapDTO();
-        danilaDto.ferieAnnoCorrente =
-                vr.get().vacationDaysCurrentYearTotal
-                        - vr.get().vacationDaysCurrentYearUsed;
-        danilaDto.ferieAnnoPassato =
-                vr.get().vacationDaysLastYearAccrued
-                        - vr.get().vacationDaysLastYearUsed;
-        danilaDto.permessi = vr.get().permissionCurrentYearTotal
-                - vr.get().permissionUsed;
+        danilaDto.ferieAnnoCorrente = vr.get().getVacationDaysCurrentYearTotal()
+                        - vr.get().getVacationDaysCurrentYearUsed();
+        
+        danilaDto.ferieAnnoPassato = vr.get().getVacationDaysLastYearAccrued()
+                        - vr.get().getVacationDaysLastYearUsed();
+        
+        danilaDto.permessi = vr.get().getPermissionCurrentYearTotal()
+                - vr.get().getPermissionUsed();
 
         Optional<ContractMonthRecap> recap =
                 wrapperFactory.create(contract).getContractMonthRecap(

@@ -1,4 +1,4 @@
-package manager.vacations;
+package manager.services.vacations.impl;
 
 import com.google.common.collect.Lists;
 
@@ -8,7 +8,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.Builder;
 import lombok.Getter;
 
-import manager.vacations.AccruedDecision.TypeAccrued;
+import manager.services.vacations.impl.AccruedDecision.TypeAccrued;
 
 import models.Absence;
 import models.VacationPeriod;

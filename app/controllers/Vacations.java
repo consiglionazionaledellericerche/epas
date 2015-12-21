@@ -7,8 +7,10 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
-import manager.vacations.VacationsRecap;
-import manager.vacations.VacationsRecapFactory;
+import manager.services.vacations.IVacationsRecap;
+import manager.services.vacations.IVacationsService;
+import manager.services.vacations.impl.VacationsRecapImpl;
+import manager.services.vacations.test.TestVacationsService;
 
 import models.Contract;
 import models.User;
@@ -27,7 +29,7 @@ import javax.inject.Inject;
 public class Vacations extends Controller {
 
   @Inject
-  private static VacationsRecapFactory vacationsFactory;
+  private static IVacationsService vacationsService;
   @Inject
   private static IWrapperFactory wrapperFactory;
 
@@ -52,12 +54,12 @@ public class Vacations extends Controller {
       show(lastActiveMonth.getYear());
     }
 
-    List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
+    List<IVacationsRecap> vacationsRecapList = Lists.newArrayList();
 
     for (Contract contract : contractList) {
-      Optional<VacationsRecap> vacationsRecap;
+      Optional<IVacationsRecap> vacationsRecap;
 
-      vacationsRecap = vacationsFactory.create(
+      vacationsRecap = vacationsService.create(
               year, contract, LocalDate.now(), true);
 
       Preconditions.checkState(vacationsRecap.isPresent());
@@ -81,12 +83,12 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(
+    Optional<IVacationsRecap> vr = vacationsService.create(
             anno, contract.get(), LocalDate.now(), true);
 
     Preconditions.checkState(vr.isPresent());
 
-    VacationsRecap vacationsRecap = vr.get();
+    IVacationsRecap vacationsRecap = vr.get();
 
     boolean activeVacationCurrentYear = true;
 
@@ -108,12 +110,12 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(
+    Optional<IVacationsRecap> vr = vacationsService.create(
             anno, contract.get(), LocalDate.now(), true);
 
     Preconditions.checkState(vr.isPresent());
 
-    VacationsRecap vacationsRecap = vr.get();
+    IVacationsRecap vacationsRecap = vr.get();
 
     boolean activeVacationLastYear = true;
 
@@ -134,12 +136,12 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(
+    Optional<IVacationsRecap> vr = vacationsService.create(
             anno, contract.get(), LocalDate.now(), true);
 
     Preconditions.checkState(vr.isPresent());
 
-    VacationsRecap vacationsRecap = vr.get();
+    IVacationsRecap vacationsRecap = vr.get();
 
     boolean activePermission = true;
 

@@ -1,4 +1,4 @@
-package manager.vacations;
+package manager.services.vacations.impl;
 
 public class AccruedConverter {
   
