@@ -1,15 +1,12 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -19,6 +16,10 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QUser;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 /**
  * @author dario
@@ -39,8 +40,9 @@ public class UserDao extends DaoBase {
   public User getUserByIdAndPassword(Long id, Optional<String> password) {
     final QUser user = QUser.user;
     final BooleanBuilder condition = new BooleanBuilder();
-    if (password.isPresent())
+    if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(user)
             .where(condition.and(user.id.eq(id)));
     return query.singleResult(user);
@@ -62,8 +64,9 @@ public class UserDao extends DaoBase {
   public User getUserByUsernameAndPassword(String username, Optional<String> password) {
     final QUser user = QUser.user;
     final BooleanBuilder condition = new BooleanBuilder();
-    if (password.isPresent())
+    if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(user)
             .where(condition.and(user.username.eq(username)));
     return query.singleResult(user);

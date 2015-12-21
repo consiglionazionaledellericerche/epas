@@ -7,13 +7,14 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
+import controllers.Security;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.User;
 
 import org.drools.KnowledgeBase;
 
-import controllers.Security;
 import play.mvc.Http;
 
 import java.util.Map;

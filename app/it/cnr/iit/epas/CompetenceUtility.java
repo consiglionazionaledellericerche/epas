@@ -1,27 +1,20 @@
 package it.cnr.iit.epas;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.PersonDayDao;
+
 import manager.PairStamping;
 import manager.PersonDayManager;
 import manager.PersonManager;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -35,8 +28,19 @@ import models.query.QCompetence;
 import models.query.QCompetenceCode;
 import models.query.QPerson;
 import models.query.QPersonShiftShiftType;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
 import play.Logger;
 import play.i18n.Messages;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 
 public class CompetenceUtility {

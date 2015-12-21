@@ -1,14 +1,8 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -21,14 +15,22 @@ import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityDay;
 import models.query.QPersonReperibilityType;
 
+import org.joda.time.LocalDate;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 /**
  * @author dario
  */
 public class PersonReperibilityDayDao extends DaoBase {
 
-  private final static QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
-  private final static QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
-  private final static QPersonReperibility pr = QPersonReperibility.personReperibility;
+  private static final QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
+  private static final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+  private static final QPersonReperibility pr = QPersonReperibility.personReperibility;
+
   @Inject
   PersonReperibilityDayDao(JPQLQueryFactory queryFactory,
                            Provider<EntityManager> emp) {
@@ -36,9 +38,9 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
 
-  /******************************************************************************************************************************/
-  /**Query DAO relative al PersonReperibilityDay																				 **/
-  /******************************************************************************************************************************/
+  //*********************************************************/
+  // Query DAO relative al PersonReperibilityDay.          **/
+  //*********************************************************/
 
   /**
    * @return un personReperibilityDay nel caso in cui la persona person in data date fosse
@@ -67,8 +69,9 @@ public class PersonReperibilityDayDao extends DaoBase {
    */
   public List<PersonReperibilityDay> getPersonReperibilityDayFromPeriodAndType(LocalDate begin, LocalDate to, PersonReperibilityType type, Optional<PersonReperibility> pr) {
     BooleanBuilder condition = new BooleanBuilder();
-    if (pr.isPresent())
+    if (pr.isPresent()) {
       condition.and(prd.personReperibility.eq(pr.get()));
+    }
     JPQLQuery query = getQueryFactory().from(prd).where(condition.and(prd.date.between(begin, to)
             .and(prd.reperibilityType.eq(type)))).orderBy(prd.date.asc());
     return query.list(prd);
@@ -84,9 +87,9 @@ public class PersonReperibilityDayDao extends DaoBase {
     return deleted;
   }
 
-  /*********************************************************************************************************************************/
-  /**Query DAO relative al personReperibilityType																					**/
-  /*********************************************************************************************************************************/
+  //***************************************************************/
+  // Query DAO relative al personReperibilityType                **/
+  //***************************************************************/
 
   /**
    * @return il personReperibilityType relativo all'id passato come parametro
@@ -96,9 +99,9 @@ public class PersonReperibilityDayDao extends DaoBase {
     return query.singleResult(prt);
   }
 
-  /*********************************************************************************************************************************/
-  /**Query DAO relative al personReperibility																						**/
-  /*********************************************************************************************************************************/
+  //***************************************************************/
+  // Query DAO relative al personReperibility                    **/
+  //***************************************************************/
 
   /**
    * @return il PersonReperibility relativo alla persona person e al tipo type passati come

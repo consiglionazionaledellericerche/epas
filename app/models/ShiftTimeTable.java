@@ -1,5 +1,9 @@
 package models;
 
+import models.base.BaseModel;
+
+import org.joda.time.LocalTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,10 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.joda.time.LocalTime;
-
-import models.base.BaseModel;
 
 @Entity
 @Table(name = "shift_time_table")

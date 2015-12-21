@@ -111,17 +111,18 @@ public class ContractDao extends DaoBase {
   public Contract getContract(LocalDate date, Person person) {
 
     for (Contract c : person.contracts) {
-      if (DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval()))
+      if (DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval())) {
         return c;
+      }
     }
         /*
-		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
-		List<Contract> contractList = getPersonContractList(person);
-		for(Contract c : contractList){
-			if(DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval()))
-				return c;
-		}
-		*/
+    //FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
+    List<Contract> contractList = getPersonContractList(person);
+    for(Contract c : contractList){
+      if(DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval()))
+        return c;
+    }
+    */
     //-----------------------
     return null;
   }
@@ -136,10 +137,12 @@ public class ContractDao extends DaoBase {
                                                                   Optional<Contract> contract) {
     QContractStampProfile csp = QContractStampProfile.contractStampProfile;
     final BooleanBuilder condition = new BooleanBuilder();
-    if (person.isPresent())
+    if (person.isPresent()) {
       condition.and(csp.contract.person.eq(person.get()));
-    if (contract.isPresent())
+    }
+    if (contract.isPresent()) {
       condition.and(csp.contract.eq(contract.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(csp)
             .where(condition).orderBy(csp.beginDate.asc());
     return query.list(csp);
@@ -158,8 +161,8 @@ public class ContractDao extends DaoBase {
 
 
   /******************************************************************************************************************************************/
-	/*Inserisco in questa parte del Dao le query relative ai ContractWorkingTimeType per evitare di creare una classe specifica che contenga  */
-	/*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
+  /*Inserisco in questa parte del Dao le query relative ai ContractWorkingTimeType per evitare di creare una classe specifica che contenga  */
+  /*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
   /******************************************************************************************************************************************/
 
 

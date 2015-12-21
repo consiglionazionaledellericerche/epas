@@ -1,25 +1,28 @@
 package jobs;
 
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 
 import lombok.extern.slf4j.Slf4j;
+
 import manager.ConsistencyManager;
+
 import models.Person;
 import models.User;
+
+import org.joda.time.LocalDate;
+
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
+
+import javax.inject.Inject;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 1 5 * * ?") // Ore 5:01
 public class DarkNightJob extends Job {
 
-  private final static String JOBS_CONF = "jobs.active";
+  private static final String JOBS_CONF = "jobs.active";
   @Inject
   static ConsistencyManager consistencyManager;
 

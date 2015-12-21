@@ -1,12 +1,8 @@
 package dao;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -14,6 +10,11 @@ import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeTypeDay;
+
+import org.joda.time.LocalDate;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 /**
  * @author dario
@@ -48,8 +49,9 @@ public class WorkingTimeTypeDayDao extends DaoBase {
     //Prendo il WorkingTimeType
     Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(date, person);
 
-    if (!wtt.isPresent())
+    if (!wtt.isPresent()) {
       return null;
+    }
 
     return getWorkingTimeTypeDayByDayOfWeek(wtt.get(), date.getDayOfWeek());
   }

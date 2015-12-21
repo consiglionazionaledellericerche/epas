@@ -1,16 +1,17 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.CompetenceCode;
 import models.query.QCompetenceCode;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 /**
  * @author dario

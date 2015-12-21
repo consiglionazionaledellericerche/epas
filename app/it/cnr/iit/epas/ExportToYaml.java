@@ -119,8 +119,9 @@ public class ExportToYaml {
     String vacationCodesYaml = "";
     List<VacationCode> vacCodeList = VacationCode.findAll();
     for (VacationCode vacCode : vacCodeList) {
-      if (vacCode.description.equals("28+4") || vacCode.description.equals("26+4"))
+      if (vacCode.description.equals("28+4") || vacCode.description.equals("26+4")) {
         vacationCodesYaml = vacationCodesYaml + appendVacationCode(vacCode);
+      }
     }
     writeToYamlFile(fileName, vacationCodesYaml);
 
@@ -227,8 +228,9 @@ public class ExportToYaml {
     out = out + getFormattedProperty("minutesExcess", abtg.minutesExcess + "");
     out = out + getFormattedProperty("accumulationBehaviour", abtg.accumulationBehaviour.name());
     out = out + getFormattedProperty("accumulationType", abtg.accumulationType.name());
-    if (abtg.replacingAbsenceType != null)
+    if (abtg.replacingAbsenceType != null) {
       out = out + getFormattedProperty("replacingAbsenceType", "abt" + abtg.replacingAbsenceType.id);
+    }
 
     return out;
   }
@@ -248,12 +250,15 @@ public class ExportToYaml {
 //		out = out + getFormattedProperty("mealTicketCalculation", abt.mealTicketCalculation+"");
 //		out = out + getFormattedProperty("multipleUse", abt.multipleUse+"");
 
-    if (abt.validFrom != null)
+    if (abt.validFrom != null) {
       out = out + getFormattedProperty("validFrom", "'" + abt.validFrom + "'");
-    if (abt.validTo != null)
+    }
+    if (abt.validTo != null) {
       out = out + getFormattedProperty("validTo", "'" + abt.validTo + "'");
-    if (abt.absenceTypeGroup != null)
+    }
+    if (abt.absenceTypeGroup != null) {
       out = out + getFormattedProperty("absenceTypeGroup", "abtg" + abt.absenceTypeGroup.id);
+    }
 
     String value = "[";
     for (Qualification qual : abt.qualifications) {
@@ -279,14 +284,17 @@ public class ExportToYaml {
     out = out + getFormattedHeader("Stamping", "s" + s.id);
     out = out + getFormattedProperty("personDay", "pd" + s.personDay.id);
     out = out + getFormattedProperty("way", s.way.description);
-    if (s.date != null)
+    if (s.date != null) {
       out = out + getFormattedProperty("date", "'" + s.date + "'");
+    }
     out = out + getFormattedProperty("markedByAdmin", s.markedByAdmin + "");
     out = out + getFormattedProperty("valid", s.valid + "");
-    if (s.stampModificationType != null)
+    if (s.stampModificationType != null) {
       out = out + getFormattedProperty("stampModificationType", s.stampModificationType.code);
-    if (s.stampType != null && s.stampType.equals(StampTypes.MOTIVI_DI_SERVIZIO))
+    }
+    if (s.stampType != null && s.stampType.equals(StampTypes.MOTIVI_DI_SERVIZIO)) {
       out = out + getFormattedProperty("stampType", "motiviDiServizio");
+    }
     return out;
   }
 
@@ -294,8 +302,9 @@ public class ExportToYaml {
     String out = "";
     out = out + getFormattedHeader("PersonDay", "pd" + pd.id);
     out = out + getFormattedProperty("person", "person" + pd.person.id);
-    if (pd.date != null)
+    if (pd.date != null) {
       out = out + getFormattedProperty("date", "'" + pd.date + "'");
+    }
     out = out + getFormattedProperty("isTicketForcedByAdmin", pd.isTicketForcedByAdmin + "");
     out = out + getFormattedProperty("isTicketAvailable", pd.isTicketAvailable + "");
     out = out + getFormattedProperty("isTimeAtWorkAutoCertificated", wrapperFactory.create(pd).isFixedTimeAtWork() + "");
@@ -326,12 +335,15 @@ public class ExportToYaml {
     for (Contract c : person.contracts) {
       out = out + getFormattedHeader("Contract", "c" + c.id);
       out = out + getFormattedProperty("person", "person" + person.id);
-      if (c.beginDate != null)
+      if (c.beginDate != null) {
         out = out + getFormattedProperty("beginDate", "'" + c.beginDate + "'");
-      if (c.endContract != null)
+      }
+      if (c.endContract != null) {
         out = out + getFormattedProperty("endContract", "'" + c.endContract + "'");
-      if (c.endDate != null)
+      }
+      if (c.endDate != null) {
         out = out + getFormattedProperty("endDate", "'" + c.endDate + "'");
+      }
       out = out + getFormattedProperty("onCertificate", c.onCertificate + "");
     }
     return out;
@@ -400,8 +412,9 @@ public class ExportToYaml {
   }
 
   private String getFormattedProperty(String name, String value) {
-    if (value != null && value.contains(":"))
+    if (value != null && value.contains(":")) {
       value = value.replace(":", "-");
+    }
     return "    " + name + ": " + value + "\r\n";
   }
 

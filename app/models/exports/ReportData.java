@@ -1,8 +1,8 @@
 package models.exports;
 
-import java.util.List;
-
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Dati prelevati via json dalle segnalazioni degli utenti.

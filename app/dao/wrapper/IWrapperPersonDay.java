@@ -48,7 +48,7 @@ public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
   void setPreviousForProgressive(Optional<PersonDay> potentialOnlyPrevious);
 
   /**
-   * L'ultima timbratura in ordine di tempo nel giorno
+   * L'ultima timbratura in ordine di tempo nel giorno.
    */
   Stamping getLastStamping();
 

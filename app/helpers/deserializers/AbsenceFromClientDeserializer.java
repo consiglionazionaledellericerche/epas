@@ -10,23 +10,23 @@ import com.google.gson.JsonParseException;
 
 import dao.PersonDao;
 
+import injection.StaticInject;
+
+import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
 import models.exports.AbsenceFromClient;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import injection.StaticInject;
 
 import java.lang.reflect.Type;
 
 import javax.inject.Inject;
 
+@Slf4j
 @StaticInject
 public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFromClient> {
 
-  private final static Logger log = LoggerFactory.getLogger(AbsenceFromClientDeserializer.class);
   @Inject
   private static PersonDao personDao;
 
@@ -37,7 +37,7 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
   public AbsenceFromClient deserialize(JsonElement json, Type arg1,
                                        JsonDeserializationContext arg2) throws JsonParseException {
 
-    JsonObject jAbsence = json.getAsJsonObject();
+    JsonObject jsonAbsence = json.getAsJsonObject();
 
     AbsenceFromClient afc = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateDeserializer())
@@ -48,8 +48,8 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
      * Nel campo matricolaFirma decido di riportare il valore dell'id
      * con cui viene salvata la persona sul db invece che la matricola
      */
-    JsonArray tipoMatricola = jAbsence.getAsJsonArray("tipoMatricolaFirma");
-    String matricolaFirma = jAbsence.get("matricolaFirma").getAsString();
+    JsonArray tipoMatricola = jsonAbsence.getAsJsonArray("tipoMatricolaFirma");
+    String matricolaFirma = jsonAbsence.get("matricolaFirma").getAsString();
 
     Person person = null;
 

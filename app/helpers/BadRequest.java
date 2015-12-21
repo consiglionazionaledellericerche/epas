@@ -1,6 +1,3 @@
-/**
- *
- */
 package helpers;
 
 import play.Logger;
@@ -12,7 +9,7 @@ import play.mvc.results.Result;
 import java.io.IOException;
 
 /**
- * BadRequest (HTTP 400) with response content)
+ * BadRequest (HTTP 400) with response content.
  *
  * @author cristian
  */
@@ -32,7 +29,7 @@ public class BadRequest extends Result {
   }
 
   /**
-   * Send a 400 Bad request
+   * Send a 400 Bad request.
    */
   public static void badRequest(String description) {
     throw new BadRequest(description);

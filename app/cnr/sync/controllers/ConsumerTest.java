@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import cnr.sync.consumers.PeopleConsumer;
 import cnr.sync.dto.PersonDto;
 import cnr.sync.dto.SimplePersonDto;
+
 import play.mvc.Controller;
 
 import java.util.List;

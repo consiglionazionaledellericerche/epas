@@ -1,12 +1,12 @@
 package dao.wrapper;
 
-import org.joda.time.YearMonth;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import models.ContractMonthRecap;
+
+import org.joda.time.YearMonth;
 
 /**
  * @author alessandro

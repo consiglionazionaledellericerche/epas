@@ -75,10 +75,11 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       holidaysAvailability = competence.get().valueApproved;
-    else
+    } else {
       holidaysAvailability = 0;
+    }
     return holidaysAvailability;
   }
 
@@ -91,10 +92,11 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       weekDayAvailability = competence.get().valueApproved;
-    else
+    } else {
       weekDayAvailability = 0;
+    }
     return weekDayAvailability;
   }
 
@@ -108,10 +110,11 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       daylightWorkingDaysOvertime = competence.get().valueApproved;
-    else
+    } else {
       daylightWorkingDaysOvertime = 0;
+    }
     return daylightWorkingDaysOvertime;
   }
 
@@ -125,10 +128,11 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       daylightholidaysOvertime = competence.get().valueApproved;
-    else
+    } else {
       daylightholidaysOvertime = 0;
+    }
     return daylightholidaysOvertime;
   }
 
@@ -141,10 +145,11 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       ordinaryShift = competence.get().valueApproved;
-    else
+    } else {
       ordinaryShift = 0;
+    }
     return ordinaryShift;
   }
 
@@ -155,14 +160,16 @@ public class PersonMonthCompetenceRecap {
     int nightShift = 0;
     CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("T2");
 
-    if (cmpCode == null)
+    if (cmpCode == null) {
       return 0;
+    }
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       nightShift = competence.get().valueApproved;
-    else
+    } else {
       nightShift = 0;
+    }
     return nightShift;
   }
 }

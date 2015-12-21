@@ -10,14 +10,11 @@ import it.cnr.iit.epas.DateUtility;
 
 import manager.recaps.recomputation.RecomputeRecap;
 
-import models.base.IPeriodModel;
 import models.base.IPropertyInPeriod;
-import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 
 import java.util.List;
 

@@ -5,6 +5,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import cnr.sync.dto.CompetenceDto;
+import cnr.sync.dto.DayRecap;
+
+import controllers.Resecure;
+import controllers.Resecure.BasicAuth;
+
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
@@ -23,10 +29,6 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import cnr.sync.dto.CompetenceDto;
-import cnr.sync.dto.DayRecap;
-import controllers.Resecure;
-import controllers.Resecure.BasicAuth;
 import play.mvc.Controller;
 import play.mvc.With;
 

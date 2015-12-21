@@ -1,14 +1,16 @@
 package manager;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
+
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+
 import play.Play;
 import play.libs.Mail;
 

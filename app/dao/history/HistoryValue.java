@@ -40,18 +40,20 @@ public class HistoryValue<T extends BaseModel> {
 
     LocalDateTime time = this.revision.getRevisionDate();
 
-    if (time == null)
+    if (time == null) {
       return "";
+    }
 
     return time.toString("dd/MM/yyyy - HH:mm");
   }
 
   public String formattedOwner() {
 
-    if (this.revision.owner != null)
+    if (this.revision.owner != null) {
       return this.revision.owner.username;
-    else
+    } else {
       return "ePAS";
+    }
   }
 
   public boolean typeIsDel() {
