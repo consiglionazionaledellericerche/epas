@@ -137,8 +137,8 @@ public class Clocks extends Controller {
   }
 
   public static void daySituation() {
-//		Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
-//		Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
+    // Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
+    // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
     User user = Security.getUser().orNull();
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {

@@ -1,6 +1,3 @@
-/**
- *
- */
 package models;
 
 import models.base.BaseModel;

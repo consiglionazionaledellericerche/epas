@@ -71,7 +71,7 @@ public class PersonMonthsManager {
 
   /**
    * @return un Insertable che verifica se le ore di formazione per anno e mese richieste sono già
-   * state inviate
+   *     state inviate.
    */
   public Insertable checkIfAlreadySend(Person person, int year, int month) {
     Insertable rr = new Insertable(true, "");
@@ -80,7 +80,9 @@ public class PersonMonthsManager {
             Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
 
     if (list.size() > 0) {
-      rr.message = "Impossibile inserire ore di formazione per il mese precedente poichè gli attestati per quel mese sono già stati inviati";
+      rr.message =
+          "Impossibile inserire ore di formazione per il mese precedente poichè gli "
+          + "attestati per quel mese sono già stati inviati";
       rr.result = false;
 
     }
@@ -89,7 +91,7 @@ public class PersonMonthsManager {
 
   /**
    * @return un Insertable che controlla se esiste nel database una entry con l'id passato come
-   * parametro per quelle ore di formazione
+   *     parametro per quelle ore di formazione.
    */
   public Insertable checkIfExist(PersonMonthRecap pm) {
     Insertable rr = new Insertable(true, "");

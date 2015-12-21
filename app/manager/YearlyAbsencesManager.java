@@ -23,7 +23,7 @@ import javax.inject.Inject;
 public class YearlyAbsencesManager {
 
   private static final Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
-  public Comparator<Person> PersonNameComparator = new Comparator<Person>() {
+  public Comparator<Person> personNameComparator = new Comparator<Person>() {
 
     public int compare(Person person1, Person person2) {
 
@@ -38,7 +38,7 @@ public class YearlyAbsencesManager {
     }
 
   };
-  public Comparator<AbsenceType> AbsenceCodeComparator = new Comparator<AbsenceType>() {
+  public Comparator<AbsenceType> absenceCodeComparator = new Comparator<AbsenceType>() {
 
     public int compare(AbsenceType absenceCode1, AbsenceType absenceCode2) {
       return absenceCode1.code.compareTo(absenceCode2.code);
@@ -46,34 +46,34 @@ public class YearlyAbsencesManager {
     }
 
   };
+
   @Inject
   private AbsenceDao absenceDao;
 
-  /**
-   *
-   * @param persons
-   * @param abt
-   * @param begin
-   * @param end
-   * @return
-   */
-  public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end) {
-    Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
+  public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(
+      List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end) {
+
+    Table<Person, AbsenceType, Integer> tableMonthlyAbsences =
+        TreeBasedTable.create(personNameComparator, absenceCodeComparator);
     for (Person p : persons) {
-      List<Absence> absenceInMonth = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<JustifiedTimeAtWork>absent(), false, false);
+      List<Absence> absenceInMonth =
+          absenceDao.getAbsenceByCodeInPeriod(
+              Optional.fromNullable(p), Optional.<String>absent(), begin, end,
+              Optional.<JustifiedTimeAtWork>absent(), false, false);
 
       tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
       for (Absence abs : absenceInMonth) {
         Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
         log.debug("Per la persona {} il codice {} vale: {}",
-                new Object[]{p, abs.absenceType.code, value});
+            new Object[]{p, abs.absenceType.code, value});
         if (value == null) {
-          log.debug("Inserisco in tabella nuova assenza per {} con codice {}", p, abs.absenceType.code);
+          log.debug("Inserisco in tabella nuova assenza per {} con codice {}",
+              p, abs.absenceType.code);
           tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
         } else {
           tableMonthlyAbsences.row(p).put(abs.absenceType, value + 1);
           log.debug("Incremento il numero di giorni per l'assenza {} di {} al valore {}",
-                  new Object[]{abs.absenceType.code, p, value + 1});
+              new Object[]{abs.absenceType.code, p, value + 1});
 
         }
       }
@@ -106,7 +106,7 @@ public class YearlyAbsencesManager {
       final int prime = 31;
       int result = 1;
       result = prime * result
-              + ((absenceCode == null) ? 0 : absenceCode.hashCode());
+          + ((absenceCode == null) ? 0 : absenceCode.hashCode());
       return result;
     }
 

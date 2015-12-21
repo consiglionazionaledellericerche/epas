@@ -281,13 +281,13 @@ public class PersonDayManager {
     }
 
     // Decidere quando verrà il momento di fare i conti con gianvito...
-    //		if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork,
-    //				pd.getValue().date, pd.getPersonDayContract().get(),
-    //				pd.getWorkingTimeTypeDay().get()) ){
+    //if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork,
+    //  pd.getValue().date, pd.getPersonDayContract().get(),
+    //  pd.getWorkingTimeTypeDay().get()) ){
     //
-    //			setIsTickeAvailable(pd, false);
-    //			return workTime + justifiedTimeAtWork;
-    //		}
+    //  setIsTickeAvailable(pd, false);
+    //  return workTime + justifiedTimeAtWork;
+    //}
 
 
     // IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -295,16 +295,16 @@ public class PersonDayManager {
     setIsTickeAvailable(pd, true);
 
     // marcatori: versione p ed e
-    //		//e
-    //		if(effectiveTimeSpent > 0 && workingTimeDecurted < workTime) {
-    //			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-    //					StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-    //		}
-    //		//p
-    //		if(effectiveTimeSpent == 0) {
-    //			pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-    //					StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-    //		}
+    ////e
+    //if(effectiveTimeSpent > 0 && workingTimeDecurted < workTime) {
+    //  pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+    //    StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+    //}
+    ////p
+    //if(effectiveTimeSpent == 0) {
+    //  pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
+    //    StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+    //}
 
     // marcatori: versione con solo e salvataggio del tempo decurtato.
     //e
@@ -319,7 +319,7 @@ public class PersonDayManager {
   }
 
   /**
-   * La condizione del lavoro minimo pomeridiano è soddisfatta?
+   * La condizione del lavoro minimo pomeridiano è soddisfatta?.
    */
   private boolean isAfternoonThresholdConditionSatisfied(List<PairStamping> validPairs,
                                                          WorkingTimeTypeDay wttd) {
@@ -474,10 +474,8 @@ public class PersonDayManager {
           pd.getValue().stampModificationType =
               stampTypeManager.getStampMofificationType(
                   StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-        }
-
-        // Caso in cui la pausa pranzo fatta è inferiore a quella minima
-        else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
+        } else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
+          // Caso in cui la pausa pranzo fatta è inferiore a quella minima
 
           pd.getValue().stampModificationType =
               stampTypeManager.getStampMofificationType(
@@ -717,9 +715,9 @@ public class PersonDayManager {
 
     Preconditions.checkState(pd.getPersonDayContract().isPresent());
 
-//		Una mappa contenente tutti i problemi del giorno da inserire o rimuovere.
-//		Il booleano associato al Trouble e' settato a TRUE se il problema e' presente,
-//		 a FALSE se invece non e' presente
+    // Una mappa contenente tutti i problemi del giorno da inserire o rimuovere.
+    // Il booleano associato al Trouble e' settato a TRUE se il problema e' presente,
+    // a FALSE se invece non e' presente
     final Map<Troubles, Boolean> troubles = Maps.newHashMap();
 
     //se prima o uguale a source contract il problema è fixato
@@ -747,10 +745,10 @@ public class PersonDayManager {
       } else {
         troubles.put(Troubles.UNCOUPLED_FIXED, Boolean.TRUE);
       }
-    }
+    } else {
 
-    //persona not fixed
-    else {
+      //persona not fixed
+
       //caso no festa, no assenze, no timbrature
       if (!isAllDayAbsences(pd.getValue()) && pd.getValue().stampings.isEmpty()
           && !pd.getValue().isHoliday && !isEnoughHourlyAbsences(pd.getValue())) {
@@ -770,10 +768,8 @@ public class PersonDayManager {
         } else {
           troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.TRUE);
         }
-      }
-
-      //caso festa, no assenze, timbrature disaccoppiate
-      else if (!isAllDayAbsences(pd.getValue()) && pd.getValue().isHoliday) {
+      } else if (!isAllDayAbsences(pd.getValue()) && pd.getValue().isHoliday) {
+        //caso festa, no assenze, timbrature disaccoppiate
 
         setValidPairStampings(pd.getValue());
 

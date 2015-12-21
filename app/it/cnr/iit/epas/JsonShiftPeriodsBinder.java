@@ -1,6 +1,3 @@
-/**
- *
- */
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonArray;
@@ -49,11 +46,10 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
-    /* (non-Javadoc)
-	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
-	 */
   @Override
-  public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+  public Object bind(
+      String name, Annotation[] annotations, String value, Class actualClass, Type genericType)
+          throws Exception {
 
     Logger.debug("binding ShiftPeriods: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
     try {
@@ -98,7 +94,8 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
             throw new IllegalArgumentException(String.format("ShiftSlot with name = %s not found2", shiftSlotDesc));
           }
 
-          ShiftPeriod shiftPeriod = new ShiftPeriod(person, start, end, shiftType, false, shiftSlot);
+          ShiftPeriod shiftPeriod =
+              new ShiftPeriod(person, start, end, shiftType, false, shiftSlot);
           Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftSlot=%s", person.name, start, end, shiftType, shiftSlot);
 
           shiftPeriods.add(shiftPeriod);

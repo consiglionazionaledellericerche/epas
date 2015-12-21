@@ -514,12 +514,11 @@ public class ConsistencyManager {
         // per costruirlo. Soluzione: costruisco tutti i riepiloghi del contratto.
         populateContractMonthRecap(contract, Optional.<YearMonth>absent());
       }
-    }
-
-    // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
-    // è particolare e va gestito con un metodo dedicato.
-    else if (contract.getValue().sourceDateResidual != null
+    } else if (contract.getValue().sourceDateResidual != null
             && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().sourceDateResidual))) {
+
+      // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
+      // è particolare e va gestito con un metodo dedicato.
 
       previousMonthRecap =
               Optional.fromNullable(populateContractMonthFromSource(contract, yearMonthToCompute));

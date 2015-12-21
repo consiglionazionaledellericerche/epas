@@ -12,8 +12,10 @@ import javax.persistence.Table;
 
 
 /**
- * @author dario questa classe rappresenta il residuo annuale relativo a una certa persona per quel
- *         che riguarda le ore fatte in più (o in meno)
+ * Questa classe rappresenta il residuo annuale relativo a una certa persona per quel
+ * che riguarda le ore fatte in più (o in meno).
+ *
+ * @author dario
  */
 @Audited
 @Entity

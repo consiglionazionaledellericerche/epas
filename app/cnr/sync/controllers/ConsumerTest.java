@@ -55,23 +55,4 @@ public class ConsumerTest extends Controller {
 
   }
 
-  //	public static void syncPeople(){
-  //
-  //		List<SimplePersonDTO> perseoPeople = people();
-  //
-  //		List<Integer> ids = FluentIterable.from(perseoPeople).transform(
-  //				new Function<SimplePersonDTO, Integer>() {
-  //					@Override
-  //					public Integer apply(SimplePersonDTO input) {
-  //						return input.id;
-  //					}
-  //				}).toList();
-  //
-  //
-  //
-  //		flash.success("chiamata la syncPeople()");
-  //
-  //		Offices.showOffices();
-  //	}
-
 }

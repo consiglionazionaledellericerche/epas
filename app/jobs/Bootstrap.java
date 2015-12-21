@@ -71,7 +71,7 @@ public class Bootstrap extends Job<Void> {
       return;
     }
 
-//		in modo da inibire l'esecuzione dei job in base alla configurazione
+    // in modo da inibire l'esecuzione dei job in base alla configurazione
     if ("false".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
       return;
@@ -93,7 +93,7 @@ public class Bootstrap extends Job<Void> {
       Fixtures.loadModels("../db/import/developer.yml");
     }
 
-//		Allinea tutte le sequenze del db
+    // Allinea tutte le sequenze del db
     Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
     fixUserPermission.doJob();
