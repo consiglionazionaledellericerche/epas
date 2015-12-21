@@ -18,39 +18,39 @@ import java.lang.reflect.Type;
 
 public class PersonDeserializer implements JsonDeserializer<Person> {
 
-  //	Pattern per il parsing delle date
+  // Pattern per il parsing delle date
   static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
 
   @Override
   public Person deserialize(JsonElement json, Type arg1,
                             JsonDeserializationContext arg2) throws JsonParseException {
 
-    JsonObject jPerson = json.getAsJsonObject();
+    JsonObject jsonPerson = json.getAsJsonObject();
 
     Person person = new Person();
 
-    person.name = jPerson.has("otherNames") ?
-            jPerson.get("firstname").getAsString() + " " + jPerson.get("otherNames").getAsString()
-            : jPerson.get("firstname").getAsString();
+    person.name = jsonPerson.has("otherNames")
+            ? jsonPerson.get("firstname").getAsString() + " "
+              + jsonPerson.get("otherNames").getAsString()
+            : jsonPerson.get("firstname").getAsString();
 
-    person.surname = jPerson.has("otherSurnames") ?
-            jPerson.get("surname").getAsString() + " " + jPerson.get("otherSurnames").getAsString()
-            : jPerson.get("surname").getAsString();
+    person.surname = jsonPerson.has("otherSurnames")
+            ? jsonPerson.get("surname").getAsString() + " "
+              + jsonPerson.get("otherSurnames").getAsString()
+            : jsonPerson.get("surname").getAsString();
 
-    person.birthday = LocalDate.parse(jPerson.get("birthDate").getAsString(), dtf);
+    person.birthday = LocalDate.parse(jsonPerson.get("birthDate").getAsString(), dtf);
 
-    person.email = jPerson.get("email").getAsString();
-//		person.cnr_email=jPerson.get("emailCnr").getAsString();
-    person.number = jPerson.get("number").getAsInt();
+    person.email = jsonPerson.get("email").getAsString();
+    person.number = jsonPerson.get("number").getAsInt();
 
-    JsonArray badges = jPerson.get("badges").getAsJsonArray();
+    JsonArray badges = jsonPerson.get("badges").getAsJsonArray();
 
     if (badges.iterator().hasNext()) {
       JsonObject badge = badges.iterator().next().getAsJsonObject();
-//			person.badgeNumber = badge.get("number").getAsString();
     }
 
-    JsonArray contacts = jPerson.get("contacts").getAsJsonArray();
+    JsonArray contacts = jsonPerson.get("contacts").getAsJsonArray();
 
     if (contacts.iterator().hasNext()) {
       JsonObject contact = contacts.iterator().next().getAsJsonObject();
@@ -59,7 +59,7 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
       person.mobile = contact.get("mobile").getAsString();
     }
 
-    JsonArray contracts = jPerson.get("contracts").getAsJsonArray();
+    JsonArray contracts = jsonPerson.get("contracts").getAsJsonArray();
 
     if (contracts.iterator().hasNext()) {
       for (JsonElement je : contracts) {

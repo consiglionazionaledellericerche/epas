@@ -4,7 +4,7 @@ import org.joda.time.LocalDate;
 
 public enum Parameter {
 
-	/* GENERAL PARAMETER */
+  /* GENERAL PARAMETER */
 
   INIT_USE_PROGRAM("general", "init_use_program", LocalDate.now().toString()),
 
@@ -23,17 +23,18 @@ public enum Parameter {
   DATE_START_MEAL_TICKET("general", "date_start_meal_ticket", ""),
 
   EMAIL_TO_CONTACT("general", "email_to_contact", ""),
-//	EMAIL_TO_CONTACT viene utilizzato per popolare il campo replyTo delle
-//	mail inviate dal sistema in base all'ufficio del destinatario
+  //EMAIL_TO_CONTACT viene utilizzato per popolare il campo replyTo delle
+  //mail inviate dal sistema in base all'ufficio del destinatario
 
-  SEND_EMAIL("general", "send_email", "false"),            // attiva/disattiva l'invio delle mail dai job
+  //attiva/disattiva l'invio delle mail dai job
+  SEND_EMAIL("general", "send_email", "false"),
 
   MEAL_TIME_START_HOUR("general", "meal_time_start_hour", "1"),
   MEAL_TIME_START_MINUTE("general", "meal_time_start_minute", "0"),
   MEAL_TIME_END_HOUR("general", "meal_time_end_hour", "23"),
   MEAL_TIME_END_MINUTE("general", "meal_time_end_minute", "0"),
-	
-	/* YEARLY PARAMETER */
+
+  /* YEARLY PARAMETER */
 
   MONTH_EXPIRY_VACATION_PAST_YEAR("yearly", "month_expiry_vacation_past_year", "8"),
   DAY_EXPIRY_VACATION_PAST_YEAR("yearly", "day_expiry_vacation_past_year", "31"),

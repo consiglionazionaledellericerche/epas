@@ -27,10 +27,11 @@ public class OfficeManager {
   private final RoleDao roleDao;
   private final ConfGeneralManager confGeneralManager;
   private final ConfYearManager confYearManager;
+
   @Inject
   public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-                       RoleDao roleDao, ConfGeneralManager confGeneralManager,
-                       ConfYearManager confYearManager) {
+      RoleDao roleDao, ConfGeneralManager confGeneralManager,
+      ConfYearManager confYearManager) {
     this.usersRolesOfficesDao = usersRolesOfficesDao;
     this.roleDao = roleDao;
     this.confGeneralManager = confGeneralManager;
@@ -78,7 +79,7 @@ public class OfficeManager {
     Preconditions.checkNotNull(ip);
 
     return FluentIterable.from(confGeneralManager.containsValue(
-            Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
+        Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
             new Function<ConfGeneral, Office>() {
 
               @Override

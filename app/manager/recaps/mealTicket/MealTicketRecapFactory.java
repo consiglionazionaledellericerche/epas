@@ -31,13 +31,6 @@ public class MealTicketRecapFactory {
     this.mealTicketDao = mealTicketDao;
   }
 
-  /**
-   *
-   * @param person
-   * @param month
-   * @param year
-   * @return
-   */
   public Optional<MealTicketRecap> create(Contract contract) {
 
     Preconditions.checkNotNull(contract);

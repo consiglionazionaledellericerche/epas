@@ -20,7 +20,6 @@ public interface IPropertyInPeriod extends IPeriodModel, Model {
 
   /**
    * Imposta l'owner del periodo.
-   * @param target
    */
   void setOwner(IPropertiesInPeriodOwner target);
 
@@ -40,7 +39,6 @@ public interface IPropertyInPeriod extends IPeriodModel, Model {
 
   /**
    * Il valore del periodo.
-   * @return
    */
   Object getValue();
 
@@ -51,15 +49,12 @@ public interface IPropertyInPeriod extends IPeriodModel, Model {
 
   /**
    * Se il valore di otherValue è lo stesso del value del periodo.
-   * @param other
-   * @return
    */
   boolean periodValueEquals(Object otherValue);
 
 
   /**
    * Una nuova istanza del tipo PeriodModel.
-   * @return
    */
   IPropertyInPeriod newInstance();
 

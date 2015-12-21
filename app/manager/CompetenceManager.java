@@ -49,6 +49,7 @@ public class CompetenceManager {
   private final CompetenceDao competenceDao;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
+
   @Inject
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
                            OfficeDao officeDao, CompetenceDao competenceDao,
@@ -63,7 +64,7 @@ public class CompetenceManager {
   }
 
   /**
-   * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili
+   * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili.
    */
   public List<String> populateListWithOvertimeCodes() {
     List<String> list = Lists.newArrayList();
@@ -74,7 +75,7 @@ public class CompetenceManager {
   }
 
   /**
-   * @return il quantitativo di straordinari totali
+   * @return il quantitativo di straordinari totali.
    */
   public Integer getTotalOvertime(List<TotalOvertime> total) {
     Integer totaleMonteOre = 0;
@@ -85,7 +86,7 @@ public class CompetenceManager {
   }
 
   /**
-   * @return il quantitativo su base annuale di straordinari
+   * @return il quantitativo su base annuale di straordinari.
    */
   public int getTotalYearlyOvertime(List<Competence> competenceYearList) {
     int totaleOreStraordinarioAnnuale = 0;
@@ -97,7 +98,7 @@ public class CompetenceManager {
   }
 
   /**
-   * @return il quantitativo su base mensile di straordinari
+   * @return il quantitativo su base mensile di straordinari.
    */
   public int getTotalMonthlyOvertime(List<Competence> competenceMonthList) {
     int totaleOreStraordinarioMensile = 0;
@@ -136,8 +137,8 @@ public class CompetenceManager {
 
   /**
    * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su
-   * orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per le
-   * persone dell'ufficio office
+   *     orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per
+   *     le persone dell'ufficio office.
    */
   public Table<Person, String, Integer> composeTableForOvertime(
       int year, int month, Integer page,
@@ -167,8 +168,7 @@ public class CompetenceManager {
               .getCompetence(p, year, month, code);
       if (comp.isPresent()) {
         overtime = comp.get().valueApproved;
-      }
-      else {
+      } else {
         overtime = 0;
       }
       builder.put(p, "Giorni di Presenza", daysAtWork);
@@ -185,8 +185,8 @@ public class CompetenceManager {
 
   /**
    * @return la tabella che contiene nelle righe le persone, nelle colonne le competenze e come
-   * valori i booleani che determinano se per la persona è attiva la competenza comp rappresentata
-   * dalla stringa della descrizione della competenza stessa
+   *     valori i booleani che determinano se per la persona è attiva la competenza come
+   *     rappresentata dalla stringa della descrizione della competenza stessa.
    */
   public Table<Person, String, Boolean> getTableForEnabledCompetence(List<Person> personList) {
     ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
@@ -223,7 +223,7 @@ public class CompetenceManager {
 
   /**
    * @return true se avviene correttamente il cambiamento della lista di competenze attive per la
-   * persona Person passata come parametro
+   *     persona Person passata come parametro.
    */
   public boolean saveNewCompetenceEnabledConfiguration(
       Map<String, Boolean> competence,
@@ -237,15 +237,13 @@ public class CompetenceManager {
       if (!value) {
         if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
           person.competenceCode.remove(competenceCodeDao.getCompetenceCodeById(code.id));
-        }
-        else {
+        } else {
           continue;
         }
       } else {
         if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
           continue;
-        }
-        else {
+        } else {
           person.competenceCode.add(competenceCodeDao.getCompetenceCodeById(code.id));
         }
       }
@@ -257,7 +255,7 @@ public class CompetenceManager {
 
   /**
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
-   * personList nell'anno year
+   *     personList nell'anno year.
    */
   public FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException {
     FileInputStream inputStream = null;

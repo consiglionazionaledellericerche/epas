@@ -50,9 +50,8 @@ public class PersonDays extends Controller {
 
   /**
    * metodo rest che ritorna la situazione della persona (passata per email) in un giorno specifico
-   * (date)
+   * (date).
    */
-
   @BasicAuth
   public static void getDaySituation(String email, LocalDate date) {
     Person person = personDao.byEmail(email).orNull();
@@ -76,7 +75,7 @@ public class PersonDays extends Controller {
 
   /**
    * metodo rest che ritorna la situazione di una persona relativa al mese e all'anno passati come
-   * parametro
+   * parametro.
    */
   @BasicAuth
   public static void getMonthSituation(String email, int month, int year) {
@@ -104,8 +103,10 @@ public class PersonDays extends Controller {
       if (cmr.isPresent()) {
         pmDTO = generateMonthDTO(cmr.get());
       } else {
-        JsonResponse.notFound("Non sono presenti informazioni per "
-                + person.name + " " + person.surname + " nel mese di " + DateUtility.fromIntToStringMonth(month));
+        JsonResponse.notFound(
+            "Non sono presenti informazioni per "
+            + person.name + " " + person.surname + " nel mese di "
+            + DateUtility.fromIntToStringMonth(month));
       }
     }
     renderJSON(pmDTO);
@@ -115,40 +116,40 @@ public class PersonDays extends Controller {
 
   /**
    * @return il personDayDTO costruito sulla base del personDay passato come parametro da ritornare
-   * alle funzioni rest
+   *     alle funzioni rest.
    */
   private static PersonDayDto generateDayDTO(PersonDay pd) {
-    PersonDayDto pdDTO = new PersonDayDto();
-    pdDTO.buonopasto = pd.isTicketAvailable;
-    pdDTO.differenza = pd.difference;
-    pdDTO.progressivo = pd.progressive;
-    pdDTO.tempolavoro = pd.timeAtWork;
+    PersonDayDto pdDto = new PersonDayDto();
+    pdDto.buonopasto = pd.isTicketAvailable;
+    pdDto.differenza = pd.difference;
+    pdDto.progressivo = pd.progressive;
+    pdDto.tempolavoro = pd.timeAtWork;
     if (pd.absences != null && pd.absences.size() > 0) {
       for (Absence abs : pd.absences) {
-        pdDTO.codiceassenza.add(abs.absenceType.code);
+        pdDto.codiceassenza.add(abs.absenceType.code);
       }
     }
     if (pd.stampings != null && pd.stampings.size() > 0) {
       for (Stamping s : pd.stampings) {
-        pdDTO.timbrature.add(s.date.toString());
+        pdDto.timbrature.add(s.date.toString());
       }
     }
-    return pdDTO;
+    return pdDto;
   }
 
   /**
    * @return il personMonthDTO costruito sulla base del COntractMonthRecap opzionale passato come
-   * parametro da ritornare alle funzioni rest
+   *     parametro da ritornare alle funzioni rest.
    */
   private static PersonMonthDto generateMonthDTO(ContractMonthRecap cmr) {
-    PersonMonthDto pmDTO = new PersonMonthDto();
-    pmDTO.buoniMensa = cmr.remainingMealTickets;
-    pmDTO.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;
-    pmDTO.progressivoFinaleMese = cmr.progressivoFinaleMese;
-    pmDTO.straordinari = cmr.straordinariMinuti;
-    pmDTO.residuoTotaleAnnoCorrente = cmr.remainingMinutesCurrentYear;
-    pmDTO.residuoTotaleAnnoPassato = cmr.remainingMinutesLastYear;
-    return pmDTO;
+    PersonMonthDto pmDto = new PersonMonthDto();
+    pmDto.buoniMensa = cmr.remainingMealTickets;
+    pmDto.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;
+    pmDto.progressivoFinaleMese = cmr.progressivoFinaleMese;
+    pmDto.straordinari = cmr.straordinariMinuti;
+    pmDto.residuoTotaleAnnoCorrente = cmr.remainingMinutesCurrentYear;
+    pmDto.residuoTotaleAnnoPassato = cmr.remainingMinutesLastYear;
+    return pmDto;
   }
 
 }

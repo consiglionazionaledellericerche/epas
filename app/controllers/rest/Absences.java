@@ -142,9 +142,13 @@ public class Absences extends Controller {
               + person.get().surname + " da cui prender le informazioni per il calcolo");
     } else {
 
-      AbsenceInsertReport air = absenceManager.insertAbsenceSimulation(person.get(), begin,
-              Optional.fromNullable(end), absenceTypeManager.getAbsenceType(absenceCode)
-              , Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
+      AbsenceInsertReport air =
+          absenceManager
+            .insertAbsenceSimulation(
+                person.get(), begin, Optional.fromNullable(end),
+                absenceTypeManager.getAbsenceType(absenceCode),
+                Optional.<Blob>absent(), Optional.<String>absent(),
+                Optional.<Integer>absent());
 
       renderJSON(mapper.writer(JacksonModule
               .filterProviderFor(SimpleBeanPropertyFilter

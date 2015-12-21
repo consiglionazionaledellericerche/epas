@@ -22,10 +22,10 @@ public class ConsumerTest extends Controller {
 
   private static PersonDto person(int iid) {
 
-    PersonDto personDTO = new PersonDto();
+    PersonDto personDto = new PersonDto();
 
     try {
-      personDTO = peopleConsumer.getPerson(iid).get();
+      personDto = peopleConsumer.getPerson(iid).get();
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -34,7 +34,7 @@ public class ConsumerTest extends Controller {
       e.printStackTrace();
     }
 
-    return personDTO;
+    return personDto;
   }
 
   private static List<SimplePersonDto> people() {

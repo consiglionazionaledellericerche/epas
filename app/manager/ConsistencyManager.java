@@ -72,14 +72,16 @@ public class ConsistencyManager {
   private final AbsenceTypeDao absenceTypeDao;
   private final VacationsRecapFactory vacationsFactory;
   private final ConfGeneralManager confGeneralManager;
+
   @Inject
-  public ConsistencyManager(SecureManager secureManager, OfficeDao officeDao,
-                            PersonManager personManager, PersonDao personDao, PersonDayManager personDayManager,
-                            ContractMonthRecapManager contractMonthRecapManager,
-                            PersonDayInTroubleManager personDayInTroubleManager, IWrapperFactory wrapperFactory,
-                            PersonDayDao personDayDao, ConfYearManager confYearManager, StampTypeManager stampTypeManager,
-                            AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, VacationsRecapFactory vacationsFactory,
-                            ConfGeneralManager confGeneralManager) {
+  public ConsistencyManager(
+      SecureManager secureManager, OfficeDao officeDao,
+      PersonManager personManager, PersonDao personDao,
+      PersonDayManager personDayManager, ContractMonthRecapManager contractMonthRecapManager,
+      PersonDayInTroubleManager personDayInTroubleManager, IWrapperFactory wrapperFactory,
+      PersonDayDao personDayDao, ConfYearManager confYearManager, StampTypeManager stampTypeManager,
+      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, VacationsRecapFactory vacationsFactory,
+      ConfGeneralManager confGeneralManager) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -100,11 +102,6 @@ public class ConsistencyManager {
 
   /**
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-   *
-   * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive
-   *                 alla data di ieri
-   * @param year     l'anno dal quale far partire il fix
-   * @param month    il mese dal quale far partire il fix
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
                                  boolean sendMail, boolean onlyRecap) {
@@ -150,7 +147,7 @@ public class ConsistencyManager {
         // causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla,
         // altrimenti schianta
         personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
-      } catch (EmailException e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
