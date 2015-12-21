@@ -15,9 +15,9 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.SecureManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
 import manager.vacations.VacationManager;
+import manager.vacations.VacationsRecap;
+import manager.vacations.VacationsRecapFactory;
 
 import models.Contract;
 import models.Office;

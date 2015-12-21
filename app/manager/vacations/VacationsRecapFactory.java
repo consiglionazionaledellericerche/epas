@@ -1,4 +1,4 @@
-package manager.recaps.vacation;
+package manager.vacations;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -9,7 +9,6 @@ import dao.wrapper.IWrapperFactory;
 
 import manager.ConfYearManager;
 import manager.cache.AbsenceTypeManager;
-import manager.vacations.VacationManager;
 
 import models.Absence;
 import models.Contract;

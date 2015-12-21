@@ -16,8 +16,8 @@ import lombok.Data;
 
 import manager.PersonManager;
 import manager.SecureManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.vacations.VacationsRecap;
+import manager.vacations.VacationsRecapFactory;
 
 import models.Contract;
 import models.ContractMonthRecap;

@@ -7,8 +7,8 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.vacations.VacationsRecap;
+import manager.vacations.VacationsRecapFactory;
 
 import models.Contract;
 import models.User;
