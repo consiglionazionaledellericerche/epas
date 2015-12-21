@@ -19,6 +19,8 @@ import java.util.List;
 
 
 /**
+ * WrapperWorkingTimeType con alcune funzionalità aggiuntive.
+ *
  * @author alessandro
  */
 public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
@@ -55,13 +57,15 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
     for (Contract contract : activeContract) {
 
-      if (!contract.person.office.id.equals(officeId))
+      if (!contract.person.office.id.equals(officeId)) {
         continue;
+      }
 
       ContractWorkingTimeType current = contractManager
               .getContractWorkingTimeTypeFromDate(contract, today);
-      if (current.workingTimeType.id.equals(value.id))
+      if (current.workingTimeType.id.equals(value.id)) {
         contractList.add(contract);
+      }
     }
 
     return contractList;
@@ -82,14 +86,16 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
     for (Contract contract : activeContract) {
 
-      //TODO 	questa restrizione andrebbe fatta dentro activeContract
-      if (!contract.person.office.id.equals(officeId))
+      //TODO questa restrizione andrebbe fatta dentro activeContract
+      if (!contract.person.office.id.equals(officeId)) {
         continue;
+      }
 
       for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
 
-        if (cwtt.workingTimeType.id.equals(value.id))
+        if (cwtt.workingTimeType.id.equals(value.id)) {
           cwttList.add(cwtt);
+        }
       }
     }
 

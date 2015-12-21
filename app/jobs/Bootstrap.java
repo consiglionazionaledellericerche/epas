@@ -1,12 +1,23 @@
 package jobs;
 
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
+import com.google.common.base.Optional;
+import com.google.common.io.Resources;
 
-import javax.inject.Inject;
+import dao.UserDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+
+import lombok.extern.slf4j.Slf4j;
+
+import manager.ConsistencyManager;
+
+import models.Contract;
+import models.Person;
+import models.Qualification;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
+import models.WorkingTimeType;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -17,26 +28,19 @@ import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 
-import com.google.common.base.Optional;
-import com.google.common.io.Resources;
-
-import dao.UserDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import lombok.extern.slf4j.Slf4j;
-import manager.ConsistencyManager;
-import models.Contract;
-import models.Person;
-import models.Qualification;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-import models.WorkingTimeType;
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**
@@ -49,7 +53,7 @@ import play.test.Fixtures;
 @Slf4j
 public class Bootstrap extends Job<Void> {
 
-  private final static String JOBS_CONF = "jobs.active";
+  private static final String JOBS_CONF = "jobs.active";
 
   @Inject
   static FixUserPermission fixUserPermission;
@@ -113,19 +117,19 @@ public class Bootstrap extends Job<Void> {
                 person.fullName(), contract.get().beginDate);
                 /*
                 Contract c = contract.get();
-				c.sourceDateResidual = new LocalDate(wrContract.dateForInitialization());
-				c.sourcePermissionUsed = 0;
-				c.sourceRecoveryDayUsed = 0;
-				c.sourceRemainingMealTicket = 0;
-				c.sourceRemainingMinutesCurrentYear = 0;
-				c.sourceRemainingMinutesLastYear = 0;
-				c.sourceVacationCurrentYearUsed = 0;
-				c.sourceVacationLastYearUsed = 0;
-				c.sourceByAdmin = false;
-				c.save();
+        c.sourceDateResidual = new LocalDate(wrContract.dateForInitialization());
+        c.sourcePermissionUsed = 0;
+        c.sourceRecoveryDayUsed = 0;
+        c.sourceRemainingMealTicket = 0;
+        c.sourceRemainingMinutesCurrentYear = 0;
+        c.sourceRemainingMinutesLastYear = 0;
+        c.sourceVacationCurrentYearUsed = 0;
+        c.sourceVacationLastYearUsed = 0;
+        c.sourceByAdmin = false;
+        c.save();
 
-				consistencyManager.updatePersonSituation(person.id, c.sourceDateResidual);
-				*/
+        consistencyManager.updatePersonSituation(person.id, c.sourceDateResidual);
+        */
       }
     }
 

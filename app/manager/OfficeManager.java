@@ -1,9 +1,5 @@
 package manager;
 
-import java.util.Set;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -12,12 +8,17 @@ import com.google.inject.Inject;
 
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+
 import models.ConfGeneral;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.Parameter;
+
+import org.joda.time.LocalDate;
+
+import java.util.Set;
 
 public class OfficeManager {
 

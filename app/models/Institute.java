@@ -1,19 +1,20 @@
 package models;
 
+import com.google.common.collect.Sets;
+
+import models.base.MutableModel;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
+
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.envers.Audited;
-
-import com.google.common.collect.Sets;
-
-import models.base.MutableModel;
-import play.data.validation.Required;
-import play.data.validation.Unique;
 
 /**
  * @author alessandro

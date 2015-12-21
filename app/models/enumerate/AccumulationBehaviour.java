@@ -13,12 +13,15 @@ public enum AccumulationBehaviour {
   }
 
   public static AccumulationBehaviour getByDescription(String description) {
-    if (description.equals("niente"))
+    if (description.equals("niente")) {
       return AccumulationBehaviour.nothing;
-    if (description.equals("sostituisce il codice e decrementa l'accumulo"))
+    }
+    if (description.equals("sostituisce il codice e decrementa l'accumulo")) {
       return AccumulationBehaviour.replaceCodeAndDecreaseAccumulation;
-    if (description.equals("non accetta ulteriori assenze"))
+    }
+    if (description.equals("non accetta ulteriori assenze")) {
       return AccumulationBehaviour.noMoreAbsencesAccepted;
+    }
 
     return null;
   }

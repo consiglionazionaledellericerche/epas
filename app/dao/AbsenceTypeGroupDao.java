@@ -36,8 +36,9 @@ public class AbsenceTypeGroupDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     QAbsenceTypeGroup absenceTypeGroup = QAbsenceTypeGroup.absenceTypeGroup;
     final JPQLQuery query = getQueryFactory().from(absenceTypeGroup);
-    if (findAll)
+    if (findAll) {
       return query.list(absenceTypeGroup);
+    }
     if (codeToReplace.isPresent()) {
       condition.and(absenceTypeGroup.replacingAbsenceType.code.eq(codeToReplace.get()));
       return query.where(condition).list(absenceTypeGroup);

@@ -1,19 +1,15 @@
 package manager;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -21,7 +17,14 @@ import models.ContractWorkingTimeType;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+
+import org.joda.time.LocalDate;
+
 import play.db.jpa.JPAPlugin;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**

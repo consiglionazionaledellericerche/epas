@@ -1,14 +1,5 @@
 package manager;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.persistence.Query;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -21,16 +12,29 @@ import dao.PersonDayDao;
 import dao.UserDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
 import lombok.extern.slf4j.Slf4j;
+
 import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
+
+import org.joda.time.LocalDate;
+
 import play.db.jpa.JPA;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.persistence.Query;
 
 @Slf4j
 public class PersonManager {
@@ -103,10 +107,11 @@ public class PersonManager {
   public boolean isIdPresentInOldSoftware(Long id) {
     Person person = personDao.getPersonByOldID(id);
     //Person person = Person.find("Select p from Person p where p.oldId = ?", id).first();
-    if (person == null)
+    if (person == null) {
       return false;
-    else
+    } else {
       return true;
+    }
 
   }
 
@@ -119,13 +124,15 @@ public class PersonManager {
     queryReperibility.setParameter("date", date).setParameter("person", person);
     int prdCount = queryReperibility.getFirstResult();
     //	List<PersonReperibilityDay> prd =  queryReperibility.getResultList();
-    if (prdCount != 0)
+    if (prdCount != 0) {
       return false;
+    }
     Query queryShift = JPA.em().createQuery("Select count(*) from PersonShiftDay psd where psd.date = :date and psd.personShift.person = :person");
     queryShift.setParameter("date", date).setParameter("person", person);
     int psdCount = queryShift.getFirstResult();
-    if (psdCount != 0)
+    if (psdCount != 0) {
       return false;
+    }
 
     return true;
   }
@@ -175,8 +182,9 @@ public class PersonManager {
   private int whichBlankPosition(String s) {
     int position = 0;
     for (int i = 0; i < s.length(); i++) {
-      if (s.charAt(i) == ' ')
+      if (s.charAt(i) == ' ') {
         position = i;
+      }
     }
     return position;
   }

@@ -18,6 +18,8 @@ import org.joda.time.YearMonth;
 import java.util.List;
 
 /**
+ * Oggetto persone con molte funzionalità aggiuntive.
+ *
  * @author marco
  */
 public interface IWrapperPerson extends IWrapperModel<Person> {
@@ -95,7 +97,7 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   public CertificatedData getCertificatedData(int year, int month);
 
   /**
-   * Getter per la competenza della persona <CompetenceCode, year, month>
+   * Getter per la competenza della persona tramite CompetenceCode, year e month.
    */
   public Competence competence(final CompetenceCode code, final int year, final int month);
 

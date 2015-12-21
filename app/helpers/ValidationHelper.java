@@ -1,7 +1,5 @@
 package helpers;
 
-import java.util.List;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -9,13 +7,17 @@ import com.google.common.collect.FluentIterable;
 
 import play.data.validation.Error;
 
+import java.util.List;
+
 
 /**
- * @author daniele Classe di utilita' per visualizzare gli errori di validazione nel flash scope
- *         recupera il nome e il messaggio di validazione dai Messages
+ *  Classe di utilita' per visualizzare gli errori di validazione nel flash scope
+ *  recupera il nome e il messaggio di validazione dai Messages.
+ *
+ * @author daniele
  */
-// FIXME implementare la validazione nei modali oppure rimuovere i modali per le form
 public class ValidationHelper {
+  //FIXME implementare la validazione nei modali oppure rimuovere i modali per le form
 
   public static String errorsMessages(List<Error> errors) {
 

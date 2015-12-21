@@ -55,7 +55,7 @@ public class PersonMonthsManager {
    * @return un Insertable che verifica se esiste già un periodo contenente delle ore di formazione
    * per la persona person
    */
-  public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month, 
+  public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month,
       LocalDate beginDate, LocalDate endDate) {
     List<PersonMonthRecap> pmList = personMonthRecapDao
         .getPersonMonthRecaps(person, year, month, beginDate, endDate);
@@ -76,7 +76,7 @@ public class PersonMonthsManager {
   public Insertable checkIfAlreadySend(Person person, int year, int month) {
     Insertable rr = new Insertable(true, "");
     List<PersonMonthRecap> list = personMonthRecapDao
-        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
 
     if (list.size() > 0) {
@@ -101,7 +101,7 @@ public class PersonMonthsManager {
     return rr;
   }
 
-  public final static class Insertable {
+  public static final class Insertable {
     private boolean result;
     private String message;
 

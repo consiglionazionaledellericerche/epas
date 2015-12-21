@@ -20,7 +20,7 @@ import javax.inject.Inject;
 
 public class OvertimesManager {
 
-  private final static Logger log = LoggerFactory.getLogger(OvertimesManager.class);
+  private static final Logger log = LoggerFactory.getLogger(OvertimesManager.class);
   private final CompetenceDao competenceDao;
 
   @Inject

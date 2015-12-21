@@ -2,6 +2,7 @@
 # require fabric
 
 from fabric.api import *
+from hashlib import md5
 
 env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
 #env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
@@ -48,6 +49,17 @@ def logtail():
     with cd(APP):
         run("tail -f logs/epas.log")
 
+@task
+def changepassword(username, password, dbname="epas-devel", dbuser="epas"):
+    """
+    change password of the user identified by username
+    """
+
+    # using obsolete md5... please migrate to sha512 or bcrypt.
+    sql = "update users set password = '%s' where username = '%s'" % \
+        (md5(password).hexdigest(), username)
+    local("psql -U %s -c \"%s\" %s" % (dbuser, sql, dbname))
+
 def recreatedb(dbname, dbuser):
     try:
         local("psql -lqt | cut -d \| -f 1 | grep -w %s" % (dbname, ))
@@ -62,7 +74,6 @@ def copydb(dbname, dbuser="epas", remotedb="epas"):
     """
     copy production db into local database
     """
-    # with open("/tmp/itapharma.sql.gz", "w") as local_file:
     run("pg_dump -U %s -O %s | gzip -c > /tmp/db.sql.gz" % (remotedb, remotedb))
     get("/tmp/db.sql.gz", "/tmp")
     recreatedb(dbname, dbuser)
