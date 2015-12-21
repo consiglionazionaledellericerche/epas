@@ -14,8 +14,8 @@ import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.vacations.VacationsRecap;
+import manager.vacations.VacationsRecapFactory;
 
 import models.Absence;
 import models.CompetenceCode;

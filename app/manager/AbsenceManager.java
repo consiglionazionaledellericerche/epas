@@ -28,10 +28,12 @@ import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.CheckMessage;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.vacations.VacationsRecap;
+import manager.vacations.VacationsRecapFactory;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;

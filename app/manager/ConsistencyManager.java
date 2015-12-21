@@ -19,8 +19,8 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.cache.StampTypeManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.vacations.VacationsRecap;
+import manager.vacations.VacationsRecapFactory;
 
 import models.Absence;
 import models.AbsenceType;

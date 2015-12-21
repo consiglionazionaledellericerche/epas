@@ -1,4 +1,4 @@
-package manager.recaps.vacation;
+package manager.vacations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -11,8 +11,6 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.cache.AbsenceTypeManager;
-import manager.vacations.AccruedComponent;
-import manager.vacations.AccruedDecision;
 import manager.vacations.AccruedDecision.TypeAccrued;
 
 import models.Absence;
@@ -24,7 +22,6 @@ import models.enumerate.AbsenceTypeMapping;
 import org.joda.time.LocalDate;
 
 import java.util.List;
-
 
 /**
  * @author alessandro Classe da utilizzare per il riepilogo delle informazioni relative al piano
