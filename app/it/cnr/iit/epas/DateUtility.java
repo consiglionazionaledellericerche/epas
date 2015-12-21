@@ -1,7 +1,7 @@
 package it.cnr.iit.epas;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Days;
@@ -13,15 +13,15 @@ import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DateUtility {
 
-  public final static int DECEMBER = 12;
-  public final static int JANUARY = 1;
-  final static int MINUTE_IN_HOUR = 60;
-  final static LocalDate MAX_DATE = new LocalDate(9999, 12, 1);
+  public static final int DECEMBER = 12;
+  public static final int JANUARY = 1;
+  static final int MINUTE_IN_HOUR = 60;
+  static final LocalDate MAX_DATE = new LocalDate(9999, 12, 1);
 
   /**
    * @return il giorno in cui cade la pasqua
@@ -38,8 +38,9 @@ public class DateUtility {
     z = ((8 * century + 5) / 25) - 5; /* E3: sync with moon's orbit */
     d = (5 * year / 4) - x - 10;
     epact = (11 * golden + 20 + z - x) % 30; /* E5: epact */
-    if ((epact == 25 && golden > 11) || epact == 24)
+    if ((epact == 25 && golden > 11) || epact == 24) {
       epact++;
+    }
     n = 44 - epact;
     n += 30 * (n < 21 ? 1 : 0); /* E6: */
     n += 7 - ((d + n) % 7);

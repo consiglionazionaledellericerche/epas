@@ -51,32 +51,45 @@ public class ConfYear extends BaseModel {
 
     Integer i = Integer.parseInt(this.fieldValue);
 
-    if (i == 0)
+    if (i == 0) {
       return "nessun limite";
-    if (i == 1)
+    }
+    if (i == 1) {
       return "entro fine gennaio";
-    if (i == 2)
+    }
+    if (i == 2) {
       return "entro fine febbraio";
-    if (i == 3)
+    }
+    if (i == 3) {
       return "entro fine marzo";
-    if (i == 4)
+    }
+    if (i == 4) {
       return "entro fine aprile";
-    if (i == 5)
+    }
+    if (i == 5) {
       return "entro fine maggio";
-    if (i == 6)
+    }
+    if (i == 6) {
       return "entro fine giugno";
-    if (i == 7)
+    }
+    if (i == 7) {
       return "entro fine luglio";
-    if (i == 8)
+    }
+    if (i == 8) {
       return "entro fine agosto";
-    if (i == 9)
+    }
+    if (i == 9) {
       return "entro fine settembre";
-    if (i == 10)
+    }
+    if (i == 10) {
       return "entro fine ottobre";
-    if (i == 11)
+    }
+    if (i == 11) {
       return "entro fine novembre";
-    if (i == 12)
+    }
+    if (i == 12) {
       return "entro fine dicembre";
+    }
     return null;
 
   }
@@ -85,10 +98,11 @@ public class ConfYear extends BaseModel {
   public String getIntelligibleNumberValue() {
     Integer i = Integer.parseInt(this.fieldValue);
 
-    if (i == 0)
+    if (i == 0) {
       return "nessun limite";
-    else
+    } else {
       return i + "";
+    }
   }
 
 }

@@ -28,10 +28,12 @@ public class DateInterval {
 
   public DateInterval(LocalDate date1, LocalDate date2) {
 
-    if (date1 == null)
+    if (date1 == null) {
       date1 = DateUtility.setInfinity();
-    if (date2 == null)
+    }
+    if (date2 == null) {
       date2 = DateUtility.setInfinity();
+    }
 
     //Non applico il riferimento ma costruisco nuovi oggetti
     LocalDate date1Copy = new LocalDate(date1);
@@ -56,8 +58,9 @@ public class DateInterval {
 
   public boolean isClosed() {
 
-    if (DateUtility.isInfinity(this.end))
+    if (DateUtility.isInfinity(this.end)) {
       return false;
+    }
     return true;
 
   }

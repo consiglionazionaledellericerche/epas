@@ -1,17 +1,21 @@
 package helpers.attestati;
 
+import lombok.Getter;
+
 import models.Person;
 
 /**
  * Contiene le informazioni essenziali prelevate dal sistema centrale del CNR E' utilizzata anche
  * per effettuare i controlli di esistenza delle persone sia nel sistema centrale del CNR che in
- * ePAS
+ * ePAS.
  *
  * @author cristian
  */
+@Getter
 public final class Dipendente implements Comparable<Dipendente> {
 
-  private final String matricola, cognomeNome;
+  private final String matricola;
+  private final String cognomeNome;
   private final Person person;
 
   public Dipendente(final Person person, final String nomeCognome) {
@@ -24,18 +28,6 @@ public final class Dipendente implements Comparable<Dipendente> {
     this.cognomeNome = nomeCognome;
     this.person = person;
 
-  }
-
-  public String getMatricola() {
-    return matricola;
-  }
-
-  public String getCognomeNome() {
-    return cognomeNome;
-  }
-
-  public Person getPerson() {
-    return person;
   }
 
   /**
@@ -65,24 +57,31 @@ public final class Dipendente implements Comparable<Dipendente> {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (!(obj instanceof Dipendente))
+    }
+    if (!(obj instanceof Dipendente)) {
       return false;
+    }
     Dipendente other = (Dipendente) obj;
     if (cognomeNome == null) {
-      if (other.cognomeNome != null)
+      if (other.cognomeNome != null) {
         return false;
-    } else if (!cognomeNome.toUpperCase().replace(" ", "").equals(other.cognomeNome.toUpperCase().replace(" ", "")))
-      //!cognomeNome.equals(other.cognomeNome))
+      }
+    } else if (!cognomeNome.toUpperCase().replace(" ", "")
+        .equals(other.cognomeNome.toUpperCase().replace(" ", ""))) {
       return false;
+    }
     if (matricola == null) {
-      if (other.matricola != null)
+      if (other.matricola != null) {
         return false;
-    } else if (!matricola.equals(other.matricola))
+      }
+    } else if (!matricola.equals(other.matricola)) {
       return false;
+    }
     return true;
   }
 

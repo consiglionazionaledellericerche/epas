@@ -1,5 +1,18 @@
 package models;
 
+import com.google.common.base.Optional;
+
+import dao.wrapper.IWrapperContract;
+
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
+import models.base.BaseModel;
+
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,16 +21,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-
-import dao.wrapper.IWrapperContract;
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-import models.base.BaseModel;
-import play.data.validation.Required;
 
 @Entity
 @Table(name = "contract_month_recap", uniqueConstraints = {@UniqueConstraint(columnNames = {"year", "month", "contract_id"})})

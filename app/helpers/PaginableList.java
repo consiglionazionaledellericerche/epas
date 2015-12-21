@@ -18,8 +18,9 @@ public final class PaginableList<T> {
     this.page = page;
     int count = (int) items.size();
     this.totalPage = count / this.page_size;
-    if (count % this.page_size != 0)
+    if (count % this.page_size != 0) {
       this.totalPage++;
+    }
   }
 
   public List<T> items() {
@@ -28,10 +29,11 @@ public final class PaginableList<T> {
 
   public List<T> getPaginatedItems() {
     int offset = this.page * PAGE_SIZE;
-    if (offset + PAGE_SIZE >= items.size())
+    if (offset + PAGE_SIZE >= items.size()) {
       return this.items.subList(offset, items.size());
-    else
+    } else {
       return this.items.subList(offset, offset + PAGE_SIZE);
+    }
 
   }
 

@@ -1,5 +1,10 @@
 package models;
 
+import models.base.BaseModel;
+import models.enumerate.ShiftSlot;
+
+import org.joda.time.LocalDate;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -7,11 +12,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.joda.time.LocalDate;
-
-import models.base.BaseModel;
-import models.enumerate.ShiftSlot;
 
 @Entity
 @Table(name = "person_shift_days")

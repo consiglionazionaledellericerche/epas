@@ -1,29 +1,18 @@
-/**
- *
- */
 package models.exports;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
- * Classe utilizzata per passare via JSON i dati relativi all'autenticazione
+ * Classe utilizzata per passare via JSON i dati relativi all'autenticazione.
  *
  * @author cristian
  */
+@Getter
+@RequiredArgsConstructor
 public class AuthInfo {
 
   private final String username;
   private final String password;
-
-  public AuthInfo(String username, String password) {
-    this.username = username;
-    this.password = password;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
 
 }

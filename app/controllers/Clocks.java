@@ -3,6 +3,8 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
+import controllers.Resecure.NoCheck;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -30,7 +32,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
-import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.Play;
 import play.data.binding.As;
@@ -38,6 +39,7 @@ import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -48,7 +50,7 @@ import javax.inject.Inject;
 @With({RequestInit.class, Resecure.class})
 public class Clocks extends Controller {
 
-  public final static String SKIP_IP_CHECK = "skip.ip.check";
+  public static final String SKIP_IP_CHECK = "skip.ip.check";
   @Inject
   private static OfficeDao officeDao;
   @Inject

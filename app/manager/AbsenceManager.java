@@ -1,16 +1,5 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -27,11 +16,14 @@ import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
+
 import it.cnr.iit.epas.CheckMessage;
+
 import manager.recaps.vacation.VacationsRecap;
 import manager.recaps.vacation.VacationsRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
@@ -45,8 +37,20 @@ import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
+
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import play.db.jpa.Blob;
 import play.libs.Mail;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**
@@ -54,7 +58,7 @@ import play.libs.Mail;
  */
 public class AbsenceManager {
 
-  private final static Logger log = LoggerFactory.getLogger(AbsenceManager.class);
+  private static final Logger log = LoggerFactory.getLogger(AbsenceManager.class);
   private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
   private final ContractMonthRecapManager contractMonthRecapManager;
   private final WorkingTimeTypeDao workingTimeTypeDao;
@@ -116,18 +120,20 @@ public class AbsenceManager {
       return null;
     }
 
-    if (vr.get().vacationDaysLastYearNotYetUsed > 0)
+    if (vr.get().vacationDaysLastYearNotYetUsed > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
+    }
 
-    if (vr.get().persmissionNotYetUsed > 0)
-
+    if (vr.get().persmissionNotYetUsed > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
+    }
 
-    if (vr.get().vacationDaysCurrentYearNotYetUsed > 0)
+    if (vr.get().vacationDaysCurrentYearNotYetUsed > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
+    }
 
 
     return null;
@@ -443,8 +449,9 @@ public class AbsenceManager {
           absence.absenceFile = file.orNull();
         } else {
           for (Absence abs : beginAbsence.absences) {
-            if (abs.absenceFile == null)
+            if (abs.absenceFile == null) {
               absence.absenceFile = file.orNull();
+            }
           }
         }
 
@@ -494,11 +501,10 @@ public class AbsenceManager {
       for (LocalDate data : airl.datesInReperibilityOrShift()) {
         date = date + data + ' ';
       }
-      email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " + date +
-              " per il quale risulta una reperibilità o un turno attivi. " + '\n' +
-              "Controllare tramite la segreteria del personale." + '\n' +
-              '\n' +
-              "Servizio ePas");
+      email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " + date
+          + " per il quale risulta una reperibilità o un turno attivi. \n"
+          + "Controllare tramite la segreteria del personale.\n"
+          + "\n Servizio ePas");
 
     } catch (EmailException e) {
       // TODO GESTIRE L'Eccezione nella generazione dell'email
@@ -509,14 +515,15 @@ public class AbsenceManager {
   }
 
   /**
-   * controlla se si sta prendendo un codice di assenza in un giorno in cui si è reperibili
+   * controlla se si sta prendendo un codice di assenza in un giorno in cui si è reperibili.
    *
    * @return true se si sta prendendo assenza per un giorno in cui si è reperibili, false altrimenti
    */
   private boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date) {
 
     //controllo se la persona è in reperibilità
-    Optional<PersonReperibilityDay> prd = personReperibilityDayDao.getPersonReperibilityDay(person, date);
+    Optional<PersonReperibilityDay> prd =
+        personReperibilityDayDao.getPersonReperibilityDay(person, date);
     //controllo se la persona è in turno
     Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(person, date);
 
@@ -524,16 +531,17 @@ public class AbsenceManager {
   }
 
   /**
-   * Gestisce l'inserimento dei codici 91 (1 o più consecutivi)
+   * Gestisce l'inserimento dei codici 91 (1 o più consecutivi).
    */
-  private AbsencesResponse handlerCompensatoryRest(Person person,
-                                                   LocalDate date, AbsenceType absenceType, Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
+  private AbsencesResponse handlerCompensatoryRest(
+      Person person, LocalDate date, AbsenceType absenceType,
+      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
     Integer maxRecoveryDaysOneThree = confYearManager
             .getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
 
-    //		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
-    //		Bisogna considerare anche eventuali inizializzazioni
+    // TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
+    // Bisogna considerare anche eventuali inizializzazioni
     int alreadyUsed = 0;
     List<Absence> absences91 = absenceDao.getAbsenceByCodeInPeriod(
             Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
@@ -543,12 +551,11 @@ public class AbsenceManager {
       alreadyUsed = absences91.size();
     }
 
-    // 			verifica se ha esaurito il bonus per l'anno
-    if (person.qualification.qualification > 0 &&
-            person.qualification.qualification < 4 &&
-            alreadyUsed >= maxRecoveryDaysOneThree) {
-      //			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
-      //					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
+    // verifica se ha esaurito il bonus per l'anno
+    if (person.qualification.qualification > 0 && person.qualification.qualification < 4
+        && alreadyUsed >= maxRecoveryDaysOneThree) {
+      // TODO questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
+      // assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
       return new AbsencesResponse(date, absenceType.code,
               String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI +
                       " - Usati %s", alreadyUsed));
@@ -565,28 +572,33 @@ public class AbsenceManager {
   /**
    * Gestisce l'inserimento esplicito dei codici 31, 32 e 94.
    */
-  private AbsencesResponse handler31_32_94(Person person,
-                                           LocalDate date, AbsenceType absenceType, Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
+  private AbsencesResponse handler31_32_94(
+      Person person, LocalDate date, AbsenceType absenceType,
+      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType) && canTake32(person, date, otherAbsences)) {
+    if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
+        && canTake32(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
-    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType) && canTake31(person, date, otherAbsences)) {
+    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType)
+        && canTake31(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
-    if (AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType) && canTake94(person, date, otherAbsences)) {
+    if (AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)
+        && canTake94(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
-    //		CODICE FERIE NON DISPONIBILE
+    // CODICE FERIE NON DISPONIBILE
     return new AbsencesResponse(date, absenceType.code,
             AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
   }
 
   /**
-   * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute)
+   * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute).
    */
-  private AbsencesResponse handler37(Person person,
-                                     LocalDate date, AbsenceType absenceType, Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
+  private AbsencesResponse handler37(
+      Person person, LocalDate date, AbsenceType absenceType,
+      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
     if (date.getYear() == LocalDate.now().getYear()) {
       Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
@@ -616,8 +628,9 @@ public class AbsenceManager {
    * @param file
    * @throws EmailException
    */
-  private List<AbsencesResponse> handlerAbsenceTypeGroup(Person person, LocalDate date,
-                                                         AbsenceType absenceType, Optional<Blob> file, boolean persist) {
+  private List<AbsencesResponse> handlerAbsenceTypeGroup(
+      Person person, LocalDate date, AbsenceType absenceType, Optional<Blob> file,
+      boolean persist) {
 
     CheckMessage checkMessage = absenceGroupManager.checkAbsenceGroup(absenceType, person, date);
     List<AbsencesResponse> result = Lists.newArrayList();
@@ -630,7 +643,10 @@ public class AbsenceManager {
     result.add(insert(person, date, absenceType, file, Optional.<Integer>absent(), persist));
 
     if (checkMessage.absenceType != null) {
-      result.add(insert(person, date, checkMessage.absenceType, file, Optional.<Integer>absent(), persist));
+      result.add(
+          insert(
+              person, date, checkMessage.absenceType,
+              file, Optional.<Integer>absent(), persist));
     }
     return result;
   }

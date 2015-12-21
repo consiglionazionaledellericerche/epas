@@ -40,7 +40,6 @@ import net.fortuna.ical4j.model.ValidationException;
 
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
-import org.slf4j.LoggerFactory;
 
 import play.Logger;
 import play.data.binding.As;

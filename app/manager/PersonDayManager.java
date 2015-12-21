@@ -102,15 +102,17 @@ public class PersonDayManager {
         if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
             abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
             abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
-            abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
+            abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours)) {
           return true;
+        }
       }
       return false;
     } else {
-      if (pd.absences.size() >= 1)
+      if (pd.absences.size() >= 1) {
         return true;
-      else
+      } else {
         return false;
+      }
     }
 
   }
@@ -1090,15 +1092,15 @@ public class PersonDayManager {
         currentWorkingDays++;
       } else {
         PersonDay previusPersonDay = null;
-        if (totalDays.size() > 0)
+        if (totalDays.size() > 0) {
           previusPersonDay = totalDays.get(totalDays.size() - 1);
+        }
 
         PersonDay newPersonDay;
         //primo giorno del mese festivo
-        if (previusPersonDay == null)
+        if (previusPersonDay == null) {
           newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0);
-          //altri giorni festivi
-        else {
+        } else {
           newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, previusPersonDay.progressive);
         }
 
@@ -1162,8 +1164,9 @@ public class PersonDayManager {
    * Il numero di coppie ingresso/uscita da stampare per il personday
    */
   public int numberOfInOutInPersonDay(PersonDay pd) {
-    if (pd == null)
+    if (pd == null) {
       return 0;
+    }
     Collections.sort(pd.stampings);
 
     int coupleOfStampings = 0;
@@ -1200,8 +1203,9 @@ public class PersonDayManager {
       }
     }
     //l'ultima stampings e' in chiudo una coppia
-    if (lastWay != null)
+    if (lastWay != null) {
       coupleOfStampings++;
+    }
 
     return coupleOfStampings;
   }

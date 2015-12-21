@@ -3,7 +3,6 @@ package dao;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 

@@ -1,10 +1,10 @@
 package dao.wrapper;
 
-import java.util.List;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.WorkingTimeType;
+
+import java.util.List;
 
 public interface IWrapperWorkingTimeType extends IWrapperModel<WorkingTimeType> {
 

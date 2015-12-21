@@ -79,8 +79,9 @@ public class AbsenceType extends BaseModel {
 
   @Transient
   public String getShortDescription() {
-    if (description != null && description.length() > 60)
+    if (description != null && description.length() > 60) {
       return description.substring(0, 60) + "...";
+    }
     return description;
   }
 

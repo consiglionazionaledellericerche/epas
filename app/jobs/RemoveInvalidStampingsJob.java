@@ -1,20 +1,23 @@
 package jobs;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 
 import dao.PersonDayDao;
+
 import manager.ConsistencyManager;
+
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.jobs.Job;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 public class RemoveInvalidStampingsJob extends Job {
 

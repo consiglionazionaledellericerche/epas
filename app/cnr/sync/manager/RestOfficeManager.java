@@ -17,9 +17,6 @@ import manager.OfficeManager;
 import models.Institute;
 import models.Office;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import play.data.validation.Validation;
 
 import java.util.Collection;

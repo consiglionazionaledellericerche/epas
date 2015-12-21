@@ -3,16 +3,17 @@
  */
 package it.cnr.iit.epas;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import models.exports.AuthInfo;
+
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 /**
  * @author cristian

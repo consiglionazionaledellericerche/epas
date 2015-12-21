@@ -1,25 +1,20 @@
 package dao.wrapper;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import com.google.common.base.Optional;
 
 import it.cnr.iit.epas.DateInterval;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import java.util.List;
+
 public interface IWrapperContract extends IWrapperModel<Contract> {
 
-  /**
-   *
-   * @param month
-   * @param year
-   * @return
-   */
   boolean isLastInMonth(int month, int year);
 
   /**
@@ -27,40 +22,16 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
    */
   boolean isDefined();
 
-  /**
-   *
-   * @return
-   */
   DateInterval getContractDateInterval();
 
-  /**
-   *
-   * @return
-   */
   DateInterval getContractDatabaseInterval();
 
-  /**
-   *
-   * @return
-   */
   DateInterval getContractDatabaseIntervalForMealTicket();
 
-  /**
-   *
-   * @return
-   */
   Optional<YearMonth> getFirstMonthToRecap();
 
-  /**
-   *
-   * @return
-   */
   YearMonth getLastMonthToRecap();
 
-  /**
-   *
-   * @return
-   */
   List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList();
 
   Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth);

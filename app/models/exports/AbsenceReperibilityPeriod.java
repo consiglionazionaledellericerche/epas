@@ -1,12 +1,9 @@
-/**
- *
- */
 package models.exports;
-
-import org.joda.time.LocalDate;
 
 import models.Person;
 import models.PersonReperibilityType;
+
+import org.joda.time.LocalDate;
 
 /**
  * Classe di supporto per l'importazione delle informazioni relative ai giorni di assenza delle

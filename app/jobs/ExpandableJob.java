@@ -29,7 +29,7 @@ import javax.inject.Inject;
 @On("0 0 15 ? * MON,WED,FRI")
 public class ExpandableJob extends Job {
 
-  private final static String JOBS_CONF = "jobs.active";
+  private static final String JOBS_CONF = "jobs.active";
   @Inject
   private static PersonDayInTroubleManager personDayInTroubleManager;
   @Inject

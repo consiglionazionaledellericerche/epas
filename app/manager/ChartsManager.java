@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
+import controllers.Security;
+
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -33,7 +35,6 @@ import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import controllers.Security;
 import play.db.jpa.Blob;
 import play.db.jpa.JPAPlugin;
 
@@ -51,7 +52,7 @@ import javax.inject.Inject;
 
 public class ChartsManager {
 
-  private final static Logger log = LoggerFactory.getLogger(ChartsManager.class);
+  private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
   private final ConfGeneralManager confGeneralManager;
   private final CompetenceCodeDao competenceCodeDao;
   private final CompetenceDao competenceDao;
@@ -147,8 +148,9 @@ public class ChartsManager {
         PersonOvertime po = new PersonOvertime();
         Long val = null;
         Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
-        if (result.isPresent())
+        if (result.isPresent()) {
           val = result.get().longValue();
+        }
 
         po.month = month;
         po.year = year;
@@ -210,12 +212,15 @@ public class ChartsManager {
           String[] tokens = line.split(",");
 
           for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i].startsWith("Matricola"))
+            if (tokens[i].startsWith("Matricola")) {
               indexMatricola = i;
-            if (tokens[i].startsWith("Codice Assenza"))
+            }
+            if (tokens[i].startsWith("Codice Assenza")) {
               indexAssenza = i;
-            if (tokens[i].startsWith("Data Assenza"))
+            }
+            if (tokens[i].startsWith("Data Assenza")) {
               indexDataAssenza = i;
+            }
 
           }
           continue;
@@ -241,12 +246,13 @@ public class ChartsManager {
 
           if (abs == null) {
             if (!dataAssenza.isBefore
-                    (new LocalDate(LocalDate.now().getYear() - 1, 1, 1)))
+                    (new LocalDate(LocalDate.now().getYear() - 1, 1, 1))) {
               renderResult =
                       new RenderResult(null, matricola,
                               p.name, p.surname, assenza,
                               dataAssenza, false, "nessuna assenza trovata",
                               null);
+            }
             log.info("Nessuna assenza trovata in data {} per {}", dataAssenza, p.surname);
           } else {
             if (abs.absenceType.certificateCode
@@ -258,12 +264,13 @@ public class ChartsManager {
               log.info("Assenza riscontrata in data {} per {} con codice {}", dataAssenza, p.surname, assenza);
             } else {
               if (!abs.personDay.date.isBefore
-                      (new LocalDate(LocalDate.now().getYear() - 1, 1, 1)))
+                      (new LocalDate(LocalDate.now().getYear() - 1, 1, 1))) {
                 renderResult = new RenderResult(null,
                         matricola, p.name, p.surname,
                         assenza, dataAssenza, false,
                         "assenza diversa da quella in anagrafica",
                         abs.absenceType.code);
+              }
               log.info("Riscontrata assenza diversa da quella in anagrafica in data {} per {}",
                       dataAssenza, p.surname);
             }
@@ -336,8 +343,9 @@ public class ChartsManager {
       List<Contract> contractList = personDao.getContractList(p, beginDate, endDate);
 
       LocalDate beginDateAUX = null;
-      if (contractList.isEmpty())
+      if (contractList.isEmpty()) {
         contractList.addAll(p.contracts);
+      }
 
       for (Contract contract : contractList) {
         if (beginDateAUX != null && beginDateAUX.equals(contract.beginDate)) {
@@ -447,10 +455,12 @@ public class ChartsManager {
    **/
 
   private String removeApice(String token) {
-    if (token.startsWith("\""))
+    if (token.startsWith("\"")) {
       token = token.substring(1);
-    if (token.endsWith("\""))
+    }
+    if (token.endsWith("\"")) {
       token = token.substring(0, token.length() - 1);
+    }
     return token;
   }
 
@@ -483,7 +493,7 @@ public class ChartsManager {
    * Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici
    **/
 
-  public final static class Month {
+  public static final class Month {
     public int id;
     public String mese;
 
@@ -493,7 +503,7 @@ public class ChartsManager {
     }
   }
 
-  public final static class Year {
+  public static final class Year {
     public int id;
     public int anno;
 
@@ -508,7 +518,7 @@ public class ChartsManager {
    * quanto trovato all'interno del file dello schedone
    **/
 
-  public final static class RenderList {
+  public static final class RenderList {
     private List<RenderResult> listNull;
     private List<RenderResult> listTrueFalse;
 

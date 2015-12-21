@@ -56,7 +56,7 @@ import javax.inject.Inject;
 
 public class ConsistencyManager {
 
-  private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
+  private static final Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
   private final PersonManager personManager;
@@ -664,5 +664,5 @@ public class ConsistencyManager {
     return cmr;
 
   }
-  
+
 }

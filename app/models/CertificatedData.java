@@ -1,15 +1,16 @@
 package models;
 
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.envers.Audited;
-
-import models.base.BaseModel;
-import play.data.validation.Required;
 
 
 /**
