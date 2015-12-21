@@ -211,8 +211,7 @@ public class ContractMonthRecapManager {
       cmr.remainingMinutesLastYear = initMonteOreAnnoPassato;
       cmr.remainingMinutesCurrentYear = initMonteOreAnnoCorrente;
 
-      Parameter param = cmr.qualifica > 3 ?
-              Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49 :
+      Parameter param = cmr.qualifica > 3 ? Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49 :
               Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13;
       Integer monthExpiryRecoveryDay = confYearManager.getIntegerFieldValue(param,
               cmr.person.office, cmr.year);
@@ -647,5 +646,5 @@ public class ContractMonthRecapManager {
 
 
 
-	
+
 

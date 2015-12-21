@@ -88,8 +88,8 @@ public class ContractDao extends DaoBase {
   public List<Contract> getContractListByWorkingTimeType(WorkingTimeType wtt) {
     QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
     QContract contract = QContract.contract;
-    final JPQLQuery query = getQueryFactory().from(contract).
-            leftJoin(contract.contractWorkingTimeType, cwtt).where(cwtt.workingTimeType.eq(wtt));
+    final JPQLQuery query = getQueryFactory().from(contract)
+            .leftJoin(contract.contractWorkingTimeType, cwtt).where(cwtt.workingTimeType.eq(wtt));
 
     return query.list(contract);
   }
@@ -150,7 +150,7 @@ public class ContractDao extends DaoBase {
   }
 
   /**
-   * @return il contractStampProfile relativo all'id passato come parametro
+   * @return il contractStampProfile relativo all'id passato come parametro.
    */
   public ContractStampProfile getContractStampProfileById(Long id) {
     QContractStampProfile csp = QContractStampProfile.contractStampProfile;
@@ -160,14 +160,15 @@ public class ContractDao extends DaoBase {
   }
 
 
-  /******************************************************************************************************************************************/
-  /*Inserisco in questa parte del Dao le query relative ai ContractWorkingTimeType per evitare di creare una classe specifica che contenga  */
-  /*una o al più due query e risulti pertanto troppo dispersiva                                                                             */
-  /******************************************************************************************************************************************/
+  //***********************************************************************************************/
+  // Inserisco in questa parte del Dao le query relative ai ContractWorkingTimeType per evitare   */
+  // di creare una classe specifica che contenga una o al più due query e risulti pertanto troppo */
+  // dispersiva                                                                                   */
+  //    *******************************************************************************************/
 
 
   /**
-   * @return la lista di contractWorkingTimeType associati al contratto passato come parametro
+   * @return la lista di contractWorkingTimeType associati al contratto passato come parametro.
    */
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeList(Contract contract) {
     QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;

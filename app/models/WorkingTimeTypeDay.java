@@ -1,7 +1,6 @@
-/**
- *
- */
 package models;
+
+import lombok.ToString;
 
 import models.base.BaseModel;
 
@@ -22,11 +21,12 @@ import javax.persistence.Transient;
 
 /**
  * Per ogni giorno della settimana ci sono riportate le informazioni necessarie all'utilizzo di
- * questa tipologia di orario nel giorno specificato
+ * questa tipologia di orario nel giorno specificato.
  *
  * @author cristian
  * @author dario
  */
+@ToString
 @Audited
 @Entity
 @Table(name = "working_time_type_days")
@@ -44,18 +44,18 @@ public class WorkingTimeTypeDay extends BaseModel {
   public int dayOfWeek;
 
   /**
-   * tempo di lavoro giornaliero espresso in minuti
+   * tempo di lavoro giornaliero espresso in minuti.
    */
   @Required
   public Integer workingTime;
 
   /**
-   * booleano per controllo se il giorno in questione è festivo o meno
+   * booleano per controllo se il giorno in questione è festivo o meno.
    */
   public boolean holiday = false;
 
   /**
-   * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto
+   * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto.
    */
   @Required
   public Integer mealTicketTime = 0;
@@ -85,77 +85,20 @@ public class WorkingTimeTypeDay extends BaseModel {
   public Integer timeSlotExitTo;
 
   /**
-   * tempo inizio pausa pranzo
+   * tempo inizio pausa pranzo.
    */
   public Integer timeMealFrom;
 
   /**
-   * tempo fine pausa pranzo
+   * tempo fine pausa pranzo.
    */
   public Integer timeMealTo;
 
 
-//	/**
-//	 * Setter per tempo di lavoro.
-//	 * @param workingTime
-//	 * @param wttd
-//	 * 
-//	 */
-//	public void setWorkingTime(Integer workingTime) {
-//		
-//		if (workingTime == null) {
-//			this.workingTime = 0;
-//		} else {
-//			this.workingTime = workingTime;
-//		}
-//	}
-//	
-//	/**
-//	 * Setter per tempo di pausa pranzo.
-//	 * @param breakTicketTime
-//	 */
-//	public void setBreakTicketTime(Integer breakTicketTime) {
-//		
-//		if (breakTicketTime == null) {
-//			this.breakTicketTime = 0;
-//		} else {
-//			this.breakTicketTime = breakTicketTime;
-//		}
-//		
-//		if (this.breakTicketTime < 30) {
-//			this.breakTicketTime = 30;
-//		}
-//	}
-//	
-//	/**
-//	 * Setter per tempo per avere il buono pasto.
-//	 * @param mealTicketTime
-//	 */
-//	public void setMealTicketTime(Integer mealTicketTime) {
-//		
-//		if (mealTicketTime == null) {
-//			this.mealTicketTime = 0;
-//		} else {
-//			this.mealTicketTime = mealTicketTime;
-//		}
-//	}
-//	
-//	/**
-//	 * Setter per giorno festivo.
-//	 * @param holiday
-//	 */
-//	public void setHoliday(String holiday) {
-//		if (holiday != null && holiday.equals("true")) {
-//			this.holiday = true;
-//		} else {
-//			this.holiday = false;
-//		}
-//	}
-
   /**
    * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo
    * mealTicketTime che rappresenta il tempo minimo di lavoro per avere diritto al buono pasto è
-   * pari a zero)
+   * pari a zero).
    */
   @Transient
   public boolean mealTicketEnabled() {
@@ -171,11 +114,4 @@ public class WorkingTimeTypeDay extends BaseModel {
 
   }
 
-  @Override
-  public String toString() {
-    return String.format("WorkingTimeTypeDay[%d] - dayOfWeek = %d, workingTimeType.id = %d, workingTime = %d, mealTicketTime = %d, breakTicketTime = %d, holiday = %s, " +
-                    "timeSlotEntranceFrom = %d, timeSlotEntranceTo = %d, timeSlotExitFrom = %d, timeSlotExitTo = %d, timeMealFrom = %d, timeMealTo = %d",
-            id, dayOfWeek, workingTimeType.id, workingTime, mealTicketTime, breakTicketTime, holiday, timeSlotEntranceFrom, timeSlotEntranceTo,
-            timeSlotExitFrom, timeSlotExitTo, timeMealFrom, timeMealTo);
-  }
 }

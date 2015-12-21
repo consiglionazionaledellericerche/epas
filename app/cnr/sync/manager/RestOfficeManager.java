@@ -32,14 +32,14 @@ public class RestOfficeManager {
   @Inject
   private OfficeManager officeManager;
 
-  public int saveImportedSeats(Collection<OfficeDto> officeDTOList) {
+  public int saveImportedSeats(Collection<OfficeDto> officeDtoList) {
 
-    Preconditions.checkNotNull(officeDTOList);
+    Preconditions.checkNotNull(officeDtoList);
 
     Set<InstituteDto> institutesDto = Sets.newHashSet();
 
     //  Estrazione senza doppioni di tutti gli istituti dalla lista degli uffici
-    for (OfficeDto office : officeDTOList) {
+    for (OfficeDto office : officeDtoList) {
       institutesDto.add(office.institute);
     }
 
@@ -70,7 +70,7 @@ public class RestOfficeManager {
 
     int syncedOffices = 0;
 
-    for (OfficeDto officeDto : officeDTOList) {
+    for (OfficeDto officeDto : officeDtoList) {
 
       Office office = new Office();
       officeDto.copyInto(office);

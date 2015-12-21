@@ -57,11 +57,6 @@ public class QualificationDao extends DaoBase {
 
   }
 
-  /**
-   *
-   * @param qualification
-   * @return
-   */
   public Optional<Qualification> byQualification(Integer qualification) {
 
     Preconditions.checkNotNull(qualification);
@@ -74,10 +69,6 @@ public class QualificationDao extends DaoBase {
 
   }
 
-  /**
-   *
-   * @return
-   */
   public List<Qualification> findAll() {
 
     QQualification qual = QQualification.qualification1;
@@ -97,9 +88,11 @@ public class QualificationDao extends DaoBase {
 
 
   /**
-   * @return la lista di qualifiche superiori o uguali al limite passato come parametro (da usare,
-   * ad esempio, per ritornare la lista delle qualifiche dei tecnici che hanno qualifica superiore a
-   * 3)
+   * Costruisce la lista di qualifiche superiori o uguali al limite passato come parametro.
+   *
+   * @return la lista di qualifiche superiori o uguali al limite passato come parametro
+   *     (da usare, ad esempio, per ritornare la lista delle qualifiche dei tecnici che hanno
+   *     qualifica superiore a 3)
    */
   public List<Qualification> getQualificationGreaterThan(Integer limit) {
     QQualification qual = QQualification.qualification1;

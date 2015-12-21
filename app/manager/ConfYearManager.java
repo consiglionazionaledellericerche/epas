@@ -152,24 +152,10 @@ public class ConfYearManager {
     return value;
   }
 
-  /**
-   *
-   * @param param
-   * @param office
-   * @param year
-   * @return
-   */
   public Integer getIntegerFieldValue(Parameter param, Office office, Integer year) {
     return new Integer(getFieldValue(param, office, year));
   }
 
-  /**
-   *
-   * @param param
-   * @param office
-   * @param year
-   * @return
-   */
   public LocalDate getLocalDateFieldValue(Parameter param, Office office, Integer year) {
     return new LocalDate(getFieldValue(param, office, year));
   }
@@ -196,7 +182,7 @@ public class ConfYearManager {
   }
 
   /**
-   * @return il conf year di un certo ufficio in un certo anno rispondente al parametro field
+   * @return il conf year di un certo ufficio in un certo anno rispondente al parametro field.
    */
   private Optional<ConfYear> getByFieldName(String field, Integer year, Office office) {
 

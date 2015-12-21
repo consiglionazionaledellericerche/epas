@@ -344,31 +344,32 @@ public class Shift extends Controller {
    * @author arianna
    */
   @BasicAuth
-  public static void exportMonthCalAsPDF() {
-    int year = params.get("year", Integer.class);
-    int month = params.get("month", Integer.class);
-    Long shiftCategoryId = params.get("type", Long.class);
+  public static void exportMonthCalAsPDF(int year, int month, Long type) {
 
-    Logger.debug("sono nella exportMonthCalAsPDF con shiftCategory=%s year=%s e month=%s", shiftCategoryId, year, month);
+    log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
+        type, year, month);
 
-    ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
+    ShiftCategories shiftCategory = ShiftCategories.findById(type);
     if (shiftCategory == null) {
       notFound(String.format("shiftCategory shiftCategory = %s doesn't exist", shiftCategory));
     }
 
-    //ArrayList<String> shiftTypes = new ArrayList<String>();
-    List<ShiftType> shiftTypes = ShiftType.find("SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory).fetch();
-    Logger.debug("shiftTypes=%s", shiftTypes);
+    List<ShiftType> shiftTypes =
+        ShiftType.find(
+            "SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory).fetch();
+    log.debug("shiftTypes={}", shiftTypes);
 
-    // crea la tabella dei turni mensile (tipo turno, giorno) -> (persona turno mattina, persona turno pomeriggio)
-    Table<String, Integer, ShiftManager.SD> shiftCalendar = HashBasedTable.<String, Integer, ShiftManager.SD>create();
+    // crea la tabella dei turni mensile (tipo turno, giorno) ->
+    //  (persona turno mattina, persona turno pomeriggio)
+    Table<String, Integer, ShiftManager.SD> shiftCalendar =
+        HashBasedTable.<String, Integer, ShiftManager.SD>create();
 
 
     // prende il primo giorno del mese
     LocalDate firstOfMonth = new LocalDate(year, month, 1);
 
     for (ShiftType shiftType : shiftTypes) {
-      Logger.debug("controlla type=%s", shiftType.type);
+      log.debug("controlla type={}", shiftType.type);
 
       // put the shift information i ìn the calendar shiftCalendar
       shiftManager.buildMonthlyShiftCalendar(firstOfMonth, shiftType, shiftCalendar);
@@ -377,25 +378,29 @@ public class Shift extends Controller {
 
     LocalDate today = new LocalDate();
     String shiftDesc = shiftCategory.description;
-    String supervisor = shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
+    String supervisor =
+        shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
     renderPDF(today, firstOfMonth, shiftCalendar, shiftDesc, supervisor);
   }
 
 
   /**
-   * Restituisce la lista delle assenze delle persone di un certo turno in un certo periodo di tempo.
+   * Restituisce la lista delle assenze delle persone di un certo turno in un certo periodo di
+   * tempo.
    *
    * @author arianna
    *
    */
   @BasicAuth
-  public static void absence() {
+  public static void absence(
+      Integer yearFrom, Integer monthFrom, Integer dayFrom,
+      Integer yearTo, Integer monthTo, Integer dayTo) {
     response.accessControl("*");
 
     String type = params.get("type");
 
-    LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
-    LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
+    LocalDate from = new LocalDate(yearFrom, monthFrom, dayFrom);
+    LocalDate to = new LocalDate(yearTo, monthTo, dayTo);
 
     ShiftType shiftType = shiftDao.getShiftTypeByType(type);
     if (shiftType == null) {
@@ -404,8 +409,12 @@ public class Shift extends Controller {
     Logger.debug("Cerco Turnisti di tipo %s", shiftType.type);
 
     // get the list of persons involved in the shift of type 'type'
-    List<Person> personList = new ArrayList<Person>();
-    personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
+    List<Person> personList =
+        JPA.em().createQuery(
+            "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
+            + "WHERE psst.shiftType.type = :type "
+            + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
+            + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
             .setParameter("type", type)
             .getResultList();
 
@@ -430,7 +439,8 @@ public class Shift extends Controller {
     absenceShiftPeriods =
         shiftManager.getAbsentShiftPeriodsFromAbsentShiftDays(absencePersonShiftDays, shiftType);
 
-    Logger.debug("Find %s absenceShiftPeriod. AbsenceShiftPeriod = %s", absenceShiftPeriods.size(), absenceShiftPeriods.toString());
+    log.debug("Find {} absenceShiftPeriod. AbsenceShiftPeriod = {}",
+        absenceShiftPeriods.size(), absenceShiftPeriods.toString());
     render(absenceShiftPeriods);
   }
 

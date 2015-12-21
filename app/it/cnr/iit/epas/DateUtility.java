@@ -24,7 +24,7 @@ public class DateUtility {
   static final LocalDate MAX_DATE = new LocalDate(9999, 12, 1);
 
   /**
-   * @return il giorno in cui cade la pasqua
+   * @return il giorno in cui cade la pasqua.
    */
   private static final LocalDate findEaster(int year) {
     if (year <= 1582) {
@@ -56,14 +56,8 @@ public class DateUtility {
     }
   }
 
-  /**
-   *
-   * @param officePatron
-   * @param date
-   * @return
-   */
-  public static boolean isGeneralHoliday(final Optional<MonthDay> officePatron,
-                                         final LocalDate date) {
+  public static boolean isGeneralHoliday(
+      final Optional<MonthDay> officePatron, final LocalDate date) {
 
     LocalDate easter = findEaster(date.getYear());
     LocalDate easterMonday = easter.plusDays(1);
@@ -115,7 +109,7 @@ public class DateUtility {
     }
 
     /**
-     * ricorrenza centocinquantenario dell'unità d'Italia
+     * ricorrenza centocinquantenario dell'unità d'Italia.
      */
     if (date.isEqual(new LocalDate(2011, 3, 17))) {
       return true;
@@ -125,10 +119,10 @@ public class DateUtility {
   }
 
   /**
-   * @param begin data iniziale
+   * @param begin data iniziale.
    * @param end   data finale
    * @return lista di tutti i giorni fisici contenuti nell'intervallo [begin,end] estremi compresi,
-   * escluse le general holiday
+   *     escluse le general holiday
    */
   public static List<LocalDate> getGeneralWorkingDays(final LocalDate begin, final LocalDate end) {
 
@@ -145,7 +139,7 @@ public class DateUtility {
 
 
   /**
-   * @param date     data
+   * @param date data.
    * @param interval intervallo
    * @return true se la data ricade nell'intervallo estremi compresi
    */
@@ -163,7 +157,7 @@ public class DateUtility {
 
   /**
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
-   * intersezione vuota
+   *     intersezione vuota.
    */
   public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2) {
     if (inter1 == null || inter2 == null) {
@@ -196,7 +190,7 @@ public class DateUtility {
   }
 
   /**
-   * @param inter l'intervallo
+   * @param inter l'intervallo.
    * @return conta il numero di giorni appartenenti all'intervallo estremi compresi
    */
   public static int daysInInterval(final DateInterval inter) {
@@ -219,10 +213,10 @@ public class DateUtility {
   }
 
   /**
-   * @param first  il primo intervallo
+   * @param first  il primo intervallo.
    * @param second il secondo intervallo
    * @return true se il primo intervallo e' contenuto nel secondo intervallo (estremi compresi),
-   * false altrimenti
+   *     false altrimenti
    */
   public static boolean isIntervalIntoAnother(final DateInterval first, final DateInterval second) {
 
@@ -233,7 +227,7 @@ public class DateUtility {
   }
 
   /**
-   * @return la data infinito
+   * @return la data infinito.
    */
   public static LocalDate setInfinity() {
     return MAX_DATE;
@@ -249,7 +243,7 @@ public class DateUtility {
 
 
   /**
-   * @param monthNumber mese da formattare
+   * @param monthNumber mese da formattare.
    * @return il nome del mese con valore monthNumber, null in caso di argomento non valido
    */
   public static String fromIntToStringMonth(final Integer monthNumber) {
@@ -258,7 +252,7 @@ public class DateUtility {
   }
 
   /**
-   * @param minute minuti da formattare
+   * @param minute minuti da formattare.
    * @return stringa contente la formattazione -?HH:MM
    */
   public static String fromMinuteToHourMinute(final int minute) {
@@ -290,7 +284,7 @@ public class DateUtility {
 
 
   /**
-   * @param date    data
+   * @param date data.
    * @param pattern : default dd/MM
    * @return effettua il parsing di una stringa che contiene solo giorno e Mese
    */
@@ -306,16 +300,16 @@ public class DateUtility {
   }
 
   /**
-   * @param yearMonth il mese da considerare
-   * @return il primo giorno del mese da considerare formato LocalDate
+   * @param yearMonth il mese da considerare.
+   * @return il primo giorno del mese da considerare formato LocalDate.
    */
   public static LocalDate getMonthFirstDay(final YearMonth yearMonth) {
     return new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
   }
 
   /**
-   * @param yearMonth il mese da considerare
-   * @return l'ultimo giorno del mese da considerare formato LocalDate
+   * @param yearMonth il mese da considerare.
+   * @return l'ultimo giorno del mese da considerare formato LocalDate.
    */
   public static LocalDate getMonthLastDay(final YearMonth yearMonth) {
     return new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1).dayOfMonth()
@@ -323,8 +317,8 @@ public class DateUtility {
   }
 
   /**
-   * @param time ora
-   * @return il numero di minuti trascorsi dall'inizio del giorno all'ora
+   * @param time ora.
+   * @return il numero di minuti trascorsi dall'inizio del giorno all'ora.
    */
   public static int toMinute(final LocalDateTime time) {
     int dateToMinute = 0;
@@ -337,9 +331,9 @@ public class DateUtility {
   }
 
   /**
-   * @param begin orario di ingresso
-   * @param end   orario di uscita
-   * @return minuti lavorati
+   * @param begin orario di ingresso.
+   * @param end   orario di uscita.
+   * @return minuti lavorati.
    */
   public static Integer getDifferenceBetweenLocalTime(final LocalTime begin, final LocalTime end) {
 

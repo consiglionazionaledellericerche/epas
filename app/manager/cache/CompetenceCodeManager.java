@@ -20,7 +20,7 @@ import javax.persistence.EntityManager;
 public class CompetenceCodeManager {
 
   protected final JPQLQueryFactory queryFactory;
-  private final String COMPETENCE_PREFIX = "comp";
+  private static final String COMPETENCE_PREFIX = "comp";
 
   @Inject
   CompetenceCodeManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -37,7 +37,7 @@ public class CompetenceCodeManager {
   }
 
   /**
-   * Preleva dalla cache il competence code
+   * Preleva dalla cache il competence code.
    */
   public CompetenceCode getCompetenceCode(
           String code) {
@@ -62,7 +62,7 @@ public class CompetenceCodeManager {
   }
 
   /**
-   * @return il CompetenceCode relativo al codice code passato come parametro
+   * @return il CompetenceCode relativo al codice code passato come parametro.
    */
   private CompetenceCode getCompetenceCodeByCode(
           String code) {
