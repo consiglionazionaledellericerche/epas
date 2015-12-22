@@ -1,14 +1,12 @@
-/**
- *
- */
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.exports.AuthInfo;
 
-import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -18,6 +16,7 @@ import java.lang.reflect.Type;
 /**
  * @author cristian
  */
+@Slf4j
 @Global
 public class AuthInfoBinder implements TypeBinder<AuthInfo> {
 
@@ -26,12 +25,16 @@ public class AuthInfoBinder implements TypeBinder<AuthInfo> {
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
   @Override
-  public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+  public Object bind(
+      String name, Annotation[] annotations, String value,
+      Class actualClass, Type genericType) throws Exception {
 
-    Logger.trace("binding AuthInfo: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+    log.trace("binding AuthInfo: {}, {}, {}, {}, {}",
+        name, annotations, value, actualClass, genericType);
     JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 
-    return new AuthInfo(jsonObject.get("username").getAsString(), jsonObject.get("password").getAsString());
+    return new AuthInfo(
+        jsonObject.get("username").getAsString(), jsonObject.get("password").getAsString());
 
   }
 

@@ -40,7 +40,6 @@ public interface IPeriodModel extends Model {
 
   /**
    * L'effettiva data fine nel caso di periodi complessi.
-   * @return
    */
   LocalDate calculatedEnd();
 

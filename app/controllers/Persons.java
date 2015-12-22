@@ -267,8 +267,8 @@ public class Persons extends Controller {
   }
 
   /**
-   * metodo che mostra la situazione delle ferie secondo il corrente piano ferie
-   * @param personId l'id della persona di cui si intende vedere la situazione
+   * metodo che mostra la situazione delle ferie secondo il corrente piano ferie.
+   * @param personId l'id della persona di cui si intende vedere la situazione.
    */
   public static void showCurrentVacation(Long personId) {
 

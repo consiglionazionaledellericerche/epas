@@ -73,12 +73,12 @@ public class AbsenceInsertReport {
   public List<LocalDate> datesInReperibilityOrShift() {
 
     return FluentIterable.from(absences).filter(
-            new Predicate<AbsencesResponse>() {
-              @Override
-              public boolean apply(AbsencesResponse air) {
-                return air.isDayInReperibilityOrShift();
-              }
-            }).transform(AbsencesResponse.toDate.INSTANCE).toList();
+        new Predicate<AbsencesResponse>() {
+          @Override
+          public boolean apply(AbsencesResponse air) {
+            return air.isDayInReperibilityOrShift();
+          }
+        }).transform(AbsencesResponse.toDate.INSTANCE).toList();
   }
 
 }

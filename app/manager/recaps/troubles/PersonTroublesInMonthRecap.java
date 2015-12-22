@@ -33,11 +33,6 @@ public class PersonTroublesInMonthRecap {
   public int holidayWorkingTimeNotAccepted = 0;
   public int holidayWorkingTimeAccepted = 0;
 
-  /**
-   * @param person
-   * @param monthBegin
-   * @param monthEnd
-   */
   public PersonTroublesInMonthRecap(PersonDayInTroubleDao personDayInTroubleDao,
                                     PersonManager personManager, Person person, LocalDate monthBegin, LocalDate monthEnd) {
 

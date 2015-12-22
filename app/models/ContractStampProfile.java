@@ -28,7 +28,7 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   public boolean includeDate(LocalDate date) {
     if (beginDate == null && endDate == null) {
-//			TODO decidere se considerare l'intervallo infinito, oppure nullo
+      //TODO decidere se considerare l'intervallo infinito, oppure nullo
       return false;
     }
     if (beginDate == null) {
@@ -60,7 +60,7 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner owner) {
-    this.contract = (Contract)owner; 
+    this.contract = (Contract)owner;
   }
 
   @Override
@@ -72,7 +72,7 @@ public class ContractStampProfile extends PropertyInPeriod {
   @Override
   public void setType(Object value) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -83,18 +83,17 @@ public class ContractStampProfile extends PropertyInPeriod {
   @Override
   public void setValue(Object value) {
     this.fixedworkingtime = (Boolean)value;
-    
+
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof ContractStampProfile) {
-      return this.fixedworkingtime == 
-          ((ContractStampProfile) otherValue).fixedworkingtime;
+      return this.fixedworkingtime == ((ContractStampProfile) otherValue).fixedworkingtime;
     }
     return false;
   }
-  
+
   @Override
   public String getLabel() {
     return this.fixedworkingtime + "";

@@ -23,7 +23,9 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "contract_month_recap", uniqueConstraints = {@UniqueConstraint(columnNames = {"year", "month", "contract_id"})})
+@Table(
+    name = "contract_month_recap",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"year", "month", "contract_id"})})
 public class ContractMonthRecap extends BaseModel {
 
   @Required
@@ -37,16 +39,16 @@ public class ContractMonthRecap extends BaseModel {
   @Column
   public int month;
 
-  /**************************************************************************
-   * MODULO RECAP ASSENZE
-   **************************************************************************/
+  //***************************************************************************/
+  // MODULO RECAP ASSENZE
+  // **************************************************************************/
 
   @Column(name = "abs_rc_usati")
   public Integer recoveryDayUsed = 0;        //numeroRiposiCompensativi
 
-  /**************************************************************************
-   * FONTI DELL'ALGORITMO RESIDUI
-   **************************************************************************/
+  //***************************************************************************/
+  // * FONTI DELL'ALGORITMO RESIDUI
+  // **************************************************************************/
 
   @Column(name = "s_r_bp_init")
   public int buoniPastoDaInizializzazione = 0;
@@ -99,9 +101,9 @@ public class ContractMonthRecap extends BaseModel {
   @Column(name = "s_ol")
   public int oreLavorate = 0;                // riepilogo per il template
 
-  /**************************************************************************
-   * DECISIONI DELL'ALGORITMO
-   **************************************************************************/
+  //***************************************************************************/
+  // DECISIONI DELL'ALGORITMO
+  // **************************************************************************/
 
   @Column(name = "d_pfn_ap")
   public int progressivoFinaleNegativoMeseImputatoAnnoPassato = 0;
@@ -127,9 +129,9 @@ public class ContractMonthRecap extends BaseModel {
   public Integer remainingMealTickets = 0; //buoniPastoResidui
 
 
-  /**************************************************************************
-   * DI SUPPORTO (VALORIZZATI PER POI ESSERE IMPUTATI)
-   **************************************************************************/
+  //***************************************************************************/
+  // DI SUPPORTO (VALORIZZATI PER POI ESSERE IMPUTATI)
+  // **************************************************************************/
 
   @Transient
   public int straordinariMinuti = 0;    //competences (di appoggio deducibile dalle imputazioni)
@@ -137,20 +139,22 @@ public class ContractMonthRecap extends BaseModel {
   @Transient
   public int riposiCompensativiMinuti = 0;    //absences  (di appoggio deducibile dalle imputazioni)
   // in charts è usato... capire cosa contiene alla fine e fixare
-  @Transient
-  public int progressivoFinaleNegativoMese = 0;    //person day	// (di appoggio deducibile dalle imputazioni)
 
-  /**************************************************************************
-   * DI SUPPORTO (VALORIZZATI PER POI ESSERE SCORPORATI)
-   **************************************************************************/
+  //person day  // (di appoggio deducibile dalle imputazioni)
+  @Transient
+  public int progressivoFinaleNegativoMese = 0;
+
+  //**************************************************************************
+  // DI SUPPORTO (VALORIZZATI PER POI ESSERE SCORPORATI)
+  // ************************************************************************/
 
   @Transient
   public int progressivoFinalePositivoMeseAux = 0;    //person day
   // forse è usato... capire cosa contiene alla fine e fixare
 
-  /**************************************************************************
-   * TRANSIENTI DA METTERE NEL WRAPPER
-   **************************************************************************/
+  //**************************************************************************
+  // TRANSIENTI DA METTERE NEL WRAPPER
+  //*************************************************************************/
 
   @Transient
   public Person person;
@@ -163,9 +167,8 @@ public class ContractMonthRecap extends BaseModel {
 
   @Transient
   public int getStraordinarioMinuti() {
-    return this.straordinariMinutiS1Print +
-            this.straordinariMinutiS2Print +
-            this.straordinariMinutiS3Print;
+    return this.straordinariMinutiS1Print + this.straordinariMinutiS2Print
+            + this.straordinariMinutiS3Print;
   }
 
   @Transient

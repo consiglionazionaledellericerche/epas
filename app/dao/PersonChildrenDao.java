@@ -16,9 +16,10 @@ import javax.persistence.EntityManager;
 
 
 /**
+ * Dao per i PersonChildren.
+ *
  * @author dario
  */
-
 public class PersonChildrenDao extends DaoBase {
 
   @Inject
@@ -28,7 +29,7 @@ public class PersonChildrenDao extends DaoBase {
 
 
   /**
-   * @return il personChildren relativo all'id passato come parametro
+   * @return il personChildren relativo all'id passato come parametro.
    */
   public PersonChildren getById(Long id) {
     QPersonChildren personChildren = QPersonChildren.personChildren;
@@ -39,7 +40,7 @@ public class PersonChildrenDao extends DaoBase {
 
 
   /**
-   * @return la lista di tutti i figli della persona person passata come parametro
+   * @return la lista di tutti i figli della persona person passata come parametro.
    */
   public List<PersonChildren> getAllPersonChildren(Person person) {
     QPersonChildren personChildren = QPersonChildren.personChildren;

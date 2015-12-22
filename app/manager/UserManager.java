@@ -71,9 +71,10 @@ public class UserManager {
     //  Caso standard
     if (overlapUsers.isEmpty()) {
       username = standardUsername;
-    }
-    //  Caso di omonimia
-    else {
+    } else {
+
+      //  Caso di omonimia
+
       //  Cerco tutti i numeri della sequenza autogenerata per i casi di omonimia
       List<Integer> sequence = Lists.newArrayList();
       for (String user : overlapUsers) {
@@ -85,9 +86,8 @@ public class UserManager {
       //  Solo un omonimo
       if (sequence.isEmpty()) {
         username = standardUsername + 1;
-      }
-      //  Più di un omonimo
-      else {
+      } else {
+        //  Più di un omonimo
         username = standardUsername + (Collections.max(sequence) + 1);
       }
     }

@@ -1,6 +1,3 @@
-/**
- *
- */
 package models;
 
 import models.base.BaseModel;
@@ -34,7 +31,8 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity
 @Audited
-@Table(name = "person_days", uniqueConstraints = {@UniqueConstraint(columnNames = {"person_id", "date"})})
+@Table(name = "person_days",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"person_id", "date"})})
 public class PersonDay extends BaseModel {
 
   private static final long serialVersionUID = -5013385113251848310L;
@@ -55,7 +53,7 @@ public class PersonDay extends BaseModel {
   public Integer progressive;
 
   /**
-   * Minuti tolti per pausa pranzo preve
+   * Minuti tolti per pausa pranzo breve.
    */
   public Integer decurted;
 
@@ -99,7 +97,8 @@ public class PersonDay extends BaseModel {
   public MealTicket mealTicketAssigned = null;
 
 
-  public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
+  public PersonDay(
+      Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
     this.person = person;
     this.date = date;
     this.timeAtWork = timeAtWork;
@@ -112,7 +111,7 @@ public class PersonDay extends BaseModel {
   }
 
   /**
-   * Controlla che il personDay cada nel giorno attuale
+   * Controlla che il personDay cada nel giorno attuale.
    */
   public boolean isToday() {
     return this.date.isEqual(new LocalDate());
@@ -120,8 +119,11 @@ public class PersonDay extends BaseModel {
 
   @Override
   public String toString() {
-    return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
-            id, person.id, date, difference, isTicketAvailable, stampModificationType, progressive, timeAtWork);
+    return String.format(
+        "PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, "
+        + "modificationType = %s, progressive = %s, timeAtWork = %s",
+        id, person.id, date, difference, isTicketAvailable, stampModificationType,
+        progressive, timeAtWork);
   }
 
 }

@@ -1,6 +1,3 @@
-/**
- *
- */
 package models.enumerate;
 
 /**
@@ -8,7 +5,7 @@ package models.enumerate;
  */
 public enum WorkingTimeTypeValues implements Identified {
 
-  NORMALE_MOD(1l);
+  NORMALE_MOD(1L);
 
   private long id;
 

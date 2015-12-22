@@ -34,7 +34,7 @@ public class ConfGeneralManager {
   }
 
   /**
-   * @return l'oggetto confGeneral relativo all'id passato come parametro
+   * @return l'oggetto confGeneral relativo all'id passato come parametro.
    */
   public Optional<ConfGeneral> getById(Long pk) {
 
@@ -48,7 +48,7 @@ public class ConfGeneralManager {
 
 
   /**
-   * @return il confGeneral relativo al campo param e all'ufficio office passati come parametro
+   * @return il confGeneral relativo al campo param e all'ufficio office passati come parametro.
    */
   private Optional<ConfGeneral> getByField(Parameter param, Office office) {
 
@@ -62,7 +62,7 @@ public class ConfGeneralManager {
 
   /**
    * @return restituisce la lista di tutti i confGeneral che nel parametro field, contengono il
-   * valore value
+   *     valore value.
    */
   public List<ConfGeneral> containsValue(String field, String value) {
 
@@ -75,7 +75,6 @@ public class ConfGeneralManager {
 
   /**
    * Produce la configurazione generale di default.
-   *
    * Se overwrite è false mantiene senza sovrascrivere eventuali parametri generali preesitenti.
    */
   public void buildOfficeConfGeneral(Office office, boolean overwrite) {
@@ -98,22 +97,21 @@ public class ConfGeneralManager {
   /**
    * Aggiorna il parametro di configurazione relativo all'office. Se value non è presente viene
    * persistito il valore di default.
-   *
    * Il valore precedente se presente viene sovrascritto.
    */
   public ConfGeneral saveConfGeneral(Parameter param, Office office, Optional<String> value) {
-//		Il valore passato o in alternativa il valore di default
+    // Il valore passato o in alternativa il valore di default
     String newValue = value.isPresent() ? value.get() : param.getDefaultValue();
     final String key = param.description + office.id;
 
-//		Prelevo quella esistente se esiste, altrimenti ne creo una nuova
+    // Prelevo quella esistente se esiste, altrimenti ne creo una nuova
     ConfGeneral confGeneral = getByField(param, office)
             .or(new ConfGeneral(office, param.description, newValue));
 
     confGeneral.fieldValue = newValue;
     confGeneral.save();
 
-//		Aggiorno la cache
+    // Aggiorno la cache
     Cache.set(key, confGeneral, "30mn");
 
     return confGeneral;
@@ -131,40 +129,28 @@ public class ConfGeneralManager {
 
     final String key = param.description + office.id;
 
-//		1. Provo a prelevarlo dalla cache
+    // 1. Provo a prelevarlo dalla cache
     ConfGeneral confGeneral = Cache.get(key, ConfGeneral.class);
 
-//		Se non e' presente in cache, lo prelevo dal db
+    // Se non e' presente in cache, lo prelevo dal db
     if (confGeneral == null) {
       confGeneral = getByField(param, office).orNull();
 
-//			Se non e' presente sul db ne creo uno con la configurazione di default
+      //Se non e' presente sul db ne creo uno con la configurazione di default
       if (confGeneral == null) {
         return saveConfGeneral(param, office, Optional.<String>absent());
       }
-//			Aggiorno la cache se lo prelevo dal db
+      // Aggiorno la cache se lo prelevo dal db
       Cache.set(key, confGeneral, "30mn");
     }
 
     return confGeneral;
   }
 
-  /**
-   *
-   * @param param
-   * @param office
-   * @return
-   */
   public Integer getIntegerFieldValue(Parameter param, Office office) {
     return new Integer(getConfGeneral(param, office).fieldValue);
   }
 
-  /**
-   *
-   * @param param
-   * @param office
-   * @return
-   */
   public Optional<LocalDate> getLocalDateFieldValue(Parameter param, Office office) {
     try {
       return Optional.fromNullable(new LocalDate(getConfGeneral(param, office).fieldValue));
@@ -175,12 +161,6 @@ public class ConfGeneralManager {
 
   }
 
-  /**
-   *
-   * @param param
-   * @param office
-   * @return
-   */
   public boolean getBooleanFieldValue(Parameter param, Office office) {
     return new Boolean(getConfGeneral(param, office).fieldValue);
   }

@@ -29,6 +29,7 @@ public class SyncManager {
 
   private final OfficeDao officeDao;
   private final PersonDao personDao;
+
   @Inject
   public SyncManager(OfficeDao officeDao, PersonDao personDao) {
     this.officeDao = officeDao;
@@ -38,7 +39,7 @@ public class SyncManager {
   /**
    * questo metodo può essere chiamato dal job settimanale che sincronizza le email cnr del
    * personale oppure dalla chiamata rest per conoscere i tempi di lavoro e le missioni del
-   * personale per la rendicontazione dei progetti
+   * personale per la rendicontazione dei progetti.
    */
   @Deprecated //Deprecato oppure inserire nuova chiave di sincronizzazione
   public void syncronizeCnrEmail() {

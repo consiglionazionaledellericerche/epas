@@ -637,8 +637,8 @@ public class Absences extends Controller {
     rules.checkIfPermitted(office);
 
     Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable
-        .create(yearlyAbsencesManager.PersonNameComparator,
-            yearlyAbsencesManager.AbsenceCodeComparator);
+        .create(yearlyAbsencesManager.personNameComparator,
+            yearlyAbsencesManager.absenceCodeComparator);
     AbsenceType abt = new AbsenceType();
     abt.code = "Totale";
 

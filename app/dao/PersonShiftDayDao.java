@@ -33,7 +33,7 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * @return il personShiftDay relativo alla persona person nel caso in cui in data date fosse in
-   * turno Null altrimenti
+   *     turno Null altrimenti.
    */
   public Optional<PersonShiftDay> getPersonShiftDay(Person person, LocalDate date) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
@@ -49,24 +49,30 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo
-   * shiftType 'type'
+   *     shiftType 'type'.
    *
+   * <p>
    * PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND
    * psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch();
+   * </p>
    */
-  public List<PersonShiftDay> getPersonShiftDayByTypeAndPeriod(LocalDate from, LocalDate to, ShiftType type) {
+  public List<PersonShiftDay> getPersonShiftDayByTypeAndPeriod(
+      LocalDate from, LocalDate to, ShiftType type) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 
-    JPQLQuery query = getQueryFactory().from(personShiftDay).where(personShiftDay.date.between(from, to)
+    JPQLQuery query =
+        getQueryFactory().from(personShiftDay)
+          .where(personShiftDay.date.between(from, to)
             .and(personShiftDay.shiftType.eq(type))).orderBy(personShiftDay.date.asc());
     return query.list(personShiftDay);
   }
 
   /**
    * @return il personShiftDay relativo al tipo 'shiftType' nel giorno 'date' con lo slot
-   * 'shiftSlot'
+   *     'shiftSlot'.
    */
-  public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
+  public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(
+      ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 
     JPQLQuery query = getQueryFactory().from(personShiftDay).where(personShiftDay.date.eq(date)
@@ -77,7 +83,7 @@ public class PersonShiftDayDao extends DaoBase {
 
 
   /**
-   * @return il personShift associato alla persona passata come parametro
+   * @return il personShift associato alla persona passata come parametro.
    */
   public PersonShift getPersonShiftByPerson(Person person) {
     final QPersonShift personShift = QPersonShift.personShift;

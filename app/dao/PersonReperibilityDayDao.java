@@ -44,7 +44,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * @return un personReperibilityDay nel caso in cui la persona person in data date fosse
-   * reperibile. Null altrimenti
+   *     reperibile. Null altrimenti.
    */
   public Optional<PersonReperibilityDay> getPersonReperibilityDay(Person person, LocalDate date) {
 
@@ -57,17 +57,21 @@ public class PersonReperibilityDayDao extends DaoBase {
 
 
   /**
-   * @return il personReperibilityDay relativo al tipo e alla data passati come parametro
+   * @return il personReperibilityDay relativo al tipo e alla data passati come parametro.
    */
-  public PersonReperibilityDay getPersonReperibilityDayByTypeAndDate(PersonReperibilityType type, LocalDate date) {
-    JPQLQuery query = getQueryFactory().from(prd).where(prd.date.eq(date).and(prd.reperibilityType.eq(type)));
+  public PersonReperibilityDay getPersonReperibilityDayByTypeAndDate(
+      PersonReperibilityType type, LocalDate date) {
+    JPQLQuery query =
+        getQueryFactory().from(prd)
+          .where(prd.date.eq(date).and(prd.reperibilityType.eq(type)));
     return query.singleResult(prd);
   }
 
   /**
-   * @return la lista dei personReperibilityDay nel periodo compreso tra begin e to e con tipo type
+   * @return la lista dei personReperibilityDay nel periodo compreso tra begin e to e con tipo type.
    */
-  public List<PersonReperibilityDay> getPersonReperibilityDayFromPeriodAndType(LocalDate begin, LocalDate to, PersonReperibilityType type, Optional<PersonReperibility> pr) {
+  public List<PersonReperibilityDay> getPersonReperibilityDayFromPeriodAndType(
+      LocalDate begin, LocalDate to, PersonReperibilityType type, Optional<PersonReperibility> pr) {
     BooleanBuilder condition = new BooleanBuilder();
     if (pr.isPresent()) {
       condition.and(prd.personReperibility.eq(pr.get()));
@@ -80,10 +84,12 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * @return il numero di personReperibilityDay cancellati che hanno come parametri il tipo type e
-   * il giorno day
+   *     il giorno day.
    */
   public long deletePersonReperibilityDay(PersonReperibilityType type, LocalDate day) {
-    Long deleted = getQueryFactory().delete(prd).where(prd.reperibilityType.eq(type).and(prd.date.eq(day))).execute();
+    Long deleted =
+        getQueryFactory().delete(prd)
+          .where(prd.reperibilityType.eq(type).and(prd.date.eq(day))).execute();
     return deleted;
   }
 
@@ -92,7 +98,7 @@ public class PersonReperibilityDayDao extends DaoBase {
   //***************************************************************/
 
   /**
-   * @return il personReperibilityType relativo all'id passato come parametro
+   * @return il personReperibilityType relativo all'id passato come parametro.
    */
   public PersonReperibilityType getPersonReperibilityTypeById(Long id) {
     JPQLQuery query = getQueryFactory().from(prt).where(prt.id.eq(id));
@@ -105,10 +111,13 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * @return il PersonReperibility relativo alla persona person e al tipo type passati come
-   * parametro
+   *     parametro.
    */
-  public PersonReperibility getPersonReperibilityByPersonAndType(Person person, PersonReperibilityType type) {
-    JPQLQuery query = getQueryFactory().from(pr).where(pr.person.eq(person).and(pr.personReperibilityType.eq(type)));
+  public PersonReperibility getPersonReperibilityByPersonAndType(
+      Person person, PersonReperibilityType type) {
+    JPQLQuery query =
+        getQueryFactory().from(pr)
+          .where(pr.person.eq(person).and(pr.personReperibilityType.eq(type)));
     return query.singleResult(pr);
 
   }
@@ -116,7 +125,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * @return la lista dei personReperibility che hanno come personReperibilityType il tipo passato
-   * come parametro
+   *     come parametro.
    */
   public List<PersonReperibility> getPersonReperibilityByType(PersonReperibilityType type) {
     JPQLQuery query = getQueryFactory().from(pr).where(pr.personReperibilityType.eq(type));

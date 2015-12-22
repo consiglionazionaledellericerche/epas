@@ -29,14 +29,16 @@ public class QualificationDao extends DaoBase {
 
   /**
    * @return la lista di qualifiche a seconda dei parametri passati: nel caso in cui il booleano sia
-   * "true" viene ritornata l'intera lista di qualifiche. Nel caso sia presente la qualifica che si
-   * vuole ritornare, viene ritornata sempre una lista, ma con un solo elemento, corrispondente al
-   * criterio di ricerca. Nel caso invece in cui si voglia una lista di elementi sulla base dell'id,
-   * si controllerà il parametro idQualification, se presente, che determinerà una lista di un solo
-   * elemento corrispondente ai criteri di ricerca. Ritorna null nel caso in cui non dovesse essere
-   * soddisfatta alcuna delle opzioni di chiamata
+   *     "true" viene ritornata l'intera lista di qualifiche. Nel caso sia presente la qualifica che
+   *     si vuole ritornare, viene ritornata sempre una lista, ma con un solo elemento,
+   *     corrispondente al criterio di ricerca. Nel caso invece in cui si voglia una lista di
+   *     elementi sulla base dell'id, si controllerà il parametro idQualification, se presente, che
+   *     determinerà una lista di un solo elemento corrispondente ai criteri di ricerca.
+   *     Ritorna null nel caso in cui non dovesse essere soddisfatta alcuna delle opzioni di
+   *     chiamata.
    */
-  public List<Qualification> getQualification(Optional<Integer> qualification, Optional<Long> idQualification, boolean findAll) {
+  public List<Qualification> getQualification(
+      Optional<Integer> qualification, Optional<Long> idQualification, boolean findAll) {
     final BooleanBuilder condition = new BooleanBuilder();
     QQualification qual = QQualification.qualification1;
     final JPQLQuery query = getQueryFactory().from(qual);
@@ -57,11 +59,6 @@ public class QualificationDao extends DaoBase {
 
   }
 
-  /**
-   *
-   * @param qualification
-   * @return
-   */
   public Optional<Qualification> byQualification(Integer qualification) {
 
     Preconditions.checkNotNull(qualification);
@@ -74,10 +71,6 @@ public class QualificationDao extends DaoBase {
 
   }
 
-  /**
-   *
-   * @return
-   */
   public List<Qualification> findAll() {
 
     QQualification qual = QQualification.qualification1;
@@ -86,7 +79,7 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
-   * @return la lista di qualifiche che possono usufruire del codice di assenza abt
+   * @return la lista di qualifiche che possono usufruire del codice di assenza abt.
    */
   public List<Qualification> getQualificationByAbsenceTypeLinked(AbsenceType abt) {
     QQualification qual = QQualification.qualification1;
@@ -97,9 +90,11 @@ public class QualificationDao extends DaoBase {
 
 
   /**
-   * @return la lista di qualifiche superiori o uguali al limite passato come parametro (da usare,
-   * ad esempio, per ritornare la lista delle qualifiche dei tecnici che hanno qualifica superiore a
-   * 3)
+   * Costruisce la lista di qualifiche superiori o uguali al limite passato come parametro.
+   *
+   * @return la lista di qualifiche superiori o uguali al limite passato come parametro
+   *     (da usare, ad esempio, per ritornare la lista delle qualifiche dei tecnici che hanno
+   *     qualifica superiore a 3)
    */
   public List<Qualification> getQualificationGreaterThan(Integer limit) {
     QQualification qual = QQualification.qualification1;

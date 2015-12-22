@@ -19,11 +19,9 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.cache.StampTypeManager;
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
 
 import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -34,10 +32,8 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
-import org.apache.commons.mail.EmailException;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -68,18 +64,13 @@ public class ConsistencyManager {
   private final ConfYearManager confYearManager;
   private final PersonDayDao personDayDao;
   private final StampTypeManager stampTypeManager;
-  private final AbsenceDao absenceDao;
-  private final AbsenceTypeDao absenceTypeDao;
-  private final IVacationsService vacationsService;
   private final ConfGeneralManager confGeneralManager;
-  
+
   @Inject
   public ConsistencyManager(SecureManager secureManager, 
       OfficeDao officeDao,
       PersonDao personDao,
       PersonDayDao personDayDao,
-      AbsenceDao absenceDao, 
-      AbsenceTypeDao absenceTypeDao,
       
       PersonManager personManager, 
       PersonDayManager personDayManager,
@@ -89,8 +80,7 @@ public class ConsistencyManager {
       ConfYearManager confYearManager, 
       StampTypeManager stampTypeManager,
 
-      IWrapperFactory wrapperFactory, 
-      IVacationsService vacationsService) {
+      IWrapperFactory wrapperFactory) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -103,19 +93,11 @@ public class ConsistencyManager {
     this.personDayDao = personDayDao;
     this.confYearManager = confYearManager;
     this.stampTypeManager = stampTypeManager;
-    this.absenceDao = absenceDao;
-    this.absenceTypeDao = absenceTypeDao;
-    this.vacationsService = vacationsService;
     this.confGeneralManager = confGeneralManager;
   }
 
   /**
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-   *
-   * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive
-   *                 alla data di ieri
-   * @param year     l'anno dal quale far partire il fix
-   * @param month    il mese dal quale far partire il fix
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
                                  boolean sendMail, boolean onlyRecap) {
@@ -161,7 +143,7 @@ public class ConsistencyManager {
         // causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla,
         // altrimenti schianta
         personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
-      } catch (EmailException e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
@@ -528,12 +510,11 @@ public class ConsistencyManager {
         // per costruirlo. Soluzione: costruisco tutti i riepiloghi del contratto.
         populateContractMonthRecap(contract, Optional.<YearMonth>absent());
       }
-    }
-
-    // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
-    // è particolare e va gestito con un metodo dedicato.
-    else if (contract.getValue().sourceDateResidual != null
+    } else if (contract.getValue().sourceDateResidual != null
             && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().sourceDateResidual))) {
+
+      // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
+      // è particolare e va gestito con un metodo dedicato.
 
       previousMonthRecap =
               Optional.fromNullable(populateContractMonthFromSource(contract, yearMonthToCompute));

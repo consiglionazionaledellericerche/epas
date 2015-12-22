@@ -78,8 +78,8 @@ public class SecureRulesPlugin extends PlayPlugin {
     builder.add(ResourceFactory.newByteArrayResource(rulesContent), ResourceType.DRL);
     if (builder.hasErrors()) {
       log.error(builder.getErrors().toString());
-      throw new RuntimeException("Drools compilation failed: " +
-              builder.getErrors().size() + " errors");
+      throw new RuntimeException("Drools compilation failed: "
+              + builder.getErrors().size() + " errors");
     }
 
     knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();

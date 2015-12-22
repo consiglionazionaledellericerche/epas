@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per VacationCode.
+ *
  * @author dario
  */
 public class VacationCodeDao extends DaoBase {
@@ -24,7 +26,7 @@ public class VacationCodeDao extends DaoBase {
   }
 
   /**
-   * @return la lista di tutti i vacationCode presenti sul database
+   * @return la lista di tutti i vacationCode presenti sul database.
    */
   public List<VacationCode> getAllVacationCodes() {
     final QVacationCode code = QVacationCode.vacationCode;
@@ -33,7 +35,7 @@ public class VacationCodeDao extends DaoBase {
   }
 
   /**
-   * @return il vacationCode associato all'id passato come parametro
+   * @return il vacationCode associato all'id passato come parametro.
    */
   public VacationCode getVacationCodeById(Long id) {
     final QVacationCode code = QVacationCode.vacationCode;
@@ -44,7 +46,7 @@ public class VacationCodeDao extends DaoBase {
   }
 
   /**
-   * @return il vacationCode associato alla stringa passata come parametro
+   * @return il vacationCode associato alla stringa passata come parametro.
    */
   public VacationCode getVacationCodeByDescription(String description) {
     final QVacationCode code = QVacationCode.vacationCode;

@@ -55,7 +55,6 @@ public class TemplateUtility {
   private final PersonDao personDao;
   private final QualificationDao qualificationDao;
   private final AbsenceTypeDao absenceTypeDao;
-  private final StampingDao stampingDao;
   private final RoleDao roleDao;
   private final BadgeReaderDao badgeReaderDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
@@ -64,17 +63,17 @@ public class TemplateUtility {
 
 
   @Inject
-  public TemplateUtility(SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
-                         QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao, StampingDao stampingDao,
-                         RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
-                         IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
+  public TemplateUtility(
+      SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
+      QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
+      RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
     this.personDao = personDao;
     this.qualificationDao = qualificationDao;
     this.absenceTypeDao = absenceTypeDao;
-    this.stampingDao = stampingDao;
     this.roleDao = roleDao;
     this.badgeReaderDao = badgeReaderDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
@@ -84,8 +83,8 @@ public class TemplateUtility {
 
 
   /**
-   * @param month numero mese nel formato stringa (ex: "1")
-   * @return il nome del mese
+   * @param month numero mese nel formato stringa (ex: "1").
+   * @return il nome del mese.
    */
   public final String monthName(final String month) {
 
@@ -93,8 +92,8 @@ public class TemplateUtility {
   }
 
   /**
-   * @param month numero mese formato integer (ex: 1)
-   * @return il nome del mese
+   * @param month numero mese formato integer (ex: 1).
+   * @return il nome del mese.
    */
   public final String monthName(final Integer month) {
 
@@ -102,8 +101,8 @@ public class TemplateUtility {
   }
 
   /**
-   * @param month mese di partenza
-   * @return mese successivo a mese di partenza
+   * @param month mese di partenza.
+   * @return mese successivo a mese di partenza.
    */
   public final int computeNextMonth(final int month) {
     if (month == DateUtility.DECEMBER) {
@@ -113,9 +112,9 @@ public class TemplateUtility {
   }
 
   /**
-   * @param month mese di partenza
-   * @param year  anno di partenza
-   * @return anno successivo al mese/anno di partenza
+   * @param month mese di partenza.
+   * @param year  anno di partenza.
+   * @return anno successivo al mese/anno di partenza.
    */
   public final int computeNextYear(final int month, final int year) {
     if (month == DateUtility.DECEMBER) {
@@ -125,8 +124,8 @@ public class TemplateUtility {
   }
 
   /**
-   * @param month mese di partenza
-   * @return mese precedente a mese di partenza
+   * @param month mese di partenza.
+   * @return mese precedente a mese di partenza.
    */
   public final int computePreviousMonth(final int month) {
     if (month == DateUtility.JANUARY) {
@@ -136,9 +135,9 @@ public class TemplateUtility {
   }
 
   /**
-   * @param month mese di partenza
-   * @param year  anno di partenza
-   * @return anno precedente al mese/anno di partenza
+   * @param month mese di partenza.
+   * @param year  anno di partenza.
+   * @return anno precedente al mese/anno di partenza.
    */
   public final int computePreviousYear(final int month, final int year) {
     if (month == DateUtility.JANUARY) {
@@ -195,7 +194,7 @@ public class TemplateUtility {
 
   public List<Role> rolesAssignable(Office office) {
 
-    List roles = Lists.newArrayList();
+    List<Role> roles = Lists.newArrayList();
 
     // TODO: i ruoli impostabili sull'office dipendono da chi esegue la richiesta...
     // e vanno spostati nel secureManager.
@@ -269,11 +268,6 @@ public class TemplateUtility {
         Optional.<BadgeReader>absent()).list();
   }
 
-  /**
-   *
-   * @param office
-   * @return
-   */
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
@@ -292,7 +286,7 @@ public class TemplateUtility {
     Optional<AbsenceType> ferCode = absenceTypeDao
             .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
     Preconditions.checkState(ferCode.isPresent());
-    
+
     return FluentIterable.from(Lists.newArrayList(ferCode.get()))
             .append(absenceTypeDao.getFrequentTypes()).toList();
   }
@@ -303,7 +297,7 @@ public class TemplateUtility {
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
   }
-  
+
   /**
    * L'istanza del wrapperFactory disponibile nei template.
    * @return wrapperFactory
