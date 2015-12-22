@@ -940,7 +940,7 @@ public class ShiftManager {
         absenceShiftPeriod =
             new AbsenceShiftPeriod(
                 abs.personDay.person, abs.personDay.date, abs.personDay.date,
-                ShiftType.findById(shiftType.id));
+                ShiftType.<ShiftType>findById(shiftType.id));
         absenceShiftPeriods.add(absenceShiftPeriod);
         log.trace("Creato nuovo absenceShiftPeriod, person={}, start={}, end={}",
             absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
@@ -1375,30 +1375,32 @@ public class ShiftManager {
 
     }
 
-    Logger.debug("hoursApproved=%s exceedMins=%s", hoursApproved, exceedMins);
+    log.debug("hoursApproved={} exceedMins={}", hoursApproved, exceedMins);
 
     int[] result = {hoursApproved, exceedMins};
 
-    Logger.debug("La calcShiftValueApproved restituisce %s", result);
+    log.debug("La calcShiftValueApproved restituisce {}", result);
 
     return result;
   }
 
-  /*
-   * @author arianna
+  /**
    * Crea il calendario con le reperibilita' di un determinato tipo in un dato anno completo o
-   * relativo ad una sola persona
+   * relativo ad una sola persona.
    *
-   * @param year 					- anno di riferimento del calendario
-   * @param type					- tipo di turni da caricare
-   * @param personsInTheCalList	- lista vuota o contenete la persona della quae caricare i turni:
-   * 								  se è vuota carica tutto il turno
-   * @return icsCalendar			- calendario
+   * @author arianna
+   * @param year anno di riferimento del calendario
+   * @param type tipo di turni da caricare
+   * @param personShift opzionale, contiene la persona della quale caricare i turni,
+   *     se è vuota carica tutto il turno
+   * @return icsCalendar calendario
    */
-  public Calendar createicsShiftCalendar(int year, String type, Optional<PersonShift> personShift) {
+  public Calendar createicsShiftCalendar(
+      int year, String type, Optional<PersonShift> personShift) {
     List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 
-    Logger.debug("nella createicsReperibilityCalendar(int %s, String %s, List<PersonShift> %s)", year, type, personShift);
+    log.debug("nella createicsReperibilityCalendar(int {}, String {}, List<PersonShift> {})",
+        year, type, personShift);
     ShiftCategories shiftCategory = shiftDao.getShiftCategoryByType(type);
     String eventLabel = "Turno ".concat(shiftCategory.description).concat(": ");
 
