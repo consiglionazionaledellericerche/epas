@@ -39,6 +39,7 @@ public class VacationsRecap implements IVacationsRecap {
   public static class VacationsRequest {
     
     @Getter private final int year;
+    @Getter private final Contract contract;
     @Getter private final DateInterval contractDateInterval;
     @Getter private final LocalDate accruedDate;
     @Getter private final List<VacationPeriod> contractVacationPeriod;
@@ -47,12 +48,13 @@ public class VacationsRecap implements IVacationsRecap {
     @Getter private final boolean considerExpireDate;
 
     @Builder
-    private VacationsRequest(final int year, final DateInterval contractDateInterval, 
-        final Optional<LocalDate> accruedDate, final List<VacationPeriod> contractVacationPeriod, 
-        final List<Absence> postPartumUsed, final LocalDate expireDate, 
-        final boolean considerExpireDate) {
-      this.contractVacationPeriod = contractVacationPeriod;
+    private VacationsRequest(final int year, final Contract contract,
+        final DateInterval contractDateInterval, final Optional<LocalDate> accruedDate, 
+        final List<VacationPeriod> contractVacationPeriod, final List<Absence> postPartumUsed, 
+        final LocalDate expireDate, final boolean considerExpireDate) {
       this.year = year;
+      this.contract = contract;
+      this.contractVacationPeriod = contractVacationPeriod;
       this.contractDateInterval = contractDateInterval;
       this.postPartumUsed = postPartumUsed;
       if (accruedDate.isPresent()) {
@@ -109,26 +111,27 @@ public class VacationsRecap implements IVacationsRecap {
    * @param accruedDate data di maturazione
    * @param expireDate data di scadenza ferie
    * @param considerDateExpireLastYear se considerare la data si scadenza
-   * @param dateAsToday simulazione come se fosse oggi.
    */
+  @Builder
   public VacationsRecap(int year, Contract contract, List<Absence> absencesToConsider,
-      LocalDate accruedDate, LocalDate expireDate, boolean considerDateExpireLastYear,
-      Optional<LocalDate> dateAsToday ) {
+      LocalDate accruedDate, LocalDate expireDate, boolean considerDateExpireLastYear) {
     
     DateInterval contractDateInterval = 
         new DateInterval(contract.getBeginDate(), contract.calculatedEnd());
     
-    initDataStructures(year, accruedDate, expireDate, absencesToConsider, dateAsToday, 
-        contract, contractDateInterval);
+    initDataStructures(year, accruedDate, expireDate, absencesToConsider, contract,
+        contractDateInterval);
     
     this.vacationsRequest = VacationsRequest.builder()
         .year(year)
+        .contract(contract)
         .contractDateInterval(contractDateInterval)
         .accruedDate(Optional.fromNullable(accruedDate))
         .contractVacationPeriod(contract.vacationPeriods)
         .postPartumUsed(this.postPartum)
         .expireDate(expireDate)
-        .considerExpireDate(considerDateExpireLastYear).build();
+        .considerExpireDate(considerDateExpireLastYear)
+        .build();
 
     this.vacationsLastYear = VacationsTypeResult.builder()
         .vacationsRequest(vacationsRequest)
@@ -165,7 +168,7 @@ public class VacationsRecap implements IVacationsRecap {
    * @param absencesToConsider la lista di assenza fatte da considerare.
    */
   private void initDataStructures(int year, LocalDate accruedDate, LocalDate expireDate, 
-      List<Absence> absencesToConsider, Optional<LocalDate> dateAsToday, Contract contract, 
+      List<Absence> absencesToConsider, Contract contract, 
       DateInterval contractDateInterval) {
    
     // TODO: filtrare otherAbsencs le sole nell'intervallo[dateFrom, dateTo]
@@ -182,10 +185,6 @@ public class VacationsRecap implements IVacationsRecap {
 
       //32
       if (ab.absenceType.code.equals(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode())) {
-        if (dateAsToday.isPresent()
-                && ab.personDay.date.isAfter(dateAsToday.get())) {
-          continue;
-        }
         if (abYear == year - 1) {
           list32PreviouYear.add(ab);
         } else if (abYear == year) {
@@ -195,10 +194,6 @@ public class VacationsRecap implements IVacationsRecap {
       }
       //31
       if (ab.absenceType.code.equals(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode())) {
-        if (dateAsToday.isPresent()
-                && ab.personDay.date.isAfter(dateAsToday.get())) {
-          continue;
-        }
         if (abYear == year) {
           list31RequestYear.add(ab);
         } else if (abYear == year + 1) {
@@ -208,10 +203,6 @@ public class VacationsRecap implements IVacationsRecap {
       }
       //94
       if (ab.absenceType.code.equals(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode())) {
-        if (dateAsToday.isPresent()
-                && ab.personDay.date.isAfter(dateAsToday.get())) {
-          continue;
-        }
         if (abYear == year) {
           list94RequestYear.add(ab);
         }
@@ -220,10 +211,6 @@ public class VacationsRecap implements IVacationsRecap {
       //37
       if (ab.absenceType.code.equals(AbsenceTypeMapping
           .FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode())) {
-        if (dateAsToday.isPresent()
-                && ab.personDay.date.isAfter(dateAsToday.get())) {
-          continue;
-        }
         if (abYear == year) {
           list37RequestYear.add(ab);
         } else if (abYear == year + 1) {

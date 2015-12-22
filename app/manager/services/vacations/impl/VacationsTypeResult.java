@@ -16,6 +16,8 @@ import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
+
 /**
  * Il risultato per il TypeVacation per la richiesta vacationsRequest, 
  * considerando le absenceUsed e i sourced.
@@ -80,7 +82,7 @@ public class VacationsTypeResult implements IVacationsTypeResult {
         vacationsRequest.getContractDateInterval());
 
     // Costruisco il riepilogo delle totali.
-    if (totalInterval != null) {
+    //if (totalInterval != null) {
       this.totalResult = AccruedResult.builder()
           .vacationsTypeResult(this)
           .interval(totalInterval)
@@ -99,10 +101,10 @@ public class VacationsTypeResult implements IVacationsTypeResult {
       }
       // Fix dei casi particolari nel caso del riepilogo totali quando capita il cambio piano.
       this.totalResult.adjustDecision();
-    }
+    //}
 
     // Costruisco il riepilogo delle maturate.
-    if (accruedInterval != null) {
+    //if (accruedInterval != null) {
       this.accruedResult = AccruedResult.builder()
           .vacationsTypeResult(this)
           .interval(accruedInterval)
@@ -119,7 +121,7 @@ public class VacationsTypeResult implements IVacationsTypeResult {
             .setPostPartumAbsences(vacationsRequest.getPostPartumUsed())
             .compute());
       }
-    }
+    //}
 
     return;
   }
@@ -176,7 +178,11 @@ public class VacationsTypeResult implements IVacationsTypeResult {
    * Numero di assenze totali.
    */
   public Integer getTotal() {
-    
+    if (this.totalResult == null) {
+      int i = 0;
+    } else {
+      Logger.info("toto bien");
+    }
     //todo usare fixed
     return this.totalResult.accrued;
   }

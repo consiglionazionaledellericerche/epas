@@ -41,15 +41,6 @@ public class ContractMonthRecap extends BaseModel {
    * MODULO RECAP ASSENZE
    **************************************************************************/
 
-  @Column(name = "abs_fap_usate")
-  public Integer vacationLastYearUsed = 0;
-
-  @Column(name = "abs_fac_usate")
-  public Integer vacationCurrentYearUsed = 0;
-
-  @Column(name = "abs_p_usati")
-  public Integer permissionUsed = 0;
-
   @Column(name = "abs_rc_usati")
   public Integer recoveryDayUsed = 0;        //numeroRiposiCompensativi
 
@@ -205,9 +196,6 @@ public class ContractMonthRecap extends BaseModel {
 
     //MODULO RECAP ASSENZE
 
-    this.vacationLastYearUsed = 0;
-    this.vacationCurrentYearUsed = 0;
-    this.permissionUsed = 0;
     this.recoveryDayUsed = 0;        //numeroRiposiCompensativi
 
     //FONTI DELL'ALGORITMO RESIDUI

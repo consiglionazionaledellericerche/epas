@@ -21,41 +21,24 @@ import java.util.List;
 public interface IVacationsService {
 
   /**
-   * Costruisce il riepilogo ferie.
+   * Costruisce il riepilogo ferie con il calcolo di assenze maturate e residue a oggi considerando
+   * la data di scadenza ferie anno passato della sede competente. 
    * @param year anno
    * @param contract contratto
-   * @param actualDate data di maturazione
-   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
-   * @param otherAbsences altre assenze extra db.
-   * @param dateAsToday per simulare oggi con un giorno diverso da oggi
    * @return il recap
    */
-  Optional<IVacationsRecap> create(int year, Contract contract,
-      LocalDate actualDate, boolean considerExpireLastYear,
-      List<Absence> otherAbsences, Optional<LocalDate> dateAsToday);
+  Optional<IVacationsRecap> create(int year, Contract contract);
   
   /**
-   * Costruisce il riepilogo ferie con valori di default. 
+   * Costruisce il riepilogo ferie alla fine del mese con il calcolo delle assenze 
+   * maturate e residue fino a quel momento (ignorando le eventuali assenze prese successivamente).
+   * Serve a Danila.
    * @param year anno
+   * @param month anno
    * @param contract contratto
-   * @param actualDate data maturazione
-   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
    * @return il recap
    */
-  Optional<IVacationsRecap> create(int year, Contract contract, LocalDate actualDate,
-      boolean considerExpireLastYear);
-  
-  /**
-   * Costruisce il riepilogo ferie con valori di default. 
-   * @param year anno
-   * @param contract contratto
-   * @param actualDate data di maturazione
-   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
-   * @param dateAsToday per simulare oggi con un giorno diverso da oggi
-   * @return il recap
-   */
-  Optional<IVacationsRecap> create(int year, Contract contract, LocalDate actualDate, 
-      boolean considerExpireLastYear, LocalDate dateAsToday);
+  Optional<IVacationsRecap> createEndMonth(int year, int month, Contract contract);
   
   /**
    * Il primo codice utilizzabile nella data. Ordine: 31, 32, 94.
@@ -83,6 +66,15 @@ public interface IVacationsService {
    * @return true se è possibile prendere il codice 31.
    */
   boolean canTake31(Person person, LocalDate date, List<Absence> otherAbsences);
+  
+  /**
+   * Verifica che la persona alla data possa prendere un giorno di ferie con codice 37.
+   * @param person persona
+   * @param date data 
+   * @param otherAbsences altre assenze da considerare.
+   * @return true se è possibile prendere il codice 37.
+   */
+  public boolean canTake37(Person person, LocalDate date, List<Absence> otherAbsences);
   
   /**
    * Verifica che la persona alla data possa prendere un giorno di permesso con codice 94.
