@@ -884,7 +884,8 @@ public class CompetenceUtility {
                       person.name, person.surname, personDay.get().date, stampings);
 
                   badStampingDays = (inconsistentAbsenceTable.contains(person, thMissingTime))
-                      ? inconsistentAbsenceTable.get(person, thMissingTime) : Lists.newArrayList();
+                      ? inconsistentAbsenceTable.get(person, thMissingTime)
+                          : Lists.<String>newArrayList();
                   badStampingDays.add(
                       personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stampings)
                         .concat("(").concat(workedTime).concat(" ore lavorate)"));
@@ -909,7 +910,8 @@ public class CompetenceUtility {
 
                   lackOfTimes =
                       (inconsistentAbsenceTable.contains(person, thLackTime))
-                        ? inconsistentAbsenceTable.get(person, thLackTime) : Lists.newArrayList();
+                        ? inconsistentAbsenceTable.get(person, thLackTime)
+                            : Lists.<String>newArrayList();
                   lackOfTimes.add(Integer.toString(lackOfMinutes));
                   inconsistentAbsenceTable.put(person, label, badStampingDays);
                   inconsistentAbsenceTable.put(person, thLackTime, lackOfTimes);

@@ -311,7 +311,7 @@ public class Shift extends Controller {
     // save the total requested Shift Hours in the DB
     log.debug("AGGIORNA IL DATABASE");
     List<Competence> savedCompetences =
-        shiftManager.updateDBShiftCompetences(totalPersonShiftWorkedTime, year, month);
+        shiftManager.updateDbShiftCompetences(totalPersonShiftWorkedTime, year, month);
 
     // crea la tabella con le informazioni per il report PDF mensile
     totalShiftInfo =
