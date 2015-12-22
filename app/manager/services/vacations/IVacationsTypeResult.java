@@ -52,21 +52,6 @@ public interface IVacationsTypeResult {
    * Assenze usate.
    */
   Integer getUsed();
-
-  /**
-   * Rimanenti totali.
-   */
-  Integer getNotYetUsedTotal();
-
-  /**
-   * Rimanenti maturate.
-   */
-  Integer getNotYetUsedAccrued();
-  
-  /**
-   * Assenze rimanenti sul totale che il dipendente avrebbe potuto prendere. (Tabellone Danila)
-   */
-  Integer getRemaining();
   
   /**
    * Numero di assenze totali.
@@ -77,5 +62,16 @@ public interface IVacationsTypeResult {
    * Numero di assenze maturate.
    */
   Integer getAccrued();
+
+  /**
+   * Rimanenti totali (indipendentemente che siano prendibili, non maturate o scadute).
+   */
+  Integer getNotYetUsedTotal();
+
+  /**
+   * Rimanenti maturate (prendibili). Per i determinati solo le maturate, per gli indeterminati
+   * tutte. Per le ferie dell'anno precedente considera la data di scadenza ferie della sede.
+   */
+  Integer getNotYetUsedAccrued();
   
 }
