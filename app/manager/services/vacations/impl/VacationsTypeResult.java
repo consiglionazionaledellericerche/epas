@@ -145,14 +145,15 @@ public class VacationsTypeResult implements IVacationsTypeResult {
   }
   
   /**
-   * Rimanenti totali.
+   * Rimanenti totali (indipendentemente che siano prendibili, non maturate o scadute).
    */
   public Integer getNotYetUsedTotal() {
     return this.getTotal() - this.getUsed();
   }
 
   /**
-   * Rimanenti maturate.
+   * Rimanenti maturate (prendibili). Per i determinati solo le maturate, per gli indeterminati
+   * tutte. Per le ferie dell'anno precedente considera la data di scadenza ferie della sede.
    */
   public Integer getNotYetUsedAccrued() {
 
@@ -177,14 +178,6 @@ public class VacationsTypeResult implements IVacationsTypeResult {
     }
 
   }
-  
-  /**
-   * Rimanenti sul totale che il dipendente avrebbe potuto prendere. (Tabellone Danila)
-   */
-  public Integer getRemaining() {
-    return this.getTotal() - this.getUsed();
-  }
- 
 
 }
 

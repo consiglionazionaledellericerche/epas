@@ -138,11 +138,11 @@ public class MonthRecaps extends Controller {
         Optional<IVacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
 
         CustomRecapDTO danilaDto = new CustomRecapDTO();
-        danilaDto.ferieAnnoCorrente = vr.get().getVacationsCurrentYear().getRemaining();
+        danilaDto.ferieAnnoCorrente = vr.get().getVacationsCurrentYear().getNotYetUsedTotal();
         
-        danilaDto.ferieAnnoPassato = vr.get().getVacationsLastYear().getRemaining();
+        danilaDto.ferieAnnoPassato = vr.get().getVacationsLastYear().getNotYetUsedTotal();
         
-        danilaDto.permessi = vr.get().getPermissions().getRemaining();
+        danilaDto.permessi = vr.get().getPermissions().getNotYetUsedTotal();
 
         Optional<ContractMonthRecap> recap =
                 wrapperFactory.create(contract).getContractMonthRecap(
