@@ -53,8 +53,8 @@ public class Paginator {
     }
     params.remove("body");
 
-    int lastPage = (int) (results.getTotal() / results.getLimit() +
-            (results.getTotal() % results.getLimit() == 0 ? 0 : 1));
+    int lastPage = (int) (results.getTotal() / results.getLimit()
+            + (results.getTotal() % results.getLimit() == 0 ? 0 : 1));
     pages = ContiguousSet.create(Range.closed(Math.max(current - 5, 1),
             Math.min(current + 5, lastPage)),
             DiscreteDomain.integers());

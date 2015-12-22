@@ -368,8 +368,8 @@ public class Shift extends Controller {
 
     // crea la tabella dei turni mensile (tipo turno, giorno) ->
     //  (persona turno mattina, persona turno pomeriggio)
-    Table<String, Integer, ShiftManager.SD> shiftCalendar =
-        HashBasedTable.<String, Integer, ShiftManager.SD>create();
+    Table<String, Integer, ShiftManager.Sd> shiftCalendar =
+        HashBasedTable.<String, Integer, ShiftManager.Sd>create();
 
 
     // prende il primo giorno del mese

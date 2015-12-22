@@ -130,7 +130,7 @@ public class TemplateExtensions extends JavaExtensions {
     }
     return obj.toString();
   }
-  
+
   public static String label(Boolean b) {
     if (b) {
       return "Si";
@@ -193,7 +193,8 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String[] toStringItems(Iterable<Object> iterable) {
-    return Iterables.toArray(Iterables.transform(iterable, Functions.toStringFunction()), String.class);
+    return
+        Iterables.toArray(Iterables.transform(iterable, Functions.toStringFunction()), String.class);
   }
 
   public static String value(LocalDate date) {

@@ -131,18 +131,18 @@ public class AttestatiClient {
               .url(loginUrl)
               .method(Method.POST).execute();
 
-      Logger.debug("Effettuata la richiesta di login come utente %s, codice di risposta http = %s",
+      log.debug("Effettuata la richiesta di login come utente %s, codice di risposta http = {}",
               attestatiLogin, loginResponse.statusCode());
 
       Document loginDoc = loginResponse.parse();
-      Logger.debug("Risposta alla login = \n%s", loginDoc);
+      log.debug("Risposta alla login = \n{}", loginDoc);
 
 
       Elements loginMessages = loginDoc.select("h5[align=center]>font");
 
-      if (loginResponse.statusCode() != 200 ||
-              loginMessages.isEmpty() ||
-              !loginMessages.first().ownText().contains("Login completata con successo.")) {
+      if (loginResponse.statusCode() != 200
+              || loginMessages.isEmpty()
+              || !loginMessages.first().ownText().contains("Login completata con successo.")) {
         return new LoginResponse(attestatiLogin, false, loginResponse.cookies(), year, month);
       } else {
         return new LoginResponse(attestatiLogin, true, loginResponse.cookies(), year, month);

@@ -5,12 +5,12 @@ import play.test.FunctionalTest;
 
 public class ApplicationTest extends FunctionalTest {
 
-    @Test
-    public void testThatIndexPageWorks() {
-        Response response = GET("/login");
-        assertIsOk(response);
-        assertContentType("text/html", response);
-        assertCharset(play.Play.defaultWebEncoding, response);
-    }
-    
+  @Test
+  public void testThatIndexPageWorks() {
+    Response response = GET("/login");
+    assertIsOk(response);
+    assertContentType("text/html", response);
+    assertCharset(play.Play.defaultWebEncoding, response);
+  }
+
 }

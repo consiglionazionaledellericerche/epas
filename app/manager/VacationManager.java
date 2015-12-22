@@ -31,7 +31,7 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di permesso legge spettanti al dipendente a seconda dei giorni di
-   * presenza
+   *     presenza.
    */
   public static int convertWorkDaysToPermissionDays(int days) {
     int permissionDays = 0;
@@ -56,9 +56,12 @@ public class VacationManager {
    */
   public LocalDate vacationsLastYearExpireDate(int year, Office office) {
 
-    Integer monthExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
+    Integer monthExpiryVacationPastYear =
+        confYearManager.getIntegerFieldValue(
+            Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
 
-    Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
+    Integer dayExpiryVacationPastYear =
+        confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
 
     LocalDate expireDate = LocalDate.now()
         .withYear(year)
@@ -70,8 +73,7 @@ public class VacationManager {
 
 
   /**
-   * @param year       l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono
-   *                   scadute
+   * @param year l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono scadute.
    * @param expireDate l'ultimo giorno utile per usufruire delle ferie dell'anno precedente
    */
   public boolean isVacationsLastYearExpired(int year, LocalDate expireDate) {
@@ -86,9 +88,10 @@ public class VacationManager {
   }
 
   /**
-   * @return numero di permessi maturati nel periodo yearInterval associati a contract
+   * @return numero di permessi maturati nel periodo yearInterval associati a contract.
    */
-  public int getPermissionAccruedYear(IWrapperContract wrContract, int year, Optional<LocalDate> accruedDate) {
+  public int getPermissionAccruedYear(
+      IWrapperContract wrContract, int year, Optional<LocalDate> accruedDate) {
 
     //Calcolo l'intersezione fra l'anno e il contratto attuale
     DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1),
@@ -129,7 +132,7 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di ferie maturati nell'anno year calcolati a partire dai piani
-   * ferie associati al contratto corrente
+   *     ferie associati al contratto corrente.
    */
   public int getVacationAccruedYear(IWrapperContract wrContract, int year,
                                     Optional<LocalDate> accruedDate, List<Absence> postPartum) {
@@ -220,12 +223,6 @@ public class VacationManager {
 
   }
 
-  /**
-   *
-   * @param absences
-   * @param interval
-   * @return
-   */
   private int filterAbsences(List<Absence> absences, DateInterval interval) {
     int count = 0;
     for (Absence ab : absences) {
@@ -238,7 +235,7 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
-   * dell'anno per chi lavora in istituto da meno di tre anni
+   *     dell'anno per chi lavora in istituto da meno di tre anni.
    */
   public int convertWorkDaysToVacationDaysLessThreeYears(int days) {
 
@@ -289,7 +286,7 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
-   * dell'anno per chi lavora in istituto da più di tre anni
+   *     dell'anno per chi lavora in istituto da più di tre anni.
    */
   public int convertWorkDaysToVacationDaysMoreThreeYears(int days) {
     if (days <= 0) {
@@ -339,7 +336,7 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di ferie maturati secondo il piano di accumulo previsto per il part
-   * time verticale
+   *     time verticale.
    */
   public int converWorkDaysToVacationDaysPartTime(int days) {
     if (days <= 0) {
@@ -431,7 +428,7 @@ public class VacationManager {
   }
 
   /**
-   * @return il numero di giorni di permesso maturati con il piano ferie relativo al part time
+   * @return il numero di giorni di permesso maturati con il piano ferie relativo al part time.
    */
   public int convertWorkDaysToPermissionDaysPartTime(int days) {
     int permissionDays = 0;

@@ -16,6 +16,8 @@ import play.inject.BeanSource;
 import java.util.Set;
 
 /**
+ * Injection Plugin.
+ *
  * @author marco
  */
 public class InjectionPlugin extends PlayPlugin implements BeanSource {

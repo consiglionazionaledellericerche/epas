@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
 import manager.OfficeManager;
-import manager.PersonManager;
 import manager.UserManager;
 
 import models.Contract;
@@ -55,6 +54,8 @@ import javax.inject.Inject;
 
 
 /**
+ * Wizard per la configurazione iniziale di ePAS.
+ *
  * @author daniele
  */
 //@With( {Resecure.class})
@@ -173,7 +174,10 @@ public class Wizard extends Controller {
     render("@" + currentStep.template, steps, currentStep, percent, properties);
   }
 
-  // Step 1 del Wizard, cambio password Admin.
+  /**
+   * Step 1 del Wizard, cambio password Admin.
+   *
+   */
   public static void changeAdminPsw(
       int stepIndex, @Required String adminPassword,
       @Required @Equals(value = "adminPassword", message = "Le password non corrispondono")
@@ -203,7 +207,9 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 2 Creazione Istituto e Ufficio
+  /**
+   * STEP 2 Creazione Istituto e Ufficio.
+   */
   public static void setOffice(int stepIndex, @Valid Institute institute, @Valid Office office) {
 
     if (validation.hasErrors()) {
@@ -241,7 +247,9 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 3 Configurazione Generale
+  /**
+   * STEP 3 Configurazione Generale.
+   */
   public static void setGenConf(int stepIndex, @Required String dateOfPatron,
       @Required @CheckWith(StringIsTime.class) String lunchPauseStart,
       @Required @CheckWith(StringIsTime.class) String lunchPauseEnd,
@@ -274,7 +282,9 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 4 Creazione Profilo per l'amministratore
+  /**
+   * STEP 4 Creazione Profilo per l'amministratore.
+   */
   public static void seatManagerRole(int stepIndex, Person person, @Required int qualification,
       @Required LocalDate beginDate, LocalDate endContract,
       @Required String managerPassword,
@@ -325,7 +335,9 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 2 Creazione Istituto e Ufficio
+  /**
+   * STEP 2 Creazione Istituto e Ufficio.
+   */
   public static void summary(int stepIndex) {
 
     List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);

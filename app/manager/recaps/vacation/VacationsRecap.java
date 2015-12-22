@@ -54,9 +54,12 @@ public class VacationsRecap {
   public Integer vacationDaysCurrentYearTotal = 0;
   public Integer permissionCurrentYearTotal = 0;
   public LocalDate dateExpireLastYear;
-  public boolean isExpireLastYear = false;		/* true se le ferie dell'anno passato sono scadute */
-  public boolean isExpireBeforeEndYear = false;	/* true se il contratto termina prima della fine dell'anno richiesto */
-  public boolean isActiveAfterBeginYear = false;	/* true se il contratto inizia dopo l'inizio dell'anno richiesto */
+  /* true se le ferie dell'anno passato sono scadute */
+  public boolean isExpireLastYear = false;
+  /* true se il contratto termina prima della fine dell'anno richiesto */
+  public boolean isExpireBeforeEndYear = false;
+  /* true se il contratto inizia dopo l'inizio dell'anno richiesto */
+  public boolean isActiveAfterBeginYear = false;
   private DateInterval previousYearInterval;
   private DateInterval requestYearInterval;
   private DateInterval nextYearInterval;
@@ -70,13 +73,11 @@ public class VacationsRecap {
   private List<Absence> postPartum = Lists.newArrayList();
 
   /**
-   * @param year                   l'anno in considerazione
-   * @param contract               il contratto di cui si vuole calcolare il riepilogo.
-   * @param actualDate             la data specifica dell'anno attuale in cui si desidera
-   *                               fotografare la situazione in termini di ferie e permessi maturati
-   *                               (tipicamente oggi)
-   * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza
-   *                               per l'utilizzo
+   * @param year l'anno in considerazione.
+   * @param contract il contratto di cui si vuole calcolare il riepilogo.
+   *     situazione in termini di ferie e permessi maturati (tipicamente oggi)
+   * @param considerExpireLastYear impostare false se non si vuole considerare il limite di
+   *     scadenza per l'utilizzo
    */
   public VacationsRecap(IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
                         AbsenceTypeDao absenceTypeDao, AbsenceTypeManager absenceTypeManager,
@@ -117,7 +118,8 @@ public class VacationsRecap {
     //(3) permessi usati dell'anno richiesto
     permissionUsed = list94RequestYear.size();
 
-    if (this.contract.sourceDateResidual != null && this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null
+        && this.contract.sourceDateResidual.getYear() == year) {
       vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
       vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
       permissionUsed += this.contract.sourcePermissionUsed;
@@ -174,8 +176,8 @@ public class VacationsRecap {
     absences.addAll(list32RequestYear);
     absences.addAll(list31NextYear);
     absences.addAll(list37NextYear);
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null
+            && this.contract.sourceDateResidual.getYear() == year) {
       vacationDaysLastYearUsed += this.contract.sourceVacationLastYearUsed;
       vacationDaysCurrentYearUsed += this.contract.sourceVacationCurrentYearUsed;
       permissionUsed += this.contract.sourcePermissionUsed;
@@ -197,24 +199,24 @@ public class VacationsRecap {
   }
 
   public int sourceVacationCurrentYearUsed() {
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null
+            && this.contract.sourceDateResidual.getYear() == year) {
       return this.contract.sourceVacationCurrentYearUsed;
     }
     return 0;
   }
 
   public int sourceVacationLastYearUsed() {
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null
+            && this.contract.sourceDateResidual.getYear() == year) {
       return this.contract.sourceVacationLastYearUsed;
     }
     return 0;
   }
 
   public int sourcePermissionUsed() {
-    if (this.contract.sourceDateResidual != null &&
-            this.contract.sourceDateResidual.getYear() == year) {
+    if (this.contract.sourceDateResidual != null
+            && this.contract.sourceDateResidual.getYear() == year) {
       return this.contract.sourcePermissionUsed;
     }
     return 0;
