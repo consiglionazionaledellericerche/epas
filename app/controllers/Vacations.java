@@ -9,7 +9,7 @@ import dao.wrapper.IWrapperPerson;
 
 import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
-import manager.services.vacations.impl.VacationsRecapImpl;
+import manager.services.vacations.impl.VacationsRecap;
 import manager.services.vacations.test.TestVacationsService;
 
 import models.Contract;

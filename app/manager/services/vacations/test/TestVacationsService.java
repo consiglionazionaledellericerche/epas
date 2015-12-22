@@ -15,7 +15,7 @@ import manager.ConfYearManager;
 import manager.cache.AbsenceTypeManager;
 import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
-import manager.services.vacations.impl.VacationsRecapImpl;
+import manager.services.vacations.impl.VacationsRecap;
 
 import models.Absence;
 import models.AbsenceType;
@@ -38,17 +38,16 @@ import javax.inject.Inject;
  */
 public class TestVacationsService implements IVacationsService {
 
-  /**
-   * Costruttore del recap.
-   */
-  @Override
-  public IVacationsRecap build(int year, Contract contract, List<Absence> absencesToConsider,
-      LocalDate accruedDate, LocalDate dateExpireLastYear, boolean considerDateExpireLastYear,
-      Optional<LocalDate> dateAsToday) {
-    
-    return new VacationsRecapImpl(year, contract, absencesToConsider, LocalDate.now(), 
-        dateExpireLastYear, true, dateAsToday); 
-  }
+//  /**
+//   * Costruttore privato del recap.
+//   */
+//  private IVacationsResponse build(int year, Contract contract, List<Absence> absencesToConsider,
+//      LocalDate accruedDate, LocalDate dateExpireLastYear, boolean considerDateExpireLastYear,
+//      Optional<LocalDate> dateAsToday) {
+//    
+//    return new VacationsResponse(year, contract, absencesToConsider, LocalDate.now(), 
+//        dateExpireLastYear, true, dateAsToday); 
+//  }
 
   @Override
   public Optional<IVacationsRecap> create(int year, Contract contract, LocalDate actualDate,

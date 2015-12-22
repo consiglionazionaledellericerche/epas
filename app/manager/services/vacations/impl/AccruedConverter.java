@@ -1,13 +1,15 @@
 package manager.services.vacations.impl;
 
+import lombok.Builder;
+
 public class AccruedConverter {
-  
-  private AccruedConverter() {
     
-  }
-  
-  public static AccruedConverter accruedConverter() {
-    return new AccruedConverter();
+  /**
+   * Convertitore per ferie e permessi maturati.
+   */
+  @Builder
+  public AccruedConverter() {
+    
   }
 
   /**
