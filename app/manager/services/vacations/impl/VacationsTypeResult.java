@@ -89,7 +89,8 @@ public class VacationsTypeResult implements IVacationsTypeResult {
       for (VacationPeriod vp : vacationsRequest.getContractVacationPeriod()) {
         this.totalResult.addResult(
 
-            AccruedResultInPeriod.buildAccruedResultInPeriod(this.totalResult,
+            AccruedResultInPeriod.buildAccruedResultInPeriod(
+                this.totalResult,
                 DateUtility.intervalIntersection(totalInterval, vp.getDateInterval()),
                 vp.vacationCode)
 
@@ -102,12 +103,17 @@ public class VacationsTypeResult implements IVacationsTypeResult {
 
     // Costruisco il riepilogo delle maturate.
     if (accruedInterval != null) {
+      this.accruedResult = AccruedResult.builder()
+          .vacationsTypeResult(this)
+          .interval(accruedInterval)
+          .build();
 
       for (VacationPeriod vp : vacationsRequest.getContractVacationPeriod()) {
         this.accruedResult.addResult(
 
-            AccruedResultInPeriod.buildAccruedResultInPeriod(this.totalResult,
-                DateUtility.intervalIntersection(totalInterval, vp.getDateInterval()),
+            AccruedResultInPeriod.buildAccruedResultInPeriod(
+                this.totalResult,
+                DateUtility.intervalIntersection(accruedInterval, vp.getDateInterval()),
                 vp.vacationCode)
 
             .setPostPartumAbsences(vacationsRequest.getPostPartumUsed())
@@ -124,11 +130,18 @@ public class VacationsTypeResult implements IVacationsTypeResult {
   public Integer getUsed() {
     return this.absencesUsed.size() + this.sourced;
   }
+  
+  /**
+   * Rimanenti totali.
+   */
+  public Integer getNotYetUsedTotal() {
+    return this.getTotal() - this.getUsed();
+  }
 
   /**
-   * Logica per rimanenti.
+   * Rimanenti maturate.
    */
-  public Integer getNotYetUsed() {
+  public Integer getNotYetUsedAccrued() {
 
     // caso delle ferie anno passato.
     if (this.typeVacation.equals(TypeVacation.VACATION_LAST_YEAR)) {
@@ -159,7 +172,23 @@ public class VacationsTypeResult implements IVacationsTypeResult {
     return this.totalResult.accrued - this.getUsed();
   }
   
-  //todo usare fixed
+  /**
+   * Numero di assenze totali.
+   */
+  public Integer getTotal() {
+    
+    //todo usare fixed
+    return this.totalResult.accrued;
+  }
+  
+  /**
+   * Numero di assenze maturate.
+   */
+  public Integer getAccrued() {
+    
+    return this.accruedResult.accrued;
+  }
+
   
  
 }

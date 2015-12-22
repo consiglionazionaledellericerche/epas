@@ -89,7 +89,6 @@ public class VacationsRecap implements IVacationsRecap {
   
   // SUPPORTO AL CALCOLO
   
-  private DateInterval contractInterval;
   private List<Absence> list32PreviouYear = Lists.newArrayList();
   private List<Absence> list31RequestYear = Lists.newArrayList();
   private List<Absence> list37RequestYear = Lists.newArrayList();
@@ -116,11 +115,15 @@ public class VacationsRecap implements IVacationsRecap {
       LocalDate accruedDate, LocalDate expireDate, boolean considerDateExpireLastYear,
       Optional<LocalDate> dateAsToday ) {
     
-    initDataStructures(absencesToConsider, dateAsToday, contract);
+    DateInterval contractDateInterval = 
+        new DateInterval(contract.getBeginDate(), contract.calculatedEnd());
+    
+    initDataStructures(year, accruedDate, expireDate, absencesToConsider, dateAsToday, 
+        contract, contractDateInterval);
     
     this.vacationsRequest = VacationsRequest.builder()
         .year(year)
-        .contractDateInterval(new DateInterval(contract.getBeginDate(), contract.calculatedEnd()))
+        .contractDateInterval(contractDateInterval)
         .accruedDate(Optional.fromNullable(accruedDate))
         .contractVacationPeriod(contract.vacationPeriods)
         .postPartumUsed(this.postPartum)
@@ -144,7 +147,7 @@ public class VacationsRecap implements IVacationsRecap {
             .append(list31NextYear)
             .append(list37NextYear).toList())
         .sourced(sourceVacationCurrentYearUsed)
-        .typeVacation(TypeVacation.VACATION_LAST_YEAR)
+        .typeVacation(TypeVacation.VACATION_CURRENT_YEAR)
         .build();
     
     this.permissions = VacationsTypeResult.builder()
@@ -152,17 +155,18 @@ public class VacationsRecap implements IVacationsRecap {
         .absencesUsed(FluentIterable
             .from(list94RequestYear).toList())
         .sourced(sourcePermissionUsed)
-        .typeVacation(TypeVacation.VACATION_LAST_YEAR)
+        .typeVacation(TypeVacation.PERMISSION_CURRENT_YEAR)
         .build();
   }
   
   /**
-   * Inizializza le strutture per il calcolo.
+   * Inizializza le strutture per il calcolo (in modo efficiente).
    *  
    * @param absencesToConsider la lista di assenza fatte da considerare.
    */
-  private void initDataStructures(List<Absence> absencesToConsider,
-      Optional<LocalDate> dateAsToday, Contract contract) {
+  private void initDataStructures(int year, LocalDate accruedDate, LocalDate expireDate, 
+      List<Absence> absencesToConsider, Optional<LocalDate> dateAsToday, Contract contract, 
+      DateInterval contractDateInterval) {
    
     // TODO: filtrare otherAbsencs le sole nell'intervallo[dateFrom, dateTo]
 
@@ -182,9 +186,9 @@ public class VacationsRecap implements IVacationsRecap {
                 && ab.personDay.date.isAfter(dateAsToday.get())) {
           continue;
         }
-        if (abYear == vacationsRequest.year - 1) {
+        if (abYear == year - 1) {
           list32PreviouYear.add(ab);
-        } else if (abYear == vacationsRequest.year) {
+        } else if (abYear == year) {
           list32RequestYear.add(ab);
         }
         continue;
@@ -195,9 +199,9 @@ public class VacationsRecap implements IVacationsRecap {
                 && ab.personDay.date.isAfter(dateAsToday.get())) {
           continue;
         }
-        if (abYear == vacationsRequest.year) {
+        if (abYear == year) {
           list31RequestYear.add(ab);
-        } else if (abYear == vacationsRequest.year + 1) {
+        } else if (abYear == year + 1) {
           list31NextYear.add(ab);
         }
         continue;
@@ -208,7 +212,7 @@ public class VacationsRecap implements IVacationsRecap {
                 && ab.personDay.date.isAfter(dateAsToday.get())) {
           continue;
         }
-        if (abYear == vacationsRequest.year) {
+        if (abYear == year) {
           list94RequestYear.add(ab);
         }
         continue;
@@ -220,9 +224,9 @@ public class VacationsRecap implements IVacationsRecap {
                 && ab.personDay.date.isAfter(dateAsToday.get())) {
           continue;
         }
-        if (abYear == vacationsRequest.year) {
+        if (abYear == year) {
           list37RequestYear.add(ab);
-        } else if (abYear == vacationsRequest.year + 1) {
+        } else if (abYear == year + 1) {
           list37NextYear.add(ab);
         }
         continue;
@@ -233,26 +237,26 @@ public class VacationsRecap implements IVacationsRecap {
 
     //Vacation Last Year Expired
     this.isExpireLastYear = false;
-    if (vacationsRequest.year < LocalDate.now().getYear()) {
+    if (year < LocalDate.now().getYear()) {
       this.isExpireLastYear = true;
-    } else if (vacationsRequest.year == LocalDate.now().getYear()
-            && vacationsRequest.accruedDate.isAfter(vacationsRequest.expireDate)) {
+    } else if (year == LocalDate.now().getYear()
+            && accruedDate.isAfter(expireDate)) {
       this.isExpireLastYear = true;
     }
 
     //Contract Expire Before End Of Year / Active After Begin Of Year
-    LocalDate startRequestYear = new LocalDate(vacationsRequest.year, 1, 1);
-    LocalDate endRequestYear = new LocalDate(vacationsRequest.year, 12, 31);
-    if (this.contractInterval.getEnd().isBefore(endRequestYear)) {
+    LocalDate startRequestYear = new LocalDate(year, 1, 1);
+    LocalDate endRequestYear = new LocalDate(year, 12, 31);
+    if (contractDateInterval.getEnd().isBefore(endRequestYear)) {
       this.isExpireBeforeEndYear = true;
     }
-    if (this.contractInterval.getBegin().isAfter(startRequestYear)) {
+    if (contractDateInterval.getBegin().isAfter(startRequestYear)) {
       this.isActiveAfterBeginYear = true;
     }
     
     //TODO farli diventare un getter di contract
     if (contract.sourceDateResidual != null 
-        && contract.sourceDateResidual.getYear() == vacationsRequest.year) {
+        && contract.sourceDateResidual.getYear() == year) {
       
       sourceVacationLastYearUsed += contract.sourceVacationLastYearUsed;
       sourceVacationCurrentYearUsed += contract.sourceVacationCurrentYearUsed;

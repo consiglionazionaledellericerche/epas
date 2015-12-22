@@ -54,13 +54,28 @@ public interface IVacationsTypeResult {
   Integer getUsed();
 
   /**
-   * Logica per assenze rimanenti.
+   * Rimanenti totali.
    */
-  Integer getNotYetUsed();
+  Integer getNotYetUsedTotal();
+
+  /**
+   * Rimanenti maturate.
+   */
+  Integer getNotYetUsedAccrued();
   
   /**
    * Assenze rimanenti sul totale che il dipendente avrebbe potuto prendere. (Tabellone Danila)
    */
   Integer getRemaining();
+  
+  /**
+   * Numero di assenze totali.
+   */
+  Integer getTotal();
+  
+  /**
+   * Numero di assenze maturate.
+   */
+  Integer getAccrued();
   
 }

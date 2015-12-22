@@ -525,7 +525,9 @@ public class AbsenceManager {
           contractDao.getContract(LocalDate.now(), person),
           LocalDate.now(), false, otherAbsences, Optional.<LocalDate>absent());
       if (vr.isPresent()) {
-        int remaining37 = vr.get().getVacationsLastYear().getNotYetUsed();
+        // TODO: avendo il calcolo total gratis si può rimuovere il consiederExpireDate e prendere
+        // direttamente il getNotYetUsedTotal.
+        int remaining37 = vr.get().getVacationsLastYear().getNotYetUsedAccrued();
         if (remaining37 > 0) {
           //37 disponibile
           return insert(person, date, absenceType, file,
