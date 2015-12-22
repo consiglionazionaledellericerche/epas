@@ -61,7 +61,7 @@ public class AccruedResult implements IAccruedResult {
    */
   public AccruedResult addResult(AccruedResultInPeriod periodAccruedResult) {
     this.childDecisions.add(periodAccruedResult);
-    this.postPartum = periodAccruedResult.postPartum;
+    this.postPartum.addAll(periodAccruedResult.postPartum);
     this.days += periodAccruedResult.days;
     this.accrued += periodAccruedResult.accrued;
     return this;

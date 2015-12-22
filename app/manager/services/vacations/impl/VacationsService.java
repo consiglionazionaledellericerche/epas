@@ -215,18 +215,18 @@ public class VacationsService implements IVacationsService {
       return null;
     }
 
-    if (vr.get().getVacationsLastYear().getNotYetUsed() > 0) {
+    if (vr.get().getVacationsLastYear().getNotYetUsedAccrued() > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
     }
 
-    if (vr.get().getPermissions().getNotYetUsed() > 0)  {
+    if (vr.get().getPermissions().getNotYetUsedAccrued() > 0)  {
 
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
     }
 
-    if (vr.get().getVacationsCurrentYear().getNotYetUsed() > 0) {
+    if (vr.get().getVacationsCurrentYear().getNotYetUsedAccrued() > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
     }
@@ -250,7 +250,7 @@ public class VacationsService implements IVacationsService {
       return false;
     }
 
-    return (vr.get().getVacationsCurrentYear().getNotYetUsed() > 0);
+    return (vr.get().getVacationsCurrentYear().getNotYetUsedAccrued() > 0);
 
   }
 
@@ -271,7 +271,7 @@ public class VacationsService implements IVacationsService {
     }
 
 
-    return (vr.get().getVacationsLastYear().getNotYetUsed() > 0);
+    return (vr.get().getVacationsLastYear().getNotYetUsedAccrued() > 0);
   }
 
   /**
@@ -290,7 +290,7 @@ public class VacationsService implements IVacationsService {
       return false;
     }
 
-    return (vr.get().getPermissions().getNotYetUsed() > 0);
+    return (vr.get().getPermissions().getNotYetUsedAccrued() > 0);
 
   }
 
