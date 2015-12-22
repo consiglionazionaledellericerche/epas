@@ -73,7 +73,7 @@ public class PersonDayManager {
   }
 
   /**
-   * @return true se nel giorno vi e' una assenza giornaliera
+   * @return true se nel giorno vi e' una assenza giornaliera.
    */
   public boolean isAllDayAbsences(PersonDay pd) {
 
@@ -83,8 +83,8 @@ public class PersonDayManager {
       if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
         return false;
       } else if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-          && (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) ||
-          abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
+          && (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)
+          || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
         return true;
       }
     }
@@ -93,16 +93,16 @@ public class PersonDayManager {
 
   /**
    * @return true se nel giorno c'è un'assenza oraria che giustifica una quantità oraria sufficiente
-   * a decretare la persona "presente" a lavoro
+   *     a decretare la persona "presente" a lavoro.
    */
   public boolean isEnoughHourlyAbsences(PersonDay pd) {
 
     if (pd.person.qualification.qualification > 3) {
       for (Absence abs : pd.absences) {
-        if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
-            abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
-            abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
-            abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours)) {
+        if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours)
+            || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours)
+            || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours)
+            || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours)) {
           return true;
         }
       }
@@ -221,7 +221,6 @@ public class PersonDayManager {
 
     // Calcolo ...
 
-    int mealTicketTime = wttd.mealTicketTime;            //6 ore
     int minBreakTicketTime = wttd.breakTicketTime;    //30 minuti
 
     List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
@@ -239,7 +238,7 @@ public class PersonDayManager {
 
     if (baessoAlgorithm) {
       if (gapLunchPairs.size() > 0) {
-        //	recupero la durata della pausa pranzo fatta
+        // recupero la durata della pausa pranzo fatta
         effectiveTimeSpent = gapLunchPairs.get(0).timeInPair;
       }
     } else {
@@ -259,6 +258,8 @@ public class PersonDayManager {
     }
 
     //3) Decisioni
+
+    int mealTicketTime = wttd.mealTicketTime;            //6 ore
 
     // Non ho eseguito il tempo minimo per buono pasto.
     if (stampingMinutes - missingTime < mealTicketTime) {
@@ -357,34 +358,37 @@ public class PersonDayManager {
    * lavoro minimo pomeridiano, devo anche avere giustificativi e/o flessibilità sufficiente a
    * raggiungere il tempo di orario giornaliero.
    *
-   * Per fare questo conteggio devo calcolarmi la situazione residua al giorno precedente che non è
-   * persistita. Per tornare ad essere efficienti si deve injettare nella populate person day la
-   * situazione calcolata al giorno precedente.
+   *<p>Per fare questo conteggio devo calcolarmi la situazione residua al giorno precedente che non
+   * è persistita. Per tornare ad essere efficienti si deve injettare nella populate person day la
+   * situazione calcolata al giorno precedente.</p>
    *
-   * Secondo me nascono delle problematiche significative nel caso in cui volessi inserire dei
+   * <p>Secondo me nascono delle problematiche significative nel caso in cui volessi inserire dei
    * riposi compensativi nel passato. Questo comporterebbe il ricalcolo dei giorni e potrebbe
    * risultare cambiata in negativo una decisione passata di attribuzione del buono pasto. Per
    * ovviare a questa evenienza si dovrebbe effettuare un check di ogni giorno successivo al riposo
    * compensativo da inserire e verificare che con tale assenza inserita non si va mai in negativo.
    * Ma questo fatto potrebbe essere intercettato dal dipendente che si vede attribuire il riposo
-   * compensativo e cancellare il buono pasto e quindi potrebbe contattare la segreteria.
+   * compensativo e cancellare il buono pasto e quindi potrebbe contattare la segreteria.</p>
    *
-   * Una soluzione a ogni problema potrebbe essere quella di persistere nel db in ogni personDay la
-   * situazione di flessibilità raggiunta - residui anno passato, anno corrente e buoni pasto. In
-   * questo modo l'utente anche visivamente avrebbe la percezione di quello che sta succedendo nel
-   * giorno.
+   * <p>Una soluzione a ogni problema potrebbe essere quella di persistere nel db in ogni personDay
+   * la situazione di flessibilità raggiunta - residui anno passato, anno corrente e buoni pasto.
+   * In questo modo l'utente anche visivamente avrebbe la percezione di quello che sta succedendo
+   * nel giorno.</p>
    */
-  public boolean isGianvitoConditionSatisfied(int workingTimeDecurted,
-                                              int justifiedTimeAtWork, LocalDate date, Contract contract, WorkingTimeTypeDay wttd) {
+  public boolean isGianvitoConditionSatisfied(
+      int workingTimeDecurted, int justifiedTimeAtWork, LocalDate date, Contract contract,
+      WorkingTimeTypeDay wttd) {
 
-    // - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro giornaliero.
-    // 		ok buono pasto
+    // - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro
+    //   giornaliero.
+    // ok buono pasto
     if (workingTimeDecurted >= wttd.workingTime) {
       return true;
     }
 
-    // - Ho il tempo di lavoro (eventualmente decurtato) che non raggiunge il tempo di lavoro giornaliero.
-    //	 - Aggiungo PEPE
+    // - Ho il tempo di lavoro (eventualmente decurtato) che non raggiunge il tempo di lavoro
+    //   giornaliero.
+    // - Aggiungo PEPE
     //     - livello raggiunto ok buono pasto
     //TODO: capire se in justifiedTimeAtWork posso considerare tutte le assenze
     // orarie o solo PEPE e gravi motivi personali.
@@ -1070,7 +1074,7 @@ public class PersonDayManager {
   }
 
   /**
-   * Genera una lista di PersonDay aggiungendo elementi fittizzi per coprire ogni giorno del mese
+   * Genera una lista di PersonDay aggiungendo elementi fittizzi per coprire ogni giorno del mese.
    */
   public List<PersonDay> getTotalPersonDayInMonth(List<PersonDay> personDays,
                                                   Person person, int year, int month) {
@@ -1083,7 +1087,8 @@ public class PersonDayManager {
     int currentWorkingDays = 0;
     LocalDate currentDate = beginMonth;
     while (!currentDate.isAfter(endMonth)) {
-      if (currentWorkingDays < personDays.size() && personDays.get(currentWorkingDays).date.isEqual(currentDate)) {
+      if (currentWorkingDays < personDays.size()
+          && personDays.get(currentWorkingDays).date.isEqual(currentDate)) {
         totalDays.add(personDays.get(currentWorkingDays));
         currentWorkingDays++;
       } else {
@@ -1095,9 +1100,15 @@ public class PersonDayManager {
         PersonDay newPersonDay;
         //primo giorno del mese festivo
         if (previusPersonDay == null) {
-          newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0);
+          newPersonDay =
+              new PersonDay(
+                  person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0);
         } else {
-          newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, previusPersonDay.progressive);
+          newPersonDay =
+              new PersonDay(
+                  person,
+                  new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0,
+                  previusPersonDay.progressive);
         }
 
         totalDays.add(newPersonDay);
@@ -1109,7 +1120,7 @@ public class PersonDayManager {
   }
 
   /**
-   * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
+   * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro.
    */
   public int numberOfMealTicketToUse(List<PersonDay> personDays) {
     int number = 0;
@@ -1124,7 +1135,7 @@ public class PersonDayManager {
 
   /**
    * Il numero di buoni pasto da restituire all'interno della lista di person day passata come
-   * parametro
+   * parametro.
    */
   public int numberOfMealTicketToRender(List<PersonDay> personDays) {
     int ticketTorender = 0;
@@ -1157,7 +1168,7 @@ public class PersonDayManager {
   }
 
   /**
-   * Il numero di coppie ingresso/uscita da stampare per il personday
+   * Il numero di coppie ingresso/uscita da stampare per il personday.
    */
   public int numberOfInOutInPersonDay(PersonDay pd) {
     if (pd == null) {
@@ -1207,7 +1218,7 @@ public class PersonDayManager {
   }
 
   /**
-   * @return la quantità in eccesso, se c'è, nei giorni in cui una persona è in turno
+   * @return la quantità in eccesso, se c'è, nei giorni in cui una persona è in turno.
    */
   public int getExceedInShift(PersonDay pd) {
     Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(pd.person, pd.date);

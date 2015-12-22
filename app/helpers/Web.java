@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
+ * Contiene metodi per ottenere i messaggi per le crud ed altre utilità per la parte template.
+ *
  * @author marco
  */
 public final class Web {

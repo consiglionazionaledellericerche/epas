@@ -46,9 +46,9 @@ public class VacationsRecapFactory {
   /**
    * @param dateAsToday per simulare con un giorno diverso da oggi
    */
-  public Optional<VacationsRecap> create(int year, Contract contract,
-                                         LocalDate actualDate, boolean considerExpireLastYear,
-                                         List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
+  public Optional<VacationsRecap> create(
+      int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear,
+      List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
 
     IWrapperContract c = wrapperFactory.create(contract);
 
@@ -56,8 +56,7 @@ public class VacationsRecapFactory {
       return Optional.<VacationsRecap>absent();
     }
 
-    if (c.getValue().vacationPeriods == null ||
-            c.getValue().vacationPeriods.isEmpty()) {
+    if (c.getValue().vacationPeriods == null || c.getValue().vacationPeriods.isEmpty()) {
       return Optional.<VacationsRecap>absent();
     }
 
@@ -81,31 +80,17 @@ public class VacationsRecapFactory {
     return Optional.fromNullable(vacationRecap);
   }
 
-  /**
-   *
-   * @param person
-   * @param month
-   * @param year
-   * @return
-   */
-  public Optional<VacationsRecap> create(int year, Contract contract,
-                                         LocalDate actualDate, boolean considerExpireLastYear) {
+  public Optional<VacationsRecap> create(
+      int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) {
 
     List<Absence> otherAbsences = Lists.newArrayList();
     return create(year, contract, actualDate, considerExpireLastYear,
             otherAbsences, Optional.<LocalDate>absent());
   }
 
-  /**
-   *
-   * @param person
-   * @param month
-   * @param year
-   * @return
-   */
-  public Optional<VacationsRecap> create(int year, Contract contract,
-                                         LocalDate actualDate, boolean considerExpireLastYear,
-                                         LocalDate dateAsToday) {
+  public Optional<VacationsRecap> create(
+      int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear,
+      LocalDate dateAsToday) {
 
     List<Absence> otherAbsences = Lists.newArrayList();
     return create(year, contract, actualDate, considerExpireLastYear,

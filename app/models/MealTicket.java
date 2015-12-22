@@ -39,7 +39,7 @@ public class MealTicket extends BaseModel {
   public LocalDate date;
 
   @Required
-  public Integer block;	/*esempio 5941 3165 01 */
+  public Integer block; /*esempio 5941 3165 01 */
 
   public Integer number;
 

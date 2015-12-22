@@ -56,7 +56,7 @@ import javax.inject.Inject;
 
 /**
  * @author arianna
- * @author Dario
+ * @author dario
  */
 @Slf4j
 public class ReperibilityManager {
@@ -391,21 +391,27 @@ public class ReperibilityManager {
       log.debug("trovato personReperibilityDay.personReperibility.person={} e reqstart={}",
           personReperibilityDay.personReperibility.person, startDay);
 
-      if (personReperibilityDay == null || (personReperibilityDay.personReperibility.person != requestor)) {
+      if (personReperibilityDay == null
+          || (personReperibilityDay.personReperibility.person != requestor)) {
         throw new IllegalArgumentException(
-            String.format("Impossible to offer the day %s because is not associated to the right requestor %s", start, requestor));
+            String.format(
+                "Impossible to offer the day %s because is not associated to the right "
+                + "requestor %s", start, requestor));
       } else {
-        Logger.debug("Aggiorno il personReperibilityDay = %s", personReperibilityDay);
-        //PersonReperibility substituteRep = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.person = ? AND pr.personReperibilityType = ?", substitute, reperibilityType).first();
-        PersonReperibility substituteRep = personReperibilityDayDao.getPersonReperibilityByPersonAndType(substitute, reperibilityType);
+        log.debug("Aggiorno il personReperibilityDay = {}", personReperibilityDay);
+        PersonReperibility substituteRep =
+            personReperibilityDayDao
+              .getPersonReperibilityByPersonAndType(substitute, reperibilityType);
         personReperibilityDay.personReperibility = substituteRep;
 
-        Logger.info("scambio reperibilità del richiedente con personReperibilityDay.personReperibility.person=%s e reqstart=%s", personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+        log.info("scambio reperibilità del richiedente con "
+            + "personReperibilityDay.personReperibility.person={} e reqstart={}",
+            personReperibilityDay.personReperibility.person, personReperibilityDay.date);
       }
 
       personReperibilityDay.save();
 
-      Logger.info("Aggiornato PersonReperibilityDay del richiedente= %s", personReperibilityDay);
+      log.info("Aggiornato PersonReperibilityDay del richiedente= {}", personReperibilityDay);
 
       start = start.plusDays(1);
     }
@@ -413,19 +419,19 @@ public class ReperibilityManager {
   }
 
 
-  /*
-   * @param personReperibilityDays	- lista di giorni di reperibilità effettuati dai reperibili
-   * @return							- lista dei reperibili coinvolti nei giorni di reperibilità
-   * 									passati come parametro
+  /**
+   * @param personReperibilityDays lista di giorni di reperibilità effettuati dai reperibili.
+   * @return lista dei reperibili coinvolti nei giorni di reperibilità passati come parametro
    */
-  public List<Person> getPersonsFromReperibilityDays(List<PersonReperibilityDay> personReperibilityDays) {
+  public List<Person> getPersonsFromReperibilityDays(
+      List<PersonReperibilityDay> personReperibilityDays) {
     List<Person> personList = new ArrayList<Person>();
 
     for (PersonReperibilityDay prd : personReperibilityDays) {
       if (!personList.contains(prd.personReperibility.person)) {
-        Logger.trace("inserisco il reperibile ", prd.personReperibility.person);
+        log.trace("inserisco il reperibile {}", prd.personReperibility.person);
         personList.add(prd.personReperibility.person);
-        Logger.trace("trovata person=%s", prd.personReperibility.person);
+        log.trace("trovata person={}", prd.personReperibility.person);
       }
     }
 
@@ -433,17 +439,20 @@ public class ReperibilityManager {
   }
 
 
-  /*
-   * Costrisce il calendario delle reperibilità lavorate festive e feriali di un determinato anno
+  /**
+   * Costrisce il calendario delle reperibilità lavorate festive e feriali di un determinato anno.
    *
-   * @param year 				- anno di riferimento del calendario
-   * @param reperibilityType	- tipo di reperibilità di cui costrire il calendario
-   * @return					- Lista di tabelle (una per ogni mese dell'anno) contenenti per ogni persona e giorno del mese
-   * 							l'indicazione se la persona ha effettuato un turno di reperibilità festivo (FS) o feriale (FR)
+   * @param year anno di riferimento del calendario
+   * @param reperibilityType tipo di reperibilità di cui costrire il calendario
+   * @return Lista di tabelle (una per ogni mese dell'anno) contenenti per ogni persona e giorno
+   *     del mese l'indicazione se la persona ha effettuato un turno di reperibilità festivo (FS)
+   *     o feriale (FR)
    */
-  public List<Table<Person, Integer, String>> buildYearlyReperibilityCalendar(int year, PersonReperibilityType reperibilityType) {
+  public List<Table<Person, Integer, String>> buildYearlyReperibilityCalendar(
+      int year, PersonReperibilityType reperibilityType) {
 
-    List<Table<Person, Integer, String>> reperibilityMonths = new ArrayList<Table<Person, Integer, String>>();
+    List<Table<Person, Integer, String>> reperibilityMonths =
+        new ArrayList<Table<Person, Integer, String>>();
 
     // for each month of the year
     for (int i = 1; i <= 12; i++) {
@@ -451,7 +460,9 @@ public class ReperibilityManager {
       LocalDate firstOfMonth = new LocalDate(year, i, 1);
 
       List<PersonReperibilityDay> personReperibilityDays =
-          personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), reperibilityType, Optional.<PersonReperibility>absent());
+          personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
+              firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), reperibilityType,
+              Optional.<PersonReperibility>absent());
 
       // table associated to the current month of the year
       ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder();
@@ -459,9 +470,9 @@ public class ReperibilityManager {
 
       for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
         Person person = personReperibilityDay.personReperibility.person;
-
-        //builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "FS" : "FR");
-        builder.put(person, personReperibilityDay.date.getDayOfMonth(), personManager.isHoliday(person, personReperibilityDay.date) ? "FS" : "FR");
+        builder.put(
+            person, personReperibilityDay.date.getDayOfMonth(),
+            personManager.isHoliday(person, personReperibilityDay.date) ? "FS" : "FR");
       }
       reperibilityMonth = builder.build();
       reperibilityMonths.add(reperibilityMonth);
@@ -471,17 +482,20 @@ public class ReperibilityManager {
   }
 
 
-  /*
+  /**
    * Costruisce il resoconto del numero dei giorni lavorati in reperibilità festiva e feriale
-   * sulla base di un calendario annuale passato come parametro
+   * sulla base di un calendario annuale passato come parametro.
    *
-   * @param reperibilityMonths	- contiene una tabella per ogni mese di un anno che contiene per ogni
-   * 								giorno e persona coinvolta se ha lavorato una reperibilità festiva o feriale
-   * @return						- tabella che contiene per ogni
+   * @param reperibilityMonths contiene una tabella per ogni mese di un anno che contiene per ogni
+   *     giorno e persona coinvolta se ha lavorato una reperibilità festiva o feriale
+   * @return tabella che contiene per ogni
    */
-  public Table<Person, String, Integer> buildYearlyReperibilityReport(List<Table<Person, Integer, String>> reperibilityMonths) {
+  public Table<Person, String, Integer> buildYearlyReperibilityReport(
+      List<Table<Person, Integer, String>> reperibilityMonths) {
+
     int i = 0;
-    Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
+    Table<Person, String, Integer> reperibilitySumDays =
+        HashBasedTable.<Person, String, Integer>create();
 
     // fro each month of the calendar
     for (Table<Person, Integer, String> reperibilityMonth : reperibilityMonths) {
@@ -491,12 +505,14 @@ public class ReperibilityManager {
       for (Person person : reperibilityMonth.rowKeySet()) {
         for (Integer dayOfMonth : reperibilityMonth.columnKeySet()) {
           if (reperibilityMonth.contains(person, dayOfMonth)) {
-            //SemRep semRep = SemRep.valueOf( String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i<=6 ?1:2)));
-            String col = String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i <= 6 ? 1 : 2));
+            String col =
+                String.format("%s%dS",
+                    reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i <= 6 ? 1 : 2));
 
-            int n = reperibilitySumDays.contains(person, col) ? reperibilitySumDays.get(person, col) + 1 : 1;
+            int n =
+                reperibilitySumDays.contains(person, col)
+                  ? reperibilitySumDays.get(person, col) + 1 : 1;
             reperibilitySumDays.put(person, col, Integer.valueOf(n));
-
           } else {
 
           }
@@ -508,18 +524,20 @@ public class ReperibilityManager {
   }
 
 
-  /*
-   * @author arianna
+  /**
    * Salva il riepilogo dei giorni di reperibilit√† e le reason di un certo mesenel database.
    * La reason contiene la descrizione dei periodi di reperibilit√† effettuati
-   * in quel mese
+   * in quel mese.
    *
-   * @param personReperibilityDays	- list of repribility days worked by persons
-   * @param year						- anno di riferimento dei giorni di reperibilità passati come parametro
-   * @param month						- mese di riferimento dei giorni di  reperibilità passati come parametro
-   * @return							- numero di competenze salvate nel DB
+   * @author arianna
+   *
+   * @param personReperibilityDays list of repribility days worked by persons
+   * @param year anno di riferimento dei giorni di reperibilità passati come parametro
+   * @param month mese di riferimento dei giorni di  reperibilità passati come parametro
+   * @return numero di competenze salvate nel DB
    */
-  public int updateDBReperibilityCompetences(List<PersonReperibilityDay> personReperibilityDays, int year, int month) {
+  public int updateDBReperibilityCompetences(
+      List<PersonReperibilityDay> personReperibilityDays, int year, int month) {
 
     // single person reperibility period in a month
     class PRP {
@@ -537,7 +555,8 @@ public class ReperibilityManager {
 
       @Override
       public String toString() {
-        return (this.inizio != this.fine) ? String.format("%d-%d/%s", inizio, fine, mese) : String.format("%d/%s", inizio, mese);
+        return (this.inizio != this.fine)
+            ? String.format("%d-%d/%s", inizio, fine, mese) : String.format("%d/%s", inizio, mese);
       }
     }
 
@@ -557,8 +576,8 @@ public class ReperibilityManager {
 
 
     // get the Competence code for the reperibility working or non-working days
-    CompetenceCode competenceCodeFS = competenceCodeDao.getCompetenceCodeByCode(codFs);
-    CompetenceCode competenceCodeFR = competenceCodeDao.getCompetenceCodeByCode(codFr);
+    CompetenceCode competenceCodeFs = competenceCodeDao.getCompetenceCodeByCode(codFs);
+    CompetenceCode competenceCodeFr = competenceCodeDao.getCompetenceCodeByCode(codFr);
 
     // read the first day of the month and the short month description
     LocalDate firstOfMonth = new LocalDate(year, month, 1);
@@ -593,8 +612,8 @@ public class ReperibilityManager {
       PRP currentPersonReperibilityPeriod = null;
 
       // number of working and non-working days
-      int NumOfFsDays = 0;
-      int NumOfFrDays = 0;
+      int numOfFsDays = 0;
+      int numOfFrDays = 0;
 
       // for each day of month
       for (Integer dayOfMonth : reperibilityMonth.columnKeySet()) {
@@ -602,18 +621,22 @@ public class ReperibilityManager {
         // counts the reperibility days fs and fr
         if (reperibilityMonth.contains(person, dayOfMonth)) {
           if (reperibilityMonth.get(person, dayOfMonth).equals(codFr)) {
-            NumOfFrDays++;
+            numOfFrDays++;
           } else {
-            NumOfFsDays++;
+            numOfFsDays++;
           }
         }
 
         // create the reperibility periods strings divided by fs and fr
         if (reperibilityMonth.contains(person, dayOfMonth)) {
-          if ((previousPersonReperibilityDay == null) ||
-              (!reperibilityMonth.get(person, dayOfMonth).equals(previousPersonReperibilityDay.tipo)) ||
-              ((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) {
-            currentPersonReperibilityPeriod = new PRP(dayOfMonth, dayOfMonth, shortMonth, reperibilityMonth.get(person, dayOfMonth));
+          if ((previousPersonReperibilityDay == null)
+              || (!reperibilityMonth.get(person, dayOfMonth)
+                    .equals(previousPersonReperibilityDay.tipo))
+              || ((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) {
+            currentPersonReperibilityPeriod =
+                new PRP(
+                    dayOfMonth, dayOfMonth, shortMonth,
+                    reperibilityMonth.get(person, dayOfMonth));
 
             if (currentPersonReperibilityPeriod.tipo == codFs) {
               fsPeriods.add(currentPersonReperibilityPeriod);
@@ -623,11 +646,13 @@ public class ReperibilityManager {
           } else {
             currentPersonReperibilityPeriod.fine = dayOfMonth;
           }
-          previousPersonReperibilityDay = new PRD(dayOfMonth, reperibilityMonth.get(person, dayOfMonth));
+          previousPersonReperibilityDay =
+              new PRD(dayOfMonth, reperibilityMonth.get(person, dayOfMonth));
         }
       }
 
-      Logger.debug("NumOfFsDays=%d fsPeriods=%s - NumOfFrDays=%d frPeriods=%s ", NumOfFsDays, fsPeriods, NumOfFrDays, frPeriods);
+      log.debug("NumOfFsDays={} fsPeriods={} - NumOfFrDays={} frPeriods={} ",
+          numOfFsDays, fsPeriods, numOfFrDays, frPeriods);
 
       // build the Fs and Fr reasons
       String fsReason = "";
@@ -638,53 +663,56 @@ public class ReperibilityManager {
       for (PRP prp : frPeriods) {
         frReason = frReason.concat(prp.toString().concat(" "));
       }
-      Logger.debug("ReasonFS=%s ReasonFR=%s", fsReason, frReason);
+      log.debug("ReasonFS={} ReasonFR={}", fsReason, frReason);
 
-      Logger.debug("Cerca Competence FS per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFS.id);
+      log.debug("Cerca Competence FS per person={} id={}, year={}, month={} competenceCodeId={}",
+          person.surname, person.id, year, month, competenceCodeFs.id);
+
       // save the FS reperibility competences in the DB
-      Optional<Competence> FsCompetence = competenceDao.getCompetence(person, year, month, competenceCodeFS);
-      //			Competence FsCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?",
-      //					person, year, month, competenceCodeFS).first();
+      Optional<Competence> FsCompetence =
+          competenceDao.getCompetence(person, year, month, competenceCodeFs);
 
       if (FsCompetence.isPresent()) {
-        Logger.debug("Trovato competenza FS =%s", FsCompetence);
+        log.debug("Trovato competenza FS ={}", FsCompetence);
         // update the requested hours
-        FsCompetence.get().setValueApproved(NumOfFsDays, fsReason);
+        FsCompetence.get().setValueApproved(numOfFsDays, fsReason);
         FsCompetence.get().save();
 
-        Logger.debug("Aggiornata competenza %s", FsCompetence);
+        log.debug("Aggiornata competenza {}", FsCompetence);
         numSavedCompetences++;
       } else {
-        Logger.debug("Trovato nessuna competenza FS");
+        log.debug("Trovato nessuna competenza FS");
         // insert a new competence with the requested hours and reason
-        Competence competence = new Competence(person, competenceCodeFS, year, month, NumOfFsDays, fsReason);
+        Competence competence =
+            new Competence(person, competenceCodeFs, year, month, numOfFsDays, fsReason);
         competence.save();
 
-        Logger.debug("Salvata competenza %s", competence);
+        log.debug("Salvata competenza {}", competence);
         numSavedCompetences++;
       }
 
-      Logger.debug("Cerca Competence FR per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFR.id);
+      log.debug("Cerca Competence FR per person={} id={}, year={}, month={} competenceCodeId={}",
+          person.surname, person.id, year, month, competenceCodeFr.id);
       // save the FR reperibility competences in the DB
-      Optional<Competence> FrCompetence = competenceDao.getCompetence(person, year, month, competenceCodeFR);
-      //			Competence FrCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?",
-      //					person, year, month, competenceCodeFR).first();
+      Optional<Competence> frCompetence =
+          competenceDao.getCompetence(person, year, month, competenceCodeFr);
 
-      if (FrCompetence.isPresent()) {
+      if (frCompetence.isPresent()) {
         // update the requested hours
-        Logger.debug("Trovato competenza FR =%s", FsCompetence);
-        FrCompetence.get().setValueApproved(NumOfFrDays, frReason);
-        FrCompetence.get().save();
+        log.debug("Trovato competenza FR ={}", FsCompetence);
+        frCompetence.get().setValueApproved(numOfFrDays, frReason);
+        frCompetence.get().save();
 
-        Logger.debug("Aggiornata competenza %s", FrCompetence);
+        log.debug("Aggiornata competenza {}", frCompetence);
         numSavedCompetences++;
 
       } else {
         // insert a new competence with the requested hours an reason
-        Logger.debug("Trovato nessuna competenza FR");
-        Competence competence = new Competence(person, competenceCodeFR, year, month, NumOfFrDays, fsReason);
+        log.debug("Trovato nessuna competenza FR");
+        Competence competence =
+            new Competence(person, competenceCodeFr, year, month, numOfFrDays, fsReason);
         competence.save();
-        Logger.debug("Salvata competenza %s", competence);
+        log.debug("Salvata competenza {}", competence);
         numSavedCompetences++;
       }
     }
@@ -694,29 +722,31 @@ public class ReperibilityManager {
   }
 
 
-  /*
-   * @param  competenceList 		- lista di competenze
-   * @param personsApprovedCompetence	- tabella contnente per ogni persona, coinvolta nelle competenze
-   * 								passate come eparametro, e per ogni tipo di competenza, il valore
-   * 								approvato per quella competenza
+  /**
+   * @param  competenceList lista di competenze.
+   * @param personsApprovedCompetence tabella contnente per ogni persona, coinvolta nelle
+   *     competenze passate come eparametro, e per ogni tipo di competenza, il valore approvato
+   *     per quella competenza.
    */
-  public void updateReperibilityDaysReportFromCompetences(Table<Person, String, Integer> personsApprovedCompetence, List<Competence> competenceList) {
+  public void updateReperibilityDaysReportFromCompetences(
+      Table<Person, String, Integer> personsApprovedCompetence, List<Competence> competenceList) {
     for (Competence competence : competenceList) {
-      Logger.debug("Metto nella tabella competence = %s", competence.toString());
-      personsApprovedCompetence.put(competence.person, competence.competenceCode.codeToPresence, competence.valueApproved);
+      log.debug("Metto nella tabella competence = {}", competence.toString());
+      personsApprovedCompetence.put(
+          competence.person, competence.competenceCode.codeToPresence, competence.valueApproved);
     }
   }
 
 
-  /*
-   * @param  competenceList 		- lista di competenze
-   * @param reperibilityDateDays	- tabella contnente per ogni persona, coinvolta nelle competenze
-   * 								passate come eparametro, e per ogni tipo di competenza, il valore
-   * 								della reason
+  /**
+   * @param  competenceList lista di competenze.
+   * @param reperibilityDateDays tabella contnente per ogni persona, coinvolta nelle competenze
+   *     passate come eparametro, e per ogni tipo di competenza, il valore della reason
    */
-  public void updateReperibilityDatesReportFromCompetences(Table<Person, String, List<String>> reperibilityDateDays, List<Competence> competenceList) {
+  public void updateReperibilityDatesReportFromCompetences(
+      Table<Person, String, List<String>> reperibilityDateDays, List<Competence> competenceList) {
     for (Competence competence : competenceList) {
-      Logger.debug("Metto nella tabella competence = %s", competence.toString());
+      log.debug("Metto nella tabella competence = {}", competence.toString());
       List<String> str = Arrays.asList(competence.reason.split(" "));
       reperibilityDateDays.put(competence.person, competence.competenceCode.codeToPresence, str);
     }
@@ -724,13 +754,18 @@ public class ReperibilityManager {
 
 
   /**
-   * @author arianna crea una tabella con le eventuali inconsistenze tra le timbrature dei
+   * Crea una tabella con le eventuali inconsistenze tra le timbrature dei
    * reperibili di un certo tipo e i turni di reperibilit√† svolti in un determinato periodo di
-   * tempo ritorna una tabella del tipo (Person, [thNoStamping, thAbsence], List<'gg/MMM '>)
+   * tempo ritorna una tabella del tipo (Person, [thNoStamping, thAbsence], List['gg/MMM']).
+   *
+   * @author arianna
    */
-  public Table<Person, String, List<String>> getReperibilityInconsistenceAbsenceTable(List<PersonReperibilityDay> personReperibilityDays, LocalDate startDate, LocalDate endDate) {
+  public Table<Person, String, List<String>> getReperibilityInconsistenceAbsenceTable(
+        List<PersonReperibilityDay> personReperibilityDays,
+        LocalDate startDate, LocalDate endDate) {
     // for each person contains days with absences and no-stamping  matching the reperibility days
-    Table<Person, String, List<String>> inconsistentAbsenceTable = TreeBasedTable.<Person, String, List<String>>create();
+    Table<Person, String, List<String>> inconsistentAbsenceTable =
+        TreeBasedTable.<Person, String, List<String>>create();
 
     // lista dei giorni di assenza e mancata timbratura
     List<String> noStampingDays = new ArrayList<String>();
@@ -744,27 +779,31 @@ public class ReperibilityManager {
       //------------------------------------------
 
       Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personReperibilityDay.date);
-      //PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
 
       // if there are no events and it is not an holiday -> error
       if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
         //if (!person.isHoliday(personReperibilityDay.date)) {
         if (!personDay.get().isHoliday) {
-          Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+          log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
+              + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 
 
-          noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
+          noStampingDays =
+              (inconsistentAbsenceTable.contains(person, thNoStampings))
+                ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
           noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
           inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
         }
       } else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
         // check for the stampings in working days
-        //if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
         if (!personDay.get().isHoliday && personDay.get().stampings.isEmpty()) {
-          Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
+          log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
+              + "giorno {}", person.name, person.surname, personDay.get().date);
 
 
-          noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
+          noStampingDays =
+              (inconsistentAbsenceTable.contains(person, thNoStampings))
+                ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
           noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
           inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
         }
@@ -773,9 +812,12 @@ public class ReperibilityManager {
         if (!personDay.get().absences.isEmpty()) {
           for (Absence absence : personDay.get().absences) {
             if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
-              Logger.info("La reperibilit√† di %s %s √® incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+              log.info("La reperibilità di {} {} è incompatibile con la sua assenza nel "
+                  + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 
-              absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences)) ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();
+              absenceDays =
+                  (inconsistentAbsenceTable.contains(person, thAbsences))
+                    ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();
               absenceDays.add(personReperibilityDay.date.toString("dd MMM"));
               inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
             }
@@ -788,13 +830,15 @@ public class ReperibilityManager {
   }
 
 
-  /*
+  /**
    * Export the reperibility calendar in iCal for the person with id = personId with reperibility
-   * of type 'type' for the 'year' year
+   * of type 'type' for the 'year' year.
    * If the personId=0, it exports the calendar for all  the reperibility persons of type 'type'
    */
-  public Optional<Calendar> createCalendar(Long type, Optional<Long> personId, int year) {
-    log.debug("Crea iCal per l'anno {} della person con id = {}, reperibility type {}", year, personId, type);
+  public Optional<Calendar> createCalendar(
+      Long type, Optional<Long> personId, int year) {
+    log.debug("Crea iCal per l'anno {} della person con id = {}, reperibility type {}",
+        year, personId, type);
 
     // check for the parameter
     //---------------------------
@@ -802,25 +846,34 @@ public class ReperibilityManager {
     Optional<PersonReperibility> personReperibility = Optional.absent();
     if (personId.isPresent()) {
       // read the reperibility person
-      personReperibility = Optional.fromNullable(personReperibilityDayDao.getPersonReperibilityByPersonAndType(personDao.getPersonById(personId.get()), personReperibilityDayDao.getPersonReperibilityTypeById(type)));
+      personReperibility =
+          Optional.fromNullable(
+              personReperibilityDayDao.getPersonReperibilityByPersonAndType(
+                  personDao.getPersonById(personId.get()),
+                  personReperibilityDayDao.getPersonReperibilityTypeById(type)));
       if (!personReperibility.isPresent()) {
-        log.info("Person id = {} is not associated to a reperibility of type = {}", personId.get(), type);
+        log.info("Person id = {} is not associated to a reperibility of type = {}",
+            personId.get(), type);
         return Optional.<Calendar>absent();
       }
     }
 
-    log.debug("chiama la createicsReperibilityCalendar({}, {}, {})", year, type, personReperibility);
+    log.debug("chiama la createicsReperibilityCalendar({}, {}, {})",
+        year, type, personReperibility);
     Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
     icsCalendar = createicsReperibilityCalendar(year, type, personReperibility);
 
-    log.debug("la createicsReperibilityCalendar ha trovato {} periodi di reperibilità.", icsCalendar.getComponents().size());
-    log.debug("Crea iCal per l'anno {} della person con id = {}, reperibility type {}", year, personId, type);
+    log.debug("la createicsReperibilityCalendar ha trovato {} periodi di reperibilità.",
+        icsCalendar.getComponents().size());
+    log.debug("Crea iCal per l'anno {} della person con id = {}, reperibility type {}",
+        year, personId, type);
 
     return Optional.of(icsCalendar);
   }
 
 
-  public Calendar createicsReperibilityCalendar(int year, Long type, Optional<PersonReperibility> personReperibility) {
+  public Calendar createicsReperibilityCalendar(
+      int year, Long type, Optional<PersonReperibility> personReperibility) {
 
     String eventLabel;
     List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
@@ -840,8 +893,9 @@ public class ReperibilityManager {
 
     if (!personReperibility.isPresent()) {
       // read the reperibility person
-      //List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
-      personsInTheCalList = personReperibilityDayDao.getPersonReperibilityByType(personReperibilityDayDao.getPersonReperibilityTypeById(type));
+      personsInTheCalList =
+          personReperibilityDayDao.getPersonReperibilityByType(
+              personReperibilityDayDao.getPersonReperibilityTypeById(type));
     } else {
       personsInTheCalList.add(personReperibility.get());
     }
@@ -849,12 +903,14 @@ public class ReperibilityManager {
 
     for (PersonReperibility personRep : personsInTheCalList) {
 
-      eventLabel = (personsInTheCalList.size() == 1) ? "Reperibilità Registro" : "Reperibilità ".concat(personRep.person.surname);
-      List<PersonReperibilityDay> reperibilityDays = personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(from, to, personRep.personReperibilityType, Optional.of(personRep));
-      //PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
+      eventLabel = (personsInTheCalList.size() == 1)
+          ? "Reperibilità Registro" : "Reperibilità ".concat(personRep.person.surname);
+      List<PersonReperibilityDay> reperibilityDays =
+          personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
+              from, to, personRep.personReperibilityType, Optional.of(personRep));
 
-      log.debug("Reperibility find called from {} to {}, found {} reperibility days for person id = {}",
-          from, to, reperibilityDays.size(), personRep.person.id);
+      log.debug("Reperibility find called from {} to {}, found {} reperibility days for person"
+          + " id = {}", from, to, reperibilityDays.size(), personRep.person.id);
 
       log.debug("Calcola i periodi di reperibilità");
 
@@ -865,10 +921,9 @@ public class ReperibilityManager {
       for (PersonReperibilityDay prd : reperibilityDays) {
 
         Date date = new Date(prd.date.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());
-        //log.debug("Data reperibilita' per {}, date={}", prd.personReperibility.person.surname, date.toString());
 
         if (startDate == null) {
-          Logger.debug("Nessun periodo, nuovo periodo: startDate=%s", date);
+          log.debug("Nessun periodo, nuovo periodo: startDate={}", date);
 
           startDate = endDate = date;
           sequence = 1;
@@ -876,20 +931,21 @@ public class ReperibilityManager {
         }
 
         if (date.getTime() - endDate.getTime() > 86400 * 1000) {
-          Logger.debug("Memorizza periodo: startDate=%s, sequence=%s", startDate, sequence);
+          log.debug("Memorizza periodo: startDate={}, sequence={}", startDate, sequence);
           icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
           startDate = endDate = date;
           sequence = 1;
-          Logger.trace("Nuovo periodo: startDate=%s", date);
+          log.trace("Nuovo periodo: startDate={}", date);
         } else {
           sequence++;
           endDate = date;
-          Logger.debug("Allungamento periodo: startDate=%s, endDate=%s, sequence.new=%s", startDate, endDate, sequence);
+          log.debug("Allungamento periodo: startDate={}, endDate={}, sequence.new={}",
+              startDate, endDate, sequence);
         }
 
       }
 
-      Logger.debug("Memorizzo l'ultimo periodo: startDate=%s, sequence=%s", startDate, sequence);
+      log.debug("Memorizzo l'ultimo periodo: startDate={}, sequence={}", startDate, sequence);
       icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
     }
 

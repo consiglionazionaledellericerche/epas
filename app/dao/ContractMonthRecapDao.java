@@ -25,11 +25,11 @@ import javax.persistence.EntityManager;
 
 /**
  * DAO per i riepiloghi mensili.
- *
+ * <p>
  * - situazione residuale minuti anno passato e anno corrente - situazione residuale buoni pasto
  *
  * - situazione residuale ferie (solo per il mese di dicembre)
- *
+ * </p>
  * @author alessandro
  */
 public class ContractMonthRecapDao extends DaoBase {
@@ -41,7 +41,6 @@ public class ContractMonthRecapDao extends DaoBase {
 
   /**
    * I riepiloghi delle persone con un massimo di buoni pasto passato come parametro.
-   *
    * TODO: il filtro sugli office delle persone.
    */
   public List<ContractMonthRecap> getPersonMealticket(YearMonth yearMonth,
