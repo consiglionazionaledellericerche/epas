@@ -2,19 +2,10 @@ package manager.services.vacations;
 
 import com.google.common.collect.ImmutableList;
 
-import it.cnr.iit.epas.DateUtility;
-
-import lombok.Getter;
-
-import manager.services.vacations.impl.AccruedResult;
-import manager.services.vacations.impl.VacationsRecap;
-import manager.services.vacations.impl.VacationsTypeResult;
 import manager.services.vacations.impl.VacationsRecap.VacationsRequest;
 import manager.services.vacations.impl.VacationsTypeResult.TypeVacation;
 
 import models.Absence;
-
-import org.joda.time.LocalDate;
 
 /**
  * Il risultato per il TypeVacation per la richiesta VacationsRequest. 
@@ -25,25 +16,25 @@ public interface IVacationsTypeResult {
 
   /**
    * I Dati della richiesta (comuni ad ogni tipo di assenza).
-   * @return
+   * @return la richiesta. 
    */
   VacationsRequest getVacationsRequest();
   
   /**
    * Il tipo di assenza del risultato.
-   * @return
+   * @return il tipo.
    */
   TypeVacation getTypeVacation();
   
   /**
    * Le assenze usate del tipo di assenza.
-   * @return
+   * @return la lista di assenze.
    */
   ImmutableList<Absence> getAbsencesUsed();
   
   /**
    * Le assenza da inizilizzazione del tipo di assenza.
-   * @return
+   * @return source.
    */
   int getSourced();
   
@@ -59,19 +50,16 @@ public interface IVacationsTypeResult {
   
   /**
    * Assenze usate.
-   * @return
    */
   Integer getUsed();
 
   /**
    * Logica per assenze rimanenti.
-   * @return
    */
   Integer getNotYetUsed();
   
   /**
    * Assenze rimanenti sul totale che il dipendente avrebbe potuto prendere. (Tabellone Danila)
-   * @return
    */
   Integer getRemaining();
   

@@ -32,7 +32,7 @@ public class AccruedResult implements IAccruedResult {
   @Getter protected final VacationsTypeResult vacationsResult;
   @Getter protected final AccruedConverter accruedConverter;
   
-  @Getter protected List<AccruedResultInPeriod> childDecisions = Lists.newArrayList();;
+  @Getter protected List<AccruedResultInPeriod> childDecisions = Lists.newArrayList();
   
   @Getter protected DateInterval interval;
 
@@ -41,10 +41,15 @@ public class AccruedResult implements IAccruedResult {
   @Getter protected int accrued = 0;
   @Getter protected int fixed = 0;
   
+  /**
+   * Costruttore del risultato.
+   * @param vacationsTypeResult il risultato a cui si riferisce.
+   * @param interval l'intervallo effettivo su cui operare.
+   */
   @Builder
-  public AccruedResult(VacationsTypeResult vacationsResult, DateInterval interval) {
+  public AccruedResult(VacationsTypeResult vacationsTypeResult, DateInterval interval) {
     
-    this.vacationsResult = vacationsResult;
+    this.vacationsResult = vacationsTypeResult;
     this.interval = interval;
     this.accruedConverter = AccruedConverter.builder().build();
   }

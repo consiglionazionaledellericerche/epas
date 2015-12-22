@@ -33,6 +33,10 @@ public class Vacations extends Controller {
   @Inject
   private static IWrapperFactory wrapperFactory;
 
+  /**
+   * Vista riepiloghi ferie per l'employee.
+   * @param year anno.
+   */
   public static void show(Integer year) {
 
     Optional<User> currentUser = Security.getUser();
