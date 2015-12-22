@@ -55,7 +55,7 @@
 
 			<td data-order="${vacationsRecap.vacationsLastYear.used}">
 				<a
-				href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.vacationsRequest.contract, 
+				href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.vacationsRequest.contract.id, 
 				    vacationsRecap.vacationsRequest.year)}"
 				data-async-modal="#defaultModal">
 					${vacationsRecap.vacationsLastYear.used} </a>
@@ -63,14 +63,14 @@
 
 			<td data-order="${vacationsRecap.vacationsCurrentYear.used}">
 				<a
-				href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.vacationsRequest.contract, 
+				href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.vacationsRequest.contract.id, 
 				    vacationsRecap.vacationsRequest.year)}"
 				data-async-modal="#defaultModal">
 					${vacationsRecap.vacationsCurrentYear.used} </a>
 			</td>
 
 			<td data-order="${vacationsRecap.permissions.used}"><a
-				href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.vacationsRequest.contract, 
+				href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.vacationsRequest.contract.id, 
 				    vacationsRecap.vacationsRequest.year)}"
 				data-async-modal="#defaultModal"> ${vacationsRecap.permissions.used} </a></td>
 
