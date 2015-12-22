@@ -14,6 +14,8 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.SecureManager;
 import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
@@ -35,6 +37,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 @With({Secure.class, RequestInit.class})
+@Slf4j
 public class VacationsAdmin extends Controller {
 
   @Inject
@@ -96,8 +99,7 @@ public class VacationsAdmin extends Controller {
           continue;
         }
 
-        Optional<IVacationsRecap> vr = vacationsService.create(year, 
-            contract, LocalDate.now(), true);
+        Optional<IVacationsRecap> vr = vacationsService.create(year, contract);
 
         if (vr.isPresent()) {
           vacationsList.add(vr.get());
@@ -129,7 +131,7 @@ public class VacationsAdmin extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract, LocalDate.now(), true);
+    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
@@ -152,7 +154,7 @@ public class VacationsAdmin extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract, LocalDate.now(), true);
+    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
@@ -176,7 +178,7 @@ public class VacationsAdmin extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract, LocalDate.now(), true);
+    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 

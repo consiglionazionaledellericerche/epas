@@ -134,8 +134,8 @@ public class MonthRecaps extends Controller {
       IWrapperPerson wrPerson = wrapperFactory.create(person);
 
       for (Contract contract : wrPerson.getMonthContracts(year, month)) {
-        Optional<IVacationsRecap> vr = vacationsService.create(year,
-                contract, LocalDate.now(), true, monthEnd);
+        
+        Optional<IVacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
 
         CustomRecapDTO danilaDto = new CustomRecapDTO();
         danilaDto.ferieAnnoCorrente = vr.get().getVacationsCurrentYear().getRemaining();

@@ -74,7 +74,9 @@ public class AccruedResult implements IAccruedResult {
    */
   public AccruedResult adjustDecision() {
     
-    // TODO controllare.
+    if (this.interval == null) {
+      return this;
+    }
     
     // per ora i valori in maturazione non li aggiusto.
     if (this.vacationsResult.getTypeVacation().equals(TypeVacation.PERMISSION_CURRENT_YEAR) 

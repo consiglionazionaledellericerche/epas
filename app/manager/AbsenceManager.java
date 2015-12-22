@@ -520,20 +520,10 @@ public class AbsenceManager {
   private AbsencesResponse handler37(Person person, LocalDate date, AbsenceType absenceType, 
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    if (date.getYear() == LocalDate.now().getYear()) {
-      Optional<IVacationsRecap> vr = vacationsService.create(date.getYear(),
-          contractDao.getContract(LocalDate.now(), person),
-          LocalDate.now(), false, otherAbsences, Optional.<LocalDate>absent());
-      if (vr.isPresent()) {
-        // TODO: avendo il calcolo total gratis si può rimuovere il consiederExpireDate e prendere
-        // direttamente il getNotYetUsedTotal.
-        int remaining37 = vr.get().getVacationsLastYear().getNotYetUsedAccrued();
-        if (remaining37 > 0) {
-          //37 disponibile
-          return insert(person, date, absenceType, file,
-                  Optional.<Integer>absent(), persist);
-        }
-      }
+    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType) 
+        && vacationsService.canTake37(person, date, otherAbsences)) {
+      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
+     
     }
 
     //37 non disponibile
