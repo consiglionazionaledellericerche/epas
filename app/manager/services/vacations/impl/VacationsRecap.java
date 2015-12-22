@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import manager.services.vacations.IVacationsRecap;
-import manager.services.vacations.IVacationsTypeResult;
 import manager.services.vacations.impl.VacationsTypeResult.TypeVacation;
 
 import models.Absence;
@@ -109,7 +108,7 @@ public class VacationsRecap implements IVacationsRecap {
    * @param contract contratto
    * @param absencesToConsider assenze da considerare
    * @param accruedDate data di maturazione
-   * @param dateExpireLastYear data di scadenza ferie
+   * @param expireDate data di scadenza ferie
    * @param considerDateExpireLastYear se considerare la data si scadenza
    * @param dateAsToday simulazione come se fosse oggi.
    */

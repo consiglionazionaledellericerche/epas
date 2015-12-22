@@ -12,25 +12,25 @@ public interface IVacationsRecap {
   
   /**
    * I dati della richiesta per generare il recap.
-   * @return
+   * @return la richiesta.
    */
   VacationsRequest getVacationsRequest();
 
   /**
    * Riepilogo ferie anno passato.
-   * @return
+   * @return il recap.
    */
   IVacationsTypeResult getVacationsLastYear();
   
   /**
    * Riepilogo ferie anno corrente.
-   * @return
+   * @return il recap.
    */
   IVacationsTypeResult getVacationsCurrentYear();
   
   /**
    * Riepilogo permessi.
-   * @return
+   * @return il recap.
    */
   IVacationsTypeResult getPermissions();
   

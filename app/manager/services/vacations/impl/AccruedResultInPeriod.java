@@ -24,10 +24,11 @@ public class AccruedResultInPeriod extends AccruedResult {
   @Getter private VacationCode vacationCode;
   
   /**
-   * Costruttore.
-   * @param vacationsResult
-   * @param vacationCode
-   * @param interval
+   * Costruttore del risultato nel periodo.
+   * // TODO: il vacationCode si potrebbe derivare dal TypeVacation.
+   * @param parentAccruedResult il risultato di cui è un fattore.
+   * @param interval l'intervallo effettivo su cui lavorare
+   * @param vacationCode il tipo di assenza.
    */
   private AccruedResultInPeriod(AccruedResult parentAccruedResult, DateInterval interval, 
       VacationCode vacationCode) {
@@ -63,7 +64,7 @@ public class AccruedResultInPeriod extends AccruedResult {
 
   /**
    * Effettua il calcolo.
-   * @return
+   * @return this
    */
   public AccruedResultInPeriod compute() {
     

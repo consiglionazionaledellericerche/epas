@@ -8,7 +8,6 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.Builder;
 import lombok.Getter;
 
-import manager.services.vacations.IAccruedResult;
 import manager.services.vacations.IVacationsTypeResult;
 import manager.services.vacations.impl.VacationsRecap.VacationsRequest;
 
@@ -83,7 +82,7 @@ public class VacationsTypeResult implements IVacationsTypeResult {
     // Costruisco il riepilogo delle totali.
     if (totalInterval != null) {
       this.totalResult = AccruedResult.builder()
-          .vacationsResult(this)
+          .vacationsTypeResult(this)
           .interval(totalInterval)
           .build();
 
@@ -121,7 +120,6 @@ public class VacationsTypeResult implements IVacationsTypeResult {
   
   /**
    * Numero di assenze usate.
-   * @return
    */
   public Integer getUsed() {
     return this.absencesUsed.size() + this.sourced;
@@ -129,7 +127,6 @@ public class VacationsTypeResult implements IVacationsTypeResult {
 
   /**
    * Logica per rimanenti.
-   * @return
    */
   public Integer getNotYetUsed() {
 
@@ -157,7 +154,6 @@ public class VacationsTypeResult implements IVacationsTypeResult {
   
   /**
    * Rimanenti sul totale che il dipendente avrebbe potuto prendere. (Tabellone Danila)
-   * @return
    */
   public Integer getRemaining() {
     return this.totalResult.accrued - this.getUsed();
