@@ -1,7 +1,6 @@
-/**
- *
- */
 package models;
+
+import lombok.ToString;
 
 import models.base.BaseModel;
 
@@ -18,14 +17,16 @@ import javax.persistence.Table;
 /**
  * @author cristian
  */
+@ToString
 @Entity
 @Table(name = "vacation_codes")
 public class VacationCode extends BaseModel {
 
   private static final long serialVersionUID = 6182486562743326271L;
 
-  //modificare quindi anche la funzione di popolamento. ci devono essere delle update ogni volta che per quell'id
-  //viene trovato un nuovo piano ferie (ovvero se per quell'id ce n'è più di uno).
+  // modificare quindi anche la funzione di popolamento. ci devono essere delle update ogni
+  // volta che per quell'id viene trovato un nuovo piano ferie (ovvero se per quell'id ce
+  // n'è più di uno).
 
 
   @OneToMany(mappedBy = "vacationCode")
@@ -42,9 +43,4 @@ public class VacationCode extends BaseModel {
   @Column(name = "permission_days")
   public Integer permissionDays;
 
-  @Override
-  public String toString() {
-    return String.format("VacationCode[%s] - description = %s, vacationDays = %d, permissionDays = %d",
-            id, description, vacationDays, permissionDays);
-  }
 }

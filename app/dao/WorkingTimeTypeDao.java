@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per i WorkingTimeType.
  * @author dario
  */
 public class WorkingTimeTypeDao extends DaoBase {
@@ -38,11 +39,6 @@ public class WorkingTimeTypeDao extends DaoBase {
     this.contractDao = contractDao;
   }
 
-  /**
-   *
-   * @param description
-   * @return
-   */
   @Deprecated
   public WorkingTimeType getWorkingTimeTypeByDescription(String description) {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
@@ -90,16 +86,11 @@ public class WorkingTimeTypeDao extends DaoBase {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
     final JPQLQuery query = getQueryFactory()
             .from(wtt)
-            .where(wtt.office.isNull()
-                    .or(BooleanExpression.allOf(wtt.office.eq(office).and(wtt.disabled.eq(false)))));
+            .where(wtt.office.isNull().or(
+                BooleanExpression.allOf(wtt.office.eq(office).and(wtt.disabled.eq(false)))));
     return query.list(wtt);
   }
 
-  /**
-   *
-   * @param id
-   * @return
-   */
   public WorkingTimeType getWorkingTimeTypeById(Long id) {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
     final JPQLQuery query = getQueryFactory().from(wtt)
@@ -109,7 +100,7 @@ public class WorkingTimeTypeDao extends DaoBase {
 
 
   /**
-   * @return la lista degli orari di lavoro presenti di default sul database
+   * @return la lista degli orari di lavoro presenti di default sul database.
    */
   public List<WorkingTimeType> getDefaultWorkingTimeType() {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
@@ -119,7 +110,7 @@ public class WorkingTimeTypeDao extends DaoBase {
   }
 
   /**
-   * @return il tipo di orario di lavoro utilizzato in date
+   * @return il tipo di orario di lavoro utilizzato in date.
    */
   public Optional<WorkingTimeType> getWorkingTimeType(LocalDate date, Person person) {
 

@@ -83,8 +83,8 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
 
-    if (this.getPersonDayContract().get().sourceDateResidual != null &&
-            this.getPersonDayContract().get().sourceDateResidual
+    if (this.getPersonDayContract().get().sourceDateResidual != null
+            && this.getPersonDayContract().get().sourceDateResidual
                     .isEqual(this.value.date.minusDays(1))) {
       //Giorno successivo all'inizializzazione
       return;

@@ -33,9 +33,9 @@ public class StampingManager {
   private final PersonDayManager personDayManager;
   private final PersonStampingDayRecapFactory stampingDayRecapFactory;
   private final ConsistencyManager consistencyManager;
-  
+
   /**
-   * 
+   *
    * @param stampingDao il dao per cercare le stampings
    * @param personDayDao il dao per cercare i personday
    * @param personDao il dao per cercare le persone
@@ -44,7 +44,7 @@ public class StampingManager {
    * @param consistencyManager
    * il costruttore dell'injector.
    */
-  @Inject  
+  @Inject
   public StampingManager(StampingDao stampingDao,
                          PersonDayDao personDayDao,
                          PersonDao personDao,
@@ -195,8 +195,6 @@ public class StampingManager {
       Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence);
 
       if (!pd.isPresent()) {
-//      personDay = new PersonDay(person, dayPresence);
-//             personDay.create();
         continue;
       } else {
         personDay = pd.get();

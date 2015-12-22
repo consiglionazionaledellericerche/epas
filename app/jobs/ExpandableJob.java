@@ -12,7 +12,6 @@ import manager.PersonDayInTroubleManager;
 
 import models.Person;
 
-import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 
 import play.Play;
@@ -39,7 +38,7 @@ public class ExpandableJob extends Job {
 
   public void doJob() {
 
-//		in modo da inibire l'esecuzione dei job in base alla configurazione
+    // in modo da inibire l'esecuzione dei job in base alla configurazione
     if ("false".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("ExpandableJob Interrotto. Disattivato dalla configurazione.");
       return;
@@ -60,7 +59,7 @@ public class ExpandableJob extends Job {
 
     try {
       personDayInTroubleManager.sendMail(personList, fromDate, toDate, "no assenze");
-    } catch (EmailException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 

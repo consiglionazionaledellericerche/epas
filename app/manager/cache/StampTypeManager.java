@@ -67,15 +67,6 @@ public class StampTypeManager {
 
     if (value == null) {
 
-//			StampModificationType dailyLunch = 
-//					stampingDao.getStampModificationTypeByCode(
-//							StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-//			StampModificationType minLunch = 
-//					stampingDao.getStampModificationTypeByCode(
-//							StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-//			Cache.set("dailyLunch", dailyLunch);
-//			Cache.set("minLunch", minLunch);
-
       value = getStampModificationTypeByCode(code);
 
       Preconditions.checkNotNull(value);

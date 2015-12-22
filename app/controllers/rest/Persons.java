@@ -129,7 +129,8 @@ public class Persons extends Controller {
               start.getMonthOfYear(), Optional.fromNullable(code)));
 
       start = start.plusMonths(1);
-      //			Il caso in cui non vengano specificate delle date che coincidono con l'inizio e la fine di un mese
+      // Il caso in cui non vengano specificate delle date che coincidono con l'inizio e la fine
+      // di un mese
       if (start.isAfter(end) && start.getMonthOfYear() == end.getMonthOfYear()) {
         competences.addAll(competenceDao.competenceInMonth(person, start.getYear(),
                 start.getMonthOfYear(), Optional.fromNullable(code)));

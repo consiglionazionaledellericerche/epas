@@ -1,12 +1,12 @@
 package dao.history;
 
-import org.hibernate.envers.RevisionType;
-import org.joda.time.LocalDateTime;
-
 import com.google.common.base.Function;
 
 import models.base.BaseModel;
 import models.base.Revision;
+
+import org.hibernate.envers.RevisionType;
+import org.joda.time.LocalDateTime;
 
 /**
  * @author marco
@@ -24,14 +24,14 @@ public class HistoryValue<T extends BaseModel> {
     this.type = type;
   }
 
-  public static <T extends BaseModel> Function<Object[], HistoryValue<T>>
-  fromTuple(final Class<T> cls) {
+  public static <T extends BaseModel> Function<Object[], HistoryValue<T>> fromTuple(
+      final Class<T> cls) {
 
     return new Function<Object[], HistoryValue<T>>() {
       @Override
       public HistoryValue<T> apply(Object[] tuple) {
         return new HistoryValue<T>(cls.cast(tuple[0]), (Revision) tuple[1],
-                (RevisionType) tuple[2]);
+            (RevisionType) tuple[2]);
       }
     };
   }

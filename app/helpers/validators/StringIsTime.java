@@ -1,13 +1,13 @@
 package helpers.validators;
 
-import java.util.regex.Pattern;
-
 import play.data.validation.Check;
+
+import java.util.regex.Pattern;
 
 public class StringIsTime extends Check {
 
   /**
-   * matches strings as HH:MM or HHMM
+   * matches strings as HH:MM or HHMM.
    */
   @Override
   public boolean isSatisfied(Object validatedObject, Object time) {

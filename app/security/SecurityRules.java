@@ -107,10 +107,10 @@ public class SecurityRules {
    * Se il check fornito è già stato verificato, viene restituito il precedente già valorizzato,
    * altrimenti viene creato e valorizzato il nuovo check, salvandolo per le successive iterazioni.
    *
-   * Ovviamente il risultato della verifica è valida soltanto per la richiesta in corso
-   * (ThreadLocal).
+   * <p>Ovviamente il risultato della verifica è valida soltanto per la richiesta in corso
+   * (ThreadLocal).</p>
    *
-   * Questa funzione ha l'effetto collaterale di impostare il check.granted.
+   * <p>Questa funzione ha l'effetto collaterale di impostare il check.granted.</p>
    *
    * @return true se il check fornito è permesso per lo user fornito.
    */
