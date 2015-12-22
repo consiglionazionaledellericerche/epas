@@ -82,46 +82,42 @@ public class VacationsTypeResult implements IVacationsTypeResult {
         vacationsRequest.getContractDateInterval());
 
     // Costruisco il riepilogo delle totali.
-    //if (totalInterval != null) {
-      this.totalResult = AccruedResult.builder()
-          .vacationsTypeResult(this)
-          .interval(totalInterval)
-          .build();
+    this.totalResult = AccruedResult.builder()
+        .vacationsTypeResult(this)
+        .interval(totalInterval)
+        .build();
 
-      for (VacationPeriod vp : vacationsRequest.getContractVacationPeriod()) {
-        this.totalResult.addResult(
+    for (VacationPeriod vp : vacationsRequest.getContractVacationPeriod()) {
+      this.totalResult.addResult(
 
-            AccruedResultInPeriod.buildAccruedResultInPeriod(
-                this.totalResult,
-                DateUtility.intervalIntersection(totalInterval, vp.getDateInterval()),
-                vp.vacationCode)
+          AccruedResultInPeriod.buildAccruedResultInPeriod(
+              this.totalResult,
+              DateUtility.intervalIntersection(totalInterval, vp.getDateInterval()),
+              vp.vacationCode)
 
-            .setPostPartumAbsences(vacationsRequest.getPostPartumUsed())
-            .compute());
-      }
-      // Fix dei casi particolari nel caso del riepilogo totali quando capita il cambio piano.
-      this.totalResult.adjustDecision();
-    //}
+          .setPostPartumAbsences(vacationsRequest.getPostPartumUsed())
+          .compute());
+    }
+    // Fix dei casi particolari nel caso del riepilogo totali quando capita il cambio piano.
+    this.totalResult.adjustDecision();
 
     // Costruisco il riepilogo delle maturate.
-    //if (accruedInterval != null) {
-      this.accruedResult = AccruedResult.builder()
-          .vacationsTypeResult(this)
-          .interval(accruedInterval)
-          .build();
+    this.accruedResult = AccruedResult.builder()
+        .vacationsTypeResult(this)
+        .interval(accruedInterval)
+        .build();
 
-      for (VacationPeriod vp : vacationsRequest.getContractVacationPeriod()) {
-        this.accruedResult.addResult(
+    for (VacationPeriod vp : vacationsRequest.getContractVacationPeriod()) {
+      this.accruedResult.addResult(
 
-            AccruedResultInPeriod.buildAccruedResultInPeriod(
-                this.totalResult,
-                DateUtility.intervalIntersection(accruedInterval, vp.getDateInterval()),
-                vp.vacationCode)
+          AccruedResultInPeriod.buildAccruedResultInPeriod(
+              this.totalResult,
+              DateUtility.intervalIntersection(accruedInterval, vp.getDateInterval()),
+              vp.vacationCode)
 
-            .setPostPartumAbsences(vacationsRequest.getPostPartumUsed())
-            .compute());
-      }
-    //}
+          .setPostPartumAbsences(vacationsRequest.getPostPartumUsed())
+          .compute());
+    }
 
     return;
   }
@@ -131,6 +127,21 @@ public class VacationsTypeResult implements IVacationsTypeResult {
    */
   public Integer getUsed() {
     return this.absencesUsed.size() + this.sourced;
+  }
+  
+  /**
+   * Numero di assenze totali.
+   */
+  public Integer getTotal() {
+    return this.totalResult.accrued + this.totalResult.fixed;
+  }
+  
+  /**
+   * Numero di assenze maturate.
+   */
+  public Integer getAccrued() {
+    
+    return this.accruedResult.accrued + this.totalResult.fixed; 
   }
   
   /**
@@ -154,15 +165,15 @@ public class VacationsTypeResult implements IVacationsTypeResult {
           return 0;
         }
       }
-      return this.accruedResult.accrued - this.getUsed();
+      return this.getAccrued() - this.getUsed();
     }
 
     //altri casi permessi e ferie anno corrente
     if (DateUtility.isInfinity(this.vacationsRequest.getContractDateInterval().getEnd())) {  
       //per i determinati considero le maturate (perchè potrebbero decidere di cambiare contratto)
-      return this.accruedResult.accrued - this.getUsed();
+      return this.getAccrued() - this.getUsed();
     } else {
-      return this.totalResult.accrued - this.getUsed();
+      return this.getTotal() - this.getUsed();
     }
 
   }
@@ -171,32 +182,10 @@ public class VacationsTypeResult implements IVacationsTypeResult {
    * Rimanenti sul totale che il dipendente avrebbe potuto prendere. (Tabellone Danila)
    */
   public Integer getRemaining() {
-    return this.totalResult.accrued - this.getUsed();
+    return this.getTotal() - this.getUsed();
   }
-  
-  /**
-   * Numero di assenze totali.
-   */
-  public Integer getTotal() {
-    if (this.totalResult == null) {
-      int i = 0;
-    } else {
-      Logger.info("toto bien");
-    }
-    //todo usare fixed
-    return this.totalResult.accrued;
-  }
-  
-  /**
-   * Numero di assenze maturate.
-   */
-  public Integer getAccrued() {
-    
-    return this.accruedResult.accrued;
-  }
-
-  
  
+
 }
 
 
