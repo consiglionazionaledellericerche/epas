@@ -25,14 +25,12 @@ public class AccruedResultInPeriod extends AccruedResult {
   
   /**
    * Costruttore del risultato nel periodo.
-   * // TODO: il vacationCode si potrebbe derivare dal TypeVacation.
    * @param parentAccruedResult il risultato di cui è un fattore.
    * @param interval l'intervallo effettivo su cui lavorare
    * @param vacationCode il tipo di assenza.
    */
   private AccruedResultInPeriod(AccruedResult parentAccruedResult, DateInterval interval, 
       VacationCode vacationCode) {
-    //a questo livello non mi serve il response.
     super(parentAccruedResult.getVacationsResult(), interval);
     this.vacationCode = vacationCode;
   }
@@ -68,41 +66,42 @@ public class AccruedResultInPeriod extends AccruedResult {
    */
   public AccruedResultInPeriod compute() {
     
-    if (this.interval != null) {
+    if (this.interval == null) { 
+      return this;
+    }
 
-      //calcolo i giorni maturati col metodo di conversione
-      if (vacationsResult.getTypeVacation().equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
-        
-        //TODO: verificare che nel caso dei permessi non considero i giorni postPartum
-        this.days = DateUtility.daysInInterval(this.interval);  
-        
-        if (this.vacationCode.equals("21+3") 
-            || this.vacationCode.description.equals("22+3")) {
+    //calcolo i giorni maturati col metodo di conversione
+    if (vacationsResult.getTypeVacation().equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
 
-          this.accrued = this.accruedConverter.permissionsPartTime(this.days);
-        } else {
-          this.accrued = this.accruedConverter.permissions(this.days);
-        }
+      //TODO: verificare che nel caso dei permessi non considero i giorni postPartum
+      this.days = DateUtility.daysInInterval(this.interval);  
 
+      if (this.vacationCode.equals("21+3") 
+          || this.vacationCode.description.equals("22+3")) {
+
+        this.accrued = this.accruedConverter.permissionsPartTime(this.days);
       } else {
-        
-        this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
-
-        if (this.vacationCode.description.equals("26+4")) {
-          this.accrued = this.accruedConverter.vacationsLessThreeYears(this.days);
-        }
-        if (this.vacationCode.description.equals("28+4")) {
-          this.accrued = this.accruedConverter.vacationsMoreThreeYears(this.days);
-        }
-        if (this.vacationCode.description.equals("21+3")) {
-          this.accrued = this.accruedConverter.vacationsPartTimeLessThreeYears(this.days);
-        }
-        if (this.vacationCode.description.equals("22+3")) {
-          this.accrued = this.accruedConverter.vacationsPartTimeMoreThreeYears(this.days);
-        }
+        this.accrued = this.accruedConverter.permissions(this.days);
       }
 
+    } else {
+
+      this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
+
+      if (this.vacationCode.description.equals("26+4")) {
+        this.accrued = this.accruedConverter.vacationsLessThreeYears(this.days);
+      }
+      if (this.vacationCode.description.equals("28+4")) {
+        this.accrued = this.accruedConverter.vacationsMoreThreeYears(this.days);
+      }
+      if (this.vacationCode.description.equals("21+3")) {
+        this.accrued = this.accruedConverter.vacationsPartTimeLessThreeYears(this.days);
+      }
+      if (this.vacationCode.description.equals("22+3")) {
+        this.accrued = this.accruedConverter.vacationsPartTimeMoreThreeYears(this.days);
+      }
     }
+
     return this;
   }
   
