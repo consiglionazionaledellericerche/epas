@@ -12,22 +12,50 @@ import org.joda.time.LocalDate;
 
 import java.util.List;
 
+/**
+ * Servizio ferie e permessi.
+ * 
+ * @author alessandro
+ *
+ */
 public interface IVacationsService {
-  
-  IVacationsRecap build(int year, Contract contract, List<Absence> absencesToConsider,
-      LocalDate accruedDate, LocalDate dateExpireLastYear, boolean considerDateExpireLastYear,
-      Optional<LocalDate> dateAsToday);
-  
+
+  /**
+   * Costruisce il riepilogo ferie.
+   * @param year anno
+   * @param contract contratto
+   * @param actualDate data di maturazione
+   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
+   * @param otherAbsences altre assenze extra db.
+   * @param dateAsToday per simulare oggi con un giorno diverso da oggi
+   * @return il recap
+   */
   Optional<IVacationsRecap> create(int year, Contract contract,
       LocalDate actualDate, boolean considerExpireLastYear,
       List<Absence> otherAbsences, Optional<LocalDate> dateAsToday);
   
+  /**
+   * Costruisce il riepilogo ferie con valori di default. 
+   * @param year anno
+   * @param contract contratto
+   * @param actualDate data maturazione
+   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
+   * @return il recap
+   */
   Optional<IVacationsRecap> create(int year, Contract contract, LocalDate actualDate,
       boolean considerExpireLastYear);
   
+  /**
+   * Costruisce il riepilogo ferie con valori di default. 
+   * @param year anno
+   * @param contract contratto
+   * @param actualDate data di maturazione
+   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
+   * @param dateAsToday per simulare oggi con un giorno diverso da oggi
+   * @return il recap
+   */
   Optional<IVacationsRecap> create(int year, Contract contract, LocalDate actualDate, 
       boolean considerExpireLastYear, LocalDate dateAsToday);
-  
   
   /**
    * Il primo codice utilizzabile nella data. Ordine: 31, 32, 94.

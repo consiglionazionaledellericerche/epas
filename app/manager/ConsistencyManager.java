@@ -576,10 +576,12 @@ public class ConsistencyManager {
         return;
       }
 
-      currentMonthRecap.vacationLastYearUsed = vacationRecap.get().getVacationDaysLastYearUsed();
+      
+      //FIXME: questi tre campi non sono mai usati, rimuoverli.
+      currentMonthRecap.vacationLastYearUsed = vacationRecap.get().getVacationsLastYear().getUsed();
       currentMonthRecap.vacationCurrentYearUsed = 
-          vacationRecap.get().getVacationDaysCurrentYearUsed();
-      currentMonthRecap.permissionUsed = vacationRecap.get().getPermissionUsed();
+          vacationRecap.get().getVacationsCurrentYear().getUsed();
+      currentMonthRecap.permissionUsed = vacationRecap.get().getPermissions().getUsed();
 
       // (2) RESIDUI
       List<Absence> otherCompensatoryRest = Lists.newArrayList();

@@ -1,73 +1,39 @@
 package manager.services.vacations;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import manager.services.vacations.impl.VacationsRecap.VacationsRequest;
 
-import it.cnr.iit.epas.DateInterval;
-
-import manager.services.vacations.impl.AccruedDecision;
-
-import models.Absence;
-import models.Contract;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
-
+/**
+ * Contiene il riepilogo ferie per un certo anno di un contratto.
+ * 
+ * @author alessandro
+ *
+ */
 public interface IVacationsRecap {
   
-  // DATI DELLA RICHIESTA
-  int getYear();
-  
-  Contract getContract();
-  
-  List<Absence> getAbsencesToConsider();
-  
-  LocalDate getAccruedDate();
-  
-  LocalDate getDateExpireLastYear();
-  
-  boolean isConsiderDateExpireLastYear();
-  
-  Optional<LocalDate> getDateAsToday();
+  /**
+   * I dati della richiesta per generare il recap.
+   * @return
+   */
+  VacationsRequest getVacationsRequest();
 
-  // DECISIONI
-  AccruedDecision getDecisionsVacationLastYearAccrued();
+  /**
+   * Riepilogo ferie anno passato.
+   * @return
+   */
+  IVacationsTypeResult getVacationsLastYear();
   
-  AccruedDecision getDecisionsVacationCurrentYearAccrued();
+  /**
+   * Riepilogo ferie anno corrente.
+   * @return
+   */
+  IVacationsTypeResult getVacationsCurrentYear();
   
-  AccruedDecision getDecisionsPermissionYearAccrued();
+  /**
+   * Riepilogo permessi.
+   * @return
+   */
+  IVacationsTypeResult getPermissions();
   
-  AccruedDecision getDecisionsVacationCurrentYearTotal();
-  
-  AccruedDecision getDecisionsPermissionYearTotal();
-  
-  // TOTALI
-  Integer getVacationDaysCurrentYearTotal();
-  
-  Integer getPermissionCurrentYearTotal();
-
-  // USATE
-  int getVacationDaysLastYearUsed();
-  
-  int getVacationDaysCurrentYearUsed();
-  
-  int getPermissionUsed();
-
-  // MATURATE
-  Integer getVacationDaysLastYearAccrued();
-  
-  Integer getVacationDaysCurrentYearAccrued();
-  
-  Integer getPermissionCurrentYearAccrued();
-
-  // RIMANENTI
-  Integer getVacationDaysLastYearNotYetUsed();
-  
-  Integer getVacationDaysCurrentYearNotYetUsed();
-  
-  Integer getPersmissionNotYetUsed();
-
   /**
    * True se le ferie dell'anno passato sono scadute.
    */

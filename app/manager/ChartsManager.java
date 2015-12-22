@@ -18,7 +18,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
-import manager.services.vacations.impl.VacationsRecapImpl;
+import manager.services.vacations.impl.VacationsRecap;
 import manager.services.vacations.test.TestVacationsService;
 
 import models.Absence;
@@ -431,9 +431,9 @@ public class ChartsManager {
 
     int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
     out.append(person.surname + ' ' + person.name + ',');
-    out.append(new Integer(vr.get().getVacationDaysCurrentYearUsed()).toString() + ',' +
-            new Integer(vr.get().getVacationDaysLastYearUsed()).toString() + ',' +
-            new Integer(vr.get().getPermissionUsed()).toString() + ',' +
+    out.append(new Integer(vr.get().getVacationsCurrentYear().getUsed()).toString() + ',' +
+            new Integer(vr.get().getVacationsLastYear().getUsed()).toString() + ',' +
+            new Integer(vr.get().getPermissions().getUsed()).toString() + ',' +
             new Integer(recap.get().remainingMinutesCurrentYear).toString() + ',' +
             new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
     int month = LocalDate.now().getMonthOfYear();

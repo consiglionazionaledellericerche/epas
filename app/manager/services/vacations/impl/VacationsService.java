@@ -37,7 +37,7 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
-public class RealVacationsService implements IVacationsService {
+public class VacationsService implements IVacationsService {
 
   private final AbsenceDao absenceDao;
   private final ContractDao contractDao;
@@ -48,7 +48,7 @@ public class RealVacationsService implements IVacationsService {
   private final IWrapperFactory wrapperFactory;
 
   @Inject
-  RealVacationsService(
+  VacationsService(
       AbsenceDao absenceDao, 
       AbsenceTypeDao absenceTypeDao, 
       ContractDao contractDao,
@@ -65,14 +65,13 @@ public class RealVacationsService implements IVacationsService {
   }
 
   /**
-   * Costruttore del recap.
+   * Costruttore privato del recap. 
    */
-  @Override
-  public IVacationsRecap build(int year, Contract contract, List<Absence> absencesToConsider,
+  private IVacationsRecap build(int year, Contract contract, List<Absence> absencesToConsider,
       LocalDate accruedDate, LocalDate dateExpireLastYear, boolean considerDateExpireLastYear,
       Optional<LocalDate> dateAsToday) {
     
-    return new VacationsRecapImpl(year, contract, absencesToConsider, LocalDate.now(), 
+    return new VacationsRecap(year, contract, absencesToConsider, LocalDate.now(), 
         dateExpireLastYear, true, dateAsToday); 
   }
   
@@ -216,18 +215,18 @@ public class RealVacationsService implements IVacationsService {
       return null;
     }
 
-    if (vr.get().getVacationDaysLastYearNotYetUsed() > 0) {
+    if (vr.get().getVacationsLastYear().getNotYetUsed() > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
     }
 
-    if (vr.get().getPersmissionNotYetUsed() > 0)  {
+    if (vr.get().getPermissions().getNotYetUsed() > 0)  {
 
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
     }
 
-    if (vr.get().getVacationDaysCurrentYearNotYetUsed() > 0) {
+    if (vr.get().getVacationsCurrentYear().getNotYetUsed() > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
     }
@@ -251,7 +250,7 @@ public class RealVacationsService implements IVacationsService {
       return false;
     }
 
-    return (vr.get().getVacationDaysCurrentYearNotYetUsed() > 0);
+    return (vr.get().getVacationsCurrentYear().getNotYetUsed() > 0);
 
   }
 
@@ -272,7 +271,7 @@ public class RealVacationsService implements IVacationsService {
     }
 
 
-    return (vr.get().getVacationDaysLastYearNotYetUsed() > 0);
+    return (vr.get().getVacationsLastYear().getNotYetUsed() > 0);
   }
 
   /**
@@ -291,7 +290,7 @@ public class RealVacationsService implements IVacationsService {
       return false;
     }
 
-    return (vr.get().getPersmissionNotYetUsed() > 0);
+    return (vr.get().getPermissions().getNotYetUsed() > 0);
 
   }
 

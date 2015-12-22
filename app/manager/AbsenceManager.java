@@ -525,7 +525,7 @@ public class AbsenceManager {
           contractDao.getContract(LocalDate.now(), person),
           LocalDate.now(), false, otherAbsences, Optional.<LocalDate>absent());
       if (vr.isPresent()) {
-        int remaining37 = vr.get().getVacationDaysLastYearNotYetUsed();
+        int remaining37 = vr.get().getVacationsLastYear().getNotYetUsed();
         if (remaining37 > 0) {
           //37 disponibile
           return insert(person, date, absenceType, file,
