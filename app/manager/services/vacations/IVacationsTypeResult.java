@@ -7,6 +7,8 @@ import manager.services.vacations.impl.VacationsTypeResult.TypeVacation;
 
 import models.Absence;
 
+import org.joda.time.LocalDate;
+
 /**
  * Il risultato per il TypeVacation per la richiesta VacationsRequest. 
  * 
@@ -73,5 +75,10 @@ public interface IVacationsTypeResult {
    * tutte. Per le ferie dell'anno precedente considera la data di scadenza ferie della sede.
    */
   Integer getNotYetUsedAccrued();
+  
+  /**
+   * La data di scadenza utilizzo ferie.
+   */
+  public LocalDate getExpireDate();
   
 }

@@ -6,6 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.Getter;
 
 import manager.services.vacations.IAccruedResult;
+import manager.services.vacations.IAccruedResultInPeriod;
 import manager.services.vacations.impl.VacationsTypeResult.TypeVacation;
 
 import models.Absence;
@@ -19,7 +20,7 @@ import java.util.List;
  * @author alessandro
  *
  */
-public class AccruedResultInPeriod extends AccruedResult {
+public class AccruedResultInPeriod extends AccruedResult implements IAccruedResultInPeriod {
 
   @Getter private VacationCode vacationCode;
   
@@ -70,12 +71,14 @@ public class AccruedResultInPeriod extends AccruedResult {
       return this;
     }
 
+    //TODO: verificare che nel caso dei permessi non considero i giorni postPartum.
+    this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();  
+    
     //calcolo i giorni maturati col metodo di conversione
     if (vacationsResult.getTypeVacation().equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
 
-      //TODO: verificare che nel caso dei permessi non considero i giorni postPartum
-      this.days = DateUtility.daysInInterval(this.interval);  
-
+      //this.days = DateUtility.daysInInterval(this.interval);
+      
       if (this.vacationCode.equals("21+3") 
           || this.vacationCode.description.equals("22+3")) {
 
@@ -86,7 +89,7 @@ public class AccruedResultInPeriod extends AccruedResult {
 
     } else {
 
-      this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
+      //this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
 
       if (this.vacationCode.description.equals("26+4")) {
         this.accrued = this.accruedConverter.vacationsLessThreeYears(this.days);

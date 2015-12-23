@@ -41,6 +41,7 @@ public class VacationsTypeResult implements IVacationsTypeResult {
   //DATI OUTPUT
   @Getter private AccruedResult totalResult;
   @Getter private AccruedResult accruedResult;
+  @Getter private LocalDate expire;
   
   /**
    * Costruttore del risultato.
@@ -159,7 +160,7 @@ public class VacationsTypeResult implements IVacationsTypeResult {
 
     // caso delle ferie anno passato.
     if (this.typeVacation.equals(TypeVacation.VACATION_LAST_YEAR)) {
-      LocalDate expireDate = this.vacationsRequest.getExpireDate();
+      LocalDate expireDate = this.vacationsRequest.getExpireDateLastYear();
 
       if (this.vacationsRequest.isConsiderExpireDate()) {
         if (this.vacationsRequest.getAccruedDate().isAfter(expireDate)) {
@@ -177,6 +178,37 @@ public class VacationsTypeResult implements IVacationsTypeResult {
       return this.getTotal() - this.getUsed();
     }
 
+  }
+  
+  /**
+   * La data di scadenza utilizzo ferie.
+   */
+  public LocalDate getExpireDate() {
+    
+    LocalDate computedEndContract = this.vacationsRequest.getContractDateInterval().getEnd();
+   
+    if (this.typeVacation.equals(TypeVacation.VACATION_LAST_YEAR)) {
+      if (computedEndContract.isBefore(this.vacationsRequest.getExpireDateLastYear())) {
+        return computedEndContract;
+      } 
+      return this.vacationsRequest.getExpireDateLastYear(); 
+    }
+    
+    if (this.typeVacation.equals(TypeVacation.VACATION_CURRENT_YEAR)) {
+      if (computedEndContract.isBefore(this.vacationsRequest.getExpireDateCurrentYear())) {
+        return computedEndContract;
+      } 
+      return this.vacationsRequest.getExpireDateCurrentYear(); 
+    }
+    
+    if (this.typeVacation.equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
+      LocalDate endYear = new LocalDate(this.vacationsRequest.getYear(), 12, 31);
+      if (computedEndContract.isBefore(endYear)) {
+        return computedEndContract;
+      } 
+      return endYear; 
+    }
+    return null;
   }
 
 }
