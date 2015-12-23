@@ -3,20 +3,20 @@ package manager.services.vacations.impl;
 import lombok.Builder;
 
 public class AccruedConverter {
-    
+
   /**
    * Convertitore per ferie e permessi maturati.
    */
   @Builder
   public AccruedConverter() {
-    
+
   }
 
   /**
    * Il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
    * dell'anno per chi lavora in istituto da meno di tre anni.
    * @param days giorni lavorati
-   * @return ferie maturate 
+   * @return ferie maturate
    */
   public int vacationsLessThreeYears(int days) {
 
@@ -72,7 +72,7 @@ public class AccruedConverter {
    * @return ferie maturate
    */
   public int vacationsMoreThreeYears(int days) {
-    
+
     if (days <= 0) {
       return 0;
     }
@@ -125,7 +125,7 @@ public class AccruedConverter {
    * @return ferie maturate
    */
   public int vacationsPartTimeLessThreeYears(int days) {
-    
+
     if (days <= 0) {
       return 0;
     }
@@ -219,7 +219,7 @@ public class AccruedConverter {
       return 22;
     }
   }
-  
+
   /**
    * Il numero di giorni di permesso legge spettanti al dipendente a seconda dei giorni di
    * presenza.
@@ -261,5 +261,5 @@ public class AccruedConverter {
     }
     return permissionDays;
   }
-  
+
 }
