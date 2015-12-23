@@ -8,14 +8,13 @@ import manager.services.vacations.impl.AccruedResultInPeriod;
 import manager.services.vacations.impl.VacationsTypeResult;
 
 import models.Absence;
+import models.VacationCode;
 
 import java.util.List;
 
-public interface IAccruedResult {
+public interface IAccruedResultInPeriod {
 
-  VacationsTypeResult getVacationsResult();
-  
-  List<AccruedResultInPeriod> getAccruedResultsInPeriod();
+  VacationCode getVacationCode();
   
   DateInterval getInterval();
 

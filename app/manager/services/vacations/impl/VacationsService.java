@@ -101,7 +101,8 @@ public class VacationsService implements IVacationsService {
     //      accruedDate = new LocalDate(year, 12, 31);
     //    }
 
-    LocalDate dateExpireLastYear = vacationsLastYearExpireDate(year, contract.person.office);
+    LocalDate expireDateLastYear = vacationsLastYearExpireDate(year, contract.person.office);
+    LocalDate expireDateCurrentYear = vacationsLastYearExpireDate(year + 1, contract.person.office);
     
     List<Absence> absencesToConsider = absenceToConsider(wrContract.getValue().person, year, 
         wrContract.getContractDatabaseInterval(), dateAsToday);
@@ -112,7 +113,8 @@ public class VacationsService implements IVacationsService {
         .contract(contract)
         .absencesToConsider(absencesToConsider)
         .accruedDate(accruedDate)
-        .expireDate(dateExpireLastYear)
+        .expireDateLastYear(expireDateLastYear)
+        .expireDateCurrentYear(expireDateCurrentYear)
         .build();
 
     return Optional.fromNullable(vacationRecap);

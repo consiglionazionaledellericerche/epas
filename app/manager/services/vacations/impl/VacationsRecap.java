@@ -44,14 +44,16 @@ public class VacationsRecap implements IVacationsRecap {
     @Getter private final LocalDate accruedDate;
     @Getter private final List<VacationPeriod> contractVacationPeriod;
     @Getter private final List<Absence> postPartumUsed;
-    @Getter private final LocalDate expireDate;
+    @Getter private final LocalDate expireDateLastYear;
     @Getter private final boolean considerExpireDate;
+    @Getter private final LocalDate expireDateCurrentYear;
 
     @Builder
     private VacationsRequest(final int year, final Contract contract,
         final DateInterval contractDateInterval, final Optional<LocalDate> accruedDate, 
         final List<VacationPeriod> contractVacationPeriod, final List<Absence> postPartumUsed, 
-        final LocalDate expireDate, final boolean considerExpireDate) {
+        final LocalDate expireDateLastYear, final LocalDate expireDateCurrentYear, 
+        final boolean considerExpireDate) {
       this.year = year;
       this.contract = contract;
       this.contractVacationPeriod = contractVacationPeriod;
@@ -62,7 +64,8 @@ public class VacationsRecap implements IVacationsRecap {
       } else {
         this.accruedDate = LocalDate.now();  
       }
-      this.expireDate = expireDate;
+      this.expireDateLastYear = expireDateLastYear;
+      this.expireDateCurrentYear = expireDateCurrentYear;
       this.considerExpireDate = considerExpireDate;
     }
   }
@@ -114,12 +117,13 @@ public class VacationsRecap implements IVacationsRecap {
    */
   @Builder
   public VacationsRecap(int year, Contract contract, List<Absence> absencesToConsider,
-      LocalDate accruedDate, LocalDate expireDate, boolean considerDateExpireLastYear) {
+      LocalDate accruedDate, LocalDate expireDateLastYear, LocalDate expireDateCurrentYear,
+      boolean considerDateExpireLastYear) {
     
     DateInterval contractDateInterval = 
         new DateInterval(contract.getBeginDate(), contract.calculatedEnd());
     
-    initDataStructures(year, accruedDate, expireDate, absencesToConsider, contract,
+    initDataStructures(year, accruedDate, expireDateLastYear, absencesToConsider, contract,
         contractDateInterval);
     
     this.vacationsRequest = VacationsRequest.builder()
@@ -129,7 +133,8 @@ public class VacationsRecap implements IVacationsRecap {
         .accruedDate(Optional.fromNullable(accruedDate))
         .contractVacationPeriod(contract.vacationPeriods)
         .postPartumUsed(this.postPartum)
-        .expireDate(expireDate)
+        .expireDateLastYear(expireDateLastYear)
+        .expireDateCurrentYear(expireDateCurrentYear)
         .considerExpireDate(considerDateExpireLastYear)
         .build();
 

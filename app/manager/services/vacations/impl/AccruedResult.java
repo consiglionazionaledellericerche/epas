@@ -32,7 +32,7 @@ public class AccruedResult implements IAccruedResult {
   @Getter protected final VacationsTypeResult vacationsResult;
   @Getter protected final AccruedConverter accruedConverter;
   
-  @Getter protected List<AccruedResultInPeriod> childDecisions = Lists.newArrayList();
+  @Getter protected List<AccruedResultInPeriod> accruedResultsInPeriod = Lists.newArrayList();
   
   @Getter protected DateInterval interval;
 
@@ -56,14 +56,14 @@ public class AccruedResult implements IAccruedResult {
   
   /**
    * Somma il risultato.
-   * @param periodAccruedResult il risultato da sommare.
+   * @param accruedResultInPeriod il risultato da sommare.
    * @return this
    */
-  public AccruedResult addResult(AccruedResultInPeriod periodAccruedResult) {
-    this.childDecisions.add(periodAccruedResult);
-    this.postPartum.addAll(periodAccruedResult.postPartum);
-    this.days += periodAccruedResult.days;
-    this.accrued += periodAccruedResult.accrued;
+  public AccruedResult addResult(AccruedResultInPeriod accruedResultInPeriod) {
+    this.accruedResultsInPeriod.add(accruedResultInPeriod);
+    this.postPartum.addAll(accruedResultInPeriod.postPartum);
+    this.days += accruedResultInPeriod.days;
+    this.accrued += accruedResultInPeriod.accrued;
     return this;
   }
   
@@ -83,7 +83,7 @@ public class AccruedResult implements IAccruedResult {
       return this;
     }
     
-    if (this.childDecisions.isEmpty()) {
+    if (this.accruedResultsInPeriod.isEmpty()) {
       return this;
     }
     
@@ -93,22 +93,22 @@ public class AccruedResult implements IAccruedResult {
     int totalYearPostPartum = 0;
     int totalVacationAccrued = 0;
     
-    AccruedResultInPeriod minVacationPeriodDecision = null;
+    AccruedResultInPeriod minAccruedResultInPeriod = null;
 
 
-    for (AccruedResultInPeriod childDecision : this.getChildDecisions()) {
+    for (AccruedResultInPeriod accruedResultInPeriod : this.accruedResultsInPeriod) {
 
-      if (minVacationPeriodDecision == null) {
+      if (minAccruedResultInPeriod == null) {
         
-        minVacationPeriodDecision = childDecision;
+        minAccruedResultInPeriod = accruedResultInPeriod;
         
-      } else if (childDecision.getVacationCode().vacationDays 
-          < minVacationPeriodDecision.getVacationCode().vacationDays ) {
+      } else if (accruedResultInPeriod.getVacationCode().vacationDays 
+          < minAccruedResultInPeriod.getVacationCode().vacationDays ) {
         
-        minVacationPeriodDecision = childDecision;
+        minAccruedResultInPeriod = accruedResultInPeriod;
       }
-      totalYearPostPartum += childDecision.getPostPartum().size();
-      totalVacationAccrued += childDecision.getAccrued();
+      totalYearPostPartum += accruedResultInPeriod.getPostPartum().size();
+      totalVacationAccrued += accruedResultInPeriod.getAccrued();
       
     }
 
@@ -123,10 +123,10 @@ public class AccruedResult implements IAccruedResult {
         && this.interval.getBegin().equals(yearInterval.getBegin())
             && this.interval.getEnd().equals(yearInterval.getEnd())) {
       
-      if (minVacationPeriodDecision.getVacationCode().vacationDays 
+      if (minAccruedResultInPeriod.getVacationCode().vacationDays 
           > totalVacationAccrued) {
         
-        this.fixed = minVacationPeriodDecision.getVacationCode().vacationDays 
+        this.fixed = minAccruedResultInPeriod.getVacationCode().vacationDays 
             - totalVacationAccrued; //positive
       }
     }
