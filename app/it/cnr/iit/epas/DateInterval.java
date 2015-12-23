@@ -12,8 +12,6 @@ public class DateInterval {
 
   /**
    * Costruttore con end optional.
-   * @param begin
-   * @param end
    */
   public DateInterval(LocalDate begin, Optional<LocalDate> end) {
     Preconditions.checkArgument(begin != null);

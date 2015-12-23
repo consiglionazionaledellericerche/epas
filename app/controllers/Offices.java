@@ -76,8 +76,8 @@ public class Offices extends Controller {
    * @param id dell'istituto da modificare
    */
   public static void edit(Long id) {
-    
-    
+
+
     final Office office = Office.findById(id);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -111,7 +111,7 @@ public class Offices extends Controller {
               validation.errorsMap());
       flash.error(Web.msgHasErrors());
       IWrapperOffice wrOffice = wrapperFactory.create(office);
-      if(!office.isPersistent()) {
+      if (!office.isPersistent()) {
         render("@blank", office, wrOffice);
       } else {
         render("@edit", office, wrOffice);

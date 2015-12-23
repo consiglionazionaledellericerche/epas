@@ -55,6 +55,8 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 /**
+ * Gestore delle funzionalità relative alle reperibilità.
+ *
  * @author arianna
  * @author dario
  */

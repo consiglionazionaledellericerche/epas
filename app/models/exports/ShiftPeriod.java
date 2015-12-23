@@ -8,7 +8,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 /**
- * Classe di supporto per l'esportazione delle informazioni relative ai turni delle persone
+ * Classe di supporto per l'esportazione delle informazioni relative ai turni delle persone.
  *
  * @author dario, arianna
  */
@@ -23,7 +23,9 @@ public class ShiftPeriod {
   public LocalTime startSlot;
   public LocalTime endSlot;
 
-  public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
+  public ShiftPeriod(
+      Person person, LocalDate start, LocalDate end, ShiftType shiftType,
+      boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
     this.person = person;
     this.start = start;
     this.end = end;
@@ -34,7 +36,8 @@ public class ShiftPeriod {
     this.endSlot = endSlot;
   }
 
-  public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot) {
+  public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType,
+      boolean cancelled, ShiftSlot shiftSlot) {
     this.person = person;
     this.start = start;
     this.end = end;
@@ -44,7 +47,8 @@ public class ShiftPeriod {
   }
 
   // for periods of 1 day where end date is null
-  public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
+  public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType,
+      boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
     this.person = person;
     this.start = start;
     this.shiftType = shiftType;
@@ -55,7 +59,8 @@ public class ShiftPeriod {
   }
 
   // for cancelled shift
-  public ShiftPeriod(LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled) {
+  public ShiftPeriod(LocalDate start, LocalDate end, ShiftType shiftType,
+      boolean cancelled) {
     this.start = start;
     this.end = end;
     this.shiftType = shiftType;

@@ -79,7 +79,7 @@ public class SwitchTemplate extends Controller {
 
       Absences.yearlyAbsences(personId, year);
     }
-    
+
     if (action.equals("Absences.absenceInPeriod")) {
 
       Absences.absenceInPeriod(personId, null, null);
@@ -104,7 +104,7 @@ public class SwitchTemplate extends Controller {
 
       Competences.enabledCompetences(officeId);
     }
-    
+
     if (action.equals("Competences.approvedCompetenceInYear")) {
 
       Competences.approvedCompetenceInYear(year, false, officeId);
@@ -167,14 +167,14 @@ public class SwitchTemplate extends Controller {
 
       MealTickets.recapMealTickets(year, month, officeId);
     }
-    
+
     if (action.equals("MonthRecaps.showRecaps")) {
-      
+
       MonthRecaps.showRecaps(year, month, officeId);
     }
-    
+
     if (action.equals("MonthRecaps.customRecap")) {
-      
+
       MonthRecaps.customRecap(year, month, officeId);
     }
 
@@ -238,7 +238,7 @@ public class SwitchTemplate extends Controller {
       Secure.login();
     }
 
-    if (year == null) {	/* TODO check bound year */
+    if (year == null) { /* TODO check bound year */
 
       Application.index();
     }

@@ -18,7 +18,9 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Audited
-@Table(name = "badges", uniqueConstraints = {@UniqueConstraint(columnNames = {"badge_reader_id", "code"})})
+@Table(
+    name = "badges",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"badge_reader_id", "code"})})
 public class Badge extends BaseModel {
 
   @Required
@@ -36,7 +38,7 @@ public class Badge extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "badge_system_id")
   public BadgeSystem badgeSystem;
-  
-  
+
+
 
 }

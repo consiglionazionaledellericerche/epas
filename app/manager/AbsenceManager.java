@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
 
 import models.Absence;

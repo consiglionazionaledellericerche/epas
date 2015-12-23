@@ -25,11 +25,12 @@ public class AbsenceFromJsonManager {
   private AbsenceDao absenceDao;
 
   /**
-   * @return la lista dei PersonPeriodAbsenceCode nel periodo compreso tra 'dateFrom' e 'dateTo' per
-   * le persone recuperate dal 'body' contenente la lista delle persone ricavate dalle email
-   * arrivate via chiamata post json
+   * @return la lista dei PersonPeriodAbsenceCode nel periodo compreso tra 'dateFrom' e 'dateTo'
+   *     per le persone recuperate dal 'body' contenente la lista delle persone ricavate dalle
+   *     email arrivate via chiamata post json.
    */
-  public List<PersonPeriodAbsenceCode> getPersonForAbsenceFromJson(PersonEmailFromJson body, LocalDate dateFrom, LocalDate dateTo) {
+  public List<PersonPeriodAbsenceCode> getPersonForAbsenceFromJson(
+      PersonEmailFromJson body, LocalDate dateFrom, LocalDate dateTo) {
     List<PersonPeriodAbsenceCode> personsToRender = new ArrayList<PersonPeriodAbsenceCode>();
     PersonPeriodAbsenceCode personPeriodAbsenceCode = null;
 
@@ -42,7 +43,9 @@ public class AbsenceFromJsonManager {
       if (person != null) {
         log.debug("Controllo {}", person.getFullname());
 
-        List<Absence> absences = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
+        List<Absence> absences =
+            absenceDao.getAbsencesInPeriod(
+                Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
 
         log.debug("Lista assenze per {}: {}", person.getFullname(), absences);
 
@@ -65,28 +68,30 @@ public class AbsenceFromJsonManager {
               personPeriodAbsenceCode.surname = person.surname;
               personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
               if (startCurrentPeriod.getMonthOfYear() < 10) {
-                meseInizio = new String("0" + startCurrentPeriod.getMonthOfYear());
+                meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
               } else {
-                meseInizio = new String("" + startCurrentPeriod.getMonthOfYear());
+                meseInizio = String.valueOf(startCurrentPeriod.getMonthOfYear());
               }
               if (endCurrentPeriod.getMonthOfYear() < 10) {
-                meseFine = new String("0" + endCurrentPeriod.getMonthOfYear());
+                meseFine = "0" + endCurrentPeriod.getMonthOfYear();
               } else {
-                meseFine = new String("" + endCurrentPeriod.getMonthOfYear());
+                meseFine = String.valueOf(endCurrentPeriod.getMonthOfYear());
               }
 
               if (startCurrentPeriod.getDayOfMonth() < 10) {
-                giornoInizio = new String("0" + startCurrentPeriod.getDayOfMonth());
+                giornoInizio = "0" + startCurrentPeriod.getDayOfMonth();
               } else {
-                giornoInizio = new String("" + startCurrentPeriod.getDayOfMonth());
+                giornoInizio = "" + String.valueOf(startCurrentPeriod.getDayOfMonth());
               }
               if (endCurrentPeriod.getDayOfMonth() < 10) {
-                giornoFine = new String("0" + endCurrentPeriod.getDayOfMonth());
+                giornoFine = "0" + endCurrentPeriod.getDayOfMonth();
               } else {
-                giornoFine = new String("" + endCurrentPeriod.getDayOfMonth());
+                giornoFine = String.valueOf(endCurrentPeriod.getDayOfMonth());
               }
-              personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear() + "-" + meseInizio + "-" + giornoInizio);
-              personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear() + "-" + meseFine + "-" + giornoFine);
+              personPeriodAbsenceCode.start =
+                  startCurrentPeriod.getYear() + "-" + meseInizio + "-" + giornoInizio;
+              personPeriodAbsenceCode.end =
+                  endCurrentPeriod.getYear() + "-" + meseFine + "-" + giornoFine;
               personsToRender.add(personPeriodAbsenceCode);
 
               previousAbsence = abs;
@@ -106,28 +111,30 @@ public class AbsenceFromJsonManager {
             personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
 
             if (startCurrentPeriod.getMonthOfYear() < 10) {
-              meseInizio = new String("0" + startCurrentPeriod.getMonthOfYear());
+              meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
             } else {
-              meseInizio = new String("" + startCurrentPeriod.getMonthOfYear());
+              meseInizio = String.valueOf(startCurrentPeriod.getMonthOfYear());
             }
             if (endCurrentPeriod.getMonthOfYear() < 10) {
-              meseFine = new String("0" + endCurrentPeriod.getMonthOfYear());
+              meseFine = "0" + endCurrentPeriod.getMonthOfYear();
             } else {
-              meseFine = new String("" + endCurrentPeriod.getMonthOfYear());
+              meseFine = String.valueOf(endCurrentPeriod.getMonthOfYear());
             }
 
             if (startCurrentPeriod.getDayOfMonth() < 10) {
-              giornoInizio = new String("0" + startCurrentPeriod.getDayOfMonth());
+              giornoInizio = "0" + startCurrentPeriod.getDayOfMonth();
             } else {
-              giornoInizio = new String("" + startCurrentPeriod.getDayOfMonth());
+              giornoInizio = String.valueOf(startCurrentPeriod.getDayOfMonth());
             }
             if (endCurrentPeriod.getDayOfMonth() < 10) {
-              giornoFine = new String("0" + endCurrentPeriod.getDayOfMonth());
+              giornoFine = "0" + endCurrentPeriod.getDayOfMonth();
             } else {
-              giornoFine = new String("" + endCurrentPeriod.getDayOfMonth());
+              giornoFine = String.valueOf(endCurrentPeriod.getDayOfMonth());
             }
-            personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear() + "-" + meseInizio + "-" + giornoInizio);
-            personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear() + "-" + meseFine + "-" + giornoFine);
+            personPeriodAbsenceCode.start =
+                startCurrentPeriod.getYear() + "-" + meseInizio + "-" + giornoInizio;
+            personPeriodAbsenceCode.end =
+                endCurrentPeriod.getYear() + "-" + meseFine + "-" + giornoFine;
             personsToRender.add(personPeriodAbsenceCode);
 
             previousAbsence = abs;
@@ -143,32 +150,35 @@ public class AbsenceFromJsonManager {
           personPeriodAbsenceCode.surname = person.surname;
           personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
           if (startCurrentPeriod.getMonthOfYear() < 10) {
-            meseInizio = new String("0" + startCurrentPeriod.getMonthOfYear());
+            meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
           } else {
-            meseInizio = new String("" + startCurrentPeriod.getMonthOfYear());
+            meseInizio = String.valueOf(startCurrentPeriod.getMonthOfYear());
           }
           if (endCurrentPeriod.getMonthOfYear() < 10) {
-            meseFine = new String("0" + endCurrentPeriod.getMonthOfYear());
+            meseFine = "0" + endCurrentPeriod.getMonthOfYear();
           } else {
-            meseFine = new String("" + endCurrentPeriod.getMonthOfYear());
+            meseFine = String.valueOf(endCurrentPeriod.getMonthOfYear());
           }
 
           if (startCurrentPeriod.getDayOfMonth() < 10) {
-            giornoInizio = new String("0" + startCurrentPeriod.getDayOfMonth());
+            giornoInizio = "0" + startCurrentPeriod.getDayOfMonth();
           } else {
-            giornoInizio = new String("" + startCurrentPeriod.getDayOfMonth());
+            giornoInizio = String.valueOf(startCurrentPeriod.getDayOfMonth());
           }
           if (endCurrentPeriod.getDayOfMonth() < 10) {
-            giornoFine = new String("0" + endCurrentPeriod.getDayOfMonth());
+            giornoFine = "0" + endCurrentPeriod.getDayOfMonth();
           } else {
-            giornoFine = new String("" + endCurrentPeriod.getDayOfMonth());
+            giornoFine = String.valueOf(endCurrentPeriod.getDayOfMonth());
           }
-          personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear() + "-" + meseInizio + "-" + giornoInizio);
-          personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear() + "-" + meseFine + "-" + giornoFine);
+          personPeriodAbsenceCode.start =
+              startCurrentPeriod.getYear() + "-" + meseInizio + "-" + giornoInizio;
+          personPeriodAbsenceCode.end =
+              endCurrentPeriod.getYear() + "-" + meseFine + "-" + giornoFine;
           personsToRender.add(personPeriodAbsenceCode);
         }
       } else {
-        log.error("Richiesta persona non presente in anagrafica. Possibile sia un non strutturato.");
+        log.error("Richiesta persona non presente in anagrafica. "
+            + "Possibile sia un non strutturato.");
       }
     }
     return personsToRender;

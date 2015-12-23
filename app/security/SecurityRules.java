@@ -149,7 +149,8 @@ public class SecurityRules {
   private static class AgendaLogger extends DefaultAgendaEventListener {
     @Override
     public void afterActivationFired(AfterActivationFiredEvent event) {
-      log.debug("RULE {} {}", event.getActivation().getRule().getName(), event.getActivation().getFactHandles());
+      log.debug("RULE {} {}",
+          event.getActivation().getRule().getName(), event.getActivation().getFactHandles());
     }
   }
 }

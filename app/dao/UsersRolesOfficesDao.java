@@ -29,11 +29,6 @@ public class UsersRolesOfficesDao extends DaoBase {
     super(queryFactory, emp);
   }
 
-  /**
-   *
-   * @param id
-   * @return
-   */
   public UsersRolesOffices getById(Long id) {
     QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     final JPQLQuery query = getQueryFactory().from(uro)
@@ -42,7 +37,7 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
-   * @return l'usersRolesOffice associato ai parametri passati
+   * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOffices(User user, Role role, Office office) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
@@ -56,7 +51,7 @@ public class UsersRolesOfficesDao extends DaoBase {
 
 
   /**
-   * @return l'usersRolesOffice associato ai parametri passati
+   * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOfficesByUserAndOffice(User user, Office office) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;

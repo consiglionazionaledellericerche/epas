@@ -22,6 +22,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per i PersonShift.
+ *
  * @author dario
  */
 public class PersonShiftDayDao extends DaoBase {

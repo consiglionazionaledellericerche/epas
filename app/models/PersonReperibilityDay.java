@@ -16,13 +16,16 @@ import javax.persistence.UniqueConstraint;
 
 
 /**
- * Rappresenta un giorno di reperibilità di una persona reperibile
+ * Rappresenta un giorno di reperibilità di una persona reperibile.
  *
  * @author cristian
  */
 @Audited
 @Entity
-@Table(name = "person_reperibility_days", uniqueConstraints = {@UniqueConstraint(columnNames = {"person_reperibility_id", "date"})})
+@Table(
+    name = "person_reperibility_days",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"person_reperibility_id", "date"})})
 public class PersonReperibilityDay extends BaseModel {
 
   private static final long serialVersionUID = 6170327692153445002L;

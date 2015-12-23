@@ -231,10 +231,6 @@ public class WrapperPerson implements IWrapperPerson {
     return hasPassToIndefinite;
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<ContractStampProfile> getCurrentContractStampProfile() {
 
@@ -256,10 +252,6 @@ public class WrapperPerson implements IWrapperPerson {
     return this.currentContractStampProfile;
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<WorkingTimeType> getCurrentWorkingTimeType() {
 
@@ -277,7 +269,8 @@ public class WrapperPerson implements IWrapperPerson {
 
     //ricerca
     for (ContractWorkingTimeType cwtt : this.currentContract.get().contractWorkingTimeType) {
-      if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+      if (DateUtility
+          .isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
         this.currentWorkingTimeType = Optional.fromNullable(cwtt.workingTimeType);
         return this.currentWorkingTimeType;
       }
@@ -286,10 +279,6 @@ public class WrapperPerson implements IWrapperPerson {
 
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<ContractWorkingTimeType> getCurrentContractWorkingTimeType() {
 
@@ -316,10 +305,6 @@ public class WrapperPerson implements IWrapperPerson {
     return Optional.absent();
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<VacationPeriod> getCurrentVacationPeriod() {
 

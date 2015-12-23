@@ -14,8 +14,6 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.SecureManager;
 import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
@@ -37,7 +35,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 @With({Secure.class, RequestInit.class})
-@Slf4j
 public class VacationsAdmin extends Controller {
 
   @Inject

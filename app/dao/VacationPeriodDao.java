@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per i periodi di ferie.
+ *
  * @author dario
  */
 public class VacationPeriodDao extends DaoBase {
@@ -26,7 +28,7 @@ public class VacationPeriodDao extends DaoBase {
   }
 
   /**
-   * @return la lista dei vacationPeriod associati al contratto passato come parametro
+   * @return la lista dei vacationPeriod associati al contratto passato come parametro.
    */
   public List<VacationPeriod> getVacationPeriodByContract(Contract contract) {
     final QVacationPeriod vacationPeriod = QVacationPeriod.vacationPeriod;
