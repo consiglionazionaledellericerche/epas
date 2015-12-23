@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+@SuppressWarnings("rawtypes")
 @Slf4j
 public class RemoveInvalidStampingsJob extends Job {
 

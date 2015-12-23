@@ -70,10 +70,12 @@ public class Persons extends Controller {
               @Override
               public DayRecap apply(PersonDay personday) {
                 DayRecap dayRecap = new DayRecap();
-                dayRecap.workingMinutes = personDayManager.workingMinutes(wrapperFactory.create(personday));
+                dayRecap.workingMinutes =
+                    personDayManager.workingMinutes(wrapperFactory.create(personday));
                 dayRecap.date = personday.date.toString();
                 dayRecap.mission = personDayManager.isOnMission(personday);
-                dayRecap.workingTime = wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
+                dayRecap.workingTime =
+                    wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
 
                 return dayRecap;
               }
@@ -91,7 +93,8 @@ public class Persons extends Controller {
     if (person != null) {
 
       personDays = FluentIterable.from(
-              absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
+              absenceDao.getAbsencesInPeriod(
+                  Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
               .transform(new Function<Absence, DayRecap>() {
                 @Override
                 public DayRecap apply(Absence absence) {

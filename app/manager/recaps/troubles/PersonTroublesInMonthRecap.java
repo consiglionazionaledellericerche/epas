@@ -33,8 +33,9 @@ public class PersonTroublesInMonthRecap {
   public int holidayWorkingTimeNotAccepted = 0;
   public int holidayWorkingTimeAccepted = 0;
 
-  public PersonTroublesInMonthRecap(PersonDayInTroubleDao personDayInTroubleDao,
-                                    PersonManager personManager, Person person, LocalDate monthBegin, LocalDate monthEnd) {
+  public PersonTroublesInMonthRecap(
+      PersonDayInTroubleDao personDayInTroubleDao, PersonManager personManager,
+      Person person, LocalDate monthBegin, LocalDate monthEnd) {
 
     this.person = person;
     List<PersonDayInTrouble> troubles = personDayInTroubleDao

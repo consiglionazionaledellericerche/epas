@@ -9,7 +9,6 @@ import com.google.gson.JsonParser;
 import controllers.Security;
 
 import dao.PersonDao;
-import dao.StampingDao;
 
 import injection.StaticInject;
 
@@ -43,8 +42,6 @@ import javax.inject.Inject;
 @StaticInject
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
-  @Inject
-  private static StampingDao stampingDao;
   @Inject
   private static PersonDao personDao;
   @Inject
@@ -109,7 +106,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       /**
        * Cercare la persona in funzione del tipo di matricolaFirma.
-       * Nel campo matricolaFirma decido di riportare il valore dell'id con cui viene salvata 
+       * Nel campo matricolaFirma decido di riportare il valore dell'id con cui viene salvata
        * la persona sul db invece che la matricola.
        */
       JsonArray tipoMatricola = jsonObject.getAsJsonArray("tipoMatricolaFirma");
@@ -123,7 +120,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
             matricolaFirma, tipo);
 
         /**
-         * l'ordine con cui faccio le ricerche sul db dipende dall'array tipoMatricola 
+         * l'ordine con cui faccio le ricerche sul db dipende dall'array tipoMatricola
          * che mi ha passato il client,
          * quindi vado sul db a fare la ricerca partendo dal primo campo dell'array passato.
          * Se lo trovo ok ed esco, altrimenti proseguo nel for a cercare con il tipo successivo
@@ -177,7 +174,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
           //Nell'inserimento delle persone ci deve essere un controllo che verifichi che non ci
           //siano casi in cui il campo id possa essere utilizzato per associare il badge alla
-          //persona e lo stesso valore dell'id esista già come oldId, 
+          //persona e lo stesso valore dell'id esista già come oldId,
           //altrimenti questa parte di codice non funzionerebbe
 
           person = personDao.getPersonById(intMatricolaFirmaAsLong);

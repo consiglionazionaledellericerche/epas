@@ -14,6 +14,8 @@ import org.hibernate.envers.query.AuditQuery;
 import java.util.List;
 
 /**
+ * Dao per lo storico dei PersonDay.
+ *
  * @author marco
  */
 public class PersonDayHistoryDao {

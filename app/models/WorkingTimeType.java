@@ -1,5 +1,7 @@
 package models;
 
+import com.google.common.collect.Lists;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -23,12 +25,14 @@ import javax.persistence.Transient;
 
 
 /**
+ * Modello per le tipologie di orario di lavoro.
+ *
  * @author cristian
  * @author dario
  */
 @Entity
 @Audited
-@Table(name="working_time_types")
+@Table(name = "working_time_types")
 public class WorkingTimeType extends BaseModel {
 
   private static final long serialVersionUID = -3443521979786226461L;
@@ -42,7 +46,7 @@ public class WorkingTimeType extends BaseModel {
   public Boolean horizontal;
 
   /**
-   * True se il tipo di orario corrisponde ad un "turno di lavoro" false altrimenti
+   * True se il tipo di orario corrisponde ad un "turno di lavoro" false altrimenti.
    */
   public boolean shift = false;
 
@@ -55,7 +59,7 @@ public class WorkingTimeType extends BaseModel {
 
   @NotAudited
   @OneToMany(mappedBy = "workingTimeType")
-  public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
+  public List<ContractWorkingTimeType> contractWorkingTimeType = Lists.newArrayList();
 
   //@Required
   @ManyToOne(fetch = FetchType.LAZY)

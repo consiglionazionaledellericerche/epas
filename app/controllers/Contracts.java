@@ -272,9 +272,6 @@ public class Contracts extends Controller {
     notFoundIfNull(contract);
 
     rules.checkIfPermitted(contract.person.office);
-//    for (ContractStampProfile csp : contract.contractStampProfile) {
-//      csp.delete();
-//    }
 
     if (!confirmed) {
       render("@delete", contract);
@@ -480,9 +477,9 @@ public class Contracts extends Controller {
   /**
    * Salva l'inizializzazione.
    *
-   * @param contract           contract
-   * @param sourceDateResidual nuova data inizializzazione
-   * @param confirmed          step di conferma ricevuta
+   * @param contract  contract.
+   * @param sourceDateResidual nuova data inizializzazione.
+   * @param confirmedResidual step di conferma ricevuta.
    */
   public static void saveResidualSourceContract(@Valid final Contract contract,
       @Valid final LocalDate sourceDateResidual, boolean confirmedResidual) {
@@ -581,9 +578,9 @@ public class Contracts extends Controller {
   /**
    * Salva l'inizializzazione.
    *
-   * @param contract             contract
-   * @param sourceDateMealTicket nuova data inizializzazione
-   * @param confirmed            step di conferma ricevuta
+   * @param contract contract.
+   * @param sourceDateMealTicket nuova data inizializzazione.
+   * @param confirmedMeal step di conferma ricevuta.
    */
   public static void saveMealTicketSourceContract(@Valid final Contract contract,
       @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmedMeal) {

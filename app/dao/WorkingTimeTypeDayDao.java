@@ -17,6 +17,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per i giorni delle tipologie di orario di lavoro.
+ *
  * @author dario
  */
 public class WorkingTimeTypeDayDao extends DaoBase {
@@ -31,10 +33,11 @@ public class WorkingTimeTypeDayDao extends DaoBase {
     this.workingTimeTypeDao = workingTimeTypeDao;
   }
 
-  /**
+  /**.
    * @return il workingTimeTypeDay relativo al workingTimeType e al giorno passati come parametro
    */
-  private WorkingTimeTypeDay getWorkingTimeTypeDayByDayOfWeek(WorkingTimeType wtt, Integer dayOfWeek) {
+  private WorkingTimeTypeDay getWorkingTimeTypeDayByDayOfWeek(
+      WorkingTimeType wtt, Integer dayOfWeek) {
 
     final QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
 

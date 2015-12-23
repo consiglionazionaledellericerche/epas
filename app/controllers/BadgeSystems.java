@@ -138,8 +138,7 @@ public class BadgeSystems extends Controller {
 
 
   /**
-   * @param badgeSystem badgeSystem
-   * @param user        l'utente creato a partire dal badge reader.
+   * @param badgeSystem badgeSystem da salvare.
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
 
@@ -207,15 +206,19 @@ public class BadgeSystems extends Controller {
 
   }
 
-  public static void saveBadges(@Valid BadgeSystem badgeSystem, @Required String code,
-                                @Valid Person person, boolean personFixed) {
+  public static void saveBadges(
+      @Valid BadgeSystem badgeSystem, @Required String code, @Valid Person person,
+      boolean personFixed) {
 
     rules.checkIfPermitted(badgeSystem.office);
 
     List<Person> activePersons = Lists.newArrayList();
     if (!validation.hasError("badgeSystem")) {
-      activePersons = personDao.list(Optional.<String>absent(),
-          Sets.newHashSet(badgeSystem.office), false, LocalDate.now(), LocalDate.now(), true).list();
+      activePersons =
+          personDao.list(
+              Optional.<String>absent(),
+              Sets.newHashSet(badgeSystem.office), false,
+              LocalDate.now(), LocalDate.now(), true).list();
     }
 
     if (validation.hasErrors()) {

@@ -34,13 +34,13 @@ public class MealTicketDao extends DaoBase {
   MealTicketDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
-  
+
   /**
    * mealTickt assegnati alla persona nella finestra temporale specificata.<br>
    * Ordinati per data di scadenza (in base a expireDateOrder) e per codice blocco.
+   *
    * @param contract contratto
    * @param interval intervallo
-   * @param expireDateOrder true asc, false desc
    * @return lista di buoni pasto.
    */
   public List<MealTicket> getMealTicketAssignedToPersonIntoInterval(
@@ -53,13 +53,13 @@ public class MealTicketDao extends DaoBase {
         .where(mealTicket.contract.eq(contract))
         .where(mealTicket.date.goe(interval.getBegin()))
         .where(mealTicket.date.loe(interval.getEnd()));
-    
+
     if (order.equals(MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC)) {
       query.orderBy(mealTicket.expireDate.asc());
     } else if (order.equals(MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC)) {
       query.orderBy(mealTicket.date.desc());
     }
-    
+
     query.orderBy(mealTicket.code.asc());
 
     return query.list(mealTicket);
@@ -110,7 +110,7 @@ public class MealTicketDao extends DaoBase {
 
 
   }
-  
+
   /**
    * I buoni pasto del blocco ordinati per codice asc.
    * @param codeBlock il codice del blocco.

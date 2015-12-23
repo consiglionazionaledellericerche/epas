@@ -18,13 +18,15 @@ public class AbsenceReperibilityPeriod {
   public final PersonReperibilityType reperibilityType;
   public LocalDate end;
 
-  public AbsenceReperibilityPeriod(Person person, LocalDate start, PersonReperibilityType type) {
+  public AbsenceReperibilityPeriod(
+      Person person, LocalDate start, PersonReperibilityType type) {
     this.person = person;
     this.start = start;
     this.reperibilityType = type;
   }
 
-  public AbsenceReperibilityPeriod(Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
+  public AbsenceReperibilityPeriod(
+      Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
     this.person = person;
     this.start = start;
     this.end = end;

@@ -30,6 +30,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 /**
+ * Estensioni vari utilizzabili nei template, principamente formattatori di oggetti.
+ *
  * @author marco
  */
 @StaticInject
@@ -80,10 +82,6 @@ public class TemplateExtensions extends JavaExtensions {
     return DT_FORMATTER.print(dt);
   }
 
-  public static String time(LocalDateTime dt) {
-    return TIME_FORMATTER.print(dt);
-  }
-
   public static String format(Object obj) {
     if (obj instanceof LocalDate) {
       return format((LocalDate) obj);
@@ -92,11 +90,16 @@ public class TemplateExtensions extends JavaExtensions {
     }
   }
 
+  public static String time(LocalDateTime dt) {
+    return TIME_FORMATTER.print(dt);
+  }
+
   public static String percentage(BigDecimal value) {
     return new DecimalFormat("##.### %").format(value);
   }
 
-  public static <T extends GenericModel> String joinOnField(final Iterable<T> models, final String fieldName) {
+  public static <T extends GenericModel> String joinOnField(
+      final Iterable<T> models, final String fieldName) {
 
     return COMMAJ.join(Iterables.transform(models, new Function<T, String>() {
 
@@ -131,8 +134,8 @@ public class TemplateExtensions extends JavaExtensions {
     return obj.toString();
   }
 
-  public static String label(Boolean b) {
-    if (b) {
+  public static String label(Boolean bool) {
+    if (bool) {
       return "Si";
     } else {
       return "No";
@@ -161,16 +164,7 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static Object label(String label, Object... args) {
-//		if (Session.current().contains(CustomMessages.I18N_KEY)) {
-//			final String url = Router.getFullUrl("CustomMessages.customize");
-//			final String locale = Lang.get();
-//			return raw("<span class=\"i18n\" data-url=\"" + url
-//					+ "\" data-locale=\"" + locale +"\" data-key=\"" + label
-//					+ "\" data-value=\"" + VitisdbPlugin.getKey(locale, label)
-//					+ "\">" + Messages.get(label, args) + "</span>");
-//		} else {
     return raw(Messages.get(label, args));
-//		}
   }
 
   public static Iterable<String> commaSplit(String value) {
@@ -193,8 +187,8 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String[] toStringItems(Iterable<Object> iterable) {
-    return
-        Iterables.toArray(Iterables.transform(iterable, Functions.toStringFunction()), String.class);
+    return Iterables.toArray(
+        Iterables.transform(iterable, Functions.toStringFunction()), String.class);
   }
 
   public static String value(LocalDate date) {

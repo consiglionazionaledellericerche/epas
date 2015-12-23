@@ -1,7 +1,7 @@
 package models.enumerate;
 
 /**
- * enumerato relativo alle possibili modifiche del tempo di lavoro del personDay
+ * Enumerato relativo alle possibili modifiche del tempo di lavoro del personDay.
  *
  * @author dario
  */

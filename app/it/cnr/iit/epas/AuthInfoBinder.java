@@ -14,6 +14,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 /**
+ * Binder per le informazioni sul auth info (username, password).
+ *
  * @author cristian
  */
 @Slf4j
@@ -24,6 +26,7 @@ public class AuthInfoBinder implements TypeBinder<AuthInfo> {
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
+  @SuppressWarnings("rawtypes")
   @Override
   public Object bind(
       String name, Annotation[] annotations, String value,

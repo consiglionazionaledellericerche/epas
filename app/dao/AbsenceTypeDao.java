@@ -63,7 +63,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * I tipi assenza ordinata da quelli più frequenti.
-   * 
+   *
    * @return lista assenze ordinata per utilizzo.
    */
   public List<AbsenceType> getFrequentTypes() {
@@ -73,7 +73,7 @@ public class AbsenceTypeDao extends DaoBase {
 
     //TRICK selezionare anche quelle mai usate: http://stackoverflow.com/
     //questions/4076098/how-to-select-rows-with-no-matching-entry-in-another-table
-    
+
     //IVV fallisce. Aggiornare alla macchina docker.
     try {
       final JPQLQuery query = getQueryFactory().from(absenceType)
@@ -107,8 +107,9 @@ public class AbsenceTypeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(absenceType)
             .orderBy(absenceType.code.asc());
     if (name.isPresent() && !name.get().trim().isEmpty()) {
-      condition.andAnyOf(absenceType.code.startsWithIgnoreCase(name.get()),
-              absenceType.description.toLowerCase().like("%" + Strings.toLowerCase(name.get()) + "%"));
+      condition.andAnyOf(
+          absenceType.code.startsWithIgnoreCase(name.get()),
+          absenceType.description.toLowerCase().like("%" + Strings.toLowerCase(name.get()) + "%"));
       query.where(condition);
     }
 
@@ -116,7 +117,7 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
-   * @return l'absenceType relativo all'id passato come parametro
+   * @return l'absenceType relativo all'id passato come parametro.
    */
   public AbsenceType getAbsenceTypeById(Long long1) {
 
@@ -131,7 +132,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * @return la lista di codici di assenza che sono validi da una certa data in poi ordinati per
-   * codice di assenza crescente
+   *     codice di assenza crescente.
    */
   public List<AbsenceType> getAbsenceTypeFromEffectiveDate(
           LocalDate date) {
@@ -146,7 +147,7 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
-   * @return l'absenceType relativo al codice passato come parametro
+   * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> getAbsenceTypeByCode(String string) {
 
@@ -163,7 +164,8 @@ public class AbsenceTypeDao extends DaoBase {
    * Una mappa contenente gli AbsenceType fatte dalle persona nel mese e numero di assenze fatte per
    * ogni tipo.
    */
-  public Map<AbsenceType, Long> getAbsenceTypeInPeriod(Person person, LocalDate fromDate, Optional<LocalDate> toDate) {
+  public Map<AbsenceType, Long> getAbsenceTypeInPeriod(
+      Person person, LocalDate fromDate, Optional<LocalDate> toDate) {
     Preconditions.checkNotNull(person);
     Preconditions.checkNotNull(fromDate);
 
