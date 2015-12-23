@@ -39,10 +39,10 @@ import javax.inject.Inject;
 
 
 /**
+ * Implements methods used by sist-org in order to keep overtime information.
+ *
  * @autor arianna
  *
- * Implements methods used by sist-org in order
- * to keep overtime information
  */
 @Slf4j
 public class Overtimes extends Controller {

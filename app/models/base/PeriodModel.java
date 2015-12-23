@@ -11,7 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class PeriodModel extends BaseModel implements IPeriodModel, Comparable<PeriodModel> {
+public abstract class PeriodModel extends BaseModel
+    implements IPeriodModel, Comparable<PeriodModel> {
 
   @Getter
   @Setter
@@ -31,7 +32,7 @@ public abstract class PeriodModel extends BaseModel implements IPeriodModel, Com
     }
     return beginDate.compareTo(other.beginDate);
   }
-  
+
   @Override
   public LocalDate calculatedEnd() {
     return endDate;

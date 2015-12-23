@@ -27,7 +27,7 @@ public class ConfYearManager {
   /**
    * Questo manager utilizza direttamente JPQL perchè implementa un ulteriore strato di astrazione
    * sulle configurazioni (le configurazioni richieste non esistenti vengono create sulla base dei
-   * dati di default o degli anni precedenti)
+   * dati di default o degli anni precedenti).
    */
   @Inject
   ConfYearManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -38,7 +38,9 @@ public class ConfYearManager {
    * Produce la configurazione annuale per l'office. I parametri vengono creati a partire dalla
    * configurazione dell'anno precedente (se presente), altrimenti dai valori di default.
    *
+   * <p>
    * Se overwrite è false mantiene senza sovrascrivere eventuali parametri generali preesitenti.
+   * </p>
    */
   public void buildOfficeConfYear(Office office, Integer year, boolean overwrite) {
 
@@ -69,9 +71,10 @@ public class ConfYearManager {
    * persistito il valore dell'anno precedente. Se il valore dell'anno precedente non è presente
    * viene persistito il valore di default.
    *
-   * Il valore preesistente se presente viene sovrascritto.
+   * <p>Il valore preesistente se presente viene sovrascritto.</p>
    */
-  public Optional<ConfYear> saveConfYear(Parameter param, Office office, Integer year, Optional<String> value) {
+  public Optional<ConfYear> saveConfYear(
+      Parameter param, Office office, Integer year, Optional<String> value) {
 
     //Decido il nuovo valore
 
@@ -106,7 +109,6 @@ public class ConfYearManager {
 
   /**
    * Si recupera l'oggetto quando si vuole modificare il parametro.
-   *
    * Se serve il valore utilizzare getFieldValue (utilizzo della cache).
    */
   public ConfYear getByField(Parameter param, Office office, Integer year) {
@@ -212,7 +214,10 @@ public class ConfYearManager {
         new LocalDate(year, month, Integer.parseInt(value));
       } catch (Exception e) {
 
-        return new MessageResult(false, Integer.parseInt(value) + "/" + month + "/" + year + " data non valida. Settare correttamente i parametri.");
+        return new MessageResult(
+            false,
+            Integer.parseInt(value) + "/" + month + "/" + year + " data non valida. "
+                + "Settare correttamente i parametri.");
       }
     }
 
@@ -223,7 +228,10 @@ public class ConfYearManager {
       try {
         new LocalDate(year, Integer.parseInt(value), day);
       } catch (Exception e) {
-        return new MessageResult(false, Integer.parseInt(value) + "/" + year + " data non valida. Settare correttamente i parametri.");
+        return new MessageResult(
+            false,
+            Integer.parseInt(value) + "/" + year + " data non valida. "
+                + "Settare correttamente i parametri.");
       }
 
     }

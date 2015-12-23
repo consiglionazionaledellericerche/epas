@@ -61,11 +61,6 @@ public class BadgeSystemDao extends DaoBase {
     return query.singleResult(badgeSystem);
   }
 
-  /**
-   *
-   * @param name
-   * @return
-   */
   public PerseoSimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
                                                        Optional<BadgeReader> badgeReader) {
 

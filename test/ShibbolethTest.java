@@ -20,7 +20,9 @@ public class ShibbolethTest extends FunctionalTest {
    */
   @Test
   public void testShibbolethAuthentication() {
-    assertThat(Person.find("SELECT p FROM Person p where email = ?" , "cristian.lucchesi@cnr.it"), IsNull.notNullValue());
+    assertThat(
+        Person.find("SELECT p FROM Person p where email = ?" , "cristian.lucchesi@cnr.it"),
+        IsNull.notNullValue());
     // Set up the mock shibboleth attributes that
     // will be used to authenticate the next user which
     // logins in.
@@ -43,7 +45,9 @@ public class ShibbolethTest extends FunctionalTest {
   }
 
 
-  /** Fixed a bug in the default version of this method. It dosn't follow redirects properly **/
+  /**
+   * Fixed a bug in the default version of this method. It dosn't follow redirects properly.
+   */
   public static Response GET(Object url, boolean followRedirect) {
     Response response = GET(url);
     if (Http.StatusCode.FOUND == response.status && followRedirect) {

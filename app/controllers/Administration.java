@@ -251,8 +251,8 @@ public class Administration extends Controller {
    * @param end      la data in cui finire
    * @param forAll   se il controllo deve essere fatto per tutti
    */
-  public static void deleteUncoupledStampings(List<Long> peopleId,
-                                              @Required LocalDate begin, LocalDate end, boolean forAll) {
+  public static void deleteUncoupledStampings(
+      List<Long> peopleId, @Required LocalDate begin, LocalDate end, boolean forAll) {
 
     if (validation.hasErrors()) {
       params.flash();

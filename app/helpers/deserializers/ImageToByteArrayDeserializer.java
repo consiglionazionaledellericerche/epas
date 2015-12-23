@@ -21,7 +21,8 @@ public class ImageToByteArrayDeserializer implements JsonDeserializer<byte[]> {
   private static final String IMAGE_MAGIK = "data:image/png;base64,";
 
   /**
-   * @see com.google.gson.JsonDeserializer#deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext)
+   * @see com.google.gson.JsonDeserializer#deserialize(com.google.gson.JsonElement,
+   *    java.lang.reflect.Type, com.google.gson.JsonDeserializationContext)
    */
   @Override
   public byte[] deserialize(JsonElement json, Type typeOfT,

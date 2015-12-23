@@ -9,7 +9,6 @@ import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.RoleDao;
-import dao.wrapper.IWrapperFactory;
 
 import models.Office;
 import models.Role;
@@ -22,11 +21,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 public class SecureManager {
-
-  //private final static Logger log = LoggerFactory.getLogger(SecurityManager.class);
-
-  @Inject
-  private IWrapperFactory wrapperFactory;
 
   @Inject
   private RoleDao roleDao;
@@ -124,7 +118,7 @@ public class SecureManager {
 
   }
 
-  public Set<Office> officesBadgeAllowed(User user){
+  public Set<Office> officesBadgeAllowed(User user) {
     ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN);
 
     return getOfficeAllowed(user, roles);

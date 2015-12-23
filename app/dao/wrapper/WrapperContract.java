@@ -166,11 +166,6 @@ public class WrapperContract implements IWrapperContract {
     return currentMonth;
   }
 
-  /**
-   *
-   * @param yearMonth
-   * @return
-   */
   @Override
   public Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth) {
 

@@ -71,7 +71,7 @@ public class BlockMealTicket {
   }
 
   /**
-   * Il giorno di scadenza dei buoni appartenenti al blocchetto.
+   * @return il giorno di scadenza dei buoni appartenenti al blocchetto.
    */
   public LocalDate getExpireDate() {
     if (this.getDimBlock() > 0) {
@@ -81,7 +81,7 @@ public class BlockMealTicket {
   }
 
   /**
-   * L'amministratore assegnatario del blocchetto.
+   * @return l'amministratore assegnatario del blocchetto.
    */
   public Person getAdmin() {
     if (this.getDimBlock() > 0) {
@@ -91,7 +91,7 @@ public class BlockMealTicket {
   }
 
   /**
-   * La data di consegna (inserimento ePAS) del blocchetto.
+   * @return la data di consegna (inserimento ePAS) del blocchetto.
    */
   public LocalDate getReceivedDate() {
     if (this.getDimBlock() > 0) {
@@ -101,19 +101,17 @@ public class BlockMealTicket {
   }
 
   /**
-   * Il primo number del blocco.
-   * @return
+   * @return il primo number del blocco.
    */
   public int getFirst() {
     return this.mealTickets.get(0).number;
   }
 
   /**
-   * L'ultimo number del blocco.
-   * @return
+   * @return l'ultimo number del blocco.
    */
   public int getLast() {
-    return this.mealTickets.get(this.mealTickets.size()-1).number;
+    return this.mealTickets.get(this.mealTickets.size() - 1).number;
   }
 
 }

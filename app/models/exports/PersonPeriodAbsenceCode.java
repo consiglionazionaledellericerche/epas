@@ -2,10 +2,12 @@ package models.exports;
 
 
 /**
+ * Oggetto per l'esportazione di un periodo di assenza per una certa persona relativa a un
+ * certo codice.
+ *
  * @author dario
  * @author alessandro
- * @author arianna (aggiunto id) oggetto per l'esportazione di un periodo di assenza per una certa
- *         persona relativa a un certo codice
+ * @author arianna (aggiunto id)
  */
 public class PersonPeriodAbsenceCode {
 

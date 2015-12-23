@@ -109,9 +109,10 @@ public class AbsenceManager {
   }
 
   /**
-   * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94
+   * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94.
    */
-  private AbsenceType whichVacationCode(Person person, LocalDate date, List<Absence> otherAbsences) {
+  private AbsenceType whichVacationCode(
+      Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
     Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),

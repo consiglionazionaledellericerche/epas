@@ -43,8 +43,9 @@ public class ContractMonthRecapDao extends DaoBase {
    * I riepiloghi delle persone con un massimo di buoni pasto passato come parametro.
    * TODO: il filtro sugli office delle persone.
    */
-  public List<ContractMonthRecap> getPersonMealticket(YearMonth yearMonth,
-                                                      Optional<Integer> max, Optional<String> name, Set<Office> offices) {
+  public List<ContractMonthRecap> getPersonMealticket(
+      YearMonth yearMonth, Optional<Integer> max, Optional<String> name,
+      Set<Office> offices) {
 
     final QContractMonthRecap recap = QContractMonthRecap.contractMonthRecap;
     final QContract contract = QContract.contract;
