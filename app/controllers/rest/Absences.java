@@ -90,7 +90,8 @@ public class Absences extends Controller {
   }
 
   @BasicAuth
-  public static void insertAbsence(String email, String absenceCode, LocalDate begin, LocalDate end) {
+  public static void insertAbsence(
+      String email, String absenceCode, LocalDate begin, LocalDate end) {
     Person person = personDao.byEmail(email).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
@@ -101,7 +102,8 @@ public class Absences extends Controller {
     }
     List<AbsenceAddedRest> list = Lists.newArrayList();
     try {
-      AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(person, begin, Optional.fromNullable(end),
+      AbsenceInsertReport air =
+          absenceManager.insertAbsenceRecompute(person, begin, Optional.fromNullable(end),
               absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(),
               Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
       for (AbsencesResponse ar : air.getAbsences()) {

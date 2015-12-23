@@ -23,6 +23,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per i PersonReperibilityDay.
+ *
  * @author dario
  */
 public class PersonReperibilityDayDao extends DaoBase {

@@ -120,7 +120,7 @@ public class VacationsAdmin extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     if (contract == null) {
-      error();	/* send a 500 error */
+      error(); /* send a 500 error */
     }
 
     rules.checkIfPermitted(contract.person.office);
@@ -142,7 +142,7 @@ public class VacationsAdmin extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     if (contract == null) {
-      error();	/* send a 500 error */
+      error(); /* send a 500 error */
     }
 
     rules.checkIfPermitted(contract.person.office);
@@ -164,7 +164,7 @@ public class VacationsAdmin extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     if (contract == null) {
-      error();	/* send a 500 error */
+      error(); /* send a 500 error */
     }
 
     rules.checkIfPermitted(contract.person.office);

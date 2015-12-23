@@ -84,7 +84,7 @@ public class PersonMonthCompetenceRecap {
   }
 
   /**
-   * Ritorna il numero di giorni di indennità di reperibilità feriale per la persona nel mese
+   * Ritorna il numero di giorni di indennità di reperibilità feriale per la persona nel mese.
    */
   private int getWeekDayAvailability(Person person, @Valid int year, @Valid int month) {
     int weekDayAvailability = 0;
@@ -102,7 +102,7 @@ public class PersonMonthCompetenceRecap {
 
   /**
    * Ritorna il numero di giorni di straordinario diurno nei giorni lavorativi per la persona nel
-   * mese
+   * mese.
    */
   private int getDaylightWorkingDaysOvertime(Person person, int year, int month) {
     int daylightWorkingDaysOvertime = 0;
@@ -120,7 +120,7 @@ public class PersonMonthCompetenceRecap {
 
   /**
    * Ritorna il numero di giorni di straordinario diurno nei giorni festivi o notturno nei giorni
-   * lavorativi per la persona nel mese
+   * lavorativi per la persona nel mese.
    */
   private int getDaylightholidaysOvertime(Person person, int year, int month) {
     int daylightholidaysOvertime = 0;
@@ -137,7 +137,7 @@ public class PersonMonthCompetenceRecap {
   }
 
   /**
-   * Ritorna il numero di giorni di turno ordinario per la persona nel mese
+   * Ritorna il numero di giorni di turno ordinario per la persona nel mese.
    */
   private int getOrdinaryShift(Person person, int year, int month) {
     int ordinaryShift = 0;
@@ -154,7 +154,7 @@ public class PersonMonthCompetenceRecap {
   }
 
   /**
-   * Ritorna il numero di giorni di turno notturno per la persona nel mese
+   * Ritorna il numero di giorni di turno notturno per la persona nel mese.
    */
   private int getNightShift(Person person, int year, int month) {
     int nightShift = 0;

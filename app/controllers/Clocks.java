@@ -67,8 +67,6 @@ public class Clocks extends Controller {
   private static PersonStampingDayRecapFactory stampingDayRecapFactory;
   @Inject
   private static ConsistencyManager consistencyManager;
-  @Inject
-  private static SecurityRules rules;
 
   @NoCheck
   public static void show() {
@@ -94,7 +92,8 @@ public class Clocks extends Controller {
       }
     }
 
-    List<Person> personList = personDao.list(Optional.<String>absent(), offices, false, data, data, true).list();
+    List<Person> personList =
+        personDao.list(Optional.<String>absent(), offices, false, data, data, true).list();
     render(data, personList);
   }
 
@@ -115,7 +114,8 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+      String addressesAllowed =
+          confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
       if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
 

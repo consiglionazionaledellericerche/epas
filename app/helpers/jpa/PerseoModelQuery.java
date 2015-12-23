@@ -117,12 +117,13 @@ public class PerseoModelQuery {
       return query.list(expression);
     }
 
+    public List<T> list(long limits) {
+      return query.restrict(QueryModifiers.limit(limits)).list(expression);
+    }
+
     public SearchResults<T> listResults() {
       return paginatedQuery(query).listResults(expression);
     }
 
-    public List<T> list(long limits) {
-      return query.restrict(QueryModifiers.limit(limits)).list(expression);
-    }
   }
 }

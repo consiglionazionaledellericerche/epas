@@ -24,10 +24,12 @@ public class PersonDayInTroubleDao extends DaoBase {
   }
 
   /**
-   * @return la lista dei personDayInTrouble relativi alla persona person nel periodo begin-end. E'
-   * possibile specificare se si vuole ottenere quelli fixati (fixed = true) o no (fixed = false)
+   * @return la lista dei personDayInTrouble relativi alla persona person nel periodo begin-end.
+   *     E' possibile specificare se si vuole ottenere quelli fixati (fixed = true) o no
+   *     (fixed = false).
    */
-  public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(Person person, LocalDate begin, LocalDate end) {
+  public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(
+      Person person, LocalDate begin, LocalDate end) {
 
     QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
 

@@ -14,8 +14,9 @@ public class PersonCompetenceRecap {
   public final List<CompetenceCode> personActiveCompetence;
   public final List<CompetenceCode> totalCompetenceCode;
 
-  public PersonCompetenceRecap(Person person, List<CompetenceCode> personActiveCompetence,
-                               List<CompetenceCode> codes) {
+  public PersonCompetenceRecap(
+      Person person, List<CompetenceCode> personActiveCompetence,
+      List<CompetenceCode> codes) {
     this.person = person;
     this.personActiveCompetence = personActiveCompetence;
     this.totalCompetenceCode = codes;

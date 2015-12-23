@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 //@On("0 10 6 ? * MON")
 //@On("0 40 10 * * ?")
+@SuppressWarnings("rawtypes")
 public class CheckCnrEmailJob extends Job {
 
   @Inject

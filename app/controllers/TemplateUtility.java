@@ -14,7 +14,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
-import dao.StampingDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 

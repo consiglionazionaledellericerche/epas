@@ -37,7 +37,6 @@ import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
-import org.apache.commons.mail.EmailException;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -363,7 +362,7 @@ public class ConsistencyManager {
   /**
    * Se al giorno precedente l'ultima timbratura è una entrata disaccoppiata e nel giorno attuale vi
    * è una uscita nei limiti notturni in configurazione, allora vengono aggiunte le timbrature
-   * default a 00:00
+   * default a 00:00.
    */
   private void handlerNightStamp(IWrapperPersonDay pd) {
 
@@ -403,7 +402,8 @@ public class ConsistencyManager {
         exitStamp.markedByAdmin = false;
         exitStamp.stampModificationType = smtMidnight;
         exitStamp.note =
-                "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+            "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della "
+            + "mezzanotte";
         exitStamp.personDay = previous;
         exitStamp.save();
         previous.stampings.add(exitStamp);
@@ -413,8 +413,9 @@ public class ConsistencyManager {
 
         // timbratura apertura giorno attuale
         Stamping enterStamp =
-                new Stamping(pd.getValue(), new LocalDateTime(pd.getValue().date.getYear(),
-                        pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(), 0, 0));
+            new Stamping(
+                pd.getValue(), new LocalDateTime(pd.getValue().date.getYear(),
+                pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(), 0, 0));
 
         enterStamp.way = WayType.in;
         enterStamp.markedByAdmin = false;
@@ -423,7 +424,8 @@ public class ConsistencyManager {
 
 
         enterStamp.note =
-                "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+                "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo "
+                + "della mezzanotte";
 
         enterStamp.save();
 
@@ -635,7 +637,7 @@ public class ConsistencyManager {
             .getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull();
 
     DateInterval monthInterSource =
-            new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
+        new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
     List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab32);
     List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab31);
     List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab37);

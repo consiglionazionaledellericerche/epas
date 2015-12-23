@@ -33,6 +33,7 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
   @Inject
   private static PersonDao personDao;
 
+  @SuppressWarnings("rawtypes")
   @Override
   public Object bind(String name, Annotation[] annotations, String value,
                      Class actualClass, Type genericType) throws Exception {

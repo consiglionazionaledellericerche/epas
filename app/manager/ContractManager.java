@@ -34,7 +34,6 @@ import javax.inject.Inject;
  */
 public class ContractManager {
 
-  private final ConfGeneralManager confGeneralManager;
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
   private final VacationCodeDao vacationCodeDao;
@@ -42,17 +41,15 @@ public class ContractManager {
   /**
    * Constructor.
    *
-   * @param confGeneralManager {@link ConfGeneralManager}
    * @param consistencyManager {@link ConsistencyManager}
    * @param vacationCodeDao    {@link VacationCodeDao}
    * @param wrapperFactory     {@link IWrapperFactory}
    */
   @Inject
-  public ContractManager(final ConfGeneralManager confGeneralManager,
-                         final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
-                         final IWrapperFactory wrapperFactory) {
+  public ContractManager(
+      final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
+      final IWrapperFactory wrapperFactory) {
 
-    this.confGeneralManager = confGeneralManager;
     this.consistencyManager = consistencyManager;
     this.vacationCodeDao = vacationCodeDao;
     this.wrapperFactory = wrapperFactory;
@@ -221,8 +218,9 @@ public class ContractManager {
     contract.save();
   }
 
-  private VacationPeriod buildVacationPeriod(final Contract contract,
-                                             final VacationCode vacationCode, final LocalDate beginFrom, final LocalDate endTo) {
+  private VacationPeriod buildVacationPeriod(
+      final Contract contract, final VacationCode vacationCode,
+      final LocalDate beginFrom, final LocalDate endTo) {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
     vacationPeriod.contract = contract;

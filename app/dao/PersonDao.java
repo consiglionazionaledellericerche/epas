@@ -733,10 +733,6 @@ public final class PersonDao extends DaoBase {
    * un office in offices.
    * Importante: utile perchè non sporca l'entity manager con oggetti parziali.
    *
-   * @param offices
-   * @param year
-   * @param month
-   * @return
    */
   public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
 

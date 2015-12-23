@@ -25,6 +25,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per gli uffici.
+ *
  * @author dario
  */
 public class OfficeDao extends DaoBase {
@@ -38,7 +40,7 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * @return l'ufficio identificato dall'id passato come parametro
+   * @return l'ufficio identificato dall'id passato come parametro.
    */
   public Office getOfficeById(Long id) {
 
@@ -50,7 +52,7 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * @return la lista di tutti gli uffici presenti sul database
+   * @return la lista di tutti gli uffici presenti sul database.
    */
   public List<Office> getAllOffices() {
 
@@ -63,7 +65,7 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * @return l'ufficio associato al codice passato come parametro
+   * @return l'ufficio associato al codice passato come parametro.
    */
   public Optional<Office> byCode(String code) {
 
@@ -76,7 +78,7 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * @return l'ufficio associato al codice passato come parametro
+   * @return l'ufficio associato al codice passato come parametro.
    */
   public Optional<Office> byCodeId(String codeId) {
 
@@ -141,7 +143,8 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * Tutte le sedi. //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
+   * Tutte le sedi.
+   * //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
    * ordinamento sugli istituti.
    */
   public PerseoSimpleResults<Office> allOffices() {

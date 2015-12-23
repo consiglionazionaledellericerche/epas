@@ -45,7 +45,7 @@ import javax.inject.Inject;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già
- * presenti
+ * presenti.
  *
  * @author cristian
  */
@@ -113,23 +113,9 @@ public class Bootstrap extends Job<Void> {
       IWrapperContract wrContract = wrapperFactory.create(contract.get());
       if (wrContract.initializationMissing()) {
 
-        log.info("Bootstrap contract scan: il contratto di {} iniziato il {} non è initializationMissing",
-                person.fullName(), contract.get().beginDate);
-                /*
-                Contract c = contract.get();
-        c.sourceDateResidual = new LocalDate(wrContract.dateForInitialization());
-        c.sourcePermissionUsed = 0;
-        c.sourceRecoveryDayUsed = 0;
-        c.sourceRemainingMealTicket = 0;
-        c.sourceRemainingMinutesCurrentYear = 0;
-        c.sourceRemainingMinutesLastYear = 0;
-        c.sourceVacationCurrentYearUsed = 0;
-        c.sourceVacationLastYearUsed = 0;
-        c.sourceByAdmin = false;
-        c.save();
-
-        consistencyManager.updatePersonSituation(person.id, c.sourceDateResidual);
-        */
+        log.info(
+            "Bootstrap contract scan: contratto di {} iniziato il {} non è initializationMissing",
+            person.fullName(), contract.get().beginDate);
       }
     }
 

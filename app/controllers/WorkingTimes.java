@@ -51,8 +51,6 @@ public class WorkingTimes extends Controller {
   @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static SecureManager secureManager;
-  @Inject
   private static SecurityRules rules;
   @Inject
   private static WorkingTimeTypeDao workingTimeTypeDao;
@@ -226,7 +224,8 @@ public class WorkingTimes extends Controller {
     workingTimeTypeManager.saveWorkingTimeType(wttd6, wtt, 6);
     workingTimeTypeManager.saveWorkingTimeType(wttd7, wtt, 7);
 
-    flash.success("Inserito nuovo orario di lavoro '%s' per la sede %s.", wtt.description, wtt.office.name);
+    flash.success("Inserito nuovo orario di lavoro '%s' per la sede %s.",
+        wtt.description, wtt.office.name);
 
     manageWorkingTime(wtt.office.id);
 
@@ -256,7 +255,8 @@ public class WorkingTimes extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     if (wtt == null) {
 
-      flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
+      flash.error("Impossibile caricare il tipo orario specificato. "
+          + "Riprovare o effettuare una segnalazione.");
       WorkingTimes.manageWorkingTime(null);
     }
 
