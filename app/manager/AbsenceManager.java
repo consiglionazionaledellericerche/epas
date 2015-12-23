@@ -250,7 +250,7 @@ public class AbsenceManager {
                 person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
       } else if (AbsenceTypeMapping.FER.is(absenceType)) {
         aiList.add(
-            handlerFER(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
+            handlerFer(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
       } else if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType)
               || AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
               || AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)) {
@@ -571,7 +571,7 @@ public class AbsenceManager {
   /**
    * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.
    */
-  private AbsencesResponse handlerFER(Person person, LocalDate date, AbsenceType absenceType, 
+  private AbsencesResponse handlerFer(Person person, LocalDate date, AbsenceType absenceType, 
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
     AbsenceType wichFer = vacationsService.whichVacationCode(person, date, otherAbsences);

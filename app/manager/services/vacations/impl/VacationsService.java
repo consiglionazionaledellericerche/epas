@@ -42,20 +42,20 @@ public class VacationsService implements IVacationsService {
   private final AbsenceDao absenceDao;
   private final ContractDao contractDao;
   private final AbsenceTypeDao absenceTypeDao;
-  
+
   private final AbsenceTypeManager absenceTypeManager;
   private final ConfYearManager confYearManager;
   private final IWrapperFactory wrapperFactory;
 
   @Inject
-  VacationsService(
-      AbsenceDao absenceDao, 
-      AbsenceTypeDao absenceTypeDao, 
+  public VacationsService(
+      AbsenceDao absenceDao,
+      AbsenceTypeDao absenceTypeDao,
       ContractDao contractDao,
       AbsenceTypeManager absenceTypeManager,
       ConfYearManager confYearManager,
       IWrapperFactory wrapperFactory) {
-    
+
     this.absenceDao = absenceDao;
     this.absenceTypeDao = absenceTypeDao;
     this.contractDao = contractDao;
@@ -83,7 +83,7 @@ public class VacationsService implements IVacationsService {
       return Optional.<IVacationsRecap>absent();
     }
 
-    if (wrContract.getValue().vacationPeriods == null 
+    if (wrContract.getValue().vacationPeriods == null
         || wrContract.getValue().vacationPeriods.isEmpty()) {
       return Optional.<IVacationsRecap>absent();
     }
@@ -103,8 +103,8 @@ public class VacationsService implements IVacationsService {
 
     LocalDate expireDateLastYear = vacationsLastYearExpireDate(year, contract.person.office);
     LocalDate expireDateCurrentYear = vacationsLastYearExpireDate(year + 1, contract.person.office);
-    
-    List<Absence> absencesToConsider = absenceToConsider(wrContract.getValue().person, year, 
+
+    List<Absence> absencesToConsider = absenceToConsider(wrContract.getValue().person, year,
         wrContract.getContractDatabaseInterval(), dateAsToday);
     absencesToConsider.addAll(otherAbsences);
 
@@ -119,13 +119,13 @@ public class VacationsService implements IVacationsService {
 
     return Optional.fromNullable(vacationRecap);
   }
-  
+
   /**
    * Preleva dal db le assenze da considerare per la costruzione del riepilogo ferie dell'anno year.
-   * Se dateAsToday è popolato ignora tutte le assenze fatte (sia ferie/permessi che postPartum) 
+   * Se dateAsToday è popolato ignora tutte le assenze fatte (sia ferie/permessi che postPartum)
    * prese dopo tale data.
    */
-  private List<Absence> absenceToConsider(Person person, int year, 
+  public List<Absence> absenceToConsider(Person person, int year,
       DateInterval contractDatabaseInterval, Optional<LocalDate> dateAsToday) {
 
     // Gli intervalli su cui predere le assenze nel db
@@ -142,7 +142,7 @@ public class VacationsService implements IVacationsService {
                     new DateInterval(new LocalDate(year + 1, 1, 1),
                             new LocalDate(year + 1, 12, 31)));
 
-    // limite superiode dateAsToday. Messo qua per non sporcare i calcoli a livelli successivi, 
+    // limite superiode dateAsToday. Messo qua per non sporcare i calcoli a livelli successivi,
     // visto che serve solo per il tabellone di danila.
     if (dateAsToday.isPresent()) {
       if (DateUtility.isDateIntoInterval(dateAsToday.get(), previousYearInterval)) {
@@ -155,7 +155,7 @@ public class VacationsService implements IVacationsService {
         nextYearInterval = new DateInterval(nextYearInterval.getBegin(), dateAsToday.get());
       }
     }
-    
+
     // Il contratto deve essere attivo nell'anno...
     Preconditions.checkNotNull(requestYearInterval);
     LocalDate dateFrom = requestYearInterval.getBegin();
@@ -169,7 +169,7 @@ public class VacationsService implements IVacationsService {
 
     // Le assenze
     List<Absence> absencesForVacationsRecap = absenceDao
-            .getAbsencesInCodeList(person, dateFrom, dateTo, 
+            .getAbsencesInCodeList(person, dateFrom, dateTo,
                 absenceTypeManager.codesForVacations(), true);
 
     return absencesForVacationsRecap;
@@ -177,7 +177,7 @@ public class VacationsService implements IVacationsService {
 
   /**
    * Costruisce il riepilogo ferie con il calcolo di assenze maturate e residue a oggi considerando
-   * la data di scadenza ferie anno passato della sede competente. 
+   * la data di scadenza ferie anno passato della sede competente.
    * @param year anno
    * @param contract contratto
    * @return il recap
@@ -186,14 +186,14 @@ public class VacationsService implements IVacationsService {
   public Optional<IVacationsRecap> create(int year, Contract contract) {
 
     LocalDate accruedDate = LocalDate.now();
-    
+
     List<Absence> otherAbsences = Lists.newArrayList();
-    
+
     return create(year, contract, accruedDate, otherAbsences, Optional.<LocalDate>absent());
   }
-  
+
   /**
-   * Costruisce il riepilogo ferie alla fine del mese con il calcolo delle assenze 
+   * Costruisce il riepilogo ferie alla fine del mese con il calcolo delle assenze
    * maturate e residue fino a quel momento (ignorando le eventuali assenze prese successivamente).
    * Serve a Danila.
    * @param year anno
@@ -203,28 +203,28 @@ public class VacationsService implements IVacationsService {
    */
   @Override
   public Optional<IVacationsRecap> createEndMonth(int year, int month, Contract contract) {
-    
+
     LocalDate endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
     List<Absence> otherAbsences = Lists.newArrayList();
     return create(year, contract, endMonth, otherAbsences, Optional.fromNullable(endMonth));
   }
 
-  
-  
+
+
   /**
    * Il primo codice utilizzabile nella data. Ordine: 31, 32, 94.
    * @param person persona
-   * @param date data 
+   * @param date data
    * @param otherAbsences altre assenze da considerare.
    * @return tipo assenza
    */
-  public AbsenceType whichVacationCode(Person person, LocalDate date, 
+  public AbsenceType whichVacationCode(Person person, LocalDate date,
       List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences, 
+    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
-    
+
     if (!vr.isPresent()) {
       return null;
     }
@@ -251,14 +251,14 @@ public class VacationsService implements IVacationsService {
   /**
    * Verifica che la persona alla data possa prendere un giorno di ferie codice 32.
    * @param person persona
-   * @param date data 
+   * @param date data
    * @param otherAbsences altre assenze da considerare.
    * @return true se è possibile prendere il codice 32.
    */
   public boolean canTake32(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences, 
+    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
     if (!vr.isPresent()) {
       return false;
@@ -271,14 +271,14 @@ public class VacationsService implements IVacationsService {
   /**
    * Verifica che la persona alla data possa prendere un giorno di ferie codice 31.
    * @param person persona
-   * @param date data 
+   * @param date data
    * @param otherAbsences altre assenze da considerare.
    * @return true se è possibile prendere il codice 31.
    */
   public boolean canTake31(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences, 
+    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
     if (!vr.isPresent()) {
       return false;
@@ -287,21 +287,21 @@ public class VacationsService implements IVacationsService {
 
     return (vr.get().getVacationsLastYear().getNotYetUsedAccrued() > 0);
   }
-  
+
   /**
    * Verifica che la persona alla data possa prendere un giorno di ferie con codice 37.
    * @param person persona
-   * @param date data 
+   * @param date data
    * @param otherAbsences altre assenze da considerare.
    * @return true se è possibile prendere il codice 37.
    */
   public boolean canTake37(Person person, LocalDate date, List<Absence> otherAbsences) {
-    
+
     if (date.getYear() == LocalDate.now().getYear()) {
-      Optional<IVacationsRecap> vacationsRecap = create(date.getYear(), 
-          contractDao.getContract(LocalDate.now(), person), LocalDate.now(), otherAbsences, 
+      Optional<IVacationsRecap> vacationsRecap = create(date.getYear(),
+          contractDao.getContract(LocalDate.now(), person), LocalDate.now(), otherAbsences,
           Optional.<LocalDate>absent());
-      
+
       if (vacationsRecap.isPresent()) {
         int remaining37 = vacationsRecap.get().getVacationsLastYear().getNotYetUsedTotal();
         if (remaining37 > 0) {
@@ -316,14 +316,14 @@ public class VacationsService implements IVacationsService {
   /**
    * Verifica che la persona alla data possa prendere un giorno di permesso con codice 94.
    * @param person persona
-   * @param date data 
+   * @param date data
    * @param otherAbsences altre assenze da considerare.
    * @return true se è possibile prendere il codice 94.
    */
   public boolean canTake94(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences, 
+    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
     if (!vr.isPresent()) {
       return false;
@@ -332,7 +332,7 @@ public class VacationsService implements IVacationsService {
     return (vr.get().getPermissions().getNotYetUsedAccrued() > 0);
 
   }
- 
+
   /**
    * La data di scadenza delle ferie anno passato per l'office passato come argomento nell'anno.
    * year.
@@ -352,15 +352,15 @@ public class VacationsService implements IVacationsService {
         .withYear(year)
         .withMonthOfYear(monthExpiryVacationPastYear)
         .withDayOfMonth(dayExpiryVacationPastYear);
-    
+
     return expireDate;
   }
-  
+
   /**
    * Se sono scadute le ferie per l'anno passato.
    * @param year anno
    * @param expireDate data scadenza
-   * @return esito 
+   * @return esito
    */
   public boolean isVacationsLastYearExpired(int year, LocalDate expireDate) {
     LocalDate today = LocalDate.now();

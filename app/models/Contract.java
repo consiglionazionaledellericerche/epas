@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import lombok.Getter;
+
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
@@ -38,6 +40,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
    */
+  @Getter
   @Column(name = "source_date_residual")
   public LocalDate sourceDateResidual = null;
 
@@ -47,12 +50,15 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Column(name = "source_by_admin")
   public boolean sourceByAdmin = true;
 
+  @Getter
   @Column(name = "source_vacation_last_year_used")
   public Integer sourceVacationLastYearUsed = null;
 
+  @Getter
   @Column(name = "source_vacation_current_year_used")
   public Integer sourceVacationCurrentYearUsed = null;
 
+  @Getter
   @Column(name = "source_permission_used")
   public Integer sourcePermissionUsed = null;
 
@@ -72,6 +78,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @JoinColumn(name = "person_id")
   public Person person;
 
+  @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginFrom")
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
@@ -137,7 +144,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
-     
+
     if (type.equals(ContractWorkingTimeType.class)) {
       return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
     }
@@ -151,7 +158,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public LocalDate calculatedEnd() {
     if (this.endContract != null) {
       return this.endContract;
-    } 
+    }
     return this.endDate;
   }
 

@@ -10,6 +10,8 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import manager.AbsenceManager.AbsenceToDate;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -218,7 +220,7 @@ public class ContractManager {
     contract.save();
   }
 
-  private VacationPeriod buildVacationPeriod(
+  public static VacationPeriod buildVacationPeriod(
       final Contract contract, final VacationCode vacationCode,
       final LocalDate beginFrom, final LocalDate endTo) {
 
@@ -227,7 +229,6 @@ public class ContractManager {
     vacationPeriod.beginFrom = beginFrom;
     vacationPeriod.endTo = endTo;
     vacationPeriod.vacationCode = vacationCode;
-    vacationPeriod.save();
     return vacationPeriod;
   }
 
@@ -256,9 +257,9 @@ public class ContractManager {
       // Tempo indeterminato, creo due vacation 3 anni più infinito
 
       contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
-              contract.beginDate.plusYears(3).minusDays(1)));
+        contract.beginDate.plusYears(3).minusDays(1)).save());
       contract.vacationPeriods
-              .add(buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null));
+        .add(buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null).save());
 
     } else {
 
@@ -267,17 +268,49 @@ public class ContractManager {
         // Tempo determinato più lungo di 3 anni
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
-                contract.beginDate.plusYears(3).minusDays(1)));
+                contract.beginDate.plusYears(3).minusDays(1)).save());
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v28,
-                contract.beginDate.plusYears(3), contract.endDate));
+                contract.beginDate.plusYears(3), contract.endDate).save());
 
       } else {
 
         contract.vacationPeriods.add(
-                buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate));
+                buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate).save());
       }
     }
+  }
+
+  public List<VacationPeriod> contractVacationPeriods(Contract contract)  {
+
+    List<VacationPeriod> vacationPeriods = Lists.newArrayList();
+
+    VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
+    VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
+
+    if (contract.getEndDate() == null) {
+
+      // Tempo indeterminato, creo due vacation 3 anni più infinito
+      vacationPeriods.add(buildVacationPeriod(contract, v26, contract.getBeginDate(),
+          contract.getBeginDate().plusYears(3).minusDays(1)));
+      vacationPeriods.add(
+          buildVacationPeriod(contract, v28, contract.getBeginDate().plusYears(3), null));
+
+    } else {
+
+      if (contract.endDate.isAfter(contract.beginDate.plusYears(3).minusDays(1))) {
+
+        // Tempo determinato più lungo di 3 anni
+        vacationPeriods.add(buildVacationPeriod(contract, v26, contract.getBeginDate(),
+            contract.getBeginDate().plusYears(3).minusDays(1)));
+        vacationPeriods.add(
+            buildVacationPeriod(contract, v28, contract.getBeginDate().plusYears(3), contract.getEndDate()));
+      } else {
+        vacationPeriods.add(
+            buildVacationPeriod(contract, v26, contract.getBeginDate(), contract.getEndDate()));
+      }
+    }
+    return vacationPeriods;
   }
 
   /**

@@ -22,22 +22,22 @@ import org.joda.time.LocalDate;
 import java.util.List;
 
 /**
- * Implementazione dell'interfaccia IVacationsRecap. 
+ * Implementazione dell'interfaccia IVacationsRecap.
  * Contiene il riepilogo ferie per un certo anno di un contratto.
- * 
+ *
  * @author alessandro
  *
  */
 public class VacationsRecap implements IVacationsRecap {
 
   /**
-   * Raccoglie i dati della richiesta necessari al calcolo per la 
+   * Raccoglie i dati della richiesta necessari al calcolo per la
    * costruzione riepilogo ferie e permessi.
    * @author alessandro
    *
    */
   public static class VacationsRequest {
-    
+
     @Getter private final int year;
     @Getter private final Contract contract;
     @Getter private final DateInterval contractDateInterval;
@@ -45,15 +45,13 @@ public class VacationsRecap implements IVacationsRecap {
     @Getter private final List<VacationPeriod> contractVacationPeriod;
     @Getter private final List<Absence> postPartumUsed;
     @Getter private final LocalDate expireDateLastYear;
-    @Getter private final boolean considerExpireDate;
     @Getter private final LocalDate expireDateCurrentYear;
 
     @Builder
     private VacationsRequest(final int year, final Contract contract,
-        final DateInterval contractDateInterval, final Optional<LocalDate> accruedDate, 
-        final List<VacationPeriod> contractVacationPeriod, final List<Absence> postPartumUsed, 
-        final LocalDate expireDateLastYear, final LocalDate expireDateCurrentYear, 
-        final boolean considerExpireDate) {
+        final DateInterval contractDateInterval, final Optional<LocalDate> accruedDate,
+        final List<VacationPeriod> contractVacationPeriod, final List<Absence> postPartumUsed,
+        final LocalDate expireDateLastYear, final LocalDate expireDateCurrentYear) {
       this.year = year;
       this.contract = contract;
       this.contractVacationPeriod = contractVacationPeriod;
@@ -62,16 +60,15 @@ public class VacationsRecap implements IVacationsRecap {
       if (accruedDate.isPresent()) {
         this.accruedDate = accruedDate.get();
       } else {
-        this.accruedDate = LocalDate.now();  
+        this.accruedDate = LocalDate.now();
       }
       this.expireDateLastYear = expireDateLastYear;
       this.expireDateCurrentYear = expireDateCurrentYear;
-      this.considerExpireDate = considerExpireDate;
     }
   }
-  
+
   @Getter private VacationsRequest vacationsRequest;
-  
+
   // DECISIONI
   @Getter private VacationsTypeResult vacationsLastYear;
   @Getter private VacationsTypeResult vacationsCurrentYear;
@@ -81,19 +78,19 @@ public class VacationsRecap implements IVacationsRecap {
    * True se le ferie dell'anno passato sono scadute.
    */
   @Getter private boolean isExpireLastYear = false;
-  
+
   /**
    * True se il contratto scade prima della fine dell'anno.
    */
   @Getter private boolean isExpireBeforeEndYear = false;
-  
+
   /**
    * True se il contratto inizia dopo l'inizio dell'anno.
    */
   @Getter private boolean isActiveAfterBeginYear = false;
-  
+
   // SUPPORTO AL CALCOLO
-  
+
   private List<Absence> list32PreviouYear = Lists.newArrayList();
   private List<Absence> list31RequestYear = Lists.newArrayList();
   private List<Absence> list37RequestYear = Lists.newArrayList();
@@ -105,37 +102,35 @@ public class VacationsRecap implements IVacationsRecap {
   private int sourceVacationLastYearUsed = 0;
   private int sourceVacationCurrentYearUsed = 0;
   private int sourcePermissionUsed = 0;
-  
+
   /**
    * Costruttore.
    * @param year anno
    * @param contract contratto
    * @param absencesToConsider assenze da considerare
    * @param accruedDate data di maturazione
-   * @param expireDate data di scadenza ferie
-   * @param considerDateExpireLastYear se considerare la data si scadenza
+   * @param expireDateLastYear data di scadenza ferie
+   * @param expireDateCurrentYear data di scadenza ferie
    */
   @Builder
   public VacationsRecap(int year, Contract contract, List<Absence> absencesToConsider,
-      LocalDate accruedDate, LocalDate expireDateLastYear, LocalDate expireDateCurrentYear,
-      boolean considerDateExpireLastYear) {
-    
-    DateInterval contractDateInterval = 
+      LocalDate accruedDate, LocalDate expireDateLastYear, LocalDate expireDateCurrentYear) {
+
+    DateInterval contractDateInterval =
         new DateInterval(contract.getBeginDate(), contract.calculatedEnd());
-    
+
     initDataStructures(year, accruedDate, expireDateLastYear, absencesToConsider, contract,
         contractDateInterval);
-    
+
     this.vacationsRequest = VacationsRequest.builder()
         .year(year)
         .contract(contract)
         .contractDateInterval(contractDateInterval)
         .accruedDate(Optional.fromNullable(accruedDate))
-        .contractVacationPeriod(contract.vacationPeriods)
+        .contractVacationPeriod(contract.getVacationPeriods())
         .postPartumUsed(this.postPartum)
         .expireDateLastYear(expireDateLastYear)
         .expireDateCurrentYear(expireDateCurrentYear)
-        .considerExpireDate(considerDateExpireLastYear)
         .build();
 
     this.vacationsLastYear = VacationsTypeResult.builder()
@@ -147,7 +142,7 @@ public class VacationsRecap implements IVacationsRecap {
         .sourced(sourceVacationLastYearUsed)
         .typeVacation(TypeVacation.VACATION_LAST_YEAR)
         .build();
-    
+
     this.vacationsCurrentYear = VacationsTypeResult.builder()
         .vacationsRequest(vacationsRequest)
         .absencesUsed(FluentIterable
@@ -157,7 +152,7 @@ public class VacationsRecap implements IVacationsRecap {
         .sourced(sourceVacationCurrentYearUsed)
         .typeVacation(TypeVacation.VACATION_CURRENT_YEAR)
         .build();
-    
+
     this.permissions = VacationsTypeResult.builder()
         .vacationsRequest(vacationsRequest)
         .absencesUsed(FluentIterable
@@ -166,16 +161,16 @@ public class VacationsRecap implements IVacationsRecap {
         .typeVacation(TypeVacation.PERMISSION_CURRENT_YEAR)
         .build();
   }
-  
+
   /**
    * Inizializza le strutture per il calcolo (in modo efficiente).
-   *  
+   *
    * @param absencesToConsider la lista di assenza fatte da considerare.
    */
-  private void initDataStructures(int year, LocalDate accruedDate, LocalDate expireDate, 
-      List<Absence> absencesToConsider, Contract contract, 
+  private void initDataStructures(int year, LocalDate accruedDate, LocalDate expireDate,
+      List<Absence> absencesToConsider, Contract contract,
       DateInterval contractDateInterval) {
-   
+
     // TODO: filtrare otherAbsencs le sole nell'intervallo[dateFrom, dateTo]
 
     for (Absence ab : absencesToConsider) {
@@ -245,17 +240,17 @@ public class VacationsRecap implements IVacationsRecap {
     if (contractDateInterval.getBegin().isAfter(startRequestYear)) {
       this.isActiveAfterBeginYear = true;
     }
-    
+
     //TODO farli diventare un getter di contract
-    if (contract.sourceDateResidual != null 
-        && contract.sourceDateResidual.getYear() == year) {
-      
-      sourceVacationLastYearUsed += contract.sourceVacationLastYearUsed;
-      sourceVacationCurrentYearUsed += contract.sourceVacationCurrentYearUsed;
-      sourcePermissionUsed += contract.sourcePermissionUsed;
-      
+    if (contract.getSourceDateResidual() != null
+        && contract.getSourceDateResidual().getYear() == year) {
+
+      sourceVacationLastYearUsed += contract.getSourceVacationLastYearUsed();
+      sourceVacationCurrentYearUsed += contract.getSourceVacationCurrentYearUsed();
+      sourcePermissionUsed += contract.getSourcePermissionUsed();
+
     }
-    
+
   }
-    
+
 }
