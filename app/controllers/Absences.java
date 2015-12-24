@@ -255,9 +255,9 @@ public class Absences extends Controller {
    * @param absenceType il tipo di assenza da salvare
    * @param file l'eventuale allegato
    */
-  public static void save(@Required @Valid Person person,
+  public static void save(@Required Person person,
       @Required LocalDate dateFrom, @Required LocalDate dateTo,
-      @Valid AbsenceType absenceType,
+      @Required @Valid AbsenceType absenceType,
       Blob file) {
 
     if (Validation.hasErrors()) {
