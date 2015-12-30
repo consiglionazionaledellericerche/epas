@@ -256,10 +256,14 @@ public class ContractManager {
 
       // Tempo indeterminato, creo due vacation 3 anni più infinito
 
-      contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
-        contract.beginDate.plusYears(3).minusDays(1)).save());
-      contract.vacationPeriods
-        .add(buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null).save());
+      contract.vacationPeriods.add(
+          buildVacationPeriod(
+              contract, v26, contract.beginDate,
+              contract.beginDate.plusYears(3).minusDays(1))
+            .<VacationPeriod>save());
+      contract.vacationPeriods.add(
+          buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null)
+            .<VacationPeriod>save());
 
     } else {
 
@@ -268,15 +272,15 @@ public class ContractManager {
         // Tempo determinato più lungo di 3 anni
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
-                contract.beginDate.plusYears(3).minusDays(1)).save());
+                contract.beginDate.plusYears(3).minusDays(1)).<VacationPeriod>save());
 
         contract.vacationPeriods.add(buildVacationPeriod(contract, v28,
-                contract.beginDate.plusYears(3), contract.endDate).save());
+                contract.beginDate.plusYears(3), contract.endDate).<VacationPeriod>save());
 
       } else {
-
         contract.vacationPeriods.add(
-                buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate).save());
+            buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate)
+                .<VacationPeriod>save());
       }
     }
   }
