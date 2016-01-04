@@ -44,7 +44,7 @@ public class VacationManager {
     if (days >= 226 && days <= 315) {
       permissionDays = 3;
     }
-    if (days >= 316 && days <= 365) {
+    if (days >= 316 && days <= 366) {
       permissionDays = 4;
     }
     return permissionDays;
