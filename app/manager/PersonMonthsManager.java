@@ -55,9 +55,12 @@ public class PersonMonthsManager {
    */
   public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month,
       LocalDate beginDate, LocalDate endDate) {
+    
     List<PersonMonthRecap> pmList = personMonthRecapDao
         .getPersonMonthRecaps(person, year, month, beginDate, endDate);
+    
     Insertable rr = new Insertable(true, "");
+    
     if (pmList != null && pmList.size() > 0) {
       rr.message = "Esiste un periodo di ore di formazione "
           + "che contiene uno o entrambi i giorni specificati.";

@@ -14,6 +14,8 @@ import javax.persistence.Table;
 
 
 /**
+ * Entità ore di formazione.
+ * 
  * @author cristian
  */
 //@Audited
@@ -43,16 +45,43 @@ public class PersonMonthRecap extends BaseModel {
   public Integer trainingHours;
 
   @Column(name = "hours_approved")
-  public Boolean hoursApproved;
-
+  public Boolean hoursApproved = false;
+  
   /**
-   * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminarefromDate
+   * Costruisce un nuono oggetto di ore formazione.
+   * @param person person
+   * @param year anno
+   * @param month mese
    */
   public PersonMonthRecap(Person person, int year, int month) {
     this.person = person;
     this.year = year;
     this.month = month;
-
+  }
+  
+  /**
+   * Ritorna true se le ore si riferiscono al mese attuale od al mese precedente 
+   * e non sono ancora state approvate.
+   * 
+   * @return se possono essere modificate.
+   */
+  public boolean isEditable() {
+    
+    if (hoursApproved) {
+      return false;
+    }
+    
+    LocalDate date = LocalDate.now();
+    //mese attuale
+    if (month == date.getMonthOfYear() && year == date.getYear()) { 
+      return true;
+    }
+    //mese precedente
+    if (month == date.minusMonths(1).getMonthOfYear() && year == date.minusMonths(1).getYear()) {
+      return true;
+    }
+    
+    return false;
   }
 
 }
