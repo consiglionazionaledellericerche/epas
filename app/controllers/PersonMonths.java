@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
@@ -41,7 +42,7 @@ public class PersonMonths extends Controller {
   private static PersonMonthsManager personMonthsManager;
 
   /**
-   * metodo che renderizza la visualizzazione delle ore di formazione.
+   * metodo che renderizza la visualizzazione del riepilogo orario.
    * @param year l'anno
    */
   public static void hourRecap(int year) {
@@ -120,9 +121,12 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
     
     Person person = Security.getUser().get().person;
-    
+   
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+      
+      Verify.verify(pm.isEditable());
+      
       if (!validation.hasErrors()) {
         if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
           validation.addError("value",
@@ -200,38 +204,15 @@ public class PersonMonths extends Controller {
     }
     
     PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
+    
+    Verify.verify(pm.isEditable());
+    
     personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
     flash.success("Salvate %d ore di formazione ", value);
 
     PersonMonths.trainingHours(year);
-    
   }
-  
-  /**
-   * metodo che renderizza la visualizzazione della form per l'inserimento delle ore di formazione.
-   */
-  public static void insertTrainingHoursPreviousMonth() {
-
-    Person person = Security.getUser().get().person;
-    LocalDate date = new LocalDate();
-    int month = 0;
-    int year = 0;
-    int max = 0;
-    if (date.getMonthOfYear() == 1) {
-      date = date.minusMonths(1);
-      month = date.getMonthOfYear();
-      year = date.getYear();
-      max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
-      render(person, month, year, max);
-    }
-    max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
-    month = date.minusMonths(1).getMonthOfYear();
-    year = date.getYear();
-
-    render("@insertTrainingHours", person, month, year);
-  }
-
-
+ 
   /**
    * Modifica delle ore di formazione.
    * @param personMonthSituationId id

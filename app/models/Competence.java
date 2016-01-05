@@ -1,5 +1,11 @@
 package models;
 
+import lombok.ToString;
+
+import models.base.BaseModel;
+
+import play.data.validation.Required;
+
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
@@ -7,9 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import models.base.BaseModel;
-import play.data.validation.Required;
 
 
 /**
@@ -20,6 +23,7 @@ import play.data.validation.Required;
  * @author dario
  * @author arianna
  */
+@ToString
 @Entity
 @Table(name = "competences")
 public class Competence extends BaseModel {
@@ -49,7 +53,8 @@ public class Competence extends BaseModel {
 
   public String reason;
 
-  public Competence(Person person, CompetenceCode competenceCode, int year, int month) {
+  public Competence(
+      Person person, CompetenceCode competenceCode, int year, int month) {
     super();
     this.person = person;
     this.competenceCode = competenceCode;
@@ -57,7 +62,8 @@ public class Competence extends BaseModel {
     this.month = month;
   }
 
-  public Competence(Person person, CompetenceCode competenceCode, int year, int month, int value, String reason) {
+  public Competence(
+      Person person, CompetenceCode competenceCode, int year, int month, int value, String reason) {
     super();
     this.person = person;
     this.competenceCode = competenceCode;
@@ -69,12 +75,6 @@ public class Competence extends BaseModel {
 
   public Competence() {
     super();
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Competence[%d] - person.id = %d, competenceCode.id = %d, year = %d, month = %d, valueApproved = %d, valueRequested = %s, reason = %s",
-            id, person.id, competenceCode.id, year, month, valueApproved, valueRequested, reason);
   }
 
   public int getYear() {

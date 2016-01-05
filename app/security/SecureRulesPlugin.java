@@ -22,8 +22,8 @@ import java.util.Properties;
  */
 public class SecureRulesPlugin extends PlayPlugin {
 
-  private final static Logger log = LoggerFactory.getLogger(SecureRulesPlugin.class);
-  private final static String FILENAME = "permissions.drl";
+  private static final Logger log = LoggerFactory.getLogger(SecureRulesPlugin.class);
+  private static final String FILENAME = "permissions.drl";
 
   static KnowledgeBase knowledgeBase;
   Long lastModified;
@@ -78,8 +78,8 @@ public class SecureRulesPlugin extends PlayPlugin {
     builder.add(ResourceFactory.newByteArrayResource(rulesContent), ResourceType.DRL);
     if (builder.hasErrors()) {
       log.error(builder.getErrors().toString());
-      throw new RuntimeException("Drools compilation failed: " +
-              builder.getErrors().size() + " errors");
+      throw new RuntimeException("Drools compilation failed: "
+              + builder.getErrors().size() + " errors");
     }
 
     knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();

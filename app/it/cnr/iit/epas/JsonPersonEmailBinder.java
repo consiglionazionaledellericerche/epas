@@ -7,13 +7,14 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
+import injection.StaticInject;
+
 import models.Person;
 import models.exports.PersonEmailFromJson;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -28,10 +29,11 @@ import javax.inject.Inject;
 @StaticInject
 public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
 
-  private final static Logger log = LoggerFactory.getLogger(JsonPersonEmailBinder.class);
+  private static final Logger log = LoggerFactory.getLogger(JsonPersonEmailBinder.class);
   @Inject
   private static PersonDao personDao;
 
+  @SuppressWarnings("rawtypes")
   @Override
   public Object bind(String name, Annotation[] annotations, String value,
                      Class actualClass, Type genericType) throws Exception {
@@ -55,8 +57,9 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
         person = personDao.byEmail(email).orNull();
 
 
-        if (person != null)
+        if (person != null) {
           persons.add(person);
+        }
       }
       log.debug("Ritorno lista persone...%s", persons);
       pefjl.persons = persons;

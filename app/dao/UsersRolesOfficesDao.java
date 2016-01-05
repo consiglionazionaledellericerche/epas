@@ -1,23 +1,25 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import helpers.ModelQuery;
+
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 public class UsersRolesOfficesDao extends DaoBase {
 
@@ -27,11 +29,6 @@ public class UsersRolesOfficesDao extends DaoBase {
     super(queryFactory, emp);
   }
 
-  /**
-   *
-   * @param id
-   * @return
-   */
   public UsersRolesOffices getById(Long id) {
     QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     final JPQLQuery query = getQueryFactory().from(uro)
@@ -40,7 +37,7 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
-   * @return l'usersRolesOffice associato ai parametri passati
+   * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOffices(User user, Role role, Office office) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
@@ -54,7 +51,7 @@ public class UsersRolesOfficesDao extends DaoBase {
 
 
   /**
-   * @return l'usersRolesOffice associato ai parametri passati
+   * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOfficesByUserAndOffice(User user, Office office) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;

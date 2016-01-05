@@ -1,7 +1,21 @@
-/**
- *
- */
 package it.cnr.iit.epas;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import dao.PersonDao;
+
+import injection.StaticInject;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.Person;
+import models.exports.PersonsList;
+
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -10,23 +24,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import dao.PersonDao;
-import injection.StaticInject;
-import models.Person;
-import models.exports.PersonsList;
-import play.Logger;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
-
 
 /**
+ * Binder per il json la lista delle persone.
+ *
  * @author arianna
  */
+@Slf4j
 @Global
 @StaticInject
 public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
@@ -38,16 +42,20 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
+  @SuppressWarnings("rawtypes")
   @Override
-  public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+  public Object bind(
+      String name, Annotation[] annotations, String value, Class actualClass, Type genericType)
+          throws Exception {
 
-    Logger.debug("binding Persons: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+    log.debug("binding Persons: {}, {}, {}, {}, {}",
+        name, annotations, value, actualClass, genericType);
     try {
       List<Person> persons = new ArrayList<Person>();
-      Logger.debug("letto vaue = %s", value);
+      log.debug("letto vaue = {}", value);
 
       JsonArray jsonArray = new JsonParser().parse(value).getAsJsonArray();
-      Logger.debug("jsonArray = %s", jsonArray);
+      log.debug("jsonArray = {}", jsonArray);
 
       JsonObject jsonObject = null;
       Person person = null;
@@ -56,25 +64,26 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
       for (JsonElement jsonElement : jsonArray) {
 
         jsonObject = jsonElement.getAsJsonObject();
-        Logger.trace("jsonObject = %s", jsonObject);
+        log.trace("jsonObject = {}", jsonObject);
 
         personEmail = jsonObject.get("email").getAsString();
 
         person = personDao.byEmail(personEmail).orNull();
         if (person == null) {
-          throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));
+          throw new IllegalArgumentException(
+              String.format("Person with email = %s doesn't exist", personEmail));
         }
-        Logger.debug("Find person %s with email %s", person.name, personEmail);
+        log.debug("Find person {} with email {}", person.name, personEmail);
 
         persons.add(person);
       }
 
-      Logger.debug("persons = %s", persons);
+      log.debug("persons = {}", persons);
 
       return new PersonsList(persons);
 
     } catch (Exception e) {
-      Logger.error(e, "Problem during binding List<Person>.");
+      log.error("Problem during binding List<Person>.", e);
       throw e;
     }
   }

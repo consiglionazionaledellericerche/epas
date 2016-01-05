@@ -28,7 +28,7 @@ public class HorizontalWorkingTime {
 
   /**
    * Frazione orario di minuti lavorativi da sommare alle ore lavorative FIXME: perché non fare un
-   * campo unico con i minuti lavorativi del giorno?
+   * campo unico con i minuti lavorativi del giorno?.
    */
   @Min(0)
   @Max(DateTimeConstants.MINUTES_PER_HOUR - 1)
@@ -123,11 +123,7 @@ public class HorizontalWorkingTime {
     }
   }
 
-  /**
-   * @param wttd
-   * @return
-   */
-  private final static String holidayName(final int dayOfWeek) {
+  private static final String holidayName(final int dayOfWeek) {
 
     return LocalDate.now().withDayOfWeek(dayOfWeek).dayOfWeek().getAsText();
   }
@@ -182,10 +178,6 @@ public class HorizontalWorkingTime {
     }
   }
 
-  /**
-   * @param wttd
-   * @return
-   */
   private final boolean isHoliday(final WorkingTimeTypeDay wttd) {
 
     return this.holidays.contains(LocalDate.now()

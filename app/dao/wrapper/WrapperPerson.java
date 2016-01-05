@@ -1,8 +1,6 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -50,13 +48,13 @@ public class WrapperPerson implements IWrapperPerson {
   private final PersonMonthRecapDao personMonthRecapDao;
   private final IWrapperFactory wrapperFactory;
   private final CompetenceDao competenceDao;
-  
+
   private Optional<Contract> currentContract = null;
   private Optional<WorkingTimeType> currentWorkingTimeType = null;
   private Optional<VacationPeriod> currentVacationPeriod = null;
   private Optional<ContractStampProfile> currentContractStampProfile = null;
   private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
-  
+
 
   @Inject
   WrapperPerson(@Assisted Person person, ContractDao contractDao,
@@ -91,18 +89,21 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   /**
+   * Calcola il contratto attualmente attivo.
+   *
    * @return il contratto attualmente attivo per quella persona
    */
   @Override
   public Optional<Contract> getCurrentContract() {
 
-    if (this.currentContract != null)
+    if (this.currentContract != null) {
       return this.currentContract;
+    }
 
-    if (this.currentContract == null)
+    if (this.currentContract == null) {
       this.currentContract = Optional.fromNullable(
               contractDao.getContract(LocalDate.now(), value));
-
+    }
     return this.currentContract;
   }
 
@@ -218,20 +219,18 @@ public class WrapperPerson implements IWrapperPerson {
     boolean hasPassToIndefinite = false;
 
     for (Contract contract : orderedContractInYear) {
-      if (contract.endDate != null)
+      if (contract.endDate != null) {
         hasDefinite = true;
+      }
 
-      if (hasDefinite && contract.endDate == null)
+      if (hasDefinite && contract.endDate == null) {
         hasPassToIndefinite = true;
+      }
     }
 
     return hasPassToIndefinite;
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<ContractStampProfile> getCurrentContractStampProfile() {
 
@@ -253,10 +252,6 @@ public class WrapperPerson implements IWrapperPerson {
     return this.currentContractStampProfile;
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<WorkingTimeType> getCurrentWorkingTimeType() {
 
@@ -268,12 +263,14 @@ public class WrapperPerson implements IWrapperPerson {
       getCurrentContract();
     }
 
-    if (!this.currentContract.isPresent())
+    if (!this.currentContract.isPresent()) {
       return Optional.absent();
+    }
 
     //ricerca
     for (ContractWorkingTimeType cwtt : this.currentContract.get().contractWorkingTimeType) {
-      if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+      if (DateUtility
+          .isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
         this.currentWorkingTimeType = Optional.fromNullable(cwtt.workingTimeType);
         return this.currentWorkingTimeType;
       }
@@ -282,10 +279,6 @@ public class WrapperPerson implements IWrapperPerson {
 
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<ContractWorkingTimeType> getCurrentContractWorkingTimeType() {
 
@@ -297,12 +290,14 @@ public class WrapperPerson implements IWrapperPerson {
       getCurrentContract();
     }
 
-    if (!this.currentContract.isPresent())
+    if (!this.currentContract.isPresent()) {
       return Optional.absent();
+    }
 
     //ricerca
     for (ContractWorkingTimeType cwtt : this.currentContract.get().contractWorkingTimeType) {
-      if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+      if (DateUtility.isDateIntoInterval(
+          LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
         this.currentContractWorkingTimeType = Optional.fromNullable(cwtt);
         return this.currentContractWorkingTimeType;
       }
@@ -310,25 +305,24 @@ public class WrapperPerson implements IWrapperPerson {
     return Optional.absent();
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public Optional<VacationPeriod> getCurrentVacationPeriod() {
 
-    if (this.currentVacationPeriod != null)
+    if (this.currentVacationPeriod != null) {
       return this.currentVacationPeriod;
+    }
 
     if (this.currentContract == null) {
       getCurrentContract();
     }
-    if (!this.currentContract.isPresent())
+    if (!this.currentContract.isPresent()) {
       return Optional.absent();
+    }
 
     //ricerca
     for (VacationPeriod vp : this.currentContract.get().vacationPeriods) {
-      if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(vp.beginFrom, vp.endTo))) {
+      if (DateUtility.isDateIntoInterval(
+          LocalDate.now(), new DateInterval(vp.beginFrom, vp.endTo))) {
         this.currentVacationPeriod = Optional.fromNullable(vp);
         return this.currentVacationPeriod;
       }
@@ -338,7 +332,7 @@ public class WrapperPerson implements IWrapperPerson {
 
 
   /**
-   * Getter per la competenza della persona <CompetenceCode, year, month>
+   * Getter per la competenza della persona con CompetenceCode, year, month.
    */
   @Override
   public Competence competence(final CompetenceCode code,

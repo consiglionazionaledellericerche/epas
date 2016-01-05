@@ -1,6 +1,3 @@
-/**
- *
- */
 package models.enumerate;
 
 import lombok.Getter;
@@ -11,19 +8,19 @@ import lombok.Getter;
 @Getter
 public enum StampTypes {
 
-	/*
- id |          code          |       description        | identifier
-----+------------------------+--------------------------+------------
-  1 | motiviDiServizio       | Motivi di servizio       | s
-  2 | visitaMedica           | Visita Medica            | vm
-  3 | permessoSindacale      | Permesso sindacale       | ps
-  4 | incaricoDiInsegnamento | Incarico di insegnamento | is
-  5 | dirittoAlloStudio      | Diritto allo studio      | das
-  6 | motiviPersonali        | Motivi personali         | mp
-  7 | reperibilita           | Reperibilità             | r
-  8 | intramoenia            | Intramoenia              | i
-  9 | guardiaMedica          | Guardia Medica           | gm
-	 */
+  /*
+   id |          code          |       description        | identifier
+  ----+------------------------+--------------------------+------------
+    1 | motiviDiServizio       | Motivi di servizio       | s
+    2 | visitaMedica           | Visita Medica            | vm
+    3 | permessoSindacale      | Permesso sindacale       | ps
+    4 | incaricoDiInsegnamento | Incarico di insegnamento | is
+    5 | dirittoAlloStudio      | Diritto allo studio      | das
+    6 | motiviPersonali        | Motivi personali         | mp
+    7 | reperibilita           | Reperibilità             | r
+    8 | intramoenia            | Intramoenia              | i
+    9 | guardiaMedica          | Guardia Medica           | gm
+   */
 
   MOTIVI_DI_SERVIZIO("s", "motiviDiServizio","Motivi di servizio"),
   VISITA_MEDICA("vm", "visitaMedica","Visita Medica"),

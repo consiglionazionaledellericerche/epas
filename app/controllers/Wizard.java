@@ -13,10 +13,11 @@ import dao.WorkingTimeTypeDao;
 
 import helpers.validators.StringIsTime;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfGeneralManager;
 import manager.ContractManager;
 import manager.OfficeManager;
-import manager.PersonManager;
 import manager.UserManager;
 
 import models.Contract;
@@ -53,9 +54,12 @@ import javax.inject.Inject;
 
 
 /**
+ * Wizard per la configurazione iniziale di ePAS.
+ *
  * @author daniele
  */
 //@With( {Resecure.class})
+@Slf4j
 public class Wizard extends Controller {
 
   public static final String STEPS_KEY = "steps";
@@ -74,26 +78,23 @@ public class Wizard extends Controller {
   private static RoleDao roleDao;
   @Inject
   private static ContractManager contractManager;
-  @Inject
-  private static PersonManager personManager;
+
   @Inject
   private static UserManager userManager;
 
   public static List<WizardStep> createSteps() {
     return ImmutableList
-            .of(WizardStep.of("Cambio password Admin", "changeAdminPsw", 0),
-                    WizardStep.of("Nuovo ufficio", "setOffice", 1),
-                    WizardStep.of("Configurazione generale", "setGenConf", 2),
-                    WizardStep.of("Creazione Ruolo per l'amministrazione", "seatManagerRole", 3),
-                    WizardStep.of("Riepilogo", "summary", 4));
+        .of(WizardStep.of("Cambio password Admin", "changeAdminPsw", 0),
+            WizardStep.of("Nuovo ufficio", "setOffice", 1),
+            WizardStep.of("Configurazione generale", "setGenConf", 2),
+            WizardStep.of("Creazione Ruolo per l'amministrazione", "seatManagerRole", 3),
+            WizardStep.of("Riepilogo", "summary", 4));
   }
 
   public static void wizard(int step) {
     Preconditions.checkNotNull(step);
 
     //  Recupero dalla cache
-    List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
-    Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
     Long officeCount = Cache.get(Resecure.OFFICE_COUNT, Long.class);
 
     if (officeCount == null) {
@@ -102,33 +103,40 @@ public class Wizard extends Controller {
     }
 
     if (officeCount > 0) {
-      flash.error("Impossibile accedere alla procedura di Wizard se è già presente un Ufficio nel sistema");
+      flash.error("Impossibile accedere alla procedura di Wizard se è già presente un Ufficio"
+          + " nel sistema");
       Institutes.list(null);
     }
 
     double percent = 0;
+
+    //  Recupero dalla cache
+    List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
 
     if (steps == null) {
       steps = createSteps();
       Cache.safeAdd(STEPS_KEY, steps, "10mn");
     }
 
+    //  Recupero dalla cache
+    Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
+
     if (properties == null) {
       try {
         properties = new Properties();
         properties.load(new FileInputStream("conf/Wizard_Properties.conf"));
       } catch (IOException f) {
-        Logger.error("Impossibile caricare il file Wizard_Properties.conf per la procedura di Wizard");
+        log.error("Impossibile caricare il file Wizard_Properties.conf per la procedura di Wizard");
       }
       Cache.safeAdd(PROPERTIES_KEY, properties, "10mn");
     }
 
     int stepsCompleted = Collections2.filter(steps, new Predicate<WizardStep>() {
-      @Override
-      public boolean apply(WizardStep step) {
-        return step.completed;
-      }
-    }).size();
+        @Override
+        public boolean apply(WizardStep step) {
+          return step.completed;
+        }
+      }).size();
 
     percent = stepsCompleted * (100 / steps.size());
 
@@ -145,7 +153,7 @@ public class Wizard extends Controller {
       }
     }
 
-    //    	Submit
+    // Submit
     if (stepsCompleted == steps.size()) {
       Cache.clear();
       submit();
@@ -166,11 +174,14 @@ public class Wizard extends Controller {
     render("@" + currentStep.template, steps, currentStep, percent, properties);
   }
 
-  // Step 1 del Wizard, cambio password Admin.
-  public static void changeAdminPsw(int stepIndex, @Required String adminPassword,
-                                    @Required @Equals(value = "adminPassword",
-                                            message = "Le password non corrispondono")
-                                    String adminPasswordRetype) {
+  /**
+   * Step 1 del Wizard, cambio password Admin.
+   *
+   */
+  public static void changeAdminPsw(
+      int stepIndex, @Required String adminPassword,
+      @Required @Equals(value = "adminPassword", message = "Le password non corrispondono")
+      String adminPasswordRetype) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -196,7 +207,9 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 2 Creazione Istituto e Ufficio
+  /**
+   * STEP 2 Creazione Istituto e Ufficio.
+   */
   public static void setOffice(int stepIndex, @Valid Institute institute, @Valid Office office) {
 
     if (validation.hasErrors()) {
@@ -234,11 +247,13 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 3 Configurazione Generale
+  /**
+   * STEP 3 Configurazione Generale.
+   */
   public static void setGenConf(int stepIndex, @Required String dateOfPatron,
-                                @Required @CheckWith(StringIsTime.class) String lunchPauseStart,
-                                @Required @CheckWith(StringIsTime.class) String lunchPauseEnd,
-                                @Email String emailToContact) {
+      @Required @CheckWith(StringIsTime.class) String lunchPauseStart,
+      @Required @CheckWith(StringIsTime.class) String lunchPauseEnd,
+      @Email String emailToContact) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -267,13 +282,14 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 4 Creazione Profilo per l'amministratore
+  /**
+   * STEP 4 Creazione Profilo per l'amministratore.
+   */
   public static void seatManagerRole(int stepIndex, Person person, @Required int qualification,
-                                     @Required LocalDate beginDate, LocalDate endContract,
-                                     @Required String managerPassword,
-                                     @Required @Equals(value = "managerPassword",
-                                             message = "Le password non corrispondono")
-                                     String managerPasswordRetype) {
+      @Required LocalDate beginDate, LocalDate endContract,
+      @Required String managerPassword,
+      @Required @Equals(value = "managerPassword",  message = "Le password non corrispondono")
+      String managerPasswordRetype) {
 
     validation.required(person.name);
     validation.required(person.surname);
@@ -319,7 +335,9 @@ public class Wizard extends Controller {
     wizard(stepIndex + 1);
   }
 
-  // STEP 2 Creazione Istituto e Ufficio
+  /**
+   * STEP 2 Creazione Istituto e Ufficio.
+   */
   public static void summary(int stepIndex) {
 
     List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
@@ -381,37 +399,37 @@ public class Wizard extends Controller {
     Cache.safeDelete(Resecure.OFFICE_COUNT);
 
     List<String> lunchStart = Splitter.on(":").trimResults()
-            .splitToList(properties.getProperty("lunchPauseStart"));
+        .splitToList(properties.getProperty("lunchPauseStart"));
 
     List<String> lunchStop = Splitter.on(":").trimResults()
-            .splitToList(properties.getProperty("lunchPauseEnd"));
+        .splitToList(properties.getProperty("lunchPauseEnd"));
 
     List<String> dateOfPatron = Splitter.on("/").trimResults()
-            .splitToList(properties.getProperty("dateOfPatron"));
+        .splitToList(properties.getProperty("dateOfPatron"));
 
     confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, office,
-            Optional.fromNullable(LocalDate.now().toString()));
+        Optional.fromNullable(LocalDate.now().toString()));
 
     confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office,
-            Optional.fromNullable(dateOfPatron.get(0)));
+        Optional.fromNullable(dateOfPatron.get(0)));
 
     confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office,
-            Optional.fromNullable(dateOfPatron.get(1)));
+        Optional.fromNullable(dateOfPatron.get(1)));
 
     confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_HOUR, office,
-            Optional.fromNullable(lunchStart.get(0)));
+        Optional.fromNullable(lunchStart.get(0)));
 
     confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_MINUTE, office,
-            Optional.fromNullable(lunchStart.get(1)));
+        Optional.fromNullable(lunchStart.get(1)));
 
     confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_HOUR, office,
-            Optional.fromNullable(lunchStop.get(0)));
+        Optional.fromNullable(lunchStop.get(0)));
 
     confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_MINUTE, office,
-            Optional.fromNullable(lunchStop.get(1)));
+        Optional.fromNullable(lunchStop.get(1)));
 
     confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, office,
-            Optional.fromNullable(properties.getProperty("emailToContact")));
+        Optional.fromNullable(properties.getProperty("emailToContact")));
 
     officeManager.generateConfAndPermission(office);
 
@@ -423,8 +441,8 @@ public class Wizard extends Controller {
     person.email = properties.getProperty("personnelAdminEmail");
 
     person.qualification = qualificationDao.getQualification(Optional
-                    .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
-            Optional.<Long>absent(), false).get(0);
+        .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
+        Optional.<Long>absent(), false).get(0);
 
     if (properties.containsKey("personnelAdminNumber")) {
       person.number = Integer.parseInt(properties.getProperty("personnelAdminNumber"));
@@ -440,7 +458,7 @@ public class Wizard extends Controller {
     Contract contract = new Contract();
 
     LocalDate contractBegin = LocalDate
-            .parse(properties.getProperty("personnelAdminbeginDate"), dtf);
+        .parse(properties.getProperty("personnelAdminbeginDate"), dtf);
 
     LocalDate contractEnd = null;
 
@@ -456,7 +474,7 @@ public class Wizard extends Controller {
     contract.save();
 
     WorkingTimeType wtt = workingTimeTypeDao
-            .workingTypeTypeByDescription("Normale", Optional.<Office>absent());
+        .workingTypeTypeByDescription("Normale", Optional.<Office>absent());
 
     contractManager.properContractCreate(contract, wtt);
 

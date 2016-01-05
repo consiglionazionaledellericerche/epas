@@ -1,19 +1,20 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Person;
 import models.PersonDayInTrouble;
 import models.query.QPersonDayInTrouble;
+
+import org.joda.time.LocalDate;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 public class PersonDayInTroubleDao extends DaoBase {
 
@@ -23,10 +24,12 @@ public class PersonDayInTroubleDao extends DaoBase {
   }
 
   /**
-   * @return la lista dei personDayInTrouble relativi alla persona person nel periodo begin-end. E'
-   * possibile specificare se si vuole ottenere quelli fixati (fixed = true) o no (fixed = false)
+   * @return la lista dei personDayInTrouble relativi alla persona person nel periodo begin-end.
+   *     E' possibile specificare se si vuole ottenere quelli fixati (fixed = true) o no
+   *     (fixed = false).
    */
-  public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(Person person, LocalDate begin, LocalDate end) {
+  public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(
+      Person person, LocalDate begin, LocalDate end) {
 
     QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
 

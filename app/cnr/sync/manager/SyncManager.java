@@ -1,19 +1,12 @@
 package cnr.sync.manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import cnr.sync.dto.DepartmentDto;
 import cnr.sync.dto.PersonRest;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 
@@ -21,15 +14,22 @@ import lombok.extern.slf4j.Slf4j;
 
 import models.Office;
 import models.Person;
+
 import play.Play;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 @Slf4j
 public class SyncManager {
 
   private final OfficeDao officeDao;
   private final PersonDao personDao;
+
   @Inject
   public SyncManager(OfficeDao officeDao, PersonDao personDao) {
     this.officeDao = officeDao;
@@ -39,7 +39,7 @@ public class SyncManager {
   /**
    * questo metodo può essere chiamato dal job settimanale che sincronizza le email cnr del
    * personale oppure dalla chiamata rest per conoscere i tempi di lavoro e le missioni del
-   * personale per la rendicontazione dei progetti
+   * personale per la rendicontazione dei progetti.
    */
   @Deprecated //Deprecato oppure inserire nuova chiave di sincronizzazione
   public void syncronizeCnrEmail() {

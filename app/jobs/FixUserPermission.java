@@ -1,22 +1,25 @@
 package jobs;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
 import com.google.common.collect.Lists;
 
 import injection.StaticInject;
+
 import manager.OfficeManager;
+
 import models.Office;
 import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.test.Fixtures;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 @StaticInject
 public class FixUserPermission {
@@ -39,18 +42,18 @@ public class FixUserPermission {
       }
     }
 
-/*		Procedura un pò esagerata per la riassociazione dei ruoli e permessi corretti
- * 
- *		Crea una copia di tutte le triple degli userRoleOffice per poi
- *		cancellarli tutti dal db in modo da poter cancellare i permessi
- *	 	e i ruoli.
- *		Poi reimporta dal file yaml i permessi e i ruoli corretti e ricrea tutti gli 
- *		userRoleOffice in base alle informazioni precedentemente salvate
- *	
- */
+    /* Procedura un pò esagerata per la riassociazione dei ruoli e permessi corretti
+     *
+     * Crea una copia di tutte le triple degli userRoleOffice per poi
+     * cancellarli tutti dal db in modo da poter cancellare i permessi
+     * e i ruoli.
+     * Poi reimporta dal file yaml i permessi e i ruoli corretti e ricrea tutti gli
+     * userRoleOffice in base alle informazioni precedentemente salvate
+     *
+     */
 
-//		int evolution = (Integer)JPA.em().
-//				createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
+    // int evolution = (Integer)JPA.em().
+    //    createNativeQuery("SELECT max(id) from play_evolutions").getSingleResult();
 
     Role developer = Role.find("byName", Role.DEVELOPER).first();
 
@@ -85,14 +88,14 @@ public class FixUserPermission {
       Logger.info("Ricreati %s permessi", uros.size());
     }
 
-    //		Sistema i permessi per gli user admin e developer
+    // Sistema i permessi per gli user admin e developer
     List<Office> offices = Office.findAll();
 
     for (Office o : offices) {
       officeManager.setSystemUserPermission(o);
     }
 
-    //		Sistema i permessi per tutte le persone
+    // Sistema i permessi per tutte le persone
     List<Person> persons = Person.findAll();
     Role employeeRole = Role.find("byName", Role.EMPLOYEE).first();
     for (Person p : persons) {

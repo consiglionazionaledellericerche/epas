@@ -1,13 +1,13 @@
 package helpers;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
 import org.joda.time.LocalDate;
 
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 import play.data.binding.types.DateBinder;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 @Global
 public class LocalDateBinder implements TypeBinder<LocalDate> {

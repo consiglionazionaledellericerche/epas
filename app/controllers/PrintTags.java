@@ -55,9 +55,9 @@ public class PrintTags extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
-    String titolo = "Situazione presenze mensile " +
-            DateUtility.fromIntToStringMonth(month) + " " + year + " di " +
-            person.surname + " " + person.name;
+    String titolo = "Situazione presenze mensile "
+            + DateUtility.fromIntToStringMonth(month) + " " + year + " di "
+            + person.surname + " " + person.name;
 
     renderPDF(psDto, titolo);
   }
@@ -95,9 +95,9 @@ public class PrintTags extends Controller {
             .create(person.getValue(), year, month);
 
     // FIXME: spostare nel template
-    String titolo = "Situazione presenze mensile " +
-            DateUtility.fromIntToStringMonth(month) + " " + year + " di " +
-            person.getValue().fullName();
+    String titolo = "Situazione presenze mensile "
+            + DateUtility.fromIntToStringMonth(month) + " " + year + " di "
+            + person.getValue().fullName();
 
     renderPDF(psDto, titolo);
 

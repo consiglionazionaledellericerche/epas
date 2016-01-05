@@ -13,8 +13,6 @@ import dao.UsersRolesOfficesDao;
 
 import helpers.Web;
 
-import manager.SecureManager;
-
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -32,6 +30,7 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -55,8 +54,6 @@ public class BadgeReaders extends Controller {
   private static RoleDao roleDao;
   @Inject
   private static UsersRolesOfficesDao uroDao;
-  @Inject
-  private static SecureManager secureManager;
 
   public static void index() {
     flash.keep();
@@ -64,7 +61,7 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   * 
+   *
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -78,7 +75,7 @@ public class BadgeReaders extends Controller {
 
 
   /**
-   * 
+   *
    * @param id identificativo del lettore badge.
    */
   public static void show(Long id) {
@@ -88,12 +85,12 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   * 
+   *
    * @param id identificativo del lettore badge.
    */
   public static void edit(Long id) {
 
-    
+
     final BadgeReader badgeReader = badgeReaderDao.byId(id);
     notFoundIfNull(badgeReader);
     rules.checkIfPermitted(badgeReader.owner);
@@ -137,7 +134,7 @@ public class BadgeReaders extends Controller {
 
 
   /**
-   * 
+   *
    * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeReader badgeReader) {
@@ -158,7 +155,7 @@ public class BadgeReaders extends Controller {
 
 
   /**
-   * @param id identificativo del badge reader.
+   * @param user Utente a cui modificare la password.
    * @param newPass nuova password da associare al lettore.
    */
   public static void changePassword(@Valid User user,
@@ -185,7 +182,7 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   * 
+   *
    * @param badgeReader l'oggetto badge reader da salvare.
    * @param user l'utente creato a partire dal badge reader.
    */
@@ -217,7 +214,6 @@ public class BadgeReaders extends Controller {
 
   /**
    * Gestore associazioni con i BadgeSystem.
-   * @param badgeReaderId
    */
   public static void joinBadgeSystems(Long badgeReaderId) {
 
@@ -231,7 +227,6 @@ public class BadgeReaders extends Controller {
 
   /**
    * Salva la nuova associazione.
-   * @param badgeReader.
    */
   public static void saveBadgeSystems(@Valid BadgeReader badgeReader, boolean confirmed) {
 

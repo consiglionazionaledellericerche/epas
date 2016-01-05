@@ -1,12 +1,8 @@
 package dao;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -15,7 +11,14 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeTypeDay;
 
+import org.joda.time.LocalDate;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 /**
+ * Dao per i giorni delle tipologie di orario di lavoro.
+ *
  * @author dario
  */
 public class WorkingTimeTypeDayDao extends DaoBase {
@@ -30,10 +33,11 @@ public class WorkingTimeTypeDayDao extends DaoBase {
     this.workingTimeTypeDao = workingTimeTypeDao;
   }
 
-  /**
+  /**.
    * @return il workingTimeTypeDay relativo al workingTimeType e al giorno passati come parametro
    */
-  private WorkingTimeTypeDay getWorkingTimeTypeDayByDayOfWeek(WorkingTimeType wtt, Integer dayOfWeek) {
+  private WorkingTimeTypeDay getWorkingTimeTypeDayByDayOfWeek(
+      WorkingTimeType wtt, Integer dayOfWeek) {
 
     final QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
 
@@ -48,8 +52,9 @@ public class WorkingTimeTypeDayDao extends DaoBase {
     //Prendo il WorkingTimeType
     Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(date, person);
 
-    if (!wtt.isPresent())
+    if (!wtt.isPresent()) {
       return null;
+    }
 
     return getWorkingTimeTypeDayByDayOfWeek(wtt.get(), date.getDayOfWeek());
   }

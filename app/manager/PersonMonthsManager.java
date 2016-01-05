@@ -18,15 +18,8 @@ public class PersonMonthsManager {
   @Inject
   private PersonMonthRecapDao personMonthRecapDao;
 
-  /**
-   *
-   * @param pm
-   * @param approved
-   * @param value
-   * @param from
-   * @param to
-   */
-  public void saveTrainingHours(PersonMonthRecap pm, boolean approved, Integer value, LocalDate from, LocalDate to) {
+  public void saveTrainingHours(
+      PersonMonthRecap pm, boolean approved, Integer value, LocalDate from, LocalDate to) {
     pm.hoursApproved = false;
     pm.trainingHours = value;
     pm.fromDate = from;
@@ -36,16 +29,21 @@ public class PersonMonthsManager {
 
   /**
    * @return un Insertable che controlla se è possibile prendere i parametri passati alla funzione
-   * oppure se questi presentano dei problemi
+   *     oppure se questi presentano dei problemi.
    */
-  public Insertable checkIfInsertable(int begin, int end, Integer value, LocalDate beginDate, LocalDate endDate) {
+  public Insertable checkIfInsertable(
+      int begin, int end, Integer value, LocalDate beginDate, LocalDate endDate) {
     Insertable rr = new Insertable(true, "");
     if (begin > end) {
-      rr.message = "La data di inizio del periodo di formazione non può essere successiva a quella di fine";
+      rr.message =
+          "La data di inizio del periodo di formazione non può essere successiva a quella di fine";
       rr.result = false;
     }
-    if (value == null || value < 0 || value > 24 * (endDate.getDayOfMonth() - beginDate.getDayOfMonth() + 1)) {
-      rr.message = "Non sono valide le ore di formazione negative, testuali o che superino la quantità massima di ore nell'intervallo temporale inserito.";
+    if (value == null || value < 0
+        || value > 24 * (endDate.getDayOfMonth() - beginDate.getDayOfMonth() + 1)) {
+      rr.message =
+          "Non sono valide le ore di formazione negative, testuali o che superino la quantità "
+          + "massima di ore nell'intervallo temporale inserito.";
       rr.result = false;
     }
     return rr;
@@ -53,13 +51,16 @@ public class PersonMonthsManager {
 
   /**
    * @return un Insertable che verifica se esiste già un periodo contenente delle ore di formazione
-   * per la persona person
+   *     per la persona person.
    */
-  public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month, 
+  public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month,
       LocalDate beginDate, LocalDate endDate) {
+    
     List<PersonMonthRecap> pmList = personMonthRecapDao
         .getPersonMonthRecaps(person, year, month, beginDate, endDate);
+    
     Insertable rr = new Insertable(true, "");
+    
     if (pmList != null && pmList.size() > 0) {
       rr.message = "Esiste un periodo di ore di formazione "
           + "che contiene uno o entrambi i giorni specificati.";
@@ -71,16 +72,18 @@ public class PersonMonthsManager {
 
   /**
    * @return un Insertable che verifica se le ore di formazione per anno e mese richieste sono già
-   * state inviate
+   *     state inviate.
    */
   public Insertable checkIfAlreadySend(Person person, int year, int month) {
     Insertable rr = new Insertable(true, "");
     List<PersonMonthRecap> list = personMonthRecapDao
-        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
 
     if (list.size() > 0) {
-      rr.message = "Impossibile inserire ore di formazione per il mese precedente poichè gli attestati per quel mese sono già stati inviati";
+      rr.message =
+          "Impossibile inserire ore di formazione per il mese precedente poichè gli "
+          + "attestati per quel mese sono già stati inviati";
       rr.result = false;
 
     }
@@ -89,7 +92,7 @@ public class PersonMonthsManager {
 
   /**
    * @return un Insertable che controlla se esiste nel database una entry con l'id passato come
-   * parametro per quelle ore di formazione
+   *     parametro per quelle ore di formazione.
    */
   public Insertable checkIfExist(PersonMonthRecap pm) {
     Insertable rr = new Insertable(true, "");
@@ -101,7 +104,7 @@ public class PersonMonthsManager {
     return rr;
   }
 
-  public final static class Insertable {
+  public static final class Insertable {
     private boolean result;
     private String message;
 

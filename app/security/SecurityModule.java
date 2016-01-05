@@ -7,13 +7,12 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
-import lombok.extern.slf4j.Slf4j;
+import controllers.Security;
 
 import models.User;
 
 import org.drools.KnowledgeBase;
 
-import controllers.Security;
 import play.mvc.Http;
 
 import java.util.Map;
@@ -23,7 +22,6 @@ import java.util.Map;
  *
  * @author marco
  */
-@Slf4j
 public class SecurityModule implements Module {
 
   public static final String REMOTE_ADDRESS = "request.remoteAddress";
@@ -39,7 +37,8 @@ public class SecurityModule implements Module {
   @Provides
   public Map<PermissionCheckKey, Boolean> currentChecks() {
     if (!Http.Request.current().args.containsKey(REQUESTS_CHECKS)) {
-      Http.Request.current().args.put(REQUESTS_CHECKS, Maps.<PermissionCheckKey, Boolean>newHashMap());
+      Http.Request.current().args
+        .put(REQUESTS_CHECKS, Maps.<PermissionCheckKey, Boolean>newHashMap());
     }
     return (Map<PermissionCheckKey, Boolean>) Http.Request.current().args.get(REQUESTS_CHECKS);
   }
@@ -57,10 +56,7 @@ public class SecurityModule implements Module {
 
   @Provides
   public Optional<User> currentOperator() {
-    Optional<User> user = Security.getUser();
-//    log.debug("SecurityModule: currentOperator = "
-//            + (user.isPresent() ? user.get() : "non presente"));
-    return user;
+    return Security.getUser();
   }
 
   @Override

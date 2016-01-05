@@ -16,6 +16,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per AbsenceTypeGroup.
+ *
  * @author dario
  */
 public class AbsenceTypeGroupDao extends DaoBase {
@@ -26,18 +28,19 @@ public class AbsenceTypeGroupDao extends DaoBase {
   }
 
   /**
-   * @param codeToReplace, findAll
    * @return la lista dei gruppi di codici di assenza nel caso in cui sia valorizzato a "true" il
-   * parametro findAll. Nel caso in cui, invece, sia false e sia valorizzato il campo codeToReplace,
-   * verrà ritornata una lista con un solo elemento contenente l'absenceTypeGroup che soddisfa il
-   * criterio di codeToReplace.
+   *     parametro findAll. Nel caso in cui, invece, sia false e sia valorizzato il campo
+   *     codeToReplace, verrà ritornata una lista con un solo elemento contenente l'absenceTypeGroup
+   *     che soddisfa il criterio di codeToReplace.
    */
-  public List<AbsenceTypeGroup> getAbsenceTypeGroup(Optional<String> codeToReplace, boolean findAll) {
+  public List<AbsenceTypeGroup> getAbsenceTypeGroup(
+      Optional<String> codeToReplace, boolean findAll) {
     final BooleanBuilder condition = new BooleanBuilder();
     QAbsenceTypeGroup absenceTypeGroup = QAbsenceTypeGroup.absenceTypeGroup;
     final JPQLQuery query = getQueryFactory().from(absenceTypeGroup);
-    if (findAll)
+    if (findAll) {
       return query.list(absenceTypeGroup);
+    }
     if (codeToReplace.isPresent()) {
       condition.and(absenceTypeGroup.replacingAbsenceType.code.eq(codeToReplace.get()));
       return query.where(condition).list(absenceTypeGroup);

@@ -41,12 +41,12 @@ public class PersonStampingDayRecap {
   private static final String MEALTICKET_YES = "YES";
   private static final String MEALTICKET_NO = "NO";
   private static final String MEALTICKET_EMPTY = "";
-    
+
   private final StampingTemplateFactory stampingTemplateFactory;
   private final PersonDayManager personDayManager;
-  
+
   private static StampModificationType fixedStampModificationType = null;
-  
+
   public PersonDay personDay;
   public Long personDayId;
   public Person person;
@@ -88,7 +88,7 @@ public class PersonStampingDayRecap {
   public List<String> note = Lists.newArrayList();
 
   /**
-   * Costruisce l'oggetto contenente un giorno lavorativo da visualizzare nel tabellone 
+   * Costruisce l'oggetto contenente un giorno lavorativo da visualizzare nel tabellone
    * timbrature.
    * @param personDayManager injected
    * @param personManager injected
@@ -104,20 +104,20 @@ public class PersonStampingDayRecap {
   public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
                                 StampingTemplateFactory stampingTemplateFactory,
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
-                                WorkingTimeTypeDao workingTimeTypeDao, 
-                                ConfGeneralManager confGeneralManager, PersonDay pd, 
+                                WorkingTimeTypeDao workingTimeTypeDao,
+                                ConfGeneralManager confGeneralManager, PersonDay pd,
                                 int numberOfInOut, Optional<List<Contract>> monthContracts) {
 
     this.stampingTemplateFactory = stampingTemplateFactory;
     this.personDayManager = personDayManager;
-    
+
     this.personDay = pd;
     this.personDayId = pd.id;
 
     if (pd.isToday()) {
       System.out.println("Si aprono le danze.");
     }
-    
+
     if (pd.isPersistent()) {
       this.holiday = pd.isHoliday;
     } else {
@@ -127,9 +127,9 @@ public class PersonStampingDayRecap {
     this.person = pd.person;
     setDateInfo(pd.date);
     this.absences = pd.absences;
-    
+
     IWrapperPersonDay wrPersonDay = wrapperFactory.create(pd);
-    
+
     this.stampingsTemplate = getStampingsTemplate(wrPersonDay, numberOfInOut);
     this.note.addAll(getStampingsNote(this.stampingsTemplate));
 
@@ -186,7 +186,7 @@ public class PersonStampingDayRecap {
       this.setWorkTime(pd.timeAtWork);
       this.setDifference(pd.difference);
       this.setProgressive(pd.progressive);
-      
+
     } else if (this.today) {
 
       // not fixed:  worktime, difference, progressive for today
@@ -198,7 +198,7 @@ public class PersonStampingDayRecap {
     }
     // worktime, difference, progressive for future
     if (this.future) {
-      
+
       this.difference = "";
       this.workTime = "";
       this.progressive = "";
@@ -242,8 +242,8 @@ public class PersonStampingDayRecap {
 
         // se è precedente a source lo ignoro
         if (contract.sourceDateResidual != null
-                && (contract.sourceDateResidual.equals(pd.date) ||
-                contract.sourceDateResidual.isAfter(pd.date))) {
+                && (contract.sourceDateResidual.equals(pd.date)
+                || contract.sourceDateResidual.isAfter(pd.date))) {
           this.ignoreDay = true;
         }
 
@@ -263,7 +263,7 @@ public class PersonStampingDayRecap {
 
   /**
    * Imposta il valore della colonna buono pasto nel tabellone timbrature.
-   * 
+   *
    * @param mealTicket ottenuto si/no
    * @param todayInProgress se è il giorno di oggi.
    */
@@ -298,7 +298,7 @@ public class PersonStampingDayRecap {
 
   /**
    * Imposta il valore dei campi date, past, today, future.
-   * 
+   *
    * @param date la data.
    */
   private void setDateInfo(LocalDate date) {
@@ -327,22 +327,22 @@ public class PersonStampingDayRecap {
 
   /**
    * Crea le timbrature da visualizzare nel tabellone timbrature. <br>
-   * 1) Riempita di timbrature fittizie nelle celle vuote, fino ad arrivare alla dimensione 
+   * 1) Riempita di timbrature fittizie nelle celle vuote, fino ad arrivare alla dimensione
    *    di numberOfInOut. <br>
-   * 2) Con associato il colore e il tipo di bordatura da visualizzare nel tabellone.   
+   * 2) Con associato il colore e il tipo di bordatura da visualizzare nel tabellone.
    *
    * @param wrPersonDay il personDay
    * @param numberOfInOut numero di timbrature.
    * @return la lista di timbrature per il template.
    */
-  private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay, 
+  private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay,
       int numberOfInOut) {
-    
+
     List<Stamping> stampings = personDayManager
         .getStampingsForTemplate(wrPersonDay, numberOfInOut);
-    
+
     List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
-    
+
     boolean samePair = false;
     for (Stamping stamping : stampings) {
 
@@ -357,21 +357,21 @@ public class PersonStampingDayRecap {
       } else if (samePair) {
         position = "center";
       }
-      
+
       StampingTemplate stampingTemplate = stampingTemplateFactory.create(stamping, position);
 
       stampingsTemplate.add(stampingTemplate);
     }
     return stampingsTemplate;
   }
-  
+
   /**
    * La lista delle note in stampingsTemplate.
    * @param stampingsTemplate le timbrature del giorno.
    * @return la lista di note
    */
   private List<String> getStampingsNote(List<StampingTemplate> stampingsTemplate) {
-    List<String> note = Lists.newArrayList(); 
+    List<String> note = Lists.newArrayList();
     for (StampingTemplate stampingTemplate : stampingsTemplate) {
       if (stampingTemplate.stamping.note != null && !stampingTemplate.stamping.note.equals("")) {
         note.add(stampingTemplate.hour + ": " + stampingTemplate.stamping.note);
@@ -380,7 +380,7 @@ public class PersonStampingDayRecap {
     return note;
   }
 
-  
+
 
   /**
    * Formatta il valore del tempo minimo per il buono pasto. 0 string vuota.
@@ -444,8 +444,8 @@ public class PersonStampingDayRecap {
   }
 
   /**
-   * Formatta il valore del tempo a lavoro previsto dal tipo orario. 0 stringa vuota. 
-   * 
+   * Formatta il valore del tempo a lavoro previsto dal tipo orario. 0 stringa vuota.
+   *
    * @param workingTime minuti lavorati
    */
   private void setWorkingTime(int workingTime) {
@@ -455,7 +455,7 @@ public class PersonStampingDayRecap {
       this.workingTime = DateUtility.fromMinuteToHourMinute(workingTime);
     }
   }
-  
+
   /**
    * Formatta il valore del tempo lavorato nel giorno (lordo comprensivo di tempo decurtato).
    * @param workTime minuti lavorati
@@ -470,7 +470,7 @@ public class PersonStampingDayRecap {
 
   /**
    * Formatta il valore della differenza. Imposta i campi this.difference e this.differenceNegative
-   * 
+   *
    * @param difference minuti di differenza
    */
   private void setDifference(int difference) {
@@ -483,7 +483,7 @@ public class PersonStampingDayRecap {
   }
 
   /**
-   * Formatta il valore del progressivo. Imposta i campi this.progressive e 
+   * Formatta il valore del progressivo. Imposta i campi this.progressive e
    * this.progressiveNegative
    * @param progressive minuti di progressivo
    */

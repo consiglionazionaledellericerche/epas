@@ -5,6 +5,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import cnr.sync.dto.CompetenceDto;
+import cnr.sync.dto.DayRecap;
+
+import controllers.Resecure;
+import controllers.Resecure.BasicAuth;
+
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
@@ -23,10 +29,6 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import cnr.sync.dto.CompetenceDto;
-import cnr.sync.dto.DayRecap;
-import controllers.Resecure;
-import controllers.Resecure.BasicAuth;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -68,10 +70,12 @@ public class Persons extends Controller {
               @Override
               public DayRecap apply(PersonDay personday) {
                 DayRecap dayRecap = new DayRecap();
-                dayRecap.workingMinutes = personDayManager.workingMinutes(wrapperFactory.create(personday));
+                dayRecap.workingMinutes =
+                    personDayManager.workingMinutes(wrapperFactory.create(personday));
                 dayRecap.date = personday.date.toString();
                 dayRecap.mission = personDayManager.isOnMission(personday);
-                dayRecap.workingTime = wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
+                dayRecap.workingTime =
+                    wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
 
                 return dayRecap;
               }
@@ -89,7 +93,8 @@ public class Persons extends Controller {
     if (person != null) {
 
       personDays = FluentIterable.from(
-              absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
+              absenceDao.getAbsencesInPeriod(
+                  Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
               .transform(new Function<Absence, DayRecap>() {
                 @Override
                 public DayRecap apply(Absence absence) {
@@ -127,7 +132,8 @@ public class Persons extends Controller {
               start.getMonthOfYear(), Optional.fromNullable(code)));
 
       start = start.plusMonths(1);
-      //			Il caso in cui non vengano specificate delle date che coincidono con l'inizio e la fine di un mese
+      // Il caso in cui non vengano specificate delle date che coincidono con l'inizio e la fine
+      // di un mese
       if (start.isAfter(end) && start.getMonthOfYear() == end.getMonthOfYear()) {
         competences.addAll(competenceDao.competenceInMonth(person, start.getYear(),
                 start.getMonthOfYear(), Optional.fromNullable(code)));

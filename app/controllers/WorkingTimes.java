@@ -36,12 +36,12 @@ import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -50,8 +50,6 @@ public class WorkingTimes extends Controller {
 
   @Inject
   private static OfficeDao officeDao;
-  @Inject
-  private static SecureManager secureManager;
   @Inject
   private static SecurityRules rules;
   @Inject
@@ -83,7 +81,7 @@ public class WorkingTimes extends Controller {
 
     render(wttDefault, office);
   }
-  
+
   /**
    * Gestione dei tipi orario particolari.
    * @param officeId sede
@@ -110,12 +108,12 @@ public class WorkingTimes extends Controller {
 
     render(wttAllowedEnabled, wttAllowedDisabled, office);
   }
-  
-  
+
+
 
   /**
    * I contratti attivi che per quella sede hanno quel tipo orario.
-   * 
+   *
    * @param wttId orario
    * @param officeId sede
    */
@@ -125,7 +123,7 @@ public class WorkingTimes extends Controller {
     notFoundIfNull(wtt);
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(wtt.office);
     rules.checkIfPermitted(office);
 
@@ -142,7 +140,7 @@ public class WorkingTimes extends Controller {
     notFoundIfNull(wtt);
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(wtt.office);
     rules.checkIfPermitted(office);
 
@@ -226,7 +224,8 @@ public class WorkingTimes extends Controller {
     workingTimeTypeManager.saveWorkingTimeType(wttd6, wtt, 6);
     workingTimeTypeManager.saveWorkingTimeType(wttd7, wtt, 7);
 
-    flash.success("Inserito nuovo orario di lavoro '%s' per la sede %s.", wtt.description, wtt.office.name);
+    flash.success("Inserito nuovo orario di lavoro '%s' per la sede %s.",
+        wtt.description, wtt.office.name);
 
     manageWorkingTime(wtt.office.id);
 
@@ -256,7 +255,8 @@ public class WorkingTimes extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     if (wtt == null) {
 
-      flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
+      flash.error("Impossibile caricare il tipo orario specificato. "
+          + "Riprovare o effettuare una segnalazione.");
       WorkingTimes.manageWorkingTime(null);
     }
 
@@ -331,7 +331,9 @@ public class WorkingTimes extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     if (wtt == null) {
 
-      flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
+      flash.error(
+          "Impossibile trovare il tipo orario specificato. Riprovare o effettuare una "
+          + "segnalazione.");
       manageWorkingTime(null);
     }
 
@@ -350,14 +352,9 @@ public class WorkingTimes extends Controller {
     render(wtt, wttList, office);
   }
 
-  /**
-   * @param wttId
-   * @param wttId1
-   * @param dateFrom
-   * @param dateTo
-   */
-  public static void executeChangeWorkingTimeTypeToAll(WorkingTimeType wttOld,
-                                                       WorkingTimeType wttNew, Long officeId, LocalDate dateFrom, LocalDate dateTo) {
+  public static void executeChangeWorkingTimeTypeToAll(
+      WorkingTimeType wttOld, WorkingTimeType wttNew, Long officeId, LocalDate dateFrom,
+      LocalDate dateTo) {
 
     Office office = officeDao.getOfficeById(officeId);
 
@@ -375,7 +372,9 @@ public class WorkingTimes extends Controller {
     if (wttOld.office != null && wttNew.office != null
             && !wttOld.office.id.equals(wttNew.office.id)) {
 
-      flash.error("L'operazione di cambio orario a tutti deve coinvolgere tipi orario definiti per la stessa sede.");
+      flash.error(
+          "L'operazione di cambio orario a tutti deve coinvolgere tipi orario definiti per la "
+          + "stessa sede.");
       manageWorkingTime(office.id);
     }
 
@@ -401,8 +400,10 @@ public class WorkingTimes extends Controller {
         boolean needChanges = false;
 
         for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-          if (cwtt.workingTimeType.id.equals(wttOld.id) &&
-                  DateUtility.intervalIntersection(contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate)) != null) {
+          if (cwtt.workingTimeType.id.equals(wttOld.id)
+                  &&
+              DateUtility.intervalIntersection(
+                  contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate)) != null) {
             needChanges = true;
           }
         }
@@ -413,7 +414,8 @@ public class WorkingTimes extends Controller {
 
           List<ContractWorkingTimeType> newCwttList = new ArrayList<ContractWorkingTimeType>();
 
-          for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) { //requires ordinata per beginDate @OrderBy
+          //requires ordinata per beginDate @OrderBy
+          for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
 
             // FIXME: secondo me la requires che siano ordinati non serve più
             // verificare.
@@ -435,12 +437,14 @@ public class WorkingTimes extends Controller {
             }
           }
           Logger.info("clean");
-          List<ContractWorkingTimeType> newCwttListClean = cleanContractWorkingTimeType(newCwttList);
+          List<ContractWorkingTimeType> newCwttListClean =
+              cleanContractWorkingTimeType(newCwttList);
           Logger.info("replace");
           replaceContractWorkingTimeTypeList(contract, newCwttListClean);
           Logger.info("recompute");
 
-          contractManager.recomputeContract(contract, Optional.fromNullable(dateFrom), false, false);
+          contractManager.recomputeContract(
+              contract, Optional.fromNullable(dateFrom), false, false);
 
           contractChanges++;
 
@@ -457,10 +461,12 @@ public class WorkingTimes extends Controller {
 
     JPAPlugin.startTx(false);
     if (contractError == 0) {
-      flash.success("Operazione completata con successo. Correttamente aggiornati %s contratti.", contractChanges);
+      flash.success("Operazione completata con successo. Correttamente aggiornati %s "
+          + "contratti.", contractChanges);
     } else {
-      flash.error("Aggiornati correttamente %s contratti. Si sono verificati errori per %s contratti. "
-              + "Riprovare o effettuare una segnalazione.", contractChanges, contractError);
+      flash.error("Aggiornati correttamente %s contratti. Si sono verificati errori per"
+          + " %s contratti. Riprovare o effettuare una segnalazione.",
+          contractChanges, contractError);
     }
 
     //TODO capire quale office deve essere ritornato
@@ -559,11 +565,12 @@ public class WorkingTimes extends Controller {
   }
 
   /**
-   * Fonde insieme due periodi consecutivi con lo stesso tipo orario
+   * Fonde insieme due periodi consecutivi con lo stesso tipo orario.
    *
    * @require cwttList ordinato per beginDate
    */
-  public static List<ContractWorkingTimeType> cleanContractWorkingTimeType(List<ContractWorkingTimeType> cwttList) {
+  public static List<ContractWorkingTimeType> cleanContractWorkingTimeType(
+      List<ContractWorkingTimeType> cwttList) {
 
     Collections.sort(cwttList);
 
@@ -619,9 +626,10 @@ public class WorkingTimes extends Controller {
   }
 
   /**
-   * Elimina gli esistenti ContractWorkingTimeType del contratto e li sostituisce con cwttList
+   * Elimina gli esistenti ContractWorkingTimeType del contratto e li sostituisce con cwttList.
    */
-  private static void replaceContractWorkingTimeTypeList(Contract contract, List<ContractWorkingTimeType> cwttList) {
+  private static void replaceContractWorkingTimeTypeList(
+      Contract contract, List<ContractWorkingTimeType> cwttList) {
 
     List<ContractWorkingTimeType> toDelete = new ArrayList<ContractWorkingTimeType>();
     for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {

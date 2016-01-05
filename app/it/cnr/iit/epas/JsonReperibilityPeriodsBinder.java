@@ -1,6 +1,3 @@
-/**
- *
- */
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonArray;
@@ -10,13 +7,16 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
+import injection.StaticInject;
+
+import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 
 import org.joda.time.LocalDate;
 
-import injection.StaticInject;
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
@@ -29,8 +29,11 @@ import java.util.List;
 import javax.inject.Inject;
 
 /**
+ * Binder per il json dei periodi di reperibilità.
+ *
  * @author cristian
  */
+@Slf4j
 @Global
 @StaticInject
 public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPeriods> {
@@ -42,10 +45,14 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
+  @SuppressWarnings("rawtypes")
   @Override
-  public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+  public Object bind(
+      String name, Annotation[] annotations, String value, Class actualClass, Type genericType)
+          throws Exception {
 
-    Logger.debug("binding ReperibilityPeriods: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+    log.debug("binding ReperibilityPeriods: {}, {}, {}, {}, {}",
+        name, annotations, value, actualClass, genericType);
     try {
 
       List<ReperibilityPeriod> reperibilityPeriods = new ArrayList<ReperibilityPeriod>();
@@ -69,7 +76,8 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
         person = personDao.getPersonById(personId);
         //person = Person.findById(personId);
         if (person == null) {
-          throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
+          throw new IllegalArgumentException(
+              String.format("Person with id = %s not found", personId));
         }
 
         LocalDate start = new LocalDate(jsonObject.get("start").getAsString());

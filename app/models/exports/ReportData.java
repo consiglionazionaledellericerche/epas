@@ -1,8 +1,8 @@
 package models.exports;
 
-import java.util.List;
-
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * Dati prelevati via json dalle segnalazioni degli utenti.
@@ -26,8 +26,8 @@ public class ReportData {
   }
 
   private BrowserData browser;
-	private String html;
-	private byte[] img;
-	private String note;
-	private String url;
+  private String html;
+  private byte[] img;
+  private String note;
+  private String url;
 }

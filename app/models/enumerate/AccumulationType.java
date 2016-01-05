@@ -14,14 +14,18 @@ public enum AccumulationType {
   }
 
   public static AccumulationType getByDescription(String description) {
-    if (description.equals("no"))
+    if (description.equals("no")) {
       return AccumulationType.no;
-    if (description.equals("annuale"))
+    }
+    if (description.equals("annuale")) {
       return AccumulationType.yearly;
-    if (description.equals("mensile"))
+    }
+    if (description.equals("mensile")) {
       return AccumulationType.monthly;
-    if (description.equals("sempre"))
+    }
+    if (description.equals("sempre")) {
       return AccumulationType.always;
+    }
     return null;
   }
 }

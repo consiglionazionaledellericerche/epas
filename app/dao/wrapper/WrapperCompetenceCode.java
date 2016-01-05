@@ -1,16 +1,17 @@
 package dao.wrapper;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.CompetenceDao;
 import dao.OfficeDao;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
+
+import java.util.List;
 
 /**
  * @author alessandro
@@ -22,7 +23,8 @@ public class WrapperCompetenceCode implements IWrapperCompetenceCode {
   private final OfficeDao officeDao;
 
   @Inject
-  WrapperCompetenceCode(@Assisted CompetenceCode cc, OfficeDao officeDao, CompetenceDao competenceDao) {
+  WrapperCompetenceCode(
+      @Assisted CompetenceCode cc, OfficeDao officeDao, CompetenceDao competenceDao) {
     this.value = cc;
     this.competenceDao = competenceDao;
     this.officeDao = officeDao;
@@ -34,7 +36,7 @@ public class WrapperCompetenceCode implements IWrapperCompetenceCode {
   }
 
   /**
-   * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
+   * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza.
    */
   public int totalFromCompetenceCode(int month, int year, Long officeId) {
 

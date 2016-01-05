@@ -1,9 +1,5 @@
 package manager;
 
-import java.util.Set;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -12,12 +8,17 @@ import com.google.inject.Inject;
 
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+
 import models.ConfGeneral;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.Parameter;
+
+import org.joda.time.LocalDate;
+
+import java.util.Set;
 
 public class OfficeManager {
 
@@ -26,10 +27,11 @@ public class OfficeManager {
   private final RoleDao roleDao;
   private final ConfGeneralManager confGeneralManager;
   private final ConfYearManager confYearManager;
+
   @Inject
   public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-                       RoleDao roleDao, ConfGeneralManager confGeneralManager,
-                       ConfYearManager confYearManager) {
+      RoleDao roleDao, ConfGeneralManager confGeneralManager,
+      ConfYearManager confYearManager) {
     this.usersRolesOfficesDao = usersRolesOfficesDao;
     this.roleDao = roleDao;
     this.confGeneralManager = confGeneralManager;
@@ -77,7 +79,7 @@ public class OfficeManager {
     Preconditions.checkNotNull(ip);
 
     return FluentIterable.from(confGeneralManager.containsValue(
-            Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
+        Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
             new Function<ConfGeneral, Office>() {
 
               @Override

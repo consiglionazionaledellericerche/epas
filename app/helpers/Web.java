@@ -1,10 +1,6 @@
 package helpers;
 
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
@@ -14,34 +10,46 @@ import com.google.common.collect.Maps;
 
 import play.i18n.Messages;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 /**
+ * Contiene metodi per ottenere i messaggi per le crud ed altre utilità per la parte template.
+ *
  * @author marco
  */
 public final class Web {
   public static final String MSG_CANCELLED = "crud.cancelled";
+
   /**
-   * Attenzione: richiesto il parametro object
+   * Attenzione: richiesto il parametro object.
    */
   public static final String MSG_SAVED = "crud.saved";
+
   /**
-   * Attenzione: richiesto il parametro object
+   * Attenzione: richiesto il parametro object.
    */
   public static final String MSG_CREATED = "crud.created";
+
   /**
-   * Attenzione: richiesto il parametro object
+   * Attenzione: richiesto il parametro object.
    */
   public static final String MSG_MODIFIED = "crud.modified";
+
   /**
-   * Attenzione richiesto il parametro object
+   * Attenzione richiesto il parametro object.
    */
   public static final String MSG_DELETED = "crud.deleted";
+
   public static final String MSG_HAS_ERRORS = "crud.hasErrors";
+
   private Web() {
   }
 
   private static String toName(Class<?> cls) {
-    return Character.toLowerCase(cls.getSimpleName().charAt(0)) +
-            cls.getSimpleName().substring(1);
+    return Character.toLowerCase(cls.getSimpleName().charAt(0))
+            + cls.getSimpleName().substring(1);
   }
 
   public static String msgCancelled() {
@@ -69,7 +77,7 @@ public final class Web {
   }
 
   /**
-   * @return gli attributi serializzati
+   * @return gli attributi serializzati.
    */
   public static String serialize(Map<String, ?> attributes, String... unless) {
     return Joiner.on(' ').skipNulls().join(Iterables.transform(Maps.filterKeys(attributes,

@@ -123,11 +123,13 @@ public class StampingTemplate {
 
   protected void setHour(LocalDateTime date) {
     String hour = date.getHourOfDay() + "";
-    if (hour.length() == 1)
+    if (hour.length() == 1) {
       hour = "0" + hour;
+    }
     String minute = date.getMinuteOfHour() + "";
-    if (minute.length() == 1)
+    if (minute.length() == 1) {
       minute = "0" + minute;
+    }
     this.hour = hour + ":" + minute;
   }
 }

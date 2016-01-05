@@ -24,9 +24,9 @@ import javax.persistence.EntityManager;
 public class AbsenceTypeManager {
 
   protected final JPQLQueryFactory queryFactory;
-  private final String ABT_PREFIX = "abt";
-  private final String POST_PARTUM_LIST = "post-partum-list";
-  private final String CODES_FOR_VACATION = "codes-for-vacation";
+  private static final String ABT_PREFIX = "abt";
+  private static final String POST_PARTUM_LIST = "post-partum-list";
+  private static final String CODES_FOR_VACATION = "codes-for-vacation";
 
   @Inject
   AbsenceTypeManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -42,7 +42,7 @@ public class AbsenceTypeManager {
   }
 
   /**
-   * Preleva dalla cache l'absenceType
+   * Preleva dalla cache l'absenceType.
    */
   public AbsenceType getAbsenceType(
           String code) {
@@ -96,7 +96,7 @@ public class AbsenceTypeManager {
   }
 
   /**
-   * @return lo AbsenceType relativo al codice code passato come parametro
+   * @return lo AbsenceType relativo al codice code passato come parametro.
    */
   private AbsenceType getAbsenceTypeByCode(
           String code) {
@@ -113,7 +113,7 @@ public class AbsenceTypeManager {
 
   /**
    * @return la lista di tutti i codici di assenza che prevedono la riduzione dei giorni dell'anno
-   * su cui computare la maturazione delle ferie
+   *     su cui computare la maturazione delle ferie.
    */
   private List<AbsenceType> getReducingAccruingDaysForVacations() {
 
@@ -131,7 +131,7 @@ public class AbsenceTypeManager {
 
   /**
    * @return la lista di tutti i codici di assenza che prevedono la riduzione dei giorni dell'anno
-   * su cui computare la maturazione delle ferie
+   *     su cui computare la maturazione delle ferie.
    */
   private List<AbsenceType> getCodesForVacations() {
 

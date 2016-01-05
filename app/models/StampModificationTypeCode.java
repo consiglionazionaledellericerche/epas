@@ -3,17 +3,19 @@ package models;
 
 public enum StampModificationTypeCode {
 
-	/*
- id | code |                                        description                                         
-----+------+--------------------------------------------------------------------------------------------
-  1 | p    | Tempo calcolato togliendo dal tempo di lavoro la durata dell'intervallo pranzo
-  2 | e    | Ora di entrata calcolata perché la durata dell'intervallo pranzo è minore del minimo
-  3 | m    | Timbratura modificata dall'amministratore
-  4 | x    | Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte
-  5 | f    | Tempo di lavoro che si avrebbe uscendo adesso
-  6 | d    | Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)
-  7 | md   | Timbratura modificata dal dipendente
-	*/
+  /*
+   id | code |                                        description
+  ----+------+-------------------------------------------------------------------------------------
+    1 | p    | Tempo calcolato togliendo dal tempo di lavoro la durata dell'intervallo pranzo
+    2 | e    | Ora di entrata calcolata perché la durata dell'intervallo pranzo è minore del minimo
+    3 | m    | Timbratura modificata dall'amministratore
+    4 | x    | Ora inserita automaticamente per considerare il tempo di lavoro a cavallo
+             | della mezzanotte
+    5 | f    | Tempo di lavoro che si avrebbe uscendo adesso
+    6 | d    | Considerato presente se non ci sono codici di assenza (orario di lavoro
+             | autodichiarato)
+    7 | md   | Timbratura modificata dal dipendente
+   */
 
 
 

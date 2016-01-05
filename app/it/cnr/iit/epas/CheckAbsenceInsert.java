@@ -1,9 +1,9 @@
 package it.cnr.iit.epas;
 
+import org.joda.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.joda.time.LocalDate;
 
 /**
  * @author dario
@@ -16,7 +16,9 @@ public class CheckAbsenceInsert {
   public boolean insertInShiftOrReperibility;
   public int howManyAbsenceInReperibilityOrShift;
 
-  public CheckAbsenceInsert(int quantity, String message, boolean insertInShiftOrReperibility, int howManyAbsenceInReperibilityOrShift) {
+  public CheckAbsenceInsert(
+      int quantity, String message, boolean insertInShiftOrReperibility,
+      int howManyAbsenceInReperibilityOrShift) {
     this.totalAbsenceInsert = quantity;
     this.message = message;
     this.insertInShiftOrReperibility = insertInShiftOrReperibility;

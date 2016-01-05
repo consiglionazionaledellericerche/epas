@@ -10,6 +10,8 @@ import models.PersonDay;
 import models.WorkingTimeType;
 
 /**
+ * Interfaccia per generico factory di alcuni componenti di ePAS.
+ *
  * @author marco
  */
 public interface IWrapperFactory {

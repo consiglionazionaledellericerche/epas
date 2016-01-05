@@ -36,8 +36,9 @@ public class BlockMealTicket {
    */
   public Integer getRemaining() {
     Integer consumed = this.getConsumed();
-    if (consumed == null)
+    if (consumed == null) {
       return null;
+    }
     return this.getDimBlock() - this.getConsumed();
   }
 
@@ -49,64 +50,68 @@ public class BlockMealTicket {
   public Integer getConsumed() {
     Integer count = 0;
     for (MealTicket mealTicket : this.mealTickets) {
-      if (mealTicket.used == null)
+      if (mealTicket.used == null) {
         return null;
-      if (mealTicket.used)
+      }
+      if (mealTicket.used) {
         count++;
+      }
     }
     return count;
   }
-  
+
   /**
    * Il giorno di attribuzione del blocco.
    */
   public LocalDate getDate() {
-    if (this.getDimBlock() > 0)
+    if (this.getDimBlock() > 0) {
       return this.mealTickets.get(0).date;
+    }
     return null;
   }
 
   /**
-   * Il giorno di scadenza dei buoni appartenenti al blocchetto.
+   * @return il giorno di scadenza dei buoni appartenenti al blocchetto.
    */
   public LocalDate getExpireDate() {
-    if (this.getDimBlock() > 0)
+    if (this.getDimBlock() > 0) {
       return this.mealTickets.get(0).expireDate;
+    }
     return null;
   }
 
   /**
-   * L'amministratore assegnatario del blocchetto.
+   * @return l'amministratore assegnatario del blocchetto.
    */
   public Person getAdmin() {
-    if (this.getDimBlock() > 0)
+    if (this.getDimBlock() > 0) {
       return this.mealTickets.get(0).admin;
+    }
     return null;
   }
 
   /**
-   * La data di consegna (inserimento ePAS) del blocchetto.
+   * @return la data di consegna (inserimento ePAS) del blocchetto.
    */
   public LocalDate getReceivedDate() {
-    if (this.getDimBlock() > 0)
+    if (this.getDimBlock() > 0) {
       return this.mealTickets.get(0).date;
+    }
     return null;
   }
-  
+
   /**
-   * Il primo number del blocco.
-   * @return
+   * @return il primo number del blocco.
    */
   public int getFirst() {
     return this.mealTickets.get(0).number;
   }
-  
+
   /**
-   * L'ultimo number del blocco.
-   * @return
+   * @return l'ultimo number del blocco.
    */
   public int getLast() {
-    return this.mealTickets.get(this.mealTickets.size()-1).number;
+    return this.mealTickets.get(this.mealTickets.size() - 1).number;
   }
 
 }

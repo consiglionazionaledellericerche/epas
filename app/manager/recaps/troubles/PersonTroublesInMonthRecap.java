@@ -1,17 +1,19 @@
 package manager.recaps.troubles;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.PersonDayInTroubleDao;
+
 import manager.PersonManager;
+
 import models.Person;
 import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
+
+import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * Classe che modella il riepilogo delle timbrature mancanti per la persona tramite una lista di
@@ -31,13 +33,9 @@ public class PersonTroublesInMonthRecap {
   public int holidayWorkingTimeNotAccepted = 0;
   public int holidayWorkingTimeAccepted = 0;
 
-  /**
-   * @param person
-   * @param monthBegin
-   * @param monthEnd
-   */
-  public PersonTroublesInMonthRecap(PersonDayInTroubleDao personDayInTroubleDao,
-                                    PersonManager personManager, Person person, LocalDate monthBegin, LocalDate monthEnd) {
+  public PersonTroublesInMonthRecap(
+      PersonDayInTroubleDao personDayInTroubleDao, PersonManager personManager,
+      Person person, LocalDate monthBegin, LocalDate monthEnd) {
 
     this.person = person;
     List<PersonDayInTrouble> troubles = personDayInTroubleDao

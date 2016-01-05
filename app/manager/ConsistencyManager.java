@@ -37,7 +37,6 @@ import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
-import org.apache.commons.mail.EmailException;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -56,7 +55,7 @@ import javax.inject.Inject;
 
 public class ConsistencyManager {
 
-  private final static Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
+  private static final Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
   private final PersonManager personManager;
@@ -72,14 +71,16 @@ public class ConsistencyManager {
   private final AbsenceTypeDao absenceTypeDao;
   private final VacationsRecapFactory vacationsFactory;
   private final ConfGeneralManager confGeneralManager;
+
   @Inject
-  public ConsistencyManager(SecureManager secureManager, OfficeDao officeDao,
-                            PersonManager personManager, PersonDao personDao, PersonDayManager personDayManager,
-                            ContractMonthRecapManager contractMonthRecapManager,
-                            PersonDayInTroubleManager personDayInTroubleManager, IWrapperFactory wrapperFactory,
-                            PersonDayDao personDayDao, ConfYearManager confYearManager, StampTypeManager stampTypeManager,
-                            AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, VacationsRecapFactory vacationsFactory,
-                            ConfGeneralManager confGeneralManager) {
+  public ConsistencyManager(
+      SecureManager secureManager, OfficeDao officeDao,
+      PersonManager personManager, PersonDao personDao,
+      PersonDayManager personDayManager, ContractMonthRecapManager contractMonthRecapManager,
+      PersonDayInTroubleManager personDayInTroubleManager, IWrapperFactory wrapperFactory,
+      PersonDayDao personDayDao, ConfYearManager confYearManager, StampTypeManager stampTypeManager,
+      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, VacationsRecapFactory vacationsFactory,
+      ConfGeneralManager confGeneralManager) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -100,11 +101,6 @@ public class ConsistencyManager {
 
   /**
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-   *
-   * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive
-   *                 alla data di ieri
-   * @param year     l'anno dal quale far partire il fix
-   * @param month    il mese dal quale far partire il fix
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
                                  boolean sendMail, boolean onlyRecap) {
@@ -150,7 +146,7 @@ public class ConsistencyManager {
         // causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla,
         // altrimenti schianta
         personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
-      } catch (EmailException e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
@@ -366,7 +362,7 @@ public class ConsistencyManager {
   /**
    * Se al giorno precedente l'ultima timbratura è una entrata disaccoppiata e nel giorno attuale vi
    * è una uscita nei limiti notturni in configurazione, allora vengono aggiunte le timbrature
-   * default a 00:00
+   * default a 00:00.
    */
   private void handlerNightStamp(IWrapperPersonDay pd) {
 
@@ -406,7 +402,8 @@ public class ConsistencyManager {
         exitStamp.markedByAdmin = false;
         exitStamp.stampModificationType = smtMidnight;
         exitStamp.note =
-                "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+            "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della "
+            + "mezzanotte";
         exitStamp.personDay = previous;
         exitStamp.save();
         previous.stampings.add(exitStamp);
@@ -416,8 +413,9 @@ public class ConsistencyManager {
 
         // timbratura apertura giorno attuale
         Stamping enterStamp =
-                new Stamping(pd.getValue(), new LocalDateTime(pd.getValue().date.getYear(),
-                        pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(), 0, 0));
+            new Stamping(
+                pd.getValue(), new LocalDateTime(pd.getValue().date.getYear(),
+                pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(), 0, 0));
 
         enterStamp.way = WayType.in;
         enterStamp.markedByAdmin = false;
@@ -426,7 +424,8 @@ public class ConsistencyManager {
 
 
         enterStamp.note =
-                "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+                "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo "
+                + "della mezzanotte";
 
         enterStamp.save();
 
@@ -517,12 +516,11 @@ public class ConsistencyManager {
         // per costruirlo. Soluzione: costruisco tutti i riepiloghi del contratto.
         populateContractMonthRecap(contract, Optional.<YearMonth>absent());
       }
-    }
-
-    // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
-    // è particolare e va gestito con un metodo dedicato.
-    else if (contract.getValue().sourceDateResidual != null
+    } else if (contract.getValue().sourceDateResidual != null
             && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().sourceDateResidual))) {
+
+      // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
+      // è particolare e va gestito con un metodo dedicato.
 
       previousMonthRecap =
               Optional.fromNullable(populateContractMonthFromSource(contract, yearMonthToCompute));
@@ -639,7 +637,7 @@ public class ConsistencyManager {
             .getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull();
 
     DateInterval monthInterSource =
-            new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
+        new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
     List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab32);
     List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab31);
     List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab37);
@@ -664,5 +662,5 @@ public class ConsistencyManager {
     return cmr;
 
   }
-  
+
 }

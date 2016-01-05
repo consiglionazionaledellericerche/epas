@@ -1,19 +1,21 @@
 package dao.wrapper;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.RoleDao;
+
 import manager.ConfGeneralManager;
+
 import models.Office;
 import models.Role;
 import models.UsersRolesOffices;
 import models.enumerate.Parameter;
+
+import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * @author alessandro
@@ -24,12 +26,6 @@ public class WrapperOffice implements IWrapperOffice {
   private final RoleDao roleDao;
   private final ConfGeneralManager confGeneralManager;
 
-  /**
-   *
-   * @param office
-   * @param roleDao
-   * @param confGeneralManager
-   */
   @Inject
   WrapperOffice(@Assisted Office office, RoleDao roleDao, ConfGeneralManager confGeneralManager) {
     value = office;
@@ -58,8 +54,9 @@ public class WrapperOffice implements IWrapperOffice {
     for (UsersRolesOffices uro : this.value.usersRolesOffices) {
 
       if (uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id)
-              && uro.user.person != null)
+              && uro.user.person != null) {
         uroList.add(uro);
+      }
     }
     return uroList;
   }
@@ -75,8 +72,9 @@ public class WrapperOffice implements IWrapperOffice {
     for (UsersRolesOffices uro : this.value.usersRolesOffices) {
 
       if (uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id)
-              && uro.user.person != null)
+              && uro.user.person != null) {
         uroList.add(uro);
+      }
     }
     return uroList;
   }
@@ -91,8 +89,9 @@ public class WrapperOffice implements IWrapperOffice {
     for (UsersRolesOffices uro : this.value.usersRolesOffices) {
 
       if (uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdminMini.id)
-              && uro.user.person != null)
+              && uro.user.person != null) {
         uroList.add(uro);
+      }
     }
     return uroList;
   }

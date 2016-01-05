@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
+import controllers.Security;
+
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -33,7 +35,6 @@ import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import controllers.Security;
 import play.db.jpa.Blob;
 import play.db.jpa.JPAPlugin;
 
@@ -51,7 +52,7 @@ import javax.inject.Inject;
 
 public class ChartsManager {
 
-  private final static Logger log = LoggerFactory.getLogger(ChartsManager.class);
+  private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
   private final ConfGeneralManager confGeneralManager;
   private final CompetenceCodeDao competenceCodeDao;
   private final CompetenceDao competenceDao;
@@ -60,6 +61,7 @@ public class ChartsManager {
   private final AbsenceDao absenceDao;
   private final VacationsRecapFactory vacationsFactory;
   private final IWrapperFactory wrapperFactory;
+
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
                        CompetenceDao competenceDao, CompetenceManager competenceManager,
@@ -77,14 +79,15 @@ public class ChartsManager {
   }
 
   /**
-   * @return la lista di oggetti Year a partire dall'inizio di utilizzo del programma a oggi
+   * @return la lista di oggetti Year a partire dall'inizio di utilizzo del programma a oggi.
    */
   public List<Year> populateYearList(Office office) {
     List<Year> annoList = Lists.newArrayList();
     Integer yearBegin = null;
     int counter = 0;
 
-    ConfGeneral yearInitUseProgram = confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
+    ConfGeneral yearInitUseProgram =
+        confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
     counter++;
     LocalDate date = new LocalDate(yearInitUseProgram.fieldValue);
     yearBegin = date.getYear();
@@ -101,7 +104,7 @@ public class ChartsManager {
   }
 
   /**
-   * @return la lista degli oggetti Month
+   * @return la lista degli oggetti Month.
    */
   public List<Month> populateMonthList() {
     List<Month> meseList = Lists.newArrayList();
@@ -121,10 +124,8 @@ public class ChartsManager {
   }
 
   /**
-   * .size()
-   *
    * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in
-   * anagrafica
+   *     anagrafica.
    */
   public List<CompetenceCode> populateOvertimeCodeList() {
     List<CompetenceCode> codeList = Lists.newArrayList();
@@ -138,17 +139,22 @@ public class ChartsManager {
   }
 
   /**
-   * @return la lista dei personOvertime
+   * @return la lista dei personOvertime.
    */
-  public List<PersonOvertime> populatePersonOvertimeList(List<Person> personList, List<CompetenceCode> codeList, int year, int month) {
+  public List<PersonOvertime> populatePersonOvertimeList(
+      List<Person> personList, List<CompetenceCode> codeList, int year, int month) {
     List<PersonOvertime> poList = Lists.newArrayList();
     for (Person p : personList) {
       if (p.office.equals(Security.getUser().get().person.office)) {
         PersonOvertime po = new PersonOvertime();
         Long val = null;
-        Optional<Integer> result = competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
-        if (result.isPresent())
+        Optional<Integer> result =
+            competenceDao
+              .valueOvertimeApprovedByMonthAndYear(
+                  year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
+        if (result.isPresent()) {
           val = result.get().longValue();
+        }
 
         po.month = month;
         po.year = year;
@@ -165,18 +171,19 @@ public class ChartsManager {
   }
 
 
-  /**Inizio parte di business logic**/
+  // ******* Inizio parte di business logic *********/
 
   /**
    * @return il totale delle ore residue per anno totali sommando quelle che ha ciascuna persona
-   * della lista personeProva
+   *     della lista personeProva.
    */
   public int calculateTotalResidualHour(List<Person> personeProva, int year) {
     int totaleOreResidue = 0;
     for (Person p : personeProva) {
       if (p.office.equals(Security.getUser().get().person.office)) {
         for (int month = 1; month < 13; month++) {
-          totaleOreResidue = totaleOreResidue + (competenceManager.positiveResidualInMonth(p, year, month) / 60);
+          totaleOreResidue =
+              totaleOreResidue + (competenceManager.positiveResidualInMonth(p, year, month) / 60);
         }
         log.debug("Ore in più per {} nell'anno {}: {}",
                 new Object[]{p.getFullname(), year, totaleOreResidue});
@@ -210,12 +217,15 @@ public class ChartsManager {
           String[] tokens = line.split(",");
 
           for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i].startsWith("Matricola"))
+            if (tokens[i].startsWith("Matricola")) {
               indexMatricola = i;
-            if (tokens[i].startsWith("Codice Assenza"))
+            }
+            if (tokens[i].startsWith("Codice Assenza")) {
               indexAssenza = i;
-            if (tokens[i].startsWith("Data Assenza"))
+            }
+            if (tokens[i].startsWith("Data Assenza")) {
               indexDataAssenza = i;
+            }
 
           }
           continue;
@@ -231,41 +241,43 @@ public class ChartsManager {
           JPAPlugin.closeTx(false);
           JPAPlugin.startTx(false);
 
-          Person p = personDao.getPersonByNumber(matricola);
+          Person person = personDao.getPersonByNumber(matricola);
           Absence abs = absenceDao.getAbsencesInPeriod(
-                  Optional.fromNullable(p), dataAssenza
-                  , Optional.<LocalDate>absent(), false).size() > 0 ?
-                  absenceDao.getAbsencesInPeriod(
-                          Optional.fromNullable(p), dataAssenza
-                          , Optional.<LocalDate>absent(), false).get(0) : null;
+                  Optional.fromNullable(person), dataAssenza,
+                  Optional.<LocalDate>absent(), false).size() > 0
+                      ? absenceDao.getAbsencesInPeriod(
+                          Optional.fromNullable(person), dataAssenza,
+                          Optional.<LocalDate>absent(), false).get(0) : null;
 
           if (abs == null) {
-            if (!dataAssenza.isBefore
-                    (new LocalDate(LocalDate.now().getYear() - 1, 1, 1)))
+            if (!dataAssenza.isBefore(new LocalDate(LocalDate.now().getYear() - 1, 1, 1))) {
               renderResult =
                       new RenderResult(null, matricola,
-                              p.name, p.surname, assenza,
+                              person.name, person.surname, assenza,
                               dataAssenza, false, "nessuna assenza trovata",
                               null);
-            log.info("Nessuna assenza trovata in data {} per {}", dataAssenza, p.surname);
+            }
+            log.info("Nessuna assenza trovata in data {} per {}", dataAssenza, person.surname);
           } else {
             if (abs.absenceType.certificateCode
                     .equalsIgnoreCase(assenza)) {
               renderResult = new RenderResult(null,
-                      matricola, p.name, p.surname,
+                      matricola, person.name, person.surname,
                       assenza, dataAssenza, true, "",
                       null);
-              log.info("Assenza riscontrata in data {} per {} con codice {}", dataAssenza, p.surname, assenza);
+              log.info("Assenza riscontrata in data {} per {} con codice {}",
+                  dataAssenza, person.surname, assenza);
             } else {
-              if (!abs.personDay.date.isBefore
-                      (new LocalDate(LocalDate.now().getYear() - 1, 1, 1)))
+              if (!abs.personDay.date.isBefore(
+                  new LocalDate(LocalDate.now().getYear() - 1, 1, 1))) {
                 renderResult = new RenderResult(null,
-                        matricola, p.name, p.surname,
+                        matricola, person.name, person.surname,
                         assenza, dataAssenza, false,
                         "assenza diversa da quella in anagrafica",
                         abs.absenceType.code);
+              }
               log.info("Riscontrata assenza diversa da quella in anagrafica in data {} per {}",
-                      dataAssenza, p.surname);
+                      dataAssenza, person.surname);
             }
           }
 
@@ -295,13 +307,14 @@ public class ChartsManager {
 
   /**
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
-   * compensativi per ciascuna persona della lista passata come parametro relativa all'anno year
+   *     compensativi per ciascuna persona della lista passata come parametro relativa all'anno
+   *     year.
    */
   public FileInputStream export(Integer year, List<Person> personList) throws IOException {
-    File tempFile = File.createTempFile("straordinari" + year, ".csv");
-    FileInputStream inputStream = new FileInputStream(tempFile);
-    FileWriter writer = new FileWriter(tempFile, true);
-    BufferedWriter out = new BufferedWriter(writer);
+    final File tempFile = File.createTempFile("straordinari" + year, ".csv");
+    final FileInputStream inputStream = new FileInputStream(tempFile);
+    final FileWriter writer = new FileWriter(tempFile, true);
+    final BufferedWriter out = new BufferedWriter(writer);
     Integer month = null;
     LocalDate endDate = null;
     LocalDate beginDate = null;
@@ -316,9 +329,9 @@ public class ChartsManager {
     }
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
-      out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i) +
-              ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i) +
-              ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
+              + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+              + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -336,30 +349,34 @@ public class ChartsManager {
       List<Contract> contractList = personDao.getContractList(p, beginDate, endDate);
 
       LocalDate beginDateAUX = null;
-      if (contractList.isEmpty())
+      if (contractList.isEmpty()) {
         contractList.addAll(p.contracts);
+      }
 
       for (Contract contract : contractList) {
         if (beginDateAUX != null && beginDateAUX.equals(contract.beginDate)) {
-          log.error("Due contratti uguali nella stessa lista di contratti per {} : come è possibile!?!?", p.getFullname());
+          log.error("Due contratti uguali nella stessa lista di contratti per {} : "
+              + "come è possibile!?!?", p.getFullname());
 
         } else {
-          IWrapperContract c = wrapperFactory.create(contract);
+          IWrapperContract contr = wrapperFactory.create(contract);
           beginDateAUX = contract.beginDate;
           YearMonth actual = new YearMonth(year, 1);
           YearMonth last = new YearMonth(year, 12);
           while (!actual.isAfter(last)) {
-            Optional<ContractMonthRecap> recap = c.getContractMonthRecap(actual);
+            Optional<ContractMonthRecap> recap = contr.getContractMonthRecap(actual);
             if (recap.isPresent()) {
-              situazione = situazione +
-                      (new Integer(recap.get().straordinariMinuti / 60).toString())
+              situazione = situazione
+                      + (new Integer(recap.get().straordinariMinuti / 60).toString())
                       + ',' + (new Integer(recap.get().riposiCompensativiMinuti / 60).toString())
                       + ',' + (new Integer((recap.get().getPositiveResidualInMonth()
                       + recap.get().straordinariMinuti) / 60).toString())
                       + ',';
               totalOvertime = totalOvertime + new Integer(recap.get().straordinariMinuti / 60);
-              totalCompensatoryRest = totalCompensatoryRest + new Integer(recap.get().riposiCompensativiMinuti / 60);
-              totalPlusHours = totalPlusHours + new Integer((recap.get().getPositiveResidualInMonth()
+              totalCompensatoryRest =
+                  totalCompensatoryRest + new Integer(recap.get().riposiCompensativiMinuti / 60);
+              totalPlusHours =
+                  totalPlusHours + new Integer((recap.get().getPositiveResidualInMonth()
                       + recap.get().straordinariMinuti) / 60);
             } else {
               situazione = situazione + ("0" + ',' + "0" + ',' + "0");
@@ -385,7 +402,7 @@ public class ChartsManager {
 
   /**
    * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e
-   * residuo per la persona passata come parametro
+   *     residuo per la persona passata come parametro.
    */
   public FileInputStream exportDataSituation(Person person) throws IOException {
     File tempFile = File.createTempFile("esportazioneSituazioneFinale" + person.surname, ".csv");
@@ -393,7 +410,9 @@ public class ChartsManager {
     FileWriter writer = new FileWriter(tempFile, true);
     BufferedWriter out = new BufferedWriter(writer);
 
-    out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
+    out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati "
+        + "anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),"
+        + "Riposi compensativi anno corrente");
     out.newLine();
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
@@ -419,13 +438,14 @@ public class ChartsManager {
 
     Preconditions.checkState(wtt.isPresent());
 
-    int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
     out.append(person.surname + ' ' + person.name + ',');
-    out.append(new Integer(vr.get().vacationDaysCurrentYearUsed).toString() + ',' +
-            new Integer(vr.get().vacationDaysLastYearUsed).toString() + ',' +
-            new Integer(vr.get().permissionUsed).toString() + ',' +
-            new Integer(recap.get().remainingMinutesCurrentYear).toString() + ',' +
-            new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
+    out.append(new Integer(vr.get().vacationDaysCurrentYearUsed).toString() + ','
+            + new Integer(vr.get().vacationDaysLastYearUsed).toString() + ','
+            + new Integer(vr.get().permissionUsed).toString() + ','
+            + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ','
+            + new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
+
+    int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
     int month = LocalDate.now().getMonthOfYear();
     int riposiCompensativiMinuti = 0;
     for (int i = 1; i <= month; i++) {
@@ -443,14 +463,15 @@ public class ChartsManager {
 
   /**
    * Metodi privati per il calcolo da utilizzare per la restituzione al controller del dato
-   * richiesto
+   * richiesto.
    **/
-
   private String removeApice(String token) {
-    if (token.startsWith("\""))
+    if (token.startsWith("\"")) {
       token = token.substring(1);
-    if (token.endsWith("\""))
+    }
+    if (token.endsWith("\"")) {
       token = token.substring(0, token.length() - 1);
+    }
     return token;
   }
 
@@ -458,7 +479,10 @@ public class ChartsManager {
     token = removeApice(token);
     token = token.substring(0, 10);
     String[] elements = token.split("/");
-    LocalDate date = new LocalDate(Integer.parseInt(elements[2]), Integer.parseInt(elements[1]), Integer.parseInt(elements[0]));
+    LocalDate date =
+        new LocalDate(
+            Integer.parseInt(elements[2]), Integer.parseInt(elements[1]),
+            Integer.parseInt(elements[0]));
     return date;
   }
 
@@ -480,10 +504,9 @@ public class ChartsManager {
   }
 
   /**
-   * Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici
+   * Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici.
    **/
-
-  public final static class Month {
+  public static final class Month {
     public int id;
     public String mese;
 
@@ -493,7 +516,7 @@ public class ChartsManager {
     }
   }
 
-  public final static class Year {
+  public static final class Year {
     public int id;
     public int anno;
 
@@ -505,10 +528,10 @@ public class ChartsManager {
 
   /**
    * Classe per la restituzione di un oggetto al controller che contenga le liste per la verifica di
-   * quanto trovato all'interno del file dello schedone
+   * quanto trovato all'interno del file dello schedone.
    **/
 
-  public final static class RenderList {
+  public static final class RenderList {
     private List<RenderResult> listNull;
     private List<RenderResult> listTrueFalse;
 
@@ -529,7 +552,7 @@ public class ChartsManager {
 
   /**
    * classe privata per la restituzione del risultato relativo al processo di controllo sulle
-   * assenze dell'anno passato
+   * assenze dell'anno passato.
    **/
 
   public class RenderResult {
@@ -543,7 +566,9 @@ public class ChartsManager {
     public String message;
     public String codiceInAnagrafica;
 
-    public RenderResult(String line, Integer matricola, String nome, String cognome, String codice, LocalDate data, boolean check, String message, String codiceInAnagrafica) {
+    public RenderResult(
+        String line, Integer matricola, String nome, String cognome, String codice,
+        LocalDate data, boolean check, String message, String codiceInAnagrafica) {
       this.line = line;
       this.matricola = matricola;
       this.nome = nome;
@@ -557,6 +582,6 @@ public class ChartsManager {
     }
   }
 
-  /***********************************************************************************************************/
+  // *********** Fine parte di business logic ****************/
 
 }
