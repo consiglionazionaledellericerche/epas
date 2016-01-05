@@ -1,14 +1,5 @@
 package manager;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -16,10 +7,22 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import dao.UserDao;
+
 import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
 import models.User;
+
+import org.joda.time.LocalDate;
+
 import play.libs.Codec;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by daniele on 13/10/15.
@@ -68,9 +71,10 @@ public class UserManager {
     //  Caso standard
     if (overlapUsers.isEmpty()) {
       username = standardUsername;
-    }
-    //  Caso di omonimia
-    else {
+    } else {
+
+      //  Caso di omonimia
+
       //  Cerco tutti i numeri della sequenza autogenerata per i casi di omonimia
       List<Integer> sequence = Lists.newArrayList();
       for (String user : overlapUsers) {
@@ -82,9 +86,8 @@ public class UserManager {
       //  Solo un omonimo
       if (sequence.isEmpty()) {
         username = standardUsername + 1;
-      }
-      //  Più di un omonimo
-      else {
+      } else {
+        //  Più di un omonimo
         username = standardUsername + (Collections.max(sequence) + 1);
       }
     }

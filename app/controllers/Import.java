@@ -118,17 +118,5 @@ public class Import extends Controller {
 
     Set<Person> importedPeople = Sets.newHashSet();
 
-    //		try {
-    //			importedPeople = peopleConsumer.seatPeople(seat.code.toString()).get();
-    //		} catch (IllegalStateException | InterruptedException
-    //				| ExecutionException e) {
-    //			flash.error("Impossibile recuperare la lista degli istituti da Perseo");
-    //			e.printStackTrace();
-    //		}
-    //
-    //		for(Person p : importedPeople ){
-    //			Logger.info("Persone Importata: %s-%s-%s-%s-%s-%s",p.fullName(),p.birthday,p.email,p.cnr_email,p.number,p.badgeNumber);
-    //		}
-
   }
 }

@@ -62,11 +62,8 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
-   * Il simple result dei badgeReaders-
+   * Il simple result dei badgeReaders.
    *
-   * @param name
-   * @param badgeSystem
-   * @return
    */
   public PerseoSimpleResults<BadgeReader> badgeReaders(Optional<String> name,
                                                        Optional<BadgeSystem> badgeSystem) {
@@ -75,8 +72,8 @@ public class BadgeReaderDao extends DaoBase {
     final QBadgeSystem qBadgeSystem = QBadgeSystem.badgeSystem;
 
     JPQLQuery query = getQueryFactory()
-        .from(badgeReader);    
-    
+        .from(badgeReader);
+
     final BooleanBuilder condition = new BooleanBuilder();
 
     if (badgeSystem.isPresent()) {
@@ -85,7 +82,7 @@ public class BadgeReaderDao extends DaoBase {
           .rightJoin(qBadgeSystem.badgeReaders, badgeReader);
       condition.and(qBadgeSystem.eq(badgeSystem.get()));
     }
-   
+
     if (name.isPresent()) {
       condition.and(matchBadgeReaderName(badgeReader, name.get()));
     }

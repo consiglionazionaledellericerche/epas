@@ -1,21 +1,23 @@
 package manager;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperContract;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
 import models.Absence;
 import models.Office;
 import models.VacationPeriod;
 import models.enumerate.Parameter;
+
+import org.joda.time.LocalDate;
+
+import java.util.List;
 
 public class VacationManager {
 
@@ -29,18 +31,22 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di permesso legge spettanti al dipendente a seconda dei giorni di
-   * presenza
+   *     presenza.
    */
   public static int convertWorkDaysToPermissionDays(int days) {
     int permissionDays = 0;
-    if (days >= 45 && days <= 135)
+    if (days >= 45 && days <= 135) {
       permissionDays = 1;
-    if (days >= 136 && days <= 225)
+    }
+    if (days >= 136 && days <= 225) {
       permissionDays = 2;
-    if (days >= 226 && days <= 315)
+    }
+    if (days >= 226 && days <= 315) {
       permissionDays = 3;
-    if (days >= 316 && days <= 365)
+    }
+    if (days >= 316 && days <= 366) {
       permissionDays = 4;
+    }
     return permissionDays;
   }
 
@@ -50,9 +56,12 @@ public class VacationManager {
    */
   public LocalDate vacationsLastYearExpireDate(int year, Office office) {
 
-    Integer monthExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
+    Integer monthExpiryVacationPastYear =
+        confYearManager.getIntegerFieldValue(
+            Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
 
-    Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
+    Integer dayExpiryVacationPastYear =
+        confYearManager.getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
 
     LocalDate expireDate = LocalDate.now()
         .withYear(year)
@@ -61,11 +70,10 @@ public class VacationManager {
     return expireDate;
   }
 
-  
+
 
   /**
-   * @param year       l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono
-   *                   scadute
+   * @param year l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono scadute.
    * @param expireDate l'ultimo giorno utile per usufruire delle ferie dell'anno precedente
    */
   public boolean isVacationsLastYearExpired(int year, LocalDate expireDate) {
@@ -80,9 +88,10 @@ public class VacationManager {
   }
 
   /**
-   * @return numero di permessi maturati nel periodo yearInterval associati a contract
+   * @return numero di permessi maturati nel periodo yearInterval associati a contract.
    */
-  public int getPermissionAccruedYear(IWrapperContract wrContract, int year, Optional<LocalDate> accruedDate) {
+  public int getPermissionAccruedYear(
+      IWrapperContract wrContract, int year, Optional<LocalDate> accruedDate) {
 
     //Calcolo l'intersezione fra l'anno e il contratto attuale
     DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1),
@@ -123,7 +132,7 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di ferie maturati nell'anno year calcolati a partire dai piani
-   * ferie associati al contratto corrente
+   *     ferie associati al contratto corrente.
    */
   public int getVacationAccruedYear(IWrapperContract wrContract, int year,
                                     Optional<LocalDate> accruedDate, List<Absence> postPartum) {
@@ -214,12 +223,6 @@ public class VacationManager {
 
   }
 
-  /**
-   *
-   * @param absences
-   * @param interval
-   * @return
-   */
   private int filterAbsences(List<Absence> absences, DateInterval interval) {
     int count = 0;
     for (Absence ab : absences) {
@@ -232,158 +235,212 @@ public class VacationManager {
 
   /**
    * @return il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
-   * dell'anno per chi lavora in istituto da meno di tre anni
+   *     dell'anno per chi lavora in istituto da meno di tre anni.
    */
   public int convertWorkDaysToVacationDaysLessThreeYears(int days) {
 
-    if (days <= 0)
+    if (days <= 0) {
       return 0;
+    }
 
-    if (days >= 1 && days <= 15)
+    if (days >= 1 && days <= 15) {
       return 0;
-    if (days >= 16 && days <= 45)
+    }
+    if (days >= 16 && days <= 45) {
       return 2;
-    if (days >= 46 && days <= 75)
+    }
+    if (days >= 46 && days <= 75) {
       return 4;
-    if (days >= 76 && days <= 106)
+    }
+    if (days >= 76 && days <= 106) {
       return 6;
-    if (days >= 107 && days <= 136)
+    }
+    if (days >= 107 && days <= 136) {
       return 8;
-    if (days >= 137 && days <= 167)
+    }
+    if (days >= 137 && days <= 167) {
       return 10;
-    if (days >= 168 && days <= 197)
+    }
+    if (days >= 168 && days <= 197) {
       return 13;
-    if (days >= 198 && days <= 227)
+    }
+    if (days >= 198 && days <= 227) {
       return 15;
-    if (days >= 228 && days <= 258)
+    }
+    if (days >= 228 && days <= 258) {
       return 17;
-    if (days >= 259 && days <= 288)
+    }
+    if (days >= 259 && days <= 288) {
       return 19;
-    if (days >= 289 && days <= 319)
+    }
+    if (days >= 289 && days <= 319) {
       return 21;
-    if (days >= 320 && days <= 349)
+    }
+    if (days >= 320 && days <= 349) {
       return 23;
-
-    else
+    } else {
       return 26;
+    }
 
   }
 
   /**
    * @return il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
-   * dell'anno per chi lavora in istituto da più di tre anni
+   *     dell'anno per chi lavora in istituto da più di tre anni.
    */
   public int convertWorkDaysToVacationDaysMoreThreeYears(int days) {
-    if (days <= 0)
+    if (days <= 0) {
       return 0;
+    }
 
-    if (days >= 1 && days <= 15)
+    if (days >= 1 && days <= 15) {
       return 0;
-    if (days >= 16 && days <= 45)
+    }
+    if (days >= 16 && days <= 45) {
       return 2;
-    if (days >= 46 && days <= 75)
+    }
+    if (days >= 46 && days <= 75) {
       return 4;
-    if (days >= 76 && days <= 106)
+    }
+    if (days >= 76 && days <= 106) {
       return 7;
-    if (days >= 107 && days <= 136)
+    }
+    if (days >= 107 && days <= 136) {
       return 9;
-    if (days >= 137 && days <= 167)
+    }
+    if (days >= 137 && days <= 167) {
       return 11;
-    if (days >= 168 && days <= 197)
+    }
+    if (days >= 168 && days <= 197) {
       return 14;
-    if (days >= 198 && days <= 227)
+    }
+    if (days >= 198 && days <= 227) {
       return 16;
-    if (days >= 228 && days <= 258)
+    }
+    if (days >= 228 && days <= 258) {
       return 18;
-    if (days >= 259 && days <= 288)
+    }
+    if (days >= 259 && days <= 288) {
       return 21;
-    if (days >= 289 && days <= 319)
+    }
+    if (days >= 289 && days <= 319) {
       return 23;
-    if (days >= 320 && days <= 349)
+    }
+    if (days >= 320 && days <= 349) {
       return 25;
-    else
+    } else {
       return 28;
+    }
 
   }
 
   /**
    * @return il numero di giorni di ferie maturati secondo il piano di accumulo previsto per il part
-   * time verticale
+   *     time verticale.
    */
   public int converWorkDaysToVacationDaysPartTime(int days) {
-    if (days <= 0)
+    if (days <= 0) {
       return 0;
+    }
 
-    if (days >= 1 && days <= 15)
+    if (days >= 1 && days <= 15) {
       return 0;
-    if (days >= 16 && days <= 45)
+    }
+    if (days >= 16 && days <= 45) {
       return 2;
-    if (days >= 46 && days <= 75)
+    }
+    if (days >= 46 && days <= 75) {
       return 3;
-    if (days >= 76 && days <= 106)
+    }
+    if (days >= 76 && days <= 106) {
       return 5;
-    if (days >= 107 && days <= 136)
+    }
+    if (days >= 107 && days <= 136) {
       return 6;
-    if (days >= 137 && days <= 167)
+    }
+    if (days >= 137 && days <= 167) {
       return 8;
-    if (days >= 168 && days <= 197)
+    }
+    if (days >= 168 && days <= 197) {
       return 10;
-    if (days >= 198 && days <= 227)
+    }
+    if (days >= 198 && days <= 227) {
       return 12;
-    if (days >= 228 && days <= 258)
+    }
+    if (days >= 228 && days <= 258) {
       return 14;
-    if (days >= 259 && days <= 288)
+    }
+    if (days >= 259 && days <= 288) {
       return 15;
-    if (days >= 289 && days <= 319)
+    }
+    if (days >= 289 && days <= 319) {
       return 17;
-    if (days >= 320 && days <= 349)
+    }
+    if (days >= 320 && days <= 349) {
       return 18;
-    else
+    } else {
       return 21;
+    }
   }
 
   public int converWorkDaysToVacationDaysPartTimeMoreThanThreeYears(int days) {
-    if (days <= 0)
+    if (days <= 0) {
       return 0;
-    if (days >= 1 && days <= 15)
+    }
+    if (days >= 1 && days <= 15) {
       return 0;
-    if (days >= 16 && days <= 45)
+    }
+    if (days >= 16 && days <= 45) {
       return 2;
-    if (days >= 46 && days <= 75)
+    }
+    if (days >= 46 && days <= 75) {
       return 3;
-    if (days >= 76 && days <= 106)
+    }
+    if (days >= 76 && days <= 106) {
       return 6;
-    if (days >= 107 && days <= 136)
+    }
+    if (days >= 107 && days <= 136) {
       return 7;
-    if (days >= 137 && days <= 167)
+    }
+    if (days >= 137 && days <= 167) {
       return 9;
-    if (days >= 168 && days <= 197)
+    }
+    if (days >= 168 && days <= 197) {
       return 11;
-    if (days >= 198 && days <= 227)
+    }
+    if (days >= 198 && days <= 227) {
       return 13;
-    if (days >= 228 && days <= 258)
+    }
+    if (days >= 228 && days <= 258) {
       return 14;
-    if (days >= 259 && days <= 288)
+    }
+    if (days >= 259 && days <= 288) {
       return 17;
-    if (days >= 289 && days <= 319)
+    }
+    if (days >= 289 && days <= 319) {
       return 18;
-    if (days >= 320 && days <= 349)
+    }
+    if (days >= 320 && days <= 349) {
       return 20;
-    else
+    } else {
       return 22;
+    }
   }
 
   /**
-   * @return il numero di giorni di permesso maturati con il piano ferie relativo al part time
+   * @return il numero di giorni di permesso maturati con il piano ferie relativo al part time.
    */
   public int convertWorkDaysToPermissionDaysPartTime(int days) {
     int permissionDays = 0;
-    if (days >= 45 && days <= 135)
+    if (days >= 45 && days <= 135) {
       permissionDays = 1;
-    if (days >= 136 && days <= 315)
+    }
+    if (days >= 136 && days <= 315) {
       permissionDays = 2;
-    if (days >= 316 && days <= 365)
+    }
+    if (days >= 316 && days <= 365) {
       permissionDays = 3;
+    }
     return permissionDays;
   }
 

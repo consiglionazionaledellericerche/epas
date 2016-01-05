@@ -40,6 +40,7 @@ public class PersonDayInTroubleManager {
   private final IWrapperFactory factory;
   private final PersonDayInTroubleDao personDayInTroubleDao;
   private final ConfGeneralManager confGeneralManager;
+
   @Inject
   public PersonDayInTroubleManager(
           PersonDayInTroubleDao personDayInTroubleDao,
@@ -51,21 +52,16 @@ public class PersonDayInTroubleManager {
     this.factory = factory;
   }
 
-  /**
-   *
-   * @param pd
-   * @param cause
-   */
   public void setTrouble(PersonDay pd, Troubles cause) {
 
     for (PersonDayInTrouble pdt : pd.troubles) {
       if (pdt.cause.equals(cause)) {
-//			Se esiste gia' non faccio nulla
+        // Se esiste gia' non faccio nulla
         return;
       }
     }
 
-//		Se non esiste lo creo
+    // Se non esiste lo creo
     PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
     trouble.save();
     pd.troubles.add(trouble);
@@ -76,22 +72,22 @@ public class PersonDayInTroubleManager {
 
 
   /**
-   * @param cause Metodo per rimuovere i problemi con una determinata causale all'interno del
-   *              personDay
+   * Metodo per rimuovere i problemi con una determinata causale all'interno del
+   * personDay.
    */
   public void fixTrouble(final PersonDay pd, final Troubles cause) {
 
-//		Questo codice schianta se si fa una remove e si continua l'iterazione
-//		
-//		for(PersonDayInTrouble pdt : pd.troubles){
-//			if( pdt.cause.equals(cause)){
-//				pd.troubles.remove(pdt);
-//				pdt.delete();
-//				
-//				log.info("Rimosso PersonDayInTrouble {} - {} - {}", 
-//						pd.person.getFullname(), pd.date, cause);
-//			}
-//		}
+    // Questo codice schianta se si fa una remove e si continua l'iterazione
+    //
+    //  for(PersonDayInTrouble pdt : pd.troubles){
+    //    if( pdt.cause.equals(cause)){
+    //      pd.troubles.remove(pdt);
+    //      pdt.delete();
+    //
+    //      log.info("Rimosso PersonDayInTrouble {} - {} - {}",
+    //        pd.person.getFullname(), pd.date, cause);
+    //     }
+    //  }
 
     Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
       @Override
@@ -113,16 +109,17 @@ public class PersonDayInTroubleManager {
    * Metodo che controlla i giorni con problemi dei dipendenti che non hanno timbratura fixed e
    * invia mail nel caso in cui esistano timbrature disaccoppiate.
    */
-  private void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
+  private void checkPersonDayForSendingEmail(
+      Person person, LocalDate begin, LocalDate end, String cause) {
 
-    if (p.surname.equals("Conti") && p.name.equals("Marco")) {
+    if (person.surname.equals("Conti") && person.name.equals("Marco")) {
 
       log.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
       return;
     }
 
-    Contract currentActiveContract = factory.create(p).getCurrentContract().orNull();
-//		Se la persona e' fuori contratto non si prosegue con i controlli
+    Contract currentActiveContract = factory.create(person).getCurrentContract().orNull();
+    // Se la persona e' fuori contratto non si prosegue con i controlli
     if (currentActiveContract == null) {
       return;
     }
@@ -132,7 +129,7 @@ public class PersonDayInTroubleManager {
             new DateInterval(begin, end));
 
     List<PersonDayInTrouble> pdList = personDayInTroubleDao
-            .getPersonDayInTroubleInPeriod(p, intervalToCheck.getBegin(),
+            .getPersonDayInTroubleInPeriod(person, intervalToCheck.getBegin(),
                     intervalToCheck.getEnd());
 
     List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
@@ -155,17 +152,18 @@ public class PersonDayInTroubleManager {
     boolean flag;
     try {
 
-      flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
+      flag = sendEmailToPerson(dateTroubleStampingList, person, cause);
 
     } catch (Exception e) {
 
       log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
-              new Object[]{dateTroubleStampingList, p, cause, p.getFullname()});
+              new Object[]{dateTroubleStampingList, person, cause, person.getFullname()});
       e.printStackTrace();
       return;
     }
 
-    //se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi
+    //se ho inviato mail devo andare a settare 'true' i campi emailSent dei
+    //personDayInTrouble relativi
     if (flag) {
       for (PersonDayInTrouble pd : pdList) {
         pd.emailSent = true;
@@ -176,9 +174,10 @@ public class PersonDayInTroubleManager {
 
   /**
    * Controlla ogni due giorni la presenza di giorni in cui non ci siano nè assenze nè timbrature
-   * per tutti i dipendenti (invocato nell'expandableJob)
+   * per tutti i dipendenti (invocato nell'expandableJob).
    */
-  public void sendMail(List<Person> personList, LocalDate fromDate, LocalDate toDate, String cause) throws EmailException {
+  public void sendMail(
+      List<Person> personList, LocalDate fromDate, LocalDate toDate, String cause) {
 
     for (Person p : personList) {
 
@@ -189,25 +188,28 @@ public class PersonDayInTroubleManager {
       if (p.wantEmail && officeMail) {
         checkPersonDayForSendingEmail(p, fromDate, toDate, cause);
       } else {
-        log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false", p.getFullname());
+        log.info("Non verrà inviata la mail a {} in quanto il campo di invio mail è false",
+            p.getFullname());
       }
     }
   }
 
   /**
    * Invia la mail alla persona specificata in firma con la lista dei giorni in cui ha timbrature
-   * disaccoppiate
+   * disaccoppiate.
    *
    * @param date, person
    */
-  private boolean sendEmailToPerson(List<LocalDate> dateList, Person person, String cause) throws EmailException {
+  private boolean sendEmailToPerson(
+      List<LocalDate> dateList, Person person, String cause) throws EmailException {
     if (dateList.size() == 0) {
       return false;
     }
     log.info("Preparo invio mail per {}", person.getFullname());
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
-      simpleEmail.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
+      simpleEmail.addReplyTo(
+          confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
     } catch (EmailException e1) {
       e1.printStackTrace();
     }
@@ -228,36 +230,45 @@ public class PersonDayInTroubleManager {
       }
     }
     String incipit = "";
-    if (dateFormat.size() == 0)
+    if (dateFormat.size() == 0) {
       return false;
-    if (dateFormat.size() > 1)
+    }
+    if (dateFormat.size() > 1) {
       incipit = "Nei giorni: ";
-    if (dateFormat.size() == 1)
+    }
+    if (dateFormat.size() == 1) {
       incipit = "Nel giorno: ";
+    }
 
     simpleEmail.setSubject("ePas Controllo timbrature");
     String message = "";
     if (cause.equals("timbratura")) {
-      message = "Gentile " + person.name + " " + person.surname +
-              "\r\n" + incipit + date + " il sistema ePAS ha rilevato un caso di timbratura disaccoppiata. \r\n " +
-              "La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-              "Saluti \r\n" +
-              "Il team di ePAS";
+      message = "Gentile " + person.name + " " + person.surname
+          + "\r\n" + incipit + date + " il sistema ePAS ha rilevato un caso di timbratura "
+          + "disaccoppiata. \r\n "
+          + "La preghiamo di contattare l'ufficio del personale per regolarizzare la sua "
+          + "posizione. \r\n"
+          +  "Saluti \r\n"
+          + "Il team di ePAS";
 
     }
     if (cause.equals("no assenze")) {
-      message = "Gentile " + person.name + " " + person.surname +
-              "\r\n" + incipit + date + " il sistema ePAS ha rilevato un caso di mancanza di timbrature e di codici di assenza. \r\n " +
-              "La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-              "Saluti \r\n" +
-              "Il team di ePAS";
+      message = "Gentile " + person.name + " " + person.surname
+          + "\r\n" + incipit + date
+          + " il sistema ePAS ha rilevato un caso di mancanza di timbrature e di codici di assenza."
+          + " \r\n "
+          + "La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione."
+          + " \r\n"
+          + "Saluti \r\n"
+          + "Il team di ePAS";
     }
 
     simpleEmail.setMsg(message);
 
     Mail.send(simpleEmail);
 
-    log.info("Inviata mail a {} contenente le date da controllare : {}", person.getFullname(), date);
+    log.info("Inviata mail a {} contenente le date da controllare : {}",
+        person.getFullname(), date);
     return true;
 
   }

@@ -1,13 +1,7 @@
 package dao;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import com.google.inject.Provider;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -22,7 +16,16 @@ import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
 import models.query.QShiftType;
 
+import org.joda.time.LocalDate;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 /**
+ * Dao per i turni.
+ *
  * @author dario
  */
 public class ShiftDao extends DaoBase {
@@ -34,7 +37,7 @@ public class ShiftDao extends DaoBase {
   }
 
   /**
-   * @return lo shiftType corrispondente al tipo type passato come parametro
+   * @return lo shiftType corrispondente al tipo type passato come parametro.
    */
   public ShiftType getShiftTypeByType(String type) {
     final QShiftType shiftType = QShiftType.shiftType;
@@ -44,9 +47,10 @@ public class ShiftDao extends DaoBase {
 
   /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
-   * 'to'
+   *     'to'.
    */
-  public List<PersonShiftDay> getShiftDaysByPeriodAndType(LocalDate begin, LocalDate to, ShiftType type) {
+  public List<PersonShiftDay> getShiftDaysByPeriodAndType(
+      LocalDate begin, LocalDate to, ShiftType type) {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
     JPQLQuery query = getQueryFactory().from(psd)
             .where(psd.date.between(begin, to)
@@ -55,12 +59,13 @@ public class ShiftDao extends DaoBase {
   }
 
   /**
-   * @return la lista dei 'personShiftDay' della persona 'person' di tipo 'type' presenti nel
-   * periodo tra 'begin' e 'to'
    * @author arianna
-   * @person person
+   *
+   * @return la lista dei 'personShiftDay' della persona 'person' di tipo 'type' presenti nel
+   *     periodo tra 'begin' e 'to'.
    */
-  public List<PersonShiftDay> getPersonShiftDaysByPeriodAndType(LocalDate begin, LocalDate to, ShiftType type, Person person) {
+  public List<PersonShiftDay> getPersonShiftDaysByPeriodAndType(
+      LocalDate begin, LocalDate to, ShiftType type, Person person) {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
     JPQLQuery query = getQueryFactory().from(psd)
             .where(psd.date.between(begin, to)
@@ -73,17 +78,20 @@ public class ShiftDao extends DaoBase {
 
 
   /**
-   * @return la lista dei turni cancellati relativi al tipo 'type' nel periodo compreso tra 'from' e
-   * 'to'
+   * @return la lista dei turni cancellati relativi al tipo 'type' nel periodo compreso tra 'from'
+   *     e 'to'.
    */
-  public List<ShiftCancelled> getShiftCancelledByPeriodAndType(LocalDate from, LocalDate to, ShiftType type) {
+  public List<ShiftCancelled> getShiftCancelledByPeriodAndType(
+      LocalDate from, LocalDate to, ShiftType type) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
-    JPQLQuery query = getQueryFactory().from(sc).where(sc.date.between(from, to).and(sc.type.eq(type))).orderBy(sc.date.asc());
+    JPQLQuery query =
+        getQueryFactory().from(sc)
+          .where(sc.date.between(from, to).and(sc.type.eq(type))).orderBy(sc.date.asc());
     return query.list(sc);
   }
 
   /**
-   * @return il turno cancellato relativo al giorno 'day' e al tipo 'type' passati come parametro
+   * @return il turno cancellato relativo al giorno 'day' e al tipo 'type' passati come parametro.
    */
   public ShiftCancelled getShiftCancelled(LocalDate day, ShiftType type) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
@@ -92,7 +100,7 @@ public class ShiftDao extends DaoBase {
   }
 
   /**
-   * @return il quantitativo di shiftCancelled effettivamente cancellati
+   * @return il quantitativo di shiftCancelled effettivamente cancellati.
    */
   public Long deleteShiftCancelled(ShiftType type, LocalDate day) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
@@ -101,7 +109,7 @@ public class ShiftDao extends DaoBase {
 
 
   /**
-   * @return il PersonShift relativo alla persona person e al tipo type passati come parametro
+   * @return il PersonShift relativo alla persona person e al tipo type passati come parametro.
    * @author arianna
    */
   public PersonShift getPersonShiftByPersonAndType(Long personId, String type) {
@@ -118,8 +126,10 @@ public class ShiftDao extends DaoBase {
 
 
   /**
-   * @return la categoria associata al tipo di turno
    * @author arianna
+
+   * @return la categoria associata al tipo di turno.
+   *
    */
   public ShiftCategories getShiftCategoryByType(String type) {
     final QShiftType st = QShiftType.shiftType;

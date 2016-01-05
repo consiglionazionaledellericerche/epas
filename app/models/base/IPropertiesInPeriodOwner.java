@@ -7,13 +7,11 @@ import java.util.Collection;
  *
  * @author alessandro
  *
- * @param <T>
  */
 public interface IPropertiesInPeriodOwner extends IPeriodModel {
 
   /**
    * La lista dei periodi del tipo specificato.
-   * @return
    */
   Collection<IPropertyInPeriod> periods(Object type);
 }

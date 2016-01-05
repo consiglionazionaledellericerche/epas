@@ -83,8 +83,8 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
 
-    if (this.getPersonDayContract().get().sourceDateResidual != null &&
-            this.getPersonDayContract().get().sourceDateResidual
+    if (this.getPersonDayContract().get().sourceDateResidual != null
+            && this.getPersonDayContract().get().sourceDateResidual
                     .isEqual(this.value.date.minusDays(1))) {
       //Giorno successivo all'inizializzazione
       return;
@@ -170,9 +170,6 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     this.previousForNightStamp = Optional.fromNullable(candidate);
   }
 
-  /**
-   *
-   */
   public Optional<Contract> getPersonDayContract() {
 
     if (this.personDayContract != null) {
@@ -192,7 +189,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
   }
 
   /**
-   * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true;
+   * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true.
    */
   public boolean isFixedTimeAtWork() {
     if (this.isFixedTimeAtWorkk != null) {
@@ -220,11 +217,6 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     return this.isFixedTimeAtWorkk;
   }
 
-  /**
-   *
-   *
-   * @return
-   */
   public Optional<WorkingTimeTypeDay> getWorkingTimeTypeDay() {
 
     if (this.workingTimeTypeDay != null) {

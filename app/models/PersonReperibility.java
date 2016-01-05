@@ -1,7 +1,14 @@
-/**
- *
- */
 package models;
+
+import lombok.ToString;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import java.util.List;
 
@@ -15,19 +22,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import models.base.BaseModel;
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 
 /**
- * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona
+ * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona.
  *
  * @author cristian
  */
+@ToString
 @Audited
 @Entity
 @Table(name = "person_reperibility")
@@ -59,9 +60,4 @@ public class PersonReperibility extends BaseModel {
 
   public String note;
 
-  @Override
-  public String toString() {
-    return String.format("PersonReperibility[%d] - person.id = %d, startDate = %s, endDate = %s, personReperibilityType.id = %s",
-            id, person.id, startDate, endDate, personReperibilityType != null ? personReperibilityType.id : "null");
-  }
 }

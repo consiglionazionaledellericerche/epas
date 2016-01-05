@@ -1,14 +1,16 @@
 package manager;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
+
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+
 import play.Play;
 import play.libs.Mail;
 
@@ -53,8 +55,8 @@ public class EmailManager {
   public void recoveryPasswordMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
 
-    final String message = "Utente: " + person.user.username +
-            "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: "
+    final String message = "Utente: " + person.user.username
+            + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: "
             + getRecoveryBaseUrl(person.user.recoveryToken);
 
     final String subject = "ePas Recupero Password";
@@ -66,15 +68,18 @@ public class EmailManager {
     Preconditions.checkState(person != null && person.isPersistent());
 
     final String message = String.format("Gentile %s,\r\n"
-                    + "Ti informiamo che e' stato inserito il tuo nominativo nel sistema ePas raggiungibile all'indirizzo %s\r\n"
+                    + "Ti informiamo che e' stato inserito il tuo nominativo nel sistema ePas "
+                    + "raggiungibile all'indirizzo %s\r\n"
                     + "\r\nIl tuo username per l'accesso all'applicazione e':\r\n"
                     + "\r\n"
                     + "User: %s\r\n"
                     + "\r\n"
-                    + "Per poter eseguire l'accesso e' necessario generare una nuova password da questo indirizzo %s\r\n"
+                    + "Per poter eseguire l'accesso e' necessario generare una nuova password "
+                    + "da questo indirizzo %s\r\n"
                     + "\r\n"
                     + "Il Team di ePas.",
-            person.fullName(), BASE_URL, person.user.username, getRecoveryBaseUrl(person.user.recoveryToken));
+            person.fullName(), BASE_URL, person.user.username,
+            getRecoveryBaseUrl(person.user.recoveryToken));
 
     final String subject = "Nuovo inserimento Utente in ePas";
 

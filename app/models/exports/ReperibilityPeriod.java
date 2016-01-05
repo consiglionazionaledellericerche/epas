@@ -1,6 +1,3 @@
-/**
- *
- */
 package models.exports;
 
 import models.Person;
@@ -27,7 +24,8 @@ public class ReperibilityPeriod {
     this.end = end;
   }
 
-  public ReperibilityPeriod(Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
+  public ReperibilityPeriod(
+      Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
     this.person = person;
     this.start = start;
     this.end = end;

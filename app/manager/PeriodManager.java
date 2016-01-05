@@ -10,14 +10,11 @@ import it.cnr.iit.epas.DateUtility;
 
 import manager.recaps.recomputation.RecomputeRecap;
 
-import models.base.IPeriodModel;
 import models.base.IPropertyInPeriod;
-import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 
 import java.util.List;
 
@@ -48,11 +45,11 @@ public class PeriodManager {
     boolean recomputeBeginSet = false;
 
     //copia dei periodi ordinata
-    // TODO: periods() deve prendere il tipo quando ci sarà, e andranno modificate tutte 
+    // TODO: periods() deve prendere il tipo quando ci sarà, e andranno modificate tutte
     // le implementazioni
     List<IPropertyInPeriod> originals = Lists.newArrayList();
     for (IPropertyInPeriod originalPeriod :
-      propertyInPeriod.getOwner().periods(propertyInPeriod.getClass()) ) {
+          propertyInPeriod.getOwner().periods(propertyInPeriod.getClass()) ) {
       originals.add(originalPeriod);
     }
     Collections.sort(originals);
@@ -208,14 +205,13 @@ public class PeriodManager {
   }
 
   /**
-   * Quando modifico le date del target. 
-   * 
+   * Quando modifico le date del target.
+   *
    * @param previousInterval l'intervallo del target precedente
    * @param newInterval l'intervallo del target nuovo
    * @param initMissing se col nuovo intervallo manca l'inizializzazione del target
-   * @return
    */
-  public RecomputeRecap buildTargetRecap(DateInterval previousInterval, 
+  public RecomputeRecap buildTargetRecap(DateInterval previousInterval,
       DateInterval newInterval, boolean initMissing) {
 
     RecomputeRecap recomputeRecap = new RecomputeRecap();
@@ -256,14 +252,9 @@ public class PeriodManager {
     return recomputeRecap;
   }
 
-  /**
-   * 
-   * @param recomputeRecap
-   * @return
-   */
   private void setDays(RecomputeRecap recomputeRecap) {
-    if (recomputeRecap.recomputeFrom != null && 
-        !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+    if (recomputeRecap.recomputeFrom != null
+        && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.days = DateUtility.daysInInterval(
           new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
     } else {
@@ -272,8 +263,8 @@ public class PeriodManager {
   }
 
   private void setNeedRecap(RecomputeRecap recomputeRecap) {
-    if (recomputeRecap.recomputeFrom == null || 
-        recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
+    if (recomputeRecap.recomputeFrom == null
+        || recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.needRecomputation = false;
     } else {
       recomputeRecap.needRecomputation = true;

@@ -30,7 +30,7 @@ import java.util.List;
  * @author alessandro
  */
 public class MealTicketManager {
-  
+
   /**
    * I tipi di ordinamento per la selezione della lista dei buoni pasto.
    * @author alessandro
@@ -46,7 +46,7 @@ public class MealTicketManager {
   private final ConfGeneralManager confGeneralManager;
   private final IWrapperFactory wrapperFactory;
   private final ConsistencyManager consistencyManager;
-  
+
   /**
    * Costrutture.
    * @param personDao personDao
@@ -69,17 +69,17 @@ public class MealTicketManager {
   }
 
   /**
-   * 
+   *
    *
    * @param codeBlock il codice del blocco di meal ticket
    * @param dimBlock la dimensione del blocco di meal ticket
    * @param expireDate la data di scadenza dei buoni nel blocco
    * @return la lista di MealTicket appartenenti al blocco.
    */
-  
+
   /**
    * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock e dagli
-   * estremi. 
+   * estremi.
    * @param codeBlock codice blocco
    * @param first il primo codice
    * @param last l'ultimo codice
@@ -188,8 +188,8 @@ public class MealTicketManager {
 
   /**
    * Genera i blocchi di codici consecutivi a partire dalla lista ordinata di buoni pasto.
-   * @param mealTicketListOrdered una lista di buoni pasto ordinata 
-   *   per data di scadenza e per codice blocco.
+   * @param mealTicketListOrdered una lista di buoni pasto ordinata
+   *     per data di scadenza e per codice blocco.
    * @param interval intervallo da considerare.
    * @return i blocchi
    */
@@ -201,8 +201,8 @@ public class MealTicketManager {
     MealTicket previousMealTicket = null;
 
     for (MealTicket mealTicket : mealTicketListOrdered) {
-      
-      if (interval.isPresent() 
+
+      if (interval.isPresent()
           && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
         continue;
       }

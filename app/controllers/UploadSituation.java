@@ -23,6 +23,8 @@ import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
@@ -67,6 +69,7 @@ import javax.inject.Inject;
  *
  * @author cristian
  */
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class UploadSituation extends Controller {
 
@@ -115,7 +118,8 @@ public class UploadSituation extends Controller {
     String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
     String userToPresence = confGeneralManager.getFieldValue(Parameter.USER_TO_PRESENCE, office);
 
-    String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin");
+    String attestatiLogin =
+        params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin");
 
     render(year, month, urlToPresence, attestatiLogin);
   }
@@ -132,7 +136,8 @@ public class UploadSituation extends Controller {
     }
 
     if (month == null || year == null) {
-      flash.error("Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
+      flash.error(
+          "Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
       Application.indexAdmin();
     }
 
@@ -147,7 +152,8 @@ public class UploadSituation extends Controller {
     List<Competence> competenceList = null;
 
     FileInputStream inputStream = null;
-    File tempFile = File.createTempFile("situazioneMensile" + year.toString() + month.toString(), ".txt");
+    File tempFile =
+        File.createTempFile("situazioneMensile" + year.toString() + month.toString(), ".txt");
     inputStream = new FileInputStream(tempFile);
 
     FileWriter writer = new FileWriter(tempFile, true);
@@ -163,10 +169,10 @@ public class UploadSituation extends Controller {
         for (Absence abs : absenceList) {
           out.write(p.number.toString());
           out.append(' ').append('A').append(' ')
-                  .append(abs.absenceType.code).append(' ')
-                  .append(new Integer(abs.personDay.date.getDayOfMonth()).toString()).append(' ')
-                  .append(new Integer(abs.personDay.date.getDayOfMonth()).toString()).append(' ')
-                  .append('0');
+          .append(abs.absenceType.code).append(' ')
+          .append(new Integer(abs.personDay.date.getDayOfMonth()).toString()).append(' ')
+          .append(new Integer(abs.personDay.date.getDayOfMonth()).toString()).append(' ')
+          .append('0');
           out.newLine();
         }
 
@@ -175,13 +181,13 @@ public class UploadSituation extends Controller {
 
         for (Competence comp : competenceList) {
           Logger.trace(
-                  "Inserisco nel file per gli attestati per %d/%d: matricola %d, compCode=%s, ore=%d",
-                  month, year, p.number, comp.competenceCode.code, comp.valueApproved);
+              "Inserisco nel file per gli attestati per %d/%d: matricola %d, compCode=%s, ore=%d",
+              month, year, p.number, comp.competenceCode.code, comp.valueApproved);
           out.append(p.number.toString())
-                  .append(' ').append('C').append(' ')
-                  .append(comp.competenceCode.code).append(' ')
-                  .append(new Integer(comp.valueApproved).toString()).append(' ')
-                  .append('0').append(' ').append('0');
+          .append(' ').append('C').append(' ')
+          .append(comp.competenceCode.code).append(' ')
+          .append(new Integer(comp.valueApproved).toString()).append(' ')
+          .append('0').append(' ').append('0');
           out.newLine();
         }
 
@@ -199,7 +205,9 @@ public class UploadSituation extends Controller {
   }
 
 
-  public static void processAttestati(final String attestatiLogin, final String attestatiPassword, Integer year, Integer month) throws MalformedURLException, URISyntaxException {
+  public static void processAttestati(
+      final String attestatiLogin, final String attestatiPassword, Integer year, Integer month)
+          throws MalformedURLException, URISyntaxException {
 
     LoginResponse loginResponse = null;
     List<Dipendente> listaDipendenti = null;
@@ -207,7 +215,8 @@ public class UploadSituation extends Controller {
     if (attestatiLogin == null && attestatiPassword == null) {
       loginResponse = loadAttestatiLoginCached();
       listaDipendenti = loadAttestatiListaCached();
-      if (loginResponse == null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size() == 0) {
+      if (loginResponse == null || !loginResponse.isLoggedIn()
+          || listaDipendenti == null || listaDipendenti.size() == 0) {
         flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
         UploadSituation.loginAttestati(year, month);
       }
@@ -225,7 +234,8 @@ public class UploadSituation extends Controller {
         redirect("Application.indexAdmin");
       }
 
-      String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, user.person.office);
+      String urlToPresence =
+          confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, user.person.office);
 
       try {
         //1) LOGIN
@@ -238,7 +248,8 @@ public class UploadSituation extends Controller {
         }
 
         //2) CARICO LISTA DIPENDENTI CNR CENTRALE (ANNO-MESE)
-        Logger.debug("Prendo lista dipendenti da %s. Anno = %d, mese = %d", urlToPresence, year, month);
+        log.debug("Prendo lista dipendenti da {}. Anno = {}, mese = {}",
+            urlToPresence, year, month);
 
 
         listaDipendenti = attestatiClient.listaDipendenti(loginResponse.getCookies(), year, month);
@@ -246,45 +257,57 @@ public class UploadSituation extends Controller {
 
       } catch (AttestatiException e) {
         flash.error(
-                String.format("Errore durante il login e/o prelevamento della lista dei dipendenti dal sistema degli attestati. Eccezione: %s", e));
+            String.format("Errore durante il login e/o prelevamento della lista dei dipendenti "
+                + "dal sistema degli attestati. Eccezione: {}", e));
         UploadSituation.loginAttestati(year, month);
       }
 
       if (listaDipendenti == null || listaDipendenti.isEmpty()) {
-        flash.error("Errore durante il prelevamento della lista dei dipendenti dal sistema degli attestati.");
+        flash.error(
+            "Errore durante il prelevamento della lista dei dipendenti dal sistema degli "
+                + "attestati.");
         UploadSituation.loginAttestati(year, month);
       }
     }
 
     final List<Person> activePersons = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesWriteAllowed(Security.getUser().get()),
-            false, new LocalDate(year, month, 1),
-            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
-    final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
-      @Override
-      public Dipendente apply(Person person) {
-        Dipendente dipendente =
-                new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
-        return dipendente;
-      }
-    }).toSet();
-    Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
+    final Set<Dipendente> activeDipendenti =
+        FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
+          @Override
+          public Dipendente apply(Person person) {
+            Dipendente dipendente =
+                new Dipendente(
+                    person,
+                    Joiner.on(" ").skipNulls()
+                    .join(person.surname, person.othersSurnames, person.name));
+            return dipendente;
+          }
+        }).toSet();
+    log.trace("Lista dipendenti attivi nell'anno {}, mese {} e': {}",
+        year, month, activeDipendenti);
 
 
-    Set<Dipendente> dipendentiNonInEpas = getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendenti);
-    Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
+    Set<Dipendente> dipendentiNonInEpas =
+        getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendenti);
+    Set<Dipendente> dipendentiNonInCNR =
+        getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
 
     memAttestatiIntoCache(loginResponse, listaDipendenti);
 
     final IWrapperFactory wrapper = factory;
 
-    render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR, loginResponse, wrapper);
+    render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR,
+        loginResponse, wrapper);
 
   }
 
-  public static void processAllPersons(int year, int month) throws MalformedURLException, URISyntaxException {
+  public static void processAllPersons(int year, int month)
+      throws MalformedURLException, URISyntaxException {
     if (params.get("back") != null) {
       UploadSituation.loginAttestati(year, month);
     }
@@ -292,7 +315,8 @@ public class UploadSituation extends Controller {
     LoginResponse loginResponse = loadAttestatiLoginCached();
     List<Dipendente> listaDipendenti = loadAttestatiListaCached();
 
-    if (loginResponse == null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size() == 0) {
+    if (loginResponse == null || !loginResponse.isLoggedIn()
+        || listaDipendenti == null || listaDipendenti.size() == 0) {
       flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
       UploadSituation.loginAttestati(year, month);
     }
@@ -300,9 +324,9 @@ public class UploadSituation extends Controller {
     Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
 
     List<RispostaElaboraDati> checks = elaboraDatiDipendenti(
-            loginResponse.getCookies(),
-            Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti),
-            year, month);
+        loginResponse.getCookies(),
+        Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti),
+        year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
       @Override
@@ -311,31 +335,38 @@ public class UploadSituation extends Controller {
       }
     };
 
-    List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+    List<RispostaElaboraDati> risposteNotOk =
+        FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
 
-    if (risposteNotOk.isEmpty())
+    if (risposteNotOk.isEmpty()) {
       flash.success("Elaborazione dipendenti effettuata senza errori.");
-    else if (risposteNotOk.size() == 1)
-      flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per 1 dipendente. Controllare l'esito.");
-    else
-      flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per %s dipendenti. Controllare l'esito.",
-              risposteNotOk.size());
+    } else if (risposteNotOk.size() == 1) {
+      flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per "
+          + "1 dipendente. Controllare l'esito.");
+    } else {
+      flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per %s"
+          + " dipendenti. Controllare l'esito.",
+          risposteNotOk.size());
+    }
 
     UploadSituation.processAttestati(null, null, year, month);
 
 
   }
 
-  public static void processSinglePerson(String matricola, int year, int month) throws MalformedURLException, URISyntaxException {
+  public static void processSinglePerson(String matricola, int year, int month)
+      throws MalformedURLException, URISyntaxException {
     if (matricola == null) {
-      flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
+      flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una "
+          + "segnalazione.");
       UploadSituation.processAttestati(null, null, year, month);
     }
     rules.checkIfPermitted(Security.getUser().get().person.office);
     LoginResponse loginResponse = loadAttestatiLoginCached();
     List<Dipendente> listaDipendenti = loadAttestatiListaCached();
 
-    if (loginResponse == null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size() == 0) {
+    if (loginResponse == null || !loginResponse.isLoggedIn()
+        || listaDipendenti == null || listaDipendenti.size() == 0) {
       flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
       UploadSituation.loginAttestati(year, month);
     }
@@ -351,7 +382,8 @@ public class UploadSituation extends Controller {
     }
 
     if (dipendente == null) {
-      flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
+      flash.error("Errore caricamento dipendente da elaborare. "
+          + "Riprovare o effettuare una segnalazione.");
       UploadSituation.processAttestati(null, null, year, month);
     }
 
@@ -360,9 +392,9 @@ public class UploadSituation extends Controller {
 
 
     List<RispostaElaboraDati> checks = elaboraDatiDipendenti(
-            loginResponse.getCookies(),
-            Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti),
-            year, month);
+        loginResponse.getCookies(),
+        Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti),
+        year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
       @Override
@@ -371,12 +403,15 @@ public class UploadSituation extends Controller {
       }
     };
 
-    List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+    List<RispostaElaboraDati> risposteNotOk =
+        FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
 
-    if (risposteNotOk.isEmpty())
+    if (risposteNotOk.isEmpty()) {
       flash.success("Elaborazione dipendente effettuata senza errori.");
-    else
-      flash.error("Elaborazione dipendente effettuata. Sono stati riscontrati problemi per 1 dipendente. Controllare l'esito.");
+    } else {
+      flash.error("Elaborazione dipendente effettuata. Sono stati riscontrati problemi per "
+          + "1 dipendente. Controllare l'esito.");
+    }
 
 
     UploadSituation.processAttestati(null, null, year, month);
@@ -403,7 +438,9 @@ public class UploadSituation extends Controller {
     render(cd);
   }
 
-  private static List<RispostaElaboraDati> elaboraDatiDipendenti(Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month) throws MalformedURLException, URISyntaxException {
+  private static List<RispostaElaboraDati> elaboraDatiDipendenti(
+      Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month)
+          throws MalformedURLException, URISyntaxException {
     List<RispostaElaboraDati> checks = Lists.newLinkedList();
     Person person = null;
 
@@ -411,23 +448,24 @@ public class UploadSituation extends Controller {
 
       person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
 
-      List<PersonMonthRecap> pmList = personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
+      List<PersonMonthRecap> pmList =
+          personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(
+              person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
 
       //Numero di buoni mensa da passare alla procedura di invio attestati
       List<PersonDay> personDays = personDayDao
-              .getPersonDayInMonth(person, new YearMonth(year, month));
+          .getPersonDayInMonth(person, new YearMonth(year, month));
       Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDays);
 
       //vedere se l'ho gia' inviato con successo
-      CertificatedData cert = personMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
-      //CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
-
+      CertificatedData cert =
+          personMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
 
       RispostaElaboraDati rispostaElaboraDati = attestatiClient.elaboraDatiDipendente(
-              cookies, dipendente, year, month,
-              absenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
-              competenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
-              pmList, mealTicket);
+          cookies, dipendente, year, month,
+          absenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
+          competenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
+          pmList, mealTicket);
       if (rispostaElaboraDati.isOk()) {
         for (PersonMonthRecap personMonth : pmList) {
           personMonth.hoursApproved = true;
@@ -437,8 +475,10 @@ public class UploadSituation extends Controller {
 
       if (cert == null) {
         //FIXME
-        //queste variabili di appoggio sono state inserite perchè richiamandole direttamente nel costruttore veniva lanciata l'eccezione
-        //play.exceptions.JavaExecutionException: models.CertificatedData.<init>(Lmodels/Person;Ljava/lang/String;Ljava/lang/String;II)V
+        //queste variabili di appoggio sono state inserite perchè richiamandole direttamente nel
+        //costruttore veniva lanciata l'eccezione
+        //play.exceptions.JavaExecutionException:
+        //  models.CertificatedData.<init>(Lmodels/Person;Ljava/lang/String;Ljava/lang/String;II)V
         int anno = year;
         int mese = month;
         String cognomeNome = dipendente.getCognomeNome();
@@ -460,7 +500,8 @@ public class UploadSituation extends Controller {
     return checks;
   }
 
-  private static void memAttestatiIntoCache(LoginResponse loginResponse, List<Dipendente> listaDipendenti) {
+  private static void memAttestatiIntoCache(
+      LoginResponse loginResponse, List<Dipendente> listaDipendenti) {
     Cache.set(LOGIN_RESPONSE_CACHED + Security.getUser().get().username, loginResponse);
     Cache.set(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username, listaDipendenti);
   }
@@ -478,42 +519,56 @@ public class UploadSituation extends Controller {
   @SuppressWarnings("unchecked")
   private static List<Dipendente> loadAttestatiListaCached() {
 
-    return (List<Dipendente>) Cache.get(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username);
+    return (List<Dipendente>)
+        Cache.get(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username);
   }
 
-  private static Set<Dipendente> getDipendenteNonInEpas(int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
-    Set<Dipendente> dipendentiNonInEpas = Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
-    if (dipendentiNonInEpas.size() > 0)
-      Logger.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. %s", dipendentiNonInEpas);
+  private static Set<Dipendente> getDipendenteNonInEpas(
+      int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
+    Set<Dipendente> dipendentiNonInEpas =
+        Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
+    if (dipendentiNonInEpas.size() > 0) {
+      log.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. {}",
+          dipendentiNonInEpas);
+    }
 
     return dipendentiNonInEpas;
   }
 
-  private static Set<Dipendente> getDipendenteNonInCnr(int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
-    Set<Dipendente> dipendentiNonInCNR = Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
-    if (dipendentiNonInCNR.size() > 0)
-      Logger.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. %s", dipendentiNonInCNR);
+  private static Set<Dipendente> getDipendenteNonInCnr(
+      int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
+    Set<Dipendente> dipendentiNonInCnr =
+        Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
+    if (dipendentiNonInCnr.size() > 0) {
+      log.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. {}",
+          dipendentiNonInCnr);
+    }
 
-    return dipendentiNonInCNR;
+    return dipendentiNonInCnr;
   }
 
   private static Set<Dipendente> getActiveDipendenti(int year, int month) {
 
     final List<Person> activePersons = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesWriteAllowed(Security.getUser().get()),
-            false, new LocalDate(year, month, 1),
-            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
-    final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
-      @Override
-      public Dipendente apply(Person person) {
-        Dipendente dipendente =
-                new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
-        return dipendente;
-      }
-    }).toSet();
-    Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
+    final Set<Dipendente> activeDipendenti =
+        FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
+          @Override
+          public Dipendente apply(Person person) {
+            Dipendente dipendente =
+                new Dipendente(
+                    person,
+                    Joiner.on(" ").skipNulls()
+                    .join(person.surname, person.othersSurnames, person.name));
+            return dipendente;
+          }
+        }).toSet();
+    log.trace("Lista dipendenti attivi nell'anno {}, mese {} e': {}",
+        year, month, activeDipendenti);
 
     return activeDipendenti;
   }

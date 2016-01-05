@@ -21,6 +21,8 @@ import org.joda.time.YearMonth;
 import java.util.List;
 
 /**
+ * Contract con alcune funzionalità aggiuntive.
+ *
  * @author marco
  */
 public class WrapperContract implements IWrapperContract {
@@ -55,9 +57,9 @@ public class WrapperContract implements IWrapperContract {
       if (contract.id.equals(value.id)) {
         continue;
       }
-      DateInterval cInterval = wrapperFactory.create(contract)
+      DateInterval contractInterval = wrapperFactory.create(contract)
               .getContractDateInterval();
-      if (DateUtility.intervalIntersection(monthInterval, cInterval) != null) {
+      if (DateUtility.intervalIntersection(monthInterval, contractInterval) != null) {
         if (value.beginDate.isBefore(contract.beginDate)) {
           return false;
         }
@@ -80,7 +82,7 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
-   * Conversione della lista dei contractWorkingtimeType da Set a List
+   * Conversione della lista dei contractWorkingtimeType da Set a List.
    *
    * @param contract * @return
    */
@@ -116,15 +118,6 @@ public class WrapperContract implements IWrapperContract {
       return new DateInterval(value.sourceDateResidual.plusDays(1),
               contractInterval.getEnd());
     }
-//		
-//		Optional<LocalDate> dateInitUse = confGeneralManager
-//				.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, value.person.office);
-//		if(dateInitUse.isPresent() ) {
-//			
-//			if(dateInitUse.get().isAfter(contractInterval.getBegin())) {
-//				return new DateInterval(dateInitUse.get(), contractInterval.getEnd());
-//			}
-//		}
 
     return contractInterval;
   }
@@ -173,11 +166,6 @@ public class WrapperContract implements IWrapperContract {
     return currentMonth;
   }
 
-  /**
-   *
-   * @param yearMonth
-   * @return
-   */
   @Override
   public Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth) {
 

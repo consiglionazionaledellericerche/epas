@@ -55,17 +55,19 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @As(binder = NullStringBinder.class)
   public String note;
+
   /**
    * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente
    * all'apposita macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di
    * timbratura poichè la persona in questione non ha potuto effettuare la timbratura (valore =
-   * true)
+   * true).
    */
   @Column(name = "marked_by_admin")
   public Boolean markedByAdmin = false;
+
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
-   * true quando è il dipendente a modificare la propria timbratura
+   * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
   public Boolean markedByEmployee = false;
@@ -76,8 +78,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public boolean valid;
   @Transient
   public int pairId = 0;
+
   /**
-   * true, la cella fittizia di uscita adesso
+   * true, la cella fittizia di uscita adesso.
    */
   @Transient
   public boolean exitingNow = false;
@@ -110,8 +113,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @Override
   public String toString() {
-    return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
-        id, personDay.id, way, date, stampType != null ? stampType : "null", stampModificationType != null ? stampModificationType.id : "null");
+    return String.format(
+        "Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, "
+            + "stampModificationType.id = %s",
+        id, personDay.id, way, date, stampType != null ? stampType : "null",
+        stampModificationType != null ? stampModificationType.id : "null");
   }
 
   /**
@@ -127,6 +133,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     }
   }
 
+  /**
+   * @return orario della timbratura formattato come HH:mm.
+   */
   @Transient
   public String formattedHour() {
     if (this.date != null) {

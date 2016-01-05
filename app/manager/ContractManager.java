@@ -1,19 +1,15 @@
 package manager;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -21,7 +17,14 @@ import models.ContractWorkingTimeType;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+
+import org.joda.time.LocalDate;
+
 import play.db.jpa.JPAPlugin;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**
@@ -31,7 +34,6 @@ import play.db.jpa.JPAPlugin;
  */
 public class ContractManager {
 
-  private final ConfGeneralManager confGeneralManager;
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
   private final VacationCodeDao vacationCodeDao;
@@ -39,17 +41,15 @@ public class ContractManager {
   /**
    * Constructor.
    *
-   * @param confGeneralManager {@link ConfGeneralManager}
    * @param consistencyManager {@link ConsistencyManager}
    * @param vacationCodeDao    {@link VacationCodeDao}
    * @param wrapperFactory     {@link IWrapperFactory}
    */
   @Inject
-  public ContractManager(final ConfGeneralManager confGeneralManager,
-                         final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
-                         final IWrapperFactory wrapperFactory) {
+  public ContractManager(
+      final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
+      final IWrapperFactory wrapperFactory) {
 
-    this.confGeneralManager = confGeneralManager;
     this.consistencyManager = consistencyManager;
     this.vacationCodeDao = vacationCodeDao;
     this.wrapperFactory = wrapperFactory;
@@ -218,8 +218,9 @@ public class ContractManager {
     contract.save();
   }
 
-  private VacationPeriod buildVacationPeriod(final Contract contract,
-                                             final VacationCode vacationCode, final LocalDate beginFrom, final LocalDate endTo) {
+  private VacationPeriod buildVacationPeriod(
+      final Contract contract, final VacationCode vacationCode,
+      final LocalDate beginFrom, final LocalDate endTo) {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
     vacationPeriod.contract = contract;

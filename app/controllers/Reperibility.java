@@ -451,7 +451,8 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportMonthAsPDF(@Required int year, @Required int month, @Required Long reperibilityId) {
+  public static void exportMonthAsPDF(
+      @Required int year, @Required int month, @Required Long reperibilityId) {
 
     if (validation.hasErrors()) {
       badRequest("Parametri mancanti. " + validation.errors());
@@ -473,14 +474,8 @@ public class Reperibility extends Controller {
         TreeBasedTable.<Person, String, List<String>>create();
 
     // get the Competence code for the reperibility working or non-working days
-    //CompetenceCode competenceCodeFS =
-    //    CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFs)
-    //        .first();
     final CompetenceCode competenceCodeFs = competenceCodeDao.getCompetenceCodeByCode(codFs);
 
-    //CompetenceCode competenceCodeFR =
-    //    CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codFr)
-    //        .first();
     final CompetenceCode competenceCodeFr = competenceCodeDao.getCompetenceCodeByCode(codFr);
 
     log.debug("Creazione dei  competenceCodeFS competenceCodeFR {}/{}",

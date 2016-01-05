@@ -1,9 +1,8 @@
 package helpers.jpa;
 
-import java.util.List;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+
 import com.mysema.query.QueryModifiers;
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPQLQuery;
@@ -11,9 +10,13 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.Expression;
 
 import helpers.Paginator;
+
 import models.base.BaseModel;
+
 import play.db.jpa.JPA;
 import play.mvc.Scope;
+
+import java.util.List;
 
 /**
  * @author marco
@@ -47,7 +50,7 @@ public class PerseoModelQuery {
   }
 
   /**
-   * @return a simplequery object, wrap list or listResults
+   * @return a simplequery object, wrap list or listResults.
    */
   public static <T> PerseoSimpleResults<T> wrap(JPQLQuery query,
                                                 Expression<T> expression) {
@@ -114,12 +117,13 @@ public class PerseoModelQuery {
       return query.list(expression);
     }
 
+    public List<T> list(long limits) {
+      return query.restrict(QueryModifiers.limit(limits)).list(expression);
+    }
+
     public SearchResults<T> listResults() {
       return paginatedQuery(query).listResults(expression);
     }
 
-    public List<T> list(long limits) {
-      return query.restrict(QueryModifiers.limit(limits)).list(expression);
-    }
   }
 }

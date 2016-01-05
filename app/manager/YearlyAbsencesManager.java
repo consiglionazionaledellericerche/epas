@@ -1,42 +1,44 @@
 package manager;
 
-import java.util.Comparator;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
+
 public class YearlyAbsencesManager {
 
-  private final static Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
-  public Comparator<Person> PersonNameComparator = new Comparator<Person>() {
+  private static final Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
+  public Comparator<Person> personNameComparator = new Comparator<Person>() {
 
     public int compare(Person person1, Person person2) {
 
       String name1 = person1.surname.toUpperCase();
       String name2 = person2.surname.toUpperCase();
 
-      if (name1.equals(name2))
+      if (name1.equals(name2)) {
         return person1.name.toUpperCase().compareTo(person2.name.toUpperCase());
+      }
       return name1.compareTo(name2);
 
     }
 
   };
-  public Comparator<AbsenceType> AbsenceCodeComparator = new Comparator<AbsenceType>() {
+  public Comparator<AbsenceType> absenceCodeComparator = new Comparator<AbsenceType>() {
 
     public int compare(AbsenceType absenceCode1, AbsenceType absenceCode2) {
       return absenceCode1.code.compareTo(absenceCode2.code);
@@ -44,34 +46,34 @@ public class YearlyAbsencesManager {
     }
 
   };
+
   @Inject
   private AbsenceDao absenceDao;
 
-  /**
-   *
-   * @param persons
-   * @param abt
-   * @param begin
-   * @param end
-   * @return
-   */
-  public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end) {
-    Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
+  public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(
+      List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end) {
+
+    Table<Person, AbsenceType, Integer> tableMonthlyAbsences =
+        TreeBasedTable.create(personNameComparator, absenceCodeComparator);
     for (Person p : persons) {
-      List<Absence> absenceInMonth = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<JustifiedTimeAtWork>absent(), false, false);
+      List<Absence> absenceInMonth =
+          absenceDao.getAbsenceByCodeInPeriod(
+              Optional.fromNullable(p), Optional.<String>absent(), begin, end,
+              Optional.<JustifiedTimeAtWork>absent(), false, false);
 
       tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
       for (Absence abs : absenceInMonth) {
         Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
         log.debug("Per la persona {} il codice {} vale: {}",
-                new Object[]{p, abs.absenceType.code, value});
+            new Object[]{p, abs.absenceType.code, value});
         if (value == null) {
-          log.debug("Inserisco in tabella nuova assenza per {} con codice {}", p, abs.absenceType.code);
+          log.debug("Inserisco in tabella nuova assenza per {} con codice {}",
+              p, abs.absenceType.code);
           tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
         } else {
           tableMonthlyAbsences.row(p).put(abs.absenceType, value + 1);
           log.debug("Incremento il numero di giorni per l'assenza {} di {} al valore {}",
-                  new Object[]{abs.absenceType.code, p, value + 1});
+              new Object[]{abs.absenceType.code, p, value + 1});
 
         }
       }
@@ -80,7 +82,7 @@ public class YearlyAbsencesManager {
   }
 
   /*Non è molto chiaro cosa facesse questa classe innestata all'interno di YearlyAbsences*/
-  public final static class AbsenceTypeDays {
+  public static final class AbsenceTypeDays {
     public String absenceCode;
     public Integer i;
 
@@ -104,31 +106,36 @@ public class YearlyAbsencesManager {
       final int prime = 31;
       int result = 1;
       result = prime * result
-              + ((absenceCode == null) ? 0 : absenceCode.hashCode());
+          + ((absenceCode == null) ? 0 : absenceCode.hashCode());
       return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
+      if (this == obj) {
         return true;
-      if (obj == null)
+      }
+      if (obj == null) {
         return false;
-      if (getClass() != obj.getClass())
+      }
+      if (getClass() != obj.getClass()) {
         return false;
+      }
       AbsenceTypeDays other = (AbsenceTypeDays) obj;
       if (absenceCode == null) {
-        if (other.absenceCode != null)
+        if (other.absenceCode != null) {
           return false;
-      } else if (!absenceCode.equals(other.absenceCode))
+        }
+      } else if (!absenceCode.equals(other.absenceCode)) {
         return false;
+      }
       return true;
     }
 
   }
 
   /*Così come non è chiaro cosa ci facesse questa...*/
-  public final static class AbsenceTypeDate {
+  public static final class AbsenceTypeDate {
     public AbsenceType absenceType;
     public LocalDate date;
 

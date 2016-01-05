@@ -35,4 +35,6 @@ DROP TABLE stamp_types_history;
 
 DROP TABLE stamp_types;
 
+UPDATE persons SET number = NULL WHERE number = 0;
+
 # ---!Downs

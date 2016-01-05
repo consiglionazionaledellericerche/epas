@@ -2,6 +2,8 @@ package it.cnr.iit.epas;
 
 import dao.wrapper.IWrapperFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -25,6 +27,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+@Slf4j
 public class ExportToYaml {
 
   @Inject
@@ -32,7 +35,7 @@ public class ExportToYaml {
 
 
   /**
-   * Builder Yaml della tabella AbsenceType e AbsenceTypeGroup
+   * Builder Yaml della tabella AbsenceType e AbsenceTypeGroup.
    */
   public void buildAbsenceTypesAndQualifications(String fileName) {
 
@@ -46,40 +49,50 @@ public class ExportToYaml {
     String absencesYaml = "";
 
     //AbsenceType senza AbsenceTypeGroup
-    List<AbsenceType> abtList1 = AbsenceType.find("Select abt from AbsenceType abt where abt.absenceTypeGroup is null").fetch();
+    List<AbsenceType> abtList1 =
+        AbsenceType.find(
+            "Select abt from AbsenceType abt where abt.absenceTypeGroup is null").fetch();
     for (AbsenceType abt : abtList1) {
       absencesYaml = absencesYaml + appendAbsenceType(abt);
     }
 
     //AbsenceTypeGroup senza replacingAbsenceType
-    List<AbsenceTypeGroup> abtgList1 = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.replacingAbsenceType is null").fetch();
+    List<AbsenceTypeGroup> abtgList1 =
+        AbsenceTypeGroup.find(
+            "Select abtg from AbsenceTypeGroup abtg where abtg.replacingAbsenceType is null")
+          .fetch();
     for (AbsenceTypeGroup abtg : abtgList1) {
       absencesYaml = absencesYaml + appendAbsenceTypeGroup(abtg);
     }
 
     //AbsenceTypeGroup con replacingAbsenceType
-    List<AbsenceTypeGroup> abtgList2 = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.replacingAbsenceType is not null").fetch();
+    List<AbsenceTypeGroup> abtgList2 =
+        AbsenceTypeGroup.find(
+            "Select abtg from AbsenceTypeGroup abtg where abtg.replacingAbsenceType is not null")
+          .fetch();
     for (AbsenceTypeGroup abtg : abtgList2) {
       try {
         absencesYaml = absencesYaml + appendAbsenceType(abtg.replacingAbsenceType);
       } catch (Exception e) {
-        Logger.info("abtgList2: Scartata AbsenceType duplicata %s", abtg.replacingAbsenceType.code);
+        log.info("abtgList2: Scartata AbsenceType duplicata {}", abtg.replacingAbsenceType.code);
       }
       try {
         absencesYaml = absencesYaml + appendAbsenceTypeGroup(abtg);
       } catch (Exception e) {
-        Logger.info("abtgList2: Scartato AbsenceTypeGroup duplicato %s", abtg.label);
+        log.info("abtgList2: Scartato AbsenceTypeGroup duplicato {}", abtg.label);
       }
 
     }
 
     //AbsenceType con AbsenceTypeGroup
-    List<AbsenceType> abtList2 = AbsenceType.find("Select abt from AbsenceType abt where abt.absenceTypeGroup is not null").fetch();
+    List<AbsenceType> abtList2 =
+        AbsenceType.find(
+            "Select abt from AbsenceType abt where abt.absenceTypeGroup is not null").fetch();
     for (AbsenceType abt : abtList2) {
       try {
         absencesYaml = absencesYaml + appendAbsenceType(abt);
       } catch (Exception e) {
-        Logger.info("abtList2: Scartata AbsenceType duplicata %s", abt.code);
+        log.info("abtList2: Scartata AbsenceType duplicata {}", abt.code);
       }
     }
 
@@ -87,10 +100,6 @@ public class ExportToYaml {
     writeToYamlFile(fileName, qualificationsYaml + absencesYaml);
   }
 
-  /**
-   *
-   * @param fileName
-   */
   public void buildQualifications(String fileName) {
     String qualificationsYaml = "";
     List<Qualification> qualificationList = Qualification.findAll();
@@ -101,7 +110,7 @@ public class ExportToYaml {
   }
 
   /**
-   * Builder Yaml della tabella CompetenceCode
+   * Builder Yaml della tabella CompetenceCode.
    */
   public void buildCompetenceCodes(String fileName) {
     String competenceCodesYaml = "";
@@ -113,14 +122,15 @@ public class ExportToYaml {
   }
 
   /**
-   * Builder Yaml della tabella VacationCodes
+   * Builder Yaml della tabella VacationCodes.
    */
   public void buildVacationCodes(String fileName) {
     String vacationCodesYaml = "";
     List<VacationCode> vacCodeList = VacationCode.findAll();
     for (VacationCode vacCode : vacCodeList) {
-      if (vacCode.description.equals("28+4") || vacCode.description.equals("26+4"))
+      if (vacCode.description.equals("28+4") || vacCode.description.equals("26+4")) {
         vacationCodesYaml = vacationCodesYaml + appendVacationCode(vacCode);
+      }
     }
     writeToYamlFile(fileName, vacationCodesYaml);
 
@@ -128,7 +138,8 @@ public class ExportToYaml {
 
   /**
    * Builder Yaml della persona contente WorkingTimeType, WorkingTimeTypeDays, StampProfiles,
-   * Contracts //TODO Person_CompetenceCode assegnabili
+   * Contracts.
+   * TODO Person_CompetenceCode assegnabili.
    */
   public void buildPerson(Person person, String fileName) {
     String personYaml = "";
@@ -143,7 +154,8 @@ public class ExportToYaml {
 
   /**
    * Builder Yaml della persona contenente Competences del mese, PersonMonth per il calcolo del
-   * riepilogo mensile, PersonDays e Stampings //TODO cosa serve per testare aggiornaRiepiloghi??
+   * riepilogo mensile, PersonDays e Stampings.
+   * TODO cosa serve per testare aggiornaRiepiloghi??
    */
   public void buildPersonMonth(Person person, int year, int month, String fileName) {
     String personMonthYaml = "";
@@ -159,10 +171,10 @@ public class ExportToYaml {
     LocalDate yearStart = new LocalDate(year, 1, 1);
     LocalDate yearEnd = new LocalDate(year, 12, 31);
     List<PersonDay> pdList = PersonDay.find(
-        "Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-        person,
-        yearStart,
-        yearEnd).fetch();
+        "Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? "
+            + "order by pd.date",
+        person, yearStart, yearEnd)
+        .fetch();
 
 
     String yearlyAbsences = "";
@@ -176,10 +188,11 @@ public class ExportToYaml {
 
   private String buildDays(Person person, int year, int month) {
     LocalDate date = new LocalDate(year, month, 1);
-    List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date DESC",
-        person,
-        date,
-        date.dayOfMonth().withMaximumValue())
+    List<PersonDay> pdList =
+        PersonDay.find(
+            "Select pd from PersonDay pd where pd.person = ? and pd.date between ? "
+            + "and ? order by pd.date DESC",
+            person, date, date.dayOfMonth().withMaximumValue())
         .fetch();
     String out = "";
     for (PersonDay pd : pdList) {
@@ -205,7 +218,6 @@ public class ExportToYaml {
     out = out + getFormattedProperty("code", comp.code);
     out = out + getFormattedProperty("codeToPresence", comp.codeToPresence);
     out = out + getFormattedProperty("description", comp.description);
-    //		out = out + getFormattedProperty("inactive", comp.inactive+"");
     return out;
   }
 
@@ -227,8 +239,10 @@ public class ExportToYaml {
     out = out + getFormattedProperty("minutesExcess", abtg.minutesExcess + "");
     out = out + getFormattedProperty("accumulationBehaviour", abtg.accumulationBehaviour.name());
     out = out + getFormattedProperty("accumulationType", abtg.accumulationType.name());
-    if (abtg.replacingAbsenceType != null)
-      out = out + getFormattedProperty("replacingAbsenceType", "abt" + abtg.replacingAbsenceType.id);
+    if (abtg.replacingAbsenceType != null) {
+      out = out + getFormattedProperty(
+          "replacingAbsenceType", "abt" + abtg.replacingAbsenceType.id);
+    }
 
     return out;
   }
@@ -239,21 +253,20 @@ public class ExportToYaml {
     out = out + getFormattedHeader("AbsenceType", "abt" + abt.id);
     out = out + getFormattedProperty("certificateCode", abt.certificateCode);
     out = out + getFormattedProperty("code", abt.code);
-    //		out = out + getFormattedProperty("compensatoryRest", abt.compensatoryRest+"");
     out = out + getFormattedProperty("consideredWeekEnd", abt.consideredWeekEnd + "");
     out = out + getFormattedProperty("description", abt.description);
-    //		out = out + getFormattedProperty("ignoreStamping", abt.ignoreStamping+"");
     out = out + getFormattedProperty("internalUse", abt.internalUse + "");
     out = out + getFormattedProperty("justifiedTimeAtWork", abt.justifiedTimeAtWork.toString());
-//		out = out + getFormattedProperty("mealTicketCalculation", abt.mealTicketCalculation+"");
-//		out = out + getFormattedProperty("multipleUse", abt.multipleUse+"");
 
-    if (abt.validFrom != null)
+    if (abt.validFrom != null) {
       out = out + getFormattedProperty("validFrom", "'" + abt.validFrom + "'");
-    if (abt.validTo != null)
+    }
+    if (abt.validTo != null) {
       out = out + getFormattedProperty("validTo", "'" + abt.validTo + "'");
-    if (abt.absenceTypeGroup != null)
+    }
+    if (abt.absenceTypeGroup != null) {
       out = out + getFormattedProperty("absenceTypeGroup", "abtg" + abt.absenceTypeGroup.id);
+    }
 
     String value = "[";
     for (Qualification qual : abt.qualifications) {
@@ -274,19 +287,23 @@ public class ExportToYaml {
     return out;
   }
 
-  private String appendStamping(Stamping s) {
+  private String appendStamping(Stamping stamping) {
     String out = "";
-    out = out + getFormattedHeader("Stamping", "s" + s.id);
-    out = out + getFormattedProperty("personDay", "pd" + s.personDay.id);
-    out = out + getFormattedProperty("way", s.way.description);
-    if (s.date != null)
-      out = out + getFormattedProperty("date", "'" + s.date + "'");
-    out = out + getFormattedProperty("markedByAdmin", s.markedByAdmin + "");
-    out = out + getFormattedProperty("valid", s.valid + "");
-    if (s.stampModificationType != null)
-      out = out + getFormattedProperty("stampModificationType", s.stampModificationType.code);
-    if (s.stampType != null && s.stampType.equals(StampTypes.MOTIVI_DI_SERVIZIO))
+    out = out + getFormattedHeader("Stamping", "s" + stamping.id);
+    out = out + getFormattedProperty("personDay", "pd" + stamping.personDay.id);
+    out = out + getFormattedProperty("way", stamping.way.description);
+    if (stamping.date != null) {
+      out = out + getFormattedProperty("date", "'" + stamping.date + "'");
+    }
+    out = out + getFormattedProperty("markedByAdmin", stamping.markedByAdmin + "");
+    out = out + getFormattedProperty("valid", stamping.valid + "");
+    if (stamping.stampModificationType != null) {
+      out = out + getFormattedProperty(
+          "stampModificationType", stamping.stampModificationType.code);
+    }
+    if (stamping.stampType != null && stamping.stampType.equals(StampTypes.MOTIVI_DI_SERVIZIO)) {
       out = out + getFormattedProperty("stampType", "motiviDiServizio");
+    }
     return out;
   }
 
@@ -294,13 +311,14 @@ public class ExportToYaml {
     String out = "";
     out = out + getFormattedHeader("PersonDay", "pd" + pd.id);
     out = out + getFormattedProperty("person", "person" + pd.person.id);
-    if (pd.date != null)
+    if (pd.date != null) {
       out = out + getFormattedProperty("date", "'" + pd.date + "'");
+    }
     out = out + getFormattedProperty("isTicketForcedByAdmin", pd.isTicketForcedByAdmin + "");
     out = out + getFormattedProperty("isTicketAvailable", pd.isTicketAvailable + "");
-    out = out + getFormattedProperty("isTimeAtWorkAutoCertificated", wrapperFactory.create(pd).isFixedTimeAtWork() + "");
+    out = out + getFormattedProperty(
+        "isTimeAtWorkAutoCertificated", wrapperFactory.create(pd).isFixedTimeAtWork() + "");
     out = out + getFormattedProperty("isWorkingInAnotherPlace", pd.isWorkingInAnotherPlace + "");
-    //out = out + getFormattedProperty("modificationType", pd.modificationType);
     out = out + getFormattedProperty("progressive", pd.progressive + "");
     out = out + getFormattedProperty("difference", pd.difference + "");
     out = out + getFormattedProperty("timeAtWork", pd.timeAtWork + "");
@@ -326,12 +344,15 @@ public class ExportToYaml {
     for (Contract c : person.contracts) {
       out = out + getFormattedHeader("Contract", "c" + c.id);
       out = out + getFormattedProperty("person", "person" + person.id);
-      if (c.beginDate != null)
+      if (c.beginDate != null) {
         out = out + getFormattedProperty("beginDate", "'" + c.beginDate + "'");
-      if (c.endContract != null)
+      }
+      if (c.endContract != null) {
         out = out + getFormattedProperty("endContract", "'" + c.endContract + "'");
-      if (c.endDate != null)
+      }
+      if (c.endDate != null) {
         out = out + getFormattedProperty("endDate", "'" + c.endDate + "'");
+      }
       out = out + getFormattedProperty("onCertificate", c.onCertificate + "");
     }
     return out;
@@ -380,15 +401,6 @@ public class ExportToYaml {
         out = out + getFormattedProperty("person", "person" + person.id);
         out = out + getFormattedProperty("year", pm.year + "");
         out = out + getFormattedProperty("month", pm.month + "");
-        //				out = out + getFormattedProperty("compensatoryRestInMinutes", pm.compensatoryRestInMinutes+"");
-        //				out = out + getFormattedProperty("recuperiOreDaAnnoPrecedente", pm.recuperiOreDaAnnoPrecedente+"");
-        //				out = out + getFormattedProperty("remainingMinutesPastYearTaken", pm.remainingMinutesPastYearTaken+"");
-        //				out = out + getFormattedProperty("residualPastYear", pm.residualPastYear+"");
-        //				out = out + getFormattedProperty("riposiCompensativiDaAnnoCorrente", pm.riposiCompensativiDaAnnoCorrente+"");
-        //				out = out + getFormattedProperty("riposiCompensativiDaAnnoPrecedente", pm.riposiCompensativiDaAnnoPrecedente+"");
-        //				out = out + getFormattedProperty("riposiCompensativiDaInizializzazione", pm.riposiCompensativiDaInizializzazione+"");
-        //				out = out + getFormattedProperty("straordinari", pm.straordinari+"");
-        //				//out = out + getFormattedProperty("", pm.totalRemainingMinutes); deprecated
       }
     }
     return out;
@@ -400,8 +412,9 @@ public class ExportToYaml {
   }
 
   private String getFormattedProperty(String name, String value) {
-    if (value != null && value.contains(":"))
+    if (value != null && value.contains(":")) {
       value = value.replace(":", "-");
+    }
     return "    " + name + ": " + value + "\r\n";
   }
 
@@ -412,7 +425,7 @@ public class ExportToYaml {
       writer.print(out);
       writer.close();
     } catch (Exception e) {
-
+      //Empty
     }
   }
 

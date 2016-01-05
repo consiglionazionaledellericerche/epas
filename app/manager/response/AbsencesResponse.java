@@ -13,16 +13,27 @@ import org.joda.time.LocalDate;
 @JsonFilter(JacksonModule.FILTER)
 public class AbsencesResponse {
 
-  public final static String CODICE_FERIE_GIA_PRESENTE = "Il codice di assenza é già presente in almeno uno dei giorni in cui lo si voleva inserire";
-  public final static String CODICE_GIORNALIERO_GIA_PRESENTE = "Esiste già un codice di assenza giornaliero nel periodo indicato. Operazione annullata";
-  public final static String NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO = "Nessun codice ferie disponibile per il periodo richiesto";
-  public final static String RIPOSI_COMPENSATIVI_ESAURITI = "Numero di giorni di riposo compensativo esauriti per l'anno corrente";
-  public final static String MONTE_ORE_INSUFFICIENTE = "Monte ore insufficiente per l'assegnamento del riposo compensativo";
-  public final static String NON_UTILIZZABILE_NEI_FESTIVI = "Codice non utilizzabile in un giorno festivo";
-  public final static String CODICI_MALATTIA_FIGLI_NON_DISPONIBILE = "Impossibile usufruire dei codici ferie per malattia dei figli";
-  public final static String NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37 = "Nessun codice ferie dell'anno precedente 37 utilizzabile";
-  public final static String ERRORE_GENERICO = "Impossibile inserire il codice d'assenza";
-  public final static String PERSONDAY_PRECEDENTE_NON_PRESENTE = "Nessun personday per il giorno precedente a quando si intende inserire il codice con allegato. Verificare";
+  public static final String CODICE_FERIE_GIA_PRESENTE =
+      "Il codice di assenza é già presente in almeno uno dei giorni in cui lo si voleva inserire";
+  public static final String CODICE_GIORNALIERO_GIA_PRESENTE =
+      "Esiste già un codice di assenza giornaliero nel periodo indicato. Operazione annullata";
+  public static final String NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO =
+      "Nessun codice ferie disponibile per il periodo richiesto";
+  public static final String RIPOSI_COMPENSATIVI_ESAURITI =
+      "Numero di giorni di riposo compensativo esauriti per l'anno corrente";
+  public static final String MONTE_ORE_INSUFFICIENTE =
+      "Monte ore insufficiente per l'assegnamento del riposo compensativo";
+  public static final String NON_UTILIZZABILE_NEI_FESTIVI =
+      "Codice non utilizzabile in un giorno festivo";
+  public static final String CODICI_MALATTIA_FIGLI_NON_DISPONIBILE =
+      "Impossibile usufruire dei codici ferie per malattia dei figli";
+  public static final String NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37 =
+      "Nessun codice ferie dell'anno precedente 37 utilizzabile";
+  public static final String ERRORE_GENERICO =
+      "Impossibile inserire il codice d'assenza";
+  public static final String PERSONDAY_PRECEDENTE_NON_PRESENTE =
+      "Nessun personday per il giorno precedente a quando si intende inserire il codice con "
+      + "allegato. Verificare";
 
   private LocalDate date;
   private String absenceCode;

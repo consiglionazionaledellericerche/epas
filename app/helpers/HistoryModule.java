@@ -1,14 +1,15 @@
 package helpers;
 
-import javax.persistence.EntityManager;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
+import javax.persistence.EntityManager;
 
 /**
+ * Module which provides the AuditReader.
  * @author marco
  */
 public class HistoryModule extends AbstractModule {

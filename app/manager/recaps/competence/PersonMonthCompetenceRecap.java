@@ -75,15 +75,16 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       holidaysAvailability = competence.get().valueApproved;
-    else
+    } else {
       holidaysAvailability = 0;
+    }
     return holidaysAvailability;
   }
 
   /**
-   * Ritorna il numero di giorni di indennità di reperibilità feriale per la persona nel mese
+   * Ritorna il numero di giorni di indennità di reperibilità feriale per la persona nel mese.
    */
   private int getWeekDayAvailability(Person person, @Valid int year, @Valid int month) {
     int weekDayAvailability = 0;
@@ -91,16 +92,17 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       weekDayAvailability = competence.get().valueApproved;
-    else
+    } else {
       weekDayAvailability = 0;
+    }
     return weekDayAvailability;
   }
 
   /**
    * Ritorna il numero di giorni di straordinario diurno nei giorni lavorativi per la persona nel
-   * mese
+   * mese.
    */
   private int getDaylightWorkingDaysOvertime(Person person, int year, int month) {
     int daylightWorkingDaysOvertime = 0;
@@ -108,16 +110,17 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       daylightWorkingDaysOvertime = competence.get().valueApproved;
-    else
+    } else {
       daylightWorkingDaysOvertime = 0;
+    }
     return daylightWorkingDaysOvertime;
   }
 
   /**
    * Ritorna il numero di giorni di straordinario diurno nei giorni festivi o notturno nei giorni
-   * lavorativi per la persona nel mese
+   * lavorativi per la persona nel mese.
    */
   private int getDaylightholidaysOvertime(Person person, int year, int month) {
     int daylightholidaysOvertime = 0;
@@ -125,15 +128,16 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       daylightholidaysOvertime = competence.get().valueApproved;
-    else
+    } else {
       daylightholidaysOvertime = 0;
+    }
     return daylightholidaysOvertime;
   }
 
   /**
-   * Ritorna il numero di giorni di turno ordinario per la persona nel mese
+   * Ritorna il numero di giorni di turno ordinario per la persona nel mese.
    */
   private int getOrdinaryShift(Person person, int year, int month) {
     int ordinaryShift = 0;
@@ -141,28 +145,31 @@ public class PersonMonthCompetenceRecap {
 
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       ordinaryShift = competence.get().valueApproved;
-    else
+    } else {
       ordinaryShift = 0;
+    }
     return ordinaryShift;
   }
 
   /**
-   * Ritorna il numero di giorni di turno notturno per la persona nel mese
+   * Ritorna il numero di giorni di turno notturno per la persona nel mese.
    */
   private int getNightShift(Person person, int year, int month) {
     int nightShift = 0;
     CompetenceCode cmpCode = competenceCodeDao.getCompetenceCodeByCode("T2");
 
-    if (cmpCode == null)
+    if (cmpCode == null) {
       return 0;
+    }
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
-    if (competence.isPresent())
+    if (competence.isPresent()) {
       nightShift = competence.get().valueApproved;
-    else
+    } else {
       nightShift = 0;
+    }
     return nightShift;
   }
 }

@@ -1,19 +1,21 @@
 package models;
 
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
-import models.base.BaseModel;
-
 
 /**
- * @author dario questa classe rappresenta il residuo annuale relativo a una certa persona per quel
- *         che riguarda le ore fatte in più (o in meno)
+ * Questa classe rappresenta il residuo annuale relativo a una certa persona per quel
+ * che riguarda le ore fatte in più (o in meno).
+ *
+ * @author dario
  */
 @Audited
 @Entity

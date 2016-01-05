@@ -1,12 +1,9 @@
 package manager.cache;
 
-import javax.persistence.EntityManager;
-
-import org.apache.commons.lang.NotImplementedException;
-
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
@@ -14,7 +11,12 @@ import com.mysema.query.jpa.impl.JPAQueryFactory;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.query.QStampModificationType;
+
+import org.apache.commons.lang.NotImplementedException;
+
 import play.cache.Cache;
+
+import javax.persistence.EntityManager;
 
 public class StampTypeManager {
 
@@ -64,15 +66,6 @@ public class StampTypeManager {
     StampModificationType value = (StampModificationType) Cache.get(key);
 
     if (value == null) {
-
-//			StampModificationType dailyLunch = 
-//					stampingDao.getStampModificationTypeByCode(
-//							StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-//			StampModificationType minLunch = 
-//					stampingDao.getStampModificationTypeByCode(
-//							StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-//			Cache.set("dailyLunch", dailyLunch);
-//			Cache.set("minLunch", minLunch);
 
       value = getStampModificationTypeByCode(code);
 

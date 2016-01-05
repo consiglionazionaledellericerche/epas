@@ -3,6 +3,8 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
+import controllers.Resecure.NoCheck;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -30,7 +32,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
-import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.Play;
 import play.data.binding.As;
@@ -38,6 +39,7 @@ import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -48,7 +50,7 @@ import javax.inject.Inject;
 @With({RequestInit.class, Resecure.class})
 public class Clocks extends Controller {
 
-  public final static String SKIP_IP_CHECK = "skip.ip.check";
+  public static final String SKIP_IP_CHECK = "skip.ip.check";
   @Inject
   private static OfficeDao officeDao;
   @Inject
@@ -65,8 +67,6 @@ public class Clocks extends Controller {
   private static PersonStampingDayRecapFactory stampingDayRecapFactory;
   @Inject
   private static ConsistencyManager consistencyManager;
-  @Inject
-  private static SecurityRules rules;
 
   @NoCheck
   public static void show() {
@@ -92,7 +92,8 @@ public class Clocks extends Controller {
       }
     }
 
-    List<Person> personList = personDao.list(Optional.<String>absent(), offices, false, data, data, true).list();
+    List<Person> personList =
+        personDao.list(Optional.<String>absent(), offices, false, data, data, true).list();
     render(data, personList);
   }
 
@@ -113,7 +114,8 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+      String addressesAllowed =
+          confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
 
       if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
 
@@ -135,8 +137,8 @@ public class Clocks extends Controller {
   }
 
   public static void daySituation() {
-//		Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
-//		Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
+    // Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
+    // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
     User user = Security.getUser().orNull();
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {

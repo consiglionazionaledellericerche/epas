@@ -51,6 +51,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.io.File;
@@ -254,9 +255,9 @@ public class Absences extends Controller {
    * @param absenceType il tipo di assenza da salvare
    * @param file l'eventuale allegato
    */
-  public static void save(@Required @Valid Person person,
+  public static void save(@Required Person person,
       @Required LocalDate dateFrom, @Required LocalDate dateTo,
-      @Valid AbsenceType absenceType,
+      @Required @Valid AbsenceType absenceType,
       Blob file) {
 
     if (Validation.hasErrors()) {
@@ -636,8 +637,8 @@ public class Absences extends Controller {
     rules.checkIfPermitted(office);
 
     Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable
-        .create(yearlyAbsencesManager.PersonNameComparator,
-            yearlyAbsencesManager.AbsenceCodeComparator);
+        .create(yearlyAbsencesManager.personNameComparator,
+            yearlyAbsencesManager.absenceCodeComparator);
     AbsenceType abt = new AbsenceType();
     abt.code = "Totale";
 

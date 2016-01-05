@@ -1,6 +1,3 @@
-/**
- *
- */
 package models;
 
 
@@ -38,6 +35,8 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 /**
+ * Entity per le persone.
+ *
  * @author cristian
  */
 
@@ -78,20 +77,20 @@ public class Person extends MutableModel implements Comparable<Person> {
   public User user;
 
   /**
-   * Numero di matricola
+   * Numero di matricola.
    */
   @Unique
   public Integer number;
 
 
   /**
-   * id che questa persona aveva nel vecchio database
+   * id che questa persona aveva nel vecchio database.
    */
   public Long oldId;
 
   /**
    * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con
-   * Perseo (Person.id di Perseo)
+   * Perseo (Person.id di Perseo).
    */
   @Unique
   public Integer iId;
@@ -114,7 +113,7 @@ public class Person extends MutableModel implements Comparable<Person> {
 
   /**
    * i successivi due campi servono per la nuova relazione tra Person e Person relativa ai
-   * responsabili
+   * responsabili.
    */
   @OneToMany(mappedBy = "personInCharge")
   @OrderBy("surname")
@@ -126,13 +125,13 @@ public class Person extends MutableModel implements Comparable<Person> {
   public Person personInCharge;
 
   /**
-   * questo campo booleano serve a stabilire se una persona è un responsabile o no
+   * questo campo booleano serve a stabilire se una persona è un responsabile o no.
    */
   @Column(name = "is_person_in_charge")
   public boolean isPersonInCharge;
 
   /**
-   * relazione con i turni
+   * relazione con i turni.
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
@@ -142,58 +141,51 @@ public class Person extends MutableModel implements Comparable<Person> {
   public List<Contract> contracts = Lists.newArrayList();
 
   /**
-   * relazione con la tabella dei figli del personale
+   * relazione con la tabella dei figli del personale.
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<PersonChildren> personChildren = Sets.newHashSet();
 
   /**
-   * relazione con la nuova tabella dei person day
+   * relazione con la nuova tabella dei person day.
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonDay> personDays = Lists.newArrayList();
-  ;
 
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<CertificatedData> certificatedData = Lists.newArrayList();
-  ;
+
 
   @OneToMany(mappedBy = "admin")
   public List<MealTicket> mealTicketsAdmin = Lists.newArrayList();
-  ;
 
   /**
-   * relazione con la nuova tabella dei person_month
+   * relazione con la nuova tabella dei person_month.
    */
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonMonthRecap> personMonths = Lists.newArrayList();
-  ;
 
   /**
-   * relazione con la nuova tabella dei person_year
+   * relazione con la nuova tabella dei person_year.
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonYear> personYears = Lists.newArrayList();
-  ;
-
 
   /**
-   * relazione con la tabella Competence
+   * relazione con la tabella Competence.
    */
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Competence> competences = Lists.newArrayList();
-  ;
 
   /**
    * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
-   * una certa competenza
+   * una certa competenza.
    */
   @NotAudited
   @ManyToMany(cascade = {CascadeType.REFRESH})
   public List<CompetenceCode> competenceCode = Lists.newArrayList();
-  ;
 
   @OneToOne(mappedBy = "person")
   public PersonHourForOvertime personHourForOvertime;
@@ -257,7 +249,8 @@ public class Person extends MutableModel implements Comparable<Person> {
   @Override
   public int compareTo(Person person) {
 
-    int res = (this.surname.compareTo(person.surname) == 0) ? this.name.compareTo(person.name) : this.surname.compareTo(person.surname);
+    int res = (this.surname.compareTo(person.surname) == 0)
+        ? this.name.compareTo(person.name) : this.surname.compareTo(person.surname);
     return res;
   }
 
