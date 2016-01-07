@@ -48,5 +48,5 @@ public class VacationPeriod extends BaseModel {
   public DateInterval getDateInterval(){
     return new DateInterval(this.beginFrom, this.endTo);
   }
-
+ 
 }
