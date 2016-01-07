@@ -1,11 +1,10 @@
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import dao.VacationCodeDao;
 
 import manager.ContractManager;
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.impl.VacationsRecap;
 
 import models.Absence;
@@ -14,11 +13,8 @@ import models.VacationCode;
 import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
-import org.mockito.Mock;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 
@@ -81,7 +77,7 @@ public class VacationsRecapTest {
   }
 
   public ContractManager getContractManager() {
-    return new ContractManager(null, getVacationCodeDao(), null);
+    return new ContractManager(null, getVacationCodeDao(), null, null);
   }
 
   private VacationCodeDao getVacationCodeDao() {

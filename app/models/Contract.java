@@ -16,6 +16,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -132,10 +133,13 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
-   * Conversione della lista dei contractWorkingtimeType da Set a List.
+   * La lista ordinata dei contractWorkingTimeType.
+   * @return lista
    */
-  public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
-    return Lists.newArrayList(contractWorkingTimeType);
+  public List<ContractWorkingTimeType> getContractWorkingTimeTypeOrderedList() {
+    List<ContractWorkingTimeType> list = Lists.newArrayList(this.contractWorkingTimeType);
+    Collections.sort(list);
+    return list;
   }
 
 
