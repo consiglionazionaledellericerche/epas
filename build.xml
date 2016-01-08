@@ -27,46 +27,65 @@ Sets the play path to the build.xml directly.
     <!-- -Dplay.path=...
     <property name="play.path" value="${env.PLAY1_PATH}"/>
     -->
-	<!--
+  <!--
     <import file="${play.path}/resources/application-build.xml"/>
     -->
 
-	 <!-- APT based code generation -->
+   <!-- APT based code generation -->
 
-	<property name="src" value="${basedir}/app"/>
-	<property name="generated" value="${basedir}/app"/>
-	<property name="dst" value="${basedir}/build" />
-	<property name="lib.dir" value="${basedir}/lib"/>
-	
-	<fail unless="play.path" message="must define -Dplay.path=${PLAY_PATH}" />
+  <property name="src" value="${basedir}/app"/>
+  <property name="generated" value="${basedir}/app"/>
+  <property name="dst" value="${basedir}/build" />
+  <property name="lib.dir" value="${basedir}/lib"/>
+  <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
 
-	<path id="cp">
-		<fileset dir="${lib.dir}">
-			<include name="*.jar"/>
-		</fileset>
-		<fileset dir="${play.path}/framework/lib">
-			<include name="*.jar"/>
-		</fileset>
-		<fileset dir="${play.path}/framework">
-			<include name="play-*.jar"/>
-		</fileset>
-	</path>
+  <fail unless="play.path" message="must define -Dplay.path=${PLAY_PATH}" />
 
-	<target name="build">
-		<mkdir dir="${dst}"/>
-	    <javac destdir="${dst}" classpathref="cp" includeantruntime="false">
-	        <src path="${src}"/>
-	    	<src path="${play.path}/framework/src"/>
-	    	  <compilerarg value="-proc:only"/>
-	    	  <compilerarg value="-Aquerydsl.packageSuffix=.query"/>
-	    	  <compilerarg value="-processor"/>
-	    	  <compilerarg value="com.mysema.query.apt.jpa.JPAAnnotationProcessor"/>
-	    	  <compilerarg value="-s"/>
-	    	  <compilerarg value="${generated}"/>
-	    </javac>
-	
-	    <delete verbose="true">
-		  <fileset dir="${src}" includes="**/*.class" />
-	    </delete>
-	</target>
+  <path id="cp">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${play.path}/framework/lib">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${play.path}/framework">
+      <include name="play-*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="build">
+    <delete verbose="true">
+      <fileset dir="${src}" includes="models/**/query/*.java"/>
+      <fileset dir="${src}" includes="play/db/jpa/query/*.java"/>
+    </delete>
+    <mkdir dir="${dst}"/>
+    <javac destdir="${dst}" classpathref="cp" includeantruntime="false"
+        target="1.8" source="1.8">
+        <compilerclasspath refid="cp" />
+        <src path="${play.path}/framework/src"/>
+        <filename name="play/db/jpa/*.java"/>
+        <compilerarg value="-proc:only"/>
+        <compilerarg value="-Aquerydsl.packageSuffix=.query"/>
+        <compilerarg value="-processor"/>
+        <compilerarg value="com.mysema.query.apt.jpa.JPAAnnotationProcessor"/>
+        <compilerarg value="-s"/>
+        <compilerarg value="${generated}"/>
+    </javac>
+    <javac destdir="${dst}" classpathref="cp" includeantruntime="false"
+        target="1.8" source="1.8">
+        <compilerclasspath refid="cp" />
+        <src path="${src}" />
+        <filename name="models/**/*.java"/>
+        <compilerarg value="-proc:only"/>
+        <compilerarg value="-Aquerydsl.packageSuffix=.query"/>
+        <compilerarg value="-processor"/>
+        <compilerarg value="com.mysema.query.apt.jpa.JPAAnnotationProcessor"/>
+        <compilerarg value="-s"/>
+        <compilerarg value="${generated}"/>
+    </javac>
+
+    <delete verbose="true">
+      <fileset dir="${src}" includes="**/*.class" />
+    </delete>
+  </target>
 </project>
