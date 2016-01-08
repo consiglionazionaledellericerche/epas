@@ -1,21 +1,15 @@
 package models.query;
 
-import com.mysema.query.types.Path;
-import com.mysema.query.types.PathMetadata;
-import com.mysema.query.types.path.BooleanPath;
-import com.mysema.query.types.path.DateTimePath;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.EnumPath;
-import com.mysema.query.types.path.NumberPath;
-import com.mysema.query.types.path.PathInits;
-import com.mysema.query.types.path.SimplePath;
-import com.mysema.query.types.path.StringPath;
-
+import static com.mysema.query.types.PathMetadataFactory.*;
 import models.Stamping;
 
-import static com.mysema.query.types.PathMetadataFactory.forVariable;
 
+import com.mysema.query.types.path.*;
+
+import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -31,8 +25,6 @@ public class QStamping extends EntityPathBase<Stamping> {
     public static final QStamping stamping = new QStamping("stamping");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
-
-    public final QBadgeReader badgeReader;
 
     public final DateTimePath<org.joda.time.LocalDateTime> date = createDateTime("date", org.joda.time.LocalDateTime.class);
 
@@ -77,7 +69,6 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public QStamping(Class<? extends Stamping> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
         this.personDay = inits.isInitialized("personDay") ? new QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
         this.stampModificationType = inits.isInitialized("stampModificationType") ? new QStampModificationType(forProperty("stampModificationType")) : null;
     }
