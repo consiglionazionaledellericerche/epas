@@ -49,7 +49,7 @@ public class ReportMailer extends Mailer {
   private static final String EMAIL_SUBJECT = "report.subject";
 
   // default decenti
-  private static final String DEFAULT_EMAIL = "segnalazioni@iit.cnr.it";
+  private static final String DEFAULT_EMAIL = "segnalazioni@epas.iit.cnr.it";
   private static final String DEFAULT_SUBJECT = "Segnalazione ePAS";
 
   private static final Splitter COMMAS = Splitter.on(',').trimResults()
