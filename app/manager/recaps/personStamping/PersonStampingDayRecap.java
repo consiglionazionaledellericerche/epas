@@ -9,6 +9,8 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -35,6 +37,7 @@ import java.util.List;
  *
  * @author alessandro
  */
+@Slf4j
 public class PersonStampingDayRecap {
 
   private static final String MEALTICKET_NOT_YET = "NOT_YET";
@@ -115,7 +118,7 @@ public class PersonStampingDayRecap {
     this.personDayId = pd.id;
 
     if (pd.isToday()) {
-      System.out.println("Si aprono le danze.");
+      log.debug("Instanziato PersonStampingDayRecap relativo al giorno corrente.");
     }
 
     if (pd.isPersistent()) {
