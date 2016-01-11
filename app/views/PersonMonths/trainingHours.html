@@ -7,16 +7,18 @@
 #{title title:('Ore di formazione ' + year + ' ' + person.fullname ) /}
 
     #{alert color:'info'}
-     <p>Le ore di formazione possono essere inserite solo per il mese selezionabile.</p> 
+     <p>E' possibile aggiungere o modificare le ore di formazione del mese attuale o del
+	    mese precedente.
+	 </p> 
   	 <p>Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
   	
     #{/alert}
   	
-    <table class="table table-condensed center">
+    <table class="table table-condensed table-bordered center">
 	  <tr class="warning">
 		<th>Mese</th>
 		<th>Ore di formazione</th>
-		<th>Modifica</th>
+		<th>Aggiungi</th>
 		<th>Approvate</th>
 		
 	  </tr>
@@ -29,39 +31,34 @@
 		
 		<!-- Modifica -->
 		<td>
-			<ul class="list-group">			
 			#{list items:personMonthRecapList, as: 'pm'}
-				#{if pm != null}
-				  #{if pm.month == mese}
+				#{if pm != null && pm.month == mese}
 				    <!-- mese attuale o precedente-->	
-					#{if mese == today.getMonthOfYear()  || (mese == today.minusMonths(1).getMonthOfYear() && pm.hoursApproved == false)}		
-						
-					  <li class="list-group-item list-group-item-info" >
-					    <p>
+				    
+				    <p>
 					      <span class="label label-success">${pm.trainingHours} ore</span>
-					      <span><b>Da:</b> ${pm.fromDate?.format()}</span>
-					      <span><b>A:</b> ${pm.toDate?.format()}</span>
-					    </p>
-						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-async-modal="#defaultModal"><i class="fa fa-pencil"></i></a>
-						
-						<a href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
-					  </li>
-					#{/if}
-					<!-- mesi passati -->
-					#{else}
-					  <li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate?.format()}</u> <b>A:</b> <u>${pm.toDate?.format()}</u></li>	
-					#{/else}
+					      <span>${pm.fromDate?.format()}</span>
+					      #{if !pm.fromDate?.isEqual(pm.toDate)}
+					      - <span>${pm.toDate?.format()}</span>
+					      #{/if}
+				    
+				      #{if pm.editable }
+						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-async-modal="#defaultModal">
+						<i class="fa fa-pencil"></i></a>						
+						<a href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" 
+						   data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
+					  #{/if}
+					</p>   
 				  #{/if}
-				
-				#{/if}
 			#{/list}
-			</ul>
 		</td>
 		
 		
 		<!-- Inserimento -->
 		<td>
-			#{if mese == today.getMonthOfYear() && year == today.getYear()}
+			#{if (mese == today.getMonthOfYear() && year == today.getYear()) 
+			     || (mese == today.minusMonths(1).getMonthOfYear() && year == today.minusMonths(1).getYear())}
+			     
 				<a href="@{PersonMonths.insertTrainingHours(mese, year)}" data-async-modal="#defaultModal">Inserisci ore di formazione</a>
 			#{/if}
 			
@@ -85,11 +82,6 @@
 	  </tr>
 	  #{/list}
     </table>
-	
-	    
-  	  <a href="@{PersonMonths.insertTrainingHoursPreviousMonth()}" data-async-modal="#defaultModal">
-  	  Inserisci ore di formazione del mese precedente se non ancora approvate.</a>
-
 
 </div>
 

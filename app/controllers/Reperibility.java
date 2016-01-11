@@ -382,12 +382,12 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportYearAsPDF(int year, Long reperibilityId) {
+  public static void exportYearAsPDF(int year, Long type) {
 
     PersonReperibilityType reperibilityType =
-        personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
+        personReperibilityDayDao.getPersonReperibilityTypeById(type);
     notFoundIfNull(
-        reperibilityType, String.format("ReperibilityType id = %s doesn't exist", reperibilityId));
+        reperibilityType, String.format("ReperibilityType id = %s doesn't exist", type));
 
     // build the reperibility calendar
     List<Table<Person, Integer, String>> reperibilityMonths = Lists.newArrayList();
@@ -452,16 +452,16 @@ public class Reperibility extends Controller {
    */
   @BasicAuth
   public static void exportMonthAsPDF(
-      @Required int year, @Required int month, @Required Long reperibilityId) {
+      @Required int year, @Required int month, @Required Long type) {
 
     if (validation.hasErrors()) {
       badRequest("Parametri mancanti. " + validation.errors());
     }
 
     PersonReperibilityType reperibilityType =
-        personReperibilityDayDao.getPersonReperibilityTypeById(reperibilityId);
+        personReperibilityDayDao.getPersonReperibilityTypeById(type);
 
-    notFoundIfNull(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));
+    notFoundIfNull(String.format("ReperibilityType id = %s doesn't exist", type));
 
     final LocalDate today = LocalDate.now();
 
