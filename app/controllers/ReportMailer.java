@@ -49,7 +49,9 @@ public class ReportMailer extends Mailer {
   private static final String EMAIL_SUBJECT = "report.subject";
 
   // default decenti
-  private static final String DEFAULT_EMAIL = "epas@iit.cnr.it";
+
+  private static final String DEFAULT_EMAIL_FROM = "segnalazioni@epas.tools.iit.cnr.it";
+  private static final String DEFAULT_EMAIL_TO = "epas@iit.cnr.it";
   private static final String DEFAULT_SUBJECT = "Segnalazione ePAS";
 
   private static final Splitter COMMAS = Splitter.on(',').trimResults()
@@ -66,7 +68,7 @@ public class ReportMailer extends Mailer {
       Optional<User> user) {
 
     final List<String> dests = COMMAS.splitToList(Play.configuration
-        .getProperty(EMAIL_TO, DEFAULT_EMAIL));
+        .getProperty(EMAIL_TO, DEFAULT_EMAIL_TO));
     if (dests.isEmpty()) {
       log.error("please correct {} in application.conf", EMAIL_TO);
       return;
@@ -78,7 +80,7 @@ public class ReportMailer extends Mailer {
         && !Strings.isNullOrEmpty(user.get().person.email)) {
       setReplyTo(user.get().person.email);
     }
-    setFrom(Play.configuration.getProperty(EMAIL_FROM, DEFAULT_EMAIL));
+    setFrom(Play.configuration.getProperty(EMAIL_FROM, DEFAULT_EMAIL_FROM));
     setSubject(Play.configuration.getProperty(EMAIL_SUBJECT, DEFAULT_SUBJECT));
 
     try {
