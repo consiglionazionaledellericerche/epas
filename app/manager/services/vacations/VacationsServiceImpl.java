@@ -183,8 +183,9 @@ public class VacationsServiceImpl implements IVacationsService {
   }
   
   /**
-   * Costruisce il riepilogo ferie con il calcolo di assenze maturate e residue a oggi considerando
-   * la data di scadenza ferie anno passato della sede competente.
+   * Costruisce il riepilogo ferie con il calcolo di assenze maturate e residue a oggi 
+   * o alla fine dell'anno se passato, considerando la data di scadenza ferie anno passato 
+   * della sede competente.
    * @param year anno
    * @param contract contratto
    * @return il recap
@@ -193,6 +194,10 @@ public class VacationsServiceImpl implements IVacationsService {
   public Optional<VacationsRecap> create(int year, Contract contract) {
 
     LocalDate accruedDate = LocalDate.now();
+    
+    if (year < accruedDate.getYear()) {
+      accruedDate = new LocalDate(year, 12, 31);
+    }
 
     List<Absence> otherAbsences = Lists.newArrayList();
 

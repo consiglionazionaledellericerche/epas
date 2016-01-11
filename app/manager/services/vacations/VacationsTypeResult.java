@@ -132,6 +132,15 @@ public class VacationsTypeResult {
     }
     return null;
   }
+  
+  public boolean getExpired() {
+    LocalDate expireDate = this.vacationsRequest.getExpireDateLastYear();
+
+    if (this.vacationsRequest.getAccruedDate().isAfter(expireDate)) {
+      return true;
+    }
+    return false;
+  }
 
 }
 
