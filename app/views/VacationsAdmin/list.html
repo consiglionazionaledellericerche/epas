@@ -17,42 +17,48 @@
   #{title title:'Ferie e Permessi ' + year, administration:true /}
 </div>  
 
-<div class="container">
+<div class="container-fluid">
 
-  <table  class="table table-striped table-hover table-bordered table-condensed" datatable width="100%">
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
 		<tr>
-			<th class="col-md-3">Nome</th>
-			<th>Ferie Fatte ${year-1}</th>
-			<th>Ferie Fatte ${year}</th>
-			<th>Permessi Fatti ${year}</th>
+		    <th rowspan="2">Nome</th>
+		    <th class="warning" colspan="3">Ferie ${year-1}</th>
+		    <th class="info" colspan="5">Ferie ${year}</th>
+		    <th class="success" colspan="5">Permessi ${year}</th>
+		    <th colspan="2">Limiti</th>
+		</tr>	
+		<tr>	
+			<th class="warning">Totali</th>
+			<th class="warning">Usufruite</th>
+			<th class="warning">Residue</th>
 			
-			<th>Ferie ${year-1}<br> 
-			   #{if isVacationLastYearExpired}<span class="glyphicon glyphicon-remove" style="color: red;"></span>#{/if}
-			   #{else}<span class="glyphicon glyphicon-ok" style="color: green;"></span>#{/else}
-			</th>
+			<th class="info">Totali</th>
+			<th class="info">Maturate</th>
+			<th class="info">Usufruite</th>
+			<th class="info">Residue<br>Totali</th>
+			<th class="info">Residue<br>Maturate</th>
 			
-			<th>Ferie ${year}<br>Residue Totali
-			</th>
-			<th>Ferie ${year}<br>Residue Maturate
-			</th>
-			<th>Permessi<br>Residui Totali
-			</th>
-			<th>Permessi<br>Residui Maturati
-			</th>
-			<th>Limite <br>Iniziale
-			</th>
-			<th>Limite <br>Finale
-			</th>
+			<th class="success">Totali</th>
+			<th class="success">Maturate</th>
+			<th class="success">Usufruite</th>
+			<th class="success">Residue<br>Totali</th>
+			<th class="success">Residue<br>Maturate</th>
+			
+			
+			
+			<th>Iniziale</th>
+			<th>Finale</th>
 		</tr>
 	</thead>
 
 	<tbody>
 		#{list items:vacationsList, as:'vacationsRecap'}
 		<tr>
-			<!-- ferie e permessi fatti -->
+			<!-- ferie anno precedente -->
 			<td>${vacationsRecap.vacationsRequest.contract.person.fullname}</td>
-
+			
+			<td class="warning"><strong>${vacationsRecap.vacationsLastYear.total}</strong></td>
 			<td data-order="${vacationsRecap.vacationsLastYear.used}">
 				<a
 				href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.vacationsRequest.contract.id, 
@@ -60,7 +66,17 @@
 				data-async-modal="#defaultModal">
 					${vacationsRecap.vacationsLastYear.used} </a>
 			</td>
-
+			#{if vacationsRecap.vacationsLastYear.expired}
+			  <td class="danger">${vacationsRecap.vacationsLastYear.notYetUsedTotal}</td>
+			#{/if}#{else}
+			  <td>${vacationsRecap.vacationsLastYear.notYetUsedTotal}</td>
+			#{/else}
+			
+			
+			
+			<!-- Ferie anno corrente -->
+			<td class="info"><strong>${vacationsRecap.vacationsCurrentYear.total}</strong></td>
+			<td>${vacationsRecap.vacationsCurrentYear.accrued}</td>
 			<td data-order="${vacationsRecap.vacationsCurrentYear.used}">
 				<a
 				href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.vacationsRequest.contract.id, 
@@ -68,34 +84,36 @@
 				data-async-modal="#defaultModal">
 					${vacationsRecap.vacationsCurrentYear.used} </a>
 			</td>
-
-			<td data-order="${vacationsRecap.permissions.used}"><a
-				href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.vacationsRequest.contract.id, 
-				    vacationsRecap.vacationsRequest.year)}"
-				data-async-modal="#defaultModal"> ${vacationsRecap.permissions.used} </a></td>
-
-			<!-- residui -->
-
-			<!-- ferie anno passato -->
-			<td>${vacationsRecap.vacationsLastYear.notYetUsedTotal}</td>
-
-			<!-- ferie 2014 -->
+			
 			<td>${vacationsRecap.vacationsCurrentYear.notYetUsedTotal}</td>
 			<td>${vacationsRecap.vacationsCurrentYear.notYetUsedAccrued}</td>
 
-			<!-- permessi 2014 -->
+			<!-- Permessi anno corrente -->
+			<td class="success"><strong>${vacationsRecap.permissions.total}</strong></td>
+			<td>${vacationsRecap.permissions.accrued}</td>
+			<td data-order="permissions">
+				<a
+				href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.vacationsRequest.contract.id, 
+				    vacationsRecap.vacationsRequest.year)}"
+				data-async-modal="#defaultModal">
+					${vacationsRecap.permissions.used} </a>
+			</td>
+			
 			<td>${vacationsRecap.permissions.notYetUsedTotal}</td>
 			<td>${vacationsRecap.permissions.notYetUsedAccrued}</td>
 
+			
 			<td>
 			  #{if vacationsRecap.isActiveAfterBeginYear } 
-			    <span class="badge badge-success">${vacationsRecap.vacationsRequest.contractDateInterval.getBegin()}</span>
+			    ${vacationsRecap.vacationsRequest.contractDateInterval.getBegin().format()}
 			  #{/if}
+			  #{else}
+			    
+			  #{/else}
 			</td>
-
 			<td>
 			  #{if vacationsRecap.isExpireBeforeEndYear } 
-			    <span class="badge badge-important">${vacationsRecap.vacationsRequest.contractDateInterval.getEnd()}</span>
+			    ${vacationsRecap.vacationsRequest.contractDateInterval.getEnd().format()}
 			  #{/if}
 			</td>
 
