@@ -23,25 +23,30 @@ import org.joda.time.LocalDate;
 import java.util.List;
 
 /**
+ * Builder del riepilogo ferie e delle strutture dati annesse (i passaggi intermedi).
+ * 
  * @author alessandro
- *
  */
 public class VacationsRecapBuilder {
   
   public static final int YEAR_VACATION_UPPER_BOUND = 28;
 
   /**
-   * Costruisce il VacationRecap. 
-   * @param year
-   * @param contract
-   * @param absencesToConsider
-   * @param accruedDate
-   * @param expireDateLastYear
-   * @param expireDateCurrentYear
-   * @return
+   * Costruisce il VacationRecap. <br>
+   * La dateRecap è la data del riepilogo (tipicamente oggi) serve per: <br>
+   * - stabilire se le ferie dell'anno passato sono scadute <br>
+   * - calcolare la situazione delle maturate.
+   *  
+   * @param year anno
+   * @param contract contratto
+   * @param absencesToConsider assenze da considerare
+   * @param dateRecap data del riepilogo.  
+   * @param expireDateLastYear data scadenza ferie anno passato per l'anno precedente
+   * @param expireDateCurrentYear data scadenza ferie anno passato per l'anno corrente
+   * @return il recap.
    */
   public VacationsRecap buildVacationRecap(int year, Contract contract, 
-      List<Absence> absencesToConsider, LocalDate accruedDate, LocalDate expireDateLastYear, 
+      List<Absence> absencesToConsider, LocalDate dateRecap, LocalDate expireDateLastYear, 
       LocalDate expireDateCurrentYear) {
 
     VacationsRecap vacationsRecap = new VacationsRecap();
@@ -54,7 +59,7 @@ public class VacationsRecapBuilder {
     if (year < LocalDate.now().getYear()) {
       vacationsRecap.setExpireLastYear(true);
     } else if (year == LocalDate.now().getYear()
-            && accruedDate.isAfter(expireDateLastYear)) {
+            && dateRecap.isAfter(expireDateLastYear)) {
       vacationsRecap.setExpireLastYear(true);
     }
 
@@ -70,8 +75,6 @@ public class VacationsRecapBuilder {
     
     VacationsRecapTempData tempData = VacationsRecapTempData.builder()
         .year(year)
-        .accruedDate(accruedDate)
-        .expireDate(expireDateLastYear)
         .absencesToConsider(absencesToConsider)
         .contract(contract).build();
     
@@ -79,7 +82,7 @@ public class VacationsRecapBuilder {
         .year(year)
         .contract(contract)
         .contractDateInterval(contractDateInterval)
-        .accruedDate(Optional.fromNullable(accruedDate))
+        .accruedDate(Optional.fromNullable(dateRecap))
         .contractVacationPeriod(contract.getVacationPeriods())
         .postPartumUsed(tempData.getPostPartum())
         .expireDateLastYear(expireDateLastYear)
@@ -114,11 +117,11 @@ public class VacationsRecapBuilder {
   
   /**
    * Costruisce il risultato della richiesta per il TypeVacation specifico.
-   * @param vacationsRequest
-   * @param typeVacation
-   * @param absencesUsed
-   * @param sourced
-   * @return
+   * @param vacationsRequest richista
+   * @param typeVacation tipo assenza
+   * @param absencesUsed lista delle assenze usate
+   * @param sourced dati iniziali
+   * @return il risultato per il tipo.
    */
   private VacationsTypeResult buildVacationsTypeResult(VacationsRequest vacationsRequest, 
       TypeVacation typeVacation, ImmutableList<Absence> absencesUsed, int sourced) {
@@ -165,10 +168,12 @@ public class VacationsRecapBuilder {
   }
   
   /**
-   * Risultato per la rischiesta in vacationsTypeResult rispetto all'interval passato. 
-   * @param vacationsTypeResult
-   * @param interval
-   * @return
+   * Risultato per la richiesta in vacationsTypeResult rispetto all'interval passato. <br>
+   * Esistono tipicamente due accruedResult: quello delle assenze totali e quello delle assenze 
+   * maturate. 
+   * @param vacationsTypeResult risultato della richiesta.
+   * @param interval intervallo.
+   * @return il risultato.
    */
   private AccruedResult buildAccruedResult(VacationsTypeResult vacationsTypeResult, 
       DateInterval interval) {
@@ -196,11 +201,11 @@ public class VacationsRecapBuilder {
   
   /**
    * Costruisce il sotto risultato relativo al vacationCode per l'intervallo interval.
-   * @param parentAccruedResult
-   * @param interval
-   * @param vacationCode
-   * @param absences
-   * @return
+   * @param parentAccruedResult l'accruedResult
+   * @param interval l'intervallo del vacationPeriod
+   * @param vacationCode il codice
+   * @param absences le assenze da considerare.
+   * @return il risultato nel periodo.
    */
   private AccruedResultInPeriod buildAccruedResultInPeriod(AccruedResult parentAccruedResult,
       DateInterval interval, VacationCode vacationCode, List<Absence> absences) {
@@ -269,27 +274,28 @@ public class VacationsRecapBuilder {
     return accruedResultInPeriod;
   }
   
- /**
-  * Somma il risultato in period a accruedResult.
-  * @param accruedResult il padre
-  * @param accruedResultInPeriod il sotto-risultato da sommare
-  * @return
-  */
- private AccruedResult addResult(AccruedResult accruedResult, 
-     AccruedResultInPeriod accruedResultInPeriod) {
-   
-   accruedResult.getAccruedResultsInPeriod().add(accruedResultInPeriod);
-   accruedResult.getPostPartum().addAll(accruedResultInPeriod.getPostPartum());
-   accruedResult.setDays(accruedResult.getDays() + accruedResultInPeriod.getDays());
-   accruedResult.setAccrued(accruedResult.getAccrued() + accruedResultInPeriod.getAccrued());
-   return accruedResult;
- }
-  
- /**
-  * Aggiusta il calcolo di ferie e permessi totali.
-  * 
-  * @param accruedResult il risultato da aggiustare.
-  * @return il risultato aggiustato.
+  /**
+   * Somma il risultato in period relativo ad un vacationPeriod ad accruedResult.
+   * @param accruedResult accruedResult
+   * @param accruedResultInPeriod il sotto-risultato da sommare all'accruedResult
+   * @return l'accruedResult.
+   */
+  private AccruedResult addResult(AccruedResult accruedResult, 
+      AccruedResultInPeriod accruedResultInPeriod) {
+
+    accruedResult.getAccruedResultsInPeriod().add(accruedResultInPeriod);
+    accruedResult.getPostPartum().addAll(accruedResultInPeriod.getPostPartum());
+    accruedResult.setDays(accruedResult.getDays() + accruedResultInPeriod.getDays());
+    accruedResult.setAccrued(accruedResult.getAccrued() + accruedResultInPeriod.getAccrued());
+    return accruedResult;
+  }
+
+  /**
+   * Aggiusta il calcolo di ferie e permessi totali. <br>
+   * Si applica solo all'accruedResult delle totali.
+   * 
+   * @param accruedResult il risultato da aggiustare.
+   * @return il risultato aggiustato.
   */
   private AccruedResult adjustDecision(AccruedResult accruedResult) {
 
@@ -298,7 +304,8 @@ public class VacationsRecapBuilder {
     }
 
     // per ora i permessi non li aggiusto.
-    if (accruedResult.getVacationsResult().getTypeVacation().equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
+    if (accruedResult.getVacationsResult().getTypeVacation()
+        .equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
       return accruedResult;
     }
 

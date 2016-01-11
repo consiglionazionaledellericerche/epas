@@ -71,7 +71,6 @@ public class VacationsTypeResult {
   
   /**
    * Rimanenti maturate.
-   * @return
    */
   public Integer getNotYetUsedAccrued() {
     return this.getAccrued() - this.getUsed();
