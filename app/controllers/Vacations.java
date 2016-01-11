@@ -7,8 +7,8 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.User;
@@ -56,10 +56,10 @@ public class Vacations extends Controller {
       show(lastActiveMonth.getYear());
     }
 
-    List<IVacationsRecap> vacationsRecapList = Lists.newArrayList();
+    List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
 
     for (Contract contract : contractList) {
-      Optional<IVacationsRecap> vacationsRecap;
+      Optional<VacationsRecap> vacationsRecap;
 
       vacationsRecap = vacationsService.create(year, contract);
 
@@ -88,11 +88,11 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract.get());
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
-    IVacationsRecap vacationsRecap = vr.get();
+    VacationsRecap vacationsRecap = vr.get();
 
     boolean activeVacationCurrentYear = true;
 
@@ -117,11 +117,11 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract.get());
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
-    IVacationsRecap vacationsRecap = vr.get();
+    VacationsRecap vacationsRecap = vr.get();
 
     boolean activeVacationLastYear = true;
 
@@ -145,11 +145,11 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract.get());
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
-    IVacationsRecap vacationsRecap = vr.get();
+    VacationsRecap vacationsRecap = vr.get();
 
     boolean activePermission = true;
 

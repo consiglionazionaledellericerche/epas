@@ -1,4 +1,4 @@
-package manager.services.vacations.impl;
+package manager.services.vacations;
 
 import lombok.Builder;
 
@@ -237,7 +237,7 @@ public class AccruedConverter {
     if (days >= 226 && days <= 315) {
       permissionDays = 3;
     }
-    if (days >= 316 && days <= 365) {
+    if (days >= 316 && days <= 366) {
       permissionDays = 4;
     }
     return permissionDays;
@@ -256,9 +256,9 @@ public class AccruedConverter {
     if (days >= 136 && days <= 315) {
       permissionDays = 2;
     }
-    if (days >= 316 && days <= 365) {
+    if (days >= 316 && days <= 366) {
       permissionDays = 3;
-    }
+    } 
     return permissionDays;
   }
 

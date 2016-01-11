@@ -28,13 +28,10 @@
         <td>${vacationsRecap.vacationsLastYear.total} (${vacationsRecap.vacationsLastYear.accrued})</td>
         <!-- utilizzate -->
         <td>
-		  #{if vacationsRecap.vacationsLastYear.used != 0 } 
            <a href="@{Vacations.vacationsLastYear(vacationsRecap.vacationsRequest.year)}" 
               data-async-modal="#defaultModal">
 			${vacationsRecap.vacationsLastYear.used}
 		  </a>
-		  #{/if}
-		  #{else} 0 #{/else}     
 	    </td>
 	    <!-- residue (maturate) -->
         <td>${vacationsRecap.vacationsLastYear.notYetUsedTotal} 
@@ -50,13 +47,10 @@
         <td>${vacationsRecap.vacationsCurrentYear.total} (${vacationsRecap.vacationsCurrentYear.accrued})</td>
         <!-- utilizzate -->
         <td>
-		  #{if vacationsRecap.vacationsCurrentYear.used != 0 } 
            <a href="@{Vacations.vacationsCurrentYear(vacationsRecap.vacationsRequest.year)}" 
               data-async-modal="#defaultModal">
 			${vacationsRecap.vacationsCurrentYear.used}
 		  </a>
-		  #{/if}
-		  #{else} 0 #{/else}     
 	    </td>
 	    <!-- residue (maturate) -->
         <td>${vacationsRecap.vacationsCurrentYear.notYetUsedTotal} 
@@ -83,13 +77,10 @@
         <td>${vacationsRecap.permissions.total} (${vacationsRecap.permissions.accrued})</td>
         <!-- utilizzate -->
         <td>
-		  #{if vacationsRecap.permissions.used != 0 } 
            <a href="@{Vacations.permissionCurrentYear(vacationsRecap.vacationsRequest.year)}" 
               data-async-modal="#defaultModal">
 			${vacationsRecap.permissions.used}
 		  </a>
-		  #{/if}
-		  #{else} 0 #{/else}     
 	    </td>
 	    <!-- residue (maturate) -->
         <td>${vacationsRecap.permissions.notYetUsedTotal} 

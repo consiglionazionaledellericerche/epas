@@ -15,8 +15,8 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.SecureManager;
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.Office;
@@ -79,7 +79,7 @@ public class VacationsAdmin extends Controller {
 
     //List<Person> personList = simpleResults.paginated(page).getResults();
 
-    List<IVacationsRecap> vacationsList = Lists.newArrayList();
+    List<VacationsRecap> vacationsList = Lists.newArrayList();
 
     List<Contract> contractsWithVacationsProblems = Lists.newArrayList();
 
@@ -96,7 +96,7 @@ public class VacationsAdmin extends Controller {
           continue;
         }
 
-        Optional<IVacationsRecap> vr = vacationsService.create(year, contract);
+        Optional<VacationsRecap> vr = vacationsService.create(year, contract);
 
         if (vr.isPresent()) {
           vacationsList.add(vr.get());
@@ -128,11 +128,11 @@ public class VacationsAdmin extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
-    IVacationsRecap vacationsRecap = vr.get();
+    VacationsRecap vacationsRecap = vr.get();
 
     boolean activeVacationCurrentYear = true;
 
@@ -151,11 +151,11 @@ public class VacationsAdmin extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
-    IVacationsRecap vacationsRecap = vr.get();
+    VacationsRecap vacationsRecap = vr.get();
 
     boolean activeVacationLastYear = true;
 
@@ -175,11 +175,11 @@ public class VacationsAdmin extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<IVacationsRecap> vr = vacationsService.create(anno, contract);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
-    IVacationsRecap vacationsRecap = vr.get();
+    VacationsRecap vacationsRecap = vr.get();
 
     boolean activePermission = true;
 

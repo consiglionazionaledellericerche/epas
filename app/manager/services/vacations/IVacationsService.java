@@ -27,7 +27,7 @@ public interface IVacationsService {
    * @param contract contratto
    * @return il recap
    */
-  Optional<IVacationsRecap> create(int year, Contract contract);
+  Optional<VacationsRecap> create(int year, Contract contract);
   
   /**
    * Costruisce il riepilogo ferie alla fine del mese con il calcolo delle assenze 
@@ -38,7 +38,7 @@ public interface IVacationsService {
    * @param contract contratto
    * @return il recap
    */
-  Optional<IVacationsRecap> createEndMonth(int year, int month, Contract contract);
+  Optional<VacationsRecap> createEndMonth(int year, int month, Contract contract);
   
   /**
    * Il primo codice utilizzabile nella data. Ordine: 31, 32, 94.
