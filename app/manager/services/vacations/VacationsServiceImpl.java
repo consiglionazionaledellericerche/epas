@@ -1,4 +1,4 @@
-package manager.services.vacations.impl;
+package manager.services.vacations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -15,8 +15,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import manager.ConfYearManager;
 import manager.cache.AbsenceTypeManager;
-import manager.services.vacations.IVacationsRecap;
-import manager.services.vacations.IVacationsService;
 
 import models.Absence;
 import models.AbsenceType;
@@ -37,7 +35,7 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
-public class VacationsService implements IVacationsService {
+public class VacationsServiceImpl implements IVacationsService {
 
   private final AbsenceDao absenceDao;
   private final ContractDao contractDao;
@@ -46,15 +44,18 @@ public class VacationsService implements IVacationsService {
   private final AbsenceTypeManager absenceTypeManager;
   private final ConfYearManager confYearManager;
   private final IWrapperFactory wrapperFactory;
+  
+  private final VacationsRecapBuilder vacationsRecapImpl;
 
   @Inject
-  public VacationsService(
+  public VacationsServiceImpl(
       AbsenceDao absenceDao,
       AbsenceTypeDao absenceTypeDao,
       ContractDao contractDao,
       AbsenceTypeManager absenceTypeManager,
       ConfYearManager confYearManager,
-      IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory,
+      VacationsRecapBuilder vacationsRecapImpl) {
 
     this.absenceDao = absenceDao;
     this.absenceTypeDao = absenceTypeDao;
@@ -62,6 +63,7 @@ public class VacationsService implements IVacationsService {
     this.absenceTypeManager = absenceTypeManager;
     this.confYearManager = confYearManager;
     this.wrapperFactory = wrapperFactory;
+    this.vacationsRecapImpl = vacationsRecapImpl;
   }
 
   /**
@@ -74,23 +76,23 @@ public class VacationsService implements IVacationsService {
    * @param dateAsToday per ignorare tutto ciò che viene dopo.
    * @return il recap
    */
-  private Optional<IVacationsRecap> create(int year, Contract contract,
+  private Optional<VacationsRecap> create(int year, Contract contract,
       LocalDate accruedDate, List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
 
     if (contract == null || accruedDate == null) {
-      return Optional.<IVacationsRecap>absent();
+      return Optional.<VacationsRecap>absent();
     }
 
     if (wrContract.getValue().vacationPeriods == null
         || wrContract.getValue().vacationPeriods.isEmpty()) {
-      return Optional.<IVacationsRecap>absent();
+      return Optional.<VacationsRecap>absent();
     }
 
     // Controllo della dipendenza con i riepiloghi
     if (!wrContract.hasMonthRecapForVacationsRecap(year)) {
-      return Optional.<IVacationsRecap>absent();
+      return Optional.<VacationsRecap>absent();
     }
 
     Preconditions.checkState(accruedDate.getYear() <= year);
@@ -108,14 +110,8 @@ public class VacationsService implements IVacationsService {
         wrContract.getContractDatabaseInterval(), dateAsToday);
     absencesToConsider.addAll(otherAbsences);
 
-    IVacationsRecap vacationRecap = VacationsRecap.builder()
-        .year(year)
-        .contract(contract)
-        .absencesToConsider(absencesToConsider)
-        .accruedDate(accruedDate)
-        .expireDateLastYear(expireDateLastYear)
-        .expireDateCurrentYear(expireDateCurrentYear)
-        .build();
+    VacationsRecap vacationRecap = vacationsRecapImpl.buildVacationRecap(year, contract, 
+        absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
 
     return Optional.fromNullable(vacationRecap);
   }
@@ -183,7 +179,7 @@ public class VacationsService implements IVacationsService {
    * @return il recap
    */
   @Override
-  public Optional<IVacationsRecap> create(int year, Contract contract) {
+  public Optional<VacationsRecap> create(int year, Contract contract) {
 
     LocalDate accruedDate = LocalDate.now();
 
@@ -202,7 +198,7 @@ public class VacationsService implements IVacationsService {
    * @return il recap
    */
   @Override
-  public Optional<IVacationsRecap> createEndMonth(int year, int month, Contract contract) {
+  public Optional<VacationsRecap> createEndMonth(int year, int month, Contract contract) {
 
     LocalDate endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
     List<Absence> otherAbsences = Lists.newArrayList();
@@ -222,25 +218,25 @@ public class VacationsService implements IVacationsService {
       List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
+    Optional<VacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
 
     if (!vr.isPresent()) {
       return null;
     }
 
-    if (vr.get().getVacationsLastYear().getNotYetUsedAccrued() > 0) {
+    if (vr.get().getVacationsLastYear().getNotYetUsedTakeable() > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
     }
 
-    if (vr.get().getPermissions().getNotYetUsedAccrued() > 0)  {
+    if (vr.get().getPermissions().getNotYetUsedTakeable() > 0)  {
 
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
     }
 
-    if (vr.get().getVacationsCurrentYear().getNotYetUsedAccrued() > 0) {
+    if (vr.get().getVacationsCurrentYear().getNotYetUsedTakeable() > 0) {
       return absenceTypeDao.getAbsenceTypeByCode(
               AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
     }
@@ -258,13 +254,13 @@ public class VacationsService implements IVacationsService {
   public boolean canTake32(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
+    Optional<VacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
     if (!vr.isPresent()) {
       return false;
     }
 
-    return (vr.get().getVacationsCurrentYear().getNotYetUsedAccrued() > 0);
+    return (vr.get().getVacationsCurrentYear().getNotYetUsedTakeable() > 0);
 
   }
 
@@ -278,14 +274,14 @@ public class VacationsService implements IVacationsService {
   public boolean canTake31(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
+    Optional<VacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
     if (!vr.isPresent()) {
       return false;
     }
 
 
-    return (vr.get().getVacationsLastYear().getNotYetUsedAccrued() > 0);
+    return (vr.get().getVacationsLastYear().getNotYetUsedTakeable() > 0);
   }
 
   /**
@@ -298,7 +294,7 @@ public class VacationsService implements IVacationsService {
   public boolean canTake37(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     if (date.getYear() == LocalDate.now().getYear()) {
-      Optional<IVacationsRecap> vacationsRecap = create(date.getYear(),
+      Optional<VacationsRecap> vacationsRecap = create(date.getYear(),
           contractDao.getContract(LocalDate.now(), person), LocalDate.now(), otherAbsences,
           Optional.<LocalDate>absent());
 
@@ -323,13 +319,13 @@ public class VacationsService implements IVacationsService {
   public boolean canTake94(Person person, LocalDate date, List<Absence> otherAbsences) {
 
     Contract contract = contractDao.getContract(date, person);
-    Optional<IVacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
+    Optional<VacationsRecap> vr = create(date.getYear(), contract, date, otherAbsences,
         Optional.<LocalDate>absent());
     if (!vr.isPresent()) {
       return false;
     }
 
-    return (vr.get().getPermissions().getNotYetUsedAccrued() > 0);
+    return (vr.get().getPermissions().getNotYetUsedTakeable() > 0);
 
   }
 

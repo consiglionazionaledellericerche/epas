@@ -145,6 +145,10 @@ public class DateUtility {
    * @return true se la data ricade nell'intervallo estremi compresi
    */
   public static boolean isDateIntoInterval(final LocalDate date, final DateInterval interval) {
+    
+    if (interval == null) {
+      return false;
+    }
     LocalDate dateToCheck = date;
     if (dateToCheck == null) {
       dateToCheck = MAX_DATE;

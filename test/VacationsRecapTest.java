@@ -5,7 +5,8 @@ import static org.mockito.Mockito.when;
 import dao.VacationCodeDao;
 
 import manager.ContractManager;
-import manager.services.vacations.impl.VacationsRecap;
+import manager.services.vacations.VacationsRecap;
+import manager.services.vacations.VacationsRecapBuilder;
 
 import models.Absence;
 import models.Contract;
@@ -34,21 +35,23 @@ public class VacationsRecapTest {
     final LocalDate accruedDate = new LocalDate(2015,12,23);
     final LocalDate expireDateLastYear = new LocalDate(2015,8,31);
     final LocalDate expireDateCurrentYear = new LocalDate(2016,8,31);
-
-    final VacationsRecap vacationRecap = VacationsRecap.builder()
-        .year(2015)
-        .contract(getLucchesiContract())
-        .absencesToConsider(absencesToConsider)
-        .accruedDate(accruedDate)
-        .expireDateLastYear(expireDateLastYear)
-        .expireDateCurrentYear(expireDateCurrentYear)
-        .build();
+    
+    final VacationsRecap vacationRecap = new VacationsRecapBuilder()
+        .buildVacationRecap(2015, getLucchesiContract(), absencesToConsider,
+            accruedDate, expireDateLastYear, expireDateCurrentYear);
+//        .year(2015)
+//        .contract(getLucchesiContract())
+//        .absencesToConsider(absencesToConsider)
+//        .accruedDate(accruedDate)
+//        .expireDateLastYear(expireDateLastYear)
+//        .expireDateCurrentYear(expireDateCurrentYear)
+//        .build();
 
 
     assertThat(vacationRecap.getVacationsLastYear().getTotal()).isEqualTo(28);
     assertThat(vacationRecap.getVacationsLastYear().getUsed()).isEqualTo(0);
     assertThat(vacationRecap.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(28);
-    assertThat(vacationRecap.getVacationsLastYear().getNotYetUsedAccrued()).isEqualTo(0);
+    assertThat(vacationRecap.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
   }
 
   private Contract getLucchesiContract() {

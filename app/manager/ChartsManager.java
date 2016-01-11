@@ -16,8 +16,8 @@ import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Absence;
 import models.CompetenceCode;
@@ -421,7 +421,7 @@ public class ChartsManager {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<IVacationsRecap> vr = vacationsService.create(LocalDate.now().getYear(), 
+    Optional<VacationsRecap> vr = vacationsService.create(LocalDate.now().getYear(), 
         contract.get());
 
     Preconditions.checkState(vr.isPresent());

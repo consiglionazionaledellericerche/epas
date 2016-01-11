@@ -16,8 +16,8 @@ import lombok.Data;
 
 import manager.PersonManager;
 import manager.SecureManager;
-import manager.services.vacations.IVacationsRecap;
 import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -135,7 +135,7 @@ public class MonthRecaps extends Controller {
 
       for (Contract contract : wrPerson.getMonthContracts(year, month)) {
         
-        Optional<IVacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
+        Optional<VacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
 
         CustomRecapDTO danilaDto = new CustomRecapDTO();
         danilaDto.ferieAnnoCorrente = vr.get().getVacationsCurrentYear().getNotYetUsedTotal();
