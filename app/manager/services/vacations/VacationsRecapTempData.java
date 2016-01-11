@@ -37,8 +37,13 @@ public class VacationsRecapTempData {
   private int sourcePermissionUsed = 0;
   
   @Builder
-  protected VacationsRecapTempData(int year, LocalDate accruedDate, LocalDate expireDate,
-      List<Absence> absencesToConsider, Contract contract) { 
+  /**
+   * 
+   * @param year
+   * @param absencesToConsider
+   * @param contract
+   */
+  protected VacationsRecapTempData(int year, List<Absence> absencesToConsider, Contract contract) { 
 
     // TODO: filtrare otherAbsencs le sole nell'intervallo[dateFrom, dateTo]
 

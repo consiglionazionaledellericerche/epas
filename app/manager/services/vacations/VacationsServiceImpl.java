@@ -45,8 +45,18 @@ public class VacationsServiceImpl implements IVacationsService {
   private final ConfYearManager confYearManager;
   private final IWrapperFactory wrapperFactory;
   
-  private final VacationsRecapBuilder vacationsRecapImpl;
+  private final VacationsRecapBuilder vacationsRecapBuilder;
 
+  /**
+   * Costruttore.
+   * @param absenceDao absenceDao
+   * @param absenceTypeDao absenceTypeDao
+   * @param contractDao contractDao
+   * @param absenceTypeManager absenceTypeManager
+   * @param confYearManager confYearManager
+   * @param wrapperFactory wrapperFactory
+   * @param vacationsRecapImpl vacationsRecapImpl
+   */
   @Inject
   public VacationsServiceImpl(
       AbsenceDao absenceDao,
@@ -63,65 +73,15 @@ public class VacationsServiceImpl implements IVacationsService {
     this.absenceTypeManager = absenceTypeManager;
     this.confYearManager = confYearManager;
     this.wrapperFactory = wrapperFactory;
-    this.vacationsRecapImpl = vacationsRecapImpl;
+    this.vacationsRecapBuilder = vacationsRecapImpl;
   }
-
-  /**
-   * Costruisce il riepilogo ferie.
-   * @param year anno
-   * @param contract contratto
-   * @param accruedDate data di maturazione
-   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
-   * @param otherAbsences altre assenze extra db.
-   * @param dateAsToday per ignorare tutto ciò che viene dopo.
-   * @return il recap
-   */
-  private Optional<VacationsRecap> create(int year, Contract contract,
-      LocalDate accruedDate, List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
-
-    IWrapperContract wrContract = wrapperFactory.create(contract);
-
-    if (contract == null || accruedDate == null) {
-      return Optional.<VacationsRecap>absent();
-    }
-
-    if (wrContract.getValue().vacationPeriods == null
-        || wrContract.getValue().vacationPeriods.isEmpty()) {
-      return Optional.<VacationsRecap>absent();
-    }
-
-    // Controllo della dipendenza con i riepiloghi
-    if (!wrContract.hasMonthRecapForVacationsRecap(year)) {
-      return Optional.<VacationsRecap>absent();
-    }
-
-    Preconditions.checkState(accruedDate.getYear() <= year);
-    //    if (accruedDate.getYear() > year) {
-    //      Preconditions.checkState(expression);
-    //      // FIXME: deve essere il chiamante a non passare la data di oggi
-    //      // e qui la inizializzo in modo appropriato.
-    //      accruedDate = new LocalDate(year, 12, 31);
-    //    }
-
-    LocalDate expireDateLastYear = vacationsLastYearExpireDate(year, contract.person.office);
-    LocalDate expireDateCurrentYear = vacationsLastYearExpireDate(year + 1, contract.person.office);
-
-    List<Absence> absencesToConsider = absenceToConsider(wrContract.getValue().person, year,
-        wrContract.getContractDatabaseInterval(), dateAsToday);
-    absencesToConsider.addAll(otherAbsences);
-
-    VacationsRecap vacationRecap = vacationsRecapImpl.buildVacationRecap(year, contract, 
-        absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
-
-    return Optional.fromNullable(vacationRecap);
-  }
-
+  
   /**
    * Preleva dal db le assenze da considerare per la costruzione del riepilogo ferie dell'anno year.
    * Se dateAsToday è popolato ignora tutte le assenze fatte (sia ferie/permessi che postPartum)
    * prese dopo tale data.
    */
-  public List<Absence> absenceToConsider(Person person, int year,
+  private List<Absence> absenceToConsider(Person person, int year,
       DateInterval contractDatabaseInterval, Optional<LocalDate> dateAsToday) {
 
     // Gli intervalli su cui predere le assenze nel db
@@ -171,6 +131,57 @@ public class VacationsServiceImpl implements IVacationsService {
     return absencesForVacationsRecap;
   }
 
+
+  /**
+   * Costruisce il riepilogo ferie.
+   * @param year anno
+   * @param contract contratto
+   * @param accruedDate data di maturazione
+   * @param considerExpireLastYear se considerare la scadenza delle ferie nell'anno.
+   * @param otherAbsences altre assenze extra db.
+   * @param dateAsToday per ignorare tutto ciò che viene dopo.
+   * @return il recap
+   */
+  private Optional<VacationsRecap> create(int year, Contract contract,
+      LocalDate accruedDate, List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
+
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+
+    if (contract == null || accruedDate == null) {
+      return Optional.<VacationsRecap>absent();
+    }
+
+    if (wrContract.getValue().vacationPeriods == null
+        || wrContract.getValue().vacationPeriods.isEmpty()) {
+      return Optional.<VacationsRecap>absent();
+    }
+
+    // Controllo della dipendenza con i riepiloghi
+    if (!wrContract.hasMonthRecapForVacationsRecap(year)) {
+      return Optional.<VacationsRecap>absent();
+    }
+
+    Preconditions.checkState(accruedDate.getYear() <= year);
+    //    if (accruedDate.getYear() > year) {
+    //      Preconditions.checkState(expression);
+    //      // FIXME: deve essere il chiamante a non passare la data di oggi
+    //      // e qui la inizializzo in modo appropriato.
+    //      accruedDate = new LocalDate(year, 12, 31);
+    //    }
+
+    LocalDate expireDateLastYear = vacationsLastYearExpireDate(year, contract.person.office);
+    LocalDate expireDateCurrentYear = vacationsLastYearExpireDate(year + 1, contract.person.office);
+
+    List<Absence> absencesToConsider = absenceToConsider(wrContract.getValue().person, year,
+        wrContract.getContractDatabaseInterval(), dateAsToday);
+    absencesToConsider.addAll(otherAbsences);
+
+    VacationsRecap vacationRecap = vacationsRecapBuilder.buildVacationRecap(year, contract, 
+        absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
+
+    return Optional.fromNullable(vacationRecap);
+  }
+  
   /**
    * Costruisce il riepilogo ferie con il calcolo di assenze maturate e residue a oggi considerando
    * la data di scadenza ferie anno passato della sede competente.
@@ -188,6 +199,8 @@ public class VacationsServiceImpl implements IVacationsService {
     return create(year, contract, accruedDate, otherAbsences, Optional.<LocalDate>absent());
   }
 
+  
+
   /**
    * Costruisce il riepilogo ferie alla fine del mese con il calcolo delle assenze
    * maturate e residue fino a quel momento (ignorando le eventuali assenze prese successivamente).
@@ -204,8 +217,6 @@ public class VacationsServiceImpl implements IVacationsService {
     List<Absence> otherAbsences = Lists.newArrayList();
     return create(year, contract, endMonth, otherAbsences, Optional.fromNullable(endMonth));
   }
-
-
 
   /**
    * Il primo codice utilizzabile nella data. Ordine: 31, 32, 94.
