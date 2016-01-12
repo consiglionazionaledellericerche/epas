@@ -107,13 +107,19 @@ public class VacationsAdmin extends Controller {
       }
     }
 
-    LocalDate expireDate = vacationsService.vacationsLastYearExpireDate(year, office);
+    boolean isVacationLastYearExpired = vacationsService.isVacationsLastYearExpired(year, 
+        vacationsService.vacationsLastYearExpireDate(year, office));
+    
+    boolean isVacationCurrentYearExpired = vacationsService.isVacationsLastYearExpired(year + 1,
+        vacationsService.vacationsLastYearExpireDate(year+1, office));
+    
+    boolean isPermissionCurrentYearExpired = false;
+    if (new LocalDate(year,12,31).isBefore(LocalDate.now())) {
+      isPermissionCurrentYearExpired = true;
+    }
 
-    boolean isVacationLastYearExpired = vacationsService
-        .isVacationsLastYearExpired(year, expireDate);
-
-    render(vacationsList, isVacationLastYearExpired,
-            contractsWithVacationsProblems, year, offices, office);
+    render(vacationsList, isVacationLastYearExpired, isVacationCurrentYearExpired, 
+        isPermissionCurrentYearExpired, contractsWithVacationsProblems, year, offices, office);
   }
 
   /**

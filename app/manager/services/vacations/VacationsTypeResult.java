@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import it.cnr.iit.epas.DateUtility;
 
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,8 +37,15 @@ public class VacationsTypeResult {
   //DATI OUTPUT
   private AccruedResult totalResult;
   private AccruedResult accruedResult;
-  private LocalDate expire;
   
+  private boolean isExpired = false;
+  
+  private LocalDate lowerLimit;
+  private LocalDate upperLimit;
+  
+  private boolean isContractLowerLimit = false;
+  private boolean isContractUpperLimit = false;
+ 
   /**
    * Numero di assenze usate.
    */
@@ -131,15 +137,6 @@ public class VacationsTypeResult {
       return endYear;
     }
     return null;
-  }
-  
-  public boolean getExpired() {
-    LocalDate expireDate = this.vacationsRequest.getExpireDateLastYear();
-
-    if (this.vacationsRequest.getAccruedDate().isAfter(expireDate)) {
-      return true;
-    }
-    return false;
   }
 
 }

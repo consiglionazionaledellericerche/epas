@@ -33,20 +33,6 @@ public class VacationsRecap {
    * Risultato permessi anno corrente.
    */
   private VacationsTypeResult permissions;
-
-  /**
-   * True se le ferie dell'anno passato sono scadute.
-   */
-  private boolean isExpireLastYear = false;
-
-  /**
-   * True se il contratto scade prima della fine dell'anno.
-   */
-  private boolean isExpireBeforeEndYear = false;
-
-  /**
-   * True se il contratto inizia dopo l'inizio dell'anno.
-   */
-  private boolean isActiveAfterBeginYear = false;
+  
 
 }

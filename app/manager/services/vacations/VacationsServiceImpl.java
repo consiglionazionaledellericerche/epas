@@ -161,7 +161,7 @@ public class VacationsServiceImpl implements IVacationsService {
       return Optional.<VacationsRecap>absent();
     }
 
-    Preconditions.checkState(accruedDate.getYear() <= year);
+    //Preconditions.checkState(accruedDate.getYear() <= year);
     //    if (accruedDate.getYear() > year) {
     //      Preconditions.checkState(expression);
     //      // FIXME: deve essere il chiamante a non passare la data di oggi
@@ -195,9 +195,10 @@ public class VacationsServiceImpl implements IVacationsService {
 
     LocalDate accruedDate = LocalDate.now();
     
-    if (year < accruedDate.getYear()) {
-      accruedDate = new LocalDate(year, 12, 31);
-    }
+    
+//    if (year < accruedDate.getYear()) {
+//      accruedDate = new LocalDate(year, 12, 31);
+//    }
 
     List<Absence> otherAbsences = Lists.newArrayList();
 
@@ -309,19 +310,18 @@ public class VacationsServiceImpl implements IVacationsService {
    */
   public boolean canTake37(Person person, LocalDate date, List<Absence> otherAbsences) {
 
-    if (date.getYear() == LocalDate.now().getYear()) {
-      Optional<VacationsRecap> vacationsRecap = create(date.getYear(),
-          contractDao.getContract(LocalDate.now(), person), LocalDate.now(), otherAbsences,
-          Optional.<LocalDate>absent());
+    Optional<VacationsRecap> vacationsRecap = create(date.getYear(),
+        contractDao.getContract(LocalDate.now(), person), date, otherAbsences,
+        Optional.<LocalDate>absent());
 
-      if (vacationsRecap.isPresent()) {
-        int remaining37 = vacationsRecap.get().getVacationsLastYear().getNotYetUsedTotal();
-        if (remaining37 > 0) {
-          //37 disponibile
-          return true;
-        }
+    if (vacationsRecap.isPresent()) {
+      int remaining37 = vacationsRecap.get().getVacationsLastYear().getNotYetUsedTotal();
+      if (remaining37 > 0) {
+        //37 disponibile
+        return true;
       }
     }
+
     return false;
   }
 
