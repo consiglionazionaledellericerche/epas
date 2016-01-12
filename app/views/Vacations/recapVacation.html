@@ -28,9 +28,10 @@
  
    #{tabs}
     
-    #{tabItem id:'infoTot', title:'Informazioni Giorni Totali', active:true /}
-    #{tabItem id:'infoAcc', title:'Informazioni Giorni Maturati' /}
+    #{tabItem id:'infoTot', title:'Riepilogo', active:true /}
     #{tabItem id:'date', title:'Date Utilizzo' /}
+    #{tabItem id:'calcTot', title:'Calcolo Giorni Totali' /}
+    #{tabItem id:'calcAcc', title:'Calcolo Giorni Maturati' /}
     
   
   #{/tabs}
@@ -75,18 +76,58 @@
 	 #{/tabContentItem}  
 	   
 	 #{tabContentItem id:'infoTot', active:true}
-		 #{alert color:'info'}
-		   <p>Per l'anno <strong>${recapYear}</strong> la persona dispone di <strong>${recap.total}</strong> giorni totali 
-		      di cui <strong>${recap.used}</strong> usufruiti
-		      e <strong>${recap.notYetUsedTotal}</strong> rimanenti
-		      #{if recap.notYetUsedTotal > 0 }
-	            #{if recap.expireDate }
-	              da utilizzare entro il <strong>${recap.expireDate?.format()}</strong>
-	            #{/if}
-	          #{/if}
-	        </p>
-		 #{/alert}
-		 <p><strong>Calcolo dei giorni totali</strong></p>
+	 
+		 <div class="col-md-6 col-md-offset-3">
+		   <table class="table">
+		     <tr>
+		       <td><strong>Totali</strong></td>
+		       <td>${recap.total}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Maturate</strong></td>
+		       <td>${recap.accrued}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Usate</strong></td>
+		       <td>${recap.used}</td>
+		     </tr>
+		   </table>
+	   </div>
+	   
+	   <div class="col-md-12">
+	   #{alert color:'info'}
+	   <p>Le assenze <strong>Prendibili</strong> sono le assenze maturate che il dipendente può effettivamente utilizzare in questo
+	   momento.</p>
+	      <p>Le assenze <strong>Rimanenti</strong> sono tutte le assenze (maturate e non) residue per il dipendente.</p>
+	   #{/alert}
+	   </div>
+	   
+	   <div class="col-md-6 col-md-offset-3">
+		   <table class="table">
+		     <tr>
+		       <td><strong>Prendibili</strong></td>
+		       <td>${recap.notYetUsedTakeable}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Rimanenti</strong></td>
+		       <td>${recap.notYetUsedTotal}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Limite Massimo Utilizzo</strong></td>
+		       <td>${recap.expireDate?.format()}</td>
+		     </tr>
+		   </table>
+	   </div>
+	   
+	   
+    #{/tabContentItem}
+    
+    #{tabContentItem id:'calcTot'}
+    
+       #{alert color:'info'}
+	     <p>Sono stati calcolati <strong>${recap.total}</strong> giorni totali.</p>
+	   #{/alert}
+	   
 	     #{list items:recap.totalResult.accruedResultsInPeriod, as:'accruedResultInPeriod'}
 	       #{if accruedResultInPeriod.interval != null}
 	       <table class="table table-condensed">
@@ -128,41 +169,58 @@
 	       </table>
 	       #{/if}
         #{/list}
-        
-	    *{    
-	      <p>Intervallo: Dal <strong>${recap.totalResult.interval.begin.format()}</strong> al <strong>${recap.totalResult.interval.end.format()}</strong></p>
-	      <p>Giorni Totali: <strong>${recap.totalResult.days + recap.totalResult.postPartum.size()}</strong></p>
-	      <p>Giorni PostPartum: <strong>${recap.totalResult.postPartum.size()}</strong></p>
-      	  <p>Giorni Considerati: <strong>${recap.totalResult.days}</strong></p>
-      	  <p>Giorni Calcolati: <strong>${recap.totalResult.accrued}</strong></p>
-      	  <p>Aggiustamento: <strong></strong></p>
-
-        }*
-        
+    
     #{/tabContentItem}
     
-    #{tabContentItem id:'infoAcc'}
+    #{tabContentItem id:'calcAcc'}
        #{alert color:'info'}
-	     <strong>Riepilogo Giorni Maturati</strong>
+	     <p>Sono stati calcolati <strong>${recap.accrued}</strong> giorni maturati.</p>
 	   #{/alert}
 	   
-	      <p>Maturate: <strong>${recap.accrued}</strong></p>
-	      <p>Usufruiti: <strong>${recap.used}</strong></p>
-	      <p>Rimanenti: <strong>${recap.notYetUsedAccrued}</strong>
-	      #{if recap.notYetUsedTotal > 0 }
-	        #{if recap.expireDate }
-	          Da utilizzare entro il <strong>${recap.expireDate?.format()}</strong></p>
-	        #{/if}
-	      #{/if}
+	     #{list items:recap.accruedResult.accruedResultsInPeriod, as:'accruedResultInPeriod'}
+	       #{if accruedResultInPeriod.interval != null}
+	       <table class="table table-condensed">
+	         <tr>
+	           <td>Piano Ferie</td>
+	           <td>${accruedResultInPeriod.vacationCode.description}</td>
+	         </tr>
+	         <tr>
+	           <td>Intervallo</td>
+	           <td>Dal <strong>${accruedResultInPeriod.interval.begin.format()}</strong> al <strong>${accruedResultInPeriod.interval.end.format()}</strong></td>
+	         </tr>
+	         
 
-		  #{if recap.sourced > 0}
-	        <div class="alert alert-success">
-				<p><strong>${recap.sourced}</strong> giorni utilizzati sono stati definiti da
-				da inizializzazione ePAS.</p>
-			</div>	
-		  #{/if}
-    
+	         #{if accruedResultInPeriod.postPartum.size() > 0 }
+	         <tr>
+	           <td>Giorni nell'intervallo</td>
+	           <td><strong>+ ${accruedResultInPeriod.days + accruedResultInPeriod.postPartum.size()}</strong></td>
+	         </tr>
+	         <tr>
+	           <td>Giorni congedo parentale</td>
+	           <td><strong>- ${accruedResultInPeriod.postPartum.size()}</strong></td>
+	         </tr>
+	         <tr>
+	           <td>Giorni considerati</td>
+	           <td><strong>${accruedResultInPeriod.days}</strong></td>
+	         </tr>
+	         #{/if}
+	         #{else}
+			 <tr>
+	           <td>Giorni considerati</td>
+	           <td><strong>${accruedResultInPeriod.days}</strong></td>
+	         </tr>	         
+	         #{/else}
+	         <tr>
+	           <td>Giorni calcolati</td>
+	           <td><strong>${accruedResultInPeriod.accrued}</strong></td>
+	         </tr>	  
+	         
+	       </table>
+	       #{/if}
+        #{/list}
+        
     #{/tabContentItem}
+    
     
   #{/tabContent}  
 

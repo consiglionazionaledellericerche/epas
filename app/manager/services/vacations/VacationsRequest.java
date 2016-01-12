@@ -38,7 +38,7 @@ public class VacationsRequest {
 
   @Builder
   private VacationsRequest(final int year, final Contract contract,
-      final DateInterval contractDateInterval, final Optional<LocalDate> accruedDate,
+      final DateInterval contractDateInterval, final LocalDate accruedDate,
       final List<VacationPeriod> contractVacationPeriod, final List<Absence> postPartumUsed,
       final LocalDate expireDateLastYear, final LocalDate expireDateCurrentYear) {
     this.year = year;
@@ -46,11 +46,7 @@ public class VacationsRequest {
     this.contractVacationPeriod = contractVacationPeriod;
     this.contractDateInterval = contractDateInterval;
     this.postPartumUsed = postPartumUsed;
-    if (accruedDate.isPresent()) {
-      this.accruedDate = accruedDate.get();
-    } else {
-      this.accruedDate = LocalDate.now();
-    }
+    this.accruedDate = accruedDate;
     this.expireDateLastYear = expireDateLastYear;
     this.expireDateCurrentYear = expireDateCurrentYear;
   }

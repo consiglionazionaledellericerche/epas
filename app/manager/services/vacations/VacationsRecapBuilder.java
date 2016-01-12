@@ -3,12 +3,10 @@ package manager.services.vacations;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import lombok.Builder;
 
 import manager.services.vacations.VacationsTypeResult.TypeVacation;
 
@@ -16,7 +14,6 @@ import models.Absence;
 import models.Contract;
 import models.VacationCode;
 import models.VacationPeriod;
-import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
 
@@ -54,25 +51,6 @@ public class VacationsRecapBuilder {
     DateInterval contractDateInterval =
         new DateInterval(contract.getBeginDate(), contract.calculatedEnd());
     
-    //Vacation Last Year Expired
-    vacationsRecap.setExpireLastYear(false);
-    if (year < LocalDate.now().getYear()) {
-      vacationsRecap.setExpireLastYear(true);
-    } else if (year == LocalDate.now().getYear()
-            && dateRecap.isAfter(expireDateLastYear)) {
-      vacationsRecap.setExpireLastYear(true);
-    }
-
-    //Contract Expire Before End Of Year / Active After Begin Of Year
-    LocalDate startRequestYear = new LocalDate(year, 1, 1);
-    LocalDate endRequestYear = new LocalDate(year, 12, 31);
-    if (contractDateInterval.getEnd().isBefore(endRequestYear)) {
-      vacationsRecap.setExpireBeforeEndYear(true);
-    }
-    if (contractDateInterval.getBegin().isAfter(startRequestYear)) {
-      vacationsRecap.setActiveAfterBeginYear(true);
-    }
-    
     VacationsRecapTempData tempData = VacationsRecapTempData.builder()
         .year(year)
         .absencesToConsider(absencesToConsider)
@@ -82,7 +60,7 @@ public class VacationsRecapBuilder {
         .year(year)
         .contract(contract)
         .contractDateInterval(contractDateInterval)
-        .accruedDate(Optional.fromNullable(dateRecap))
+        .accruedDate(dateRecap)
         .contractVacationPeriod(contract.getVacationPeriods())
         .postPartumUsed(tempData.getPostPartum())
         .expireDateLastYear(expireDateLastYear)
@@ -92,6 +70,7 @@ public class VacationsRecapBuilder {
     vacationsRecap.setVacationsLastYear(buildVacationsTypeResult(
         vacationsRecap.getVacationsRequest(),
         TypeVacation.VACATION_LAST_YEAR,
+        expireDateLastYear,
         FluentIterable.from(tempData.getList32PreviouYear())
         .append(tempData.getList31RequestYear())
         .append(tempData.getList37RequestYear()).toList(),
@@ -100,6 +79,7 @@ public class VacationsRecapBuilder {
     vacationsRecap.setVacationsCurrentYear(buildVacationsTypeResult(
         vacationsRecap.getVacationsRequest(),
         TypeVacation.VACATION_CURRENT_YEAR,
+        expireDateCurrentYear,
         FluentIterable.from(tempData.getList32RequestYear())
         .append(tempData.getList31NextYear())
         .append(tempData.getList37NextYear()).toList(),
@@ -108,6 +88,7 @@ public class VacationsRecapBuilder {
     vacationsRecap.setPermissions(buildVacationsTypeResult(
         vacationsRecap.getVacationsRequest(),
         TypeVacation.PERMISSION_CURRENT_YEAR,
+        new LocalDate(year, 12, 31),
         FluentIterable.from(tempData.getList94RequestYear()).toList(),
         tempData.getSourcePermissionUsed()));
 
@@ -123,8 +104,14 @@ public class VacationsRecapBuilder {
    * @param sourced dati iniziali
    * @return il risultato per il tipo.
    */
-  private VacationsTypeResult buildVacationsTypeResult(VacationsRequest vacationsRequest, 
-      TypeVacation typeVacation, ImmutableList<Absence> absencesUsed, int sourced) {
+  private VacationsTypeResult buildVacationsTypeResult(VacationsRequest vacationsRequest,
+      TypeVacation typeVacation, LocalDate typeExpireDate, ImmutableList<Absence> absencesUsed, 
+      int sourced) {
+    
+    if (vacationsRequest.getContract().person.surname.equals("Bordone")) {
+      int i = 0;
+    }
+    
     
     VacationsTypeResult vacationsTypeResult = new VacationsTypeResult();
     vacationsTypeResult.setVacationsRequest(vacationsRequest);
@@ -139,16 +126,33 @@ public class VacationsRecapBuilder {
       totalInterval = new DateInterval(new LocalDate(vacationsRequest.getYear() - 1, 1, 1),
           new LocalDate(vacationsRequest.getYear() - 1, 12, 31));
     }
-
-    // Intervallo accrued
-    DateInterval accruedInterval = new DateInterval(totalInterval.getBegin(),
-        totalInterval.getEnd());
-    if (typeVacation.equals(TypeVacation.VACATION_CURRENT_YEAR)
-        || typeVacation.equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
-      accruedInterval = new DateInterval(new LocalDate(vacationsRequest.getYear(), 1, 1),
-          vacationsRequest.getAccruedDate());
+    
+    //Expired
+    if (vacationsRequest.getAccruedDate().isAfter(typeExpireDate)) {
+      vacationsTypeResult.setExpired(true);
+    }
+    
+    //Lower/Upper bound
+    vacationsTypeResult.setLowerLimit(totalInterval.getBegin());
+    if (vacationsRequest.getContractDateInterval().getBegin().isAfter(totalInterval.getBegin())) {
+      vacationsTypeResult.setLowerLimit(vacationsRequest.getContractDateInterval().getBegin());
+      vacationsTypeResult.setContractLowerLimit(true);
+    }
+    vacationsTypeResult.setUpperLimit(typeExpireDate);
+    if (vacationsRequest.getContractDateInterval().getEnd().isBefore(typeExpireDate)) {
+      vacationsTypeResult.setUpperLimit(vacationsRequest.getContractDateInterval().getEnd());
+      vacationsTypeResult.setContractUpperLimit(true);
     }
 
+    // Intervallo accrued
+    LocalDate beginAccrued = totalInterval.getBegin();
+    LocalDate endAccrued = totalInterval.getEnd();
+    if (endAccrued.isAfter(vacationsRequest.getAccruedDate())) {
+      endAccrued = vacationsRequest.getAccruedDate();
+    }
+    Preconditions.checkState(!beginAccrued.isAfter(endAccrued));
+    DateInterval accruedInterval = new DateInterval(beginAccrued, endAccrued);
+    
     //Intersezioni col contratto.
     accruedInterval = DateUtility.intervalIntersection(accruedInterval,
         vacationsRequest.getContractDateInterval());
