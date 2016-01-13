@@ -89,6 +89,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
+  @Getter
   @Column(name = "end_contract")
   public LocalDate endContract;
 
@@ -160,10 +161,14 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Override
   public LocalDate calculatedEnd() {
-    if (this.endContract != null) {
-      return this.endContract;
+    return computeEnd(this.endDate, this.endContract);
+  }
+  
+  public static LocalDate computeEnd(LocalDate endDate, LocalDate endContract) {
+    if (endContract != null) {
+      return endContract;
     }
-    return this.endDate;
+    return endDate;
   }
 
 

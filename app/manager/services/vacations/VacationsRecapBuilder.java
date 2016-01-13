@@ -108,11 +108,6 @@ public class VacationsRecapBuilder {
       TypeVacation typeVacation, LocalDate typeExpireDate, ImmutableList<Absence> absencesUsed, 
       int sourced) {
     
-    if (vacationsRequest.getContract().person.surname.equals("Bordone")) {
-      int i = 0;
-    }
-    
-    
     VacationsTypeResult vacationsTypeResult = new VacationsTypeResult();
     vacationsTypeResult.setVacationsRequest(vacationsRequest);
     vacationsTypeResult.setAbsencesUsed(absencesUsed);
