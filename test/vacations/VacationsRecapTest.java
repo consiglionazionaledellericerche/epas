@@ -3,6 +3,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 
 import dao.VacationCodeDao;
@@ -12,8 +13,11 @@ import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
 
 import models.Absence;
+import models.AbsenceType;
 import models.Contract;
+import models.PersonDay;
 import models.VacationCode;
+import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
 import org.testng.annotations.Test;
@@ -21,7 +25,10 @@ import org.testng.collections.Lists;
 
 import java.util.List;
 
+import mocker.MockAbsence;
+import mocker.MockAbsenceType;
 import mocker.MockContract;
+import mocker.MockPersonDay;
 
 /**
  * Verifica di base degli algoritmi relativi ai resoconti ferie.
@@ -31,10 +38,42 @@ import mocker.MockContract;
  */
 public class VacationsRecapTest {
   
+  static AbsenceType code31 = MockAbsenceType.builder()
+      .code(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode())
+      .build();
+  
+  static AbsenceType code32 = MockAbsenceType.builder()
+      .code(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode())
+      .build();
+  
+  static AbsenceType code37 = MockAbsenceType.builder()
+      .code(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode())
+      .build();
+  
+  static AbsenceType code94 = MockAbsenceType.builder()
+      .code(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode())
+      .build();
+  
   @Test
-  public void testTotalVacations() {
+  public void vacationsTestBase() {
 
     final List<Absence> absencesToConsider = Lists.newArrayList();
+    
+    absencesToConsider.addAll(getAbsences(ImmutableList.<LocalDate>builder()
+        .add(new LocalDate(2016, 1, 1))
+        .build(), code31));
+    
+    absencesToConsider.addAll(getAbsences(ImmutableList.<LocalDate>builder()
+        .add(new LocalDate(2016, 9, 1))
+        .build(), code37));
+    
+    absencesToConsider.addAll(getAbsences(ImmutableList.<LocalDate>builder()
+        .add(new LocalDate(2016, 9, 10))
+        .build(), code32));
+    
+    absencesToConsider.addAll(getAbsences(ImmutableList.<LocalDate>builder()
+        .add(new LocalDate(2016, 9, 11))
+        .build(), code94));
 
     final LocalDate accruedDate = new LocalDate(2016, 9, 1);    //recap date
     final LocalDate expireDateLastYear = new LocalDate(2016, 8, 31);
@@ -51,18 +90,21 @@ public class VacationsRecapTest {
 
     assertThat(recapIndef.getVacationsLastYear().isExpired()).isEqualTo(true);
     assertThat(recapIndef.getVacationsLastYear().getTotal()).isEqualTo(28);
-    assertThat(recapIndef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(28);
+    assertThat(recapIndef.getVacationsLastYear().getUsed()).isEqualTo(2);
+    assertThat(recapIndef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(26);
     assertThat(recapIndef.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
     
     assertThat(recapIndef.getVacationsCurrentYear().isExpired()).isEqualTo(false);
     assertThat(recapIndef.getVacationsCurrentYear().getTotal()).isEqualTo(28);
-    assertThat(recapIndef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(28);
-    assertThat(recapIndef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(28);
+    assertThat(recapIndef.getVacationsCurrentYear().getUsed()).isEqualTo(1);
+    assertThat(recapIndef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(27);
+    assertThat(recapIndef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(27);
     
     assertThat(recapIndef.getPermissions().isExpired()).isEqualTo(false);
     assertThat(recapIndef.getPermissions().getTotal()).isEqualTo(4);
-    assertThat(recapIndef.getPermissions().getNotYetUsedTotal()).isEqualTo(4);
-    assertThat(recapIndef.getPermissions().getNotYetUsedTakeable()).isEqualTo(4);
+    assertThat(recapIndef.getPermissions().getUsed()).isEqualTo(1);
+    assertThat(recapIndef.getPermissions().getNotYetUsedTotal()).isEqualTo(3);
+    assertThat(recapIndef.getPermissions().getNotYetUsedTakeable()).isEqualTo(3);
     
     //Un tempo determinato
     contract = MockContract.builder()
@@ -76,18 +118,21 @@ public class VacationsRecapTest {
     
     assertThat(recapDef.getVacationsLastYear().isExpired()).isEqualTo(true);
     assertThat(recapDef.getVacationsLastYear().getTotal()).isEqualTo(28);
-    assertThat(recapDef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(28);
+    assertThat(recapDef.getVacationsLastYear().getUsed()).isEqualTo(2);
+    assertThat(recapDef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(26);
     assertThat(recapDef.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
     
     assertThat(recapDef.getVacationsCurrentYear().isExpired()).isEqualTo(false);
     assertThat(recapDef.getVacationsCurrentYear().getTotal()).isEqualTo(21);
-    assertThat(recapDef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(21);
-    assertThat(recapDef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(18);
+    assertThat(recapDef.getVacationsCurrentYear().getUsed()).isEqualTo(1);
+    assertThat(recapDef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(20);
+    assertThat(recapDef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(17);
     
     assertThat(recapDef.getPermissions().isExpired()).isEqualTo(false);
     assertThat(recapDef.getPermissions().getTotal()).isEqualTo(3);
-    assertThat(recapDef.getPermissions().getNotYetUsedTotal()).isEqualTo(3);
-    assertThat(recapDef.getPermissions().getNotYetUsedTakeable()).isEqualTo(3);
+    assertThat(recapDef.getPermissions().getUsed()).isEqualTo(1);
+    assertThat(recapDef.getPermissions().getNotYetUsedTotal()).isEqualTo(2);
+    assertThat(recapDef.getPermissions().getNotYetUsedTakeable()).isEqualTo(2);
   }
   
   /**
@@ -166,8 +211,22 @@ public class VacationsRecapTest {
     return vcd;
   }
   
-  List<Absence> getAbsences(ImmutableList<LocalDate> dates) {
-    return null;
+  List<Absence> getAbsences(ImmutableList<LocalDate> dates, AbsenceType absenceType) {
+    
+    List<Absence> absences = Lists.newArrayList();
+    
+    for (LocalDate date :  dates) {
+      PersonDay personDay = MockPersonDay.builder()
+          .date(date)
+          .build();
+      Absence absence = MockAbsence.builder()
+          .absenceType(absenceType)
+          .personDay(personDay)
+          .date(date)
+          .build();
+      absences.add(absence);
+    }
+    return absences;
   }
 
 }
