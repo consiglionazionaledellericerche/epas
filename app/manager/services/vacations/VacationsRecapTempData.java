@@ -51,14 +51,15 @@ public class VacationsRecapTempData {
 
       int abYear;
 
-      if (ab.personDay != null) {
-        abYear = ab.personDay.date.getYear();
+      if (ab.getPersonDay() != null) {
+        abYear = ab.getPersonDay().getDate().getYear();
       } else {
-        abYear = ab.date.getYear();
+        abYear = ab.getDate().getYear();
       }
 
       //32
-      if (ab.absenceType.code.equals(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode())) {
+      if (ab.getAbsenceType().getCode()
+          .equals(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode())) {
         if (abYear == year - 1) {
           this.list32PreviouYear.add(ab);
         } else if (abYear == year) {
@@ -67,7 +68,8 @@ public class VacationsRecapTempData {
         continue;
       }
       //31
-      if (ab.absenceType.code.equals(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode())) {
+      if (ab.getAbsenceType().getCode()
+          .equals(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode())) {
         if (abYear == year) {
           this.list31RequestYear.add(ab);
         } else if (abYear == year + 1) {
@@ -76,15 +78,16 @@ public class VacationsRecapTempData {
         continue;
       }
       //94
-      if (ab.absenceType.code.equals(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode())) {
+      if (ab.getAbsenceType().getCode()
+          .equals(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode())) {
         if (abYear == year) {
           this.list94RequestYear.add(ab);
         }
         continue;
       }
       //37
-      if (ab.absenceType.code.equals(AbsenceTypeMapping
-          .FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode())) {
+      if (ab.getAbsenceType().getCode()
+          .equals(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode())) {
         if (abYear == year) {
           this.list37RequestYear.add(ab);
         } else if (abYear == year + 1) {

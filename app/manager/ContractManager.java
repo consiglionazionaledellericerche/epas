@@ -258,7 +258,7 @@ public class ContractManager {
 
     } else {
 
-      if (contract.endDate.isAfter(contract.beginDate.plusYears(3).minusDays(1))) {
+      if (contract.getEndDate().isAfter(contract.getBeginDate().plusYears(3).minusDays(1))) {
 
         // Tempo determinato più lungo di 3 anni
         vacationPeriods.add(buildVacationPeriod(contract, v26, contract.getBeginDate(),
