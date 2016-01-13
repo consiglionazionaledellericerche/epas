@@ -113,15 +113,14 @@ public class VacationsRecapBuilder {
     vacationsTypeResult.setAbsencesUsed(absencesUsed);
     vacationsTypeResult.setSourced(sourced);
     vacationsTypeResult.setTypeVacation(typeVacation);
-
-    // Intervallo totale
-    DateInterval totalInterval = new DateInterval(new LocalDate(vacationsRequest.getYear(), 1, 1),
-        new LocalDate(vacationsRequest.getYear(), 12, 31));
-    if (typeVacation.equals(TypeVacation.VACATION_LAST_YEAR)) {
-      totalInterval = new DateInterval(new LocalDate(vacationsRequest.getYear() - 1, 1, 1),
-          new LocalDate(vacationsRequest.getYear() - 1, 12, 31));
+    vacationsTypeResult.setYear(vacationsRequest.getYear());
+    if ((typeVacation.equals(TypeVacation.VACATION_LAST_YEAR))) {
+      vacationsTypeResult.setYear(vacationsRequest.getYear() - 1);
     }
     
+    // Intervallo totale
+    DateInterval totalInterval = DateUtility.getYearInterval(vacationsTypeResult.getYear());
+       
     //Expired
     if (vacationsRequest.getAccruedDate().isAfter(typeExpireDate)) {
       vacationsTypeResult.setExpired(true);
@@ -145,8 +144,10 @@ public class VacationsRecapBuilder {
     if (endAccrued.isAfter(vacationsRequest.getAccruedDate())) {
       endAccrued = vacationsRequest.getAccruedDate();
     }
-    Preconditions.checkState(!beginAccrued.isAfter(endAccrued));
-    DateInterval accruedInterval = new DateInterval(beginAccrued, endAccrued);
+    DateInterval accruedInterval = null;
+    if (!beginAccrued.isAfter(endAccrued)) {
+      accruedInterval = new DateInterval(beginAccrued, endAccrued);
+    }
     
     //Intersezioni col contratto.
     accruedInterval = DateUtility.intervalIntersection(accruedInterval,
@@ -313,7 +314,7 @@ public class VacationsRecapBuilder {
     }
 
     DateInterval yearInterval = DateUtility
-        .getYearInterval(accruedResult.getVacationsResult().getVacationsRequest().getYear());
+        .getYearInterval(accruedResult.getVacationsResult().getYear());
 
     int totalYearPostPartum = 0;
     int totalVacationAccrued = 0;
