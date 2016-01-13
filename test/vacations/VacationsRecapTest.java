@@ -14,7 +14,6 @@ import manager.services.vacations.VacationsRecapBuilder;
 import models.Absence;
 import models.Contract;
 import models.VacationCode;
-import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
 import org.testng.annotations.Test;
@@ -89,6 +88,48 @@ public class VacationsRecapTest {
     assertThat(recapDef.getPermissions().getTotal()).isEqualTo(3);
     assertThat(recapDef.getPermissions().getNotYetUsedTotal()).isEqualTo(3);
     assertThat(recapDef.getPermissions().getNotYetUsedTakeable()).isEqualTo(3);
+  }
+  
+  /**
+   * Cambiando piano ferie nel corso dell'anno 2015 per quell'anno disponeva di soli 25 giorni.
+   * Quindi gliene diamo uno in più che viene maturata immediatamente.
+   * Il test costruisce il recap al primo giorno del 2015 e dimostra che in quel momento taverniti
+   * ha un giorno di ferie immediatamente maturato, e 26 totali (subito prendibili perchè è un tempo
+   * indeterminato).
+   * Piano Ferie 26+4
+   * Intervallo  Dal 01/01/2015 al 29/10/2015
+   * Giorni considerati  302
+   * Giorni calcolati    21
+   * Piano Ferie 28+4
+   * Intervallo  Dal 30/10/2015 al 31/12/2015
+   * Giorni considerati  63
+   * Giorni calcolati    4
+   */
+  @Test
+  public void theCuriousCaseOfMariaTaverniti() {
+    
+    final List<Absence> absencesToConsider = Lists.newArrayList();
+
+    final LocalDate accruedDate = new LocalDate(2015, 1, 1);    //recap date
+    final LocalDate expireDateLastYear = new LocalDate(2014, 8, 31);
+    final LocalDate expireDateCurrentYear = new LocalDate(2015, 8, 31);
+
+    Contract contract = MockContract.builder()
+        .contractManager(getContractManager())
+        .beginDate(new LocalDate(2012,10,30))
+        .build();
+    
+    final VacationsRecap recap = new VacationsRecapBuilder().buildVacationRecap(
+        2015, contract, absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
+
+    assertThat(recap.getVacationsCurrentYear().getTotalResult().getAccrued()).isEqualTo(25);
+    assertThat(recap.getVacationsCurrentYear().getTotalResult().getFixed()).isEqualTo(1);
+    assertThat(recap.getVacationsCurrentYear().getAccruedResult().getAccrued()).isEqualTo(0);
+    
+    assertThat(recap.getVacationsCurrentYear().getTotal()).isEqualTo(26);
+    assertThat(recap.getVacationsCurrentYear().getAccrued()).isEqualTo(1);
+    assertThat(recap.getVacationsCurrentYear().getNotYetUsedAccrued()).isEqualTo(1);
+    assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(26);
   }
 
   private VacationCode vacationCode(String description) {

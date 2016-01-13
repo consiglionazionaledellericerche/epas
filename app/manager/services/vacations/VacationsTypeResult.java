@@ -29,6 +29,7 @@ public class VacationsTypeResult {
   }
 
   // DATI INPUT
+  private int year;
   private VacationsRequest vacationsRequest;
   private TypeVacation typeVacation;
   private ImmutableList<Absence> absencesUsed;
@@ -106,38 +107,7 @@ public class VacationsTypeResult {
       return this.getTotal() - this.getUsed();
     }
 
-  }
-
-  /**
-   * La data di scadenza utilizzo ferie.
-   */
-  public LocalDate getExpireDate() {
-
-    LocalDate computedEndContract = this.vacationsRequest.getContractDateInterval().getEnd();
-
-    if (this.typeVacation.equals(TypeVacation.VACATION_LAST_YEAR)) {
-      if (computedEndContract.isBefore(this.vacationsRequest.getExpireDateLastYear())) {
-        return computedEndContract;
-      }
-      return this.vacationsRequest.getExpireDateLastYear();
-    }
-
-    if (this.typeVacation.equals(TypeVacation.VACATION_CURRENT_YEAR)) {
-      if (computedEndContract.isBefore(this.vacationsRequest.getExpireDateCurrentYear())) {
-        return computedEndContract;
-      }
-      return this.vacationsRequest.getExpireDateCurrentYear();
-    }
-
-    if (this.typeVacation.equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
-      LocalDate endYear = new LocalDate(this.vacationsRequest.getYear(), 12, 31);
-      if (computedEndContract.isBefore(endYear)) {
-        return computedEndContract;
-      }
-      return endYear;
-    }
-    return null;
-  }
+  } 
 
 }
 
