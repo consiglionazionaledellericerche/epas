@@ -54,6 +54,9 @@ public class VacationsRecapTest {
       .code(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode())
       .build();
   
+  /**
+   * Test funzionalità di base per contratti indeterminati e determinati.
+   */
   @Test
   public void vacationsTestBase() {
 
