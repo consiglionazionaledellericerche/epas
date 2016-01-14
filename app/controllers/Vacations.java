@@ -7,8 +7,8 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.User;
@@ -27,10 +27,14 @@ import javax.inject.Inject;
 public class Vacations extends Controller {
 
   @Inject
-  private static VacationsRecapFactory vacationsFactory;
+  private static IVacationsService vacationsService;
   @Inject
   private static IWrapperFactory wrapperFactory;
 
+  /**
+   * Vista riepiloghi ferie per l'employee.
+   * @param year anno.
+   */
   public static void show(Integer year) {
 
     Optional<User> currentUser = Security.getUser();
@@ -57,8 +61,7 @@ public class Vacations extends Controller {
     for (Contract contract : contractList) {
       Optional<VacationsRecap> vacationsRecap;
 
-      vacationsRecap = vacationsFactory.create(
-              year, contract, LocalDate.now(), true);
+      vacationsRecap = vacationsService.create(year, contract);
 
       Preconditions.checkState(vacationsRecap.isPresent());
 
@@ -68,6 +71,10 @@ public class Vacations extends Controller {
     render(vacationsRecapList);
   }
 
+  /**
+   * La situazione dell'employee ferie anno corrente per l'anno.
+   * @param anno anno
+   */
   public static void vacationsCurrentYear(Integer anno) {
 
     Optional<User> currentUser = Security.getUser();
@@ -81,8 +88,7 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(
-            anno, contract.get(), LocalDate.now(), true);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
@@ -94,7 +100,10 @@ public class Vacations extends Controller {
 
   }
 
-
+  /**
+   * La situazione dell'employee ferie anno passato per l'anno.
+   * @param anno anno
+   */
   public static void vacationsLastYear(Integer anno) {
 
     Optional<User> currentUser = Security.getUser();
@@ -108,8 +117,7 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(
-            anno, contract.get(), LocalDate.now(), true);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
@@ -120,7 +128,10 @@ public class Vacations extends Controller {
     render("@recapVacation", vacationsRecap, activeVacationLastYear);
   }
 
-
+  /**
+   * La situazione dell'employee permessi per l'anno.
+   * @param anno anno
+   */
   public static void permissionCurrentYear(Integer anno) {
 
     Optional<User> currentUser = Security.getUser();
@@ -134,8 +145,7 @@ public class Vacations extends Controller {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(
-            anno, contract.get(), LocalDate.now(), true);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
 
     Preconditions.checkState(vr.isPresent());
 

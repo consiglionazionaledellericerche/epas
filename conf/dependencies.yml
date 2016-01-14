@@ -60,6 +60,7 @@ require:
     - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.6.3
     - com.fasterxml.jackson.module -> jackson-module-afterburner 2.6.3
     - com.github.fge -> jackson-coreutils 1.6
+    - org.testng -> testng 6.9.10
 
 # My custom repository
 

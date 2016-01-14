@@ -19,11 +19,9 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.cache.StampTypeManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.services.vacations.IVacationsService;
 
 import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -34,7 +32,6 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.Parameter;
 
 import org.joda.time.DateTimeConstants;
@@ -67,20 +64,23 @@ public class ConsistencyManager {
   private final ConfYearManager confYearManager;
   private final PersonDayDao personDayDao;
   private final StampTypeManager stampTypeManager;
-  private final AbsenceDao absenceDao;
-  private final AbsenceTypeDao absenceTypeDao;
-  private final VacationsRecapFactory vacationsFactory;
   private final ConfGeneralManager confGeneralManager;
 
   @Inject
-  public ConsistencyManager(
-      SecureManager secureManager, OfficeDao officeDao,
-      PersonManager personManager, PersonDao personDao,
-      PersonDayManager personDayManager, ContractMonthRecapManager contractMonthRecapManager,
-      PersonDayInTroubleManager personDayInTroubleManager, IWrapperFactory wrapperFactory,
-      PersonDayDao personDayDao, ConfYearManager confYearManager, StampTypeManager stampTypeManager,
-      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, VacationsRecapFactory vacationsFactory,
-      ConfGeneralManager confGeneralManager) {
+  public ConsistencyManager(SecureManager secureManager, 
+      OfficeDao officeDao,
+      PersonDao personDao,
+      PersonDayDao personDayDao,
+      
+      PersonManager personManager, 
+      PersonDayManager personDayManager,
+      ContractMonthRecapManager contractMonthRecapManager,
+      PersonDayInTroubleManager personDayInTroubleManager, 
+      ConfGeneralManager confGeneralManager,
+      ConfYearManager confYearManager, 
+      StampTypeManager stampTypeManager,
+
+      IWrapperFactory wrapperFactory) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -93,9 +93,6 @@ public class ConsistencyManager {
     this.personDayDao = personDayDao;
     this.confYearManager = confYearManager;
     this.stampTypeManager = stampTypeManager;
-    this.absenceDao = absenceDao;
-    this.absenceTypeDao = absenceTypeDao;
-    this.vacationsFactory = vacationsFactory;
     this.confGeneralManager = confGeneralManager;
   }
 
@@ -489,7 +486,7 @@ public class ConsistencyManager {
    * la stessa procedura dall'inizio del contratto. (Capire se questo caso si verifica mai).
    */
   private void populateContractMonthRecap(IWrapperContract contract,
-                                          Optional<YearMonth> yearMonthFrom) {
+      Optional<YearMonth> yearMonthFrom) {
 
     // Conterrà il riepilogo precedente di quello da costruire all'iterazione n.
     Optional<ContractMonthRecap> previousMonthRecap = Optional.<ContractMonthRecap>absent();
@@ -537,35 +534,9 @@ public class ConsistencyManager {
 
       currentMonthRecap = buildContractMonthRecap(contract, yearMonthToCompute);
 
-      // (1) FERIE E PERMESSI
-
-      // TODO: per il calcolo delle ferie e permessi ho bisogno solo del
-      // riepilogo di dicembre. Una ottimizzazione è calcolare questi campi
-      // solo nel caso di dicembre. Però i dati dei mesi intermedi potrebbero
-      // essere usati per report. Decidere.
-
       LocalDate lastDayInYearMonth =
               new LocalDate(yearMonthToCompute.getYear(), yearMonthToCompute.getMonthOfYear(), 1)
                       .dayOfMonth().withMaximumValue();
-
-      Optional<VacationsRecap> vacationRecap = vacationsFactory.create(yearMonthToCompute.getYear(),
-              contract.getValue(), lastDayInYearMonth, true);
-
-      if (!vacationRecap.isPresent()) {
-
-        // Siccome non ci sono i riepiloghi quando vado a fare l'update della
-        // timbratura schianta. Soluzioni? Se yeraMonthFrom.present() fare una
-        // missingRecap()??
-        if (yearMonthFrom.isPresent()) {
-          // provvisorio.
-          populateContractMonthRecap(contract, Optional.<YearMonth>absent());
-        }
-        return;
-      }
-
-      currentMonthRecap.vacationLastYearUsed = vacationRecap.get().vacationDaysLastYearUsed;
-      currentMonthRecap.vacationCurrentYearUsed = vacationRecap.get().vacationDaysCurrentYearUsed;
-      currentMonthRecap.permissionUsed = vacationRecap.get().permissionUsed;
 
       // (2) RESIDUI
       List<Absence> otherCompensatoryRest = Lists.newArrayList();
@@ -601,10 +572,7 @@ public class ConsistencyManager {
 
       cmr.remainingMinutesCurrentYear = contract.getValue().sourceRemainingMinutesCurrentYear;
       cmr.remainingMinutesLastYear = contract.getValue().sourceRemainingMinutesLastYear;
-      cmr.vacationLastYearUsed = contract.getValue().sourceVacationLastYearUsed;
-      cmr.vacationCurrentYearUsed = contract.getValue().sourceVacationCurrentYearUsed;
       cmr.recoveryDayUsed = contract.getValue().sourceRecoveryDayUsed;
-      cmr.permissionUsed = contract.getValue().sourcePermissionUsed;
 
       if (contract.getValue().sourceDateMealTicket != null && contract.getValue().sourceDateResidual
               .isEqual(contract.getValue().sourceDateMealTicket)) {
@@ -625,28 +593,6 @@ public class ConsistencyManager {
     // Caso complesso, combinare inizializzazione e database.
 
     ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
-
-    AbsenceType ab31 = absenceTypeDao
-            .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).orNull();
-    AbsenceType ab32 = absenceTypeDao
-            .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).orNull();
-    AbsenceType ab37 = absenceTypeDao
-            .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode())
-            .orNull();
-    AbsenceType ab94 = absenceTypeDao
-            .getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).orNull();
-
-    DateInterval monthInterSource =
-        new DateInterval(contract.getValue().sourceDateResidual.plusDays(1), lastDayInSourceMonth);
-    List<Absence> abs32 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab32);
-    List<Absence> abs31 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab31);
-    List<Absence> abs37 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab37);
-    List<Absence> abs94 = absenceDao.getAbsenceDays(monthInterSource, contract.getValue(), ab94);
-
-    cmr.vacationLastYearUsed =
-            contract.getValue().sourceVacationLastYearUsed + abs31.size() + abs37.size();
-    cmr.vacationCurrentYearUsed = contract.getValue().sourceVacationCurrentYearUsed + abs32.size();
-    cmr.permissionUsed = contract.getValue().sourcePermissionUsed + abs94.size();
 
     contract.getValue().contractMonthRecaps.add(cmr);
     cmr.save();

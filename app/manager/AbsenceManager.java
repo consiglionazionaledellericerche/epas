@@ -8,7 +8,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
 import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDayDao;
@@ -19,10 +18,11 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.CheckMessage;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.vacations.IVacationsService;
 
 import models.Absence;
 import models.AbsenceType;
@@ -41,8 +41,6 @@ import models.enumerate.QualificationMapping;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.db.jpa.Blob;
 import play.libs.Mail;
@@ -54,20 +52,20 @@ import javax.inject.Inject;
 
 
 /**
+ * Manager per le assenze.
  * @author alessandro
  */
+@Slf4j
 public class AbsenceManager {
 
-  private static final Logger log = LoggerFactory.getLogger(AbsenceManager.class);
   private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
   private final ContractMonthRecapManager contractMonthRecapManager;
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final PersonManager personManager;
   private final PersonDayDao personDayDao;
-  private final VacationsRecapFactory vacationsFactory;
+  private final IVacationsService vacationsService;
   private final AbsenceGroupManager absenceGroupManager;
   private final ContractDao contractDao;
-  private final AbsenceTypeDao absenceTypeDao;
   private final AbsenceDao absenceDao;
   private final PersonReperibilityDayDao personReperibilityDayDao;
   private final PersonShiftDayDao personShiftDayDao;
@@ -78,27 +76,31 @@ public class AbsenceManager {
 
   @Inject
   public AbsenceManager(
-          ContractMonthRecapManager contractMonthRecapManager,
-          WorkingTimeTypeDao workingTimeTypeDao,
-          PersonManager personManager, PersonDayDao personDayDao,
-          VacationsRecapFactory vacationsFactory,
-          AbsenceGroupManager absenceGroupManager,
-          IWrapperFactory wrapperFactory, ContractDao contractDao,
-          AbsenceTypeDao absenceTypeDao, AbsenceDao absenceDao,
-          PersonReperibilityDayDao personReperibilityDayDao,
-          PersonShiftDayDao personShiftDayDao,
-          ConfGeneralManager confGeneralManager,
-          ConfYearManager confYearManager, PersonChildrenDao personChildrenDao,
-          ConsistencyManager consistencyManager) {
+      PersonDayDao personDayDao,
+      WorkingTimeTypeDao workingTimeTypeDao,
+      ContractDao contractDao,
+      AbsenceDao absenceDao,
+      PersonReperibilityDayDao personReperibilityDayDao,
+      PersonShiftDayDao personShiftDayDao,
+      PersonChildrenDao personChildrenDao,
+
+      ContractMonthRecapManager contractMonthRecapManager,
+      PersonManager personManager, 
+      AbsenceGroupManager absenceGroupManager,
+      ConfGeneralManager confGeneralManager,
+      ConfYearManager confYearManager,
+      ConsistencyManager consistencyManager, 
+      
+      IWrapperFactory wrapperFactory,
+      IVacationsService vacationsService) {
 
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.personManager = personManager;
     this.personDayDao = personDayDao;
-    this.vacationsFactory = vacationsFactory;
+    this.vacationsService = vacationsService;
     this.absenceGroupManager = absenceGroupManager;
     this.contractDao = contractDao;
-    this.absenceTypeDao = absenceTypeDao;
     this.absenceDao = absenceDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
     this.personShiftDayDao = personShiftDayDao;
@@ -106,92 +108,6 @@ public class AbsenceManager {
     this.personChildrenDao = personChildrenDao;
     this.confGeneralManager = confGeneralManager;
     this.consistencyManager = consistencyManager;
-  }
-
-  /**
-   * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94.
-   */
-  private AbsenceType whichVacationCode(
-      Person person, LocalDate date, List<Absence> otherAbsences) {
-
-    Contract contract = contractDao.getContract(date, person);
-    Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-            contract, date, true, otherAbsences, Optional.<LocalDate>absent());
-    if (!vr.isPresent()) {
-      return null;
-    }
-
-    if (vr.get().vacationDaysLastYearNotYetUsed > 0) {
-      return absenceTypeDao.getAbsenceTypeByCode(
-              AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()).get();
-    }
-
-    if (vr.get().persmissionNotYetUsed > 0) {
-      return absenceTypeDao.getAbsenceTypeByCode(
-              AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()).get();
-    }
-
-    if (vr.get().vacationDaysCurrentYearNotYetUsed > 0) {
-      return absenceTypeDao.getAbsenceTypeByCode(
-              AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()).get();
-    }
-
-
-    return null;
-  }
-
-  /**
-   * Verifica che la persona alla data possa prendere un giorno di ferie codice 32.
-   *
-   * @return l'absenceType 32 in caso affermativo. Null in caso di esaurimento bonus.
-   */
-  private boolean canTake32(Person person, LocalDate date, List<Absence> otherAbsences) {
-
-    Contract contract = contractDao.getContract(date, person);
-    Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-            contract, date, true, otherAbsences, Optional.<LocalDate>absent());
-    if (!vr.isPresent()) {
-      return false;
-    }
-
-    return (vr.get().vacationDaysCurrentYearNotYetUsed > 0);
-
-  }
-
-  /**
-   * Verifica che la persona alla data possa prendere un giorno di ferie codice 31.
-   *
-   * @return true in caso affermativo, false altrimenti
-   */
-  private boolean canTake31(Person person, LocalDate date, List<Absence> otherAbsences) {
-
-    Contract contract = contractDao.getContract(date, person);
-    Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-            contract, date, true, otherAbsences, Optional.<LocalDate>absent());
-    if (!vr.isPresent()) {
-      return false;
-    }
-
-
-    return (vr.get().vacationDaysLastYearNotYetUsed > 0);
-  }
-
-  /**
-   * Verifica che la persona alla data possa prendere un giorno di permesso codice 94.
-   *
-   * @return l'absenceType 94 in caso affermativo. Null in caso di esaurimento bonus.
-   */
-  private boolean canTake94(Person person, LocalDate date, List<Absence> otherAbsences) {
-
-    Contract contract = contractDao.getContract(date, person);
-    Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-            contract, date, true, otherAbsences, Optional.<LocalDate>absent());
-    if (!vr.isPresent()) {
-      return false;
-    }
-
-    return (vr.get().persmissionNotYetUsed > 0);
-
   }
 
   /**
@@ -334,7 +250,7 @@ public class AbsenceManager {
                 person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
       } else if (AbsenceTypeMapping.FER.is(absenceType)) {
         aiList.add(
-            handlerFER(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
+            handlerFer(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
       } else if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType)
               || AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
               || AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)) {
@@ -573,46 +489,40 @@ public class AbsenceManager {
   /**
    * Gestisce l'inserimento esplicito dei codici 31, 32 e 94.
    */
-  private AbsencesResponse handler31_32_94(
-      Person person, LocalDate date, AbsenceType absenceType,
+  private AbsencesResponse handler31_32_94(Person person, LocalDate date, AbsenceType absenceType, 
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
-        && canTake32(person, date, otherAbsences)) {
+
+    if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType) 
+        && vacationsService.canTake32(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
-    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType)
-        && canTake31(person, date, otherAbsences)) {
+    
+    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType) 
+        && vacationsService.canTake31(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
-    if (AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)
-        && canTake94(person, date, otherAbsences)) {
+    
+    if (AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType) 
+        && vacationsService.canTake94(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
-    // CODICE FERIE NON DISPONIBILE
+
+    //codice ferie non disponibile
     return new AbsencesResponse(date, absenceType.code,
-            AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
+        AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
   }
 
   /**
    * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute).
    */
-  private AbsencesResponse handler37(
-      Person person, LocalDate date, AbsenceType absenceType,
+  private AbsencesResponse handler37(Person person, LocalDate date, AbsenceType absenceType, 
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    if (date.getYear() == LocalDate.now().getYear()) {
-      Optional<VacationsRecap> vr = vacationsFactory.create(date.getYear(),
-              contractDao.getContract(LocalDate.now(), person),
-              LocalDate.now(), false, otherAbsences, Optional.<LocalDate>absent());
-      if (vr.isPresent()) {
-        int remaining37 = vr.get().vacationDaysLastYearNotYetUsed;
-        if (remaining37 > 0) {
-          //37 disponibile
-          return insert(person, date, absenceType, file,
-                  Optional.<Integer>absent(), persist);
-        }
-      }
+    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType) 
+        && vacationsService.canTake37(person, date, otherAbsences)) {
+      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
+     
     }
 
     //37 non disponibile
@@ -661,16 +571,15 @@ public class AbsenceManager {
   /**
    * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.
    */
-  private AbsencesResponse handlerFER(
-      Person person, LocalDate date, AbsenceType absenceType,
+  private AbsencesResponse handlerFer(Person person, LocalDate date, AbsenceType absenceType, 
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    AbsenceType wichFer = whichVacationCode(person, date, otherAbsences);
+    AbsenceType wichFer = vacationsService.whichVacationCode(person, date, otherAbsences);
 
     //FER esauriti
     if (wichFer == null) {
       return new AbsencesResponse(date, absenceType.code,
-              AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
+          AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
     }
     return insert(person, date, wichFer, file, Optional.<Integer>absent(), persist);
   }
