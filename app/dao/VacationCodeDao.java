@@ -21,7 +21,7 @@ import javax.persistence.EntityManager;
 public class VacationCodeDao extends DaoBase {
 
   @Inject
-  VacationCodeDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+  public VacationCodeDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
 

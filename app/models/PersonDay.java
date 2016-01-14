@@ -1,5 +1,7 @@
 package models;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -42,6 +44,7 @@ public class PersonDay extends BaseModel {
   @JoinColumn(name = "person_id", nullable = false)
   public Person person;
 
+  @Getter
   @Required
   public LocalDate date;
 
