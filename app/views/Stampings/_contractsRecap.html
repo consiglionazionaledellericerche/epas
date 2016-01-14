@@ -60,8 +60,8 @@
 	      
 	      <tr>
 		    <td class="col-xs-10">Residuo dai mesi precedenti</td>
-		    #{if mese.getPreviousRecap().present}
-		      <td class="col-xs-2 success">${mese.getPreviousRecap().get().remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
+		    #{if mese.getPreviousRecapInYear().present}
+		      <td class="col-xs-2 success">${mese.getPreviousRecapInYear().get().remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
 		    #{/if}
 			#{else}
 			  <td class="col-xs-2 success">+00:00</td>

@@ -433,9 +433,15 @@ public final class PersonDao extends DaoBase {
 
     final QPerson person = QPerson.person;
     final QBadge badge = QBadge.badge;
+
+    //Rimuove tutti gli eventuali 0 iniziali alla stringa
+    // http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
+    final String cleanedBadgeNumber = badgeNumber.replaceFirst("^0+(?!$)", "");
+
     return getQueryFactory().from(person)
         .leftJoin(person.badges, badge)
-        .where(badge.badgeReader.eq(badgeReader).and(badge.code.eq(badgeNumber)))
+        .where(badge.badgeReader.eq(badgeReader)
+            .andAnyOf(badge.code.eq(badgeNumber), badge.code.eq(cleanedBadgeNumber)))
         .singleResult(person);
   }
 

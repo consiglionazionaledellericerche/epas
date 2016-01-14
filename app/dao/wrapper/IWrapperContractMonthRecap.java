@@ -14,6 +14,8 @@ public interface IWrapperContractMonthRecap extends IWrapperModel<ContractMonthR
   public IWrapperContract getContract();
 
   public Optional<ContractMonthRecap> getPreviousRecap();
+  
+  public Optional<ContractMonthRecap> getPreviousRecapInYear();
 
   /**
    * Se visualizzare il prospetto sul monte ore anno precedente.
