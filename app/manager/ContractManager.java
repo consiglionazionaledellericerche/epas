@@ -19,8 +19,9 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
-import play.db.jpa.JPAPlugin;
+import play.db.jpa.JPA;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class ContractManager {
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
   private final VacationCodeDao vacationCodeDao;
+  private final PeriodManager periodManager;
 
   /**
    * Constructor.
@@ -48,10 +50,11 @@ public class ContractManager {
   @Inject
   public ContractManager(
       final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
-      final IWrapperFactory wrapperFactory) {
+      final PeriodManager periodManager, final IWrapperFactory wrapperFactory) {
 
     this.consistencyManager = consistencyManager;
     this.vacationCodeDao = vacationCodeDao;
+    this.periodManager = periodManager;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -61,7 +64,7 @@ public class ContractManager {
    * @param contract contract
    * @return esito
    */
-  public final boolean isProperContract(final Contract contract) {
+  public final boolean isContractNotOverlapping(final Contract contract) {
 
     DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
     for (Contract c : contract.person.contracts) {
@@ -84,7 +87,7 @@ public class ContractManager {
    * @param contract contract
    * @return esito
    */
-  public final boolean contractCrossFieldValidation(final Contract contract) {
+  public final boolean isContractCrossFieldValidationPassed(final Contract contract) {
 
     if (contract.endDate != null
             && contract.endDate.isBefore(contract.beginDate)) {
@@ -100,7 +103,7 @@ public class ContractManager {
       return false;
     }
 
-    if (!isProperContract(contract)) {
+    if (!isContractNotOverlapping(contract)) {
       return false;
     }
 
@@ -116,21 +119,21 @@ public class ContractManager {
    */
   public final boolean properContractCreate(final Contract contract, final WorkingTimeType wtt) {
 
-    if (!contractCrossFieldValidation(contract)) {
+    if (!isContractCrossFieldValidationPassed(contract)) {
       return false;
     }
 
-    if (!isProperContract(contract)) {
+    if (!isContractNotOverlapping(contract)) {
       return false;
     }
 
     contract.save();
 
-    buildVacationPeriods(contract);
+    setContractVacationPeriod(contract);
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-    cwtt.beginDate = contract.beginDate;
-    cwtt.endDate = contract.endDate;
+    cwtt.beginDate = contract.getBeginDate();
+    cwtt.endDate = contract.calculatedEnd();
     cwtt.workingTimeType = wtt;
     cwtt.contract = contract;
     cwtt.save();
@@ -138,8 +141,8 @@ public class ContractManager {
 
     ContractStampProfile csp = new ContractStampProfile();
     csp.contract = contract;
-    csp.beginDate = contract.beginDate;
-    csp.endDate = contract.endDate;
+    csp.beginDate = contract.getBeginDate();
+    csp.endDate = contract.calculatedEnd();
     csp.fixedworkingtime = false;
     csp.save();
     contract.contractStampProfile.add(csp);
@@ -157,7 +160,7 @@ public class ContractManager {
   }
 
   /**
-   * Costruisce il contratto in modo sicuro e effettua il calcolo dalla data from.
+   * Aggiorna il contratto in modo sicuro ed effettua il ricalcolo.
    *
    * @param contract   contract
    * @param from       da quando effettuare il ricalcolo.
@@ -166,21 +169,13 @@ public class ContractManager {
   public final void properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
 
-    buildVacationPeriods(contract);
-    updateContractWorkingTimeType(contract);
-    updateContractStampProfile(contract);
-
-    recomputeContract(contract, Optional.fromNullable(from), true, onlyRecaps);
+    setContractVacationPeriod(contract);
+    
+    periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
+    periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
+    
+    recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
   }
-
-  /**
-   * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
-   *
-   * @param contract contratto su cui effettuare il ricalcolo.
-   * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. Se null ricalcola
-   *        dall'inizio del contratto. newContract: indica se il ricalcolo è relativo ad un nuvo
-   *        contratto ad uno già esistente
-   */
 
   /**
    * Ricalcolo del contratto a partire dalla data from.
@@ -200,42 +195,91 @@ public class ContractManager {
     }
 
     if (!newContract) {
-      // Distruggere i riepiloghi
-      // TODO: anche quelli sulle ferie quando ci saranno
-      destroyContractMonthRecap(contract);
 
-      JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
+      YearMonth yearMonthFrom = new YearMonth(startDate);
+      
+      // Distruggere i riepiloghi esistenti da yearMonthFrom.
+      // TODO: anche quelli sulle ferie quando ci saranno
+      for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
+        if (new YearMonth(cmr.year, cmr.month).isBefore(yearMonthFrom)) {
+          continue;
+        }
+        cmr.delete();
+      }
+      
+      JPA.em().flush();
+      contract.refresh();   //per aggiornare la lista contract.contractMonthRecaps
     }
 
     consistencyManager.updateContractSituation(contract, startDate);
   }
 
-  private void destroyContractMonthRecap(final Contract contract) {
-    for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-      cmr.delete();
-    }
-    contract.save();
-  }
 
-  private VacationPeriod buildVacationPeriod(
-      final Contract contract, final VacationCode vacationCode,
-      final LocalDate beginFrom, final LocalDate endTo) {
+  /**
+   * Builder dell'oggetto vacationPeriod.
+   * @param contract contratto
+   * @param vacationCode vacationCode
+   * @param beginFrom da
+   * @param endTo a
+   * @return il vacationPeriod
+   */
+  private static VacationPeriod buildVacationPeriod(final Contract contract, 
+      final VacationCode vacationCode, final LocalDate beginFrom, final LocalDate endTo) {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
     vacationPeriod.contract = contract;
     vacationPeriod.beginFrom = beginFrom;
     vacationPeriod.endTo = endTo;
     vacationPeriod.vacationCode = vacationCode;
-    vacationPeriod.save();
     return vacationPeriod;
   }
-
+  
   /**
-   * Costruisce la struttura dei periodi ferie associati al contratto applicando la normativa
+   * Ritorna i vacation period di default per il contratto applicando la normativa
    * vigente.
+   * 
+   * @param contract contract
+   * @return i vacation period
    */
-  public void buildVacationPeriods(final Contract contract) {
+  public List<VacationPeriod> contractVacationPeriods(Contract contract)  {
+
+    List<VacationPeriod> vacationPeriods = Lists.newArrayList();
+
+    VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
+    VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
+
+    if (contract.getEndDate() == null) {
+
+      // Tempo indeterminato, creo due vacation 3 anni più infinito
+      vacationPeriods.add(buildVacationPeriod(contract, v26, contract.getBeginDate(),
+          contract.getBeginDate().plusYears(3).minusDays(1)));
+      vacationPeriods.add(
+          buildVacationPeriod(contract, v28, contract.getBeginDate().plusYears(3), null));
+
+    } else {
+
+      if (contract.getEndDate().isAfter(contract.getBeginDate().plusYears(3).minusDays(1))) {
+
+        // Tempo determinato più lungo di 3 anni
+        vacationPeriods.add(buildVacationPeriod(contract, v26, contract.getBeginDate(),
+            contract.getBeginDate().plusYears(3).minusDays(1)));
+        vacationPeriods.add(
+            buildVacationPeriod(contract, v28, contract.getBeginDate().plusYears(3), 
+                contract.getEndDate()));
+      } else {
+        vacationPeriods.add(
+            buildVacationPeriod(contract, v26, contract.getBeginDate(), contract.getEndDate()));
+      }
+    }
+    return vacationPeriods;
+  }
+  
+  /**
+   * Assegna i vacationPeriod di default al contratto, eliminando quelli precedentemente impostati.
+   * 
+   * @param contract contratto.
+   */
+  public void setContractVacationPeriod(final Contract contract) {
 
     // TODO: Quando verrà implementata la crud per modificare manualmente
     // i piani ferie non sarà sufficiente cancellare la storia, ma dare
@@ -248,118 +292,12 @@ public class ContractManager {
     contract.save();
     contract.refresh();
 
-    VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
-    VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
-
-    if (contract.endDate == null) {
-
-      // Tempo indeterminato, creo due vacation 3 anni più infinito
-
-      contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
-              contract.beginDate.plusYears(3).minusDays(1)));
-      contract.vacationPeriods
-              .add(buildVacationPeriod(contract, v28, contract.beginDate.plusYears(3), null));
-
-    } else {
-
-      if (contract.endDate.isAfter(contract.beginDate.plusYears(3).minusDays(1))) {
-
-        // Tempo determinato più lungo di 3 anni
-
-        contract.vacationPeriods.add(buildVacationPeriod(contract, v26, contract.beginDate,
-                contract.beginDate.plusYears(3).minusDays(1)));
-
-        contract.vacationPeriods.add(buildVacationPeriod(contract, v28,
-                contract.beginDate.plusYears(3), contract.endDate));
-
-      } else {
-
-        contract.vacationPeriods.add(
-                buildVacationPeriod(contract, v26, contract.beginDate, contract.endDate));
-      }
+    contract.vacationPeriods = Lists.newArrayList();
+    contract.vacationPeriods.addAll(contractVacationPeriods(contract));
+    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+      vacationPeriod.save();
     }
-  }
-
-  /**
-   * Quando vengono modificate le date di inizio o fine del contratto occorre rivedere la struttura
-   * dei periodi di tipo orario. (1)Eliminare i periodi non più appartenenti al contratto
-   * (2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
-   * (3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
-   */
-  private void updateContractWorkingTimeType(final Contract contract) {
-    // Aggiornare i periodi workingTimeType
-    // 1) Cancello quelli che non appartengono più a contract
-    List<ContractWorkingTimeType> toDelete = Lists.newArrayList();
-    IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-      DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-      if (DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(),
-              cwttInterval) == null) {
-        toDelete.add(cwtt);
-      }
-    }
-    for (ContractWorkingTimeType cwtt : toDelete) {
-      cwtt.delete();
-      contract.contractWorkingTimeType.remove(cwtt);
-      contract.save();
-    }
-
-    // Conversione a List per avere il metodo get()
-    final List<ContractWorkingTimeType> cwttList =
-            Lists.newArrayList(contract.contractWorkingTimeType);
-
-    // Sistemo il primo
-    ContractWorkingTimeType first = cwttList.get(0);
-    first.beginDate = wrappedContract.getContractDateInterval().getBegin();
-    first.save();
-    // Sistemo l'ultimo
-    ContractWorkingTimeType last = cwttList.get(contract.contractWorkingTimeType.size() - 1);
-    last.endDate = wrappedContract.getContractDateInterval().getEnd();
-    if (DateUtility.isInfinity(last.endDate)) {
-      last.endDate = null;
-    }
-    last.save();
-    contract.save();
-  }
-
-  /**
-   * Quando vengono modificate le date di inizio o fine del contratto occorre rivedere la struttura
-   * dei periodi di stampProfile. (1)Eliminare i periodi non più appartenenti al contratto
-   * (2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
-   * (3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
-   */
-  private void updateContractStampProfile(final Contract contract) {
-    // Aggiornare i periodi stampProfile
-    // 1) Cancello quelli che non appartengono più a contract
-    List<ContractStampProfile> toDelete = Lists.newArrayList();
-    IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    for (ContractStampProfile csp : contract.contractStampProfile) {
-      DateInterval cspInterval = new DateInterval(csp.beginDate, csp.endDate);
-      if (DateUtility.intervalIntersection(wrappedContract.getContractDateInterval(),
-              cspInterval) == null) {
-        toDelete.add(csp);
-      }
-    }
-    for (ContractStampProfile csp : toDelete) {
-      csp.delete();
-      contract.contractWorkingTimeType.remove(csp);
-      contract.save();
-    }
-
-    // Conversione a List per avere il metodo get()
-    List<ContractStampProfile> cspList = Lists.newArrayList(contract.contractStampProfile);
-
-    // Sistemo il primo
-    ContractStampProfile first = cspList.get(0);
-    first.beginDate = wrappedContract.getContractDateInterval().getBegin();
-    first.save();
-    // Sistemo l'ultimo
-    ContractStampProfile last = cspList.get(contract.contractStampProfile.size() - 1);
-    last.endDate = wrappedContract.getContractDateInterval().getEnd();
-    if (DateUtility.isInfinity(last.endDate)) {
-      last.endDate = null;
-    }
-    last.save();
+  
     contract.save();
   }
 
@@ -383,14 +321,6 @@ public class ContractManager {
     return null;
   }
 
-
-  /**
-   * Conversione della lista dei contractStampProfile da Set a List.
-   */
-  public final List<ContractStampProfile> getContractStampProfileAsList(final Contract contract) {
-
-    return Lists.newArrayList(contract.contractStampProfile);
-  }
 
   /**
    * Sistema l'inizializzazione impostando i valori corretti se mancanti.

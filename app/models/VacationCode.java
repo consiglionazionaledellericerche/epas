@@ -1,5 +1,6 @@
 package models;
 
+import lombok.Getter;
 import lombok.ToString;
 
 import models.base.BaseModel;

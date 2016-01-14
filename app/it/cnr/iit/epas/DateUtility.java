@@ -139,11 +139,16 @@ public class DateUtility {
 
 
   /**
-   * @param date data.
+   * Se la data è contenuta nell'intervallo.
+   * @param date     data
    * @param interval intervallo
    * @return true se la data ricade nell'intervallo estremi compresi
    */
   public static boolean isDateIntoInterval(final LocalDate date, final DateInterval interval) {
+    
+    if (interval == null) {
+      return false;
+    }
     LocalDate dateToCheck = date;
     if (dateToCheck == null) {
       dateToCheck = MAX_DATE;
@@ -156,45 +161,52 @@ public class DateUtility {
   }
 
   /**
+   * L'intervallo contenente l'intersezione fra inter1 e inter2.
+   * @param inter1 primo intervallo
+   * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
-   *     intersezione vuota.
+   *         intersezione vuota.
    */
-  public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2) {
+  public static DateInterval intervalIntersection(final DateInterval inter1, 
+      final DateInterval inter2) {
+  
     if (inter1 == null || inter2 == null) {
       return null;
     }
-    // ordino
-    if (!inter1.getBegin().isBefore(inter2.getBegin())) {
-      DateInterval aux = new DateInterval(inter1.getBegin(), inter1.getEnd());
-      inter1 = inter2;
-      inter2 = aux;
-    }
-
-
+    
     // un intervallo contenuto nell'altro
     if (isIntervalIntoAnother(inter1, inter2)) {
-      return inter1;
+      return new DateInterval(inter1.getBegin(), inter1.getEnd());
     }
 
     if (isIntervalIntoAnother(inter2, inter1)) {
-      return inter2;
+      return new DateInterval(inter2.getBegin(), inter2.getEnd());
     }
 
+    DateInterval copy1 = new DateInterval(inter1.getBegin(), inter1.getEnd());
+    DateInterval copy2 = new DateInterval(inter2.getBegin(), inter2.getEnd());
+
+    // ordino
+    if (!inter1.getBegin().isBefore(inter2.getBegin())) {
+      DateInterval aux = new DateInterval(inter1.getBegin(), inter1.getEnd());
+      copy1 = inter2;
+      copy2 = aux;
+    }
+ 
     // fine di inter1 si interseca con inizio di inter2
-    if (inter1.getEnd().isBefore(inter2.getBegin())) {
+    if (copy1.getEnd().isBefore(copy2.getBegin())) {
       return null;
     } else {
-      return new DateInterval(inter2.getBegin(), inter1.getEnd());
+      return new DateInterval(copy2.getBegin(), copy1.getEnd());
     }
-
   }
-
+  
   /**
-   * @param inter l'intervallo.
-   * @return conta il numero di giorni appartenenti all'intervallo estremi compresi
+   * Conta il numero di giorni appartenenti all'intervallo estremi compresi.
+   * @param inter l'intervallo
+   * @return numero di giorni
    */
   public static int daysInInterval(final DateInterval inter) {
-
 
     int days = Days.daysBetween(inter.getBegin(), inter.getEnd()).getDays() + 1;
 
@@ -213,21 +225,23 @@ public class DateUtility {
   }
 
   /**
-   * @param first  il primo intervallo.
+   * Se il primo intervallo è contenuto nel secondo intervallo.
+   * @param first  il primo intervallo
    * @param second il secondo intervallo
-   * @return true se il primo intervallo e' contenuto nel secondo intervallo (estremi compresi),
-   *     false altrimenti
+   * @return se il primo interllallo è contenuto nel secondo intervallo.
    */
   public static boolean isIntervalIntoAnother(final DateInterval first, final DateInterval second) {
 
-    if (first.getBegin().isBefore(second.getBegin()) || first.getEnd().isAfter(second.getEnd())) {
+    if (first.getBegin().isBefore(second.getBegin()) 
+        || first.getEnd().isAfter(second.getEnd())) {
       return false;
     }
     return true;
   }
 
   /**
-   * @return la data infinito.
+   * La data massima che equivale a infinito.
+   * @return la data infinito
    */
   public static LocalDate setInfinity() {
     return MAX_DATE;
@@ -239,6 +253,15 @@ public class DateUtility {
    */
   public static boolean isInfinity(final LocalDate date) {
     return date.equals(MAX_DATE);
+  }
+  
+  /**
+   * L'intervallo dell'anno.
+   * @param year anno
+   * @return l'intervallo
+   */
+  public static DateInterval getYearInterval(int year) {
+    return new DateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
   }
 
 

@@ -16,8 +16,8 @@ import lombok.Data;
 
 import manager.PersonManager;
 import manager.SecureManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -51,7 +51,7 @@ public class MonthRecaps extends Controller {
   @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static VacationsRecapFactory vacationsFactory;
+  private static IVacationsService vacationsService;
   @Inject
   private static PersonManager personManager;
   @Inject
@@ -134,18 +134,15 @@ public class MonthRecaps extends Controller {
       IWrapperPerson wrPerson = wrapperFactory.create(person);
 
       for (Contract contract : wrPerson.getMonthContracts(year, month)) {
-        Optional<VacationsRecap> vr = vacationsFactory.create(year,
-                contract, LocalDate.now(), true, monthEnd);
+        
+        Optional<VacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
 
         CustomRecapDTO danilaDto = new CustomRecapDTO();
-        danilaDto.ferieAnnoCorrente =
-                vr.get().vacationDaysCurrentYearTotal
-                        - vr.get().vacationDaysCurrentYearUsed;
-        danilaDto.ferieAnnoPassato =
-                vr.get().vacationDaysLastYearAccrued
-                        - vr.get().vacationDaysLastYearUsed;
-        danilaDto.permessi = vr.get().permissionCurrentYearTotal
-                - vr.get().permissionUsed;
+        danilaDto.ferieAnnoCorrente = vr.get().getVacationsCurrentYear().getNotYetUsedTotal();
+        
+        danilaDto.ferieAnnoPassato = vr.get().getVacationsLastYear().getNotYetUsedTotal();
+        
+        danilaDto.permessi = vr.get().getPermissions().getNotYetUsedTotal();
 
         Optional<ContractMonthRecap> recap =
                 wrapperFactory.create(contract).getContractMonthRecap(

@@ -15,9 +15,8 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.SecureManager;
-import manager.VacationManager;
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.Office;
@@ -47,14 +46,17 @@ public class VacationsAdmin extends Controller {
   @Inject
   private static IWrapperFactory wrapperFactory;
   @Inject
-  private static VacationsRecapFactory vacationsFactory;
-  @Inject
-  private static VacationManager vacationManager;
+  private static IVacationsService vacationsService;
   @Inject
   private static SecurityRules rules;
   @Inject
   private static ContractDao contractDao;
 
+  /**
+   * Riepiloghi ferie della sede.
+   * @param year anno
+   * @param officeId sede
+   */
   public static void list(Integer year, Long officeId) {
 
     Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
@@ -85,8 +87,8 @@ public class VacationsAdmin extends Controller {
 
       for (Contract contract : person.contracts) {
 
-        IWrapperContract c = wrapperFactory.create(contract);
-        if (DateUtility.intervalIntersection(c.getContractDateInterval(),
+        IWrapperContract cwrContract = wrapperFactory.create(contract);
+        if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
                 yearInterval) == null) {
 
           //Questo evento andrebbe segnalato... la list dovrebbe caricare
@@ -94,8 +96,7 @@ public class VacationsAdmin extends Controller {
           continue;
         }
 
-        Optional<VacationsRecap> vr = vacationsFactory.create(year,
-                contract, LocalDate.now(), true);
+        Optional<VacationsRecap> vr = vacationsService.create(year, contract);
 
         if (vr.isPresent()) {
           vacationsList.add(vr.get());
@@ -106,28 +107,34 @@ public class VacationsAdmin extends Controller {
       }
     }
 
-    LocalDate expireDate = vacationManager
-            .vacationsLastYearExpireDate(year, office);
+    boolean isVacationLastYearExpired = vacationsService.isVacationsLastYearExpired(year, 
+        vacationsService.vacationsLastYearExpireDate(year, office));
+    
+    boolean isVacationCurrentYearExpired = vacationsService.isVacationsLastYearExpired(year + 1,
+        vacationsService.vacationsLastYearExpireDate(year+1, office));
+    
+    boolean isPermissionCurrentYearExpired = false;
+    if (new LocalDate(year,12,31).isBefore(LocalDate.now())) {
+      isPermissionCurrentYearExpired = true;
+    }
 
-    boolean isVacationLastYearExpired = vacationManager
-            .isVacationsLastYearExpired(year, expireDate);
-
-    render(vacationsList, isVacationLastYearExpired,
-            contractsWithVacationsProblems, year, offices, office);
+    render(vacationsList, isVacationLastYearExpired, isVacationCurrentYearExpired, 
+        isPermissionCurrentYearExpired, contractsWithVacationsProblems, year, offices, office);
   }
 
+  /**
+   * Riepilogo ferie anno corrente. 
+   * @param contractId contratto
+   * @param anno anno
+   */
   public static void vacationsCurrentYear(Long contractId, Integer anno) {
 
     Contract contract = contractDao.getContractById(contractId);
-    if (contract == null) {
-      error(); /* send a 500 error */
-    }
+    notFoundIfNull(contract);
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<VacationsRecap> vr = vacationsFactory
-            .create(anno, contract, LocalDate.now(), true);
-
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
@@ -138,17 +145,19 @@ public class VacationsAdmin extends Controller {
     renderTemplate("Vacations/recapVacation.html", vacationsRecap, activeVacationCurrentYear);
   }
 
+  /**
+   * Riepilogo ferie anno passato. 
+   * @param contractId contratto
+   * @param anno anno
+   */
   public static void vacationsLastYear(Long contractId, Integer anno) {
 
     Contract contract = contractDao.getContractById(contractId);
-    if (contract == null) {
-      error(); /* send a 500 error */
-    }
+    notFoundIfNull(contract);
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<VacationsRecap> vr = vacationsFactory
-            .create(anno, contract, LocalDate.now(), true);
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 
@@ -160,18 +169,19 @@ public class VacationsAdmin extends Controller {
   }
 
 
+  /**
+   * Riepilogo permessi anno corrente. 
+   * @param contractId contratto
+   * @param anno anno
+   */
   public static void permissionCurrentYear(Long contractId, Integer anno) {
 
     Contract contract = contractDao.getContractById(contractId);
-    if (contract == null) {
-      error(); /* send a 500 error */
-    }
+    notFoundIfNull(contract);
 
     rules.checkIfPermitted(contract.person.office);
 
-    Optional<VacationsRecap> vr = vacationsFactory
-            .create(anno, contract, LocalDate.now(), true);
-
+    Optional<VacationsRecap> vr = vacationsService.create(anno, contract);
 
     Preconditions.checkState(vr.isPresent());
 

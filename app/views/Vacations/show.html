@@ -23,42 +23,38 @@
       <!-- Ferie Past year -->  	
       <tr>
         <!-- year -->
-        <td>${vacationsRecap.year - 1}</td>
+        <td>${vacationsRecap.vacationsRequest.year - 1}</td>
         <!-- totali (maturate) -->
-        <td>${vacationsRecap.vacationDaysLastYearAccrued} (${vacationsRecap.vacationDaysLastYearAccrued})</td>
+        <td>${vacationsRecap.vacationsLastYear.total} (${vacationsRecap.vacationsLastYear.accrued})</td>
         <!-- utilizzate -->
         <td>
-		  #{if vacationsRecap.vacationDaysLastYearUsed != 0 } 
-           <a href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
-			${vacationsRecap.vacationDaysLastYearUsed}
+           <a href="@{Vacations.vacationsLastYear(vacationsRecap.vacationsRequest.year)}" 
+              data-async-modal="#defaultModal">
+			${vacationsRecap.vacationsLastYear.used}
 		  </a>
-		  #{/if}
-		  #{else} 0 #{/else}     
 	    </td>
 	    <!-- residue (maturate) -->
-        <td>${vacationsRecap.vacationDaysLastYearNotYetUsed} 
-           (${vacationsRecap.vacationDaysLastYearNotYetUsed}) </td>
+        <td>${vacationsRecap.vacationsLastYear.notYetUsedTotal} 
+           (${vacationsRecap.vacationsLastYear.notYetUsedAccrued}) </td>
 
       </tr>
       
       <!-- Ferie Current year -->
       <tr>
         <!-- year -->
-        <td>${vacationsRecap.year}</td>
+        <td>${vacationsRecap.vacationsRequest.year}</td>
         <!-- totali (maturate) -->
-        <td>${vacationsRecap.vacationDaysCurrentYearTotal} (${vacationsRecap.vacationDaysCurrentYearAccrued})</td>
+        <td>${vacationsRecap.vacationsCurrentYear.total} (${vacationsRecap.vacationsCurrentYear.accrued})</td>
         <!-- utilizzate -->
         <td>
-		  #{if vacationsRecap.vacationDaysCurrentYearUsed != 0 } 
-           <a href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
-			${vacationsRecap.vacationDaysCurrentYearUsed}
+           <a href="@{Vacations.vacationsCurrentYear(vacationsRecap.vacationsRequest.year)}" 
+              data-async-modal="#defaultModal">
+			${vacationsRecap.vacationsCurrentYear.used}
 		  </a>
-		  #{/if}
-		  #{else} 0 #{/else}     
 	    </td>
 	    <!-- residue (maturate) -->
-        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed} 
-           (${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed}) </td>
+        <td>${vacationsRecap.vacationsCurrentYear.notYetUsedTotal} 
+           (${vacationsRecap.vacationsCurrentYear.notYetUsedAccrued}) </td>
 
       </tr>
   	</table>
@@ -76,21 +72,19 @@
       </tr>  	
       <tr>
         <!-- year -->
-        <td>${vacationsRecap.year}</td>
+        <td>${vacationsRecap.vacationsRequest.year}</td>
         <!-- totali (maturate) -->
-        <td>${vacationsRecap.permissionCurrentYearTotal} (${vacationsRecap.permissionCurrentYearAccrued})</td>
+        <td>${vacationsRecap.permissions.total} (${vacationsRecap.permissions.accrued})</td>
         <!-- utilizzate -->
         <td>
-		  #{if vacationsRecap.permissionUsed != 0 } 
-           <a href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-async-modal="#defaultModal">
-			${vacationsRecap.permissionUsed}
+           <a href="@{Vacations.permissionCurrentYear(vacationsRecap.vacationsRequest.year)}" 
+              data-async-modal="#defaultModal">
+			${vacationsRecap.permissions.used}
 		  </a>
-		  #{/if}
-		  #{else} 0 #{/else}     
 	    </td>
 	    <!-- residue (maturate) -->
-        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed} 
-           (${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}) </td>
+        <td>${vacationsRecap.permissions.notYetUsedTotal} 
+           (${vacationsRecap.permissions.notYetUsedAccrued}) </td>
       </tr>
   	</table>
       
@@ -106,7 +100,7 @@
 	      <th>Valore</th>
 	    </tr>
 	    
-	    #{list items: vacationsRecap.contract.vacationPeriods, as: 'vp'}
+	    #{list items: vacationsRecap.vacationsRequest.contractVacationPeriod, as: 'vp'}
 	    <tr>
 	      <td>${vp.beginFrom.format()}</td>
 	      <td>

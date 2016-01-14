@@ -141,7 +141,7 @@ $(function($) {
         "url": "/public/i18n/DataTablesItalian.json"
       }
     });
-    this.find('[datatable-meal]').DataTable({
+    this.find('[datatable-small]').DataTable({
     	"order":[[0,"desc"]],
         "pageLength": 10,
         "lengthMenu": [

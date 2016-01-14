@@ -3,6 +3,8 @@ package models;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 import models.enumerate.JustifiedTimeAtWork;
 
@@ -45,6 +47,7 @@ public class AbsenceType extends BaseModel {
   @ManyToMany
   public List<Qualification> qualifications = new ArrayList<Qualification>();
 
+  @Getter
   @Required
   public String code;
 

@@ -418,10 +418,8 @@ public class Shift extends Controller {
   @BasicAuth
   public static void absence(
       Integer yearFrom, Integer monthFrom, Integer dayFrom,
-      Integer yearTo, Integer monthTo, Integer dayTo) {
+      Integer yearTo, Integer monthTo, Integer dayTo, String type) {
     response.accessControl("*");
-
-    String type = params.get("type");
 
     ShiftType shiftType = shiftDao.getShiftTypeByType(type);
     if (shiftType == null) {
