@@ -317,7 +317,7 @@ public class Administration extends Controller {
         .getActiveContractsInPeriod(from, Optional.<LocalDate>absent());
 
     for (Contract contract : contracts) {
-      contractManager.buildVacationPeriods(contract);
+      contractManager.setContractVacationPeriod(contract);
 
       log.info("Il contratto di {} iniziato il {} non è stato ripristinato "
           + "con i piani ferie corretti.", contract.person.fullName(), contract.beginDate);

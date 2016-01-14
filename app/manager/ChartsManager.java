@@ -16,8 +16,8 @@ import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
-import manager.recaps.vacation.VacationsRecap;
-import manager.recaps.vacation.VacationsRecapFactory;
+import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Absence;
 import models.CompetenceCode;
@@ -59,13 +59,13 @@ public class ChartsManager {
   private final CompetenceManager competenceManager;
   private final PersonDao personDao;
   private final AbsenceDao absenceDao;
-  private final VacationsRecapFactory vacationsFactory;
+  private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
 
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
                        CompetenceDao competenceDao, CompetenceManager competenceManager,
-                       PersonDao personDao, VacationsRecapFactory vacationsFactory,
+                       PersonDao personDao, IVacationsService vacationsService,
                        AbsenceDao absenceDao, ConfGeneralManager confGeneralManager,
                        IWrapperFactory wrapperFactory) {
     this.confGeneralManager = confGeneralManager;
@@ -74,7 +74,7 @@ public class ChartsManager {
     this.competenceManager = competenceManager;
     this.personDao = personDao;
     this.absenceDao = absenceDao;
-    this.vacationsFactory = vacationsFactory;
+    this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -421,8 +421,8 @@ public class ChartsManager {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsFactory.create(LocalDate.now().getYear(),
-            contract.get(), LocalDate.now(), false);
+    Optional<VacationsRecap> vr = vacationsService.create(LocalDate.now().getYear(), 
+        contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
@@ -439,13 +439,15 @@ public class ChartsManager {
     Preconditions.checkState(wtt.isPresent());
 
     out.append(person.surname + ' ' + person.name + ',');
-    out.append(new Integer(vr.get().vacationDaysCurrentYearUsed).toString() + ','
-            + new Integer(vr.get().vacationDaysLastYearUsed).toString() + ','
-            + new Integer(vr.get().permissionUsed).toString() + ','
-            + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ','
-            + new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
+
+    out.append(new Integer(vr.get().getVacationsCurrentYear().getUsed()).toString() + ',' 
+        + new Integer(vr.get().getVacationsLastYear().getUsed()).toString() + ',' 
+        + new Integer(vr.get().getPermissions().getUsed()).toString() + ',' 
+        + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ',' 
+        + new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
 
     int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
+
     int month = LocalDate.now().getMonthOfYear();
     int riposiCompensativiMinuti = 0;
     for (int i = 1; i <= month; i++) {

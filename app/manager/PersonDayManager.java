@@ -61,7 +61,6 @@ public class PersonDayManager {
                           ConfGeneralManager confGeneralManager,
                           PersonDayInTroubleManager personDayInTroubleManager,
                           ContractMonthRecapManager contractMonthRecapManager,
-                          VacationManager vacationManager,
                           PersonShiftDayDao personShiftDayDao) {
 
     this.personDayDao = personDayDao;

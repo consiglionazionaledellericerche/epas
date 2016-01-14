@@ -1,0 +1,38 @@
+package manager.services.vacations;
+
+import com.google.common.collect.Lists;
+
+import it.cnr.iit.epas.DateInterval;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+
+import models.Absence;
+
+import java.util.List;
+
+/**
+ * I giorni maturati nell'intervallo, tenuto conto dei postPartum e del tipo di richiesta
+ * (in vacationsResponse).
+ * @author alessandro
+ *
+ */
+@Data
+public class AccruedResult {
+
+  public static final int YEAR_VACATION_UPPER_BOUND = 28;
+
+  private VacationsTypeResult vacationsResult;
+  private AccruedConverter accruedConverter;
+
+  private List<AccruedResultInPeriod> accruedResultsInPeriod = Lists.newArrayList();
+
+  private DateInterval interval;
+
+  private List<Absence> postPartum = Lists.newArrayList();
+  private int days = 0;
+  private int accrued = 0;
+  private int fixed = 0;
+
+}

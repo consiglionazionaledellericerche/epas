@@ -1,5 +1,8 @@
 package models;
 
+import lombok.Data;
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -26,10 +29,12 @@ public class Absence extends BaseModel {
 
   private static final long serialVersionUID = -1963061850354314327L;
 
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "absence_type_id")
   public AbsenceType absenceType;
-
+  
+  @Getter
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "personDay_id", nullable = false)
   public PersonDay personDay;
@@ -39,6 +44,7 @@ public class Absence extends BaseModel {
 
   @Column(name = "absence_file", nullable = true)
   public Blob absenceFile;
+  
   /**
    * Questo campo serve nel caso in cui debba essere valorizzata la data di inserimento di
    * un'assenza senza che questa debba essere associata a un personDay. In particolare nel caso in
@@ -47,6 +53,7 @@ public class Absence extends BaseModel {
    * traccia di quale giorno debba contenere l'assenza in modo che, successivamente, possano essere
    * eseguiti tutti i calcoli senza però impattare sul database
    */
+  @Getter
   @Transient
   public LocalDate date;
 

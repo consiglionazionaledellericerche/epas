@@ -168,7 +168,7 @@ public class Contracts extends Controller {
     contract.endDate = endDate;
     contract.endContract = endContract;
     contract.onCertificate = onCertificate;
-    if (!contractManager.isProperContract(contract)) {
+    if (!contractManager.isContractNotOverlapping(contract)) {
       validation.addError("contract.crossValidationFailed",
               "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
