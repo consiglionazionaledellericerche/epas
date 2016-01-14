@@ -16,7 +16,6 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
   private final ContractMonthRecap value;
   private final IWrapperContract contract;
   private final IWrapperFactory wrapperFactory;
-  private Optional<ContractMonthRecap> previousRecap = null;
 
   @Inject
   WrapperContractMonthRecap(@Assisted ContractMonthRecap cmr,
@@ -45,13 +44,23 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
   @Override
   public Optional<ContractMonthRecap> getPreviousRecap() {
 
-    if (this.previousRecap == null) {
-
-      this.previousRecap = wrapperFactory.create(value.contract)
+      return wrapperFactory.create(value.contract)
+              .getContractMonthRecap(new YearMonth(value.year, value.month)
+                      .minusMonths(1));
+  }
+  
+  /**
+   * Il recap precedente se presente.
+   */
+  @Override
+  public Optional<ContractMonthRecap> getPreviousRecapInYear() {
+    
+    if (this.value.month != 1) {
+      return wrapperFactory.create(value.contract)
               .getContractMonthRecap(new YearMonth(value.year, value.month)
                       .minusMonths(1));
     }
-    return this.previousRecap;
+    return Optional.<ContractMonthRecap>absent();
   }
 
   /**
@@ -73,13 +82,13 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
       return 0;
     }
     //Preconditions.checkState(hasResidualLastYear());
-
-    if (getPreviousRecap().isPresent()) {
+    Optional<ContractMonthRecap> previous = getPreviousRecap();
+    if (previous.isPresent()) {
 
       if (value.month == 1) {
         return value.initMonteOreAnnoPassato;
       } else {
-        return getPreviousRecap().get().remainingMinutesLastYear;
+        return previous.get().remainingMinutesLastYear;
       }
 
     } else {
