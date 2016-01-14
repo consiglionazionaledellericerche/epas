@@ -6,11 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import controllers.Security;
-
 import dao.PersonDao;
-
-import injection.StaticInject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +20,8 @@ import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDateTime;
 
+import controllers.Security;
+import injection.StaticInject;
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
@@ -114,103 +112,21 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       Logger.trace("L'array json di tipoMatricola: %s", tipoMatricola);
 
-      for (int i = 0; i < tipoMatricola.size(); i++) {
-        String tipo = tipoMatricola.get(i).getAsString();
-        Logger.trace("Il tipo di matricolaFirma che sto controllando per la matricola %s e': %s",
-            matricolaFirma, tipo);
+      //Rimuove tutti gli eventuali 0 iniziali alla stringa
+      // http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
+//      String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
 
-        /**
-         * l'ordine con cui faccio le ricerche sul db dipende dall'array tipoMatricola
-         * che mi ha passato il client,
-         * quindi vado sul db a fare la ricerca partendo dal primo campo dell'array passato.
-         * Se lo trovo ok ed esco, altrimenti proseguo nel for a cercare con il tipo successivo
-         */
+      if (Security.getUser().get().badgeReader == null) {
+        log.warn("L'user autenticato come badgeReader "
+            + "non ha una istanza badgeReader valida associata.");
 
-        if (tipo.equals("matricolaCNR")) {
+        return null;
+      }
+      person = personDao.getPersonByBadgeNumber(matricolaFirma,
+          Security.getUser().get().badgeReader);
 
-          if (matricolaFirma.indexOf("INT") > 0) {
-            continue;
-          }
-          try {
-            int firma = Integer.parseInt(matricolaFirma);
-            person = personDao.getPersonByNumber(firma, Optional.fromNullable(offices));
-            //person = Person.find("Select p from Person p where p.number = ?", firma).first();
-          } catch (NumberFormatException nfe) {
-            Logger.debug("Impossibile cercare una persona tramite la matricola se la "
-                + "matricola non e' numerica. Matricola = %s", matricolaFirma);
-            continue;
-          }
-
-          if (person != null) {
-            stamping.personId = person.id;
-            break;
-          }
-          continue;
-
-        }
-
-        if (tipo.equals("idTabellaINT")) {
-          Logger.debug("Controllo l'idtabellaINT");
-          //Matricola firma derivante dal contatore interno
-          String intMatricolaFirma = matricolaFirma;
-
-          if (matricolaFirma.indexOf("INT") > 0) {
-            intMatricolaFirma = matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3).trim();
-          } else {
-            continue;
-          }
-          Logger.debug("La matricola firma è: %s", intMatricolaFirma);
-
-          long intMatricolaFirmaAsLong = Long.parseLong(intMatricolaFirma);
-
-
-          //Controlla sul campo person oldId
-          person = personDao.getPersonByOldID(intMatricolaFirmaAsLong,
-              Optional.fromNullable(offices));
-          if (person != null) {
-            stamping.personId = person.id;
-            break;
-          }
-
-          //Nell'inserimento delle persone ci deve essere un controllo che verifichi che non ci
-          //siano casi in cui il campo id possa essere utilizzato per associare il badge alla
-          //persona e lo stesso valore dell'id esista già come oldId,
-          //altrimenti questa parte di codice non funzionerebbe
-
-          person = personDao.getPersonById(intMatricolaFirmaAsLong);
-          if (person != null) {
-            Logger.debug("La persona corrispondente è: %s %s", person.name, person.surname);
-            stamping.personId = person.id;
-            break;
-          }
-
-          continue;
-
-        }
-
-        if (tipo.equals("matricolaBadge")) {
-
-          //Rimuove tutti gli eventuali 0 iniziali alla stringa
-          // http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
-          String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
-
-          if (Security.getUser().get().badgeReader == null) {
-            log.warn("L'user autenticato come badgeReader "
-                + "non ha una istanza badgeReader valida associata.");
-
-            return null;
-          }
-          person = personDao.getPersonByBadgeNumber(badgeNumber,
-              Security.getUser().get().badgeReader);
-
-          if (person != null) {
-            stamping.personId = person.id;
-            break;
-          }
-          continue;
-
-        }
-
+      if (person != null) {
+        stamping.personId = person.id;
       }
 
       if (stamping.personId == null) {
