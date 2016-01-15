@@ -2,7 +2,6 @@ package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -102,19 +101,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         }
       }
 
-      /**
-       * Cercare la persona in funzione del tipo di matricolaFirma.
-       * Nel campo matricolaFirma decido di riportare il valore dell'id con cui viene salvata
-       * la persona sul db invece che la matricola.
-       */
-      JsonArray tipoMatricola = jsonObject.getAsJsonArray("tipoMatricolaFirma");
       String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
-
-      Logger.trace("L'array json di tipoMatricola: %s", tipoMatricola);
-
-      //Rimuove tutti gli eventuali 0 iniziali alla stringa
-      // http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
-//      String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
 
       if (Security.getUser().get().badgeReader == null) {
         log.warn("L'user autenticato come badgeReader "
