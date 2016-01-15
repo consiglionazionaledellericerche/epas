@@ -158,21 +158,6 @@ public class MealTickets extends Controller {
         contract.person.office.id);
   }
 
-
-  /**
-   * Aggiunge i 3 blocchetti inseriti. 
-   * @param personId persona
-   * @param codeBlock1 codice1
-   * @param dimBlock1 dim1
-   * @param expireDate1 data1
-   * @param codeBlock2 codice2
-   * @param dimBlock2 dim2
-   * @param expireDate2 data2
-   * @param codeBlock3 codice3
-   * @param dimBlock3 dim3
-   * @param expireDate3 data3
-   */
-  
   /**
    * Aggiunta di un blocchetto alla persona.
    * @param personId persona.
@@ -238,7 +223,7 @@ public class MealTickets extends Controller {
 
     //Persistenza
     for (MealTicket mealTicket : ticketToAddOrdered) {
-      mealTicket.date = LocalDate.now();
+      mealTicket.date = deliveryDate;
       mealTicket.contract = contractDao.getContract(mealTicket.date, person);
       mealTicket.admin = admin.person;
       mealTicket.save();
