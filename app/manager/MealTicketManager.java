@@ -12,7 +12,7 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.recaps.mealTicket.BlockMealTicket;
+import manager.services.mealtickets.BlockMealTicket;
 
 import models.Contract;
 import models.ContractMonthRecap;

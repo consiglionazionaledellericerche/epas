@@ -123,6 +123,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   /**
    * Ritorna il ContractStampProfile attivo alla data.
    */
+  @Transient
   public Optional<ContractStampProfile> getContractStampProfileFromDate(LocalDate date) {
 
     for (ContractStampProfile csp : contractStampProfile) {
@@ -137,6 +138,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * La lista ordinata dei contractWorkingTimeType.
    * @return lista
    */
+  @Transient
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeOrderedList() {
     List<ContractWorkingTimeType> list = Lists.newArrayList(this.contractWorkingTimeType);
     Collections.sort(list);

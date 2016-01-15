@@ -19,9 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.MealTicketManager;
-import manager.recaps.mealTicket.BlockMealTicket;
-import manager.recaps.mealTicket.MealTicketRecap;
-import manager.recaps.mealTicket.MealTicketRecapFactory;
+import manager.services.mealtickets.BlockMealTicket;
+import manager.services.mealtickets.MealTicketRecap;
+import manager.services.mealtickets.MealTicketRecapFactory;
 
 import models.Contract;
 import models.ContractMonthRecap;

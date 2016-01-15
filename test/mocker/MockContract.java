@@ -16,7 +16,7 @@ import java.util.List;
 public class MockContract {
   
   @Builder
-  public static Contract contract(
+  private static Contract contract(
       LocalDate beginDate,
       LocalDate endDate,
       LocalDate endContract,
