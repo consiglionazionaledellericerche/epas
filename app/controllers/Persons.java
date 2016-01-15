@@ -48,7 +48,6 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;
@@ -488,10 +487,10 @@ public class Persons extends Controller {
   }
 
 
-  public static void confirmGroup(@Required List<Long> peopleId, Long personId) {
+  public static void confirmGroup(@Required List<Long> peopleGroupId, Long personId) {
     Person person = personDao.getPersonById(personId);
     Person p = null;
-    for (Long id : peopleId) {
+    for (Long id : peopleGroupId) {
       p = personDao.getPersonById(id);
       p.personInCharge = person;
       p.save();
@@ -499,7 +498,7 @@ public class Persons extends Controller {
     }
     person.save();
     flash.success("Aggiunte persone al gruppo di %s %s", person.name, person.surname);
-    list(null);
+    workGroup(person.id);
   }
 
   public static void removePersonFromGroup(Long pId) {
