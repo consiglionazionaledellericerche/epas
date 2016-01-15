@@ -368,7 +368,6 @@ public class ContractManager {
     contract.sourceRemainingMinutesCurrentYear = 0;
     contract.sourceRemainingMinutesLastYear = 0;
     contract.sourceRecoveryDayUsed = 0;
-    contract.sourceRemainingMealTicket = 0;
   }
 
   /**
