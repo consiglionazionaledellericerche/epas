@@ -8,7 +8,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import it.cnr.iit.epas.DateInterval;
 
-import manager.MealTicketManager.MealTicketOrder;
+import manager.services.mealTickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Contract;
 import models.MealTicket;

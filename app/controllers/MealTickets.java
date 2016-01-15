@@ -18,10 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
-import manager.MealTicketManager;
-import manager.services.mealtickets.BlockMealTicket;
-import manager.services.mealtickets.MealTicketRecap;
-import manager.services.mealtickets.MealTicketRecapFactory;
+import manager.services.mealTickets.BlockMealTicket;
+import manager.services.mealTickets.IMealTicketsService;
+import manager.services.mealTickets.MealTicketRecap;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -55,13 +54,11 @@ public class MealTickets extends Controller {
   @Inject
   private static PersonDao personDao;
   @Inject
-  private static MealTicketRecapFactory mealTicketFactory;
+  private static IMealTicketsService mealTicketService;
   @Inject
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static MealTicketDao mealTicketDao;
-  @Inject
-  private static MealTicketManager mealTicketManager;
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
   @Inject
@@ -108,14 +105,14 @@ public class MealTickets extends Controller {
     Preconditions.checkState(contract.isPresent());
 
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketFactory.create(contract.get());
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
     Preconditions.checkState(currentRecap.isPresent());
     recap = currentRecap.get();
 
     //riepilogo contratto precedente
     Contract previousContract = personDao.getPreviousPersonContract(contract.get());
     if (previousContract != null) {
-      Optional<MealTicketRecap> previousRecap = mealTicketFactory.create(previousContract);
+      Optional<MealTicketRecap> previousRecap = mealTicketService.create(previousContract);
       if (previousRecap.isPresent()) {
         recapPrevious = previousRecap.get();
       }
@@ -144,7 +141,7 @@ public class MealTickets extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-    int mealTicketsTransfered = mealTicketManager.mealTicketsLegacy(contract);
+    int mealTicketsTransfered = mealTicketService.mealTicketsLegacy(contract);
 
     if (mealTicketsTransfered == 0) {
       flash.error("Non e' stato trasferito alcun buono pasto. "
@@ -182,7 +179,7 @@ public class MealTickets extends Controller {
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
     Preconditions.checkState(contract.isPresent());
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketFactory.create(contract.get());
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
     Preconditions.checkState(currentRecap.isPresent());
     recap = currentRecap.get();
  
@@ -197,7 +194,7 @@ public class MealTickets extends Controller {
     
     
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-    ticketToAddOrdered.addAll(mealTicketManager
+    ticketToAddOrdered.addAll(mealTicketService
         .buildBlockMealTicket(codeBlock, ticketNumberFrom, ticketNumberTo, expireDate));
 
     List<MealTicket> ticketsError = Lists.newArrayList();
@@ -213,7 +210,7 @@ public class MealTickets extends Controller {
     }
     if (!ticketsError.isEmpty()) {
       
-      List<BlockMealTicket> blocksError = mealTicketManager
+      List<BlockMealTicket> blocksError = mealTicketService
           .getBlockMealTicketReceivedIntoInterval(ticketsError, Optional.<DateInterval>absent());
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo, 
           deliveryDate, expireDate, admin, blocksError);
