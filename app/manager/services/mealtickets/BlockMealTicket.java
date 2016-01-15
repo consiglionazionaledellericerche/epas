@@ -1,4 +1,4 @@
-package manager.recaps.mealTicket;
+package manager.services.mealtickets;
 
 import com.google.common.collect.Lists;
 
