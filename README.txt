@@ -6,7 +6,7 @@ Avvio da Eclipse
 
 Per il run su eclipse utilizzare questo parametro vmargs:
 
- -javaagent:"${project_loc:Personnel Attendance System}/lib/lombok-1.16.4.jar"
+ -javaagent:"${project_loc:Personnel Attendance System}/lib/lombok-1.16.6.jar"
 
 Per java>=8 aggiungere -noverify per java<8 aggiungere -XX:-UseSplitVerifier
 
