@@ -206,6 +206,7 @@ person.telephone=Telefono
 person.user.username= Username in ePAS
 person.wantEmail=Invio Email
 
+peopleGroupId= Persone del gruppo di Lavoro
 qualification=Livello
 
 recapMealTickets=Riepilogo Buoni Pasto
