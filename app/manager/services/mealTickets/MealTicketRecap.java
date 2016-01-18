@@ -42,6 +42,15 @@ public class MealTicketRecap {
   private DateInterval mealTicketInterval = null;
   
   /**
+   * Il residio negativo (cambiato di segno). Significativo solo se dateExpire != null.
+   * @return il residuo negativo.
+   */
+  public int getNegativeResidual() {
+    return (this.sourcedInInterval + this.mealTicketsReceivedDeliveryOrderedDesc.size() 
+    - this.personDaysMealTickets.size()) * -1;
+  }
+  
+  /**
    * Tutti i blocchi consegnati di un mealTicketRecap (dal più vecchio).
    */
   public List<BlockMealTicket> getBlockMealTicketReceived() {

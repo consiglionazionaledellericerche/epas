@@ -8,9 +8,9 @@
 		   A <strong>${recap.getMealTicketInterval().getEnd()?.format()}</strong>
 		 #{/if}
 		 #{if recap.getSourcedInInterval()}<br>Buoni pasto da inizializzazione <strong>${recap.getSourcedInInterval()}</strong>#{/if}
-		 <br>Buoni pasto consegnati <strong>${recap.getBlockMealTicketReceived().size()}</strong>
+		 <br>Buoni pasto consegnati <strong>${recap.mealTicketsReceivedExpireOrderedAsc.size()}</strong>
 	     <br>Buoni pasto consumati <strong>${recap.personDaysMealTickets.size()}</strong>
-	     <br>Buoni pasto residui in questo momento: <strong>${recap.getSourcedInInterval() + recap.getBlockMealTicketReceived().size() - recap.personDaysMealTickets.size()}</strong>
+	     <br>Buoni pasto residui in questo momento: <strong>${recap.getSourcedInInterval() + recap.mealTicketsReceivedExpireOrderedAsc.size() - recap.personDaysMealTickets.size()}</strong>
 	 #{/alert}
 	 
 	 
