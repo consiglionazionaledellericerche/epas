@@ -141,8 +141,21 @@ $(function($) {
         "url": "/public/i18n/DataTablesItalian.json"
       }
     });
+    
     this.find('[datatable-small]').DataTable({
-    	"order":[[0,"desc"]],
+        "pageLength": 10,
+        "lengthMenu": [
+          [10,15,20, 25, 50, 100, -1],
+          [10,15,20, 25, 50, 100, "Tutti"]
+        ],
+        "language": {
+          "url": "/public/i18n/DataTablesItalian.json"
+        }
+      });
+    
+    //i buoni pasto hanno bisogno di un doppio ordinamento... per quello hanno una regola speciale.
+    this.find('[datatable-mealTicket]').DataTable({
+    	"order":[[2,"desc"],[0,"desc"]],
         "pageLength": 10,
         "lengthMenu": [
           [10,15,20, 25, 50, 100, -1],

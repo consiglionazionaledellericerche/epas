@@ -1,6 +1,10 @@
-package manager.recaps.mealTicket;
+package manager.services.mealTickets;
 
 import com.google.common.collect.Lists;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import models.Contract;
 import models.MealTicket;
@@ -10,13 +14,21 @@ import org.joda.time.LocalDate;
 
 import java.util.List;
 
+/**
+ * Blocco di buoni pasto.
+ * 
+ * @author alessandro
+ * 
+ */
+@Getter(AccessLevel.PUBLIC)
+@Setter(AccessLevel.PACKAGE)
 public class BlockMealTicket {
 
-  public Contract contract;
-  public Integer codeBlock;
-  public List<MealTicket> mealTickets;
+  private Contract contract;
+  private Integer codeBlock;
+  private List<MealTicket> mealTickets;
 
-  public BlockMealTicket(Integer codeBlock) {
+  protected BlockMealTicket(Integer codeBlock) {
 
     this.codeBlock = codeBlock;
     this.mealTickets = Lists.newArrayList();
@@ -32,7 +44,6 @@ public class BlockMealTicket {
   /**
    * Il numero di buoni rimanenti all'interno del blocchetto. N.B. Il metodo ritorna un valore
    * valido solo se la variabile lazy used è valorizzata per tutti i buoni pasto del blocchetto.
-   * (Per valorizzarla occorre passare dalla MealTicketRecap.build())
    */
   public Integer getRemaining() {
     Integer consumed = this.getConsumed();
@@ -45,7 +56,6 @@ public class BlockMealTicket {
   /**
    * Il numero di buoni consumati all'interno del blocchetto. N.B. Il metodo ritorna un valore
    * valido solo se la variabile lazy used è valorizzata per tutti i buoni pasto del blocchetto.
-   * (Per valorizzarla occorre passare dalla MealTicketRecap.build())
    */
   public Integer getConsumed() {
     Integer count = 0;
