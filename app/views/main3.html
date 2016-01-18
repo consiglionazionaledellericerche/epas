@@ -94,8 +94,11 @@
               <li><a href="@{Absences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
               <li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
               <li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
-              <li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
               <li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
+              <li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
+              <li><a href="@{MealTickets.mealTickets()}">Riepilogo buoni pasto</a></li>
+
+
               <li class="divider"></li>
               <li><a href="@{PrintTags.showPersonTag(session.get("yearSelected"), session.get("monthSelected"))}">Stampa cartellino presenze</a></li>
               <li class="divider"></li>

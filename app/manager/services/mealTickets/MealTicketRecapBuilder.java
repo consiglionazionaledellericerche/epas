@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import java.util.List;
 
 /**
+ * Costruisce il recap dei buoni pasto.
  * @author alessandro
  */
 public class MealTicketRecapBuilder {
@@ -24,9 +25,12 @@ public class MealTicketRecapBuilder {
    * 2) MEAL_TICKET_EXPIRED: in error finisce la data in cui si inizia a consumare buoni pasto 
    * scaduti.<br>
    * Se non ci sono errori viene salvato il numero di buoni pasto rimanenti.
-   * @param contract 
-   * @param mealTicketInterval, List<MealTicket> ordere
-   * @return
+   * @param contract contract
+   * @param mealTicketInterval intervallo buoni pasto da considerare
+   * @param personDays giorni da considerare
+   * @param expireOrderedDesc buoni pasto ordinati per data scadenza decrescente
+   * @param deliveryOrderedAsc buoni pasto ordinati per data consegna crescente
+   * @return il recap
    */
   public MealTicketRecap buildMealTicketRecap(Contract contract, DateInterval mealTicketInterval, 
       List<PersonDay> personDays, List<MealTicket> expireOrderedDesc, 
