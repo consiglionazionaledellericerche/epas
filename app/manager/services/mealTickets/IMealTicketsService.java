@@ -62,15 +62,6 @@ public interface IMealTicketsService {
    * @return il numero di buoni pasto trasferiti fra un contratto e l'altro.
    */
   int mealTicketsLegacy(Contract contract);
-  
-  /**
-   * Costruisce i blocchi di codici consecutivi a partire dalla lista ordinata di buoni pasto.
-   * @param mealTicketListOrdered una lista di buoni pasto ordinata
-   *     per data di scadenza e per codice blocco.
-   * @param interval intervallo da considerare.
-   * @return i blocchi
-   */
-  public List<BlockMealTicket> getBlockMealTicketReceivedIntoInterval(
-          List<MealTicket> mealTicketListOrdered, Optional<DateInterval> interval);
+
   
 }
