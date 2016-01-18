@@ -21,6 +21,7 @@ import manager.ConsistencyManager;
 import manager.services.mealTickets.BlockMealTicket;
 import manager.services.mealTickets.IMealTicketsService;
 import manager.services.mealTickets.MealTicketRecap;
+import manager.services.mealTickets.MealTicketStaticUtility;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -52,23 +53,24 @@ public class MealTickets extends Controller {
   @Inject
   private static SecurityRules rules;
   @Inject
-  private static PersonDao personDao;
-  @Inject
-  private static IMealTicketsService mealTicketService;
-  @Inject
   private static IWrapperFactory wrapperFactory;
   @Inject
-  private static MealTicketDao mealTicketDao;
-  @Inject
-  private static ContractMonthRecapDao contractMonthRecapDao;
+  private static PersonDao personDao;
   @Inject
   private static ContractDao contractDao;
   @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static ConsistencyManager consistencyManager;
-  @Inject
   private static ConfGeneralManager confGeneralManager;
+  @Inject
+  private static ConsistencyManager consistencyManager;
+
+  @Inject
+  private static IMealTicketsService mealTicketService;
+  @Inject
+  private static MealTicketDao mealTicketDao;
+  @Inject
+  private static ContractMonthRecapDao contractMonthRecapDao;
   
   /**
    * I riepiloghi buoni pasto dei dipendenti dell'office per il mese selezionato.
@@ -210,8 +212,8 @@ public class MealTickets extends Controller {
     }
     if (!ticketsError.isEmpty()) {
       
-      List<BlockMealTicket> blocksError = mealTicketService
-          .getBlockMealTicketReceivedIntoInterval(ticketsError, Optional.<DateInterval>absent());
+      List<BlockMealTicket> blocksError = MealTicketStaticUtility
+          .getBlockMealTicketFromOrderedList(ticketsError, Optional.<DateInterval>absent());
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo, 
           deliveryDate, expireDate, admin, blocksError);
     }

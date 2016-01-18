@@ -47,13 +47,12 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   }
 
   @Inject
-  private final PersonDao personDao;
-  private final MealTicketDao mealTicketDao;
-  private final ConfGeneralManager confGeneralManager;
-  private final IWrapperFactory wrapperFactory;
-  private final ConsistencyManager consistencyManager;
-  
-  private final MealTicketRecapBuilder mealTicketRecapBuilder;
+  private PersonDao personDao;
+  private MealTicketDao mealTicketDao;
+  private ConfGeneralManager confGeneralManager;
+  private IWrapperFactory wrapperFactory;
+  private ConsistencyManager consistencyManager;
+  private MealTicketRecapBuilder mealTicketRecapBuilder;
   
   /**
    * Costrutture.
@@ -217,56 +216,6 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     return mealTicketsTransfered;
   }
 
-  /**
-   * Costruisce i blocchi di codici consecutivi a partire dalla lista ordinata di buoni pasto.
-   * @param mealTicketListOrdered una lista di buoni pasto ordinata
-   *     per data di scadenza e per codice blocco.
-   * @param interval intervallo da considerare.
-   * @return i blocchi
-   */
-  @Override
-  public List<BlockMealTicket> getBlockMealTicketReceivedIntoInterval(
-          List<MealTicket> mealTicketListOrdered, Optional<DateInterval> interval) {
-
-    List<BlockMealTicket> blockList = Lists.newArrayList();
-    BlockMealTicket currentBlock = null;
-    MealTicket previousMealTicket = null;
-
-    for (MealTicket mealTicket : mealTicketListOrdered) {
-
-      if (interval.isPresent()
-          && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
-        continue;
-      }
-
-      //Primo buono pasto
-      if (currentBlock == null) {
-        previousMealTicket = mealTicket;
-        currentBlock = new BlockMealTicket(mealTicket.block);
-        currentBlock.mealTickets.add(mealTicket);
-        currentBlock.contract = mealTicket.contract;
-        continue;
-      }
-
-      //Stesso blocco
-      Long previous = Long.parseLong(previousMealTicket.code) + 1;
-      Long actual = Long.parseLong(mealTicket.code);
-      if (previous.equals(actual) && previousMealTicket.contract.equals(mealTicket.contract)) {
-        currentBlock.mealTickets.add(mealTicket);
-      } else {
-        //Nuovo blocco
-        blockList.add(currentBlock);
-        currentBlock = new BlockMealTicket(mealTicket.block);
-        currentBlock.mealTickets.add(mealTicket);
-        currentBlock.contract = mealTicket.contract;
-      }
-      previousMealTicket = mealTicket;
-    }
-
-    if (currentBlock != null) {
-      blockList.add(currentBlock);
-    }
-    return blockList;
-  }
+  
 
 }
