@@ -14,8 +14,8 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.MealTicketManager.MealTicketOrder;
 import manager.cache.CompetenceCodeManager;
+import manager.services.mealTickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Absence;
 import models.Competence;

@@ -8,19 +8,19 @@
 		   A <strong>${recap.getMealTicketInterval().getEnd()?.format()}</strong>
 		 #{/if}
 		 #{if recap.getSourcedInInterval()}<br>Buoni pasto da inizializzazione <strong>${recap.getSourcedInInterval()}</strong>#{/if}
-		 <br>Buoni pasto consegnati <strong>${recap.getMealTicketsReceivedOrdered().size()}</strong>
-	     <br>Buoni pasto consumati <strong>${recap.getPersonDayMapped().size()}</strong>
-	     <br>Buoni pasto residui in questo momento: <strong>${recap.getSourcedInInterval() + recap.getMealTicketsReceivedOrdered().size() - recap.getPersonDayMapped().size()}</strong>
+		 <br>Buoni pasto consegnati <strong>${recap.mealTicketsReceivedExpireOrderedAsc.size()}</strong>
+	     <br>Buoni pasto consumati <strong>${recap.personDaysMealTickets.size()}</strong>
+	     <br>Buoni pasto residui in questo momento: <strong>${recap.getSourcedInInterval() + recap.mealTicketsReceivedExpireOrderedAsc.size() - recap.personDaysMealTickets.size()}</strong>
 	 #{/alert}
 	 
 	 
 	 
-	 #{if recap.isMealTicketRunOut() }
+	 #{if recap.dateRunOut }
 		 #{alert color:'danger'}
-		    La persona ha esaurito i buoni pasto in data ${recap.getDateRunOut()?.format()}<br>
+		    La persona ha esaurito i buoni pasto in data ${recap.dateRunOut?.format()}<br>
 		 #{/alert}   
 	 #{/if}
-	 #{if recap.isMealTicketExpired() }
+	 #{if recap.dateExpire }
 	   <!-- Implementare meglio prima di renderizzare questo alert 
 	   <strong>ATTENZIONE:</strong> La persona ha usufruito di 
 	   buonipasto scaduti in data ${recap.getDateExpire()}
