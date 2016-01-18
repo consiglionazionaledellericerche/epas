@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
@@ -72,6 +73,46 @@ public class MealTickets extends Controller {
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
   
+  public static void mealTickets() {
+    
+    Optional<User> user = Security.getUser();
+    Verify.verify(user.isPresent());
+    Verify.verifyNotNull(user.get().person);
+    
+    Person person = user.get().person;
+
+    MealTicketRecap recap;
+    MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
+
+    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+    Preconditions.checkState(contract.isPresent());
+
+    // riepilogo contratto corrente
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
+    Preconditions.checkState(currentRecap.isPresent());
+    recap = currentRecap.get();
+
+    //riepilogo contratto precedente
+    Contract previousContract = personDao.getPreviousPersonContract(contract.get());
+    if (previousContract != null) {
+      Optional<MealTicketRecap> previousRecap = mealTicketService.create(previousContract);
+      if (previousRecap.isPresent()) {
+        recapPrevious = previousRecap.get();
+      }
+    }
+
+    LocalDate deliveryDate = LocalDate.now();
+    LocalDate today = LocalDate.now();
+    //TODO mettere nel default.
+    Integer ticketNumberFrom = 1;
+    Integer ticketNumberTo = 22;
+    
+    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
+
+    render(person, recap, recapPrevious, deliveryDate, expireDate, today, 
+        ticketNumberFrom, ticketNumberTo);
+  }
+  
   /**
    * I riepiloghi buoni pasto dei dipendenti dell'office per il mese selezionato.
    * @param year year
@@ -94,6 +135,10 @@ public class MealTickets extends Controller {
     render(office, monthRecapList, officeStartDate, year, month);
   }
   
+  /**
+   * Riepilogo buoni pasto per la singola persona.
+   * @param personId persona
+   */
   public static void personMealTickets(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -135,6 +180,11 @@ public class MealTickets extends Controller {
         ticketNumberFrom, ticketNumberTo);
   }
 
+  /**
+   * Trasferisce i buoni avanzati del vecchio contratto a quello nuovo.
+   * TODO: renderlo nuovamente operativo quando ce ne sarà bisogno. Adesso il link è oscurato.
+   * @param contractId contratto
+   */
   public static void mealTicketsLegacy(Long contractId) {
 
     Contract contract = contractDao.getContractById(contractId);

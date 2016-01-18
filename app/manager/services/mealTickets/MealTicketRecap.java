@@ -43,8 +43,6 @@ public class MealTicketRecap {
   
   /**
    * Tutti i blocchi consegnati di un mealTicketRecap (dal più vecchio).
-   * @param mealTicketRecap
-   * @return
    */
   public List<BlockMealTicket> getBlockMealTicketReceived() {
 
