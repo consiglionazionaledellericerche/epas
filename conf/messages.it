@@ -260,6 +260,8 @@ views.tags.display.date.month.7=Luglio
 views.tags.display.date.month.8=Agosto
 views.tags.display.date.month.9=Settembre
 
+vacations.takable=Usufruibili
+
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
