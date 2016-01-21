@@ -144,7 +144,7 @@
   #{title title:('Situazione Ferie anno ' + year), administration:true /}
   
   #{alert color:'info'}
-    <p>Nella cella <strong>Prendibili</strong> per i tempi determinati vengono considerati solo i giorni
+    <p>Nella cella <strong>&{'vacations.takable'}</strong> per i tempi determinati vengono considerati solo i giorni
     maturati mentre per i tempi indeterminati vengono considerati i giorni totali rimanenti.</p>
     #{if isVacationCurrentYearExpired}
     <p><span class="glyphicon glyphicon-remove" style="color: red;"></span> Questo simbolo indica che il relativo
@@ -163,7 +163,7 @@
 		    <th colspan="2">Limiti Utilizzo</th>
 		</tr>	
 		<tr>
-		    <th>Prendibili
+		    <th>&{'vacations.takable'}
 		    #{if isVacationCurrentYearExpired}
     			<span class="glyphicon glyphicon-remove" style="color: red;"></span>
     		#{/if}
@@ -219,7 +219,7 @@
    #{title title:('Situazione Permessi anno ' + year), administration:true /}
    
     #{alert color:'info'}
-	    <p>Nella cella <strong>Prendibili</strong> per i tempi determinati vengono considerati solo i giorni
+	    <p>Nella cella <strong>&{'vacations.takable'}</strong> per i tempi determinati vengono considerati solo i giorni
 	    maturati mentre per i tempi indeterminati vengono considerati i giorni totali rimanenti.</p>
 	    #{if isPermissionCurrentYearExpired}
 	    <p><span class="glyphicon glyphicon-remove" style="color: red;"></span> Questo simbolo indica che il relativo
@@ -239,7 +239,7 @@
 		    <th colspan="2">Limiti Utilizzo</th>
 		</tr>	
 		<tr>
-		    <th>Prendibili
+		    <th>&{'vacations.takable'}
 		      #{if isPermissionCurrentYearExpired}
 	    		<span class="glyphicon glyphicon-remove" style="color: red;"></span>
 	    	  #{/if}	
@@ -295,7 +295,7 @@
   #{title title:('Situazione Ferie anno ' + (year-1)), administration:true /}
   
   #{alert color:'info'}
-    <p>Nella cella <strong>Prendibili</strong> per i tempi determinati vengono considerati solo i giorni
+    <p>Nella cella <strong>&{'vacations.takable'}</strong> per i tempi determinati vengono considerati solo i giorni
     maturati mentre per i tempi indeterminati vengono considerati i giorni totali rimanenti.</p>
     #{if isVacationLastYearExpired}
     <p><span class="glyphicon glyphicon-remove" style="color: red;"></span> Questo simbolo indica che il relativo
@@ -314,7 +314,7 @@
 		    <th colspan="2">Limiti Utilizzo</th>
 		</tr>	
 		<tr>
-		    <th>Prendibili
+		    <th>&{'vacations.takable'}
 		    #{if isVacationLastYearExpired}
     			<span class="glyphicon glyphicon-remove" style="color: red;"></span>
             #{/if}
