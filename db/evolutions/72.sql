@@ -29,6 +29,10 @@ alter table meal_ticket add CONSTRAINT code_unique_key unique (code);
 
 # ---!Downs
 
+drop table mealaux;
+
+alter table meal_ticket drop constraint code_unique_key;
+
 
 
 
