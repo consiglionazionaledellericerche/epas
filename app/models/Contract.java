@@ -45,6 +45,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Column(name = "source_date_residual")
   public LocalDate sourceDateResidual = null;
 
+  @Getter
   @Column(name = "source_date_meal_ticket")
   public LocalDate sourceDateMealTicket = null;
 
@@ -72,6 +73,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Column(name = "source_remaining_minutes_current_year")
   public Integer sourceRemainingMinutesCurrentYear = null;
 
+  @Getter
   @Column(name = "source_remaining_meal_ticket")
   public Integer sourceRemainingMealTicket = null;
 
@@ -123,6 +125,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   /**
    * Ritorna il ContractStampProfile attivo alla data.
    */
+  @Transient
   public Optional<ContractStampProfile> getContractStampProfileFromDate(LocalDate date) {
 
     for (ContractStampProfile csp : contractStampProfile) {
@@ -137,6 +140,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * La lista ordinata dei contractWorkingTimeType.
    * @return lista
    */
+  @Transient
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeOrderedList() {
     List<ContractWorkingTimeType> list = Lists.newArrayList(this.contractWorkingTimeType);
     Collections.sort(list);

@@ -68,6 +68,9 @@ when
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
      	
+     	/*Riepilogo buoni pasto */
+     	"MealTickets.mealTickets",
+     	
      	/* Ore di formazione */
      	"PersonMonths.trainingHours",
      	"PersonMonths.deleteTrainingHours",

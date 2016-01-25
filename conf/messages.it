@@ -115,7 +115,7 @@ deliveryDate=Consegnato il
 DEL= Eliminazione
 
 emailToContact= Indirizzo email dell&#39;amministrazione
-endContract= Scadenza Contratto
+endContract=Data Risoluzione 
 endDate=Data Fine
 expireDate=Data Scadenza
 
@@ -206,6 +206,7 @@ person.telephone=Telefono
 person.user.username= Username in ePAS
 person.wantEmail=Invio Email
 
+peopleGroupId= Persone del gruppo di Lavoro
 qualification=Livello
 
 recapMealTickets=Riepilogo Buoni Pasto
@@ -258,6 +259,8 @@ views.tags.display.date.month.6=Giugno
 views.tags.display.date.month.7=Luglio
 views.tags.display.date.month.8=Agosto
 views.tags.display.date.month.9=Settembre
+
+vacations.takable=Usufruibili
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
