@@ -9,6 +9,7 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -43,6 +44,7 @@ public class MealTicket extends BaseModel {
 
   public Integer number;
 
+  @Unique
   public String code; /* concatenzazione block + number */
 
   @Required

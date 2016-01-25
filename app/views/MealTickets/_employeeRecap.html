@@ -1,7 +1,31 @@
+    
+    #{if recap.dateRunOut }
+		 #{alert color:'danger'}
+		    <p>Tutti i buoni pasto consegnati sono stati maturati in data ${recap.dateRunOut?.format()}.</p>
+		    <p>Sono stati maturati <strong>${recap.negativeResidual}</strong> buoni pasto oltre quelli consegnati.</p>
+		    <p>Contattare l'amministrazione per ricevere i nuovi blocchetti.</p>
+		 #{/alert}   
+	 #{/if}
+	 #{else}
+	    #{alert color:'success'}
+		    <p>Rimangono <strong>${recap.remaining}</strong> buoni pasto consegnati ancora da maturare.</p>
+		 #{/alert}
+	 #{/else}
+	 #{if recap.dateExpire }
+	   <!-- Implementare meglio prima di renderizzare questo alert 
+	   <strong>ATTENZIONE:</strong> La persona ha usufruito di 
+	   buonipasto scaduti in data ${recap.getDateExpire()}
+	   --> 
+	 #{/if}
+    
     #{alert color:'info'}
       <p>Elenco dei blocchi consegnati a <strong>${recap.contract.person.fullname}</strong>.</p>
+      <p>I valori <strong>Maturati / Da Maturare</strong> sono puramente indicativi e sono ottenuti calcolando i buoni pasto maturati
+      partendo da quelli con scadenza più imminente e dal codice progressivo minore.</p>
+      
       <p><i class="fa fa-lightbulb-o"></i> Cliccando sui titoli delle colonne è possibile ordinare
-      i blocchi consegnati per <em>Codice Blocco</em>, <em>Data Consegna</em> e <em>Data Scadenza</em> </p>
+      i blocchi consegnati per <em>Codice Blocco</em>, <em>Data Consegna</em>, <em>Data Scadenza</em> e <em>Maturati/Da Maturare</em>
+      </p>
     #{/alert} 	
 
 	  <table class="table center" datatable-mealTicket>
@@ -10,11 +34,13 @@
 		      <th>Codice</th>
 		      <th>Consegnato il</th>
 		      <th>Scadenza</th>
+		      
+		      <th>Maturati</th>
+		      <th>Da Maturare</th>
+		      
 		      *{
-		      <th>Usati</th>
-		      <th>Rimanenti</th>
-		      }*
 		      <th>Rimozione</th>
+		      }*
 		    </tr>
 	     </thead>
 	     <tbody>     
@@ -25,20 +51,21 @@
 		        </td> 
 		        <td data-order="${block.getDate()}">${block.getDate()?.format()}</td>
 		        <td data-order="${block.getExpireDate()}">${block.getExpireDate()?.format()}</td>
-		        *{
+		        
 		        <td>
 		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
 		        </td>
 		        <td>
 		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
 		        </td>
-		        }*
-		        
+		       
+		        *{
 		        <td>
                   <a class="btn btn-danger btn-xs" 
                   href="@{MealTickets.deletePersonMealTicket(recap.contract.id, block.codeBlock, block.first, block.last, false)}"
                   data-async-modal="#defaultModal" >Rimuovi</a>
                 </td>
+                 }*
 		      </tr>
 		  #{/list}  
 		  </tbody>
