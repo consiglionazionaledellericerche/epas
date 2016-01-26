@@ -45,7 +45,10 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
-   * True se il contratto è l'ultimo contratto per mese e anno selezionati.
+   * True se il contratto è l'ultimo contratto della persona per mese e anno selezionati.
+   * @param month mese
+   * @param year anno
+   * @return esito.
    */
   @Override
   public boolean isLastInMonth(int month, int year) {
@@ -74,6 +77,7 @@ public class WrapperContract implements IWrapperContract {
 
   /**
    * True se il contratto è a tempo determinato.
+   * @return esito.
    */
   @Override
   public boolean isDefined() {
@@ -81,18 +85,20 @@ public class WrapperContract implements IWrapperContract {
     return this.value.endDate != null;
   }
 
-  /**
-   * Conversione della lista dei contractWorkingtimeType da Set a List.
-   *
-   * @param contract * @return
-   */
-  @Override
-  public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
-    return Lists.newArrayList(this.value.contractWorkingTimeType);
-  }
+//  /**
+//   * Conversione della lista dei contractWorkingtimeType da Set a List.
+//   *
+//   * @param contract * @return
+//   */
+//  @Override
+//  public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
+//    return Lists.newArrayList(this.value.contractWorkingTimeType);
+//  }
 
   /**
-   * L'intervallo attivo per il contratto.
+   * L'intervallo effettivo per il contratto. Se endContract (data terminazione del contratto) 
+   * è presente sovrascrive contract.endDate.
+   * @return l'intervallo.
    */
   @Override
   public DateInterval getContractDateInterval() {
@@ -104,7 +110,9 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
-   * L'intervallo dei giorni da considerare per le computazioni nel database ePAS.
+   * L'intervallo ePAS per il contratto. Se è presente una data di inizializzazione generale del
+   * contratto sovrascrive contract.beginDate.
+   * @return l'intervallo.
    */
   @Override
   public DateInterval getContractDatabaseInterval() {
@@ -123,7 +131,9 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
-   * L'intervallo dei giorni da considerare per le computazioni nel database ePAS.
+   * L'intervallo ePAS per il contratto dal punto di vista dei buoni pasto. Se è presente una data 
+   * di inizializzazione buoni pasto del contratto sovrascrive contract.beginDate.
+   * @return l'intervallo.
    */
   @Override
   public DateInterval getContractDatabaseIntervalForMealTicket() {
@@ -140,6 +150,7 @@ public class WrapperContract implements IWrapperContract {
   /**
    * Il mese del primo riepilogo esistente per il contratto. absent() se non ci sono i dati per
    * costruire il primo riepilogo.
+   * @return il mese (absent se non esiste).
    */
   @Override
   public Optional<YearMonth> getFirstMonthToRecap() {
@@ -154,7 +165,9 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
-   * Il mese dell'ultimo riepilogo esistente per il contratto (al momento della chiamata).
+   * Il mese dell'ultimo riepilogo esistente per il contratto (al momento della chiamata).<br>
+   * Il mese attuale se il contratto termina dopo di esso. Altrimenti il mese di fine contratto.
+   * @return il mese
    */
   @Override
   public YearMonth getLastMonthToRecap() {
@@ -166,6 +179,11 @@ public class WrapperContract implements IWrapperContract {
     return currentMonth;
   }
 
+  /**
+   * Il riepilogo mensile attualmente persistito (se esiste).
+   * @param yearMonth mese
+   * @return il riepilogo (absent se non presente)
+   */
   @Override
   public Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth) {
 
@@ -177,9 +195,26 @@ public class WrapperContract implements IWrapperContract {
     }
     return Optional.absent();
   }
-
+  
   /**
-   * Diagnostiche sul contratto.
+   * Se sono state definite sia la inizializzazione generale che quella buoni pasto e quella 
+   * dei buoni pasto è precedente a quella generale.
+   * @return esito
+   */
+  @Override
+  public boolean mealTicketInitBeforeGeneralInit() {
+    if (value.sourceDateResidual != null && value.sourceDateMealTicket != null 
+        && value.sourceDateResidual.isAfter(value.sourceDateMealTicket)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  
+  /**
+   * Se il contratto necessita di inizializzazione. 
+   * @return esito
    */
   @Override
   public boolean initializationMissing() {
@@ -192,10 +227,48 @@ public class WrapperContract implements IWrapperContract {
 
     return value.beginDate.isBefore(dateForInit);
   }
+  
+  /**
+   * Se per il contratto c'è almeno un riepilogo necessario non persistito.
+   * @return esito.
+   */
+  @Override
+  public boolean monthRecapMissing() {
+
+    Optional<YearMonth> monthToCheck = getFirstMonthToRecap();
+    if (!monthToCheck.isPresent()) {
+      return true;
+    }
+    YearMonth nowMonth = YearMonth.now();
+    while (!monthToCheck.get().isAfter(nowMonth)) {
+      // FIXME: renderlo efficiente, un dao che li ordina.
+      if (!getContractMonthRecap(monthToCheck.get()).isPresent()) {
+        return true;
+      }
+      monthToCheck = Optional.fromNullable(monthToCheck.get().plusMonths(1));
+    }
+
+    return false;
+  }
+  
+  /**
+   * Se un riepilogo per il mese passato come argomento non è persistito.
+   * @param yearMonth mese
+   * @return esito.
+   */
+  @Override
+  public boolean monthRecapMissing(YearMonth yearMonth) {
+
+    if (getContractMonthRecap(yearMonth).isPresent()) {
+      return false;
+    }
+    return true;
+  }
 
   /**
-   * La data di inizilizzazione è la successiva fra la creazione della persona e l'inizio utilizzo
+   * La data di inizializzazione è la successiva fra la creazione della persona e l'inizio utilizzo
    * del software della sede della persona (che potrebbe cambiare a causa del trasferimento).
+   * @return data
    */
   @Override
   public LocalDate dateForInitialization() {
@@ -215,35 +288,29 @@ public class WrapperContract implements IWrapperContract {
     return candidate;
   }
 
-
+  /**
+   * Se il contratto è finito prima che la sede della persona fosse installata in ePAS.
+   * @return esito
+   */
   @Override
-  public boolean monthRecapMissing(YearMonth yearMonth) {
+  public boolean noRelevant() {
 
-    if (getContractMonthRecap(yearMonth).isPresent()) {
-      return false;
-    }
-    return true;
-  }
+    LocalDate officeInstallation =
+            new LocalDate(confGeneralManager.getFieldValue(
+                    Parameter.INIT_USE_PROGRAM, value.person.office));
 
-  @Override
-  public boolean monthRecapMissing() {
-
-    Optional<YearMonth> monthToCheck = getFirstMonthToRecap();
-    if (!monthToCheck.isPresent()) {
+    if (officeInstallation.isAfter(getContractDateInterval().getEnd())) {
       return true;
     }
-    YearMonth nowMonth = YearMonth.now();
-    while (!monthToCheck.get().isAfter(nowMonth)) {
-      // FIXME: renderlo efficiente, un dao che li ordina.
-      if (!getContractMonthRecap(monthToCheck.get()).isPresent()) {
-        return true;
-      }
-      monthToCheck = Optional.fromNullable(monthToCheck.get().plusMonths(1));
-    }
-
     return false;
   }
-
+  
+  /**
+   * Se il contratto ha tutti i riepiloghi necessari per calcolare il riepilogo per l'anno
+   * passato come parametro.
+   * @param yearToRecap anno
+   * @return esito
+   */
   @Override
   public boolean hasMonthRecapForVacationsRecap(int yearToRecap) {
 
@@ -272,19 +339,6 @@ public class WrapperContract implements IWrapperContract {
       return true;
     }
 
-    return false;
-  }
-
-  @Override
-  public boolean noRelevant() {
-
-    LocalDate officeInstallation =
-            new LocalDate(confGeneralManager.getFieldValue(
-                    Parameter.INIT_USE_PROGRAM, value.person.office));
-
-    if (officeInstallation.isAfter(getContractDateInterval().getEnd())) {
-      return true;
-    }
     return false;
   }
 
