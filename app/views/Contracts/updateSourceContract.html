@@ -126,6 +126,16 @@
   		  </p> 
        </div>
        
+       #{if wrContract.mealTicketInitBeforeGeneralInit() }
+        #{alert color:'warning', center:true}
+	      <p><i class="fa fa-2x fa-times bg-warning"></i> &{'contract.mealTicketInitBeforeGeneralInit'}</p>
+	       
+	      <p>Si consiglia di definire una inizializzazione del residuo buoni
+	      pasto successiva a <strong>${wrContract.value.sourceDateResidual.format()}</strong>.
+	      </p>
+        #{/alert}
+       #{/if}
+       
        #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
       'data-async':'#page_content', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
 	    <input type="hidden" name="contract.id" value="${contract.id}" />
