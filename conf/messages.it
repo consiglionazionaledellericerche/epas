@@ -83,6 +83,10 @@ contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
 contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
 contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
 
+contract.mealTicketInitBeforeGeneralInit = Per il contratto attuale è stata definita una inizializzazione buoni pasto precedente all'inizializzazione generale. Questo potrebbe portare	a calcoli errati o inattesi circa il residuo dei buoni pasto per il dipendente.
+
+
+
 contractStampProfile.fixedworkingtime=Presenza Automatica
 ContractStampProfile=Periodo Presenza Automatica
 ContractStampProfile=Periodo Presenza Automatica
