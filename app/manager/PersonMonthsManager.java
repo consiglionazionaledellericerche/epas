@@ -18,6 +18,14 @@ public class PersonMonthsManager {
   @Inject
   private PersonMonthRecapDao personMonthRecapDao;
 
+  /**
+   * salva le ore di formazione per il periodo specificato.
+   * @param pm il personMonthRecao
+   * @param approved se sono già approvate o no le ore di formazione
+   * @param value la quantità di ore di formazione da approvare
+   * @param from data inizio del periodo di formazione
+   * @param to data fine del periodo di formazione.
+   */
   public void saveTrainingHours(
       PersonMonthRecap pm, boolean approved, Integer value, LocalDate from, LocalDate to) {
     pm.hoursApproved = false;

@@ -185,13 +185,13 @@ public class PersonMonths extends Controller {
     
     LocalDate beginDate = new LocalDate(year, month, begin);
     LocalDate endDate = new LocalDate(year, month, end);
-    if (!validation.hasErrors()) {
-      if (!personMonthsManager
-          .checkIfPeriodAlreadyExists(person, year, month, beginDate, endDate).getResult()) {
-        validation.addError("begin",
-            "ore già presenti per l'intervallo selezionato");
-      }
-    }
+//    if (!validation.hasErrors()) {
+//      if (!personMonthsManager
+//          .checkIfPeriodAlreadyExists(person, year, month, beginDate, endDate).getResult()) {
+//        validation.addError("begin",
+//            "ore già presenti per l'intervallo selezionato");
+//      }
+//    }
     if (!validation.hasErrors()) {
       if (!personMonthsManager.checkIfAlreadySend(person, year, month).getResult()) {
         flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
