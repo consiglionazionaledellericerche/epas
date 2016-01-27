@@ -94,7 +94,12 @@ public class ConsistencyManager {
   }
 
   /**
-   * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
+   * Ricalcolo della situazione di una persona (o tutte) dal mese e anno specificati ad oggi.
+   * @param person persona (se absent tutte)
+   * @param user utente loggato
+   * @param fromDate dalla data
+   * @param sendMail se deve inviare le email sui giorni con problemi
+   * @param onlyRecap se si vuole aggiornare solo i riepiloghi
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
       boolean sendMail, boolean onlyRecap) {
@@ -125,12 +130,12 @@ public class ConsistencyManager {
       JPA.em().flush();
       JPA.em().clear();
     }
-    
+
     log.info("Inizia la parte di pulizia days in trouble...");
     for (Person p : personList) {
-      
+
       personDayInTroubleManager.cleanPersonDayInTrouble(p);
-      
+
       JPA.em().flush();
       JPA.em().clear();
     }
