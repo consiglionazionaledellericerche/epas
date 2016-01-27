@@ -174,7 +174,7 @@ public class ContractManager {
     setContractVacationPeriod(contract);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
-    //personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
+    personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
     
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
   }
