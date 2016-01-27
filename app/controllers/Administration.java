@@ -211,12 +211,12 @@ public class Administration extends Controller {
   public static void fixPersonSituation(Person person, int year, int month, boolean onlyRecap) {
 
     LocalDate date = new LocalDate(year, month, 1);
-
-    //Optional<Person> person = personId == null ? Optional.<Person>absent()
-    //    : Optional.fromNullable(personDao.getPersonById(personId));
-
-    consistencyManager.fixPersonSituation(Optional.fromNullable(person), 
-        Security.getUser(), date, false, onlyRecap);
+    
+    Optional<Person> optPerson = Optional.<Person>absent();
+    if (person.isPersistent()) {
+      optPerson = Optional.fromNullable(person);
+    }
+    consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, false, onlyRecap);
 
     flash.success("Esecuzione terminata");
 

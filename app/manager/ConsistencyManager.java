@@ -119,7 +119,6 @@ public class ConsistencyManager {
     }
 
     for (Person p : personList) {
-
       if (onlyRecap) {
         updatePersonRecaps(p.id, fromDate);
       } else {
@@ -139,6 +138,7 @@ public class ConsistencyManager {
       JPA.em().flush();
       JPA.em().clear();
     }
+    log.info("... Conclusa.");
 
     if (sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY
             && LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY) {
@@ -156,8 +156,10 @@ public class ConsistencyManager {
       } catch (Exception e) {
         e.printStackTrace();
       }
+      log.info("... Conclusa.");
     }
     
+    log.info("Conclusa procedura FixPersonsSituation con parametri!");
 
   }
 
