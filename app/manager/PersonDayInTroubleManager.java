@@ -2,11 +2,14 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -40,16 +43,19 @@ public class PersonDayInTroubleManager {
   private final IWrapperFactory factory;
   private final PersonDayInTroubleDao personDayInTroubleDao;
   private final ConfGeneralManager confGeneralManager;
+  private final WrapperModelFunctionFactory wrapperModelFunctionFactory;
 
   @Inject
   public PersonDayInTroubleManager(
           PersonDayInTroubleDao personDayInTroubleDao,
           ConfGeneralManager confGeneralManager,
-          PersonDayDao personDayDao, IWrapperFactory factory) {
+          PersonDayDao personDayDao, IWrapperFactory factory, 
+          WrapperModelFunctionFactory wrapperModelFunctionFactory) {
 
     this.personDayInTroubleDao = personDayInTroubleDao;
     this.confGeneralManager = confGeneralManager;
     this.factory = factory;
+    this.wrapperModelFunctionFactory = wrapperModelFunctionFactory;
   }
 
   public void setTrouble(PersonDay pd, Troubles cause) {
@@ -125,20 +131,19 @@ public class PersonDayInTroubleManager {
     }
 
     DateInterval intervalToCheck = DateUtility.intervalIntersection(
-            factory.create(currentActiveContract).getContractDateInterval(),
-            new DateInterval(begin, end));
+        factory.create(currentActiveContract).getContractDateInterval(),
+        new DateInterval(begin, end));
 
-    List<PersonDayInTrouble> pdList = personDayInTroubleDao
-            .getPersonDayInTroubleInPeriod(person, intervalToCheck.getBegin(),
-                    intervalToCheck.getEnd());
+    List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person, 
+        Optional.fromNullable(intervalToCheck.getBegin()), 
+        Optional.fromNullable(intervalToCheck.getEnd()));
 
     List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
-
 
     for (PersonDayInTrouble pdt : pdList) {
 
       Optional<ContractStampProfile> csp = currentActiveContract
-              .getContractStampProfileFromDate(pdt.personDay.date);
+          .getContractStampProfileFromDate(pdt.personDay.date);
 
       if (csp.isPresent() && csp.get().fixedworkingtime == true) {
         continue;
@@ -271,5 +276,33 @@ public class PersonDayInTroubleManager {
         person.getFullname(), date);
     return true;
 
+  }
+  
+  /**
+   * Elimina i personDayInTrouble che non appartengono ad alcun contratto valido ePAS. (Cioè
+   * anche quelli che appartengono ad un contratto ma sono precedenti la sua inizializzazione). 
+   * @param person persona
+   */
+  public final void cleanPersonDayInTrouble(Person person) {
+    
+    final List<PersonDayInTrouble> pdtList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(
+        person, Optional.<LocalDate>absent(), Optional.<LocalDate>absent());
+
+    List<IWrapperContract> wrapperContracts = FluentIterable.from(person.contracts)
+        .transform(wrapperModelFunctionFactory.contract()).toList();
+    
+    for (PersonDayInTrouble pdt : pdtList) {
+      boolean toDelete = true;
+      for (IWrapperContract wrContract : wrapperContracts) {
+        if ( DateUtility.isDateIntoInterval(pdt.personDay.date, 
+            wrContract.getContractDatabaseInterval())) {
+          toDelete = false;
+          break;
+        }
+      }
+      if (toDelete) {
+        pdt.delete();
+      }
+    }
   }
 }

@@ -6,8 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -19,7 +17,6 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.cache.StampTypeManager;
-import manager.services.vacations.IVacationsService;
 
 import models.Absence;
 import models.Contract;
@@ -139,9 +136,6 @@ public class ConsistencyManager {
               LocalDate.now().minusDays(1), true).list();
 
       try {
-        // A questo punto del codice le Persone della personList sono detached a
-        // causa della chiusura delle transazioni e mi tocca rifare la query prima di passarla,
-        // altrimenti schianta
         personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
       } catch (Exception e) {
         e.printStackTrace();
@@ -607,6 +601,19 @@ public class ConsistencyManager {
     contract.getValue().save();
     return cmr;
 
+  }
+  
+  /**
+   * Procedura da lanciare per pulire i personDayInTrouble non più significativi. <br>
+   * 1) Giorni che non appartengono ad alcun contratto.
+   * 2) Giorni che appartengono ad un contratto ma che sono precedenti all'inizializzazione
+   *    generale.
+   * @param person
+   * @param dateFrom
+   */
+  public void cleanPersonDayInTrouble(Person person) {
+    // TO Implement
+    
   }
 
 }
