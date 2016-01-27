@@ -97,10 +97,10 @@ public class ConsistencyManager {
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
-                                 boolean sendMail, boolean onlyRecap) {
+      boolean sendMail, boolean onlyRecap) {
 
     Set<Office> offices = user.isPresent() ? secureManager.officesWriteAllowed(user.get())
-            : Sets.newHashSet(officeDao.getAllOffices());
+        : Sets.newHashSet(officeDao.getAllOffices());
 
     // (0) Costruisco la lista di persone su cui voglio operare
     List<Person> personList = Lists.newArrayList();
@@ -125,10 +125,21 @@ public class ConsistencyManager {
       JPA.em().flush();
       JPA.em().clear();
     }
+    
+    log.info("Inizia la parte di pulizia days in trouble...");
+    for (Person p : personList) {
+      
+      personDayInTroubleManager.cleanPersonDayInTrouble(p);
+      
+      JPA.em().flush();
+      JPA.em().clear();
+    }
 
     if (sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY
             && LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY) {
 
+      log.info("Inizia la parte di invio email...");
+      
       LocalDate begin = new LocalDate().minusMonths(1);
       LocalDate end = new LocalDate().minusDays(1);
 
@@ -141,6 +152,8 @@ public class ConsistencyManager {
         e.printStackTrace();
       }
     }
+    
+
   }
 
   /**
