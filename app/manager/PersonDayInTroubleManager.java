@@ -301,6 +301,7 @@ public class PersonDayInTroubleManager {
         }
       }
       if (toDelete) {
+        log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(), pdt.personDay.date);
         pdt.delete();
       }
     }
