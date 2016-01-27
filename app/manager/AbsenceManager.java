@@ -210,6 +210,12 @@ public class AbsenceManager {
             dateTo.or(dateFrom), mealTicket.orNull(), file.orNull()});
 
     AbsenceInsertReport air = new AbsenceInsertReport();
+    
+    if (!absenceType.qualifications.contains(person.qualification)) {
+      air.getWarnings().add(AbsencesResponse.CODICE_NON_UTILIZZABILE);
+      return air;
+    }
+
 
     if (dateTo.isPresent() && dateFrom.isAfter(dateTo.get())) {
       air.getWarnings().add(DATE_NON_VALIDE);
