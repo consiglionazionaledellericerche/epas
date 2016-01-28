@@ -19,7 +19,9 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+import helpers.ModelQuery.SimpleResults;
 import helpers.Web;
+import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -140,8 +142,8 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     LocalDate date = new LocalDate();
     List<Person> personList  = personDao.list(Optional.<String>absent(),
-            Sets.newHashSet(office),
-            false, date, date.dayOfMonth().withMaximumValue(), true).list();
+        Sets.newHashSet(office),
+        false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
     // TODO: togliere questa storpiaggine.
 
@@ -214,14 +216,14 @@ public class Competences extends Controller {
     LocalDate today = LocalDate.now();
     if (today.getYear() == year && month > today.getMonthOfYear()) {
       flash.error("Impossibile accedere a situazione futura, "
-              + "redirect automatico a mese attuale");
+          + "redirect automatico a mese attuale");
       competences(year, today.getMonthOfYear());
     }
 
     Person person = user.get().person;
 
     Optional<Contract> contract = wrapperFactory.create(person)
-            .getLastContractInMonth(year, month);
+        .getLastContractInMonth(year, month);
 
     if (!contract.isPresent()) {
       flash.error("Nessun contratto attivo nel mese.");
@@ -229,7 +231,7 @@ public class Competences extends Controller {
     }
 
     PersonMonthCompetenceRecap personMonthCompetenceRecap =
-            personMonthCompetenceRecapFactory.create(contract.get(), month, year);
+        personMonthCompetenceRecapFactory.create(contract.get(), month, year);
 
     render(personMonthCompetenceRecap, person, year, month);
 
@@ -257,7 +259,7 @@ public class Competences extends Controller {
     LocalDate today = LocalDate.now();
     if (today.getYear() == year && month > today.getMonthOfYear()) {
       flash.error("Impossibile accedere a situazione futura, "
-              + "redirect automatico a mese attuale");
+          + "redirect automatico a mese attuale");
       showCompetences(year, today.getMonthOfYear(), officeId, name, competenceCode, page);
     }
     if (page == null) {
@@ -269,7 +271,7 @@ public class Competences extends Controller {
     List<CompetenceCode> competenceCodeList = competenceDao.activeCompetenceCode(office);
     if (competenceCodeList.size() == 0) {
       flash.error("Per visualizzare la sezione Competenze è necessario "
-              + "abilitare almeno un codice competenza ad un dipendente.");
+          + "abilitare almeno un codice competenza ad un dipendente.");
       Competences.enabledCompetences(officeId);
     }
 
@@ -289,10 +291,10 @@ public class Competences extends Controller {
 
     // Le persone che hanno quella competence attualmente abilitata
     SearchResults<?> results = personDao.listForCompetence(competenceCode,
-            Optional.fromNullable(name), Sets.newHashSet(office), false,
-            new LocalDate(year, month, 1),
-            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
-            Optional.<Person>absent()).listResults();
+        Optional.fromNullable(name), Sets.newHashSet(office), false,
+        new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+        Optional.<Person>absent()).listResults();
 
     // TODO: creare quelle che non esistono (meglio eliminare x-editable).
 
@@ -343,10 +345,10 @@ public class Competences extends Controller {
     competence.save();
 
     log.info("saved id={} (person={}) code={} (value={})", competence.id, competence.person,
-            competence.competenceCode.code, competence.valueApproved);
+        competence.competenceCode.code, competence.valueApproved);
 
     consistencyManager.updatePersonSituation(competence.person.id,
-            new LocalDate(competence.year, competence.month, 1));
+        new LocalDate(competence.year, competence.month, 1));
 
     renderText("ok");
   }
@@ -442,7 +444,7 @@ public class Competences extends Controller {
     Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newHashMap();
 
     List<Competence> competenceInYear = competenceDao
-            .getCompetenceInYear(year, Optional.fromNullable(office));
+        .getCompetenceInYear(year, Optional.fromNullable(office));
 
     for (Competence competence : competenceInYear) {
 
@@ -495,8 +497,8 @@ public class Competences extends Controller {
       totalValueAssigned.put(competence.competenceCode, value);
     }
     List<IWrapperPerson> personList = FluentIterable
-            .from(personSet)
-            .transform(wrapperFunctionFactory.person()).toList();
+        .from(personSet)
+        .transform(wrapperFunctionFactory.person()).toList();
 
     render(personList, totalValueAssigned, mapPersonCompetenceRecap,
         office, year, onlyDefined);
@@ -504,42 +506,52 @@ public class Competences extends Controller {
   }
 
 
+  /**
+   * restituisce il template per il responsabile di gruppo di lavoro contenente le informazioni
+   * su giorni di presenza, straordinari, ore a lavoro...
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param name il nome su cui filtrare
+   * @param page la pagina su cui filtrare
+   */
   public static void monthlyOvertime(Integer year, Integer month, String name, Integer page) {
 
-//    if (!Security.getUser().get().person.isPersonInCharge)
-//      forbidden();
-//
-//    User user = Security.getUser().get();
-//    if (page == null)
-//      page = 0;
-//    Table<Person, String, Integer> tableFeature = null;
-//    LocalDate beginMonth = null;
-//    if (year == 0 && month == 0) {
-//      int yearParams = params.get("year", Integer.class);
-//      int monthParams = params.get("month", Integer.class);
-//      beginMonth = new LocalDate(yearParams, monthParams, 1);
-//    } else {
-//      beginMonth = new LocalDate(year, month, 1);
-//    }
-//    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-//    SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
-//            Optional.fromNullable(name),
-//            Sets.newHashSet(user.person.office),
-//            false,
-//            new LocalDate(year, month, 1),
-//            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
-//            Optional.fromNullable(user.person));
-//    tableFeature = competenceManager.composeTableForOvertime(year, month,
-//            page, name, user.person.office, beginMonth, simpleResults, code);
-//
-//
-//    if (year != 0 && month != 0)
-//      render(tableFeature, year, month, simpleResults, name);
-//    else {
-//      int yearParams = params.get("year", Integer.class);
-//      int monthParams = params.get("month", Integer.class);
-//      render(tableFeature, yearParams, monthParams, simpleResults, name);
-//    }
+    if (!Security.getUser().get().person.isPersonInCharge) {
+      forbidden();
+    }
+
+    User user = Security.getUser().get();
+    if (page == null) {
+      page = 0;
+    }
+    Table<Person, String, Integer> tableFeature = null;
+    LocalDate beginMonth = null;
+    if (year == 0 && month == 0) {
+      int yearParams = params.get("year", Integer.class);
+      int monthParams = params.get("month", Integer.class);
+      beginMonth = new LocalDate(yearParams, monthParams, 1);
+    } else {
+      beginMonth = new LocalDate(year, month, 1);
+    }
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    PerseoSimpleResults<Person> simpleResults = personDao.listForCompetence(code,
+        Optional.fromNullable(name),
+        Sets.newHashSet(user.person.office),
+        false,
+        new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
+        Optional.fromNullable(user.person));
+    tableFeature = competenceManager.composeTableForOvertime(year, month,
+        page, name, user.person.office, beginMonth, simpleResults, code);
+
+
+    if (year != 0 && month != 0) {
+      render(tableFeature, year, month, simpleResults, name);
+    } else {
+      int yearParams = params.get("year", Integer.class);
+      int monthParams = params.get("month", Integer.class);
+      render(tableFeature, yearParams, monthParams, simpleResults, name);
+    }
   }
 
 }
