@@ -66,7 +66,7 @@ public final class PersonDao extends DaoBase {
   PersonDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
-
+  
   /**
    *
    * @param offices la lista degli uffici
@@ -776,6 +776,12 @@ public final class PersonDao extends DaoBase {
 
     public Person person = null;
 
+    /**
+     * Costruttore.
+     * @param id id
+     * @param name nome
+     * @param surname cognome
+     */
     public PersonLite(Long id, String name, String surname) {
       this.id = id;
       this.name = name;

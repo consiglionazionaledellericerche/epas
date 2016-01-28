@@ -3,7 +3,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 
 import dao.VacationCodeDao;
@@ -200,7 +199,7 @@ public class VacationsRecapTest {
   }
 
   public ContractManager getContractManager() {
-    return new ContractManager(null, getVacationCodeDao(), null, null);
+    return new ContractManager(null, getVacationCodeDao(), null, null, null);
   }
 
   private VacationCodeDao getVacationCodeDao() {

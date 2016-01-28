@@ -91,6 +91,7 @@ contractStampProfile.fixedworkingtime=Presenza Automatica
 ContractStampProfile=Periodo Presenza Automatica
 ContractStampProfile=Periodo Presenza Automatica
 ContractWorkingTimeType=Periodo Tipo Orario
+contractWorkingTimeType=Periodo Tipo Orario
 
 crud.cancel=Indietro
 crud.cancelled=Operazione annullata.

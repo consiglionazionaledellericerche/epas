@@ -1,8 +1,10 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
@@ -29,14 +31,19 @@ public class PersonDayInTroubleDao extends DaoBase {
    *     (fixed = false).
    */
   public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(
-      Person person, LocalDate begin, LocalDate end) {
+      Person person, Optional<LocalDate> begin, Optional<LocalDate> end) {
 
     QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
 
-    final JPQLQuery query = getQueryFactory()
-            .from(pdit)
-            .where(pdit.personDay.person.eq(person)
-                    .and(pdit.personDay.date.between(begin, end)));
+    BooleanBuilder conditions = new BooleanBuilder(pdit.personDay.person.eq(person));
+    if (begin.isPresent()) {
+      conditions.and(pdit.personDay.date.goe(begin.get()));
+    }
+    if (end.isPresent()) {
+      conditions.and(pdit.personDay.date.loe(end.get()));
+    }
+
+    final JPQLQuery query = getQueryFactory().from(pdit).where(conditions);
 
     return query.list(pdit);
   }
