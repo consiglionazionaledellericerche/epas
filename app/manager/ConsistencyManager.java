@@ -30,6 +30,7 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.Parameter;
+import models.enumerate.Troubles;
 
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -140,8 +141,9 @@ public class ConsistencyManager {
     }
     log.info("... Conclusa.");
 
-    if (sendMail && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY
-            && LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY) {
+    if (sendMail 
+        && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY
+        && LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY) {
 
       log.info("Inizia la parte di invio email...");
       
@@ -152,7 +154,11 @@ public class ConsistencyManager {
               LocalDate.now().minusDays(1), true).list();
 
       try {
-        personDayInTroubleManager.sendMail(personList, begin, end, "timbratura");
+        personDayInTroubleManager.sendTroubleEmails(personList, begin, end, Lists.newArrayList(
+            Troubles.UNCOUPLED_FIXED, 
+            Troubles.UNCOUPLED_HOLIDAY, 
+            Troubles.UNCOUPLED_WORKING));
+        
       } catch (Exception e) {
         e.printStackTrace();
       }

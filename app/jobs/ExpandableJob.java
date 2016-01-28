@@ -1,6 +1,7 @@
 package jobs;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayInTroubleManager;
 
 import models.Person;
+import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
 
@@ -58,7 +60,9 @@ public class ExpandableJob extends Job {
             true).list();
 
     try {
-      personDayInTroubleManager.sendMail(personList, fromDate, toDate, "no assenze");
+      personDayInTroubleManager.sendTroubleEmails(personList, fromDate, toDate, Lists.newArrayList(
+          Troubles.NO_ABS_NO_STAMP));
+      
     } catch (Exception e) {
       e.printStackTrace();
     }
