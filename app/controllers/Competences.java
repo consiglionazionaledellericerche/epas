@@ -214,7 +214,7 @@ public class Competences extends Controller {
 
     //Redirect in caso di mese futuro
     LocalDate today = LocalDate.now();
-    if (today.getYear() == year && month > today.getMonthOfYear()) {
+    if (year > today.getYear() || today.getYear() == year && month > today.getMonthOfYear()) {
       flash.error("Impossibile accedere a situazione futura, "
           + "redirect automatico a mese attuale");
       competences(year, today.getMonthOfYear());
