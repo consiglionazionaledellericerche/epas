@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 
 import dao.ContractDao;
@@ -306,12 +307,17 @@ public class Contracts extends Controller {
    * @param cwtt nuovo periodo di orario.
    * @param confirmed se conferma ricevuta.
    */
-  public static void saveContractWorkingTimeType(
-      @Valid ContractWorkingTimeType cwtt, boolean confirmed) {
+  public static void saveContractWorkingTimeType(ContractWorkingTimeType cwtt, boolean confirmed) {
 
+    // IMPORTANTE!!! Rimosso @Valid da cwtt e effettuata la validazione mancante a mano.
+    // Perchè si comprometteva il funzionamento dell drools. Issue #166
+    
     notFoundIfNull(cwtt);
     notFoundIfNull(cwtt.contract);
-
+    notFoundIfNull(cwtt.workingTimeType);
+    Verify.verify(cwtt.contract.isPersistent());
+    Verify.verify(cwtt.workingTimeType.isPersistent());
+    
     rules.checkIfPermitted(cwtt.contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
