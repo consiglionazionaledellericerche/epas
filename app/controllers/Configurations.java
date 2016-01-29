@@ -4,7 +4,6 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import dao.ConfYearDao;
 import dao.OfficeDao;
 
 import it.cnr.iit.epas.DateUtility;
@@ -40,11 +39,10 @@ public class Configurations extends Controller {
   @Inject
   private static ConfGeneralManager confGeneralManager;
   @Inject
-  private static SecurityRules rules;
-  @Inject
   private static ConfYearManager confYearManager;
+
   @Inject
-  private static ConfYearDao confYearDao;
+  private static SecurityRules rules;
 
   /**
    * Visualizza la pagina di configurazione generale dell'office.
@@ -194,7 +192,7 @@ public class Configurations extends Controller {
    */
   public static void saveConfYear(String pk, String value) {
 
-    ConfYear conf = confYearDao.getById(Long.parseLong(pk));
+    ConfYear conf = confYearManager.getById(Long.parseLong(pk));
 
     Preconditions.checkNotNull(conf);
 
