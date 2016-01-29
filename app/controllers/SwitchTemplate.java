@@ -89,6 +89,14 @@ public class SwitchTemplate extends Controller {
 
       Competences.competences(year, month);
     }
+    
+    if (action.equals("Configurations.showConfGeneral")) {
+      Configurations.showConfGeneral(officeId);
+    }
+    
+    if (action.equals("Configurations.showConfYear")) {
+      Configurations.showConfYear(officeId);
+    }
 
     if (action.equals("Competences.showCompetences")) {
 

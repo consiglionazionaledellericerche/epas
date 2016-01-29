@@ -2,16 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Parametri di configurazione' /}
 
-%{ name = 'confYear' }%
-#{include './_confTabs.html' /}
-
 <div class="container">
   
-  #{include './_switchOffice.html' /} 
- 
-  <section id="results">
-
-	 <div class="panel panel-primary">
+  %{ name = 'confYear' }%
+  #{include './_confTabs.html' /}
+  
+  #{alert color:'info'}
+    <p>Elenco dei parametri a valenza annuale definiti per la sede <strong>${office.name}</strong>.</p>
+  #{/alert}     
+  
+   <div class="panel panel-primary">
       <div class="panel-heading">
         <h3 class="panel-title">Parametri ${previousYear}</h3>
       </div>
@@ -126,8 +126,6 @@
 	
 	</div>
   </div>
-  
-  </section>
 
 </div>
 

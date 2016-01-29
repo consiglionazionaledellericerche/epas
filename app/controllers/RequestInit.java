@@ -526,6 +526,19 @@ public class RequestInit extends Controller {
         return "MealTickets.recapMealTickets";
       }
     }
+    
+    if (action.startsWith("Configurations.")) {
+      if (action.equals("Configurations.showConfGeneral")) {
+        renderArgs.put("dropDown", "dropDownAdministration");
+        renderArgs.put("switchOffice", true);
+        return "Configurations.showConfGeneral";
+      }
+      if (action.equals("Configurations.showConfYear")) {
+        renderArgs.put("dropDown", "dropDownAdministration");
+        renderArgs.put("switchOffice", true);
+        return "Configurations.showConfYear";
+      }
+    }
 
     return session.get("actionSelected");
   }
