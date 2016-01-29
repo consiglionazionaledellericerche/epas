@@ -629,17 +629,4 @@ public class ConsistencyManager {
 
   }
   
-  /**
-   * Procedura da lanciare per pulire i personDayInTrouble non più significativi. <br>
-   * 1) Giorni che non appartengono ad alcun contratto.
-   * 2) Giorni che appartengono ad un contratto ma che sono precedenti all'inizializzazione
-   *    generale.
-   * @param person
-   * @param dateFrom
-   */
-  public void cleanPersonDayInTrouble(Person person) {
-    // TO Implement
-    
-  }
-
 }

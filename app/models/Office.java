@@ -1,10 +1,13 @@
 package models;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import models.base.BaseModel;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -14,6 +17,7 @@ import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -31,7 +35,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Audited
 @Table(name = "office")
-public class Office extends BaseModel {
+public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -8689432709728656660L;
 
@@ -80,6 +84,9 @@ public class Office extends BaseModel {
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<ConfYear> confYear = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
+  public List<Configuration> configurations = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
@@ -108,5 +115,14 @@ public class Office extends BaseModel {
   @Override
   public String toString() {
     return getLabel();
+  }
+
+  @Override
+  public Collection<IPropertyInPeriod> periods(Object type) {
+    
+    if (type.equals(Configuration.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(configurations);
+    }
+    return null;
   }
 }
