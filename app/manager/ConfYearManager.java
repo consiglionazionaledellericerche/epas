@@ -33,6 +33,17 @@ public class ConfYearManager {
   ConfYearManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     this.queryFactory = new JPAQueryFactory(emp);
   }
+  
+  /**
+   * La configurazione annuale con l'id.
+   * @return confYear
+   */
+  public ConfYear getById(Long id) {
+    QConfYear confYear = QConfYear.confYear;
+    final JPQLQuery query = queryFactory.from(confYear)
+            .where(confYear.id.eq(id));
+    return query.singleResult(confYear);
+  }
 
   /**
    * Produce la configurazione annuale per l'office. I parametri vengono creati a partire dalla
