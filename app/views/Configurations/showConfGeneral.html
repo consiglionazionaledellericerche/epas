@@ -2,15 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Parametri di configurazione' /}
 
-%{ name = 'confGeneral' }%
-#{include './_confTabs.html' /}
 
 <div class="container">
- 
-  #{include './_switchOffice.html' /} 
- 
-  <section id="results">
 
+     %{ name = 'confGeneral' }%
+     #{include './_confTabs.html' /}
+     
+	#{alert color:'info'}
+	  <p>Elenco dei parametri generali definiti per la sede <strong>${office.name}</strong>.</p>
+	#{/alert}     
+ 
     <div class="panel panel-primary">
       <div class="panel-heading">
         <h3 class="panel-title"><span class="badge">1</span> Configurazione Generale Istituto</h3>
@@ -242,5 +243,4 @@
 </fieldset>
 
  -->
- </section>
 </div>
