@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -12,6 +13,7 @@ import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
@@ -83,6 +85,8 @@ public class UploadSituation extends Controller {
   @Inject
   private static PersonDao personDao;
   @Inject
+  private static OfficeDao officeDao;
+  @Inject
   private static PersonDayDao personDayDao;
   @Inject
   private static SecureManager secureManager;
@@ -99,15 +103,35 @@ public class UploadSituation extends Controller {
   @Inject
   private static IWrapperFactory factory;
 
-  public static void show() {
+  /**
+   * Pagina iniziale di selezione mese. Decidere se fare prima il login.
+   * @param officeId
+   */
+  public static void show(Long officeId) {
 
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    LocalDate lastMonth = LocalDate.now().minusMonths(1);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
-    int month = lastMonth.getMonthOfYear();
-    int year = lastMonth.getYear();
+    Optional<LocalDate> officeInitUse = confGeneralManager
+        .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, office);
+    
+    Verify.verify(officeInitUse.get() != null);
 
-    render(year, month);
+    // anni in cui possono essere inviati gli attestati (installazione sede fino ad oggi)
+    int officeYearFrom = officeInitUse.get().getYear();
+    int officeYearTo = LocalDate.now().getYear();
+    if (officeYearFrom > officeYearTo) {
+      officeYearTo = officeYearFrom;
+    }
+    
+    // mese scorso preselezionato (se esiste) oppure installazione sede
+    YearMonth previousYearMonth = new YearMonth(LocalDate.now().minusMonths(1));
+    if (previousYearMonth.isBefore(new YearMonth(officeInitUse.get()))) {
+      previousYearMonth = new YearMonth(officeInitUse.get());
+    }
+
+    render(office, officeYearFrom, officeYearTo, previousYearMonth);
   }
 
   public static void loginAttestati(Integer year, Integer month) {
@@ -205,9 +229,8 @@ public class UploadSituation extends Controller {
   }
 
 
-  public static void processAttestati(
-      final String attestatiLogin, final String attestatiPassword, Integer year, Integer month)
-          throws MalformedURLException, URISyntaxException {
+  public static void processAttestati(Long officeId, final String attestatiLogin, final String attestatiPassword, 
+      Integer year, Integer month) throws MalformedURLException, URISyntaxException {
 
     LoginResponse loginResponse = null;
     List<Dipendente> listaDipendenti = null;
@@ -227,7 +250,7 @@ public class UploadSituation extends Controller {
       Cache.set(LISTA_DIPENTENTI_CNR_CACHED + user.username, null);
 
       if (params.get("back") != null) {
-        show();
+        show(officeId);
       }
 
       if (params.get("home") != null) {
@@ -306,7 +329,7 @@ public class UploadSituation extends Controller {
 
   }
 
-  public static void processAllPersons(int year, int month)
+  public static void processAllPersons(Long officeId, int year, int month)
       throws MalformedURLException, URISyntaxException {
     if (params.get("back") != null) {
       UploadSituation.loginAttestati(year, month);
@@ -349,17 +372,17 @@ public class UploadSituation extends Controller {
           risposteNotOk.size());
     }
 
-    UploadSituation.processAttestati(null, null, year, month);
+    UploadSituation.processAttestati(officeId, null, null, year, month);
 
 
   }
 
-  public static void processSinglePerson(String matricola, int year, int month)
+  public static void processSinglePerson(Long officeId, String matricola, int year, int month)
       throws MalformedURLException, URISyntaxException {
     if (matricola == null) {
       flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una "
           + "segnalazione.");
-      UploadSituation.processAttestati(null, null, year, month);
+      UploadSituation.processAttestati(officeId, null, null, year, month);
     }
     rules.checkIfPermitted(Security.getUser().get().person.office);
     LoginResponse loginResponse = loadAttestatiLoginCached();
@@ -384,7 +407,7 @@ public class UploadSituation extends Controller {
     if (dipendente == null) {
       flash.error("Errore caricamento dipendente da elaborare. "
           + "Riprovare o effettuare una segnalazione.");
-      UploadSituation.processAttestati(null, null, year, month);
+      UploadSituation.processAttestati(officeId, null, null, year, month);
     }
 
     Set<Dipendente> activeDipendenti = new HashSet<Dipendente>();
@@ -414,7 +437,7 @@ public class UploadSituation extends Controller {
     }
 
 
-    UploadSituation.processAttestati(null, null, year, month);
+    UploadSituation.processAttestati(officeId, null, null, year, month);
 
   }
 

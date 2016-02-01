@@ -137,7 +137,7 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("UploadSituation.show")) {
 
-      UploadSituation.show();
+      UploadSituation.show(officeId);
     }
 
     if (action.equals("Absences.manageAttachmentsPerCode")) {

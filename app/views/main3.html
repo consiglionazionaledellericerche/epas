@@ -156,7 +156,7 @@
               #{/if}
 
               #{if ip.uploadSituation }
-              <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
+              <li><a href="@{UploadSituation.show(session.get("officeSelected"))}">Invio Attestati</a></li>
               <li class="divider"></li>
               #{/if}
 
