@@ -2,9 +2,12 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Invio Attestati'  /}
 
+#{set breadcrumbs:['Invio Attestati':@Persons.list()] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
 <div class="container">
 
-
+	#{title title:('Invio Attestati ' + office.name), administration:true /}
     <div class="panel panel-primary">
       <div class="panel-heading">
         <h3 class="panel-title text-center">Caricamento situazione mensile del personale</h3>
@@ -25,14 +28,14 @@
 		#{form @UploadSituation.uploadSituation()}
 		<div class="center">
 		<p>Scegli anno e mese di assenze e competenze per i quali vuoi popolare il file da inviare agli attestati di presenza</p>
-			
-			#{select 'year', value: year, id:'year'}
-				#{option 2013}2013#{/option}
-				#{option 2014}2014#{/option}
-				#{option 2015}2015#{/option}
+
+			#{select 'year', value: previousYearMonth.year, id:'year'}
+			  #{list items:officeYearFrom..officeYearTo, as:'item'}
+				#{option item}${item}#{/option}
+			  #{/list}
 			#{/select}
 			
-			#{select 'month', value: month, id:'month'}
+			#{select 'month', value: previousYearMonth.monthOfYear, id:'month'}
 				#{option 1}Gennaio#{/option}
 				#{option 2}Febbraio#{/option}
 				#{option 3}Marzo#{/option}

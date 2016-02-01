@@ -76,10 +76,17 @@ public class AttestatiClient {
     AssenzaPerPost assenza = null;
 
     for (Absence absence : absences) {
-      String absenceCodeToSend =
-          (absence.absenceType.certificateCode == null || absence.absenceType.certificateCode == "")
-              ? absence.absenceType.code.toUpperCase()
-              : absence.absenceType.certificateCode.toUpperCase();
+      
+      //codici a uso interno li salto
+      if (absence.absenceType.internalUse) {
+        continue;
+      }
+      //codice per attestati
+      String absenceCodeToSend = absence.absenceType.code;
+      if (absence.absenceType.certificateCode != null 
+          && !absence.absenceType.certificateCode.trim().isEmpty()) { 
+        absenceCodeToSend = absence.absenceType.certificateCode;
+      }
 
       if (previousDate == null || previousAbsenceCode == null) {
         assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
