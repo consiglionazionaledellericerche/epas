@@ -244,5 +244,16 @@ public class Configurations extends Controller {
 
     render(office, offices);
   }
+  
+  
+  public static void show(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    rules.checkIfPermitted(office);
+    
+    render(office);
+  }
 
 }
