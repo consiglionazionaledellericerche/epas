@@ -26,11 +26,17 @@
 
 
 <div class="container center">
+      #{form @UploadSituation.show(), class:'form-horizontal'}
+	      <input type="submit" value="Torna a Login e Selezione mese" class="btn-primary"/>
+	      <input type="hidden" name="officeId" value="${office.id}" />
+	      <input type="hidden" name="year" value="${year}" />
+		  <input type="hidden" name="month" value="${month}" />
+	  #{/form}
 
 	  #{form @processAllPersons(year, month), class:'form-horizontal'}
 		  <input type="hidden" name="year" value="${year}" />
 		  <input type="hidden" name="month" value="${month}" />
-		  <input type="submit" name="back" value="Torna a Login e Selezione mese" class="btn"/>
+		  
 		  
 		  <button type="submit" class="btn btn-warning"/><span class="glyphicon glyphicon-fire"></span> Elabora Tutti</button> 
 	  #{/form}

@@ -1,10 +1,22 @@
 *{ATTENZIONE! i popover bootstrap non sono compatibili con la select2, non usarli contemporaneamente!!}*
 #{f.edit _arg, label:_label}
+
+*{ 
+   Per fare confronto con liste di tipi primitivi (esempio integer, etc) passare il campo 
+   byEquals: true
+}*
+
+
 <select class="form-control ${_class}" name="${field.name}" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
 <option></option>
-	#{list _items}
-		<option value="${_}"#{if field.value == _} selected#{/if}>${_.label()}</option>
-	#{/list}
+  #{list _items}
+         #{if _byEquals}
+		  <option value="${_}"#{if _value.equals(_)} selected#{/if}>${_.label()}</option>
+		#{/if}
+		#{else }
+		  <option value="${_}"#{if field.value == _} selected#{/if}>${_.label()}</option>
+		#{/else}
+  #{/list}
 </select>
 #{/f.edit}
 

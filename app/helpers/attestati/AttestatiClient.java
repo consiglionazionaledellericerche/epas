@@ -1,13 +1,22 @@
 package helpers.attestati;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import com.beust.jcommander.internal.Maps;
 
 import controllers.Security;
 
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
 
-import it.cnr.iit.epas.DateUtility;
-
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
@@ -36,8 +45,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -52,12 +63,16 @@ public class AttestatiClient {
 
   private static String CLIENT_USER_AGENT = "ePAS";
   private static String BASE_LOGIN_URL = "LoginLDAP";
+  private static String BASE_LISTA_DIP_MASK_URL = "ListaDipMask";
   private static String BASE_LISTA_DIPENDENTI_URL = "ListaDip";
   private static String BASE_ELABORA_DATI_URL = "HostDip";
+  
   @Inject
   private ConfGeneralManager confGeneralManager;
   @Inject
-  private PersonDao persondao;
+  private PersonDao personDao;
+  @Inject 
+  private OfficeDao officeDao;
 
   /**
    * La lista di assenze passate sono di tipo giornaliero ma al sistema degli attestati vanno
@@ -112,53 +127,108 @@ public class AttestatiClient {
   }
 
   /**
-   * Effettua la login sul sistema degli attestati facendo una post con i parametri passati.
-   *
-   * @param attestatiLogin    nome utente epas
+   * Effettua login sul sito degli attestati. Se già presente una sessione la annulla e ricarica
+   * tutte le informazioni sul mese selezionato. 
+   * Preleva la lista degli office abilitati all'invio delle presenze e tutti i dipendenti 
+   * che risultano su Attestati per l'anno/mese selezionato.
+   * 
+   * @param urlToPresence url per attestato.
+   * @param attestatiLogin username
    * @param attestatiPassword password
-   * @return la LoginResponse contiene l'ok se la login è andata a buon fine ed in questo caso anche
-   *     i cookies necessari per le richieste successive.
+   * @param year anno 
+   * @param month mese
+   * @return
+   * @throws AttestatiException
+   * @throws MalformedURLException
+   * @throws URISyntaxException
    */
-  public LoginResponse login(
-      String attestatiLogin, String attestatiPassword, Integer year, Integer month)
-          throws AttestatiException, MalformedURLException, URISyntaxException {
+  public SessionAttestati login(String urlToPresence, String attestatiLogin, String attestatiPassword, 
+      SessionAttestati sessionAttestati, Integer year, Integer month) {
 
-    Office office = Security.getUser().get().person.office;
-    String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
-    URI baseUri = new URI(urlToPresence);
-    URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
-
-    Connection connection = Jsoup.connect(loginUrl.toString());
-    Response loginResponse;
     try {
-      loginResponse = connection
-              .data("utente", attestatiLogin)
-              .data("login", attestatiPassword)
-              .userAgent(CLIENT_USER_AGENT)
-              .url(loginUrl)
-              .method(Method.POST).execute();
+      final URI baseUri = new URI(urlToPresence);
 
-      log.debug("Effettuata la richiesta di login come utente %s, codice di risposta http = {}",
-              attestatiLogin, loginResponse.statusCode());
+      // 1) Login
+      if (sessionAttestati == null || !sessionAttestati.loggedIn) {
+        final URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
+        Connection connection = Jsoup.connect(loginUrl.toString());
+        Response loginResponse = connection
+            .data("utente", attestatiLogin)
+            .data("login", attestatiPassword)
+            .userAgent(CLIENT_USER_AGENT)
+            .url(loginUrl)
+            .method(Method.POST).execute();
+        log.debug("Effettuata la richiesta di login come utente %s, codice di risposta http = {}",
+            attestatiLogin, loginResponse.statusCode());
 
-      Document loginDoc = loginResponse.parse();
-      log.debug("Risposta alla login = \n{}", loginDoc);
+        Document loginDoc = loginResponse.parse();
+        log.debug("Risposta alla login = \n{}", loginDoc);
 
+        Elements loginMessages = loginDoc.select("h5[align=center]>font");
+        if (loginResponse.statusCode() != 200 || loginMessages.isEmpty()
+            || !loginMessages.first().ownText().contains("Login completata con successo.")) {
+          //errore login
+          return new SessionAttestati(attestatiLogin, false, loginResponse.cookies(), year, month);
+        }
 
-      Elements loginMessages = loginDoc.select("h5[align=center]>font");
+        sessionAttestati = new SessionAttestati(attestatiLogin,
+            true, loginResponse.cookies(), year, month);
+      }
+      // 2) Sedi abilitate
+      final URL listaDipendentiMaskUrl = baseUri.resolve(BASE_LISTA_DIP_MASK_URL).toURL();
+      Connection connection = Jsoup.connect(listaDipendentiMaskUrl.toString());
+      connection.cookies(sessionAttestati.getCookies());
 
-      if (loginResponse.statusCode() != 200
-              || loginMessages.isEmpty()
-              || !loginMessages.first().ownText().contains("Login completata con successo.")) {
-        return new LoginResponse(attestatiLogin, false, loginResponse.cookies(), year, month);
-      } else {
-        return new LoginResponse(attestatiLogin, true, loginResponse.cookies(), year, month);
+      Response listaDipendentiMaskResponse = connection
+          .userAgent(CLIENT_USER_AGENT)
+          .method(Method.GET).execute();
+
+      log.debug("Effettuata la richiesta di sedi disponibili %s, codice di risposta http = {}",
+          attestatiLogin, listaDipendentiMaskResponse.statusCode());
+
+      if (listaDipendentiMaskResponse.statusCode() != 200) {
+        throw new AttestatiException(
+            String.format("Impossibile prelevare la lista delle sedi abilitate."
+                + "Il sistema remote ha restituito il codice di errore http = %d."
+                + "Contattare l'amministratore di ePAS per maggiori informazioni.",
+                listaDipendentiMaskResponse.statusCode()));
       }
 
+      Document listaDipendentiMaskDoc = listaDipendentiMaskResponse.parse();
+      //  <TD WIDTH='24%'>
+      //    <SELECT NAME='sede_id'>
+      //      <OPTION>223400</OPTION>
+      //      <OPTION>223400</OPTION>
+      //      <OPTION>223410</OPTION>
+      //    </SELECT>
+      //  </TD>
+      Elements selectSeat = listaDipendentiMaskDoc.select("select[name*=sede_id]");
+      for (Element option : selectSeat.first().children()) {
+        try {
+          Optional<Office> office = officeDao.byCodeId(option.text());
+          if (office.isPresent()) {
+            if (sessionAttestati.getOfficesDips().get(office.get()) == null) {
+              // caricare le persone.
+              Set<Dipendente> officeDips = listaDipendenti(office.get(), 
+                  sessionAttestati.getCookies(), year, month);
+              sessionAttestati.getOfficesDips().put(office.get(), officeDips);
+              log.debug("Ho prelevato la sede %s con %s dipendenti.", office, officeDips.size());
+            }
+          }
+        } catch(Exception e) {}
+      }
+
+      return sessionAttestati;
+
     } catch (IOException e) {
-      log.error("Errore durante la login sul sistema di invio degli attestati. Eccezione = {}", e);
-      return new LoginResponse(attestatiLogin, false, null, year, month);
+      log.error("Errore durante la login e fetch informazioni sistema di invio degli attestati."
+          + " Eccezione = {}", e);
+    } catch (URISyntaxException e1) {
+      log.error("Errore durante la login e fetch informazioni sistema di invio degli attestati."
+          + " Eccezione = {}", e1);      
     }
+
+    return new SessionAttestati(attestatiLogin, false, null, year, month);
   }
 
   /**
@@ -168,12 +238,11 @@ public class AttestatiClient {
    * @return la lista dei dipendenti estratta dall'HTML della apposita pagina prevista nel sistema
    *     degli attestati di Roma
    */
-  public List<Dipendente> listaDipendenti(
+  public Set<Dipendente> listaDipendenti(Office office,
       Map<String, String> cookies, Integer year, Integer month)
       throws URISyntaxException, MalformedURLException {
     Response listaDipendentiResponse;
 
-    Office office = Security.getUser().get().person.office;
     String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
 
     URI baseUri = new URI(urlToPresence);
@@ -221,7 +290,7 @@ public class AttestatiClient {
        *  <td align="middle"> <font size="1" color="#0000FF" face="Arial">NO</font></td>
        * </tr>
        */
-      List<Dipendente> listaDipendenti = Lists.newArrayList();
+      Set<Dipendente> listaDipendenti = Sets.newHashSet();
       Elements anchorMatricole = listaDipendentiDoc.select("a[href*=DettDip?matr=]");
       for (Element e : anchorMatricole) {
         String matricola = e.ownText();
@@ -232,7 +301,7 @@ public class AttestatiClient {
             tdMatricola.siblingElements().get(1).text().replace("\u00a0", "").trim();
         log.debug("Nel html della lista delle persone individuato \"{}\", matricola=\"{}\"",
             nomeCognome, matricola);
-        Person person = persondao.getPersonByNumber(Integer.parseInt(matricola));
+        Person person = personDao.getPersonByNumber(Integer.parseInt(matricola));
         listaDipendenti.add(new Dipendente(person, nomeCognome));
       }
 
@@ -378,7 +447,7 @@ public class AttestatiClient {
         //Si aggiunge il contenuto testuale degli elementi font che contengono il
         //messaggio di errore
         for (Element el : errorElements) {
-          problems.append(el.ownText());
+          problems.append(el.ownText()).append(" | ");
         }
         isOk = false;
       }
@@ -434,16 +503,121 @@ public class AttestatiClient {
     }
 
   }
+  
+  /**
+   * Costruisce l'oggetto che contiene le liste comparate dei dipendenti.
+   * (Quelli attivi su CNR, quelli attivi su EPAS e le differenze).
+   * @param office
+   * @param sessionAttestati
+   * @return
+   */
+  public DipendenteComparedRecap buildComparedLists(Office office, 
+      SessionAttestati sessionAttestati) {
+    
+    DipendenteComparedRecap recap = new DipendenteComparedRecap();
+    recap.cnrDipendenti = sessionAttestati.getOfficesDips().get(office);
+    
+    int year = sessionAttestati.getYear();
+    int month = sessionAttestati.getMonth();
+    
+    List<Person> persons = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+
+    recap.epasDipendenti = FluentIterable.from(persons)
+        .transform(new Function<Person, Dipendente>() {
+          @Override
+          public Dipendente apply(Person person) {
+            Dipendente dipendente =
+                new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, 
+                    person.othersSurnames, person.name));
+            return dipendente;
+          }
+        }).toSet();
+    
+    recap.validDipendenti = Sets.intersection(recap.cnrDipendenti, recap.epasDipendenti);
+    
+    recap.notInEpasDipendenti = getDipendenteNonInEpas(recap.cnrDipendenti, recap.epasDipendenti);
+    recap.notInCnrDipendenti = getDipendenteNonInCnr(recap.cnrDipendenti, recap.epasDipendenti);
+    
+    return recap;
+  }
+  
+  /**
+   * @param listaDipendenti
+   * @param activeDipendenti
+   * @return
+   */
+  private Set<Dipendente> getDipendenteNonInEpas(Set<Dipendente> listaDipendenti,
+      Set<Dipendente> activeDipendenti) {
+   
+    Set<Dipendente> dipendentiNonInEpas =
+        Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
+    if (dipendentiNonInEpas.size() > 0) {
+      log.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. {}",
+          dipendentiNonInEpas);
+    }
+    return dipendentiNonInEpas;
+  }
+
+  /**
+   * 
+   * @param listaDipendenti
+   * @param activeDipendenti
+   * @return
+   */
+  private Set<Dipendente> getDipendenteNonInCnr(Set<Dipendente> listaDipendenti,
+      Set<Dipendente> activeDipendenti) {
+    Set<Dipendente> dipendentiNonInCnr =
+        Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
+    if (dipendentiNonInCnr.size() > 0) {
+      log.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. {}",
+          dipendentiNonInCnr);
+    }
+    return dipendentiNonInCnr;
+  }
+
+  /*
+  private Set<Dipendente> getActiveDipendenti(int year, int month) {
+
+    final List<Person> activePersons = personDao.list(
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+
+    final Set<Dipendente> activeDipendenti =
+        FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
+          @Override
+          public Dipendente apply(Person person) {
+            Dipendente dipendente =
+                new Dipendente(
+                    person,
+                    Joiner.on(" ").skipNulls()
+                    .join(person.surname, person.othersSurnames, person.name));
+            return dipendente;
+          }
+        }).toSet();
+    log.trace("Lista dipendenti attivi nell'anno {}, mese {} e': {}",
+        year, month, activeDipendenti);
+
+    return activeDipendenti;
+  }
+  */
 
   @SuppressWarnings("serial")
-  public static final class LoginResponse implements Serializable {
+  @Data
+  public static final class SessionAttestati implements Serializable {
+    
     private final boolean loggedIn;
     private final Map<String, String> cookies;
     private String usernameCnr;
     private Integer year;
     private Integer month;
+    private Map<Office, Set<Dipendente>> officesDips = Maps.newHashMap();;
+    
 
-    public LoginResponse(String usernameCnr, boolean loggedIn,
+    public SessionAttestati(String usernameCnr, boolean loggedIn,
         Map<String, String> cookies, Integer year, Integer month) {
       this.usernameCnr = usernameCnr;
       this.loggedIn = loggedIn;
@@ -451,29 +625,18 @@ public class AttestatiClient {
       this.year = year;
       this.month = month;
     }
-
-    public String getUsernameCnr() {
-      return usernameCnr;
-    }
-
-    public boolean isLoggedIn() {
-      return loggedIn;
-    }
-
-    public Map<String, String> getCookies() {
-      return cookies;
-    }
-
-    public Integer getYear() {
-      return this.year;
-    }
-
-    public Integer getMonth() {
-      return this.month;
-    }
-
-    public String getNamedMonth() {
-      return DateUtility.fromIntToStringMonth(this.month);
-    }
   }
+  
+  @Data
+  public static final class DipendenteComparedRecap {
+    
+    Set<Dipendente> cnrDipendenti;
+    Set<Dipendente> epasDipendenti;
+
+    Set<Dipendente> validDipendenti;
+    Set<Dipendente> notInEpasDipendenti;
+    Set<Dipendente> notInCnrDipendenti;
+  }
+
+ 
 }
