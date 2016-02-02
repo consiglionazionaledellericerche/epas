@@ -1,5 +1,5 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Riepilogo Attestati elaborati ' + templateUtility.monthName(cd.month) + ' ' + cd.year + ' per ' + cd.person.surname + ' ' + cd.person.name/}
+#{modalAsync id:'modalAbsence', button:'Salva', 
+  title:'Riepilogo Attestati elaborati ' + templateUtility.monthName(cd.month) + ' ' + cd.year + ' per ' + cd.person.surname + ' ' + cd.person.name }
 
 <div class="container-fluid center">
   
@@ -32,3 +32,5 @@
     </table>
 
 </div>
+
+#{/modalAsync}

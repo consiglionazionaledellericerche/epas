@@ -554,12 +554,14 @@ when
         "Competences.saveNewCompetenceConfiguration",
         
         /* Vecchio permesso uploadSituation */
-        "UploadSituation.show",
-        "UploadSituation.uploadSituation",
-        "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati",
-        "UploadSituation.processSinglePerson",
+        "UploadSituation.uploadData",
+        "UploadSituation.changeMonth",
+        "UploadSituation.createFile",
+        "UploadSituation.computeCreateFile",
+        "UploadSituation.fetchData",
+        "UploadSituation.logoutAttestati",
         "UploadSituation.processAllPersons",
+        "UploadSituation.processSinglePerson",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
         
@@ -674,12 +676,14 @@ when
         "Competences.saveNewCompetenceConfiguration",
         
          /* Vecchio permesso uploadSituation */
-        "UploadSituation.show",
-        "UploadSituation.uploadSituation",
-        "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati",
-        "UploadSituation.processSinglePerson",
+        "UploadSituation.uploadData",
+        "UploadSituation.changeMonth",
+        "UploadSituation.createFile",
+        "UploadSituation.computeCreateFile",
+        "UploadSituation.fetchData",
+        "UploadSituation.logoutAttestati",
         "UploadSituation.processAllPersons",
+        "UploadSituation.processSinglePerson",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
         

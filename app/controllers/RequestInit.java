@@ -482,10 +482,11 @@ public class RequestInit extends Controller {
 
     if (action.startsWith("UploadSituation.")) {
 
-      if (action.equals("UploadSituation.show")) {
+      if (action.equals("UploadSituation.uploadData")) {
 
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "UploadSituation.show";
+        renderArgs.put("switchOffice", true);
+        return "UploadSituation.uploadData";
       }
 
       if (action.equals("UploadSituation.loginAttestati")) {

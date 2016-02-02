@@ -1,7 +1,5 @@
 package controllers;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -18,9 +16,11 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 import helpers.attestati.AttestatiClient;
-import helpers.attestati.AttestatiClient.LoginResponse;
+import helpers.attestati.AttestatiClient.DipendenteComparedRecap;
+import helpers.attestati.AttestatiClient.SessionAttestati;
 import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
@@ -30,32 +30,28 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
+import manager.UploadSituationManager;
 
-import models.Absence;
 import models.CertificatedData;
-import models.Competence;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
-import models.User;
 import models.enumerate.Parameter;
 
-import org.joda.time.LocalDate;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.YearMonth;
+import org.testng.collections.Maps;
 
 import play.Logger;
 import play.cache.Cache;
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -77,19 +73,18 @@ public class UploadSituation extends Controller {
 
   public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
   public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
-
+  
+  public static final String FILE_PREFIX = "situazioneMensile";
+  public static final String FILE_SUFFIX = ".txt";
+  
   @Inject
   private static SecurityRules rules;
-  @Inject
-  private static ConfGeneralManager confGeneralManager;
   @Inject
   private static PersonDao personDao;
   @Inject
   private static OfficeDao officeDao;
   @Inject
   private static PersonDayDao personDayDao;
-  @Inject
-  private static SecureManager secureManager;
   @Inject
   private static AbsenceDao absenceDao;
   @Inject
@@ -102,253 +97,245 @@ public class UploadSituation extends Controller {
   private static PersonMonthRecapDao personMonthRecapDao;
   @Inject
   private static IWrapperFactory factory;
+  @Inject
+  private static UploadSituationManager updloadSituationManager;
+  @Inject
+  private static ConfGeneralManager confGeneralManager; 
 
   /**
-   * Pagina iniziale di selezione mese. Decidere se fare prima il login.
-   * @param officeId
+   * Tab carica data. 
+   * @param officeId sede
    */
-  public static void show(Long officeId) {
+  public static void uploadData(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-
-    Optional<LocalDate> officeInitUse = confGeneralManager
-        .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, office);
     
-    Verify.verify(officeInitUse.get() != null);
-
-    // anni in cui possono essere inviati gli attestati (installazione sede fino ad oggi)
-    int officeYearFrom = officeInitUse.get().getYear();
-    int officeYearTo = LocalDate.now().getYear();
-    if (officeYearFrom > officeYearTo) {
-      officeYearTo = officeYearFrom;
-    }
+    IWrapperOffice wrOffice = factory.create(office);
+    Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
     
-    // mese scorso preselezionato (se esiste) oppure installazione sede
-    YearMonth previousYearMonth = new YearMonth(LocalDate.now().minusMonths(1));
-    if (previousYearMonth.isBefore(new YearMonth(officeInitUse.get()))) {
-      previousYearMonth = new YearMonth(officeInitUse.get());
+    //caricare eventuale sessione già presente
+    SessionAttestati sessionAttestati = loadAttestatiLoginCached();
+
+    if (sessionAttestati != null && monthToUpload.isPresent()) {
+      
+      int year = sessionAttestati.getYear();
+      int month = sessionAttestati.getMonth();
+      
+      monthToUpload = Optional.fromNullable(new YearMonth(year, month));
+      
+      DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
+          .buildComparedLists(office, sessionAttestati);
+
+      IWrapperFactory wrapper = factory;
+      render(wrOffice, monthToUpload, sessionAttestati, dipendenteComparedRecap, wrapper);
     }
 
-    render(office, officeYearFrom, officeYearTo, previousYearMonth);
+    render(wrOffice, monthToUpload, sessionAttestati);
+  }
+  
+  /**
+   * Modale Cambia il mese.
+   * @param officeId
+   */
+  public static void changeMonth(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    IWrapperOffice wrOffice = factory.create(office);
+    Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
+
+    SessionAttestati sessionAttestati = loadAttestatiLoginCached();
+
+    if (sessionAttestati != null && monthToUpload.isPresent()) {
+
+      int year = sessionAttestati.getYear();
+      int month = sessionAttestati.getMonth();
+
+      monthToUpload = Optional.fromNullable(new YearMonth(year, month));
+      render(wrOffice, monthToUpload, sessionAttestati);
+      
+    } else {
+      //sessione scaduta.
+      render(wrOffice);
+    }
   }
 
-  public static void loginAttestati(Integer year, Integer month) {
-
-    Office office = Security.getUser().get().person.office;
+  /**
+   * Tab creazione file.
+   * @param officeId sede
+   * @param year anno
+   * @param month mese
+   */
+  public static void createFile(Long officeId, Integer year, Integer month) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
-    String userToPresence = confGeneralManager.getFieldValue(Parameter.USER_TO_PRESENCE, office);
-
-    String attestatiLogin =
-        params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin");
-
-    render(year, month, urlToPresence, attestatiLogin);
+    IWrapperOffice wrOffice = factory.create(office);
+    Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
+    render(wrOffice, monthToUpload);
   }
+  
+  /**
+   * Tab creazione file.
+   * @param office sede
+   * @param year anno
+   * @param month mese
+   */
+  public static void computeCreateFile(@Valid Office office, 
+      @Required Integer year, @Required Integer month) {
+    
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
-
-  public static void uploadSituation(Integer year, Integer month) throws IOException {
-    if (params.get("loginAttestati") != null) {
-      loginAttestati(year, month);
-      return;
+    IWrapperOffice wrOffice = factory.create(office);
+    if (!validation.hasErrors()) {
+      //controllo che il mese sia uploadable
+      if (!wrOffice.isYearMonthUploadable(new YearMonth(year, month))) {
+        validation.addError("year", "non può essere precedente al primo mese riepilogabile");
+        validation.addError("month", "non può essere precedente al primo mese riepilogabile");
+      }
     }
 
-    if (params.get("back") != null) {
-      redirect("Application.indexAdmin");
+    if (validation.hasErrors()) {
+      response.status = 400;
+      //flash.error(Web.msgHasErrors());
+      log.warn("validation errors: {}", validation.errorsMap());
+      Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));
+      render("@createFile", wrOffice, monthToUpload);
     }
+    
+    String body = updloadSituationManager.createFile(office, year, month);
+    String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX; 
+    renderBinary(IOUtils.toInputStream(body), fileName);
+  }
+  
+  /**
+   * Carica i dati sul personale (sia lato CNR sia lato ePAS confrontando le due liste).
+   * Se necessario effettua login (in caso di username e password null si cerca la login in cache).
+   * 
+   * @param office
+   * @param year
+   * @param month
+   * @param attestatiLogin
+   * @param attestatiPassword
+   */
+  public static void fetchData(@Valid Office office, Integer year, 
+      Integer month, final String attestatiLogin, final String attestatiPassword, boolean changeMonth) {
+    
+    rules.checkIfPermitted(office);
+    IWrapperOffice wrOffice = factory.create(office);
+    
+    // Sessione in cache
+    SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
-    if (month == null || year == null) {
-      flash.error(
-          "Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
-      Application.indexAdmin();
-    }
-
-    User user = Security.getUser().get();
-
-    rules.checkIfPermitted(user.person.office);
-
-    List<Person> personList = personDao.getPersonsByNumber();
-
-    Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
-    List<Absence> absenceList = null;
-    List<Competence> competenceList = null;
-
-    FileInputStream inputStream = null;
-    File tempFile =
-        File.createTempFile("situazioneMensile" + year.toString() + month.toString(), ".txt");
-    inputStream = new FileInputStream(tempFile);
-
-    FileWriter writer = new FileWriter(tempFile, true);
-    try {
-      BufferedWriter out = new BufferedWriter(writer);
-      out.write(user.person.office.codeId);
-      out.write(' ');
-      out.write(new String(month.toString() + year.toString()));
-      out.newLine();
-      for (Person p : personList) {
-
-        absenceList = absenceDao.getAbsencesNotInternalUseInMonth(p, year, month);
-        for (Absence abs : absenceList) {
-          out.write(p.number.toString());
-          out.append(' ').append('A').append(' ')
-          .append(abs.absenceType.code).append(' ')
-          .append(new Integer(abs.personDay.date.getDayOfMonth()).toString()).append(' ')
-          .append(new Integer(abs.personDay.date.getDayOfMonth()).toString()).append(' ')
-          .append('0');
-          out.newLine();
+    if (changeMonth) {
+      //cambio mese, effettuo la validazione prima di fetchare.
+      if (!validation.hasErrors()) {
+        //controllo che il mese sia uploadable
+        if (!wrOffice.isYearMonthUploadable(new YearMonth(year, month))) {
+          validation.addError("year", "non può essere precedente al primo mese riepilogabile");
+          validation.addError("month", "non può essere precedente al primo mese riepilogabile");
         }
-
-        //competenceList = pm.getCompetenceInMonthForUploadSituation();
-        competenceList = competenceDao.getCompetenceInMonthForUploadSituation(p, year, month);
-
-        for (Competence comp : competenceList) {
-          Logger.trace(
-              "Inserisco nel file per gli attestati per %d/%d: matricola %d, compCode=%s, ore=%d",
-              month, year, p.number, comp.competenceCode.code, comp.valueApproved);
-          out.append(p.number.toString())
-          .append(' ').append('C').append(' ')
-          .append(comp.competenceCode.code).append(' ')
-          .append(new Integer(comp.valueApproved).toString()).append(' ')
-          .append('0').append(' ').append('0');
-          out.newLine();
-        }
-
       }
 
-      out.close();
+      if (validation.hasErrors()) {
+        response.status = 400;
+        log.warn("validation errors: {}", validation.errorsMap());
+        Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));
+        render("@changeMonth", wrOffice, monthToUpload, sessionAttestati);
+      }
+      
+      //ripulire lo stato della sessione
+      sessionAttestati = new SessionAttestati(sessionAttestati.getUsernameCnr(), true, 
+          sessionAttestati.getCookies(), year, month);
+      
+      sessionAttestati = attestatiClient.login(confGeneralManager
+          .getFieldValue(Parameter.URL_TO_PRESENCE, office), null, null, sessionAttestati, 
+          year, month);
 
-      renderBinary(inputStream, "situazioneMensile" + year.toString() + month.toString());
-      Application.indexAdmin();
-    } catch (IOException e) {
-      Logger.warn("Errore nella creazione del file per gli attestati. Eccezione=%s", e);
-      flash.error("Il file non è stato creato correttamente, accedere al file di log.");
-      Application.indexAdmin();
+      memAttestatiIntoCache(sessionAttestati, null);
     }
-  }
+    
+    // Nuovo login e scarico lista dei dipendenti in attestati
+    if (attestatiLogin != null && attestatiPassword != null) {
+      try {
+        memAttestatiIntoCache(null, null);
 
+        if (year == null || month == null) {
+          Optional<YearMonth> next = wrOffice.nextYearMonthToUpload();
+          Verify.verify(next.isPresent());
+          year = next.get().getYear();
+          month = next.get().getMonthOfYear();
+        }
 
-  public static void processAttestati(Long officeId, final String attestatiLogin, final String attestatiPassword, 
-      Integer year, Integer month) throws MalformedURLException, URISyntaxException {
+        sessionAttestati = attestatiClient.login(confGeneralManager
+            .getFieldValue(Parameter.URL_TO_PRESENCE, office), attestatiLogin, attestatiPassword, 
+            null, year, month);
 
-    LoginResponse loginResponse = null;
-    List<Dipendente> listaDipendenti = null;
+        if (!sessionAttestati.isLoggedIn()) {
+          flash.error("Errore durante il login sul sistema degli attestati.");
+          UploadSituation.uploadData(office.id);
+        }
 
-    if (attestatiLogin == null && attestatiPassword == null) {
-      loginResponse = loadAttestatiLoginCached();
-      listaDipendenti = loadAttestatiListaCached();
-      if (loginResponse == null || !loginResponse.isLoggedIn()
-          || listaDipendenti == null || listaDipendenti.size() == 0) {
-        flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
-        UploadSituation.loginAttestati(year, month);
+        memAttestatiIntoCache(sessionAttestati, null);
+        
+      } catch (AttestatiException e) {
+        flash.error(String.format("Errore durante il login e/o prelevamento della lista "
+            + "dei dipendenti dal sistema degli attestati. Eccezione: {}", e));
+        UploadSituation.uploadData(office.id);
       }
     } else {
-      User user = Security.getUser().get();
-      rules.checkIfPermitted(user.person.office);
-      Cache.set(LOGIN_RESPONSE_CACHED + user.username, null);
-      Cache.set(LISTA_DIPENTENTI_CNR_CACHED + user.username, null);
-
-      if (params.get("back") != null) {
-        show(officeId);
-      }
-
-      if (params.get("home") != null) {
-        redirect("Application.indexAdmin");
-      }
-
-      String urlToPresence =
-          confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, user.person.office);
-
-      try {
-        //1) LOGIN
-
-        loginResponse = attestatiClient.login(attestatiLogin, attestatiPassword, year, month);
-        if (!loginResponse.isLoggedIn()) {
-          flash.error("Errore durante il login sul sistema degli attestati.");
-          UploadSituation.loginAttestati(year, month);
-          return;
-        }
-
-        //2) CARICO LISTA DIPENDENTI CNR CENTRALE (ANNO-MESE)
-        log.debug("Prendo lista dipendenti da {}. Anno = {}, mese = {}",
-            urlToPresence, year, month);
-
-
-        listaDipendenti = attestatiClient.listaDipendenti(loginResponse.getCookies(), year, month);
-
-
-      } catch (AttestatiException e) {
-        flash.error(
-            String.format("Errore durante il login e/o prelevamento della lista dei dipendenti "
-                + "dal sistema degli attestati. Eccezione: {}", e));
-        UploadSituation.loginAttestati(year, month);
-      }
-
-      if (listaDipendenti == null || listaDipendenti.isEmpty()) {
-        flash.error(
-            "Errore durante il prelevamento della lista dei dipendenti dal sistema degli "
-                + "attestati.");
-        UploadSituation.loginAttestati(year, month);
+      
+      if (sessionAttestati == null || !sessionAttestati.isLoggedIn()) {
+        flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
+        UploadSituation.uploadData(office.id);
       }
     }
-
-    final List<Person> activePersons = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesWriteAllowed(Security.getUser().get()),
-        false, new LocalDate(year, month, 1),
-        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
-
-    final Set<Dipendente> activeDipendenti =
-        FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
-          @Override
-          public Dipendente apply(Person person) {
-            Dipendente dipendente =
-                new Dipendente(
-                    person,
-                    Joiner.on(" ").skipNulls()
-                    .join(person.surname, person.othersSurnames, person.name));
-            return dipendente;
-          }
-        }).toSet();
-    log.trace("Lista dipendenti attivi nell'anno {}, mese {} e': {}",
-        year, month, activeDipendenti);
-
-
-    Set<Dipendente> dipendentiNonInEpas =
-        getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendenti);
-    Set<Dipendente> dipendentiNonInCNR =
-        getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
-
-    memAttestatiIntoCache(loginResponse, listaDipendenti);
-
-    final IWrapperFactory wrapper = factory;
-
-    render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR,
-        loginResponse, wrapper);
-
+    
+    uploadData(office.id);
+  }
+  
+  public static void logoutAttestati(Long officeId) {
+    
+    memAttestatiIntoCache(null, null);
+    flash.success("Logout attestati eseguito.");
+    UploadSituation.uploadData(officeId);
   }
 
-  public static void processAllPersons(Long officeId, int year, int month)
+  public static void processAllPersons(Office office, int year, int month)
       throws MalformedURLException, URISyntaxException {
-    if (params.get("back") != null) {
-      UploadSituation.loginAttestati(year, month);
-    }
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    LoginResponse loginResponse = loadAttestatiLoginCached();
-    List<Dipendente> listaDipendenti = loadAttestatiListaCached();
+   
+    rules.checkIfPermitted(office);
+    
+    SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
-    if (loginResponse == null || !loginResponse.isLoggedIn()
-        || listaDipendenti == null || listaDipendenti.size() == 0) {
+    if (sessionAttestati == null || !sessionAttestati.isLoggedIn()) {
       flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
-      UploadSituation.loginAttestati(year, month);
+      UploadSituation.uploadData(office.id);
     }
 
-    Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
-
+    if (sessionAttestati.getOfficesDips().get(office) == null) {
+      flash.error("La sede per la quale si vuole caricare gli attestati non è abilitata "
+          + "su Attestati CNR, effettuare un nuovo login e riprovare.");
+      uploadData(office.id);
+    }
+    if (sessionAttestati.getYear() != year || sessionAttestati.getMonth() != month) {
+      flash.error("Per caricare i dati di un mese diverso da quello corrente "
+          + "utilizzare l'apposita funzione di cambio mese.");
+      uploadData(office.id);
+    }
+    
+    DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
+        .buildComparedLists(office, sessionAttestati);
+    
     List<RispostaElaboraDati> checks = elaboraDatiDipendenti(
-        loginResponse.getCookies(),
-        Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti),
+        sessionAttestati.getCookies(), dipendenteComparedRecap.getValidDipendenti(),
         year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
@@ -372,52 +359,55 @@ public class UploadSituation extends Controller {
           risposteNotOk.size());
     }
 
-    UploadSituation.processAttestati(officeId, null, null, year, month);
+    UploadSituation.uploadData(office.id);
 
 
   }
 
   public static void processSinglePerson(Long officeId, String matricola, int year, int month)
       throws MalformedURLException, URISyntaxException {
-    if (matricola == null) {
-      flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una "
-          + "segnalazione.");
-      UploadSituation.processAttestati(officeId, null, null, year, month);
-    }
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    LoginResponse loginResponse = loadAttestatiLoginCached();
-    List<Dipendente> listaDipendenti = loadAttestatiListaCached();
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    notFoundIfNull(matricola);
+    rules.checkIfPermitted(office);
+    SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
-    if (loginResponse == null || !loginResponse.isLoggedIn()
-        || listaDipendenti == null || listaDipendenti.size() == 0) {
+    if (sessionAttestati == null || !sessionAttestati.isLoggedIn()) {
       flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
-      UploadSituation.loginAttestati(year, month);
+      UploadSituation.uploadData(office.id);
     }
 
-    Set<Dipendente> activeDipendentiCached = getActiveDipendenti(year, month);
-
-    Dipendente dipendente = null;
-    for (Dipendente dip : activeDipendentiCached) {
-      if (dip.getMatricola().equals(matricola)) {
-        dipendente = dip;
+    if (sessionAttestati.getOfficesDips().get(office) == null) {
+      flash.error("La sede per la quale si vuole caricare gli attestati non è abilitata "
+          + "su Attestati CNR, effettuare un nuovo login e riprovare.");
+      uploadData(office.id);
+    }
+    if (sessionAttestati.getYear() != year || sessionAttestati.getMonth() != month) {
+      flash.error("Per caricare i dati di un mese diverso da quello corrente "
+          + "utilizzare l'apposita funzione di cambio mese.");
+      uploadData(office.id);
+    }
+    
+    DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
+        .buildComparedLists(office, sessionAttestati);
+    
+    Optional<Dipendente> dipendente = Optional.<Dipendente>absent();
+    for (Dipendente dipCached : dipendenteComparedRecap.getValidDipendenti()) {
+      if (dipCached.getMatricola().equals(matricola)) {
+        dipendente = Optional.fromNullable(dipCached);
         break;
       }
     }
 
-    if (dipendente == null) {
-      flash.error("Errore caricamento dipendente da elaborare. "
-          + "Riprovare o effettuare una segnalazione.");
-      UploadSituation.processAttestati(officeId, null, null, year, month);
+    if (!dipendente.isPresent()) {
+      flash.error("Il dipendente selezionato non è presente nell'elenco. Effettuare"
+          + "nuovamente login attestati e riprovare, oppure inviare una segnalazione.");
+      UploadSituation.uploadData(office.id);
     }
 
-    Set<Dipendente> activeDipendenti = new HashSet<Dipendente>();
-    activeDipendenti.add(dipendente);
-
-
-    List<RispostaElaboraDati> checks = elaboraDatiDipendenti(
-        loginResponse.getCookies(),
-        Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti),
-        year, month);
+    List<RispostaElaboraDati> checks = elaboraDatiDipendenti(sessionAttestati.getCookies(),
+        Sets.newHashSet(dipendente.get()), year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
       @Override
@@ -436,8 +426,7 @@ public class UploadSituation extends Controller {
           + "1 dipendente. Controllare l'esito.");
     }
 
-
-    UploadSituation.processAttestati(officeId, null, null, year, month);
+    UploadSituation.uploadData(office.id);
 
   }
 
@@ -524,16 +513,17 @@ public class UploadSituation extends Controller {
   }
 
   private static void memAttestatiIntoCache(
-      LoginResponse loginResponse, List<Dipendente> listaDipendenti) {
-    Cache.set(LOGIN_RESPONSE_CACHED + Security.getUser().get().username, loginResponse);
+      SessionAttestati sessionAttestati, List<Dipendente> listaDipendenti) {
+    Cache.set(LOGIN_RESPONSE_CACHED + Security.getUser().get().username, sessionAttestati);
+    
     Cache.set(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username, listaDipendenti);
   }
 
   /**
    * Carica in cache lo stato della connessione con attestati.cnr
    */
-  private static LoginResponse loadAttestatiLoginCached() {
-    return (LoginResponse) Cache.get(LOGIN_RESPONSE_CACHED + Security.getUser().get().username);
+  private static SessionAttestati loadAttestatiLoginCached() {
+    return (SessionAttestati) Cache.get(LOGIN_RESPONSE_CACHED + Security.getUser().get().username);
   }
 
   /**
@@ -546,54 +536,9 @@ public class UploadSituation extends Controller {
         Cache.get(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username);
   }
 
-  private static Set<Dipendente> getDipendenteNonInEpas(
-      int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
-    Set<Dipendente> dipendentiNonInEpas =
-        Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
-    if (dipendentiNonInEpas.size() > 0) {
-      log.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. {}",
-          dipendentiNonInEpas);
-    }
-
-    return dipendentiNonInEpas;
-  }
-
-  private static Set<Dipendente> getDipendenteNonInCnr(
-      int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti) {
-    Set<Dipendente> dipendentiNonInCnr =
-        Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
-    if (dipendentiNonInCnr.size() > 0) {
-      log.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. {}",
-          dipendentiNonInCnr);
-    }
-
-    return dipendentiNonInCnr;
-  }
-
-  private static Set<Dipendente> getActiveDipendenti(int year, int month) {
-
-    final List<Person> activePersons = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesWriteAllowed(Security.getUser().get()),
-        false, new LocalDate(year, month, 1),
-        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
-
-    final Set<Dipendente> activeDipendenti =
-        FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
-          @Override
-          public Dipendente apply(Person person) {
-            Dipendente dipendente =
-                new Dipendente(
-                    person,
-                    Joiner.on(" ").skipNulls()
-                    .join(person.surname, person.othersSurnames, person.name));
-            return dipendente;
-          }
-        }).toSet();
-    log.trace("Lista dipendenti attivi nell'anno {}, mese {} e': {}",
-        year, month, activeDipendenti);
-
-    return activeDipendenti;
-  }
+  
+  
+  
+  
 
 }

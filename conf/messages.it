@@ -242,6 +242,11 @@ uro.user= Utente
 user.password= Password
 user.username= Username
 
+yearAtt=Anno Attestato
+monthAtt=Mese Attestato
+attestatiLogin=Username Attestati
+attestatiPassword=Password Attestati
+
 views.common.false=falso
 views.common.true=vero
 views.common.yes_or_no.false=NO
