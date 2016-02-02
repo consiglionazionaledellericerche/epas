@@ -258,7 +258,9 @@ public class UploadSituation extends Controller {
       sessionAttestati = attestatiClient.login(confGeneralManager
           .getFieldValue(Parameter.URL_TO_PRESENCE, office), null, null, sessionAttestati, 
           year, month);
-
+      if (sessionAttestati != null) {
+        flash.success("Sessione aggiornata.");
+      }
       memAttestatiIntoCache(sessionAttestati, null);
     }
     

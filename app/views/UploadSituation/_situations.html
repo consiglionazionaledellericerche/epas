@@ -89,7 +89,25 @@
 		  #{/list}
 		</table>
 		
-		#{alert color:'danger'}
+	   <div class="center">
+        <h3>Elenco dei Dipendenti da verificare</h3>
+        #{alert color:'danger'}
+          <p>Sono riportati i dipendenti che non compaiono in entrambe le liste considerate.</p>
+          <p>Una volta corretti i nomi e i valori delle matricole in modo che venga effettuato il matching 
+          tra le due liste, sincronizza nuovamente le liste.
+          </p>
+          #{form @UploadSituation.fetchData(), class:'form-horizontal'}
+    		#{f.hidden 'office.id', value:wrOffice.value.id /}
+    		#{f.hidden 'changeMonth', value:true /}
+			#{f.hidden 'year', value:sessionAttestati.year /}
+			#{f.hidden 'month', value:sessionAttestati.month /}
+ 			#{b.buttons center:true}
+      		  #{b.submit 'Sincronizza Nuovamente'/}
+    		#{/b.buttons}
+          #{/form}
+        #{/alert}
+      </div>
+		
 	    <p><strong>Dipendenti in Attestati CNR non trovati in EPAS</strong></p>
 		<table class="table table-condensed">
 				  <tr>
@@ -103,8 +121,6 @@
 				    </tr> 
 				  #{/list}
 				</table>
-		#{/alert}
-		#{alert color:'danger'}
 		<p><strong>Dipendenti in EPAS non trovati in Attestati CNR</strong></p>
 		<table class="table table-condensed">
 				  <tr>
@@ -118,6 +134,6 @@
 				    </tr> 
 				  #{/list}
   	   </table>
-  	   #{/alert}
+
 
 <div id="modalCerts" class="modal container" tabindex="-1"></div>
