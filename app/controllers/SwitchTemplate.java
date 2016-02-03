@@ -135,11 +135,6 @@ public class SwitchTemplate extends Controller {
       Competences.monthlyOvertime(year, month, null, null);
     }
 
-    if (action.equals("UploadSituation.show")) {
-
-      UploadSituation.show();
-    }
-
     if (action.equals("Absences.manageAttachmentsPerCode")) {
 
       Absences.manageAttachmentsPerCode(year, month);

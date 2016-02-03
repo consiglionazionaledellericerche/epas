@@ -10,37 +10,8 @@
       </div>
       <div class="panel-body">
       
-        <div class="col-xs-5">
-          #{form action:@Competences.monthlyovertime(), class:'form-search',  
-          method:'GET', autocomplete:'off',
-          'data-reload':'#results'}
-    
-            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
-            <i class="icon-search icon-large"></i>
             <input type="hidden" name="year" value="${year}"/>
 	        <input type="hidden" name="month" value="${month}"/>
-	        #{/form}
-         </div>
-
-        <section id="results">
-
-          <div class="col-xs-7">
-            <ul class="pagination">
-              #{if simpleResults.totalPage > 0}
-	  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-	  	            #{if simpleResults.page==indexPage}
-	  	              <li class="active"><a href="#">${indexPage+1}</a></li>
-	  	            #{/if}
-	  	            #{else}
-	  	              <li><a href="@{Competences.monthlyovertime(year, month, name, indexPage)}">${indexPage+1}</a></li>
-	  	            #{/else}
-	  	          #{/list}
-  	          #{/if}
-	          #{else}
-	            <br>
-	          #{/else}
-            </ul>
-		  </div>
 
 		 <div class="col-xs-12">
 		    <table class="table overtime-big table-hover">
@@ -73,10 +44,7 @@
 		    	#{/list}
 		    </table>
 		  </div>        
-
-        </section>
-              
-        
+       
       </div>
     </div>
 

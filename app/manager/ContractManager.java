@@ -39,6 +39,7 @@ public class ContractManager {
   private final IWrapperFactory wrapperFactory;
   private final VacationCodeDao vacationCodeDao;
   private final PeriodManager periodManager;
+  private final PersonDayInTroubleManager personDayInTroubleManager;
 
   /**
    * Constructor.
@@ -50,11 +51,13 @@ public class ContractManager {
   @Inject
   public ContractManager(
       final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
-      final PeriodManager periodManager, final IWrapperFactory wrapperFactory) {
+      final PeriodManager periodManager, final PersonDayInTroubleManager personDayInTroubleManager, 
+      final IWrapperFactory wrapperFactory) {
 
     this.consistencyManager = consistencyManager;
     this.vacationCodeDao = vacationCodeDao;
     this.periodManager = periodManager;
+    this.personDayInTroubleManager = personDayInTroubleManager;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -168,11 +171,10 @@ public class ContractManager {
    */
   public final void properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
-
     setContractVacationPeriod(contract);
-    
     periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
+    personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
     
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
   }

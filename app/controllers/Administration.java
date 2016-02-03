@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
+import manager.PersonDayInTroubleManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
 
@@ -31,6 +32,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -65,6 +67,8 @@ public class Administration extends Controller {
   private static PersonDayDao personDayDao;
   @Inject
   private static PersonDayManager personDayManager;
+  @Inject
+  private static PersonDayInTroubleManager personDayInTroubleManager;
 
   /**
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
@@ -200,18 +204,19 @@ public class Administration extends Controller {
   /**
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
    *
-   * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
+   * @param person la persona da fixare, -1 per fixare tutte le persone
    * @param year     l'anno dal quale far partire il fix
    * @param month    il mese dal quale far partire il fix
    */
-  public static void fixPersonSituation(Long personId, int year, int month, boolean onlyRecap) {
+  public static void fixPersonSituation(Person person, int year, int month, boolean onlyRecap) {
 
     LocalDate date = new LocalDate(year, month, 1);
-
-    Optional<Person> person = personId == null ? Optional.<Person>absent()
-        : Optional.fromNullable(personDao.getPersonById(personId));
-
-    consistencyManager.fixPersonSituation(person, Security.getUser(), date, false, onlyRecap);
+    
+    Optional<Person> optPerson = Optional.<Person>absent();
+    if (person.isPersistent()) {
+      optPerson = Optional.fromNullable(person);
+    }
+    consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, false, onlyRecap);
 
     flash.success("Esecuzione terminata");
 
@@ -323,6 +328,27 @@ public class Administration extends Controller {
           + "con i piani ferie corretti.", contract.person.fullName(), contract.beginDate);
     }
 
+    utilities();
+  }
+  
+  /**
+   * Rimuove dal database tutti i personDayInTrouble che non appartengono ad alcun contratto o che
+   * sono precedenti la sua inizializzazione.
+   */
+  @SuppressWarnings("deprecation")
+  public static void fixDaysInTrouble() {
+    
+    List<Person> people = Person.findAll();
+    for (Person person : people) {
+
+      JPAPlugin.closeTx(false);
+      JPAPlugin.startTx(false);
+      person = personDao.getPersonById(person.id);
+      personDayInTroubleManager.cleanPersonDayInTrouble(person);
+    }
+    
+    flash.success("Operazione completata");
+    
     utilities();
   }
 
