@@ -167,6 +167,9 @@ public class UploadSituation extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
+    //TODO: costruire la lista degli anni sulla base di tutti gli uffici permessi 
+    //e usarla nel template.
+    
     IWrapperOffice wrOffice = factory.create(office);
     Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
     render(wrOffice, monthToUpload);
@@ -400,7 +403,7 @@ public class UploadSituation extends Controller {
     }
 
     List<RispostaElaboraDati> checks = elaboraDatiDipendenti(sessionAttestati.getCookies(),
-        Sets.newHashSet(dipendente.get()), year, month);
+        Lists.newArrayList(dipendente.get()), year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
       @Override
@@ -444,7 +447,7 @@ public class UploadSituation extends Controller {
   }
 
   private static List<RispostaElaboraDati> elaboraDatiDipendenti(
-      Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month)
+      Map<String, String> cookies, List<Dipendente> dipendenti, int year, int month)
           throws MalformedURLException, URISyntaxException {
     List<RispostaElaboraDati> checks = Lists.newLinkedList();
     Person person = null;
