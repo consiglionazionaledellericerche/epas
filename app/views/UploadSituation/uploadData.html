@@ -44,8 +44,12 @@
 		  <td><a href="@{logoutAttestati(wrOffice.value.id)}" class="btn btn-xs btn-danger">Logout</a></td>
 		</tr>
 		<tr>
+		  <td>Sede selezionata <strong>${wrOffice.value.name}</strong></td>
+		  <td><a href="@{updateSession(wrOffice.value.id)}" class="btn btn-xs btn-primary" data-async-modal="#modalCerts">Cambia</a></td>
+		</tr>
+		<tr>
 		  <td>Mese selezionato <strong>&{'views.tags.display.date.month.' + sessionAttestati.month} ${sessionAttestati.year}</strong></td>
-		  <td><a href="@{changeMonth(wrOffice.value.id)}" class="btn btn-xs btn-primary" data-async-modal="#modalCerts">Cambia</a></td>
+		  <td><a href="@{updateSession(wrOffice.value.id)}" class="btn btn-xs btn-primary" data-async-modal="#modalCerts">Cambia</a></td>
 		</tr>
 		</table>
 		#{/if}
