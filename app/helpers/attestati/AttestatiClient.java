@@ -155,10 +155,10 @@ public class AttestatiClient {
         final URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
         Connection connection = Jsoup.connect(loginUrl.toString());
         Response loginResponse = connection
-            //.data("utente", attestatiLogin)
-            //.data("login", attestatiPassword)
-            .data("utente", "claudio.baesso")
-            .data("login", "a")
+            .data("utente", attestatiLogin)
+            .data("login", attestatiPassword)
+            //.data("utente", "claudio.baesso")
+            //.data("login", "a")
             .userAgent(CLIENT_USER_AGENT)
             .url(loginUrl)
             .method(Method.POST).execute();
@@ -557,7 +557,9 @@ public class AttestatiClient {
           }
         }).toSet();
     
-    recap.validDipendenti = Sets.intersection(recap.cnrDipendenti, recap.epasDipendenti);
+    recap.validDipendenti = Lists.newArrayList(
+        Sets.intersection(recap.cnrDipendenti, recap.epasDipendenti));
+    Collections.sort(recap.validDipendenti);
     
     recap.notInEpasDipendenti = getDipendenteNonInEpas(recap.cnrDipendenti, recap.epasDipendenti);
     recap.notInCnrDipendenti = getDipendenteNonInCnr(recap.cnrDipendenti, recap.epasDipendenti);
@@ -657,7 +659,7 @@ public class AttestatiClient {
     Set<Dipendente> cnrDipendenti;
     Set<Dipendente> epasDipendenti;
 
-    Set<Dipendente> validDipendenti;
+    List<Dipendente> validDipendenti;
     Set<Dipendente> notInEpasDipendenti;
     Set<Dipendente> notInCnrDipendenti;
   }
