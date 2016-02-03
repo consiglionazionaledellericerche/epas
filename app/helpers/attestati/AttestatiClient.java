@@ -6,9 +6,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import com.beust.jcommander.internal.Maps;
 
 import controllers.Security;
 
@@ -639,7 +638,7 @@ public class AttestatiClient {
     private Integer year;
     private Integer month;
     private Office office;
-    private Map<Office, Set<Dipendente>> officesDips = Maps.newHashMap();;
+    private Map<Office, Set<Dipendente>> officesDips = Maps.newHashMap();
     private List<Integer> yearsList = Lists.newArrayList();
 
     public SessionAttestati(String usernameCnr, boolean loggedIn,
