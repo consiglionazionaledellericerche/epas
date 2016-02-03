@@ -1,0 +1,36 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
+
+<div class="container">
+#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
+</div>
+
+#{uploadSituation.uploadSituationTabs activeAction:'createFile' /}
+
+<div class="container">
+	
+  
+	  #{form @UploadSituation.computeCreateFile(), class:'form-horizontal'}
+		
+		#{alert color:'info'}
+		<p>Utilizzare questa procedura per generare un file contenente le informazioni 
+		da caricare in <strong>CNR Attestati</strong>.
+		</p>
+		<p>Scegli <strong>anno</strong> e <strong>mese</strong> di assenze e competenze per i quali vuoi popolare
+		 il file da inviare agli attestati di presenza.</p>
+		#{/alert}
+
+        #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
+
+		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
+		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
+
+		<br>
+		#{b.buttons center:true}
+            *{ #{b.cancel @updateSourceContract(contract.id) /} }*
+            #{b.submit 'Crea File'/}
+          #{/b.buttons}
+	#{/form}
+
+</div>

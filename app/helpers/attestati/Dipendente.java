@@ -87,7 +87,8 @@ public final class Dipendente implements Comparable<Dipendente> {
 
   @Override
   public int compareTo(final Dipendente other) {
-    return other.cognomeNome.compareTo(cognomeNome);
+    // FIXME per averli in ordine alfabetico ho dovuto invertire l'esito di compare to.
+    return other.cognomeNome.compareTo(cognomeNome) * -1;
   }
 
   @Override

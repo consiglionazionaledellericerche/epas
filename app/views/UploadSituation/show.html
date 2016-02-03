@@ -2,65 +2,95 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Invio Attestati'  /}
 
+*{
+#{set breadcrumbs:['Invio Attestati':@Persons.list()] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+}*
+
 <div class="container">
 
-
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title text-center">Caricamento situazione mensile del personale</h3>
-      </div>
-      <div class="panel-body">
-
-		<p>Questa procedura può:
+	#{title title:('Invio Attestati per la sede ' + office.name), administration:true /}
+	
+	*{
+	#{alert color:'primary'}
+	  <p>Questa sezione di ePAS mette a disposizione delle procedure automatizzate di caricamento
+	  situazioni mensili del personale sul portale <em>Cnr Attestati</em>.</p>
+	#{/alert}
+	}*
+	
+	#{panel color:'primary', title:'Popolamento diretto Form Attestati (Richiede login LDAP)'}
+	#{form @UploadSituation.processAttestati(), class:'form-horizontal'}
 		
-		<ul>
-		  	<li>Produrre il file per caricare i dati della assenze e delle competeze sul sistema degli attestati di presenza dell'amministrazione centrale del CNR</li>
-		  	<li>Validare i dati caricati tramite file sul sistema centrale del CNR e riportare eventuali errori segnalati da quest'ultimo</li>
-		</ul>
-		
+		#{alert color:'info'}
+		<p>Utilizzare questa procedura per popolare direttamente tramite ePAS le form presenti 
+		in <strong>CNR Attestati</strong>.
 		</p>
+		<ul>
+		  	<li>Per ogni persona di cui vanno trasmesse le assenze e competenze, effettua una funzione "Elabora dati" dell'attestato della persona.</li>
+		  	<li>La procedura riporta la lista dei risultati della "Elabora dati" di ogni persona e permette di correggere gli eventuali errori manualmente.</li>
+		</ul>
+		#{/alert}
+		
+		#{alert color:'danger'}
+		<p class="text-danger"><strong>Importante</strong></p>
+		<p class="text-danger">Prima di effettuare questa operazione è necessario effettuare lo stralcio dati sul sistema dell'amministrazione centrale del CNR.<br>
+		    Lo stralcio dati aggiorna l'elenco del personale tra i database dell'amministrazione centrale ed è richiesta, almeno una volta per ogni mese, 
+			dalle procedure dell'amministrazione centrale per la gestione elettronica degli attestati di presenza.
+		</p>
+		#{/alert}
+	
+	     #{f.hidden 'office.id'/}
+	
+		 #{f.selectEnum 'year', label:yearAtt, items:years, value:previousYearMonth.year, byEquals:true, required:true /} 
+		 
+		 #{f.selectEnum 'month', label:monthAtt, items:months, value:previousYearMonth.monthOfYear, byEquals:true, required:true /}		
+		
+		 #{if loginResponse==null || !loginResponse.isLoggedIn() }
+		   #{f.input 'attestatiLogin', required:true /}
+		   #{f.input 'attestatiPassword', type:'password', required:true /}
+		   <div class="center">	
+		    <input type="submit" value="Login attestati" class="btn-primary"/>
+	       </div>
+		 #{/if}
+ 	     #{else}
+ 	      <div class="center">	
+		    <input type="submit" value="Seleziona Mese" class="btn-primary"/>
+		    <br>
+		    <br>
+		    <p>Login LDAP attualmente effettuato con username <strong>${loginResponse.usernameCnr}</strong>.
+		    
+	      </div>
+	     #{/else}
+	#{/form}
+	
+	#{/panel}
+	
+	#{panel color:'primary', title:'Generazione file da caricare manualmente sul portale CNR Attestati'}
+	  
+	  #{form @UploadSituation.createFile(), class:'form-horizontal'}
+		
+		#{f.hidden 'office.id'/}
 		
 		
-		<div class="well center">
-		#{form @UploadSituation.uploadSituation()}
-		<div class="center">
-		<p>Scegli anno e mese di assenze e competenze per i quali vuoi popolare il file da inviare agli attestati di presenza</p>
-			
-			#{select 'year', value: year, id:'year'}
-				#{option 2013}2013#{/option}
-				#{option 2014}2014#{/option}
-				#{option 2015}2015#{/option}
-			#{/select}
-			
-			#{select 'month', value: month, id:'month'}
-				#{option 1}Gennaio#{/option}
-				#{option 2}Febbraio#{/option}
-				#{option 3}Marzo#{/option}
-				#{option 4}Aprile#{/option}
-				#{option 5}Maggio#{/option}
-				#{option 6}Giugno#{/option}
-				#{option 7}Luglio#{/option}
-				#{option 8}Agosto#{/option}
-				#{option 9}Settembre#{/option}
-				#{option 10}Ottobre#{/option}
-				#{option 11}Novembre#{/option}
-				#{option 12}Dicembre#{/option}
-			#{/select}
-		</div>
-		
+		#{alert color:'info'}
+		<p>Utilizzare questa procedura per generare un file contenente le informazioni 
+		da caricare in <strong>CNR Attestati</strong>.
+		</p>
+		<p>Scegli <strong>anno</strong> e <strong>mese</strong> di assenze e competenze per i quali vuoi popolare
+		 il file da inviare agli attestati di presenza</p>
+		#{/alert}
+
+		#{f.selectEnum 'year', label:yearAtt, items:years, value:previousYearMonth.year, byEquals:true /} 
+		 
+		#{f.selectEnum 'month', label:monthAtt, items:months, value:previousYearMonth.monthOfYear, byEquals:true /}	
+
 		<br>
-		
 		<div class="center">
-		 	<input type="submit" name="creaFile" value="Crea file" class="btn btn-primary"/>
-			<input type="submit" name="loginAttestati" value="Login attestati" class="btn"/>
-			<input type="submit" name="back" value="Indietro" class="btn"/>
+			<input type="submit" value="Crea File" class="btn-primary"/>
 		</div>
-		#{/form}
-		</div>
-		
-		
-		
-	  </div>
-	</div>	
+	#{/form}
+	
+	
+	#{/panel}
 
 </div>

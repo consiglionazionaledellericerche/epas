@@ -38,8 +38,8 @@ public class PersonTroublesInMonthRecap {
       Person person, LocalDate monthBegin, LocalDate monthEnd) {
 
     this.person = person;
-    List<PersonDayInTrouble> troubles = personDayInTroubleDao
-            .getPersonDayInTroubleInPeriod(person, monthBegin, monthEnd);
+    List<PersonDayInTrouble> troubles = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person, 
+        Optional.fromNullable(monthBegin), Optional.fromNullable(monthEnd));
 
 
     for (PersonDayInTrouble trouble : troubles) {

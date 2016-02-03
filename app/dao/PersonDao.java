@@ -66,7 +66,7 @@ public final class PersonDao extends DaoBase {
   PersonDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
-
+  
   /**
    *
    * @param offices la lista degli uffici
@@ -336,16 +336,24 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * @return la lista di persone che hanno una matricola associata.
+   * La lista di persone con matricola valida associata. Se office present le sole persone di quella
+   * sede.
+   * @param office
+   * @return persone con matricola valida
    */
-  public List<Person> getPersonsByNumber() {
+  public List<Person> getPersonsWithNumber(Optional<Office> office) {
 
     final QPerson person = QPerson.person;
 
-    final JPQLQuery query =
-        getQueryFactory().from(person).where(person.number.isNotNull().and(person.number.ne(0)));
-    query.orderBy(person.number.asc());
-    return query.list(person);
+    BooleanBuilder condition = 
+        new BooleanBuilder(person.number.isNotNull().and(person.number.ne(0)));
+    
+    if (office.isPresent()) {
+      condition.and(person.office.eq(office.get()));
+    }
+
+    return getQueryFactory().from(person)
+        .where(condition).orderBy(person.number.asc()).list(person);
   }
 
   /**
@@ -776,6 +784,12 @@ public final class PersonDao extends DaoBase {
 
     public Person person = null;
 
+    /**
+     * Costruttore.
+     * @param id id
+     * @param name nome
+     * @param surname cognome
+     */
     public PersonLite(Long id, String name, String surname) {
       this.id = id;
       this.name = name;

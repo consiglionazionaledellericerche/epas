@@ -79,4 +79,16 @@
    #{/form}
   #{/panel}
   
+  <!-- I day in trouble esistenti -->
+  #{panel title:'Fix dei days in trouble', dim:12 }
+   #{alert color:'info'}
+     <p>Eliminare dal database i giorni con problemi delle persone che non appartengono a nessun
+     contratto oppure che sono appartenenti ad un contratto ma precedenti la sua inizializzazione.
+     </p>
+   #{/alert}
+   #{form @Administration.fixDaysInTrouble(),class:'form-horizontal'}
+	 <button type="submit" class="btn btn-default">Elimina problemi fuori dei contratti</button>
+   #{/form}
+  #{/panel}
+  
 </div>  
