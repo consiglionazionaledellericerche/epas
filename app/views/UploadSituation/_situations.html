@@ -48,7 +48,6 @@
 		             <td>Non ancora caricato</td>
 		             <td></td>
 		             <td></td>
-		             <td></td>
 		           #{/else}
 		      #{/if}
 		      
@@ -80,6 +79,7 @@
       			  #{/secure.link}
 		        #{/if}
 		        </td>
+		      #{/else}  
 		        <!-- elabora singolo -->
 		        <td>
 		          <a href="@{UploadSituation.processSinglePerson(wrOffice.value.id, dipendente.getMatricola(), 
@@ -87,7 +87,7 @@
 		            <span class="glyphicon glyphicon-cog"></span>Carica
 		          </a>
 		        </td>
-		      #{/else} 
+		       
 		 
 		    </tr>  
 		  #{/list}
