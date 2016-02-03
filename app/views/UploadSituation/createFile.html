@@ -2,43 +2,28 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Invio Attestati'  /}
 
-*{
-#{set breadcrumbs:['Invio Attestati':@Persons.list()] /}
-#{breadcrumbs breadcrumbs, noHome:true, container:true /}
-}*
-
 <div class="container">
-#{title title:('Invio Attestati per la sede ' + wrOffice.value.name), administration:true /}
+#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
 </div>
 
 #{uploadSituation.uploadSituationTabs activeAction:'createFile' /}
 
 <div class="container">
 	
-	*{
-	#{alert color:'primary'}
-	  <p>Questa sezione di ePAS mette a disposizione delle procedure automatizzate di caricamento
-	  situazioni mensili del personale sul portale <em>Cnr Attestati</em>.</p>
-	#{/alert}
-	}*
-	
-	#{panel color:'primary', title:'Generazione file da caricare manualmente sul portale CNR Attestati'}
-	  
+  
 	  #{form @UploadSituation.computeCreateFile(), class:'form-horizontal'}
-		
-		#{f.hidden 'office.id', value:wrOffice.value.id /}
 		
 		#{alert color:'info'}
 		<p>Utilizzare questa procedura per generare un file contenente le informazioni 
 		da caricare in <strong>CNR Attestati</strong>.
 		</p>
 		<p>Scegli <strong>anno</strong> e <strong>mese</strong> di assenze e competenze per i quali vuoi popolare
-		 il file da inviare agli attestati di presenza. Deve essere uguale o successivo al primo mese significativo 
-		 per la sede selezionata che è <strong>${wrOffice.getFirstMonthUploadable().get().format()}</strong></p>
+		 il file da inviare agli attestati di presenza.</p>
 		#{/alert}
 
+        #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
+
 		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
-		 
 		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
 
 		<br>
@@ -47,8 +32,5 @@
             #{b.submit 'Crea File'/}
           #{/b.buttons}
 	#{/form}
-	
-	
-	#{/panel}
 
 </div>

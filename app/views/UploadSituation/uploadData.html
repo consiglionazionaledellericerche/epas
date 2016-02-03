@@ -2,13 +2,8 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Invio Attestati'  /}
 
-*{
-#{set breadcrumbs:['Invio Attestati':@Persons.list()] /}
-#{breadcrumbs breadcrumbs, noHome:true, container:true /}
-}*
-
 <div class="container">
-#{title title:('Invio Attestati per la sede ' + wrOffice.value.name), administration:true /}
+#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
 </div>
 
 #{uploadSituation.uploadSituationTabs activeAction:'uploadData' /}
