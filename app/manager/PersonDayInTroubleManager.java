@@ -4,8 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
