@@ -1,0 +1,31 @@
+#{modalAsync id:'modalAbsence', button:'Salva', 
+  title:'Seleziona Anno e Mese' }
+
+#{if sessionAttestati==null || !sessionAttestati.isLoggedIn() }
+	#{alert color:'info'}
+	<p>La sessione è scaduta, effettuare nuovamente login.</p>
+	#{/alert}
+#{/if}
+
+#{else}
+
+  #{alert color:'info'}
+    <p>Seleziona l'anno e il mese dei quali vuoi caricare o verificare gli attesti di presenza.</p>
+  #{/alert}
+  
+  #{form @UploadSituation.fetchData(), class:'form-horizontal'}
+  
+    #{f.hidden 'updateSession', value:true /}
+
+    #{f.selectModel 'office', items:sessionAttestati.officesDips.keySet(), value:wrOffice.value /}
+    
+ 	#{f.selectEnum 'year', label:'Anno Attestato', items:sessionAttestati.yearsList, value:monthToUpload.year, byEquals:true, required:true /}
+	#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.monthOfYear, byEquals:true, required:true /}		
+				 
+    #{b.buttons center:true}
+      #{b.submit 'Cambia mese'/}
+    #{/b.buttons}
+  #{/form}
+#{/else}
+
+#{/modalAsync}

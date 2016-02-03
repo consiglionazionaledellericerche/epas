@@ -555,7 +555,7 @@ when
         
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
-        "UploadSituation.changeMonth",
+        "UploadSituation.updateSession",
         "UploadSituation.createFile",
         "UploadSituation.computeCreateFile",
         "UploadSituation.fetchData",
@@ -677,7 +677,7 @@ when
         
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
-        "UploadSituation.changeMonth",
+        "UploadSituation.updateSession",
         "UploadSituation.createFile",
         "UploadSituation.computeCreateFile",
         "UploadSituation.fetchData",

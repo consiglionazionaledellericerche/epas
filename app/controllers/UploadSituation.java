@@ -5,7 +5,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -29,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
-import manager.SecureManager;
 import manager.UploadSituationManager;
 
 import models.CertificatedData;
@@ -41,7 +39,6 @@ import models.enumerate.Parameter;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.YearMonth;
-import org.testng.collections.Maps;
 
 import play.Logger;
 import play.cache.Cache;
@@ -54,7 +51,6 @@ import security.SecurityRules;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -136,27 +132,22 @@ public class UploadSituation extends Controller {
   }
   
   /**
-   * Modale Cambia il mese.
+   * Modale Cambia il mese e la sede.
    * @param officeId
    */
-  public static void changeMonth(Long officeId) {
+  public static void updateSession(Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     
     IWrapperOffice wrOffice = factory.create(office);
-    Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
-
     SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
-    if (sessionAttestati != null && monthToUpload.isPresent()) {
-
-      int year = sessionAttestati.getYear();
-      int month = sessionAttestati.getMonth();
-
-      monthToUpload = Optional.fromNullable(new YearMonth(year, month));
-      render(wrOffice, monthToUpload, sessionAttestati);
+    if (sessionAttestati != null) {
+      YearMonth monthToUpload = new YearMonth(sessionAttestati.getYear(), 
+          sessionAttestati.getMonth());
+      render(wrOffice, sessionAttestati, monthToUpload);
       
     } else {
       //sessione scaduta.
@@ -226,7 +217,7 @@ public class UploadSituation extends Controller {
    * @param attestatiPassword
    */
   public static void fetchData(@Valid Office office, Integer year, 
-      Integer month, final String attestatiLogin, final String attestatiPassword, boolean changeMonth) {
+      Integer month, final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
     
     rules.checkIfPermitted(office);
     IWrapperOffice wrOffice = factory.create(office);
@@ -234,7 +225,7 @@ public class UploadSituation extends Controller {
     // Sessione in cache
     SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
-    if (changeMonth) {
+    if (updateSession) {
       //cambio mese, effettuo la validazione prima di fetchare.
       if (!validation.hasErrors()) {
         //controllo che il mese sia uploadable
@@ -253,11 +244,11 @@ public class UploadSituation extends Controller {
       
       //ripulire lo stato della sessione
       sessionAttestati = new SessionAttestati(sessionAttestati.getUsernameCnr(), true, 
-          sessionAttestati.getCookies(), year, month);
+          sessionAttestati.getCookies(), office, year, month);
       
       sessionAttestati = attestatiClient.login(confGeneralManager
           .getFieldValue(Parameter.URL_TO_PRESENCE, office), null, null, sessionAttestati, 
-          year, month);
+          office, year, month);
       if (sessionAttestati != null) {
         flash.success("Sessione aggiornata.");
       }
@@ -278,7 +269,7 @@ public class UploadSituation extends Controller {
 
         sessionAttestati = attestatiClient.login(confGeneralManager
             .getFieldValue(Parameter.URL_TO_PRESENCE, office), attestatiLogin, attestatiPassword, 
-            null, year, month);
+            null, office, year, month);
 
         if (!sessionAttestati.isLoggedIn()) {
           flash.error("Errore durante il login sul sistema degli attestati.");

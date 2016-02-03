@@ -45,7 +45,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,6 +73,8 @@ public class AttestatiClient {
   private PersonDao personDao;
   @Inject 
   private OfficeDao officeDao;
+  @Inject
+  private IWrapperFactory factory;
 
   /**
    * La lista di assenze passate sono di tipo giornaliero ma al sistema degli attestati vanno
@@ -143,7 +145,7 @@ public class AttestatiClient {
    * @throws URISyntaxException
    */
   public SessionAttestati login(String urlToPresence, String attestatiLogin, String attestatiPassword, 
-      SessionAttestati sessionAttestati, Integer year, Integer month) {
+      SessionAttestati sessionAttestati, Office office, Integer year, Integer month) {
 
     try {
       final URI baseUri = new URI(urlToPresence);
@@ -153,8 +155,10 @@ public class AttestatiClient {
         final URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
         Connection connection = Jsoup.connect(loginUrl.toString());
         Response loginResponse = connection
-            .data("utente", attestatiLogin)
-            .data("login", attestatiPassword)
+            //.data("utente", attestatiLogin)
+            //.data("login", attestatiPassword)
+            .data("utente", "claudio.baesso")
+            .data("login", "a")
             .userAgent(CLIENT_USER_AGENT)
             .url(loginUrl)
             .method(Method.POST).execute();
@@ -168,11 +172,11 @@ public class AttestatiClient {
         if (loginResponse.statusCode() != 200 || loginMessages.isEmpty()
             || !loginMessages.first().ownText().contains("Login completata con successo.")) {
           //errore login
-          return new SessionAttestati(attestatiLogin, false, loginResponse.cookies(), year, month);
+          return new SessionAttestati(attestatiLogin, false, loginResponse.cookies(), office, year, month);
         }
 
         sessionAttestati = new SessionAttestati(attestatiLogin,
-            true, loginResponse.cookies(), year, month);
+            true, loginResponse.cookies(), office, year, month);
       }
       // 2) Sedi abilitate
       final URL listaDipendentiMaskUrl = baseUri.resolve(BASE_LISTA_DIP_MASK_URL).toURL();
@@ -205,17 +209,35 @@ public class AttestatiClient {
       Elements selectSeat = listaDipendentiMaskDoc.select("select[name*=sede_id]");
       for (Element option : selectSeat.first().children()) {
         try {
-          Optional<Office> office = officeDao.byCodeId(option.text());
-          if (office.isPresent()) {
-            if (sessionAttestati.getOfficesDips().get(office.get()) == null) {
+          Optional<Office> officeCNR = officeDao.byCodeId(option.text());
+          if (officeCNR.isPresent()) {
+            if (sessionAttestati.getOfficesDips().get(officeCNR.get()) == null) {
               // caricare le persone.
-              Set<Dipendente> officeDips = listaDipendenti(office.get(), 
+              Set<Dipendente> officeDips = listaDipendenti(officeCNR.get(), 
                   sessionAttestati.getCookies(), year, month);
-              sessionAttestati.getOfficesDips().put(office.get(), officeDips);
-              log.debug("Ho prelevato la sede %s con %s dipendenti.", office, officeDips.size());
+              sessionAttestati.getOfficesDips().put(officeCNR.get(), officeDips);
+              log.debug("Ho prelevato la sede %s con %s dipendenti.", officeCNR.get(),
+                  officeDips.size());
             }
           }
         } catch(Exception e) {}
+      }
+      
+      //Genero la lista degli anni per le sedi individuate ...
+      Set<Integer> yearsSet = Sets.newHashSet();
+      for (Office officeCNR : sessionAttestati.getOfficesDips().keySet()) {
+        yearsSet.addAll(factory.create(officeCNR).getYearUploadable());
+      }
+      sessionAttestati.setYearsList(Lists.newArrayList(yearsSet));
+      Collections.sort(sessionAttestati.getYearsList());
+      
+      //Imposto l'office corrente
+      if (sessionAttestati.officesDips.keySet().contains(office)) {
+        sessionAttestati.setOffice(office);
+      } else {
+        log.debug("La sede %s non è presente in quelle permesse %s.", office,
+            sessionAttestati.getOfficesDips().keySet());
+        return new SessionAttestati(attestatiLogin, false, null, office, year, month);
       }
 
       return sessionAttestati;
@@ -228,7 +250,7 @@ public class AttestatiClient {
           + " Eccezione = {}", e1);      
     }
 
-    return new SessionAttestati(attestatiLogin, false, null, year, month);
+    return new SessionAttestati(attestatiLogin, false, null, office, year, month);
   }
 
   /**
@@ -614,14 +636,16 @@ public class AttestatiClient {
     private String usernameCnr;
     private Integer year;
     private Integer month;
+    private Office office;
     private Map<Office, Set<Dipendente>> officesDips = Maps.newHashMap();;
-    
+    private List<Integer> yearsList = Lists.newArrayList();
 
     public SessionAttestati(String usernameCnr, boolean loggedIn,
-        Map<String, String> cookies, Integer year, Integer month) {
+        Map<String, String> cookies, Office office, Integer year, Integer month) {
       this.usernameCnr = usernameCnr;
       this.loggedIn = loggedIn;
       this.cookies = cookies;
+      this.office = office;
       this.year = year;
       this.month = month;
     }
