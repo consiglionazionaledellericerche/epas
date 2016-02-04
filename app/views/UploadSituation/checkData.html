@@ -23,8 +23,8 @@
 
         #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
 
-		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
-		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
+		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:year, byEquals:true /} 
+		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:month, byEquals:true /}	
 
 		<br>
 		#{b.buttons center:true}
@@ -33,14 +33,21 @@
           #{/b.buttons}
 	#{/form}
 	
-	<table>
+	<table class="table table-condensed table-bordered table-striped">
 	  <tr>
 	    <th>Dipendente</th>
 	    <th>Assenze</th>
+	    <th>Competenze</th>
+	    <th>Ore Formazione</th>
+	    <th>Buoni Pasto</th>
 	  </tr>
 	#{list items:results, as:'result'}
 	  <tr>
-	    <td>${result.dipendente.nomeCognome}</td>
+	    <td>${result.dipendente.cognomeNome}</td>
+	    <td>${result.absencesSent}</td>
+	    <td>${result.competencesSent}</td>
+	    <td>${result.trainingHoursSent}</td>
+	    <td>${result.mealTicketSent}</td>
 	  </tr>
 	#{/list}
 	</table>
