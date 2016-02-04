@@ -38,14 +38,18 @@ public class PersonMonthRecapDao extends DaoBase {
    */
   public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person,
       Integer year, Optional<Integer> month, Optional<Boolean> hoursApproved) {
+    
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+    
     final BooleanBuilder condition = new BooleanBuilder();
+    
     if (month.isPresent()) {
       condition.and(personMonthRecap.month.eq(month.get()));
     }
     if (hoursApproved.isPresent()) {
       condition.and(personMonthRecap.hoursApproved.eq(hoursApproved.get()));
     }
+    
     final JPQLQuery query = getQueryFactory().from(personMonthRecap)
             .where(condition.and(personMonthRecap.person.eq(person)
                 .and(personMonthRecap.year.eq(year))));
@@ -108,9 +112,10 @@ public class PersonMonthRecapDao extends DaoBase {
   /**
    * @return il certificatedData relativo alla persona 'person' per il mese 'month' e l'anno 'year'.
    */
-  public CertificatedData getCertificatedDataByPersonMonthAndYear(
-      Person person, Integer month, Integer year) {
+  public CertificatedData getPersonCertificatedData(Person person, Integer month, Integer year) {
+    
     QCertificatedData cert = QCertificatedData.certificatedData;
+    
     JPQLQuery query = getQueryFactory().from(cert)
             .where(cert.person.eq(person).and(cert.month.eq(month).and(cert.year.eq(year))));
     return query.singleResult(cert);

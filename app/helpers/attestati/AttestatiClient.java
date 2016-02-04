@@ -11,23 +11,31 @@ import com.google.common.collect.Sets;
 
 import controllers.Security;
 
+import dao.AbsenceDao;
+import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
+import manager.PersonDayManager;
 
 import models.Absence;
+import models.CertificatedData;
 import models.Competence;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonthRecap;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
@@ -73,6 +81,16 @@ public class AttestatiClient {
   @Inject 
   private OfficeDao officeDao;
   @Inject
+  private PersonMonthRecapDao personMonthRecapDao;
+  @Inject
+  private AbsenceDao absenceDao;
+  @Inject
+  private PersonDayDao personDayDao;
+  @Inject
+  private PersonDayManager personDayManager;
+  @Inject
+  private CompetenceDao competenceDao;
+  @Inject
   private IWrapperFactory factory;
 
   /**
@@ -98,10 +116,10 @@ public class AttestatiClient {
         continue;
       }
       //codice per attestati
-      String absenceCodeToSend = absence.absenceType.code;
+      String absenceCodeToSend = absence.absenceType.code.toUpperCase();
       if (absence.absenceType.certificateCode != null 
           && !absence.absenceType.certificateCode.trim().isEmpty()) { 
-        absenceCodeToSend = absence.absenceType.certificateCode;
+        absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
       }
 
       if (previousDate == null || previousAbsenceCode == null) {
@@ -337,146 +355,170 @@ public class AttestatiClient {
     }
   }
 
-  public RispostaElaboraDati elaboraDatiDipendente(
+  /**
+   * 
+   * @param cookies
+   * @param dipendente
+   * @param year
+   * @param month
+   * @param absences
+   * @param competences
+   * @param pmList
+   * @param mealTicket
+   * @return
+   * @throws URISyntaxException
+   * @throws MalformedURLException
+   */
+  private RispostaElaboraDati elaboraDatiDipendenteClient(
           Map<String, String> cookies, Dipendente dipendente, Integer year, Integer month,
           List<Absence> absences, List<Competence> competences,
-          List<PersonMonthRecap> pmList, Integer mealTicket)
+          List<PersonMonthRecap> pmList, Integer mealTicket, boolean performSent)
           throws URISyntaxException, MalformedURLException {
 
-    Office office = Security.getUser().get().person.office;
+    //Office office = Security.getUser().get().person.office;
+    Office office = dipendente.getPerson().office;
     String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
-
     URI baseUri = new URI(urlToPresence);
     final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 
-    StringBuffer absencesSent = new StringBuffer();
-    StringBuffer competencesSent = new StringBuffer();
-    //Nuovo stringBuffer per l'invio delle ore di formazione
-    StringBuffer trainingHoursSent = new StringBuffer();
-    StringBuffer mealTicketSent = new StringBuffer();
-    StringBuffer problems = new StringBuffer();
-
-    boolean isOk = true;
-
+    //Connessione
     Connection connection = Jsoup.connect(elaboraDatiUrl.toString());
-    connection.cookies(cookies);
+    if (performSent) {
+      connection.cookies(cookies);
+      connection.userAgent(CLIENT_USER_AGENT)
+      .data("matr", dipendente.getMatricola())
+      .data("anno", year.toString())
+      .data("mese", month.toString())
+      .data("sede_id", office.codeId)
+      .method(Method.POST);
+    }
 
-    connection.userAgent(CLIENT_USER_AGENT)
-            .data("matr", dipendente.getMatricola())
-            .data("anno", year.toString())
-            .data("mese", month.toString())
-            .data("sede_id", office.codeId)
-            .method(Method.POST);
-
+    // Invio le Assenze
     int codAssAssoCounter = 0;
+    StringBuffer absencesSent = new StringBuffer();
     for (AssenzaPerPost assenzaPerPost : getAssenzePerPost(absences)) {
-
-      connection.data("codass" + codAssAssoCounter, assenzaPerPost.getCodice());
-      connection.data("gg_inizio" + codAssAssoCounter, assenzaPerPost.getGgInizio().toString());
-      connection.data("gg_fine" + codAssAssoCounter, assenzaPerPost.getGgFine().toString());
       absencesSent.append(assenzaPerPost.getCodice()).append(",")
-              .append(assenzaPerPost.getGgInizio()).append(",")
-              .append(assenzaPerPost.getGgFine()).append("; ");
-      Logger.info("%s, sto spedendo l'assenza di tipo %s, gg inizio = %d, gg_fine = %d",
-              dipendente.getCognomeNome(), assenzaPerPost.getCodice(),
-              assenzaPerPost.getGgInizio(), assenzaPerPost.getGgInizio());
+      .append(assenzaPerPost.getGgInizio()).append(",")
+      .append(assenzaPerPost.getGgFine()).append("; ");
+      if (performSent) {
+        connection.data("codass" + codAssAssoCounter, assenzaPerPost.getCodice());
+        connection.data("gg_inizio" + codAssAssoCounter, assenzaPerPost.getGgInizio().toString());
+        connection.data("gg_fine" + codAssAssoCounter, assenzaPerPost.getGgFine().toString());
+        log.info("{}, sto spedendo l'assenza di tipo {}, gg inizio = {}, gg_fine = {}",
+            dipendente.getCognomeNome(), assenzaPerPost.getCodice(),
+            assenzaPerPost.getGgInizio(), assenzaPerPost.getGgInizio());
+      }
       codAssAssoCounter++;
     }
 
+    // Invio le Competenze
     int codComCounter = 0;
+    StringBuffer competencesSent = new StringBuffer();
     for (Competence competence : competences) {
-      connection.data("codcom" + codComCounter, competence.competenceCode.code);
-      connection.data("oreatt" + codComCounter, String.valueOf(competence.valueApproved));
       competencesSent.append(competence.competenceCode.code).append(",")
-              .append(competence.valueApproved).append("; ");
-      log.info("{}, sto spedendo la competenza di tipo {}, ore attribuite = {}",
-          dipendente.getCognomeNome(), competence.competenceCode.code, competence.valueApproved);
+      .append(competence.valueApproved).append("; ");
+      if (performSent) {
+        connection.data("codcom" + codComCounter, competence.competenceCode.code);
+        connection.data("oreatt" + codComCounter, String.valueOf(competence.valueApproved));
+        log.info("{}, sto spedendo la competenza di tipo {}, ore attribuite = {}",
+            dipendente.getCognomeNome(), competence.competenceCode.code, competence.valueApproved);
+      }
       codComCounter++;
     }
 
-    int codFormCounter = 0;
+    // Invio le ore di formazione
+    int counter = 0;
+    StringBuffer trainingHoursSent = new StringBuffer();
     if (pmList != null) {
       for (PersonMonthRecap pm : pmList) {
-        connection.data(
-            "gg_inizio_corso" + codFormCounter, String.valueOf(pm.fromDate.getDayOfMonth()));
-        connection.data(
-            "gg_fine_corso" + codFormCounter, String.valueOf(pm.toDate.getDayOfMonth()));
-        connection.data(
-            "ore_corso" + codFormCounter, String.valueOf(pm.trainingHours));
         trainingHoursSent.append(String.valueOf(pm.fromDate.getDayOfMonth())).append(",")
-                .append(String.valueOf(pm.toDate.getDayOfMonth())).append(",")
+        .append(String.valueOf(pm.toDate.getDayOfMonth())).append(",")
                 .append(String.valueOf(pm.trainingHours)).append("; ");
-        log.info("{}, sto spedendo {} ore di formazione dal giorno {} al giorno {}",
-            dipendente.getCognomeNome(), pm.trainingHours,
-            pm.fromDate, pm.toDate);
-        codFormCounter++;
-      }
-    }
-
-    // Decommentato in virtù dell'aggiornamento dovuto all'utilizzo dei ticket restaurant
-    if (mealTicket != null) {
-      connection.data("gg_buoni_pasto", String.valueOf(mealTicket));
-      mealTicketSent.append(String.valueOf(year)).append(",")
-          .append(String.valueOf(month)).append(",").append(String.valueOf(mealTicket));
-      log.info("Inviati {} buoni pasto per {}", mealTicket, dipendente.getCognomeNome());
-    }
-
-
-    Response elaboraDatiResponse;
-    try {
-      elaboraDatiResponse = connection.execute();
-
-      log.debug("Effettuata l'elaborazione dati del dipendente {} (matricola {}) per l'anno {}, "
-          + "mese {}. Codice di risposta http = {}",
-          dipendente.getCognomeNome(), dipendente.getMatricola(), year, month,
-          elaboraDatiResponse.statusCode());
-
-      if (elaboraDatiResponse.statusCode() != 200) {
-        throw new AttestatiException(
-            String.format("Errore durante l'elaborazione dati del dipendente %s",
-                dipendente.getCognomeNome()));
-      }
-
-      Document elaboraDatiDoc = elaboraDatiResponse.parse();
-      Logger.info("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);
-
-      /*
-       * In caso di errore nella pagina restituita compaiono degli H5 come questi:
-       *    <H5 align=center><FONT SIZE='4' FACE='Arial'>
-       *      Errore in fase di controllo competenze <BR>
-       *      7  ERRASSSOVRAPP<BR>Assenza  OA7 in periodi sovrapposti </FONT>
-       *    </H5>
-       *    <BR>Controllo Competenze --> ..Effettuato!
-       *    <B>Non sono state inserite competenze</B>
-       *    <H5 align=center><FONT SIZE='4' FACE='Arial'>
-       *      Errore in fase di controllo assenze dipendente=9535, mese=10, anno=2013, errore=7
-       *      ERRASSSOVRAPP<BR>Assenza  OA7 in periodi sovrapposti </FONT>
-       *    </H5>
-       */
-
-      Elements errorElements = elaboraDatiDoc.select("h5[align=center]>font");
-      if (errorElements.isEmpty()) {
-        /*TODO: controllare anche che ci sia scritto:
-         *
-         * <BR>Controllo Competenze --> ..Effettuato!
-         * <B>Non sono state inserite competenze</B>
-         * <BR>Controllo Assenze --> ..Effettuato!
-         * <BR>Aggiornamento Competenze --> ..Effettuato! <B></B>
-         * <BR>Aggiornamento Assenze --> ..Effettuato! <B></B><BR>
-         */
-      } else {
-        //Si aggiunge il contenuto testuale degli elementi font che contengono il
-        //messaggio di errore
-        for (Element el : errorElements) {
-          problems.append(el.ownText()).append(" | ");
+        if (performSent) {
+          connection.data("gg_inizio_corso" + counter, String.valueOf(pm.fromDate.getDayOfMonth()));
+          connection.data("gg_fine_corso" + counter, String.valueOf(pm.toDate.getDayOfMonth()));
+          connection.data("ore_corso" + counter, String.valueOf(pm.trainingHours));
+          log.info("{}, sto spedendo {} ore di formazione dal giorno {} al giorno {}",
+              dipendente.getCognomeNome(), pm.trainingHours,
+              pm.fromDate, pm.toDate);
         }
-        isOk = false;
+        counter++;
       }
-    } catch (IOException e) {
-      log.error("Errore la chiamata alla funzione \"elabora dati\" sistema di invio degli "
-          + "attestati. Eccezione = {}", e.getStackTrace().toString());
-      throw new AttestatiException(
-          String.format("Impossibile effettuare l'elaborazione dati su %s", elaboraDatiUrl));
+    }
+
+    // Invio i buoni pasto
+    StringBuffer mealTicketSent = new StringBuffer();
+    if (mealTicket != null) {
+      mealTicketSent.append(String.valueOf(year)).append(",")
+      .append(String.valueOf(month)).append(",").append(String.valueOf(mealTicket));
+      if (performSent) {
+        connection.data("gg_buoni_pasto", String.valueOf(mealTicket));
+        log.info("Inviati {} buoni pasto per {}", mealTicket, dipendente.getCognomeNome());
+      }
+    }
+
+    // Invio i dati
+    Response elaboraDatiResponse;
+    boolean isResponseOk = true;
+    StringBuffer problems = new StringBuffer();
+    if (performSent) {
+      try {
+        elaboraDatiResponse = connection.execute();
+
+        log.debug("Effettuata l'elaborazione dati del dipendente {} (matricola {}) per l'anno {}, "
+            + "mese {}. Codice di risposta http = {}",
+            dipendente.getCognomeNome(), dipendente.getMatricola(), year, month,
+            elaboraDatiResponse.statusCode());
+
+        if (elaboraDatiResponse.statusCode() != 200) {
+          throw new AttestatiException(
+              String.format("Errore durante l'elaborazione dati del dipendente %s",
+                  dipendente.getCognomeNome()));
+        }
+
+        Document elaboraDatiDoc = elaboraDatiResponse.parse();
+        Logger.info("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);
+
+        /*
+         * In caso di errore nella pagina restituita compaiono degli H5 come questi:
+         *    <H5 align=center><FONT SIZE='4' FACE='Arial'>
+         *      Errore in fase di controllo competenze <BR>
+         *      7  ERRASSSOVRAPP<BR>Assenza  OA7 in periodi sovrapposti </FONT>
+         *    </H5>
+         *    <BR>Controllo Competenze --> ..Effettuato!
+         *    <B>Non sono state inserite competenze</B>
+         *    <H5 align=center><FONT SIZE='4' FACE='Arial'>
+         *      Errore in fase di controllo assenze dipendente=9535, mese=10, anno=2013, errore=7
+         *      ERRASSSOVRAPP<BR>Assenza  OA7 in periodi sovrapposti </FONT>
+         *    </H5>
+         */
+
+        Elements errorElements = elaboraDatiDoc.select("h5[align=center]>font");
+        if (errorElements.isEmpty()) {
+          /*TODO: controllare anche che ci sia scritto:
+           *
+           * <BR>Controllo Competenze --> ..Effettuato!
+           * <B>Non sono state inserite competenze</B>
+           * <BR>Controllo Assenze --> ..Effettuato!
+           * <BR>Aggiornamento Competenze --> ..Effettuato! <B></B>
+           * <BR>Aggiornamento Assenze --> ..Effettuato! <B></B><BR>
+           */
+        } else {
+          //Si aggiunge il contenuto testuale degli elementi font che contengono il
+          //messaggio di errore
+          for (Element el : errorElements) {
+            problems.append(el.ownText()).append(" | ");
+          }
+          isResponseOk = false;
+        }
+      } catch (IOException e) {
+        log.error("Errore la chiamata alla funzione \"elabora dati\" sistema di invio degli "
+            + "attestati. Eccezione = {}", e.getStackTrace().toString());
+        throw new AttestatiException(
+            String.format("Impossibile effettuare l'elaborazione dati su %s", elaboraDatiUrl));
+      }
+    } else {
+      //Oppure niente ... senza problemi e con risposta automaticamente ok.
     }
 
     RispostaElaboraDati resp =
@@ -486,8 +528,87 @@ public class AttestatiClient {
     resp.setCompetencesSent(competencesSent.length() > 0 ? competencesSent.toString() : null);
     resp.setTrainingHoursSent(trainingHoursSent.length() > 0 ? trainingHoursSent.toString() : null);
     resp.setMealTicketSent(mealTicketSent.length() > 0 ? mealTicketSent.toString() : null);
-    resp.setOk(isOk);
+    resp.setOk(isResponseOk);
+    resp.setDipendente(dipendente);
     return resp;
+  }
+  
+  /**
+   * Elabora i dati dei dipendenti presenti nella lista. Se la sessione è presente invia i dati
+   * ad attestati.
+   * 
+   */
+  public List<RispostaElaboraDati> elaboraDatiDipendenti(
+      Optional<SessionAttestati> sessionAttestati, 
+      List<Dipendente> dipendenti, Integer year, Integer month)
+          throws MalformedURLException, URISyntaxException {
+    
+    List<RispostaElaboraDati> checks = Lists.newLinkedList();
+
+    for (Dipendente dipendente : dipendenti) {
+
+      Person person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
+
+      //Ore formazione
+      List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
+          .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+              Optional.fromNullable(month), Optional.<Boolean>absent());
+
+      //Buoni Pasto
+      Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
+          .getPersonDayInMonth(person, new YearMonth(year, month)));
+      
+      //Assenze
+      List<Absence> absences = absenceDao.getAbsencesNotInternalUseInMonth(person, year, month);
+      
+      //Competenze
+      List<Competence> competences = competenceDao
+          .getCompetenceInMonthForUploadSituation(person, year, month);
+      
+      //Dati inviati
+      CertificatedData cert = personMonthRecapDao.getPersonCertificatedData(person, month, year);
+      
+      //Se la sessione è presente faccio perform.
+      if (sessionAttestati.isPresent()) {
+        RispostaElaboraDati rispostaElaboraDati = elaboraDatiDipendenteClient(
+            sessionAttestati.get().getCookies(), dipendente, year, month,
+            absences, competences, trainingHoursList, mealTicket, true);
+        if (rispostaElaboraDati.isOk()) {
+          for (PersonMonthRecap personMonth : trainingHoursList) {
+            personMonth.hoursApproved = true;
+            personMonth.save();
+          }
+        }
+        if (cert == null) {
+          //FIXME
+          //queste variabili di appoggio sono state inserite perchè richiamandole direttamente nel
+          //costruttore veniva lanciata l'eccezione
+          //play.exceptions.JavaExecutionException:
+          //  models.CertificatedData.<init>(Lmodels/Person;Ljava/lang/String;Ljava/lang/String;II)V
+          int anno = year;
+          int mese = month;
+          String cognomeNome = dipendente.getCognomeNome();
+          String matricola = dipendente.getMatricola();
+          cert = new CertificatedData(person, cognomeNome, matricola, anno, mese);
+        }
+        cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
+        cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
+        cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
+        cert.trainingHoursSent = rispostaElaboraDati.getTrainingHoursSent();
+        cert.problems = rispostaElaboraDati.getProblems();
+        cert.isOk = rispostaElaboraDati.isOk();
+        cert.save();
+        checks.add(rispostaElaboraDati);
+      } else {
+        //e' una previsione.
+        RispostaElaboraDati rispostaElaboraDati = elaboraDatiDipendenteClient(
+            null, dipendente, year, month,
+            absences, competences, trainingHoursList, mealTicket, true);
+        checks.add(rispostaElaboraDati);
+      }
+    }
+
+    return checks;
   }
 
   /**
@@ -540,21 +661,8 @@ public class AttestatiClient {
     
     int year = sessionAttestati.getYear();
     int month = sessionAttestati.getMonth();
-    
-    List<Person> persons = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(office), false, new LocalDate(year, month, 1),
-        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
-    recap.epasDipendenti = FluentIterable.from(persons)
-        .transform(new Function<Person, Dipendente>() {
-          @Override
-          public Dipendente apply(Person person) {
-            Dipendente dipendente =
-                new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, 
-                    person.othersSurnames, person.name));
-            return dipendente;
-          }
-        }).toSet();
+    recap.epasDipendenti = officeActivePeopleAsDipendente(office, year, month);
     
     recap.validDipendenti = Lists.newArrayList(
         Sets.intersection(recap.cnrDipendenti, recap.epasDipendenti));
@@ -565,7 +673,7 @@ public class AttestatiClient {
     
     return recap;
   }
-  
+    
   /**
    * @param listaDipendenti
    * @param activeDipendenti
@@ -600,33 +708,33 @@ public class AttestatiClient {
     return dipendentiNonInCnr;
   }
 
-  /*
-  private Set<Dipendente> getActiveDipendenti(int year, int month) {
+  /**
+   * Costruisce l'insieme di Dipendenti con le persone attive nel mese in ePAS.
+   * @param office sede
+   * @param year anno 
+   * @param month mese
+   * @return
+   */
+  public Set<Dipendente> officeActivePeopleAsDipendente(Office office, int year, int month) {
 
-    final List<Person> activePersons = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesWriteAllowed(Security.getUser().get()),
-        false, new LocalDate(year, month, 1),
+    List<Person> persons = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
-    final Set<Dipendente> activeDipendenti =
-        FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
+    Set<Dipendente> dipendenti = FluentIterable.from(persons)
+        .transform(new Function<Person, Dipendente>() {
           @Override
           public Dipendente apply(Person person) {
             Dipendente dipendente =
-                new Dipendente(
-                    person,
-                    Joiner.on(" ").skipNulls()
-                    .join(person.surname, person.othersSurnames, person.name));
+                new Dipendente(person, Joiner.on(" ").skipNulls().join(person.surname, 
+                    person.othersSurnames, person.name));
             return dipendente;
           }
         }).toSet();
-    log.trace("Lista dipendenti attivi nell'anno {}, mese {} e': {}",
-        year, month, activeDipendenti);
 
-    return activeDipendenti;
+    return dipendenti;
   }
-  */
+  
 
   @SuppressWarnings("serial")
   @Data
