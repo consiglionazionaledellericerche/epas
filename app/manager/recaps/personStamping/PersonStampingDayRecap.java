@@ -55,8 +55,10 @@ public class PersonStampingDayRecap {
   public Person person;
   public WorkingTimeTypeDay wttd = null;
   public WorkingTimeType wtt = null;
-  public String stampingWorkingTime = "";
+
   public String workingTime = "";
+  public String workTimeExplanation = "";
+  
   public String mealTicketTime = "";
   public String timeMealFrom = "";
   public String timeMealTo = "";
@@ -465,10 +467,38 @@ public class PersonStampingDayRecap {
    */
   private void setWorkTime(int workTime) {
     this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
-    if (personDay.decurted != null) {
-      this.stampingWorkingTime =
-              DateUtility.fromMinuteToHourMinute(workTime + personDay.decurted);
+    
+    if (personDay.stampingsTime != null && personDay.stampingsTime > 0) {
+      this.workTimeExplanation = this.workTimeExplanation 
+          + "<br>Da timbrature: " + 
+          stronger(DateUtility.fromMinuteToHourMinute(personDay.stampingsTime));
     }
+    
+    if (personDay.justifiedTimeNoMeal != null && personDay.justifiedTimeNoMeal > 0) {
+      this.workTimeExplanation = this.workTimeExplanation 
+          + "<br>Giustificato da assenze: " + 
+          stronger(DateUtility.fromMinuteToHourMinute(personDay.justifiedTimeNoMeal));
+    }
+
+    if (personDay.justifiedTimeMeal != null && personDay.justifiedTimeMeal > 0) {
+      this.workTimeExplanation = this.workTimeExplanation 
+          + "<br>Giustificato da assenze che concorrono al calcolo del buono pasto: " + 
+          stronger(DateUtility.fromMinuteToHourMinute(personDay.justifiedTimeMeal));
+    }
+    
+    if (personDay.decurted != null && personDay.decurted > 0) {
+      this.workTimeExplanation = this.workTimeExplanation 
+          + "<br>Sottratto per pausa pranzo assente o troppo breve: " + 
+          stronger(DateUtility.fromMinuteToHourMinute(personDay.decurted));
+    }
+    if (!this.workTimeExplanation.isEmpty()) {
+      this.workTimeExplanation = 
+          "Tempo a lavoro totale: " + stronger(this.workTime) + this.workTimeExplanation;
+    }
+  }
+  
+  private String stronger(String string) {
+    return "<strong>" + string + "</strong>";
   }
 
   /**

@@ -39,6 +39,11 @@
   margin-left: 0;
   margin-right: 0;
   }
+  
+  /* The max width is dependant on the container (more info below) */
+  .popover{
+    max-width: 100%; /* Max Width of the popover (depending on the container!) */
+  }
 
   #page_content {
   widht: 100%;
@@ -206,14 +211,10 @@
     <td class="tempoLavoro default-single">
 
       ${dayRecap.workTime}
-      #{if dayRecap.personDay.decurted != null}
-      <a href="#" data-popover
-         data-trigger="hover" data-toggle="popover"
-         data-placement="bottom"
+      #{if !dayRecap.workTimeExplanation.empty}
+      <a href="#" popover-hover
          data-html="true"
-         data-content="${(
-	    		'Tempo Totale Timbrature: <strong>'+dayRecap.stampingWorkingTime+'</strong>'+
-	    		'<br>Tempo Sottratto Per Pausa Pranzo: <strong>'+dayRecap.personDay.decurted+' minuti</strong>').escape()}"
+         data-content="${(dayRecap.workTimeExplanation).escape()}"
          title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
       </a>
       #{/if}
@@ -261,9 +262,7 @@
 
     <td class="default-single">
       #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
-      <a href="#" data-popover
-         data-trigger="hover" data-toggle="popover"
-         data-placement="bottom"
+      <a href="#" popover-hover
          data-html="true"
          data-content="${(
 	    		'Tempo Lavoro: <strong>'+dayRecap.workingTime+'</strong>'+
@@ -279,9 +278,7 @@
     <td class="default-single note">
       #{if dayRecap.note.size != 0}
 
-      <a href="#" class="btn btn-small note" data-popover
-         data-trigger="hover" data-toggle="popover"
-         data-placement="right"
+      <a href="#" class="btn btn-small note" popover-hover
          data-html="true"
          data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
          title="Info timbrature">Info</a>
