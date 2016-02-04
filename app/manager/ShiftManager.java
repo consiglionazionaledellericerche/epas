@@ -1014,8 +1014,8 @@ public class ShiftManager {
 
         // check if the competence has been processed to be sent to Rome
         // and and this case we don't change the valueApproved
-        CertificatedData certData =
-            personMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
+        CertificatedData certData = personMonthRecapDao
+            .getPersonCertificatedData(person, month, year);
 
         int apprHours =
             (certData != null && certData.isOk && (certData.competencesSent != null))

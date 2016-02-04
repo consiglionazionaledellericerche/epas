@@ -76,19 +76,9 @@ public class UploadSituation extends Controller {
   @Inject
   private static SecurityRules rules;
   @Inject
-  private static PersonDao personDao;
-  @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static PersonDayDao personDayDao;
-  @Inject
-  private static AbsenceDao absenceDao;
-  @Inject
-  private static CompetenceDao competenceDao;
-  @Inject
   private static AttestatiClient attestatiClient;
-  @Inject
-  private static PersonDayManager personDayManager;
   @Inject
   private static PersonMonthRecapDao personMonthRecapDao;
   @Inject
@@ -330,8 +320,8 @@ public class UploadSituation extends Controller {
     DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
         .buildComparedLists(office, sessionAttestati);
     
-    List<RispostaElaboraDati> checks = elaboraDatiDipendenti(
-        sessionAttestati.getCookies(), dipendenteComparedRecap.getValidDipendenti(),
+    List<RispostaElaboraDati> checks = attestatiClient.elaboraDatiDipendenti(
+        Optional.fromNullable(sessionAttestati), dipendenteComparedRecap.getValidDipendenti(),
         year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
@@ -402,8 +392,9 @@ public class UploadSituation extends Controller {
       UploadSituation.uploadData(office.id);
     }
 
-    List<RispostaElaboraDati> checks = elaboraDatiDipendenti(sessionAttestati.getCookies(),
-        Lists.newArrayList(dipendente.get()), year, month);
+    List<RispostaElaboraDati> checks = attestatiClient
+        .elaboraDatiDipendenti(Optional.fromNullable(sessionAttestati), 
+            Lists.newArrayList(dipendente.get()), year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
       @Override
@@ -426,92 +417,57 @@ public class UploadSituation extends Controller {
 
   }
 
+  /**
+   * Modale visualizzazione problemi.
+   * 
+   * @param certificatedDataId
+   */
   public static void showProblems(Long certificatedDataId) {
     rules.checkIfPermitted(Security.getUser().get().person.office);
     CertificatedData cd = personMonthRecapDao.getCertificatedDataById(certificatedDataId);
-    //CertificatedData cd = CertificatedData.findById(certificatedDataId);
     if (cd == null) {
       renderText("L'elaborazione attestati richiesta è inesistente.");
     }
     render(cd);
   }
 
+  /**
+   * Modale visualizzazione dati inviati.
+   * @param certificatedDataId
+   */
   public static void showCertificatedData(Long certificatedDataId) {
     rules.checkIfPermitted(Security.getUser().get().person.office);
     CertificatedData cd = personMonthRecapDao.getCertificatedDataById(certificatedDataId);
-    //CertificatedData cd = CertificatedData.findById(certificatedDataId);
     if (cd == null) {
       renderText("L'elaborazione attestati richiesta è inesistente.");
     }
     render(cd);
   }
 
-  private static List<RispostaElaboraDati> elaboraDatiDipendenti(
-      Map<String, String> cookies, List<Dipendente> dipendenti, int year, int month)
-          throws MalformedURLException, URISyntaxException {
-    List<RispostaElaboraDati> checks = Lists.newLinkedList();
-    Person person = null;
+  /**
+   * Verifica i dati che ePAS invierebbe ad Attestati. Visualizza anche gli eventuali dati mandati 
+   * e gli errori riportati.
+   * 
+   * @param officeId sede
+   */
+  public static void checkData(Long officeId, Integer year, Integer month) 
+      throws MalformedURLException, URISyntaxException {
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+        
+    Set<Dipendente> people = attestatiClient.officeActivePeopleAsDipendente(office, year, month);
+    
+    List<RispostaElaboraDati> results = attestatiClient.elaboraDatiDipendenti(
+        Optional.<SessionAttestati>absent(), Lists.newArrayList(people), year, month);
 
-    for (Dipendente dipendente : dipendenti) {
-
-      person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
-
-      List<PersonMonthRecap> pmList =
-          personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(
-              person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
-
-      //Numero di buoni mensa da passare alla procedura di invio attestati
-      List<PersonDay> personDays = personDayDao
-          .getPersonDayInMonth(person, new YearMonth(year, month));
-      Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDays);
-
-      //vedere se l'ho gia' inviato con successo
-      CertificatedData cert =
-          personMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
-
-      RispostaElaboraDati rispostaElaboraDati = attestatiClient.elaboraDatiDipendente(
-          cookies, dipendente, year, month,
-          absenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
-          competenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
-          pmList, mealTicket);
-      if (rispostaElaboraDati.isOk()) {
-        for (PersonMonthRecap personMonth : pmList) {
-          personMonth.hoursApproved = true;
-          personMonth.save();
-        }
-      }
-
-      if (cert == null) {
-        //FIXME
-        //queste variabili di appoggio sono state inserite perchè richiamandole direttamente nel
-        //costruttore veniva lanciata l'eccezione
-        //play.exceptions.JavaExecutionException:
-        //  models.CertificatedData.<init>(Lmodels/Person;Ljava/lang/String;Ljava/lang/String;II)V
-        int anno = year;
-        int mese = month;
-        String cognomeNome = dipendente.getCognomeNome();
-        String matricola = dipendente.getMatricola();
-        cert = new CertificatedData(person, cognomeNome, matricola, anno, mese);
-      }
-      Logger.info("Inizio creazione record certificated_data");
-      cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
-      cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
-      cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
-      cert.trainingHoursSent = rispostaElaboraDati.getTrainingHoursSent();
-      cert.problems = rispostaElaboraDati.getProblems();
-      cert.isOk = rispostaElaboraDati.isOk();
-      cert.save();
-
-      checks.add(rispostaElaboraDati);
-    }
-
-    return checks;
+    render(results, office, year, month);  
   }
 
   private static void memAttestatiIntoCache(
       SessionAttestati sessionAttestati, List<Dipendente> listaDipendenti) {
-    Cache.set(LOGIN_RESPONSE_CACHED + Security.getUser().get().username, sessionAttestati);
     
+    Cache.set(LOGIN_RESPONSE_CACHED + Security.getUser().get().username, sessionAttestati);
     Cache.set(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username, listaDipendenti);
   }
 
@@ -522,16 +478,8 @@ public class UploadSituation extends Controller {
     return (SessionAttestati) Cache.get(LOGIN_RESPONSE_CACHED + Security.getUser().get().username);
   }
 
-  /**
-   * Carica in cache la lista dipendenti abilitati in attestati.cnr
-   */
-  @SuppressWarnings("unchecked")
-  private static List<Dipendente> loadAttestatiListaCached() {
 
-    return (List<Dipendente>)
-        Cache.get(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username);
-  }
-
+  
   
   
   
