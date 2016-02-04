@@ -456,12 +456,13 @@ public class UploadSituation extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
         
+    IWrapperOffice wrOffice = factory.create(office);
     Set<Dipendente> people = attestatiClient.officeActivePeopleAsDipendente(office, year, month);
     
     List<RispostaElaboraDati> results = attestatiClient.elaboraDatiDipendenti(
         Optional.<SessionAttestati>absent(), Lists.newArrayList(people), year, month);
 
-    render(results, office, year, month);  
+    render(results, wrOffice, year, month);  
   }
 
   private static void memAttestatiIntoCache(

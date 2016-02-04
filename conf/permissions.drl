@@ -564,6 +564,7 @@ when
         "UploadSituation.processSinglePerson",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
+        "UploadSituation.checkData",
         
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
@@ -686,6 +687,7 @@ when
         "UploadSituation.processSinglePerson",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
+        "UploadSituation.checkData",
         
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
