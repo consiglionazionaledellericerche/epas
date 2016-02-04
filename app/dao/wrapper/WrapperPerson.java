@@ -363,8 +363,7 @@ public class WrapperPerson implements IWrapperPerson {
   @Override
   public CertificatedData getCertificatedData(int year, int month) {
 
-    CertificatedData cd = personMonthRecapDao
-            .getCertificatedDataByPersonMonthAndYear(this.value, month, year);
+    CertificatedData cd = personMonthRecapDao.getPersonCertificatedData(this.value, month, year);
     return cd;
   }
 
