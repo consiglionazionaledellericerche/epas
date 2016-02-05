@@ -256,11 +256,14 @@ public class PersonDayManager {
     //1) Calcolare tutte le gapPair
     Stamping outForLunch = null;
     for (PairStamping validPair : validPairs) {
-      if (outForLunch == null) {
-        outForLunch = validPair.out;
-      } else {
-        allGapPairs.add(new PairStamping(outForLunch, validPair.in));
-        outForLunch = validPair.out;
+      if (validPair.out.stampType == null
+          || StampTypes.PAUSA_PRANZO.equals(validPair.out.stampType)) {
+        if (outForLunch == null) {
+          outForLunch = validPair.out;
+        } else {
+          allGapPairs.add(new PairStamping(outForLunch, validPair.in));
+          outForLunch = validPair.out;
+        }
       }
     }
 
