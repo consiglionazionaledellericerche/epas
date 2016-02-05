@@ -153,7 +153,7 @@ public class PersonDayInTroubleManager {
         continue;
       }
       
-      if (confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, person.office)) {
+      if (!confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, person.office)) {
         log.info("Non verrà inviata la mail a {} in quanto "
             + "la sua sede {} ha invio mail disabilitato",
             person.getFullname(), person.office.name);
