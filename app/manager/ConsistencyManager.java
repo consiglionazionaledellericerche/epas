@@ -331,7 +331,7 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd, false);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
@@ -346,7 +346,7 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd, false);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
@@ -359,7 +359,9 @@ public class ConsistencyManager {
     // controllo uscita notturna
     handlerNightStamp(pd);
 
-    personDayManager.updateTimeAtWork(pd);
+    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
+
+    personDayManager.updateTimeAtWork(pd, pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
     personDayManager.updateDifference(pd);
 
