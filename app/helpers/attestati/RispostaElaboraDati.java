@@ -2,6 +2,8 @@ package helpers.attestati;
 
 import lombok.Data;
 
+import models.Person;
+
 /**
  * Contiene le informazioni relative alla richiesta/risposta di elaborazione dati delle
  * assenze/competenze/buoni mensa inviati al sistema degli attestati del CNR.
@@ -10,6 +12,7 @@ import lombok.Data;
  */
 @Data
 public final class RispostaElaboraDati {
+  private Dipendente dipendente;
   private final String cognomeNome;
   private final String matricola;
   private boolean ok = false;

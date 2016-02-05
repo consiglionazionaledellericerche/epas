@@ -25,7 +25,7 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   private static final long serialVersionUID = 3730183716240278997L;
 
   @Required
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name = "contract_id")
   public Contract contract;
 

@@ -554,14 +554,18 @@ when
         "Competences.saveNewCompetenceConfiguration",
         
         /* Vecchio permesso uploadSituation */
-        "UploadSituation.show",
-        "UploadSituation.uploadSituation",
-        "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati",
-        "UploadSituation.processSinglePerson",
+        "UploadSituation.uploadData",
+        "UploadSituation.updateSession",
+        "UploadSituation.createFile",
+        "UploadSituation.computeCreateFile",
+        "UploadSituation.fetchData",
+        "UploadSituation.logoutAttestati",
         "UploadSituation.processAllPersons",
+        "UploadSituation.processSinglePerson",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
+        "UploadSituation.checkData",
+        "UploadSituation.performCheckData",
         
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
@@ -674,14 +678,18 @@ when
         "Competences.saveNewCompetenceConfiguration",
         
          /* Vecchio permesso uploadSituation */
-        "UploadSituation.show",
-        "UploadSituation.uploadSituation",
-        "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati",
-        "UploadSituation.processSinglePerson",
+        "UploadSituation.uploadData",
+        "UploadSituation.updateSession",
+        "UploadSituation.createFile",
+        "UploadSituation.computeCreateFile",
+        "UploadSituation.fetchData",
+        "UploadSituation.logoutAttestati",
         "UploadSituation.processAllPersons",
+        "UploadSituation.processSinglePerson",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
+        "UploadSituation.checkData",
+        "UploadSituation.performCheckData",
         
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
