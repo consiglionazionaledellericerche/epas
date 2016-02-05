@@ -38,7 +38,6 @@ public class PersonDaysTest {
   @Test
   public void test() {
     
-
     PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
     PersonDay personDay = new PersonDay(null, second);
     
