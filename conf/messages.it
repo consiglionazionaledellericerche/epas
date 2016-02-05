@@ -139,6 +139,9 @@ logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
 
+mealTicket.aquired= Buono Pasto maturato
+mealTicket.notAquired= Buono Pasto non maturato
+mealTicket.notYetAquired= Buono Pasto non ancora maturato
 mealTicket=Buono Pasto
 modifierType= Calcolo Orario
 
