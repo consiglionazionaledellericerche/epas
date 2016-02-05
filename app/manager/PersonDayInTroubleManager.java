@@ -227,7 +227,7 @@ public class PersonDayInTroubleManager {
         log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
                 new Object[]{troublesDateToSend, person, troubleCausesToSend, 
                     person.getFullname()});
-        e.printStackTrace();
+        log.error(e.getStackTrace().toString());
       }
     }
   }

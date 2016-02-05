@@ -145,16 +145,6 @@ public class PersonDayManager {
 
     //Pulizia stato personDay.
     cleanTimeAtWork(pd);
-    
-    //Se hanno il tempo di lavoro fissato non calcolo niente
-    if (pd.isFixedTimeAtWork()) {
-
-      if (pd.getValue().isHoliday) {
-        return pd;
-      }
-      pd.getValue().timeAtWork = pd.getWorkingTimeTypeDay().get().workingTime;
-      return pd;
-    }
 
     for (Absence abs : pd.getValue().absences) {
 
@@ -208,6 +198,16 @@ public class PersonDayManager {
         pd.getValue().justifiedTimeNoMeal += pd.getWorkingTimeTypeDay().get().workingTime / 2;
         continue;
       }
+    }
+    
+    //Se hanno il tempo di lavoro fissato non calcolo niente
+    if (pd.isFixedTimeAtWork()) {
+
+      if (pd.getValue().isHoliday) {
+        return pd;
+      }
+      pd.getValue().timeAtWork = pd.getWorkingTimeTypeDay().get().workingTime;
+      return pd;
     }
 
     //Minuti derivanti dalle timbrature
