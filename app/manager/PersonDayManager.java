@@ -132,12 +132,13 @@ public class PersonDayManager {
   private void cleanTimeAtWork(PersonDay pd) {
     
     setTicketStatusIfNotForced(pd, false);
-    pd.stampModificationType = null;
-    pd.decurted = 0;
-    pd.stampingsTime = 0;
-    pd.justifiedTimeMeal = 0;
-    pd.justifiedTimeNoMeal = 0;
-    pd.timeAtWork = 0;
+    
+    pd.setStampModificationType(null);
+    pd.setDecurted(0);
+    pd.setStampingsTime(0);
+    pd.setJustifiedTimeMeal(0);
+    pd.setJustifiedTimeNoMeal(0);
+    pd.setTimeAtWork(0);
   }
   
   
@@ -240,15 +241,15 @@ public class PersonDayManager {
    * al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali per garantire 
    * l'usabilità anche ai controller che gestiscono reperibilità e turni).<br>
    * // FIXME: #163 #174
-   * @param pesrsonDay personDay
+   * @param personDay personDay
    * @param startLunch inizio fascia pranzo istituto
    * @param endLunch fine fascia pranzo istituto
    * @return la lista delle pause pranzo
    */
-  private List<PairStamping> getGapLunchPairs(PersonDay pesrsonDay, LocalDateTime startLunch, 
+  private List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalDateTime startLunch, 
       LocalDateTime endLunch) {
 
-    List<PairStamping> validPairs = computeValidPairStampings(pesrsonDay);
+    List<PairStamping> validPairs = computeValidPairStampings(personDay);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -303,17 +304,17 @@ public class PersonDayManager {
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd, 
       boolean fixedTimeAtWork, LocalDateTime startLunch, LocalDateTime endLunch) {
     
-    //Pulizia stato personDay.
+    // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
 
-    for (Absence abs : personDay.absences) {
+    for (Absence abs : personDay.getAbsences()) {
 
       // #######
       // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
       
       if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
         cleanTimeAtWork(personDay);
-        personDay.timeAtWork = wttd.workingTime;
+        personDay.setTimeAtWork(wttd.workingTime);
         return personDay;
       }
 
@@ -321,7 +322,7 @@ public class PersonDayManager {
       if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
         cleanTimeAtWork(personDay);
         setTicketStatusIfNotForced(personDay, true);
-        personDay.timeAtWork = wttd.workingTime;
+        personDay.setTimeAtWork(wttd.workingTime);
         return personDay;
       }
 
@@ -330,7 +331,7 @@ public class PersonDayManager {
           abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
         cleanTimeAtWork(personDay);
         setTicketStatusIfNotForced(personDay, false);
-        personDay.timeAtWork = 0;
+        personDay.setTimeAtWork(0);
         return personDay;
       }
       
@@ -339,46 +340,49 @@ public class PersonDayManager {
       
       // Giustificativi grana minuti (priorità sugli altri casi) Ex. PEPE
       if (abs.justifiedMinutes != null) {
-        personDay.justifiedTimeNoMeal += abs.justifiedMinutes;
+        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + abs.justifiedMinutes);
         continue;
       }
 
       // Giustificativi grana ore (discriminare per calcolo buono o no)
       if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
         if (abs.absenceType.justifiedTimeAtWork.mealTimeCounting) {
-          personDay.justifiedTimeMeal += abs.absenceType.justifiedTimeAtWork.minutes;
+          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() 
+              + abs.absenceType.justifiedTimeAtWork.minutes);
         } else {
-          personDay.justifiedTimeNoMeal += abs.absenceType.justifiedTimeAtWork.minutes;  
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
+              + abs.absenceType.justifiedTimeAtWork.minutes);
         }
         continue;
       }
       
-      //Mezza giornata giustificata.
+      // Mezza giornata giustificata.
       if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
-        personDay.justifiedTimeNoMeal += wttd.workingTime / 2;
+        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
+            + (wttd.workingTime / 2));
         continue;
       }
     }
     
-    //Se hanno il tempo di lavoro fissato non calcolo niente
+    // Se hanno il tempo di lavoro fissato non calcolo niente
     if (fixedTimeAtWork) {
 
-      if (personDay.isHoliday) {
+      if (personDay.isHoliday()) {
         return personDay;
       }
-      personDay.timeAtWork = wttd.workingTime;
+      personDay.setTimeAtWork(wttd.workingTime);
       return personDay;
     }
 
-    //Minuti derivanti dalle timbrature
-    personDay.stampingsTime += stampingMinutes(personDay);
+    // Minuti derivanti dalle timbrature
+    personDay.setStampingsTime(stampingMinutes(personDay));
 
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.timeAtWork = personDay.stampingsTime + personDay.justifiedTimeMeal 
-        + personDay.justifiedTimeNoMeal;
-    
+    personDay.setTimeAtWork( personDay.getStampingsTime() + personDay.getJustifiedTimeMeal() 
+        + personDay.getJustifiedTimeNoMeal());
+
     // Se è festa ho finito ...
-    if (personDay.isHoliday) {
+    if (personDay.isHoliday()) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
@@ -427,7 +431,7 @@ public class PersonDayManager {
     //3) Decisioni
     
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
-    int mealTicketsMinutes = personDay.stampingsTime + personDay.justifiedTimeMeal;
+    int mealTicketsMinutes = personDay.getStampingsTime() + personDay.getJustifiedTimeMeal();
     
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - missingTime < mealTicketTime) {
@@ -460,46 +464,49 @@ public class PersonDayManager {
     // IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     setTicketStatusIfNotForced(personDay, true);
-    personDay.decurted = null;
+    personDay.setDecurted(null);
     if (workingTimeDecurted < mealTicketsMinutes) {
 
-      personDay.decurted = missingTime;
+      personDay.setDecurted(missingTime);
     }
 
-    personDay.timeAtWork = workingTimeDecurted + personDay.justifiedTimeNoMeal;
+    personDay.setTimeAtWork(workingTimeDecurted + personDay.getJustifiedTimeNoMeal());
     return personDay;
   }
-  
+
   /**
    * Popola il campo difference del PersonDay.
+   * @param personDay personDay
+   * @param wttd wttd
+   * @param fixedTimeAtWork fixedTimeAtWork
    */
-  public void updateDifference(PersonDay pd, WorkingTimeTypeDay wttd, boolean fixedTimeAtWork) {
-
+  public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd, 
+      boolean fixedTimeAtWork) {
 
     //persona fixed
-    if (fixedTimeAtWork && pd.timeAtWork == 0) {
-      pd.difference = 0;
+    if (fixedTimeAtWork && personDay.getTimeAtWork() == 0) {
+      personDay.setDifference(0);
       return;
     }
 
     //festivo
-    if (pd.isHoliday) {
-      if (pd.acceptedHolidayWorkingTime) {
-        pd.difference = pd.timeAtWork;
+    if (personDay.isHoliday()) {
+      if (personDay.isAcceptedHolidayWorkingTime()) {
+        personDay.setDifference(personDay.getTimeAtWork());
       } else {
-        pd.difference = 0;
+        personDay.setDifference(0);
       }
       return;
     }
 
     //assenze giornaliere
-    if (isAllDayAbsences(pd)) {
-      pd.difference = 0;
+    if (isAllDayAbsences(personDay)) {
+      personDay.setDifference(0);
       return;
     }
 
     //feriale
-    pd.difference = pd.timeAtWork - wttd.workingTime;
+    personDay.setDifference(personDay.getTimeAtWork() - wttd.workingTime);
   }
 
 
@@ -511,41 +518,46 @@ public class PersonDayManager {
     //primo giorno del mese o del contratto
     if (!previousForProgressive.isPresent()) {
 
-      personDay.progressive = personDay.difference;
+      personDay.setProgressive(personDay.getDifference());
       return;
     }
 
     //caso generale
-    personDay.progressive = personDay.difference + previousForProgressive.get().progressive;
+    personDay.setProgressive(personDay.getDifference() 
+        + previousForProgressive.get().getProgressive());
 
   }
 
   /**
    * Popola il campo isTicketAvailable.
+   * @param personDay personDay 
+   * @param wttd wttd
+   * @param fixedTimeAtWork fixedTimeAtWork
+   * @return personDay
    */
-  public void updateTicketAvailable(PersonDay pd, WorkingTimeTypeDay wttd, 
+  public PersonDay updateTicketAvailable(PersonDay personDay, WorkingTimeTypeDay wttd, 
       boolean fixedTimeAtWork) {
 
     //caso forced by admin
-    if (pd.isTicketForcedByAdmin) {
-      return;
+    if (personDay.isTicketForcedByAdmin()) {
+      return personDay;
     }
 
     //caso persone fixed
     if (fixedTimeAtWork) {
-      if (pd.isHoliday) {
-        pd.isTicketAvailable = false;
-      } else if (!pd.isHoliday && !isAllDayAbsences(pd)) {
-        pd.isTicketAvailable = true;
-      } else if (!pd.isHoliday && isAllDayAbsences(pd)) {
-        pd.isTicketAvailable = false;
+      if (personDay.isHoliday()) {
+        personDay.setTicketAvailable(false);
+      } else if (!personDay.isHoliday() && !isAllDayAbsences(personDay)) {
+        personDay.setTicketAvailable(true);
+      } else if (!personDay.isHoliday() && isAllDayAbsences(personDay)) {
+        personDay.setTicketAvailable(false);
       }
-      return;
+      return personDay;
     }
 
     //caso persone normali
-    pd.isTicketAvailable = pd.isTicketAvailable && wttd.mealTicketEnabled();
-    return;
+    personDay.setTicketAvailable(personDay.isTicketAvailable() && wttd.mealTicketEnabled());
+    return personDay;
   }
   
   /**
@@ -555,8 +567,8 @@ public class PersonDayManager {
    */
   public void setTicketStatusIfNotForced(PersonDay pd, boolean isTicketAvailable) {
 
-    if (!pd.isTicketForcedByAdmin) {
-      pd.isTicketAvailable = isTicketAvailable;
+    if (!pd.isTicketForcedByAdmin()) {
+      pd.setTicketAvailable(isTicketAvailable);
     }
   }
 
@@ -827,14 +839,14 @@ public class PersonDayManager {
 
     //Lavoro su una copia ordinata.
     List<Stamping> stampings = Lists.newArrayList();
-    for (Stamping stamping : personDay.stampings) {
+    for (Stamping stamping : personDay.getStampings()) {
       stampings.add(stamping);
     }
     Collections.sort(stampings);
 
     //(1)Costruisco le coppie valide per calcolare il worktime
-    List<PairStamping> validPairs = new ArrayList<PairStamping>();
-    List<Stamping> serviceStampings = new ArrayList<Stamping>();
+    List<PairStamping> validPairs = Lists.newArrayList();
+    List<Stamping> serviceStampings = Lists.newArrayList();
     Stamping stampEnter = null;
 
     for (Stamping stamping : stampings) {
@@ -1135,9 +1147,6 @@ public class PersonDayManager {
    * @return minuti
    */
   private int stampingMinutes(PersonDay personDay) {
-
-    Preconditions.checkNotNull(personDay);
-    Preconditions.checkState(personDay.isPersistent());
 
     List<PairStamping> validPairs = computeValidPairStampings(personDay);
 
