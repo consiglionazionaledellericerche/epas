@@ -1,6 +1,8 @@
-#{extends 'modal.html' /}
-#{set modalHeader: 'Errori Attestati elaborati ' + templateUtility.monthName(cd.month) + ' ' + cd.year + ' per ' + cd.person.surname + ' ' + cd.person.name/}
+#{modalAsync id:'modalAbsence', button:'Salva', 
+  title:'Errori Attestati elaborati ' + templateUtility.monthName(cd.month) + ' ' + cd.year + ' per ' + cd.person.surname + ' ' + cd.person.name }
 
 <div class="container-fluid center">
     <p>${cd.problems}</p>
 </div>
+
+#{/modalAsync}
