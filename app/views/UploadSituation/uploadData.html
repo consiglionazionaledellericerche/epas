@@ -1,0 +1,80 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
+
+<div class="container">
+#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
+</div>
+
+#{uploadSituation.uploadSituationTabs activeAction:'uploadData' /}
+
+<div class="container">
+	
+	#{alert color:'danger', dismissible:'true'}
+		<p class="text-danger"><strong>Importante</strong></p>
+		<p class="text-danger">Prima di effettuare questa operazione è necessario effettuare lo stralcio dati sul sistema dell'amministrazione centrale del CNR.<br>
+		    Lo stralcio dati aggiorna l'elenco del personale tra i database dell'amministrazione centrale ed è richiesta, almeno una volta per ogni mese, 
+			dalle procedure dell'amministrazione centrale per la gestione elettronica degli attestati di presenza.
+		</p>
+	  #{/alert}		
+	
+   <div class="col-md-8">
+	  #{alert color:'info'}
+		<p>Utilizzare questa procedura per popolare direttamente tramite ePAS le form presenti 
+		in <strong>CNR Attestati</strong>.
+		</p>
+		<ul>
+		  	<li>Per ogni persona di cui vanno trasmesse le assenze e competenze, effettua una funzione "Carica Dati" dell'attestato della persona.</li>
+		  	<li>La procedura riporta la lista dei risultati della "Carica Dati" di ogni persona e permette di correggere gli eventuali errori manualmente.</li>
+		</ul>
+	  #{/alert}	 
+	</div>
+	<div class="col-md-4">
+		
+		#{if sessionAttestati}
+		<p><strong>Sessione attuale</strong></p>
+		<table class="table">
+		<tr>
+		  <td>Login Attestati attualmente effettuato con username <strong>${sessionAttestati.usernameCnr}</strong></td>
+		  <td><a href="@{logoutAttestati(wrOffice.value.id)}" class="btn btn-xs btn-danger">Logout</a></td>
+		</tr>
+		<tr>
+		  <td>Sede selezionata <strong>${wrOffice.value.name}</strong></td>
+		  <td><a href="@{updateSession(wrOffice.value.id)}" class="btn btn-xs btn-primary" data-async-modal="#modalCerts">Cambia</a></td>
+		</tr>
+		<tr>
+		  <td>Mese selezionato <strong>&{'views.tags.display.date.month.' + sessionAttestati.month} ${sessionAttestati.year}</strong></td>
+		  <td><a href="@{updateSession(wrOffice.value.id)}" class="btn btn-xs btn-primary" data-async-modal="#modalCerts">Cambia</a></td>
+		</tr>
+		</table>
+		#{/if}
+		#{else}
+		  <p><strong>Sessione attuale</strong></p>
+		  <p>Attualmente non collegato con Attestati CNR.</p>
+		#{/else}
+		
+	</div>	
+</div>
+<div class="container">
+      
+	
+	#{form @UploadSituation.fetchData(), class:'form-horizontal'}
+	
+	     #{f.hidden 'office.id', value:wrOffice.value.id /}
+		
+		 #{if sessionAttestati==null || !sessionAttestati.isLoggedIn() }
+		   #{f.input 'attestatiLogin', required:true /}
+		   #{f.input 'attestatiPassword', type:'password', required:true /}
+		   #{b.buttons center:true}
+            *{ #{b.cancel @updateSourceContract(contract.id) /} }*
+            #{b.submit 'Login Attestati'/}
+           #{/b.buttons}
+		   
+		 #{/if}
+	#{/form}
+	
+	#{if sessionAttestati != null && sessionAttestati.isLoggedIn() }
+	   #{include './_situations.html' /} 
+	#{/if}
+
+</div>
