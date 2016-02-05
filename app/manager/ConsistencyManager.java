@@ -387,11 +387,13 @@ public class ConsistencyManager {
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
         pd.isFixedTimeAtWork(), startLunch, endLunch);
 
-    personDayManager.updateDifference(pd);
+    personDayManager.updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork());
 
-    personDayManager.updateProgressive(pd);
+    personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
 
-    personDayManager.updateTicketAvailable(pd);
+    personDayManager.updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork());
 
     // controllo problemi strutturali del person day
     if (pd.getValue().date.isBefore(LocalDate.now())) {

@@ -47,8 +47,6 @@ import java.util.Map;
 @Slf4j
 public class PersonDayManager {
 
-  private final PersonDayDao personDayDao;
-  private final StampTypeManager stampTypeManager;
   private final ConfGeneralManager confGeneralManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final ContractMonthRecapManager contractMonthRecapManager;
@@ -73,8 +71,6 @@ public class PersonDayManager {
       ContractMonthRecapManager contractMonthRecapManager,
       PersonShiftDayDao personShiftDayDao) {
 
-    this.personDayDao = personDayDao;
-    this.stampTypeManager = stampTypeManager;
     this.confGeneralManager = confGeneralManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.contractMonthRecapManager = contractMonthRecapManager;
@@ -236,12 +232,6 @@ public class PersonDayManager {
   }
 
   /**
-   * 
-   *
-   * @param pd personDay.
-   */
-  
-  /**
    * Costruisce la lista di coppie di timbrature (uscita/entrata) che rappresentano le potenziali
    * pause pranzo.<br> 
    * L'algoritmo filtra le coppie che appartengono alla fascia pranzo passata come parametro.<br>
@@ -250,10 +240,10 @@ public class PersonDayManager {
    * al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali per garantire 
    * l'usabilità anche ai controller che gestiscono reperibilità e turni).<br>
    * // FIXME: #163 #174
-   * @param pesrsonDay
-   * @param startLunch
-   * @param endLunch
-   * @return
+   * @param pesrsonDay personDay
+   * @param startLunch inizio fascia pranzo istituto
+   * @param endLunch fine fascia pranzo istituto
+   * @return la lista delle pause pranzo
    */
   private List<PairStamping> getGapLunchPairs(PersonDay pesrsonDay, LocalDateTime startLunch, 
       LocalDateTime endLunch) {
@@ -483,97 +473,81 @@ public class PersonDayManager {
   /**
    * Popola il campo difference del PersonDay.
    */
-  public void updateDifference(IWrapperPersonDay pd) {
+  public void updateDifference(PersonDay pd, WorkingTimeTypeDay wttd, boolean fixedTimeAtWork) {
 
-    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
 
     //persona fixed
-    if (pd.isFixedTimeAtWork() && pd.getValue().timeAtWork == 0) {
-      pd.getValue().difference = 0;
+    if (fixedTimeAtWork && pd.timeAtWork == 0) {
+      pd.difference = 0;
       return;
     }
 
     //festivo
-    if (pd.getValue().isHoliday) {
-      if (pd.getValue().acceptedHolidayWorkingTime) {
-        pd.getValue().difference = pd.getValue().timeAtWork;
+    if (pd.isHoliday) {
+      if (pd.acceptedHolidayWorkingTime) {
+        pd.difference = pd.timeAtWork;
       } else {
-        pd.getValue().difference = 0;
+        pd.difference = 0;
       }
       return;
     }
 
     //assenze giornaliere
-    if (isAllDayAbsences(pd.getValue())) {
-      pd.getValue().difference = 0;
+    if (isAllDayAbsences(pd)) {
+      pd.difference = 0;
       return;
     }
 
     //feriale
-    pd.getValue().difference = pd.getValue().timeAtWork
-        - pd.getWorkingTimeTypeDay().get().workingTime;
+    pd.difference = pd.timeAtWork - wttd.workingTime;
   }
 
 
   /**
    * Popola il campo progressive del PersonDay.
    */
-  public void updateProgressive(IWrapperPersonDay pd) {
+  public void updateProgressive(PersonDay personDay, Optional<PersonDay> previousForProgressive) {
 
     //primo giorno del mese o del contratto
-    if (!pd.getPreviousForProgressive().isPresent()) {
+    if (!previousForProgressive.isPresent()) {
 
-      pd.getValue().progressive = pd.getValue().difference;
+      personDay.progressive = personDay.difference;
       return;
     }
 
     //caso generale
-    pd.getValue().progressive = pd.getValue().difference
-        + pd.getPreviousForProgressive().get().progressive;
+    personDay.progressive = personDay.difference + previousForProgressive.get().progressive;
 
   }
 
   /**
    * Popola il campo isTicketAvailable.
    */
-  public void updateTicketAvailable(IWrapperPersonDay pd) {
+  public void updateTicketAvailable(PersonDay pd, WorkingTimeTypeDay wttd, 
+      boolean fixedTimeAtWork) {
 
     //caso forced by admin
-    if (pd.getValue().isTicketForcedByAdmin) {
+    if (pd.isTicketForcedByAdmin) {
       return;
     }
 
     //caso persone fixed
-    if (pd.isFixedTimeAtWork()) {
-      if (pd.getValue().isHoliday) {
-        pd.getValue().isTicketAvailable = false;
-      } else if (!pd.getValue().isHoliday && !isAllDayAbsences(pd.getValue())) {
-        pd.getValue().isTicketAvailable = true;
-      } else if (!pd.getValue().isHoliday && isAllDayAbsences(pd.getValue())) {
-        pd.getValue().isTicketAvailable = false;
+    if (fixedTimeAtWork) {
+      if (pd.isHoliday) {
+        pd.isTicketAvailable = false;
+      } else if (!pd.isHoliday && !isAllDayAbsences(pd)) {
+        pd.isTicketAvailable = true;
+      } else if (!pd.isHoliday && isAllDayAbsences(pd)) {
+        pd.isTicketAvailable = false;
       }
       return;
     }
 
     //caso persone normali
-    pd.getValue().isTicketAvailable =
-        pd.getValue().isTicketAvailable && isTicketEnabledForWorkingTime(pd);
+    pd.isTicketAvailable = pd.isTicketAvailable && wttd.mealTicketEnabled();
     return;
   }
   
-  /**
-   * True se la persona ha uno dei WorkingTime abilitati al buono pasto.
-   */
-  private boolean isTicketEnabledForWorkingTime(IWrapperPersonDay pd) {
-
-    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
-
-    if (pd.getWorkingTimeTypeDay().get().mealTicketEnabled()) {
-      return true;
-    }
-    return false;
-  }
-
   /**
    * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false.
    * @param pd personDay
@@ -623,9 +597,12 @@ public class PersonDayManager {
     
     updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork(), 
         startLunch, endLunch);
-    updateDifference(pd);
-    updateProgressive(pd);
-    updateTicketAvailable(pd);
+    
+    updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
+    
+    updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
+    
+    updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
   }
 
