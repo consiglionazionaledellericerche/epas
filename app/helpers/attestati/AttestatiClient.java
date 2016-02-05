@@ -603,7 +603,7 @@ public class AttestatiClient {
         //e' una previsione.
         RispostaElaboraDati rispostaElaboraDati = elaboraDatiDipendenteClient(
             null, dipendente, year, month,
-            absences, competences, trainingHoursList, mealTicket, true);
+            absences, competences, trainingHoursList, mealTicket, false);
         checks.add(rispostaElaboraDati);
       }
     }

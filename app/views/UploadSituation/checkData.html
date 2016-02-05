@@ -11,37 +11,80 @@
 <div class="container">
 	
   
-	#{form @UploadSituation.checkData(), class:'form-horizontal'}
+	#{form @UploadSituation.performCheckData(), class:'form-horizontal'}
 		
 		#{alert color:'info'}
-		<p>Utilizzare questa procedura per generare un file contenente le informazioni 
-		da caricare in <strong>CNR Attestati</strong>.
+		<p>Utilizzare questa procedura per visualizzare i dati che ePAS caricherebbe su <strong>CNR Attestati</strong>
+		in questo momento.
 		</p>
-		<p>Scegli <strong>anno</strong> e <strong>mese</strong> di assenze e competenze per i quali vuoi popolare
-		 il file da inviare agli attestati di presenza.</p>
+		<p>Scegli <strong>sede</strong> <strong>anno</strong> e <strong>mese</strong> da verificare.
 		#{/alert}
 
-        #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
-
-		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
-		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
+		#{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
+		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:year, byEquals:true /} 
+		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:month, byEquals:true /}	
 
 		<br>
 		#{b.buttons center:true}
             *{ #{b.cancel @updateSourceContract(contract.id) /} }*
-            #{b.submit 'Crea File'/}
+            #{b.submit 'Verifica'/}
           #{/b.buttons}
 	#{/form}
 	
-	<table>
+	#{if results}
+	<table class="table table-condensed table-bordered table-striped">
 	  <tr>
 	    <th>Dipendente</th>
 	    <th>Assenze</th>
+	    <th>Competenze</th>
+	    <th>Ore Formazione</th>
+	    <th>Buoni Pasto</th>
+	    <th>Esito</th>
+	    <th>Problemi</th>
 	  </tr>
 	#{list items:results, as:'result'}
+	
+	  %{ wrPerson = wrapper.create(result.dipendente.person); }%
+	
 	  <tr>
-	    <td>${result.dipendente.nomeCognome}</td>
+	    <td>${result.dipendente.cognomeNome}</td>
+	    <td>${result.absencesSent}</td>
+	    <td>${result.competencesSent}</td>
+	    <td>${result.trainingHoursSent}</td>
+	    <td>${result.mealTicketSent}</td>
+	    #{if wrPerson.getCertificatedData(year, month) != null}
+	      #{if wrPerson.getCertificatedData(year, month).isOk }     
+		      <td class="bg-success">
+			  #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(year, month).id), modal:'#modalCerts'}
+	      				  dati
+	      	  #{/secure.link}
+			  </td>
+			  <td></td>
+		  #{/if}
+		  #{else}
+		      <td class="bg-danger">
+			  #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(year, month).id), modal:'#modalCerts'}
+	      				  dati
+	      	  #{/secure.link}
+			  </td>
+			  <td>
+			  #{secure.link @UploadSituation.showProblems(wrPerson.getCertificatedData(year, month).id), modal:'#modalCerts'}
+	      				problemi
+	      	  #{/secure.link}
+			  </td>
+		  #{/else}	  
+		#{/if}
+		#{else}
+		  <td></td>
+		  <td></td>
+		#{/else}
+		
+		      
+		    
 	  </tr>
 	#{/list}
 	</table>
+	#{/if}
 </div>
+
+<div id="modalCerts" class="modal container" tabindex="-1"></div>

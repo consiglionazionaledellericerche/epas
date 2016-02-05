@@ -72,7 +72,9 @@ public class PersonDayManager {
   }
 
   /**
-   * @return true se nel giorno vi e' una assenza giornaliera.
+   * Se nel giorno vi è una assenza giornaliera.
+   * 
+   * @return esito
    */
   public boolean isAllDayAbsences(PersonDay pd) {
 
@@ -91,8 +93,10 @@ public class PersonDayManager {
   }
 
   /**
-   * @return true se nel giorno c'è un'assenza oraria che giustifica una quantità oraria sufficiente
+   * Se nel giorno c'è un'assenza oraria che giustifica una quantità oraria sufficiente
    *     a decretare la persona "presente" a lavoro.
+   *  TODO: documentare meglio non si capisce.
+   * @return 
    */
   public boolean isEnoughHourlyAbsences(PersonDay pd) {
 
@@ -116,125 +120,129 @@ public class PersonDayManager {
 
   }
 
-
   /**
-   * True se la persona ha uno dei WorkingTime abilitati al buono pasto.
+   * Pulisce la parte di calcolo del tempo al lavoro.
    */
-  private boolean isTicketAvailableForWorkingTime(IWrapperPersonDay pd) {
-
-    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
-
-    if (pd.getWorkingTimeTypeDay().get().mealTicketEnabled()) {
-      return true;
-    }
-    return false;
+  private void cleanTimeAtWork(IWrapperPersonDay pd) {
+    
+    setTicketStatusIfNotForced(pd, false);
+    pd.getValue().stampModificationType = null;
+    pd.getValue().decurted = 0;
+    pd.getValue().stampingsTime = 0;
+    pd.getValue().justifiedTimeMeal = 0;
+    pd.getValue().justifiedTimeNoMeal = 0;
+    pd.getValue().timeAtWork = 0;
   }
-
+  
   /**
-   * Calcola i minuti lavorati nel person day. Assegna il campo isTicketAvailable. //FIXME: questo
-   * metodo per motivi di sicurezza non dovrebbe modificare il personDay. Ma dovrebbe esclusivamente
-   * fornire risultati. Creare un Message che contenga tutte le decisioni dell'algoritmo e delegare
-   * il chiamante alla modifica dei campi del person day.
+   * Calcolo del tempo a lavoro e del buono pasto.
    *
    * @return il numero di minuti trascorsi a lavoro
    */
-  public int getCalculatedTimeAtWork(IWrapperPersonDay pd) {
+  public IWrapperPersonDay updateTimeAtWork(IWrapperPersonDay pd) {
 
     Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
-    //Perche' in questa funzione si imposta a null lo stampModificationType ??
-    pd.getValue().stampModificationType = null;
 
-    int justifiedTimeAtWork = 0;
-
-    //Se hanno il tempo di lavoro fissato non calcolo niente
-    if (pd.isFixedTimeAtWork()) {
-
-      if (pd.getValue().isHoliday) {
-        return 0;
-      }
-      return pd.getWorkingTimeTypeDay().get().workingTime;
-    }
+    //Pulizia stato personDay.
+    cleanTimeAtWork(pd);
 
     for (Absence abs : pd.getValue().absences) {
 
+      // #######
+      // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
+      
       if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-        return pd.getWorkingTimeTypeDay().get().workingTime;
+        cleanTimeAtWork(pd);
+        pd.getValue().timeAtWork = pd.getWorkingTimeTypeDay().get().workingTime;
+        return pd;
       }
 
       //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
       if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
-        setIsTickeAvailable(pd, true);
-        return pd.getWorkingTimeTypeDay().get().workingTime;
+        cleanTimeAtWork(pd);
+        setTicketStatusIfNotForced(pd, true);
+        pd.getValue().timeAtWork = pd.getWorkingTimeTypeDay().get().workingTime;
+        return pd;
       }
 
       // Caso di assenza giornaliera.
       if (abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
           abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
-
-        setIsTickeAvailable(pd, false);
-        return 0;
+        cleanTimeAtWork(pd);
+        setTicketStatusIfNotForced(pd, false);
+        pd.getValue().timeAtWork = 0;
+        return pd;
       }
-
-      // Giustificativi grana minuti (priorità sugli altri casi)
+      
+      // #######
+      //  Assenze non giornaliere da cumulare ....
+      
+      // Giustificativi grana minuti (priorità sugli altri casi) Ex. PEPE
       if (abs.justifiedMinutes != null) {
-        justifiedTimeAtWork += abs.justifiedMinutes;
+        pd.getValue().justifiedTimeNoMeal += abs.justifiedMinutes;
         continue;
       }
 
+      // Giustificativi grana ore (discriminare per calcolo buono o no)
       if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
-
-        justifiedTimeAtWork += abs.absenceType.justifiedTimeAtWork.minutes;
+        if (abs.absenceType.justifiedTimeAtWork.mealTimeCounting) {
+          pd.getValue().justifiedTimeMeal += abs.absenceType.justifiedTimeAtWork.minutes;
+        } else {
+          pd.getValue().justifiedTimeNoMeal += abs.absenceType.justifiedTimeAtWork.minutes;  
+        }
         continue;
       }
+      
+      //Mezza giornata giustificata.
       if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
-
-        justifiedTimeAtWork += pd.getWorkingTimeTypeDay().get().workingTime / 2;
+        pd.getValue().justifiedTimeNoMeal += pd.getWorkingTimeTypeDay().get().workingTime / 2;
         continue;
       }
     }
+    
+    //Se hanno il tempo di lavoro fissato non calcolo niente
+    if (pd.isFixedTimeAtWork()) {
 
-    //se non c'è almeno una coppia di timbrature considero il justifiedTimeAtWork
-    //(che però non contribuisce all'attribuzione del buono che quindi è certamente non assegnato)
-    if (pd.getValue().stampings.size() < 2) {
-      setIsTickeAvailable(pd, false);
-      return justifiedTimeAtWork;
+      if (pd.getValue().isHoliday) {
+        return pd;
+      }
+      pd.getValue().timeAtWork = pd.getWorkingTimeTypeDay().get().workingTime;
+      return pd;
     }
 
     //Minuti derivanti dalle timbrature
-    int stampingMinutes = stampingMinutes(pd.getValue());
+    pd.getValue().stampingsTime += stampingMinutes(pd.getValue());
 
+    // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
+    pd.getValue().timeAtWork = pd.getValue().stampingsTime + pd.getValue().justifiedTimeMeal 
+        + pd.getValue().justifiedTimeNoMeal;
+    
+    // Se è festa ho finito ...
     if (pd.getValue().isHoliday) {
-      setIsTickeAvailable(pd, false);
-      return justifiedTimeAtWork + stampingMinutes;
+      setTicketStatusIfNotForced(pd, false);
+      return pd;
     }
 
-    //IL PRANZO E' SERVITOOOOO????
-
-    // Ticket non previsto dall'orario di lavoro.
-    WorkingTimeTypeDay wttd = pd.getWorkingTimeTypeDay().get();
-    if (!wttd.mealTicketEnabled()) {
-
-      setIsTickeAvailable(pd, false);
-      return stampingMinutes + justifiedTimeAtWork;
+    // Se il buono pasto non è previsto dall'orario ho finito ...
+    if (!pd.getWorkingTimeTypeDay().get().mealTicketEnabled()) {
+      setTicketStatusIfNotForced(pd, false);
+      return pd;
     }
-
-    // Calcolo ...
-
-    int minBreakTicketTime = wttd.breakTicketTime;    //30 minuti
-
-    List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
-    int effectiveTimeSpent = 0;
+    
+    // #######################################################################################
+    // IL PRANZO E' SERVITOOOOO????
+    // Questa parte determina se il buono pasto è ottenuto e la eventuale quantità decurtata
+    // dal tempo a lavoro.
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
-
-    // DA CONFIGURARE /////////////////////////////////////////////////////
+    List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
+    int effectiveTimeSpent = 0;
     boolean baessoAlgorithm = true;
     for (PairStamping lunchPair : gapLunchPairs) {
       if (lunchPair.prPair) {
         baessoAlgorithm = false;
       }
     }
-
     if (baessoAlgorithm) {
       if (gapLunchPairs.size() > 0) {
         // recupero la durata della pausa pranzo fatta
@@ -248,36 +256,36 @@ public class PersonDayManager {
         }
       }
     }
-    ///////////////////////////////////////////////////////////////////////
 
     //2) Calcolo l'eventuale differenza tra la pausa fatta e la pausa minima
+    int minBreakTicketTime = pd.getWorkingTimeTypeDay().get().breakTicketTime;    //30 minuti
     int missingTime = minBreakTicketTime - effectiveTimeSpent;
     if (missingTime < 0) {
       missingTime = 0;
     }
 
     //3) Decisioni
-
-    int mealTicketTime = wttd.mealTicketTime;            //6 ore
-
+    
+    int mealTicketTime = pd.getWorkingTimeTypeDay().get().mealTicketTime;            //6 ore
+    int mealTicketsMinutes = pd.getValue().stampingsTime + pd.getValue().justifiedTimeMeal;
+    
     // Non ho eseguito il tempo minimo per buono pasto.
-    if (stampingMinutes - missingTime < mealTicketTime) {
-      setIsTickeAvailable(pd, false);
-      return stampingMinutes + justifiedTimeAtWork;
-    }
-
-    // Calcolo tempo decurtato per pausa troppo breve.
-    int workingTimeDecurted = stampingMinutes;
-    if (missingTime > 0) {
-      workingTimeDecurted = stampingMinutes - missingTime;
+    if (mealTicketsMinutes - missingTime < mealTicketTime) {
+      setTicketStatusIfNotForced(pd, false);
+      return pd;
     }
 
     // Controllo pausa pomeridiana (solo se la soglia è definita)
     if (!isAfternoonThresholdConditionSatisfied(computeValidPairStampings(pd.getValue()),
         pd.getWorkingTimeTypeDay().get())) {
-
-      setIsTickeAvailable(pd, false);
-      return stampingMinutes + justifiedTimeAtWork;
+      setTicketStatusIfNotForced(pd, false);
+      return pd;
+    }
+    
+    // Calcolo tempo decurtato per pausa troppo breve.
+    int workingTimeDecurted = mealTicketsMinutes;
+    if (missingTime > 0) {
+      workingTimeDecurted = mealTicketsMinutes - missingTime;
     }
 
     // Decidere quando verrà il momento di fare i conti con gianvito...
@@ -289,33 +297,18 @@ public class PersonDayManager {
     //  return workTime + justifiedTimeAtWork;
     //}
 
-
+    // #########
     // IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    setIsTickeAvailable(pd, true);
-
-    // marcatori: versione p ed e
-    ////e
-    //if(effectiveTimeSpent > 0 && workingTimeDecurted < workTime) {
-    //  pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-    //    StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-    //}
-    ////p
-    //if(effectiveTimeSpent == 0) {
-    //  pd.getValue().stampModificationType = stampTypeManager.getStampMofificationType(
-    //    StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-    //}
-
-    // marcatori: versione con solo e salvataggio del tempo decurtato.
-    //e
+    setTicketStatusIfNotForced(pd, true);
     pd.getValue().decurted = null;
-    if (workingTimeDecurted < stampingMinutes) {
+    if (workingTimeDecurted < mealTicketsMinutes) {
 
       pd.getValue().decurted = missingTime;
     }
 
-    return workingTimeDecurted + justifiedTimeAtWork;
-
+    pd.getValue().timeAtWork = workingTimeDecurted + pd.getValue().justifiedTimeNoMeal;
+    return pd;
   }
 
   /**
@@ -407,91 +400,7 @@ public class PersonDayManager {
   }
 
 
-  /**
-   * FIXME: metodo usato in days per protime. Rimuoverlo e trovare una soluzione furba perchè non è
-   * più mantenuto. Calcola i minuti lavorati nel person day. Assegna il campo isTicketAvailable.
-   *
-   * @return il numero di minuti trascorsi a lavoro
-   */
-  @Deprecated
-  public int workingMinutes(IWrapperPersonDay pd) {
-
-    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
-
-    int workTime = 0;
-
-    // Se hanno il tempo di lavoro fissato non calcolo niente
-    if (pd.isFixedTimeAtWork()) {
-      return pd.getWorkingTimeTypeDay().get().workingTime;
-    }
-
-    if (!pd.getValue().isHoliday && pd.getValue().stampings.size() >= 2) {
-
-      Collections.sort(pd.getValue().stampings);
-
-      List<PairStamping> validPairs = computeValidPairStampings(pd.getValue());
-
-      for (PairStamping validPair : validPairs) {
-
-        workTime = workTime - DateUtility.toMinute(validPair.in.date);
-        workTime = workTime + DateUtility.toMinute(validPair.out.date);
-      }
-
-      // Il pranzo e' servito??
-      WorkingTimeTypeDay wttd = pd.getWorkingTimeTypeDay().get();
-
-      // se mealTicketTime è zero significa che il dipendente nel giorno
-      // non ha diritto al calcolo del buono pasto
-      if (!wttd.mealTicketEnabled()) {
-
-        setIsTickeAvailable(pd, false);
-        return workTime;
-      }
-
-      int mealTicketTime = wttd.mealTicketTime; // 6 ore
-      int breakTicketTime = wttd.breakTicketTime; // 30 minuti
-      int breakTimeDiff = breakTicketTime;
-      pd.getValue().stampModificationType = null;
-      List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
-
-      if (gapLunchPairs.size() > 0) {
-        // recupero la durata della pausa pranzo fatta
-        int minTimeForLunch = gapLunchPairs.get(0).timeInPair;
-        // Calcolo l'eventuale differenza tra la pausa fatta e la pausa
-        // minima
-        breakTimeDiff = (breakTicketTime - minTimeForLunch <= 0) ? 0
-            : (breakTicketTime - minTimeForLunch);
-      }
-
-      if (workTime - breakTimeDiff >= mealTicketTime) {
-
-        if (!pd.getValue().isTicketForcedByAdmin
-            || pd.getValue().isTicketForcedByAdmin
-            && pd.getValue().isTicketAvailable) {
-          workTime = workTime - breakTimeDiff;
-        }
-
-        // caso in cui non sia stata effettuata una pausa pranzo
-        if (breakTimeDiff == breakTicketTime) {
-
-          pd.getValue().stampModificationType =
-              stampTypeManager.getStampMofificationType(
-                  StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
-        } else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
-          // Caso in cui la pausa pranzo fatta è inferiore a quella minima
-
-          pd.getValue().stampModificationType =
-              stampTypeManager.getStampMofificationType(
-                  StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
-        }
-      }
-
-      setIsTickeAvailable(pd, false);
-
-    }
-
-    return workTime;
-  }
+  
 
   /**
    * 1) Setta il campo valid per ciascuna stamping del personDay (sulla base del loro valore al
@@ -589,14 +498,6 @@ public class PersonDayManager {
   }
 
   /**
-   * Assegna il numero di minuti in cui una persona è stata a lavoro in quella data.
-   */
-  public void updateTimeAtWork(IWrapperPersonDay pd) {
-
-    pd.getValue().timeAtWork = getCalculatedTimeAtWork(pd);
-  }
-
-  /**
    * Popola il campo difference del PersonDay.
    */
   public void updateDifference(IWrapperPersonDay pd) {
@@ -673,17 +574,31 @@ public class PersonDayManager {
 
     //caso persone normali
     pd.getValue().isTicketAvailable =
-        pd.getValue().isTicketAvailable && isTicketAvailableForWorkingTime(pd);
+        pd.getValue().isTicketAvailable && isTicketEnabledForWorkingTime(pd);
     return;
+  }
+  
+  /**
+   * True se la persona ha uno dei WorkingTime abilitati al buono pasto.
+   */
+  private boolean isTicketEnabledForWorkingTime(IWrapperPersonDay pd) {
+
+    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
+
+    if (pd.getWorkingTimeTypeDay().get().mealTicketEnabled()) {
+      return true;
+    }
+    return false;
   }
 
   /**
    * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false.
+   * @param pd
+   * @param isTicketAvailable
    */
-  public void setIsTickeAvailable(IWrapperPersonDay pd, boolean isTicketAvailable) {
+  public void setTicketStatusIfNotForced(IWrapperPersonDay pd, boolean isTicketAvailable) {
 
     if (!pd.getValue().isTicketForcedByAdmin) {
-
       pd.getValue().isTicketAvailable = isTicketAvailable;
     }
   }
@@ -1258,6 +1173,92 @@ public class PersonDayManager {
             return !input.valid;
           }
         }).isEmpty();
+  }
+  
+  /**
+   * FIXME: metodo usato in days per protime. Rimuoverlo e trovare una soluzione furba perchè non è
+   * più mantenuto. Calcola i minuti lavorati nel person day. Assegna il campo isTicketAvailable.
+   *
+   * @return il numero di minuti trascorsi a lavoro
+   */
+  @Deprecated
+  public int workingMinutes(IWrapperPersonDay pd) {
+
+    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
+
+    int workTime = 0;
+
+    // Se hanno il tempo di lavoro fissato non calcolo niente
+    if (pd.isFixedTimeAtWork()) {
+      return pd.getWorkingTimeTypeDay().get().workingTime;
+    }
+
+    if (!pd.getValue().isHoliday && pd.getValue().stampings.size() >= 2) {
+
+      Collections.sort(pd.getValue().stampings);
+
+      List<PairStamping> validPairs = computeValidPairStampings(pd.getValue());
+
+      for (PairStamping validPair : validPairs) {
+
+        workTime = workTime - DateUtility.toMinute(validPair.in.date);
+        workTime = workTime + DateUtility.toMinute(validPair.out.date);
+      }
+
+      // Il pranzo e' servito??
+      WorkingTimeTypeDay wttd = pd.getWorkingTimeTypeDay().get();
+
+      // se mealTicketTime è zero significa che il dipendente nel giorno
+      // non ha diritto al calcolo del buono pasto
+      if (!wttd.mealTicketEnabled()) {
+
+        setTicketStatusIfNotForced(pd, false);
+        return workTime;
+      }
+
+      int mealTicketTime = wttd.mealTicketTime; // 6 ore
+      int breakTicketTime = wttd.breakTicketTime; // 30 minuti
+      int breakTimeDiff = breakTicketTime;
+      pd.getValue().stampModificationType = null;
+      List<PairStamping> gapLunchPairs = getGapLunchPairs(pd.getValue());
+
+      if (gapLunchPairs.size() > 0) {
+        // recupero la durata della pausa pranzo fatta
+        int minTimeForLunch = gapLunchPairs.get(0).timeInPair;
+        // Calcolo l'eventuale differenza tra la pausa fatta e la pausa
+        // minima
+        breakTimeDiff = (breakTicketTime - minTimeForLunch <= 0) ? 0
+            : (breakTicketTime - minTimeForLunch);
+      }
+
+      if (workTime - breakTimeDiff >= mealTicketTime) {
+
+        if (!pd.getValue().isTicketForcedByAdmin
+            || pd.getValue().isTicketForcedByAdmin
+            && pd.getValue().isTicketAvailable) {
+          workTime = workTime - breakTimeDiff;
+        }
+
+        // caso in cui non sia stata effettuata una pausa pranzo
+        if (breakTimeDiff == breakTicketTime) {
+
+          pd.getValue().stampModificationType =
+              stampTypeManager.getStampMofificationType(
+                  StampModificationTypeCode.FOR_DAILY_LUNCH_TIME);
+        } else if (breakTimeDiff > 0 && breakTimeDiff != breakTicketTime) {
+          // Caso in cui la pausa pranzo fatta è inferiore a quella minima
+
+          pd.getValue().stampModificationType =
+              stampTypeManager.getStampMofificationType(
+                  StampModificationTypeCode.FOR_MIN_LUNCH_TIME);
+        }
+      }
+
+      setTicketStatusIfNotForced(pd, false);
+
+    }
+
+    return workTime;
   }
 
 }

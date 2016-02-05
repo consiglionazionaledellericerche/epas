@@ -450,18 +450,32 @@ public class UploadSituation extends Controller {
    * 
    * @param officeId sede
    */
-  public static void checkData(Long officeId, Integer year, Integer month) 
-      throws MalformedURLException, URISyntaxException {
+  public static void checkData(Long officeId, Integer year, Integer month) { 
+    
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
         
+    IWrapperOffice wrOffice = factory.create(office);
+    render(wrOffice, year, month);
+  
+  }
+  
+  public static void performCheckData(Office office, Integer year, Integer month)
+    throws MalformedURLException, URISyntaxException {
+
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+        
+    IWrapperOffice wrOffice = factory.create(office);
     Set<Dipendente> people = attestatiClient.officeActivePeopleAsDipendente(office, year, month);
-    
+
     List<RispostaElaboraDati> results = attestatiClient.elaboraDatiDipendenti(
         Optional.<SessionAttestati>absent(), Lists.newArrayList(people), year, month);
-
-    render(results, office, year, month);  
+    
+    IWrapperFactory wrapper = factory;
+    render("@checkData", results, wrOffice, year, month, wrapper);
+      
   }
 
   private static void memAttestatiIntoCache(
