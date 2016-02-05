@@ -1151,8 +1151,8 @@ public class PersonDayManager {
 
   /**
    * Se le stampings nel giorno sono tutte valide.
-   * @param personDay
-   * @return 
+   * @param personDay personDay
+   * @return esito
    */
   private boolean allValidStampings(PersonDay personDay) {
 
