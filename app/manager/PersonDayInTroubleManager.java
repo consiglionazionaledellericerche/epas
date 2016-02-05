@@ -4,8 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
@@ -154,7 +153,7 @@ public class PersonDayInTroubleManager {
         continue;
       }
       
-      if (confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, person.office)) {
+      if (!confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, person.office)) {
         log.info("Non verrà inviata la mail a {} in quanto "
             + "la sua sede {} ha invio mail disabilitato",
             person.getFullname(), person.office.name);

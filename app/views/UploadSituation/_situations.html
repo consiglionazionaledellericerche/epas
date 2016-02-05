@@ -1,0 +1,159 @@
+	
+  #{panel title:'Caricamento Attestati'}
+  <h4>Caricamento Attestati &{'views.tags.display.date.month.' + sessionAttestati.month} 
+    ${sessionAttestati.year} - Dipendenti ${wrOffice.value.name}
+  </h4>
+  <br>
+  #{if dipendenteComparedRecap.validDipendenti.empty}
+    <p> Per la sede selezionata <strong>${wrOffice.value.name}</strong> non sono è stato individuato
+    nessun dipendente inserito in entrambe le liste considerate.</p>
+  #{/if}
+  #{else}
+      <div class="pull-right">
+      #{form @processAllPersons(), class:'form-horizontal'}
+		  <input type="hidden" name="year" value="${sessionAttestati.year}" />
+		  <input type="hidden" name="month" value="${sessionAttestati.month}" />
+		  <input type="hidden" name="office.id" value="${wrOffice.value.id}" />
+		  <button type="submit" class="btn btn-warning"/>
+		  <span class="glyphicon glyphicon-fire"></span>Carica Tutti</button> 
+	  #{/form}
+	  </div>
+      <table class="table table-condensed table-bordered">
+		  <tr>
+		    <th>Matricola</th>
+		    <th>Nome Cognome</th>
+		    <th>Esito</th>
+		    <th>Dati<br>elaborati</th>
+		    <th>Problemi<br>Elaborazione</th>
+		    <th>Elabora singolo<br>dipendente</th>
+		  </tr>
+		  
+		  #{list items:dipendenteComparedRecap.validDipendenti, as:'dipendente'}
+		  
+		    %{ wrPerson = wrapper.create(dipendente.person); }%
+		   <tr>
+		    
+		      <td>${dipendente.matricola}</td>
+		      <td>${dipendente.cognomeNome}</td>
+		      
+		      <!-- Non ancora elaborato -->
+		      #{if wrPerson.getCertificatedData(sessionAttestati.year, sessionAttestati.month) == null}
+		           #{if dipendentiNonInCNR.contains(dipendente)}
+		             <td>Non in CNR</td>
+		             <td></td>
+		             <td></td>
+		             <td></td>
+		           #{/if}
+		           #{else}
+		             <td>Non ancora caricato</td>
+		             <td></td>
+		             <td></td>
+		           #{/else}
+		      #{/if}
+		      
+		      <!-- Già elaborato -->
+		      #{else}
+		        <!-- esito -->
+		        
+		        #{if wrPerson.getCertificatedData(sessionAttestati.year, sessionAttestati.month).isOk }
+		           <td class="success"><span class="glyphicon glyphicon-ok" style="color: green;"></span></td>
+		        #{/if}
+		        #{else}
+		           <td class="danger"><span class="glyphicon glyphicon-remove" style="color: red;"></span></td>   
+		        #{/else}
+		        
+		        
+		        <!-- dati elaborati -->
+		        <td>
+		          #{if wrPerson.getCertificatedData(sessionAttestati.year, sessionAttestati.month) != null}
+		            #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(sessionAttestati.year, sessionAttestati.month).id), modal:'#modalCerts'}
+      				  dati
+      			    #{/secure.link}
+		          #{/if}
+		        </td>
+		        <!-- problemi -->
+		        <td>
+		        #{if wrPerson.getCertificatedData(sessionAttestati.year, sessionAttestati.month).problems != null}
+		          #{secure.link @UploadSituation.showProblems(wrPerson.getCertificatedData(sessionAttestati.year, sessionAttestati.month).id), modal:'#modalCerts'}
+      				problemi
+      			  #{/secure.link}
+		        #{/if}
+		        </td>
+		      #{/else}  
+		        <!-- elabora singolo -->
+		        <td>
+		          <a href="@{UploadSituation.processSinglePerson(wrOffice.value.id, dipendente.getMatricola(), 
+		          sessionAttestati.year, sessionAttestati.month)}">
+		            <span class="glyphicon glyphicon-cog"></span>Carica
+		          </a>
+		        </td>
+		       
+		 
+		    </tr>  
+		  #{/list}
+		</table>
+	#{/else}
+	#{/panel}	
+	
+	#{panel title:'Elenco dei Dipendenti da verificare'}
+      #{if !dipendenteComparedRecap.notInEpasDipendenti.empty 
+             || !dipendenteComparedRecap.notInCnrDipendenti.empty}
+        <p>Per la sede selezionata <strong>${wrOffice.value.name}</strong> e il mese selezionato 
+  	    <strong>&{'views.tags.display.date.month.' + sessionAttestati.month} 
+        ${sessionAttestati.year}</strong> le liste dipendenti ePAS e Attestati CNR non corrispondono perfettamente.</p>
+          <p>
+          Affinchè vi sia matching fra le due liste occorre una corrispondenza esatta di:<br>
+          <strong>Matricola del dipendente</strong><br>
+          <strong>Cognome e Nome del dipendente</strong><p>
+          
+          <p>Per i dipendenti di cui si vuole caricare gli attestati correggere matricola e nome in modo che venga effettuato il matching 
+          tra le due liste, poi sincronizzare nuovamente le liste.<br>
+          
+        </p>
+        
+        #{form @UploadSituation.fetchData(), class:'form-horizontal'}
+    		#{f.hidden 'office.id', value:wrOffice.value.id /}
+    		#{f.hidden 'changeMonth', value:true /}
+			#{f.hidden 'year', value:sessionAttestati.year /}
+			#{f.hidden 'month', value:sessionAttestati.month /}
+ 			#{b.buttons center:'true'}
+ 			  <button type="submit" class="btn btn-primary"/>Sincronizza Liste</button> 
+    		#{/b.buttons}
+          #{/form}
+		
+	    <p><strong>Dipendenti in Attestati CNR non trovati in EPAS</strong></p>
+		<table class="table table-condensed">
+				  <tr>
+				    <th>Matricola</th>
+				    <th>Nome Cognome</th>
+				  </tr>
+				  #{list items:dipendenteComparedRecap.notInEpasDipendenti, as:'dipendente'}
+				    <tr>
+				      <td>${dipendente.matricola}</td>
+				      <td>${dipendente.cognomeNome}</td>
+				    </tr> 
+				  #{/list}
+				</table>
+		<p><strong>Dipendenti in EPAS non trovati in Attestati CNR</strong></p>
+		<table class="table table-condensed">
+				  <tr>
+				    <th>Matricola</th>
+				    <th>Nome Cognome</th>
+				  </tr>
+				  #{list items:dipendenteComparedRecap.notInCnrDipendenti, as:'dipendente'}
+				    <tr>
+				      <td>${dipendente.matricola}</td>
+				      <td>${dipendente.cognomeNome}</td>
+				    </tr> 
+				  #{/list}
+  	   </table>
+  	 #{/if}
+  	 #{else}
+  	 <p>Per la sede selezionata <strong>${wrOffice.value.name}</strong> e il mese selezionato 
+  	 <strong>&{'views.tags.display.date.month.' + sessionAttestati.month} 
+    ${sessionAttestati.year}</strong> le liste dipendenti ePAS e 
+  	 Attestati CNR corrispondono perfettamente.
+  	 #{/else}  
+   #{/panel}
+
+<div id="modalCerts" class="modal container" tabindex="-1"></div>
