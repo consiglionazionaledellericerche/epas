@@ -90,6 +90,11 @@ public class Charts extends Controller {
   }
 
 
+  /**
+   * metodo che ritorna il template degli straordinari calcolati sulle ore positive 
+   * di residuo nell'anno.
+   * @param year l'anno di riferimento
+   */
   public static void overtimeOnPositiveResidualInYear(Integer year) {
 
     rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -161,6 +166,10 @@ public class Charts extends Controller {
   }
 
 
+  /**
+   * restituisce la lista delle assenze che combaciano e no rispetto allo schedone.
+   * @param file il file dello schedone
+   */
   public static void processLastYearAbsences(Blob file) {
 
     rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -172,6 +181,9 @@ public class Charts extends Controller {
     render(listTrueFalse, listNull);
   }
 
+  /**
+   * esporta le ore e gli straordinari.
+   */
   public static void exportHourAndOvertime() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
     List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
@@ -179,6 +191,12 @@ public class Charts extends Controller {
     render(annoList);
   }
 
+  /**
+   * metodo che compone il file .csv contenente, per ogni persona, le ore in più, gli straordinari 
+   * e i riposi compensativi suddivisi per mese nell'anno passato come parametro.
+   * @param year l'anno di riferimento
+   * @throws IOException eccezione in formazione del file 
+   */
   public static void export(Integer year) throws IOException {
     rules.checkIfPermitted(Security.getUser().get().person.office);
 
@@ -192,6 +210,10 @@ public class Charts extends Controller {
     renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi" + year + ".csv");
   }
 
+  /**
+   * metodo che renderizza il template per la lista delle persone di cui si può chiedere
+   * l'esportazione della situazione finale in termini di residuo/assenze...
+   */
   public static void exportFinalSituation() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
     Set<Office> offices = Sets.newHashSet();
@@ -204,6 +226,11 @@ public class Charts extends Controller {
     render(personList);
   }
 
+  /**
+   * genera il file .csv contenente le informazioni finali della persona richiesta.
+   * @param personId l'id della persona di cui si vogliono le informazioni
+   * @throws IOException eventuale eccezione generata dalla creazione del file
+   */
   public static void exportDataSituation(Long personId) throws IOException {
     rules.checkIfPermitted(Security.getUser().get().person.office);
 

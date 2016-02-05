@@ -49,16 +49,34 @@ public class PersonDay extends BaseModel {
   public LocalDate date;
 
   @Column(name = "time_at_work")
-  public Integer timeAtWork;
+  public Integer timeAtWork = 0; 
+  
+  /**
+   * Tempo all'interno di timbrature valide.
+   */
+  @Column(name = "stamping_time")
+  public Integer stampingsTime = 0;
+  
+  /**
+   * Tempo giustificato da assenze che non contribuiscono al tempo per buono pasto.
+   */
+  @Column(name = "justified_time_no_meal")
+  public Integer justifiedTimeNoMeal = 0;
+  
+  /**
+   * Tempo giustificato da assenze che contribuiscono al tempo per buono pasto.
+   */
+  @Column(name = "justified_time_meal")
+  public Integer justifiedTimeMeal = 0;
 
-  public Integer difference;
+  public Integer difference = 0;
 
-  public Integer progressive;
+  public Integer progressive = 0;
 
   /**
    * Minuti tolti per pausa pranzo breve.
    */
-  public Integer decurted;
+  public Integer decurted = 0;
 
   @Column(name = "is_ticket_available")
   public boolean isTicketAvailable = true;

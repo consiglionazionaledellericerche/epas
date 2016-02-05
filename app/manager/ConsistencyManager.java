@@ -331,7 +331,7 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setIsTickeAvailable(pd, false);
+      personDayManager.setTicketStatusIfNotForced(pd, false);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
@@ -346,7 +346,7 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setIsTickeAvailable(pd, false);
+      personDayManager.setTicketStatusIfNotForced(pd, false);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
