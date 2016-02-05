@@ -361,7 +361,31 @@ public class ConsistencyManager {
 
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
-    personDayManager.updateTimeAtWork(pd, pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
+    Integer mealTimeStartHour = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.getValue().person.office);
+    Integer mealTimeStartMinute = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.getValue().person.office);
+    Integer mealTimeEndHour = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
+    Integer mealTimeEndMinute = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
+    LocalDateTime startLunch = new LocalDateTime()
+        .withYear(pd.getValue().date.getYear())
+        .withMonthOfYear(pd.getValue().date.getMonthOfYear())
+        .withDayOfMonth(pd.getValue().date.getDayOfMonth())
+        .withHourOfDay(mealTimeStartHour)
+        .withMinuteOfHour(mealTimeStartMinute);
+
+    LocalDateTime endLunch = new LocalDateTime()
+        .withYear(pd.getValue().date.getYear())
+        .withMonthOfYear(pd.getValue().date.getMonthOfYear())
+        .withDayOfMonth(pd.getValue().date.getDayOfMonth())
+        .withHourOfDay(mealTimeEndHour)
+        .withMinuteOfHour(mealTimeEndMinute);
+    
+    
+    personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork(), startLunch, endLunch);
 
     personDayManager.updateDifference(pd);
 
