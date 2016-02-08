@@ -1,4 +1,4 @@
-package manager;
+package manager.services;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -19,12 +19,12 @@ public class PairStamping {
   public Stamping in;
   public Stamping out;
   
-  int timeInPair = 0;
+  public int timeInPair = 0;
 
   /**
    * Coppia di timbrature per pranzo. CNR centrale.
    */
-  boolean prPair = false;
+  public boolean prPair = false;
   
   /**
    * Costruisce la coppia di timbrature.
