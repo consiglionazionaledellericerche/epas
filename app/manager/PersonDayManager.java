@@ -25,7 +25,6 @@ import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonShiftDay;
-import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
@@ -142,7 +141,6 @@ public class PersonDayManager {
   }
   
   
-
   /**
    * La condizione del lavoro minimo pomeridiano è soddisfatta?.
    */

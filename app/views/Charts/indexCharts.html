@@ -1,17 +1,10 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Grafici' /}
-<div id="container-fluid-nav-tabs" class="container-fluid">
 
 
-<ul class="nav nav-tabs">
-  <li class="active"><a href="@{Charts.indexCharts()}">Grafici</a></li>
-  <li><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
-  <li><a href="@{Charts.exportHourAndOvertime()}">Esportazione ore in più e di straordinario</a></li>
-  <li><a href="@{Charts.exportFinalSituation()}">Esportazione informazioni finali di un dipendente</a></li>
-</ul>
+#{charts.chartsTabs activeAction:'indexCharts' /}
 
-</div>
 <div class="container">
 
 <div class="panel panel-primary">
