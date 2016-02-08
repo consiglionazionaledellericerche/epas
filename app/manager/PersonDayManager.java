@@ -37,6 +37,7 @@ import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -157,8 +158,8 @@ public class PersonDayManager {
 
     for (PairStamping pair : validPairs) {
 
-      int inMinute = DateUtility.toMinute(pair.in.date);
-      int outMinute = DateUtility.toMinute(pair.out.date);
+      int inMinute = DateUtility.toMinute(pair.first.date);
+      int outMinute = DateUtility.toMinute(pair.second.date);
 
       if (inMinute <= threshold && outMinute >= threshold) {
         workingTimeInThreshold += outMinute - threshold;
@@ -244,8 +245,8 @@ public class PersonDayManager {
    * @param endLunch fine fascia pranzo istituto
    * @return la lista delle pause pranzo
    */
-  private List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalDateTime startLunch, 
-      LocalDateTime endLunch) {
+  public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch, 
+      LocalTime endLunch) {
 
     List<PairStamping> validPairs = computeValidPairStampings(personDay);
 
@@ -254,13 +255,17 @@ public class PersonDayManager {
     //1) Calcolare tutte le gapPair
     Stamping outForLunch = null;
     for (PairStamping validPair : validPairs) {
-      if (validPair.out.stampType == null
-          || StampTypes.PAUSA_PRANZO.equals(validPair.out.stampType)) {
+      if (validPair.second.stampType == null
+          || StampTypes.PAUSA_PRANZO.equals(validPair.second.stampType)) {
         if (outForLunch == null) {
-          outForLunch = validPair.out;
+          outForLunch = validPair.second;
         } else {
-          allGapPairs.add(new PairStamping(outForLunch, validPair.in));
-          outForLunch = validPair.out;
+          //validPair.first non dovrebbe avere causali diverse da pausa pranzo
+          if (validPair.first.stampType == null
+              || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType)) {
+            allGapPairs.add(new PairStamping(outForLunch, validPair.first));
+            outForLunch = validPair.second;
+          }
         }
       }
     }
@@ -269,30 +274,33 @@ public class PersonDayManager {
     // nel calcolo del tempo limare gli estremi a tale fascia se necessario
     List<PairStamping> gapPairs = Lists.newArrayList();
     for (PairStamping gapPair : allGapPairs) {
-      LocalDateTime out = gapPair.out.date;
-      LocalDateTime in = gapPair.in.date;
-      boolean isInIntoMealTime = in.isAfter(startLunch.minusMinutes(1))
-          && in.isBefore(endLunch.plusMinutes(1));
-      boolean isOutIntoMealTime = out.isAfter(startLunch.minusMinutes(1))
-          && out.isBefore(endLunch.plusMinutes(1));
-
-      if (isInIntoMealTime || isOutIntoMealTime || (!isInIntoMealTime && !isOutIntoMealTime)) {
-        LocalDateTime inForCompute = gapPair.in.date;
-        LocalDateTime outForCompute = gapPair.out.date;
-        if (!isInIntoMealTime) {
-          inForCompute = startLunch;
+      LocalTime first = gapPair.first.date.toLocalTime();
+      LocalTime second = gapPair.second.date.toLocalTime();
+      
+      boolean isInIntoMealTime = !first.isBefore(startLunch) && !first.isAfter(endLunch);
+      boolean isOutIntoMealTime = !second.isBefore(startLunch) && !second.isAfter(endLunch);
+      
+      if (!isInIntoMealTime && !isOutIntoMealTime) {
+        if (second.isBefore(startLunch) || first.isAfter(endLunch)) {
+          continue;
         }
-        if (!isOutIntoMealTime) {
-          outForCompute = endLunch;
-        }
-        int timeInPair = 0;
-        timeInPair = timeInPair - DateUtility.toMinute(inForCompute);
-        timeInPair = timeInPair + DateUtility.toMinute(outForCompute);
-        gapPair.timeInPair = timeInPair;
-        gapPairs.add(gapPair);
       }
+      
+      LocalTime inForCompute = gapPair.first.date.toLocalTime();
+      LocalTime outForCompute = gapPair.second.date.toLocalTime();
+      if (!isInIntoMealTime) {
+        inForCompute = startLunch;
+      }
+      if (!isOutIntoMealTime) {
+        outForCompute = endLunch;
+      }
+      int timeInPair = 0;
+      timeInPair = timeInPair - DateUtility.toMinute(inForCompute);
+      timeInPair = timeInPair + DateUtility.toMinute(outForCompute);
+      gapPair.timeInPair = timeInPair;
+      gapPairs.add(gapPair);
     }
-
+    
     return gapPairs;
   }
   
@@ -303,7 +311,7 @@ public class PersonDayManager {
    * @return oggetto modificato.
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd, 
-      boolean fixedTimeAtWork, LocalDateTime startLunch, LocalDateTime endLunch) {
+      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch) {
     
     // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
@@ -594,17 +602,11 @@ public class PersonDayManager {
         .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
     Integer mealTimeEndMinute = confGeneralManager
         .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
-    LocalDateTime startLunch = new LocalDateTime()
-        .withYear(pd.getValue().date.getYear())
-        .withMonthOfYear(pd.getValue().date.getMonthOfYear())
-        .withDayOfMonth(pd.getValue().date.getDayOfMonth())
+    LocalTime startLunch = new LocalTime()
         .withHourOfDay(mealTimeStartHour)
         .withMinuteOfHour(mealTimeStartMinute);
 
-    LocalDateTime endLunch = new LocalDateTime()
-        .withYear(pd.getValue().date.getYear())
-        .withMonthOfYear(pd.getValue().date.getMonthOfYear())
-        .withDayOfMonth(pd.getValue().date.getDayOfMonth())
+    LocalTime endLunch = new LocalTime()
         .withHourOfDay(mealTimeEndHour)
         .withMinuteOfHour(mealTimeEndMinute);
     
@@ -840,9 +842,7 @@ public class PersonDayManager {
 
     //Lavoro su una copia ordinata.
     List<Stamping> stampings = Lists.newArrayList();
-    for (Stamping stamping : personDay.getStampings()) {
-      stampings.add(stamping);
-    }
+    stampings.addAll(personDay.getStampings());
     Collections.sort(stampings);
 
     //(1)Costruisco le coppie valide per calcolare il worktime
@@ -896,8 +896,8 @@ public class PersonDayManager {
     for (Stamping stamping : serviceStampings) {
       boolean belongToValidPair = false;
       for (PairStamping validPair : validPairs) {
-        LocalDateTime outTime = validPair.out.date;
-        LocalDateTime inTime = validPair.in.date;
+        LocalDateTime outTime = validPair.second.date;
+        LocalDateTime inTime = validPair.first.date;
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
           belongToValidPair = true;
           break;
@@ -912,8 +912,8 @@ public class PersonDayManager {
 
     //(3)aggrego le stamping di servizio per coppie valide ed eseguo il check di sequenza valida
     for (PairStamping validPair : validPairs) {
-      LocalDateTime outTime = validPair.out.date;
-      LocalDateTime inTime = validPair.in.date;
+      LocalDateTime outTime = validPair.second.date;
+      LocalDateTime inTime = validPair.first.date;
       List<Stamping> serviceStampingsInSinglePair = Lists.newArrayList();
       for (Stamping stamping : serviceStampingsInValidPair) {
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
