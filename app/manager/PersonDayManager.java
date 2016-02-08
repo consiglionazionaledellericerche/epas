@@ -18,6 +18,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.cache.StampTypeManager;
+import manager.services.PairStamping;
 
 import models.Absence;
 import models.Contract;
