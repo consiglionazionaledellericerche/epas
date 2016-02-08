@@ -244,10 +244,12 @@ public class PersonStampingDayRecap {
           this.ignoreDay = true;
         }
 
-        // se è precedente a source lo ignoro
+        // Tutti i giorni precedenti alla creazione della persona o all'inizializzazione del contratto
+        // Sono da ignorare
         if (contract.sourceDateResidual != null
             && (contract.sourceDateResidual.equals(pd.date)
-            || contract.sourceDateResidual.isAfter(pd.date))) {
+            || contract.sourceDateResidual.isAfter(pd.date))
+            || person.createdAt.toLocalDate().isAfter(pd.date)) {
           this.ignoreDay = true;
         }
 
@@ -273,6 +275,14 @@ public class PersonStampingDayRecap {
    */
   private void setMealTicket(boolean mealTicket, boolean todayInProgress) {
 
+    if (this.ignoreDay) {
+      this.mealTicket = MEALTICKET_EMPTY;
+      return;
+    }
+    if (this.holiday) {
+      this.mealTicket = MEALTICKET_EMPTY;
+      return;
+    }
     // GIORNI FUTURI
     if (this.future) {
       if (!this.absences.isEmpty()) {
@@ -282,12 +292,6 @@ public class PersonStampingDayRecap {
       }
       return;
     }
-
-    if (this.holiday) {
-      this.mealTicket = MEALTICKET_EMPTY;
-      return;
-    }
-
     // Giorni Passati e giorno attuale
     if (!mealTicket) {
       if (todayInProgress) {
@@ -298,7 +302,6 @@ public class PersonStampingDayRecap {
     } else {
       this.mealTicket = MEALTICKET_YES;
     }
-
   }
 
   /**
