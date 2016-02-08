@@ -240,7 +240,6 @@ public class PersonDayManager {
    * ricomputare il timeInPair della coppia assumendo la timbratura al di fuori della fascia uguale 
    * al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali per garantire 
    * l'usabilità anche ai controller che gestiscono reperibilità e turni).<br>
-   * // FIXME: #163 #174
    * @param personDay personDay
    * @param startLunch inizio fascia pranzo istituto
    * @param endLunch fine fascia pranzo istituto
@@ -278,7 +277,7 @@ public class PersonDayManager {
       boolean isOutIntoMealTime = out.isAfter(startLunch.minusMinutes(1))
           && out.isBefore(endLunch.plusMinutes(1));
 
-      if (isInIntoMealTime || isOutIntoMealTime) {
+      if (isInIntoMealTime || isOutIntoMealTime || (!isInIntoMealTime && !isOutIntoMealTime)) {
         LocalDateTime inForCompute = gapPair.in.date;
         LocalDateTime outForCompute = gapPair.out.date;
         if (!isInIntoMealTime) {
