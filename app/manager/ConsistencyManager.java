@@ -35,6 +35,7 @@ import models.enumerate.Troubles;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -369,20 +370,13 @@ public class ConsistencyManager {
         .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
     Integer mealTimeEndMinute = confGeneralManager
         .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
-    LocalDateTime startLunch = new LocalDateTime()
-        .withYear(pd.getValue().date.getYear())
-        .withMonthOfYear(pd.getValue().date.getMonthOfYear())
-        .withDayOfMonth(pd.getValue().date.getDayOfMonth())
+    LocalTime startLunch = new LocalTime()
         .withHourOfDay(mealTimeStartHour)
         .withMinuteOfHour(mealTimeStartMinute);
 
-    LocalDateTime endLunch = new LocalDateTime()
-        .withYear(pd.getValue().date.getYear())
-        .withMonthOfYear(pd.getValue().date.getMonthOfYear())
-        .withDayOfMonth(pd.getValue().date.getDayOfMonth())
+    LocalTime endLunch = new LocalTime()
         .withHourOfDay(mealTimeEndHour)
         .withMinuteOfHour(mealTimeEndMinute);
-    
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
         pd.isFixedTimeAtWork(), startLunch, endLunch);

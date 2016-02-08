@@ -344,6 +344,16 @@ public class DateUtility {
    * @return il numero di minuti trascorsi dall'inizio del giorno all'ora.
    */
   public static int toMinute(final LocalDateTime time) {
+    return toMinute(time.toLocalTime());
+  }
+  
+  
+  /**
+   * Il tempo dalla mezzanotte. 
+   * @param time orario
+   * @return tempo
+   */
+  public static int toMinute(final LocalTime time) {
     int dateToMinute = 0;
     if (time != null) {
       int hour = time.get(DateTimeFieldType.hourOfDay());
