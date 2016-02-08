@@ -65,7 +65,7 @@ public class PersonDaysTest {
   }
   
   /**
-   * Test su un giorno Normale.
+   * Quando la pausa pranzo contiene interamente la fascia pranzo dell'istituto va conteggiata.
    */
   @Test
   public void tagliaferriIsHungry() {
@@ -105,6 +105,18 @@ public class PersonDaysTest {
     //assertThat(personDay.getDifference()).isEqualTo(-42);
     //assertThat(personDay.getProgressive()).isEqualTo(18);
     assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    
+  }
+  
+  /**
+   * Le pause pranzo da considerare sono tutte quelle che hanno:
+   * Uscita pr Ingresso pr
+   * Uscita pr Ingresso 
+   * Uscita    Ingrssso pr
+   * Uscita    Ingresso    (e sono in istituto non di servizio) 
+   */
+  @Test
+  public void consideredGapLunchPairs() { 
     
   }
   

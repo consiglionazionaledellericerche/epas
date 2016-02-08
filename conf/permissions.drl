@@ -565,6 +565,7 @@ when
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
         "UploadSituation.checkData",
+        "UploadSituation.performCheckData",
         
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
@@ -688,6 +689,7 @@ when
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
         "UploadSituation.checkData",
+        "UploadSituation.performCheckData",
         
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",

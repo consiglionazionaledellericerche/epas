@@ -123,7 +123,7 @@ public class MealTickets extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+    rules.checkIfPermitted(office);
     List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
             .getPersonMealticket(new YearMonth(year, month), Optional.<Integer>absent(), 
                 Optional.<String>absent(), Sets.newHashSet(office));
