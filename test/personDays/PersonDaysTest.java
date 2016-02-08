@@ -65,6 +65,50 @@ public class PersonDaysTest {
   }
   
   /**
+   * Test su un giorno Normale.
+   */
+  @Test
+  public void tagliaferriIsHungry() {
+    
+    // TODO: fare il test di tagliaferri issue #163
+    LocalDateTime startLunch = new LocalDateTime()
+        .withHourOfDay(12)
+        .withMinuteOfHour(0);
+    
+    LocalDateTime endLunch = new LocalDateTime()
+        .withHourOfDay(15)
+        .withMinuteOfHour(0);
+    
+    //PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
+    PersonDay personDay = new PersonDay(null, second);
+    
+    List<Stamping> stampings = Lists.newArrayList();
+    stampings.add(stampings(personDay, 8, 30, WayType.in, null));
+    stampings.add(stampings(personDay, 11, 30, WayType.out, null));
+    
+    stampings.add(stampings(personDay, 15, 30, WayType.in, null));
+    stampings.add(stampings(personDay, 19, 30, WayType.out, null));
+    
+    personDay.setStampings(stampings);
+    
+    PersonDayManager personDayManager = new PersonDayManager(
+        null, null, null, null, null, null, null);
+    
+    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch);
+    //personDayManager.updateDifference(personDay, normalDay(), false);
+    //personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
+    personDayManager.updateTicketAvailable(personDay, normalDay(), false);
+    
+    assertThat(personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
+    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    assertThat(personDay.getDecurted()).isEqualTo(null);      //00 minuti
+    //assertThat(personDay.getDifference()).isEqualTo(-42);
+    //assertThat(personDay.getProgressive()).isEqualTo(18);
+    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    
+  }
+  
+  /**
    * Supporto alla creazione di un WorkingTimeType da non mockare.
    * @return
    */
