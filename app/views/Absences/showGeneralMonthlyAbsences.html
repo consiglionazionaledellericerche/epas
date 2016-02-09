@@ -35,7 +35,7 @@
             <tbody>
             	#{list tableMonthlyAbsences.rowMap().entrySet(),as:'entry'}
 				<tr>
-					<td class="warning">${entry.getKey().name} ${entry.getKey().surname}</td>
+					<td class="warning">${entry.getKey().surname} ${entry.getKey().name}</td>
 					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
 						<td data-order="${entry.getValue().get(col)}">
 							<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}"

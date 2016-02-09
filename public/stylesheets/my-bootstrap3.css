@@ -366,3 +366,18 @@ td.MOD{
 td.DEL{
   color: red;
 }
+
+td.default-single > i.fa-cutlery{
+  color: #669EC1;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+td.default-single > i.fa-ban{
+  color: #B54F4F;
+  text-shadow: 1px 1px 1px #ccc;
+}
+td.default-single > i.fa-spinner{
+  color: #3A79A0;
+}
+
+

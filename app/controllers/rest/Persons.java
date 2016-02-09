@@ -70,8 +70,10 @@ public class Persons extends Controller {
               @Override
               public DayRecap apply(PersonDay personday) {
                 DayRecap dayRecap = new DayRecap();
-                dayRecap.workingMinutes =
-                    personDayManager.workingMinutes(wrapperFactory.create(personday));
+                
+                dayRecap.workingMinutes = 0; //FIXME richiamare il metodo updateTimeAtWork 
+                    //personDayManager.workingMinutes(wrapperFactory.create(personday));
+                    
                 dayRecap.date = personday.date.toString();
                 dayRecap.mission = personDayManager.isOnMission(personday);
                 dayRecap.workingTime =
