@@ -209,7 +209,8 @@ public class WorkingTimes extends Controller {
       render(office, vwt, step, day);
     }    
     if (validation.hasErrors()){
-      render(office, vwt, step, day);
+      day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step-1).dayOfWeek().getAsText());
+      render(office, vwt, step-1, day);
     }
    
     //altri giorni

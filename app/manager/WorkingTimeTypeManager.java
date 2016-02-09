@@ -51,6 +51,9 @@ public class WorkingTimeTypeManager {
         wttd.ticketAfternoonThreshold = 0;
         wttd.ticketAfternoonWorkingTime = 0;
       } else {
+        wttd.workingTime =
+            vwt.workingTimeHour * DateTimeConstants.SECONDS_PER_MINUTE
+                    + vwt.workingTimeMinute;
         if (vwt.mealTicketEnabled) {
           wttd.mealTicketTime =
               vwt.mealTicketTimeHour
@@ -71,9 +74,7 @@ public class WorkingTimeTypeManager {
                 vwt.ticketAfternoonWorkingTime;
           }
         }
-        wttd.workingTime =
-            vwt.workingTimeHour * DateTimeConstants.SECONDS_PER_MINUTE
-                    + vwt.workingTimeMinute;        
+                
       }
       wttd.save();      
       
