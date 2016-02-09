@@ -200,7 +200,7 @@ public class WorkingTimes extends Controller {
 
     String day = "";
     step++; 
-    if (step < 8) {
+    if (step < LAST_STEP) {
       day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step).dayOfWeek().getAsText());
     }
     // giro 0: si crea il nuovo orario verticale per il lunedi
@@ -222,7 +222,7 @@ public class WorkingTimes extends Controller {
     }    
     vwt.dayOfWeek = step - 1 ;
     list.add(vwt);  
-    Cache.safeAdd(key, list, "5mn");  
+    Cache.safeAdd(key, list, "30mn");  
    
     //caso finale: persisto la lista di dto
     if (step == LAST_STEP) {      

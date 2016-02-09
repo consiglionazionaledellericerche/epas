@@ -60,7 +60,7 @@
 	   field:'horizontalPattern.mealTicketEnabled',
 	   value:horizontalPattern.mealTicketEnabled /}  
   
-	  <div id="horizontal-mealticket">
+	  <div id="horizontal-mealticket" #{if !horizontalPattern.mealTicketEnabled} style="display: none" #{/if}>
 	  #{workingTime.legend buonoPasto:'true', wttTips:'true' /}
 	  
       #{workingTime.input 
@@ -89,7 +89,7 @@
 	   field:'horizontalPattern.afternoonThresholdEnabled',
 	   value:horizontalPattern.afternoonThresholdEnabled /}  
 	  
-	   <div id="horizontal-afternoon" style="display: none">
+	   <div id="horizontal-afternoon" #{if !horizontalPattern.afternoonThresholdEnabled} style="display: none" #{/if}>
 	   
 	      #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
 	      	

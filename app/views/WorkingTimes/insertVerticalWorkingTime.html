@@ -59,7 +59,7 @@
 	   		value:vwt.mealTicketEnabled,
 	   		disabled:disable /}  
 	   		
-	   		<div id="horizontal-mealticket">
+	   		<div id="horizontal-mealticket" #{if !vwt.mealTicketEnabled} style="display: none" #{/if}>
 	  		#{workingTime.legend buonoPasto:'true', wttTips:'true' /}
 	  
       		#{workingTime.input 
@@ -90,7 +90,7 @@
 	   		value:vwt.afternoonThresholdEnabled,
 	   		disabled:disable /}  
 	  
-	   		<div id="horizontal-afternoon" style="display: none">
+	   		<div id="horizontal-afternoon" #{if !vwt.afternoonThresholdEnabled} style="display: none" #{/if}>
 	   
 	      	#{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
 	      	
