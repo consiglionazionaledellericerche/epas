@@ -56,7 +56,8 @@
 	   		title:'Calcolo Buono Pasto abilitato',
 	   		color:'danger',
 	   		field:'vwt.mealTicketEnabled',
-	   		value:vwt.mealTicketEnabled /}  
+	   		value:vwt.mealTicketEnabled,
+	   		disabled:disable /}  
 	   		
 	   		<div id="horizontal-mealticket">
 	  		#{workingTime.legend buonoPasto:'true', wttTips:'true' /}
@@ -67,14 +68,16 @@
 	  			color:'danger', 
 	  			field:'vwt.mealTicketTime',
 	  			hourValue:vwt.mealTicketTimeHour,
-	  			minuteValue:vwt.mealTicketTimeMinute /}
+	  			minuteValue:vwt.mealTicketTimeMinute,
+	  			disabled:disable /}
 	  	
 	  		#{workingTime.input 
 	   			type:'minutes', 
 	   			title:'Durata minima intervallo pranzo', 
 	   			color:'danger',
 	   			field:'vwt.breakTicketTime',
-	   			value:vwt.breakTicketTime /}
+	   			value:vwt.breakTicketTime,
+	   			disabled:disable /}
 	  
 	  		<!-- Soglia buono pasto -->  
 	  
@@ -84,7 +87,8 @@
 	   		title:'Condizione soglia pomeridiana attiva',
 	   		color:'danger',
 	   		field:'vwt.afternoonThresholdEnabled',
-	   		value:vwt.afternoonThresholdEnabled /}  
+	   		value:vwt.afternoonThresholdEnabled,
+	   		disabled:disable /}  
 	  
 	   		<div id="horizontal-afternoon" style="display: none">
 	   
@@ -123,7 +127,8 @@
 			
 			var selected = $("input[type='radio']:checked").val();
 			if(selected == "true"){
-				jQuery("input[type=number]").attr( "disabled", "disabled" );				
+				jQuery("input[type=number]").attr( "disabled", "disabled" );	
+				
 			}
 			else{
 				jQuery("input[type=number]").removeAttr("disabled");				
