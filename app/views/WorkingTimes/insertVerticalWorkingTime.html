@@ -1,0 +1,148 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Creazione nuovo Tipo Orario verticale per ' + office.name  /}
+
+#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(office.id), ('Nuovo tipo orario ' + office.name):null]/}
+
+<div class="container">
+
+	#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+	#{title title:'Creazione Nuovo Tipo Orario Verticale ' + office.name /}
+
+	<div class="col-md-10 col-md-offset-1">
+	<div id="form-horizontal">
+      #{form @WorkingTimes.insertVerticalWorkingTime(), class:'form-horizontal'}
+      
+      	#{if !vwt.name}
+      		#{f.input 'vwt.name', required:'true' /}
+      	#{/if}
+      	#{else}
+      		<input type="hidden" name="vwt.name" value="${vwt.name}"/>
+      		#{f.view 'vwt.name' /}
+      	#{/else}
+      	
+      	<input type="hidden" name="office.id" value="${office.id}"/>
+  	  	<input type="hidden" name="step" value="${step}"/>
+  	  		<div class="alert alert-success">
+  	  			<h3 align="center">${day}</h3>
+  	  		</div>
+      	  %{ disable = vwt.holiday; }%
+      	 
+       	  #{workingTime.input
+	   		type:'radio', 
+	   		title:'Festivo',
+	   		color:'info',
+	   		field:'vwt.holiday',
+	   		value:vwt.holiday,
+	   		disabled:disable /} 
+      	
+      
+	      #{workingTime.input 
+		    type:'hoursAndMinutes',
+		    title:'Tempo lavoro giornaliero', 
+		  	color:'info', 
+		  	field:'vwt.workingTime',
+		  	hourValue:vwt?.workingTimeHour,
+		  	minuteValue:vwt?.workingTimeMinute,
+		  	disabled:disable  /}
+		  		   
+		   <!-- Buono pasto -->
+	  
+	  		#{workingTime.legend buonoPastoAbilitato:'true', wttTips:'true' /}
+	  
+	  		#{workingTime.input
+	   		type:'radio', 
+	   		title:'Calcolo Buono Pasto abilitato',
+	   		color:'danger',
+	   		field:'vwt.mealTicketEnabled',
+	   		value:vwt.mealTicketEnabled /}  
+	   		
+	   		<div id="horizontal-mealticket">
+	  		#{workingTime.legend buonoPasto:'true', wttTips:'true' /}
+	  
+      		#{workingTime.input 
+	    		type:'hoursAndMinutes', 
+	    		title:'Tempo di lavoro minimo per diritto a usufruire del buono pasto', 
+	  			color:'danger', 
+	  			field:'vwt.mealTicketTime',
+	  			hourValue:vwt.mealTicketTimeHour,
+	  			minuteValue:vwt.mealTicketTimeMinute /}
+	  	
+	  		#{workingTime.input 
+	   			type:'minutes', 
+	   			title:'Durata minima intervallo pranzo', 
+	   			color:'danger',
+	   			field:'vwt.breakTicketTime',
+	   			value:vwt.breakTicketTime /}
+	  
+	  		<!-- Soglia buono pasto -->  
+	  
+	  
+	  		#{workingTime.input
+	   		type:'radio', 
+	   		title:'Condizione soglia pomeridiana attiva',
+	   		color:'danger',
+	   		field:'vwt.afternoonThresholdEnabled',
+	   		value:vwt.afternoonThresholdEnabled /}  
+	  
+	   		<div id="horizontal-afternoon" style="display: none">
+	   
+	      	#{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+	      	
+		  	#{workingTime.input 
+		   	type:'hoursAndMinutes',
+		   	title:'Soglia pomeridiana per buono pasto',
+		   	color:'danger',
+		   	field:'vwt.ticketAfternoonThreshold',
+		   	hourValue:vwt.ticketAfternoonThresholdHour,
+		   	minuteValue:vwt.ticketAfternoonThresholdMinute  /}
+		
+		  	#{workingTime.input
+		   	type:'minutes', 
+		   	title:'Lavoro minimo per buono pasto dopo soglia pomeridiana',
+		   	color:'danger',
+		   	field:'vwt.ticketAfternoonWorkingTime',
+		   	value:vwt.ticketAfternoonWorkingTime /}  
+			</div>
+   			</div>
+			<div class="center">
+	    		<input class="btn btn-primary" type="submit" value="Crea"/>
+	  		</div>
+      #{/form}
+	</div>
+	</div>
+
+</div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+		
+		$('input[type=radio]').click( function() {
+			
+			var selected = $("input[type='radio']:checked").val();
+			if(selected == "true"){
+				jQuery("input[type=number]").attr( "disabled", "disabled" );				
+			}
+			else{
+				jQuery("input[type=number]").removeAttr("disabled");				
+			}		    
+		    
+		});    
+		
+		$("input[name='vwt.mealTicketEnabled']").change(function(){
+			
+			jQuery( "#horizontal-mealticket" ).toggle(0);
+		
+		});
+		
+
+		$("input[name='vwt.afternoonThresholdEnabled']").change(function(){
+			
+			jQuery( "#horizontal-afternoon" ).toggle(0);
+		
+		});
+	 });
+	</script>
+#{/set}

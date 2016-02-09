@@ -5,6 +5,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import controllers.Wizard.WizardStep;
+
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.WorkingTimeTypeDao;
@@ -27,10 +29,13 @@ import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
+import models.dto.VerticalWorkingTime;
 
+import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPAPlugin;
@@ -45,8 +50,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import sun.util.logging.resources.logging;
+
 @With({Resecure.class, RequestInit.class})
 public class WorkingTimes extends Controller {
+
+  private static final String VERTICAL_WORKING_TIME_STEP = "vwt"; 
+  private static final int LAST_STEP = 8;
 
   @Inject
   private static OfficeDao officeDao;
@@ -76,8 +86,8 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(office);
 
     List<IWrapperWorkingTimeType> wttDefault = FluentIterable
-            .from(workingTimeTypeDao.getDefaultWorkingTimeType())
-            .transform(wrapperFunctionFactory.workingTimeType()).toList();
+        .from(workingTimeTypeDao.getDefaultWorkingTimeType())
+        .transform(wrapperFunctionFactory.workingTimeType()).toList();
 
     render(wttDefault, office);
   }
@@ -93,8 +103,8 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(office);
 
     List<IWrapperWorkingTimeType> wttAllowed = FluentIterable
-            .from(office.workingTimeType)
-            .transform(wrapperFunctionFactory.workingTimeType()).toList();
+        .from(office.workingTimeType)
+        .transform(wrapperFunctionFactory.workingTimeType()).toList();
 
     List<IWrapperWorkingTimeType> wttAllowedEnabled = Lists.newArrayList();
     List<IWrapperWorkingTimeType> wttAllowedDisabled = Lists.newArrayList();
@@ -153,6 +163,10 @@ public class WorkingTimes extends Controller {
   }
 
 
+  /**
+   * metodo che renderizza il template per la creazione di un nuovo orario di lavoro.
+   * @param officeId l'id dell'ufficio in cui inserire l'orario di lavoro
+   */
   public static void insertWorkingTime(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -173,8 +187,75 @@ public class WorkingTimes extends Controller {
 
   }
 
+  /**
+   * metodo che renderizza il giorno per la costruzione dell'orario di lavoro.
+   * @param vwt l'oggetto dto che contiene le informazioni del giorno per l'orario di lavoro
+   * @param office l'ufficio a cui assegnare il nuovo orario di lavoro
+   * @param step il passo
+   */
+  public static void insertVerticalWorkingTime(@Valid VerticalWorkingTime vwt, 
+      Office office, int step) {
+
+    notFoundIfNull(office);
+
+    String day = "";
+    step++; 
+    if (step < 8) {
+      day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step).dayOfWeek().getAsText());
+    }
+    // giro 0: si crea il nuovo orario verticale per il lunedi
+    if (vwt == null) {      
+      vwt = new VerticalWorkingTime();
+      render(office, vwt, step, day);
+    }    
+    if (validation.hasErrors()){
+      render(office, vwt, step, day);
+    }
+   
+    //altri giorni
+    final String key = VERTICAL_WORKING_TIME_STEP + Security.getUser().get().username;
+    List<VerticalWorkingTime> list = Cache.get(key, List.class);
+
+    if (list == null) {
+      list = Lists.newArrayList();
+    }    
+    vwt.dayOfWeek = step - 1 ;
+    list.add(vwt);  
+    Cache.safeAdd(key, list, "5mn");  
+   
+    //caso finale: persisto la lista di dto
+    if (step == LAST_STEP) {      
+      workingTimeTypeManager.saveVerticalWorkingTimeType(list, office, vwt.name);
+      flash.success("Salvato correttamente orario di lavoro %s", vwt.name);
+      manageOfficeWorkingTime(office.id);
+      //renderVerticalWorkingTime(office.id, list);      
+    }   
+
+    render(vwt, step, office, day);
+
+  }
+  
+  /**
+   * TODO: per la renderizzazione dell'orario verticale prima del salvataggio.
+   * @param officeId l'id dell'ufficio in cui si vuole inserire il nuovo orario
+   * @param list la lista dei dto contenente le info per il nuovo orario
+   */
+  public static void renderVerticalWorkingTime(Long officeId, List<VerticalWorkingTime> list){
+    Office office = officeDao.getOfficeById(officeId);
+    render(office, list);
+  }
+
+//  public static void saveVertical(){
+//    
+//  }
+  
+  /**
+   * metodo che consente la creazione di un nuovo orario di lavoro orizzontale.
+   * @param horizontalPattern il dto contenente le informazioni da persistere
+   * @param office l'ufficio a cui associare l'orario di lavoro
+   */
   public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
-                                    @Required Office office) {
+      @Required Office office) {
 
     // TODO: la creazione dell'orario default ha office null.
     notFoundIfNull(office);
@@ -182,10 +263,10 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(office);
 
     WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(
-            horizontalPattern.name, Optional.fromNullable(office));
+        horizontalPattern.name, Optional.fromNullable(office));
     if (wtt != null) {
       validation.addError("horizontalPattern.name",
-              "nome già presente", horizontalPattern.name);
+          "nome già presente", horizontalPattern.name);
     }
 
     if (validation.hasErrors()) {
@@ -202,9 +283,9 @@ public class WorkingTimes extends Controller {
   }
 
   public static void save(@Valid WorkingTimeType wtt, WorkingTimeTypeDay wttd1,
-                          WorkingTimeTypeDay wttd2, WorkingTimeTypeDay wttd3,
-                          WorkingTimeTypeDay wttd4, WorkingTimeTypeDay wttd5,
-                          WorkingTimeTypeDay wttd6, WorkingTimeTypeDay wttd7) {
+      WorkingTimeTypeDay wttd2, WorkingTimeTypeDay wttd3,
+      WorkingTimeTypeDay wttd4, WorkingTimeTypeDay wttd5,
+      WorkingTimeTypeDay wttd6, WorkingTimeTypeDay wttd7) {
 
     if (validation.hasErrors()) {
       flash.error(ValidationHelper.errorsMessages(validation.errors()));
@@ -333,7 +414,7 @@ public class WorkingTimes extends Controller {
 
       flash.error(
           "Impossibile trovare il tipo orario specificato. Riprovare o effettuare una "
-          + "segnalazione.");
+              + "segnalazione.");
       manageWorkingTime(null);
     }
 
@@ -370,17 +451,17 @@ public class WorkingTimes extends Controller {
 
     //L'operazione deve interessare tipi orario della stessa sede
     if (wttOld.office != null && wttNew.office != null
-            && !wttOld.office.id.equals(wttNew.office.id)) {
+        && !wttOld.office.id.equals(wttNew.office.id)) {
 
       flash.error(
           "L'operazione di cambio orario a tutti deve coinvolgere tipi orario definiti per la "
-          + "stessa sede.");
+              + "stessa sede.");
       manageWorkingTime(office.id);
     }
 
     //Prendere tutti i contratti attivi da firstDay ad oggi
     List<Contract> contractInPeriod =
-            contractDao.getActiveContractsInPeriod(dateFrom, Optional.fromNullable(dateTo));
+        contractDao.getActiveContractsInPeriod(dateFrom, Optional.fromNullable(dateTo));
     JPAPlugin.closeTx(false);
     JPAPlugin.startTx(false);
 
@@ -401,7 +482,7 @@ public class WorkingTimes extends Controller {
 
         for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
           if (cwtt.workingTimeType.id.equals(wttOld.id)
-                  &&
+              &&
               DateUtility.intervalIntersection(
                   contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate)) != null) {
             needChanges = true;
@@ -421,8 +502,8 @@ public class WorkingTimes extends Controller {
             // verificare.
 
             DateInterval intersection = DateUtility
-                    .intervalIntersection(contractPeriod,
-                            new DateInterval(cwtt.beginDate, cwtt.endDate));
+                .intervalIntersection(contractPeriod,
+                    new DateInterval(cwtt.beginDate, cwtt.endDate));
 
             if (cwtt.workingTimeType.id.equals(wttOld.id) && intersection != null) {
 
@@ -475,7 +556,7 @@ public class WorkingTimes extends Controller {
   }
 
   private static List<ContractWorkingTimeType> splitContractWorkingTimeType(
-          ContractWorkingTimeType cwtt, DateInterval period, WorkingTimeType wttNew) {
+      ContractWorkingTimeType cwtt, DateInterval period, WorkingTimeType wttNew) {
 
     List<ContractWorkingTimeType> newCwttList = new ArrayList<ContractWorkingTimeType>();
 
@@ -491,7 +572,7 @@ public class WorkingTimes extends Controller {
     //caso1 cwtt inizia dopo e finisce prima (interamente contenuto)
     // Risultato dello split: MIDDLE (new)
     if (DateUtility.isIntervalIntoAnother(
-            new DateInterval(cwtt.beginDate, cwtt.endDate), period)) {
+        new DateInterval(cwtt.beginDate, cwtt.endDate), period)) {
 
       middle.beginDate = cwtt.beginDate;
       middle.endDate = cwtt.endDate;
@@ -504,7 +585,7 @@ public class WorkingTimes extends Controller {
     //caso 2 cwtt inizia prima e finisce prima (o uguale)
     // Risultato dello split: FIRST (old) MIDDLE (new)
     if (cwttInterval.getBegin().isBefore(period.getBegin())
-            && !cwttInterval.getEnd().isAfter(period.getEnd())) {
+        && !cwttInterval.getEnd().isAfter(period.getEnd())) {
 
       first.beginDate = cwtt.beginDate;
       first.endDate = period.getBegin().minusDays(1);
@@ -522,7 +603,7 @@ public class WorkingTimes extends Controller {
     //caso 3 cwtt inizia dopo (o uguale) e finisce dopo
     // Risultato dello split: MIDDLE (new) LAST (old)
     if (!cwttInterval.getBegin().isBefore(period.getBegin())
-            && cwttInterval.getEnd().isAfter(period.getEnd())) {
+        && cwttInterval.getEnd().isAfter(period.getEnd())) {
 
       middle.beginDate = cwtt.beginDate;
       middle.endDate = period.getEnd();
@@ -541,7 +622,7 @@ public class WorkingTimes extends Controller {
     //caso 4 cwtt inizia prima e finisce dopo
     // Risultato dello split: FIRST (old) MIDDLE (new) LAST (old)
     if (cwttInterval.getBegin().isBefore(period.getBegin())
-            && cwttInterval.getEnd().isAfter(period.getEnd())) {
+        && cwttInterval.getEnd().isAfter(period.getEnd())) {
 
       first.beginDate = cwtt.beginDate;
       first.endDate = period.getBegin().minusDays(1);
