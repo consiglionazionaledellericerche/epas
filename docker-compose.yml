@@ -13,7 +13,7 @@ postgres:
 
 nginx:
 
-  image: dmur/nginx-proxy:latest
+  image: jwilder/nginx-proxy:latest
 
   ports:
   - "80:80"
@@ -38,7 +38,6 @@ epas:
 
   environment:
   - VIRTUAL_HOST=localhost
-#  - LOCALHOST=true                        # default: false -- Attiva l'accesso web da localhost
 #  - HTTPS=true                            # default: false -- Attiva l'utilizzodel protocollo HTTPS
 #  - CERT_NAME=epas                        # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
 #  - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato

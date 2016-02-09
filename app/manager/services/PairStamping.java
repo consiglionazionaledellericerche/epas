@@ -1,4 +1,4 @@
-package manager;
+package manager.services;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -16,44 +16,49 @@ public class PairStamping {
    */
   private static int SEQUENCE_ID = 1;
   
-  public Stamping in;
-  public Stamping out;
+  public Stamping first;
+  public Stamping second;
   
-  int timeInPair = 0;
+  public int timeInPair = 0;
 
   /**
    * Coppia di timbrature per pranzo. CNR centrale.
    */
-  boolean prPair = false;
+  public boolean prPair = false;
   
   /**
    * Costruisce la coppia di timbrature.
    * @modify in.pairId e out.pairId se appartengono ad una coppia valida. 
-   * @param in ingresso
-   * @param out uscita
+   * @param first ingresso
+   * @param second uscita
    */
-  public PairStamping(Stamping in, Stamping out) {
+  public PairStamping(Stamping first, Stamping second) {
 
-    this.in = in;
-    this.out = out;
+    this.first = first;
+    this.second = second;
 
     timeInPair = 0;
-    timeInPair = timeInPair - DateUtility.toMinute(in.date);
-    timeInPair = timeInPair + DateUtility.toMinute(out.date);
+    timeInPair = timeInPair - DateUtility.toMinute(first.date);
+    timeInPair = timeInPair + DateUtility.toMinute(second.date);
     
     //La coppia valida la imposto nel caso di coppia definitiva (non contenente l'uscita fittizia
     // e se si tratta di una coppia in-out, il caso out-in è usato nel calcolo del buono pasto.
-    if (!out.exitingNow && in.isIn() && out.isOut()) {
+    if (!second.exitingNow && first.isIn() && second.isOut()) {
       int pairId = SEQUENCE_ID++;
-      in.pairId = pairId;
-      out.pairId = pairId;
+      first.pairId = pairId;
+      second.pairId = pairId;
     }
 
     // TODO: decidere se entrambe o almeno una.
-    if ((in.stampType != null && in.stampType.equals(StampTypes.PAUSA_PRANZO))
-        || (out.stampType != null && out.stampType.equals(StampTypes.PAUSA_PRANZO))) {
+    if ((first.stampType != null && first.stampType.equals(StampTypes.PAUSA_PRANZO))
+        || (second.stampType != null && second.stampType.equals(StampTypes.PAUSA_PRANZO))) {
       prPair = true;
     }
+  }
+  
+  public String toString() {
+    return String.format("[%s,%s]", first.date.toString("HH:mm:ss"),
+        second.date.toString("HH:mm:ss"));
   }
 
 }
