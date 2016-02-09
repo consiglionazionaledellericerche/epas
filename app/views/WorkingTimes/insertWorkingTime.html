@@ -60,7 +60,7 @@
 	   field:'horizontalPattern.mealTicketEnabled',
 	   value:horizontalPattern.mealTicketEnabled /}  
   
-	  <div id="horizontal-mealticket">
+	  <div id="horizontal-mealticket" #{if !horizontalPattern.mealTicketEnabled} style="display: none" #{/if}>
 	  #{workingTime.legend buonoPasto:'true', wttTips:'true' /}
 	  
       #{workingTime.input 
@@ -89,7 +89,7 @@
 	   field:'horizontalPattern.afternoonThresholdEnabled',
 	   value:horizontalPattern.afternoonThresholdEnabled /}  
 	  
-	   <div id="horizontal-afternoon" style="display: none">
+	   <div id="horizontal-afternoon" #{if !horizontalPattern.afternoonThresholdEnabled} style="display: none" #{/if}>
 	   
 	      #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
 	      	
@@ -124,20 +124,21 @@
  
   
     <div id="form-vertical" style="display: none">
-      #{form @WorkingTimes.save(), class:'form-horizontal'}
+      #{form @WorkingTimes.insertVerticalWorkingTime(), class:'form-horizontal'}
   	    <input type="hidden" name="office.id" value="${office.id}"/>
-  
-	    #{f.input 'horizontalPattern.name', required:'true' /}  
+  		<input type="hidden" name="step" value="0"/>
 	    #{f.view 'office'  /}
 	  
 	    <div class="alert alert-success">
-	      Nell'orario verticale impostare lo schema giornaliero per ogni singolo
-	      giorno.
+	      Nell'orario verticale occorre impostare lo schema giornaliero per ogni singolo
+	      giorno. 
+	      Premendo sul tasto "Inizia", giorno per giorno, verrà richiesto di riempire i campi con i valori per il tempo a lavoro,
+	      la pausa pranzo e se è un giorno festivo
         </div>	 
         
-        <div class="alert alert-danger">
-          In fase di implementazione. In caso di necessità contattare epas@iit.cnr.it
-        </div>
+		<div class="center">
+	    	<input class="btn btn-primary" type="submit" value="Inizia"/>
+	  	</div>
       #{/form}
     </div> <!-- end form vertical -->
    
