@@ -482,23 +482,12 @@ public class RequestInit extends Controller {
 
     if (action.startsWith("UploadSituation.")) {
 
-      if (action.equals("UploadSituation.show")) {
+      if (action.equals("UploadSituation.uploadData")) {
 
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "UploadSituation.show";
+        return "UploadSituation.uploadData";
       }
 
-      if (action.equals("UploadSituation.loginAttestati")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "UploadSituation.loginAttestati";
-      }
-
-      if (action.equals("UploadSituation.processAttestati")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "UploadSituation.processAttestati";
-      }
     }
 
     if (action.startsWith("WorkingTimes.")) {

@@ -111,7 +111,7 @@ public class WorkingTimeTypeDay extends BaseModel {
     } else {
       return false;
     }
-
   }
+  
 
 }
