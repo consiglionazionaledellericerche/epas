@@ -253,21 +253,18 @@ public class PersonDayManager {
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
     //1) Calcolare tutte le gapPair
-    Stamping outForLunch = null;
+    PairStamping previous = null;
     for (PairStamping validPair : validPairs) {
-      if (validPair.second.stampType == null
-          || StampTypes.PAUSA_PRANZO.equals(validPair.second.stampType)) {
-        if (outForLunch == null) {
-          outForLunch = validPair.second;
-        } else {
-          //validPair.first non dovrebbe avere causali diverse da pausa pranzo
-          if (validPair.first.stampType == null
-              || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType)) {
-            allGapPairs.add(new PairStamping(outForLunch, validPair.first));
-            outForLunch = validPair.second;
-          }
+      if (previous != null) {
+        if ((previous.second.stampType == null 
+            || StampTypes.PAUSA_PRANZO.equals(previous.second.stampType))
+            && (validPair.first.stampType == null 
+            || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType)) ) {
+          
+          allGapPairs.add(new PairStamping(previous.second, validPair.first));
         }
-      }
+      } 
+      previous = validPair;
     }
 
     //2) selezionare quelle che appartengono alla fascia pranzo,
