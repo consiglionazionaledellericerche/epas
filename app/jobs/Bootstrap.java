@@ -3,21 +3,27 @@ package jobs;
 import com.google.common.base.Optional;
 import com.google.common.io.Resources;
 
+import dao.OfficeDao;
 import dao.UserDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.ConfGeneralManager;
+import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 
+import models.Configuration;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.enumerate.Parameter;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -63,7 +69,14 @@ public class Bootstrap extends Job<Void> {
   static ConsistencyManager consistencyManager;
   @Inject
   static UserDao userDao;
+  @Inject
+  static OfficeDao officeDao;
+  @Inject
+  static ConfGeneralManager confGeneralManager;
+  @Inject
+  static ConfigurationManager configurationManager;
 
+  
   public void doJob() throws IOException {
 
     if (Play.runingInTestMode()) {
@@ -140,6 +153,20 @@ public class Bootstrap extends Job<Void> {
       }
     } else {
       //BOH
+    }
+    
+    //migrazione nuova configurazione
+    List<Office> offices = officeDao.allOffices().list();
+    for (Office office : offices) {
+
+      Integer dayOfPatron = confGeneralManager
+          .getIntegerFieldValue(Parameter.DAY_OF_PATRON, office);
+      Integer monthOfPatron = confGeneralManager
+          .getIntegerFieldValue(Parameter.MONTH_OF_PATRON, office);
+
+      
+      //Configuration configuration = new Configuration(Epas); 
+
     }
 
   }
