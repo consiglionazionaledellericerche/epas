@@ -209,20 +209,7 @@ public class PersonStampingDayRecap {
       this.progressive = "";
     }
 
-    // meal ticket (NO)
-    if (this.today && !personDayManager.isAllDayAbsences(pd)) {
-      this.setMealTicket(pd.isTicketAvailable, true);
-
-    } else if (this.today && personDayManager.isAllDayAbsences(pd)) {
-      //c'è una assenza giornaliera, la decisione è già presa
-      this.setMealTicket(pd.isTicketAvailable, false);
-
-    } else if (!this.holiday) {
-      this.setMealTicket(pd.isTicketAvailable, false);
-
-    } else {
-      this.setMealTicket(true, false);
-    }
+    this.setMealTicket(pd.isTicketAvailable);
 
     // lunch (p,e)
     if (pd.stampModificationType != null && !this.future) {
@@ -239,17 +226,16 @@ public class PersonStampingDayRecap {
     // is sourceContract (solo se monthContracts presente)
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {
-        // se è precedente all'inizio del contratto lo ignoro
-        if (contract.beginDate.isAfter(pd.date)) {
-          this.ignoreDay = true;
-        }
-
-        // Tutti i giorni precedenti alla creazione della persona o all'inizializzazione del contratto
-        // Sono da ignorare
-        if (contract.sourceDateResidual != null
-            && (contract.sourceDateResidual.equals(pd.date)
-            || contract.sourceDateResidual.isAfter(pd.date))
-            || person.createdAt.toLocalDate().isAfter(pd.date)) {
+        /**
+         * Se il giorno è:
+         * Precedente all'inizio del contratto
+         * Oppure precedente a un'inizializzazione definita
+         * Oppure precedente alla data di inserimento della persona
+         * Viene Ignorato
+         */
+        if (contract.beginDate.isAfter(pd.date) ||
+            (contract.sourceDateResidual != null && pd.date.isBefore(contract.sourceDateResidual)) ||
+            pd.date.isBefore(person.createdAt.toLocalDate())) {
           this.ignoreDay = true;
         }
 
@@ -261,7 +247,7 @@ public class PersonStampingDayRecap {
         this.setWorkTime(0);
         this.setDifference(0);
         this.setProgressive(0);
-        this.setMealTicket(true, false);
+        this.setMealTicket(true);
       }
     }
   }
@@ -270,12 +256,11 @@ public class PersonStampingDayRecap {
   /**
    * Imposta il valore della colonna buono pasto nel tabellone timbrature.
    *
-   * @param mealTicket      ottenuto si/no
-   * @param todayInProgress se è il giorno di oggi.
+   * @param mealTicket ottenuto si/no
    */
-  private void setMealTicket(boolean mealTicket, boolean todayInProgress) {
+  private void setMealTicket(boolean mealTicket) {
 
-    if (this.ignoreDay) {
+    if (this.ignoreDay || !this.personDay.isPersistent()) {
       this.mealTicket = MEALTICKET_EMPTY;
       return;
     }
@@ -294,7 +279,7 @@ public class PersonStampingDayRecap {
     }
     // Giorni Passati e giorno attuale
     if (!mealTicket) {
-      if (todayInProgress) {
+      if (this.today) {
         this.mealTicket = MEALTICKET_NOT_YET;
       } else {
         this.mealTicket = MEALTICKET_NO;
@@ -535,5 +520,3 @@ public class PersonStampingDayRecap {
   }
 
 }
-
-
