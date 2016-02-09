@@ -139,6 +139,9 @@ logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
 
+mealTicket.aquired= Buono Pasto maturato
+mealTicket.notAquired= Buono Pasto non maturato
+mealTicket.notYetAquired= Buono Pasto non ancora maturato
 mealTicket=Buono Pasto
 modifierType= Calcolo Orario
 
@@ -242,6 +245,11 @@ uro.user= Utente
 user.password= Password
 user.username= Username
 
+yearAtt=Anno Attestato
+monthAtt=Mese Attestato
+attestatiLogin=Username Attestati
+attestatiPassword=Password Attestati
+
 views.common.false=falso
 views.common.true=vero
 views.common.yes_or_no.false=NO
@@ -321,6 +329,14 @@ JustifiedTimeAtWork.FiveHours= 5 ore
 JustifiedTimeAtWork.SixHours= 6 ore
 JustifiedTimeAtWork.SevenHours= 7 ore
 JustifiedTimeAtWork.EightHours= 8 ore
+JustifiedTimeAtWork.OneHourMealTimeCounting= 1 ora (conteggiata per buono pasto)
+JustifiedTimeAtWork.TwoHoursMealTimeCounting= 2 ore (conteggiate per buono pasto)
+JustifiedTimeAtWork.ThreeHoursMealTimeCounting= 3 ore (conteggiate per buono pasto)
+JustifiedTimeAtWork.FourHoursMealTimeCounting= 4 ore (conteggiate per buono pasto)
+JustifiedTimeAtWork.FiveHoursMealTimeCounting= 5 ore (conteggiate per buono pasto)
+JustifiedTimeAtWork.SixHoursMealTimeCounting= 6 ore (conteggiate per buono pasto)
+JustifiedTimeAtWork.SevenHoursMealTimeCounting= 7 ore (conteggiate per buono pasto)
+JustifiedTimeAtWork.EightHoursMealTimeCounting= 8 ore (conteggiate per buono pasto)
 JustifiedTimeAtWork.Nothing= Niente
 JustifiedTimeAtWork.TimeToComplete= Quello che manca
 JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
