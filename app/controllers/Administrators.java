@@ -23,7 +23,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import javax.inject.Inject;
@@ -37,17 +36,17 @@ public class Administrators extends Controller {
   private static final Logger log = LoggerFactory.getLogger(Institutes.class);
 
   @Inject
-  private static SecurityRules rules;
-
+  static SecurityRules rules;
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static UserDao userDao;
+  static UserDao userDao;
 
   /**
    * metodo che ritorna la form di inserimento amministratore per la sede passata per parametro.
+   *
    * @param officeId l'id della sede a cui associare amministratore e ruolo.
    */
   public static void blank(Long officeId) {
@@ -66,6 +65,7 @@ public class Administrators extends Controller {
 
   /**
    * metodo che salva il ruolo per l'user_role_office.
+   *
    * @param uro l'user_role_office da salvare
    */
   public static void save(@Valid UsersRolesOffices uro) {
@@ -73,7 +73,7 @@ public class Administrators extends Controller {
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", uro,
-              validation.errorsMap());
+          validation.errorsMap());
       flash.error(Web.msgHasErrors());
 
       render("@insertNewAdministrator", uro);
@@ -90,6 +90,7 @@ public class Administrators extends Controller {
 
   /**
    * metodo che cancella l'uro specificato.
+   *
    * @param uroId l'id dell'user_role_office
    */
   public static void delete(Long uroId) {
@@ -119,6 +120,7 @@ public class Administrators extends Controller {
     // recupera
     session.put(USERNAME, user.username);
     // redirect alla radice
+    session.remove("officeSelected");
     redirect(Play.ctxPath + "/");
   }
 
