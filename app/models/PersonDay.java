@@ -1,6 +1,7 @@
 package models;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import models.base.BaseModel;
 
@@ -35,6 +36,8 @@ import javax.persistence.UniqueConstraint;
 @Audited
 @Table(name = "person_days",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"person_id", "date"})})
+@Getter
+@Setter
 public class PersonDay extends BaseModel {
 
   private static final long serialVersionUID = -5013385113251848310L;
@@ -109,17 +112,18 @@ public class PersonDay extends BaseModel {
   public StampModificationType stampModificationType;
 
   @Transient
-  public PersonDay previousPersonDayInMonth = null;
-
-  @Transient
-  public Contract personDayContract = null;
-
-  @Transient
   public MealTicket mealTicketAssigned = null;
 
-
-  public PersonDay(
-      Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
+  /**
+   * Costruttore.
+   * @param person person
+   * @param date date
+   * @param timeAtWork timeAtWork
+   * @param difference difference
+   * @param progressive progressive
+   */
+  public PersonDay(Person person, LocalDate date, 
+      int timeAtWork, int difference, int progressive) {
     this.person = person;
     this.date = date;
     this.timeAtWork = timeAtWork;
@@ -127,6 +131,11 @@ public class PersonDay extends BaseModel {
     this.progressive = progressive;
   }
 
+  /**
+   * Costruttore.
+   * @param person person
+   * @param date date
+   */
   public PersonDay(Person person, LocalDate date) {
     this(person, date, 0, 0, 0);
   }
@@ -135,7 +144,7 @@ public class PersonDay extends BaseModel {
    * Controlla che il personDay cada nel giorno attuale.
    */
   public boolean isToday() {
-    return this.date.isEqual(new LocalDate());
+    return this.date.isEqual(LocalDate.now());
   }
 
   @Override
