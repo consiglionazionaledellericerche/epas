@@ -4,13 +4,12 @@
 from fabric.api import *
 from hashlib import md5
 
-#env.hosts = ["epas@epas-demo.devel.iit.cnr.it"]
 env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
+#env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
 
 APP = "epas"
 PLAY = "/home/epas/bin/play/play"
 
-#BACKUP_DIR= "/opt/epas-demo/backups"
 BACKUP_DIR= "/data/backups/epas"
 
 @task
@@ -63,12 +62,12 @@ def changepassword(username, password, dbname="epas-devel", dbuser="epas"):
 
 def recreatedb(dbname, dbuser):
     try:
-        local("psql -lqt | cut -d \| -f 1 | grep -w %s" % (dbname, dbuser))
+        local("psql -lqt | cut -d \| -f 1 | grep -w %s" % (dbname, ))
     except:
         pass
     else:
         local("dropdb %s" % (dbname, ))
-    local("createdb -O %s -U%s %s" % (dbuser, dbuser, dbname))
+    local("createdb -O %s %s" % (dbuser, dbname))
 
 @task
 def copydb(dbname, dbuser="epas", remotedb="epas"):
