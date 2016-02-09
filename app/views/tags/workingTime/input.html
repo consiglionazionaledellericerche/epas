@@ -4,6 +4,7 @@
  field: nome del campo http
  value: valore di default del campo
  color: colore del div
+ disabled: se true disabilita il campo non applicato nelle multiple select
 
  hoursAndMinutes:
    field: il prefisso del nome del campo. 
@@ -27,13 +28,14 @@
     #{if _type.equals("hoursAndMinutes")}
       <label for="${_field}Hour" class="col-sm-2 control-label">Ore</label>
       <div class="col-sm-3">
-        <input type="number" class="form-control" name="${_field}Hour" value="${_hourValue}">
+        <input type="number" class="form-control" name="${_field}Hour" value="${_hourValue}"#{if _disabled}disabled#{/if} >
         #{ifError _field+'Hour'} #{error _field+'Hour' /} #{/ifError}
+        
       </div>
     
       <label for="${_field}Minute" class="col-sm-2 control-label">Minuti</label>
       <div class="col-sm-3">
-        <input type="number" class="form-control" name="${_field}Minute" value="${_minuteValue}">
+        <input type="number" class="form-control" name="${_field}Minute" value="${_minuteValue}" #{if _disabled}disabled#{/if}>
         #{ifError _field+'Minute'} #{error _field+'Minute' /} #{/ifError}
       </div>
     #{/if}
@@ -53,7 +55,7 @@
     #{if _type.equals("minutes")}
       <label for="${_field}" class="col-sm-2 control-label">Minuti</label>
         <div class="col-sm-3">
-          <input type="number" class="form-control" name="${_field}" value="${_value}">
+          <input type="number" class="form-control" name="${_field}" value="${_value}" #{if _disabled}disabled#{/if}>
           #{ifError _field} #{error _field /} #{/ifError}
         </div>    
     #{/if}
