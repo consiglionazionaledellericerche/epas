@@ -197,6 +197,8 @@ public class WorkingTimes extends Controller {
       Office office, int step) {
 
     notFoundIfNull(office);
+    
+    rules.checkIfPermitted(office);
 
     String day = "";
     step++; 
