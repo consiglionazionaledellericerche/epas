@@ -461,7 +461,9 @@ when
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
-        "WorkingTimes.showHorizontal"				
+        "WorkingTimes.showHorizontal",
+        "WorkingTimes.insertVerticalWorkingTime"
+        			
                
        ), target == $o, granted == false)
 then
@@ -575,6 +577,7 @@ when
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll",
         "WorkingTimes.saveHorizontal",
+        "WorkingTimes.insertVerticalWorkingTime",
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
@@ -700,6 +703,7 @@ when
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll",
         "WorkingTimes.saveHorizontal",
+        "WorkingTimes.insertVerticalWorkingTime",
         
         /* Vecchio permesso editCompetenceCode
          *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
