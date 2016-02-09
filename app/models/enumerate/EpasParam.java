@@ -1,5 +1,6 @@
 package models.enumerate;
 
+import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public enum EpasParam {
       EpasParamTimeType.GENERAL,
       EpasParamValueType.DATE,
       Lists.newArrayList(RecomputationType.RESIDUAL_MEALTICKETS),
-      null),
+      new LocalDate(2014, 7, 1)),
   
   SEND_EMAIL("send_email",
       EpasParamTimeType.GENERAL,

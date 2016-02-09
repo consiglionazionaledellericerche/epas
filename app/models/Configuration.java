@@ -32,7 +32,7 @@ public class Configuration extends PropertyInPeriod {
 
   @Column(name = "field_value")
   public String fieldValue;
-
+  
   @Override
   public IPropertiesInPeriodOwner getOwner() {
     return this.office;
