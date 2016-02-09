@@ -191,22 +191,20 @@ public class ContractManager {
                                       final boolean newContract, final boolean onlyRecaps) {
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    LocalDate startDate = wrContract.getContractDatabaseInterval().getBegin();
-    if (dateFrom.isPresent() && dateFrom.get().isAfter(startDate)) {
-      startDate = dateFrom.get();
-    }
+
+    LocalDate startDate = dateFrom
+        .or(wrContract.getContractDatabaseInterval().getBegin());
 
     if (!newContract) {
 
       YearMonth yearMonthFrom = new YearMonth(startDate);
-      
+
       // Distruggere i riepiloghi esistenti da yearMonthFrom.
       // TODO: anche quelli sulle ferie quando ci saranno
       for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-        if (new YearMonth(cmr.year, cmr.month).isBefore(yearMonthFrom)) {
-          continue;
+        if (!yearMonthFrom.isAfter(new YearMonth(cmr.year, cmr.month))) {
+          cmr.delete();
         }
-        cmr.delete();
       }
       
       JPA.em().flush();

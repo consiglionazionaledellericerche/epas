@@ -35,6 +35,7 @@ import models.enumerate.Troubles;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -331,7 +332,7 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd, false);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
@@ -346,7 +347,7 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd, false);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
@@ -359,13 +360,34 @@ public class ConsistencyManager {
     // controllo uscita notturna
     handlerNightStamp(pd);
 
-    personDayManager.updateTimeAtWork(pd);
+    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
-    personDayManager.updateDifference(pd);
+    Integer mealTimeStartHour = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.getValue().person.office);
+    Integer mealTimeStartMinute = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.getValue().person.office);
+    Integer mealTimeEndHour = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
+    Integer mealTimeEndMinute = confGeneralManager
+        .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
+    LocalTime startLunch = new LocalTime()
+        .withHourOfDay(mealTimeStartHour)
+        .withMinuteOfHour(mealTimeStartMinute);
 
-    personDayManager.updateProgressive(pd);
+    LocalTime endLunch = new LocalTime()
+        .withHourOfDay(mealTimeEndHour)
+        .withMinuteOfHour(mealTimeEndMinute);
+    
+    personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork(), startLunch, endLunch);
 
-    personDayManager.updateTicketAvailable(pd);
+    personDayManager.updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork());
+
+    personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
+
+    personDayManager.updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork());
 
     // controllo problemi strutturali del person day
     if (pd.getValue().date.isBefore(LocalDate.now())) {

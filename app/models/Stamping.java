@@ -110,6 +110,18 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     this.personDay = personDay;
     this.date = time;
   }
+  
+  /**
+   * Costruttore.
+   *
+   * @param personDay personDay
+   * @param time      time
+   */
+  public Stamping(PersonDay personDay, WayType way, LocalDateTime time) {
+    this.personDay = personDay;
+    this.date = time;
+    this.way = way;
+  }
 
   @Override
   public String toString() {

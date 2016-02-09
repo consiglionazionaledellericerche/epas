@@ -14,7 +14,7 @@ import dao.PersonDayDao;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.PairStamping;
+import manager.services.PairStamping;
 import manager.PersonDayManager;
 import manager.PersonManager;
 
@@ -560,18 +560,18 @@ public class CompetenceUtility {
               for (PairStamping pairStamping : pairStampings) {
 
                 strStamp =
-                    strStamp.concat(pairStamping.in.date.toString("HH:mm")).concat(" - ")
-                      .concat(pairStamping.out.date.toString("HH:mm")).concat("  ");
+                    strStamp.concat(pairStamping.first.date.toString("HH:mm")).concat(" - ")
+                      .concat(pairStamping.second.date.toString("HH:mm")).concat("  ");
                 log.debug("Controllo la coppia {}", strStamp);
 
                 // controlla se la coppia di timbrature interseca l'intervallo prima e dopo
                 //pranzo del turno
-                if (!pairStamping.out.date.toLocalTime().isBefore(startLunchTime)
-                    && !pairStamping.in.date.toLocalTime().isAfter(startShift)) {
+                if (!pairStamping.second.date.toLocalTime().isBefore(startLunchTime)
+                    && !pairStamping.first.date.toLocalTime().isAfter(startShift)) {
                   okBeforeLunch = true;
                 }
-                if (!pairStamping.out.date.toLocalTime().isBefore(endShift)
-                    && !pairStamping.in.date.toLocalTime().isAfter(endLunchTime)) {
+                if (!pairStamping.second.date.toLocalTime().isBefore(endShift)
+                    && !pairStamping.first.date.toLocalTime().isAfter(endLunchTime)) {
                   okAfterLunch = true;
                 }
               }
@@ -605,18 +605,18 @@ public class CompetenceUtility {
                 for (PairStamping pairStamping : pairStampings) {
 
                   // l'intervallo di tempo lavorato interseca la parte del turno prima di pranzo
-                  if ((pairStamping.in.date.toLocalTime().isBefore(startShift)
-                      && pairStamping.out.date.toLocalTime().isAfter(startShift))
-                      || (pairStamping.in.date.toLocalTime().isAfter(startShift)
-                          && pairStamping.in.date.toLocalTime().isBefore(startLunchTime))) {
+                  if ((pairStamping.first.date.toLocalTime().isBefore(startShift)
+                      && pairStamping.second.date.toLocalTime().isAfter(startShift))
+                      || (pairStamping.first.date.toLocalTime().isAfter(startShift)
+                          && pairStamping.first.date.toLocalTime().isBefore(startLunchTime))) {
 
                     // conta le ore lavorate in turno prima di pranzo
                     lowLimit =
-                        (pairStamping.in.date.toLocalTime().isBefore(startShift))
-                          ? startShift : pairStamping.in.date.toLocalTime();
+                        (pairStamping.first.date.toLocalTime().isBefore(startShift))
+                          ? startShift : pairStamping.first.date.toLocalTime();
                     upLimit =
-                        (pairStamping.out.date.toLocalTime().isBefore(startLunchTime))
-                          ? pairStamping.out.date.toLocalTime() : startLunchTime;
+                        (pairStamping.second.date.toLocalTime().isBefore(startLunchTime))
+                          ? pairStamping.second.date.toLocalTime() : startLunchTime;
                     workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
                     log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}",
                         startShift, startLunchTime, lowLimit, upLimit, workingMinutes);
@@ -624,20 +624,20 @@ public class CompetenceUtility {
                     // calcola gli scostamenti dalla prima fascia del turno tenendo conto dei
                     // 15 min di comporto se il turnista è entrato prima
                     //TODO: mettere il parametro 15 minuti parametrico
-                    if (pairStamping.in.date.toLocalTime().isBefore(startShift)) {
+                    if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
                       newLimit =
-                          (pairStamping.in.date.toLocalTime().isBefore(startShift.minusMinutes(15)))
-                            ? startShift.minusMinutes(15) : pairStamping.in.date.toLocalTime();
-                      if (pairStamping.in.date.toLocalTime()
+                          (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(15)))
+                            ? startShift.minusMinutes(15) : pairStamping.first.date.toLocalTime();
+                      if (pairStamping.first.date.toLocalTime()
                             .isBefore(startShift.minusMinutes(15))) {
                         inTolleranceLimit = false;
                       }
                     } else {
                       // è entrato dopo
                       newLimit =
-                          (pairStamping.in.date.toLocalTime().isAfter(startShift.plusMinutes(15)))
-                            ? startShift.plusMinutes(15) : pairStamping.in.date.toLocalTime();
-                      if (pairStamping.in.date.toLocalTime().isAfter(startShift.plusMinutes(15))) {
+                          (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(15)))
+                            ? startShift.plusMinutes(15) : pairStamping.first.date.toLocalTime();
+                      if (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(15))) {
                         inTolleranceLimit = false;
                       }
                     }
@@ -647,27 +647,27 @@ public class CompetenceUtility {
 
                     // calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto dei
                     // 15 min di comporto se il turnista è andato a  pranzo prima
-                    if (pairStamping.out.date.toLocalTime().isBefore(startLunchTime)) {
+                    if (pairStamping.second.date.toLocalTime().isBefore(startLunchTime)) {
                       log.trace("vedo uscita per pranzo prima");
                       newLimit =
                           (startLunchTime.minusMinutes(15)
-                                .isAfter(pairStamping.out.date.toLocalTime()))
-                            ? startLunchTime.minusMinutes(15) : pairStamping.out.date.toLocalTime();
+                                .isAfter(pairStamping.second.date.toLocalTime()))
+                            ? startLunchTime.minusMinutes(15) : pairStamping.second.date.toLocalTime();
                       diffStartLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, startLunchTime);
                       if (startLunchTime.minusMinutes(15)
-                            .isAfter(pairStamping.out.date.toLocalTime())) {
+                            .isAfter(pairStamping.second.date.toLocalTime())) {
                         inTolleranceLimit = false;
                       }
-                    } else if (pairStamping.out.date.toLocalTime().isBefore(endLunchTime)) {
+                    } else if (pairStamping.second.date.toLocalTime().isBefore(endLunchTime)) {
                       // è andato a pranzo dopo
                       log.debug("vedo uscita per pranzo dopo");
                       newLimit =
                           (startLunchTime.plusMinutes(15)
-                                .isAfter(pairStamping.out.date.toLocalTime()))
-                            ? pairStamping.out.date.toLocalTime() : startLunchTime.plusMinutes(15);
+                                .isAfter(pairStamping.second.date.toLocalTime()))
+                            ? pairStamping.second.date.toLocalTime() : startLunchTime.plusMinutes(15);
                       if (startLunchTime.plusMinutes(15)
-                            .isBefore(pairStamping.out.date.toLocalTime())) {
+                            .isBefore(pairStamping.second.date.toLocalTime())) {
                         inTolleranceLimit = false;
                       }
                       diffStartLunchTime =
@@ -680,43 +680,43 @@ public class CompetenceUtility {
                   }
 
                   // l'intervallo di tempo lavorato interseca la parte del turno dopo pranzo
-                  if ((pairStamping.in.date.toLocalTime().isBefore(endLunchTime)
-                      && pairStamping.out.date.toLocalTime().isAfter(endLunchTime))
-                      || (pairStamping.in.date.toLocalTime().isAfter(endLunchTime)
-                          && pairStamping.in.date.toLocalTime().isBefore(endShift))) {
+                  if ((pairStamping.first.date.toLocalTime().isBefore(endLunchTime)
+                      && pairStamping.second.date.toLocalTime().isAfter(endLunchTime))
+                      || (pairStamping.first.date.toLocalTime().isAfter(endLunchTime)
+                          && pairStamping.first.date.toLocalTime().isBefore(endShift))) {
 
                     // conta le ore lavorate in turno dopo pranzo
                     lowLimit =
-                        (pairStamping.in.date.toLocalTime().isBefore(endLunchTime))
-                          ? endLunchTime : pairStamping.in.date.toLocalTime();
+                        (pairStamping.first.date.toLocalTime().isBefore(endLunchTime))
+                          ? endLunchTime : pairStamping.first.date.toLocalTime();
                     upLimit =
-                        (pairStamping.out.date.toLocalTime().isBefore(endShift))
-                          ? pairStamping.out.date.toLocalTime() : endShift;
+                        (pairStamping.second.date.toLocalTime().isBefore(endShift))
+                          ? pairStamping.second.date.toLocalTime() : endShift;
                     workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
                     log.debug("N.2 - elt={} --- es={}  slowLimit={} upLimit={} workingMinutes={}",
                         endLunchTime, endShift, lowLimit, upLimit, workingMinutes);
 
                     // calcola gli scostamenti dalla seconda fascia del turno tenendo conto dei
                     // 15 min di comporto se il turnista è rientrato prima dalla pausa pranzo
-                    if (pairStamping.in.date.toLocalTime().isBefore(endLunchTime)
-                        && pairStamping.in.date.toLocalTime().isAfter(startLunchTime)) {
+                    if (pairStamping.first.date.toLocalTime().isBefore(endLunchTime)
+                        && pairStamping.first.date.toLocalTime().isAfter(startLunchTime)) {
                       log.trace("vedo rientro da pranzo prima");
                       newLimit =
                           (endLunchTime.minusMinutes(15)
-                                .isAfter(pairStamping.in.date.toLocalTime()))
-                            ? endLunchTime.minusMinutes(15) : pairStamping.in.date.toLocalTime();
+                                .isAfter(pairStamping.first.date.toLocalTime()))
+                            ? endLunchTime.minusMinutes(15) : pairStamping.first.date.toLocalTime();
                       diffEndLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
                       log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}",
                           newLimit, endLunchTime, diffEndLunchTime);
-                    } else if (pairStamping.in.date.toLocalTime().isBefore(endShift)
-                          && pairStamping.in.date.toLocalTime().isAfter(endLunchTime)) {
+                    } else if (pairStamping.first.date.toLocalTime().isBefore(endShift)
+                          && pairStamping.first.date.toLocalTime().isAfter(endLunchTime)) {
                       // è rientrato dopo
                       log.trace("vedo rientro da pranzo dopo");
                       newLimit =
-                          (pairStamping.in.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15)))
-                            ? endLunchTime.plusMinutes(15) : pairStamping.in.date.toLocalTime();
-                      if (pairStamping.in.date.toLocalTime()
+                          (pairStamping.first.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15)))
+                            ? endLunchTime.plusMinutes(15) : pairStamping.first.date.toLocalTime();
+                      if (pairStamping.first.date.toLocalTime()
                             .isAfter(endLunchTime.plusMinutes(15))) {
                         inTolleranceLimit = false;
                       }
@@ -728,20 +728,20 @@ public class CompetenceUtility {
 
 
                     // se il turnista è uscito prima del turno
-                    if (pairStamping.out.date.toLocalTime().isBefore(endShift)) {
+                    if (pairStamping.second.date.toLocalTime().isBefore(endShift)) {
                       log.debug("vedo uscita prima della fine turno");
                       newLimit =
-                          (endShift.minusMinutes(15).isAfter(pairStamping.out.date.toLocalTime()))
-                            ? endShift.minusMinutes(15) : pairStamping.out.date.toLocalTime();
-                      if (endShift.minusMinutes(15).isAfter(pairStamping.out.date.toLocalTime())) {
+                          (endShift.minusMinutes(15).isAfter(pairStamping.second.date.toLocalTime()))
+                            ? endShift.minusMinutes(15) : pairStamping.second.date.toLocalTime();
+                      if (endShift.minusMinutes(15).isAfter(pairStamping.second.date.toLocalTime())) {
                         inTolleranceLimit = false;
                       }
                     } else {
                       log.trace("vedo uscita dopo la fine turno");
                       // il turnista è uscito dopo la fine del turno
                       newLimit =
-                          (pairStamping.out.date.toLocalTime().isAfter(endShift.plusMinutes(15)))
-                            ? endShift.plusMinutes(15) : pairStamping.out.date.toLocalTime();
+                          (pairStamping.second.date.toLocalTime().isAfter(endShift.plusMinutes(15)))
+                            ? endShift.plusMinutes(15) : pairStamping.second.date.toLocalTime();
                     }
                     diffEndShift = DateUtility.getDifferenceBetweenLocalTime(endShift, newLimit);
                     log.debug("diffEndShift={}", diffEndShift);
@@ -749,8 +749,8 @@ public class CompetenceUtility {
 
                   // write the pair stamping
                   stampings =
-                      stampings.concat(pairStamping.in.date.toString("HH:mm")).concat("-")
-                        .concat(pairStamping.out.date.toString("HH:mm")).concat("  ");
+                      stampings.concat(pairStamping.first.date.toString("HH:mm")).concat("-")
+                        .concat(pairStamping.second.date.toString("HH:mm")).concat("  ");
                 }
 
                 stampings.concat("<br />");
