@@ -281,6 +281,7 @@ wtt= Tipo Orario
 
 year= Anno (se presente)
 
+vwt.name= Nome orario
 
 ###########################
 # Messaggi di validazione
