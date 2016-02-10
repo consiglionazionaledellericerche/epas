@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -14,6 +15,8 @@ import it.cnr.iit.epas.DateUtility;
 
 import models.Configuration;
 import models.Office;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
 import models.enumerate.EpasParam;
 import models.enumerate.EpasParam.EpasParamTimeType;
 import models.enumerate.EpasParam.EpasParamValueType;
@@ -50,27 +53,24 @@ public class ConfigurationManager {
   public Configuration updateLocalTime(EpasParam epasParam, Office office, LocalTime localTime, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME));
-    return build(epasParam, office, localTime.hourOfDay() + ":" + localTime.minuteOfHour(), 
-        begin, end, false);
+    return build(epasParam, office,epasParam.convertValue(localTime), begin, end, false);
   }
 
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime Interval. 
    * @param epasParam parametro.
    * @param office sede.
-   * @param localTimeFrom localTime inzio
-   * @param localTimeTo localTime fine
+   * @param from localTime inzio
+   * @param to localTime fine
    * @param begin inizio
    * @param end fine
    * @return configurazione
    */
   public Configuration updateLocalTimeInterval(EpasParam epasParam, Office office, 
-      LocalTime localTimeFrom, LocalTime localTimeTo, 
-      Optional<LocalDate> begin, Optional<LocalDate> end) {
-    Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME));
-    return build(epasParam, office, 
-        localTimeFrom.hourOfDay() + ":" + localTimeFrom.minuteOfHour() + "-" +
-            localTimeTo.hourOfDay() + ":" + localTimeTo.minuteOfHour(),
+      LocalTime from, LocalTime to, Optional<LocalDate> begin, Optional<LocalDate> end) {
+    Preconditions.checkState(epasParam.epasParamValueType
+        .equals(EpasParamValueType.LOCALTIME_INTERVAL));
+    return build(epasParam, office, epasParam.convertLocalTimeInterval(from, to) ,
             begin, end, false);
   }
 
@@ -86,7 +86,7 @@ public class ConfigurationManager {
   public Configuration updateLocalDate(EpasParam epasParam, Office office, LocalDate localDate, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE));
-    return build(epasParam, office, localDate.toString(), begin, end, false);
+    return build(epasParam, office, epasParam.convertValue(localDate), begin, end, false);
   }
 
   /**
@@ -102,7 +102,7 @@ public class ConfigurationManager {
   public Configuration updateDayMonth(EpasParam epasParam, Office office, int day, int month, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
-    return build(epasParam, office, day + "-" + month, begin, end, false);
+    return build(epasParam, office, epasParam.convertDayMonth(day, month), begin, end, false);
   }
 
   /**
@@ -118,7 +118,7 @@ public class ConfigurationManager {
   public Configuration updateYearlyDayMonth(EpasParam epasParam, Office office, int day, int month, 
       int year, boolean applyToTheEnd) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
-    return build(epasParam, office, day + "-" + month, 
+    return build(epasParam, office, epasParam.convertDayMonth(day, month), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd);
   }
@@ -135,7 +135,7 @@ public class ConfigurationManager {
   public Configuration updateYearlyMonth(EpasParam epasParam, Office office, int month, 
       int year, boolean applyToTheEnd) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.MONTH));
-    return build(epasParam, office, "" + month, 
+    return build(epasParam, office, epasParam.convertValue(month), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd);
   }
@@ -152,7 +152,7 @@ public class ConfigurationManager {
   public Configuration updateBoolean(EpasParam epasParam, Office office, boolean value, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN));
-    return build(epasParam, office, "" + value, begin, end, false);
+    return build(epasParam, office, epasParam.convertValue(value), begin, end, false);
   }
 
   /**
@@ -167,7 +167,7 @@ public class ConfigurationManager {
   public Configuration updateInteger(EpasParam epasParam, Office office, Integer value, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER));
-    return build(epasParam, office, "" + value, begin, end, false);
+    return build(epasParam, office, epasParam.convertValue(value), begin, end, false);
   }
 
   /**
@@ -182,7 +182,7 @@ public class ConfigurationManager {
   public Configuration updateYearlyInteger(EpasParam epasParam, Office office, 
       int value, int year, boolean applyToTheEnd) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER));
-    return build(epasParam, office, "" + value, 
+    return build(epasParam, office, epasParam.convertValue(value), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd);
   }
@@ -199,7 +199,7 @@ public class ConfigurationManager {
   public Configuration updateIpList(EpasParam epasParam, Office office, List<String> values, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST));
-    return build(epasParam, office, Joiner.on("-").join(values), begin, end, false);
+    return build(epasParam, office, epasParam.convertIpList(values), begin, end, false);
   }
 
   /**
@@ -215,7 +215,7 @@ public class ConfigurationManager {
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL));
     // TODO: validare la mail
-    return build(epasParam, office, email, begin, end, false);
+    return build(epasParam, office, epasParam.convertValue(email), begin, end, false);
   }
 
   /**
@@ -288,5 +288,62 @@ public class ConfigurationManager {
     }
     return end;
   }
+  
+  /**
+   * La lista delle configurazioni della sede per la data. <br> 
+   * Se non esiste (inizializzazione parametro) applica il valore di default. 
+   * @param office sede
+   * @param date data
+   * @return lista di configurazioni
+   */
+  public List<Configuration> getOfficeConfigurationsByDate(Office office, LocalDate date) {
+
+    List<Configuration> list = Lists.newArrayList();
+    for (EpasParam epasParam : EpasParam.values()) {
+      list.add(getOfficeConfiguration(office, epasParam, date));
+    }
+    return list;
+  }
+
+  /**
+   * Preleva la configurazione per la sede, il tipo e la data passata.
+   * @param office
+   * @param epasParam
+   * @param date
+   * @return
+   */
+  public Configuration getOfficeConfiguration(Office office, EpasParam epasParam, LocalDate date) {
+    
+    //TODO verificare se serve la cache .... forse no.
+    for (Configuration configuration : office.configurations) {
+      if (!configuration.epasParam.equals(epasParam)) {
+        continue;
+      }
+      if (!DateUtility.isDateIntoInterval(date, 
+          new DateInterval(configuration.beginDate, configuration.calculatedEnd()))) {
+        continue;
+      }
+      return configuration;
+    }
+    return buildDefault(office, epasParam);
+  }
+  
+  /**
+   * Costruttore della configurazione di default se non esiste.<br>
+   * Verificare che venga chiamata esclusivamente nel caso di nuovo enumerato !!!
+   * Di norma la configurazione di default andrebbe creata tramite migrazione o al momento
+   * della creazione della sede.
+   * @param office
+   * @param epasParam
+   * @return
+   */
+  private Configuration buildDefault(Office office, EpasParam epasParam) {
+        
+    return build(epasParam, office, (String)epasParam.defaultValue, 
+        Optional.fromNullable(office.beginDate), Optional.<LocalDate>absent(), true);
+
+  }
+
+  
 
 }

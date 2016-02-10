@@ -11,10 +11,12 @@ import it.cnr.iit.epas.DateUtility;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ConfYearManager.MessageResult;
+import manager.ConfigurationManager;
 import manager.SecureManager;
 
 import models.ConfGeneral;
 import models.ConfYear;
+import models.Configuration;
 import models.Office;
 import models.enumerate.Parameter;
 
@@ -25,6 +27,7 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -40,6 +43,9 @@ public class Configurations extends Controller {
   private static ConfGeneralManager confGeneralManager;
   @Inject
   private static ConfYearManager confYearManager;
+  
+  @Inject
+  private static ConfigurationManager configurationManager;
 
   @Inject
   private static SecurityRules rules;
@@ -245,7 +251,10 @@ public class Configurations extends Controller {
     render(office, offices);
   }
   
-  
+  /**
+   * Visualizzazioine nuova gestione configurazione.
+   * @param officeId
+   */
   public static void show(Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
@@ -253,7 +262,12 @@ public class Configurations extends Controller {
     
     rules.checkIfPermitted(office);
     
-    render(office);
+    List<Configuration> currentConfiguration = configurationManager
+        .getOfficeConfigurationsByDate(office, LocalDate.now());
+    
+    render(office, currentConfiguration);
   }
+  
+  
 
 }

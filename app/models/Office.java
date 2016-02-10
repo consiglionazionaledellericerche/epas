@@ -8,6 +8,7 @@ import it.cnr.iit.epas.NullStringBinder;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.base.PropertyInPeriod;
 import models.enumerate.EpasParam;
 
 import org.hibernate.envers.Audited;
@@ -128,6 +129,11 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
     return null;
   }
   
+  /**
+   * Filtra dalla lista di configurations le occorrenze del tipo epasParam.
+   * @param epasParam filtro
+   * @return insieme filtrato
+   */
   private Set<IPropertyInPeriod> filterConfigurations(EpasParam epasParam) {
     Set<IPropertyInPeriod> configurations = Sets.newHashSet();
     for (Configuration configuration : this.configurations) {
@@ -137,4 +143,5 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
     }
     return configurations;
   }
+
 }
