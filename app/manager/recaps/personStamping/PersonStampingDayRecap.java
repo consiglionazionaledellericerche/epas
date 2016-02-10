@@ -234,7 +234,7 @@ public class PersonStampingDayRecap {
          * Viene Ignorato
          */
         if (contract.beginDate.isAfter(pd.date) ||
-            (contract.sourceDateResidual != null && pd.date.isBefore(contract.sourceDateResidual)) ||
+            (contract.sourceDateResidual != null && !pd.date.isAfter(contract.sourceDateResidual)) ||
             pd.date.isBefore(person.createdAt.toLocalDate())) {
           this.ignoreDay = true;
         }
