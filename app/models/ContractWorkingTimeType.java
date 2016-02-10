@@ -54,28 +54,20 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
-    if (otherValue instanceof ContractWorkingTimeType) {
-      return this.workingTimeType.id == (((ContractWorkingTimeType) otherValue).workingTimeType.id);
+    if (otherValue instanceof WorkingTimeType) {
+      return this.getValue().equals(((WorkingTimeType)otherValue));
     }
     return false;
   }
 
-
-  /* (non-Javadoc)
-   * @see models.base.IPropertyInPeriod#getType()
-   */
   @Override
   public Object getType() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.getClass();
   }
 
-  /* (non-Javadoc)
-   * @see models.base.IPropertyInPeriod#setType(java.lang.Object)
-   */
   @Override
   public void setType(Object value) {
-    // TODO Auto-generated method stub
+    // questo metodo in questo caso non serve, perchè i periods sono tutti dello stesso tipo.
   }
   
   @Override

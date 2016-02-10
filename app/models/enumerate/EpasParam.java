@@ -1,6 +1,7 @@
 package models.enumerate;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.testng.collections.Lists;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public enum EpasParam {
   
   DATE_START_MEAL_TICKET("date_start_meal_ticket",
       EpasParamTimeType.GENERAL,
-      EpasParamValueType.DATE,
+      EpasParamValueType.LOCALDATE,
       Lists.newArrayList(RecomputationType.RESIDUAL_MEALTICKETS),
       new LocalDate(2014, 7, 1)),
   
@@ -93,13 +94,13 @@ public enum EpasParam {
   
   HOUR_MAX_TO_CALCULATE_WORKTIME("hour_max_to_calculate_worktime",
       EpasParamTimeType.PERIODIC,
-      EpasParamValueType.HOUR_MINUTE,
+      EpasParamValueType.LOCALTIME,
       Lists.newArrayList(RecomputationType.DAYS),
-      "5:00"),
+      new LocalTime(5, 0)),
   
   LUNCH_INTERVAL("lunch_interval",
       EpasParamTimeType.PERIODIC,
-      EpasParamValueType.HOUR_MINUTE_INTERVAL,
+      EpasParamValueType.LOCALTIME_INTERVAL,
       Lists.newArrayList(RecomputationType.DAYS),
       "12:00-15:00");
 
@@ -127,7 +128,7 @@ public enum EpasParam {
   }
   
   public enum EpasParamValueType {
-    DAY_MONTH, DATE, MONTH, HOUR_MINUTE, HOUR_MINUTE_INTERVAL, 
+    LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE,  DAY_MONTH, MONTH,  
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
   }
 
