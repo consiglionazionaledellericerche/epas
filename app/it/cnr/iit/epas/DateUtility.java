@@ -56,6 +56,12 @@ public class DateUtility {
     }
   }
 
+  /**
+   * Festività generale.
+   * @param officePatron giorno del patrono
+   * @param date data da verificare
+   * @return esito
+   */
   public static boolean isGeneralHoliday(
       final Optional<MonthDay> officePatron, final LocalDate date) {
 
@@ -238,6 +244,20 @@ public class DateUtility {
     }
     return true;
   }
+  
+  /**
+   * Se i due inervalli coincidono.
+   * @param first first
+   * @param second second
+   * @return esito
+   */
+  public static boolean areIntervalsEquals(final DateInterval first, final DateInterval second) {
+    if (first.getBegin().isEqual(second.getBegin()) 
+        && first.getEnd().isEqual(second.getEnd())) {
+      return true;
+    }
+    return false;
+  }
 
   /**
    * La data massima che equivale a infinito.
@@ -282,27 +302,27 @@ public class DateUtility {
     if (minute == 0) {
       return "00:00";
     }
-    String s = "";
+    String string = "";
     int positiveMinute = minute;
     if (minute < 0) {
-      s = s + "-";
+      string = string + "-";
       positiveMinute = minute * -1;
     }
     int hour = positiveMinute / MINUTE_IN_HOUR;
     int min = positiveMinute % MINUTE_IN_HOUR;
 
     if (hour < 10) {
-      s = s + "0" + hour;
+      string = string + "0" + hour;
     } else {
-      s = s + hour;
+      string = string + hour;
     }
-    s = s + ":";
+    string = string + ":";
     if (min < 10) {
-      s = s + "0" + min;
+      string = string + "0" + min;
     } else {
-      s = s + min;
+      string = string + min;
     }
-    return s;
+    return string;
   }
 
 

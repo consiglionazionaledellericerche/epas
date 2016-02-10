@@ -8,6 +8,7 @@ import it.cnr.iit.epas.NullStringBinder;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.enumerate.EpasParam;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -19,6 +20,7 @@ import play.data.validation.Unique;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -120,9 +122,19 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
     
-    if (type.equals(Configuration.class)) {
-      return Sets.<IPropertyInPeriod>newHashSet(configurations);
+    if (type.getClass().equals(EpasParam.class)) {
+      return (Collection<IPropertyInPeriod>)filterConfigurations((EpasParam)type);
     }
     return null;
+  }
+  
+  private Set<IPropertyInPeriod> filterConfigurations(EpasParam epasParam) {
+    Set<IPropertyInPeriod> configurations = Sets.newHashSet();
+    for (Configuration configuration : this.configurations) {
+      if (configuration.epasParam.equals(epasParam)) {
+        configurations.add(configuration);
+      }
+    }
+    return configurations;
   }
 }

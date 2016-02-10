@@ -52,7 +52,7 @@ CREATE TABLE configurations (
   office_id BIGINT NOT NULL,
   epas_param TEXT NOT NULL,
   field_value TEXT NOT NULL,
-  begin_date DATE,
+  begin_date DATE NOT NULL,
   end_date DATE,
   FOREIGN KEY (office_id) REFERENCES office (id)
 );

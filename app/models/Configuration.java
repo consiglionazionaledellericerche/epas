@@ -27,7 +27,7 @@ public class Configuration extends PropertyInPeriod {
   public Office office;
 
   @Enumerated(EnumType.STRING)
-  @Column(name="epas_param")
+  @Column(name = "epas_param")
   public EpasParam epasParam;
 
   @Column(name = "field_value")
@@ -65,11 +65,11 @@ public class Configuration extends PropertyInPeriod {
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
-    //if (this.epasParam.equals(EpasParam.LUNCH_INTERVAL)) {
-      if (this.fieldValue.equals(otherValue)) {
+    if (otherValue instanceof String) {
+      if (this.getValue().equals((String)otherValue)) {
         return true;
       }
-    //}
+    }
     return false;
   }
 
