@@ -10,6 +10,65 @@
    <p>Elenco dei parametri configurazione per la sede <strong>${office.name}</strong> ed il loro valore attuale.</p>
   #{/alert}
   
+  <h3>Parametri Generali</h3>
+  <table class="table">
+    <tr>
+      <th>Parametro</th>
+      <th>Valore</th>
+      <th>Dal</th>
+      <th>Al</th>
+    </tr>
+  #{list items:currentConfiguration, as:'conf'}
+    #{if conf.epasParam.general}
+  	<tr>
+  	  <td>${conf.epasParam.name}</td>
+  	  <td>${conf.fieldValue}</td>
+  	  <td>${conf.beginDate}</td>
+  	  <td>${conf.calculatedEnd()}</td>
+  	</tr>
+  	#{/if}
+  #{/list}
+  </table>
   
-  TODO
+  <h3>Parametri a cadenza Annuale</h3>
+  <table class="table">
+    <tr>
+      <th>Parametro</th>
+      <th>Valore</th>
+      <th>Dal</th>
+      <th>Al</th>
+    </tr>
+  #{list items:currentConfiguration, as:'conf'}
+  	#{if conf.epasParam.yearly}
+  	<tr>
+  	  <td>${conf.epasParam.name}</td>
+  	  <td>${conf.fieldValue}</td>
+  	  <td>${conf.beginDate}</td>
+  	  <td>${conf.calculatedEnd()}</td>
+  	</tr>
+  	#{/if}
+  #{/list}
+  </table>
+  
+  
+  <h3>Parametri periodici</h3>
+  <table class="table">
+    <tr>
+      <th>Parametro</th>
+      <th>Valore</th>
+      <th>Dal</th>
+      <th>Al</th>
+    </tr>
+  #{list items:currentConfiguration, as:'conf'}
+  	#{if conf.epasParam.periodic}
+  	<tr>
+  	  <td>${conf.epasParam.name}</td>
+  	  <td>${conf.fieldValue}</td>
+  	  <td>${conf.beginDate}</td>
+  	  <td>${conf.calculatedEnd()}</td>
+  	</tr>
+  	#{/if}
+  #{/list}
+  </table>
+  
 </div>

@@ -1,5 +1,7 @@
 package models.enumerate;
 
+import com.google.common.base.Joiner;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.testng.collections.Lists;
@@ -15,37 +17,37 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.DAY_MONTH,
       Lists.newArrayList(RecomputationType.DAYS),
-      "1-1"),
+      convertDayMonth(1,1)),
   
   WEB_STAMPING_ALLOWED("web_stamping_allowed",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       Lists.newArrayList(RecomputationType.NONE),
-      (Object)new Boolean(false)),
+      convertValue(false)),
   
-  ADDRESSES_ALLOWED("",
+  ADDRESSES_ALLOWED("addresses_allowed",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.IP_LIST,
       Lists.newArrayList(RecomputationType.NONE),
-      ""),
+      convertIpList(Lists.<String>newArrayList())),
   
   NUMBER_OF_VIEWING_COUPLE("number_of_viewing_couple",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.INTEGER,
       Lists.newArrayList(RecomputationType.NONE),
-      new Integer(2)),
+      convertValue(2)),
   
   DATE_START_MEAL_TICKET("date_start_meal_ticket",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.LOCALDATE,
       Lists.newArrayList(RecomputationType.RESIDUAL_MEALTICKETS),
-      new LocalDate(2014, 7, 1)),
+      convertValue(new LocalDate(2014, 7, 1))),
   
   SEND_EMAIL("send_email",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       Lists.newArrayList(RecomputationType.NONE),
-      new Boolean(false)),
+      convertValue(false)),
   
   /**
    * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema. 
@@ -54,7 +56,7 @@ public enum EpasParam {
       EpasParamTimeType.GENERAL,
       EpasParamValueType.EMAIL,
       Lists.newArrayList(RecomputationType.NONE),
-      ""),
+      convertValue("")),
   
   //#######################################
   // YEARLY PARAMS
@@ -63,31 +65,31 @@ public enum EpasParam {
       EpasParamTimeType.YEARLY,
       EpasParamValueType.DAY_MONTH,
       Lists.newArrayList(RecomputationType.NONE),
-      "8-31"),
+      convertDayMonth(8,31)),
 
   MONTH_EXPIRY_RECOVERY_DAYS_13("month_expire_recovery_days_13",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.MONTH,
       Lists.newArrayList(RecomputationType.RESIDUAL_HOURS),
-      "0"),
+      convertValue(0)),
   
-  MONTH_EXPIRY_RECOVERY_DAYS_49("month_expire_recovery_days_13",
+  MONTH_EXPIRY_RECOVERY_DAYS_49("month_expire_recovery_days_49",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.MONTH,
       Lists.newArrayList(RecomputationType.RESIDUAL_HOURS),
-      "3"),
+      convertValue(3)),
 
   MAX_RECOVERY_DAYS_13("max_recovery_days_13",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.INTEGER,
       Lists.newArrayList(RecomputationType.NONE),
-      "22"),
+      convertValue(22)),
   
   MAX_RECOVERY_DAYS_49("max_recovery_days_49",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.INTEGER,
       Lists.newArrayList(RecomputationType.NONE),
-      "0"),
+      convertValue(0)),
 
   //#######################################
   // PERIODIC PARAMS
@@ -96,13 +98,13 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME,
       Lists.newArrayList(RecomputationType.DAYS),
-      new LocalTime(5, 0)),
+      convertValue(new LocalTime(5, 0))),
   
   LUNCH_INTERVAL("lunch_interval",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       Lists.newArrayList(RecomputationType.DAYS),
-      "12:00-15:00");
+      convertLocalTimeInterval(new LocalTime(12,0), new LocalTime(15,0)));
 
   public final String name;
   public final EpasParamTimeType epasParamTimeType;
@@ -132,4 +134,62 @@ public enum EpasParam {
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
   }
 
+  public boolean isYearly() {
+    return this.epasParamTimeType.equals(EpasParamTimeType.YEARLY);
+  }
+  
+  public boolean isGeneral() {
+    return this.epasParamTimeType.equals(EpasParamTimeType.GENERAL);
+  }
+  
+  public boolean isPeriodic() {
+    return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
+  }
+  
+  // ##############################################################
+  // Parte static
+  
+  /**
+   * Converte il tipo primitivo nella formattazione string.
+   * @param valueType
+   * @param value
+   * @return
+   */
+  public static String convertValue(Object value) {
+    if (value instanceof String) {
+      return (String)value;
+    }
+
+    if (value instanceof Boolean) {
+      return "" + value;
+    }
+    
+    if (value instanceof Integer) {
+      return "" + value;
+    }
+    
+    if (value instanceof LocalTime) {
+      return ((LocalTime)value).getHourOfDay() + ":" + ((LocalTime)value).getMinuteOfHour();
+    }
+    
+    if (value instanceof LocalDate) {
+      return ((LocalDate)value).toString();
+    }
+    
+    return null;
+  }
+  
+  public static String convertLocalTimeInterval(LocalTime from, LocalTime to) {
+    return from.getHourOfDay() + ":" + from.getMinuteOfHour() + "-" 
+        + to.getHourOfDay() + ":" + to.getMinuteOfHour();
+  }
+  
+  public static String convertDayMonth(int day, int month) {
+    return day + "-" + month;
+  }
+  
+  public static String convertIpList(List<String> ipList) {
+    return Joiner.on("-").join(ipList);
+  }
+  
 }
