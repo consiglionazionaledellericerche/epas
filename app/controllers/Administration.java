@@ -28,6 +28,7 @@ import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 
+import org.apache.commons.lang.WordUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -46,29 +47,29 @@ import javax.inject.Inject;
 public class Administration extends Controller {
 
   @Inject
-  private static SecureManager secureManager;
+  static SecureManager secureManager;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static ConsistencyManager consistencyManager;
+  static ConsistencyManager consistencyManager;
   @Inject
-  private static ExportToYaml exportToYaml;
+  static ExportToYaml exportToYaml;
   @Inject
-  private static CompetenceUtility competenceUtility;
+  static CompetenceUtility competenceUtility;
   @Inject
-  private static ConfGeneralManager confGeneralManager;
+  static ConfGeneralManager confGeneralManager;
   @Inject
-  private static IWrapperFactory wrapperFactory;
+  static IWrapperFactory wrapperFactory;
   @Inject
-  private static ContractDao contractDao;
+  static ContractDao contractDao;
   @Inject
-  private static ContractManager contractManager;
+  static ContractManager contractManager;
   @Inject
-  private static PersonDayDao personDayDao;
+  static PersonDayDao personDayDao;
   @Inject
-  private static PersonDayManager personDayManager;
+  static PersonDayManager personDayManager;
   @Inject
-  private static PersonDayInTroubleManager personDayInTroubleManager;
+  static PersonDayInTroubleManager personDayInTroubleManager;
 
   /**
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
@@ -350,6 +351,23 @@ public class Administration extends Controller {
     flash.success("Operazione completata");
     
     utilities();
+  }
+
+  public static void capitalizePeople() {
+
+    List<Person> people = Person.findAll();
+    for (Person person : people) {
+
+      person.name = WordUtils.capitalizeFully(person.name);
+      person.surname = WordUtils.capitalizeFully(person.surname);
+
+      person.save();
+    }
+
+    flash.success("Operazione completata");
+
+    utilities();
+
   }
 
 }
