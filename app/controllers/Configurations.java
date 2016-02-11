@@ -268,6 +268,19 @@ public class Configurations extends Controller {
     render(office, currentConfiguration);
   }
   
+  /**
+   * Edit del parametro di configurazione.
+   * @param configuration
+   */
+  public static void edit(Long configurationId) {
+    
+    Configuration configuration = Configuration.findById(configurationId);
+    notFoundIfNull(configuration);
+    rules.checkIfPermitted(configuration.office);
+    
+    render(configuration);
+  }
+  
   
 
 }

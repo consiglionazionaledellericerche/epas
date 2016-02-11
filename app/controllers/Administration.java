@@ -466,13 +466,21 @@ public class Administration extends Controller {
       
       log.info("Inizio migrazione parametri periodici {}", office.name);
       
-      Integer hour = confYearManager
-          .getIntegerFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, office, 
+      String hour = confYearManager
+          .getFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME, office, 
               LocalDate.now().getYear());
-      configurationManager.updateLocalTime(EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, office, 
-          new LocalTime(hour, 0), Optional.of(office.beginDate), 
-          Optional.fromNullable(office.endDate));
+
+      if (hour.split(":").length == 1) {
+        configurationManager.updateLocalTime(EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, office,
+            new LocalTime(new Integer(hour.split(":")[0]), 0), 
+            Optional.of(office.beginDate), Optional.fromNullable(office.endDate));  
+      } else {
+        configurationManager.updateLocalTime(EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, office,
+            new LocalTime(new Integer(hour.split(":")[0]), new Integer(hour.split(":")[1])), 
+            Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+      }
       
+
       Integer mealTimeStartHour = confGeneralManager
           .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, office);
       Integer mealTimeStartMinute = confGeneralManager

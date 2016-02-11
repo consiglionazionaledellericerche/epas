@@ -323,8 +323,8 @@ public class ConfigurationManager {
       if (!configuration.epasParam.equals(epasParam)) {
         continue;
       }
-      if (!DateUtility.isDateIntoInterval(date, 
-          new DateInterval(configuration.beginDate, configuration.calculatedEnd()))) {
+      DateInterval interval = new DateInterval(configuration.beginDate, configuration.calculatedEnd()); 
+      if (!DateUtility.isDateIntoInterval(date, interval)) {
         continue;
       }
       return configuration;
