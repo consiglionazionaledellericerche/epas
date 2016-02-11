@@ -1,6 +1,5 @@
 package manager;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -15,11 +14,14 @@ import it.cnr.iit.epas.DateUtility;
 
 import models.Configuration;
 import models.Office;
-import models.base.IPropertyInPeriod;
-import models.base.PeriodModel;
 import models.enumerate.EpasParam;
 import models.enumerate.EpasParam.EpasParamTimeType;
 import models.enumerate.EpasParam.EpasParamValueType;
+
+import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
+import models.enumerate.EpasParam.EpasParamValueType.IpList;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
+
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -53,7 +55,7 @@ public class ConfigurationManager {
   public Configuration updateLocalTime(EpasParam epasParam, Office office, LocalTime localTime, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME));
-    return build(epasParam, office,epasParam.convertValue(localTime), begin, end, false);
+    return build(epasParam, office,EpasParamValueType.formatValue(localTime), begin, end, false);
   }
 
   /**
@@ -70,7 +72,7 @@ public class ConfigurationManager {
       LocalTime from, LocalTime to, Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType
         .equals(EpasParamValueType.LOCALTIME_INTERVAL));
-    return build(epasParam, office, epasParam.convertLocalTimeInterval(from, to) ,
+    return build(epasParam, office, EpasParamValueType.formatValue(new LocalTimeInterval(from, to)),
             begin, end, false);
   }
 
@@ -86,7 +88,7 @@ public class ConfigurationManager {
   public Configuration updateLocalDate(EpasParam epasParam, Office office, LocalDate localDate, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE));
-    return build(epasParam, office, epasParam.convertValue(localDate), begin, end, false);
+    return build(epasParam, office, EpasParamValueType.formatValue(localDate), begin, end, false);
   }
 
   /**
@@ -102,7 +104,7 @@ public class ConfigurationManager {
   public Configuration updateDayMonth(EpasParam epasParam, Office office, int day, int month, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
-    return build(epasParam, office, epasParam.convertDayMonth(day, month), begin, end, false);
+    return build(epasParam, office, EpasParamValueType.formatValue(new DayMonth(day, month)), begin, end, false);
   }
 
   /**
@@ -118,7 +120,7 @@ public class ConfigurationManager {
   public Configuration updateYearlyDayMonth(EpasParam epasParam, Office office, int day, int month, 
       int year, boolean applyToTheEnd) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
-    return build(epasParam, office, epasParam.convertDayMonth(day, month), 
+    return build(epasParam, office, EpasParamValueType.formatValue(new DayMonth(day, month)), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd);
   }
@@ -134,8 +136,9 @@ public class ConfigurationManager {
    */
   public Configuration updateYearlyMonth(EpasParam epasParam, Office office, int month, 
       int year, boolean applyToTheEnd) {
+    // TODO: validare il valore 1-12 o fare un tipo specifico.
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.MONTH));
-    return build(epasParam, office, epasParam.convertValue(month), 
+    return build(epasParam, office, EpasParamValueType.formatValue(month), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd);
   }
@@ -152,7 +155,7 @@ public class ConfigurationManager {
   public Configuration updateBoolean(EpasParam epasParam, Office office, boolean value, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN));
-    return build(epasParam, office, epasParam.convertValue(value), begin, end, false);
+    return build(epasParam, office, EpasParamValueType.formatValue(value), begin, end, false);
   }
 
   /**
@@ -167,7 +170,7 @@ public class ConfigurationManager {
   public Configuration updateInteger(EpasParam epasParam, Office office, Integer value, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER));
-    return build(epasParam, office, epasParam.convertValue(value), begin, end, false);
+    return build(epasParam, office, EpasParamValueType.formatValue(value), begin, end, false);
   }
 
   /**
@@ -182,7 +185,7 @@ public class ConfigurationManager {
   public Configuration updateYearlyInteger(EpasParam epasParam, Office office, 
       int value, int year, boolean applyToTheEnd) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER));
-    return build(epasParam, office, epasParam.convertValue(value), 
+    return build(epasParam, office, EpasParamValueType.formatValue(value), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd);
   }
@@ -199,7 +202,8 @@ public class ConfigurationManager {
   public Configuration updateIpList(EpasParam epasParam, Office office, List<String> values, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST));
-    return build(epasParam, office, epasParam.convertIpList(values), begin, end, false);
+    return build(epasParam, office, EpasParamValueType.formatValue(new IpList(values)), 
+        begin, end, false);
   }
 
   /**
@@ -213,9 +217,9 @@ public class ConfigurationManager {
    */
   public Configuration updateEmail(EpasParam epasParam, Office office, String email, 
       Optional<LocalDate> begin, Optional<LocalDate> end) {
+    // TODO: validare il valore o fare un tipo specifico.
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL));
-    // TODO: validare la mail
-    return build(epasParam, office, epasParam.convertValue(email), begin, end, false);
+    return build(epasParam, office, EpasParamValueType.formatValue(email), begin, end, false);
   }
 
   /**
@@ -338,12 +342,40 @@ public class ConfigurationManager {
    * @return
    */
   private Configuration buildDefault(Office office, EpasParam epasParam) {
-        
+
     return build(epasParam, office, (String)epasParam.defaultValue, 
         Optional.fromNullable(office.beginDate), Optional.<LocalDate>absent(), true);
 
   }
 
+  /**
+   * Preleva il valore del parametro alla data.
+   * @param office sede
+   * @param epasParam tipo parametro
+   * @param date data
+   * @return value
+   */
+  public Object configValue(Office office, EpasParam epasParam, LocalDate date) {
+    Configuration configuration = getOfficeConfiguration(office, epasParam, date);
+    return EpasParamValueType.parseValue(configuration.epasParam.epasParamValueType, 
+        configuration.fieldValue);
+  }
+  
+  /**
+   * Preleva il valore del parametro per l'anno.
+   * @param office sede
+   * @param epasParam tipo parametro
+   * @param year anno
+   * @return value
+   */
+  public Object configValue(Office office, EpasParam epasParam, int year) {
+    Preconditions.checkArgument(epasParam.isYearly());
+    LocalDate date = new LocalDate(year, 1, 1);
+    if (office.beginDate.getYear() == year) {
+      date = office.beginDate;
+    }
+    return configValue(office, epasParam, date);
+  }
   
 
 }
