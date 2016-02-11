@@ -16,10 +16,9 @@
   <div class="alert alert-danger">
     Impostare il mese-anno dal quale effettuare i ricalcoli. Per effettuare il ricalcolo per tutti i
     dipendenti lasciare vuoto il campo Dipendente.
-
   </div>
-  #{f.selectModel 'person', items:personList, label:'Dipendente', placeholder:'Vuoto per ricalcolare
-  tutti' /}
+
+  #{f.selectModel 'person', items:personList, label:'Dipendente', placeholder:'Vuoto per ricalcolare tutti' /}
   #{f.input 'month', type:'number', label:'Mese' /}
   #{f.input 'year', type:'number', label:'anno' /}
   #{f.booleanRadio 'onlyRecap', label:'Ricalcola soli i riepiloghi', value:false /}
