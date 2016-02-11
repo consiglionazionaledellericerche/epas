@@ -405,7 +405,7 @@ public class Administration extends Controller {
       
       Optional<LocalDate> mealTicket = confGeneralManager
           .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-      LocalDate date = (LocalDate)EpasParam.DATE_START_MEAL_TICKET.defaultValue;
+      LocalDate date = new LocalDate(EpasParam.DATE_START_MEAL_TICKET.defaultValue);
       if (mealTicket.isPresent()) {
         date = mealTicket.get();
       } 
@@ -493,6 +493,9 @@ public class Administration extends Controller {
           Optional.fromNullable(office.endDate));
       
     }
+    
+    LocalTime test = new LocalTime(15, 0);
+    log.info("test is {}", test.toString("hh:mm"));
   }
 
 }
