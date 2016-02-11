@@ -354,6 +354,25 @@ StampTypes.INTRAMOENIA= Intramoenia
 StampTypes.GUARDIA_MEDICA= Guardia Medica
 StampTypes.PAUSA_PRANZO= Pausa Pranzo
 
+# Parametri di configurazione
+
+WEB_STAMPING_ALLOWED=Autorizzazione timbratura via web
+ADDRESSES_ALLOWED=Indirizzi IP autorizzati per timbratura via web
+NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
+DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
+SEND_EMAIL=Invio email di avviso ai dipendenti
+EMAIL_TO_CONTACT=Indirizzo email segreteria per replyTo
+
+EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
+MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
+MONTH_EXPIRY_RECOVERY_DAYS_49=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 4 a 9
+MAX_RECOVERY_DAYS_13=Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3
+MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9
+
+DAY_OF_PATRON=Festa del Patrono
+HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
+LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
+
 WayType.in= Ingresso
 WayType.out= Uscita
 

@@ -6,69 +6,93 @@
 
   #{title title:('Parametri configurazione ' + office.name), administration:true /}
   
-  #{alert color:'info'}
-   <p>Elenco dei parametri configurazione per la sede <strong>${office.name}</strong> ed il loro valore attuale.</p>
-  #{/alert}
+  #{tabs}
+    #{tabItem id:'general', title:'Generali', active:true /}
+    #{tabItem id:'yearly', title:'Annuali' /}
+    #{tabItem id:'periodic', title:'Periodici' /}
+  #{/tabs}
+
+<br>
+
+#{tabContent}
+
+  #{tabContentItem id:'general', active:true}
   
-  <h3>Parametri Generali</h3>
-  <table class="table">
-    <tr>
-      <th>Parametro</th>
-      <th>Valore</th>
-      <th>Dal</th>
-      <th>Al</th>
-    </tr>
-  #{list items:currentConfiguration, as:'conf'}
-    #{if conf.epasParam.general}
-  	<tr>
-  	  <td>${conf.epasParam.name}</td>
-  	  <td>${conf.fieldValue}</td>
-  	  <td>${conf.beginDate}</td>
-  	  <td>${conf.calculatedEnd()}</td>
-  	</tr>
-  	#{/if}
-  #{/list}
-  </table>
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri generali di configurazione per la sede 
+	   <strong>${office.name}</strong> ed il loro valore.</p>
+	  #{/alert}
+	  
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	    #{if conf.epasParam.general}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${conf.fieldValue}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	  
+  #{/tabContentItem}
   
-  <h3>Parametri a cadenza Annuale</h3>
-  <table class="table">
-    <tr>
-      <th>Parametro</th>
-      <th>Valore</th>
-      <th>Dal</th>
-      <th>Al</th>
-    </tr>
-  #{list items:currentConfiguration, as:'conf'}
-  	#{if conf.epasParam.yearly}
-  	<tr>
-  	  <td>${conf.epasParam.name}</td>
-  	  <td>${conf.fieldValue}</td>
-  	  <td>${conf.beginDate}</td>
-  	  <td>${conf.calculatedEnd()}</td>
-  	</tr>
-  	#{/if}
-  #{/list}
-  </table>
+  #{tabContentItem id:'yearly'}
   
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri di configurazione a cadenza annuale per la sede 
+	   <strong>${office.name}</strong> ed il loro valore attuale.</p>
+	  #{/alert}
+	  
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	  	#{if conf.epasParam.yearly}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${conf.fieldValue}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	  
+  #{/tabContentItem}
   
-  <h3>Parametri periodici</h3>
-  <table class="table">
-    <tr>
-      <th>Parametro</th>
-      <th>Valore</th>
-      <th>Dal</th>
-      <th>Al</th>
-    </tr>
-  #{list items:currentConfiguration, as:'conf'}
-  	#{if conf.epasParam.periodic}
-  	<tr>
-  	  <td>${conf.epasParam.name}</td>
-  	  <td>${conf.fieldValue}</td>
-  	  <td>${conf.beginDate}</td>
-  	  <td>${conf.calculatedEnd()}</td>
-  	</tr>
-  	#{/if}
-  #{/list}
-  </table>
+  #{tabContentItem id:'periodic'}
+  
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri di configurazione a cadenza periodica per la sede 
+	   <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+	  #{/alert}
+	
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	      <th>Dal</th>
+	      <th>Al</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	  	#{if conf.epasParam.periodic}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${conf.fieldValue}</td>
+	  	  <td>${conf.beginDate.format()}</td>
+	  	  <td>${conf.calculatedEnd()?.format()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+  #{/tabContentItem}
+#{/tabContent}
   
 </div>
