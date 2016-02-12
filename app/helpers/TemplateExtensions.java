@@ -15,6 +15,7 @@ import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -64,12 +65,11 @@ public class TemplateExtensions extends JavaExtensions {
           .toFormatter();
 
   private static final DateTimeFormatter DT_FORMATTER = DateTimeFormat
-          .forPattern("dd/MM/yyyy HH:mm:ss");
-
-  private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat
-          .forPattern("HH:mm");
+      .forPattern("dd/MM/yyyy HH:mm:ss");
+  private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
   private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
+    
   public static String format(ReadablePeriod period) {
     return PERIOD_FORMATTER.print(period);
   }
@@ -80,6 +80,11 @@ public class TemplateExtensions extends JavaExtensions {
 
   public static String format(LocalDateTime dt) {
     return DT_FORMATTER.print(dt);
+  }
+   
+  public static String format(LocalTime time) {
+    String prova = time.toString("HH:mm"); 
+    return prova;
   }
 
   public static String format(Object obj) {
@@ -131,15 +136,20 @@ public class TemplateExtensions extends JavaExtensions {
     if (obj instanceof BaseModel) {
       return ((BaseModel)obj).getLabel();
     }
-    return obj.toString();
-  }
-
-  public static String label(Boolean bool) {
-    if (bool) {
-      return "Si";
-    } else {
-      return "No";
+    if (obj instanceof LocalDate) {
+      return format((LocalDate)obj);
     }
+    if (obj instanceof LocalTime) {
+      return format((LocalTime)obj);
+    }
+    if (obj instanceof Boolean) {
+      if ((Boolean)obj) {
+        return Messages.get("views.common.yes_or_no.true");
+      } else {
+        return Messages.get("views.common.yes_or_no.false");
+      }
+    }
+    return obj.toString();
   }
 
   public static String label(Range<?> obj) {

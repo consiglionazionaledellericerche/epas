@@ -4,6 +4,7 @@ import models.base.BaseModel;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.EpasParamValueType;
 
 import org.hibernate.envers.Audited;
 
@@ -72,6 +73,16 @@ public class Configuration extends PropertyInPeriod {
     }
     return false;
   }
+  
+  /**
+   * 
+   * @return
+   */
+  public Object parseValue() {
+    return this.epasParam.epasParamValueType
+        .parseValue(this.epasParam.epasParamValueType, this.fieldValue);
+  }
+  
 
 
 }

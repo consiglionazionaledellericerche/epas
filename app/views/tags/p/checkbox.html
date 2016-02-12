@@ -1,0 +1,14 @@
+*{
+ arg (required) field.name attribute
+ value (optional) default to field.value
+ label (optional) default to field.name
+}*
+#{p.edit _arg, checkbox:true, value:_value, label:_label}
+%{
+  if (_value == null) { _value = field.value }
+}%
+    <input type="checkbox" name="${field.name}" value="true" id="${field.id}"
+    	${_value ? 'checked="checked"'.raw() : ''}
+    	${helpers.Web.serialize(_attrs, "arg", "value", "label", "required").raw()} />
+    <input type="hidden" name="${field.name}" value="false"/>
+#{/p.edit}

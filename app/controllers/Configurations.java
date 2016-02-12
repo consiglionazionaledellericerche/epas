@@ -3,25 +3,34 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 
 import dao.OfficeDao;
 
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ConfYearManager.MessageResult;
+import manager.recaps.recomputation.RecomputeRecap;
 import manager.ConfigurationManager;
+import manager.PeriodManager;
 import manager.SecureManager;
 
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Configuration;
 import models.Office;
+import models.base.IPropertyInPeriod;
 import models.enumerate.Parameter;
+import models.enumerate.EpasParam.EpasParamValueType;
+import models.enumerate.EpasParam.EpasParamValueType.IpList;
 
 import org.joda.time.LocalDate;
 
+import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -33,6 +42,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 @With({Resecure.class, RequestInit.class})
+@Slf4j
 public class Configurations extends Controller {
 
   @Inject
@@ -46,7 +56,8 @@ public class Configurations extends Controller {
   
   @Inject
   private static ConfigurationManager configurationManager;
-
+  @Inject
+  private static PeriodManager periodManager;
   @Inject
   private static SecurityRules rules;
 
@@ -281,6 +292,115 @@ public class Configurations extends Controller {
     render(configuration);
   }
   
+  /**
+   * Aggiornamento di un parametro di configurazione.
+   * @param configuration
+   * @param validityYear
+   * @param validityBegin
+   * @param validityEnd
+   * @param booleanNewValue
+   * @param confirmed
+   */
+  public static void update(@Valid Configuration configuration, 
+      Integer validityYear, LocalDate validityBegin, LocalDate validityEnd,
+      Boolean booleanNewValue, String stringNewValue, Integer integerNewValue, 
+      LocalDate localdateNewValue, boolean confirmed) {
+    
+    rules.checkIfPermitted(configuration.office);
+    Configuration newConfiguration = null;
+    if (configuration.epasParam.isGeneral()) {
+      validityBegin = null;
+      validityEnd = null;
+    }
+    if (configuration.epasParam.isYearly()) {
+      // validazione anno e impostare le date   
+    }
+    if (configuration.epasParam.isPeriodic()) {
+      //validazione periodo
+    }
+
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
+      if (booleanNewValue == null) {
+        validation.addError("booleanNewValue", "valore non valido.");
+      } else {
+        newConfiguration = configurationManager.updateBoolean(configuration.epasParam, 
+            configuration.office, booleanNewValue, 
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
+      if (integerNewValue == null) {
+        validation.addError("integerNewValue", "valore non valido.");
+      } else {
+        newConfiguration = configurationManager.updateInteger(configuration.epasParam, 
+            configuration.office, integerNewValue, 
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST)) {
+      if (stringNewValue != null) {
+        IpList ipList = (IpList)EpasParamValueType
+            .parseValue(configuration.epasParam.epasParamValueType, stringNewValue);
+        // TODO: validazione sugli ip
+        newConfiguration = configurationManager.updateIpList(configuration.epasParam, 
+            configuration.office, ipList.ipList,
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+      } else {
+        validation.addError("stringNewValue", "valore non valido.");
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE)) {
+      if (localdateNewValue == null) {
+        validation.addError("localdateNewValue", "valore non valido.");
+      } else {
+        newConfiguration = configurationManager.updateLocalDate(configuration.epasParam, 
+            configuration.office, localdateNewValue, 
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL)) {
+      if (stringNewValue != null && stringNewValue.contains("@")) {
+        // TODO: validazione sulla email
+        newConfiguration = configurationManager.updateEmail(configuration.epasParam, 
+            configuration.office, stringNewValue,
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+      } else {
+        validation.addError("stringNewValue", "valore non valido.");
+      }
+    }
+    
+    if (validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors: {}", validation.errorsMap());
+      render("@edit", configuration, validityYear, validityBegin, validityEnd, 
+          booleanNewValue, stringNewValue, integerNewValue, localdateNewValue);
+    }
+    
+    Verify.verifyNotNull(newConfiguration);
+    
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(configuration.office.getBeginDate(),
+            Optional.fromNullable(configuration.office.calculatedEnd()),
+            periodRecaps);
+    
+    if (!confirmed) {
+      
+      response.status = 400;
+      confirmed = true;
+      render("@edit", confirmed, recomputeRecap, configuration, 
+          validityYear, validityBegin, validityEnd, 
+          booleanNewValue, stringNewValue, integerNewValue, localdateNewValue);
+    }
+    
+    periodManager.updatePeriods(newConfiguration, true);
+    
+    //TODO: ricalcoli
+    
+    flash.success("Parametro aggiornato correttamente.");
+    
+    show(configuration.office.id);
+  }
   
 
 }

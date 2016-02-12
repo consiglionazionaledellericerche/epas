@@ -5,19 +5,18 @@
   <br>
   </div>
   
-  #{alert color:'info'}
-    <p>La modifica di questo paramatro comporta la sincronizzazzione per tutti i dipendenti 
-    di tipo
-    <ul> 
-    #{list items:configuration.epasParam.recomputationTypes, as:'recomputationType'}
-      <li>&{recomputationType}</li>
-    #{/list}
-    </ul>
-    a partire dal primo giorno modificato.
-    </p>
-  #{/alert}
+  <!-- Visualizzazione stato attuale -->
+  #{if configuration.epasParam.general }
+    <p>Il parametro <strong>&{configuration.epasParam}</strong> per la sede <strong>${configuration.office.name}</strong> 
+    è attualmente impostato a <strong>${configuration.parseValue().label()}</strong>.
+    <p>
+  #{/if}
   
-  <table class="table">
+  #{if configuration.epasParam.yearly || configuration.epasParam.periodic}
+    <p>Valuri assunti dal parametro <strong>&{configuration.epasParam}</strong> per la sede <strong>${configuration.office.name}</strong> 
+    e loro validità.
+    <p>
+    <table class="table">
     <tr>
      <th>Valore</th>
      <th>Validità Dal</th>
@@ -26,14 +25,63 @@
     
     #{list items:configuration.office.periods(configuration.type), as:'conf'}
     <tr>
-      <td>${conf.fieldValue}</td>
+      <td><strong>${conf.fieldValue}</strong></td>
       <td>${conf.beginDate.format()}</td>
 	  <td>${conf.calculatedEnd()?.format()}</td>
     </tr>
     #{/list}
   </table>
+  #{/if}
   
-  #{alert color:'success'}
-    <p>TODO: form di modifica</p>
+  <!-- Riepilogo delle ricomputazioni eventuali -->
+  #{alert color:'info'}
+    #{if configuration.epasParam.recomputationTypes.empty }
+	  <p>La modifica del valore di questo parametro non comporta alcun tipo di riconteggio 
+	    o sincronizzazione dello stato dei dipendenti.
+	  </p>
+    #{/if}#{else}
+	  <p>La modifica di questo paramatro comporta la sincronizzazzione per tutti i dipendenti 
+	    di <strong>${configuration.office.name}</strong> di tipo:
+	    <ul> 
+	    #{list items:configuration.epasParam.recomputationTypes, as:'recomputationType'}
+	      <li>&{recomputationType}</li>
+	    #{/list}
+	    </ul>
+	    a partire dal primo giorno modificato.
+	  </p>
+    #{/else}
   #{/alert}
+  
+  
+  <!-- Form per la modifica -->
+  
+     <div id="configData">
+     #{form action:@Configurations.update(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#configData'}
+		
+		#{p.hidden 'configuration.id', value:configuration.id /}
+		
+		#{f.hidden 'confirmed' /}
+		#{configuration.typeform configuration:configuration, confirmed:confirmed, booleanNewValue:booleanNewValue /}
+		
+	    #{if !confirmed}
+	    	<!--bottoni -->
+			#{b.buttons center:true}   
+		       #{b.submit 'Aggiorna'/}
+		    #{/b.buttons}
+	    #{/if}
+	    #{else}
+	      <!--bottoni -->
+		  #{b.buttons center:true}
+		    #{b.cancel @show(configuration.office.id) /}
+		    #{b.submit 'Conferma'/}
+		  #{/b.buttons}
+		 #{/else}
+	    
+	 #{/form}
+     </div>	  
+
+ 
+  
 #{/modalAsync}

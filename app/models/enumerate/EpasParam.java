@@ -23,42 +23,39 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.DAY_MONTH,
       EpasParamValueType.formatValue(new DayMonth(1,1)),
-      Lists.newArrayList(RecomputationType.DAYS)),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          RecomputationType.RESIDUAL_MEALTICKETS)),
   
   WEB_STAMPING_ALLOWED("web_stamping_allowed",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.newArrayList(RecomputationType.NONE)),
+      Lists.<RecomputationType>newArrayList()),
         
   ADDRESSES_ALLOWED("addresses_allowed",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.IP_LIST,
       EpasParamValueType.formatValue(new IpList(Lists.<String>newArrayList())),
-      Lists.newArrayList(RecomputationType.NONE)),
-      
+      Lists.<RecomputationType>newArrayList()),
   
   NUMBER_OF_VIEWING_COUPLE("number_of_viewing_couple",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(2),
-      Lists.newArrayList(RecomputationType.NONE)),
-      
+      Lists.<RecomputationType>newArrayList()),
   
   DATE_START_MEAL_TICKET("date_start_meal_ticket",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.LOCALDATE,
       EpasParamValueType.formatValue(new LocalDate(2014, 7, 1)),
       Lists.newArrayList(RecomputationType.RESIDUAL_MEALTICKETS)),
-      
   
   SEND_EMAIL("send_email",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.newArrayList(RecomputationType.NONE)),
-      
-  
+      Lists.<RecomputationType>newArrayList()),
+        
   /**
    * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema. 
    */
@@ -66,8 +63,7 @@ public enum EpasParam {
       EpasParamTimeType.GENERAL,
       EpasParamValueType.EMAIL,
       EpasParamValueType.formatValue(""),
-      Lists.newArrayList(RecomputationType.NONE)),
-      
+      Lists.<RecomputationType>newArrayList()),
   
   //#######################################
   // YEARLY PARAMS
@@ -76,7 +72,7 @@ public enum EpasParam {
       EpasParamTimeType.YEARLY,
       EpasParamValueType.DAY_MONTH,
       EpasParamValueType.formatValue(new DayMonth(8,31)),
-      Lists.newArrayList(RecomputationType.NONE)),
+      Lists.<RecomputationType>newArrayList()),
 
   MONTH_EXPIRY_RECOVERY_DAYS_13("month_expire_recovery_days_13",
       EpasParamTimeType.YEARLY,
@@ -90,20 +86,18 @@ public enum EpasParam {
       EpasParamValueType.MONTH,
       EpasParamValueType.formatValue(3),
       Lists.newArrayList(RecomputationType.RESIDUAL_HOURS)),
-      
 
   MAX_RECOVERY_DAYS_13("max_recovery_days_13",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(22),
-      Lists.newArrayList(RecomputationType.NONE)),
-      
+      Lists.<RecomputationType>newArrayList()),
   
   MAX_RECOVERY_DAYS_49("max_recovery_days_49",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(0),
-      Lists.newArrayList(RecomputationType.NONE)),
+      Lists.<RecomputationType>newArrayList()),
 
   //#######################################
   // PERIODIC PARAMS
@@ -112,16 +106,16 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME,
       EpasParamValueType.formatValue(new LocalTime(5, 0)),
-      Lists.newArrayList(RecomputationType.DAYS)),
-      
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          RecomputationType.RESIDUAL_MEALTICKETS)),
   
   LUNCH_INTERVAL("lunch_interval",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
       .formatValue(new LocalTimeInterval(new LocalTime(12,0), new LocalTime(15,0))),
-      Lists.newArrayList(RecomputationType.DAYS));
-      
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          RecomputationType.RESIDUAL_MEALTICKETS));
 
   public final String name;
   public final EpasParamTimeType epasParamTimeType;
@@ -156,7 +150,7 @@ public enum EpasParam {
   }
   
   public enum RecomputationType {
-    DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS, NONE;
+    DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS;
   }
   
   /**
@@ -177,6 +171,10 @@ public enum EpasParam {
         this.day = day;
         this.month = month;
       }
+      @Override
+      public String toString() {
+        return formatValue(this);
+      }
     }
     
     public static class LocalTimeInterval {
@@ -187,6 +185,10 @@ public enum EpasParam {
         this.from = from;
         this.to = to;
       }
+      @Override
+      public String toString() {
+        return formatValue(this);
+      }
     }
     
     public static class IpList {
@@ -194,6 +196,10 @@ public enum EpasParam {
       // TODO: validation
       public IpList(List<String> ipList) { 
         this.ipList = ipList;
+      }
+      @Override
+      public String toString() {
+        return formatValue(this);
       }
     }
     
@@ -273,13 +279,12 @@ public enum EpasParam {
         case IP_LIST:
           return new IpList(Splitter.on(IP_LIST_SEPARATOR).splitToList(value));
         case INTEGER:
-          return value;
+          return new Integer(value);
         case BOOLEAN:
-          return value;
+          return new Boolean(value);
       }
       return null;
     }
-
   }
   
 
