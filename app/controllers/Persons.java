@@ -38,6 +38,7 @@ import models.WorkingTimeType;
 
 import net.sf.oval.constraint.MinLength;
 
+import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -132,6 +133,9 @@ public class Persons extends Controller {
     }
 
     rules.checkIfPermitted(person.office);
+
+    person.name = WordUtils.capitalizeFully(person.name);
+    person.surname = WordUtils.capitalizeFully(person.surname);
 
     person.user = userManager.createUser(person);
 
