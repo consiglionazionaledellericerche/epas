@@ -8,11 +8,7 @@ if [ -z "${VIRTUAL_HOST}" ]; then
 fi
 
 EPAS_HOST=${VIRTUAL_HOST}
-
-chown -R epas:epas /home/epas
-
 HTTPS=${HTTPS:-false}
-
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
 
 # use default port number if it is still not set
@@ -128,7 +124,7 @@ appRun () {
   echo ".... evoluzioni terminate"
   
   echo "Avvio ePAS..."
-  sudo -u epas -H play run --%prod -Dprecompiled=true
+  sudo -u epas -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
   echo "....ePAS avviato"
 }
 
