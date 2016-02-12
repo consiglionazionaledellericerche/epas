@@ -252,8 +252,8 @@ attestatiPassword=Password Attestati
 
 views.common.false=falso
 views.common.true=vero
-views.common.yes_or_no.false=NO
-views.common.yes_or_no.true=SI
+views.common.yes_or_no.false=No
+views.common.yes_or_no.true=Si
 
 views.tags.display.date.format.allTime=%%hh:%%mm
 views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
@@ -372,6 +372,19 @@ MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livel
 DAY_OF_PATRON=Festa del Patrono
 HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
 LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
+
+DAYS=Ricalcoli giornalieri.
+RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
+RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
+
+validityYear=Anno
+validityBegin=Validità Inizio
+validityEnd=Validità Fine
+
+booleanNewValue=Nuovo Valore
+stringNewValue=Nuovo Valore
+integerNewValue=Nuovo Valore
+localdateNewValue=Nuovo Valore
 
 WayType.in= Ingresso
 WayType.out= Uscita

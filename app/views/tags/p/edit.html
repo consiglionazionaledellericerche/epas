@@ -1,0 +1,37 @@
+*{
+ arg (required) field attribute
+ label (optional) default to arg.name
+ description (optional) default to null
+ required (optional) default to false
+ checkbox (optional) default to false
+ inline (optional) default to false
+}*
+#{field _arg}%{
+  if (_label == null) {
+  	_label = field.name
+  }
+  if (_body) {
+    _body.setProperty('field', field)
+  }
+  if (noLabel == null) {
+    noLabel = _inline;
+  }
+}%<div class="form-group#{if field.error} has-error#{/if}" data-role="fieldcontain">
+  #{if _checkbox?:false}<div #{if !noLabel}class="col-sm-offset-2 col-sm-10"#{/if}>
+    <div class="checkbox"><label>
+      #{doBody /}
+      ${_label.label()}#{if _required?:false}#{p.required/}#{/if}
+     </label>
+     #{ifError field.name}<span class="help-block">${field.error}</span>#{/ifError}
+    </div>
+    </div>
+  #{/if}
+  #{else}
+   <label for="${field.id}" class="#{if noLabel}sr-only#{/if}#{else}control-label col-sm-2#{/else}">${_label.label()}#{if _required?:false}#{p.required/}#{/if}</label>
+   #{if !noLabel}<div class="col-sm-10">#{/if}#{doBody /}
+     #{if _description}<span class="help-block">${_description.label()}</span>#{/if}
+     #{ifError field.name}<span class="help-block">${field.error.raw()}</span>#{/ifError}
+   #{if !noLabel}</div>#{/if}
+  #{/else}
+</div>
+#{/field}

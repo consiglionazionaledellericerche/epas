@@ -1,0 +1,68 @@
+*{ _confirmed:
+   _configuration
+   _booleanNewValue
+}*
+  <!-- Parte sul primo step -->
+  #{if !_confirmed}
+    <!-- input period -->
+    #{if configuration.epasParam.yearly }
+      #{p.text 'validityYear', type:'number', value:validityYear /}
+    #{/if}
+    #{if configuration.epasParam.periodic }
+      #{p.date 'validityBegin', value:validityBegin?.format(), required:true /}
+	  #{p.date 'validityEnd', value:validityEnd?.format() /}
+    #{/if}
+
+    
+    <!-- input value -->
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.BOOLEAN) }
+	  #{p.booleanRadio 'booleanNewValue', value:_booleanNewValue /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.INTEGER) }
+	  #{p.text 'integerNewValue', type:'number', value:_integerNewValue /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.IP_LIST) }
+	  #{p.textarea 'stringNewValue', value:_stringNewValue /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALDATE) }
+	  #{p.date 'localdateNewValue', value:_localdateNewValue?.format() /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
+	  #{p.text 'stringNewValue', value:_stringNewValue /}
+	#{/if}
+    
+	
+  #{/if}
+  <!-- Parte sullo step di conferma -->
+  #{else}
+  
+    <!-- input period -->
+    #{if configuration.epasParam.yearly }
+      #{p.text 'validityYear', type:'number', value:validityYear /}
+    #{/if}
+    #{if configuration.epasParam.periodic }
+      #{f.simpleView 'validityBegin', value:validityBegin?.format(), hidden:true /}
+      #{f.simpleView 'validityEnd', value:validityEnd?.format(), hidden:true /}
+    #{/if}
+
+    <!-- input value -->
+    #{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.BOOLEAN) }
+	  #{f.simpleView 'booleanNewValue', value:_booleanNewValue, hidden:true /}
+    #{/if}
+    #{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.INTEGER) }
+	  #{f.simpleView 'integerNewValue', value:_integerNewValue, hidden:true /}
+	#{/if}
+    #{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.IP_LIST) }
+	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALDATE) }
+	  #{f.simpleView 'localdateNewValue', value:_localdateNewValue.format(), hidden:true /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
+	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
+	#{/if}
+		  
+	  *{ vedi se ti vanno bene }*  		
+	  *{ #{recomputeRecap recomputeRecap:recomputeRecap /} }*
+
+  #{/else}

@@ -384,25 +384,25 @@ public class Administration extends Controller {
           .getIntegerFieldValue(Parameter.MONTH_OF_PATRON, office);
 
       configurationManager.updateDayMonth(EpasParam.DAY_OF_PATRON, office, day, month, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       
       Boolean web = confGeneralManager
           .getBooleanFieldValue(Parameter.WEB_STAMPING_ALLOWED, office);
       
       configurationManager.updateBoolean(EpasParam.WEB_STAMPING_ALLOWED, office, web, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       
       // Verificare il vecchio splitter e ad esempio rimuovere le quadre.
       List<String> ipList = Splitter.on("-")
           .splitToList(confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, office));
       configurationManager.updateIpList(EpasParam.ADDRESSES_ALLOWED, office, ipList, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       
       Integer integer = confGeneralManager
           .getIntegerFieldValue(Parameter.NUMBER_OF_VIEWING_COUPLE, office);
       
       configurationManager.updateInteger(EpasParam.NUMBER_OF_VIEWING_COUPLE, office, integer, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       
       Optional<LocalDate> mealTicket = confGeneralManager
           .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
@@ -411,18 +411,18 @@ public class Administration extends Controller {
         date = mealTicket.get();
       } 
       configurationManager.updateLocalDate(EpasParam.DATE_START_MEAL_TICKET, office, date, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
 
       Boolean sendEmail = confGeneralManager
           .getBooleanFieldValue(Parameter.SEND_EMAIL, office);
       
       configurationManager.updateBoolean(EpasParam.SEND_EMAIL, office, sendEmail, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       
       String email = confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, office);
       
       configurationManager.updateEmail(EpasParam.EMAIL_TO_CONTACT, office, email, 
-          Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+          Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       
       Integer year = office.beginDate.getYear();
       while (year != null) {
@@ -434,27 +434,27 @@ public class Administration extends Controller {
         month = confYearManager
             .getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
         configurationManager.updateYearlyDayMonth(EpasParam.EXPIRY_VACATION_PAST_YEAR, office, 
-            day, month, year, true);
+            day, month, year, true, true);
         
         month = confYearManager
             .getIntegerFieldValue(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13, office, year);
         configurationManager.updateYearlyMonth(EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13, office, 
-            month, year, true);
+            month, year, true, true);
         
         month = confYearManager
             .getIntegerFieldValue(Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49, office, year);
         configurationManager.updateYearlyMonth(EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49, office, 
-            month, year, true);
+            month, year, true, true);
         
         integer = confYearManager
             .getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, office, year);
         configurationManager.updateYearlyInteger(EpasParam.MAX_RECOVERY_DAYS_13, office, 
-            integer, year, true);
+            integer, year, true, true);
         
         integer = confYearManager
             .getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_49, office, year);
         configurationManager.updateYearlyInteger(EpasParam.MAX_RECOVERY_DAYS_49, office, 
-            integer, year, true);
+            integer, year, true, true);
         
         
         if ((year == LocalDate.now().getYear()) 
@@ -474,11 +474,11 @@ public class Administration extends Controller {
       if (hour.split(":").length == 1) {
         configurationManager.updateLocalTime(EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, office,
             new LocalTime(new Integer(hour.split(":")[0]), 0), 
-            Optional.of(office.beginDate), Optional.fromNullable(office.endDate));  
+            Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);  
       } else {
         configurationManager.updateLocalTime(EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, office,
             new LocalTime(new Integer(hour.split(":")[0]), new Integer(hour.split(":")[1])), 
-            Optional.of(office.beginDate), Optional.fromNullable(office.endDate));
+            Optional.of(office.beginDate), Optional.fromNullable(office.endDate), true);
       }
       
 
@@ -499,7 +499,7 @@ public class Administration extends Controller {
       
       configurationManager.updateLocalTimeInterval(EpasParam.LUNCH_INTERVAL, office, 
           startLunch, endLunch, Optional.of(office.beginDate), 
-          Optional.fromNullable(office.endDate));
+          Optional.fromNullable(office.endDate), true);
       
     }
     
