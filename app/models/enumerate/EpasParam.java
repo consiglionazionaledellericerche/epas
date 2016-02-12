@@ -259,6 +259,7 @@ public enum EpasParam {
      * @return
      */
     public static Object parseValue(final EpasParamValueType type, final String value) {
+      try {
       switch (type) {
         case LOCALDATE:
           return new LocalDate(value);
@@ -282,6 +283,9 @@ public enum EpasParam {
           return new Integer(value);
         case BOOLEAN:
           return new Boolean(value);
+      }
+      } catch(Exception e) {
+        return null;
       }
       return null;
     }

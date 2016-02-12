@@ -26,6 +26,7 @@ import models.Office;
 import models.base.IPropertyInPeriod;
 import models.enumerate.Parameter;
 import models.enumerate.EpasParam.EpasParamValueType;
+import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
 
 import org.joda.time.LocalDate;
@@ -313,11 +314,22 @@ public class Configurations extends Controller {
       validityEnd = null;
     }
     if (configuration.epasParam.isYearly()) {
-      // validazione anno e impostare le date   
+      validityBegin = configurationManager.officeYearBegin(configuration.office, validityYear);
+      validityEnd = configurationManager.officeYearEnd(configuration.office, validityYear);
+      if (validityBegin == null) {
+        validation.addError("validityYear", "anno non ammesso.");
+      }
     }
     if (configuration.epasParam.isPeriodic()) {
       //validazione periodo
     }
+    if (validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors: {}", validation.errorsMap());
+      render("@edit", configuration, validityYear, validityBegin, validityEnd, 
+          booleanNewValue, stringNewValue, integerNewValue, localdateNewValue);
+    }
+    
 
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
       if (booleanNewValue == null) {
@@ -359,13 +371,34 @@ public class Configurations extends Controller {
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL)) {
-      if (stringNewValue != null && stringNewValue.contains("@")) {
+      if (stringNewValue != null) {
         // TODO: validazione sulla email
         newConfiguration = configurationManager.updateEmail(configuration.epasParam, 
             configuration.office, stringNewValue,
             Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
       } else {
         validation.addError("stringNewValue", "valore non valido.");
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
+      DayMonth dayMonth = 
+          (DayMonth)EpasParamValueType.parseValue(EpasParamValueType.DAY_MONTH, stringNewValue);
+      if (dayMonth != null) {
+        newConfiguration = configurationManager.updateDayMonth(configuration.epasParam, 
+            configuration.office, dayMonth.day, dayMonth.month,
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+
+      } else {
+        validation.addError("stringNewValue", "valore non valido.");
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.MONTH)) {
+      if (integerNewValue == null || integerNewValue < 0 || integerNewValue > 12) {
+        validation.addError("integerNewValue", "valore non valido.");
+      } else {
+        newConfiguration = configurationManager.updateMonth(configuration.epasParam, 
+            configuration.office, integerNewValue, 
+            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
       }
     }
     
@@ -381,7 +414,7 @@ public class Configurations extends Controller {
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(configuration.office.getBeginDate(),
-            Optional.fromNullable(configuration.office.calculatedEnd()),
+            Optional.fromNullable(LocalDate.now()),
             periodRecaps);
     
     if (!confirmed) {

@@ -129,6 +129,24 @@ public class ConfigurationManager {
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd, persist);
   }
 
+
+  /**
+   * Aggiunge una nuova configurazione di tipo Month con cadenza annuale. 
+   * @param epasParam parametro
+   * @param office sede 
+   * @param month month
+   * @param year anno
+   * @param applyToTheEnd se voglio applicare la configurazione anche per gli anni successivi.
+   * @return configurazione
+   */
+  public Configuration updateMonth(EpasParam epasParam, Office office, int month, 
+      Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
+    // TODO: validare il valore 1-12 o fare un tipo specifico.
+    Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.MONTH));
+    return build(epasParam, office, EpasParamValueType.formatValue(month), begin, end, false, 
+        persist);
+  }
+  
   /**
    * Aggiunge una nuova configurazione di tipo Month con cadenza annuale. 
    * @param epasParam parametro
