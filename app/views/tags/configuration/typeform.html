@@ -30,6 +30,12 @@
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
 	  #{p.text 'stringNewValue', value:_stringNewValue /}
 	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.DAY_MONTH) }
+	  #{p.text 'stringNewValue', value:_stringNewValue /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.MONTH) }
+	  #{p.text 'integerNewValue', value:_integerNewValue /}
+	#{/if}
     
 	
   #{/if}
@@ -38,7 +44,7 @@
   
     <!-- input period -->
     #{if configuration.epasParam.yearly }
-      #{p.text 'validityYear', type:'number', value:validityYear /}
+      #{f.simpleView 'validityYear', value:validityYear, hidden:true /}
     #{/if}
     #{if configuration.epasParam.periodic }
       #{f.simpleView 'validityBegin', value:validityBegin?.format(), hidden:true /}
@@ -61,8 +67,14 @@
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
 	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
 	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.DAY_MONTH) }
+	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.MONTH) }
+	  #{f.simpleView 'integerNewValue', value:_integerNewValue, hidden:true /}
+	#{/if}
 		  
 	  *{ vedi se ti vanno bene }*  		
-	  *{ #{recomputeRecap recomputeRecap:recomputeRecap /} }*
+	#{recomputeRecap recomputeRecap:recomputeRecap /}
 
   #{/else}
