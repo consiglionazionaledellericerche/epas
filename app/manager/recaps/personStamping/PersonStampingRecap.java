@@ -4,14 +4,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
-import it.cnr.iit.epas.DateUtility;
-
-import manager.ContractMonthRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 
@@ -56,6 +52,7 @@ public class PersonStampingRecap {
   public int numberOfMealTicketToUse = 0;
   public int basedWorkingDays = 0;
   public int totalWorkingTime = 0;
+  public int positiveResidualInMonth = 0;
 
   //I riepiloghi di ogni giorno
   public List<PersonStampingDayRecap> daysRecap = Lists.newArrayList();
@@ -72,28 +69,23 @@ public class PersonStampingRecap {
   public int numberOfInOut = 0;
 
   /**
-   * Costruisce l'oggetto contenente tutte le informazioni da renderizzare nella pagina
-   * tabellone timbrature.
+   * Costruisce l'oggetto contenente tutte le informazioni da renderizzare nella pagina tabellone
+   * timbrature.
    *
-   * @param personDayManager personDayManager
-   * @param personDayDao personDayDao
-   * @param mealTicketDao mealTicketDao
-   * @param personManager personManager
-   * @param contractMonthRecapManager contractMonthRecapManager
+   * @param personDayManager        personDayManager
+   * @param personDayDao            personDayDao
+   * @param personManager           personManager
    * @param stampingDayRecapFactory stampingDayRecapFactory
-   * @param wrapperFactory wrapperFactory
-   * @param dateUtility dateUtility
-   * @param year year
-   * @param month month
-   * @param person person
+   * @param wrapperFactory          wrapperFactory
+   * @param year                    year
+   * @param month                   month
+   * @param person                  person
    */
   public PersonStampingRecap(PersonDayManager personDayManager,
-                             PersonDayDao personDayDao, MealTicketDao mealTicketDao,
+                             PersonDayDao personDayDao,
                              PersonManager personManager,
-                             ContractMonthRecapManager contractMonthRecapManager,
                              PersonStampingDayRecapFactory stampingDayRecapFactory,
                              IWrapperFactory wrapperFactory,
-                             DateUtility dateUtility,
                              int year, int month, Person person) {
 
     this.month = month;
@@ -147,7 +139,7 @@ public class PersonStampingRecap {
           Optional.fromNullable(monthContracts));
       this.daysRecap.add(dayRecap);
 
-      this.totalWorkingTime = this.totalWorkingTime + pd.timeAtWork;
+      this.totalWorkingTime += pd.timeAtWork;
 
 
       if (stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()) {
@@ -195,6 +187,9 @@ public class PersonStampingRecap {
         }
       }
     }
+
+    this.positiveResidualInMonth = wrapperFactory.create(person)
+        .getPositiveResidualInMonth(this.year, this.month);
 
     this.numberOfCompensatoryRestUntilToday = personManager
         .numberOfCompensatoryRestUntilToday(person, year, month);
