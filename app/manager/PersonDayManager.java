@@ -88,11 +88,14 @@ public class PersonDayManager {
     for (Absence abs : pd.absences) {
       // TODO: per adesso il telelavoro lo considero come giorno lavorativo
       // normale. Chiedere ai romani.
-      if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-        return false;
-      } else if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
+      // TODO: il telelavoro è giorno di lavoro da casa, quindi non giustifica 
+      // ma assegna tempo a lavoro, ma non assegna buono pasto.
+      //if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+      //  return false;
+      //} else 
+      if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
           && (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)
-          || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
+              || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
         return true;
       }
     }
@@ -131,9 +134,9 @@ public class PersonDayManager {
    * Pulisce la parte di calcolo del tempo al lavoro.
    */
   private void cleanTimeAtWork(PersonDay pd) {
-    
+
     setTicketStatusIfNotForced(pd, false);
-    
+
     pd.setStampModificationType(null);
     pd.setDecurted(0);
     pd.setStampingsTime(0);
@@ -141,8 +144,8 @@ public class PersonDayManager {
     pd.setJustifiedTimeNoMeal(0);
     pd.setTimeAtWork(0);
   }
-  
-  
+
+
   /**
    * La condizione del lavoro minimo pomeridiano è soddisfatta?.
    */
@@ -260,7 +263,7 @@ public class PersonDayManager {
             || StampTypes.PAUSA_PRANZO.equals(previous.second.stampType))
             && (validPair.first.stampType == null 
             || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType)) ) {
-          
+
           allGapPairs.add(new PairStamping(previous.second, validPair.first));
         }
       } 
@@ -273,16 +276,16 @@ public class PersonDayManager {
     for (PairStamping gapPair : allGapPairs) {
       LocalTime first = gapPair.first.date.toLocalTime();
       LocalTime second = gapPair.second.date.toLocalTime();
-      
+
       boolean isInIntoMealTime = !first.isBefore(startLunch) && !first.isAfter(endLunch);
       boolean isOutIntoMealTime = !second.isBefore(startLunch) && !second.isAfter(endLunch);
-      
+
       if (!isInIntoMealTime && !isOutIntoMealTime) {
         if (second.isBefore(startLunch) || first.isAfter(endLunch)) {
           continue;
         }
       }
-      
+
       LocalTime inForCompute = gapPair.first.date.toLocalTime();
       LocalTime outForCompute = gapPair.second.date.toLocalTime();
       if (!isInIntoMealTime) {
@@ -297,10 +300,10 @@ public class PersonDayManager {
       gapPair.timeInPair = timeInPair;
       gapPairs.add(gapPair);
     }
-    
+
     return gapPairs;
   }
-  
+
   /**
    * Calcolo del tempo a lavoro e del buono pasto.
    * @param personDay personDay.
@@ -309,7 +312,7 @@ public class PersonDayManager {
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd, 
       boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch) {
-    
+
     // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
 
@@ -317,7 +320,7 @@ public class PersonDayManager {
 
       // #######
       // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
-      
+
       if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
         cleanTimeAtWork(personDay);
         personDay.setTimeAtWork(wttd.workingTime);
@@ -340,10 +343,10 @@ public class PersonDayManager {
         personDay.setTimeAtWork(0);
         return personDay;
       }
-      
+
       // #######
       //  Assenze non giornaliere da cumulare ....
-      
+
       // Giustificativi grana minuti (priorità sugli altri casi) Ex. PEPE
       if (abs.justifiedMinutes != null) {
         personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + abs.justifiedMinutes);
@@ -361,7 +364,7 @@ public class PersonDayManager {
         }
         continue;
       }
-      
+
       // Mezza giornata giustificata.
       if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
         personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
@@ -369,7 +372,7 @@ public class PersonDayManager {
         continue;
       }
     }
-    
+
     // Se hanno il tempo di lavoro fissato non calcolo niente
     if (fixedTimeAtWork) {
 
@@ -385,7 +388,7 @@ public class PersonDayManager {
 
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
     personDay.setTimeAtWork( personDay.getStampingsTime() + personDay.getJustifiedTimeMeal() 
-        + personDay.getJustifiedTimeNoMeal());
+    + personDay.getJustifiedTimeNoMeal());
 
     // Se è festa ho finito ...
     if (personDay.isHoliday()) {
@@ -398,7 +401,7 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-    
+
     // #######################################################################################
     // IL PRANZO E' SERVITOOOOO????
     // Questa parte determina se il buono pasto è ottenuto e la eventuale quantità decurtata
@@ -435,10 +438,10 @@ public class PersonDayManager {
     }
 
     //3) Decisioni
-    
+
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
     int mealTicketsMinutes = personDay.getStampingsTime() + personDay.getJustifiedTimeMeal();
-    
+
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - missingTime < mealTicketTime) {
       setTicketStatusIfNotForced(personDay, false);
@@ -450,7 +453,7 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-    
+
     // Calcolo tempo decurtato per pausa troppo breve.
     int workingTimeDecurted = mealTicketsMinutes;
     if (missingTime > 0) {
@@ -565,7 +568,7 @@ public class PersonDayManager {
     personDay.setTicketAvailable(personDay.isTicketAvailable() && wttd.mealTicketEnabled());
     return personDay;
   }
-  
+
   /**
    * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false.
    * @param pd personDay
@@ -583,14 +586,14 @@ public class PersonDayManager {
    * oggi).
    */
   public void queSeraSera(IWrapperPersonDay pd) {
-    
+
     //Strutture dati transienti necessarie al calcolo
     if (!pd.getPersonDayContract().isPresent()) {
       return;
     }
 
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
-    
+
     Integer mealTimeStartHour = confGeneralManager
         .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.getValue().person.office);
     Integer mealTimeStartMinute = confGeneralManager
@@ -606,19 +609,19 @@ public class PersonDayManager {
     LocalTime endLunch = new LocalTime()
         .withHourOfDay(mealTimeEndHour)
         .withMinuteOfHour(mealTimeEndMinute);
-    
+
     updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork(), 
         startLunch, endLunch);
-    
+
     updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
-    
+
     updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
-    
+
     updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
   }
 
- 
+
 
   /**
    * Verifica che nel person day vi sia una situazione coerente di timbrature. Situazioni errate si
@@ -952,7 +955,7 @@ public class PersonDayManager {
 
     return validPairs;
   }
-  
+
   /**
    * 1) Setta il campo valid per ciascuna stamping del personDay (sulla base del loro valore al
    *    momento della call) <br> 
@@ -987,7 +990,7 @@ public class PersonDayManager {
    * Genera una lista di PersonDay aggiungendo elementi fittizzi per coprire ogni giorno del mese.
    */
   public List<PersonDay> getTotalPersonDayInMonth(List<PersonDay> personDays,
-                                                  Person person, int year, int month) {
+      Person person, int year, int month) {
 
     LocalDate beginMonth = new LocalDate(year, month, 1);
     LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
