@@ -7,12 +7,11 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
-import controllers.Security;
-
 import models.User;
 
 import org.drools.KnowledgeBase;
 
+import controllers.Security;
 import play.mvc.Http;
 
 import java.util.Map;
@@ -26,6 +25,7 @@ public class SecurityModule implements Module {
 
   public static final String REMOTE_ADDRESS = "request.remoteAddress";
   public static final String REQUESTS_CHECKS = "requests.checks";
+  public static final String NO_REQUEST_ADDRESS = "localhost";
 
   @Provides
   @Named("request.action")
@@ -38,7 +38,7 @@ public class SecurityModule implements Module {
   public Map<PermissionCheckKey, Boolean> currentChecks() {
     if (!Http.Request.current().args.containsKey(REQUESTS_CHECKS)) {
       Http.Request.current().args
-        .put(REQUESTS_CHECKS, Maps.<PermissionCheckKey, Boolean>newHashMap());
+          .put(REQUESTS_CHECKS, Maps.<PermissionCheckKey, Boolean>newHashMap());
     }
     return (Map<PermissionCheckKey, Boolean>) Http.Request.current().args.get(REQUESTS_CHECKS);
   }
@@ -46,7 +46,8 @@ public class SecurityModule implements Module {
   @Provides
   @Named(REMOTE_ADDRESS)
   public String currentIpAddress() {
-    return Http.Request.current().remoteAddress;
+    return Http.Request.current() != null ? Http.Request.current().remoteAddress
+        : NO_REQUEST_ADDRESS;
   }
 
   @Provides
