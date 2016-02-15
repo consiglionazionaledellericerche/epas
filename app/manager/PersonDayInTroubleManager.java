@@ -253,7 +253,7 @@ public class PersonDayInTroubleManager {
     for (LocalDate d : dates) {
       
       DayMonth patron = (DayMonth)configurationManager
-          .configValue(person.office, EpasParam.DAY_OF_PATRON);
+          .configValue(person.office, EpasParam.DAY_OF_PATRON, d);
       
       if (!DateUtility
           .isGeneralHoliday(Optional.fromNullable(new MonthDay(patron.month, patron.day)), d)) {
