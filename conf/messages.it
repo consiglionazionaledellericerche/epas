@@ -142,6 +142,7 @@ Institutes.blank=Nuovo istituto
 Institutes.delete=Elimina istituto
 invalid.time=Formato del tempo errato.
 
+includeStampingDetails= Includi dettagli timbrature
 link.denied= Permessi insufficenti
 logout= Esci
 lunchPauseEnd= Fine pausa pranzo
