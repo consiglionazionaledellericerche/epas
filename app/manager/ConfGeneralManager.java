@@ -23,6 +23,12 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+/**
+ * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
+ * @author alessandro
+ *
+ */
+@Deprecated
 public class ConfGeneralManager {
 
 

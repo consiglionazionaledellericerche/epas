@@ -88,7 +88,7 @@ public class RestOfficeManager {
       office.validateAndSave();
       if (!Validation.hasErrors()) {
         syncedOffices++;
-        officeManager.generateConfAndPermission(office);
+        officeManager.setSystemUserPermission(office);
         log.info("Importata Sede {}", office.name);
       } else {
         Optional<Office> existentSeat = officeDao.byCode(office.code);

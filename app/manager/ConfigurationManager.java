@@ -6,6 +6,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 
+import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
@@ -21,7 +22,8 @@ import models.enumerate.EpasParam.EpasParamValueType;
 import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
-
+import models.query.QAbsence;
+import models.query.QConfiguration;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -43,6 +45,19 @@ public class ConfigurationManager {
     this.periodManager = periodManager;
   }
 
+  /**
+   * Tutte le configurazioni di un certo tipo.
+   * @param epasParam il parametro
+   * @return elenco
+   */
+  public List<Configuration> configurationWithType(EpasParam epasParam) {
+    final QConfiguration configuration = QConfiguration.configuration;
+
+    final JPQLQuery query = queryFactory.from(configuration)
+            .where(configuration.epasParam.eq(epasParam));
+    return query.list(configuration);
+  }
+  
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime. 
    * @param epasParam parametro
@@ -371,6 +386,20 @@ public class ConfigurationManager {
     return build(epasParam, office, (String)epasParam.defaultValue, 
         Optional.fromNullable(office.beginDate), Optional.<LocalDate>absent(), true, true);
 
+  }
+  
+  /**
+   * Preleva il valore del parametro generale.
+   * @param office sede
+   * @param epasParam tipo parametro
+   * @param date data
+   * @return value
+   */
+  public Object configValue(Office office, EpasParam epasParam) {
+    Preconditions.checkArgument(epasParam.isGeneral());
+    Configuration configuration = getOfficeConfiguration(office, epasParam, LocalDate.now());
+    return EpasParamValueType.parseValue(configuration.epasParam.epasParamValueType, 
+        configuration.fieldValue);
   }
 
   /**

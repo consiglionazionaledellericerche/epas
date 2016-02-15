@@ -13,7 +13,7 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.ConfYearManager;
+import manager.ConfigurationManager;
 import manager.cache.AbsenceTypeManager;
 
 import models.Absence;
@@ -22,7 +22,8 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.Parameter;
+import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 
 import org.joda.time.LocalDate;
 
@@ -42,7 +43,7 @@ public class VacationsServiceImpl implements IVacationsService {
   private final AbsenceTypeDao absenceTypeDao;
 
   private final AbsenceTypeManager absenceTypeManager;
-  private final ConfYearManager confYearManager;
+  private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
   
   private final VacationsRecapBuilder vacationsRecapBuilder;
@@ -62,16 +63,16 @@ public class VacationsServiceImpl implements IVacationsService {
       AbsenceDao absenceDao,
       AbsenceTypeDao absenceTypeDao,
       ContractDao contractDao,
+      ConfigurationManager configurationManager,
       AbsenceTypeManager absenceTypeManager,
-      ConfYearManager confYearManager,
       IWrapperFactory wrapperFactory,
       VacationsRecapBuilder vacationsRecapImpl) {
 
     this.absenceDao = absenceDao;
     this.absenceTypeDao = absenceTypeDao;
     this.contractDao = contractDao;
+    this.configurationManager = configurationManager;
     this.absenceTypeManager = absenceTypeManager;
-    this.confYearManager = confYearManager;
     this.wrapperFactory = wrapperFactory;
     this.vacationsRecapBuilder = vacationsRecapImpl;
   }
@@ -354,16 +355,13 @@ public class VacationsServiceImpl implements IVacationsService {
    */
   public LocalDate vacationsLastYearExpireDate(int year, Office office) {
 
-    Integer monthExpiryVacationPastYear = confYearManager.getIntegerFieldValue(
-        Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR, office, year);
-
-    Integer dayExpiryVacationPastYear = confYearManager.getIntegerFieldValue(
-        Parameter.DAY_EXPIRY_VACATION_PAST_YEAR, office, year);
+    DayMonth dayMonthExpiryVacationPastYear = (DayMonth)configurationManager
+        .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
 
     LocalDate expireDate = LocalDate.now()
         .withYear(year)
-        .withMonthOfYear(monthExpiryVacationPastYear)
-        .withDayOfMonth(dayExpiryVacationPastYear);
+        .withMonthOfYear(dayMonthExpiryVacationPastYear.month)
+        .withDayOfMonth(dayMonthExpiryVacationPastYear.day);
 
     return expireDate;
   }

@@ -15,7 +15,6 @@ import helpers.validators.StringIsTime;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.UserManager;
@@ -27,7 +26,6 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.WorkingTimeType;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -55,11 +53,12 @@ import javax.inject.Inject;
 
 /**
  * Wizard per la configurazione iniziale di ePAS.
- *
+ * TODO: il wizard non è più mantenuto nella parte di salvataggio della configurazione iniziale.
+ *  Se si vuole riabilitare utilizzare la nuova gestione della configurazione. 
  * @author daniele
  */
-//@With( {Resecure.class})
 @Slf4j
+@Deprecated
 public class Wizard extends Controller {
 
   public static final String STEPS_KEY = "steps";
@@ -68,8 +67,6 @@ public class Wizard extends Controller {
   private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
   @Inject
   private static OfficeManager officeManager;
-  @Inject
-  private static ConfGeneralManager confGeneralManager;
   @Inject
   private static QualificationDao qualificationDao;
   @Inject
@@ -398,40 +395,40 @@ public class Wizard extends Controller {
     //  Invalido la cache sul conteggio degli uffici
     Cache.safeDelete(Resecure.OFFICE_COUNT);
 
-    List<String> lunchStart = Splitter.on(":").trimResults()
-        .splitToList(properties.getProperty("lunchPauseStart"));
+//    List<String> lunchStart = Splitter.on(":").trimResults()
+//        .splitToList(properties.getProperty("lunchPauseStart"));
+//
+//    List<String> lunchStop = Splitter.on(":").trimResults()
+//        .splitToList(properties.getProperty("lunchPauseEnd"));
+//
+//    List<String> dateOfPatron = Splitter.on("/").trimResults()
+//        .splitToList(properties.getProperty("dateOfPatron"));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, office,
+//        Optional.fromNullable(LocalDate.now().toString()));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office,
+//        Optional.fromNullable(dateOfPatron.get(0)));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office,
+//        Optional.fromNullable(dateOfPatron.get(1)));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_HOUR, office,
+//        Optional.fromNullable(lunchStart.get(0)));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_MINUTE, office,
+//        Optional.fromNullable(lunchStart.get(1)));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_HOUR, office,
+//        Optional.fromNullable(lunchStop.get(0)));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_MINUTE, office,
+//        Optional.fromNullable(lunchStop.get(1)));
+//
+//    confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, office,
+//        Optional.fromNullable(properties.getProperty("emailToContact")));
 
-    List<String> lunchStop = Splitter.on(":").trimResults()
-        .splitToList(properties.getProperty("lunchPauseEnd"));
-
-    List<String> dateOfPatron = Splitter.on("/").trimResults()
-        .splitToList(properties.getProperty("dateOfPatron"));
-
-    confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, office,
-        Optional.fromNullable(LocalDate.now().toString()));
-
-    confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office,
-        Optional.fromNullable(dateOfPatron.get(0)));
-
-    confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office,
-        Optional.fromNullable(dateOfPatron.get(1)));
-
-    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_HOUR, office,
-        Optional.fromNullable(lunchStart.get(0)));
-
-    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_MINUTE, office,
-        Optional.fromNullable(lunchStart.get(1)));
-
-    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_HOUR, office,
-        Optional.fromNullable(lunchStop.get(0)));
-
-    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_MINUTE, office,
-        Optional.fromNullable(lunchStop.get(1)));
-
-    confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, office,
-        Optional.fromNullable(properties.getProperty("emailToContact")));
-
-    officeManager.generateConfAndPermission(office);
+    officeManager.setSystemUserPermission(office);
 
     //Creazione persona Amministratore
 
@@ -483,7 +480,7 @@ public class Wizard extends Controller {
     manager.save();
 
     //  Assegnamento dei permessi all'utente creato
-    officeManager.generateConfAndPermission(office);
+    officeManager.setSystemUserPermission(office);
 
     officeManager.setUro(manager, office, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
     officeManager.setUro(manager, office, roleDao.getRoleByName(Role.EMPLOYEE));

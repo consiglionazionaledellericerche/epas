@@ -177,8 +177,7 @@ public class Administration extends Controller {
     for (Person person : persons) {
 
       //Configurazione office
-      LocalDate initUse = confGeneralManager
-          .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office).orNull();
+      LocalDate initUse = person.office.getBeginDate();
 
       //Contratto attuale
       Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
