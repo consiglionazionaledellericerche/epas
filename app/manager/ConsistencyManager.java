@@ -36,6 +36,7 @@ import models.enumerate.Troubles;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -416,13 +417,13 @@ public class ConsistencyManager {
     if (lastStampingPreviousDay != null && lastStampingPreviousDay.isIn()) {
 
       // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
-      Integer maxHour = (Integer)configurationManager.configValue(pd.getValue().person.office, 
+      LocalTime maxHour = (LocalTime)configurationManager.configValue(pd.getValue().person.office, 
           EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
       Collections.sort(pd.getValue().stampings);
 
       if (pd.getValue().stampings.size() > 0 && pd.getValue().stampings.get(0).way == WayType.out
-              && maxHour > pd.getValue().stampings.get(0).date.getHourOfDay()) {
+              && maxHour.isAfter(pd.getValue().stampings.get(0).date.toLocalTime())) {
 
         StampModificationType smtMidnight = stampTypeManager.getStampMofificationType(
                 StampModificationTypeCode.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);

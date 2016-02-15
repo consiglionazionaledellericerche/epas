@@ -69,7 +69,7 @@ public class PersonManager {
   public boolean isHoliday(Person person, LocalDate date) {
 
     DayMonth patron = (DayMonth)configurationManager
-        .configValue(person.office, EpasParam.DAY_OF_PATRON);
+        .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
     
     if (DateUtility
         .isGeneralHoliday(Optional.fromNullable(new MonthDay(patron.month, patron.day)), date)) {
