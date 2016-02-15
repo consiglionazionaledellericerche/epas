@@ -6,13 +6,8 @@ import com.google.common.base.Predicates;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
-import dao.AbsenceDao;
-import dao.CompetenceDao;
 import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
@@ -26,21 +21,17 @@ import helpers.attestati.RispostaElaboraDati;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
-import manager.PersonDayManager;
+import manager.ConfigurationManager;
 import manager.UploadSituationManager;
 
 import models.CertificatedData;
 import models.Office;
-import models.Person;
-import models.PersonDay;
-import models.PersonMonthRecap;
 import models.enumerate.Parameter;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.YearMonth;
 
-import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -52,7 +43,6 @@ import security.SecurityRules;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -73,6 +63,8 @@ public class UploadSituation extends Controller {
   public static final String FILE_PREFIX = "situazioneMensile";
   public static final String FILE_SUFFIX = ".txt";
   
+  public static final String URL_TO_PRESENCE = "url_to_presence";
+  
   @Inject
   private static SecurityRules rules;
   @Inject
@@ -85,8 +77,6 @@ public class UploadSituation extends Controller {
   private static IWrapperFactory factory;
   @Inject
   private static UploadSituationManager updloadSituationManager;
-  @Inject
-  private static ConfGeneralManager confGeneralManager; 
 
   /**
    * Tab carica data. 
@@ -123,7 +113,8 @@ public class UploadSituation extends Controller {
   
   /**
    * Modale Cambia il mese e la sede.
-   * @param officeId
+   * 
+   * @param officeId sede
    */
   public static void updateSession(Long officeId) {
     
@@ -203,14 +194,14 @@ public class UploadSituation extends Controller {
    * Carica i dati sul personale (sia lato CNR sia lato ePAS confrontando le due liste).
    * Se necessario effettua login (in caso di username e password null si cerca la login in cache).
    * 
-   * @param office
-   * @param year
-   * @param month
-   * @param attestatiLogin
-   * @param attestatiPassword
+   * @param office sede
+   * @param year anno
+   * @param month mese
+   * @param attestatiLogin username
+   * @param attestatiPassword pass
    */
-  public static void fetchData(@Valid Office office, Integer year, 
-      Integer month, final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
+  public static void fetchData(@Valid Office office, Integer year, Integer month, 
+      final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
     
     rules.checkIfPermitted(office);
     IWrapperOffice wrOffice = factory.create(office);
@@ -239,9 +230,9 @@ public class UploadSituation extends Controller {
       sessionAttestati = new SessionAttestati(sessionAttestati.getUsernameCnr(), true, 
           sessionAttestati.getCookies(), office, year, month);
       
-      sessionAttestati = attestatiClient.login(confGeneralManager
-          .getFieldValue(Parameter.URL_TO_PRESENCE, office), null, null, sessionAttestati, 
-          office, year, month);
+      sessionAttestati = attestatiClient.login(Play.configuration.getProperty(URL_TO_PRESENCE),
+          null, null, sessionAttestati, office, year, month);
+      
       if (sessionAttestati != null) {
         flash.success("Sessione aggiornata.");
       }
@@ -260,9 +251,8 @@ public class UploadSituation extends Controller {
           month = next.get().getMonthOfYear();
         }
 
-        sessionAttestati = attestatiClient.login(confGeneralManager
-            .getFieldValue(Parameter.URL_TO_PRESENCE, office), attestatiLogin, attestatiPassword, 
-            null, office, year, month);
+        sessionAttestati = attestatiClient.login(Play.configuration.getProperty(URL_TO_PRESENCE),
+            attestatiLogin, attestatiPassword, null, office, year, month);
 
         if (!sessionAttestati.isLoggedIn()) {
           flash.error("Errore durante il login sul sistema degli attestati.");
@@ -287,13 +277,26 @@ public class UploadSituation extends Controller {
     uploadData(office.id);
   }
   
+  /**
+   * Logout attestati.
+   * @param officeId sede
+   */
   public static void logoutAttestati(Long officeId) {
     
     memAttestatiIntoCache(null, null);
     flash.success("Logout attestati eseguito.");
     UploadSituation.uploadData(officeId);
   }
+  
 
+  /**
+   * Elabora i dati di tutte le persone della sede per quel mese.
+   * @param office sede
+   * @param year anno
+   * @param month mese 
+   * @throws MalformedURLException 
+   * @throws URISyntaxException 
+   */
   public static void processAllPersons(Office office, int year, int month)
       throws MalformedURLException, URISyntaxException {
    
@@ -350,6 +353,15 @@ public class UploadSituation extends Controller {
 
   }
 
+  /**
+   * Elabora i dati della matricola.
+   * @param officeId sede 
+   * @param matricola matricola 
+   * @param year anno
+   * @param month mese
+   * @throws MalformedURLException
+   * @throws URISyntaxException
+   */
   public static void processSinglePerson(Long officeId, String matricola, int year, int month)
       throws MalformedURLException, URISyntaxException {
     
@@ -420,7 +432,7 @@ public class UploadSituation extends Controller {
   /**
    * Modale visualizzazione problemi.
    * 
-   * @param certificatedDataId
+   * @param certificatedDataId dati certificati
    */
   public static void showProblems(Long certificatedDataId) {
     rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -433,7 +445,7 @@ public class UploadSituation extends Controller {
 
   /**
    * Modale visualizzazione dati inviati.
-   * @param certificatedDataId
+   * @param certificatedDataId dati certificati
    */
   public static void showCertificatedData(Long certificatedDataId) {
     rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -461,6 +473,14 @@ public class UploadSituation extends Controller {
   
   }
   
+  /**
+   * Visualizza i dati certificati per la sede in quel mese.
+   * @param office sede
+   * @param year anno 
+   * @param month mese
+   * @throws MalformedURLException
+   * @throws URISyntaxException
+   */
   public static void performCheckData(Office office, Integer year, Integer month)
     throws MalformedURLException, URISyntaxException {
 

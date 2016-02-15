@@ -12,15 +12,12 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.ConfGeneralManager;
 import manager.ConsistencyManager;
-import manager.services.mealTickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.PersonDay;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -49,7 +46,6 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   @Inject
   private PersonDao personDao;
   private MealTicketDao mealTicketDao;
-  private ConfGeneralManager confGeneralManager;
   private IWrapperFactory wrapperFactory;
   private ConsistencyManager consistencyManager;
   private MealTicketRecapBuilder mealTicketRecapBuilder;
@@ -65,14 +61,12 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   @Inject
   public MealTicketsServiceImpl(PersonDao personDao, 
       MealTicketDao mealTicketDao,
-      ConfGeneralManager confGeneralManager,
       ConsistencyManager consistencyManager,
       MealTicketRecapBuilder mealTicketRecapBuilder,
       IWrapperFactory wrapperFactory) {
     
     this.personDao = personDao;
     this.mealTicketDao = mealTicketDao;
-    this.confGeneralManager = confGeneralManager;
     this.consistencyManager = consistencyManager;
     this.mealTicketRecapBuilder = mealTicketRecapBuilder;
     this.wrapperFactory = wrapperFactory;
@@ -117,18 +111,15 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     DateInterval intervalForMealTicket = wrapperFactory.create(contract)
             .getContractDatabaseIntervalForMealTicket();
 
-    Optional<LocalDate> officeStartDate = confGeneralManager
-            .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, contract.person.office);
+    LocalDate officeStartDate = contract.person.office.getBeginDate();
 
-    if (officeStartDate.isPresent()) {
-      if (officeStartDate.get().isBefore(intervalForMealTicket.getBegin())) {
-        return Optional.fromNullable(intervalForMealTicket);
-      }
-      if (DateUtility
-              .isDateIntoInterval(officeStartDate.get(), intervalForMealTicket)) {
-        return Optional.fromNullable(new DateInterval(officeStartDate.get(),
-                intervalForMealTicket.getEnd()));
-      }
+    if (officeStartDate.isBefore(intervalForMealTicket.getBegin())) {
+      return Optional.fromNullable(intervalForMealTicket);
+    }
+    if (DateUtility
+        .isDateIntoInterval(officeStartDate, intervalForMealTicket)) {
+      return Optional.fromNullable(new DateInterval(officeStartDate,
+          intervalForMealTicket.getEnd()));
     }
 
     return Optional.<DateInterval>absent();

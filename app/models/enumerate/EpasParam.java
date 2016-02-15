@@ -164,6 +164,7 @@ public enum EpasParam {
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
     
     public static class DayMonth {
+      // TODO: eliminare e usare MonthDay.........
       public Integer day;
       public Integer month;
       // TODO: validation
