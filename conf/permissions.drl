@@ -87,7 +87,7 @@ when
      	"Persons.resetPassword",
      	
      	/* Stampa cartellino */
-     	"PrintTags.showPersonTag",
+     	"PrintTags.showTag",
      	
      	/* 
      	 * Visualizzazione eventuali turni via iCal
