@@ -102,6 +102,7 @@ crud.hasErrors =Occorre correggere gli errori riportati.
 crud.modified=&{%s} modificato con successo
 crud.saved=&{%s} salvato con successo
 crud.save=Salva
+crud.ok= Ok
 
 csp.beginDate= Data Inizio
 csp.endDate= Data Fine
@@ -111,6 +112,7 @@ cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
 cwtt.workingTimeType= Tipo Orario
 
+date.modified= Data della Modifica
 dateFrom=Dal
 dateOfPatron= Data del Patrono
 dateTo=Fino Al
@@ -118,6 +120,8 @@ day= Giorno (se presente)
 deliveryDate=Consegnato il
 
 DEL= Eliminazione
+
+done.by= Effettuata da
 
 emailToContact= Indirizzo email dell&#39;amministrazione
 endContract=Data Risoluzione 
@@ -127,6 +131,10 @@ expireDate=Data Scadenza
 feedback.subject =EPAS - Segnalazione utente
 feedback.staff =Lo staff di EPAS
 
+
+history.back= Indietro
+history.type= Operazione
+
 institute.cds= Centro di spesa
 institute.code=Sigla
 institute.name=Nome
@@ -134,6 +142,7 @@ Institutes.blank=Nuovo istituto
 Institutes.delete=Elimina istituto
 invalid.time=Formato del tempo errato.
 
+includeStampingDetails= Includi dettagli timbrature
 link.denied= Permessi insufficenti
 logout= Esci
 lunchPauseEnd= Fine pausa pranzo
@@ -227,10 +236,12 @@ secure.logout=Utente correttamente disconnesso
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 
+stamping= Timbratura
 stamping.in= Timbratura di ingresso
 stamping.note= Note
 stamping.out= Timbratura di uscita
 stamping.stampType= Causale Timbratura
+stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
 stampType= Causale
 
