@@ -34,8 +34,8 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.EpasParam;
 import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.Parameter;
 import models.enumerate.QualificationMapping;
 
 import org.apache.commons.mail.EmailException;
@@ -69,10 +69,9 @@ public class AbsenceManager {
   private final AbsenceDao absenceDao;
   private final PersonReperibilityDayDao personReperibilityDayDao;
   private final PersonShiftDayDao personShiftDayDao;
-  private final ConfYearManager confYearManager;
   private final PersonChildrenDao personChildrenDao;
-  private final ConfGeneralManager confGeneralManager;
   private final ConsistencyManager consistencyManager;
+  private final ConfigurationManager configurationManager;
 
   @Inject
   public AbsenceManager(
@@ -87,9 +86,8 @@ public class AbsenceManager {
       ContractMonthRecapManager contractMonthRecapManager,
       PersonManager personManager, 
       AbsenceGroupManager absenceGroupManager,
-      ConfGeneralManager confGeneralManager,
-      ConfYearManager confYearManager,
-      ConsistencyManager consistencyManager, 
+      ConsistencyManager consistencyManager,
+      ConfigurationManager configurationManager,
       
       IWrapperFactory wrapperFactory,
       IVacationsService vacationsService) {
@@ -98,15 +96,14 @@ public class AbsenceManager {
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.personManager = personManager;
     this.personDayDao = personDayDao;
+    this.configurationManager = configurationManager;
     this.vacationsService = vacationsService;
     this.absenceGroupManager = absenceGroupManager;
     this.contractDao = contractDao;
     this.absenceDao = absenceDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
     this.personShiftDayDao = personShiftDayDao;
-    this.confYearManager = confYearManager;
     this.personChildrenDao = personChildrenDao;
-    this.confGeneralManager = confGeneralManager;
     this.consistencyManager = consistencyManager;
   }
 
@@ -417,8 +414,11 @@ public class AbsenceManager {
     MultiPartEmail email = new MultiPartEmail();
 
     try {
+      String replayTo = (String)configurationManager
+          .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+      
       email.addTo(person.email);
-      email.addReplyTo(confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office));
+      email.addReplyTo(replayTo);
       email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
       String date = "";
       for (LocalDate data : airl.datesInReperibilityOrShift()) {
@@ -460,8 +460,8 @@ public class AbsenceManager {
       Person person, LocalDate date, AbsenceType absenceType,
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    Integer maxRecoveryDaysOneThree = confYearManager
-            .getIntegerFieldValue(Parameter.MAX_RECOVERY_DAYS_13, person.office, date.getYear());
+    Integer maxRecoveryDaysOneThree = (Integer)configurationManager
+        .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_13, date.getYear());
 
     // TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
     // Bisogna considerare anche eventuali inizializzazioni

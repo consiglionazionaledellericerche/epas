@@ -1,23 +1,23 @@
 package manager;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 
-import models.ConfGeneral;
+import models.Configuration;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.enumerate.Parameter;
+import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.EpasParamValueType;
+import models.enumerate.EpasParam.EpasParamValueType.IpList;
 
-import org.joda.time.LocalDate;
-
+import java.util.List;
 import java.util.Set;
 
 public class OfficeManager {
@@ -25,17 +25,16 @@ public class OfficeManager {
 
   private final UsersRolesOfficesDao usersRolesOfficesDao;
   private final RoleDao roleDao;
-  private final ConfGeneralManager confGeneralManager;
-  private final ConfYearManager confYearManager;
+  private final ConfigurationManager configurationManager;
 
   @Inject
-  public OfficeManager(UsersRolesOfficesDao usersRolesOfficesDao,
-      RoleDao roleDao, ConfGeneralManager confGeneralManager,
-      ConfYearManager confYearManager) {
+  public OfficeManager(
+      UsersRolesOfficesDao usersRolesOfficesDao,
+      RoleDao roleDao,
+      ConfigurationManager configurationManager) {
     this.usersRolesOfficesDao = usersRolesOfficesDao;
     this.roleDao = roleDao;
-    this.confGeneralManager = confGeneralManager;
-    this.confYearManager = confYearManager;
+    this.configurationManager = configurationManager;
   }
 
   /**
@@ -74,33 +73,27 @@ public class OfficeManager {
     return false;
   }
 
+  
+  /**
+   * Le sedi che hanno tale ip abilitato per timbrature.
+   * @param ip indirizzo da verificare
+   * @return insieme sedi
+   */
   public Set<Office> getOfficesWithAllowedIp(String ip) {
 
     Preconditions.checkNotNull(ip);
-
-    return FluentIterable.from(confGeneralManager.containsValue(
-        Parameter.ADDRESSES_ALLOWED.description, ip)).transform(
-            new Function<ConfGeneral, Office>() {
-
-              @Override
-              public Office apply(ConfGeneral input) {
-                return input.office;
-              }
-            }).toSet();
+    Set<Office> offices = Sets.newHashSet();
+    List<Configuration> configurationWithType = configurationManager
+        .configurationWithType(EpasParam.ADDRESSES_ALLOWED);
+    
+    for (Configuration configuration : configurationWithType) {
+      IpList ipList = (IpList)EpasParamValueType.parseValue(EpasParamValueType.IP_LIST, 
+          (String)configuration.getValue());
+      if (ipList.ipList.contains(ip)) {
+        offices.add(configuration.office);
+      }
+    }
+    return offices;
   }
 
-  public void generateConfAndPermission(Office office) {
-
-    Preconditions.checkNotNull(office);
-
-    if (office.confGeneral.isEmpty()) {
-      confGeneralManager.buildOfficeConfGeneral(office, false);
-    }
-    if (office.confYear.isEmpty()) {
-      confYearManager.buildOfficeConfYear(office, LocalDate.now().getYear() - 1, false);
-      confYearManager.buildOfficeConfYear(office, LocalDate.now().getYear(), false);
-    }
-
-    setSystemUserPermission(office);
-  }
 }
