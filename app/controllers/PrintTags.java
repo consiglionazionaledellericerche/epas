@@ -52,7 +52,7 @@ public class PrintTags extends Controller {
   @Inject
   static IWrapperFactory wrapperFactory;
 
-  public static void showTag(Person person, int month, int year) {
+  public static void showTag(Person person, int month, int year, boolean includeStampingDetails) {
 
     if (person == null) {
       flash.error("Selezionare una persona dall'elenco del personale.");
@@ -66,8 +66,6 @@ public class PrintTags extends Controller {
     String titolo = "Situazione presenze mensile "
         + DateUtility.fromIntToStringMonth(month) + " " + year + " di "
         + person.surname + " " + person.name;
-
-    boolean includeStampingDetails = true;
 
     List<PersonStampingDayRecap> days = psDto.daysRecap;
     List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();

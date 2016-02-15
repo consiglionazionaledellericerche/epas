@@ -25,6 +25,7 @@
   <input type="hidden" name="year" value="${date.getYear()}"/>
 
   #{f.selectModel 'person', items:personList /}
+  #{f.checkbox 'includeStampingDetails' /}
   #{b.buttons center:'true'}
   #{b.back /}
   #{b.ok /}
