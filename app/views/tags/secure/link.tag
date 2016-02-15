@@ -23,6 +23,8 @@ fa: optional fontawesome code
 #{/if}
 #{else}
   <span notAllowed data-original-title="&{'link.denied'}">
+  #{if _fa}<i class="fa fa-${_fa}"></i>
+  <span class="hidden-xs"> #{/if}
    #{doBody/}
   </span>
 #{/else}
