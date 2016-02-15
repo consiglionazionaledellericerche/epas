@@ -204,6 +204,9 @@ public class TemplateExtensions extends JavaExtensions {
   public static String value(LocalDate date) {
     return date.toString("dd/MM/yyyy");
   }
+  public static String value(String string) {
+    return string;
+  }
 
   public static String shortDayName(LocalDate date) {
     final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd E");

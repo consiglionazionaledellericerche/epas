@@ -9,7 +9,7 @@
 <div class="input-group">
     <input type="${_type == null ? 'text' : _type}" name="${field.name}" id="${field.id}" class="form-control ${_attrs['class']}"
   	value="${(!_attrs.containsKey('value') ? field.value : _value)?.value()}"
-  	data-provide="datepicker"
+  	datepicker
   	${helpers.Web.serialize(_attrs, "arg", "value", "label", "required", "inline").raw()} />
     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 </div>

@@ -136,6 +136,9 @@ public class PeriodManager {
     
     //Validazione copertura periodi.
     Verify.verify(validatePeriods(propertyInPeriod.getOwner(), periodList));
+    
+    //Fix merge period
+    
 
     if (persist) {
       for (IPropertyInPeriod periodRemoved : toRemove) {
@@ -251,7 +254,7 @@ public class PeriodManager {
   private IPropertyInPeriod insertIntoList(IPropertyInPeriod previous,
       IPropertyInPeriod present, List<IPropertyInPeriod> periodList) {
 
-    if (previous != null && previous.periodValueEquals(present))  {
+    if (previous != null && previous.periodValueEquals(present.getValue()))  {
       previous.setEndDate(present.getEndDate());
       if (present.getRecomputeFrom() != null) {
         previous.setRecomputeFrom(present.getRecomputeFrom());

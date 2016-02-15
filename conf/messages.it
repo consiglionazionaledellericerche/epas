@@ -377,14 +377,15 @@ DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
-validityYear=Anno
-validityBegin=Validità Inizio
-validityEnd=Validità Fine
+configurationDto.validityYear=Anno
+configurationDto.toTheEnd=Anche Per gli anni successivi
+configurationDto.validityBegin=Validità Inizio
+configurationDto.validityEnd=Validità Fine
 
-booleanNewValue=Nuovo Valore
-stringNewValue=Nuovo Valore
-integerNewValue=Nuovo Valore
-localdateNewValue=Nuovo Valore
+configurationDto.booleanNewValue=Nuovo Valore
+configurationDto.stringNewValue=Nuovo Valore
+configurationDto.integerNewValue=Nuovo Valore
+configurationDto.localdateNewValue=Nuovo Valore
 
 WayType.in= Ingresso
 WayType.out= Uscita

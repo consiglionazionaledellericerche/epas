@@ -9,6 +9,7 @@ import dao.OfficeDao;
 
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
@@ -28,8 +29,10 @@ import models.enumerate.Parameter;
 import models.enumerate.EpasParam.EpasParamValueType;
 import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -290,7 +293,79 @@ public class Configurations extends Controller {
     notFoundIfNull(configuration);
     rules.checkIfPermitted(configuration.office);
     
-    render(configuration);
+    ConfigurationDto configurationDto = new ConfigurationDto(configuration);
+    
+    render(configuration, configurationDto);
+  }
+  
+  @Data
+  public static class ConfigurationDto {
+
+    public LocalDate validityBegin;
+    public LocalDate validityEnd;
+    
+    public Integer validityYear;
+    public Boolean toTheEnd = false;
+    
+    public Boolean booleanNewValue;
+    public String stringNewValue;
+    public Integer integerNewValue;
+    public LocalDate localdateNewValue;
+    
+    
+    /**
+     * Default constructor.
+     */
+    public ConfigurationDto() {
+      
+    }
+    
+    /**
+     * Constructor from configuration (contiene i valori del dto iniziale).
+     * @param configuration
+     */
+    public ConfigurationDto(Configuration configuration) {
+      if (configuration.epasParam.isGeneral()) {
+        this.validityBegin = configuration.getBeginDate();
+        this.validityEnd = configuration.calculatedEnd();
+      }
+      if (configuration.epasParam.isYearly()) {
+        this.validityYear = LocalDate.now().getYear();
+      }
+      if (configuration.epasParam.isPeriodic()) {
+        this.validityBegin = configuration.getBeginDate();
+        this.validityEnd = configuration.calculatedEnd();
+      }
+
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
+        this.booleanNewValue = (Boolean)configuration.parseValue();
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
+        this.integerNewValue = (Integer)configuration.parseValue();
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST)) {
+        this.stringNewValue = EpasParamValueType.formatValue((IpList)configuration.parseValue());
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE)) {
+        this.localdateNewValue = (LocalDate)configuration.parseValue();
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL)) {
+        this.stringNewValue = (String)configuration.parseValue();
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
+        this.stringNewValue = EpasParamValueType.formatValue((DayMonth)configuration.parseValue());
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.MONTH)) {
+        this.integerNewValue = (Integer)configuration.parseValue();
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME)) {
+        this.stringNewValue = EpasParamValueType.formatValue((LocalTime)configuration.parseValue());
+      }
+      if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME_INTERVAL)) {
+        this.stringNewValue = EpasParamValueType
+            .formatValue((LocalTimeInterval)configuration.parseValue());
+      }
+    }
   }
   
   /**
@@ -303,21 +378,23 @@ public class Configurations extends Controller {
    * @param confirmed
    */
   public static void update(@Valid Configuration configuration, 
-      Integer validityYear, LocalDate validityBegin, LocalDate validityEnd,
-      Boolean booleanNewValue, String stringNewValue, Integer integerNewValue, 
-      LocalDate localdateNewValue, boolean confirmed) {
+      ConfigurationDto configurationDto, boolean confirmed) {
     
     rules.checkIfPermitted(configuration.office);
     Configuration newConfiguration = null;
     if (configuration.epasParam.isGeneral()) {
-      validityBegin = null;
-      validityEnd = null;
+      configurationDto.validityBegin = null;
+      configurationDto.validityEnd = null;
     }
     if (configuration.epasParam.isYearly()) {
-      validityBegin = configurationManager.officeYearBegin(configuration.office, validityYear);
-      validityEnd = configurationManager.officeYearEnd(configuration.office, validityYear);
-      if (validityBegin == null) {
-        validation.addError("validityYear", "anno non ammesso.");
+      configurationDto.validityBegin = configurationManager
+          .officeYearBegin(configuration.office, configurationDto.validityYear);
+      if (!configurationDto.toTheEnd) {
+      configurationDto.validityEnd = configurationManager
+          .officeYearEnd(configuration.office, configurationDto.validityYear);
+      } 
+      if (configurationDto.validityBegin == null) {
+        validation.addError("configurationDto.validityYear", "anno non ammesso.");
       }
     }
     if (configuration.epasParam.isPeriodic()) {
@@ -326,104 +403,133 @@ public class Configurations extends Controller {
     if (validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
-      render("@edit", configuration, validityYear, validityBegin, validityEnd, 
-          booleanNewValue, stringNewValue, integerNewValue, localdateNewValue);
+      render("@edit", configuration, configurationDto);
     }
     
 
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
-      if (booleanNewValue == null) {
-        validation.addError("booleanNewValue", "valore non valido.");
+      if (configurationDto.booleanNewValue == null) {
+        validation.addError("configurationDto.booleanNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateBoolean(configuration.epasParam, 
-            configuration.office, booleanNewValue, 
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            configuration.office, configurationDto.booleanNewValue, 
+            Optional.fromNullable(configurationDto.validityBegin), 
+            Optional.fromNullable(configurationDto.validityEnd), false);
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
-      if (integerNewValue == null) {
-        validation.addError("integerNewValue", "valore non valido.");
+      if (configurationDto.integerNewValue == null) {
+        validation.addError("configurationDto.integerNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateInteger(configuration.epasParam, 
-            configuration.office, integerNewValue, 
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            configuration.office, configurationDto.integerNewValue, 
+            Optional.fromNullable(configurationDto.validityBegin), 
+            Optional.fromNullable(configurationDto.validityEnd), false);
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST)) {
-      if (stringNewValue != null) {
-        IpList ipList = (IpList)EpasParamValueType
-            .parseValue(configuration.epasParam.epasParamValueType, stringNewValue);
+      if (configurationDto.stringNewValue != null) {
+        IpList ipList = (IpList)EpasParamValueType.parseValue(
+            configuration.epasParam.epasParamValueType, configurationDto.stringNewValue);
         // TODO: validazione sugli ip
         newConfiguration = configurationManager.updateIpList(configuration.epasParam, 
             configuration.office, ipList.ipList,
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            Optional.fromNullable(configurationDto.validityBegin), 
+            Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("stringNewValue", "valore non valido.");
+        validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE)) {
-      if (localdateNewValue == null) {
-        validation.addError("localdateNewValue", "valore non valido.");
+      if (configurationDto.localdateNewValue == null) {
+        validation.addError("configurationDto.localdateNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateLocalDate(configuration.epasParam, 
-            configuration.office, localdateNewValue, 
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            configuration.office, configurationDto.localdateNewValue, 
+            Optional.fromNullable(configurationDto.validityBegin), 
+            Optional.fromNullable(configurationDto.validityEnd), false);
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL)) {
-      if (stringNewValue != null) {
+      if (configurationDto.stringNewValue != null) {
         // TODO: validazione sulla email
         newConfiguration = configurationManager.updateEmail(configuration.epasParam, 
-            configuration.office, stringNewValue,
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            configuration.office, configurationDto.stringNewValue,
+            Optional.fromNullable(configurationDto.validityBegin), 
+            Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("stringNewValue", "valore non valido.");
+        validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
-      DayMonth dayMonth = 
-          (DayMonth)EpasParamValueType.parseValue(EpasParamValueType.DAY_MONTH, stringNewValue);
+      DayMonth dayMonth = (DayMonth)EpasParamValueType
+          .parseValue(EpasParamValueType.DAY_MONTH, configurationDto.stringNewValue);
       if (dayMonth != null) {
         newConfiguration = configurationManager.updateDayMonth(configuration.epasParam, 
             configuration.office, dayMonth.day, dayMonth.month,
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            Optional.fromNullable(configurationDto.validityBegin), 
+            Optional.fromNullable(configurationDto.validityEnd), false);
 
       } else {
-        validation.addError("stringNewValue", "valore non valido.");
+        validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.MONTH)) {
-      if (integerNewValue == null || integerNewValue < 0 || integerNewValue > 12) {
-        validation.addError("integerNewValue", "valore non valido.");
+      if (configurationDto.integerNewValue == null || configurationDto.integerNewValue < 0 
+          || configurationDto.integerNewValue > 12) {
+        validation.addError("configurationDto.integerNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateMonth(configuration.epasParam, 
-            configuration.office, integerNewValue, 
-            Optional.fromNullable(validityBegin), Optional.fromNullable(validityEnd), false);
+            configuration.office, configurationDto.integerNewValue, 
+            Optional.fromNullable(configurationDto.validityBegin),
+            Optional.fromNullable(configurationDto.validityEnd), false);
       }
     }
-    
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME)) {
+      LocalTime localtime = (LocalTime)EpasParamValueType
+          .parseValue(EpasParamValueType.LOCALTIME, configurationDto.stringNewValue);
+      if (localtime != null) {
+        newConfiguration = configurationManager.updateLocalTime(configuration.epasParam, 
+            configuration.office, localtime, 
+            Optional.fromNullable(configurationDto.validityBegin),
+            Optional.fromNullable(configurationDto.validityEnd), false);
+      } else {
+        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+      }
+    }
+    if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME_INTERVAL)) {
+      LocalTimeInterval localtimeInterval = (LocalTimeInterval)EpasParamValueType
+          .parseValue(EpasParamValueType.LOCALTIME_INTERVAL, configurationDto.stringNewValue);
+      if (localtimeInterval != null) {
+        newConfiguration = configurationManager.updateLocalTimeInterval(configuration.epasParam, 
+            configuration.office, localtimeInterval.from, localtimeInterval.to, 
+            Optional.fromNullable(configurationDto.validityBegin),
+            Optional.fromNullable(configurationDto.validityEnd), false);
+      } else {
+        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+      }
+    }
+
     if (validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
-      render("@edit", configuration, validityYear, validityBegin, validityEnd, 
-          booleanNewValue, stringNewValue, integerNewValue, localdateNewValue);
+      render("@edit", configuration, configurationDto);
     }
-    
+
     Verify.verifyNotNull(newConfiguration);
-    
+
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(configuration.office.getBeginDate(),
             Optional.fromNullable(LocalDate.now()),
             periodRecaps);
+    recomputeRecap.configuration = configuration;
     
     if (!confirmed) {
       
       response.status = 400;
       confirmed = true;
-      render("@edit", confirmed, recomputeRecap, configuration, 
-          validityYear, validityBegin, validityEnd, 
-          booleanNewValue, stringNewValue, integerNewValue, localdateNewValue);
+      render("@edit", confirmed, recomputeRecap, configuration, configurationDto);
     }
     
     periodManager.updatePeriods(newConfiguration, true);
