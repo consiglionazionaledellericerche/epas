@@ -33,7 +33,7 @@
 
 <body>
 
-<h3>${titolo}</h3>
+<h3>Situazione presenze mensile ${org.joda.time.LocalDate.now().withYear(psDto.year).withMonthOfYear(psDto.month).toString("MMMM YYYY")} di ${psDto.person.fullname}</h3>
 
 <table>
   <tr>
