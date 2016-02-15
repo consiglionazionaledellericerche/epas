@@ -7,7 +7,8 @@ import com.google.common.hash.Hashing;
 
 import dao.UserDao;
 
-import manager.ConfGeneralManager;
+import manager.ConfigurationManager;
+import manager.OfficeManager;
 
 import models.User;
 import models.enumerate.Parameter;
@@ -31,7 +32,7 @@ public class Security extends Secure.Security {
   @Inject
   private static UserDao userDao;
   @Inject
-  private static ConfGeneralManager confGeneralManager;
+  private static OfficeManager officeManager;
 
   /**
    * @return true se è autenticato, false altrimenti.
@@ -117,7 +118,6 @@ public class Security extends Secure.Security {
       return true;
     }
     String remoteAddress = Http.Request.current().remoteAddress;
-    return !confGeneralManager.containsValue(
-        Parameter.ADDRESSES_ALLOWED.description, remoteAddress).isEmpty();
+    return !(Boolean)officeManager.getOfficesWithAllowedIp(remoteAddress).isEmpty();
   }
 }

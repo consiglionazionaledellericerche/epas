@@ -11,7 +11,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
+import manager.ConfigurationManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.cache.StampTypeManager;
@@ -25,7 +25,9 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 
@@ -110,7 +112,7 @@ public class PersonStampingDayRecap {
                                 StampingTemplateFactory stampingTemplateFactory,
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
                                 WorkingTimeTypeDao workingTimeTypeDao,
-                                ConfGeneralManager confGeneralManager, PersonDay pd,
+                                ConfigurationManager configurationManager, PersonDay pd,
                                 int numberOfInOut, Optional<List<Contract>> monthContracts) {
 
     this.stampingTemplateFactory = stampingTemplateFactory;
@@ -153,17 +155,11 @@ public class PersonStampingDayRecap {
       this.setBreakTicketTime(this.wttd.breakTicketTime);
     }
 
-    Integer mealTimeStartHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.person.office);
-    Integer mealTimeStartMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.person.office);
-    Integer mealTimeEndHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.person.office);
-    Integer mealTimeEndMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.person.office);
+    LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.person.office, EpasParam.LUNCH_INTERVAL, pd.getDate());
 
-    this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
-    this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
+    this.setTimeMealFrom(lunchInterval.from.getHourOfDay(), lunchInterval.from.getMinuteOfHour());
+    this.setTimeMealTo(lunchInterval.to.getHourOfDay(), lunchInterval.to.getMinuteOfHour());
 
     if (wrPersonDay.isFixedTimeAtWork()) {
 

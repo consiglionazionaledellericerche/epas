@@ -30,10 +30,12 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.EpasParam;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -48,7 +50,7 @@ import java.util.Map;
 @Slf4j
 public class PersonDayManager {
 
-  private final ConfGeneralManager confGeneralManager;
+  private final ConfigurationManager configurationManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final ContractMonthRecapManager contractMonthRecapManager;
   private final PersonShiftDayDao personShiftDayDao;
@@ -58,7 +60,7 @@ public class PersonDayManager {
    * @param personDayDao personDao
    * @param stampTypeManager stampTypeManager
    * @param absenceDao absenceDao
-   * @param confGeneralManager confGeneralManager
+   * @param configurationManager configurationManager
    * @param personDayInTroubleManager personDayInTroubleManager
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personShiftDayDao personShiftDayDao
@@ -67,12 +69,12 @@ public class PersonDayManager {
   public PersonDayManager(PersonDayDao personDayDao,
       StampTypeManager stampTypeManager,
       AbsenceDao absenceDao,
-      ConfGeneralManager confGeneralManager,
+      ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager,
       ContractMonthRecapManager contractMonthRecapManager,
       PersonShiftDayDao personShiftDayDao) {
 
-    this.confGeneralManager = confGeneralManager;
+    this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.personShiftDayDao = personShiftDayDao;
@@ -594,24 +596,11 @@ public class PersonDayManager {
 
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
-    Integer mealTimeStartHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.getValue().person.office);
-    Integer mealTimeStartMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.getValue().person.office);
-    Integer mealTimeEndHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
-    Integer mealTimeEndMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
-    LocalTime startLunch = new LocalTime()
-        .withHourOfDay(mealTimeStartHour)
-        .withMinuteOfHour(mealTimeStartMinute);
-
-    LocalTime endLunch = new LocalTime()
-        .withHourOfDay(mealTimeEndHour)
-        .withMinuteOfHour(mealTimeEndMinute);
-
+    LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+    
     updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork(), 
-        startLunch, endLunch);
+        lunchInterval.from, lunchInterval.to);
 
     updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
