@@ -266,9 +266,14 @@ public enum EpasParam {
         case LOCALTIME:
           return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
         case LOCALTIME_INTERVAL:
-          return new LocalTimeInterval(
+              LocalTimeInterval interval = new LocalTimeInterval(
               (LocalTime)parseValue(LOCALTIME, value.split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
               (LocalTime)parseValue(LOCALTIME, value.split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
+              if (interval.to.isBefore(interval.from)) {
+                return null;
+              } else {
+                return interval;
+              }
         case DAY_MONTH:
           return new DayMonth(
               new Integer(value.split(DAY_MONTH_SEPARATOR)[0]), 
