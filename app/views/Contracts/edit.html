@@ -67,7 +67,7 @@
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			<input type="hidden" name="confirmed" value="true" />
 			
-			#{recomputeRecap recomputeRecap:recomputeRecap /}
+			#{recomputeRecap.show recomputeRecap:recomputeRecap /}
 			
 			#{b.buttons center:true}
 			   #{b.submit 'Conferma'/}

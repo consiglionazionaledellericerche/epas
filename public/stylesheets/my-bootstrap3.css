@@ -333,6 +333,12 @@ tfoot input {
   margin-top: 2em;
   margin-bottom: 2em;
 }
+
+/* classe che riprende la nomenlclatura bootstrap per il colore del testo */
+.text-dark { 
+  color: #292525;
+}
+
 /* CREA LO SFONDO PER I VALORI NEI TAG view
 div.form-group .form-control-static {
     background: rgb(245,245,245);

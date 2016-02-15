@@ -1,60 +1,90 @@
 #{modalAsync noTitle:true}
   
   <div class="text-center">
-  <h3>Gestione &{configuration.epasParam}</h3>
+  <h3>Modifica Configurazione ${configuration.office.name}</h3>
   <br>
   </div>
   
+  <div class="row">
+  <div class="col-md-10 col-md-offset-1">
+  <h4><strong><em>&{configuration.epasParam}</em></strong></h4>
+  <br>
   <!-- Visualizzazione stato attuale -->
   #{if configuration.epasParam.general }
-    <p>Il parametro <strong>&{configuration.epasParam}</strong> per la sede <strong>${configuration.office.name}</strong> 
+    
+    <p>Questo parametro per la sede <strong>${configuration.office.name}</strong> 
     è attualmente impostato a <strong>${configuration.parseValue().label()}</strong>.
     <p>
   #{/if}
   
   #{if configuration.epasParam.yearly || configuration.epasParam.periodic}
-    <p>Valori assunti dal parametro <strong>&{configuration.epasParam}</strong> per la sede <strong>${configuration.office.name}</strong> 
-    e loro validità.
+    #{alert color:'info'}
+    <p>I Valori assunti da questo parametro per la sede <strong>${configuration.office.name}</strong> 
+    e loro validità sono:
     <p>
+    #{/alert}
     <table class="table">
     <tr>
-     <th>Valore</th>
-     <th>Validità Dal</th>
+     <th>Dal</th>
      <th>Al</th>
+     <th>Valore</th>
     </tr>
+    
     
     #{list items:configuration.office.periods(configuration.type), as:'conf'}
     <tr>
+	  <td class="col-xs-3"><em>${conf.beginDate.format()}</em></td>
+	  #{if conf.calculatedEnd()}
+	  <td class="col-xs-3"><em>${conf.calculatedEnd()?.format()}</em></td>
+	  #{/if} #{else}
+	  <td class="col-xs-3"><em>Indeterminato</em></td>
+	  #{/else}       
       <td><strong>${conf.fieldValue}</strong></td>
-      <td>${conf.beginDate.format()}</td>
-	  <td>${conf.calculatedEnd()?.format()}</td>
     </tr>
     #{/list}
+    
+    
   </table>
   #{/if}
   
   <!-- Riepilogo delle ricomputazioni eventuali -->
-  #{alert color:'info'}
+  #{alert color:'warning', textcolor:'dark'}
+    <p><strong>Guida alla Modifica</strong></p>
     #{if configuration.epasParam.recomputationTypes.empty }
-	  <p>La modifica del valore di questo parametro non comporta alcun tipo di riconteggio 
-	    o sincronizzazione dello stato dei dipendenti.
+      
+	  <p><i class="fa fa-thumbs-o-up"></i> La modifica del valore di questo parametro non comporta alcun tipo di riconteggio 
+	    o sincronizzazione.
 	  </p>
     #{/if}#{else}
-	  <p>La modifica di questo paramatro comporta la sincronizzazzione per tutti i dipendenti 
+	  <p><i class="fa fa-exclamation-triangle"></i> La modifica di questo paramatro comporta la sincronizzazzione per tutti i dipendenti 
 	    di <strong>${configuration.office.name}</strong> di tipo:
 	    <ul> 
 	    #{list items:configuration.epasParam.recomputationTypes, as:'recomputationType'}
 	      <li>&{recomputationType}</li>
 	    #{/list}
 	    </ul>
-	    a partire dal primo giorno modificato.
+	    a partire dal primo giorno modificato fino ad oggi.
 	  </p>
+	   <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
     #{/else}
+    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.MONTH) }
+      <p><i class="fa fa-info-circle"></i> Inserire il mese nel formato numerico (da 1 a 12). Inserire il valore 0 per disabilitare il limite.</p>
+    #{/if}
+    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.IP_LIST) }
+      <p><i class="fa fa-info-circle"></i> Inserire ogni IP separato da quello precedente tramite una virgola ed uno spazio.</p>
+    #{/if}
+    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.DAY_MONTH) }
+      <p><i class="fa fa-info-circle"></i> Inserire il giorno-mese nel formato GG/MM.</p>
+    #{/if}
+    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME) }
+      <p><i class="fa fa-info-circle"></i> Inserire l'orario nel formato HH:mm (dove HH può assumere valori da 0 a 23).</p>
+    #{/if}
+    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
+      <p><i class="fa fa-info-circle"></i> Inserire l'intervallo orario nel formato HH:mm - HH:mm (dove HH può assumere valori da 0 a 23).</p>
+    #{/if}
   #{/alert}
-  
-  
+    
   <!-- Form per la modifica -->
-  
      <div id="configData">
      #{form action:@Configurations.update(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal', 'data-async':'#page_content',
@@ -63,7 +93,8 @@
 		#{p.hidden 'configuration.id', value:configuration.id /}
 		
 		#{f.hidden 'confirmed' /}
-		#{configuration.typeform configuration:configuration, confirmed:confirmed, booleanNewValue:booleanNewValue /}
+		#{configuration.typeform configuration:configuration, confirmed:confirmed, 
+		configurationDto:configurationDto /}
 		
 	    #{if !confirmed}
 	    	<!--bottoni -->
@@ -81,7 +112,8 @@
 	    
 	 #{/form}
      </div>	  
-
  
+   </div>
+  </div>
   
 #{/modalAsync}

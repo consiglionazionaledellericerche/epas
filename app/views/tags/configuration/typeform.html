@@ -6,35 +6,41 @@
   #{if !_confirmed}
     <!-- input period -->
     #{if configuration.epasParam.yearly }
-      #{p.text 'validityYear', type:'number', value:validityYear /}
+      #{p.text 'configurationDto.validityYear', type:'number', value:_configurationDto.validityYear /}
+      #{p.booleanRadio 'configurationDto.toTheEnd', value:_configurationDto.toTheEnd /}
     #{/if}
     #{if configuration.epasParam.periodic }
-      #{p.date 'validityBegin', value:validityBegin?.format(), required:true /}
-	  #{p.date 'validityEnd', value:validityEnd?.format() /}
+      #{p.date 'configurationDto.validityBegin', value:_configurationDto.validityBegin?.format(), required:true /}
+	  #{p.date 'configurationDto.validityEnd', value:_configurationDto.validityEnd?.format() /}
     #{/if}
-
     
     <!-- input value -->
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.BOOLEAN) }
-	  #{p.booleanRadio 'booleanNewValue', value:_booleanNewValue /}
+	  #{p.booleanRadio 'configurationDto.booleanNewValue', value:_configurationDto.booleanNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.INTEGER) }
-	  #{p.text 'integerNewValue', type:'number', value:_integerNewValue /}
+	  #{p.text 'configurationDto.integerNewValue', type:'number', value:_configurationDto.integerNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.IP_LIST) }
-	  #{p.textarea 'stringNewValue', value:_stringNewValue /}
+	  #{p.textarea 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALDATE) }
-	  #{p.date 'localdateNewValue', value:_localdateNewValue?.format() /}
+	  #{p.date 'configurationDto.localdateNewValue', value:_configurationDto.localdateNewValue?.format() /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
-	  #{p.text 'stringNewValue', value:_stringNewValue /}
+	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.DAY_MONTH) }
-	  #{p.text 'stringNewValue', value:_stringNewValue /}
+	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.MONTH) }
-	  #{p.text 'integerNewValue', value:_integerNewValue /}
+	  #{p.text 'configurationDto.integerNewValue', value:_configurationDto.integerNewValue /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME) }
+	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
+	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
     
 	
@@ -44,37 +50,44 @@
   
     <!-- input period -->
     #{if configuration.epasParam.yearly }
-      #{f.simpleView 'validityYear', value:validityYear, hidden:true /}
+      #{f.simpleView 'configurationDto.validityYear', value:_configurationDto.validityYear, hidden:true /}
+      #{f.simpleView 'configurationDto.toTheEnd', value:_configurationDto.toTheEnd, hidden:true /}
     #{/if}
     #{if configuration.epasParam.periodic }
-      #{f.simpleView 'validityBegin', value:validityBegin?.format(), hidden:true /}
-      #{f.simpleView 'validityEnd', value:validityEnd?.format(), hidden:true /}
+      #{f.simpleView 'configurationDto.validityBegin', value:_configurationDto.validityBegin?.format(), hidden:true /}
+      #{f.simpleView 'configurationDto.validityEnd', value:_configurationDto.validityEnd?.format(), hidden:true /}
     #{/if}
 
     <!-- input value -->
     #{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.BOOLEAN) }
-	  #{f.simpleView 'booleanNewValue', value:_booleanNewValue, hidden:true /}
+	  #{f.simpleView 'configurationDto.booleanNewValue', value:_configurationDto.booleanNewValue, hidden:true /}
     #{/if}
     #{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.INTEGER) }
-	  #{f.simpleView 'integerNewValue', value:_integerNewValue, hidden:true /}
+	  #{f.simpleView 'configurationDto.integerNewValue', value:_configurationDto.integerNewValue, hidden:true /}
 	#{/if}
     #{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.IP_LIST) }
-	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
+	  #{f.simpleView 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue, hidden:true /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALDATE) }
-	  #{f.simpleView 'localdateNewValue', value:_localdateNewValue.format(), hidden:true /}
+	  #{f.simpleView 'configurationDto.localdateNewValue', value:_configurationDto.localdateNewValue.format(), hidden:true /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
-	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
+	  #{f.simpleView 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue, hidden:true /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.DAY_MONTH) }
-	  #{f.simpleView 'stringNewValue', value:_stringNewValue, hidden:true /}
+	  #{f.simpleView 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue, hidden:true /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.MONTH) }
-	  #{f.simpleView 'integerNewValue', value:_integerNewValue, hidden:true /}
+	  #{f.simpleView 'configurationDto.integerNewValue', value:_configurationDto.integerNewValue, hidden:true /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME) }
+	  #{f.simpleView 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue, hidden:true /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
+	  #{f.simpleView 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue, hidden:true /}
 	#{/if}
 		  
 	  *{ vedi se ti vanno bene }*  		
-	#{recomputeRecap recomputeRecap:recomputeRecap /}
+	#{recomputeRecap.show recomputeRecap:recomputeRecap /}
 
   #{/else}
