@@ -88,6 +88,7 @@ public class PersonStampingRecap {
                              IWrapperFactory wrapperFactory,
                              int year, int month, Person person) {
 
+    this.person = person;
     this.month = month;
     this.year = year;
 
