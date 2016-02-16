@@ -121,7 +121,7 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-      .formatValue(new LocalTimeInterval(new LocalTime(9,0), new LocalTime(19,0))),
+      .formatValue(new LocalTimeInterval(new LocalTime(0,0), new LocalTime(0,0))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
           RecomputationType.RESIDUAL_MEALTICKETS));
 
@@ -198,7 +198,7 @@ public enum EpasParam {
     }
     
     public final static String DAY_MONTH_SEPARATOR = "/";
-    public final static String LOCALTIME_INTERVAL_SEPARATOR = " - ";
+    public final static String LOCALTIME_INTERVAL_SEPARATOR = "-";
     public final static String LOCALTIME_FORMATTER = "HH:mm";
     public final static String IP_LIST_SEPARATOR = ", ";
     
@@ -262,8 +262,8 @@ public enum EpasParam {
           return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
         case LOCALTIME_INTERVAL:
               LocalTimeInterval interval = new LocalTimeInterval(
-              (LocalTime)parseValue(LOCALTIME, value.split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
-              (LocalTime)parseValue(LOCALTIME, value.split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
+              (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
+              (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
               if (interval.to.isBefore(interval.from)) {
                 return null;
               } else {
