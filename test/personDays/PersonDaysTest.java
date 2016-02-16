@@ -50,7 +50,7 @@ public class PersonDaysTest {
     
     personDay.setStampings(stampings);
     
-    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch);
+    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch, null, null);
     personDayManager.updateDifference(personDay, normalDay(), false);
     personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
@@ -83,7 +83,7 @@ public class PersonDaysTest {
     
     personDay.setStampings(stampings);
     
-    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch);
+    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch, null, null);
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
     assertThat(personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
