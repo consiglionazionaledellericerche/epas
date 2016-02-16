@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfigurationManager;
+import manager.ConsistencyManager;
 import manager.PeriodManager;
 import manager.recaps.recomputation.RecomputeRecap;
 
@@ -40,7 +41,8 @@ public class Configurations extends Controller {
 
   @Inject
   private static OfficeDao officeDao;
-  
+  @Inject
+  private static ConsistencyManager consistencyManager;
   @Inject
   private static ConfigurationManager configurationManager;
   @Inject
@@ -316,7 +318,8 @@ public class Configurations extends Controller {
     
     periodManager.updatePeriods(newConfiguration, true);
     
-    //TODO: ricalcoli
+    consistencyManager.performRecomputation(configuration.office, 
+        configuration.epasParam.recomputationTypes, recomputeRecap.recomputeFrom);
     
     flash.success("Parametro aggiornato correttamente.");
     
