@@ -12,12 +12,14 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.PersonDay;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -49,12 +51,13 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   private IWrapperFactory wrapperFactory;
   private ConsistencyManager consistencyManager;
   private MealTicketRecapBuilder mealTicketRecapBuilder;
+  private ConfigurationManager configurationManager;
   
   /**
    * Costrutture.
    * @param personDao personDao
    * @param mealTicketDao mealTicketDao
-   * @param confGeneralManager confGeneralDao
+   * @param configurationManager configurationManager
    * @param consistencyManager consistencyManager
    * @param wrapperFactory wrapperFactory
    */
@@ -62,12 +65,14 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   public MealTicketsServiceImpl(PersonDao personDao, 
       MealTicketDao mealTicketDao,
       ConsistencyManager consistencyManager,
+      ConfigurationManager configurationManager,
       MealTicketRecapBuilder mealTicketRecapBuilder,
       IWrapperFactory wrapperFactory) {
     
     this.personDao = personDao;
     this.mealTicketDao = mealTicketDao;
     this.consistencyManager = consistencyManager;
+    this.configurationManager = configurationManager;
     this.mealTicketRecapBuilder = mealTicketRecapBuilder;
     this.wrapperFactory = wrapperFactory;
   }
@@ -111,7 +116,8 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     DateInterval intervalForMealTicket = wrapperFactory.create(contract)
             .getContractDatabaseIntervalForMealTicket();
 
-    LocalDate officeStartDate = contract.person.office.getBeginDate();
+    LocalDate officeStartDate = (LocalDate)configurationManager
+        .configValue(contract.person.office, EpasParam.DATE_START_MEAL_TICKET);
 
     if (officeStartDate.isBefore(intervalForMealTicket.getBegin())) {
       return Optional.fromNullable(intervalForMealTicket);
