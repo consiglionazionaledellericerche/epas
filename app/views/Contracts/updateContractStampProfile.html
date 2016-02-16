@@ -22,7 +22,7 @@
   <tr>
     <td>${cspItem.beginDate.format()}</td>
 	<td>#{if cspItem.endDate} ${cspItem.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-	<td>&{cspItem.fixedworkingtime}</td>
+	<td>&{cspItem.fixedworkingtime.label()}</td>
   </tr>
   #{/list}
 </table>
