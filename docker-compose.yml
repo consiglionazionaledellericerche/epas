@@ -5,9 +5,10 @@ postgres:
   image: postgres:9.4.0
 
   volumes:
-  - /opt/epas/db/data:/var/lib/postgresql/data
-  - /etc/localtime:/etc/localtime:ro
-  - /opt/epas/backups/:/tmp:ro
+   - /opt/epas/db/data:/var/lib/postgresql/data
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+   - /opt/epas/backups/:/tmp:ro
 
   # restart: always
 
@@ -16,12 +17,13 @@ nginx:
   image: jwilder/nginx-proxy:latest
 
   ports:
-  - "80:80"
+   - "80:80"
 #  - "443:443"
 
   volumes:
-  - /etc/localtime:/etc/localtime:ro
-  - /var/run/docker.sock:/tmp/docker.sock
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+   - /var/run/docker.sock:/tmp/docker.sock
 #  - /opt/epas/certs/:/etc/nginx/certs
 
   # restart: always
@@ -31,14 +33,16 @@ epas:
   image: docker-registry.services.iit.cnr.it/epas:latest
 
   volumes:
-  - /opt/epas/logs/:/home/epas/epas/logs
-  - /opt/epas/attachments:/home/epas/epas/data/attachments
-  - /opt/epas/backups/:/home/epas/epas/backups
-  - /etc/localtime:/etc/localtime:ro
+   - /opt/epas/logs/:/home/epas/epas/logs
+   - /opt/epas/attachments:/home/epas/epas/data/attachments
+   - /opt/epas/backups/:/home/epas/epas/backups
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
 
   environment:
   - VIRTUAL_HOST=localhost
 #  - HTTPS=true                            # default: false -- Attiva l'utilizzodel protocollo HTTPS
+#  - URL_ATTESTATI=                        # default: https://attestati.rm.cnr.it/attestati/
 #  - CERT_NAME=epas                        # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
 #  - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato
 #  - DB_PORT=                              # default: 5432
@@ -59,6 +63,6 @@ epas:
 #  - MARK_BACKUP_AFTER=1                   # Imposta i server come backup sul proxy
 
   links:
-  - postgres
+   - postgres
 
   # restart: always
