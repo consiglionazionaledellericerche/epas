@@ -51,7 +51,7 @@
      <div id="configData">
      #{form action:@Configurations.update(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal', 'data-async':'#page_content',
-		    'data-async-error':'#configData'}
+		    'data-async-error':'#configData', 'data-spinner':'#defaultSpinner'}
 		
 		#{p.hidden 'configuration.id', value:configuration.id /}
 		
