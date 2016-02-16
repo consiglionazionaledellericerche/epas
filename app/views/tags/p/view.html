@@ -41,9 +41,9 @@
 		      ${value.label()}
 		    #{/if}
 		    #{else}
-		     #{if value instanceof models.base.INameable}
+		     *{ #{if value instanceof models.base.INameable}
 		      ${value.name}
-		     #{/if}
+		     #{/if} }*
 		     #{else}
 		      #{if value instanceof org.joda.time.LocalDate}
 		       ${value.format()}
