@@ -386,12 +386,18 @@ public class PersonDayManager {
       return personDay;
     }
 
+    //Le coppie valide
+    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    
     // Minuti derivanti dalle timbrature
-    personDay.setStampingsTime(stampingMinutes(personDay, startWork, endWork));
-
+    personDay.setStampingsTime(stampingMinutes(validPairs));
+    
+    // Minuti effettivi decurtati della fascia istituto
+    int workingMinutesInValidPairs = (workingMinutes(validPairs, startWork, endWork));
+    
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.setTimeAtWork( personDay.getStampingsTime() + personDay.getJustifiedTimeMeal() 
-    + personDay.getJustifiedTimeNoMeal());
+    personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal() 
+        + personDay.getJustifiedTimeNoMeal());
 
     // Se è festa ho finito ...
     if (personDay.isHoliday()) {
@@ -443,7 +449,7 @@ public class PersonDayManager {
     //3) Decisioni
 
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
-    int mealTicketsMinutes = personDay.getStampingsTime() + personDay.getJustifiedTimeMeal();
+    int mealTicketsMinutes = workingMinutesInValidPairs + personDay.getJustifiedTimeMeal();
 
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - missingTime < mealTicketTime) {
@@ -1135,24 +1141,56 @@ public class PersonDayManager {
     return 0;
   }
 
-
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono.
-   *
-   * @return minuti
+   * @param validPairs coppie valide di timbrature per il tempo a lavoro.
+   * @return
    */
-  private int stampingMinutes(PersonDay personDay, LocalTime startWork, LocalTime endWork) {
+  private int stampingMinutes(List<PairStamping> validPairs) {
 
     // TODO: considerare startWork ed endWork nei minuti a lavoro
-    
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
-
     int stampingMinutes = 0;
     for (PairStamping validPair : validPairs) {
         stampingMinutes += validPair.timeInPair;
     }
 
     return stampingMinutes;
+  }
+  
+  /**
+   * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono, 
+   * che facciano parte della finestra temporale specificata.
+   * @param validPairs coppie valide di timbrature per il tempo a lavoro
+   * @param startWork inizio finestra
+   * @param endWork fine finestra
+   * @return
+   */
+  private int workingMinutes(List<PairStamping> validPairs, 
+      LocalTime startWork, LocalTime endWork) {
+    
+    int workingMinutes = 0;
+    
+    //Per ogni coppia valida butto via il tempo oltre la fascia.
+    for (PairStamping validPair : validPairs) {
+      LocalTime consideredStart = new LocalTime(validPair.first.date);
+      LocalTime consideredEnd = new LocalTime(validPair.second.date);
+      if (consideredEnd.isBefore(startWork)) {
+        continue;
+      }
+      if (consideredStart.isAfter(endWork)) {
+        continue;
+      }
+      if (consideredStart.isBefore(startWork)) {
+        consideredStart = startWork;
+      }
+      if (consideredEnd.isAfter(endWork)) {
+        consideredEnd = endWork;
+      }
+      workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
+    }
+    
+    return workingMinutes;
+    
   }
 
   /**

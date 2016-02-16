@@ -121,7 +121,7 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-      .formatValue(new LocalTimeInterval(new LocalTime(0,0), new LocalTime(0,0))),
+      .formatValue(new LocalTimeInterval(new LocalTime(0,0), new LocalTime(23,59))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
           RecomputationType.RESIDUAL_MEALTICKETS));
 

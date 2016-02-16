@@ -146,6 +146,39 @@ public class PersonDay extends BaseModel {
   public boolean isToday() {
     return this.date.isEqual(LocalDate.now());
   }
+  
+  /**
+   * Nel caso di orario effettuato fuori dalla finestra dell'orario sede.
+   * 
+   * TODO: vedere se aggiungere una colonna invece di calcolare questo invariante.
+   * 
+   * timeAtWork = StampingTime - decurtedWork - decurtedMeal  
+   * + justifiedTimeMeal + justifiedTimeNoMeal
+   * 
+   * -->
+   * 
+   * decurtedWork = StampingTime - timeAtWork - decurtedMeal 
+   * + justifiedTimeMeal + justifiedTimeNoMeal 
+   * 
+   * 
+   * @return
+   */
+  @Transient
+  public int getDecurtedWork() {
+
+    int decurtedWork = stampingsTime - this.timeAtWork;
+    if (decurted != null) {
+      decurtedWork -= this.decurted;
+    }
+    if (justifiedTimeMeal != null) {
+      decurtedWork += this.justifiedTimeMeal;
+    }
+    if (justifiedTimeNoMeal != null) {
+      decurtedWork += this.justifiedTimeNoMeal;
+    }
+
+    return decurtedWork;
+  }
 
   @Override
   public String toString() {

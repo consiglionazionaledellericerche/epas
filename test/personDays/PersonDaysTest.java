@@ -25,6 +25,9 @@ public class PersonDaysTest {
 
   public static LocalTime startLunch = new LocalTime(1,0,0);
   public static LocalTime endLunch = new LocalTime(23,0,0);
+  
+  public static LocalTime startWork = new LocalTime(0,0,0);
+  public static LocalTime endWork = new LocalTime(23,59,0);
  
   public static LocalDate first = new LocalDate(2016, 1, 2);
   public static LocalDate second = new LocalDate(2016, 1, 3);
@@ -50,7 +53,8 @@ public class PersonDaysTest {
     
     personDay.setStampings(stampings);
     
-    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch, null, null);
+    personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
+        startLunch, endLunch, startWork, endWork);
     personDayManager.updateDifference(personDay, normalDay(), false);
     personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
@@ -83,7 +87,8 @@ public class PersonDaysTest {
     
     personDay.setStampings(stampings);
     
-    personDayManager.updateTimeAtWork(personDay, normalDay(), false, startLunch, endLunch, null, null);
+    personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
+        startLunch, endLunch, startWork, endWork);
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
     assertThat(personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
