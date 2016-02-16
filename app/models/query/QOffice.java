@@ -24,7 +24,7 @@ public class QOffice extends EntityPathBase<Office> {
 
     public static final QOffice office = new QOffice("office");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
     public final StringPath address = createString("address");
 
@@ -32,13 +32,21 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.BadgeSystem, QBadgeSystem> badgeSystems = this.<models.BadgeSystem, QBadgeSystem>createList("badgeSystems", models.BadgeSystem.class, QBadgeSystem.class, PathInits.DIRECT2);
 
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
+
     public final StringPath code = createString("code");
 
     public final StringPath codeId = createString("codeId");
 
     public final ListPath<models.ConfGeneral, QConfGeneral> confGeneral = this.<models.ConfGeneral, QConfGeneral>createList("confGeneral", models.ConfGeneral.class, QConfGeneral.class, PathInits.DIRECT2);
 
+    public final ListPath<models.Configuration, QConfiguration> configurations = this.<models.Configuration, QConfiguration>createList("configurations", models.Configuration.class, QConfiguration.class, PathInits.DIRECT2);
+
     public final ListPath<models.ConfYear, QConfYear> confYear = this.<models.ConfYear, QConfYear>createList("confYear", models.ConfYear.class, QConfYear.class, PathInits.DIRECT2);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

@@ -3,16 +3,10 @@ edit: link della modifica
 }*
 
 <h4>
-  #{if _edit}
-  <a class="list-group-item-heading" href="@{Offices.edit(_item.id)}">
-    <i class="fa fa-cogs"></i> ${_item.name}
-  </a>
-  #{/if}
-  #{else}
-  ${_item.name}
-  #{/else}
+  #{secure.link @Offices.edit(_item.id),target:_item,fa:'cogs',class:'list-group-item-heading'}
+    ${_item.name}
+  #{/secure.link}
 </h4>
-
 
 <div class="list-group-item-text">
   <strong><i class="fa fa-map-marker"></i> Indirizzo </strong>

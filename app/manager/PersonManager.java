@@ -20,8 +20,10 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 
 import play.db.jpa.JPA;
 
@@ -40,21 +42,24 @@ public class PersonManager {
   private final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
-  private final ConfGeneralManager confGeneralManager;
+  private final ConfigurationManager configurationManager;
 
   @Inject
   public PersonManager(ContractDao contractDao,
-                       PersonChildrenDao personChildrenDao, PersonDao personDao,
-                       PersonDayDao personDayDao, AbsenceDao absenceDao,
-                       PersonDayManager personDayManager,
-                       IWrapperFactory wrapperFactory, ConfGeneralManager confGeneralManager) {
+      PersonChildrenDao personChildrenDao, 
+      PersonDao personDao,
+      PersonDayDao personDayDao, 
+      AbsenceDao absenceDao,
+      PersonDayManager personDayManager,
+      IWrapperFactory wrapperFactory, 
+      ConfigurationManager configurationManager) {
     this.contractDao = contractDao;
     this.personDao = personDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
-    this.confGeneralManager = confGeneralManager;
+    this.configurationManager = configurationManager;
   }
 
   /**
@@ -62,8 +67,10 @@ public class PersonManager {
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
-    if (DateUtility.isGeneralHoliday(confGeneralManager
-        .officePatron(person.office), date)) {
+    MonthDay patron = (MonthDay)configurationManager
+        .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
+    
+    if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
       return true;
     }
 

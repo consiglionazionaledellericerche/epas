@@ -2,33 +2,35 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Stampa cartellino' /}
 
+#{set 'moreStyles'}
+<style type="text/css">
+  .panel{
+  margin-top: 5%;
+  }
+</style>
+#{get 'moreStyles' /}
+#{/set}
 
 <div class="container">
 
+  #{panel title:'Creazione cartellino mensile del Personale', color:'primary'}
 
-#{form @PrintTags.showTag()}
-<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Sarà generato un file per la stampa di tipo PDF. 
-Selezionare uno dei nomi presenti nella lista e premere invio</h4>
-		  </div>
-		<div class="panel-body">
-<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+  #{alert color:'info'}
+  <p>Sarà generato un file PDF contenenti le informazioni della persona selezionata.</p>
+  <p>Selezionare uno dei nomi presenti nella lista e premere ok</p>
+  #{/alert}
 
-<input type="hidden" name="year" value="${date.getYear()}"/>
+  #{form @PrintTags.showTag(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  <input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+  <input type="hidden" name="year" value="${date.getYear()}"/>
 
-<div id="frm">
-#{select 'personId', value:personList.get(0), id:'person'}
-	#{option}Scegli una persona#{/option}
-	#{list personList}
-		#{option _.id}${_.fullname}#{/option}
-	#{/list}
-#{/select}
+  #{f.selectModel 'person', items:personList /}
+  #{f.checkbox 'includeStampingDetails' /}
+  #{b.buttons center:'true'}
+  #{b.back /}
+  #{b.ok /}
+  #{/b.buttons}
+  #{/form}
+  #{/panel}
 
-	<input class="btn btn-primary" type="submit" value="Invio"/>
-	<input  action="action" class="btn" type="button" value="Indietro" onclick="history.go(-1);" />
-  </div>
-</div>
-#{/form}
-</div>
 </div>

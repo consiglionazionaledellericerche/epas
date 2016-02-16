@@ -11,7 +11,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
+/**
+ * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
+ * @author alessandro
+ *
+ */
+@Deprecated
 @Audited
 @Entity
 @Table(name = "conf_year")

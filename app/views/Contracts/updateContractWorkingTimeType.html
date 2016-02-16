@@ -55,7 +55,7 @@
 		  #{f.simpleView 'cwtt.workingTimeType' /}
 		  #{f.hidden 'cwtt.workingTimeType.id' /}
 		  
-		  #{recomputeRecap recomputeRecap:recomputeRecap /}
+		  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
 		  #{b.buttons center:true}
 		    #{b.cancel @updateContractWorkingTimeType(contract.id) /}
 		    #{b.submit 'Conferma'/}

@@ -1,6 +1,7 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -45,12 +46,15 @@ public class PeriodManager {
       IPropertyInPeriod propertyInPeriod, boolean persist) {
     boolean recomputeBeginSet = false;
 
+    //controllo iniziale consistenza periodo.
+    if (propertyInPeriod.calculatedEnd() != null) {
+      Verify.verify(!propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd()));
+    }
+    
     //copia dei periodi ordinata
-    // TODO: periods() deve prendere il tipo quando ci sarà, e andranno modificate tutte
-    // le implementazioni
     List<IPropertyInPeriod> originals = Lists.newArrayList();
     for (IPropertyInPeriod originalPeriod :
-          propertyInPeriod.getOwner().periods(propertyInPeriod.getClass()) ) {
+          propertyInPeriod.getOwner().periods(propertyInPeriod.getType()) ) {
       originals.add(originalPeriod);
     }
     Collections.sort(originals);
@@ -66,7 +70,7 @@ public class PeriodManager {
       DateInterval oldInterval = new DateInterval(oldPeriod.getBeginDate(), oldPeriod.getEndDate());
 
       //non cambia il valore del periodo nessuna modifica su quel oldPeriod
-      if (propertyInPeriod.periodValueEquals(oldPeriod)) {
+      if (propertyInPeriod.periodValueEquals(oldPeriod.getValue())) {
         previous = insertIntoList(previous, oldPeriod, periodList);
         if (previous == null || !previous.equals(oldPeriod)) {
           toRemove.add(oldPeriod);
@@ -123,6 +127,17 @@ public class PeriodManager {
         }
       }
     }
+    
+    //caso iniziale, se non vi era alcun periodo allora quello nuovo lo inserisco.
+    if (originals.isEmpty()) {
+      periodList.add(propertyInPeriod);
+    }
+    
+    //Validazione copertura periodi.
+    Verify.verify(validatePeriods(propertyInPeriod.getOwner(), periodList));
+    
+    //Fix merge period
+    
 
     if (persist) {
       for (IPropertyInPeriod periodRemoved : toRemove) {
@@ -133,11 +148,50 @@ public class PeriodManager {
       }
       propertyInPeriod.getOwner()._save();
       JPA.em().flush();
+      JPA.em().refresh(propertyInPeriod.getOwner());
     }
-
 
     return periodList;
 
+  }
+  
+  
+  /**
+   * Controlla che per ogni giorno dell'owner vi sia uno e uno solo valore.
+   * @return esito
+   */
+  private final boolean validatePeriods(IPropertiesInPeriodOwner owner, 
+      List<IPropertyInPeriod> periods) {
+    
+    //Costruzione intervallo covered
+    Collections.sort(periods);
+    LocalDate begin = null;
+    LocalDate end = null;
+    for (IPropertyInPeriod period : periods) {
+      if (begin == null) {
+        begin = period.getBeginDate();
+        end = period.calculatedEnd();
+        continue;
+      }
+      
+      // Non dovrebbero essercene altri.
+      if (end == null) {
+        return false;
+      }
+      
+      // Deve iniziare subito dopo la fine del precedente.
+      if (!end.plusDays(1).isEqual(period.getBeginDate())) {
+        return false;
+      }
+      
+      end = period.calculatedEnd();
+    }
+
+    //Confronto fra intervallo covered e quello dell'owner
+    return DateUtility.areIntervalsEquals(new DateInterval(begin, end),
+        new DateInterval(owner.getBeginDate(), owner.calculatedEnd()));
+   
+        
   }
   
   /**
@@ -199,7 +253,7 @@ public class PeriodManager {
   private IPropertyInPeriod insertIntoList(IPropertyInPeriod previous,
       IPropertyInPeriod present, List<IPropertyInPeriod> periodList) {
 
-    if (previous != null && previous.periodValueEquals(present))  {
+    if (previous != null && previous.periodValueEquals(present.getValue()))  {
       previous.setEndDate(present.getEndDate());
       if (present.getRecomputeFrom() != null) {
         previous.setRecomputeFrom(present.getRecomputeFrom());

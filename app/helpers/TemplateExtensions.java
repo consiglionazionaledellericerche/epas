@@ -15,6 +15,8 @@ import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -64,12 +66,11 @@ public class TemplateExtensions extends JavaExtensions {
           .toFormatter();
 
   private static final DateTimeFormatter DT_FORMATTER = DateTimeFormat
-          .forPattern("dd/MM/yyyy HH:mm:ss");
-
-  private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat
-          .forPattern("HH:mm");
+      .forPattern("dd/MM/yyyy HH:mm:ss");
+  private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
   private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
+    
   public static String format(ReadablePeriod period) {
     return PERIOD_FORMATTER.print(period);
   }
@@ -80,6 +81,14 @@ public class TemplateExtensions extends JavaExtensions {
 
   public static String format(LocalDateTime dt) {
     return DT_FORMATTER.print(dt);
+  }
+  
+  public static String format(MonthDay md) {
+    return md.toString("dd/MM");
+  }
+   
+  public static String format(LocalTime time) {
+    return time.toString("HH:mm"); 
   }
 
   public static String format(Object obj) {
@@ -131,15 +140,23 @@ public class TemplateExtensions extends JavaExtensions {
     if (obj instanceof BaseModel) {
       return ((BaseModel)obj).getLabel();
     }
-    return obj.toString();
-  }
-
-  public static String label(Boolean bool) {
-    if (bool) {
-      return "Si";
-    } else {
-      return "No";
+    if (obj instanceof LocalDate) {
+      return format((LocalDate)obj);
     }
+    if (obj instanceof LocalTime) {
+      return format((LocalTime)obj);
+    }
+    if (obj instanceof MonthDay) {
+      return format((MonthDay)obj);
+    }
+    if (obj instanceof Boolean) {
+      if ((Boolean)obj) {
+        return Messages.get("views.common.yes_or_no.true");
+      } else {
+        return Messages.get("views.common.yes_or_no.false");
+      }
+    }
+    return obj.toString();
   }
 
   public static String label(Range<?> obj) {
@@ -193,6 +210,9 @@ public class TemplateExtensions extends JavaExtensions {
 
   public static String value(LocalDate date) {
     return date.toString("dd/MM/yyyy");
+  }
+  public static String value(String string) {
+    return string;
   }
 
   public static String shortDayName(LocalDate date) {

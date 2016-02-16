@@ -1,0 +1,82 @@
+#{modalAsync noTitle:true}
+  
+  <div class="text-center">
+  <h3>Modifica Configurazione ${configuration.office.name}</h3>
+  <br>
+  </div>
+  
+  <div class="row">
+  <div class="col-md-10 col-md-offset-1">
+  <h4><strong><em>&{configuration.epasParam}</em></strong></h4>
+  <br>
+  <!-- Visualizzazione stato attuale -->
+  #{if configuration.epasParam.general }
+    
+    <p>Questo parametro per la sede <strong>${configuration.office.name}</strong> 
+    è attualmente impostato a <strong>${configuration.parseValue().label()}</strong>.
+    <p>
+  #{/if}
+  
+  #{if configuration.epasParam.yearly || configuration.epasParam.periodic}
+    <p>I Valori assunti da questo parametro per la sede <strong>${configuration.office.name}</strong> 
+    e loro validità sono:
+    <p>
+    <table class="table">
+    <tr>
+     <th>Dal</th>
+     <th>Al</th>
+     <th>Valore</th>
+    </tr>
+    
+    
+    #{list items:configuration.office.periods(configuration.type), as:'conf'}
+    <tr>
+	  <td class="col-xs-3"><em>${conf.beginDate.format()}</em></td>
+	  #{if conf.calculatedEnd()}
+	  <td class="col-xs-3"><em>${conf.calculatedEnd()?.format()}</em></td>
+	  #{/if} #{else}
+	  <td class="col-xs-3"><em>Indeterminato</em></td>
+	  #{/else}       
+      <td><strong>${conf.fieldValue}</strong></td>
+    </tr>
+    #{/list}
+    
+    
+  </table>
+  #{/if}
+  
+  #{include './_tutorial.html' /}
+    
+  <!-- Form per la modifica -->
+     <div id="configData">
+     #{form action:@Configurations.update(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#configData', 'data-spinner':'#defaultSpinner'}
+		
+		#{p.hidden 'configuration.id', value:configuration.id /}
+		
+		#{f.hidden 'confirmed' /}
+		#{configuration.typeform configuration:configuration, confirmed:confirmed, 
+		configurationDto:configurationDto /}
+		
+	    #{if !confirmed}
+	    	<!--bottoni -->
+			#{b.buttons center:true}   
+		       #{b.submit 'Aggiorna'/}
+		    #{/b.buttons}
+	    #{/if}
+	    #{else}
+	      <!--bottoni -->
+		  #{b.buttons center:true}
+		    #{b.cancel @show(configuration.office.id) /}
+		    #{b.submit 'Conferma'/}
+		  #{/b.buttons}
+		 #{/else}
+	    
+	 #{/form}
+     </div>	  
+ 
+   </div>
+  </div>
+  
+#{/modalAsync}

@@ -1,0 +1,99 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Parametri di configurazione' /}
+
+<div class="container">
+
+  #{title title:('Parametri configurazione ' + office.name), administration:true /}
+  
+  #{tabs}
+    #{tabItem id:'general', title:'Generali', active:true /}
+    #{tabItem id:'yearly', title:'Annuali' /}
+    #{tabItem id:'periodic', title:'Periodici' /}
+  #{/tabs}
+
+<br>
+
+#{tabContent}
+
+  #{tabContentItem id:'general', active:true}
+    <div id="editGeneral">
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri generali di configurazione per la sede 
+	   <strong>${office.name}</strong> ed il loro valore.</p>
+	  #{/alert}
+	  
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	    #{if conf.epasParam.general}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${conf.parseValue().label()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	</div>
+  #{/tabContentItem}
+  
+  #{tabContentItem id:'yearly'}
+    <div id="editYearly">
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri di configurazione a cadenza annuale per la sede 
+	   <strong>${office.name}</strong> ed il loro valore attuale.</p>
+	  #{/alert}
+	  
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	  	#{if conf.epasParam.yearly}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${conf.parseValue().label()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	</div>  
+  #{/tabContentItem}
+  
+  #{tabContentItem id:'periodic'}
+    <div id="editPeriodic">
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri di configurazione a cadenza periodica per la sede 
+	   <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+	  #{/alert}
+	
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	      <th>Dal</th>
+	      <th>Al</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	  	#{if conf.epasParam.periodic}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${conf.parseValue().label()}</td>
+	  	  <td>${conf.beginDate.format()}</td>
+	  	  <td>${conf.calculatedEnd()?.format()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	</div>
+  #{/tabContentItem}
+#{/tabContent}
+  
+</div>

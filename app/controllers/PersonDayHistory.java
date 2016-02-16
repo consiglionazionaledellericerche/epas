@@ -30,11 +30,11 @@ import javax.inject.Inject;
 public class PersonDayHistory extends Controller {
 
   @Inject
-  private static PersonDayHistoryDao personDayHistoryDao;
+  static PersonDayHistoryDao personDayHistoryDao;
   @Inject
-  private static StampingHistoryDao stampingHistoryDao;
+  static StampingHistoryDao stampingHistoryDao;
   @Inject
-  private static AbsenceHistoryDao absenceHistoryDao;
+  static AbsenceHistoryDao absenceHistoryDao;
 
 
   /**

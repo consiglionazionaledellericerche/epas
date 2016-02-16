@@ -6,13 +6,8 @@ import com.google.common.base.Predicates;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
-import dao.AbsenceDao;
-import dao.CompetenceDao;
 import dao.OfficeDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
@@ -26,21 +21,17 @@ import helpers.attestati.RispostaElaboraDati;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
-import manager.PersonDayManager;
+import manager.ConfigurationManager;
 import manager.UploadSituationManager;
 
 import models.CertificatedData;
 import models.Office;
-import models.Person;
-import models.PersonDay;
-import models.PersonMonthRecap;
 import models.enumerate.Parameter;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.YearMonth;
 
-import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -52,7 +43,6 @@ import security.SecurityRules;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -69,10 +59,14 @@ public class UploadSituation extends Controller {
 
   public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
   public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
-  
+
   public static final String FILE_PREFIX = "situazioneMensile";
   public static final String FILE_SUFFIX = ".txt";
-  
+
+  public static final String URL_TO_PRESENCE = "url_to_presence";
+
+  public static final String DEFAULT_URL_TO_PRESENCE = "https://attestati.rm.cnr.it/attestati/";
+
   @Inject
   private static SecurityRules rules;
   @Inject
@@ -85,11 +79,10 @@ public class UploadSituation extends Controller {
   private static IWrapperFactory factory;
   @Inject
   private static UploadSituationManager updloadSituationManager;
-  @Inject
-  private static ConfGeneralManager confGeneralManager; 
 
   /**
-   * Tab carica data. 
+   * Tab carica data.
+   *
    * @param officeId sede
    */
   public static void uploadData(Long officeId) {
@@ -97,20 +90,20 @@ public class UploadSituation extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     IWrapperOffice wrOffice = factory.create(office);
     Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
-    
+
     //caricare eventuale sessione già presente
     SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
     if (sessionAttestati != null && monthToUpload.isPresent()) {
-      
+
       int year = sessionAttestati.getYear();
       int month = sessionAttestati.getMonth();
-      
+
       monthToUpload = Optional.fromNullable(new YearMonth(year, month));
-      
+
       DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
           .buildComparedLists(office, sessionAttestati);
 
@@ -120,25 +113,26 @@ public class UploadSituation extends Controller {
 
     render(wrOffice, monthToUpload, sessionAttestati);
   }
-  
+
   /**
    * Modale Cambia il mese e la sede.
-   * @param officeId
+   *
+   * @param officeId sede
    */
   public static void updateSession(Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     IWrapperOffice wrOffice = factory.create(office);
     SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
     if (sessionAttestati != null) {
-      YearMonth monthToUpload = new YearMonth(sessionAttestati.getYear(), 
+      YearMonth monthToUpload = new YearMonth(sessionAttestati.getYear(),
           sessionAttestati.getMonth());
       render(wrOffice, sessionAttestati, monthToUpload);
-      
+
     } else {
       //sessione scaduta.
       render(wrOffice);
@@ -147,33 +141,35 @@ public class UploadSituation extends Controller {
 
   /**
    * Tab creazione file.
+   *
    * @param officeId sede
-   * @param year anno
-   * @param month mese
+   * @param year     anno
+   * @param month    mese
    */
   public static void createFile(Long officeId, Integer year, Integer month) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
     //TODO: costruire la lista degli anni sulla base di tutti gli uffici permessi 
     //e usarla nel template.
-    
+
     IWrapperOffice wrOffice = factory.create(office);
     Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
     render(wrOffice, monthToUpload);
   }
-  
+
   /**
    * Tab creazione file.
+   *
    * @param office sede
-   * @param year anno
-   * @param month mese
+   * @param year   anno
+   * @param month  mese
    */
-  public static void computeCreateFile(@Valid Office office, 
-      @Required Integer year, @Required Integer month) {
-    
+  public static void computeCreateFile(@Valid Office office,
+                                       @Required Integer year, @Required Integer month) {
+
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
@@ -193,28 +189,28 @@ public class UploadSituation extends Controller {
       Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));
       render("@createFile", wrOffice, monthToUpload);
     }
-    
+
     String body = updloadSituationManager.createFile(office, year, month);
-    String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX; 
+    String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX;
     renderBinary(IOUtils.toInputStream(body), fileName);
   }
-  
+
   /**
-   * Carica i dati sul personale (sia lato CNR sia lato ePAS confrontando le due liste).
-   * Se necessario effettua login (in caso di username e password null si cerca la login in cache).
-   * 
-   * @param office
-   * @param year
-   * @param month
-   * @param attestatiLogin
-   * @param attestatiPassword
+   * Carica i dati sul personale (sia lato CNR sia lato ePAS confrontando le due liste). Se
+   * necessario effettua login (in caso di username e password null si cerca la login in cache).
+   *
+   * @param office            sede
+   * @param year              anno
+   * @param month             mese
+   * @param attestatiLogin    username
+   * @param attestatiPassword pass
    */
-  public static void fetchData(@Valid Office office, Integer year, 
-      Integer month, final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
-    
+  public static void fetchData(@Valid Office office, Integer year, Integer month,
+                               final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
+
     rules.checkIfPermitted(office);
     IWrapperOffice wrOffice = factory.create(office);
-    
+
     // Sessione in cache
     SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
@@ -234,20 +230,21 @@ public class UploadSituation extends Controller {
         Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));
         render("@changeMonth", wrOffice, monthToUpload, sessionAttestati);
       }
-      
+
       //ripulire lo stato della sessione
-      sessionAttestati = new SessionAttestati(sessionAttestati.getUsernameCnr(), true, 
+      sessionAttestati = new SessionAttestati(sessionAttestati.getUsernameCnr(), true,
           sessionAttestati.getCookies(), office, year, month);
-      
-      sessionAttestati = attestatiClient.login(confGeneralManager
-          .getFieldValue(Parameter.URL_TO_PRESENCE, office), null, null, sessionAttestati, 
-          office, year, month);
+
+      sessionAttestati = attestatiClient.login(Play.configuration
+              .getProperty(URL_TO_PRESENCE, DEFAULT_URL_TO_PRESENCE),
+          null, null, sessionAttestati, office, year, month);
+
       if (sessionAttestati != null) {
         flash.success("Sessione aggiornata.");
       }
       memAttestatiIntoCache(sessionAttestati, null);
     }
-    
+
     // Nuovo login e scarico lista dei dipendenti in attestati
     if (attestatiLogin != null && attestatiPassword != null) {
       try {
@@ -260,9 +257,9 @@ public class UploadSituation extends Controller {
           month = next.get().getMonthOfYear();
         }
 
-        sessionAttestati = attestatiClient.login(confGeneralManager
-            .getFieldValue(Parameter.URL_TO_PRESENCE, office), attestatiLogin, attestatiPassword, 
-            null, office, year, month);
+        sessionAttestati = attestatiClient.login(Play.configuration
+                .getProperty(URL_TO_PRESENCE, DEFAULT_URL_TO_PRESENCE),
+            attestatiLogin, attestatiPassword, null, office, year, month);
 
         if (!sessionAttestati.isLoggedIn()) {
           flash.error("Errore durante il login sul sistema degli attestati.");
@@ -270,35 +267,48 @@ public class UploadSituation extends Controller {
         }
 
         memAttestatiIntoCache(sessionAttestati, null);
-        
+
       } catch (AttestatiException e) {
         flash.error(String.format("Errore durante il login e/o prelevamento della lista "
             + "dei dipendenti dal sistema degli attestati. Eccezione: {}", e));
         UploadSituation.uploadData(office.id);
       }
     } else {
-      
+
       if (sessionAttestati == null || !sessionAttestati.isLoggedIn()) {
         flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
         UploadSituation.uploadData(office.id);
       }
     }
-    
+
     uploadData(office.id);
   }
-  
+
+  /**
+   * Logout attestati.
+   *
+   * @param officeId sede
+   */
   public static void logoutAttestati(Long officeId) {
-    
+
     memAttestatiIntoCache(null, null);
     flash.success("Logout attestati eseguito.");
     UploadSituation.uploadData(officeId);
   }
 
+
+  /**
+   * Elabora i dati di tutte le persone della sede per quel mese.
+   *
+   * @param office sede
+   * @param year   anno
+   * @param month  mese
+   */
   public static void processAllPersons(Office office, int year, int month)
       throws MalformedURLException, URISyntaxException {
-   
+
     rules.checkIfPermitted(office);
-    
+
     SessionAttestati sessionAttestati = loadAttestatiLoginCached();
 
     if (sessionAttestati == null || !sessionAttestati.isLoggedIn()) {
@@ -316,10 +326,10 @@ public class UploadSituation extends Controller {
           + "utilizzare l'apposita funzione di cambio mese.");
       uploadData(office.id);
     }
-    
+
     DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
         .buildComparedLists(office, sessionAttestati);
-    
+
     List<RispostaElaboraDati> checks = attestatiClient.elaboraDatiDipendenti(
         Optional.fromNullable(sessionAttestati), dipendenteComparedRecap.getValidDipendenti(),
         year, month);
@@ -341,7 +351,7 @@ public class UploadSituation extends Controller {
           + "1 dipendente. Controllare l'esito.");
     } else {
       flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per %s"
-          + " dipendenti. Controllare l'esito.",
+              + " dipendenti. Controllare l'esito.",
           risposteNotOk.size());
     }
 
@@ -350,9 +360,17 @@ public class UploadSituation extends Controller {
 
   }
 
+  /**
+   * Elabora i dati della matricola.
+   *
+   * @param officeId  sede
+   * @param matricola matricola
+   * @param year      anno
+   * @param month     mese
+   */
   public static void processSinglePerson(Long officeId, String matricola, int year, int month)
       throws MalformedURLException, URISyntaxException {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     notFoundIfNull(matricola);
@@ -374,10 +392,10 @@ public class UploadSituation extends Controller {
           + "utilizzare l'apposita funzione di cambio mese.");
       uploadData(office.id);
     }
-    
+
     DipendenteComparedRecap dipendenteComparedRecap = attestatiClient
         .buildComparedLists(office, sessionAttestati);
-    
+
     Optional<Dipendente> dipendente = Optional.<Dipendente>absent();
     for (Dipendente dipCached : dipendenteComparedRecap.getValidDipendenti()) {
       if (dipCached.getMatricola().equals(matricola)) {
@@ -393,7 +411,7 @@ public class UploadSituation extends Controller {
     }
 
     List<RispostaElaboraDati> checks = attestatiClient
-        .elaboraDatiDipendenti(Optional.fromNullable(sessionAttestati), 
+        .elaboraDatiDipendenti(Optional.fromNullable(sessionAttestati),
             Lists.newArrayList(dipendente.get()), year, month);
 
     Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
@@ -419,8 +437,8 @@ public class UploadSituation extends Controller {
 
   /**
    * Modale visualizzazione problemi.
-   * 
-   * @param certificatedDataId
+   *
+   * @param certificatedDataId dati certificati
    */
   public static void showProblems(Long certificatedDataId) {
     rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -433,7 +451,8 @@ public class UploadSituation extends Controller {
 
   /**
    * Modale visualizzazione dati inviati.
-   * @param certificatedDataId
+   *
+   * @param certificatedDataId dati certificati
    */
   public static void showCertificatedData(Long certificatedDataId) {
     rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -445,42 +464,49 @@ public class UploadSituation extends Controller {
   }
 
   /**
-   * Verifica i dati che ePAS invierebbe ad Attestati. Visualizza anche gli eventuali dati mandati 
-   * e gli errori riportati.
-   * 
+   * Verifica i dati che ePAS invierebbe ad Attestati. Visualizza anche gli eventuali dati mandati e
+   * gli errori riportati.
+   *
    * @param officeId sede
    */
-  public static void checkData(Long officeId, Integer year, Integer month) { 
-    
+  public static void checkData(Long officeId, Integer year, Integer month) {
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-        
+
     IWrapperOffice wrOffice = factory.create(office);
     render(wrOffice, year, month);
-  
+
   }
-  
+
+  /**
+   * Visualizza i dati certificati per la sede in quel mese.
+   *
+   * @param office sede
+   * @param year   anno
+   * @param month  mese
+   */
   public static void performCheckData(Office office, Integer year, Integer month)
-    throws MalformedURLException, URISyntaxException {
+      throws MalformedURLException, URISyntaxException {
 
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-        
+
     IWrapperOffice wrOffice = factory.create(office);
     Set<Dipendente> people = attestatiClient.officeActivePeopleAsDipendente(office, year, month);
 
     List<RispostaElaboraDati> results = attestatiClient.elaboraDatiDipendenti(
         Optional.<SessionAttestati>absent(), Lists.newArrayList(people), year, month);
-    
+
     IWrapperFactory wrapper = factory;
     render("@checkData", results, wrOffice, year, month, wrapper);
-      
+
   }
 
   private static void memAttestatiIntoCache(
       SessionAttestati sessionAttestati, List<Dipendente> listaDipendenti) {
-    
+
     Cache.set(LOGIN_RESPONSE_CACHED + Security.getUser().get().username, sessionAttestati);
     Cache.set(LISTA_DIPENTENTI_CNR_CACHED + Security.getUser().get().username, listaDipendenti);
   }
@@ -492,11 +518,5 @@ public class UploadSituation extends Controller {
     return (SessionAttestati) Cache.get(LOGIN_RESPONSE_CACHED + Security.getUser().get().username);
   }
 
-
-  
-  
-  
-  
-  
 
 }

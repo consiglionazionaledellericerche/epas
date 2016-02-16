@@ -6,7 +6,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -22,11 +21,12 @@ import models.ContractStampProfile;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.enumerate.Parameter;
+import models.enumerate.EpasParam;
 import models.enumerate.Troubles;
 
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -42,26 +42,25 @@ public class PersonDayInTroubleManager {
 
   private final IWrapperFactory factory;
   private final PersonDayInTroubleDao personDayInTroubleDao;
-  private final ConfGeneralManager confGeneralManager;
+  private final ConfigurationManager configurationManager;
   private final WrapperModelFunctionFactory wrapperModelFunctionFactory;
 
   /**
    * Costruttore.
    * @param personDayInTroubleDao personDayInTroubleDao
-   * @param confGeneralManager confGeneralManager
-   * @param personDayDao personDayDao
+   * @param configurationManager configurationManager
    * @param factory factory
    * @param wrapperModelFunctionFactory wrapperModelFunctionFactory
    */
   @Inject
   public PersonDayInTroubleManager(
           PersonDayInTroubleDao personDayInTroubleDao,
-          ConfGeneralManager confGeneralManager,
-          PersonDayDao personDayDao, IWrapperFactory factory, 
+          ConfigurationManager configurationManager,
+          IWrapperFactory factory, 
           WrapperModelFunctionFactory wrapperModelFunctionFactory) {
 
     this.personDayInTroubleDao = personDayInTroubleDao;
-    this.confGeneralManager = confGeneralManager;
+    this.configurationManager = configurationManager;
     this.factory = factory;
     this.wrapperModelFunctionFactory = wrapperModelFunctionFactory;
   }
@@ -153,7 +152,7 @@ public class PersonDayInTroubleManager {
         continue;
       }
       
-      if (!confGeneralManager.getBooleanFieldValue(Parameter.SEND_EMAIL, person.office)) {
+      if (!(Boolean)configurationManager.configValue(person.office, EpasParam.SEND_EMAIL)) {
         log.info("Non verrà inviata la mail a {} in quanto "
             + "la sua sede {} ha invio mail disabilitato",
             person.getFullname(), person.office.name);
@@ -204,7 +203,9 @@ public class PersonDayInTroubleManager {
 
         log.info("Preparo invio mail per {}", person.getFullname());
         SimpleEmail simpleEmail = new SimpleEmail();
-        String reply = confGeneralManager.getFieldValue(Parameter.EMAIL_TO_CONTACT, person.office);
+        String reply = (String)configurationManager
+            .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+        
         if (!reply.isEmpty()) {
           simpleEmail.addReplyTo(reply);
         }
@@ -248,7 +249,11 @@ public class PersonDayInTroubleManager {
     DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MM-YYYY");
     String date = "";
     for (LocalDate d : dates) {
-      if (!DateUtility.isGeneralHoliday(confGeneralManager.officePatron(person.office), d)) {
+      
+      MonthDay patron = (MonthDay)configurationManager
+          .configValue(person.office, EpasParam.DAY_OF_PATRON, d);
+      
+      if (!DateUtility.isGeneralHoliday(Optional.fromNullable(patron), d)) {
         dateFormat.add(d);
         String str = fmt.print(d);
         date = date + str + ", ";

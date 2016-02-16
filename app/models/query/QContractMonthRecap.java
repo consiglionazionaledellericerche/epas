@@ -52,8 +52,6 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
 
     public final NumberPath<Integer> oreLavorate = createNumber("oreLavorate", Integer.class);
 
-    public final NumberPath<Integer> permissionUsed = createNumber("permissionUsed", Integer.class);
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -90,10 +88,6 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
     public final NumberPath<Integer> straordinariMinutiS2Print = createNumber("straordinariMinutiS2Print", Integer.class);
 
     public final NumberPath<Integer> straordinariMinutiS3Print = createNumber("straordinariMinutiS3Print", Integer.class);
-
-    public final NumberPath<Integer> vacationCurrentYearUsed = createNumber("vacationCurrentYearUsed", Integer.class);
-
-    public final NumberPath<Integer> vacationLastYearUsed = createNumber("vacationLastYearUsed", Integer.class);
 
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
