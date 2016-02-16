@@ -3,12 +3,12 @@ package models.enumerate;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
 
@@ -22,7 +22,7 @@ public enum EpasParam {
   DAY_OF_PATRON("dayOfPatron", 
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.DAY_MONTH,
-      EpasParamValueType.formatValue(new DayMonth(1,1)),
+      EpasParamValueType.formatValue(new MonthDay(1,1)),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
           RecomputationType.RESIDUAL_MEALTICKETS)),
   
@@ -71,7 +71,7 @@ public enum EpasParam {
   EXPIRY_VACATION_PAST_YEAR("expiry_vacation_past_year",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.DAY_MONTH,
-      EpasParamValueType.formatValue(new DayMonth(8,31)),
+      EpasParamValueType.formatValue(new MonthDay(8,31)),
       Lists.<RecomputationType>newArrayList()),
 
   MONTH_EXPIRY_RECOVERY_DAYS_13("month_expire_recovery_days_13",
@@ -163,21 +163,6 @@ public enum EpasParam {
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE,  DAY_MONTH, MONTH,  
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
     
-    public static class DayMonth {
-      // TODO: eliminare e usare MonthDay.........
-      public Integer day;
-      public Integer month;
-      // TODO: validation
-      public DayMonth(Integer day, Integer month) {
-        this.day = day;
-        this.month = month;
-      }
-      @Override
-      public String toString() {
-        return formatValue(this);
-      }
-    }
-    
     public static class LocalTimeInterval {
       public LocalTime from;
       public LocalTime to;
@@ -242,8 +227,9 @@ public enum EpasParam {
             + formatValue(((LocalTimeInterval)value).to);  
       }
       
-      if (value instanceof DayMonth) {
-        return ((DayMonth)value).day + DAY_MONTH_SEPARATOR + ((DayMonth)value).month;  
+      if (value instanceof MonthDay) {
+        return ((MonthDay)value).getDayOfMonth() + DAY_MONTH_SEPARATOR 
+            + ((MonthDay)value).getMonthOfYear();  
       }
       
       if (value instanceof IpList) {
@@ -276,9 +262,9 @@ public enum EpasParam {
                 return interval;
               }
         case DAY_MONTH:
-          return new DayMonth(
-              new Integer(value.split(DAY_MONTH_SEPARATOR)[0]), 
-              new Integer(value.split(DAY_MONTH_SEPARATOR)[1]));
+          return new MonthDay(
+              new Integer(value.split(DAY_MONTH_SEPARATOR)[1]), 
+              new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
         case MONTH:
           return new Integer(value);
         case EMAIL:

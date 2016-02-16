@@ -18,15 +18,14 @@ import models.Office;
 import models.enumerate.EpasParam;
 import models.enumerate.EpasParam.EpasParamTimeType;
 import models.enumerate.EpasParam.EpasParamValueType;
-
-import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
-import models.query.QAbsence;
 import models.query.QConfiguration;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
+import org.joda.time.Months;
 
 import java.util.List;
 
@@ -123,7 +122,7 @@ public class ConfigurationManager {
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
     return build(epasParam, office, 
-        EpasParamValueType.formatValue(new DayMonth(day, month)), begin, end, false, persist);
+        EpasParamValueType.formatValue(new MonthDay(month, day)), begin, end, false, persist);
   }
 
   /**
@@ -139,7 +138,7 @@ public class ConfigurationManager {
   public Configuration updateYearlyDayMonth(EpasParam epasParam, Office office, int day, int month, 
       int year, boolean applyToTheEnd, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
-    return build(epasParam, office, EpasParamValueType.formatValue(new DayMonth(day, month)), 
+    return build(epasParam, office, EpasParamValueType.formatValue(new MonthDay(month, day)), 
         Optional.fromNullable(officeYearBegin(office, year)), 
         Optional.fromNullable(officeYearEnd(office, year)), applyToTheEnd, persist);
   }
