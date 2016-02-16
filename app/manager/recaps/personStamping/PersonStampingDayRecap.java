@@ -27,9 +27,11 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
+import models.enumerate.EpasParam.EpasParamValueType;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import java.util.List;
 
@@ -62,9 +64,10 @@ public class PersonStampingDayRecap {
   public String workTimeExplanation = "";
 
   public String mealTicketTime = "";
-  public String timeMealFrom = "";
-  public String timeMealTo = "";
+  public String timeMealFromTo = "";
   public String breakTicketTime = "";
+  
+  public String workTimeFromTo = "";
 
   public String mealTicket;
 
@@ -157,9 +160,10 @@ public class PersonStampingDayRecap {
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
         pd.person.office, EpasParam.LUNCH_INTERVAL, pd.getDate());
-
-    this.setTimeMealFrom(lunchInterval.from.getHourOfDay(), lunchInterval.from.getMinuteOfHour());
-    this.setTimeMealTo(lunchInterval.to.getHourOfDay(), lunchInterval.to.getMinuteOfHour());
+    LocalTimeInterval workInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.person.office, EpasParam.WORK_INTERVAL, pd.getDate());
+    this.timeMealFromTo = EpasParamValueType.formatValue(lunchInterval);
+    this.workTimeFromTo = EpasParamValueType.formatValue(workInterval);
 
     if (wrPersonDay.isFixedTimeAtWork()) {
 
@@ -397,42 +401,6 @@ public class PersonStampingDayRecap {
   }
 
   /**
-   * Formatta il valore per inizio finestra intervallo pranzo.
-   *
-   * @param timeMealFromHour   ore
-   * @param timeMealFromMinute minuti
-   */
-  private void setTimeMealFrom(int timeMealFromHour, int timeMealFromMinute) {
-    String hour = timeMealFromHour + "";
-    if (hour.length() == 1) {
-      hour = "0" + hour;
-    }
-    String minute = timeMealFromMinute + "";
-    if (minute.length() == 1) {
-      minute = "0" + minute;
-    }
-    this.timeMealFrom = hour + ":" + minute;
-  }
-
-  /**
-   * Formatta il valore per fine finestra intervallo pranzo.
-   *
-   * @param timeMealToHour   ore
-   * @param timeMealToMinute minuti
-   */
-  private void setTimeMealTo(int timeMealToHour, int timeMealToMinute) {
-    String hour = timeMealToHour + "";
-    if (hour.length() == 1) {
-      hour = "0" + hour;
-    }
-    String minute = timeMealToMinute + "";
-    if (minute.length() == 1) {
-      minute = "0" + minute;
-    }
-    this.timeMealTo = hour + ":" + minute;
-  }
-
-  /**
    * Formatta il valore del tempo a lavoro previsto dal tipo orario. 0 stringa vuota.
    *
    * @param workingTime minuti lavorati
@@ -457,6 +425,12 @@ public class PersonStampingDayRecap {
       this.workTimeExplanation = this.workTimeExplanation
           + "<br>Da timbrature: " +
           stronger(DateUtility.fromMinuteToHourMinute(personDay.stampingsTime));
+    }
+    
+    if (personDay.getDecurtedWork() > 0) {
+      this.workTimeExplanation = this.workTimeExplanation
+          + "<br>Sottratto perchè al di fuori della finestra orario: " +
+          stronger(DateUtility.fromMinuteToHourMinute(personDay.getDecurtedWork()));
     }
 
     if (personDay.justifiedTimeNoMeal != null && personDay.justifiedTimeNoMeal > 0) {

@@ -261,16 +261,8 @@
     #{/else}
 
     <td class="default-single">
-      #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
-      <a href="#" popover-hover
-         data-html="true"
-         data-content="${(
-	    		'Tempo Lavoro: <strong>'+dayRecap.workingTime+'</strong>'+
-	    		'<br>Tempo lavoro per buono pasto: <strong>'+dayRecap.mealTicketTime+'</strong>'+
-	    		'<br>Durata minima intervallo pranzo: <strong>'+dayRecap.breakTicketTime+'</strong>'+
-	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.timeMealFrom+' - ' +dayRecap.timeMealTo+'</strong>'+
-	    		' (estremi compresi)').escape()}"
-         title="Info orario giornaliero">${dayRecap.workingTimeTypeDescription}</a>
+      #{if dayRecap.wtt != null && dayRecap.wttd != null}
+        #{include './_workingTimeTypePopover.html' /}
       #{/if}
 
 

@@ -11,8 +11,6 @@ import com.google.gson.Gson;
 
 import injection.StaticInject;
 
-import lombok.extern.slf4j.Slf4j;
-
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
@@ -38,7 +36,6 @@ import java.text.DecimalFormat;
  *
  * @author marco
  */
-@Slf4j
 @StaticInject
 public class TemplateExtensions extends JavaExtensions {
 
@@ -79,7 +76,6 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String format(LocalDate date) {
-    log.info("format localdate obj={}", date.toString());
     return format(date.toDate());
   }
 
