@@ -161,8 +161,11 @@ public class Configurations extends Controller {
    * @param booleanNewValue
    * @param confirmed
    */
-  public static void update(@Valid Configuration configuration, 
+  public static void update(Configuration configuration, 
       ConfigurationDto configurationDto, boolean confirmed) {
+    
+    notFoundIfNull(configuration);
+    notFoundIfNull(configuration.office);
     
     rules.checkIfPermitted(configuration.office);
     Configuration newConfiguration = null;

@@ -314,14 +314,9 @@ when
          */
         "Offices.showOffices",
         "Institutes.list",
-        
-        
-        "Configurations.showConfGeneral",
-        "Configurations.showConfYear",
-        
+
         /* Vecchio permesso viewCompetenceCode */
         "Competences.manageCompetenceCode",
-        
        
         /*********** duplicate prima di avere il contesto office  *************/
         
@@ -356,6 +351,9 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
+     	
+        "Configurations.show",
+        "Configurations.edit",
      	
      	"MealTickets.recapMealTickets",
      	"MealTickets.personMealTickets",
@@ -431,6 +429,9 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
+     	
+     	"Configurations.show",
+        "Configurations.edit",
 		
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
@@ -445,8 +446,6 @@ when
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
-        
-
         
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -592,10 +591,9 @@ when
      	"Absences.saveCode",
      	"Absences.updateCode",
      	
-     	"Configurations.saveConfGeneral",
-     	"Configurations.savePatron",
-     	"Configurations.saveConfYear",
-		"Configurations.savePastYearVacationLimit",
+     	"Configurations.show",
+     	"Configurations.edit",
+        "Configurations.update",
 		
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
@@ -724,10 +722,9 @@ when
      	"Absences.saveCode",
      	"Absences.updateCode",
      	
-     	"Configurations.saveConfGeneral",
-     	"Configurations.savePatron",
-     	"Configurations.saveConfYear",
-		"Configurations.savePastYearVacationLimit",
+     	"Configurations.show",
+     	"Configurations.edit",
+        "Configurations.update",
 		
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
