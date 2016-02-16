@@ -30,6 +30,7 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.RecomputationType;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.enumerate.Troubles;
 
@@ -225,6 +226,37 @@ public class ConsistencyManager {
 
     LocalDate to = wrapperFactory.create(contract).getContractDatabaseInterval().getEnd();
     updatePersonSituationEngine(contract.person.id, from, Optional.fromNullable(to), true);
+  }
+  
+  /**
+   * Effettua la ricomputazione.
+   * @param office
+   * @param recomputationTypes
+   * @param recomputeFrom
+   */
+  public void performRecomputation(Office office, List<RecomputationType> recomputationTypes, 
+      LocalDate recomputeFrom) {
+    
+    if (recomputationTypes.isEmpty()) {
+      return;
+    }
+    
+    if (recomputeFrom == null) {
+      return;
+    }
+    
+    for (Person person : office.persons) {
+      if (recomputationTypes.contains(RecomputationType.DAYS)) {
+        updatePersonSituation(person.id, recomputeFrom);
+      } 
+      if (recomputationTypes.contains(RecomputationType.RESIDUAL_HOURS) 
+          || recomputationTypes.contains(RecomputationType.RESIDUAL_MEALTICKETS)) {
+        updatePersonRecaps(person.id, recomputeFrom);
+      }
+      JPA.em().flush();
+      JPA.em().clear();
+    }
+    
   }
 
 

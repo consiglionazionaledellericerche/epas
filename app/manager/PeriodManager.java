@@ -13,7 +13,6 @@ import manager.recaps.recomputation.RecomputeRecap;
 
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 
