@@ -115,6 +115,13 @@ else
   sudo -u epas -H sed 's/{{SMTP_PROTOCOL}}/'"${SMTP_PROTOCOL}"'/' -i /home/epas/epas/conf/prod.conf
 fi
 
+if [ -z "${URL_ATTESTATI}" ]; then
+  sed -n '/URL_ATTESTATI/!p' -i /home/epas/epas/conf/prod.conf
+else
+  sudo -u epas -H sed 's/{{URL_ATTESTATI}}/'"${URL_ATTESTATI}"'/' -i /home/epas/epas/conf/prod.conf
+fi
+
+
 sudo -u epas -H sed 's/{{SKIP_IP_CHECK}}/'"${SKIP_IP_CHECK}"'/' -i /home/epas/epas/conf/prod.conf
 sudo -u epas -H sed 's/{{EPAS_SHIB_LOGIN}}/'"${EPAS_SHIB_LOGIN}"'/' -i /home/epas/epas/conf/prod.conf
 
