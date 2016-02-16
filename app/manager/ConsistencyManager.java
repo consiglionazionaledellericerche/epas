@@ -29,7 +29,9 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-import models.enumerate.Parameter;
+import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.RecomputationType;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.enumerate.Troubles;
 
 import org.joda.time.DateTimeConstants;
@@ -60,11 +62,25 @@ public class ConsistencyManager {
   private final ContractMonthRecapManager contractMonthRecapManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final IWrapperFactory wrapperFactory;
-  private final ConfYearManager confYearManager;
   private final PersonDayDao personDayDao;
   private final StampTypeManager stampTypeManager;
-  private final ConfGeneralManager confGeneralManager;
-
+  private final ConfigurationManager configurationManager;
+  
+  /**
+   * Constructor.
+   * @param secureManager
+   * @param officeDao
+   * @param personDao
+   * @param personDayDao
+   * @param personManager
+   * @param personDayManager
+   * @param contractMonthRecapManager
+   * @param personDayInTroubleManager
+   * @param confGeneralManager
+   * @param confYearManager
+   * @param stampTypeManager
+   * @param wrapperFactory
+   */
   @Inject
   public ConsistencyManager(SecureManager secureManager, 
       OfficeDao officeDao,
@@ -75,8 +91,7 @@ public class ConsistencyManager {
       PersonDayManager personDayManager,
       ContractMonthRecapManager contractMonthRecapManager,
       PersonDayInTroubleManager personDayInTroubleManager, 
-      ConfGeneralManager confGeneralManager,
-      ConfYearManager confYearManager, 
+      ConfigurationManager configurationManager,
       StampTypeManager stampTypeManager,
 
       IWrapperFactory wrapperFactory) {
@@ -88,11 +103,10 @@ public class ConsistencyManager {
     this.personDayManager = personDayManager;
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
+    this.configurationManager = configurationManager;
     this.wrapperFactory = wrapperFactory;
     this.personDayDao = personDayDao;
-    this.confYearManager = confYearManager;
     this.stampTypeManager = stampTypeManager;
-    this.confGeneralManager = confGeneralManager;
   }
 
   /**
@@ -213,6 +227,37 @@ public class ConsistencyManager {
     LocalDate to = wrapperFactory.create(contract).getContractDatabaseInterval().getEnd();
     updatePersonSituationEngine(contract.person.id, from, Optional.fromNullable(to), true);
   }
+  
+  /**
+   * Effettua la ricomputazione.
+   * @param office
+   * @param recomputationTypes
+   * @param recomputeFrom
+   */
+  public void performRecomputation(Office office, List<RecomputationType> recomputationTypes, 
+      LocalDate recomputeFrom) {
+    
+    if (recomputationTypes.isEmpty()) {
+      return;
+    }
+    
+    if (recomputeFrom == null) {
+      return;
+    }
+    
+    for (Person person : office.persons) {
+      if (recomputationTypes.contains(RecomputationType.DAYS)) {
+        updatePersonSituation(person.id, recomputeFrom);
+      } 
+      if (recomputationTypes.contains(RecomputationType.RESIDUAL_HOURS) 
+          || recomputationTypes.contains(RecomputationType.RESIDUAL_MEALTICKETS)) {
+        updatePersonRecaps(person.id, recomputeFrom);
+      }
+      JPA.em().flush();
+      JPA.em().clear();
+    }
+    
+  }
 
 
   private void updatePersonSituationEngine(Long personId, LocalDate from, Optional<LocalDate> to,
@@ -298,16 +343,13 @@ public class ConsistencyManager {
    */
   private LocalDate personFirstDateForEpasComputation(Person person, Optional<LocalDate> from) {
 
-    Optional<LocalDate> officeLimit =
-            confGeneralManager.getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office);
-
-    Preconditions.checkState(officeLimit.isPresent());
-
+    LocalDate officeLimit = person.office.getBeginDate();
+    
     // Calcolo a partire da
     LocalDate lowerBoundDate = new LocalDate(person.createdAt);
 
-    if (officeLimit.get().isAfter(lowerBoundDate)) {
-      lowerBoundDate = officeLimit.get();
+    if (officeLimit.isAfter(lowerBoundDate)) {
+      lowerBoundDate = officeLimit;
     }
 
     if (from.isPresent() && from.get().isAfter(lowerBoundDate)) {
@@ -362,24 +404,15 @@ public class ConsistencyManager {
 
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
-    Integer mealTimeStartHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.getValue().person.office);
-    Integer mealTimeStartMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.getValue().person.office);
-    Integer mealTimeEndHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
-    Integer mealTimeEndMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
-    LocalTime startLunch = new LocalTime()
-        .withHourOfDay(mealTimeStartHour)
-        .withMinuteOfHour(mealTimeStartMinute);
-
-    LocalTime endLunch = new LocalTime()
-        .withHourOfDay(mealTimeEndHour)
-        .withMinuteOfHour(mealTimeEndMinute);
+    LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
     
+    LocalTimeInterval workInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+        
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
-        pd.isFixedTimeAtWork(), startLunch, endLunch);
+        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from, 
+        workInterval.to);
 
     personDayManager.updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
         pd.isFixedTimeAtWork());
@@ -419,16 +452,14 @@ public class ConsistencyManager {
 
     if (lastStampingPreviousDay != null && lastStampingPreviousDay.isIn()) {
 
-      String hourMaxToCalculateWorkTime =
-              confYearManager.getFieldValue(Parameter.HOUR_MAX_TO_CALCULATE_WORKTIME,
-                      pd.getValue().person.office, pd.getValue().date.getYear());
-
-      Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
+      // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
+      LocalTime maxHour = (LocalTime)configurationManager.configValue(pd.getValue().person.office, 
+          EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
       Collections.sort(pd.getValue().stampings);
 
       if (pd.getValue().stampings.size() > 0 && pd.getValue().stampings.get(0).way == WayType.out
-              && maxHour > pd.getValue().stampings.get(0).date.getHourOfDay()) {
+              && maxHour.isAfter(pd.getValue().stampings.get(0).date.toLocalTime())) {
 
         StampModificationType smtMidnight = stampTypeManager.getStampMofificationType(
                 StampModificationTypeCode.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
@@ -651,17 +682,4 @@ public class ConsistencyManager {
 
   }
   
-  /**
-   * Procedura da lanciare per pulire i personDayInTrouble non più significativi. <br>
-   * 1) Giorni che non appartengono ad alcun contratto.
-   * 2) Giorni che appartengono ad un contratto ma che sono precedenti all'inizializzazione
-   *    generale.
-   * @param person
-   * @param dateFrom
-   */
-  public void cleanPersonDayInTrouble(Person person) {
-    // TO Implement
-    
-  }
-
 }

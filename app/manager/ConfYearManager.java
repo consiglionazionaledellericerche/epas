@@ -20,6 +20,12 @@ import play.cache.Cache;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+/**
+ * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
+ * @author alessandro
+ *
+ */
+@Deprecated
 public class ConfYearManager {
 
   protected final JPQLQueryFactory queryFactory;
@@ -32,6 +38,17 @@ public class ConfYearManager {
   @Inject
   ConfYearManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     this.queryFactory = new JPAQueryFactory(emp);
+  }
+  
+  /**
+   * La configurazione annuale con l'id.
+   * @return confYear
+   */
+  public ConfYear getById(Long id) {
+    QConfYear confYear = QConfYear.confYear;
+    final JPQLQuery query = queryFactory.from(confYear)
+            .where(confYear.id.eq(id));
+    return query.singleResult(confYear);
   }
 
   /**
@@ -134,7 +151,7 @@ public class ConfYearManager {
 
     Preconditions.checkState(param.isYearly());
 
-    String key = param.description + office.codeId;
+    String key = param.description + year + office.codeId;
 
     String value = (String) Cache.get(key);
 

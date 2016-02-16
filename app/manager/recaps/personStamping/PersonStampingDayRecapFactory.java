@@ -5,7 +5,7 @@ import com.google.common.base.Optional;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
-import manager.ConfGeneralManager;
+import manager.ConfigurationManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.cache.StampTypeManager;
@@ -25,7 +25,7 @@ public class PersonStampingDayRecapFactory {
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final PersonDayManager personDayManager;
   private final StampingTemplateFactory stampingTemplateFactory;
-  private final ConfGeneralManager confGeneralManager;
+  private final ConfigurationManager configurationManager;
   private PersonManager personManager;
 
   @Inject
@@ -34,14 +34,14 @@ public class PersonStampingDayRecapFactory {
                                 StampingTemplateFactory stampingTemplateFactory,
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
                                 WorkingTimeTypeDao workingTimeTypeDao,
-                                ConfGeneralManager confGeneralManager) {
+                                ConfigurationManager configurationManager) {
     this.personDayManager = personDayManager;
     this.personManager = personManager;
     this.stampingTemplateFactory = stampingTemplateFactory;
     this.stampTypeManager = stampTypeManager;
     this.wrapperFactory = wrapperFactory;
     this.workingTimeTypeDao = workingTimeTypeDao;
-    this.confGeneralManager = confGeneralManager;
+    this.configurationManager = configurationManager;
   }
 
   /**
@@ -56,7 +56,7 @@ public class PersonStampingDayRecapFactory {
 
     return new PersonStampingDayRecap(personDayManager, personManager,
             stampingTemplateFactory, stampTypeManager, wrapperFactory,
-            workingTimeTypeDao, confGeneralManager,
+            workingTimeTypeDao, configurationManager,
             personDay, numberOfInOut, monthContracts);
   }
 

@@ -95,13 +95,5 @@
 	  	</tbody>	
 	  </table>
   
-  <!-- Lista degli istituti che non hanno attiva la data inizio utilizzo -->
-  #{if !officeStartDate.present}
-    #{alert color:'danger'}
-      <p><strong>Attenzione</strong>: non è stata definita una data inizio utilizzo TicketRestaurant per questo istituto. 
-	  <p>Per impostarla contattare l'amministratore tecnico della sede oppure epas@iit.cnr.it</p>
-    #{/alert}
-  #{/if}
-  
 </div>
 

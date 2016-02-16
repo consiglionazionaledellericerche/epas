@@ -21,13 +21,11 @@ import manager.services.vacations.VacationsRecap;
 
 import models.Absence;
 import models.CompetenceCode;
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.WorkingTimeType;
-import models.enumerate.Parameter;
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
@@ -53,7 +51,6 @@ import javax.inject.Inject;
 public class ChartsManager {
 
   private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
-  private final ConfGeneralManager confGeneralManager;
   private final CompetenceCodeDao competenceCodeDao;
   private final CompetenceDao competenceDao;
   private final CompetenceManager competenceManager;
@@ -66,9 +63,8 @@ public class ChartsManager {
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
                        CompetenceDao competenceDao, CompetenceManager competenceManager,
                        PersonDao personDao, IVacationsService vacationsService,
-                       AbsenceDao absenceDao, ConfGeneralManager confGeneralManager,
+                       AbsenceDao absenceDao, 
                        IWrapperFactory wrapperFactory) {
-    this.confGeneralManager = confGeneralManager;
     this.competenceCodeDao = competenceCodeDao;
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
@@ -86,10 +82,8 @@ public class ChartsManager {
     Integer yearBegin = null;
     int counter = 0;
 
-    ConfGeneral yearInitUseProgram =
-        confGeneralManager.getConfGeneral(Parameter.INIT_USE_PROGRAM, office);
     counter++;
-    LocalDate date = new LocalDate(yearInitUseProgram.fieldValue);
+    LocalDate date = office.getBeginDate();
     yearBegin = date.getYear();
     annoList.add(new Year(counter, yearBegin));
 

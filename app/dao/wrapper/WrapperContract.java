@@ -1,24 +1,17 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.ConfGeneralManager;
-
 import models.Contract;
 import models.ContractMonthRecap;
-import models.ContractWorkingTimeType;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
 
 /**
  * Contract con alcune funzionalità aggiuntive.
@@ -28,14 +21,12 @@ import java.util.List;
 public class WrapperContract implements IWrapperContract {
 
   private final Contract value;
-  private final ConfGeneralManager confGeneralManager;
   private final IWrapperFactory wrapperFactory;
 
   @Inject
   WrapperContract(@Assisted Contract contract,
-                  ConfGeneralManager confGeneralManager, IWrapperFactory wrapperFactory) {
-    value = contract;
-    this.confGeneralManager = confGeneralManager;
+      IWrapperFactory wrapperFactory) {
+    this.value = contract;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -84,16 +75,6 @@ public class WrapperContract implements IWrapperContract {
 
     return this.value.endDate != null;
   }
-
-//  /**
-//   * Conversione della lista dei contractWorkingtimeType da Set a List.
-//   *
-//   * @param contract * @return
-//   */
-//  @Override
-//  public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
-//    return Lists.newArrayList(this.value.contractWorkingTimeType);
-//  }
 
   /**
    * L'intervallo effettivo per il contratto. Se endContract (data terminazione del contratto) 
@@ -272,9 +253,7 @@ public class WrapperContract implements IWrapperContract {
    */
   @Override
   public LocalDate dateForInitialization() {
-    LocalDate officeInstallation = new LocalDate(
-            confGeneralManager.getFieldValue(Parameter.INIT_USE_PROGRAM,
-                    value.person.office));
+    LocalDate officeInstallation = value.person.office.getBeginDate();
     LocalDate personCreation = new LocalDate(value.person.createdAt);
     LocalDate candidate = value.beginDate;
 
@@ -295,9 +274,7 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public boolean noRelevant() {
 
-    LocalDate officeInstallation =
-            new LocalDate(confGeneralManager.getFieldValue(
-                    Parameter.INIT_USE_PROGRAM, value.person.office));
+    LocalDate officeInstallation = value.person.office.getBeginDate();
 
     if (officeInstallation.isAfter(getContractDateInterval().getEnd())) {
       return true;

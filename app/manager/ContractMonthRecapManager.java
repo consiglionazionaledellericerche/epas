@@ -25,7 +25,7 @@ import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
-import models.enumerate.Parameter;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -54,14 +54,9 @@ public class ContractMonthRecapManager {
   @Inject
   private IWrapperFactory wrapperFactory;
   @Inject
-  private ConfGeneralManager confGeneralManager;
-  @Inject
-  private ConfYearManager confYearManager;
+  private ConfigurationManager configurationManager;
 
-
-  //private final static Logger log = LoggerFactory.getLogger(ContractMonthRecapManager.class);
-
-  /**
+ /**
    * Metodo da utilizzare per calcolare i minuti di residuo disponibili per riposo compensativo. Per
    * adesso è in questa classe per proteggere l'istanza effettiva di ContractMonthRecap in modo che
    * non si corra il rischio di sovrascriverla con quella provvisoria. Capire ...
@@ -212,10 +207,11 @@ public class ContractMonthRecapManager {
       cmr.remainingMinutesLastYear = initMonteOreAnnoPassato;
       cmr.remainingMinutesCurrentYear = initMonteOreAnnoCorrente;
 
-      Parameter param = cmr.qualifica > 3 ? Parameter.MONTH_EXPIRY_RECOVERY_DAYS_49 :
-              Parameter.MONTH_EXPIRY_RECOVERY_DAYS_13;
-      Integer monthExpiryRecoveryDay = confYearManager.getIntegerFieldValue(param,
-              cmr.person.office, cmr.year);
+      EpasParam param = cmr.qualifica > 3 ? EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49 :
+              EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13;
+      Integer monthExpiryRecoveryDay = (Integer)configurationManager
+          .configValue(cmr.person.office, param, cmr.year);
+      
       if (monthExpiryRecoveryDay != 0 && cmr.month > monthExpiryRecoveryDay) {
         cmr.possibileUtilizzareResiduoAnnoPrecedente = false;
         cmr.remainingMinutesLastYear = 0;
@@ -360,8 +356,7 @@ public class ContractMonthRecapManager {
    * calcolaFinoA, in base all'inizializzazione del contratto per buoni pasto ed alla data di inizio
    * utilizzo buoni pasto dell'office.
    */
-  private DateInterval buildIntervalForMealTicket(YearMonth yearMonth,
-            /*LocalDate calcolaFinoA,*/    Contract contract) {
+  private DateInterval buildIntervalForMealTicket(YearMonth yearMonth, Contract contract) {
 
     // FIXME: nel caso di buono pasto attribuito oggi non prenderei il dato
     // in fin dei conti la restrizione sul calcolaFinoA potrebbe essere inutile
@@ -370,14 +365,9 @@ public class ContractMonthRecapManager {
     //LocalDate firstDayOfRequestedMonth =
     //  new LocalDate(yearMonth.getYear(),yearMonth.getMonthOfYear(),1);
     //DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
-
-    Optional<LocalDate> dateStartMealTicketInOffice =
-            confGeneralManager.getLocalDateFieldValue(
-                    Parameter.DATE_START_MEAL_TICKET, contract.person.office);
-
-    if (!dateStartMealTicketInOffice.isPresent()) {
-      return null;
-    }
+    
+    LocalDate dateStartMealTicketInOffice = (LocalDate)configurationManager
+        .configValue(contract.person.office, EpasParam.DATE_START_MEAL_TICKET);
 
     LocalDate today = LocalDate.now();
 
@@ -397,7 +387,7 @@ public class ContractMonthRecapManager {
     DateInterval contractIntervalForMealTicket =
             wrapperFactory.create(contract).getContractDatabaseIntervalForMealTicket();
     DateInterval mealTicketIntervalInOffice =
-            new DateInterval(dateStartMealTicketInOffice.get(), Optional.<LocalDate>absent());
+            new DateInterval(dateStartMealTicketInOffice, Optional.<LocalDate>absent());
 
     DateInterval validDataForMealTickets = null;
     if (monthInterval != null) {

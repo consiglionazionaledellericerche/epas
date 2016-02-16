@@ -15,6 +15,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
+ * @author alessandro
+ *
+ */
+@Deprecated
 @Audited
 @Entity
 @Table(name = "conf_period")

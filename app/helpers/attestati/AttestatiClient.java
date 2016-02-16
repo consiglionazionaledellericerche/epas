@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import controllers.Security;
+import controllers.UploadSituation;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
@@ -22,7 +22,6 @@ import dao.wrapper.IWrapperFactory;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 
 import models.Absence;
@@ -30,9 +29,7 @@ import models.CertificatedData;
 import models.Competence;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.PersonMonthRecap;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -45,6 +42,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import play.Logger;
+import play.Play;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -74,8 +72,6 @@ public class AttestatiClient {
   private static String BASE_LISTA_DIPENDENTI_URL = "ListaDip";
   private static String BASE_ELABORA_DATI_URL = "HostDip";
   
-  @Inject
-  private ConfGeneralManager confGeneralManager;
   @Inject
   private PersonDao personDao;
   @Inject 
@@ -226,14 +222,14 @@ public class AttestatiClient {
       Elements selectSeat = listaDipendentiMaskDoc.select("select[name*=sede_id]");
       for (Element option : selectSeat.first().children()) {
         try {
-          Optional<Office> officeCNR = officeDao.byCodeId(option.text());
-          if (officeCNR.isPresent()) {
-            if (sessionAttestati.getOfficesDips().get(officeCNR.get()) == null) {
+          Optional<Office> officeCnr = officeDao.byCodeId(option.text());
+          if (officeCnr.isPresent()) {
+            if (sessionAttestati.getOfficesDips().get(officeCnr.get()) == null) {
               // caricare le persone.
-              Set<Dipendente> officeDips = listaDipendenti(officeCNR.get(), 
+              Set<Dipendente> officeDips = listaDipendenti(officeCnr.get(), 
                   sessionAttestati.getCookies(), year, month);
-              sessionAttestati.getOfficesDips().put(officeCNR.get(), officeDips);
-              log.debug("Ho prelevato la sede %s con %s dipendenti.", officeCNR.get(),
+              sessionAttestati.getOfficesDips().put(officeCnr.get(), officeDips);
+              log.debug("Ho prelevato la sede %s con %s dipendenti.", officeCnr.get(),
                   officeDips.size());
             }
           }
@@ -242,8 +238,8 @@ public class AttestatiClient {
       
       //Genero la lista degli anni per le sedi individuate ...
       Set<Integer> yearsSet = Sets.newHashSet();
-      for (Office officeCNR : sessionAttestati.getOfficesDips().keySet()) {
-        yearsSet.addAll(factory.create(officeCNR).getYearUploadable());
+      for (Office officeCnr : sessionAttestati.getOfficesDips().keySet()) {
+        yearsSet.addAll(factory.create(officeCnr).getYearUploadable());
       }
       sessionAttestati.setYearsList(Lists.newArrayList(yearsSet));
       Collections.sort(sessionAttestati.getYearsList());
@@ -282,7 +278,7 @@ public class AttestatiClient {
       throws URISyntaxException, MalformedURLException {
     Response listaDipendentiResponse;
 
-    String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+    String urlToPresence = Play.configuration.getProperty(UploadSituation.URL_TO_PRESENCE);
 
     URI baseUri = new URI(urlToPresence);
     final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
@@ -377,7 +373,7 @@ public class AttestatiClient {
 
     //Office office = Security.getUser().get().person.office;
     Office office = dipendente.getPerson().office;
-    String urlToPresence = confGeneralManager.getFieldValue(Parameter.URL_TO_PRESENCE, office);
+    String urlToPresence = Play.configuration.getProperty(UploadSituation.URL_TO_PRESENCE);
     URI baseUri = new URI(urlToPresence);
     final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 

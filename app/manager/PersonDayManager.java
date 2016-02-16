@@ -30,10 +30,12 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.EpasParam;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.Parameter;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -48,7 +50,7 @@ import java.util.Map;
 @Slf4j
 public class PersonDayManager {
 
-  private final ConfGeneralManager confGeneralManager;
+  private final ConfigurationManager configurationManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final ContractMonthRecapManager contractMonthRecapManager;
   private final PersonShiftDayDao personShiftDayDao;
@@ -58,7 +60,7 @@ public class PersonDayManager {
    * @param personDayDao personDao
    * @param stampTypeManager stampTypeManager
    * @param absenceDao absenceDao
-   * @param confGeneralManager confGeneralManager
+   * @param configurationManager configurationManager
    * @param personDayInTroubleManager personDayInTroubleManager
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personShiftDayDao personShiftDayDao
@@ -67,12 +69,12 @@ public class PersonDayManager {
   public PersonDayManager(PersonDayDao personDayDao,
       StampTypeManager stampTypeManager,
       AbsenceDao absenceDao,
-      ConfGeneralManager confGeneralManager,
+      ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager,
       ContractMonthRecapManager contractMonthRecapManager,
       PersonShiftDayDao personShiftDayDao) {
 
-    this.confGeneralManager = confGeneralManager;
+    this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.personShiftDayDao = personShiftDayDao;
@@ -311,7 +313,8 @@ public class PersonDayManager {
    * @return oggetto modificato.
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd, 
-      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch) {
+      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch, 
+      LocalTime startWork, LocalTime endWork) {
 
     // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
@@ -383,12 +386,18 @@ public class PersonDayManager {
       return personDay;
     }
 
+    //Le coppie valide
+    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    
     // Minuti derivanti dalle timbrature
-    personDay.setStampingsTime(stampingMinutes(personDay));
-
+    personDay.setStampingsTime(stampingMinutes(validPairs));
+    
+    // Minuti effettivi decurtati della fascia istituto
+    int workingMinutesInValidPairs = (workingMinutes(validPairs, startWork, endWork));
+    
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.setTimeAtWork( personDay.getStampingsTime() + personDay.getJustifiedTimeMeal() 
-    + personDay.getJustifiedTimeNoMeal());
+    personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal() 
+        + personDay.getJustifiedTimeNoMeal());
 
     // Se è festa ho finito ...
     if (personDay.isHoliday()) {
@@ -440,7 +449,7 @@ public class PersonDayManager {
     //3) Decisioni
 
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
-    int mealTicketsMinutes = personDay.getStampingsTime() + personDay.getJustifiedTimeMeal();
+    int mealTicketsMinutes = workingMinutesInValidPairs + personDay.getJustifiedTimeMeal();
 
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - missingTime < mealTicketTime) {
@@ -594,24 +603,15 @@ public class PersonDayManager {
 
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
-    Integer mealTimeStartHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_HOUR, pd.getValue().person.office);
-    Integer mealTimeStartMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_START_MINUTE, pd.getValue().person.office);
-    Integer mealTimeEndHour = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_HOUR, pd.getValue().person.office);
-    Integer mealTimeEndMinute = confGeneralManager
-        .getIntegerFieldValue(Parameter.MEAL_TIME_END_MINUTE, pd.getValue().person.office);
-    LocalTime startLunch = new LocalTime()
-        .withHourOfDay(mealTimeStartHour)
-        .withMinuteOfHour(mealTimeStartMinute);
-
-    LocalTime endLunch = new LocalTime()
-        .withHourOfDay(mealTimeEndHour)
-        .withMinuteOfHour(mealTimeEndMinute);
-
-    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork(), 
-        startLunch, endLunch);
+    LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+    
+    LocalTimeInterval workInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+        
+    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from, 
+        workInterval.to);
 
     updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
@@ -1141,22 +1141,56 @@ public class PersonDayManager {
     return 0;
   }
 
-
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono.
-   *
-   * @return minuti
+   * @param validPairs coppie valide di timbrature per il tempo a lavoro.
+   * @return
    */
-  private int stampingMinutes(PersonDay personDay) {
+  private int stampingMinutes(List<PairStamping> validPairs) {
 
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
-
+    // TODO: considerare startWork ed endWork nei minuti a lavoro
     int stampingMinutes = 0;
     for (PairStamping validPair : validPairs) {
-      stampingMinutes += validPair.timeInPair;
+        stampingMinutes += validPair.timeInPair;
     }
 
     return stampingMinutes;
+  }
+  
+  /**
+   * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono, 
+   * che facciano parte della finestra temporale specificata.
+   * @param validPairs coppie valide di timbrature per il tempo a lavoro
+   * @param startWork inizio finestra
+   * @param endWork fine finestra
+   * @return
+   */
+  private int workingMinutes(List<PairStamping> validPairs, 
+      LocalTime startWork, LocalTime endWork) {
+    
+    int workingMinutes = 0;
+    
+    //Per ogni coppia valida butto via il tempo oltre la fascia.
+    for (PairStamping validPair : validPairs) {
+      LocalTime consideredStart = new LocalTime(validPair.first.date);
+      LocalTime consideredEnd = new LocalTime(validPair.second.date);
+      if (consideredEnd.isBefore(startWork)) {
+        continue;
+      }
+      if (consideredStart.isAfter(endWork)) {
+        continue;
+      }
+      if (consideredStart.isBefore(startWork)) {
+        consideredStart = startWork;
+      }
+      if (consideredEnd.isAfter(endWork)) {
+        consideredEnd = endWork;
+      }
+      workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
+    }
+    
+    return workingMinutes;
+    
   }
 
   /**
