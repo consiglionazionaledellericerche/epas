@@ -293,7 +293,7 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityBegin),
             Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+        validation.addError("configurationDto.stringNewValue", "valore non valido. Formato accettato HH:mm-HH:mm");
       }
     }
 
