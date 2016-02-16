@@ -11,11 +11,14 @@ import com.google.gson.Gson;
 
 import injection.StaticInject;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -35,6 +38,7 @@ import java.text.DecimalFormat;
  *
  * @author marco
  */
+@Slf4j
 @StaticInject
 public class TemplateExtensions extends JavaExtensions {
 
@@ -75,16 +79,20 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String format(LocalDate date) {
+    log.info("format localdate obj={}", date.toString());
     return format(date.toDate());
   }
 
   public static String format(LocalDateTime dt) {
     return DT_FORMATTER.print(dt);
   }
+  
+  public static String format(MonthDay md) {
+    return md.toString("dd/MM");
+  }
    
   public static String format(LocalTime time) {
-    String prova = time.toString("HH:mm"); 
-    return prova;
+    return time.toString("HH:mm"); 
   }
 
   public static String format(Object obj) {
@@ -141,6 +149,9 @@ public class TemplateExtensions extends JavaExtensions {
     }
     if (obj instanceof LocalTime) {
       return format((LocalTime)obj);
+    }
+    if (obj instanceof MonthDay) {
+      return format((MonthDay)obj);
     }
     if (obj instanceof Boolean) {
       if ((Boolean)obj) {

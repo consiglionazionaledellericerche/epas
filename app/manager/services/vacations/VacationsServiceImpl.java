@@ -23,9 +23,9 @@ import models.Office;
 import models.Person;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 
 import java.util.List;
 
@@ -355,13 +355,13 @@ public class VacationsServiceImpl implements IVacationsService {
    */
   public LocalDate vacationsLastYearExpireDate(int year, Office office) {
 
-    DayMonth dayMonthExpiryVacationPastYear = (DayMonth)configurationManager
+    MonthDay dayMonthExpiryVacationPastYear = (MonthDay)configurationManager
         .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
 
     LocalDate expireDate = LocalDate.now()
         .withYear(year)
-        .withMonthOfYear(dayMonthExpiryVacationPastYear.month)
-        .withDayOfMonth(dayMonthExpiryVacationPastYear.day);
+        .withMonthOfYear(dayMonthExpiryVacationPastYear.getMonthOfYear())
+        .withDayOfMonth(dayMonthExpiryVacationPastYear.getDayOfMonth());
 
     return expireDate;
   }

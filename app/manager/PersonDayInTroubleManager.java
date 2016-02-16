@@ -22,9 +22,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.EpasParam;
-import models.enumerate.Parameter;
 import models.enumerate.Troubles;
-import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
@@ -252,11 +250,10 @@ public class PersonDayInTroubleManager {
     String date = "";
     for (LocalDate d : dates) {
       
-      DayMonth patron = (DayMonth)configurationManager
+      MonthDay patron = (MonthDay)configurationManager
           .configValue(person.office, EpasParam.DAY_OF_PATRON, d);
       
-      if (!DateUtility
-          .isGeneralHoliday(Optional.fromNullable(new MonthDay(patron.month, patron.day)), d)) {
+      if (!DateUtility.isGeneralHoliday(Optional.fromNullable(patron), d)) {
         dateFormat.add(d);
         String str = fmt.print(d);
         date = date + str + ", ";

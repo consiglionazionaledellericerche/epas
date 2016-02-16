@@ -21,7 +21,6 @@ import models.Person;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
 import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
@@ -68,11 +67,10 @@ public class PersonManager {
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
-    DayMonth patron = (DayMonth)configurationManager
+    MonthDay patron = (MonthDay)configurationManager
         .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
     
-    if (DateUtility
-        .isGeneralHoliday(Optional.fromNullable(new MonthDay(patron.month, patron.day)), date)) {
+    if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
       return true;
     }
 

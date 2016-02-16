@@ -17,12 +17,12 @@ import models.Configuration;
 import models.Office;
 import models.base.IPropertyInPeriod;
 import models.enumerate.EpasParam.EpasParamValueType;
-import models.enumerate.EpasParam.EpasParamValueType.DayMonth;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -135,7 +135,7 @@ public class Configurations extends Controller {
         this.stringNewValue = (String)configuration.parseValue();
       }
       if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
-        this.stringNewValue = EpasParamValueType.formatValue((DayMonth)configuration.parseValue());
+        this.stringNewValue = EpasParamValueType.formatValue((MonthDay)configuration.parseValue());
       }
       if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.MONTH)) {
         this.integerNewValue = (Integer)configuration.parseValue();
@@ -244,11 +244,11 @@ public class Configurations extends Controller {
       }
     }
     if (configuration.epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
-      DayMonth dayMonth = (DayMonth)EpasParamValueType
+      MonthDay dayMonth = (MonthDay)EpasParamValueType
           .parseValue(EpasParamValueType.DAY_MONTH, configurationDto.stringNewValue);
       if (dayMonth != null) {
         newConfiguration = configurationManager.updateDayMonth(configuration.epasParam, 
-            configuration.office, dayMonth.day, dayMonth.month,
+            configuration.office, dayMonth.getDayOfMonth(), dayMonth.getMonthOfYear(),
             Optional.fromNullable(configurationDto.validityBegin), 
             Optional.fromNullable(configurationDto.validityEnd), false);
 
