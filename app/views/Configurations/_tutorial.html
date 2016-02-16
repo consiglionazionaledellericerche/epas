@@ -81,6 +81,10 @@
       <p>Tramite questo parametro è possibile specificare la finestra temporale all'interno della quale cercare le uscite per pranzo.</p>
     #{/if}
     
+    #{if configuration.epasParam.equals(models.enumerate.EpasParam.WORK_INTERVAL) }
+      <p>Tramite questo parametro è possibile specificare la finestra temporale all'interno della quale verrà conteggiato il tempo a lavoro dei dipendenti.</p>
+    #{/if}
+    
   #{/alert} 
   
   <!-- Riepilogo delle ricomputazioni eventuali -->

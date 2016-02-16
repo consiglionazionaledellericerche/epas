@@ -313,7 +313,8 @@ public class PersonDayManager {
    * @return oggetto modificato.
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd, 
-      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch) {
+      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch, 
+      LocalTime startWork, LocalTime endWork) {
 
     // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
@@ -386,7 +387,7 @@ public class PersonDayManager {
     }
 
     // Minuti derivanti dalle timbrature
-    personDay.setStampingsTime(stampingMinutes(personDay));
+    personDay.setStampingsTime(stampingMinutes(personDay, startWork, endWork));
 
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
     personDay.setTimeAtWork( personDay.getStampingsTime() + personDay.getJustifiedTimeMeal() 
@@ -599,8 +600,12 @@ public class PersonDayManager {
     LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
         pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
     
-    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork(), 
-        lunchInterval.from, lunchInterval.to);
+    LocalTimeInterval workInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+        
+    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
+        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from, 
+        workInterval.to);
 
     updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
@@ -1136,13 +1141,15 @@ public class PersonDayManager {
    *
    * @return minuti
    */
-  private int stampingMinutes(PersonDay personDay) {
+  private int stampingMinutes(PersonDay personDay, LocalTime startWork, LocalTime endWork) {
 
+    // TODO: considerare startWork ed endWork nei minuti a lavoro
+    
     List<PairStamping> validPairs = computeValidPairStampings(personDay);
 
     int stampingMinutes = 0;
     for (PairStamping validPair : validPairs) {
-      stampingMinutes += validPair.timeInPair;
+        stampingMinutes += validPair.timeInPair;
     }
 
     return stampingMinutes;

@@ -406,9 +406,13 @@ public class ConsistencyManager {
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
         pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+    
+    LocalTimeInterval workInterval = (LocalTimeInterval)configurationManager.configValue(
+        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
         
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
-        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to);
+        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from, 
+        workInterval.to);
 
     personDayManager.updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
         pd.isFixedTimeAtWork());

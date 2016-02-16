@@ -115,6 +115,14 @@ public enum EpasParam {
       EpasParamValueType
       .formatValue(new LocalTimeInterval(new LocalTime(12,0), new LocalTime(15,0))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          RecomputationType.RESIDUAL_MEALTICKETS)),
+  
+  WORK_INTERVAL("work_interval",
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.LOCALTIME_INTERVAL,
+      EpasParamValueType
+      .formatValue(new LocalTimeInterval(new LocalTime(9,0), new LocalTime(19,0))),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
           RecomputationType.RESIDUAL_MEALTICKETS));
 
   public final String name;
