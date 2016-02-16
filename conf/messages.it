@@ -383,6 +383,7 @@ MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livel
 DAY_OF_PATRON=Festa del Patrono
 HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
 LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
+WORK_INTERVAL=Intervallo apertura / chiusura istituto
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
