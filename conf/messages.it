@@ -102,6 +102,7 @@ crud.hasErrors =Occorre correggere gli errori riportati.
 crud.modified=&{%s} modificato con successo
 crud.saved=&{%s} salvato con successo
 crud.save=Salva
+crud.userDeleteError= Errore nella cancellazione. Non si può cancellare un utente fisico con la persona ancora ad esso associata.
 
 csp.beginDate= Data Inizio
 csp.endDate= Data Fine
@@ -177,6 +178,8 @@ office.name=Nome
 Offices.blank=Nuova sede
 office=Sede
 
+offices= Sedi su cui associare l'utente
+
 onCertificate=In attestati
 
 pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
@@ -221,6 +224,8 @@ recapMealTickets=Riepilogo Buoni Pasto
 report=Descrizione problema
 restoreUser= Torna chi eri
 
+roles= Ruoli attribuibili
+
 secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 
@@ -241,9 +246,15 @@ time= Orario
 uro.office=Sede
 uro.role= Ruolo
 uro.user= Utente
-
+user= Utente
 user.password= Password
 user.username= Username
+
+Users.blank= Inserisci utente
+User.blank= Nuovo utente
+User.systemBlank= Nuovo utente di sistema
+user.person= Persona associata
+users= Utenti
 
 yearAtt=Anno Attestato
 monthAtt=Mese Attestato
