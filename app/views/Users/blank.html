@@ -5,14 +5,10 @@
 </div>
 
 <div id="userData">
-
-     
-      <div id="form-physical">
  	  
   		#{form action:@save(), method:'POST', autocomplete:false,
-  			class:'form-horizontal', 'data-async':'#badgeReaderList',
+  			class:'form-horizontal', 'data-async':'#userList',
   			'data-async-error':'#userData'}
-
 
   		#{f.input 'user.username' /}
   		#{f.input 'user.password', type:'password' /}
@@ -24,16 +20,14 @@
     		#{b.save /}
   		#{/b.buttons}
   		#{/form}
-	  </div>
-	  
+ 
   		#{alert color:'info'}   
   			<p>
     		<strong>Note:</strong> Solo l'amministratore tecnico può generare un nuovo utente.
   			</p>
   		#{/alert}
-  
-
 </div>
+
 
 #{/modalAsync}
 

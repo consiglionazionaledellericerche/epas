@@ -7,9 +7,7 @@
 
   	
 	#{alert color:'info'}
-	<p>Gli utenti della lista sottostante sono tutti gli utenti su cui si ha diritto di visione.
-	   Per adesso, l'inserimento di nuovi utenti fisici senza associare ad essi persone <strong>non</strong> è permesso
-	</p>
+	<p>Elenco degli utenti associati ad una persona.</p>
 	#{/alert}
 
 	#{form action:@Users.list(), class:'form-inline', method:'GET',
@@ -27,16 +25,8 @@
      </div>
     </div>
 	#{/form}
-
 	
-	  #{b.actions}
-	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalInsertUser" disabled="disabled">
-	      <i class="fa fa-plus"></i> &{'Users.blank'}
-	    </a>
-      #{/b.actions}
-    
-	
-	<div id="normalUserList"> <!-- per il risultato della modale asincrona -->
+    <br>
 	
 	<section id="normalResults">
     #{paginate results} 
@@ -54,8 +44,6 @@
     #{/paginate} 
      </section>
      </div>
-     
-    
-</div>
+
 
 <div id="modalInsertUser" class="modal container" tabindex="-1"></div>

@@ -5,9 +5,8 @@
 #{user.usersTabs activeAction:'systemList' /}
 <div class="container"> 
   	 
-    #{alert color:'danger'}
-	<p>Gli utenti della lista sottostante sono utenti di sistema, è possibile la modifica di essi o l'aggiunta di nuovi.
-	</p>
+    #{alert color:'info'}
+	<p>Elenco degli utenti di sistema.</p>
 	#{/alert}
 	
 	#{form action:@Users.systemList(), class:'form-inline', method:'GET',
@@ -32,6 +31,7 @@
 	    </a>
       #{/b.actions}
 	
+	<div id="userList">
 	<section id="results">
     #{paginate results} 
 	   <ul class="list-group">
@@ -45,7 +45,7 @@
 	   </ul>
     #{/paginate} 
      </section>
-     
+     </div>
      
 </div>
 
