@@ -1,0 +1,34 @@
+#{modalAsync id:'modalInsertUser', button:'Salva', title:'User.systemBlank' }
+
+<div class="alert alert-info" role="alert">
+  Inserisci i dati del nuovo <strong><i class="fa fa-user"></i> &{'user'}</strong>.
+</div>
+
+<div id="userData">
+		<div id="form-system">
+	  
+	  	#{form action:@save(), method:'POST', autocomplete:false,
+  			class:'form-horizontal', 'data-async':'#badgeReaderList',
+  			'data-async-error':'#userData'}
+
+
+  		#{f.input 'user.username' /}
+  		#{f.input 'user.password', type:'password' /}
+  		#{f.selectModels 'offices',
+  			items:templateUtility.officesAllowed(), placeholder:'Tutti gli uffici' /}
+		#{f.selectModels 'roles',
+  			items:templateUtility.allSystemRoles(), placeholder:'Tutti i ruoli di sistema' /}
+  		#{b.buttons center:true}
+    		#{b.cancel @index() /}
+    		#{b.save /}
+  		#{/b.buttons}
+  		#{/form}
+   	  </div>
+   	   #{alert color:'info'}   
+  			<p>
+    		<strong>Note:</strong> Solo l'amministratore tecnico può generare un nuovo utente.
+  			</p>
+  	   #{/alert}
+</div>
+#{/modalAsync}
+   	  

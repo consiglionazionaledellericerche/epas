@@ -52,20 +52,20 @@ public class PersonDay extends BaseModel {
   public LocalDate date;
 
   @Column(name = "time_at_work")
-  public Integer timeAtWork = 0; 
-  
+  public Integer timeAtWork = 0;
+
   /**
    * Tempo all'interno di timbrature valide.
    */
   @Column(name = "stamping_time")
   public Integer stampingsTime = 0;
-  
+
   /**
    * Tempo giustificato da assenze che non contribuiscono al tempo per buono pasto.
    */
   @Column(name = "justified_time_no_meal")
   public Integer justifiedTimeNoMeal = 0;
-  
+
   /**
    * Tempo giustificato da assenze che contribuiscono al tempo per buono pasto.
    */
@@ -116,14 +116,15 @@ public class PersonDay extends BaseModel {
 
   /**
    * Costruttore.
-   * @param person person
-   * @param date date
-   * @param timeAtWork timeAtWork
-   * @param difference difference
+   *
+   * @param person      person
+   * @param date        date
+   * @param timeAtWork  timeAtWork
+   * @param difference  difference
    * @param progressive progressive
    */
-  public PersonDay(Person person, LocalDate date, 
-      int timeAtWork, int difference, int progressive) {
+  public PersonDay(Person person, LocalDate date,
+                   int timeAtWork, int difference, int progressive) {
     this.person = person;
     this.date = date;
     this.timeAtWork = timeAtWork;
@@ -133,8 +134,9 @@ public class PersonDay extends BaseModel {
 
   /**
    * Costruttore.
+   *
    * @param person person
-   * @param date date
+   * @param date   date
    */
   public PersonDay(Person person, LocalDate date) {
     this(person, date, 0, 0, 0);
@@ -146,27 +148,29 @@ public class PersonDay extends BaseModel {
   public boolean isToday() {
     return this.date.isEqual(LocalDate.now());
   }
-  
+
   /**
    * Nel caso di orario effettuato fuori dalla finestra dell'orario sede.
-   * 
+   *
    * TODO: vedere se aggiungere una colonna invece di calcolare questo invariante.
-   * 
-   * timeAtWork = StampingTime - decurtedWork - decurtedMeal  
-   * + justifiedTimeMeal + justifiedTimeNoMeal
-   * 
+   *
+   * timeAtWork = StampingTime - decurtedWork - decurtedMeal + justifiedTimeMeal +
+   * justifiedTimeNoMeal
+   *
    * -->
-   * 
-   * decurtedWork = StampingTime - timeAtWork - decurtedMeal 
-   * + justifiedTimeMeal + justifiedTimeNoMeal 
-   * 
-   * 
-   * @return
+   *
+   * decurtedWork = StampingTime - timeAtWork - decurtedMeal + justifiedTimeMeal +
+   * justifiedTimeNoMeal
    */
   @Transient
   public int getDecurtedWork() {
 
+    if (stampingsTime == null || this.timeAtWork == null) {
+      return 0;
+    }
+
     int decurtedWork = stampingsTime - this.timeAtWork;
+
     if (decurted != null) {
       decurtedWork -= this.decurted;
     }
@@ -184,7 +188,7 @@ public class PersonDay extends BaseModel {
   public String toString() {
     return String.format(
         "PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, "
-        + "modificationType = %s, progressive = %s, timeAtWork = %s",
+            + "modificationType = %s, progressive = %s, timeAtWork = %s",
         id, person.id, date, difference, isTicketAvailable, stampModificationType,
         progressive, timeAtWork);
   }
