@@ -2,7 +2,13 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione utenti'  /}
 
-#{set breadcrumbs:['users':@Users.list(), ('Gestisci '+ user.username):null] /}
+
+#{if user.person}
+  #{set breadcrumbs:['users':null, 'personUsers':@Users.list(), ('Gestisci '+ user.username):null] /}
+#{/if}  
+#{else}
+  #{set breadcrumbs:['users':null, 'personUsers':@Users.systemList(), ('Gestisci '+ user.username):null] /}
+#{/else}  
 
 <div class="container">
 
@@ -11,15 +17,17 @@
 #{title title:'Gestione ' + user.username /}
 
 #{panel title:'Informazioni', color:'primary'}
-  	  <div class="alert alert-info" role="alert">
-		Qui di seguito sono riportate le informazioni relative all'utente <strong>${user.username}</strong>
-		
-      </div>
+  #{alert color:'info'}
+    <p>Informazioni relative all'utente #{if user.person} personale #{/if} #{else} di sistema #{/else}
+    <strong>${user.username}</strong>. </p>
+  #{/alert}
 		#{form action:@updateInfo(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }			
 
-		  #{f.hidden 'user.id' /}			
-		  #{f.input 'user.person', disabled:true /}	
+		  #{f.hidden 'user.id' /}
+		  #{if user.person}			
+		    #{f.view 'user.person' /}
+		  #{/if}	
 		  #{f.input 'user.username', required:true /}
 		  #{f.input 'user.password', type:'password', required:true /}
 		  <div class="col-sm-3">
@@ -38,9 +46,14 @@
 	      #{/list}
  	  	  </table>
  	  	  #{b.buttons center:true}
-    		#{b.cancel @index() /}
+    		
     		#{b.save /}
-    		#{b.delete @delete(user.id) /}
+    		
+    		*{ permetto di eliminare solo gli utenti di sistema }*
+    		#{if user.person == null }
+    		 #{b.delete @delete(user.id) /}
+    		#{/if}
+    		
   		  #{/b.buttons}
  	  	  </div>
  	  	  <div class="col-sm-3">
