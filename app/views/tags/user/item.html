@@ -1,0 +1,18 @@
+*{ item: l'utente
+edit: se voglio il link a edit
+
+}*
+
+<h4 style="color: black">
+  <i class="fa fa-user"></i>
+  #{if _edit}
+  
+  <a class="list-group-item-heading" href="@{edit(_item.id)}">
+   
+    ${_item.username}</a>
+  #{/if}
+  #{else}
+  ${_item.code}
+  #{/else}
+</h4>
+
