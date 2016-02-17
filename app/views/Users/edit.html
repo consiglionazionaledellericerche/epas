@@ -1,0 +1,55 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione utenti'  /}
+
+#{set breadcrumbs:['users':@Users.list(), ('Gestisci '+ user.username):null] /}
+
+<div class="container">
+
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Gestione ' + user.username /}
+
+#{panel title:'Informazioni', color:'primary'}
+  	  <div class="alert alert-info" role="alert">
+		Qui di seguito sono riportate le informazioni relative all'utente <strong>${user.username}</strong>
+		
+      </div>
+		#{form action:@updateInfo(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }			
+
+		  #{f.hidden 'user.id' /}			
+		  #{f.input 'user.person', disabled:true /}	
+		  #{f.input 'user.username', required:true /}
+		  #{f.input 'user.password', type:'password', required:true /}
+		  <div class="col-sm-3">
+		  </div>
+		  <div class="col-sm-6">
+		  <table class="table table-condended table-bordered">	
+		  <tr>
+		  	<th class="alert alert-info">Ruolo</th>
+    		<th class="alert alert-info">Ufficio</th>
+		  </tr>    
+	      #{list items:uroList, as:'uro'}
+	      <tr>
+	      	<td>${uro.role}</td>
+	      	<td>${uro.office}</td>
+	      </tr>
+	      #{/list}
+ 	  	  </table>
+ 	  	  #{b.buttons center:true}
+    		#{b.cancel @index() /}
+    		#{b.save /}
+    		#{b.delete @delete(user.id) /}
+  		  #{/b.buttons}
+ 	  	  </div>
+ 	  	  <div class="col-sm-3">
+ 	  	  </div>
+ 	  	  
+
+		#{/form}
+#{/panel}
+
+</div>
+
+<div id="modalUpdateRole" class="modal container" tabindex="-1"></div>
