@@ -170,7 +170,7 @@ public class Users extends Controller{
     }   
 
     flash.success(Web.msgSaved(User.class));
-    index();
+    systemList(null);
   }
 
 
