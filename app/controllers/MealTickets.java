@@ -17,7 +17,6 @@ import it.cnr.iit.epas.DateInterval;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.services.mealTickets.BlockMealTicket;
 import manager.services.mealTickets.IMealTicketsService;
@@ -30,8 +29,6 @@ import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.User;
-import models.enumerate.EpasParam;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -342,9 +339,18 @@ public class MealTickets extends Controller {
     personMealTickets(contract.person.id);
   }
 
-  public static void findCodeBlock() {
+  /**
+   * Ricerca un codice blocco.
+   */
+  public static void findCodeBlock(String code) {
     
-    render();
+    List<BlockMealTicket> blocks = Lists.newArrayList();
+    if (code != null) {
+    List<MealTicket> mealTicket = mealTicketDao.getMealTicketsMatchCodeBlock(code);
+      blocks = MealTicketStaticUtility
+        .getBlockMealTicketFromOrderedList(mealTicket, Optional.<DateInterval>absent());
+    }
+    render(blocks);
   }
   
   public static void returnedMealTickets(Long officeId) {
