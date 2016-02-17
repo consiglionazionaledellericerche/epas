@@ -1,0 +1,20 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+<div class="container">
+  #{title title:'Utenti' /}
+</div>
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("list")} class="active" #{/if}>
+      <a href="@{Users.list()}">Utenti con associata persona</a>
+    </li>
+    <li #{if _activeAction.equals("systemList")} class="active" #{/if}>
+      <a href="@{Users.systemList()}">Utenti di sistema</a>
+    </li>
+    
+  </ul>
+</div>
+<br>

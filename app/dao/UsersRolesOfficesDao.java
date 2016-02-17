@@ -61,6 +61,17 @@ public class UsersRolesOfficesDao extends DaoBase {
 
     return Optional.fromNullable(query.singleResult(uro));
   }
+  
+  /**
+   * 
+   * @param user
+   * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
+   */
+  public List<UsersRolesOffices> getUsersRolesOfficesByUser(User user) {
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    final JPQLQuery query = getQueryFactory().from(uro).where(uro.user.eq(user));
+    return query.list(uro);
+  }
 
   /**
    * La lista di tutti i ruoli per l'user. Utilizzato per visualizzare gli elementi della navbar.

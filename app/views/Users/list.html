@@ -1,0 +1,61 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione utenti'  /}
+
+#{user.usersTabs activeAction:'list' /}
+<div class="container">
+
+  	
+	#{alert color:'info'}
+	<p>Gli utenti della lista sottostante sono tutti gli utenti su cui si ha diritto di visione.
+	   Per adesso, l'inserimento di nuovi utenti fisici senza associare ad essi persone <strong>non</strong> è permesso
+	</p>
+	#{/alert}
+
+	#{form action:@Users.list(), class:'form-inline', method:'GET',
+    'data-reload':'#normalResults', autocomplete:'off'}
+
+    <div class="row">
+     <div class="col-sm-3">
+        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label(), inline:true /}
+     </div>
+     <div class="col-sm-1">
+        <button type="submit" name="_filter" class="btn btn-primary">
+            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+        </button>
+     </div>
+    </div>
+	#{/form}
+
+	
+	  #{b.actions}
+	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalInsertUser" disabled="disabled">
+	      <i class="fa fa-plus"></i> &{'Users.blank'}
+	    </a>
+      #{/b.actions}
+    
+	
+	<div id="normalUserList"> <!-- per il risultato della modale asincrona -->
+	
+	<section id="normalResults">
+    #{paginate results} 
+	   <ul class="list-group">
+	   #{list items:results.results, as:'item'}
+	   
+		 <li class="list-group-item list-group-item-grey">
+
+			 #{user.item item:item, edit:'true' /}
+		  
+	     </li>
+	    
+	   #{/list}
+	   </ul>
+    #{/paginate} 
+     </section>
+     </div>
+     
+    
+</div>
+
+<div id="modalInsertUser" class="modal container" tabindex="-1"></div>
