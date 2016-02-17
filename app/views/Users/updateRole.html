@@ -1,0 +1,11 @@
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'BadgeReader.blank' }
+<div class="alert alert-info" role="alert">
+  Seleziona i nuovi ruoli per <strong>${user.person}</strong> sull'ufficio <strong>${user.person.office}</strong>.
+</div>
+#{form action:@save(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#badgeReaderList',
+  'data-async-error':'#badgeReaderData'}
+  
+#{/form}
+
+#{/modalAsync}

@@ -1,0 +1,52 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione utenti'  /}
+
+#{user.usersTabs activeAction:'systemList' /}
+<div class="container"> 
+  	 
+    #{alert color:'danger'}
+	<p>Gli utenti della lista sottostante sono utenti di sistema, è possibile la modifica di essi o l'aggiunta di nuovi.
+	</p>
+	#{/alert}
+	
+	#{form action:@Users.systemList(), class:'form-inline', method:'GET',
+    'data-reload':'#results', autocomplete:'off'}
+
+    <div class="row">
+     <div class="col-sm-3">
+        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'search'.label(), inline:true /}
+     </div>
+     <div class="col-sm-1">
+        <button type="submit" name="_filter" class="btn btn-primary">
+            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
+        </button>
+     </div>
+    </div>
+	#{/form}
+	
+	  #{b.actions}
+	    <a class="btn btn-success" href="@{systemBlank()}" data-async-modal="#modalInsertUser">
+	      <i class="fa fa-plus"></i> &{'Users.blank'}
+	    </a>
+      #{/b.actions}
+	
+	<section id="results">
+    #{paginate results} 
+	   <ul class="list-group">
+	   #{list items:results.results, as:'item'}
+	   
+		 <li class="list-group-item list-group-item-grey">
+			 #{user.item item:item, edit:'true' /}		  
+	     </li>
+	    
+	   #{/list}
+	   </ul>
+    #{/paginate} 
+     </section>
+     
+     
+</div>
+
+<div id="modalInsertUser" class="modal container" tabindex="-1"></div>
