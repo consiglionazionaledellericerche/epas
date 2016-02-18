@@ -103,6 +103,7 @@ crud.modified=&{%s} modificato con successo
 crud.saved=&{%s} salvato con successo
 crud.save=Salva
 crud.userDeleteError= Errore nella cancellazione. Non si può cancellare un utente fisico con la persona ancora ad esso associata.
+crud.systemDeleteError= Errore nella cancellazione. Non è possibile cancellare un utente di sistema che abbia informazioni storicizzate ancora associate. 
 
 csp.beginDate= Data Inizio
 csp.endDate= Data Fine
