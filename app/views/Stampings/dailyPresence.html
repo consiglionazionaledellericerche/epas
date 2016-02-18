@@ -2,10 +2,11 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Presenza Giornaliera'  /}
 
- 
 <div class="container">
-  #{title title:'Presenza giornaliera ' + day + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+  #{title title:'Controllo presenze ' + office.name /}
 </div>
+
+#{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
 
 <div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
 	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
