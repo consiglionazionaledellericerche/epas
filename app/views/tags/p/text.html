@@ -1,0 +1,12 @@
+*{
+ arg (required) field.name attribute
+ value (optional) default to field.value
+ label (optional) default to field.name
+ disabled (optional) default to false
+ type (optional) default to text
+}*
+#{p.edit _arg, label:_label, value:_value}
+<input type="${_type == null ? 'text' : _type}" name="${field.name}" id="${field.id}" class="form-control ${_attrs['class']}"
+  	value="${_value == null ? field.value : _value}"
+  	${helpers.Web.serialize(_attrs, "arg", "value", "label", "required", "inline").raw()} />
+#{/p.edit}

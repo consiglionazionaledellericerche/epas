@@ -26,6 +26,12 @@ public class ContractStampProfile extends PropertyInPeriod {
   @JoinColumn(name = "contract_id", nullable = false)
   public Contract contract;
 
+  /**
+   * TODO: questa implementazione andrebbe spostata nel PeriodModel
+   * Se la data è contenuta nel periodo.
+   * @param date data da verificare
+   * @return esito
+   */
   public boolean includeDate(LocalDate date) {
     if (beginDate == null && endDate == null) {
       //TODO decidere se considerare l'intervallo infinito, oppure nullo
@@ -40,6 +46,11 @@ public class ContractStampProfile extends PropertyInPeriod {
     return !beginDate.isBefore(date) && !endDate.isAfter(date);
   }
 
+  /**
+   * TODO: questa implementazione andrebbe spostata nel PeriodModel.
+   * Il range del periodo.
+   * @return range
+   */
   public Range<LocalDate> dateRange() {
     if (beginDate == null && endDate == null) {
       return Range.all();
@@ -65,14 +76,12 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public Object getType() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.getClass();
   }
 
   @Override
   public void setType(Object value) {
-    // TODO Auto-generated method stub
-
+    // questo metodo in questo caso non serve, perchè i periods sono tutti dello stesso tipo.
   }
 
   @Override
@@ -88,8 +97,8 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
-    if (otherValue instanceof ContractStampProfile) {
-      return this.fixedworkingtime == ((ContractStampProfile) otherValue).fixedworkingtime;
+    if (otherValue instanceof Boolean) {
+      return this.getValue() == (Boolean)otherValue;
     }
     return false;
   }

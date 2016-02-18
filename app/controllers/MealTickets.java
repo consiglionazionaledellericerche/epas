@@ -17,7 +17,7 @@ import it.cnr.iit.epas.DateInterval;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
+import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.services.mealTickets.BlockMealTicket;
 import manager.services.mealTickets.IMealTicketsService;
@@ -30,6 +30,7 @@ import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.User;
+import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
@@ -62,8 +63,6 @@ public class MealTickets extends Controller {
   @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static ConfGeneralManager confGeneralManager;
-  @Inject
   private static ConsistencyManager consistencyManager;
 
   @Inject
@@ -73,6 +72,9 @@ public class MealTickets extends Controller {
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
   
+  /**
+   * Riepilogo buoni pasto dipendente.
+   */
   public static void mealTickets() {
     
     Optional<User> user = Security.getUser();
@@ -128,11 +130,7 @@ public class MealTickets extends Controller {
             .getPersonMealticket(new YearMonth(year, month), Optional.<Integer>absent(), 
                 Optional.<String>absent(), Sets.newHashSet(office));
 
-    //La data inizio utilizzo dei buoni pasto.
-    Optional<LocalDate> officeStartDate = confGeneralManager
-        .getLocalDateFieldValue(Parameter.DATE_START_MEAL_TICKET, office);
-
-    render(office, monthRecapList, officeStartDate, year, month);
+    render(office, monthRecapList, year, month);
   }
   
   /**

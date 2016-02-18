@@ -11,7 +11,7 @@ import dao.PersonDayDao;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import manager.ConfGeneralManager;
+import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
@@ -25,6 +25,8 @@ import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.EpasParamValueType.IpList;
 import models.enumerate.Parameter;
 import models.enumerate.StampTypes;
 
@@ -39,8 +41,6 @@ import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-
-import security.SecurityRules;
 
 import java.util.List;
 import java.util.Set;
@@ -60,7 +60,7 @@ public class Clocks extends Controller {
   @Inject
   private static PersonDayDao personDayDao;
   @Inject
-  private static ConfGeneralManager confGeneralManager;
+  private static ConfigurationManager configurationManger;
   @Inject
   private static PersonDayManager personDayManager;
   @Inject
@@ -114,10 +114,10 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      String addressesAllowed =
-          confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+      IpList addressesAllowed = (IpList)configurationManger
+          .configValue(person.office, EpasParam.ADDRESSES_ALLOWED);
 
-      if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
+      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
             + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -143,10 +143,10 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      String addressesAllowed = confGeneralManager
-          .getFieldValue(Parameter.ADDRESSES_ALLOWED, user.person.office);
+      IpList addressesAllowed = (IpList)configurationManger
+          .configValue(user.person.office, EpasParam.ADDRESSES_ALLOWED);
 
-      if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
+      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
             + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -196,10 +196,10 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      final String addressesAllowed = confGeneralManager.getFieldValue(Parameter.ADDRESSES_ALLOWED,
-          user.person.office);
+      final IpList addressesAllowed = (IpList)configurationManger
+          .configValue(user.person.office, EpasParam.ADDRESSES_ALLOWED);
 
-      if (!addressesAllowed.contains(Http.Request.current().remoteAddress)) {
+      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate"
             + "da questo terminale! Inserire l'indirizzo ip nella configurazione"

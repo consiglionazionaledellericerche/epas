@@ -1,19 +1,15 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.RoleDao;
 
-import manager.ConfGeneralManager;
-
 import models.Office;
 import models.Role;
 import models.UsersRolesOffices;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -21,19 +17,20 @@ import org.joda.time.YearMonth;
 import java.util.List;
 
 /**
+ * Wrapper sede. 
+ * 
  * @author alessandro
  */
 public class WrapperOffice implements IWrapperOffice {
 
   private final Office value;
   private final RoleDao roleDao;
-  private final ConfGeneralManager confGeneralManager;
 
   @Inject
-  WrapperOffice(@Assisted Office office, RoleDao roleDao, ConfGeneralManager confGeneralManager) {
+  WrapperOffice(@Assisted Office office, 
+      RoleDao roleDao) {
     value = office;
     this.roleDao = roleDao;
-    this.confGeneralManager = confGeneralManager;
   }
 
   @Override
@@ -43,8 +40,7 @@ public class WrapperOffice implements IWrapperOffice {
 
   @Override
   public final LocalDate initDate() {
-    return confGeneralManager
-            .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, this.value).get();
+    return this.value.getBeginDate();
   }
 
   /**
@@ -106,14 +102,10 @@ public class WrapperOffice implements IWrapperOffice {
   @Override
   public Optional<YearMonth> getFirstMonthUploadable() {
     
-    Optional<LocalDate> officeInitUse = confGeneralManager
-        .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, this.value);
+    LocalDate officeInitUse = this.value.getBeginDate();
     
-    if (officeInitUse.isPresent()) {
-      return Optional.fromNullable(new YearMonth(officeInitUse.get()));
-    }
+    return Optional.fromNullable(new YearMonth(officeInitUse));
     
-    return Optional.<YearMonth>absent();
   }
   
   

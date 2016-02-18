@@ -214,7 +214,6 @@ public class TemplateUtility {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
-      roles.add(roleDao.getRoleByName(Role.BADGE_READER));
       roles.add(roleDao.getRoleByName(Role.REPERIBILITY_MANAGER));
       roles.add(roleDao.getRoleByName(Role.SHIFT_MANAGER));
       roles.add(roleDao.getRoleByName(Role.REST_CLIENT));

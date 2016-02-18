@@ -502,6 +502,14 @@ public class RequestInit extends Controller {
         return "MealTickets.recapMealTickets";
       }
     }
+    
+    if (action.startsWith("Configurations.")) {
+      if (action.equals("Configurations.show")) {
+        renderArgs.put("dropDown", "dropDownAdministration");
+        renderArgs.put("switchOffice", true);
+        return "Configurations.show";
+      }
+    }
 
     return session.get("actionSelected");
   }
