@@ -58,6 +58,12 @@ public class User extends BaseModel {
 
   @Column(name = "recovery_token")
   public String recoveryToken;
+  
+  @Column(name = "disabled")
+  public boolean disabled;
+  
+  @Column(name = "expire_date")
+  public LocalDate expireDate;
 
   @Override
   public String getLabel() {

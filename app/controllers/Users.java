@@ -9,6 +9,7 @@ import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.history.HistoryValue;
+import dao.history.UserHistoryDao;
 
 import helpers.Web;
 
@@ -51,6 +52,8 @@ public class Users extends Controller{
   private static OfficeDao officeDao;
   @Inject
   private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static UserHistoryDao historyDao;
 
   public static void index() {
     flash.keep();
@@ -190,10 +193,16 @@ public class Users extends Controller{
       index();
     }
     if (user.person == null) {
-      for (UsersRolesOffices uro : uroList) {
-        uro.delete();
-      }
-      user.delete();
+      if (historyDao.historyUser(id).isEmpty()) {
+        for (UsersRolesOffices uro : uroList) {
+          uro.delete();
+        }
+        user.delete();
+      } else {
+        flash.error(Messages.get("crud.systemDeleteError"));
+        index();
+      }      
+      
     } else {
       flash.error(Messages.get("crud.userDeleteError"));
       index();
