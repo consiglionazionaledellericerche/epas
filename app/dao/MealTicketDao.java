@@ -143,5 +143,20 @@ public class MealTicketDao extends DaoBase {
     return query.singleResult(mealTicket);
   }
 
+  /**
+   * 
+   * @return
+   */
+  public List<MealTicket> getMealTicketsMatchCodeBlock(String code) {
+    QMealTicket mealTicket = QMealTicket.mealTicket;
+
+    final JPQLQuery query = getQueryFactory()
+            .from(mealTicket)
+            .where(mealTicket.code.like("%"+code+"%"))
+            .orderBy(mealTicket.code.asc());
+
+    return query.list(mealTicket);
+    
+  }
 
 }

@@ -12,11 +12,11 @@
     <li #{if _activeAction.equals("recapMealTickets")} class="active" #{/if}>
       <a href="@{MealTickets.recapMealTickets(year, month, officeId)}">Riepilogo</a>
     </li>
-    <li #{if _activeAction.equals("returnedMealTickets")} class="active" #{/if}>
-      <a href="@{MealTickets.returnedMealTickets(officeId)}">Riconsegnati</a>
-    </li>
     <li #{if _activeAction.equals("findCodeBlock")} class="active" #{/if}>
       <a href="@{MealTickets.findCodeBlock()}">Ricerca</a>
+    </li>
+    <li #{if _activeAction.equals("returnedMealTickets")} class="active" #{/if}>
+      <a href="@{MealTickets.returnedMealTickets(officeId)}">Riconsegnati</a>
     </li>
   </ul>
 </div>

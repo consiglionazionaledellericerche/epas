@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 import com.mysema.query.SearchResults;
 
@@ -22,6 +23,7 @@ import models.UsersRolesOffices;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.collections.Lists;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -33,6 +35,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -65,6 +68,7 @@ public class Users extends Controller{
    * @param name il nome utente su cui filtrare.
    */
   public static void list(String name) {
+    
     Office office = Security.getUser().get().person.office;
     SearchResults<?> results =
         userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
@@ -78,6 +82,7 @@ public class Users extends Controller{
    * @param name il nome utente su cui filtrare.
    */
   public static void systemList(String name) {
+    
     Office office = Security.getUser().get().person.office;
     SearchResults<?> results =
         userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
@@ -129,42 +134,62 @@ public class Users extends Controller{
    * @param roles la lista di id dei ruoli da assegnare
    * @param offices la lista di id degli uffici su cui assegnare gli uro
    */
-  public static void save(@Valid User user, List<Long> roles, List<Long> offices) {
-
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-
+  public static void save(@Valid User user, List<Long> roleIds, List<Long> officeIds, 
+      boolean systemUser) {
+    
+    // Binding dei parametri e check permitted // TODO: implementare un binder più furbo
+    Set<Office> offices = Sets.newHashSet();
+    Set<Role> roles = Sets.newHashSet();
+    
+    if (officeIds != null) {
+      for (Long officeId : officeIds) {
+        Office office = officeDao.getOfficeById(officeId);
+        notFoundIfNull(office);
+        rules.checkIfPermitted(office);
+        offices.add(office);
+      }
+    }
+    if (roleIds != null) {
+      
+      for (Long roleId : roleIds) {
+        Role role = roleDao.getRoleById(roleId);
+        notFoundIfNull(role);
+        roles.add(role);
+      }
+    }
+    
+    //Validazione particolare
+    if (!Validation.hasErrors()) {
+      if (user.password.length() < 5) {
+        validation.addError("user.password", "almeno 5 caratteri");
+      }
+      if (roles.isEmpty()) {
+        validation.addError("roleIds", "Almeno un ruolo");
+      }
+      if (offices.isEmpty()) {
+        validation.addError("officeIds", "Almeno una sede");
+      }
+    }
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", user, validation.errorsMap());
       flash.error(Web.msgHasErrors());
-      render("@blank", user);
-    }
-    if (user.password.length() < 5) {
-      response.status = 400;
-      validation.addError("user.password", "almeno 5 caratteri");
-      render("@systemBlank", user);
-    }
-    if (roles == null) {
-      response.status = 400;
-      validation.addError("roles", "Almeno un ruolo");
-      render("@systemBlank", user);
-    }
+      if (systemUser)  {
+        render("@systemBlank", user, offices, roles);
+      } else {
+        render("@blank", user, offices, roles);
+      }
+    }    
     
-    if (offices == null) {
-      response.status = 400;
-      validation.addError("offices", "Almeno una sede");
-      render("@systemBlank", user);
-    }
+    // Save
     
     Codec codec = new Codec();
     user.password = codec.hexMD5(user.password);
     user.save();
-    for (long id : roles) {
-
-      Role role = roleDao.getRoleById(id);
-      for (long ide : offices) {
+    for (Role role : roles) {
+      for (Office office : offices) {
         UsersRolesOffices uro = new UsersRolesOffices();
-        Office office = officeDao.getOfficeById(ide);
         uro.user = user;
         uro.office = office;
         uro.role = role;
@@ -173,7 +198,11 @@ public class Users extends Controller{
     }   
 
     flash.success(Web.msgSaved(User.class));
-    systemList(null);
+    if (systemUser) {
+      systemList(null);
+    } else {
+      list(null);
+    }
   }
 
 
@@ -186,27 +215,24 @@ public class Users extends Controller{
     notFoundIfNull(user);
 
     rules.checkIfPermitted(Security.getUser().get().person.office);
+    
+    if (user.person != null) {
 
-    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(user);
-    if (uroList.isEmpty()) {
-      flash.error(Web.msgHasErrors());
-      index();
-    }
-    if (user.person == null) {
-      if (historyDao.historyUser(id).isEmpty()) {
-        for (UsersRolesOffices uro : uroList) {
-          uro.delete();
-        }
-        user.delete();
-      } else {
-        flash.error(Messages.get("crud.systemDeleteError"));
-        index();
-      }      
-      
-    } else {
       flash.error(Messages.get("crud.userDeleteError"));
-      index();
+      edit(id);
     }
+    
+    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(user);
+    for (UsersRolesOffices uro : uroList) {
+      uro.delete();
+    }
+    try {
+      user.delete();        
+    } catch(Exception e) {
+      flash.error("Utente non eliminabile in quando relazionato con lo storico dell'applicazione.");
+      edit(id);
+    }
+
     flash.success(Web.msgDeleted(User.class));
     index();
   }

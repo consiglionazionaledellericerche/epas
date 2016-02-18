@@ -96,7 +96,7 @@ public class MonthRecaps extends Controller {
     }
 
 
-    render(recaps, year, month);
+    render(recaps, year, month, office);
   }
 
   /**

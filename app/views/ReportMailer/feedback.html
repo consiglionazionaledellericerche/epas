@@ -9,9 +9,8 @@ ${data.note}
 <p>URL: <a href="${data.url}">${data.url}</a></p>
 
 #{if user.present}
-<p>
-Utente: ${user.get()}
-</p>
+<p>Utente: ${user.get()}</p>
+<p>Sede: ${user.get().person?.office}</p>
 #{/if}
 
 <p>User Agent:

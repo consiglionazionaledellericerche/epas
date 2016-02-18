@@ -12,8 +12,50 @@
 
   #{alert color:'warning'}
     <p><strong>Ricerca nell'elenco dei blocchi inseriti.</strong></p>
-    
-    <p>In fase di implementazione.</p>
-  #{/alert}  
+  #{/alert}
+  
+  <!-- form paginata --> 
+  #{form action:@findCodeBlock(), class:'form-horizontal', method:'GET',
+          'data-reload':'#results', autocomplete:'off'}
+   
+    #{p.text 'code', 'data-autochange':true, value:code, autofocus:true,
+            placeholder:'search'.label() /}
+  #{/form}
+  
+  <section id="results">
+  <table class="table table-hover table-bordered">
+  <tr>
+	<th>Codice</th>
+	<th>Dipendente</th>
+	<th>Sede</th>
+	<th>Amministratore</th>
+  </tr>
+    #{list items:blocks, as:'block'}
+	    <tr>
+	       <td>${block.codeBlock}</td>
+           <td>
+	         #{secure.link @personMealTickets(block.contract.person.id), 
+	            target:block.contract.person.office}
+               ${block.contract.person.fullname}
+             #{/secure.link}
+	       </td>
+	       <td>${block.contract.person.office.name}</td>
+	       <td>
+	         ${block.admin.fullname}
+	         #{if block.admin.telephone}
+	           <a href="#" popover-hover
+                  data-content="${block.admin.telephone}"><i class="fa fa-phone"></i>
+               </a>
+             #{/if}
+             #{if block.admin.email}
+	           <a href="#" popover-hover
+                  data-content="${block.admin.email}"><i class="fa fa-envelope"></i>
+               </a>
+             #{/if}  
+	       </td>
+        </tr>
+    #{/list}
+  </table>      
+  </section>
 </div>
 
