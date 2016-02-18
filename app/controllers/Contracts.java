@@ -492,24 +492,6 @@ public class Contracts extends Controller {
           .key("sourceDateResidual").message("validation.before");
     }
 
-//
-//    if (!validation.hasErrors()) {
-//      if (sourceDateResidual != null
-//          && sourceDateResidual.isBefore(wrContract.dateForInitialization())) {
-//        validation.addError("sourceDateResidual", "deve essere uguale o successiva a "
-//            + wrContract.dateForInitialization().toString(dtf));
-//      }
-//      if (sourceDateResidual != null
-//          && sourceDateResidual.isAfter(wrContract.getContractDateInterval().getEnd())) {
-//        validation.addError("sourceDateResidual",
-//            "deve essere precedente o uguale alla fine del contratto");
-//      }
-//      if (sourceDateResidual == null && contract.sourceDateResidual == null) {
-//        validation.addError("sourceDateResidual",
-//            "per definire l'inizializzazione è obbligatorio questo campo");
-//      }
-//    }
-
     if (validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
