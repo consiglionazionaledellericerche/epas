@@ -472,7 +472,8 @@ public class Contracts extends Controller {
    * @param confirmedResidual  step di conferma ricevuta.
    */
   public static void saveResidualSourceContract(@Valid final Contract contract,
-                                                @Valid final LocalDate sourceDateResidual, boolean confirmedResidual) {
+                                                @Valid @Required final LocalDate sourceDateResidual,
+                                                boolean confirmedResidual) {
 
     notFoundIfNull(contract);
 
@@ -482,26 +483,36 @@ public class Contracts extends Controller {
     IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
-    if (!validation.hasErrors()) {
-      if (sourceDateResidual != null
-          && sourceDateResidual.isBefore(wrContract.dateForInitialization())) {
-        validation.addError("sourceDateResidual", "deve essere uguale o successiva a "
-            + wrContract.dateForInitialization().toString(dtf));
-      }
-      if (sourceDateResidual != null
-          && sourceDateResidual.isAfter(wrContract.getContractDateInterval().getEnd())) {
-        validation.addError("sourceDateResidual",
-            "deve essere precedente o uguale alla fine del contratto");
-      }
-      if (sourceDateResidual == null && contract.sourceDateResidual == null) {
-        validation.addError("sourceDateResidual",
-            "per definire l'inizializzazione è obbligatorio questo campo");
-      }
+    if (sourceDateResidual != null) {
+      validation.future(sourceDateResidual.toDate(), wrContract.dateForInitialization().toDate())
+          .key("sourceDateResidual").message("validation.after");
+
+      validation.past(sourceDateResidual.toDate(),
+          wrContract.getContractDateInterval().getEnd().toDate())
+          .key("sourceDateResidual").message("validation.before");
     }
+
+//
+//    if (!validation.hasErrors()) {
+//      if (sourceDateResidual != null
+//          && sourceDateResidual.isBefore(wrContract.dateForInitialization())) {
+//        validation.addError("sourceDateResidual", "deve essere uguale o successiva a "
+//            + wrContract.dateForInitialization().toString(dtf));
+//      }
+//      if (sourceDateResidual != null
+//          && sourceDateResidual.isAfter(wrContract.getContractDateInterval().getEnd())) {
+//        validation.addError("sourceDateResidual",
+//            "deve essere precedente o uguale alla fine del contratto");
+//      }
+//      if (sourceDateResidual == null && contract.sourceDateResidual == null) {
+//        validation.addError("sourceDateResidual",
+//            "per definire l'inizializzazione è obbligatorio questo campo");
+//      }
+//    }
 
     if (validation.hasErrors()) {
       response.status = 400;
-
+      log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual);
     }
 
@@ -585,8 +596,10 @@ public class Contracts extends Controller {
     // quando richiesta.
     Preconditions.checkState(!wrContract.initializationMissing());
 
-    validation.future(sourceDateMealTicket, wrContract.dateForInitialization().toDate())
-        .message("validation.after");
+    if (sourceDateMealTicket != null) {
+      validation.future(sourceDateMealTicket.toDate(), wrContract.dateForInitialization().toDate())
+          .key("sourceDateMealTicket").message("validation.after");
+    }
 
     if (validation.hasErrors()) {
       response.status = 400;
