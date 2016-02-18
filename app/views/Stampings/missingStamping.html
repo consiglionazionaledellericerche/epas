@@ -16,8 +16,12 @@
 #{/set}
 
 <div class="container">
+  #{title title:'Controllo presenze ' + office.name /}
+</div>
 
-#{title title:'Timbrature mancanti ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+#{stampings.presenceDashboardTabs activeAction:'missingStampings' /}
+
+<div class="container">
 
       <table class="table table-hover table-striped table-bordered">
 	    <tr>
@@ -28,6 +32,12 @@
 		</tr>
 	
 	   #{list items:missingStampings, as:'personMissingStampings'}
+	   
+	   #{if !personMissingStampings.troublesNoAbsenceNoStampingsL.empty 
+	       || !personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHolidayL.empty
+	       || personMissingStampings.holidayWorkingTimeNotAccepted > 0
+	       || personMissingStampings.holidayWorkingTimeAccepted > 0 }
+	       
 	   <tr>
 		 <td>
 		   <a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">
@@ -55,7 +65,8 @@
 	        <span class="badge badge-inverse">Accettate: ${personMissingStampings.holidayWorkingTimeAccepted.toHourTime()}</span>
 	        #{/if}
 	     </td>
-	   </tr>     
+	   </tr>   
+	   #{/if}  
 	   #{/list}
 	
      </table>
