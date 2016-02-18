@@ -1,0 +1,10 @@
+*{
+ arg (required) field.name attribute
+ value (optional) default to field.value
+ label (optional) default to field.name
+}*
+#{p.edit _arg, label:_label, value:_value}
+<textarea name="${field.name}" id="${field.id}" class="form-control ${_attrs['class']}"	${
+helpers.Web.serialize(_attrs, "arg", "value", "label", "required", "class").raw()}>${_value == null ? field.value : _value
+}</textarea>
+#{/p.edit}

@@ -102,7 +102,9 @@ crud.hasErrors =Occorre correggere gli errori riportati.
 crud.modified=&{%s} modificato con successo
 crud.saved=&{%s} salvato con successo
 crud.save=Salva
+crud.ok= Ok
 crud.userDeleteError= Errore nella cancellazione. Non si può cancellare un utente fisico con la persona ancora ad esso associata.
+
 crud.systemDeleteError= Errore nella cancellazione. Non è possibile cancellare un utente di sistema che abbia informazioni storicizzate ancora associate. 
 
 csp.beginDate= Data Inizio
@@ -113,6 +115,7 @@ cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
 cwtt.workingTimeType= Tipo Orario
 
+date.modified= Data della Modifica
 dateFrom=Dal
 dateOfPatron= Data del Patrono
 dateTo=Fino Al
@@ -120,6 +123,8 @@ day= Giorno (se presente)
 deliveryDate=Consegnato il
 
 DEL= Eliminazione
+
+done.by= Effettuata da
 
 emailToContact= Indirizzo email dell&#39;amministrazione
 endContract=Data Risoluzione 
@@ -129,6 +134,10 @@ expireDate=Data Scadenza
 feedback.subject =EPAS - Segnalazione utente
 feedback.staff =Lo staff di EPAS
 
+
+history.back= Indietro
+history.type= Operazione
+
 institute.cds= Centro di spesa
 institute.code=Sigla
 institute.name=Nome
@@ -136,6 +145,7 @@ Institutes.blank=Nuovo istituto
 Institutes.delete=Elimina istituto
 invalid.time=Formato del tempo errato.
 
+includeStampingDetails= Includi dettagli timbrature
 link.denied= Permessi insufficenti
 logout= Esci
 lunchPauseEnd= Fine pausa pranzo
@@ -233,10 +243,12 @@ secure.logout=Utente correttamente disconnesso
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 
+stamping= Timbratura
 stamping.in= Timbratura di ingresso
 stamping.note= Note
 stamping.out= Timbratura di uscita
 stamping.stampType= Causale Timbratura
+stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
 stampType= Causale
 
@@ -264,8 +276,8 @@ attestatiPassword=Password Attestati
 
 views.common.false=falso
 views.common.true=vero
-views.common.yes_or_no.false=NO
-views.common.yes_or_no.true=SI
+views.common.yes_or_no.false=No
+views.common.yes_or_no.true=Si
 
 views.tags.display.date.format.allTime=%%hh:%%mm
 views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
@@ -365,6 +377,40 @@ StampTypes.REPERIBILITA= Reperibilità
 StampTypes.INTRAMOENIA= Intramoenia
 StampTypes.GUARDIA_MEDICA= Guardia Medica
 StampTypes.PAUSA_PRANZO= Pausa Pranzo
+
+# Parametri di configurazione
+
+WEB_STAMPING_ALLOWED=Autorizzazione timbratura via web
+ADDRESSES_ALLOWED=Indirizzi IP autorizzati per timbratura via web
+NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
+DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
+SEND_EMAIL=Invio email di avviso ai dipendenti
+EMAIL_TO_CONTACT=Indirizzo email segreteria
+
+EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
+MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
+MONTH_EXPIRY_RECOVERY_DAYS_49=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 4 a 9
+MAX_RECOVERY_DAYS_13=Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3
+MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9
+
+DAY_OF_PATRON=Festa del Patrono
+HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
+LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
+WORK_INTERVAL=Intervallo apertura / chiusura istituto
+
+DAYS=Ricalcoli giornalieri.
+RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
+RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
+
+configurationDto.validityYear=Anno
+configurationDto.toTheEnd=Anche Per gli anni successivi
+configurationDto.validityBegin=Validità Inizio
+configurationDto.validityEnd=Validità Fine
+
+configurationDto.booleanNewValue=Nuovo Valore
+configurationDto.stringNewValue=Nuovo Valore
+configurationDto.integerNewValue=Nuovo Valore
+configurationDto.localdateNewValue=Nuovo Valore
 
 WayType.in= Ingresso
 WayType.out= Uscita

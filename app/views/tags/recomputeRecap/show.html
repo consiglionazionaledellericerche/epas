@@ -1,0 +1,62 @@
+ *{
+    recomputeRecap: il recap delle modifiche
+ }*
+ #{if _recomputeRecap.initMissing}
+  %{ color = 'danger' }%
+ #{/if}
+ #{else}
+  %{ color = 'warning' }%
+ #{/else}
+ 
+ #{alert color:color } 
+   
+  <div class="text-dark">
+   #{if _recomputeRecap.configuration }
+	  
+	  <!-- Recap Configurazioni --> 
+	  #{if _recomputeRecap.configuration.epasParam.yearly || _recomputeRecap.configuration.epasParam.periodic }
+        #{recomputeRecap.periods periods:_recomputeRecap.periods /}
+      #{/if}
+      #{if !_recomputeRecap.configuration.epasParam.recomputationTypes.empty && _recomputeRecap.needRecomputation }
+			  <p>
+			        ePAS effettuerà il ricalcolo di tutti i dati dei dipendenti 
+		 	        dal <strong>${_recomputeRecap.recomputeFrom.format()}</strong>
+		 	        al <strong>${_recomputeRecap.recomputeTo.get().format()}</strong> 
+		 	        per un totale di <strong>${_recomputeRecap.days}</strong> giorni.
+		 	  </p>			
+	  #{/if}	
+	  #{else}
+		      <p>Per questa modifica non sono necessari ricalcoli.</p>
+	  #{/else}
+	  <!-- Fine Recap Configurazioni -->
+	 
+	 
+   #{/if}
+   
+   
+
+   #{else}
+      <!-- Recap contratti -->
+      #{recomputeRecap.periods periods:_recomputeRecap.periods /}
+	  #{if _recomputeRecap.initMissing}
+	    <p>Finchè non verrà inserita l'inizializzazione non verranno effettuati i ricalcoli.>
+	  #{/if}
+	  #{else}  
+	    #{if _recomputeRecap.needRecomputation }
+			  <p>
+			        ePAS effettuerà il ricalcolo di tutti i dati del dipendente 
+		 	        dal <strong>${_recomputeRecap.recomputeFrom.format()}</strong>
+		 	        al <strong>${_recomputeRecap.recomputeTo.get().format()}</strong> 
+		 	        per un totale di <strong>${_recomputeRecap.days}</strong> giorni.
+		 	  </p>			
+		#{/if}	
+		#{else}
+		      <p>Per questa modifica non sono necessari ricalcoli.</p>
+		#{/else} 
+	  #{/else}
+	  <!-- Fine Recap contratti -->
+   #{/else}
+  </div>
+	
+  #{/alert}
+

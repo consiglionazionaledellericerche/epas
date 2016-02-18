@@ -1,0 +1,1 @@
+<sup class="hidden-lg required text-danger fa fa-star"></sup><span class="text-danger visible-lg-inline"> (&{'required'})</span>

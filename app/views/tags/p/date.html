@@ -1,0 +1,16 @@
+*{
+ arg (required) field.name attribute
+ value (optional) default to field.value
+ label (optional) default to field.name
+ disabled (optional) default to false
+ type (optional) default to text
+}*
+#{p.edit _arg, label:_label, value:_value}
+<div class="input-group">
+    <input type="${_type == null ? 'text' : _type}" name="${field.name}" id="${field.id}" class="form-control ${_attrs['class']}"
+  	value="${(!_attrs.containsKey('value') ? field.value : _value)?.value()}"
+  	datepicker
+  	${helpers.Web.serialize(_attrs, "arg", "value", "label", "required", "inline").raw()} />
+    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+</div>
+#{/p.edit}

@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.ContractDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
@@ -14,6 +15,8 @@ import it.cnr.iit.epas.ExportToYaml;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
+import manager.ConfYearManager;
+import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.PersonDayInTroubleManager;
@@ -26,7 +29,6 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.Parameter;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.DateTime;
@@ -69,7 +71,13 @@ public class Administration extends Controller {
   @Inject
   static PersonDayManager personDayManager;
   @Inject
-  static PersonDayInTroubleManager personDayInTroubleManager;
+  private static PersonDayInTroubleManager personDayInTroubleManager;
+  @Inject
+  private static OfficeDao officeDao;
+  @Inject
+  private static ConfigurationManager configurationManager;
+  @Inject
+  private static ConfYearManager confYearManager;
 
   /**
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
@@ -164,8 +172,7 @@ public class Administration extends Controller {
     for (Person person : persons) {
 
       //Configurazione office
-      LocalDate initUse = confGeneralManager
-          .getLocalDateFieldValue(Parameter.INIT_USE_PROGRAM, person.office).orNull();
+      LocalDate initUse = person.office.getBeginDate();
 
       //Contratto attuale
       Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
