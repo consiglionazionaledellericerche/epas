@@ -1,0 +1,27 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ 
+   year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   day = session.get("daySelected");
+   personId = session.get("personSelected"); }%
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("missingStampings")} class="active" #{/if}>
+      <a href="@{Stampings.missingStamping(session.get("yearSelected"),
+         session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a>
+    </li>
+    <li #{if _activeAction.equals("dailyPresence")} class="active" #{/if}>
+      <a href="@{Stampings.dailyPresence(session.get("yearSelected"),
+         session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a>
+    </li>
+    <li #{if _activeAction.equals("showRecaps")} class="active" #{/if}>
+      <a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
+         session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a>
+    </li>
+  </ul>
+</div>
+<br>
