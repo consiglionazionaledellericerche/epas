@@ -30,11 +30,12 @@ public class MealTicketRecapBuilder {
    * @param personDays giorni da considerare
    * @param expireOrderedDesc buoni pasto ordinati per data scadenza decrescente
    * @param deliveryOrderedAsc buoni pasto ordinati per data consegna crescente
+   * @param returnedDeliveryOrderedAsc buoni pasto riconsegnati ordinati per data consegna crescente
    * @return il recap
    */
   public MealTicketRecap buildMealTicketRecap(Contract contract, DateInterval mealTicketInterval, 
-      List<PersonDay> personDays, List<MealTicket> expireOrderedDesc, 
-      List<MealTicket> deliveryOrderedAsc) {
+      List<PersonDay> personDays, List<MealTicket> expireOrderedAsc, 
+      List<MealTicket> deliveryOrderedDesc, List<MealTicket> returnedDeliveryOrderedDesc) {
 
     MealTicketRecap mealTicketRecap = new MealTicketRecap();
     
@@ -45,8 +46,9 @@ public class MealTicketRecapBuilder {
 
     mealTicketRecap.setPersonDaysMealTickets(personDays);
 
-    mealTicketRecap.setMealTicketsReceivedExpireOrderedAsc(expireOrderedDesc);
-    mealTicketRecap.setMealTicketsReceivedDeliveryOrderedDesc(deliveryOrderedAsc);
+    mealTicketRecap.setMealTicketsReceivedExpireOrderedAsc(expireOrderedAsc);
+    mealTicketRecap.setMealTicketsReceivedDeliveryOrderedDesc(deliveryOrderedDesc);
+    mealTicketRecap.setMealTicketReturnedDeliveryOrderDesc(returnedDeliveryOrderedDesc);
 
     if (contract.getSourceDateMealTicket() != null 
         && DateUtility.isDateIntoInterval(contract.getSourceDateMealTicket().plusDays(1), 

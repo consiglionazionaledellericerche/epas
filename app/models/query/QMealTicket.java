@@ -51,6 +51,8 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
 
     public final NumberPath<Integer> quarter = createNumber("quarter", Integer.class);
 
+    public final BooleanPath returned = createBoolean("returned");
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QMealTicket(String variable) {

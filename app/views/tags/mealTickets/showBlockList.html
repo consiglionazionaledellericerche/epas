@@ -1,0 +1,69 @@
+*{
+	blocks: la lista dei blocchi da visualizzare.
+	showType: delivered / returned / 
+}*
+ <table class="table center" #{if _showType.equals('delivered') } datatable-mealTicket #{/if}>
+	    <thead>
+		    <tr>
+		      <th>Codice</th>
+		      <th>Consegnato il</th>
+		      <th>Scadenza</th>
+		      *{
+		      <th>Usati</th>
+		      <th>Rimanenti</th>
+		      }*
+		      
+		      #{if _showType.equals('delivered') }
+		      <th>Riconsegna</th>
+		      <th>Elimina</th>
+		      #{/if}
+		      
+		      #{if _showType.equals('returned') }
+		      <th>Annulla Riconsegna</th>
+		      #{/if}
+		      
+		    </tr>
+	     </thead>
+	     <tbody>     
+ 	      #{list items:_blocks, as:'block'}
+		      <tr>
+		        <td>
+                  <strong>${block.codeBlock}</strong> (${block.first}-${block.last})
+		        </td> 
+		        <td data-order="${block.getDate()}">${block.getDate()?.format()}</td>
+		        <td data-order="${block.getExpireDate()}">${block.getExpireDate()?.format()}</td>
+		        *{
+		        <td>
+		          <h5 class="text-danger"><strong>${block.getConsumed()}</strong></h5>
+		        </td>
+		        <td>
+		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
+		        </td>
+		        }*
+		        
+		        #{if _showType.equals('delivered') }
+		        <td>
+                  <a class="btn btn-primary btn-xs" 
+                  href="@{MealTickets.returnPersonCodeBlock(recap.contract.id, block.codeBlock, block.first, block.last, false)}"
+                  data-async-modal="#defaultModal">Riconsegna</a>
+                </td>
+  		        <td>
+                  <a class="btn btn-danger btn-xs" 
+                  href="@{MealTickets.deletePersonCodeBlock(recap.contract.id, block.codeBlock, block.first, block.last)}"
+                  data-async-modal="#defaultModal" >Rimuovi</a>
+                </td>
+                #{/if}
+                
+                #{if _showType.equals('returned') }
+                <td>
+                  <a class="btn btn-primary btn-xs" 
+                  href="@{MealTickets.returnPersonCodeBlock(recap.contract.id, block.codeBlock, block.first, block.last, true)}"
+                  data-async-modal="#defaultModal">Annulla</a>
+                </td>
+                #{/if}
+                
+		        
+		      </tr>
+		  #{/list}  
+		  </tbody>
+      </table>
