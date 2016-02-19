@@ -32,14 +32,11 @@ import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
 
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;
@@ -51,22 +48,22 @@ import javax.inject.Inject;
 @With({Resecure.class, RequestInit.class})
 public class Contracts extends Controller {
 
-  @Inject
-  private static PersonDao personDao;
-  @Inject
-  private static WrapperModelFunctionFactory wrapperFunctionFactory;
-  @Inject
-  private static ContractManager contractManager;
-  @Inject
-  private static SecurityRules rules;
-  @Inject
-  private static ContractDao contractDao;
-  @Inject
-  private static IWrapperFactory wrapperFactory;
-  @Inject
-  private static PeriodManager periodManager;
+  private static final String dtf = "dd/MM/YYY";
 
-  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYY");
+  @Inject
+  static PersonDao personDao;
+  @Inject
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
+  @Inject
+  static ContractManager contractManager;
+  @Inject
+  static SecurityRules rules;
+  @Inject
+  static ContractDao contractDao;
+  @Inject
+  static IWrapperFactory wrapperFactory;
+  @Inject
+  static PeriodManager periodManager;
 
   /**
    * I contratti del dipendente.
@@ -85,8 +82,8 @@ public class Contracts extends Controller {
       wrCurrentContract = wrapperFactory.create(wrPerson.getCurrentContract().get());
     }
     List<IWrapperContract> contractList =
-            FluentIterable.from(contractDao.getPersonContractList(person))
-                    .transform(wrapperFunctionFactory.contract()).toList();
+        FluentIterable.from(contractDao.getPersonContractList(person))
+            .transform(wrapperFunctionFactory.contract()).toList();
 
     render(person, wrPerson, wrCurrentContract, contractList);
   }
@@ -111,22 +108,22 @@ public class Contracts extends Controller {
     boolean onCertificate = contract.onCertificate;
 
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-            onCertificate);
+        onCertificate);
   }
 
   /**
    * Aggiornamento date e on certificate contratto.
    *
-   * @param contract       contract
-   * @param beginDate  inizio
-   * @param endDate scadenza
-   * @param endContract    terminazione
-   * @param onCertificate  in attestati
-   * @param confirmed      step di conferma
+   * @param contract      contract
+   * @param beginDate     inizio
+   * @param endDate       scadenza
+   * @param endContract   terminazione
+   * @param onCertificate in attestati
+   * @param confirmed     step di conferma
    */
   public static void update(@Valid Contract contract, @Required LocalDate beginDate,
-      @Valid LocalDate endDate, @Valid LocalDate endContract,
-      boolean onCertificate, boolean confirmed) {
+                            @Valid LocalDate endDate, @Valid LocalDate endContract,
+                            boolean onCertificate, boolean confirmed) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -135,9 +132,9 @@ public class Contracts extends Controller {
 
     if (!validation.hasErrors()) {
       if (contract.sourceDateResidual != null
-              && contract.sourceDateResidual.isBefore(beginDate)) {
+          && contract.sourceDateResidual.isBefore(beginDate)) {
         validation.addError("beginDate",
-                "non può essere successiva alla data di inizializzazione");
+            "non può essere successiva alla data di inizializzazione");
       }
       if (endDate != null && endDate.isBefore(beginDate)) {
         validation.addError("endDate", "non può precedere l'inizio del contratto.");
@@ -151,14 +148,9 @@ public class Contracts extends Controller {
     }
 
     if (validation.hasErrors()) {
-
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
-
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-              onCertificate);
+          onCertificate);
     }
 
     // Salvo la situazione precedente
@@ -171,9 +163,9 @@ public class Contracts extends Controller {
     contract.onCertificate = onCertificate;
     if (!contractManager.isContractNotOverlapping(contract)) {
       validation.addError("contract.crossValidationFailed",
-              "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
+          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-              onCertificate);
+          onCertificate);
     }
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -185,7 +177,7 @@ public class Contracts extends Controller {
       confirmed = true;
       response.status = 400;
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
-              onCertificate, recomputeRecap);
+          onCertificate, recomputeRecap);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
@@ -234,7 +226,7 @@ public class Contracts extends Controller {
     if (!validation.hasErrors()) {
 
       if (contract.endDate != null
-              && contract.endDate.isBefore(contract.beginDate)) {
+          && contract.endDate.isBefore(contract.beginDate)) {
         validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
 
       } else if (!contractManager.properContractCreate(contract, wtt)) {
@@ -243,16 +235,10 @@ public class Contracts extends Controller {
           validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");
         }
       }
-
     }
 
     if (validation.hasErrors()) {
-
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
-
       render("@insert", contract, wtt);
     }
 
@@ -285,6 +271,7 @@ public class Contracts extends Controller {
 
   /**
    * Crud gestione periodi tipo orario.
+   *
    * @param id contratto
    */
   public static void updateContractWorkingTimeType(Long id) {
@@ -304,20 +291,21 @@ public class Contracts extends Controller {
 
   /**
    * Salva il nuovo periodo orario.
-   * @param cwtt nuovo periodo di orario.
+   *
+   * @param cwtt      nuovo periodo di orario.
    * @param confirmed se conferma ricevuta.
    */
   public static void saveContractWorkingTimeType(ContractWorkingTimeType cwtt, boolean confirmed) {
 
     // IMPORTANTE!!! Rimosso @Valid da cwtt e effettuata la validazione mancante a mano.
     // Perchè si comprometteva il funzionamento dell drools. Issue #166
-    
+
     notFoundIfNull(cwtt);
     notFoundIfNull(cwtt.contract);
     notFoundIfNull(cwtt.workingTimeType);
     Verify.verify(cwtt.contract.isPersistent());
     Verify.verify(cwtt.workingTimeType.isPersistent());
-    
+
     rules.checkIfPermitted(cwtt.contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
@@ -329,16 +317,13 @@ public class Contracts extends Controller {
         validation.addError("cwtt.beginDate", "deve appartenere al contratto");
       }
       if (cwtt.endDate != null && !DateUtility.isDateIntoInterval(cwtt.endDate,
-                  wrappedContract.getContractDateInterval())) {
+          wrappedContract.getContractDateInterval())) {
         validation.addError("cwtt.endDate", "deve appartenere al contratto");
       }
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
 
       render("@updateContractWorkingTimeType", cwtt, contract);
     }
@@ -376,6 +361,7 @@ public class Contracts extends Controller {
 
   /**
    * Crud gestione periodi presenza automatica.
+   *
    * @param id contratto
    */
   public static void updateContractStampProfile(Long id) {
@@ -395,7 +381,8 @@ public class Contracts extends Controller {
 
   /**
    * Salva il nuovo periodo presenza automatica.
-   * @param csp nuovo periodo di presenza automatica.
+   *
+   * @param csp       nuovo periodo di presenza automatica.
    * @param confirmed se conferma ricevuta.
    */
   public static void saveContractStampProfile(@Valid ContractStampProfile csp, boolean confirmed) {
@@ -414,16 +401,13 @@ public class Contracts extends Controller {
         validation.addError("csp.beginDate", "deve appartenere al contratto");
       }
       if (csp.endDate != null && !DateUtility.isDateIntoInterval(csp.endDate,
-                  wrappedContract.getContractDateInterval())) {
+          wrappedContract.getContractDateInterval())) {
         validation.addError("csp.endDate", "deve appartenere al contratto");
       }
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
 
       render("@updateContractStampProfile", csp, contract);
     }
@@ -483,12 +467,13 @@ public class Contracts extends Controller {
   /**
    * Salva l'inizializzazione.
    *
-   * @param contract  contract.
+   * @param contract           contract.
    * @param sourceDateResidual nuova data inizializzazione.
-   * @param confirmedResidual step di conferma ricevuta.
+   * @param confirmedResidual  step di conferma ricevuta.
    */
   public static void saveResidualSourceContract(@Valid final Contract contract,
-      @Valid final LocalDate sourceDateResidual, boolean confirmedResidual) {
+                                                @Valid @Required final LocalDate sourceDateResidual,
+                                                boolean confirmedResidual) {
 
     notFoundIfNull(contract);
 
@@ -498,29 +483,18 @@ public class Contracts extends Controller {
     IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
-    if (!validation.hasErrors()) {
-      if (sourceDateResidual != null
-          && sourceDateResidual.isBefore(wrContract.dateForInitialization())) {
-        validation.addError("sourceDateResidual", "deve essere uguale o successiva a "
-              + wrContract.dateForInitialization().toString(dtf));
-      }
-      if (sourceDateResidual != null
-          && sourceDateResidual.isAfter(wrContract.getContractDateInterval().getEnd())) {
-        validation.addError("sourceDateResidual",
-                "deve essere precedente o uguale alla fine del contratto");
-      }
-      if (sourceDateResidual == null && contract.sourceDateResidual == null) {
-        validation.addError("sourceDateResidual",
-                "per definire l'inizializzazione è obbligatorio questo campo");
-      }
+    if (sourceDateResidual != null) {
+      validation.future(sourceDateResidual.toDate(), wrContract.dateForInitialization().toDate())
+          .key("sourceDateResidual").message("validation.after");
+
+      validation.past(sourceDateResidual.toDate(),
+          wrContract.getContractDateInterval().getEnd().toDate())
+          .key("sourceDateResidual").message("validation.before");
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
-
       log.warn("validation errors: {}", validation.errorsMap());
-
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual);
     }
 
@@ -584,12 +558,13 @@ public class Contracts extends Controller {
   /**
    * Salva l'inizializzazione.
    *
-   * @param contract contract.
+   * @param contract             contract.
    * @param sourceDateMealTicket nuova data inizializzazione.
-   * @param confirmedMeal step di conferma ricevuta.
+   * @param confirmedMeal        step di conferma ricevuta.
    */
   public static void saveMealTicketSourceContract(@Valid final Contract contract,
-      @Valid @Required final LocalDate sourceDateMealTicket, boolean confirmedMeal) {
+                                                  @Valid @Required final LocalDate sourceDateMealTicket,
+                                                  boolean confirmedMeal) {
 
     notFoundIfNull(contract);
 
@@ -602,19 +577,14 @@ public class Contracts extends Controller {
     // TODO: per adesso per definire il residuo dei buoni devo avere l'inizializazione generale
     // quando richiesta.
     Preconditions.checkState(!wrContract.initializationMissing());
-    if (!validation.hasErrors()) {
-      if (sourceDateMealTicket.isBefore(wrContract.dateForInitialization())) {
-        validation.addError("sourceDateResidual", "deve essere uguale o successiva a "
-            + wrContract.dateForInitialization().toString(dtf));
-      }
+
+    if (sourceDateMealTicket != null) {
+      validation.future(sourceDateMealTicket.toDate(), wrContract.dateForInitialization().toDate())
+          .key("sourceDateMealTicket").message("validation.after");
     }
 
     if (validation.hasErrors()) {
       response.status = 400;
-      //flash.error(Web.msgHasErrors());
-
-      log.warn("validation errors: {}", validation.errorsMap());
-
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
           sourceDateMealTicket);
     }
