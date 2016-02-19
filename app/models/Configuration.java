@@ -1,10 +1,8 @@
 package models;
 
-import models.base.BaseModel;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType;
 
 import org.hibernate.envers.Audited;
 
@@ -33,7 +31,7 @@ public class Configuration extends PropertyInPeriod {
 
   @Column(name = "field_value")
   public String fieldValue;
-  
+
   @Override
   public IPropertiesInPeriodOwner getOwner() {
     return this.office;
@@ -41,7 +39,7 @@ public class Configuration extends PropertyInPeriod {
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.office = (Office)target;
+    this.office = (Office) target;
   }
 
   @Override
@@ -51,7 +49,7 @@ public class Configuration extends PropertyInPeriod {
 
   @Override
   public void setType(Object value) {
-    this.epasParam = (EpasParam)value;
+    this.epasParam = (EpasParam) value;
   }
 
   @Override
@@ -61,28 +59,27 @@ public class Configuration extends PropertyInPeriod {
 
   @Override
   public void setValue(Object value) {
-    this.fieldValue = (String)value;
+    this.fieldValue = (String) value;
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof String) {
-      if (this.getValue().equals((String)otherValue)) {
+      if (this.getValue().equals((String) otherValue)) {
         return true;
       }
     }
     return false;
   }
-  
+
   /**
-   * 
+   *
    * @return
    */
   public Object parseValue() {
     return this.epasParam.epasParamValueType
         .parseValue(this.epasParam.epasParamValueType, this.fieldValue);
   }
-  
 
 
 }

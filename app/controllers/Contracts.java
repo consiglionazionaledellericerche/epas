@@ -620,6 +620,4 @@ public class Contracts extends Controller {
 
     updateSourceContract(contract.id);
   }
-
-
 }
