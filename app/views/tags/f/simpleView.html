@@ -2,6 +2,7 @@
    biglabel (optional) più spazio per i label
    hidden: (optional) un campo hidden col valore value
    value: nel caso di localdate passare il format()
+   label: etichetta
    
 }*
 #{field _arg}
@@ -15,7 +16,9 @@
 	<input type="hidden" name="${field.name}" value="${_value}"/>
 	#{/if}
 	<div class="form-group">
-	    <label class="#{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else} control-label">&{field.name}</label>
+	    <label class="#{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else} control-label">
+	    #{if _label}&{_label} #{/if}#{else}&{field.name}#{/else}
+	    </label>
 	
 	    <div class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-6#{/else}">
 	        <p class="form-control-static">

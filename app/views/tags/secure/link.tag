@@ -14,7 +14,7 @@ fa: optional fontawesome code
 }%
 #{if check == true }
   <a href="${_arg}"#{if _class} class="${_class}"#{/if}#{if _modal} data-async-modal="${_modal}"#{/if}
-  ${helpers.Web.serialize(_attrs, "arg", "class", "fa").raw()}>
+  ${helpers.Web.serialize(_attrs, "arg", "class", "fa", "target").raw()}>
   #{if _fa}<i class="fa fa-${_fa}"></i>
   <span class="hidden-xs"> #{/if}
     #{doBody/}

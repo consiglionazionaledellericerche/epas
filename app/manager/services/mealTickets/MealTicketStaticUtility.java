@@ -2,10 +2,12 @@ package manager.services.mealTickets;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import models.Contract;
 import models.MealTicket;
 
 import java.util.List;
@@ -47,7 +49,8 @@ public class MealTicketStaticUtility {
       //Stesso blocco
       Long previous = Long.parseLong(previousMealTicket.code) + 1;
       Long actual = Long.parseLong(mealTicket.code);
-      if (previous.equals(actual) && previousMealTicket.contract.equals(mealTicket.contract)) {
+      if (previous.equals(actual) && previousMealTicket.contract.equals(mealTicket.contract) 
+          && previousMealTicket.returned == mealTicket.returned) {
         currentBlock.getMealTickets().add(mealTicket);
       } else {
         //Nuovo blocco
@@ -63,6 +66,40 @@ public class MealTicketStaticUtility {
       blockList.add(currentBlock);
     }
     return blockList;
+  }
+  
+  /**
+   * La porzione di blocco associato al contratto.
+   * @param blockMealTicketsOrdered i buoni pasto del blocco.
+   * @param contract contratto 
+   * @param first primo 
+   * @param last ultimo
+   * @return la lista
+   */
+  public static List<MealTicket> blockPortion(List<MealTicket> blockMealTicketsOrdered,
+      Contract contract, int first, int last) {
+    
+    List<MealTicket> mealTickets = Lists.newArrayList();
+    Integer codeBlock = null;
+    //Controllo di consistenza.
+    for (MealTicket mealTicket : blockMealTicketsOrdered) {
+      if (codeBlock == null) {
+        codeBlock = mealTicket.block;
+      }
+      
+      // Tutti i buoni della lista devono appartenere allo stesso blocco.
+      Preconditions.checkArgument(codeBlock.equals(mealTicket.block));
+          
+      if (mealTicket.number >= first && mealTicket.number <= last) {
+        if (!mealTicket.contract.equals(contract)) {
+          // un buono nell'intervallo non appartiene al contratto effettivo!!! 
+          //non si dovrebbe verificare.
+          throw new IllegalStateException();
+        }
+        mealTickets.add(mealTicket);
+      }
+    }
+    return mealTickets;
   }
   
 }
