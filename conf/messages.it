@@ -156,6 +156,9 @@ mealTicket.notYetAquired= Buono Pasto non ancora maturato
 mealTicket=Buono Pasto
 modifierType= Calcolo Orario
 
+block.first=Dal
+block.last=Al
+
 MOD= Modifica
 
 Month.10=Ottobre
