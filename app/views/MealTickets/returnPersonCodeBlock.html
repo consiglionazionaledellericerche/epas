@@ -1,0 +1,88 @@
+#{modalAsync title:'Gestione Blocco Buoni Pasto'}
+
+  <div>
+   #{alert color:'info'}
+     #{if !undo}
+	  <p>Tramite questa form è possibile segnalare la restituzione dei buoni pasto del blocchetto <strong>${codeBlock}</strong> (o parte di esso) 
+	  attribuito a <strong>${contract.person.fullname}</strong>.</p>
+	  <p>Utilizzare la procedura di restituzione soltanto nel caso di buoni pasto scaduti o comunque non utilizzati e rimandati alla sede centrale.</p>
+     #{/if}
+     #{else}
+       <p>Tramite questa form è possibile <strong>annullare la restituzione</strong> dei buoni pasto del blocchetto 
+       <strong>${codeBlock}</strong> (o parte di esso) attribuito a <strong>${contract.person.fullname}</strong> alla sede centrale.</p>
+       <p>I buoni pasto selezionati torneranno a disposizione del dipendente.</p>
+     #{/else} 
+   #{/alert}
+	  <div id="returnedData">
+	  #{form action:@performReturnPersonCodeBlock(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#asyncHistory',
+		    'data-async-error':'#returnedData', 'data-spinner':'#defaultSpinner'}
+	
+	  #{f.hidden 'contractId', value:contract.id /}
+	  #{f.hidden 'undo', value:undo /}
+	  
+	  #{if !confirmed }
+		  #{f.simpleView 'person', value:contract.person /} 
+		  *{ #{f.hidden 'confirmed', value:confirmed /} }*
+		  #{f.simpleView 'codeBlock', hidden:'true' /}
+		  #{f.input 'first', label:'block.first', value:block.first /}
+		  #{f.input 'last', label:'block.last', value:block.last /}
+		  <div class="container-fluid center">
+		  #{if !undo}
+		    <input class="btn btn-primary" type="submit" value="Restituisci"/>
+		  #{/if}
+		  #{else}
+		  	<input class="btn btn-primary" type="submit" value="Annulla Restituisci"/>
+		  #{/else}
+		  </div>
+	  #{/if}
+	  #{else}
+	   
+        #{f.simpleView 'person', value:contract.person /} 
+		#{f.hidden 'confirmed', value:confirmed /}
+		#{f.simpleView 'codeBlock', hidden:'true' /}
+		#{f.simpleView 'first', label:'block.first', value:first, hidden:'true' /}
+		#{f.simpleView 'last', label:'block.last', value:last, hidden:'true' /}
+	    	    
+	    #{alert color:color }
+        <div class="text-dark">
+ 		  <p><i class="fa fa-bell"></i> Confermare il comando inserito con il seguente esito.</p>
+	      <table class="table center">
+	      <thead>
+		    <tr>
+		      <th>Codice</th>
+		      <th>Consegnato il</th>
+		      <th>Scadenza</th>
+              <th>Esito</th>
+		    </tr>
+	      </thead>
+	      <tbody>     
+ 	      #{list blocks, as:'blockChanged'}
+		      <tr>
+		        <td>
+                  <strong>${blockChanged.codeBlock}</strong> </a> (${blockChanged.first}-${blockChanged.last})
+		        </td> 
+		        <td data-order="${blockChanged.getDate()}">${blockChanged.getDate()?.format()}</td>
+		        <td data-order="${blockChanged.getExpireDate()}">${blockChanged.getExpireDate()?.format()}</td>
+		        <td>
+		          #{if blockChanged.returned} <em>Restituito</em>#{/if}#{else}<em>Consegnato</em>#{/else}
+		        </td>
+		      </tr>
+		  #{/list}  
+		  </tbody>
+          </table>
+        </div>
+        #{/alert}
+      
+        #{b.buttons center:true}
+	      #{b.cancel @personMealTickets(contract.person.id) /}
+		  #{b.submit 'Conferma'/}
+	    #{/b.buttons}
+	  
+	  #{/else}
+	  
+	  #{/form}
+	  </div>
+
+</div>
+#{/modalAsync}

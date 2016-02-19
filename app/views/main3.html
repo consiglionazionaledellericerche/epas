@@ -266,16 +266,8 @@
 
     <!-- do layout -->
     #{doLayout /}
-
-    #{if flash.error}
-    <div class="sr-only" data-notify="${'notify.error'.label()}" data-notify-type="error">
-      &{flash.error}
-    </div>
-    #{/if} #{if flash.success}
-    <div class="sr-only" data-notify="${'notify.success'.label()}" data-notify-type="success">
-      &{flash.success}
-    </div>
-    #{/if}
+    
+    #{pnotify /}
 
     <div id="defaultModal" class="modal container" tabindex="-1"></div>
 

@@ -32,6 +32,7 @@ public class MealTicketRecap {
   private LocalDate dateRunOut = null;
 
   private List<PersonDay> personDaysMealTickets = Lists.newArrayList();
+  private List<MealTicket> mealTicketReturnedDeliveryOrderDesc = Lists.newArrayList();
   private List<MealTicket> mealTicketsReceivedExpireOrderedAsc = Lists.newArrayList();
   private List<MealTicket> mealTicketsReceivedDeliveryOrderedDesc = Lists.newArrayList();
   
@@ -82,5 +83,16 @@ public class MealTicketRecap {
         this.getMealTicketsReceivedDeliveryOrderedDesc(), 
         Optional.fromNullable(this.getMealTicketInterval()));
   }
+  
+  /**
+   * I blocchi riconsegnati del contratto (da quelli consegnati per ultimi).
+   * @return
+   */
+  public List<BlockMealTicket> getBlockMealTicketReturnedDeliveryDesc() {
+    return MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
+        this.getMealTicketReturnedDeliveryOrderDesc(), 
+        Optional.fromNullable(this.getMealTicketInterval()));
+  }
+  
 
 }

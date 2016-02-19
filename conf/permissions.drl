@@ -424,6 +424,8 @@ when
        
        "MealTickets.recapMealTickets",
        "MealTickets.personMealTickets",
+       "MealTickets.returnedMealTickets",
+       "MealTickets.findCodeBlock",
        
        "Stampings.holidaySituation",
        "Stampings.personHolidaySituation",	
@@ -552,7 +554,10 @@ when
      	"Persons.updateSendEmail",
      	
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket",
+     	"MealTickets.returnPersonCodeBlock",
+     	"MealTickets.performReturnPersonCodeBlock",
+        "MealTickets.deletePersonCodeBlock",
+        "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
         
         /* Vecchio permesso editPersonDay */
@@ -676,7 +681,10 @@ when
      	"Persons.updateSendEmail",
      	
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket",
+     	"MealTickets.returnPersonCodeBlock",
+     	"MealTickets.performReturnPersonCodeBlock",
+        "MealTickets.deletePersonCodeBlock",
+        "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
         
         /* Vecchio permesso editPersonDay */

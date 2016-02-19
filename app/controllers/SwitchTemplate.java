@@ -166,6 +166,10 @@ public class SwitchTemplate extends Controller {
 
       MealTickets.recapMealTickets(year, month, officeId);
     }
+    if (action.equals("MealTickets.returnedMealTickets")) {
+
+      MealTickets.returnedMealTickets(officeId, null);
+    }
 
     if (action.equals("MonthRecaps.showRecaps")) {
 

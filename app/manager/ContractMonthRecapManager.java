@@ -469,8 +469,9 @@ public class ContractMonthRecapManager {
       }
 
       //Numero ticket consegnati nel mese
-      cmr.buoniPastoConsegnatiNelMese = mealTicketDao.getMealTicketAssignedToPersonIntoInterval(
-          cmr.contract, validDataForMealTickets, MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC).size();
+      cmr.buoniPastoConsegnatiNelMese = mealTicketDao
+          .getMealTicketAssignedToPersonIntoInterval(cmr.contract, validDataForMealTickets, 
+              MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false).size();
     }
 
     //residuo
