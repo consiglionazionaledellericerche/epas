@@ -117,10 +117,12 @@ public class ContractManager {
    * Costruisce il contratto in modo sicuro e effettua il calcolo.
    *
    * @param contract contract
-   * @param wtt      il tipo orarii
+   * @param wtt      il tipo orari
+   * @param recomputation      se effettuare subito il ricalcolo della persona.
    * @return esito costruzione
    */
-  public final boolean properContractCreate(final Contract contract, final WorkingTimeType wtt) {
+  public final boolean properContractCreate(final Contract contract, final WorkingTimeType wtt, 
+      boolean recomputation) {
 
     if (!isContractCrossFieldValidationPassed(contract)) {
       return false;
@@ -156,7 +158,9 @@ public class ContractManager {
     // FIXME: comando JPA per aggiornare la person
     contract.person.contracts.add(contract);
 
-    recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
+    if (recomputation) {
+      recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
+    }
 
     return true;
 

@@ -229,7 +229,7 @@ public class Contracts extends Controller {
           && contract.endDate.isBefore(contract.beginDate)) {
         validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
 
-      } else if (!contractManager.properContractCreate(contract, wtt)) {
+      } else if (!contractManager.properContractCreate(contract, wtt, true)) {
         validation.addError("contract.beginDate", "i contratti non possono sovrapporsi.");
         if (contract.endDate != null) {
           validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");

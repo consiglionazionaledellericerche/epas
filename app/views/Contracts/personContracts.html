@@ -62,7 +62,9 @@
       <!-- Piano Ferie -->
       #{f.view 'Piano Ferie', value:wrPerson.currentVacationPeriod.get().vacationCode.description /}
       
+      *{
       #{f.view 'Presenza Automatica', value:wrPerson.currentContractStampProfile.get().fixedworkingtime /}
+      }*
       </form>
       #{alert color:'info'}
         E' possibile modificare la configurazione attuale del dipendente attraverso le funzionalità
