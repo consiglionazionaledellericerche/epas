@@ -57,6 +57,8 @@ public class MealTicketRecapBuilder {
       mealTicketRecap.setSourcedInInterval(contract.getSourceRemainingMealTicket());
     }
     
+    int sourced = mealTicketRecap.getSourcedInInterval();
+    
     //MAPPING
     //init lazy variable
     for (MealTicket mealTicket : mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc()) {
@@ -64,6 +66,13 @@ public class MealTicketRecapBuilder {
     }
     //mapping
     for (int i = 0; i < mealTicketRecap.getPersonDaysMealTickets().size(); i++) {
+      
+      // scarto i giorni sourced
+      if (sourced > 0) {
+        sourced--;
+        continue;
+      }
+      
       PersonDay currentPersonDay = mealTicketRecap.getPersonDaysMealTickets().get(i);
 
       if (mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size() == i) {
@@ -72,7 +81,7 @@ public class MealTicketRecapBuilder {
       }
 
       MealTicket currentMealTicket = mealTicketRecap
-          .getMealTicketsReceivedExpireOrderedAsc().get(i);
+          .getMealTicketsReceivedExpireOrderedAsc().get(i - mealTicketRecap.getSourcedInInterval());
 
       if (currentPersonDay.date.isAfter(currentMealTicket.expireDate)) {
         mealTicketRecap.setDateExpire(currentPersonDay.date);
