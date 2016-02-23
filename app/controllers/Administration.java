@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import dao.ContractDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
@@ -14,9 +13,6 @@ import it.cnr.iit.epas.ExportToYaml;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfGeneralManager;
-import manager.ConfYearManager;
-import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.PersonDayInTroubleManager;
@@ -25,28 +21,20 @@ import manager.SecureManager;
 
 import models.AbsenceType;
 import models.Contract;
-import models.ContractStampProfile;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
-import models.User;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.testng.collections.Sets;
 
 import play.data.validation.Required;
-import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -67,8 +55,6 @@ public class Administration extends Controller {
   @Inject
   static CompetenceUtility competenceUtility;
   @Inject
-  static ConfGeneralManager confGeneralManager;
-  @Inject
   static IWrapperFactory wrapperFactory;
   @Inject
   static ContractDao contractDao;
@@ -80,19 +66,13 @@ public class Administration extends Controller {
   static PersonDayManager personDayManager;
   @Inject
   private static PersonDayInTroubleManager personDayInTroubleManager;
-  @Inject
-  private static OfficeDao officeDao;
-  @Inject
-  private static ConfigurationManager configurationManager;
-  @Inject
-  private static ConfYearManager confYearManager;
 
-  public static void prepareDbCourse() {
-    List<Person> personList = personDao.list(Optional.<String>absent(), 
-        Sets.newHashSet(officeDao.allOffices().list()), 
-        false, LocalDate.now(),
-        LocalDate.now().minusDays(1), true).list();
-
+//  public static void prepareDbCourse() {
+//    List<Person> personList = personDao.list(Optional.<String>absent(), 
+//        Sets.newHashSet(officeDao.allOffices().list()), 
+//        false, LocalDate.now(),
+//        LocalDate.now().minusDays(1), true).list();
+//
 //    int personManteined = 0;
 //    for (Person person : personList) {
 //      boolean toRemove = false;
@@ -124,86 +104,86 @@ public class Administration extends Controller {
 //    }
 //
 //    offuscatore();
-    
-    List<User> users = User.findAll();
-    for (User user : users) {
-      Codec codec = new Codec();
-      user.password = codec.hexMD5("epas");
-      user.recoveryToken = null;
-      user.expireRecoveryToken = null;
-      user.save();
-    }
-  }
-
-  private static void offuscatore() {
-
-    BufferedReader br = null;
-    List<String> surnames = Lists.newArrayList();
-    List<String> names = Lists.newArrayList();
-    try {
-      String sCurrentLine;
-      br = new BufferedReader(new FileReader("cognomi.txt"));
-      while ((sCurrentLine = br.readLine()) != null) {
-        surnames.add(WordUtils.capitalizeFully(sCurrentLine.toLowerCase()));
-      }
-
-      br = new BufferedReader(new FileReader("nomi.txt"));
-      while ((sCurrentLine = br.readLine()) != null) {
-        names.add(WordUtils.capitalizeFully(sCurrentLine.toLowerCase()));
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (br != null)br.close();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      }
-    }
-
-    List<Person> allPerson = Person.findAll();
-    int randomNum;
-    for (Person person : allPerson) { 
-      person = Person.findById(person.id); 
-      log.info("Gestisco {}", person.fullName());
-      boolean exit = false;
-      while (!exit) {
-        try {
-
-          //nome
-          randomNum = 0 + (int)(Math.random() * names.size() -1);
-          String name = names.get(randomNum);
-          //cognome 
-          randomNum = 0 + (int)(Math.random() * surnames.size() -1);
-          String surname = surnames.get(randomNum);
-          log.info("diventa {}", name + " " + surname);
-
-
-          Person exists = Person.find("byNameAndSurname", name, surname).first();
-          if (exists != null) {
-            continue;
-          }
-          person.surname = surname;
-          person.name = name;
-          person.email = name.toLowerCase() + "." + surname.toLowerCase() + "@cnr.it";
-          person.user.username = name.toLowerCase() + "." + surname.toLowerCase();
-
-          person.save();
-          person.user.save();
-          JPA.em().flush();
-          JPA.em().clear();
-
-          exit = true;
-
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-
-    }
-
-
-  }
+//    
+//    List<User> users = User.findAll();
+//    for (User user : users) {
+//      Codec codec = new Codec();
+//      user.password = codec.hexMD5("epas");
+//      user.recoveryToken = null;
+//      user.expireRecoveryToken = null;
+//      user.save();
+//    }
+//  }
+//
+//  private static void offuscatore() {
+//
+//    BufferedReader br = null;
+//    List<String> surnames = Lists.newArrayList();
+//    List<String> names = Lists.newArrayList();
+//    try {
+//      String sCurrentLine;
+//      br = new BufferedReader(new FileReader("cognomi.txt"));
+//      while ((sCurrentLine = br.readLine()) != null) {
+//        surnames.add(WordUtils.capitalizeFully(sCurrentLine.toLowerCase()));
+//      }
+//
+//      br = new BufferedReader(new FileReader("nomi.txt"));
+//      while ((sCurrentLine = br.readLine()) != null) {
+//        names.add(WordUtils.capitalizeFully(sCurrentLine.toLowerCase()));
+//      }
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//    } finally {
+//      try {
+//        if (br != null)br.close();
+//      } catch (IOException ex) {
+//        ex.printStackTrace();
+//      }
+//    }
+//
+//    List<Person> allPerson = Person.findAll();
+//    int randomNum;
+//    for (Person person : allPerson) { 
+//      person = Person.findById(person.id); 
+//      log.info("Gestisco {}", person.fullName());
+//      boolean exit = false;
+//      while (!exit) {
+//        try {
+//
+//          //nome
+//          randomNum = 0 + (int)(Math.random() * names.size() -1);
+//          String name = names.get(randomNum);
+//          //cognome 
+//          randomNum = 0 + (int)(Math.random() * surnames.size() -1);
+//          String surname = surnames.get(randomNum);
+//          log.info("diventa {}", name + " " + surname);
+//
+//
+//          Person exists = Person.find("byNameAndSurname", name, surname).first();
+//          if (exists != null) {
+//            continue;
+//          }
+//          person.surname = surname;
+//          person.name = name;
+//          person.email = name.toLowerCase() + "." + surname.toLowerCase() + "@cnr.it";
+//          person.user.username = name.toLowerCase() + "." + surname.toLowerCase();
+//
+//          person.save();
+//          person.user.save();
+//          JPA.em().flush();
+//          JPA.em().clear();
+//
+//          exit = true;
+//
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//
+//    }
+//
+//
+//  }
 
 
   /**
