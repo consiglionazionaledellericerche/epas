@@ -2,7 +2,6 @@ package jobs;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
 import dao.OfficeDao;
@@ -10,7 +9,6 @@ import dao.PersonDao;
 import dao.UserDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +18,6 @@ import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 
 import models.Contract;
-import models.ContractStampProfile;
 import models.Office;
 import models.Person;
 import models.Qualification;
@@ -31,7 +28,6 @@ import models.WorkingTimeType;
 import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
 
-import org.apache.commons.lang.WordUtils;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -42,7 +38,6 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
-import org.testng.collections.Sets;
 
 import play.Play;
 import play.db.jpa.JPA;
@@ -50,8 +45,6 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
