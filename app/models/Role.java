@@ -47,6 +47,21 @@ public class Role extends BaseModel {
     if (name.equals(Role.TECNICAL_ADMIN)) {
       return "Amministratore Tecnico";
     }
+    if (name.equals(Role.EMPLOYEE)) {
+      return "Dipendente";
+    }
+    if (name.equals(Role.REPERIBILITY_MANAGER)) {
+      return "Gestore reperibilità";
+    }
+    if (name.equals(Role.SHIFT_MANAGER)) {
+      return "Gestore turni";
+    }
+    if (name.equals(Role.BADGE_READER)) {
+      return "Lettore di badge";
+    }
+    if (name.equals(Role.REST_CLIENT)) {
+      return "Client rest";
+    }
     return this.name;
   }
 

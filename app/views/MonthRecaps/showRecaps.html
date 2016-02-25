@@ -4,8 +4,12 @@
 
 
 <div class="container">
+  #{title title:'Controllo presenze ' + office.name /}
+</div>
 
-  #{title title:'Riepilogo mensile ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+#{stampings.presenceDashboardTabs activeAction:'showRecaps' /}
+
+<div class="container">
 
 	<table class="table table-striped table-hover" width="100%" datatable>
    <thead>

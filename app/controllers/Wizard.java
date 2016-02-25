@@ -473,7 +473,7 @@ public class Wizard extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao
         .workingTypeTypeByDescription("Normale", Optional.<Office>absent());
 
-    contractManager.properContractCreate(contract, wtt);
+    contractManager.properContractCreate(contract, wtt, true);
 
     User manager = userManager.createUser(person);
     manager.password = Codec.hexMD5(properties.getProperty("personnelAdminPassword"));

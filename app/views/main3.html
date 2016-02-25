@@ -109,70 +109,7 @@
         </ul>
         #{/if}
 
-        #{if ip.isAdministrationVisible() }
-        <ul class="nav navbar-nav">
-          #{if dropDown.equals("dropDownAdministration") }
-          <li class="dropdown active">
-            #{/if}
-            #{else}
-          <li class="dropdown">
-            #{/else}
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
-              <div class="visible-xs-inline visible-md-inline visible-lg-inline"> &{'administrations'}<span class="caret"></span></div>
-            </a>
-            <ul class="dropdown-menu">
-
-              #{if ip.viewPerson }
-              <li><a href="@{Persons.list()}">Lista Persone</a></li>
-              <li class="divider"></li>
-              #{/if}
-
-              #{if ip.viewPersonDay }
-              <li><a href="@{Stampings.personStamping(session.get("personSelected"),
-                session.get("yearSelected"),
-                session.get("monthSelected"))}">Timbrature</a></li>
-              <li><a href="@{Stampings.missingStamping(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a></li>
-              <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a></li>
-
-              *{
-              <li><a href="@{Stampings.holidaySituation(session.get(" yearSelected"))}">Presenza Festiva</a></li>
-              }*
-              <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
-                session.get("monthSelected"))}">Stampa Cartellino</a></li>
-              <li class="divider"></li>
-              <li><a href="@{Charts.indexCharts()}">Utility</a></li>
-              <li class="divider"></li>
-              <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
-              <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("officeSelected"))}">Assenze</a></li>
-              <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
-
-              <li class="divider"></li>
-              #{/if}
-
-              #{if ip.viewCompetence }
-              <li><a href="@{Competences.showCompetences(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("officeSelected"))}">Competenze</a></li>
-              <li class="divider"></li>
-              #{/if}
-
-              #{if ip.uploadSituation }
-              <li><a href="@{UploadSituation.uploadData(session.get("officeSelected"))}">Invio Attestati</a></li>
-              <li class="divider"></li>
-              #{/if}
-
-              #{if ip.viewPersonDay }
-              <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("officeSelected") )}">Gestione Buoni Pasto</a></li>
-              #{/if}
-
-            </ul>
-          </li>
-        </ul>
-        #{/if}
+        #{include './_administrationItems.html' /}
 
         #{if ip.isConfigurationVisible() }
         <ul class="nav navbar-nav">
@@ -190,7 +127,7 @@
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
               <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
               <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
-
+			        <!--<li><a href="@{Users.list()}">Gestione utenti</a></li>-->
               #{/if}
               #{if ip.viewWorkingTimeType}
 
@@ -329,16 +266,8 @@
 
     <!-- do layout -->
     #{doLayout /}
-
-    #{if flash.error}
-    <div class="sr-only" data-notify="${'notify.error'.label()}" data-notify-type="error">
-      &{flash.error}
-    </div>
-    #{/if} #{if flash.success}
-    <div class="sr-only" data-notify="${'notify.success'.label()}" data-notify-type="success">
-      &{flash.success}
-    </div>
-    #{/if}
+    
+    #{pnotify /}
 
     <div id="defaultModal" class="modal container" tabindex="-1"></div>
 

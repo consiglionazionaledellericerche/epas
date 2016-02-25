@@ -2,18 +2,70 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{set breadcrumbs:[recapMealTickets:null] /}
-
-#{breadcrumbs breadcrumbs, noHome:true, container:true /}
-
 #{mealTickets.mealTicketsTabs activeAction:'returnedMealTickets' /}
 
 <div class="container">
+  
+  #{title title:'Buoni Pasto Riconsegnati ' + office.name, administration:true /}
 
   #{alert color:'warning'}
-    <p><strong>Elenco dei buoni pasto da restituire alla sede centrale.</strong></p>
-    
-    <p>In fase di implementazione.</p>
-  #{/alert}  
+    <p>Elenco dei buoni pasto da restituire alla sede centrale per <strong>${office.name}</strong>.</p>
+  #{/alert}
+  
+    <!-- form paginata --> 
+  #{form action:@returnedMealTickets(), class:'form-horizontal', method:'GET',
+          'data-reload':'#results', autocomplete:'off'}
+          
+    #{f.hidden 'officeId', value:office.id /}
+    #{p.text 'code', 'data-autochange':true, value:code, autofocus:true,
+            placeholder:'search'.label() /}
+            
+  #{/form}
+  
+  
+  <section id="results">
+  
+  #{if blocks.empty }
+    <p>Nessuna occorrenza trovata.</p>
+  #{/if}
+  #{else}
+  <table class="table table-hover table-bordered">
+  <tr>
+	<th>Codice</th>
+	<th>Dipendente</th>
+	<th>Sede</th>
+	<th>Amministratore</th>
+  </tr>
+    #{list items:blocks, as:'block'}
+	    <tr>
+	       <td>${block.codeBlock} (${block.first}-${block.last})</td>
+           <td>
+	         #{secure.link @personMealTickets(block.contract.person.id), 
+	            target:block.contract.person.office}
+               ${block.contract.person.fullname}
+             #{/secure.link}
+	       </td>
+	       <td>${block.contract.person.office.name}</td>
+	       <td>
+	         ${block.admin.fullname}
+	         #{if block.admin.telephone}
+	           <a href="#" popover-hover
+                  data-content="${block.admin.telephone}"><i class="fa fa-phone"></i>
+               </a>
+             #{/if}
+             #{if block.admin.email}
+	           <a href="#" popover-hover
+                  data-content="${block.admin.email}"><i class="fa fa-envelope"></i>
+               </a>
+             #{/if}  
+	       </td>
+        </tr>
+    #{/list}
+  </table>  
+  #{/else}    
+  
+  </section>
 </div>
+   
+
 

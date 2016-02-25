@@ -230,6 +230,16 @@ when
 	    "BadgeSystems.joinPersonNumbers",
   		"BadgeSystems.joinOldBadgeNumbers",
   		"BadgeSystems.delete",
+  		"Users.list",
+  		"Users.systemList",
+  		"Users.blank",
+  		"Users.edit",
+  		"Users.updateInfo",
+  		"Users.updateRole",
+  		"Users.index",
+  		"Users.systemBlank",
+  		"Users.save",
+  		"Users.delete",
 	
 		"Administrators.blank",
 		"Administrators.save",
@@ -255,6 +265,17 @@ when
 	   "Administrators.blank",
 	   "Administrators.delete",
 	   "Administrators.save",
+	   
+	   "Users.list",
+	   "Users.systemList",
+	   "Users.blank",
+  	   "Users.edit",
+  	   "Users.updateInfo",
+  	   "Users.updateRole",
+  	   "Users.index",
+  	   "Users.systemBlank",
+  	   "Users.save",
+  	   "Users.delete",
 	   
 	   "BadgeReaders.save",	
 	   "BadgeReaders.edit",
@@ -403,6 +424,8 @@ when
        
        "MealTickets.recapMealTickets",
        "MealTickets.personMealTickets",
+       "MealTickets.returnedMealTickets",
+       "MealTickets.findCodeBlock",
        
        "Stampings.holidaySituation",
        "Stampings.personHolidaySituation",	
@@ -531,7 +554,10 @@ when
      	"Persons.updateSendEmail",
      	
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket",
+     	"MealTickets.returnPersonCodeBlock",
+     	"MealTickets.performReturnPersonCodeBlock",
+        "MealTickets.deletePersonCodeBlock",
+        "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
         
         /* Vecchio permesso editPersonDay */
@@ -655,7 +681,10 @@ when
      	"Persons.updateSendEmail",
      	
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket",
+     	"MealTickets.returnPersonCodeBlock",
+     	"MealTickets.performReturnPersonCodeBlock",
+        "MealTickets.deletePersonCodeBlock",
+        "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
         
         /* Vecchio permesso editPersonDay */
