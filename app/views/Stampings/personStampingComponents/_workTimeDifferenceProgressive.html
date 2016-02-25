@@ -1,0 +1,74 @@
+
+
+<td class="tempoLavoro default-single">
+   #{if dayRecap.personDay.past || dayRecap.personDay.today}
+      ${dayRecap.personDay.timeAtWork.printHourMinute()}
+      
+      <!-- info tempo lavorato (i) -->
+      #{if !dayRecap.workTimeExplanation.empty}
+	      <a href="#" popover-hover
+	         data-html="true"
+	         data-content="${(dayRecap.workTimeExplanation).escape()}"
+	         title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
+	      </a>
+      #{/if}
+
+	  <!-- marcatori -->
+      #{ifnot dayRecap.todayLunchTimeCode.equals("")}
+      <strong>${dayRecap.todayLunchTimeCode}</strong>
+      #{/ifnot}
+      #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
+      <strong>${dayRecap.fixedWorkingTimeCode}</strong>
+      #{/ifnot}
+      #{ifnot dayRecap.exitingNowCode.equals("")}
+      <strong>${dayRecap.exitingNowCode}</strong>
+      #{/ifnot}
+
+      <!-- toggle holidayWork-->
+      #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
+	      #{if dayRecap.personDay.acceptedHolidayWorkingTime }
+	      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
+	      #{/if}
+	      #{else}
+	      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
+	      #{/else}
+      #{/if}
+      
+   #{/if}
+      
+     
+
+</td>
+
+	<!-- difference -->
+	<!-- colore test cella... -->
+    #{if dayRecap.personDay.difference < 0}
+      <td class="differenza  default-single" style="color: red;">
+    #{/if}
+    #{else}
+      <td class="differenza default-single">
+    #{/else}
+    <!-- valore ... -->
+    #{if dayRecap.personDay.past || dayRecap.personDay.today}
+      ${dayRecap.personDay.difference.printHourMinute()}
+    #{/if}
+    #{else}
+      *{ ${0.printHourMinute()} }* 
+    #{/else}
+    </td>
+    
+    <!-- progressive -->
+    <!-- colore test cella... -->
+    #{if dayRecap.personDay.progressive < 0}
+    <td class="progressivo default-single" style="color: red;">
+    #{/if}
+    #{else}
+    <td class="progressivo default-single">
+    #{/else}
+    <!-- valore ... -->
+    #{if dayRecap.personDay.past || dayRecap.personDay.today}
+      ${dayRecap.personDay.progressive.printHourMinute()}
+    #{/if}
+    #{else}
+      *{ ${0.printHourMinute()} }*
+    #{/else}
