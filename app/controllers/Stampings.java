@@ -61,6 +61,7 @@ import javax.inject.Inject;
 
 
 /**
+ * Controller per la gestione delle timbrature.
  * @author alessandro
  */
 @Slf4j
@@ -115,7 +116,8 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(person.getValue(), year, month);
-
+    
+    //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = false;
     
     render("@personStamping", psDto, person, showLink);
@@ -150,12 +152,18 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
+    //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = true;
     
     render(psDto, person, showLink);
 
   }
 
+  /**
+   * Nuova timbratura inserita dall'amministratore.
+   * @param person persona
+   * @param date data
+   */
   public static void blank(@Required Person person, @Required LocalDate date) {
 
     if (!person.isPersistent()) {
@@ -169,6 +177,10 @@ public class Stampings extends Controller {
     render("@edit", person, date);
   }
 
+  /**
+   * Modifica timbratura dall'amministratore.
+   * @param stamping timbratura
+   */
   public static void edit(@Valid Stamping stamping) {
 
     if (!stamping.isPersistent()) {
@@ -186,6 +198,13 @@ public class Stampings extends Controller {
     render(stamping, person, date, historyStamping);
   }
 
+  /**
+   * Salva timbratura.
+   * @param person persona
+   * @param date data
+   * @param stamping timbratura
+   * @param time orario
+   */
   public static void save(@Required Person person, @Required LocalDate date,
                           @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
 
@@ -227,6 +246,10 @@ public class Stampings extends Controller {
 
   }
 
+  /**
+   * Elimina la timbratura.
+   * @param id timbratura
+   */
   public static void delete(Long id) {
 
     final Stamping stamping = stampingDao.getStampingById(id);
@@ -246,8 +269,13 @@ public class Stampings extends Controller {
         personDay.date.getMonthOfYear());
   }
 
+  /**
+   * L'impiegato può impostare la causale.
+   * @param stampingId timbratura
+   * @param note note
+   */
   public static void updateEmployee(Long stampingId,
-                                    @As(binder = NullStringBinder.class) String note) {
+      @As(binder = NullStringBinder.class) String note) {
 
     Stamping stamp = stampingDao.getStampingById(stampingId);
     if (stamp == null) {
@@ -278,8 +306,7 @@ public class Stampings extends Controller {
    * @param month    mese
    * @param officeId sede
    */
-  public static void missingStamping(final int year, final int month,
-                                     final Long officeId) {
+  public static void missingStamping(final int year, final int month, final Long officeId) {
 
     Set<Office> offices = secureManager
         .officesReadAllowed(Security.getUser().get());
@@ -343,7 +370,44 @@ public class Stampings extends Controller {
     
     render(daysRecap, year, month, day, numberOfInOut, showLink);
   }
+  
+  /**
+   * La presenza giornaliera del responsabile gruppo.
+   * @param year anno
+   * @param month mese
+   * @param day giorno
+   */
+  public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
+    if (!Security.getUser().get().person.isPersonInCharge) {
+      forbidden();
+    }
+
+    LocalDate date = new LocalDate(year, month, day);
+
+    User user = Security.getUser().get();
+
+    List<Person> people = user.person.people;
+    int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
+
+    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+
+    daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
+
+    //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
+    boolean showLink = false;
+    boolean groupView = true;
+    
+    render("@dailyPresence", year, month, day, numberOfInOut, showLink, daysRecap, groupView);
+
+
+
+  }
+
+  /**
+   * La presenza festiva nell'anno.
+   * @param year anno
+   */
   public static void holidaySituation(int year) {
 
     List<Person> simplePersonList = personDao.list(
@@ -358,18 +422,28 @@ public class Stampings extends Controller {
     render(personList, year);
   }
 
+  /**
+   * La presenza festiva della persona nell'anno.
+   * @param personId persona 
+   * @param year anno
+   */
   public static void personHolidaySituation(Long personId, int year) {
 
-    Person p = personDao.getPersonById(personId);
-    Preconditions.checkNotNull(p);
+    Person per = personDao.getPersonById(personId);
+    Preconditions.checkNotNull(per);
 
-    rules.checkIfPermitted(p.office);
+    rules.checkIfPermitted(per.office);
 
-    IWrapperPerson person = wrapperFactory.create(p);
+    IWrapperPerson person = wrapperFactory.create(per);
 
     render(person, year);
   }
 
+  
+  /**
+   * Abilita / disabilita l'orario festivo.
+   * @param personDayId giorno
+   */
   public static void toggleWorkingHoliday(Long personDayId) {
 
     PersonDay pd = personDayDao.getPersonDayById(personDayId);
@@ -391,40 +465,6 @@ public class Stampings extends Controller {
     Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
   }
-
-  /**
-   * La presenza giornaliera del responsabile gruppo.
-   * @param year
-   * @param month
-   * @param day
-   */
-  public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
-
-    if (!Security.getUser().get().person.isPersonInCharge) {
-      forbidden();
-    }
-
-    LocalDate date = new LocalDate(year, month, day);
-
-    User user = Security.getUser().get();
-
-    List<Person> people = user.person.people;
-    int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
-
-    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-
-    daysRecap = stampingManager
-        .populatePersonStampingDayRecapList(people, date, numberOfInOut);
-
-    boolean showLink = false;
-    boolean groupView = true;
-    
-    render("@dailyPresence", year, month, day, numberOfInOut, showLink, daysRecap, groupView);
-
-
-
-  }
-
 
 }
 
