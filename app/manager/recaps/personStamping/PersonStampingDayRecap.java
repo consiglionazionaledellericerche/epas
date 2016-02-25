@@ -200,7 +200,10 @@ public class PersonStampingDayRecap {
       return;
     }
     if (!personDay.isTicketAvailable) {
-      if (personDay.isToday() || !thereAreAllDayAbsences) {
+      if (personDay.isPast()) {
+        this.mealTicket = MEALTICKET_NO;
+      }
+      else if (personDay.isToday() || !thereAreAllDayAbsences) {
         this.mealTicket = MEALTICKET_NOT_YET;
       } else {
         this.mealTicket = MEALTICKET_NO;
