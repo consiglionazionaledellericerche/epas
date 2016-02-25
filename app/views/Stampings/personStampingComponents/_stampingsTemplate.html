@@ -10,9 +10,9 @@
     #{/elseif}
 
       #{if stampingTemplate.date!=null}
-      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping'}
-        ${stampingTemplate.hour}
-      #{/secure.link}
+	      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping', renderDisabled:renderDisabled}
+	        ${stampingTemplate.hour}
+	      #{/secure.link}
       #{/if}
       #{elseif stampingTemplate.pairPosition.equals("center")}
       <abbr title="Timbratura di servizio mancante" class="initialism"><i
@@ -34,6 +34,8 @@
       <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
     </td>
     #{/list}
+        
+    #{secure.checkAction 'Stampings.blank', target:psDto.person.office}
     <td class="inserisciTimbratura default-single">
       #{if !dayRecap.personDay.future}
       #{secure.link @Stampings.blank('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),modal:'#modalStamping'}
@@ -41,3 +43,4 @@
       #{/secure.link}
       #{/if}
     </td>
+    #{/secure.checkAction}

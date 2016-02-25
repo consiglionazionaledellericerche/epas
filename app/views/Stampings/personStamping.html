@@ -14,7 +14,6 @@
     <tr>
       <th class="group-single">Giorno</th>
       <th class="group-single">Buono<br>pasto</th>
-
       <th class="invisible"></th>
 
       <th class="group-single">Codice <br>assenza</th>
@@ -23,9 +22,11 @@
       <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
-
+      
+      #{secure.checkAction 'Stampings.blank', target:psDto.person.office}
       <th class="group-single">Inserisci<br>timbratura</th>
-
+	  #{/secure.checkAction}
+	  
       <th class="invisible"></th>
 
       <th class="group-single">Tempo<br>lavoro</th>
@@ -44,7 +45,7 @@
 	      #{if dayRecap.firstDay }F#{/if}
 	
 	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id),
-	      modal:'#modalStamping'}
+	      modal:'#modalStamping', renderDisabled:renderDisabled}
 	      ${dayRecap.personDay.date.shortDayName()}
 	      #{/secure.link}
 	
