@@ -91,16 +91,21 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     List<PersonDay> personDays = personDao.getPersonDayIntoInterval(contract.person, 
         dateInterval.get(), true);
     
-    List<MealTicket> expireOrderedDesc = mealTicketDao
+    List<MealTicket> expireOrderedAsc = mealTicketDao
         .getMealTicketAssignedToPersonIntoInterval(contract, dateInterval.get(), 
-            MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC);
+            MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false);
     
-    List<MealTicket> deliveryOrderedAsc = mealTicketDao
+    List<MealTicket> deliveryOrderedDesc = mealTicketDao
         .getMealTicketAssignedToPersonIntoInterval(contract, dateInterval.get(), 
-            MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC);
+            MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
+    
+    List<MealTicket> returnedDeliveryOrderedDesc = mealTicketDao
+        .getMealTicketAssignedToPersonIntoInterval(contract, dateInterval.get(), 
+            MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, true);
 
     return Optional.fromNullable(mealTicketRecapBuilder.buildMealTicketRecap(
-        contract, dateInterval.get(), personDays, expireOrderedDesc, deliveryOrderedAsc));
+        contract, dateInterval.get(), personDays, 
+        expireOrderedAsc, deliveryOrderedDesc, returnedDeliveryOrderedDesc));
   }
   
   /**

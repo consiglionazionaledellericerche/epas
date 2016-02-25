@@ -54,8 +54,9 @@ public class MealTicket extends BaseModel {
 
   @Required
   @Column(name = "expire_date")
-
   public LocalDate expireDate;
+  
+  public boolean returned = false;
 
   @Transient
   public Boolean used = null;

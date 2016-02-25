@@ -1,0 +1,74 @@
+#{modalAsync title:'Gestione Blocco Buoni Pasto'}
+
+<div>
+
+	  #{alert color:'danger'}
+	  <p>Tramite questa form è possibile rimuovere la consegna dei buoni pasto del blocchetto <strong>${codeBlock}</strong> (o parte di esso) 
+	  attribuita a <strong>${contract.person.fullname}</strong>.</p>
+      #{/alert}
+	  
+	  <div id="deleteData">
+	  #{form action:@performDeletePersonCodeBlock(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#asyncHistory',
+		    'data-async-error':'#deleteData', 'data-spinner':'#defaultSpinner'}
+	
+	  #{f.hidden 'contractId', value:contract.id /}
+	  
+	  #{if !confirmed }
+		  #{f.simpleView 'person', value:contract.person /} 
+		  *{ #{f.hidden 'confirmed', value:confirmed /} }*
+		  #{f.simpleView 'codeBlock', hidden:'true' /}
+		  #{f.input 'first', label:'block.first', value:block.first /}
+		  #{f.input 'last', label:'block.last', value:block.last /}
+		  <div class="container-fluid center">
+		    <input class="btn btn-danger" type="submit" value="Elimina"/>
+		  </div>
+	  #{/if}
+	  #{else}
+	   
+       
+        #{f.simpleView 'person', value:contract.person /} 
+		#{f.hidden 'confirmed', value:confirmed /}
+		#{f.simpleView 'codeBlock', hidden:'true' /}
+		#{f.simpleView 'first', label:'block.first', value:first, hidden:'true' /}
+		#{f.simpleView 'last', label:'block.last', value:last, hidden:'true' /}
+	   
+	   #{alert color:'danger' }
+       <div class="text-dark">
+         <p>Elenco dei buoni pasto attribuiti a <strong>${contract.person.fullname}</strong> da rimuovere.</p>
+ 
+	      <table class="table center">
+	      <thead>
+		    <tr>
+		      <th>Codice</th>
+		      <th>Consegnato il</th>
+		      <th>Scadenza</th>
+		    </tr>
+	      </thead>
+	      <tbody>     
+ 	      #{list blocks, as:'blockChanged'}
+		      <tr>
+		        <td>
+                  <strong>${blockChanged.codeBlock}</strong> </a> (${blockChanged.first}-${blockChanged.last})
+		        </td> 
+		        <td data-order="${blockChanged.getDate()}">${blockChanged.getDate()?.format()}</td>
+		        <td data-order="${blockChanged.getExpireDate()}">${blockChanged.getExpireDate()?.format()}</td>
+		      </tr>
+		  #{/list}  
+		  </tbody>
+      </table>
+      </div>
+      #{/alert}
+      
+      #{b.buttons center:true}
+	    #{b.cancel @personMealTickets(contract.person.id) /}
+		#{b.submit 'Conferma'/}
+	  #{/b.buttons}
+	  
+	  #{/else}
+	  
+	  #{/form}
+	  </div>
+
+</div>
+#{/modalAsync}

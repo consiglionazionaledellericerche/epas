@@ -50,6 +50,10 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final BooleanPath isWorkingInAnotherPlace = createBoolean("isWorkingInAnotherPlace");
 
+    public final NumberPath<Integer> justifiedTimeMeal = createNumber("justifiedTimeMeal", Integer.class);
+
+    public final NumberPath<Integer> justifiedTimeNoMeal = createNumber("justifiedTimeNoMeal", Integer.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -59,9 +63,13 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final ListPath<models.Stamping, QStamping> stampings = this.<models.Stamping, QStamping>createList("stampings", models.Stamping.class, QStamping.class, PathInits.DIRECT2);
 
+    public final NumberPath<Integer> stampingsTime = createNumber("stampingsTime", Integer.class);
+
     public final QStampModificationType stampModificationType;
 
     public final NumberPath<Integer> timeAtWork = createNumber("timeAtWork", Integer.class);
+
+    public final BooleanPath today = createBoolean("today");
 
     public final ListPath<models.PersonDayInTrouble, QPersonDayInTrouble> troubles = this.<models.PersonDayInTrouble, QPersonDayInTrouble>createList("troubles", models.PersonDayInTrouble.class, QPersonDayInTrouble.class, PathInits.DIRECT2);
 

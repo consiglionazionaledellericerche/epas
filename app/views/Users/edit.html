@@ -1,0 +1,68 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione utenti'  /}
+
+
+#{if user.person}
+  #{set breadcrumbs:['users':null, 'personUsers':@Users.list(), ('Gestisci '+ user.username):null] /}
+#{/if}  
+#{else}
+  #{set breadcrumbs:['users':null, 'personUsers':@Users.systemList(), ('Gestisci '+ user.username):null] /}
+#{/else}  
+
+<div class="container">
+
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Gestione ' + user.username /}
+
+#{panel title:'Informazioni', color:'primary'}
+  #{alert color:'info'}
+    <p>Informazioni relative all'utente #{if user.person} personale #{/if} #{else} di sistema #{/else}
+    <strong>${user.username}</strong>. </p>
+  #{/alert}
+		#{form action:@updateInfo(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }			
+
+		  #{f.hidden 'user.id' /}
+		  #{if user.person}			
+		    #{f.view 'user.person' /}
+		  #{/if}	
+		  #{f.input 'user.username', required:true /}
+		  #{f.input 'user.password', type:'password', required:true /}
+		  <div class="col-sm-3">
+		  </div>
+		  <div class="col-sm-6">
+		  <table class="table table-condended table-bordered">	
+		  <tr>
+		  	<th class="alert alert-info">Ruolo</th>
+    		<th class="alert alert-info">Ufficio</th>
+		  </tr>    
+	      #{list items:uroList, as:'uro'}
+	      <tr>
+	      	<td>${uro.role}</td>
+	      	<td>${uro.office}</td>
+	      </tr>
+	      #{/list}
+ 	  	  </table>
+ 	  	  #{b.buttons center:true}
+    		
+    		#{b.save /}
+    		
+    		*{ permetto di eliminare solo gli utenti di sistema }*
+    		#{if user.person == null }
+    		 #{b.delete @delete(user.id) /}
+    		#{/if}
+    		
+  		  #{/b.buttons}
+ 	  	  </div>
+ 	  	  <div class="col-sm-3">
+ 	  	  </div>
+ 	  	  
+
+		#{/form}
+#{/panel}
+
+</div>
+
+<div id="modalUpdateRole" class="modal container" tabindex="-1"></div>

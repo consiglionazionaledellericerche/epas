@@ -9,6 +9,7 @@ import play.data.validation.Required;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel
@@ -16,7 +17,7 @@ public abstract class PeriodModel extends BaseModel
 
   @Getter
   @Setter
-  @Required
+  @NotNull
   @Column(name = "begin_date")
   public LocalDate beginDate;
 

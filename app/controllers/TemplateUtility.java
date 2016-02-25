@@ -14,6 +14,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -59,6 +60,7 @@ public class TemplateUtility {
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final IWrapperFactory wrapperFactory;
   private final BadgeSystemDao badgeSystemDao;
+  private final UsersRolesOfficesDao uroDao;
 
 
   @Inject
@@ -66,7 +68,7 @@ public class TemplateUtility {
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
       QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
-      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao, UsersRolesOfficesDao uroDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -78,6 +80,7 @@ public class TemplateUtility {
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
     this.badgeSystemDao = badgeSystemDao;
+    this.uroDao = uroDao;
   }
 
 
@@ -206,6 +209,29 @@ public class TemplateUtility {
     }
     return roles;
   }
+  
+  public List<Role> allSystemRoles() {
+    List<Role> roles = Lists.newArrayList();
+    Optional<User> user = Security.getUser();
+    if (user.isPresent()) {
+      roles.add(roleDao.getRoleByName(Role.REPERIBILITY_MANAGER));
+      roles.add(roleDao.getRoleByName(Role.SHIFT_MANAGER));
+      roles.add(roleDao.getRoleByName(Role.REST_CLIENT));
+      return roles;
+    }
+    return roles;
+  }
+  
+  public List<Role> allPhysicalRoles(){
+    List<Role> roles = Lists.newArrayList();
+    Optional<User> user = Security.getUser();
+    if (user.isPresent()) {
+      roles = rolesAssignable(user.get().person.office);
+      roles.add(roleDao.getRoleByName(Role.EMPLOYEE));
+      return roles;
+    }
+    return roles;
+  }
 
   /**
    * Gli uffici che l'user può assegnare come owner ai BadgeReader. Il super admin può assegnarlo ad
@@ -296,6 +322,7 @@ public class TemplateUtility {
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
   }
+
 
   /**
    * L'istanza del wrapperFactory disponibile nei template.

@@ -5,6 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.io.Resources;
 
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.UserDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -75,6 +76,8 @@ public class Bootstrap extends Job<Void> {
   static UserDao userDao;
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static PersonDao personDao;
   @Inject
   static ConfigurationManager configurationManager;
   @Inject
@@ -162,7 +165,7 @@ public class Bootstrap extends Job<Void> {
     }
     
     migrateConfiguration();
-   
+
   }
   
   /**
@@ -307,7 +310,8 @@ public class Bootstrap extends Job<Void> {
       log.info("Migrazione configurazione {} terminata!!!", office.name);
     }
   }
-
+  
+ 
   public static class DatasetImport implements Work {
 
     private final URL url;
