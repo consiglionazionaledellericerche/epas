@@ -1,0 +1,51 @@
+ #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+    #{if stampingTemplate.colour.equals("in")}
+      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
+    #{/if}
+    #{elseif stampingTemplate.colour.equals("out")}
+      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
+    #{/elseif}
+    #{elseif stampingTemplate.colour.equals("warn")}
+      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
+    #{/elseif}
+
+      #{if stampingTemplate.date!=null}
+	      #{if showLink}
+		      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping'}
+		        ${stampingTemplate.hour}
+		      #{/secure.link}
+		  #{/if}    
+		  #{else}
+		  	  ${stampingTemplate.hour}
+		  #{/else}
+      #{/if}
+      #{elseif stampingTemplate.pairPosition.equals("center")}
+      <abbr title="Timbratura di servizio mancante" class="initialism"><i
+              class="icon-warning-sign"></i></abbr>
+      #{/elseif}
+
+      #{ifnot stampingTemplate.identifier.equals("")}
+      <strong>${stampingTemplate.identifier}</strong>
+      #{/ifnot}
+      #{ifnot stampingTemplate.markedByAdminCode.equals("")}
+      <strong>${stampingTemplate.markedByAdminCode}</strong>
+      #{/ifnot}
+      #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
+      <strong>${stampingTemplate.markedByEmployeeCode}</strong>
+      #{/ifnot}
+      #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
+      <strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+      #{/ifnot}
+      <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
+    </td>
+    #{/list}
+        
+    #{if showLink}
+    <td class="inserisciTimbratura default-single">
+      #{if !dayRecap.personDay.future}
+      #{secure.link @Stampings.blank('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),modal:'#modalStamping'}
+        +++
+      #{/secure.link}
+      #{/if}
+    </td>
+    #{/if}

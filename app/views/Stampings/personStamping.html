@@ -3,84 +3,9 @@
 #{set title: 'ePAS - Timbrature'  /}
 
 #{set 'moreStyles'}
-
-<style>
-
-  html, body {
-  background-color: white;
-  }
-
-  #page_content {
-  padding-top: 70px;
-  }
-
-  .col-xs-12, .col-sm-12, .col-md-6 {
-  padding-left: 4px;
-  padding-right: 4px;
-  }
-
-  .panel-success>.panel-heading {
-  color: black;
-  background-color: grey;
-  border-color: #dddddd;
-  }
-
-  .col-xs-10, .col-xs-2 { /* tabelle riepilogo responsive */
-  border: 1px solid lightgrey;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  }
-
-  .col-xs-2 {
-  text-align: center;
-  }
-
-  .container {
-  margin-left: 0;
-  margin-right: 0;
-  }
-  
-  /* The max width is dependant on the container (more info below) */
-  .popover{
-    max-width: 100%; /* Max Width of the popover (depending on the container!) */
-  }
-
-  #page_content {
-  widht: 100%;
-  }
-
-  @media (max-width: 767px) {
-
-  #tabellonetimbrature {
-  font-size: 10px !important;
-  /* min-width: 600px; */
-  }
-
-  #padre {
-  /* min-width: 640px; */
-  }
-
-  .container {
-  margin-left: 0px;
-  padding-left: 0px;
-  margin-right: 0px;
-  padding-right: 0px;
-
-  }
-
-  footer {
-  display: none;
-  }
-
-  #riepiloghi {
-  font-size: 12px !important;
-  }
-
-  }
-
-</style>
-
+  #{include './personStampingComponents/_personStampingStyle.html' /}
 #{/set}
+
 <div class="col-xs-12 col-lg-8">
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
@@ -88,19 +13,18 @@
     <tr>
       <th class="group-single">Giorno</th>
       <th class="group-single">Buono<br>pasto</th>
-
       <th class="invisible"></th>
 
       <th class="group-single">Codice <br>assenza</th>
-
 
       #{list items:1..psDto.numberOfInOut, as:'i'}
       <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
-
-
+      
+      #{if showLink}
       <th class="group-single">Inserisci<br>timbratura</th>
+	  #{/if}
 
       <th class="invisible"></th>
 
@@ -114,171 +38,48 @@
 
     #{list items:psDto.daysRecap, as:'dayRecap'}
 
-    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
-
-    <td class="${dayRecap.holiday ? 'festivi' : 'capitalized'} default-single">
-      #{if dayRecap.firstDay }F#{/if}
-
-      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDayId),
-      modal:'#modalStamping'}
-      ${dayRecap.date.shortDayName()}
-      #{/secure.link}
-
-    </td>
-
-    <td class="default-single">
-      #{if dayRecap.mealTicket.equals("NO")}
-      <i class="fa fa-ban" popover-hover data-content="&{'mealTicket.notAquired'}"></i>
-      #{/if}
-      #{if dayRecap.mealTicket.equals("NOT_YET")}
-      <i class="fa fa-spinner fa-spin" popover-hover data-content="&{'mealTicket.notYetAquired'}"></i>
-      #{/if}
-      #{if dayRecap.mealTicket.equals("YES")}
-      <i class="fa fa-cutlery" popover-hover data-content="&{'mealTicket.aquired'}"></i>
-      #{/if}
-    </td>
-
-    <td class="invisible"></td>
-
-    <td class="assenza default-single">
-      #{secure.link @Absences.blank(dayRecap.person.id,
-      dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
-      ___
-      #{/secure.link}
-
-      #{list items:dayRecap.absences, as:'absence'}
-
-      #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
-      ${absence.absenceType.code}
-      #{if absence.justifiedMinutes}
-      ${absence.justifiedMinutes}min
-      #{/if}
-      #{/secure.link}
-      #{if absence.absenceFile.exists()}
-      #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
-      #{/secure.link}
-      #{/if}
-
-      #{/list}
-    </td>
-
-    #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
-    #{if stampingTemplate.colour.equals("in")}
-      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
-    #{/if}
-    #{elseif stampingTemplate.colour.equals("out")}
-      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
-    #{/elseif}
-    #{elseif stampingTemplate.colour.equals("warn")}
-      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
-    #{/elseif}
-
-      #{if stampingTemplate.date!=null}
-      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping'}
-        ${stampingTemplate.hour}
-      #{/secure.link}
-      #{/if}
-      #{elseif stampingTemplate.pairPosition.equals("center")}
-      <abbr title="Timbratura di servizio mancante" class="initialism"><i
-              class="icon-warning-sign"></i></abbr>
-      #{/elseif}
-
-      #{ifnot stampingTemplate.identifier.equals("")}
-      <strong>${stampingTemplate.identifier}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.markedByAdminCode.equals("")}
-      <strong>${stampingTemplate.markedByAdminCode}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
-      <strong>${stampingTemplate.markedByEmployeeCode}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
-      <strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-      #{/ifnot}
-      <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
-    </td>
-    #{/list}
-    <td class="inserisciTimbratura default-single">
-      #{if !dayRecap.future}
-      #{secure.link @Stampings.blank('id':dayRecap.person.id,dayRecap.date.format()),modal:'#modalStamping'}
-        +++
-      #{/secure.link}
-      #{/if}
-    </td>
-
-    <td class="invisible"></td>
-
-    <td class="tempoLavoro default-single">
-
-      ${dayRecap.workTime}
-      #{if !dayRecap.workTimeExplanation.empty}
-      <a href="#" popover-hover
-         data-html="true"
-         data-content="${(dayRecap.workTimeExplanation).escape()}"
-         title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
-      </a>
-      #{/if}
-      #{else}
-
-      #{/else}
-
-
-      #{ifnot dayRecap.todayLunchTimeCode.equals("")}
-      <strong>${dayRecap.todayLunchTimeCode}</strong>
-      #{/ifnot}
-      #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
-      <strong>${dayRecap.fixedWorkingTimeCode}</strong>
-      #{/ifnot}
-      #{ifnot dayRecap.exitingNowCode.equals("")}
-      <strong>${dayRecap.exitingNowCode}</strong>
-      #{/ifnot}
-
-      <!-- toggle holidayWork-->
-      #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
-      #{if dayRecap.personDay.acceptedHolidayWorkingTime }
-      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
-      #{/if}
-      #{else}
-      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
-      #{/else}
-
-      #{/if}
-
-    </td>
-
-    #{if dayRecap.differenceNegative}
-    <td class="differenza  default-single" style="color: red;">${dayRecap.difference}</td>
-    #{/if}
-    #{else}
-    <td class="differenza default-single">&nbsp;${dayRecap.difference}</td>
-    #{/else}
-
-    #{if dayRecap.progressiveNegative}
-    <td class="progressivo default-single" style="color: red;">${dayRecap.progressive}</td>
-    #{/if}
-    #{else}
-    <td class="progressivo default-single">&nbsp;${dayRecap.progressive}</td>
-    #{/else}
-
-    <td class="default-single">
-      #{if dayRecap.wtt != null && dayRecap.wttd != null}
-        #{include './_workingTimeTypePopover.html' /}
-      #{/if}
-
-
-    </td>
-    <td class="default-single note">
-      #{if dayRecap.note.size != 0}
-
-      <a href="#" class="btn btn-small note" popover-hover
-         data-html="true"
-         data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
-         title="Info timbrature">Info</a>
-
-      #{/if}
-    </td>
-
-    </tr>
+	    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
+	
+	    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+	      #{if dayRecap.firstDay }F#{/if}
+	
+	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id),
+	      modal:'#modalStamping'}
+	      ${dayRecap.personDay.date.shortDayName()}
+	      #{/secure.link}
+	
+	    </td>
+	    
+	    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
+	
+	    <td class="invisible"></td>
+	
+	    #{include './personStampingComponents/_absencesTemplate.html' /}
+	
+	    #{include './personStampingComponents/_stampingsTemplate.html' /}
+	   
+	    <td class="invisible"></td>
+	
+	    #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
+	    
+	    <td class="default-single">
+	      #{if dayRecap.wttd.present}
+	        #{include './personStampingComponents/_workingTimeTypePopover.html' /}
+	      #{/if}
+	    </td>
+	    
+	    <td class="default-single note">
+	      #{if dayRecap.note.size != 0}
+	
+	      <a href="#" class="btn btn-small note" popover-hover
+	         data-html="true"
+	         data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
+	         title="Info timbrature">Info</a>
+	
+	      #{/if}
+	    </td>
+	
+	    </tr>
     #{/list}
   </table>
 </div>
@@ -286,12 +87,13 @@
 <div id="riepiloghi">
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
-    #{include './_alerts.html' /}
-    #{include './_contractsRecap.html' /}
+    
+    #{include './personStampingComponents/_alerts.html' /}
+    #{include './personStampingComponents/_contractsRecap.html' /}
   </div>
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
-    #{include './_notes.html' /}
+    #{include './personStampingComponents/_notes.html' /}
   </div>
 </div>
 

@@ -1,0 +1,9 @@
+      <a href="#" popover-hover
+         data-html="true"
+         data-content="${(
+	    		'Tempo Lavoro: <strong>'+dayRecap.wttd.get().workingTime+'</strong>'+
+	    		'<br>Tempo lavoro per buono pasto: <strong>'+dayRecap.wttd.get().mealTicketTime+'</strong>'+
+	    		'<br>Durata minima intervallo pranzo: <strong>'+dayRecap.wttd.get().breakTicketTime+'</strong>'+
+	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.lunchInterval+'</strong>'+' (estremi compresi)'+
+	    		'<br>Finestra apertura/chiusura sede: <strong>'+dayRecap.workInterval+'</strong>'+' (estremi compresi)').escape()}"
+         title="Info orario giornaliero">${dayRecap.wttd.get().workingTimeType.description}</a>
