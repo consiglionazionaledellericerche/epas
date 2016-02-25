@@ -156,9 +156,8 @@ public class Stampings extends Controller {
     boolean showLink = true;
     
     render(psDto, person, showLink);
-
   }
-
+  
   /**
    * Nuova timbratura inserita dall'amministratore.
    * @param person persona
@@ -463,8 +462,60 @@ public class Stampings extends Controller {
         + "Ricaricare la pagina.");
 
     Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-
   }
+  
+  public static void forceMealTicket(Long personDayId, boolean confirmed, 
+      MealTicketDecision mealTicketDecision) {
+    
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+    
+    rules.checkIfPermitted(personDay.person.office);
+    
+    if (!confirmed) {
+      confirmed = true;
+      
+      mealTicketDecision = MealTicketDecision.COMPUTED;
+          
+      if (personDay.isTicketForcedByAdmin) {
+        if (personDay.isTicketAvailable) {
+          mealTicketDecision = MealTicketDecision.FORCED_TRUE;
+        } else {
+          mealTicketDecision = MealTicketDecision.FORCED_FALSE;
+        }
+      }
+      
+      render(personDay, confirmed, mealTicketDecision);  
+    }
+    
+    if (mealTicketDecision.equals(MealTicketDecision.COMPUTED)) {
+      personDay.isTicketForcedByAdmin = false;
+    } else {
+      personDay.isTicketForcedByAdmin = true;
+      if (mealTicketDecision.equals(MealTicketDecision.FORCED_FALSE)) {
+        personDay.isTicketAvailable = false;
+      }
+      if (mealTicketDecision.equals(MealTicketDecision.FORCED_TRUE)) {
+        personDay.isTicketAvailable = true;
+      }
+    }
+    
+    personDay.save();
+    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    
+    flash.success("Buono Pasto impostato correttamente.");
+    
+    Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
+        personDay.date.getMonthOfYear());
+    
+  }
+  
+  public static enum MealTicketDecision {
+
+    COMPUTED, FORCED_TRUE, FORCED_FALSE;
+  }
+  
 
 }
 

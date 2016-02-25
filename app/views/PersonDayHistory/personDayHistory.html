@@ -1,8 +1,12 @@
-#{modalAsync id:'modalStamping', button:'Salva',
-title:('Storico modifiche timbrature e assenze') }
+#{modalAsync id:'modalStamping', title:('Gestione Del Giorno') }
 
-<div class="container-fluid">
+<div class="container-fluid" id="showDay">
 
+  %{
+  activeAction = "personDayHistory";
+  }%
+  #{include 'Stampings/_showDayTabs.html' /}
+  
   #{accordionGroup 'info'}
   #{accordionItem 'stampings', parent:'info', title:'Storico Timbrature', open:true}
   #{if historyStampingsList.empty } Non ci sono timbrature. #{/if}

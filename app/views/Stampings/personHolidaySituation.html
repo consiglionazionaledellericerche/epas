@@ -1,7 +1,9 @@
 #{extends 'modal.html' /}
 #{set modalHeader: 'Presenze festive ' + person.value.surname + ' ' + person.value.name + ' anno ' + year /}
 
-<div class="container-fluid center">
+
+
+<div class="container-fluid center" id="showDay">
   #{if person.totalHolidayWorkingTime(year) > 0}
   	  <p>
         <strong>Presenza festiva: </strong><span class="label label-warning"> ${person.totalHolidayWorkingTime(year).toHourTime()}</span>
