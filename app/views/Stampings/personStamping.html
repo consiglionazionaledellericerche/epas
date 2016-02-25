@@ -3,10 +3,9 @@
 #{set title: 'ePAS - Timbrature'  /}
 
 #{set 'moreStyles'}
-
-#{include './personStampingComponents/_personStampingStyle.html' /}
-
+  #{include './personStampingComponents/_personStampingStyle.html' /}
 #{/set}
+
 <div class="col-xs-12 col-lg-8">
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
@@ -23,10 +22,10 @@
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
       
-      #{secure.checkAction 'Stampings.blank', target:psDto.person.office}
+      #{if showLink}
       <th class="group-single">Inserisci<br>timbratura</th>
-	  #{/secure.checkAction}
-	  
+	  #{/if}
+
       <th class="invisible"></th>
 
       <th class="group-single">Tempo<br>lavoro</th>
@@ -45,7 +44,7 @@
 	      #{if dayRecap.firstDay }F#{/if}
 	
 	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id),
-	      modal:'#modalStamping', renderDisabled:renderDisabled}
+	      modal:'#modalStamping'}
 	      ${dayRecap.personDay.date.shortDayName()}
 	      #{/secure.link}
 	

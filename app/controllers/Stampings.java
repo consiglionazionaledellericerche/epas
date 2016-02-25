@@ -116,9 +116,9 @@ public class Stampings extends Controller {
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(person.getValue(), year, month);
 
-    boolean renderDisabled = true;
+    boolean showLink = false;
     
-    render("@personStamping", psDto, renderDisabled);
+    render("@personStamping", psDto, person, showLink);
   }
 
 
@@ -150,9 +150,9 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
-    boolean renderDisabled = false;
+    boolean showLink = true;
     
-    render(psDto, renderDisabled);
+    render(psDto, person, showLink);
 
   }
 
@@ -321,11 +321,6 @@ public class Stampings extends Controller {
   public static void dailyPresence(final Integer year, final Integer month,
                                    final Integer day, final Long officeId) {
 
-    Set<Office> offices = secureManager
-        .officesReadAllowed(Security.getUser().get());
-    if (offices.isEmpty()) {
-      forbidden();
-    }
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -344,7 +339,9 @@ public class Stampings extends Controller {
     daysRecap = stampingManager.populatePersonStampingDayRecapList(
         activePersonsInDay, date, numberOfInOut);
 
-    render(daysRecap, year, month, day, numberOfInOut, office, offices);
+    boolean showLink = false;
+    
+    render(daysRecap, year, month, day, numberOfInOut, showLink);
   }
 
   public static void holidaySituation(int year) {
@@ -395,6 +392,12 @@ public class Stampings extends Controller {
 
   }
 
+  /**
+   * La presenza giornaliera del responsabile gruppo.
+   * @param year
+   * @param month
+   * @param day
+   */
   public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
     if (!Security.getUser().get().person.isPersonInCharge) {
@@ -413,7 +416,11 @@ public class Stampings extends Controller {
     daysRecap = stampingManager
         .populatePersonStampingDayRecapList(people, date, numberOfInOut);
 
-    render(daysRecap, year, month, day, numberOfInOut);
+    boolean showLink = false;
+    boolean groupView = true;
+    
+    render("@dailyPresence", year, month, day, numberOfInOut, showLink, daysRecap, groupView);
+
 
 
   }

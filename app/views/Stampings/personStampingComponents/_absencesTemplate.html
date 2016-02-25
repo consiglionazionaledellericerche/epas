@@ -1,23 +1,34 @@
 <td class="assenza default-single">
-  #{secure.checkAction 'Stampings.blank', target:psDto.person.office}
+  #{if showLink}
+  #{secure.checkAction 'Stampings.blank', target:person.office}
       #{secure.link @Absences.blank(dayRecap.personDay.person.id,
       dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
       ___
       #{/secure.link}
   #{/secure.checkAction}
-      #{list items:dayRecap.personDay.absences, as:'absence'}
-
-	      #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
-		      ${absence.absenceType.code}
-		      #{if absence.justifiedMinutes}
-		      ${absence.justifiedMinutes}min
-		      #{/if}
-	      #{/secure.link}
-	      
-	      #{if absence.absenceFile.exists()}
-		      #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
-		      #{/secure.link}
+  #{/if}
+  
+  #{list items:dayRecap.personDay.absences, as:'absence'}
+  
+    #{if showLink}
+	     #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
+	      ${absence.absenceType.code}
+	      #{if absence.justifiedMinutes}
+	      ${absence.justifiedMinutes}min
 	      #{/if}
+	     #{/secure.link}
+	     
+	     #{if absence.absenceFile.exists()}
+	      #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
+	      #{/secure.link}
+	     #{/if}
+    #{/if}
+    #{else}
+      ${absence.absenceType.code}
+	  #{if absence.justifiedMinutes}
+	    ${absence.justifiedMinutes}min
+	  #{/if}
+    #{/else} 
 
-      #{/list}
-    </td>
+  #{/list}
+</td>

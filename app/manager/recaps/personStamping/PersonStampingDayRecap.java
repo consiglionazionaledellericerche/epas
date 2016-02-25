@@ -209,8 +209,7 @@ public class PersonStampingDayRecap {
         this.mealTicket = MEALTICKET_NO;
       }
     }
-      
-    
+
   }
 
   /**

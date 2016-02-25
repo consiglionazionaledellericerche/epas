@@ -23,15 +23,18 @@
       #{ifnot dayRecap.exitingNowCode.equals("")}
       <strong>${dayRecap.exitingNowCode}</strong>
       #{/ifnot}
-
+	  
+	  	
       <!-- toggle holidayWork-->
-      #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
-	      #{if dayRecap.personDay.acceptedHolidayWorkingTime }
-	      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
+      #{if showLink}
+	      #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
+		      #{if dayRecap.personDay.acceptedHolidayWorkingTime }
+		      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
+		      #{/if}
+		      #{else}
+		      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
+		      #{/else}
 	      #{/if}
-	      #{else}
-	      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
-	      #{/else}
       #{/if}
       
    #{/if}
