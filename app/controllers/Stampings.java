@@ -116,7 +116,9 @@ public class Stampings extends Controller {
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(person.getValue(), year, month);
 
-    render(psDto);
+    boolean renderDisabled = true;
+    
+    render("@personStamping", psDto, renderDisabled);
   }
 
 
@@ -148,7 +150,9 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
 
-    render(psDto);
+    boolean renderDisabled = false;
+    
+    render(psDto, renderDisabled);
 
   }
 

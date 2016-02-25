@@ -1,9 +1,10 @@
 <td class="assenza default-single">
+  #{secure.checkAction 'Stampings.blank', target:psDto.person.office}
       #{secure.link @Absences.blank(dayRecap.personDay.person.id,
       dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
       ___
       #{/secure.link}
-
+  #{/secure.checkAction}
       #{list items:dayRecap.personDay.absences, as:'absence'}
 
 	      #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
