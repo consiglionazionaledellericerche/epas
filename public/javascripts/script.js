@@ -1,29 +1,94 @@
 /* Author:
  */
 $(function($) {
-  /**
-   * Author: Marco
-   * form ajax attivate con l'attributo data-async:
-   *   data-async deve contenere il target per le risposte di successo;
-   *   data-async-error deve contenere il target per gli errori.
-   */
-  $(document.body).on('submit', 'form[data-async]', function(e) {
-    var $form = $(this);
-    var target = $form.data('async');
-    var errorTarget = $form.data('async-error');
-    var $target = $(target);
-    //patch per multipart (blob)
-    var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
-    var formData = $form.serialize();
-    if ($form.attr('enctype') === 'multipart/form-data') {
-      contentType = false;
-      formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449
-    }
-    
-    var spinner = $form.data('spinner');
-    var $spinner = $(spinner);
-    $spinner.removeClass('hidden');
-    $spinner.addClass('visible');
+	
+	/**
+	 * Opposto di serialize(). Dall'url ai form params.
+	 */
+	$.queryParams = function(url) {
+		if (url.indexOf('#') !== -1) {
+			url = url.substring(0, url.indexOf('#'));
+		}
+		return (function(a) {
+			if (a == "") return {};
+			var b = {};
+			for (var i = 0; i < a.length; ++i) {
+				var p=a[i].split('=');
+				if (p.length != 2) continue;
+				b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+			}
+			return b;
+		})(url.substring(url.indexOf('?') +1).split('&'));
+	};
+	
+	/**
+	 * Author: Alessandro
+	 * Se si vuole utilizzare il caricamento async da <a> anzichè <form>.
+	 * Aggiungere all'ancora l'attributo data-async="#divTarget" ed eventualmente il data-spinner.
+	 * TODO: implementare async-error
+	 */
+	$(document.body).on('click', 'a[data-async]', function(e) {
+		var $a = $(this);
+		var target = $a.data('async');
+		var $target = $(target);
+		var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+		var url = $a.attr('href')
+		var formData = $.queryParams(url);
+
+		var spinner = $a.data('spinner');
+		var $spinner = $(spinner);
+		$spinner.removeClass('hidden');
+		$spinner.addClass('visible');
+		
+		url = url.substring(0, url.indexOf('?'));
+		method = 'post';
+
+		// TODO: chiamata ajax simile alla versione form. 
+		$.ajax({
+			type: method,
+			url: url,
+			data: formData,
+			contentType: contentType
+		}).done(function(data, status) {
+			$target.replaceWith($(target, data));
+			$target.initepas();
+		}).fail(function(xhr, status, error) {
+			if (xhr.status == 400) {
+				var $res = $(errorTarget, xhr.responseText);
+				var $etarget = errorTarget ? $(errorTarget) : $form;
+				$etarget.html($res.html()).parent().initepas();
+			} else {
+				//bootbox.alert('Si è verificato un errore: '+ error);
+			} // else segnala l'errore in qualche modo.
+		}).always(function() {
+			$spinner.removeClass('visible');
+			$spinner.addClass('hidden');
+		});
+		e.preventDefault();
+	});
+	/**
+	 * Author: Marco
+	 * form ajax attivate con l'attributo data-async:
+	 *   data-async deve contenere il target per le risposte di successo;
+	 *   data-async-error deve contenere il target per gli errori.
+	 */
+	$(document.body).on('submit', 'form[data-async]', function(e) {
+		var $form = $(this);
+		var target = $form.data('async');
+		var errorTarget = $form.data('async-error');
+		var $target = $(target);
+		//patch per multipart (blob)
+		var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+		var formData = $form.serialize();
+		if ($form.attr('enctype') === 'multipart/form-data') {
+			contentType = false;
+			formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449
+		}
+
+		var spinner = $form.data('spinner');
+		var $spinner = $(spinner);
+		$spinner.removeClass('hidden');
+		$spinner.addClass('visible');
     //        $form.find(':input').prop("readonly", true);
     //        var bgcolor = $form.css('background-color');
     //        $form.css('backround-color', '#e0e0e0');

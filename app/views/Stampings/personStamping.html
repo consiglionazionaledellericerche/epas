@@ -39,15 +39,18 @@
     #{list items:psDto.daysRecap, as:'dayRecap'}
 
 	    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
-	
+	    
 	    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+	    #{if showLink}
 	      #{if dayRecap.firstDay }F#{/if}
-	
 	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id),
 	      modal:'#modalStamping'}
 	      ${dayRecap.personDay.date.shortDayName()}
 	      #{/secure.link}
-	
+	    #{/if}
+	    #{else}
+	      ${dayRecap.personDay.date.shortDayName()}
+	    #{/else}
 	    </td>
 	    
 	    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
