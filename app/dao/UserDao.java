@@ -151,6 +151,7 @@ public class UserDao extends DaoBase {
     } else {
       condition.and(person.user.isNull());
       condition.and(user.username.notIn("admin", "developer"));
+      
       if (userLogged.person != null) {
         condition.and(user.owner.eq(userLogged.person.office));
       }      
