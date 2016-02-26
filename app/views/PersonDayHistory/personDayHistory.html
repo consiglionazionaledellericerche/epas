@@ -1,10 +1,12 @@
 #{modalAsync id:'modalStamping', title:('Gestione Del Giorno') }
 
 <div class="container-fluid" id="showDay">
-
+  
+  
   %{
   activeAction = "personDayHistory";
   }%
+  
   #{include 'Stampings/_showDayTabs.html' /}
   
   #{accordionGroup 'info'}
