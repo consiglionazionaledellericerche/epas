@@ -14,10 +14,13 @@ import play.data.validation.Unique;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -64,6 +67,12 @@ public class User extends BaseModel {
   
   @Column(name = "expire_date")
   public LocalDate expireDate;
+  
+  @Nullable
+  @ManyToOne
+  @JoinColumn(name = "office_owner_id")
+  public Office owner;
+
 
   @Override
   public String getLabel() {

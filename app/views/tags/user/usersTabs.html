@@ -14,6 +14,9 @@
     <li #{if _activeAction.equals("systemList")} class="active" #{/if}>
       <a href="@{Users.systemList()}">Utenti di sistema</a>
     </li>
+    <li #{if _activeAction.equals("disabledList")} class="active" #{/if}>
+      <a href="@{Users.disabledList()}">Utenti disabilitati</a>
+    </li>
     
   </ul>
 </div>
