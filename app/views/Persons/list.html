@@ -39,7 +39,7 @@
       <th>&{'person.currentWorkingTimeType'}</th>
       <th>&{'person.currentVacationPeriod'}</th>
       <th>&{'person.qualification'}</th>
-      <th>&{'contractStampProfile.fixedworkingtime'}</th>
+      <th>&{'office'}</th>
       <th>&{'person.wantEmail'}</th>
       #{if switchUser}
       <th></th>
@@ -83,10 +83,7 @@
       <td><font color="#000000">${person.value.getQualification() != null ?
         person.value.getQualification().qualification : ''}</font></td>
       <td>
-        #{if person.currentContractStampProfile.present &&
-        person.currentContractStampProfile.get().fixedworkingtime}
-        <i class="fa fa-check-square-o"></i>
-        #{/if}
+        ${person.value.office.name}
       </td>
 
       <!-- Invio email -->

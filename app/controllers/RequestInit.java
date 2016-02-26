@@ -501,6 +501,12 @@ public class RequestInit extends Controller {
         renderArgs.put("switchOffice", true);
         return "MealTickets.recapMealTickets";
       }
+      if (action.equals("MealTickets.returnedMealTickets")) {
+
+        renderArgs.put("dropDown", "dropDownAdministration");
+        renderArgs.put("switchOffice", true);
+        return "MealTickets.returnedMealTickets";
+      }
     }
     
     if (action.startsWith("Configurations.")) {

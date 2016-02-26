@@ -158,9 +158,18 @@ lunchPauseStart= Inizio pausa pranzo
 
 mealTicket.aquired= Buono Pasto maturato
 mealTicket.notAquired= Buono Pasto non maturato
+mealTicket.forcedAquired= Buono Pasto maturato (forzato dall'amministratore)
+mealTicket.forcedNotAquired= Buono Pasto non maturato (forzato dall'amministratore)
 mealTicket.notYetAquired= Buono Pasto non ancora maturato
 mealTicket=Buono Pasto
 modifierType= Calcolo Orario
+
+MealTicketDecision.COMPUTED=Calcolato
+MealTicketDecision.FORCED_TRUE=Forzato Si
+MealTicketDecision.FORCED_FALSE=Forzato No
+
+block.first=Dal
+block.last=Al
 
 MOD= Modifica
 

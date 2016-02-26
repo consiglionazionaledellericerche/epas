@@ -428,6 +428,8 @@ when
        
        "MealTickets.recapMealTickets",
        "MealTickets.personMealTickets",
+       "MealTickets.returnedMealTickets",
+       "MealTickets.findCodeBlock",
        
        "Stampings.holidaySituation",
        "Stampings.personHolidaySituation",	
@@ -556,7 +558,10 @@ when
      	"Persons.updateSendEmail",
      	
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket",
+     	"MealTickets.returnPersonCodeBlock",
+     	"MealTickets.performReturnPersonCodeBlock",
+        "MealTickets.deletePersonCodeBlock",
+        "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
         
         /* Vecchio permesso editPersonDay */
@@ -572,6 +577,7 @@ when
      	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
+     	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",
@@ -680,7 +686,10 @@ when
      	"Persons.updateSendEmail",
      	
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket",
+     	"MealTickets.returnPersonCodeBlock",
+     	"MealTickets.performReturnPersonCodeBlock",
+        "MealTickets.deletePersonCodeBlock",
+        "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
         
         /* Vecchio permesso editPersonDay */
@@ -696,6 +705,7 @@ when
      	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
+     	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",
