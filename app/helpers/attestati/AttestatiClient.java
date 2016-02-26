@@ -543,6 +543,9 @@ public class AttestatiClient {
 
     for (Dipendente dipendente : dipendenti) {
 
+      if (dipendente.getMatricola() == null || dipendente.getMatricola().isEmpty()) {
+        continue;
+      }
       Person person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
 
       //Ore formazione

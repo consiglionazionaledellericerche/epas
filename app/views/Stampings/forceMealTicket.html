@@ -1,0 +1,48 @@
+#{modalAsync id:'modalStamping', title:('Gestione Del Giorno') }
+ 
+ 
+ <div class="container-fluid" id="showDay">
+ 
+ %{
+ activeAction = "forceMealTicket";
+ }%
+ 
+ #{include './_showDayTabs.html' /}
+ 
+ #{alert color:'info'}
+   <p>Per il giorno <strong>${personDay.date.format()}</strong> il dipendente 
+   
+   #{if !personDay.isTicketForcedByAdmin}
+     ha il buono pasto impostato a <strong><em>Calcolato</em></strong> con valore <strong>${personDay.isTicketAvailable.label()}</strong>.
+   #{/if}
+   </p>
+   <p>Tramite questa form è possibile selezionare una fra le seguenti possibilità:</p>
+   <ul>
+     <li><strong><em>Calcolato</em></strong>: il buono pasto viene calcolato da ePAS.</li>
+     <li><strong><em>Forzato Si</em></strong>: viene forzata l'attribuzione del buono pasto.</li>
+     <li><strong><em>Forzato No</em></strong>: viene forzata la <em>non</em> attribuzione del buono pasto.</li>
+   </ul>
+      
+ #{/alert}
+ 
+ <div class="container">
+  #{form action:@forceMealTicket(), method:'POST', autocomplete:false, class:'form form-horizontal' }
+    
+    #{f.hidden 'personDayId', value:personDay.id /}
+    
+    #{f.hidden 'confirmed', value:confirmed /}
+	
+	#{f.selectEnum 'mealTicketDecision', items:controllers.Stampings.MealTicketDecision, 
+		value:mealTicketDecision, byEquals:true /}
+	
+	    
+    #{b.buttons center:true} 
+      #{b.submit 'Aggiorna'/}
+    #{/b.buttons}
+  #{/form}
+   
+ </div>
+
+</div>
+
+#{/modalAsync}

@@ -40,10 +40,12 @@ import net.sf.oval.constraint.MinLength;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.i18n.Messages;
 import play.libs.Codec;
@@ -149,7 +151,7 @@ public class Persons extends Controller {
     WorkingTimeType wtt =
         workingTimeTypeDao.workingTypeTypeByDescription("Normale", Optional.<Office>absent());
 
-    if (!contractManager.properContractCreate(contract, wtt)) {
+    if (!contractManager.properContractCreate(contract, wtt, false)) {
       flash.error(
           "Errore durante la creazione del contratto. " + "Assicurarsi di inserire date valide.");
       params.flash(); // add http parameters to the flash scope
@@ -162,7 +164,17 @@ public class Persons extends Controller {
     emailManager.newUserMail(person);
 
     log.info("Creata nuova persona: id[{}] - {}", person.id, person.fullName());
+    
+    JPA.em().flush();
+    JPA.em().clear();
+    
+    //La ricomputazione nel caso di creazione persona viene fatta alla fine.
+    person = personDao.getPersonById(person.id);
+    person.createdAt = LocalDateTime.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    person.save();
 
+    contractManager.recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
+    
     flash.success("Persona inserita correttamente in anagrafica - %s", person.fullName());
 
     list(null);

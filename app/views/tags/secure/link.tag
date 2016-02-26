@@ -14,7 +14,7 @@ fa: optional fontawesome code
 }%
 #{if check == true }
   <a href="${_arg}"#{if _class} class="${_class}"#{/if}#{if _modal} data-async-modal="${_modal}"#{/if}
-  ${helpers.Web.serialize(_attrs, "arg", "class", "fa").raw()}>
+  ${helpers.Web.serialize(_attrs, "arg", "class", "fa", "target").raw()}>
   #{if _fa}<i class="fa fa-${_fa}"></i>
   <span class="hidden-xs"> #{/if}
     #{doBody/}
@@ -22,9 +22,9 @@ fa: optional fontawesome code
   </a>
 #{/if}
 #{else}
-  <span notAllowed data-original-title="&{'link.denied'}">
-  #{if _fa}<i class="fa fa-${_fa}"></i>
-  <span class="hidden-xs"> #{/if}
-   #{doBody/}
-  </span>
+	  <span notAllowed data-original-title="&{'link.denied'}">
+	  #{if _fa}<i class="fa fa-${_fa}"></i>
+	  <span class="hidden-xs"> #{/if}
+	   #{doBody/}
+	  </span>
 #{/else}

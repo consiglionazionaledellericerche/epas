@@ -3,92 +3,45 @@
 #{set title: 'ePAS - Presenza Giornaliera'  /}
 
 <div class="container">
-  #{title title:'Controllo presenze ' + office.name /}
+  #{title title:'Controllo presenze' /}
 </div>
 
-#{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
+#{if !groupView}
+	#{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
+#{/if}
 
 <div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
 	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
 	      <tr>
-			<th>Nome</th>
-			<th>Assenza</th>
-			<th>Tempo Lavoro</th>
+			<th class="group-single">Nome</th>
+			<th class="group-single">Assenza</th>
+			<th class="group-single">Tempo<br>Lavoro</th>
 			#{list items:1..numberOfInOut, as:'i'}
-				<th>${i}° entrata</th>
-				<th>${i}° uscita</th>
+				<th class="group-left">${i}° entrata</th>
+				<th class="group-right">${i}° uscita</th>
 			#{/list}
-			<th>Buono Mensa</th>
+			<th class="group-single">Buono<br>Mensa</th>
 		  </tr>
 	
-	
+	    
+	    
 		#{list items:daysRecap, as:'dayRecap'}
+		%{
+		  person = dayRecap.personDay.person;
+		  link = false;
+		}%
 		<tr>
-			<td class="warning"><a href="@{Stampings.personStamping(dayRecap.person.id,year,month)}">${dayRecap.person.name} ${dayRecap.person.surname}</a></td>
-			
-			<td>
-			  #{list items:dayRecap.absences, as:'absence'}
-			      ${absence.absenceType.code}
-			  #{/list}	
+			<td class="default-single"">
+			<a href="@{Stampings.personStamping(dayRecap.personDay.person.id,year,month)}">${dayRecap.personDay.person.fullname}</a>
 			</td>
 			
-			<td class="tempoLavoro">
-			  ${dayRecap.workTime}
-			  #{ifnot dayRecap.todayLunchTimeCode.equals("")}
-			    <strong>${dayRecap.todayLunchTimeCode}</strong>
-			  #{/ifnot}
-			  #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
-			  	<strong>${dayRecap.fixedWorkingTimeCode}</strong>
-			  #{/ifnot}	
-			  #{ifnot dayRecap.exitingNowCode.equals("")}
-			    <strong>${dayRecap.exitingNowCode}</strong>
-			  #{/ifnot}
-			</td>	
+			#{include './personStampingComponents/_absencesTemplate.html' /}
 			
+			<td class="default-single">${dayRecap.personDay.timeAtWork.printHourMinute()}</td>
 			
-			#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
-			  #{if stampingTemplate.colour.equals("in")}
-				<td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} ">
-			  #{/if}
-			  #{elseif stampingTemplate.colour.equals("out")}
-			    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} ">
-			  #{/elseif}
-			  #{elseif stampingTemplate.colour.equals("warn")}
-			    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
-		      #{/elseif}
-						
-			  #{if stampingTemplate.date!=null}
-			  	  ${stampingTemplate.hour}
-			  #{/if}
-			  #{elseif stampingTemplate.pairPosition.equals("center")}
-			    <abbr title="Timbratura di servizio mancante" class="initialism"><i class="icon-warning-sign"></i></abbr>
-			  #{/elseif}
-	
-			  #{ifnot stampingTemplate.identifier.equals("")}
-				<strong>${stampingTemplate.identifier}</strong>
-			  #{/ifnot}	
-			  #{ifnot stampingTemplate.markedByAdminCode.equals("")}
-				<strong>${stampingTemplate.markedByAdminCode}</strong>
-			  #{/ifnot}	
-			  #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
-				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-			  #{/ifnot}	
-			  <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
-			  </td>
-		    #{/list}
+			#{include './personStampingComponents/_stampingsTemplate.html' /}
 		    
-		      <td class="success">
-				#{if dayRecap.mealTicket.equals("NO")}
-				  <span class="glyphicon glyphicon-ban-circle"></span>
-				#{/if} 
-				#{if dayRecap.mealTicket.equals("NOT_YET")}
-				  <span class="glyphicon glyphicon-remove"></span>
-				#{/if} 
-				#{if dayRecap.mealTicket.equals("YES")}
-				  <span class="glyphicon glyphicon-ok"></span>
-				#{/if} 
-			  </td>
-		    
+		    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
 			
 		</tr>	
 		#{/list}

@@ -148,6 +148,22 @@ public class PersonDay extends BaseModel {
   public boolean isToday() {
     return this.date.isEqual(LocalDate.now());
   }
+  
+  /**
+   * 
+   * @return
+   */
+  public boolean isPast() {
+    return this.date.isBefore(LocalDate.now());
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public boolean isFuture() {
+    return this.date.isAfter(LocalDate.now());
+  }
 
   /**
    * Nel caso di orario effettuato fuori dalla finestra dell'orario sede.

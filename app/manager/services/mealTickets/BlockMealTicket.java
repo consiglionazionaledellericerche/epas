@@ -1,5 +1,7 @@
 package manager.services.mealTickets;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 
 import lombok.AccessLevel;
@@ -122,6 +124,19 @@ public class BlockMealTicket {
    */
   public int getLast() {
     return this.mealTickets.get(this.mealTickets.size() - 1).number;
+  }
+  
+  /**
+   * Se l'istanza contiene tutti blocchi returned. Blocchi misti non sono permessi e causano
+   * una eccezione.
+   * @return
+   */
+  public boolean isReturned() {
+    boolean returned = this.mealTickets.get(0).returned;
+    for(MealTicket mealTicket : this.mealTickets) {
+        Verify.verify(mealTicket.returned == returned);
+    }
+    return returned;
   }
 
 }
