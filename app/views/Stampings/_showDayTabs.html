@@ -2,14 +2,12 @@
 	activeAction: la action tab attiva
 }*
 
-<div id="container-nav-tabs" class="container">
-  <ul class="nav nav-pills">
+ <ul class="nav nav-tabs">
     <li #{if activeAction.equals("personDayHistory")} class="active" #{/if}>
       <a href="@{PersonDayHistory.personDayHistory(personDay.id)}" data-async="#showDay">Storia Del Giorno</a>
     </li>
     <li #{if activeAction.equals("forceMealTicket")} class="active" #{/if}>
       <a href="@{Stampings.forceMealTicket(personDay.id)}" data-async="#showDay">Buono Pasto</a>
     </li>
-  </ul>
-</div>
-<br>
+ </ul>
+ <br>

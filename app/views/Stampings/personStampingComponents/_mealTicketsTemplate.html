@@ -1,3 +1,17 @@
+
+#{if dayRecap.personDay.isTicketForcedByAdmin} 
+
+  <td class="default-single">
+      #{if dayRecap.mealTicket.equals("NO")}
+      <i class="fa fa-ban forced" popover-hover data-content="&{'mealTicket.forcedNotAquired'}"></i>
+      #{/if}
+      #{if dayRecap.mealTicket.equals("YES")}
+      <i class="fa fa-cutlery forced" popover-hover data-content="&{'mealTicket.forcedAquired'}"></i>
+      #{/if}
+  </td>
+#{/if}
+#{else}
+
     <td class="default-single">
       #{if dayRecap.mealTicket.equals("NO")}
       <i class="fa fa-ban" popover-hover data-content="&{'mealTicket.notAquired'}"></i>
@@ -9,3 +23,6 @@
       <i class="fa fa-cutlery" popover-hover data-content="&{'mealTicket.aquired'}"></i>
       #{/if}
     </td>
+
+
+#{/else}    
