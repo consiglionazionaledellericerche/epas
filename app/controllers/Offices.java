@@ -124,7 +124,7 @@ public class Offices extends Controller {
         render("@edit", office, wrOffice);
       }
     } else {
-      office.beginDate = LocalDate.now();
+      office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
       flash.success(Web.msgSaved(Office.class));
       Institutes.index();

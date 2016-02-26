@@ -259,9 +259,19 @@ public class WrapperContract implements IWrapperContract {
    */
   @Override
   public LocalDate dateForInitialization() {
-    final LocalDate personCreation = value.person.createdAt.toLocalDate();
 
-    return personCreation.isAfter(value.beginDate) ? personCreation : value.beginDate;
+    LocalDate officeBegin = value.person.office.getBeginDate();
+    LocalDate personCreation = new LocalDate(value.person.createdAt);
+    LocalDate candidate = value.getBeginDate();
+
+    if (candidate.isBefore(officeBegin)) {
+      candidate = officeBegin;
+    }
+    if (candidate.isBefore(personCreation)) {
+      candidate = personCreation;
+    }
+
+    return candidate;
   }
 
   /**
