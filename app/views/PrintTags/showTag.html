@@ -50,67 +50,67 @@
     <th>Tipo Orario</th>
   </tr>
   #{list psDto.daysRecap,as:'dayRecap'}
-  #{if dayRecap.ignoreDay}
-  #{set ignore:true /}
-  #{/if}
-  #{else}
-  #{set ignore:false /}
-  #{/else}
-  <tr>
-    <td>
-      #{ifnot ignore}
-      #{if dayRecap.mealTicket.equals('NO')}
-      ${dayRecap.mealTicket}
-      #{/if}
-      #{/ifnot}
-    </td>
-    <td>
-      ${dayRecap.date.shortDayName()}
-    </td>
-    <td>
-      #{ifnot ignore}
-      #{list dayRecap.absences}
-      ${_.absenceType.code}
-      #{/list}
-      #{/ifnot}
-    </td>
-
-    #{list dayRecap.stampingsTemplate}
-    <td>
-      #{ifnot ignore}
-      #{if _.date}
-      ${_.hour}
-      #{/if}
-      <strong>${_.identifier}</strong>
-      <strong>${_.markedByAdminCode}</strong>
-      <strong>${_.missingExitStampBeforeMidnightCode}</strong>
-      #{/ifnot}
-    </td>
-    #{/list}
-    <td>
-      #{ifnot ignore}
-      ${dayRecap.workTime}
-      <strong>${dayRecap.todayLunchTimeCode}</strong>
-      <strong>${dayRecap.fixedWorkingTimeCode}</strong>
-      <strong>${dayRecap.exitingNowCode}</strong>
-      #{/ifnot}
-    </td>
-    <td>
-      #{ifnot ignore}
-      ${dayRecap.difference}
-      #{/ifnot}
-    </td>
-    <td>
-      #{ifnot ignore}
-      ${dayRecap.progressive}
-      #{/ifnot}
-    </td>
-    <td>
-      #{ifnot ignore}
-      ${dayRecap.workingTimeTypeDescription}
-      #{/ifnot}
-    </td>
-  </tr>
+	  #{if dayRecap.ignoreDay}
+	  #{set ignore:true /}
+	  #{/if}
+	  #{else}
+	  #{set ignore:false /}
+	  #{/else}
+	  <tr>
+	    <td>
+	      #{ifnot ignore}
+	      #{if dayRecap.mealTicket.equals('NO')}
+	      ${dayRecap.mealTicket}
+	      #{/if}
+	      #{/ifnot}
+	    </td>
+	    <td>
+	      ${dayRecap.personDay.date.shortDayName()}
+	    </td>
+	    <td>
+	      #{ifnot ignore}
+	      #{list dayRecap.personDay.absences}
+	      ${_.absenceType.code}
+	      #{/list}
+	      #{/ifnot}
+	    </td>
+	
+	    #{list dayRecap.stampingsTemplate}
+	    <td>
+	      #{ifnot ignore}
+	      #{if _.date}
+	      ${_.hour}
+	      #{/if}
+	      <strong>${_.identifier}</strong>
+	      <strong>${_.markedByAdminCode}</strong>
+	      <strong>${_.missingExitStampBeforeMidnightCode}</strong>
+	      #{/ifnot}
+	    </td>
+	    #{/list}
+	    <td>
+	      #{ifnot ignore}
+	      ${dayRecap.personDay.timeAtWork.printHourMinute()}
+	      <strong>${dayRecap.todayLunchTimeCode}</strong>
+	      <strong>${dayRecap.fixedWorkingTimeCode}</strong>
+	      <strong>${dayRecap.exitingNowCode}</strong>
+	      #{/ifnot}
+	    </td>
+	    <td>
+	      #{ifnot ignore}
+	      ${dayRecap.personDay.difference.printHourMinute()}
+	      #{/ifnot}
+	    </td>
+	    <td>
+	      #{ifnot ignore}
+	      ${dayRecap.personDay.progressive.printHourMinute()}
+	      #{/ifnot}
+	    </td>
+	    <td>
+	      #{ifnot ignore}
+	      ${dayRecap.wttd.get().workingTimeType.description}
+	      #{/ifnot}
+	    </td>
+	  </tr>
   #{/list}
 </table>
 <br>

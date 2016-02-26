@@ -5,7 +5,7 @@
  required (optional) default to false
  values required, list of enum items
 }*
-#{f.edit _arg, label:_label, value:_value, required:_required}
+#{p.edit _arg, label:_label, value:_value, required:_required}
 <select name="${field.name}" id="${field.id}" class="form-control" data-selectize
  ${helpers.Web.serialize(_attrs, "arg", "value", "label", "required", "values").raw()}>
   <option></option>
@@ -13,4 +13,4 @@
     <option value="${item}"#{if field.value == item} selected#{/if}>${item.label()}</option>
   #{/list}
 </select>
-#{/f.edit}
+#{/p.edit}

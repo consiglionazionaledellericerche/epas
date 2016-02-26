@@ -44,7 +44,7 @@ public class PersonDayHistory extends Controller {
    */
   public static void personDayHistory(long personDayId) {
 
-    final PersonDay pd = PersonDay.findById(personDayId);
+    final PersonDay personDay = PersonDay.findById(personDayId);
 
     List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
             .absences(personDayId);
@@ -87,6 +87,6 @@ public class PersonDayHistory extends Controller {
               .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-    render(historyStampingsList, historyAbsencesList, pd);
+    render(historyStampingsList, historyAbsencesList, personDay);
   }
 }

@@ -2,18 +2,9 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Straordinari mensili Gruppo'  /}
 
-<div class="container-fluid">
+<div class="container">
 
-  <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} </h3>
-      </div>
-      <div class="panel-body">
-      
-            <input type="hidden" name="year" value="${year}"/>
-	        <input type="hidden" name="month" value="${month}"/>
-
-		 <div class="col-xs-12">
+  #{title title:'Straordinari Mensili', administration:true /}
 		    <table class="table overtime-big table-hover">
 		    	<tr>
 			    	<th>Nome e cognome</th>
@@ -43,9 +34,5 @@
 		    	</tr> 
 		    	#{/list}
 		    </table>
-		  </div>        
-       
-      </div>
-    </div>
-
 </div>
+
