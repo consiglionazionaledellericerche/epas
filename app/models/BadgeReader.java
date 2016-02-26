@@ -54,12 +54,6 @@ public class BadgeReader extends BaseModel {
   @OneToMany(mappedBy = "badgeReader")
   public Set<Badge> badges = Sets.newHashSet();
 
-  @Required
-  @NotNull
-  @ManyToOne
-  @JoinColumn(name = "office_owner_id")
-  public Office owner;
-
   @ManyToMany
   public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 

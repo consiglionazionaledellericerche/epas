@@ -73,9 +73,12 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   public boolean headQuarter = false;
 
-  @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
-  public List<BadgeReader> badgeReaders = Lists.newArrayList();
+//  @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
+//  public List<BadgeReader> badgeReaders = Lists.newArrayList();
 
+  @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
+  public List<User> users = Lists.newArrayList();
+  
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 

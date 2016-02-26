@@ -37,11 +37,13 @@ badgeReader.code=Nome
 badgeReader.description=Descrizione
 badgeReader.id=id
 badgeReader.location=Location
-badgeReader.owner=Sede Responsabile
+badgeReader.user.owner=Sede Responsabile
 BadgeReaders.joinBadgeSystems= Gestisci Associazioni
 badgeReader=Sorgente Timbrature
 badgeReaders= Sorgenti Timbrature
 badgeReader.user.username=Username
+badgeReader.user.password=Password
+badgeReader.owner= Sede proprietaria
 
 badgeSystem.description=Descrizione
 badgeSystem = Gruppo Badge
@@ -102,8 +104,11 @@ crud.hasErrors =Occorre correggere gli errori riportati.
 crud.modified=&{%s} modificato con successo
 crud.saved=&{%s} salvato con successo
 crud.save=Salva
+crud.disable=Disabilita
+crud.enable=Riabilita
 crud.ok= Ok
-crud.userDeleteError= Errore nella cancellazione. Non si può cancellare un utente fisico con la persona ancora ad esso associata.
+crud.userDeleteError= Errore nella disabilitazione. Non si può disabilitare un utente fisico con la persona ancora ad esso associata.
+crud.disabled=&{%s} disabilitato con successo
 
 crud.systemDeleteError= Errore nella cancellazione. Non è possibile cancellare un utente di sistema che abbia informazioni storicizzate ancora associate. 
 
@@ -189,7 +194,7 @@ office.name=Nome
 Offices.blank=Nuova sede
 office=Sede
 
-offices= Sedi su cui associare l'utente
+officeIds= Sedi su cui associare l'utente
 
 onCertificate=In attestati
 
@@ -235,7 +240,7 @@ recapMealTickets=Riepilogo Buoni Pasto
 report=Descrizione problema
 restoreUser= Torna chi eri
 
-roles= Ruoli attribuibili
+roleIds= Ruoli attribuibili
 
 secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
@@ -262,6 +267,7 @@ uro.user= Utente
 user= Utente
 user.password= Password
 user.username= Username
+user.owner= Sede proprietaria
 
 Users.blank= Inserisci utente
 User.blank= Nuovo utente

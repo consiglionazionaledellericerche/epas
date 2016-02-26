@@ -118,7 +118,7 @@ public class BadgeReaderDao extends DaoBase {
    */
   public List<BadgeReader> getBadgeReaderByOffice(Office office) {
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
-    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.owner.eq(office));
+    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.user.owner.eq(office));
     return query.list(badgeReader);
   }
 
