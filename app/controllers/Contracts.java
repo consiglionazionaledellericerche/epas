@@ -473,8 +473,8 @@ public class Contracts extends Controller {
    * @param confirmedResidual  step di conferma ricevuta.
    */
   public static void saveResidualSourceContract(@Valid final Contract contract,
-                                                @Valid @Required final LocalDate sourceDateResidual,
-                                                boolean confirmedResidual) {
+      @Valid @Required final LocalDate sourceDateResidual,
+      boolean confirmedResidual) {
 
     notFoundIfNull(contract);
 
