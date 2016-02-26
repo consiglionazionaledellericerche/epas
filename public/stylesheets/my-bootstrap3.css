@@ -378,10 +378,21 @@ td.default-single > i.fa-cutlery{
   text-shadow: 1px 1px 1px #ccc;
 }
 
+td.default-single > i.fa-cutlery.forced{
+  color: #00395D;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
 td.default-single > i.fa-ban{
   color: #B54F4F;
   text-shadow: 1px 1px 1px #ccc;
 }
+
+td.default-single > i.fa-ban.forced{
+  color: #670000;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
 td.default-single > i.fa-spinner{
   color: #3A79A0;
 }

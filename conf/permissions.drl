@@ -573,6 +573,7 @@ when
      	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
+     	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",
@@ -700,6 +701,7 @@ when
      	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
+     	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",

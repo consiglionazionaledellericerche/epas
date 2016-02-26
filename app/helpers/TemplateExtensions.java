@@ -11,6 +11,8 @@ import com.google.gson.Gson;
 
 import injection.StaticInject;
 
+import it.cnr.iit.epas.DateUtility;
+
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
@@ -227,6 +229,14 @@ public class TemplateExtensions extends JavaExtensions {
     } catch (Throwable t) {
       // TODO logging
       throw Throwables.propagate(t);
+    }
+  }
+  
+  public static String printHourMinute(Integer i) {
+    if (i > 0) {
+      return DateUtility.fromMinuteToHourMinute(i);
+    } else {
+      return DateUtility.fromMinuteToHourMinute(i);
     }
   }
 }
