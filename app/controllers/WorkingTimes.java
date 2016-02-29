@@ -308,7 +308,7 @@ public class WorkingTimes extends Controller {
     workingTimeTypeManager.saveWorkingTimeType(wttd6, wtt, 6);
     workingTimeTypeManager.saveWorkingTimeType(wttd7, wtt, 7);
 
-    flash.success("Inserito nuovo orario di lavoro '%s' per la sede %s.",
+    flash.success("Inserito nuovo orario di lavoro %s per la sede %s.",
         wtt.description, wtt.office.name);
 
     manageWorkingTime(wtt.office.id);
