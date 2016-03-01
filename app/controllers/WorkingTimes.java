@@ -5,6 +5,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import com.sun.org.apache.xerces.internal.impl.validation.ValidationState;
+
 import controllers.Wizard.WizardStep;
 
 import dao.ContractDao;
@@ -162,79 +164,87 @@ public class WorkingTimes extends Controller {
 
   }
 
-
   /**
-   * metodo che renderizza il template per la creazione di un nuovo orario di lavoro.
-   * @param officeId l'id dell'ufficio in cui inserire l'orario di lavoro
+   * 
+   * @param name
+   * @param horizontal
    */
-  public static void insertWorkingTime(Long officeId) {
-
+  public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute, 
+      String name, boolean horizontal) {
+    
     Office office = officeDao.getOfficeById(officeId);
-
-    if (office == null) {
-
-      flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
-      WorkingTimes.manageWorkingTime(null);
-    }
-
+    notFoundIfNull(office);
     rules.checkIfPermitted(office);
-
-    HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
-
-    boolean horizontal = true;
-
-    render(office, horizontalPattern, horizontal);
-
+    
+    if (!compute) {
+      render(office);
+    }
+    
+    //Controllo unicità
+    if (name == null || name.isEmpty()) { 
+      validation.addError("name", "non può essere vuoto");
+    } else {
+      WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(name, 
+          Optional.<Office>absent());
+      if (wtt != null) {
+        validation.addError("name", "già presente in archivio.");
+      }
+    }
+    
+    if (validation.hasErrors()){
+      render(office, name, horizontal);
+    }
+    
+    if (horizontal) {
+      HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
+      horizontalPattern.name = name;
+      render("@insertWorkingTime", horizontalPattern, office, name);
+    } else {
+      
+      VerticalWorkingTime vwt = new VerticalWorkingTime();
+      int step = 1;
+      render("@insertVerticalWorkingTime", office,  vwt, name, step);
+    }
   }
-
   /**
    * metodo che renderizza il giorno per la costruzione dell'orario di lavoro.
    * @param vwt l'oggetto dto che contiene le informazioni del giorno per l'orario di lavoro
    * @param office l'ufficio a cui assegnare il nuovo orario di lavoro
    * @param step il passo
    */
-  public static void insertVerticalWorkingTime(@Valid VerticalWorkingTime vwt, 
-      Office office, int step) {
+  public static void insertVerticalWorkingTime(Office office, @Valid VerticalWorkingTime vwt,
+      @Required String name, int step) {
 
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
-    
-    String day = null;
-    final String key = VERTICAL_WORKING_TIME_STEP + Security.getUser().get().username;
-    if (step <= LAST_STEP) {
-      day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step).dayOfWeek().getAsText());
+     
+    final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
+    List<VerticalWorkingTime> list = Lists.newArrayList();
+    if (step == 1) {
+      Cache.safeAdd(key, list, "30mn");  
     }
     
-    // Primo giorno, inizializzazione.
-    if (vwt == null) {      
-      List<VerticalWorkingTime> list = Lists.newArrayList();
-      Cache.safeAdd(key, list, "30mn");
-      vwt = new VerticalWorkingTime();
-      render(office, vwt, step, day);
-    } 
-    
-    // Validazione
+    Preconditions.checkNotNull(vwt);   
+    // Validazione dto
     if (validation.hasErrors()){
-      day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step-1).dayOfWeek().getAsText());
-      render(office, vwt, step-1, day);
+      render(office, vwt, name, step);
     }
 
-    List<VerticalWorkingTime> list = Cache.get(key, List.class);
+    // Next step
+    list = Cache.get(key, List.class);
+    Preconditions.checkNotNull(list);
     vwt.dayOfWeek = step;
     list.add(vwt);  
     Cache.safeAdd(key, list, "30mn");  
-   
-    //caso finale: persisto la lista di dto
-    if (step > LAST_STEP) {      
-      workingTimeTypeManager.saveVerticalWorkingTimeType(list, office, vwt.name);
-      flash.success("Salvato correttamente orario di lavoro %s", vwt.name);
-      manageOfficeWorkingTime(office.id);
-      //renderVerticalWorkingTime(office.id, list);      
-    }   
+    if (step < LAST_STEP) {      
+      step++;
+      render(vwt, step, name, office);
+    } 
     
-    step++;
-    render(vwt, step, office, day);
+    //Last step: persistenza
+    workingTimeTypeManager.saveVerticalWorkingTimeType(list, office, name);
+    flash.success("Salvato correttamente orario di lavoro %s", vwt.name);
+    manageOfficeWorkingTime(office.id);
 
   }
   

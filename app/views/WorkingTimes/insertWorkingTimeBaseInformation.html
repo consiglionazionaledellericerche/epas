@@ -1,0 +1,37 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'Creazione nuovo Tipo Orario per ' + office.name  /}
+
+#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(office.id), ('Nuovo tipo orario ' + office.name):null]/}
+ 
+<div class="container">
+
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Creazione Nuovo Tipo Orario ' + office.name /}
+
+  <div class="col-md-10 col-md-offset-1">
+     
+     #{alert color:'info'}
+      <p>Seleziona il tipo di orario da creare per la sede ${office.name} e il nome descrittivo</p>
+     #{/alert}
+     
+     <!-- Switcher horizontal / vertical -->
+     #{form action:@WorkingTimes.insertWorkingTimeBaseInformation(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }
+		
+	   #{f.hidden 'officeId', value:office.id /}
+       #{f.hidden 'compute', value:true /}    
+       
+       #{f.booleanRadio 'horizontal', value:true /}
+  	   #{f.input 'name', required:true /}
+  	   
+  	   <!--bottoni -->
+	   #{b.buttons center:true}   
+	     #{b.submit 'Aggiorna'/}
+	   #{/b.buttons}
+  	    
+	 #{/form}
+	 	 
+ </div> 
+</div>

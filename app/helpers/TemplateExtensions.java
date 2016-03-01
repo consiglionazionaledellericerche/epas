@@ -15,6 +15,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import models.base.BaseModel;
 
+import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -238,5 +239,9 @@ public class TemplateExtensions extends JavaExtensions {
     } else {
       return DateUtility.fromMinuteToHourMinute(i);
     }
+  }
+  
+  public static String dayOfWeek(Integer day) {
+    return WordUtils.capitalize(LocalDate.now().withDayOfWeek(day).dayOfWeek().getAsText());
   }
 }
