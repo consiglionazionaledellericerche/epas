@@ -56,7 +56,7 @@ import sun.util.logging.resources.logging;
 public class WorkingTimes extends Controller {
 
   private static final String VERTICAL_WORKING_TIME_STEP = "vwt"; 
-  private static final int LAST_STEP = 8;
+  private static final int LAST_STEP = 7;
 
   @Inject
   private static OfficeDao officeDao;
@@ -197,43 +197,43 @@ public class WorkingTimes extends Controller {
       Office office, int step) {
 
     notFoundIfNull(office);
-    
     rules.checkIfPermitted(office);
-
-    String day = "";
-    step++; 
-    if (step < LAST_STEP) {
+    
+    
+    String day = null;
+    final String key = VERTICAL_WORKING_TIME_STEP + Security.getUser().get().username;
+    if (step <= LAST_STEP) {
       day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step).dayOfWeek().getAsText());
     }
-    // giro 0: si crea il nuovo orario verticale per il lunedi
+    
+    // Primo giorno, inizializzazione.
     if (vwt == null) {      
+      List<VerticalWorkingTime> list = Lists.newArrayList();
+      Cache.safeAdd(key, list, "30mn");
       vwt = new VerticalWorkingTime();
       render(office, vwt, step, day);
-    }    
+    } 
+    
+    // Validazione
     if (validation.hasErrors()){
       day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step-1).dayOfWeek().getAsText());
       render(office, vwt, step-1, day);
     }
-   
-    //altri giorni
-    final String key = VERTICAL_WORKING_TIME_STEP + Security.getUser().get().username;
-    List<VerticalWorkingTime> list = Cache.get(key, List.class);
 
-    if (list == null) {
-      list = Lists.newArrayList();
-    }    
-    vwt.dayOfWeek = step - 1 ;
+    List<VerticalWorkingTime> list = Cache.get(key, List.class);
+    vwt.dayOfWeek = step;
     list.add(vwt);  
     Cache.safeAdd(key, list, "30mn");  
    
     //caso finale: persisto la lista di dto
-    if (step == LAST_STEP) {      
+    if (step > LAST_STEP) {      
       workingTimeTypeManager.saveVerticalWorkingTimeType(list, office, vwt.name);
       flash.success("Salvato correttamente orario di lavoro %s", vwt.name);
       manageOfficeWorkingTime(office.id);
       //renderVerticalWorkingTime(office.id, list);      
     }   
-
+    
+    step++;
     render(vwt, step, office, day);
 
   }
