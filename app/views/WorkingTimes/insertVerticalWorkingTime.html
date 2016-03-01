@@ -1,6 +1,6 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title: 'Creazione nuovo Tipo Orario verticale per ' + office.name  /}
+#{set title: 'Creazione Tipo Orario verticale per ' + office.name  /}
 
 #{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(office.id), ('Nuovo tipo orario ' + office.name):null]/}
 
@@ -8,25 +8,19 @@
 
 	#{breadcrumbs breadcrumbs, noHome:'true' /}
 
-	#{title title:'Creazione Nuovo Tipo Orario Verticale ' + office.name /}
+	#{title title:'Creazione Nuovo Tipo Orario Verticale - ' + office.name /}
 
 	<div class="col-md-10 col-md-offset-1">
 	<div id="form-horizontal">
       #{form @WorkingTimes.insertVerticalWorkingTime(), class:'form-horizontal'}
       
-      	#{if !vwt.name}
-      		#{f.input 'vwt.name', required:'true' /}
-      	#{/if}
-      	#{else}
-      		<input type="hidden" name="vwt.name" value="${vwt.name}"/>
-      		#{f.view 'vwt.name' /}
-      	#{/else}
+   		#{f.simpleView 'name', label:'Nome Orario', hidden:true /}  
       	
       	<input type="hidden" name="office.id" value="${office.id}"/>
   	  	<input type="hidden" name="step" value="${step}"/>
-  	  		<div class="alert alert-success">
-  	  			<h3 align="center">${day}</h3>
-  	  		</div>
+  	  	
+  	  	<h3>${step}) ${step.dayOfWeek()}</h3> 
+	    	      
       	  %{ disable = vwt.holiday; }%
       	 
        	  #{workingTime.input
