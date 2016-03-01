@@ -485,7 +485,8 @@ public class Contracts extends Controller {
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
     if (sourceDateResidual != null) {
-      validation.future(sourceDateResidual.toDate(), wrContract.dateForInitialization().toDate())
+      validation.future(sourceDateResidual.toDate(),
+          wrContract.dateForInitialization().minusDays(1).toDate())
           .key("sourceDateResidual").message("validation.after");
 
       validation.past(sourceDateResidual.toDate(),

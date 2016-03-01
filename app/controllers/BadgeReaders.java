@@ -16,6 +16,7 @@ import helpers.Web;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
+import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -93,7 +94,7 @@ public class BadgeReaders extends Controller {
 
     final BadgeReader badgeReader = badgeReaderDao.byId(id);
     notFoundIfNull(badgeReader);
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(badgeReader.user.owner);
 
     SearchResults<?> results = badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.fromNullable(badgeReader)).listResults();
@@ -113,7 +114,7 @@ public class BadgeReaders extends Controller {
 
     final BadgeReader badgeReader = BadgeReader.findById(id);
     notFoundIfNull(badgeReader);
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(badgeReader.user.owner);
 
     //elimino la sorgente se non è associata ad alcun gruppo.
     if (badgeReader.badgeSystems.isEmpty()) {
@@ -146,7 +147,7 @@ public class BadgeReaders extends Controller {
       render("@edit", badgeReader);
     }
 
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(badgeReader.user.owner);
     badgeReader.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
@@ -163,7 +164,7 @@ public class BadgeReaders extends Controller {
 
     notFoundIfNull(user.badgeReader);
     BadgeReader badgeReader = user.badgeReader;
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(badgeReader.user.owner);
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -186,9 +187,9 @@ public class BadgeReaders extends Controller {
    * @param badgeReader l'oggetto badge reader da salvare.
    * @param user l'utente creato a partire dal badge reader.
    */
-  public static void save(@Valid BadgeReader badgeReader, @Valid User user) {
+  public static void save(@Valid BadgeReader badgeReader, @Valid Office office) {
 
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(office);
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -196,16 +197,17 @@ public class BadgeReaders extends Controller {
       flash.error(Web.msgHasErrors());
       render("@blank", badgeReader);
     }
-    if (user.password.length() < 5) {
+    if (badgeReader.user.password.length() < 5) {
       response.status = 400;
       validation.addError("user.password", "almeno 5 caratteri");
-      render("@blank", badgeReader, user);
+      render("@blank", badgeReader, office);
     }
 
+    badgeReader.user.owner = office;
     Codec codec = new Codec();
-    user.password = codec.hexMD5(user.password);
-    user.save();
-    badgeReader.user = user;
+    
+    badgeReader.user.password = codec.hexMD5(badgeReader.user.password);
+    badgeReader.user.save();
     badgeReader.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
@@ -220,7 +222,7 @@ public class BadgeReaders extends Controller {
     final BadgeReader badgeReader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(badgeReader);
 
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(badgeReader.user.owner);
 
     render("@joinBadgeSystems", badgeReader);
   }
@@ -230,7 +232,7 @@ public class BadgeReaders extends Controller {
    */
   public static void saveBadgeSystems(@Valid BadgeReader badgeReader, boolean confirmed) {
 
-    rules.checkIfPermitted(badgeReader.owner);
+    rules.checkIfPermitted(badgeReader.user.owner);
 
     // TODO:
     //creare gli uro mancanti, cancellare quelli non più usati

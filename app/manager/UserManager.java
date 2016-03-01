@@ -10,8 +10,11 @@ import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import models.Office;
 import models.Person;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 
@@ -21,6 +24,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -113,6 +117,33 @@ public class UserManager {
     log.info("Creato nuovo user per {}: username = {}", person.fullName(), user.username);
 
     return user;
+  }
+  
+  /**
+   * funzione che salva l'utente e genere i ruoli sugli uffici.
+   * @param user l'user da salvare
+   * @param offices la lista degli uffici
+   * @param roles la lista dei ruoli
+   * @param enable se deve essere disabilitato
+   */
+  public void saveUser(User user, Set<Office> offices, Set<Role> roles, boolean enable) {
+    Codec codec = new Codec();
+    user.password = codec.hexMD5(user.password);
+    if (enable) {
+      user.disabled = false;
+      user.expireDate = null;
+    }
+    user.save();
+    for (Role role : roles) {
+      for (Office office : offices) {
+        UsersRolesOffices uro = new UsersRolesOffices();
+        uro.user = user;
+        uro.office = office;
+        uro.role = role;
+        uro.save();
+      }
+    }   
+    
   }
 
 }

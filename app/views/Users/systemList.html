@@ -6,7 +6,10 @@
 <div class="container"> 
   	 
     #{alert color:'info'}
-	<p>Elenco degli utenti di sistema.</p>
+	<p>Elenco degli utenti di sistema. <br>
+	In questa lista vengono presentati anche gli utenti di sistema che rappresentano le sorgenti timbrature 
+	(verificabili nella apposita sezione <strong>Sorgenti Timbrature</strong> del menu <strong>Configurazione</strong>).
+	<br> Per la modifica di questi ultimi, pertanto, è consigliato fare riferimento alla medesima sezione del menu <u>Configurazione</u>.</p>
 	#{/alert}
 	
 	#{form action:@Users.systemList(), class:'form-inline', method:'GET',

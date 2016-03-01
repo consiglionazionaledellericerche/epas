@@ -21,6 +21,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QBadgeReader;
+import models.query.QOffice;
 import models.query.QPerson;
 import models.query.QUser;
 import models.query.QUsersRolesOffices;
@@ -132,30 +133,53 @@ public class UserDao extends DaoBase {
    * @param associated se si vogliono solo gli utenti con persona associata o anche quelli di sistema
    * @return la lista di utenti che soddisfano i parametri passati.
    */
-  public PerseoSimpleResults<User> listUsersByOffice(Optional<String> name,Office office, boolean associated){
+  public PerseoSimpleResults<User> listUsersByOffice(Optional<String> name, User userLogged, boolean associated){
     final QUser user = QUser.user;
     final QUsersRolesOffices userRoleOffice = QUsersRolesOffices.usersRolesOffices;
     final QPerson person = QPerson.person;
     JPQLQuery query = getQueryFactory().from(user)
         .leftJoin(user.usersRolesOffices, userRoleOffice)
-        .leftJoin(user.person, person).where(userRoleOffice.office.eq(office));
+        .leftJoin(user.person, person);
+    
     BooleanBuilder condition = new BooleanBuilder();
-    if (name.isPresent()) {
-      condition.and(matchBadgeReaderName(user, name.get()));
-    }
     if (associated) {
+      if (userLogged.person != null ) {
+        condition.and(user.person.office.eq(userLogged.person.office));
+      }
       condition.and(person.user.isNotNull());
+        
     } else {
       condition.and(person.user.isNull());
       condition.and(user.username.notIn("admin", "developer"));
+      
+      if (userLogged.person != null) {
+        condition.and(user.owner.eq(userLogged.person.office));
+      }      
     }
-    query.where(condition).distinct().orderBy(user.username.asc());   
+    if (name.isPresent()) {
+      condition.and(matchUserName(user, name.get()));
+    }
+   
+    query.where(user.disabled.eq(false).and(condition)).distinct().orderBy(user.username.asc());   
         
+    return PerseoModelQuery.wrap(query, user);
+  }
+  
+  /**
+   * 
+   * @param name
+   * @param office
+   * @return la lista degli utenti disabilitati
+   */
+  public PerseoSimpleResults<User> disabledUsersList(Optional<String> name) {
+    final QUser user = QUser.user;
+    
+    JPQLQuery query = getQueryFactory().from(user).where(user.disabled.eq(true));
     return PerseoModelQuery.wrap(query, user);
   }
 
   
-  private BooleanBuilder matchBadgeReaderName(QUser user, String name) {
+  private BooleanBuilder matchUserName(QUser user, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();
     for (String token : TOKEN_SPLITTER.split(name)) {
       nameCondition.and(user.username.containsIgnoreCase(token));
