@@ -30,6 +30,9 @@
 		  #{/if}	
 		  #{f.input 'user.username', required:true /}
 		  #{f.input 'user.password', type:'password', required:true /}
+		  #{if user.owner != null}
+		    #{f.input 'user.owner', readonly:true /}
+		  #{/if}
 		  <div class="col-sm-3">
 		  </div>
 		  <div class="col-sm-6">
@@ -49,20 +52,63 @@
     		
     		#{b.save /}
     		
-    		*{ permetto di eliminare solo gli utenti di sistema }*
+    		*{ permetto di disabilitare/abilitare solo gli utenti di sistema }*
     		#{if user.person == null }
-    		 #{b.delete @delete(user.id) /}
-    		#{/if}
-    		
+    		 #{if !user.disabled}
+    		 	#{b.disable @disable(user.id) /}
+    		 #{/if}
+    		 #{else}    		 		
+    		    #{b.enable /}
+    		 #{/else}
+    		#{/if}    		 
+    			
   		  #{/b.buttons}
  	  	  </div>
  	  	  <div class="col-sm-3">
  	  	  </div>
- 	  	  
-
-		#{/form}
+ 	  #{/form}
 #{/panel}
+
+	<div id="enable" style="display: none">
+	#{panel title:'Riabilita utente', color:'primary'}
+      #{form @Users.enable(), class:'form-horizontal'}
+  		<input type="hidden" name="id" value="${user.id}" />
+  		#{f.hidden 'systemUser', value:'true' /}
+	    <div class="alert alert-success">
+			E' possibile ripristinare l'utente selezionato assegnandogli il/i ruolo/i sulla/e sede/i di interesse.
+        </div>	 
+        #{f.selectModels 'officeIds', items:templateUtility.officesAllowed(), 
+  		    value:offices, placeholder:'Tutti gli uffici' /}
+
+		#{f.selectModels 'roleIds', items:templateUtility.allSystemRoles(), 
+		    value:roles , placeholder:'Tutti i ruoli di sistema' /}
+		<div class="center">
+	    	<input class="btn btn-primary" type="submit" value="Riabilita"/>
+	  	</div>
+      #{/form}
+    #{/panel}
+    </div> <!-- end form vertical -->
+
 
 </div>
 
 <div id="modalUpdateRole" class="modal container" tabindex="-1"></div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+		
+		jQuery(document).ready(function(){
+	        jQuery('#hideshow').on('click', function(event) {    
+	        	$(this).toggleClass('btn-info');
+	        	$(this).toggleClass('btn-warning');
+	        	jQuery('#enable').toggle('show');	             
+	        });
+	    });
+
+		
+
+	 });
+	</script>
+#{/set}
+

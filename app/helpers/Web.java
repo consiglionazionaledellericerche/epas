@@ -43,6 +43,8 @@ public final class Web {
   public static final String MSG_DELETED = "crud.deleted";
 
   public static final String MSG_HAS_ERRORS = "crud.hasErrors";
+  
+  public static final String MSG_DISABLED = "crud.disabled";
 
   private Web() {
   }
@@ -74,6 +76,10 @@ public final class Web {
 
   public static String msgHasErrors() {
     return Messages.get(MSG_HAS_ERRORS);
+  }
+  
+  public static String msgDisabled(Class<?> cls) {
+    return Messages.get(MSG_DISABLED, toName(cls));
   }
 
   /**

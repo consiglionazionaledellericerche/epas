@@ -13,6 +13,7 @@
 
 		#{f.hidden 'systemUser', value:'true' /}
 		
+		#{f.selectModel 'user.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
   		#{f.input 'user.username' /}
   		#{f.input 'user.password', type:'password' /}
   		 
@@ -28,10 +29,11 @@
   		#{/b.buttons}
   		#{/form}
    	  </div>
-   	   #{alert color:'info'}   
-  			<p>
-    		<strong>Note:</strong> Solo l'amministratore tecnico può generare un nuovo utente.
-  			</p>
+   	   #{alert color:'info'}
+  		<p>
+    		<strong>Note:</strong> Soltanto gli amministratori tecnici della sede resposabile potranno
+    		gestire questo &{'user'}, fra cui la modifica delle credenziali di accesso.
+  		</p>
   	   #{/alert}
 </div>
 #{/modalAsync}

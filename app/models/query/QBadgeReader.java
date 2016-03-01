@@ -44,8 +44,6 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public final StringPath location = createString("location");
 
-    public final QOffice owner;
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -69,7 +67,6 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public QBadgeReader(Class<? extends BadgeReader> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.owner = inits.isInitialized("owner") ? new QOffice(forProperty("owner"), inits.get("owner")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }
 
