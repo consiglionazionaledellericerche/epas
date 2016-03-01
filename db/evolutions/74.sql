@@ -1,5 +1,6 @@
 # ---!Ups
 
+
 -- aggiungere alla tabella office i campi begin_date e end_date ...
 
 ALTER TABLE office ADD COLUMN begin_date DATE;
@@ -78,4 +79,5 @@ ALTER TABLE office DROP COLUMN end_date;
 
 ALTER TABLE office_history DROP COLUMN begin_date;
 ALTER TABLE office_history DROP COLUMN end_date;
+
 

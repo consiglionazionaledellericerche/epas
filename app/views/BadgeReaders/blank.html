@@ -7,17 +7,17 @@
 <div id="badgeReaderData">
 
   #{form action:@save(), method:'POST', autocomplete:false,
-  class:'form form-horizontal', 'data-async':'#badgeReaderList',
+  class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#badgeReaderData'}
 
   #{f.input 'badgeReader.code', required:true /}
   #{f.input 'badgeReader.description' /}
   #{f.input 'badgeReader.location' /}
 
-  #{f.selectModel 'badgeReader.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
+  #{f.selectModel 'office', items:templateUtility.officeForBadgeReaders(), required:true /}
 
-  #{f.input 'user.username' /}
-  #{f.input 'user.password', type:'password' /}
+  #{f.input 'badgeReader.user.username' /}
+  #{f.input 'badgeReader.user.password', type:'password' /}
 
   #{b.buttons center:true}
     #{b.cancel @index() /}

@@ -239,7 +239,9 @@ when
   		"Users.index",
   		"Users.systemBlank",
   		"Users.save",
-  		"Users.delete",
+  		"Users.disable",
+  		"Users.disabledList",
+  		"Users.enable",
 	
 		"Administrators.blank",
 		"Administrators.save",
@@ -275,7 +277,9 @@ when
   	   "Users.index",
   	   "Users.systemBlank",
   	   "Users.save",
-  	   "Users.delete",
+  	   "Users.disable",
+  	   "Users.disabledList",
+	   "Users.enable",
 	   
 	   "BadgeReaders.save",	
 	   "BadgeReaders.edit",
