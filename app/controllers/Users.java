@@ -10,8 +10,11 @@ import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.history.HistoryValue;
+import dao.history.UserHistoryDao;
 
 import helpers.Web;
+
+import manager.UserManager;
 
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -20,6 +23,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.collections.Lists;
@@ -54,6 +58,10 @@ public class Users extends Controller{
   private static OfficeDao officeDao;
   @Inject
   private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static UserHistoryDao historyDao;
+  @Inject
+  private static UserManager userManager;
 
   public static void index() {
     flash.keep();
@@ -66,10 +74,10 @@ public class Users extends Controller{
    */
   public static void list(String name) {
     
-    Office office = Security.getUser().get().person.office;
+    User user = Security.getUser().get();
     SearchResults<?> results =
         userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
-            office, true).listResults();   
+            user, true).listResults();   
 
     render(results, name);
   }
@@ -80,14 +88,27 @@ public class Users extends Controller{
    */
   public static void systemList(String name) {
     
-    Office office = Security.getUser().get().person.office;
+    User user = Security.getUser().get();
     SearchResults<?> results =
-        userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
-            office, false).listResults();
+        userDao.listUsersByOffice(Optional.<String>fromNullable(name), user,
+            false).listResults();
 
     render(results, name);
   }
 
+  /**
+   * 
+   * @param name il nome utente su cui filtrare.
+   */
+  public static void disabledList(String name) {
+    
+    SearchResults<?> results =
+        userDao.disabledUsersList(Optional.<String>fromNullable(name)).listResults();    
+
+    render(results, name);
+  }
+  
+  
   public static void systemBlank() {
     render();
   }
@@ -110,14 +131,15 @@ public class Users extends Controller{
    * metodo che permette il salvataggio delle modifiche di un user.
    * @param user l'utente modificato da salvare
    */
-  public static void updateInfo(@Valid User user) {
+  public static void updateInfo(User user) {
+    rules.checkIfPermitted(user);
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", user, validation.errorsMap());
       flash.error(Web.msgHasErrors());
       render("@edit", user);
     }
-    rules.checkIfPermitted(user);
+    
     user.save();
 
     flash.success(Web.msgSaved(User.class));
@@ -178,22 +200,10 @@ public class Users extends Controller{
         render("@blank", user, offices, roles);
       }
     }    
+    rules.checkIfPermitted(user.person);
+    // Save    
+    userManager.saveUser(user, offices, roles, false);
     
-    // Save
-    
-    Codec codec = new Codec();
-    user.password = codec.hexMD5(user.password);
-    user.save();
-    for (Role role : roles) {
-      for (Office office : offices) {
-        UsersRolesOffices uro = new UsersRolesOffices();
-        uro.user = user;
-        uro.office = office;
-        uro.role = role;
-        uro.save();
-      }
-    }   
-
     flash.success(Web.msgSaved(User.class));
     if (systemUser) {
       systemList(null);
@@ -207,14 +217,21 @@ public class Users extends Controller{
    * metodo che cancella un user recuperato tramite l'id passato come parametro.
    * @param id l'id dell'utente da cancellare
    */
-  public static void delete(Long id) {
+  public static void disable(Long id) {
     User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
     notFoundIfNull(user);
 
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-
+    if (user.owner != null) {
+      rules.checkIfPermitted(user.owner);
+    } else if (user.person != null) {
+      rules.checkIfPermitted(user.person.office);
+    } else{
+      rules.checkIfPermitted();
+    }
+    
     
     if (user.person != null) {
+
       flash.error(Messages.get("crud.userDeleteError"));
       edit(id);
     }
@@ -224,13 +241,80 @@ public class Users extends Controller{
       uro.delete();
     }
     try {
-      user.delete();        
+      user.disabled = true;
+      user.owner = null;
+      user.expireDate = LocalDate.now();
+      user.save();
+             
     } catch(Exception e) {
       flash.error("Utente non eliminabile in quando relazionato con lo storico dell'applicazione.");
       edit(id);
     }
 
-    flash.success(Web.msgDeleted(User.class));
+    flash.success(Web.msgDisabled(User.class));
     index();
+  }
+  
+  /**
+   * 
+   * @param id
+   */
+  public static void enable(Long id, List<Long> officeIds, List<Long> roleIds, 
+      boolean systemUser) {
+    User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
+    notFoundIfNull(user);
+    
+    Set<Office> offices = Sets.newHashSet();
+    Set<Role> roles = Sets.newHashSet();
+    
+    if (officeIds != null) {
+      for (Long officeId : officeIds) {
+        Office office = officeDao.getOfficeById(officeId);
+        notFoundIfNull(office);
+        rules.checkIfPermitted(office);
+        offices.add(office);
+      }
+    }
+    if (roleIds != null) {
+      
+      for (Long roleId : roleIds) {
+        Role role = roleDao.getRoleById(roleId);
+        notFoundIfNull(role);
+        roles.add(role);
+      }
+    }
+    
+    //Validazione particolare
+    if (!Validation.hasErrors()) {
+      if (user.password.length() < 5) {
+        validation.addError("user.password", "almeno 5 caratteri");
+      }
+      if (roles.isEmpty()) {
+        validation.addError("roleIds", "Almeno un ruolo");
+      }
+      if (offices.isEmpty()) {
+        validation.addError("officeIds", "Almeno una sede");
+      }
+    }
+    
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", user, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      if (systemUser)  {
+        render("@systemBlank", user, offices, roles);
+      } else {
+        render("@blank", user, offices, roles);
+      }
+    }    
+
+    rules.checkIfPermitted(user.person);
+    userManager.saveUser(user, offices, roles, true);
+    flash.success(Web.msgSaved(User.class));
+    if (systemUser) {
+      systemList(null);
+    } else {
+      list(null);
+    }
   }
 }

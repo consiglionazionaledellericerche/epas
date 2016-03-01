@@ -28,13 +28,19 @@ public class QUser extends EntityPathBase<User> {
 
     public final QBadgeReader badgeReader;
 
+    public final BooleanPath disabled = createBoolean("disabled");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final DatePath<org.joda.time.LocalDate> expireDate = createDate("expireDate", org.joda.time.LocalDate.class);
 
     public final DatePath<org.joda.time.LocalDate> expireRecoveryToken = createDate("expireRecoveryToken", org.joda.time.LocalDate.class);
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final QOffice owner;
 
     public final StringPath password = createString("password");
 
@@ -68,6 +74,7 @@ public class QUser extends EntityPathBase<User> {
     public QUser(Class<? extends User> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
+        this.owner = inits.isInitialized("owner") ? new QOffice(forProperty("owner"), inits.get("owner")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

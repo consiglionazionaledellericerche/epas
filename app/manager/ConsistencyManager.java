@@ -248,8 +248,7 @@ public class ConsistencyManager {
     for (Person person : office.persons) {
       if (recomputationTypes.contains(RecomputationType.DAYS)) {
         updatePersonSituation(person.id, recomputeFrom);
-      } 
-      if (recomputationTypes.contains(RecomputationType.RESIDUAL_HOURS) 
+      } else if (recomputationTypes.contains(RecomputationType.RESIDUAL_HOURS)
           || recomputationTypes.contains(RecomputationType.RESIDUAL_MEALTICKETS)) {
         updatePersonRecaps(person.id, recomputeFrom);
       }
