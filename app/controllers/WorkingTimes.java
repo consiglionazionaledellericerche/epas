@@ -53,7 +53,7 @@ import javax.inject.Inject;
 public class WorkingTimes extends Controller {
 
   private static final String VERTICAL_WORKING_TIME_STEP = "vwt"; 
-  private static final int LAST_STEP = 7;
+  public static final int NUMBER_OF_DAYS = 7;
 
   @Inject
   private static OfficeDao officeDao;
@@ -259,7 +259,7 @@ public class WorkingTimes extends Controller {
     vwtProcessedList.add(vwt);  
     daysProcessed.add(vwt.dayOfWeek);
     Cache.safeAdd(key, vwtProcessedList, "30mn");  
-    if (step < LAST_STEP) {      
+    if (step < NUMBER_OF_DAYS) {      
       step++;
     } 
     render(vwt, step, name, office, daysProcessed);
