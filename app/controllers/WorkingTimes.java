@@ -161,8 +161,10 @@ public class WorkingTimes extends Controller {
 
   /**
    * 
+   * @param officeId
+   * @param compute
    * @param name
-   * @param horizontal
+   * @param workingTimeTypePattern
    */
   public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute, 
       String name, WorkingTimeTypePattern workingTimeTypePattern) {
@@ -202,11 +204,15 @@ public class WorkingTimes extends Controller {
       render("@insertVerticalWorkingTime", office,  vwt, name, step, daysProcessed);
     }
   }
+  
   /**
-   * metodo che renderizza il giorno per la costruzione dell'orario di lavoro.
-   * @param vwt l'oggetto dto che contiene le informazioni del giorno per l'orario di lavoro
-   * @param office l'ufficio a cui assegnare il nuovo orario di lavoro
-   * @param step il passo
+   * 
+   * @param officeId
+   * @param name
+   * @param step
+   * @param switchDay
+   * @param submit
+   * @param vwt
    */
   public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step, 
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
@@ -277,10 +283,6 @@ public class WorkingTimes extends Controller {
     render(office, list);
   }
 
-//  public static void saveVertical(){
-//    
-//  }
-  
   /**
    * metodo che consente la creazione di un nuovo orario di lavoro orizzontale.
    * @param horizontalPattern il dto contenente le informazioni da persistere
