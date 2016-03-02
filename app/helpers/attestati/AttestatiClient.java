@@ -175,13 +175,15 @@ public class AttestatiClient {
             .userAgent(CLIENT_USER_AGENT)
             .url(loginUrl)
             .method(Method.POST).execute();
-        log.debug("Effettuata la richiesta di login come utente {}, codice di risposta http = {} e con messaggio {}.",
+        log.info("Login url: {}, utente: {}, password: {}", loginUrl, attestatiLogin, attestatiPassword);
+        log.info("Effettuata la richiesta di login come utente {}, codice di risposta http = {} e con messaggio {}.",
             attestatiLogin, loginResponse.statusCode(), loginResponse.statusMessage());
 
         Document loginDoc = loginResponse.parse();
-        log.debug("Risposta alla login = \n{}", loginDoc);
-
+        log.info("Risposta alla login = \n{}", loginDoc);
+        
         Elements loginMessages = loginDoc.select("h5[align=center]>font");
+        //log.info("Login messages: {}", loginMessages.first().ownText());
         if (loginResponse.statusCode() != 200 || loginMessages.isEmpty()
             || !loginMessages.first().ownText().contains("Login completata con successo.")) {
           //errore login
@@ -200,7 +202,7 @@ public class AttestatiClient {
           .userAgent(CLIENT_USER_AGENT)
           .method(Method.GET).execute();
 
-      log.debug("Effettuata la richiesta di sedi disponibili %s, codice di risposta http = {}",
+      log.info("Effettuata la richiesta di sedi disponibili %s, codice di risposta http = {}",
           attestatiLogin, listaDipendentiMaskResponse.statusCode());
 
       if (listaDipendentiMaskResponse.statusCode() != 200) {
