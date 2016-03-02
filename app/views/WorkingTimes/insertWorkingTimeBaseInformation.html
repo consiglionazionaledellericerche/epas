@@ -23,12 +23,14 @@
 	   #{f.hidden 'officeId', value:office.id /}
        #{f.hidden 'compute', value:true /}    
        
-       #{f.booleanRadio 'horizontal', value:true /}
+      #{f.selectEnum 'workingTimeTypePattern', items:models.enumerate.WorkingTimeTypePattern, 
+		value:workingTimeTypePattern, byEquals:true /}
+		
   	   #{f.input 'name', required:true /}
   	   
   	   <!--bottoni -->
 	   #{b.buttons center:true}   
-	     #{b.submit 'Aggiorna'/}
+	     #{b.submit 'Inizia'/}
 	   #{/b.buttons}
   	    
 	 #{/form}

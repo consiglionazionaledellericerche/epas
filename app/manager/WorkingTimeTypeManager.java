@@ -10,7 +10,7 @@ import org.joda.time.DateTimeConstants;
 import java.util.List;
 
 public class WorkingTimeTypeManager {
-
+  
   /**
    * associa il giorno all'orario di lavoro.
    * @param wttd il giorno da associare all'orario di lavoro
