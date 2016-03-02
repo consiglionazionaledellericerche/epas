@@ -4,10 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
-import com.sun.org.apache.xerces.internal.impl.validation.ValidationState;
-
-import controllers.Wizard.WizardStep;
+import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -22,7 +19,6 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.ContractManager;
-import manager.SecureManager;
 import manager.WorkingTimeTypeManager;
 
 import models.Contract;
@@ -32,8 +28,8 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
 import models.dto.VerticalWorkingTime;
+import models.enumerate.WorkingTimeTypePattern;
 
-import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -49,10 +45,9 @@ import security.SecurityRules;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
-
-import sun.util.logging.resources.logging;
 
 @With({Resecure.class, RequestInit.class})
 public class WorkingTimes extends Controller {
@@ -170,14 +165,15 @@ public class WorkingTimes extends Controller {
    * @param horizontal
    */
   public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute, 
-      String name, boolean horizontal) {
+      String name, WorkingTimeTypePattern workingTimeTypePattern) {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     
     if (!compute) {
-      render(office);
+      workingTimeTypePattern = WorkingTimeTypePattern.HORIZONTAL;
+      render(office, workingTimeTypePattern);
     }
     
     //Controllo unicità
@@ -192,18 +188,18 @@ public class WorkingTimes extends Controller {
     }
     
     if (validation.hasErrors()){
-      render(office, name, horizontal);
+      render(office, name, workingTimeTypePattern);
     }
     
-    if (horizontal) {
+    if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
       HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
       horizontalPattern.name = name;
       render("@insertWorkingTime", horizontalPattern, office, name);
     } else {
-      
       VerticalWorkingTime vwt = new VerticalWorkingTime();
+      List<Integer> daysProcessed = Lists.newArrayList();
       int step = 1;
-      render("@insertVerticalWorkingTime", office,  vwt, name, step);
+      render("@insertVerticalWorkingTime", office,  vwt, name, step, daysProcessed);
     }
   }
   /**
@@ -212,39 +208,62 @@ public class WorkingTimes extends Controller {
    * @param office l'ufficio a cui assegnare il nuovo orario di lavoro
    * @param step il passo
    */
-  public static void insertVerticalWorkingTime(Office office, @Valid VerticalWorkingTime vwt,
-      @Required String name, int step) {
+  public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step, 
+      boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
+    Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
      
     final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
-    List<VerticalWorkingTime> list = Lists.newArrayList();
-    if (step == 1) {
-      Cache.safeAdd(key, list, "30mn");  
+    List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
+    if (vwtProcessedList == null) {
+      vwtProcessedList = Lists.newArrayList();
     }
     
-    Preconditions.checkNotNull(vwt);   
+    Set<Integer> daysProcessed = Sets.newHashSet();
+    for (VerticalWorkingTime processed : vwtProcessedList) {
+      daysProcessed.add(processed.dayOfWeek);
+    }
+    //Caso del cambio giorno ...
+    if (switchDay) {
+      flash.clear();
+      validation.clear();
+      vwt = new VerticalWorkingTime();
+      for (VerticalWorkingTime vwtSelected : vwtProcessedList) {
+        if (vwtSelected.dayOfWeek == step) {
+          vwt = vwtSelected;
+          render(office, vwt, name, step, daysProcessed);
+        }
+      }
+      render(office, vwt, name, step, daysProcessed);
+    }
+    
+    //Persistenza ...
+    if (submit) {
+      // TODO: validatore
+      workingTimeTypeManager.saveVerticalWorkingTimeType(vwtProcessedList, office, name);
+      flash.success("Salvato correttamente orario di lavoro %s", name);
+      manageOfficeWorkingTime(office.id);
+    }
+
+    Preconditions.checkNotNull(vwt);
     // Validazione dto
     if (validation.hasErrors()){
-      render(office, vwt, name, step);
+      flash.error("Occorre correggere gli errori riportati.");
+      render(office, vwt, name, step, daysProcessed);
     }
 
     // Next step
-    list = Cache.get(key, List.class);
-    Preconditions.checkNotNull(list);
     vwt.dayOfWeek = step;
-    list.add(vwt);  
-    Cache.safeAdd(key, list, "30mn");  
+    vwtProcessedList.add(vwt);  
+    daysProcessed.add(vwt.dayOfWeek);
+    Cache.safeAdd(key, vwtProcessedList, "30mn");  
     if (step < LAST_STEP) {      
       step++;
-      render(vwt, step, name, office);
     } 
-    
-    //Last step: persistenza
-    workingTimeTypeManager.saveVerticalWorkingTimeType(list, office, name);
-    flash.success("Salvato correttamente orario di lavoro %s", vwt.name);
-    manageOfficeWorkingTime(office.id);
+    render(vwt, step, name, office, daysProcessed);
+
 
   }
   
