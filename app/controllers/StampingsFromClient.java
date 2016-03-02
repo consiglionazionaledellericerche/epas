@@ -95,7 +95,7 @@ public class StampingsFromClient extends Controller {
     AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
 
     Optional<Integer> justifiedMinutes = Optional.<Integer>absent();
-    if (Strings.isNullOrEmpty(body.inizio) && Strings.isNullOrEmpty(body.fine)) {
+    if (!Strings.isNullOrEmpty(body.inizio) && !Strings.isNullOrEmpty(body.fine)) {
       justifiedMinutes = Optional.fromNullable(Integer.parseInt(body.fine)
               - Integer.parseInt(body.inizio));
     }
