@@ -268,6 +268,8 @@ public class WorkingTimes extends Controller {
   public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step, 
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
+    flash.clear();
+    
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -278,7 +280,6 @@ public class WorkingTimes extends Controller {
     
     //Caso del cambio giorno ...
     if (switchDay) {
-      flash.clear();
       validation.clear();
       vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
       render(office, vwt, name, step, daysProcessed);
