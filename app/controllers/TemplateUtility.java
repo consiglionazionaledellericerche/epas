@@ -14,7 +14,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
-import dao.UsersRolesOfficesDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -60,15 +59,13 @@ public class TemplateUtility {
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final IWrapperFactory wrapperFactory;
   private final BadgeSystemDao badgeSystemDao;
-  private final UsersRolesOfficesDao uroDao;
-
 
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
       QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
-      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao, UsersRolesOfficesDao uroDao) {
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -80,7 +77,6 @@ public class TemplateUtility {
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
     this.badgeSystemDao = badgeSystemDao;
-    this.uroDao = uroDao;
   }
 
 
@@ -182,6 +178,14 @@ public class TemplateUtility {
 
     Set<Office> offices = Sets.newHashSet();
     offices.addAll(institute.seats);
+
+    //FIXME per pagani metto provvisoriamente che il develop vede tutti.
+    // Per poter nominarlo amministratore tecnico di ogni sede di milano
+    // Decidere una soluzione migliore e meno sbrigativa.
+
+    if (Security.getUser().get().username.equals("developer")){
+      offices = Sets.newHashSet(officeDao.allOffices().list());
+    }
 
     List<Person> personList = personDao.listPerseo(Optional.<String>absent(), offices, false,
             LocalDate.now(), LocalDate.now(), true).list();

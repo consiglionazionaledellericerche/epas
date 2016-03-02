@@ -1,33 +1,57 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title: 'Creazione nuovo Tipo Orario verticale per ' + office.name  /}
+#{set title: 'Creazione Tipo Orario verticale per ' + office.name  /}
 
 #{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(office.id), ('Nuovo tipo orario ' + office.name):null]/}
 
 <div class="container">
 
-	#{breadcrumbs breadcrumbs, noHome:'true' /}
+  #{breadcrumbs breadcrumbs, noHome:'true' /}
 
-	#{title title:'Creazione Nuovo Tipo Orario Verticale ' + office.name /}
-
+  #{title title:'Creazione Nuovo Tipo Orario Verticale - ' + office.name /}
+    
+  <h4><strong>Nome orario verticale:</strong> ${name}</h4>
+    
+  <div id="vertical">
+   
+    #{alert color:'info'}
+	    #{if daysProcessed.size() < 7}
+	      <p>Definisci gli orari giornalieri.</p>
+	      <p>Definiti: <em><strong>${daysProcessed.size()} su 7</strong></em></p>
+	    #{/if}
+	    #{else}
+	      
+	      <div class="center">
+	      <p>Tutti i giorni sono stati correttamente definiti. Puoi modificarli cliccando
+	      sui singoli giorni oppure creare l'orario definitivamente.</p>
+	        <a class="btn btn-primary" href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 1, false, true)}">Crea Orario</a>
+	      </div> 
+	    #{/else}
+    #{/alert}  
+    
+    <ul class="nav nav-tabs">
+      <li role="presentation" #{if step == 1 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 1, true, false)}">Lun #{if daysProcessed.contains(1)} <i class="fa fa-check"></i> #{/if}</a></li>  
+      <li role="presentation" #{if step == 2 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 2, true, false)}">Mar #{if daysProcessed.contains(2)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 3 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 3, true, false)}">Mer #{if daysProcessed.contains(3)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 4 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 4, true, false)}">Gio #{if daysProcessed.contains(4)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 5 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 5, true, false)}">Ven #{if daysProcessed.contains(5)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 6 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 6, true, false)}">Sab #{if daysProcessed.contains(6)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 7 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 7, true, false)}">Dom #{if daysProcessed.contains(7)} <i class="fa fa-check"></i> #{/if}</a></li>
+    </ul>
+    
 	<div class="col-md-10 col-md-offset-1">
-	<div id="form-horizontal">
+	
+	
+	
+	<br>
       #{form @WorkingTimes.insertVerticalWorkingTime(), class:'form-horizontal'}
       
-      	#{if !vwt.name}
-      		#{f.input 'vwt.name', required:'true' /}
-      	#{/if}
-      	#{else}
-      		<input type="hidden" name="vwt.name" value="${vwt.name}"/>
-      		#{f.view 'vwt.name' /}
-      	#{/else}
+        #{f.hidden 'name', value:name /}
       	
-      	<input type="hidden" name="office.id" value="${office.id}"/>
+      	<input type="hidden" name="officeId" value="${office.id}"/>
   	  	<input type="hidden" name="step" value="${step}"/>
-  	  		<div class="alert alert-success">
-  	  			<h3 align="center">${day}</h3>
-  	  		</div>
-      	  %{ disable = vwt.holiday; }%
+  	  	
+  	  	%{ disable = vwt.holiday; }%
       	 
        	  #{workingTime.input
 	   		type:'radio', 
@@ -110,13 +134,18 @@
 		   	value:vwt.ticketAfternoonWorkingTime /}  
 			</div>
    			</div>
-			<div class="center">
+   			
+   			<div class="center">
+   			#{if daysProcessed.contains(step) }
+   				<input class="btn btn-primary" type="submit" value="Aggiorna"/>
+   			#{/if}
+   			#{else}
 	    		<input class="btn btn-primary" type="submit" value="Crea"/>
-	  		</div>
+	  		#{/else}
+	  	    </div>
       #{/form}
 	</div>
-	</div>
-
+  </div>
 </div>
 
 #{set 'moreScripts'}

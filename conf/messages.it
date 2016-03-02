@@ -167,6 +167,7 @@ modifierType= Calcolo Orario
 MealTicketDecision.COMPUTED=Calcolato
 MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
+mealTicketDecision=Valore Buono Pasto
 
 block.first=Dal
 block.last=Al
@@ -318,6 +319,9 @@ wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
 
+WorkingTimeTypePattern.HORIZONTAL = Orario Orizzontale
+WorkingTimeTypePattern.VERTICAL = Orario Verticale
+workingTimeTypePattern=Tipo Orario
 year= Anno (se presente)
 
 vwt.name= Nome orario
