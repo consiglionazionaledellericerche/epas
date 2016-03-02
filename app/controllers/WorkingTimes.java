@@ -4,8 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
-import controllers.Wizard.WizardStep;
+import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -20,7 +19,6 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.ContractManager;
-import manager.SecureManager;
 import manager.WorkingTimeTypeManager;
 
 import models.Contract;
@@ -30,8 +28,8 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
 import models.dto.VerticalWorkingTime;
+import models.enumerate.WorkingTimeTypePattern;
 
-import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -47,16 +45,15 @@ import security.SecurityRules;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
-
-import sun.util.logging.resources.logging;
 
 @With({Resecure.class, RequestInit.class})
 public class WorkingTimes extends Controller {
 
   private static final String VERTICAL_WORKING_TIME_STEP = "vwt"; 
-  private static final int LAST_STEP = 8;
+  public static final int NUMBER_OF_DAYS = 7;
 
   @Inject
   private static OfficeDao officeDao;
@@ -162,79 +159,117 @@ public class WorkingTimes extends Controller {
 
   }
 
-
   /**
-   * metodo che renderizza il template per la creazione di un nuovo orario di lavoro.
-   * @param officeId l'id dell'ufficio in cui inserire l'orario di lavoro
+   * 
+   * @param officeId
+   * @param compute
+   * @param name
+   * @param workingTimeTypePattern
    */
-  public static void insertWorkingTime(Long officeId) {
+  public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute, 
+      String name, WorkingTimeTypePattern workingTimeTypePattern) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    if (!compute) {
+      workingTimeTypePattern = WorkingTimeTypePattern.HORIZONTAL;
+      render(office, workingTimeTypePattern);
+    }
+    
+    //Controllo unicità
+    if (name == null || name.isEmpty()) { 
+      validation.addError("name", "non può essere vuoto");
+    } else {
+      WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(name, 
+          Optional.<Office>absent());
+      if (wtt != null) {
+        validation.addError("name", "già presente in archivio.");
+      }
+    }
+    
+    if (validation.hasErrors()){
+      render(office, name, workingTimeTypePattern);
+    }
+    
+    if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
+      HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
+      horizontalPattern.name = name;
+      render("@insertWorkingTime", horizontalPattern, office, name);
+    } else {
+      VerticalWorkingTime vwt = new VerticalWorkingTime();
+      List<Integer> daysProcessed = Lists.newArrayList();
+      int step = 1;
+      render("@insertVerticalWorkingTime", office,  vwt, name, step, daysProcessed);
+    }
+  }
+  
+  /**
+   * 
+   * @param officeId
+   * @param name
+   * @param step
+   * @param switchDay
+   * @param submit
+   * @param vwt
+   */
+  public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step, 
+      boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
     Office office = officeDao.getOfficeById(officeId);
-
-    if (office == null) {
-
-      flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
-      WorkingTimes.manageWorkingTime(null);
-    }
-
-    rules.checkIfPermitted(office);
-
-    HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
-
-    boolean horizontal = true;
-
-    render(office, horizontalPattern, horizontal);
-
-  }
-
-  /**
-   * metodo che renderizza il giorno per la costruzione dell'orario di lavoro.
-   * @param vwt l'oggetto dto che contiene le informazioni del giorno per l'orario di lavoro
-   * @param office l'ufficio a cui assegnare il nuovo orario di lavoro
-   * @param step il passo
-   */
-  public static void insertVerticalWorkingTime(@Valid VerticalWorkingTime vwt, 
-      Office office, int step) {
-
     notFoundIfNull(office);
-    
     rules.checkIfPermitted(office);
-
-    String day = "";
-    step++; 
-    if (step < LAST_STEP) {
-      day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step).dayOfWeek().getAsText());
+     
+    final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
+    List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
+    if (vwtProcessedList == null) {
+      vwtProcessedList = Lists.newArrayList();
     }
-    // giro 0: si crea il nuovo orario verticale per il lunedi
-    if (vwt == null) {      
+    
+    Set<Integer> daysProcessed = Sets.newHashSet();
+    for (VerticalWorkingTime processed : vwtProcessedList) {
+      daysProcessed.add(processed.dayOfWeek);
+    }
+    //Caso del cambio giorno ...
+    if (switchDay) {
+      flash.clear();
+      validation.clear();
       vwt = new VerticalWorkingTime();
-      render(office, vwt, step, day);
-    }    
-    if (validation.hasErrors()){
-      day = WordUtils.capitalize(LocalDate.now().withDayOfWeek(step-1).dayOfWeek().getAsText());
-      render(office, vwt, step-1, day);
+      for (VerticalWorkingTime vwtSelected : vwtProcessedList) {
+        if (vwtSelected.dayOfWeek == step) {
+          vwt = vwtSelected;
+          render(office, vwt, name, step, daysProcessed);
+        }
+      }
+      render(office, vwt, name, step, daysProcessed);
     }
-   
-    //altri giorni
-    final String key = VERTICAL_WORKING_TIME_STEP + Security.getUser().get().username;
-    List<VerticalWorkingTime> list = Cache.get(key, List.class);
-
-    if (list == null) {
-      list = Lists.newArrayList();
-    }    
-    vwt.dayOfWeek = step - 1 ;
-    list.add(vwt);  
-    Cache.safeAdd(key, list, "30mn");  
-   
-    //caso finale: persisto la lista di dto
-    if (step == LAST_STEP) {      
-      workingTimeTypeManager.saveVerticalWorkingTimeType(list, office, vwt.name);
-      flash.success("Salvato correttamente orario di lavoro %s", vwt.name);
+    
+    //Persistenza ...
+    if (submit) {
+      // TODO: validatore
+      workingTimeTypeManager.saveVerticalWorkingTimeType(vwtProcessedList, office, name);
+      flash.success("Salvato correttamente orario di lavoro %s", name);
       manageOfficeWorkingTime(office.id);
-      //renderVerticalWorkingTime(office.id, list);      
-    }   
+    }
 
-    render(vwt, step, office, day);
+    Preconditions.checkNotNull(vwt);
+    // Validazione dto
+    if (validation.hasErrors()){
+      flash.error("Occorre correggere gli errori riportati.");
+      render(office, vwt, name, step, daysProcessed);
+    }
+
+    // Next step
+    vwt.dayOfWeek = step;
+    vwtProcessedList.add(vwt);  
+    daysProcessed.add(vwt.dayOfWeek);
+    Cache.safeAdd(key, vwtProcessedList, "30mn");  
+    if (step < NUMBER_OF_DAYS) {      
+      step++;
+    } 
+    render(vwt, step, name, office, daysProcessed);
+
 
   }
   
@@ -248,10 +283,6 @@ public class WorkingTimes extends Controller {
     render(office, list);
   }
 
-//  public static void saveVertical(){
-//    
-//  }
-  
   /**
    * metodo che consente la creazione di un nuovo orario di lavoro orizzontale.
    * @param horizontalPattern il dto contenente le informazioni da persistere
