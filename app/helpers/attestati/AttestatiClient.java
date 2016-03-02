@@ -183,7 +183,7 @@ public class AttestatiClient {
         log.info("Risposta alla login = \n{}", loginDoc);
         
         Elements loginMessages = loginDoc.select("h5[align=center]>font");
-        
+        log.info("Login messages: {}", loginMessages.first().ownText());
         if (loginResponse.statusCode() != 200 || loginMessages.isEmpty()
             || !loginMessages.first().ownText().contains("Login completata con successo.")) {
           //errore login
