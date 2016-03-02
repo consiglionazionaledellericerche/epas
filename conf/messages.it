@@ -167,6 +167,7 @@ modifierType= Calcolo Orario
 MealTicketDecision.COMPUTED=Calcolato
 MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
+mealTicketDecision=Valore Buono Pasto
 
 block.first=Dal
 block.last=Al
