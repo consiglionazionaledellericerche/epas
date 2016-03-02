@@ -198,13 +198,64 @@ public class WorkingTimes extends Controller {
       horizontalPattern.name = name;
       render("@insertWorkingTime", horizontalPattern, office, name);
     } else {
-      VerticalWorkingTime vwt = new VerticalWorkingTime();
-      List<Integer> daysProcessed = Lists.newArrayList();
+      final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
+      List<VerticalWorkingTime> vwtProcessedList = processed(key);
+      Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
       int step = 1;
+      VerticalWorkingTime vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
+      
       render("@insertVerticalWorkingTime", office,  vwt, name, step, daysProcessed);
     }
   }
   
+  private static VerticalWorkingTime get(List<VerticalWorkingTime> wttList, int step, 
+      Optional<VerticalWorkingTime> lastInsert) {
+    VerticalWorkingTime vwt = null;
+    for (VerticalWorkingTime processed : wttList) {
+      if (processed.dayOfWeek == step) {
+        vwt = processed;
+      }
+    }
+    if (vwt == null) {
+      if (lastInsert.isPresent()) {
+        vwt = lastInsert.get();
+      } else {
+        vwt = new VerticalWorkingTime();
+      }
+    }
+    return vwt;
+  }
+  
+  private static void add(List<VerticalWorkingTime> wttList, VerticalWorkingTime vwt, int step) {
+    //rimuovere il vecchio
+    VerticalWorkingTime toDelete = null;
+    for (VerticalWorkingTime vwtOld : wttList) {
+      if (vwtOld.dayOfWeek == step) {
+        toDelete = vwtOld;
+      }
+    }
+    if (toDelete != null) {
+      wttList.remove(toDelete);
+    }
+    wttList.add(vwt);
+  }
+  
+  private static List<VerticalWorkingTime> processed(String key) {
+    List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
+    if (vwtProcessedList == null) {
+      vwtProcessedList = Lists.newArrayList();
+    }
+    return vwtProcessedList;
+  }
+  
+  private static Set<Integer> dayProcessed(List<VerticalWorkingTime> wttList) {
+    Set<Integer> daysProcessed = Sets.newHashSet();
+    for (VerticalWorkingTime processed : wttList) {
+      daysProcessed.add(processed.dayOfWeek);
+    }
+    return daysProcessed;
+  }
+   
   /**
    * 
    * @param officeId
@@ -222,26 +273,14 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(office);
      
     final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
-    List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
-    if (vwtProcessedList == null) {
-      vwtProcessedList = Lists.newArrayList();
-    }
+    List<VerticalWorkingTime> vwtProcessedList = processed(key);
+    Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
     
-    Set<Integer> daysProcessed = Sets.newHashSet();
-    for (VerticalWorkingTime processed : vwtProcessedList) {
-      daysProcessed.add(processed.dayOfWeek);
-    }
     //Caso del cambio giorno ...
     if (switchDay) {
       flash.clear();
       validation.clear();
-      vwt = new VerticalWorkingTime();
-      for (VerticalWorkingTime vwtSelected : vwtProcessedList) {
-        if (vwtSelected.dayOfWeek == step) {
-          vwt = vwtSelected;
-          render(office, vwt, name, step, daysProcessed);
-        }
-      }
+      vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
       render(office, vwt, name, step, daysProcessed);
     }
     
@@ -262,11 +301,12 @@ public class WorkingTimes extends Controller {
 
     // Next step
     vwt.dayOfWeek = step;
-    vwtProcessedList.add(vwt);  
-    daysProcessed.add(vwt.dayOfWeek);
+    add(vwtProcessedList, vwt, step);  
     Cache.safeAdd(key, vwtProcessedList, "30mn");  
+    daysProcessed.add(vwt.dayOfWeek);
     if (step < NUMBER_OF_DAYS) {      
       step++;
+      vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
     } 
     render(vwt, step, name, office, daysProcessed);
 
