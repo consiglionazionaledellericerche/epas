@@ -175,7 +175,7 @@ public class AttestatiClient {
             .userAgent(CLIENT_USER_AGENT)
             .url(loginUrl)
             .method(Method.POST).execute();
-        log.debug("Effettuata la richiesta di login come utente %s, codice di risposta http = {}",
+        log.debug("Effettuata la richiesta di login come utente {}, codice di risposta http = {}",
             attestatiLogin, loginResponse.statusCode());
 
         Document loginDoc = loginResponse.parse();
