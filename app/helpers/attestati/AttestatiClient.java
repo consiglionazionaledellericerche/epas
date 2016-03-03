@@ -175,16 +175,16 @@ public class AttestatiClient {
             .userAgent(CLIENT_USER_AGENT)
             .url(loginUrl)
             .method(Method.POST).execute();
-        log.info("Login url: {}, utente: {}, password: {}", loginUrl, attestatiLogin, attestatiPassword);
-        log.info("Effettuata la richiesta di login come utente {}, codice di risposta http = {} e con messaggio {}.",
-            attestatiLogin, loginResponse.statusCode(), loginResponse.statusMessage());
+        
+        log.info("Effettuata la richiesta di login all'indirizzo {} come utente {}, codice di risposta http = {} e con messaggio {}.",
+            loginUrl, attestatiLogin, loginResponse.statusCode(), loginResponse.statusMessage());
 
         Document loginDoc = loginResponse.parse();
-        log.info("Risposta alla login = \n{}", loginDoc);
+        log.debug("Risposta alla login = \n{}", loginDoc);
         
         Elements loginMessages = loginDoc.select("h5[align=center]>font");
         //log.info("Login messages: {}", loginMessages.first().ownText());
-        if (loginResponse.statusCode() != 200 || loginMessages.isEmpty()
+        if (loginMessages.isEmpty()
             || !loginMessages.first().ownText().contains("Login completata con successo.")) {
           //errore login
           return new SessionAttestati(attestatiLogin, false, loginResponse.cookies(), office, year, month);
@@ -202,7 +202,7 @@ public class AttestatiClient {
           .userAgent(CLIENT_USER_AGENT)
           .method(Method.GET).execute();
 
-      log.info("Effettuata la richiesta di sedi disponibili %s, codice di risposta http = {}",
+      log.info("Effettuata la richiesta di sedi disponibili {}, codice di risposta http = {}",
           attestatiLogin, listaDipendentiMaskResponse.statusCode());
 
       if (listaDipendentiMaskResponse.statusCode() != 200) {
@@ -231,7 +231,7 @@ public class AttestatiClient {
               Set<Dipendente> officeDips = listaDipendenti(officeCnr.get(), 
                   sessionAttestati.getCookies(), year, month);
               sessionAttestati.getOfficesDips().put(officeCnr.get(), officeDips);
-              log.debug("Ho prelevato la sede %s con %s dipendenti.", officeCnr.get(),
+              log.debug("Ho prelevato la sede {} con {} dipendenti.", officeCnr.get(),
                   officeDips.size());
             }
           }
@@ -280,7 +280,7 @@ public class AttestatiClient {
       throws URISyntaxException, MalformedURLException {
     Response listaDipendentiResponse;
 
-    String urlToPresence = Play.configuration.getProperty(UploadSituation.URL_TO_PRESENCE);
+    String urlToPresence = UploadSituation.URL_TO_PRESENCE;
 
     URI baseUri = new URI(urlToPresence);
     final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
@@ -310,7 +310,7 @@ public class AttestatiClient {
 
       Document listaDipendentiDoc = listaDipendentiResponse.parse();
 
-      Logger.debug("Risposta alla richiesta della lista dei dipendenti = \n%s", listaDipendentiDoc);
+      log.debug("Risposta alla richiesta della lista dei dipendenti = \n {}", listaDipendentiDoc);
 
       /*
        * Snippet di codice html da parsare per avere le matricole e il nome del dipendente:
@@ -375,7 +375,7 @@ public class AttestatiClient {
 
     //Office office = Security.getUser().get().person.office;
     Office office = dipendente.getPerson().office;
-    String urlToPresence = Play.configuration.getProperty(UploadSituation.URL_TO_PRESENCE);
+    String urlToPresence = UploadSituation.URL_TO_PRESENCE;
     URI baseUri = new URI(urlToPresence);
     final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 
