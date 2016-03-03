@@ -406,7 +406,10 @@ public class Reperibility extends Controller {
     LocalDate firstOfYear = new LocalDate(year, 1, 1);
     Options options = new Options();
     options.pageSize = IHtmlToPdfTransformer.A4L;
-    renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays);
+    String supervisor =
+            reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+    
+    renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, supervisor);
   }
 
 
@@ -538,9 +541,11 @@ public class Reperibility extends Controller {
     final String cFs = codFs;
     final String thNoStamp = Messages.get("PDFReport.thNoStampings");
     final String thAbs = Messages.get("PDFReport.thAbsences");
+    final String supervisor =
+            reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
 
     renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays,
-        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs);
+        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, supervisor);
   }
 
   /**
