@@ -53,7 +53,6 @@ public class Users extends Controller{
 
   @Inject
   private static SecurityRules rules;
-
   @Inject
   private static UserDao userDao;
   @Inject
