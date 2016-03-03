@@ -1,9 +1,0 @@
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - DEBUG.*$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Starting new HTTP connection \(1\): localhost$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Inviata la timbratura .* response content = OK$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Ultimo file scaricato: AT[[:digit:]]{6} di .* byte. Ultima riga processata la numero .*.$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Scaricato file AT[[:digit:]]{6}$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Non ci sono sul server file di timbrature più nuovi di AT[[:digit:]]{6}$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Processo il file /home/epas/area-pisa-client/scarica/AT[[:digit:]]{6} per estrarne le timbrature$
-^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2},[[:digit:]]{3} - INFO - Ignorata timbratura line = [[:digit:]]{4}.[[:digit:]]{5}(0000000DOTTORANDO|0000000000ASS RIC|.*PORTINERIA|0000COLLABORATORE|000COLLABORATRICE|000000TIROCINANTE|0000000000000COLL|000000000000COLL\.|000000000000CLBRT|00000000000COOLAB|000000000000UNIPI|00000000000000INT|000000000BORSISTA|0000000ASSEGNISTA|0000000000TESISTA|00000000000000ASS|0000000000000ASS\.|COLLABORATORE EST|000000000000SDNTT|00000000 COLLABOR|.*GIAC.*ISTITUTO|.*INTERNO.*).*$
-^\s*$
