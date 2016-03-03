@@ -1,1 +1,0 @@
-^\w{3} [ :[:digit:]]{11} .*sshd\[[[:digit:]]+\]: Connection closed by [:[:alnum:].]+ \[preauth\]$

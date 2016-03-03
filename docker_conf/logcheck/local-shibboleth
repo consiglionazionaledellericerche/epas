@@ -1,4 +1,0 @@
-^\w{3} ([[:digit:]]|\s)[[:digit:]]{1} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2} \w{2} shibboleth-sp: [[:digit:]]{10} INFO Shibboleth.Config : reload thread finished$
-^\w{3} ([[:digit:]]|\s)[[:digit:]]{1} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2} \w{2} shibboleth-sp: [[:digit:]]{10} INFO Shibboleth.Config : xmltooling.*$
-^\w{3} ([[:digit:]]|\s)[[:digit:]]{1} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2} \w{2} shibboleth-sp: [[:digit:]]{10} INFO Shibboleth.config : Library versions: .*$
-^\w{3} ([[:digit:]]|\s)[[:digit:]]{1} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2} \w{2} shibboleth-sp: [[:digit:]]{10} INFO Shibboleth.config : Shibboleth SP Version .*$
