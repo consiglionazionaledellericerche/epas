@@ -138,7 +138,7 @@ public class BadgeReaders extends Controller {
    *
    * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
    */
-  public static void updateInfo(@Valid BadgeReader badgeReader) {
+  public static void updateInfo(@Valid BadgeReader badgeReader, @Valid Office owner) {
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -147,8 +147,10 @@ public class BadgeReaders extends Controller {
       render("@edit", badgeReader);
     }
 
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(owner);
+    badgeReader.user.owner = owner;
     badgeReader.save();
+    badgeReader.user.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
     edit(badgeReader.id);
