@@ -189,25 +189,25 @@ public class BadgeReaders extends Controller {
    * @param badgeReader l'oggetto badge reader da salvare.
    * @param user l'utente creato a partire dal badge reader.
    */
-  public static void save(@Valid BadgeReader badgeReader, @Valid Office office) {
+  public static void save(@Valid BadgeReader badgeReader, @Valid Office office, @Valid User user) {
 
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
       flash.error(Web.msgHasErrors());
-      render("@blank", badgeReader);
+      render("@blank", badgeReader, office, user);
     }
-    if (badgeReader.user.password.length() < 5) {
+    if (user.password.length() < 5) {
       response.status = 400;
       validation.addError("user.password", "almeno 5 caratteri");
-      render("@blank", badgeReader, office);
+      render("@blank", badgeReader, office, user);
     }
     
     rules.checkIfPermitted(office);
 
+    badgeReader.user = user;
     badgeReader.user.owner = office;
-    Codec codec = new Codec();
-    badgeReader.user.password = codec.hexMD5(badgeReader.user.password);
+    badgeReader.user.password = new Codec().hexMD5(badgeReader.user.password);
     badgeReader.user.save();
     badgeReader.save();
 
