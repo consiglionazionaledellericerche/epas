@@ -24,7 +24,8 @@ WORKDIR /home/epas/epas/
 #prod o dev da parametrizzare
 USER epas
 
-RUN play clean && \
+RUN touch conf/dev.conf && \
+    play clean && \
     play deps --sync && \
     play precompile
 
