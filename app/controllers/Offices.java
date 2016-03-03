@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
 
 import com.mysema.query.SearchResults;
 
@@ -103,7 +104,9 @@ public class Offices extends Controller {
     final Institute institute = Institute.findById(instituteId);
     notFoundIfNull(institute);
 
-    render(institute);
+    Office office = new Office();
+    office.institute = institute;
+    render(office);
   }
 
   /**
@@ -113,6 +116,8 @@ public class Offices extends Controller {
    */
   public static void save(@Valid Office office) {
 
+    Preconditions.checkNotNull(office.institute);
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", office,
