@@ -189,8 +189,6 @@ public class BadgeReaders extends Controller {
    */
   public static void save(@Valid BadgeReader badgeReader, @Valid Office office) {
 
-    rules.checkIfPermitted(office);
-
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
@@ -202,10 +200,11 @@ public class BadgeReaders extends Controller {
       validation.addError("user.password", "almeno 5 caratteri");
       render("@blank", badgeReader, office);
     }
+    
+    rules.checkIfPermitted(office);
 
     badgeReader.user.owner = office;
     Codec codec = new Codec();
-    
     badgeReader.user.password = codec.hexMD5(badgeReader.user.password);
     badgeReader.user.save();
     badgeReader.save();
