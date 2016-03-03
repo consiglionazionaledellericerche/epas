@@ -253,6 +253,13 @@ public class Users extends Controller{
       }
     }
     
+    // FIXME: questa operazione è distruttiva, se disabilito un user con ruolo di lettore badge
+    // poi non sono più in grado di riassociargli quel ruolo.......
+    if (user.badgeReader != null) {
+      flash.error("Impossibile disabilitare un user con ruolo BadgeReader");
+      index();
+    }
+    
     List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(user);
     for (UsersRolesOffices uro : uroList) {
       uro.delete();
