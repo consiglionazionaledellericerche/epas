@@ -1,5 +1,10 @@
 package manager;
 
+import com.google.common.base.Verify;
+import com.google.gdata.util.common.base.Preconditions;
+
+import controllers.WorkingTimes;
+
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -10,7 +15,7 @@ import org.joda.time.DateTimeConstants;
 import java.util.List;
 
 public class WorkingTimeTypeManager {
-
+  
   /**
    * associa il giorno all'orario di lavoro.
    * @param wttd il giorno da associare all'orario di lavoro
@@ -33,6 +38,19 @@ public class WorkingTimeTypeManager {
    */
   public void saveVerticalWorkingTimeType(List<VerticalWorkingTime> list, 
       Office office, String name) {
+    
+    Preconditions.checkState(list.size() == WorkingTimes.NUMBER_OF_DAYS);
+    for (int i = 1; i <= WorkingTimes.NUMBER_OF_DAYS; i++) {
+      boolean finded = false;
+      for (VerticalWorkingTime vwt : list) {
+        if (vwt.dayOfWeek == i) {
+          finded = true;
+        }
+      }
+      Verify.verify(finded);
+    }
+    
+    
     WorkingTimeType wtt = new WorkingTimeType();
     wtt.office = office;
     wtt.horizontal = false;

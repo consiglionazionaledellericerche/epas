@@ -47,7 +47,6 @@ public class VerticalWorkingTime {
   @Min(0)
   public int ticketAfternoonWorkingTime = 1;
   
-  @Required
   public String name;
   
   
