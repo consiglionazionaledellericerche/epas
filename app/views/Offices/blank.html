@@ -1,7 +1,7 @@
 #{modalAsync id:'modalInsertOffice', button:'Salva', title:'Nuova sede'}
 
   <div class="alert alert-success" role="alert">
-    	Inserisci i dati della nuova sede appartenente a <strong>${institute.name}</strong>
+    	Inserisci i dati della nuova sede appartenente a <strong>${office.institute.name}</strong>
   </div>
 
   <div id="officeData">
@@ -10,7 +10,7 @@
 	    class:'form form-horizontal', 'data-async':'#instituteList',
 	    'data-async-error':'#officeData'}
 
-		#{f.hidden 'office.institute.id', value: institute.id /}
+	#{f.hidden 'office.institute.id', value: office.institute.id /}
 
     #{f.input 'office.name', required:true /}
     #{f.input 'office.codeId', required:true, popover:true /}
