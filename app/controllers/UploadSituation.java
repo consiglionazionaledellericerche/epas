@@ -63,9 +63,9 @@ public class UploadSituation extends Controller {
   public static final String FILE_PREFIX = "situazioneMensile";
   public static final String FILE_SUFFIX = ".txt";
 
-  public static final String URL_TO_PRESENCE = "url_to_presence";
-
   public static final String DEFAULT_URL_TO_PRESENCE = "https://attestati.rm.cnr.it/attestati/";
+  public static final String URL_TO_PRESENCE = Play.configuration.getProperty("url_to_presence", DEFAULT_URL_TO_PRESENCE);
+
 
   @Inject
   private static SecurityRules rules;
@@ -189,7 +189,7 @@ public class UploadSituation extends Controller {
       Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));
       render("@createFile", wrOffice, monthToUpload);
     }
-
+    
     String body = updloadSituationManager.createFile(office, year, month);
     String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX;
     renderBinary(IOUtils.toInputStream(body), fileName);
@@ -235,8 +235,7 @@ public class UploadSituation extends Controller {
       sessionAttestati = new SessionAttestati(sessionAttestati.getUsernameCnr(), true,
           sessionAttestati.getCookies(), office, year, month);
 
-      sessionAttestati = attestatiClient.login(Play.configuration
-              .getProperty(URL_TO_PRESENCE, DEFAULT_URL_TO_PRESENCE),
+      sessionAttestati = attestatiClient.login(URL_TO_PRESENCE,
           null, null, sessionAttestati, office, year, month);
 
       if (sessionAttestati != null) {
@@ -257,8 +256,7 @@ public class UploadSituation extends Controller {
           month = next.get().getMonthOfYear();
         }
 
-        sessionAttestati = attestatiClient.login(Play.configuration
-                .getProperty(URL_TO_PRESENCE, DEFAULT_URL_TO_PRESENCE),
+        sessionAttestati = attestatiClient.login(URL_TO_PRESENCE,
             attestatiLogin, attestatiPassword, null, office, year, month);
 
         if (!sessionAttestati.isLoggedIn()) {
