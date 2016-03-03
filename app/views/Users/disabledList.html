@@ -2,8 +2,13 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione utenti'  /}
 
-#{user.usersTabs activeAction:'disabledList' /}
+
 <div class="container">
+
+   #{set breadcrumbs:['users':null, 'disabledUsers':@Users.disabledList()] /}
+   #{breadcrumbs breadcrumbs, noHome:'true' /}
+
+   #{user.usersTabs activeAction:'disabledList' /}
 
 	#{alert color:'info'}
 	<p>Elenco degli utenti disabilitati. Tra essi compaiono sia gli utenti precedentemente associati a persone fisiche, sia gli 
