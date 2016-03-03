@@ -79,18 +79,23 @@ public class MealTicketRecapBuilder {
         mealTicketRecap.setDateRunOut(currentPersonDay.date);
         return mealTicketRecap;
       }
+      
+      //Attribuire i buoni pasto ai personDay... e taggarli come usati. TODO: da verificare
+      int index = i - mealTicketRecap.getSourcedInInterval();
+      if (index > 0 && index < mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size()) {
+        MealTicket currentMealTicket = mealTicketRecap
+            .getMealTicketsReceivedExpireOrderedAsc()
+            .get(i - mealTicketRecap.getSourcedInInterval());
 
-      MealTicket currentMealTicket = mealTicketRecap
-          .getMealTicketsReceivedExpireOrderedAsc().get(i - mealTicketRecap.getSourcedInInterval());
+        if (currentPersonDay.date.isAfter(currentMealTicket.expireDate)) {
+          mealTicketRecap.setDateExpire(currentPersonDay.date);
+          //continue;
+          //return;
+        }
 
-      if (currentPersonDay.date.isAfter(currentMealTicket.expireDate)) {
-        mealTicketRecap.setDateExpire(currentPersonDay.date);
-        //continue;
-        //return;
+        currentPersonDay.mealTicketAssigned = currentMealTicket;
+        currentMealTicket.used = true;
       }
-
-      currentPersonDay.mealTicketAssigned = currentMealTicket;
-      currentMealTicket.used = true;
     }
 
     mealTicketRecap.setRemaining(mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size() 
