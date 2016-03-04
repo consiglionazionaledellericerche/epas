@@ -2,18 +2,22 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 
 import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
 import dao.RoleDao;
 import dao.UserDao;
+import dao.UserDao.EnabledType;
+import dao.UserDao.UserType;
 import dao.UsersRolesOfficesDao;
 import dao.history.HistoryValue;
 import dao.history.UserHistoryDao;
 
 import helpers.Web;
 
+import manager.SecureManager;
 import manager.UserManager;
 
 import models.BadgeReader;
@@ -49,7 +53,6 @@ public class Users extends Controller{
 
   @Inject
   private static SecurityRules rules;
-
   @Inject
   private static UserDao userDao;
   @Inject
@@ -59,9 +62,9 @@ public class Users extends Controller{
   @Inject
   private static UsersRolesOfficesDao uroDao;
   @Inject
-  private static UserHistoryDao historyDao;
-  @Inject
   private static UserManager userManager;
+  @Inject
+  private static SecureManager secureManager;
 
   public static void index() {
     flash.keep();
@@ -75,9 +78,9 @@ public class Users extends Controller{
   public static void list(String name) {
     
     User user = Security.getUser().get();
-    SearchResults<?> results =
-        userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
-            user, true).listResults();   
+    Set<Office> offices = secureManager.officesTecnicalAdminAllowed(user);
+    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
+        offices, EnabledType.ONLY_ENABLED, Lists.newArrayList(UserType.PERSON)).listResults();
 
     render(results, name);
   }
@@ -89,9 +92,15 @@ public class Users extends Controller{
   public static void systemList(String name) {
     
     User user = Security.getUser().get();
-    SearchResults<?> results =
-        userDao.listUsersByOffice(Optional.<String>fromNullable(name), user,
-            false).listResults();
+    Set<Office> offices = secureManager.officesTecnicalAdminAllowed(user);
+    
+    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
+    if (userDao.isAdmin(user) || userDao.isDeveloper(user)) {
+      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
+    }
+    
+    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
+        offices, EnabledType.ONLY_ENABLED, userTypes).listResults();
 
     render(results, name);
   }
@@ -102,8 +111,16 @@ public class Users extends Controller{
    */
   public static void disabledList(String name) {
     
-    SearchResults<?> results =
-        userDao.disabledUsersList(Optional.<String>fromNullable(name)).listResults();    
+    User user = Security.getUser().get();
+    Set<Office> offices = secureManager.officesTecnicalAdminAllowed(user);
+    
+    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
+    if (userDao.isAdmin(user) || userDao.isDeveloper(user)) {
+      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
+    }
+    
+    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name), 
+        offices, EnabledType.ONLY_DISABLED, userTypes).listResults();
 
     render(results, name);
   }
@@ -218,38 +235,37 @@ public class Users extends Controller{
    * @param id l'id dell'utente da cancellare
    */
   public static void disable(Long id) {
+    
     User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
     notFoundIfNull(user);
+    Preconditions.checkState(user.person == null);
 
+    User userLogged = Security.getUser().get();
+    
     if (user.owner != null) {
       rules.checkIfPermitted(user.owner);
-    } else if (user.person != null) {
-      rules.checkIfPermitted(user.person.office);
-    } else{
-      rules.checkIfPermitted();
+    } else  {
+      //User di sistema senza owner (sistorg, protime....)
+      // TODO: fare una regola drools per questo check
+      if (!(!userDao.isAdmin(userLogged) && !userDao.isDeveloper(userLogged))) {
+        throw new IllegalStateException();
+      }
     }
     
-    
-    if (user.person != null) {
-
-      flash.error(Messages.get("crud.userDeleteError"));
-      edit(id);
+    // FIXME: questa operazione è distruttiva, se disabilito un user con ruolo di lettore badge
+    // poi non sono più in grado di riassociargli quel ruolo.......
+    if (user.badgeReader != null) {
+      flash.error("Impossibile disabilitare un user con ruolo BadgeReader");
+      index();
     }
     
     List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(user);
     for (UsersRolesOffices uro : uroList) {
       uro.delete();
     }
-    try {
-      user.disabled = true;
-      user.owner = null;
-      user.expireDate = LocalDate.now();
-      user.save();
-             
-    } catch(Exception e) {
-      flash.error("Utente non eliminabile in quando relazionato con lo storico dell'applicazione.");
-      edit(id);
-    }
+    user.disabled = true;
+    user.expireDate = LocalDate.now();
+    user.save();
 
     flash.success(Web.msgDisabled(User.class));
     index();

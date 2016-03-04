@@ -27,6 +27,7 @@ import models.query.QUser;
 import models.query.QUsersRolesOffices;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -35,6 +36,9 @@ import javax.persistence.EntityManager;
  */
 public class UserDao extends DaoBase {
 
+  public static final String ADMIN_USERNAME = "admin";
+  public static final String DEVELOPER_USERNAME = "developer";
+  
   @Inject
   public UsersRolesOfficesDao usersRolesOfficesDao;
 
@@ -93,13 +97,22 @@ public class UserDao extends DaoBase {
   }
 
 
+  /**
+   * Se l'utente è admin.
+   * @param user
+   * @return
+   */
   public boolean isAdmin(User user) {
-
-    if (user.username.equals("admin")) {
-      return true;
-    } else {
-      return false;
-    }
+    return user.username.equals(ADMIN_USERNAME);
+  }
+  
+  /**
+   * Se l'utente è developer.
+   * @param user
+   * @return
+   */
+  public boolean isDeveloper(User user) {
+    return user.username.equals(DEVELOPER_USERNAME);
   }
 
   /**
@@ -126,6 +139,14 @@ public class UserDao extends DaoBase {
     return getQueryFactory().from(user).where(user.username.contains(username)).list(user.username);
   }
   
+  public static enum UserType {
+    PERSON, SYSTEM_WITH_OWNER, SYSTEM_WITHOUT_OWNER;
+  }
+  
+  public static enum EnabledType {
+    ONLY_ENABLED, ONLY_DISABLED, BOTH;
+  }
+  
   /**
    * 
    * @param name opzionale il nome su cui filtrare
@@ -133,51 +154,45 @@ public class UserDao extends DaoBase {
    * @param associated se si vogliono solo gli utenti con persona associata o anche quelli di sistema
    * @return la lista di utenti che soddisfano i parametri passati.
    */
-  public PerseoSimpleResults<User> listUsersByOffice(Optional<String> name, User userLogged, boolean associated){
+  public PerseoSimpleResults<User> listUsersByOffice(Optional<String> name, Set<Office> offices, 
+      EnabledType enableType, List<UserType> types) {
+    
     final QUser user = QUser.user;
-    final QUsersRolesOffices userRoleOffice = QUsersRolesOffices.usersRolesOffices;
     final QPerson person = QPerson.person;
     JPQLQuery query = getQueryFactory().from(user)
-        .leftJoin(user.usersRolesOffices, userRoleOffice)
         .leftJoin(user.person, person);
     
     BooleanBuilder condition = new BooleanBuilder();
-    if (associated) {
-      if (userLogged.person != null ) {
-        condition.and(user.person.office.eq(userLogged.person.office));
-      }
-      condition.and(person.user.isNotNull());
-        
-    } else {
-      condition.and(person.user.isNull());
-      condition.and(user.username.notIn("admin", "developer"));
-      
-      if (userLogged.person != null) {
-        condition.and(user.owner.eq(userLogged.person.office));
-      }      
+    
+    // Tipi
+    
+    if (types.contains(UserType.PERSON)) {
+      condition.or(person.office.in(offices));
     }
+    if (types.contains(UserType.SYSTEM_WITH_OWNER)) {
+      condition.or(person.office.isNull().and(user.owner.in(offices)));
+    }
+    if (types.equals(UserType.SYSTEM_WITHOUT_OWNER)) {
+      condition.or(person.office.isNull().and(user.owner.isNull()));
+    }
+    // Abilitato / Disabilitato
+    
+    if (enableType.equals(EnabledType.ONLY_ENABLED)) {
+      condition.and(user.disabled.isFalse());
+    } 
+    else if (enableType.equals(EnabledType.ONLY_DISABLED)) {
+      condition.and(user.disabled.isTrue());
+    }
+    
+    // Filtro nome
     if (name.isPresent()) {
       condition.and(matchUserName(user, name.get()));
     }
    
-    query.where(user.disabled.eq(false).and(condition)).distinct().orderBy(user.username.asc());   
+    query.where(condition).distinct().orderBy(user.username.asc());   
         
     return PerseoModelQuery.wrap(query, user);
   }
-  
-  /**
-   * 
-   * @param name
-   * @param office
-   * @return la lista degli utenti disabilitati
-   */
-  public PerseoSimpleResults<User> disabledUsersList(Optional<String> name) {
-    final QUser user = QUser.user;
-    
-    JPQLQuery query = getQueryFactory().from(user).where(user.disabled.eq(true));
-    return PerseoModelQuery.wrap(query, user);
-  }
-
   
   private BooleanBuilder matchUserName(QUser user, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();

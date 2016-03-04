@@ -30,7 +30,8 @@
 	      #{f.input 'badgeReader.description' /}
 	      #{f.input 'badgeReader.location' /}
 	    
-	      #{f.selectModel 'badgeReader.owner', items:templateUtility.officeForBadgeReaders(), required:true /}
+	      #{f.selectModel 'owner', value:badgeReader.user.owner, 
+	        items:templateUtility.officeForBadgeReaders(), required:true /}
  	  	
 	      #{b.buttons}
 	        #{b.save /}
