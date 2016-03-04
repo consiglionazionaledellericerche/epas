@@ -118,7 +118,7 @@ public class SecureManager {
 
   }
 
-  public Set<Office> officesBadgeAllowed(User user) {
+  public Set<Office> officesTecnicalAdminAllowed(User user) {
     ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN);
 
     return getOfficeAllowed(user, roles);

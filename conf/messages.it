@@ -284,6 +284,9 @@ User.blank= Nuovo utente
 User.systemBlank= Nuovo utente di sistema
 user.person= Persona associata
 users= Utenti
+personUsers=Utenti Persone
+systemUsers=Utenti Di Sistema
+disabledUsers=Utenti Disabilitati
 
 yearAtt=Anno Attestato
 monthAtt=Mese Attestato
