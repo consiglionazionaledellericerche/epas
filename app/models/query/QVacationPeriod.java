@@ -24,13 +24,15 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
 
     public static final QVacationPeriod vacationPeriod = new QVacationPeriod("vacationPeriod");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPropertyInPeriod _super = new models.base.query.QPropertyInPeriod(this);
 
-    public final DatePath<org.joda.time.LocalDate> beginFrom = createDate("beginFrom", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final QContract contract;
 
-    public final DatePath<org.joda.time.LocalDate> endTo = createDate("endTo", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -38,10 +40,18 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final StringPath label = createString("label");
+
+    public final SimplePath<models.base.IPropertiesInPeriodOwner> owner = createSimple("owner", models.base.IPropertiesInPeriodOwner.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final SimplePath<Object> type = createSimple("type", Object.class);
+
     public final QVacationCode vacationCode;
+
+    public final SimplePath<Object> value = createSimple("value", Object.class);
 
     public QVacationPeriod(String variable) {
         this(VacationPeriod.class, forVariable(variable), INITS);

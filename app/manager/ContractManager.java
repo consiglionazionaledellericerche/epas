@@ -232,8 +232,8 @@ public class ContractManager {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
     vacationPeriod.contract = contract;
-    vacationPeriod.beginFrom = beginFrom;
-    vacationPeriod.endTo = endTo;
+    vacationPeriod.setBeginDate(beginFrom);
+    vacationPeriod.setEndDate(endTo);
     vacationPeriod.vacationCode = vacationCode;
     return vacationPeriod;
   }

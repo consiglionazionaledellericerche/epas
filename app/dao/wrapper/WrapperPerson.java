@@ -322,7 +322,7 @@ public class WrapperPerson implements IWrapperPerson {
     //ricerca
     for (VacationPeriod vp : this.currentContract.get().vacationPeriods) {
       if (DateUtility.isDateIntoInterval(
-          LocalDate.now(), new DateInterval(vp.beginFrom, vp.endTo))) {
+          LocalDate.now(), new DateInterval(vp.getBeginDate(), vp.calculatedEnd()))) {
         this.currentVacationPeriod = Optional.fromNullable(vp);
         return this.currentVacationPeriod;
       }

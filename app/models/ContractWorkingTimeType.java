@@ -48,8 +48,8 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
     return this.contract;
   }
 
-  public void setOwner(IPropertiesInPeriodOwner owner) {
-    this.contract = (Contract)owner;
+  public void setOwner(IPropertiesInPeriodOwner target) {
+    this.contract = (Contract)target;
   }
 
   @Override
