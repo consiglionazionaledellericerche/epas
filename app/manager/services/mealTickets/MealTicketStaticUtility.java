@@ -40,8 +40,6 @@ public class MealTicketStaticUtility {
         continue;
       }
       
-      log.info("Processo il buono {} - {}", mealTicket.block, mealTicket.code);
-
       //Primo buono pasto
       if (currentBlock == null) {
         previousMealTicket = mealTicket;
