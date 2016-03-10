@@ -28,6 +28,7 @@ import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
+import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
 
@@ -48,8 +49,6 @@ import javax.inject.Inject;
 @Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Contracts extends Controller {
-
-  private static final String dtf = "dd/MM/YYY";
 
   @Inject
   static PersonDao personDao;
@@ -336,7 +335,7 @@ public class Contracts extends Controller {
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
-            periodRecaps);
+            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
 
@@ -360,6 +359,88 @@ public class Contracts extends Controller {
 
   }
 
+  /**
+   * Crud gestione periodi presenza automatica.
+   *
+   * @param id contratto
+   */
+  public static void updateContractVacationPeriod(Long id) {
+
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    VacationPeriod vp = new VacationPeriod();
+    vp.contract = contract;
+
+    render(wrappedContract, contract, vp);
+  }
+
+  /**
+   * Salva il nuovo periodo presenza automatica.
+   *
+   * @param csp       nuovo periodo di presenza automatica.
+   * @param confirmed se conferma ricevuta.
+   */
+  public static void saveContractVacationPeriod(@Valid VacationPeriod vp, boolean confirmed) {
+
+    notFoundIfNull(vp);
+    notFoundIfNull(vp.contract);
+
+    rules.checkIfPermitted(vp.contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(vp.contract);
+    Contract contract = vp.contract;
+
+    if (!validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(vp.beginDate,
+          wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.beginDate", "deve appartenere al contratto");
+      }
+      if (vp.endDate != null && !DateUtility.isDateIntoInterval(vp.endDate,
+          wrappedContract.getContractDateInterval())) {
+        validation.addError("csp.endDate", "deve appartenere al contratto");
+      }
+    }
+
+    if (validation.hasErrors()) {
+      response.status = 400;
+
+      render("@updateContractVacationPeriod", vp, contract);
+    }
+
+    //riepilogo delle modifiche
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(vp, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+
+    if (!confirmed) {
+      confirmed = true;
+      render("@updateContractVacationPeriod", contract, vp, confirmed, recomputeRecap);
+    } else {
+
+      periodManager.updatePeriods(vp, true);
+      contract = contractDao.getContractById(contract.id);
+      contract.person.refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(ContractStampProfile.class));
+
+      updateContractVacationPeriod(contract.id);
+    }
+
+  }
+  
   /**
    * Crud gestione periodi presenza automatica.
    *
@@ -418,7 +499,7 @@ public class Contracts extends Controller {
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
-            periodRecaps);
+            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
 

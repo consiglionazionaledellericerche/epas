@@ -160,6 +160,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     if (type.equals(ContractStampProfile.class)) {
       return Sets.<IPropertyInPeriod>newHashSet(contractStampProfile);
     }
+    if (type.equals(VacationPeriod.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(vacationPeriods);
+    }
     return null;
   }
 
