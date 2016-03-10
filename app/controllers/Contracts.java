@@ -398,11 +398,11 @@ public class Contracts extends Controller {
     if (!validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(vp.beginDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("csp.beginDate", "deve appartenere al contratto");
+        validation.addError("vp.beginDate", "deve appartenere al contratto");
       }
       if (vp.endDate != null && !DateUtility.isDateIntoInterval(vp.endDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("csp.endDate", "deve appartenere al contratto");
+        validation.addError("vp.endDate", "deve appartenere al contratto");
       }
     }
 
