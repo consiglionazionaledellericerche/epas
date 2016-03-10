@@ -172,7 +172,7 @@ public class UserDao extends DaoBase {
     if (types.contains(UserType.SYSTEM_WITH_OWNER)) {
       condition.or(person.office.isNull().and(user.owner.in(offices)));
     }
-    if (types.equals(UserType.SYSTEM_WITHOUT_OWNER)) {
+    if (types.contains(UserType.SYSTEM_WITHOUT_OWNER)) {
       condition.or(person.office.isNull().and(user.owner.isNull()));
     }
     // Abilitato / Disabilitato

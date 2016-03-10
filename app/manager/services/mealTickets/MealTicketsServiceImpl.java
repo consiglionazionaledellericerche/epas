@@ -148,7 +148,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   @Override
   public List<MealTicket> buildBlockMealTicket(Integer codeBlock, Integer first, Integer last,
       LocalDate expireDate) {
-
+    
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
     for (int i = first; i <= last; i++) {
