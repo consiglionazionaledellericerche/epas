@@ -31,6 +31,8 @@ import models.User;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.data.validation.Max;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -251,7 +253,8 @@ public class MealTickets extends Controller {
    * @param expireDate data scadenza
    */
   public static void submitPersonMealTicket(Long personId, @Required Integer codeBlock, 
-      @Required Integer ticketNumberFrom, @Required Integer ticketNumberTo, 
+      @Required @Min(1) @Max(99) Integer ticketNumberFrom, 
+      @Required @Min(1) @Max(99) Integer ticketNumberTo, 
       @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
 
     Person person = personDao.getPersonById(personId);
@@ -267,6 +270,10 @@ public class MealTickets extends Controller {
     Preconditions.checkState(currentRecap.isPresent());
     recap = currentRecap.get();
  
+    if (ticketNumberFrom > ticketNumberTo) {
+      validation.addError("ticketNumberFrom", "sequenza non valida");
+    }
+    
     if (validation.hasErrors()) {
       response.status = 400;
       
