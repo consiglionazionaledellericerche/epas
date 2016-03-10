@@ -85,7 +85,7 @@ public class MealTicketDao extends DaoBase {
       query.orderBy(mealTicket.date.desc());
     }
 
-    query.orderBy(mealTicket.code.asc());
+    query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc());
 
     return query.list(mealTicket);
   }
@@ -187,12 +187,12 @@ public class MealTicketDao extends DaoBase {
       query.leftJoin(contract.person, person);
     }
 
-    query.where(mealTicket.code.like("%"+code+"%"));
+    query.where(mealTicket.block.like("%"+code+"%"));
     if (office.isPresent()) {
       query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(true)));
     }
     
-    query.orderBy(mealTicket.code.asc());
+    query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc());
 
     return query.list(mealTicket);
     
