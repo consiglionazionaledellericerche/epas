@@ -360,7 +360,7 @@ public class Contracts extends Controller {
   }
 
   /**
-   * Crud gestione periodi presenza automatica.
+   * Crud gestione periodi ferie.
    *
    * @param id contratto
    */
@@ -380,7 +380,7 @@ public class Contracts extends Controller {
   }
 
   /**
-   * Salva il nuovo periodo presenza automatica.
+   * Salva il nuovo periodo ferie.
    *
    * @param csp       nuovo periodo di presenza automatica.
    * @param confirmed se conferma ricevuta.
@@ -434,7 +434,7 @@ public class Contracts extends Controller {
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
       }
 
-      flash.success(Web.msgSaved(ContractStampProfile.class));
+      flash.success(Web.msgSaved(VacationPeriod.class));
 
       updateContractVacationPeriod(contract.id);
     }
