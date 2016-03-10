@@ -83,7 +83,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  @OrderBy("beginFrom")
+  @OrderBy("beginDate")
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
