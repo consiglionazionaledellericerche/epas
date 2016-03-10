@@ -85,7 +85,7 @@ public class MealTicketDao extends DaoBase {
       query.orderBy(mealTicket.date.desc());
     }
 
-    query.orderBy(mealTicket.code.asc());
+    query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.code.asc());
 
     return query.list(mealTicket);
   }
