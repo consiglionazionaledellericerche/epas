@@ -12,7 +12,14 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
   #{mealTickets.personMealTicketsTabs person:recap.contract.person, activeAction:'personMealTickets' /}
   
   #{alert color:'info'}
-    <p>Inserisci i dati del nuovo blocco.</p>
+    <p>Inserisci i dati del nuovo <strong>Blocco</strong>.</p>
+    <p>I campi <strong>Dal Numero</strong> <strong>Al numero</strong> specificano la dimensione del blocco.
+    Utilizzando questi campi è possibile attribuire ai dipendenti porzioni di blocco.<br> 
+    <em>Esempio: Per specificare come consegnati gli ultimi 5 buoni contenuti in un blocco di 22, specificare
+    Dal Numero 18 Al Numero 22) nei campi sopracitati.</em>
+    </p>
+    <p>Gestioni ed inserimenti alfanumerici sono in fase di implementazione. In caso di necessità
+    effettuare una segnalazione.</p>
   #{/alert} 		
         
     <div id="insertMeal">    

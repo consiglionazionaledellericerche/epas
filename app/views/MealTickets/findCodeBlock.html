@@ -28,7 +28,8 @@
     #{if !blocks.empty } 
 	  <table class="table table-hover table-bordered">
 	  <tr>
-		<th>Codice</th>
+		<th>Blocco</th>
+		<th>Posizione</th>
 		<th>Dipendente</th>
 		<th>Sede</th>
 		<th>Amministratore</th>
@@ -36,6 +37,7 @@
 	    #{list items:blocks, as:'block'}
 		    <tr>
 		       <td>${block.codeBlock}</td>
+		       <td>(${block.first}-${block.last})</td>
 	           <td>
 		         #{secure.link @personMealTickets(block.contract.person.id), 
 		            target:block.contract.person.office}
