@@ -425,26 +425,6 @@ public class Administration extends Controller {
 
     utilities();
   }
-
-  /**
-   * metodo che controlla se ci sono errori nei periodi di ferie.
-   *
-   * @param from la data da cui partire
-   */
-  public static void fixVacationPeriods(LocalDate from) {
-
-    List<Contract> contracts = contractDao
-        .getActiveContractsInPeriod(from, Optional.<LocalDate>absent());
-
-    for (Contract contract : contracts) {
-      contractManager.setContractVacationPeriod(contract);
-
-      log.info("Il contratto di {} iniziato il {} non è stato ripristinato "
-          + "con i piani ferie corretti.", contract.person.fullName(), contract.beginDate);
-    }
-
-    utilities();
-  }
   
   /**
    * Rimuove dal database tutti i personDayInTrouble che non appartengono ad alcun contratto o che
