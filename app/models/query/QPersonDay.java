@@ -39,6 +39,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final BooleanPath future = createBoolean("future");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -53,6 +55,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
     public final NumberPath<Integer> justifiedTimeMeal = createNumber("justifiedTimeMeal", Integer.class);
 
     public final NumberPath<Integer> justifiedTimeNoMeal = createNumber("justifiedTimeNoMeal", Integer.class);
+
+    public final BooleanPath past = createBoolean("past");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

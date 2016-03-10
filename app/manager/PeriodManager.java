@@ -271,10 +271,11 @@ public class PeriodManager {
    * @param begin begin del target
    * @param end end del target
    * @param periods i nuovi periods del target
+   * @param init per forzare come limite inferiore la data inizio ricalcolo
    * @return il riepilogo dei ricalcoli da effettuare.
    */
   public RecomputeRecap buildRecap(LocalDate begin, Optional<LocalDate> end,
-      List<IPropertyInPeriod> periods) {
+      List<IPropertyInPeriod> periods, Optional<LocalDate> init) {
 
     RecomputeRecap recomputeRecap = new RecomputeRecap();
 
@@ -297,7 +298,17 @@ public class PeriodManager {
         recomputeRecap.recomputeFrom = begin;
       }
     }
-
+    
+    if (init.isPresent()) {
+      if (recomputeRecap.recomputeFrom.isBefore(init.get())) {
+        recomputeRecap.recomputeFrom = init.get();
+      }
+      if (recomputeRecap.recomputeTo.isPresent() 
+          && recomputeRecap.recomputeFrom.isAfter(recomputeRecap.recomputeTo.get())) {
+        recomputeRecap.recomputeFrom = recomputeRecap.recomputeTo.get();
+      }
+    }
+    
     setDays(recomputeRecap);
 
     setNeedRecap(recomputeRecap);

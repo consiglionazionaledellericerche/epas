@@ -727,7 +727,7 @@ public final class PersonDao extends DaoBase {
 
     // fetch contract multiple bags (1) vacation periods
     JPQLQuery query2b = getQueryFactory().from(contract).leftJoin(contract.vacationPeriods, vp)
-        .fetch().orderBy(contract.beginDate.asc()).orderBy(vp.beginFrom.asc()).distinct();
+        .fetch().orderBy(contract.beginDate.asc())/*.orderBy(vp.beginDate.asc())*/.distinct();
     contracts = query2b.where(condition).list(contract);
     // TODO: riportare a List tutte le relazioni uno a molti di contract
     // e inserire singolarmente la fetch.
