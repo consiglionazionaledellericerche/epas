@@ -102,9 +102,9 @@
 	    
 	    #{list items: vacationsRecap.vacationsRequest.contractVacationPeriod, as: 'vp'}
 	    <tr>
-	      <td>${vp.beginFrom.format()}</td>
+	      <td>${vp.beginDate.format()}</td>
 	      <td>
-	        #{if vp.endTo}${vp.endTo.format()}#{/if}#{else}<em>Indeterminato</em>#{/else}
+	        #{if vp.endDate}${vp.endDate.format()}#{/if}#{else}<em>Indeterminato</em>#{/else}
 	      </td>
 	      <td>${vp.vacationCode.description}</td>
 	    </tr>
