@@ -9,21 +9,11 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
 
 <div class="container">
 
-#{title title:'Gestione Buoni Pasto ' + person.fullname /}
-
-  #{tabs}
-      #{tabItem id:'insert', title:'Nuovo Inserimento', active:true /}
-      #{tabItem id:'history', title:'Modifica Buoni Consegnati' /}
-      #{tabItem id:'recap', title:'Riepilogo' /}
-  #{/tabs}
-    <br>
+  #{mealTickets.personMealTicketsTabs person:recap.contract.person, activeAction:'personMealTickets' /}
   
-  #{tabContent}
-   <!-- Inserimento -->
-   #{tabContentItem id:'insert', active:true}
-    #{alert color:'info'}
-      <p>Inserisci i dati del nuovo blocco.</p>
-    #{/alert} 		
+  #{alert color:'info'}
+    <p>Inserisci i dati del nuovo blocco.</p>
+  #{/alert} 		
         
     <div id="insertMeal">    
     #{form @MealTickets.submitPersonMealTicket(), class:'form-horizontal',
@@ -96,47 +86,5 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
 
 	#{/form}
     </div>
-    
-   #{/tabContentItem}
-  
-	<!-- Riepilogo e eliminazione dei blocchi precedentemente inseriti -->
-   #{tabContentItem id:'recap'}
-   	#{include './_recap.html' /}
-   #{/tabContentItem}
-
-   <!-- Nuovi blocchi-->
-   #{tabContentItem id:'history'}
-     <div id="asyncHistory">
-      
-      #{if asyncNotify}
-	    #{pnotify /} *{ in caso di risposta asincrona che ridisegna il div history visualizzo le notifiche.}*
-	  #{/if}
-	  
-	  <!-- Consegnati -->
-      #{alert color:'info'}
-      <p>Elenco dei blocchi consegnati a <strong>${recap.contract.person.fullname}</strong>.</p>
-      <p><i class="fa fa-lightbulb-o"></i> Cliccando sui titoli delle colonne è possibile ordinare
-      i blocchi consegnati per <em>Codice Blocco</em>, <em>Data Consegna</em> e <em>Data Scadenza</em> </p>
-      <p><i class="fa fa-info-circle"></i> Per aprire la form di modifica dei blocchi (<em>Restituzione / Cancellazione</em>) 
-      cliccare sui tasti <strong>Riconsegna</strong> e <strong>Rimuovi</strong>.</p>
-      #{/alert} 	
-      #{mealTickets.showBlockList blocks:recap.getBlockMealTicketReceivedDeliveryDesc(), showType:'delivered' /}
-      
-      <!-- Riconsegnati -->
-      #{if recap.getBlockMealTicketReturnedDeliveryDesc().empty}
-      
-      #{/if}
-      #{else}
-       #{alert color:'info'}
-       <p>Elenco dei buoni pasto di <strong>${recap.contract.person.fullname}</strong> riconsegnati alla Sede Centrale.</p>
-       #{/alert}
-       
-       #{mealTickets.showBlockList blocks:recap.getBlockMealTicketReturnedDeliveryDesc(), showType:'returned' /} 
-      #{/else}
-     </div> 
-   #{/tabContentItem}
-   
-   
-  #{/tabContent} 
         
 </div>

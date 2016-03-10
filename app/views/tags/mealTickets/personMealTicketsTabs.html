@@ -1,0 +1,26 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   officeId = session.get("officeSelected");
+   personId = session.get("personSelected");
+}%
+
+#{title title:'Gestione Buoni Pasto ' + _person.fullname /}
+
+<div id="container-nav-tabs">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("personMealTickets")} class="active" #{/if}>
+      <a href="@{MealTickets.personMealTickets(personId)}">Nuovo Inserimento</a>
+    </li>
+    <li #{if _activeAction.equals("editPersonMealTickets")} class="active" #{/if}>
+      <a href="@{MealTickets.editPersonMealTickets(personId)}">Modifica Buoni Consegnati</a>
+    </li>
+    <li #{if _activeAction.equals("recapPersonMealTickets")} class="active" #{/if}>
+      <a href="@{MealTickets.recapPersonMealTickets(personId)}">Riepilogo</a>
+    </li>
+  </ul>
+</div>
+<br>

@@ -15,8 +15,6 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateInterval;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.ConsistencyManager;
 import manager.services.mealTickets.BlockMealTicket;
 import manager.services.mealTickets.IMealTicketsService;
@@ -45,7 +43,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class MealTickets extends Controller {
 
@@ -131,13 +128,44 @@ public class MealTickets extends Controller {
   }
   
   /**
-   * Riepilogo buoni pasto per la singola persona.
+   * Form di inserimento buoni pasto e riepilogo degli ultimi blocchi inseriti.
    * @param personId persona
-   * @param asyncNotify se redirect successivo ad una chiamata asincrona disegna il tag pnotify per
-   * la notifica di errore/successo
+   *
    */
-  public static void personMealTickets(Long personId, boolean asyncNotify) {
+  public static void personMealTickets(Long personId) {
 
+    Person person = personDao.getPersonById(personId);
+    Preconditions.checkArgument(person.isPersistent());
+    rules.checkIfPermitted(person.office);
+
+    MealTicketRecap recap;
+
+    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+    Preconditions.checkState(contract.isPresent());
+
+    // riepilogo contratto corrente
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
+    Preconditions.checkState(currentRecap.isPresent());
+    recap = currentRecap.get();
+
+    LocalDate deliveryDate = LocalDate.now();
+    LocalDate today = LocalDate.now();
+    //TODO mettere nel default.
+    Integer ticketNumberFrom = 1;
+    Integer ticketNumberTo = 22;
+    
+    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
+    User admin = Security.getUser().get();
+    
+    render(person, recap, deliveryDate, admin, expireDate, today, ticketNumberFrom, ticketNumberTo);
+  }
+  
+  /**
+   * Riepilogo contratto corrente e precedente dei buoni pasto consegnati alla persona.
+   * @param personId
+   */
+  public static void recapPersonMealTickets(Long personId) {
+    
     Person person = personDao.getPersonById(personId);
     Preconditions.checkArgument(person.isPersistent());
     rules.checkIfPermitted(person.office);
@@ -162,19 +190,28 @@ public class MealTickets extends Controller {
       }
     }
 
-    LocalDate deliveryDate = LocalDate.now();
-    LocalDate today = LocalDate.now();
-    //TODO mettere nel default.
-    Integer ticketNumberFrom = 1;
-    Integer ticketNumberTo = 22;
-    
-    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
-    User admin = Security.getUser().get();
-    
-    
+    render(person, recap, recapPrevious);
+  }
 
-    render(person, recap, recapPrevious, deliveryDate, admin, expireDate, today, 
-        ticketNumberFrom, ticketNumberTo, asyncNotify);
+  /**
+   * Form per la rimozione/riconsegna dei buoni consegnati al dipendente.
+   * @param personId
+   */
+  public static void editPersonMealTickets(Long personId) {
+    
+    Person person = personDao.getPersonById(personId);
+    Preconditions.checkArgument(person.isPersistent());
+    rules.checkIfPermitted(person.office);
+    
+    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+    Preconditions.checkState(contract.isPresent());
+
+    // riepilogo contratto corrente
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
+    Preconditions.checkState(currentRecap.isPresent());
+    MealTicketRecap recap = currentRecap.get();
+    
+    render(person, recap);
   }
 
   /**
@@ -279,7 +316,7 @@ public class MealTickets extends Controller {
 
     flash.success("Il blocco inserito è stato salvato correttamente.");
     
-    personMealTickets(person.id, false);
+    personMealTickets(person.id);
   }
   
   /**
@@ -365,7 +402,7 @@ public class MealTickets extends Controller {
 
     flash.success("%d buoni riconsegnati correttamente.", blockPortionToReturn.size());
     
-    personMealTickets(contract.person.id, true);    
+    editPersonMealTickets(contract.person.id);    
   }
 
   
@@ -446,7 +483,7 @@ public class MealTickets extends Controller {
 
     flash.success("Blocco di %d buoni rimosso correttamente.", deleted);
 
-    personMealTickets(contract.person.id, true);
+    editPersonMealTickets(contract.person.id);
   }
 
   /**
