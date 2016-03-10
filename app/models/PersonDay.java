@@ -199,6 +199,16 @@ public class PersonDay extends BaseModel {
 
     return decurtedWork;
   }
+  
+  /**
+   * Il tempo assegnabile è quello a lavoro meno i giustificativi.
+   * assignableTime = timeAtWork - justifiedTimeMeal - justifiedTimeNoMeal
+   * @return
+   */
+  @Transient
+  public int getAssignableTime() {
+    return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
+  }
 
   @Override
   public String toString() {
