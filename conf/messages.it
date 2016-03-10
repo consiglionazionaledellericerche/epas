@@ -120,6 +120,11 @@ cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
 cwtt.workingTimeType= Tipo Orario
 
+vp.beginDate= Data Inizio
+vp.endDate= Data Fine
+vp.vacationCode=Piano Ferie
+
+
 date.modified= Data della Modifica
 dateFrom=Dal
 dateOfPatron= Data del Patrono

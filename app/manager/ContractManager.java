@@ -134,7 +134,10 @@ public class ContractManager {
 
     contract.save();
 
-    setContractVacationPeriod(contract);
+    contract.vacationPeriods.addAll(contractVacationPeriods(contract));
+    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+      vacationPeriod.save();
+    }
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
     cwtt.beginDate = contract.getBeginDate();
@@ -175,7 +178,9 @@ public class ContractManager {
    */
   public final void properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
-    setContractVacationPeriod(contract);
+    
+    //setContractVacationPeriod(contract);
+    periodManager.updatePropertiesInPeriodOwner(contract, VacationPeriod.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
     personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
@@ -276,33 +281,6 @@ public class ContractManager {
       }
     }
     return vacationPeriods;
-  }
-  
-  /**
-   * Assegna i vacationPeriod di default al contratto, eliminando quelli precedentemente impostati.
-   * 
-   * @param contract contratto.
-   */
-  public void setContractVacationPeriod(final Contract contract) {
-
-    // TODO: Quando verrà implementata la crud per modificare manualmente
-    // i piani ferie non sarà sufficiente cancellare la storia, ma dare
-    // conflitto.
-
-    for (VacationPeriod oldVacation : contract.vacationPeriods) {
-      oldVacation.delete();
-    }
-
-    contract.save();
-    contract.refresh();
-
-    contract.vacationPeriods = Lists.newArrayList();
-    contract.vacationPeriods.addAll(contractVacationPeriods(contract));
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
-      vacationPeriod.save();
-    }
-  
-    contract.save();
   }
 
   /**
