@@ -41,6 +41,7 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 
@@ -157,6 +158,7 @@ public class Users extends Controller{
       render("@edit", user);
     }
     
+    user.password = Codec.hexMD5(user.password);
     user.save();
 
     flash.success(Web.msgSaved(User.class));
@@ -247,7 +249,7 @@ public class Users extends Controller{
     } else  {
       //User di sistema senza owner (sistorg, protime....)
       // TODO: fare una regola drools per questo check
-      if (!(!userDao.isAdmin(userLogged) && !userDao.isDeveloper(userLogged))) {
+      if (!(userDao.isAdmin(userLogged) || userDao.isDeveloper(userLogged))) {
         throw new IllegalStateException();
       }
     }
