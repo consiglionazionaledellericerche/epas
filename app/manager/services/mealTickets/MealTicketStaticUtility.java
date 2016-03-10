@@ -7,11 +7,14 @@ import com.google.gdata.util.common.base.Preconditions;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Contract;
 import models.MealTicket;
 
 import java.util.List;
 
+@Slf4j
 public class MealTicketStaticUtility {
 
   /**
@@ -36,6 +39,8 @@ public class MealTicketStaticUtility {
           && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
         continue;
       }
+      
+      log.info("Processo il buono {} - {}", mealTicket.block, mealTicket.code);
 
       //Primo buono pasto
       if (currentBlock == null) {
