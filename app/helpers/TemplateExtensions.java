@@ -184,6 +184,9 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static Object label(String label, Object... args) {
+    if (label.contains("%")){
+      return label;
+    }
     return raw(Messages.get(label, args));
   }
 
