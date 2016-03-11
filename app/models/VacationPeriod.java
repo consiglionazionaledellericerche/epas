@@ -90,7 +90,7 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
   
   @Override
   public String getLabel() {
-    return this.vacationCode.description;
+    return this.vacationCode.name;
   }
  
 }
