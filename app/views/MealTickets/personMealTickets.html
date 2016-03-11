@@ -2,7 +2,7 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(session.get('yearSelected'), 
+#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(session.get('yearSelected'),
 session.get('monthSelected'), session.get('officeSelected')), (person.fullname):null] /}
 
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
@@ -10,88 +10,87 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
 <div class="container">
 
   #{mealTickets.personMealTicketsTabs person:recap.contract.person, activeAction:'personMealTickets' /}
-  
+
   #{alert color:'info'}
-    <p>Inserisci i dati del nuovo <strong>Blocco</strong>.</p>
-    <p>I campi <strong>Dal Numero</strong> <strong>Al numero</strong> specificano la dimensione del blocco.
-    Utilizzando questi campi è possibile attribuire ai dipendenti porzioni di blocco.<br> 
+  <p>Inserisci i dati del nuovo <strong>Blocco</strong>.</p>
+  <p>I campi <strong>Dal Numero</strong> <strong>Al numero</strong> specificano la dimensione del blocco.
+    Utilizzando questi campi è possibile attribuire ai dipendenti porzioni di blocco.<br>
     <em>Esempio: Per specificare come consegnati gli ultimi 5 buoni contenuti in un blocco di 22, specificare
-    Dal Numero 18 Al Numero 22) nei campi sopracitati.</em>
-    </p>
-    <p>Gestioni ed inserimenti alfanumerici sono in fase di implementazione. In caso di necessità
+      Dal Numero 18 Al Numero 22 nei campi sopracitati.</em>
+  </p>
+  <p>Gestioni ed inserimenti alfanumerici sono in fase di implementazione. In caso di necessità
     effettuare una segnalazione.</p>
-  #{/alert} 		
-        
-    <div id="insertMeal">    
+  #{/alert}
+
+  <div id="insertMeal">
     #{form @MealTickets.submitPersonMealTicket(), class:'form-horizontal',
-		'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
-	  <input type="hidden" name="personId" value="${recap.contract.person.id}"/>
-	  
-	  #{f.input 'codeBlock', type:'number', required:'true' /}
-	  
-	  #{f.input	'ticketNumberFrom', type:'number', required:'true' /}
-	  #{f.input	'ticketNumberTo', type:'number', required:'true' /}
-	  
-	  #{f.date 'deliveryDate', required:'true' /}
-	  #{f.date 'expireDate', required:'true' /}
-	  #{f.view 'administrator', value:admin.person.fullname /}
-	  
-	  #{if blocksError}
-	    #{alert color:'danger', dismissible:'true'}
-	      <p><strong>Attenzione!!!</strong> L'operazione non è stata effettuata perchè uno o più
-	      dei buoni pasto selezionati sono già stati attribuiti.</p>
-	      <table class="table center">
-		    <tr>
-		      <th>Dipendente</th>
-		      <th>Codice</th>
-		      <th>Consegnato il</th>
-		      <th>Scadenza</th>
-		    </tr>
-		 #{list items:blocksError, as:'block'}
-		   <tr>
-		     <td>${block.contract.person.fullname}</td>
-		     <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td> 
-		     <td>${block.getDate()?.format()}</td>
-		     <td>${block.getExpireDate()?.format()}</td>
-		   </tr>
-		 #{/list}
-      </table>
-	    #{/alert}
-	  #{/if}
+    'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
+    <input type="hidden" name="personId" value="${recap.contract.person.id}"/>
 
-	  
-	  <div class="center">
-	    <button type="submit" class="btn btn-sm btn-primary">Salva</button>
-	  </div>
-	
-	  <br>	  
+    #{f.input 'codeBlock', type:'number', required:'true' /}
 
-	  #{alert color:'info'}
-	  <p>
-	    <i class="fa fa-thumb-tack"></i>
-	    Gli ultimi 3 inserimenti per <strong>${person.fullname}</strong> sono stati
-	  </p>  
-	  <table class="table center">
-		    <tr>
-		      <th>Codice</th>
-		      <th>Consegnato il</th>
-		      <th>Scadenza</th>
-		    </tr>
-	     %{ int i = 0; }%
-		 #{list items:recap.getBlockMealTicketReceivedDeliveryDesc(), as:'block'}
-		   #{ if i<3 }
-		   <tr>
-		     <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td> 
-		     <td>${block.getDate()?.format()}</td>
-		     <td>${block.getExpireDate()?.format()}</td>
-		   </tr>
-		   #{/if}
-		   %{ i = i + 1; }%
-		 #{/list}
-      </table>
-	  #{/alert}
+    #{f.input 'ticketNumberFrom', type:'number', required:'true' /}
+    #{f.input 'ticketNumberTo', type:'number', required:'true' /}
 
-	#{/form}
+    #{f.date 'deliveryDate', required:'true' /}
+    #{f.date 'expireDate', required:'true' /}
+    #{f.view 'administrator', value:admin.person?.fullname /}
+
+    #{if blocksError}
+    #{alert color:'danger', dismissible:'true'}
+    <p><strong>Attenzione!!!</strong> L'operazione non è stata effettuata perchè uno o più
+      dei buoni pasto selezionati sono già stati attribuiti.</p>
+    <table class="table center">
+      <tr>
+        <th>Dipendente</th>
+        <th>Codice</th>
+        <th>Consegnato il</th>
+        <th>Scadenza</th>
+      </tr>
+      #{list items:blocksError, as:'block'}
+      <tr>
+        <td>${block.contract.person.fullname}</td>
+        <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td>
+        <td>${block.getDate()?.format()}</td>
+        <td>${block.getExpireDate()?.format()}</td>
+      </tr>
+      #{/list}
+    </table>
+    #{/alert}
+    #{/if}
+
+
+    <div class="center">
+      <button type="submit" class="btn btn-sm btn-primary">Salva</button>
     </div>
-        
+    #{/form}
+    <br>
+    #{alert color:'info'}
+    #{if recap.getBlockMealTicketReceivedDeliveryDesc().isEmpty()}
+    <em>Nessun blocco valido inserito per <strong>${person.fullname}</strong></em>
+    #{/if}
+    #{else}
+    <p>
+      <i class="fa fa-thumb-tack"></i>
+      Gli ultimi 3 inserimenti per <strong>${person.fullname}</strong> sono stati
+    </p>
+    <table class="table center">
+      <tr>
+        <th>Codice</th>
+        <th>Consegnato il</th>
+        <th>Scadenza</th>
+      </tr>
+      #{list items:recap.getBlockMealTicketReceivedDeliveryDesc(), as:'block'}
+      #{if block_index <= 3 }
+      <tr>
+        <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td>
+        <td>${block.getDate()?.format()}</td>
+        <td>${block.getExpireDate()?.format()}</td>
+      </tr>
+      #{/if}
+      #{/list}
+    </table>
+    #{/else}
+    #{/alert}
+  </div>
 </div>
