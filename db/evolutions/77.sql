@@ -20,11 +20,18 @@ WHERE vpu.id = t.id;
 
 ALTER TABLE vacation_periods ALTER column vacation_code SET NOT NULL;
 
+UPDATE vacation_periods SET vacation_code = 'CODE_28_4' WHERE vacation_code = '28+4';
+UPDATE vacation_periods SET vacation_code = 'CODE_26_4' WHERE vacation_code = '26+4';
+UPDATE vacation_periods SET vacation_code = 'CODE_25_4' WHERE vacation_code = '25+4';
+UPDATE vacation_periods SET vacation_code = 'CODE_21_4' WHERE vacation_code = '21+4';
+UPDATE vacation_periods SET vacation_code = 'CODE_22_3' WHERE vacation_code = '22+3';
+UPDATE vacation_periods SET vacation_code = 'CODE_21_3' WHERE vacation_code = '21+3';
+
 # -- Distruzione vecchia implementazione
 
 ALTER TABLE vacation_periods DROP column vacation_codes_id;
-ALTER TABLE DROP TABLE vacation_codes;
-ALTER TABLE DROP TABLE vacation_codes_history;
+DROP TABLE vacation_codes;
+DROP TABLE vacation_codes_history;
 
 
 # ---!Downs
