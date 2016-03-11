@@ -4,9 +4,7 @@ import com.google.common.collect.Lists;
 
 import it.cnr.iit.epas.DateInterval;
 
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import models.Absence;
 
@@ -24,7 +22,6 @@ public class AccruedResult {
   public static final int YEAR_VACATION_UPPER_BOUND = 28;
 
   private VacationsTypeResult vacationsResult;
-  private AccruedConverter accruedConverter;
 
   private List<AccruedResultInPeriod> accruedResultsInPeriod = Lists.newArrayList();
 

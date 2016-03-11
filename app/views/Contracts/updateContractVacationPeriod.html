@@ -22,7 +22,7 @@
   <tr>
     <td>${vpItem.beginDate.format()}</td>
 	<td>#{if vpItem.endDate} ${vpItem.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-	<td>${vpItem.vacationCode.description}</td>
+	<td>${vpItem.vacationCode.label()}</td>
   </tr>
   #{/list}
 </table>
@@ -42,8 +42,7 @@
 	#{if !confirmed}	
 		 #{f.date 'vp.beginDate', value:vp.beginDate?.format(), required:true /}
 		 #{f.date 'vp.endDate', value:vp.endDate?.format() /}
-		 #{f.selectModel 'vp.vacationCode', 	
-		      items:templateUtility.getVacationCodes(), required:true /}
+		 #{f.selectEnum 'vp.vacationCode', items:models.enumerate.VacationCode, required:true /}
 		 #{b.buttons center:true}
 		   #{b.submit 'Applica'/}
 		 #{/b.buttons}
@@ -52,8 +51,7 @@
 	      #{f.hidden 'confirmed' /}
 		  #{f.simpleView 'vp.beginDate', value:vp.beginDate?.format(), hidden:true /}
 		  #{f.simpleView 'vp.endDate', value:vp.endDate?.format(), hidden:true /}
-		  #{f.simpleView 'vp.vacationCode' /}
-		  #{f.hidden 'vp.vacationCode.id' /}
+		  #{f.simpleView 'vp.vacationCode', hidden:true /}
 		  
 		  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
 		  #{b.buttons center:true}

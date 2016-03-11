@@ -1,29 +1,78 @@
-package manager.services.vacations;
+package models.enumerate;
 
-import lombok.Builder;
+import models.enumerate.EpasParam.EpasParamTimeType;
+import models.enumerate.EpasParam.EpasParamValueType;
+import models.enumerate.EpasParam.RecomputationType;
 
-public class AccruedConverter {
+import java.util.List;
 
-  /**
-   * Convertitore per ferie e permessi maturati.
-   */
-  @Builder
-  public AccruedConverter() {
+public enum VacationCode {
+  
+  CODE_28_4("28+4", 28, 4),
+  CODE_26_4("26+4", 26, 4),
+  CODE_25_4("25+4", 25, 4),
+  CODE_21_4("21+4", 21, 4),
+  
+  CODE_22_3("22+3", 22, 3),
+  CODE_21_3("21+3", 21, 3);
+    
+  public final String name;
+  public final int vacations;
+  public final int permissions;
 
+  VacationCode(String name, int vacations, int permissions) {
+    this.name = name;
+    this.vacations = vacations;
+    this.permissions = permissions;
   }
+  
+  /**
+   * Conversione giorni passati / ferie maturate.
+   * @param days giorni passati
+   * @return ferie maturate.
+   */
+  public int accruedVacations(int days) {
+    if (this.vacations == 28) {
+      return accruedProgression28(days);
+    }
+    if (this.vacations == 26) {
+      return accruedProgression26(days);
+    }
+    if (this.vacations == 22) {
+      return accruedProgression22(days);
+    }
+    if (this.vacations == 21) {
+      return accruedProgression21(days);
+    }
+    return 0;
+  }
+  
+  /**
+   * Conversione giorni passati / permessi maturati.
+   * @param days giorni passati
+   * @return permessi maturati.
+   */
+  public int accruedPermissions(int days) {
+    if (this.permissions == 4) {
+      return accruedProgression4(days);
+    }
+    if (this.permissions == 3) {
+      return accruedProgression3(days);
+    }
+    return 0;
+  }
+  
 
   /**
-   * Il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
-   * dell'anno per chi lavora in istituto da meno di tre anni.
-   * @param days giorni lavorati
-   * @return ferie maturate
+   * Progressione su 26 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
    */
-  public int vacationsLessThreeYears(int days) {
+  private int accruedProgression26(int days) {
 
     if (days <= 0) {
       return 0;
     }
-
     if (days >= 1 && days <= 15) {
       return 0;
     }
@@ -62,21 +111,18 @@ public class AccruedConverter {
     } else {
       return 26;
     }
-
   }
-
+  
   /**
-   * Il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio
-   * dell'anno per chi lavora in istituto da più di tre anni.
-   * @param days giorni lavorati
-   * @return ferie maturate
+   * Progressione su 28 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
    */
-  public int vacationsMoreThreeYears(int days) {
+  private int accruedProgression28(int days) {
 
     if (days <= 0) {
       return 0;
     }
-
     if (days >= 1 && days <= 15) {
       return 0;
     }
@@ -115,16 +161,14 @@ public class AccruedConverter {
     } else {
       return 28;
     }
-
   }
-
+  
   /**
-   * Il numero di giorni di ferie maturati secondo il piano di accumulo previsto per il part
-   * time verticale.
-   * @param days giorni lavorati
-   * @return ferie maturate
+   * Progressione su 21 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
    */
-  public int vacationsPartTimeLessThreeYears(int days) {
+  private int accruedProgression21(int days) {
 
     if (days <= 0) {
       return 0;
@@ -169,14 +213,13 @@ public class AccruedConverter {
       return 21;
     }
   }
-
+  
   /**
-   * Il numero di giorni di ferie maturati secondo il piano di accumulo previsto per il part
-   * time verticale.
-   * @param days giorni lavorati
-   * @return ferie maturate
+   * Progressione su 22 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
    */
-  public int vacationsPartTimeMoreThreeYears(int days) {
+  private int accruedProgression22(int days) {
     if (days <= 0) {
       return 0;
     }
@@ -219,14 +262,13 @@ public class AccruedConverter {
       return 22;
     }
   }
-
+  
   /**
-   * Il numero di giorni di permesso legge spettanti al dipendente a seconda dei giorni di
-   * presenza.
-   * @param days giorni lavorati
-   * @return permessi maturati
+   * Progressione su 4 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
    */
-  public int permissions(int days) {
+  private int accruedProgression4(int days) {
     int permissionDays = 0;
     if (days >= 45 && days <= 135) {
       permissionDays = 1;
@@ -244,11 +286,11 @@ public class AccruedConverter {
   }
 
   /**
-   * Il numero di giorni di permesso maturati con il piano ferie relativo al part time.
-   * @param days giorni lavorati
-   * @return permessi maturati
+   * Progressione su 3 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
    */
-  public int permissionsPartTime(int days) {
+  private int accruedProgression3(int days) {
     int permissionDays = 0;
     if (days >= 45 && days <= 135) {
       permissionDays = 1;
@@ -261,5 +303,7 @@ public class AccruedConverter {
     } 
     return permissionDays;
   }
-
+  
+  
+  
 }
