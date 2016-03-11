@@ -2,67 +2,65 @@
 ###    Correggere all'occorrenza i path per le cartelle sull'host ma lasciare inalterati i path sui container docker  
 
 postgres:
-  image: postgres:9.4.0
+  image: postgres:9.4
 
   volumes:
-   - /opt/epas/db/data:/var/lib/postgresql/data
-   - /etc/localtime:/etc/localtime:ro
-   - /etc/timezone:/etc/timezone:ro
-   - /opt/epas/backups/:/tmp:ro
+    - /opt/epas/db/data:/var/lib/postgresql/data
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+    - /opt/epas/backups/:/tmp:ro
 
-  # restart: always
+  restart: always
 
 nginx:
 
   image: jwilder/nginx-proxy:latest
 
   ports:
-   - "80:80"
-#  - "443:443"
+    - "80:80"
+#    - "443:443"
 
   volumes:
-   - /etc/localtime:/etc/localtime:ro
-   - /etc/timezone:/etc/timezone:ro
-   - /var/run/docker.sock:/tmp/docker.sock
-#  - /opt/epas/certs/:/etc/nginx/certs
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+    - /var/run/docker.sock:/tmp/docker.sock
+#    - /opt/epas/certs/:/etc/nginx/certs
 
-  # restart: always
+  restart: always
 
 epas:
 
   image: docker-registry.services.iit.cnr.it/epas:latest
 
   volumes:
-   - /opt/epas/logs/:/home/epas/epas/logs
-   - /opt/epas/attachments:/home/epas/epas/data/attachments
-   - /opt/epas/backups/:/home/epas/epas/backups
-   - /etc/localtime:/etc/localtime:ro
-   - /etc/timezone:/etc/timezone:ro
+    - /opt/epas/logs:/home/epas/epas/logs
+    - /opt/epas/attachments:/home/epas/epas/data/attachments
+    - /opt/epas/backups:/home/epas/epas/backups
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
 
   environment:
-  - VIRTUAL_HOST=localhost
-#  - HTTPS=true                            # default: false -- Attiva l'utilizzodel protocollo HTTPS
-#  - URL_ATTESTATI=                        # default: https://attestati.rm.cnr.it/attestati/
-#  - CERT_NAME=epas                        # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
-#  - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato
-#  - DB_PORT=                              # default: 5432
-#  - DB_NAME=                              # default: epas
-#  - DB_USER=                              # default: postgres
-#  - DB_PASS=                              # default: "non necessaria"
-#  - SMTP_HOST=                            # default: smtp.cnr.it
-#  - SMTP_PORT=                            # default: 587
-#  - SMTP_CHANNEL=                         # default: starttls
-#  - SMTP_USER=                            # default: 
-#  - SMTP_PASS=                            # default: 
-#  - BACKUP=true                           # default: false
-#  - BACKUP_MINUTES=                       # default: 0
-#  - BACKUP_HOURS=6                        # default: 6,12,18 (3 volte al giorno: alle 6, alle 12 e alle 18)
-#  - LOGCHECK_ADDRESSES=   
-#  - LOAD_BALANCER_LEAST_CONN=true         # Attiva l'opzione least_conn del nginx -- Fa in modo di dirigere la richiesta al server più libero
-#  - LOAD_BALANCER_IP_HASH=true            # Attiva l'opzione ip_hash del nginx -- Fa in modo che la sessione client sia servita sempre dallo stesso server se possibile
-#  - MARK_BACKUP_AFTER=1                   # Imposta i server come backup sul proxy
+    - VIRTUAL_HOST=localhost
+    - TZ=Europe/Rome
+#    - HTTPS=true                            # default: false -- Attiva l'utilizzodel protocollo HTTPS
+#    - URL_ATTESTATI=                        # default: https://attestati.rm.cnr.it/attestati/
+#    - CERT_NAME=epas                        # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
+#    - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato
+#    - DB_PORT=                              # default: 5432
+#    - DB_NAME=                              # default: epas
+#    - DB_USER=                              # default: postgres
+#    - DB_PASS=                              # default: "non necessaria"
+#    - SMTP_HOST=                            # default: smtp.cnr.it
+#    - SMTP_PORT=                            # default: 587
+#    - SMTP_CHANNEL=                         # default: starttls
+#    - SMTP_USER=                            # default:
+#    - SMTP_PASS=                            # default:
+#    - BACKUP=true                           # default: false
+#    - BACKUP_MINUTES=                       # default: 0
+#    - BACKUP_HOURS=6                        # default: 6,12,18 (3 volte al giorno: alle 6, alle 12 e alle 18)
+#    - LOGCHECK_ADDRESSES=
 
   links:
-   - postgres
+    - postgres
 
-  # restart: always
+  restart: always
