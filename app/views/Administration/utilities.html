@@ -74,15 +74,6 @@
   </div>
   #{/panel}
 
-  <!-- I PIANI FERIE -->
-  #{panel title:'Fix dei Piani Ferie', dim:12 }
-
-  #{form @Administration.fixVacationPeriods(),class:'form-horizontal'}
-  #{f.date 'from', label:'Contratti iniziati da' /}
-  <button type="submit" class="btn btn-default">Ripristina i Piani Ferie</button>
-  #{/form}
-  #{/panel}
-
   <!-- I day in trouble esistenti -->
   #{panel title:'Fix dei days in trouble', dim:12 }
   #{alert color:'info'}
