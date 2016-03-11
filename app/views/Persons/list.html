@@ -85,7 +85,7 @@
       <td>
         #{if person.currentVacationPeriod.present }
         <a href="@{Persons.showCurrentVacation(person.value.id)}" data-async-modal="#defaultModal">
-          ${person.currentVacationPeriod.get().vacationCode.description}
+          ${person.currentVacationPeriod.get().vacationCode.label()}
         </a>
         #{/if}
       </td>

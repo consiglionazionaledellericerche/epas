@@ -6,10 +6,15 @@ import it.cnr.iit.epas.DateInterval;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
+import models.enumerate.EpasParam;
+import models.enumerate.VacationCode;
 
 import play.data.validation.Required;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -26,12 +31,11 @@ import javax.persistence.Transient;
 public class VacationPeriod extends PropertyInPeriod implements IPropertyInPeriod {
 
   private static final long serialVersionUID = 7082224747753675170L;
-
+  
+  @Enumerated(EnumType.STRING)
+  @Column(name = "vacation_code")
   @Required
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "vacation_codes_id", nullable = false)
   public VacationCode vacationCode;
-
 
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
@@ -86,7 +90,7 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
   
   @Override
   public String getLabel() {
-    return this.vacationCode.description;
+    return this.vacationCode.name;
   }
  
 }

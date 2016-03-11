@@ -9,7 +9,6 @@ import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.CompetenceUtility;
-import it.cnr.iit.epas.ExportToYaml;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +26,6 @@ import models.Stamping;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -50,8 +48,6 @@ public class Administration extends Controller {
   static PersonDao personDao;
   @Inject
   static ConsistencyManager consistencyManager;
-  @Inject
-  static ExportToYaml exportToYaml;
   @Inject
   static CompetenceUtility competenceUtility;
   @Inject
@@ -336,23 +332,6 @@ public class Administration extends Controller {
     flash.success("Esecuzione terminata");
 
     utilities();
-  }
-
-  /**
-   * metodo che permette la costruzione di codici di assenza e qualifiche a partire da file .yml.
-   */
-  public static void buildYaml() {
-    //general
-    exportToYaml.buildAbsenceTypesAndQualifications(
-        "db/import/absenceTypesAndQualifications" + DateTime.now()
-            .toString("dd-MM-HH:mm") + ".yml");
-
-    exportToYaml.buildCompetenceCodes(
-        "db/import/competenceCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
-
-    exportToYaml.buildVacationCodes(
-        "db/import/vacationCode" + DateTime.now().toString("dd-MM-HH:mm") + ".yml");
-
   }
 
   /**

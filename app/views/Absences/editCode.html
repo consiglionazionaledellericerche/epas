@@ -66,12 +66,12 @@
  	</div>
  </div> 
 
-
  <div class="container-fluid center">
- 	<input class="btn btn-primary" type="submit" value="Ok">  
- 	<input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">    
+ #{secure.checkAction 'Absences.insertCode' }
+	<input class="btn btn-primary" type="submit" value="Ok">  
+ #{/secure.checkAction}
+ <input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">
  </div>
-
 #{/form}
 
 
