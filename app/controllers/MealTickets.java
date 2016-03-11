@@ -79,16 +79,14 @@ public class MealTickets extends Controller {
     
     Person person = user.get().person;
 
-    MealTicketRecap recap;
     MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
 
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
     Preconditions.checkState(contract.isPresent());
 
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
-    Preconditions.checkState(currentRecap.isPresent());
-    recap = currentRecap.get();
+    MealTicketRecap recap = mealTicketService.create(contract.get()).orNull();
+    Preconditions.checkNotNull(recap);
 
     //riepilogo contratto precedente
     Contract previousContract = personDao.getPreviousPersonContract(contract.get());
@@ -140,15 +138,12 @@ public class MealTickets extends Controller {
     Preconditions.checkArgument(person.isPersistent());
     rules.checkIfPermitted(person.office);
 
-    MealTicketRecap recap;
-
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
     Preconditions.checkState(contract.isPresent());
 
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
-    Preconditions.checkState(currentRecap.isPresent());
-    recap = currentRecap.get();
+    MealTicketRecap recap = mealTicketService.create(contract.get()).orNull();
+    Preconditions.checkNotNull(recap);
 
     LocalDate deliveryDate = LocalDate.now();
     LocalDate today = LocalDate.now();
