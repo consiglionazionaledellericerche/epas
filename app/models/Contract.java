@@ -83,7 +83,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  @OrderBy("beginFrom")
+  @OrderBy("beginDate")
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
@@ -159,6 +159,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     }
     if (type.equals(ContractStampProfile.class)) {
       return Sets.<IPropertyInPeriod>newHashSet(contractStampProfile);
+    }
+    if (type.equals(VacationPeriod.class)) {
+      return Sets.<IPropertyInPeriod>newHashSet(vacationPeriods);
     }
     return null;
   }

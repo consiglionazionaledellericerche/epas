@@ -542,6 +542,8 @@ when
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
      	
      	"Persons.children",
      	"Persons.editChild",
@@ -552,11 +554,6 @@ when
      	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
-     	
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
      	
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
@@ -671,6 +668,8 @@ when
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
      	
      	"Persons.children",
      	"Persons.editChild",
@@ -681,11 +680,6 @@ when
      	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
-   
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
      	
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",

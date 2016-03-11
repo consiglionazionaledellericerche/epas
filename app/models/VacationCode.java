@@ -43,5 +43,11 @@ public class VacationCode extends BaseModel {
   @Required
   @Column(name = "permission_days")
   public Integer permissionDays;
+  
+  @Override
+  public String toString() {
+    return this.description;
+  }
+  
 
 }
