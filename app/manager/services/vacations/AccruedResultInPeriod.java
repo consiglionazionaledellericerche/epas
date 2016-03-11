@@ -3,7 +3,7 @@ package manager.services.vacations;
 import lombok.Getter;
 import lombok.Setter;
 
-import models.VacationCode;
+import models.enumerate.VacationCode;
 
 /**
  * I giorni maturati nell'intervallo, tenuto conto dei postPartum, del tipo di richiesta

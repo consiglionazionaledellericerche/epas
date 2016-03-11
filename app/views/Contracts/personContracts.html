@@ -60,7 +60,7 @@
       #{f.view 'Tipo Orario', value:wrPerson.currentWorkingTimeType.get() /}
       
       <!-- Piano Ferie -->
-      #{f.view 'Piano Ferie', value:wrPerson.currentVacationPeriod.get().vacationCode.description /}
+      #{f.view 'Piano Ferie', value:wrPerson.currentVacationPeriod.get().vacationCode.label() /}
       
       *{
       #{f.view 'Presenza Automatica', value:wrPerson.currentContractStampProfile.get().fixedworkingtime /}
