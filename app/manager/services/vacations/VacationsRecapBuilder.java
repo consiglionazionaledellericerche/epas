@@ -1,9 +1,7 @@
 package manager.services.vacations;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.gdata.util.common.base.Preconditions;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -12,8 +10,8 @@ import manager.services.vacations.VacationsTypeResult.TypeVacation;
 
 import models.Absence;
 import models.Contract;
-import models.VacationCode;
 import models.VacationPeriod;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 
@@ -181,7 +179,6 @@ public class VacationsRecapBuilder {
     AccruedResult accruedResult = new AccruedResult();
     accruedResult.setVacationsResult(vacationsTypeResult);
     accruedResult.setInterval(interval);
-    accruedResult.setAccruedConverter(AccruedConverter.builder().build());
     
     for (VacationPeriod vp : vacationsTypeResult.getVacationsRequest()
         .getContractVacationPeriod()) {
@@ -210,12 +207,9 @@ public class VacationsRecapBuilder {
   private AccruedResultInPeriod buildAccruedResultInPeriod(AccruedResult parentAccruedResult,
       DateInterval interval, VacationCode vacationCode, List<Absence> absences) {
     
-    AccruedConverter accruedConverter = new AccruedConverter();
-    
     AccruedResultInPeriod accruedResultInPeriod = new AccruedResultInPeriod();
     accruedResultInPeriod.setVacationsResult(parentAccruedResult.getVacationsResult());
     accruedResultInPeriod.setInterval(interval);
-    accruedResultInPeriod.setAccruedConverter(AccruedConverter.builder().build());
     accruedResultInPeriod.setVacationCode(vacationCode);
 
     if (accruedResultInPeriod.getInterval() == null) {
@@ -242,31 +236,14 @@ public class VacationsRecapBuilder {
         .equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
 
       //this.days = DateUtility.daysInInterval(this.interval);
-
-      if (accruedResultInPeriod.getVacationCode().description.equals("21+3")
-          || accruedResultInPeriod.getVacationCode().description.equals("22+3")) {
-
-        accrued = accruedConverter.permissionsPartTime(accruedResultInPeriod.getDays());
-      } else {
-        accrued = accruedConverter.permissions(accruedResultInPeriod.getDays());
-      }
-
+      accrued = accruedResultInPeriod.getVacationCode()
+          .accruedPermissions(accruedResultInPeriod.getDays());
+      
     } else {
 
       //this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
-
-      if (accruedResultInPeriod.getVacationCode().description.equals("26+4")) {
-        accrued = accruedConverter.vacationsLessThreeYears(accruedResultInPeriod.getDays());
-      }
-      if (accruedResultInPeriod.getVacationCode().description.equals("28+4")) {
-        accrued = accruedConverter.vacationsMoreThreeYears(accruedResultInPeriod.getDays());
-      }
-      if (accruedResultInPeriod.getVacationCode().description.equals("21+3")) {
-        accrued = accruedConverter.vacationsPartTimeLessThreeYears(accruedResultInPeriod.getDays());
-      }
-      if (accruedResultInPeriod.getVacationCode().description.equals("22+3")) {
-        accrued = accruedConverter.vacationsPartTimeMoreThreeYears(accruedResultInPeriod.getDays());
-      }
+      accrued = accruedResultInPeriod.getVacationCode()
+          .accruedVacations(accruedResultInPeriod.getDays());
     }
     
     accruedResultInPeriod.setAccrued(accrued);
@@ -328,8 +305,8 @@ public class VacationsRecapBuilder {
 
         minAccruedResultInPeriod = accruedResultInPeriod;
 
-      } else if (accruedResultInPeriod.getVacationCode().vacationDays
-          < minAccruedResultInPeriod.getVacationCode().vacationDays ) {
+      } else if (accruedResultInPeriod.getVacationCode().vacations
+          < minAccruedResultInPeriod.getVacationCode().vacations ) {
 
         minAccruedResultInPeriod = accruedResultInPeriod;
       }
@@ -349,10 +326,10 @@ public class VacationsRecapBuilder {
         && accruedResult.getInterval().getBegin().equals(yearInterval.getBegin())
             && accruedResult.getInterval().getEnd().equals(yearInterval.getEnd())) {
 
-      if (minAccruedResultInPeriod.getVacationCode().vacationDays
+      if (minAccruedResultInPeriod.getVacationCode().vacations
           > totalVacationAccrued) {
 
-        accruedResult.setFixed(minAccruedResultInPeriod.getVacationCode().vacationDays
+        accruedResult.setFixed(minAccruedResultInPeriod.getVacationCode().vacations
             - totalVacationAccrued); //positive
       }
     }

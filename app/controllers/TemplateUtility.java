@@ -31,9 +31,9 @@ import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.VacationCode;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 
@@ -168,10 +168,6 @@ public class TemplateUtility {
     return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
   }
   
-  public List<VacationCode> getVacationCodes() {
-    return VacationCode.findAll();
-  }
-
   public List<BadgeReader> getAllBadgeReader(Person person) {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
