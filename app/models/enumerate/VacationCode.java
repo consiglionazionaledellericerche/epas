@@ -14,7 +14,11 @@ public enum VacationCode {
   CODE_21_4("21+4", 21, 4),
   
   CODE_22_3("22+3", 22, 3),
-  CODE_21_3("21+3", 21, 3);
+  CODE_21_3("21+3", 21, 3),
+  
+  /* Vecchie progressioni obsolete (ma attuate in qualche caso) */
+  CODE_30_4("30+4", 30, 4),
+  CODE_32_4("32+4", 32, 4);
     
   public final String name;
   public final int vacations;
@@ -43,6 +47,12 @@ public enum VacationCode {
     }
     if (this.vacations == 21) {
       return accruedProgression21(days);
+    }
+    if (this.vacations == 30) {
+      return accruedProgression30(days);
+    }
+    if (this.vacations == 32) {
+      return accruedProgression32(days);
     }
     return 0;
   }
@@ -160,6 +170,106 @@ public enum VacationCode {
       return 25;
     } else {
       return 28;
+    }
+  }
+  
+  /**
+   * Progressione su 30 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression30(int days) {
+
+    if (days <= 0) {
+      return 0;
+    }
+    if (days >= 1 && days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 2;
+    }
+    if (days >= 46 && days <= 75) {
+      return 5;
+    }
+    if (days >= 76 && days <= 106) {
+      return 7;
+    }
+    if (days >= 107 && days <= 136) {
+      return 10;
+    }
+    if (days >= 137 && days <= 167) {
+      return 12;
+    }
+    if (days >= 168 && days <= 197) {
+      return 15;
+    }
+    if (days >= 198 && days <= 227) {
+      return 17;
+    }
+    if (days >= 228 && days <= 258) {
+      return 20;
+    }
+    if (days >= 259 && days <= 288) {
+      return 22;
+    }
+    if (days >= 289 && days <= 319) {
+      return 25;
+    }
+    if (days >= 320 && days <= 349) {
+      return 27;
+    } else {
+      return 30;
+    }
+  }
+  
+  /**
+   * Progressione su 32 giorni.
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression32(int days) {
+
+    if (days <= 0) {
+      return 0;
+    }
+    if (days >= 1 && days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 2;
+    }
+    if (days >= 46 && days <= 75) {
+      return 5;
+    }
+    if (days >= 76 && days <= 106) {
+      return 8;
+    }
+    if (days >= 107 && days <= 136) {
+      return 10;
+    }
+    if (days >= 137 && days <= 167) {
+      return 13;
+    }
+    if (days >= 168 && days <= 197) {
+      return 16;
+    }
+    if (days >= 198 && days <= 227) {
+      return 18;
+    }
+    if (days >= 228 && days <= 258) {
+      return 21;
+    }
+    if (days >= 259 && days <= 288) {
+      return 24;
+    }
+    if (days >= 289 && days <= 319) {
+      return 26;
+    }
+    if (days >= 320 && days <= 349) {
+      return 29;
+    } else {
+      return 32;
     }
   }
   
@@ -303,7 +413,6 @@ public enum VacationCode {
     } 
     return permissionDays;
   }
-  
   
   
 }
