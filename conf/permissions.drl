@@ -620,9 +620,6 @@ when
         /* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
         "Absences.editCode",
-        "Absences.insertCode",
-     	"Absences.saveCode",
-     	"Absences.updateCode",
      	
      	"Configurations.show",
      	"Configurations.edit",
@@ -753,9 +750,6 @@ when
         /* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode*/
         "Absences.editCode",
-     	"Absences.insertCode",
-     	"Absences.saveCode",
-     	"Absences.updateCode",
      	
      	"Configurations.show",
      	"Configurations.edit",

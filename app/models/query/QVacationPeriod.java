@@ -49,7 +49,7 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
 
     public final SimplePath<Object> type = createSimple("type", Object.class);
 
-    public final QVacationCode vacationCode;
+    public final EnumPath<models.enumerate.VacationCode> vacationCode = createEnum("vacationCode", models.enumerate.VacationCode.class);
 
     public final SimplePath<Object> value = createSimple("value", Object.class);
 
@@ -72,7 +72,6 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
     public QVacationPeriod(Class<? extends VacationPeriod> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
-        this.vacationCode = inits.isInitialized("vacationCode") ? new QVacationCode(forProperty("vacationCode")) : null;
     }
 
 }

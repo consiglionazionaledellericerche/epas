@@ -5,8 +5,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 
-import dao.VacationCodeDao;
-
 import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
@@ -15,8 +13,8 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.PersonDay;
-import models.VacationCode;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 import org.testng.annotations.Test;
@@ -179,40 +177,10 @@ public class VacationsRecapTest {
     assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(26);
   }
 
-  private VacationCode vacationCode(String description) {
-    VacationCode vc = new VacationCode();
-    vc.description = description;
-    if (description.equals("26+4")) {
-      vc.vacationDays = 26;
-      vc.permissionDays = 4;
-    } else if (description.equals("28+4")) {
-      vc.vacationDays = 28;
-      vc.permissionDays = 4;
-    } else if (description.equals("21+3")) {
-      vc.vacationDays = 21;
-      vc.permissionDays = 3;
-    } else if (description.equals("22+3")) {
-      vc.vacationDays = 22;
-      vc.permissionDays = 3;
-    }
-    return vc;
-  }
-
   public ContractManager getContractManager() {
-    return new ContractManager(null, getVacationCodeDao(), null, null, null);
+    return new ContractManager(null, null, null, null);
   }
-
-  private VacationCodeDao getVacationCodeDao() {
-    VacationCodeDao vcd = mock(VacationCodeDao.class);
-
-    when(vcd.getVacationCodeByDescription("26+4")).thenReturn(vacationCode("26+4"));
-    when(vcd.getVacationCodeByDescription("28+4")).thenReturn(vacationCode("28+4"));
     
-    when(vcd.getVacationCodeByDescription("21+3")).thenReturn(vacationCode("21+3"));
-    when(vcd.getVacationCodeByDescription("22+3")).thenReturn(vacationCode("22+3"));
-    return vcd;
-  }
-  
   List<Absence> getAbsences(ImmutableList<LocalDate> dates, AbsenceType absenceType) {
     
     List<Absence> absences = Lists.newArrayList();

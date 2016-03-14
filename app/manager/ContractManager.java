@@ -3,7 +3,6 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
@@ -14,9 +13,9 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -37,7 +36,6 @@ public class ContractManager {
 
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
-  private final VacationCodeDao vacationCodeDao;
   private final PeriodManager periodManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
 
@@ -50,12 +48,11 @@ public class ContractManager {
    */
   @Inject
   public ContractManager(
-      final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
+      final ConsistencyManager consistencyManager,
       final PeriodManager periodManager, final PersonDayInTroubleManager personDayInTroubleManager, 
       final IWrapperFactory wrapperFactory) {
 
     this.consistencyManager = consistencyManager;
-    this.vacationCodeDao = vacationCodeDao;
     this.periodManager = periodManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.wrapperFactory = wrapperFactory;
@@ -179,7 +176,7 @@ public class ContractManager {
   public final void properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
     
-    //setContractVacationPeriod(contract);
+    contract.save();
     periodManager.updatePropertiesInPeriodOwner(contract, VacationPeriod.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
@@ -253,9 +250,9 @@ public class ContractManager {
   public List<VacationPeriod> contractVacationPeriods(Contract contract)  {
 
     List<VacationPeriod> vacationPeriods = Lists.newArrayList();
-
-    VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
-    VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
+    
+    VacationCode v26 = VacationCode.CODE_26_4;
+    VacationCode v28 = VacationCode.CODE_28_4;
 
     if (contract.getEndDate() == null) {
 
