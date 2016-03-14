@@ -68,8 +68,7 @@ public class RequestInit extends Controller {
     if (user.get().person != null) {
       renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
     }
-    String action = computeActionSelected(Http.Request.current().action);
-    session.put("actionSelected", action);
+    computeActionSelected();
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
@@ -204,320 +203,259 @@ public class RequestInit extends Controller {
 
   }
 
-  private static String computeActionSelected(String action) {
+  private static void computeActionSelected() {
 
+    final String currentAction = Http.Request.current().action;
 
-    if (action.startsWith("Stampings.")) {
+    if (currentAction.startsWith("SwitchTemplate")) {
+      return;
+    }
 
+    session.put("actionSelected", currentAction);
 
-      if (action.equals("Stampings.stampings")) {
-
+    if (currentAction.startsWith("Stampings.")) {
+      if (currentAction.equals("Stampings.stampings")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "Stampings.stampings";
       }
 
-      if (action.equals("Stampings.personStamping")) {
-
+      if (currentAction.equals("Stampings.personStamping")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.personStamping";
       }
 
-      if (action.equals("Stampings.missingStamping")) {
-
+      if (currentAction.equals("Stampings.missingStamping")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.missingStamping";
       }
 
-      if (action.equals("Stampings.holidaySituation")) {
+      if (currentAction.equals("Stampings.holidaySituation")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.holidaySituation";
       }
 
-      if (action.equals("Stampings.dailyPresence")) {
-
+      if (currentAction.equals("Stampings.dailyPresence")) {
         renderArgs.put("switchDay", true);
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.dailyPresence";
       }
 
-      if (action.equals("Stampings.dailyPresenceForPersonInCharge")) {
-
+      if (currentAction.equals("Stampings.dailyPresenceForPersonInCharge")) {
         renderArgs.put("switchDay", true);
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
-        return "Stampings.dailyPresenceForPersonInCharge";
       }
     }
 
-    if (action.startsWith("PersonMonths.")) {
-
-      if (action.equals("PersonMonths.trainingHours")) {
-
-
+    if (currentAction.startsWith("PersonMonths.")) {
+      if (currentAction.equals("PersonMonths.trainingHours")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "PersonMonths.trainingHours";
       }
 
-      if (action.equals("PersonMonths.hourRecap")) {
-
+      if (currentAction.equals("PersonMonths.hourRecap")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "PersonMonths.hourRecap";
       }
     }
 
-    if (action.startsWith("Vacations.")) {
-
-      if (action.equals("Vacations.show")) {
-
+    if (currentAction.startsWith("Vacations.")) {
+      if (currentAction.equals("Vacations.show")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "Vacations.show";
       }
     }
 
-    if (action.startsWith("VacationsAdmin.")) {
-
-      if (action.equals("VacationsAdmin.list")) {
+    if (currentAction.startsWith("VacationsAdmin.")) {
+      if (currentAction.equals("VacationsAdmin.list")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "VacationsAdmin.list";
       }
     }
 
-    if (action.startsWith("Persons.")) {
-
-      if (action.equals("Persons.changePassword")) {
-
+    if (currentAction.startsWith("Persons.")) {
+      if (currentAction.equals("Persons.changePassword")) {
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "Persons.changePassword";
       }
-      if (action.equals("Persons.list")) {
-
+      if (currentAction.equals("Persons.list")) {
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Persons.list";
       }
 
-      if (action.equals("Persons.edit")) {
-
+      if (currentAction.equals("Persons.edit")) {
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Persons.edit";
       }
     }
 
-    if (action.startsWith("Contracts.")) {
-      if (action.equals("Contracts.personContracts")) {
-
+    if (currentAction.startsWith("Contracts.")) {
+      if (currentAction.equals("Contracts.personContracts")) {
         renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Contracts.personContracts";
       }
     }
 
-    if (action.startsWith("Absences.")) {
-
-      if (action.equals("Absences.absences")) {
-
+    if (currentAction.startsWith("Absences.")) {
+      if (currentAction.equals("Absences.absences")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "Absences.absences";
       }
 
-      if (action.equals("Absences.manageAttachmentsPerCode")) {
-
+      if (currentAction.equals("Absences.manageAttachmentsPerCode")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.manageAttachmentsPerCode";
       }
 
-      if (action.equals("Absences.manageAttachmentsPerPerson")) {
+      if (currentAction.equals("Absences.manageAttachmentsPerPerson")) {
 
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.manageAttachmentsPerPerson";
       }
 
-      if (action.equals("Absences.absenceInPeriod")) {
+      if (currentAction.equals("Absences.absenceInPeriod")) {
         renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.absenceInPeriod";
       }
-      if (action.equals("Absences.absencesPerPerson")) {
 
+      if (currentAction.equals("Absences.absencesPerPerson")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "Absences.absencesPerPerson";
       }
 
-      if (action.equals("Absences.showGeneralMonthlyAbsences")) {
-
+      if (currentAction.equals("Absences.showGeneralMonthlyAbsences")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.showGeneralMonthlyAbsences";
       }
 
-      if (action.equals("Absences.yearlyAbsences")) {
-
+      if (currentAction.equals("Absences.yearlyAbsences")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("switchPerson", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.yearlyAbsences";
       }
     }
 
-    if (action.startsWith("Competences.")) {
-
-      if (action.equals("Competences.competences")) {
-
+    if (currentAction.startsWith("Competences.")) {
+      if (currentAction.equals("Competences.competences")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownEmployee");
-        return "Competences.competences";
       }
 
-      if (action.equals("Competences.showCompetences")) {
-
+      if (currentAction.equals("Competences.showCompetences")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.showCompetences";
       }
 
-      if (action.equals("Competences.monthlyOvertime")) {
-
+      if (currentAction.equals("Competences.monthlyOvertime")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
-        return "Competences.monthlyOvertime";
       }
 
-      if (action.equals("Competences.totalOvertimeHours")) {
-
+      if (currentAction.equals("Competences.totalOvertimeHours")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.totalOvertimeHours";
       }
 
-      if (action.equals("Competences.enabledCompetences")) {
+      if (currentAction.equals("Competences.enabledCompetences")) {
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.enabledCompetences";
       }
 
-      if (action.equals("Competences.approvedCompetenceInYear")) {
+      if (currentAction.equals("Competences.approvedCompetenceInYear")) {
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.approvedCompetenceInYear";
       }
 
-      if (action.equals("Competences.exportCompetences")) {
+      if (currentAction.equals("Competences.exportCompetences")) {
 
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.exportCompetences";
       }
 
     }
 
-    if (action.startsWith("MonthRecaps.")) {
-
-      if (action.equals("MonthRecaps.show")) {
-
+    if (currentAction.startsWith("MonthRecaps.")) {
+      if (currentAction.equals("MonthRecaps.show")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "MonthRecaps.show";
       }
 
-      if (action.equals("MonthRecaps.showRecaps")) {
+      if (currentAction.equals("MonthRecaps.showRecaps")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "MonthRecaps.showRecaps";
       }
 
-      if (action.equals("MonthRecaps.customRecap")) {
+      if (currentAction.equals("MonthRecaps.customRecap")) {
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "MonthRecaps.customRecap";
       }
     }
 
-    if (action.startsWith("UploadSituation.")) {
-
-      if (action.equals("UploadSituation.uploadData")) {
-
+    if (currentAction.startsWith("UploadSituation.")) {
+      if (currentAction.equals("UploadSituation.uploadData")) {
         renderArgs.put("dropDown", "dropDownAdministration");
-        return "UploadSituation.uploadData";
       }
-
     }
 
-    if (action.startsWith("WorkingTimes.")) {
-
-      if (action.equals("WorkingTimes.manageWorkingTime")) {
+    if (currentAction.startsWith("WorkingTimes.")) {
+      if (currentAction.equals("WorkingTimes.manageWorkingTime")) {
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownConfiguration");
-        return "WorkingTimes.manageWorkingTime";
       }
-      if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
+      if (currentAction.equals("WorkingTimes.manageOfficeWorkingTime")) {
         renderArgs.put("switchOffice", true);
         renderArgs.put("dropDown", "dropDownConfiguration");
-        return "WorkingTimes.manageOfficeWorkingTime";
       }
     }
 
-    if (action.startsWith("MealTickets.")) {
-
-      if (action.equals("MealTickets.recapMealTickets")) {
-
+    if (currentAction.startsWith("MealTickets.")) {
+      if (currentAction.equals("MealTickets.recapMealTickets")) {
         renderArgs.put("dropDown", "dropDownAdministration");
         renderArgs.put("switchMonth", true);
         renderArgs.put("switchYear", true);
         renderArgs.put("switchOffice", true);
-        return "MealTickets.recapMealTickets";
       }
-      if (action.equals("MealTickets.returnedMealTickets")) {
-
+      if (currentAction.equals("MealTickets.returnedMealTickets")) {
         renderArgs.put("dropDown", "dropDownAdministration");
         renderArgs.put("switchOffice", true);
-        return "MealTickets.returnedMealTickets";
-      }
-    }
-    
-    if (action.startsWith("Configurations.")) {
-      if (action.equals("Configurations.show")) {
-        renderArgs.put("dropDown", "dropDownAdministration");
-        renderArgs.put("switchOffice", true);
-        return "Configurations.show";
       }
     }
 
-    return session.get("actionSelected");
+    if (currentAction.startsWith("Configurations.")) {
+      if (currentAction.equals("Configurations.show")) {
+        renderArgs.put("dropDown", "dropDownAdministration");
+        renderArgs.put("switchOffice", true);
+      }
+    }
+
+    if (currentAction.startsWith("MealTickets.")) {
+      if (currentAction.equals("MealTickets.personMealTickets")) {
+        renderArgs.put("switchPerson", true);
+      }
+    }
+
+    session.put("actionSelected", currentAction);
+
   }
 
   /**
