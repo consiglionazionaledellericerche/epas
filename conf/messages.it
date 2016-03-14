@@ -130,6 +130,8 @@ VacationCode.CODE_25_4= 25+4
 VacationCode.CODE_21_4= 21+4
 VacationCode.CODE_22_3= 22+3
 VacationCode.CODE_21_3= 21+3
+VacationCode.CODE_30_4= 30+4
+VacationCode.CODE_32_4= 32+4
 
 date.modified= Data della Modifica
 dateFrom=Dal
