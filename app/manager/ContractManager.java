@@ -176,7 +176,7 @@ public class ContractManager {
   public final void properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
     
-    //setContractVacationPeriod(contract);
+    contract.save();
     periodManager.updatePropertiesInPeriodOwner(contract, VacationPeriod.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
     periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
