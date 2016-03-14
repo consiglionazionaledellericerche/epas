@@ -17,8 +17,8 @@ public enum VacationCode {
   CODE_21_3("21+3", 21, 3),
   
   /* Vecchie progressioni obsolete (ma attuate in qualche caso) */
-  CODE_30_4("30+4", 21, 3),
-  CODE_32_4("32+4", 21, 3);
+  CODE_30_4("30+4", 30, 4),
+  CODE_32_4("32+4", 32, 4);
     
   public final String name;
   public final int vacations;
