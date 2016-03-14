@@ -157,6 +157,14 @@ public class SwitchTemplate extends Controller {
       MealTickets.personMealTickets(personId);
     }
 
+    if (action.equals("MealTickets.editPersonMealTickets")) {
+      MealTickets.editPersonMealTickets(personId);
+    }
+
+    if (action.equals("MealTickets.recapPersonMealTickets")) {
+      MealTickets.recapPersonMealTickets(personId);
+    }
+
   }
 
   public static void updateDay(Integer day) throws Throwable {
