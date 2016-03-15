@@ -30,20 +30,10 @@ import javax.inject.Inject;
 
 /**
  * Implementazione di produzione del servizio meal tickets.
- * @author alessandro
  *
+ * @author alessandro
  */
 public class MealTicketsServiceImpl implements IMealTicketsService {
-
-  /**
-   * I tipi di ordinamento per la selezione della lista dei buoni pasto.
-   * @author alessandro
-   *
-   */
-  public static enum MealTicketOrder {
-    ORDER_BY_EXPIRE_DATE_ASC,
-    ORDER_BY_DELIVERY_DATE_DESC
-  }
 
   @Inject
   private PersonDao personDao;
@@ -52,23 +42,23 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   private ConsistencyManager consistencyManager;
   private MealTicketRecapBuilder mealTicketRecapBuilder;
   private ConfigurationManager configurationManager;
-  
   /**
    * Costrutture.
-   * @param personDao personDao
-   * @param mealTicketDao mealTicketDao
+   *
+   * @param personDao            personDao
+   * @param mealTicketDao        mealTicketDao
    * @param configurationManager configurationManager
-   * @param consistencyManager consistencyManager
-   * @param wrapperFactory wrapperFactory
+   * @param consistencyManager   consistencyManager
+   * @param wrapperFactory       wrapperFactory
    */
   @Inject
-  public MealTicketsServiceImpl(PersonDao personDao, 
-      MealTicketDao mealTicketDao,
-      ConsistencyManager consistencyManager,
-      ConfigurationManager configurationManager,
-      MealTicketRecapBuilder mealTicketRecapBuilder,
-      IWrapperFactory wrapperFactory) {
-    
+  public MealTicketsServiceImpl(PersonDao personDao,
+                                MealTicketDao mealTicketDao,
+                                ConsistencyManager consistencyManager,
+                                ConfigurationManager configurationManager,
+                                MealTicketRecapBuilder mealTicketRecapBuilder,
+                                IWrapperFactory wrapperFactory) {
+
     this.personDao = personDao;
     this.mealTicketDao = mealTicketDao;
     this.consistencyManager = consistencyManager;
@@ -87,27 +77,27 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     if (!dateInterval.isPresent()) {
       return Optional.<MealTicketRecap>absent();
     }
-    
-    List<PersonDay> personDays = personDao.getPersonDayIntoInterval(contract.person, 
+
+    List<PersonDay> personDays = personDao.getPersonDayIntoInterval(contract.person,
         dateInterval.get(), true);
-    
+
     List<MealTicket> expireOrderedAsc = mealTicketDao
-        .getMealTicketAssignedToPersonIntoInterval(contract, dateInterval.get(), 
+        .contractMealTickets(contract, Optional.absent(),
             MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false);
-    
+
     List<MealTicket> deliveryOrderedDesc = mealTicketDao
-        .getMealTicketAssignedToPersonIntoInterval(contract, dateInterval.get(), 
+        .contractMealTickets(contract, Optional.absent(),
             MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
-    
+
     List<MealTicket> returnedDeliveryOrderedDesc = mealTicketDao
-        .getMealTicketAssignedToPersonIntoInterval(contract, dateInterval.get(), 
+        .contractMealTickets(contract, Optional.absent(),
             MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, true);
 
     return Optional.fromNullable(mealTicketRecapBuilder.buildMealTicketRecap(
-        contract, dateInterval.get(), personDays, 
+        contract, dateInterval.get(), personDays,
         expireOrderedAsc, deliveryOrderedDesc, returnedDeliveryOrderedDesc));
   }
-  
+
   /**
    * Ritorna l'intervallo valido ePAS per il contratto riguardo la gestione dei buoni pasto. (scarto
    * la parte precedente a source se definita, e la parte precedente alla data inizio utilizzo per
@@ -119,36 +109,36 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   public Optional<DateInterval> getContractMealTicketDateInterval(Contract contract) {
 
     DateInterval intervalForMealTicket = wrapperFactory.create(contract)
-            .getContractDatabaseIntervalForMealTicket();
+        .getContractDatabaseIntervalForMealTicket();
 
-    LocalDate officeStartDate = (LocalDate)configurationManager
+    LocalDate officeStartDate = (LocalDate) configurationManager
         .configValue(contract.person.office, EpasParam.DATE_START_MEAL_TICKET);
 
     if (officeStartDate.isBefore(intervalForMealTicket.getBegin())) {
-      return Optional.fromNullable(intervalForMealTicket);
+      return Optional.of(intervalForMealTicket);
     }
-    if (DateUtility
-        .isDateIntoInterval(officeStartDate, intervalForMealTicket)) {
-      return Optional.fromNullable(new DateInterval(officeStartDate,
+    if (DateUtility.isDateIntoInterval(officeStartDate, intervalForMealTicket)) {
+      return Optional.of(new DateInterval(officeStartDate,
           intervalForMealTicket.getEnd()));
     }
 
     return Optional.<DateInterval>absent();
   }
-  
+
   /**
    * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock e dagli
    * estremi.
-   * @param codeBlock codice blocco
-   * @param first il primo codice
-   * @param last l'ultimo codice
+   *
+   * @param codeBlock  codice blocco
+   * @param first      il primo codice
+   * @param last       l'ultimo codice
    * @param expireDate la data di scadenza
    * @return la lista dei buoni
    */
   @Override
   public List<MealTicket> buildBlockMealTicket(Integer codeBlock, Integer first, Integer last,
-      LocalDate expireDate) {
-    
+                                               LocalDate expireDate) {
+
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
     for (int i = first; i <= last; i++) {
@@ -169,7 +159,6 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     return mealTicketList;
   }
 
-
   /**
    * Verifica che nel contratto precedente a contract siano avanzati dei buoni pasto assegnati. In
    * tal caso per quei buoni pasto viene modificata la relazione col contratto successivo e cambiata
@@ -189,7 +178,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     DateInterval previousContractInterval = wrContract.getContractDateInterval();
 
     Optional<ContractMonthRecap> recap = wrContract.getContractMonthRecap(
-            new YearMonth(previousContractInterval.getEnd()));
+        new YearMonth(previousContractInterval.getEnd()));
 
     if (!recap.isPresent() || recap.get().remainingMealTickets == 0) {
       return 0;
@@ -198,7 +187,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     int mealTicketsTransfered = 0;
 
     List<MealTicket> contractMealTicketsDesc = mealTicketDao
-            .getOrderedMealTicketInContract(previousContract);
+        .getOrderedMealTicketInContract(previousContract);
 
     LocalDate pastDate = LocalDate.now();
     for (int i = 0; i < recap.get().remainingMealTickets; i++) {
@@ -218,6 +207,16 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     return mealTicketsTransfered;
   }
 
-  
+
+  /**
+   * I tipi di ordinamento per la selezione della lista dei buoni pasto.
+   *
+   * @author alessandro
+   */
+  public static enum MealTicketOrder {
+    ORDER_BY_EXPIRE_DATE_ASC,
+    ORDER_BY_DELIVERY_DATE_DESC
+  }
+
 
 }
