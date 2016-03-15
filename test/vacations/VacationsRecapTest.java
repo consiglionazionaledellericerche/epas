@@ -176,6 +176,40 @@ public class VacationsRecapTest {
     assertThat(recap.getVacationsCurrentYear().getNotYetUsedAccrued()).isEqualTo(1);
     assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(26);
   }
+  
+  /**
+   * Quando il cambio di piano durante l'anno porta ad avere un numero superiore di ferie 
+   * rispetto al valore massimo fra i piani ferie.
+   * Si adotta l'aggiustamento.
+   */
+  @Test
+  public void tooLucky() {
+    
+    final List<Absence> absencesToConsider = Lists.newArrayList();
+
+    final LocalDate accruedDate = new LocalDate(2016, 1, 1);    //recap date
+    final LocalDate expireDateLastYear = new LocalDate(2015, 8, 31);
+    final LocalDate expireDateCurrentYear = new LocalDate(2016, 8, 31);
+
+    Contract contract = MockContract.builder()
+        .contractManager(getContractManager())
+        .beginDate(new LocalDate(2013,4,17))
+        .build();
+    
+    final VacationsRecap recap = new VacationsRecapBuilder().buildVacationRecap(
+        2016, contract, absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
+
+    assertThat(recap.getVacationsCurrentYear().getTotalResult().getAccrued()).isEqualTo(29);
+    assertThat(recap.getVacationsCurrentYear().getTotalResult().getFixed()).isEqualTo(-1);
+    assertThat(recap.getVacationsCurrentYear().getAccruedResult().getAccrued()).isEqualTo(0);
+    
+    assertThat(recap.getVacationsCurrentYear().getTotal()).isEqualTo(28);
+    // FIXME: le accrued dovrebbero avere il limite inferiore zero. Modificare l'algoritmo.
+    assertThat(recap.getVacationsCurrentYear().getAccrued()).isEqualTo(-1);  
+    assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(28);
+  }
+  
+  
 
   public ContractManager getContractManager() {
     return new ContractManager(null, null, null, null);
