@@ -177,9 +177,8 @@ public class ContractManager {
                                          final boolean onlyRecaps) {
     
     contract.save();
-    periodManager.updatePropertiesInPeriodOwner(contract, VacationPeriod.class);
-    periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
-    periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
+    contract.updatePropertiesInPeriodOwner();
+    //periodManager.updatePropertiesInPeriodOwner(contract);
     personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
     
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);

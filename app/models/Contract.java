@@ -1,6 +1,7 @@
 package models;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -9,6 +10,7 @@ import lombok.Getter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.enumerate.EpasParam;
 
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -164,6 +166,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
       return Sets.<IPropertyInPeriod>newHashSet(vacationPeriods);
     }
     return null;
+  }
+  
+  @Override
+  public Collection<Object> types() {
+    return ImmutableSet.of(ContractWorkingTimeType.class, ContractStampProfile.class,
+        VacationPeriod.class);
   }
 
   @Override
