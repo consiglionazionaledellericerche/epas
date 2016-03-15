@@ -28,9 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.StampingManager;
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingRecap;
-import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 

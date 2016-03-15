@@ -9,9 +9,9 @@ import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
 
 import manager.SecureManager;
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingRecap;
-import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Person;
 import models.Stamping;

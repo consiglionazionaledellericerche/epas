@@ -11,10 +11,10 @@ import dao.PersonMonthRecapDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingDayRecapFactory;
-import manager.recaps.personStamping.PersonStampingRecap;
-import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingDayRecapFactory;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Absence;
 import models.Competence;

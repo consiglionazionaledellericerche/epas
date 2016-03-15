@@ -183,7 +183,7 @@ public class VacationsRecapBuilder {
 
       AccruedResultInPeriod accruedResultInPeriod = buildAccruedResultInPeriod(
           accruedResult,
-          DateUtility.intervalIntersection(interval, vp.getDateInterval()),
+          DateUtility.intervalIntersection(interval, vp.periodInterval()),
           vp.vacationCode,
           vacationsTypeResult.getVacationsRequest().getPostPartumUsed());
       
@@ -244,7 +244,7 @@ public class VacationsRecapBuilder {
         .equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
       bound = accruedResultInPeriod.getVacationCode().permissions;
     } else {
-      bound =accruedResultInPeriod.getVacationCode().vacations;
+      bound = accruedResultInPeriod.getVacationCode().vacations;
     }
     accruedResultInPeriod.setLowerBound(bound);
     accruedResultInPeriod.setUpperBound(bound);
