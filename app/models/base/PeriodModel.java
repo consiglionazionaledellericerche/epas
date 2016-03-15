@@ -1,5 +1,7 @@
 package models.base;
 
+import it.cnr.iit.epas.DateInterval;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,5 +40,12 @@ public abstract class PeriodModel extends BaseModel
   public LocalDate calculatedEnd() {
     return endDate;
   }
+  
+  @Override
+  public DateInterval periodInterval() {
+   return new DateInterval(this.getBeginDate(), this.calculatedEnd()); 
+  }
+  
+  
 
 }

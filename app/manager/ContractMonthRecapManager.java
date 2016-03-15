@@ -15,7 +15,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.cache.CompetenceCodeManager;
-import manager.services.mealTickets.MealTicketsServiceImpl.MealTicketOrder;
+import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Absence;
 import models.Competence;

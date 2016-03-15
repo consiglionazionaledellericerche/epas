@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 public class AccruedResult {
 
-  private final static int VACATION_UPPER_BOUND = 100;
+  private static final int VACATION_UPPER_BOUND = 100;
   
   private VacationsTypeResult vacationsResult;
 

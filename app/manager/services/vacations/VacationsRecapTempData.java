@@ -11,8 +11,6 @@ import models.Absence;
 import models.Contract;
 import models.enumerate.AbsenceTypeMapping;
 
-import org.joda.time.LocalDate;
-
 import java.util.List;
 
 /**
@@ -38,10 +36,10 @@ public class VacationsRecapTempData {
   
   @Builder
   /**
-   * 
-   * @param year
-   * @param absencesToConsider
-   * @param contract
+   * Oggetto che contiene i dati di supporto al calcolo del recap ferie.
+   * @param year anno
+   * @param absencesToConsider assenze fatte da considerare
+   * @param contract contratto
    */
   protected VacationsRecapTempData(int year, List<Absence> absencesToConsider, Contract contract) { 
 
