@@ -131,6 +131,7 @@ public class Offices extends Controller {
     } else {
       office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
+      office.updatePropertiesInPeriodOwner();
       flash.success(Web.msgSaved(Office.class));
       Institutes.index();
     }

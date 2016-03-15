@@ -193,55 +193,7 @@ public class PeriodManager {
    
         
   }
-  
-  /**
-   * Quando si cambiano le date di inizio e fine dell'owner questo algoritmo sistema i periodi: <br>
-   * 1) Elimina i periodi che non appartegono più all'intervallo dell'owner <br>
-   * 2) Aggiusta il primo periodo impostando la sua data inizio 
-   *    alla nuova data inizio dell'owner.<br>
-   * 3) Aggiusta l'ultimo periodo impostando la sua data fine alla nuova data fine dell'owner.<br>
-   * Persiste il nuovo stato.
-   * @param owner owner
-   * @param propertyInPeriodClass tipo periodi
-   */
-  public final void updatePropertiesInPeriodOwner(IPropertiesInPeriodOwner owner, 
-      Class propertyInPeriodClass) {
-    
-    DateInterval ownerInterval = new DateInterval(owner.getBeginDate(), owner.calculatedEnd());
-    
-    // 1) Cancello quelli che non appartengono più a contract
-    for (IPropertyInPeriod propertyInPeriod: owner.periods(propertyInPeriodClass)) {
-      if (DateUtility.intervalIntersection(ownerInterval, 
-          new DateInterval(propertyInPeriod.getBeginDate(), propertyInPeriod.getEndDate())) 
-          == null) {
-        propertyInPeriod._delete();
-      }
-    }
-    
-    JPA.em().flush();
-    //JPA.em().clear();
-    
-    final List<IPropertyInPeriod> periods = 
-        Lists.newArrayList(owner.periods(propertyInPeriodClass));
-    Collections.sort(periods);
-    
-    // Sistemo il primo
-    IPropertyInPeriod first = periods.get(0);
-    first.setBeginDate(ownerInterval.getBegin());
-    first._save();
-    
-    // Sistemo l'ultimo
-    IPropertyInPeriod last = periods.get(periods.size() - 1);
-    last.setEndDate(ownerInterval.getEnd());
-    if (DateUtility.isInfinity(last.getEndDate())) {
-      last.setEndDate(null);
-    }
-    last._save();
-    
-    JPA.em().flush();
-    //JPA.em().clear();
-  }
-
+ 
   /**
    * Inserisce un periodo nella nuova lista ordinata. Se il periodo precedente ha lo stesso valore
    * effettua la merge.

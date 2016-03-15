@@ -504,7 +504,7 @@ public class ConsistencyManager {
   }
 
   /**
-   * Costruisce i riepiloghi mensili dei contratti della persona a partire da yeraMonthFrom.
+   * Costruisce i riepiloghi mensili dei contratti della persona a partire da yearMonthFrom.
    */
   private void populateContractMonthRecapByPerson(Person person, YearMonth yearMonthFrom) {
 
