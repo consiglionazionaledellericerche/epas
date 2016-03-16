@@ -54,7 +54,7 @@ public class VacationsServiceImpl implements IVacationsService {
    * @param absenceTypeDao absenceTypeDao
    * @param contractDao contractDao
    * @param absenceTypeManager absenceTypeManager
-   * @param confYearManager confYearManager
+   * @param configurationManager configurationManager
    * @param wrapperFactory wrapperFactory
    * @param vacationsRecapImpl vacationsRecapImpl
    */
@@ -195,11 +195,6 @@ public class VacationsServiceImpl implements IVacationsService {
   public Optional<VacationsRecap> create(int year, Contract contract) {
 
     LocalDate accruedDate = LocalDate.now();
-    
-    
-//    if (year < accruedDate.getYear()) {
-//      accruedDate = new LocalDate(year, 12, 31);
-//    }
 
     List<Absence> otherAbsences = Lists.newArrayList();
 

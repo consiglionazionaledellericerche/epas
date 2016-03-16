@@ -1,11 +1,11 @@
 package models.base;
 
+import it.cnr.iit.epas.DateInterval;
+
 import lombok.Getter;
 import lombok.Setter;
 
 import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
@@ -37,6 +37,11 @@ public abstract class PeriodModel extends BaseModel
   @Override
   public LocalDate calculatedEnd() {
     return endDate;
+  }
+  
+  @Override
+  public DateInterval periodInterval() {
+   return new DateInterval(this.getBeginDate(), this.calculatedEnd()); 
   }
 
 }

@@ -1,4 +1,4 @@
-package manager.recaps.personStamping;
+package manager.recaps.personstamping;
 
 import manager.cache.StampTypeManager;
 
