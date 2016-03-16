@@ -9,6 +9,8 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -177,8 +179,7 @@ public class ContractManager {
                                          final boolean onlyRecaps) {
     
     contract.save();
-    contract.updatePropertiesInPeriodOwner();
-    //periodManager.updatePropertiesInPeriodOwner(contract);
+    periodManager.updatePropertiesInPeriodOwner(contract);
     personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
     
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
