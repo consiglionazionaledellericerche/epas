@@ -59,12 +59,22 @@ public class ChartsManager {
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
 
+  /**
+   * Costruttore.
+   * @param competenceCodeDao competenceCodeDao
+   * @param competenceDao competenceDao
+   * @param competenceManager competenceManager
+   * @param personDao personDao
+   * @param vacationsService vacationsService
+   * @param absenceDao absenceDao
+   * @param wrapperFactory wrapperFactory
+   */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
-                       CompetenceDao competenceDao, CompetenceManager competenceManager,
-                       PersonDao personDao, IVacationsService vacationsService,
-                       AbsenceDao absenceDao, 
-                       IWrapperFactory wrapperFactory) {
+      CompetenceDao competenceDao, CompetenceManager competenceManager,
+      PersonDao personDao, IVacationsService vacationsService,
+      AbsenceDao absenceDao, 
+      IWrapperFactory wrapperFactory) {
     this.competenceCodeDao = competenceCodeDao;
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
@@ -187,6 +197,11 @@ public class ChartsManager {
     return totaleOreResidue;
   }
 
+  /**
+   * Javadoc da scrivere
+   * @param file file 
+   * @return 
+   */
   public RenderList checkSituationPastYear(Blob file) {
     if (file == null) {
       log.error("file nullo nella chiamata della checkSituationPastYear");

@@ -66,23 +66,35 @@ public class ConsistencyManager {
   private final StampTypeManager stampTypeManager;
   private final ConfigurationManager configurationManager;
 
+
   /**
    * Constructor.
+   * @param secureManager secureManager
+   * @param officeDao officeDao
+   * @param personDao personDao
+   * @param personDayDao personDayDao
+   * @param personManager personManager
+   * @param personDayManager personDayManager
+   * @param contractMonthRecapManager contractMonthRecapManager
+   * @param personDayInTroubleManager personDayInTroubleManager
+   * @param configurationManager configurationManager
+   * @param stampTypeManager stampTypeManager
+   * @param wrapperFactory wrapperFactory
    */
   @Inject
   public ConsistencyManager(SecureManager secureManager,
-                            OfficeDao officeDao,
-                            PersonDao personDao,
-                            PersonDayDao personDayDao,
+      OfficeDao officeDao,
+      PersonDao personDao,
+      PersonDayDao personDayDao,
 
-                            PersonManager personManager,
-                            PersonDayManager personDayManager,
-                            ContractMonthRecapManager contractMonthRecapManager,
-                            PersonDayInTroubleManager personDayInTroubleManager,
-                            ConfigurationManager configurationManager,
-                            StampTypeManager stampTypeManager,
+      PersonManager personManager,
+      PersonDayManager personDayManager,
+      ContractMonthRecapManager contractMonthRecapManager,
+      PersonDayInTroubleManager personDayInTroubleManager,
+      ConfigurationManager configurationManager,
+      StampTypeManager stampTypeManager,
 
-                            IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -492,7 +504,7 @@ public class ConsistencyManager {
   }
 
   /**
-   * Costruisce i riepiloghi mensili dei contratti della persona a partire da yeraMonthFrom.
+   * Costruisce i riepiloghi mensili dei contratti della persona a partire da yearMonthFrom.
    */
   private void populateContractMonthRecapByPerson(Person person, YearMonth yearMonthFrom) {
 

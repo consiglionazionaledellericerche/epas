@@ -1,7 +1,5 @@
 package manager.services.vacations;
 
-import com.google.common.base.Optional;
-
 import it.cnr.iit.epas.DateInterval;
 
 import lombok.AccessLevel;

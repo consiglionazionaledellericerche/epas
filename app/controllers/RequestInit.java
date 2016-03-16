@@ -449,7 +449,9 @@ public class RequestInit extends Controller {
     }
 
     if (currentAction.startsWith("MealTickets.")) {
-      if (currentAction.equals("MealTickets.personMealTickets")) {
+      if (currentAction.equals("MealTickets.personMealTickets")
+          || currentAction.equals("MealTickets.editPersonMealTickets")
+          || currentAction.equals("MealTickets.recapPersonMealTickets") ) {
         renderArgs.put("switchPerson", true);
       }
     }
