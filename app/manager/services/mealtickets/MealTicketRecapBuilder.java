@@ -1,4 +1,4 @@
-package manager.services.mealTickets;
+package manager.services.mealtickets;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;

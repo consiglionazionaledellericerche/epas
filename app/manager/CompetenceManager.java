@@ -13,7 +13,6 @@ import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
-import helpers.ModelQuery.SimpleResults;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
 import models.Competence;
@@ -51,11 +50,20 @@ public class CompetenceManager {
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
 
+  /**
+   * Costruttore.
+   * @param competenceCodeDao competenceCodeDao
+   * @param officeDao officeDao
+   * @param competenceDao competenceDao
+   * @param personDayDao personDayDao
+   * @param wrapperFactory wrapperFactory
+   * @param personDayManager personDayManager
+   */
   @Inject
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
-                           OfficeDao officeDao, CompetenceDao competenceDao,
-                           PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
-                           PersonDayManager personDayManager) {
+      OfficeDao officeDao, CompetenceDao competenceDao,
+      PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
+      PersonDayManager personDayManager) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -110,6 +118,13 @@ public class CompetenceManager {
     return totaleOreStraordinarioMensile;
   }
 
+  /**
+   * Salva gli straordinari.
+   * @param year anno
+   * @param numeroOre numeroOre
+   * @param officeId sede
+   * @return esito
+   */
   public boolean saveOvertime(Integer year, String numeroOre, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     TotalOvertime total = new TotalOvertime();

@@ -15,8 +15,8 @@ import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 
 import models.Contract;
 import models.Office;

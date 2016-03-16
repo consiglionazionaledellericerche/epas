@@ -7,8 +7,8 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingDayRecapFactory;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 
 import models.Contract;
 import models.Person;

@@ -74,6 +74,23 @@ public class AbsenceManager {
   private final ConsistencyManager consistencyManager;
   private final ConfigurationManager configurationManager;
 
+  /**
+   * Costruttore.
+   * @param personDayDao personDayDao
+   * @param workingTimeTypeDao workingTimeTypeDao
+   * @param contractDao contractDao
+   * @param absenceDao absenceDao
+   * @param personReperibilityDayDao personReperibilityDayDao
+   * @param personShiftDayDao personShiftDayDao
+   * @param personChildrenDao personChildrenDao
+   * @param contractMonthRecapManager contractMonthRecapManager
+   * @param personManager personManager
+   * @param absenceGroupManager absenceGroupManager
+   * @param consistencyManager consistencyManager
+   * @param configurationManager configurationManager
+   * @param wrapperFactory wrapperFactory
+   * @param vacationsService vacationsService
+   */
   @Inject
   public AbsenceManager(
       PersonDayDao personDayDao,
@@ -386,7 +403,7 @@ public class AbsenceManager {
         ar.setAbsenceAdded(absence);
 
         log.info("Simulato inserimento nuova assenza {} per {} in data: {}",
-           absence.absenceType.code, pd.person.getFullname(), absence.date);
+            absence.absenceType.code, pd.person.getFullname(), absence.date);
       }
 
       ar.setAbsenceCode(absenceType.code);
@@ -577,7 +594,7 @@ public class AbsenceManager {
    * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.
    */
   private AbsencesResponse handlerFer(Person person, LocalDate date, AbsenceType absenceType,
-                                      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
+      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
     AbsenceType wichFer = vacationsService.whichVacationCode(person, date, otherAbsences);
 
@@ -645,7 +662,7 @@ public class AbsenceManager {
   }
 
   public int removeAbsencesInPeriod(Person person, LocalDate dateFrom,
-                                    LocalDate dateTo, AbsenceType absenceType) {
+      LocalDate dateTo, AbsenceType absenceType) {
 
     LocalDate today = LocalDate.now();
     LocalDate actualDate = dateFrom;
@@ -772,8 +789,7 @@ public class AbsenceManager {
    * Costruisce la liste delle persone assenti nel periodo indicato.
    *
    * @param absencePersonDays lista di giorni di assenza effettuati
-   * @return absentPersons lista delle persone assenti coinvolte nelle assenze passate come
-   * parametro
+   * @return absentPersons lista delle persone assenti coinvolte nelle assenze passate 
    * @author arianna
    */
   public List<Person> getPersonsFromAbsentDays(List<Absence> absencePersonDays) {

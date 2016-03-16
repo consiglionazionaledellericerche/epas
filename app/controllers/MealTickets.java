@@ -16,10 +16,10 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.ConsistencyManager;
-import manager.services.mealTickets.BlockMealTicket;
-import manager.services.mealTickets.IMealTicketsService;
-import manager.services.mealTickets.MealTicketRecap;
-import manager.services.mealTickets.MealTicketStaticUtility;
+import manager.services.mealtickets.BlockMealTicket;
+import manager.services.mealtickets.IMealTicketsService;
+import manager.services.mealtickets.MealTicketRecap;
+import manager.services.mealtickets.MealTicketStaticUtility;
 
 import models.Contract;
 import models.ContractMonthRecap;

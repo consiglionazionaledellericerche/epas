@@ -31,11 +31,10 @@ import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.EpasParam;
+import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.Parameter;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -1070,6 +1069,11 @@ public class PersonDayManager {
     return ticketTorender;
   }
 
+  /**
+   * Se la persona è in missione nel giorno.
+   * @param personDay giorno
+   * @return esito
+   */
   public boolean isOnMission(PersonDay personDay) {
     return !FluentIterable.from(personDay.absences).filter(
         new Predicate<Absence>() {
@@ -1144,14 +1148,14 @@ public class PersonDayManager {
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono.
    * @param validPairs coppie valide di timbrature per il tempo a lavoro.
-   * @return
+   * @return minuti
    */
   private int stampingMinutes(List<PairStamping> validPairs) {
 
     // TODO: considerare startWork ed endWork nei minuti a lavoro
     int stampingMinutes = 0;
     for (PairStamping validPair : validPairs) {
-        stampingMinutes += validPair.timeInPair;
+      stampingMinutes += validPair.timeInPair;
     }
 
     return stampingMinutes;
@@ -1163,7 +1167,7 @@ public class PersonDayManager {
    * @param validPairs coppie valide di timbrature per il tempo a lavoro
    * @param startWork inizio finestra
    * @param endWork fine finestra
-   * @return
+   * @return minuti
    */
   private int workingMinutes(List<PairStamping> validPairs, 
       LocalTime startWork, LocalTime endWork) {
