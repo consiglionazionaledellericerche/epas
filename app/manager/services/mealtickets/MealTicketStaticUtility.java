@@ -1,4 +1,4 @@
-package manager.services.mealTickets;
+package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -14,7 +14,6 @@ import models.MealTicket;
 
 import java.util.List;
 
-@Slf4j
 public class MealTicketStaticUtility {
 
   /**

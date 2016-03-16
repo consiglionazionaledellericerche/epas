@@ -6,7 +6,6 @@ import com.google.common.base.Preconditions;
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonChildrenDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
@@ -37,24 +36,31 @@ import javax.persistence.Query;
 public class PersonManager {
 
   private final ContractDao contractDao;
-  private final PersonDao personDao;
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
   private final ConfigurationManager configurationManager;
 
+  /**
+   * Costrutture.
+   * @param contractDao contractDao
+   * @param personChildrenDao personChildrenDao
+   * @param personDayDao personDayDao
+   * @param absenceDao absenceDao
+   * @param personDayManager personDayManager
+   * @param wrapperFactory wrapperFactory
+   * @param configurationManager configurationManager
+   */
   @Inject
   public PersonManager(ContractDao contractDao,
       PersonChildrenDao personChildrenDao, 
-      PersonDao personDao,
       PersonDayDao personDayDao, 
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
       IWrapperFactory wrapperFactory, 
       ConfigurationManager configurationManager) {
     this.contractDao = contractDao;
-    this.personDao = personDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
@@ -100,26 +106,9 @@ public class PersonManager {
   }
 
   /**
-   * @return false se l'id passato alla funzione non trova tra le persone presenti in anagrafica,
-   * una che avesse nella vecchia applicazione un id uguale a quello che la sequence postgres genera
-   * automaticamente all'inserimento di una nuova persona in anagrafica. In particolare viene
-   * controllato il campo oldId presente per ciascuna persona e si verifica che non esista un valore
-   * uguale a quello che la sequence postgres ha generato
-   */
-  public boolean isIdPresentInOldSoftware(Long id) {
-    Person person = personDao.getPersonByOldID(id);
-    //Person person = Person.find("Select p from Person p where p.oldId = ?", id).first();
-    if (person == null) {
-      return false;
-    } else {
-      return true;
-    }
-
-  }
-
-  /**
-   * @return true se in quel giorno quella persona non è in turno nè in reperibilità (metodo
-   * chiamato dal controller di inserimento assenza).
+   * Calcola se la persona nel giorno non è nè in turno nè in reperibilità e quindi può prendere 
+   * l'assenza.
+   * @return esito
    */
   public boolean canPersonTakeAbsenceInShiftOrReperibility(Person person, LocalDate date) {
     Query queryReperibility =
@@ -163,16 +152,16 @@ public class PersonManager {
                 + "and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?",
             person, beginMonth, endMonth).fetch();
     Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
-    int i = 0;
+    int index = 0;
     for (AbsenceType abt : abtList) {
       boolean stato = absenceCodeMap.containsKey(abt);
       if (stato == false) {
-        i = 1;
-        absenceCodeMap.put(abt, i);
+        index = 1;
+        absenceCodeMap.put(abt, index);
       } else {
-        i = absenceCodeMap.get(abt);
+        index = absenceCodeMap.get(abt);
         absenceCodeMap.remove(abt);
-        absenceCodeMap.put(abt, i + 1);
+        absenceCodeMap.put(abt, index + 1);
       }
     }
     return absenceCodeMap;
@@ -217,8 +206,15 @@ public class PersonManager {
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();
   }
 
-  public int holidayWorkingTimeNotAccepted(
-      Person person, Optional<Integer> year, Optional<Integer> month) {
+  /**
+   * Minuti di presenza festiva non accettata.
+   * @param person persona 
+   * @param year anno
+   * @param month mese
+   * @return minuti
+   */
+  public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year, 
+      Optional<Integer> month) {
 
     List<PersonDay> pdList = personDayDao
         .getHolidayWorkingTime(person, year, month);
@@ -231,8 +227,15 @@ public class PersonManager {
     return value;
   }
 
-  public int holidayWorkingTimeAccepted(
-      Person person, Optional<Integer> year, Optional<Integer> month) {
+  /**
+   * Minuti di presenza festiva accettata.
+   * @param person persona
+   * @param year anno
+   * @param month mese 
+   * @return minuti
+   */
+  public int holidayWorkingTimeAccepted(Person person, Optional<Integer> year, 
+      Optional<Integer> month) {
 
     List<PersonDay> pdList = personDayDao
         .getHolidayWorkingTime(person, year, month);
@@ -245,6 +248,13 @@ public class PersonManager {
     return value;
   }
 
+  /**
+   * Minuti di presenza festiva totali.
+   * @param person persona
+   * @param year anno
+   * @param month mese 
+   * @return minuti
+   */
   public int holidayWorkingTimeTotal(
       Person person, Optional<Integer> year, Optional<Integer> month) {
     List<PersonDay> pdList = personDayDao

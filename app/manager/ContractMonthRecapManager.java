@@ -15,7 +15,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.cache.CompetenceCodeManager;
-import manager.services.mealTickets.MealTicketsServiceImpl.MealTicketOrder;
+import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Absence;
 import models.Competence;
@@ -61,8 +61,8 @@ public class ContractMonthRecapManager {
    * adesso è in questa classe per proteggere l'istanza effettiva di ContractMonthRecap in modo che
    * non si corra il rischio di sovrascriverla con quella provvisoria. Capire ...
    */
-  public int getMinutesForCompensatoryRest(
-      Contract contract, LocalDate date, List<Absence> otherCompensatoryRest) {
+  public int getMinutesForCompensatoryRest(Contract contract, LocalDate date, 
+      List<Absence> otherCompensatoryRest) {
 
     Optional<YearMonth> firstContractMonthRecap = wrapperFactory
         .create(contract).getFirstMonthToRecap();
@@ -108,22 +108,29 @@ public class ContractMonthRecapManager {
   }
 
   /**
-   * Nota bene: il metodo non effettua salvataggi ma solo assegnamenti.<br> Nota bene 2: il metodo
-   * assume che se il precedente riepilogo è absent() significa che non serve ai fini della
-   * computazione. Il controllo di fornire il parametro corretto è demandato al chiamante. <br>
-   * Aggiorna i campi del riepilogo contenuto in cmr, nella parte residuale ovvero:<br> - residui
-   * anno corrente <br> - residui anno passato <br> - buoni pasto rimanenti <br> alla data
-   * calcolaFinoA.<br> Durante la computazione memorizza anche le seguenti informazioni in cmr: <br>
-   * - progressivo finale totale, positivo e negativo del mese <br> - straordinari s1, s2, s3
-   * assegnati nel mese<br> - riposi compensativi effettuati in numero e minuti totali<br> - buoni
-   * pasto consegnati ed consumati nel mese <br>
+   * Nota bene: il metodo non effettua salvataggi ma solo assegnamenti.<br> 
+   * Nota bene 2: il metodo assume che se il precedente riepilogo è absent() significa che non 
+   * serve ai fini della computazione. Il controllo di fornire il parametro corretto è 
+   * demandato al chiamante. <br>
+   * 
+   * Aggiorna i campi del riepilogo contenuto in cmr, nella parte residuale ovvero:<br> 
+   *   - residui anno corrente <br> 
+   *   - residui anno passato <br> 
+   *   - buoni pasto rimanenti <br> 
+   * alla data calcolaFinoA.<br>
+   * 
+   * Durante la computazione memorizza anche le seguenti informazioni in cmr: <br>
+   * - progressivo finale totale, positivo e negativo del mese <br> 
+   * - straordinari s1, s2, s3 assegnati nel mese<br> 
+   * - riposi compensativi effettuati in numero e minuti totali<br> 
+   * - buoni pasto consegnati ed consumati nel mese <br>
    *
    * @param recapPreviousMonth    se presente è il riepilogo precedente.
    * @param otherCompensatoryRest altri riposi compensativi non persistiti nel db.
    */
-  public Optional<ContractMonthRecap> computeResidualModule(
-      ContractMonthRecap cmr, Optional<ContractMonthRecap> recapPreviousMonth,
-      YearMonth yearMonth, LocalDate calcolaFinoA, List<Absence> otherCompensatoryRest) {
+  public Optional<ContractMonthRecap> computeResidualModule(ContractMonthRecap cmr,
+      Optional<ContractMonthRecap> recapPreviousMonth, YearMonth yearMonth, LocalDate calcolaFinoA, 
+      List<Absence> otherCompensatoryRest) {
 
     Contract contract = cmr.contract;
 

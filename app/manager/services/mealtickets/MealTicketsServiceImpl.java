@@ -1,4 +1,4 @@
-package manager.services.mealTickets;
+package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;

@@ -1,4 +1,4 @@
-package manager.services.mealTickets;
+package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -9,7 +9,7 @@ import dao.wrapper.IWrapperContract;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.services.mealTickets.MealTicketsServiceImpl.MealTicketOrder;
+import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Contract;
 import models.ContractMonthRecap;

@@ -16,6 +16,7 @@ import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ConfigurationManager;
 import manager.ConsistencyManager;
+import manager.PeriodManager;
 
 import models.Contract;
 import models.Office;
@@ -84,6 +85,8 @@ public class Bootstrap extends Job<Void> {
   static ConfYearManager confYearManager;
   @Inject
   static ConfGeneralManager confGeneralManager;
+  @Inject
+  static PeriodManager periodManager;
 
   
   public void doJob() throws IOException {
@@ -119,27 +122,6 @@ public class Bootstrap extends Job<Void> {
     Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
     fixUserPermission.doJob();
-
-    //prendere tutte le persone che a oggi non hanno inizializzazione e crearne una vuota
-    //Tutte le persone con contratto iniziato dopo alla data di inizializzazione
-    // devono avere la inizializzazione al giorno prima.
-    List<Person> persons = Person.findAll();
-    for (Person person : persons) {
-
-      //Contratto attuale
-      Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-      if (!contract.isPresent()) {
-        continue;
-      }
-
-      IWrapperContract wrContract = wrapperFactory.create(contract.get());
-      if (wrContract.initializationMissing()) {
-
-        log.info(
-            "Bootstrap contract scan: contratto di {} iniziato il {} non è initializationMissing",
-            person.fullName(), contract.get().beginDate);
-      }
-    }
 
     //impostare il campo tipo orario orizzondale si/no effettuando una euristica
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
@@ -309,6 +291,13 @@ public class Bootstrap extends Job<Void> {
       
       log.info("Migrazione configurazione {} terminata!!!", office.name);
     }
+    
+    //hotfix dei periodi
+    for (Office office : offices) {
+      log.info("Hotfix dei periodi di configurazione {}.", office.name);
+      periodManager.updatePropertiesInPeriodOwner(office);
+    }
+    log.info("Hotfix dei periodi di configurazione terminata!!!");
   }
   
  
