@@ -12,13 +12,11 @@ import dao.wrapper.IWrapperOffice;
 
 import helpers.Web;
 
-import models.ConfGeneral;
-import models.ConfYear;
-import models.Configuration;
+import manager.PeriodManager;
+
 import models.Institute;
 import models.Office;
 import models.Role;
-import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -26,9 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import javax.inject.Inject;
@@ -45,6 +43,8 @@ public class Offices extends Controller {
   static RoleDao roleDao;
   @Inject
   static SecurityRules rules;
+  @Inject
+  static PeriodManager periodManager;
 
   public static void index() {
     flash.keep();
@@ -131,7 +131,7 @@ public class Offices extends Controller {
     } else {
       office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
-      office.updatePropertiesInPeriodOwner();
+      periodManager.updatePropertiesInPeriodOwner(office);
       flash.success(Web.msgSaved(Office.class));
       Institutes.index();
     }
