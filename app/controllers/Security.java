@@ -3,15 +3,14 @@ package controllers;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.hash.Hashing;
 
 import dao.UserDao;
 
-import manager.ConfigurationManager;
 import manager.OfficeManager;
 
 import models.User;
-import models.enumerate.Parameter;
 
 import play.Logger;
 import play.Play;
@@ -68,11 +67,6 @@ public class Security extends Secure.Security {
     }
     Logger.trace("Richiesta getUser(), username=%s", username);
 
-    //cache
-    //User user = (User)Cache.get(username);
-    //if(user!=null)
-    //  return Optional.of(user);
-
     //db
     User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
 
@@ -81,12 +75,12 @@ public class Security extends Secure.Security {
       Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
       return Optional.<User>absent();
     }
-    //Cache.set(username, user, CACHE_DURATION);
     return Optional.of(user);
   }
 
   /**
    * Preleva (opzionalmente) l'utente loggato.
+   *
    * @return l'utente correntemente loggato se presente
    */
   public static Optional<User> getUser() {
@@ -117,7 +111,13 @@ public class Security extends Secure.Security {
     if ("true".equals(Play.configuration.getProperty(Clocks.SKIP_IP_CHECK))) {
       return true;
     }
-    String remoteAddress = Http.Request.current().remoteAddress;
-    return !(Boolean)officeManager.getOfficesWithAllowedIp(remoteAddress).isEmpty();
+    Iterable<String> addresses = Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress);
+    for (String address : addresses) {
+      if (!officeManager.getOfficesWithAllowedIp(address).isEmpty()) {
+        return true;
+      }
+    }
+    return false;
   }
 }

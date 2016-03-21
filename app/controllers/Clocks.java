@@ -1,9 +1,10 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
-
-import controllers.Resecure.NoCheck;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -27,13 +28,14 @@ import models.Stamping.WayType;
 import models.User;
 import models.enumerate.EpasParam;
 import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.Parameter;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
+import controllers.Resecure.NoCheck;
+import edu.emory.mathcs.backport.java.util.Collections;
 import play.Logger;
 import play.Play;
 import play.data.binding.As;
@@ -52,33 +54,37 @@ public class Clocks extends Controller {
 
   public static final String SKIP_IP_CHECK = "skip.ip.check";
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
   @Inject
-  private static OfficeManager officeManager;
+  static OfficeManager officeManager;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static PersonDayDao personDayDao;
+  static PersonDayDao personDayDao;
   @Inject
-  private static ConfigurationManager configurationManger;
+  static ConfigurationManager configurationManger;
   @Inject
-  private static PersonDayManager personDayManager;
+  static PersonDayManager personDayManager;
   @Inject
-  private static PersonStampingDayRecapFactory stampingDayRecapFactory;
+  static PersonStampingDayRecapFactory stampingDayRecapFactory;
   @Inject
-  private static ConsistencyManager consistencyManager;
+  static ConsistencyManager consistencyManager;
 
   @NoCheck
   public static void show() {
 
     LocalDate data = new LocalDate();
-    Set<Office> offices;
+    Set<Office> offices = Sets.newHashSet();
 
     if ("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
       offices = FluentIterable.from(officeDao.getAllOffices()).toSet();
     } else {
-      String remoteAddress = Http.Request.current().remoteAddress;
-      offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
+      final Iterable<String> addresses = Splitter.on(",").trimResults()
+          .split(Http.Request.current().remoteAddress);
+
+      for (String address : addresses) {
+        offices.addAll(officeManager.getOfficesWithAllowedIp(address));
+      }
     }
 
     if (offices.isEmpty()) {
@@ -114,10 +120,13 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      IpList addressesAllowed = (IpList)configurationManger
+      IpList addressesAllowed = (IpList) configurationManger
           .configValue(person.office, EpasParam.ADDRESSES_ALLOWED);
 
-      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
+      final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+          .split(Http.Request.current().remoteAddress));
+
+      if (Collections.disjoint(addressesAllowed.ipList, addresses)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
             + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -143,10 +152,13 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      IpList addressesAllowed = (IpList)configurationManger
+      IpList addressesAllowed = (IpList) configurationManger
           .configValue(user.person.office, EpasParam.ADDRESSES_ALLOWED);
 
-      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
+      final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+          .split(Http.Request.current().remoteAddress));
+
+      if (Collections.disjoint(addressesAllowed.ipList, addresses)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
             + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -196,10 +208,13 @@ public class Clocks extends Controller {
 
     if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
 
-      final IpList addressesAllowed = (IpList)configurationManger
+      final IpList addressesAllowed = (IpList) configurationManger
           .configValue(user.person.office, EpasParam.ADDRESSES_ALLOWED);
 
-      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
+      final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+          .split(Http.Request.current().remoteAddress));
+
+      if (Collections.disjoint(addressesAllowed.ipList, addresses)) {
 
         flash.error("Le timbrature web per la persona indicata non sono abilitate"
             + "da questo terminale! Inserire l'indirizzo ip nella configurazione"
