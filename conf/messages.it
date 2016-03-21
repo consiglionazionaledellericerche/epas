@@ -498,3 +498,5 @@ office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attest
 office.joiningDate.popover= Data di affiliazione della sede
 
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
