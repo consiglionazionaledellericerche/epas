@@ -33,12 +33,6 @@
 		<input class="form-control" placeholder="Username" type="text" name="username" value="${flash.username}" />
 		<input class="form-control" placeholder="Password" type="password" name="password" value="" />
 	 
-		<!-- Remember me -->
-		
-		<input type="checkbox" name="remember" id="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
-		<label for="remember">&{'secure.remember'}</label>
-		
-		
 		<!-- Submit -->
 		<input class="btn btn-primary btn-block" type="submit" id="signin" value="&{'secure.signin'}" />
 
