@@ -4,6 +4,7 @@ package controllers;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
 import dao.UserDao;
@@ -13,12 +14,12 @@ import manager.OfficeManager;
 import models.User;
 
 import play.Logger;
-import play.Play;
 import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -107,17 +108,16 @@ public class Security extends Secure.Security {
     }
   }
 
+  /**
+   * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
+   * ricevuta, false altrimenti.
+   */
   public static boolean checkForWebstamping() {
-    if ("true".equals(Play.configuration.getProperty(Clocks.SKIP_IP_CHECK))) {
-      return true;
-    }
-    Iterable<String> addresses = Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress);
-    for (String address : addresses) {
-      if (!officeManager.getOfficesWithAllowedIp(address).isEmpty()) {
-        return true;
-      }
-    }
-    return false;
+
+    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress));
+
+    return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
+
 }
