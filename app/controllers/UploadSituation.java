@@ -7,6 +7,8 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import controllers.rest.attestati.NuovoAttestatiManager;
+
 import dao.OfficeDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
@@ -79,6 +81,8 @@ public class UploadSituation extends Controller {
   private static IWrapperFactory factory;
   @Inject
   private static UploadSituationManager updloadSituationManager;
+  @Inject
+  private static NuovoAttestatiManager nuovoAttestatiManager;
 
   /**
    * Tab carica data.
@@ -112,6 +116,23 @@ public class UploadSituation extends Controller {
     }
 
     render(wrOffice, monthToUpload, sessionAttestati);
+  }
+  
+  public static void newAttestati(Long officeId){
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    String token = nuovoAttestatiManager.getToken();
+    log.info("Token ricevuto: {}", token);
+    IWrapperOffice wrOffice = factory.create(office);
+    Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
+    render(wrOffice, monthToUpload);
+  }
+  
+  public static void inserisciAssenza(Office office, int month, int year){
+    
+    int result = nuovoAttestatiManager.inserisciAssenza("ebf93f8c-6247-429e-82c7-582f2d4e713e",
+        month, year, new Integer(office.codeId));
   }
 
   /**

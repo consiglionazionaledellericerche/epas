@@ -178,7 +178,7 @@ public class Person extends MutableModel implements Comparable<Person> {
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Competence> competences = Lists.newArrayList();
-
+  
   /**
    * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
    * una certa competenza.
