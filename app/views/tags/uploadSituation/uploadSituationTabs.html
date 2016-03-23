@@ -19,6 +19,9 @@
     <li #{if _activeAction.equals("createFile")} class="active" #{/if}>
       <a href="@{UploadSituation.createFile(officeId)}">Crea File</a>
     </li>
+    <li #{if _activeAction.equals("newAttestati")} class="active" #{/if}>
+      <a href="@{UploadSituation.newAttestati(officeId)}">Nuova procedura attestati</a>
+    </li>
   </ul>
 </div>
 <br>
