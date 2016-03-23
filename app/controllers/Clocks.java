@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import controllers.Resecure.NoCheck;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -29,7 +31,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
-import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
