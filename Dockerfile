@@ -9,7 +9,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/* && \
     sed -e '/pam_loginuid.so/ s/^#*/#/' -i /etc/pam.d/cron && \
-    useradd -m epas && \
     mkdir -p /home/epas/epas/data/attachments && \
     mkdir -p /home/epas/epas/logs && \
     mkdir -p /home/epas/epas/tools && \
@@ -17,13 +16,8 @@ RUN apt-get update && \
 
 ADD / /home/epas/epas/
 
-RUN chown -R epas:epas /home/epas
-
 WORKDIR /home/epas/epas/
  
-#prod o dev da parametrizzare
-USER epas
-
 RUN touch conf/dev.conf && \
     play clean && \
     play deps --sync && \
