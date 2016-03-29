@@ -60,7 +60,7 @@ epas:
 #    - BACKUP_HOURS=6                        # default: 6,12,18 (3 volte al giorno: alle 6, alle 12 e alle 18)
 #    - LOG_LEVEL=                            # default: INFO
 #    - LOG_ON_FILE=                          # default: false (true, false)
-
+#    - JOBS_ACTIVE=false                    # default: n.a. Se impostato a false disabilita l'esecuzione di tutti i job
 
   links:
     - postgres
