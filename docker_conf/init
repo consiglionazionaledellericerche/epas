@@ -122,6 +122,12 @@ else
   sed 's#{{URL_ATTESTATI}}#'"${URL_ATTESTATI}"'#' -i /home/epas/epas/conf/prod.conf
 fi
 
+if [ -z "${JOBS_ACTIVE}" ]; then
+  sed -n '/JOBS_ACTIVE/!p' -i /home/epas/epas/conf/prod.conf
+else
+  sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i /home/epas/epas/conf/prod.conf
+fi
+
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i /home/epas/epas/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i /home/epas/epas/conf/prod.conf
 
@@ -140,11 +146,11 @@ esac
 
 appRun () {
   echo "Applico eventuali evoluzioni al database..."
-  play evolutions:apply --%prod
+  sudo -u epas -H play evolutions:apply --%prod
   echo ".... evoluzioni terminate"
   
   echo "Avvio ePAS..."
-  play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
+  sudo -u epas -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
   echo "....ePAS avviato"
 }
 
@@ -153,7 +159,7 @@ appPlay() {
     echo "Per favore specifica almeno un'azione play da eseguire, es: evolutions, evolutions:apply, etc...."
     return 1
   fi
-  exec play $@ --%prod
+  exec sudo -u epas -H play $@ --%prod
 }
 
 appHelp () {
