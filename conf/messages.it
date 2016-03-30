@@ -24,7 +24,11 @@ administrator=Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
-application.config= Configurazione applicazione
+Administration.playConfiguration.table= Parametri di Configurazione Play! framework
+Administration.jvmConfiguration.table= Parametri Jvm
+Administration.runtimeData.table= Valori di Runtime
+
+application.data= Informazioni applicazione
 
 badge.badgeReader= Lettore badge associato
 badge.begin= Inzio
