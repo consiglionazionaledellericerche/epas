@@ -3,7 +3,12 @@
 #{set title: 'ePAS - Presenza Giornaliera'  /}
 
 <div class="container">
-  #{title title:'Controllo presenze' /}
+  #{if office}
+    #{title title:'Controllo presenze ' + office.name /}
+  #{/if}
+  #{else}
+    #{title title:'Controllo presenze ' + date.format() /}
+  #{/else}
 </div>
 
 #{if !groupView}
@@ -11,6 +16,9 @@
 #{/if}
 
 <div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
+   <div class="center">
+   #{title title:date.format()/}
+   </div>
 	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
 	      <tr>
 			<th class="group-single">Nome</th>
