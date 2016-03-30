@@ -64,7 +64,7 @@ import javax.inject.Inject;
  * @author cristian
  */
 @Slf4j
-public class AttestatiClient {
+public class AttestatiClientNew {
 
   private static String CLIENT_USER_AGENT = "ePAS";
   private static String BASE_LOGIN_URL = "LoginLDAP";
@@ -378,6 +378,14 @@ public class AttestatiClient {
     String urlToPresence = UploadSituation.URL_TO_PRESENCE;
     URI baseUri = new URI(urlToPresence);
     final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
+    
+    /**
+     * In questo punto devo mettere le chiamate rest per ciascuno dei parametri da inviare ad attestati:
+     * invece di inviare persona per persona tutte le informazioni, occorre inviare per ciascuna informazione
+     * (assenze, competenze, ore di formazione, buoni pasto) la lista dei dipendenti con le rispettive info
+     * come da documento inviato da pagano 
+     * 
+     */
 
     //Connessione
     Connection connection = Jsoup.connect(elaboraDatiUrl.toString());
@@ -543,13 +551,7 @@ public class AttestatiClient {
     
     List<RispostaElaboraDati> checks = Lists.newLinkedList();
 
-    /**
-     * In questo punto devo mettere le chiamate rest per ciascuno dei parametri da inviare ad attestati:
-     * invece di inviare persona per persona tutte le informazioni, occorre inviare per ciascuna informazione
-     * (assenze, competenze, ore di formazione, buoni pasto) la lista dei dipendenti con le rispettive info
-     * come da documento inviato da pagano 
-     * 
-     */
+    
     for (Dipendente dipendente : dipendenti) {
 
       if (dipendente.getMatricola() == null || dipendente.getMatricola().isEmpty()) {
@@ -557,7 +559,14 @@ public class AttestatiClient {
       }
       Person person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
 
-      
+      /**
+       * Qui devo formare i messaggi json da inviare secondo il formato richiesto da Attestati,
+       * ogni messaggio deve contenere una specifica tipologia di informazione:
+       * - messaggio con la lista dei dipendenti (in test vale solo con un dipendente) con la lista delle assenze;
+       * - messaggio con la lista dei dipendenti (in test vale solo con un dipendente) con la lista delle competenze;
+       * - messaggio con la lista dei dipendenti (in test vale solo con un dipendente) con la lista delle ore di formazione;
+       * - messaggio con la lista dei dipendenti (in test vale solo con un dipendente) con il numero dei buoni pasto;
+       */
       //Ore formazione
       List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
           .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
