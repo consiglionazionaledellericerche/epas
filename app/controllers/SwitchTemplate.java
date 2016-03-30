@@ -165,21 +165,6 @@ public class SwitchTemplate extends Controller {
 
   }
 
-  public static void updateDay(Integer day, final String actionSelected) throws Throwable {
-
-    if (actionSelected == null) {
-      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-      Secure.login();
-    }
-
-    if (day == null || day < 1 || day > 31) {
-      Application.index();
-    }
-
-    executeAction(actionSelected);
-  }
-
-
   public static void updateMonth(Integer month) throws Throwable {
 
     String action = session.get("actionSelected");
@@ -199,6 +184,27 @@ public class SwitchTemplate extends Controller {
     executeAction(action);
 
   }
+  
+  public static void updateDay(Integer day) throws Throwable {
+
+    String action = session.get("actionSelected");
+    if (action == null) {
+
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
+
+    if (day == null || day < 1 || day > 31) {
+
+      Application.index();
+    }
+    
+    session.put("daySelected", day);
+
+    executeAction(action);
+
+  }
+
 
   // esempio se si volesse utilizzare l'anno nei parametri.
   public static int currentYear() {
