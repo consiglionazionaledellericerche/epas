@@ -3,9 +3,7 @@ package controllers;
 import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
-import play.mvc.With;
 
-@With(RequestInit.class)
 public class SwitchTemplate extends Controller {
 
   public static final String USERNAME_SESSION_KEY = "username";
@@ -167,8 +165,6 @@ public class SwitchTemplate extends Controller {
 
   }
 
- 
-
   public static void updateMonth(Integer month) throws Throwable {
 
     String action = session.get("actionSelected");
@@ -223,13 +219,11 @@ public class SwitchTemplate extends Controller {
   public static void updateYear(Integer year) throws Throwable {
     String action = session.get("actionSelected");
     if (action == null) {
-
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
 
     if (year == null) { /* TODO check bound year */
-
       Application.index();
     }
 
@@ -239,10 +233,9 @@ public class SwitchTemplate extends Controller {
 
   }
 
-  public static void updatePerson(Long personId) throws Throwable {
+  public static void updatePerson(Long personId, final String actionSelected) throws Throwable {
 
-    String action = session.get("actionSelected");
-    if (action == null) {
+    if (actionSelected == null) {
 
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
@@ -255,13 +248,12 @@ public class SwitchTemplate extends Controller {
 
     session.put("personSelected", personId);
 
-    executeAction(action);
+    executeAction(actionSelected);
   }
 
-  public static void updateOffice(Long officeId) throws Throwable {
+  public static void updateOffice(Long officeId, final String actionSelected) throws Throwable {
 
-    String action = session.get("actionSelected");
-    if (action == null) {
+    if (actionSelected == null) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
@@ -271,10 +263,8 @@ public class SwitchTemplate extends Controller {
 
     session.put("officeSelected", officeId);
 
-    executeAction(action);
-
+    executeAction(actionSelected);
   }
-
 
 }
 

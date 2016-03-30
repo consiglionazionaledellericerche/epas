@@ -28,12 +28,15 @@ import models.enumerate.JustifiedTimeAtWork;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
+import play.Play;
 import play.data.validation.Required;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -316,13 +319,13 @@ public class Administration extends Controller {
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
    *
    * @param person la persona da fixare, -1 per fixare tutte le persone
-   * @param year     l'anno dal quale far partire il fix
-   * @param month    il mese dal quale far partire il fix
+   * @param year   l'anno dal quale far partire il fix
+   * @param month  il mese dal quale far partire il fix
    */
   public static void fixPersonSituation(Person person, int year, int month, boolean onlyRecap) {
 
     LocalDate date = new LocalDate(year, month, 1);
-    
+
     Optional<Person> optPerson = Optional.<Person>absent();
     if (person.isPersistent()) {
       optPerson = Optional.fromNullable(person);
@@ -404,14 +407,14 @@ public class Administration extends Controller {
 
     utilities();
   }
-  
+
   /**
    * Rimuove dal database tutti i personDayInTrouble che non appartengono ad alcun contratto o che
    * sono precedenti la sua inizializzazione.
    */
   @SuppressWarnings("deprecation")
   public static void fixDaysInTrouble() {
-    
+
     List<Person> people = Person.findAll();
     for (Person person : people) {
 
@@ -420,9 +423,9 @@ public class Administration extends Controller {
       person = personDao.getPersonById(person.id);
       personDayInTroubleManager.cleanPersonDayInTrouble(person);
     }
-    
+
     flash.success("Operazione completata");
-    
+
     utilities();
   }
 
@@ -441,6 +444,11 @@ public class Administration extends Controller {
 
     utilities();
 
+  }
+
+  public static void playConfiguration() {
+    Set<Entry<Object, Object>> configurations = Play.configuration.entrySet();
+    render(configurations);
   }
 
 }
