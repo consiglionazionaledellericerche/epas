@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.RoleDao;
@@ -37,15 +36,6 @@ public class SecureManager {
     Preconditions.checkState(user.isPersistent());
 
     final List<Role> roles = roleDao.getRolesByNames(rolesNames);
-    //PROVVISORIO: per fare in modo che super utenti come developer e admin possano
-    //vedere tutte le sedi presenti sul db in varie circostanze
-    if (user.username.equals("developer") || user.username.equals("admin")) {
-      Set<Office> officeSet = Sets.newHashSet();
-
-      officeSet.addAll(officeDao.getAllOffices());
-
-      return officeSet;
-    }
 
     return FluentIterable.from(user.usersRolesOffices)
         .filter(new Predicate<UsersRolesOffices>() {
@@ -56,8 +46,7 @@ public class SecureManager {
             }
             return true;
           }
-        })
-        .transform(new Function<UsersRolesOffices, Office>() {
+        }).transform(new Function<UsersRolesOffices, Office>() {
           @Override
           public Office apply(UsersRolesOffices uro) {
             if (roles.contains(uro.role)) {

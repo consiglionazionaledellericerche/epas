@@ -1,7 +1,8 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 
 import controllers.Resecure.NoCheck;
 
@@ -11,7 +12,6 @@ import dao.PersonDayDao;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
@@ -25,9 +25,6 @@ import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.Parameter;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -35,7 +32,6 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
 import play.Logger;
-import play.Play;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.mvc.Controller;
@@ -50,36 +46,30 @@ import javax.inject.Inject;
 @With({RequestInit.class, Resecure.class})
 public class Clocks extends Controller {
 
-  public static final String SKIP_IP_CHECK = "skip.ip.check";
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
   @Inject
-  private static OfficeManager officeManager;
+  static OfficeManager officeManager;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static PersonDayDao personDayDao;
+  static PersonDayDao personDayDao;
   @Inject
-  private static ConfigurationManager configurationManger;
+  static PersonDayManager personDayManager;
   @Inject
-  private static PersonDayManager personDayManager;
+  static PersonStampingDayRecapFactory stampingDayRecapFactory;
   @Inject
-  private static PersonStampingDayRecapFactory stampingDayRecapFactory;
-  @Inject
-  private static ConsistencyManager consistencyManager;
+  static ConsistencyManager consistencyManager;
 
   @NoCheck
   public static void show() {
 
     LocalDate data = new LocalDate();
-    Set<Office> offices;
 
-    if ("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
-      offices = FluentIterable.from(officeDao.getAllOffices()).toSet();
-    } else {
-      String remoteAddress = Http.Request.current().remoteAddress;
-      offices = officeManager.getOfficesWithAllowedIp(remoteAddress);
-    }
+    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress));
+
+    Set<Office> offices = officeManager.getOfficesWithAllowedIp(addresses);
 
     if (offices.isEmpty()) {
       flash.error("Le timbrature web non sono permesse da questo terminale! "
@@ -105,25 +95,24 @@ public class Clocks extends Controller {
       show();
     }
 
-    User user = person.user;
+    final User user = person.user;
+
     if (user == null) {
       flash.error("La persona selezionata non dispone di un account valido."
           + " Contattare l'amministratore");
       show();
     }
 
-    if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
+    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress));
 
-      IpList addressesAllowed = (IpList)configurationManger
-          .configValue(person.office, EpasParam.ADDRESSES_ALLOWED);
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.office)) {
 
-      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
+      flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
+          + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
+          + " abilitarlo");
+      show();
 
-        flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
-            + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
-            + " abilitarlo");
-        show();
-      }
     }
 
     if (Security.authenticate(user.username, password)) {
@@ -141,18 +130,16 @@ public class Clocks extends Controller {
     // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
     User user = Security.getUser().orNull();
 
-    if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
+    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress));
 
-      IpList addressesAllowed = (IpList)configurationManger
-          .configValue(user.person.office, EpasParam.ADDRESSES_ALLOWED);
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.person.office)) {
 
-      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
+      flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
+          + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
+          + " abilitarlo");
+      show();
 
-        flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
-            + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
-            + " abilitarlo");
-        show();
-      }
     }
 
     LocalDate today = LocalDate.now();
@@ -194,18 +181,16 @@ public class Clocks extends Controller {
 
     final User user = Security.getUser().get();
 
-    if (!"true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
+    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress));
 
-      final IpList addressesAllowed = (IpList)configurationManger
-          .configValue(user.person.office, EpasParam.ADDRESSES_ALLOWED);
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.person.office)) {
 
-      if (!addressesAllowed.ipList.contains(Http.Request.current().remoteAddress)) {
+      flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
+          + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
+          + " abilitarlo");
+      show();
 
-        flash.error("Le timbrature web per la persona indicata non sono abilitate"
-            + "da questo terminale! Inserire l'indirizzo ip nella configurazione"
-            + "della propria sede per abilitarlo");
-        show();
-      }
     }
 
     final PersonDay personDay = personDayDao.getOrBuildPersonDay(user.person, LocalDate.now());

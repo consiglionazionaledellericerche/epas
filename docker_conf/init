@@ -11,6 +11,7 @@ EPAS_HOST=${VIRTUAL_HOST}
 HTTPS=${HTTPS:-false}
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
 LOG_LEVEL=${LOG_LEVEL:-INFO}
+LOG_ON_FILE=${LOG_ON_FILE:-false}
 
 # use default port number if it is still not set
 case "${HTTPS}" in
@@ -48,85 +49,100 @@ BACKUP_HOURS=${BACKUP_HOURS:-6,12,18}
 # sed  's#SENDMAILTO="logcheck"/SENDMAILTO="epas"/' -i /etc/logcheck/logcheck.conf
 
 # Backup db
-sudo -u epas -H cp /home/epas/epas/docker_conf/backupdb.sh /home/epas/epas/tools/backupdb.sh 
+cp /home/epas/epas/docker_conf/backupdb.sh /home/epas/epas/tools/backupdb.sh 
 
-sudo -u epas -H sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sudo -u epas -H sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sudo -u epas -H sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sudo -u epas -H sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sudo -u epas -H sed 's#{{EPAS_HOST}}#'"${EPAS_HOST}"'#g' -i /home/epas/epas/tools/backupdb.sh
+sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/tools/backupdb.sh 
+sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/tools/backupdb.sh 
+sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/tools/backupdb.sh 
+sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/tools/backupdb.sh 
+sed 's#{{EPAS_HOST}}#'"${EPAS_HOST}"'#g' -i /home/epas/epas/tools/backupdb.sh
 
-sudo -u epas chmod +x /home/epas/epas/tools/backupdb.sh
+chmod +x /home/epas/epas/tools/backupdb.sh
 
-sudo -u epas -H cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron
+cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron
 
-sudo -u epas -H sed 's#{{BACKUP_MINUTES}}#'"${BACKUP_MINUTES}"'#' -i /home/epas/epas/tools/cron
-sudo -u epas -H sed 's#{{BACKUP_HOURS}}#'"${BACKUP_HOURS}"'#' -i /home/epas/epas/tools/cron
+sed 's#{{BACKUP_MINUTES}}#'"${BACKUP_MINUTES}"'#' -i /home/epas/epas/tools/cron
+sed 's#{{BACKUP_HOURS}}#'"${BACKUP_HOURS}"'#' -i /home/epas/epas/tools/cron
 
 BACKUP=${BACKUP:-false}
 
 if [ "${BACKUP}" == true ]; then
-crontab -u epas /home/epas/epas/tools/cron
+crontab /home/epas/epas/tools/cron
 cron
 fi
 
 # configure ePAS
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 
-sudo -u epas -H cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/
+cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/
 
-sudo -u epas -H sed 's#{{EPAS_APPLICATION_BASEURL}}#'"${EPAS_APPLICATION_BASEURL}"'#' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/conf/prod.conf
-
+sed 's#{{EPAS_APPLICATION_BASEURL}}#'"${EPAS_APPLICATION_BASEURL}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/conf/prod.conf
 
 ### Impostazione server smtp
 
 SMTP_FROM=${SMTP_FROM:-epas@cnr.it}
 SMTP_HOST=${SMTP_HOST:-smtp.cnr.it}
 
-sudo -u epas -H sed 's#{{SMTP_FROM}}#'"${SMTP_FROM}"'#' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's#{{SMTP_HOST}}#'"${SMTP_HOST}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{SMTP_FROM}}#'"${SMTP_FROM}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{SMTP_HOST}}#'"${SMTP_HOST}"'#' -i /home/epas/epas/conf/prod.conf
 
 if [ -z "${SMTP_USER}" ]; then
   sed -n '/SMTP_USER/!p' -i /home/epas/epas/conf/prod.conf
   sed -n '/SMTP_PASS/!p' -i /home/epas/epas/conf/prod.conf
 else
-  sudo -u epas -H sed 's#{{SMTP_USER}}#'"${SMTP_USER}"'#' -i /home/epas/epas/conf/prod.conf
-  sudo -u epas -H sed 's#{{SMTP_PASS}}#'"${SMTP_PASS}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_USER}}#'"${SMTP_USER}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_PASS}}#'"${SMTP_PASS}"'#' -i /home/epas/epas/conf/prod.conf
 fi
 
 if [ -z "${SMTP_PORT}" ]; then
   sed -n '/SMTP_PORT/!p'  -i /home/epas/epas/conf/prod.conf
 else
-  sudo -u epas -H sed 's#{{SMTP_PORT}}#'"${SMTP_PORT}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_PORT}}#'"${SMTP_PORT}"'#' -i /home/epas/epas/conf/prod.conf
 fi
 
 if [ -z "${SMTP_CHANNEL}" ]; then
   sed -n '/SMTP_CHANNEL/!p' -i /home/epas/epas/conf/prod.conf
 else
-  sudo -u epas -H sed 's#{{SMTP_CHANNEL}}#'"${SMTP_CHANNEL}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_CHANNEL}}#'"${SMTP_CHANNEL}"'#' -i /home/epas/epas/conf/prod.conf
 fi
 
 if [ -z "${SMTP_PROTOCOL}" ]; then
   sed -n '/SMTP_PROTOCOL/!p' -i /home/epas/epas/conf/prod.conf
 else
-  sudo -u epas -H sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i /home/epas/epas/conf/prod.conf
 fi
 
 if [ -z "${URL_ATTESTATI}" ]; then
   sed -n '/URL_ATTESTATI/!p' -i /home/epas/epas/conf/prod.conf
 else
-  sudo -u epas -H sed 's#{{URL_ATTESTATI}}#'"${URL_ATTESTATI}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{URL_ATTESTATI}}#'"${URL_ATTESTATI}"'#' -i /home/epas/epas/conf/prod.conf
 fi
 
-sudo -u epas -H sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i /home/epas/epas/conf/prod.conf
-sudo -u epas -H sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i /home/epas/epas/conf/prod.conf
+if [ -z "${JOBS_ACTIVE}" ]; then
+  sed -n '/JOBS_ACTIVE/!p' -i /home/epas/epas/conf/prod.conf
+else
+  sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i /home/epas/epas/conf/prod.conf
+fi
 
-sudo -u epas -H cp /home/epas/epas/docker_conf/log4j.prod.properties /home/epas/epas/conf/
-sudo -u epas -H sed 's#{{LOG_LEVEL}}#'"${LOG_LEVEL}"'#' -i /home/epas/epas/conf/log4j.prod.properties
+sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i /home/epas/epas/conf/prod.conf
+
+cp /home/epas/epas/docker_conf/log4j.prod.properties /home/epas/epas/conf/
+sed 's#{{LOG_LEVEL}}#'"${LOG_LEVEL}"'#' -i /home/epas/epas/conf/log4j.prod.properties
+
+case "${LOG_ON_FILE}" in
+  false) sed 's/{{FILE}}//g' -i /home/epas/epas/conf/log4j.prod.properties ;;
+  true) sed 's#{{FILE}}#'", file"'#' -i /home/epas/epas/conf/log4j.prod.properties ;;
+  *)
+    echo "ERROR: "
+    echo "  Please specify true or false in LOG_ON_FILE Env."
+    exit 1
+    ;;
+esac
 
 appRun () {
   echo "Applico eventuali evoluzioni al database..."
