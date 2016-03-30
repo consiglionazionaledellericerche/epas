@@ -367,7 +367,7 @@ public class Stampings extends Controller {
 
     boolean showLink = false;
     
-    render(daysRecap, year, month, day, numberOfInOut, showLink);
+    render(daysRecap, office, date, numberOfInOut, showLink);
   }
   
   /**
@@ -397,7 +397,7 @@ public class Stampings extends Controller {
     boolean showLink = false;
     boolean groupView = true;
     
-    render("@dailyPresence", year, month, day, numberOfInOut, showLink, daysRecap, groupView);
+    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
 
 
 
