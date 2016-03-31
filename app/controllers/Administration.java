@@ -1,6 +1,8 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -34,10 +36,12 @@ import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 
@@ -331,12 +335,13 @@ public class Administration extends Controller {
   }
 
   public static void jvmConfiguration() {
-    final Set<Entry<Object, Object>> entries = System.getProperties().entrySet();
-    entries.forEach(entry -> {
-      if (entry.getKey().equals("java.class.path")) {
-        entries.remove(entry);
-      }
-    });
+    final Collection<Entry<Object, Object>> entries = Collections2.filter(
+        System.getProperties().entrySet(), new Predicate<Entry<Object, Object>>() {
+          @Override
+          public boolean apply(@Nullable Entry<Object, Object> objectObjectEntry) {
+            return !"java.class.path".equals(objectObjectEntry.getKey());
+          }
+        });
     render("@data", entries);
   }
 
