@@ -54,7 +54,7 @@ body.modal-open #wrapper{
 }
 
 .modal.fade {
-	top: 15%;
+	top: 40%;
 	-webkit-transition: opacity 0.2s linear, top 0.2s ease-out, bottom 0.2s ease-out, margin-top 0.2s ease-out;
 	   -moz-transition: opacity 0.2s linear, top 0.2s ease-out, bottom 0.2s ease-out, margin-top 0.2s ease-out;
 	     -o-transition: opacity 0.2s linear, top 0.2s ease-out, bottom 0.2s ease-out, margin-top 0.2s ease-out;
