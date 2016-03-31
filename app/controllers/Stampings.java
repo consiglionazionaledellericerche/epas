@@ -131,8 +131,7 @@ public class Stampings extends Controller {
    * @param year     anno
    * @param month    mese
    */
-  public static void personStamping(final Long personId,
-                                    final int year, final int month) {
+  public static void personStamping(final Long personId, final int year, final int month) {
 
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
@@ -366,7 +365,6 @@ public class Stampings extends Controller {
         activePersonsInDay, date, numberOfInOut);
 
     boolean showLink = false;
-    
     render(daysRecap, office, date, numberOfInOut, showLink);
   }
   
