@@ -42,7 +42,7 @@
   #{else}
   <!-- Per ogni assenza una tabella -->
   #{list items:historyAbsencesList, as:'historyAbsence'}
-  <h5>Storico assenza codice ${historyAbsence.get(0).value?.absenceType?.code}
+  <h5>Storico assenza codice ${historyAbsence.get(0).value?.absenceType.code}
     (id=${historyAbsence.get(0).value?.id})</h5>
 
   <table class="table table-condensed table-bordered">
@@ -56,7 +56,7 @@
 
     #{list items:historyAbsence, as:'absence'}
     <tr class="warning">
-      *{<td>${absence.value.absenceType?.code}</td>}*
+      <td>${absence.value.absenceType?.code}</td>
       <td>${absence.formattedRevisionDate()}</td>
       <td>${absence.formattedOwner()}</td>
       <td class="${absence.type}">&{absence.type}</td>
