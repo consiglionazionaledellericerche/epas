@@ -1,6 +1,9 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import dao.ContractDao;
@@ -13,7 +16,6 @@ import it.cnr.iit.epas.CompetenceUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
-import manager.ContractManager;
 import manager.PersonDayInTroubleManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
@@ -34,10 +36,12 @@ import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 
@@ -58,132 +62,11 @@ public class Administration extends Controller {
   @Inject
   static ContractDao contractDao;
   @Inject
-  static ContractManager contractManager;
-  @Inject
   static PersonDayDao personDayDao;
   @Inject
   static PersonDayManager personDayManager;
   @Inject
-  private static PersonDayInTroubleManager personDayInTroubleManager;
-
-//  public static void prepareDbCourse() {
-//    List<Person> personList = personDao.list(Optional.<String>absent(), 
-//        Sets.newHashSet(officeDao.allOffices().list()), 
-//        false, LocalDate.now(),
-//        LocalDate.now().minusDays(1), true).list();
-//
-//    int personManteined = 0;
-//    for (Person person : personList) {
-//      boolean toRemove = false;
-//      if (person.office.id == 1) {
-//        if (personManteined < 20) {
-//          personManteined++;
-//        } else {
-//          toRemove = true;
-//        }
-//      }
-//      List<Contract> contracts = Lists.newArrayList();
-//      for (Contract contract : person.contracts) {
-//        if (toRemove) {
-//          contracts.add(contract);
-//        } else {
-//          for (ContractStampProfile csp : contract.contractStampProfile) {
-//            if (csp.fixedworkingtime) {
-//              contracts.add(contract);
-//              break;
-//            }
-//          }
-//        }
-//      }
-//      for (Contract contract : contracts) {
-//
-//        log.info("Rimuovo {}", person.fullName());
-//        contract.delete();
-//      }
-//    }
-//
-//    offuscatore();
-//    
-//    List<User> users = User.findAll();
-//    for (User user : users) {
-//      Codec codec = new Codec();
-//      user.password = codec.hexMD5("epas");
-//      user.recoveryToken = null;
-//      user.expireRecoveryToken = null;
-//      user.save();
-//    }
-//  }
-//
-//  private static void offuscatore() {
-//
-//    BufferedReader br = null;
-//    List<String> surnames = Lists.newArrayList();
-//    List<String> names = Lists.newArrayList();
-//    try {
-//      String sCurrentLine;
-//      br = new BufferedReader(new FileReader("cognomi.txt"));
-//      while ((sCurrentLine = br.readLine()) != null) {
-//        surnames.add(WordUtils.capitalizeFully(sCurrentLine.toLowerCase()));
-//      }
-//
-//      br = new BufferedReader(new FileReader("nomi.txt"));
-//      while ((sCurrentLine = br.readLine()) != null) {
-//        names.add(WordUtils.capitalizeFully(sCurrentLine.toLowerCase()));
-//      }
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    } finally {
-//      try {
-//        if (br != null)br.close();
-//      } catch (IOException ex) {
-//        ex.printStackTrace();
-//      }
-//    }
-//
-//    List<Person> allPerson = Person.findAll();
-//    int randomNum;
-//    for (Person person : allPerson) { 
-//      person = Person.findById(person.id); 
-//      log.info("Gestisco {}", person.fullName());
-//      boolean exit = false;
-//      while (!exit) {
-//        try {
-//
-//          //nome
-//          randomNum = 0 + (int)(Math.random() * names.size() -1);
-//          String name = names.get(randomNum);
-//          //cognome 
-//          randomNum = 0 + (int)(Math.random() * surnames.size() -1);
-//          String surname = surnames.get(randomNum);
-//          log.info("diventa {}", name + " " + surname);
-//
-//
-//          Person exists = Person.find("byNameAndSurname", name, surname).first();
-//          if (exists != null) {
-//            continue;
-//          }
-//          person.surname = surname;
-//          person.name = name;
-//          person.email = name.toLowerCase() + "." + surname.toLowerCase() + "@cnr.it";
-//          person.user.username = name.toLowerCase() + "." + surname.toLowerCase();
-//
-//          person.save();
-//          person.user.save();
-//          JPA.em().flush();
-//          JPA.em().clear();
-//
-//          exit = true;
-//
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//
-//    }
-//
-//
-//  }
-
+  static PersonDayInTroubleManager personDayInTroubleManager;
 
   /**
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
@@ -447,8 +330,34 @@ public class Administration extends Controller {
   }
 
   public static void playConfiguration() {
-    Set<Entry<Object, Object>> configurations = Play.configuration.entrySet();
-    render(configurations);
+    final Set<Entry<Object, Object>> entries = Play.configuration.entrySet();
+    render("@data", entries);
+  }
+
+  public static void jvmConfiguration() {
+    final Collection<Entry<Object, Object>> entries = Collections2.filter(
+        System.getProperties().entrySet(), new Predicate<Entry<Object, Object>>() {
+          @Override
+          public boolean apply(@Nullable Entry<Object, Object> objectObjectEntry) {
+            return !"java.class.path".equals(objectObjectEntry.getKey());
+          }
+        });
+    render("@data", entries);
+  }
+
+  public static void runtimeData() {
+
+    final int mb = 1024 * 1024;
+    final Runtime runtime = Runtime.getRuntime();
+
+    final Set<Entry<String, String>> entries = ImmutableMap.of(
+        "Available Processors", String.format("%s", runtime.availableProcessors()),
+        "Used Memory", String.format("%s Mb", (runtime.totalMemory() - runtime.freeMemory()) / mb),
+        "Free Memory", String.format("%s Mb", runtime.freeMemory() / mb),
+        "Max Memory", String.format("%s Mb", runtime.maxMemory() / mb),
+        "Total Memory", String.format("%s Mb", runtime.totalMemory() / mb)).entrySet();
+
+    render("@data", entries);
   }
 
 }
