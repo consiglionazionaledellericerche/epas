@@ -39,8 +39,8 @@
 		  link = false;
 		}%
 		<tr>
-			<td class="default-single"">
-			<a href="@{Stampings.personStamping(dayRecap.personDay.person.id,year,month)}">${dayRecap.personDay.person.fullname}</a>
+			<td class="default-single">
+			<a href="@{Stampings.personStamping(dayRecap.personDay.person.id,date.getYear(),date.getMonthOfYear())}">${dayRecap.personDay.person.fullname}</a>
 			</td>
 			
 			#{include './personStampingComponents/_absencesTemplate.html' /}
