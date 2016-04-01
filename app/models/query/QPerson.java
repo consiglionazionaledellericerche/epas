@@ -90,8 +90,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final QPersonShift personShift;
 
-    public final ListPath<models.PersonYear, QPersonYear> personYears = this.<models.PersonYear, QPersonYear>createList("personYears", models.PersonYear.class, QPersonYear.class, PathInits.DIRECT2);
-
     public final QQualification qualification;
 
     public final QPersonReperibility reperibility;

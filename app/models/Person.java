@@ -167,12 +167,6 @@ public class Person extends MutableModel implements Comparable<Person> {
   public List<PersonMonthRecap> personMonths = Lists.newArrayList();
 
   /**
-   * relazione con la nuova tabella dei person_year.
-   */
-  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
-  public List<PersonYear> personYears = Lists.newArrayList();
-
-  /**
    * relazione con la tabella Competence.
    */
   @NotAudited
