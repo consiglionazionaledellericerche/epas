@@ -15,7 +15,7 @@ WORKDIR /home/epas/epas/
  
 RUN touch conf/dev.conf && \
     play clean && \
-    play deps --sync --verbose && \
+    play deps --sync --forProd && \
     play precompile && \
     mkdir attachments logs tools backups && \
     chown -R epas:epas /home/epas
