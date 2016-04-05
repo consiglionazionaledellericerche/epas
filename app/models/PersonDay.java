@@ -114,6 +114,9 @@ public class PersonDay extends BaseModel {
   @Transient
   public MealTicket mealTicketAssigned = null;
 
+  @Transient
+  public boolean isConsideredExitingNow = false;
+  
   /**
    * Costruttore.
    *
@@ -209,7 +212,7 @@ public class PersonDay extends BaseModel {
   public int getAssignableTime() {
     return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
   }
-
+  
   @Override
   public String toString() {
     return String.format(

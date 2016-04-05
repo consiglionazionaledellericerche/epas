@@ -383,6 +383,11 @@ td.default-single > i.fa-cutlery.forced{
   text-shadow: 1px 1px 1px #ccc;
 }
 
+td.default-single > i.fa-cutlery.exitingnow{
+  color: #ACC1CE;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
 td.default-single > i.fa-ban{
   color: #B54F4F;
   text-shadow: 1px 1px 1px #ccc;

@@ -40,6 +40,7 @@ public class PersonStampingDayRecap {
 
   private static final String MEALTICKET_NOT_YET = "NOT_YET";
   private static final String MEALTICKET_YES = "YES";
+  private static final String MEALTICKET_YES_IF_EXIT_NOW = "YES_IF_EXIT_NOW";
   private static final String MEALTICKET_NO = "NO";
   private static final String MEALTICKET_EMPTY = "";
 
@@ -192,7 +193,11 @@ public class PersonStampingDayRecap {
         if (thereAreAllDayAbsences) {
           this.mealTicket = MEALTICKET_NO;
         } else {
-          this.mealTicket = MEALTICKET_YES;
+          if (personDay.isConsideredExitingNow()) {
+            this.mealTicket = MEALTICKET_YES_IF_EXIT_NOW;
+          } else {
+            this.mealTicket = MEALTICKET_YES;
+          }
         }
         return;
       }
