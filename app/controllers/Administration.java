@@ -5,6 +5,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.PersonDao;
@@ -37,7 +38,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -331,16 +331,12 @@ public class Administration extends Controller {
   }
 
   public static void playConfiguration() {
-    Set<Entry<Object, Object>> entriesOld = Play.configuration.entrySet();
-    Set<Entry<Object, Object>> entries = new HashSet<Entry<Object,Object>>();
-    
-    for (Entry<Object, Object> entry : entriesOld){
-      if(!entry.getKey().toString().contains("pass") && !entry.getKey().toString().contains("secret")){
-        entries.add(entry);
-      }      
-
-    }
-    
+    Set<Entry<Object, Object>> entries = Sets.newHashSet();
+    Play.configuration.entrySet().forEach(e -> {
+      if (!e.getKey().toString().contains("pass") && !e.getKey().toString().contains("secret")) {
+        entries.add(e);
+      }
+    });
     render("@data", entries);
   }
 
