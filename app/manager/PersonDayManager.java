@@ -760,6 +760,7 @@ public class PersonDayManager {
         stampingExitingNow.way = WayType.out;
         stampingExitingNow.markedByAdmin = false;
         stampingExitingNow.exitingNow = true;
+        personDay.isConsideredExitingNow = true;
         personDay.stampings.add(stampingExitingNow);
         queSeraSera(wrPersonDay);
         personDay.stampings.remove(stampingExitingNow);
