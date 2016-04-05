@@ -14,7 +14,7 @@ LOG_LEVEL=${LOG_LEVEL:-INFO}
 LOG_ON_FILE=${LOG_ON_FILE:-false}
 
 # use default port number if it is still not set
-case "${HTTPS}" in
+case "${PROTOCOL}" in
   "http"|"https")  echo "ePas Protocol set to ${PROTOCOL}" ;;
   *)
     echo "ERROR: "
