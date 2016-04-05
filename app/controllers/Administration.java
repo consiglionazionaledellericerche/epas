@@ -37,6 +37,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -330,7 +331,16 @@ public class Administration extends Controller {
   }
 
   public static void playConfiguration() {
-    final Set<Entry<Object, Object>> entries = Play.configuration.entrySet();
+    Set<Entry<Object, Object>> entriesOld = Play.configuration.entrySet();
+    Set<Entry<Object, Object>> entries = new HashSet<Entry<Object,Object>>();
+    
+    for (Entry<Object, Object> entry : entriesOld){
+      if(!entry.getKey().toString().contains("pass") && !entry.getKey().toString().contains("secret")){
+        entries.add(entry);
+      }      
+
+    }
+    
     render("@data", entries);
   }
 
