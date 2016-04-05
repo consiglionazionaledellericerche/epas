@@ -292,7 +292,6 @@ public class RequestInit extends Controller {
             || u.role.name.equals(Role.PERSONNEL_ADMIN)
             || u.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
           List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
-          session.put("personSelected", persons.iterator().next().id);
           renderArgs.put("navPersons", persons);
           break;
         }
