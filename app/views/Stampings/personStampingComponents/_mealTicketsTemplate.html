@@ -22,6 +22,9 @@
       #{if dayRecap.mealTicket.equals("YES")}
       <i class="fa fa-cutlery" popover-hover data-content="&{'mealTicket.aquired'}"></i>
       #{/if}
+      #{if dayRecap.mealTicket.equals("YES_IF_EXIT_NOW")}
+      <i class="fa fa-cutlery exitingnow" popover-hover data-content="&{'mealTicket.aquiredExitingNow'}"></i>
+      #{/if}
     </td>
 
 
