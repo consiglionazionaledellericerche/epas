@@ -8,22 +8,23 @@ if [ -z "${VIRTUAL_HOST}" ]; then
 fi
 
 EPAS_HOST=${VIRTUAL_HOST}
-HTTPS=${HTTPS:-false}
+PROTOCOL=${PROTOCOL:-http}
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
 LOG_LEVEL=${LOG_LEVEL:-INFO}
 LOG_ON_FILE=${LOG_ON_FILE:-false}
 
 # use default port number if it is still not set
-case "${HTTPS}" in
-  false) EPAS_APPLICATION_BASEURL="http:\/\/${EPAS_HOST}" ;;
-  true) EPAS_APPLICATION_BASEURL="https:\/\/${EPAS_HOST}" ;;
+case "${PROTOCOL}" in
+  "http"|"https")  echo "ePas Protocol set to ${PROTOCOL}" ;;
   *)
     echo "ERROR: "
-    echo "  Please specify the database http/https protocol via the HTTPS configuration option."
-    echo "  Accepted values are \"true\" or \"false\". Aborting..."
+    echo "  Please specify the database http/https protocol via the PROTOCOL configuration option."
+    echo "  Accepted values are \"http\" or \"https\". Aborting..."
     exit 1
     ;;
 esac
+
+EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${EPAS_HOST}"
 
 DB_HOST=${DB_HOST:-$POSTGRES_PORT_5432_TCP_ADDR}
 DB_PORT=${DB_PORT:-$POSTGRES_PORT_5432_TCP_PORT}
@@ -81,6 +82,7 @@ sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/conf/prod.conf
 sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/conf/prod.conf
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/conf/prod.conf
 sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i /home/epas/epas/conf/prod.conf
 
 ### Impostazione server smtp
 
