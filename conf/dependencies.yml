@@ -71,12 +71,12 @@ repositories:
         contains:
             - kjetland -> *
     - github:
-         type:       http
-         artifact:   "https://github.com/jackmoore/colorbox"
+         type:      http
+         artifact:  "https://github.com/jackmoore/colorbox"
          contains:
-                  -com.github -> *
+            - com.github -> *
     - asufana_zip_repo:
-        type: http
-        artifact: https://github.com/asufana/[module]/raw/master/dist/[module]-[revision].zip
+        type:       http
+        artifact:   "https://raw.githubusercontent.com/asufana/[module]/master/dist/[module]-[revision].zip"
         contains:
             - asufana -> play-lombok

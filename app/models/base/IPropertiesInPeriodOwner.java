@@ -14,4 +14,6 @@ public interface IPropertiesInPeriodOwner extends IPeriodModel {
    * La lista dei periodi del tipo specificato.
    */
   Collection<IPropertyInPeriod> periods(Object type);
+  
+  Collection<Object> types();
 }

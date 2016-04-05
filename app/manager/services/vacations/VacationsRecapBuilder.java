@@ -1,9 +1,7 @@
 package manager.services.vacations;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.gdata.util.common.base.Preconditions;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -12,8 +10,8 @@ import manager.services.vacations.VacationsTypeResult.TypeVacation;
 
 import models.Absence;
 import models.Contract;
-import models.VacationCode;
 import models.VacationPeriod;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 
@@ -26,8 +24,6 @@ import java.util.List;
  */
 public class VacationsRecapBuilder {
   
-  public static final int YEAR_VACATION_UPPER_BOUND = 28;
-
   /**
    * Costruisce il VacationRecap. <br>
    * La dateRecap è la data del riepilogo (tipicamente oggi) serve per: <br>
@@ -181,18 +177,17 @@ public class VacationsRecapBuilder {
     AccruedResult accruedResult = new AccruedResult();
     accruedResult.setVacationsResult(vacationsTypeResult);
     accruedResult.setInterval(interval);
-    accruedResult.setAccruedConverter(AccruedConverter.builder().build());
     
     for (VacationPeriod vp : vacationsTypeResult.getVacationsRequest()
         .getContractVacationPeriod()) {
 
       AccruedResultInPeriod accruedResultInPeriod = buildAccruedResultInPeriod(
           accruedResult,
-          DateUtility.intervalIntersection(interval, vp.getDateInterval()),
+          DateUtility.intervalIntersection(interval, vp.periodInterval()),
           vp.vacationCode,
           vacationsTypeResult.getVacationsRequest().getPostPartumUsed());
       
-      addResult(accruedResult, accruedResultInPeriod); 
+      addResult(accruedResult, accruedResultInPeriod);
     }
     
     return accruedResult;
@@ -210,12 +205,9 @@ public class VacationsRecapBuilder {
   private AccruedResultInPeriod buildAccruedResultInPeriod(AccruedResult parentAccruedResult,
       DateInterval interval, VacationCode vacationCode, List<Absence> absences) {
     
-    AccruedConverter accruedConverter = new AccruedConverter();
-    
     AccruedResultInPeriod accruedResultInPeriod = new AccruedResultInPeriod();
     accruedResultInPeriod.setVacationsResult(parentAccruedResult.getVacationsResult());
     accruedResultInPeriod.setInterval(interval);
-    accruedResultInPeriod.setAccruedConverter(AccruedConverter.builder().build());
     accruedResultInPeriod.setVacationCode(vacationCode);
 
     if (accruedResultInPeriod.getInterval() == null) {
@@ -231,45 +223,31 @@ public class VacationsRecapBuilder {
     
     //computation
     
-    //TODO: verificare che nel caso dei permessi non considero i giorni postPartum.
     accruedResultInPeriod.setDays(DateUtility.daysInInterval(accruedResultInPeriod.getInterval()) 
         - accruedResultInPeriod.getPostPartum().size());
 
-    int accrued = 0;
-    
     //calcolo i giorni maturati col metodo di conversione
+    int accrued = 0;
     if (accruedResultInPeriod.getVacationsResult().getTypeVacation()
         .equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
-
-      //this.days = DateUtility.daysInInterval(this.interval);
-
-      if (accruedResultInPeriod.getVacationCode().description.equals("21+3")
-          || accruedResultInPeriod.getVacationCode().description.equals("22+3")) {
-
-        accrued = accruedConverter.permissionsPartTime(accruedResultInPeriod.getDays());
-      } else {
-        accrued = accruedConverter.permissions(accruedResultInPeriod.getDays());
-      }
-
+      accrued = accruedResultInPeriod.getVacationCode()
+          .accruedPermissions(accruedResultInPeriod.getDays());
     } else {
-
-      //this.days = DateUtility.daysInInterval(this.interval) - this.postPartum.size();
-
-      if (accruedResultInPeriod.getVacationCode().description.equals("26+4")) {
-        accrued = accruedConverter.vacationsLessThreeYears(accruedResultInPeriod.getDays());
-      }
-      if (accruedResultInPeriod.getVacationCode().description.equals("28+4")) {
-        accrued = accruedConverter.vacationsMoreThreeYears(accruedResultInPeriod.getDays());
-      }
-      if (accruedResultInPeriod.getVacationCode().description.equals("21+3")) {
-        accrued = accruedConverter.vacationsPartTimeLessThreeYears(accruedResultInPeriod.getDays());
-      }
-      if (accruedResultInPeriod.getVacationCode().description.equals("22+3")) {
-        accrued = accruedConverter.vacationsPartTimeMoreThreeYears(accruedResultInPeriod.getDays());
-      }
+      accrued = accruedResultInPeriod.getVacationCode()
+          .accruedVacations(accruedResultInPeriod.getDays());
     }
-    
     accruedResultInPeriod.setAccrued(accrued);
+    
+    //calcolo i massimo ottenibile per questo period
+    int bound = 0;
+    if (accruedResultInPeriod.getVacationsResult().getTypeVacation()
+        .equals(TypeVacation.PERMISSION_CURRENT_YEAR)) {
+      bound = accruedResultInPeriod.getVacationCode().permissions;
+    } else {
+      bound = accruedResultInPeriod.getVacationCode().vacations;
+    }
+    accruedResultInPeriod.setLowerBound(bound);
+    accruedResultInPeriod.setUpperBound(bound);
     
     return accruedResultInPeriod;
   }
@@ -287,6 +265,13 @@ public class VacationsRecapBuilder {
     accruedResult.getPostPartum().addAll(accruedResultInPeriod.getPostPartum());
     accruedResult.setDays(accruedResult.getDays() + accruedResultInPeriod.getDays());
     accruedResult.setAccrued(accruedResult.getAccrued() + accruedResultInPeriod.getAccrued());
+
+    if (accruedResult.getUpperBound() < accruedResultInPeriod.getUpperBound()) {
+      accruedResult.setUpperBound(accruedResultInPeriod.getUpperBound());
+    }
+    if (accruedResult.getLowerBound() > accruedResultInPeriod.getLowerBound()) {
+      accruedResult.setLowerBound(accruedResultInPeriod.getLowerBound());
+    }
     return accruedResult;
   }
 
@@ -318,29 +303,14 @@ public class VacationsRecapBuilder {
 
     int totalYearPostPartum = 0;
     int totalVacationAccrued = 0;
-
-    AccruedResultInPeriod minAccruedResultInPeriod = null;
-
-
     for (AccruedResultInPeriod accruedResultInPeriod : accruedResult.getAccruedResultsInPeriod()) {
-
-      if (minAccruedResultInPeriod == null) {
-
-        minAccruedResultInPeriod = accruedResultInPeriod;
-
-      } else if (accruedResultInPeriod.getVacationCode().vacationDays
-          < minAccruedResultInPeriod.getVacationCode().vacationDays ) {
-
-        minAccruedResultInPeriod = accruedResultInPeriod;
-      }
       totalYearPostPartum += accruedResultInPeriod.getPostPartum().size();
       totalVacationAccrued += accruedResultInPeriod.getAccrued();
-
     }
 
     //Aggiusto perchè l'algoritmo ne ha date troppe.
-    if (totalVacationAccrued > YEAR_VACATION_UPPER_BOUND) {
-      accruedResult.setFixed(YEAR_VACATION_UPPER_BOUND - totalVacationAccrued);  //negative
+    if (totalVacationAccrued > accruedResult.getUpperBound()) {
+      accruedResult.setFixed(accruedResult.getUpperBound() - totalVacationAccrued);  //negative
     }
 
     //Aggiusto perchè l'algoritmo ne ha date troppo poche.
@@ -348,12 +318,8 @@ public class VacationsRecapBuilder {
     if (totalYearPostPartum == 0
         && accruedResult.getInterval().getBegin().equals(yearInterval.getBegin())
             && accruedResult.getInterval().getEnd().equals(yearInterval.getEnd())) {
-
-      if (minAccruedResultInPeriod.getVacationCode().vacationDays
-          > totalVacationAccrued) {
-
-        accruedResult.setFixed(minAccruedResultInPeriod.getVacationCode().vacationDays
-            - totalVacationAccrued); //positive
+      if (accruedResult.getLowerBound() > totalVacationAccrued) {
+        accruedResult.setFixed(accruedResult.getLowerBound() - totalVacationAccrued); //positive
       }
     }
 

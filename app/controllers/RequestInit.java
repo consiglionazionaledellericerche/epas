@@ -2,12 +2,11 @@ package controllers;
 
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDao.PersonLite;
 import dao.UsersRolesOfficesDao;
 
 import manager.SecureManager;
@@ -15,15 +14,16 @@ import manager.SecureManager;
 import models.Office;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 
-import controllers.Resecure.NoCheck;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -53,7 +53,6 @@ public class RequestInit extends Controller {
   }
 
   @Before(priority = 1)
-  @NoCheck
   static void injectMenu() {
 
     Optional<User> user = Security.getUser();
@@ -65,22 +64,19 @@ public class RequestInit extends Controller {
       return;
     }
 
-    if (user.get().person != null) {
-      renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
+    final User currentUser = user.get();
+
+    if (currentUser.person != null) {
+      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
     }
-    String action = computeActionSelected(Http.Request.current().action);
-    session.put("actionSelected", action);
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
     if (params.get("year") != null) {
-
       year = Integer.valueOf(params.get("year"));
     } else if (session.get("yearSelected") != null) {
-
       year = Integer.valueOf(session.get("yearSelected"));
     } else {
-
       year = LocalDate.now().getYear();
     }
 
@@ -89,13 +85,10 @@ public class RequestInit extends Controller {
     // month init ////////////////////////////////////////////////////////////////
     Integer month;
     if (params.get("month") != null) {
-
       month = Integer.valueOf(params.get("month"));
     } else if (session.get("monthSelected") != null) {
-
       month = Integer.valueOf(session.get("monthSelected"));
     } else {
-
       month = LocalDate.now().getMonthOfYear();
     }
 
@@ -104,74 +97,55 @@ public class RequestInit extends Controller {
     // day init //////////////////////////////////////////////////////////////////
     Integer day;
     if (params.get("day") != null) {
-
       day = Integer.valueOf(params.get("day"));
     } else if (session.get("daySelected") != null) {
-
       day = Integer.valueOf(session.get("daySelected"));
     } else {
-
       day = LocalDate.now().getDayOfMonth();
     }
 
     session.put("daySelected", day);
 
+    // Tutti gli uffici sui quali si ha almeno un ruolo (qualsiasi)
+    Set<Office> offices = secureManager.ownOffices(currentUser);
+
     // person init //////////////////////////////////////////////////////////////
-    Integer personId;
+    Long personId;
     if (params.get("personId") != null) {
-
-      personId = Integer.valueOf(params.get("personId"));
-      session.put("personSelected", personId);
+      personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
-
-      personId = Integer.valueOf(session.get("personSelected"));
-    } else if (user.get().person != null) {
-
-      session.put("personSelected", user.get().person.id);
+      personId = Long.parseLong(session.get("personSelected"));
+    } else if (currentUser.person != null) {
+      personId = currentUser.person.id;
     } else {
-
-      session.put("personSelected", 1);
+      personId = personDao.liteList(offices, year, month).iterator().next().id;
     }
 
-    Optional<Office> first = Optional.<Office>absent();
-    if (user.get().person != null) {
+    session.put("personSelected", personId);
 
-      Set<Office> officeList = secureManager.officesReadAllowed(user.get());
-      if (!officeList.isEmpty()) {
-        // List<Person> persons = personDao
-        // .getActivePersonInMonth(officeList, new YearMonth(year, month));
-        List<PersonLite> persons = personDao.liteList(officeList, year, month);
-        renderArgs.put("navPersons", persons);
-        first = Optional.fromNullable(officeList.iterator().next());
-        renderArgs.put("navOffices", officeList);
-      }
-    } else {
+    // Popolamento del dropdown degli anni
+    List<Integer> years = Lists.newArrayList();
+    int minYear = LocalDate.now().getYear();
 
-      List<Office> allOffices = officeDao.getAllOffices();
-      if (allOffices != null && !allOffices.isEmpty()) {
-        // List<Person> persons = personDao.getActivePersonInMonth(
-        // Sets.newHashSet(allOffices), new YearMonth(year, month));
-        List<PersonLite> persons = personDao.liteList(Sets.newHashSet(allOffices), year, month);
-        renderArgs.put("navPersons", persons);
-        first = Optional.fromNullable(allOffices.iterator().next());
-        renderArgs.put("navOffices", allOffices);
+    for (Office office : offices) {
+      if (office.beginDate.getYear() < minYear) {
+        minYear = office.beginDate.getYear();
       }
     }
+    for (int i = minYear; i <= LocalDate.now().getYear(); i++) {
+      years.add(i);
+    }
+    renderArgs.put("navYears", years);
 
     // office init (l'office selezionato, andrà combinato con la lista persone sopra)
 
     Long officeId;
     if (params.get("officeId") != null) {
-
       officeId = Long.valueOf(params.get("officeId"));
     } else if (session.get("officeSelected") != null) {
-
       officeId = Long.valueOf(session.get("officeSelected"));
-    } else if (first.isPresent()) {
-
-      officeId = first.get().id;
     } else {
-      officeId = -1L;
+      officeId = offices.iterator().next().id;
     }
 
     session.put("officeSelected", officeId);
@@ -186,338 +160,159 @@ public class RequestInit extends Controller {
       //FIXME: perché è previsto il tracciamento di questa eccezione??
     }
 
-    // TODO: un metodo per popolare il menu degli anni umano.
-    List<Integer> years = Lists.newArrayList();
-
-    years.add(2016);
-    years.add(2015);
-    years.add(2014);
-    years.add(2013);
-
-    renderArgs.put("navYears", years);
-
-
-    renderArgs.put("currentData",
-        new CurrentData(year, month, day,
-            Long.valueOf(session.get("personSelected")),
-            Long.valueOf(session.get("officeSelected"))));
-
+    computeActionSelected(currentUser, offices, year, month);
+    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
 
-  private static String computeActionSelected(String action) {
+  private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
 
+    final String currentAction = Http.Request.current().action;
 
-    if (action.startsWith("Stampings.")) {
+    renderArgs.put("actionSelected", currentAction);
+    session.put("actionSelected", currentAction);
 
+    final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
+        "Stampings.dailyPresence",
+        "Stampings.dailyPresenceForPersonInCharge");
 
-      if (action.equals("Stampings.stampings")) {
+    final Collection<String> monthYearSwitcher = ImmutableList.of(
+        "Stampings.stampings",
+        "Absences.absences",
+        "Competences.competences",
+        "Stampings.personStamping",
+        "Absences.manageAttachmentsPerPerson",
+        "Stampings.missingStamping", "Stampings.dailyPresence",
+        "Stampings.dailyPresenceForPersonInCharge",
+        "Absences.manageAttachmentsPerCode",
+        "Absences.showGeneralMonthlyAbsences",
+        "Competences.showCompetences",
+        "Competences.monthlyOvertime",
+        "MonthRecaps.show",
+        "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
+        "MealTickets.recapMealTickets");
 
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "Stampings.stampings";
-      }
+    final Collection<String> yearSwitcher = ImmutableList.of(
+        "Absences.yearlyAbsences",
+        "Absences.absencesPerPerson",
+        "Competences.totalOvertimeHours",
+        "Competences.approvedCompetenceInYear",
+        "Stampings.holidaySituation",
+        "PersonMonths.trainingHours",
+        "PersonMonths.hourRecap",
+        "Vacations.show",
+        "VacationsAdmin.list");
 
-      if (action.equals("Stampings.personStamping")) {
+    final Collection<String> personSwitcher = ImmutableList.of(
+        "Stampings.personStamping",
+        "Absences.manageAttachmentsPerPerson",
+        "Contracts.personContracts",
+        "Absences.absenceInPeriod",
+        "Absences.yearlyAbsences",
+        "MealTickets.personMealTickets",
+        "MealTickets.editPersonMealTickets",
+        "MealTickets.recapPersonMealTickets");
 
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchPerson", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.personStamping";
-      }
+    final Collection<String> officeSwitcher = ImmutableList.of(
+        "Stampings.missingStamping",
+        "Stampings.dailyPresence",
+        "VacationsAdmin.list",
+        "Absences.showGeneralMonthlyAbsences",
+        "Competences.showCompetences",
+        "Competences.totalOvertimeHours",
+        "Competences.enabledCompetences",
+        "Competences.approvedCompetenceInYear",
+        "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
+        "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime",
+        "MealTickets.recapMealTickets",
+        "MealTickets.returnedMealTickets",
+        "Configurations.show");
 
-      if (action.equals("Stampings.missingStamping")) {
+    final Collection<String> dropDownEmployeeActions = ImmutableList.of(
+        "Stampings.stampings",
+        "Absences.absences",
+        "Competences.competences",
+        "PersonMonths.trainingHours",
+        "PersonMonths.hourRecap",
+        "Vacations.show",
+        "Persons.changePassword",
+        "Absences.absencesPerPerson");
 
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.missingStamping";
-      }
+    final Collection<String> dropDownAdministrationActions = ImmutableList.of(
+        "Stampings.personStamping",
+        "Absences.manageAttachmentsPerPerson",
+        "Stampings.missingStamping",
+        "Stampings.holidaySituation",
+        "Stampings.dailyPresence",
+        "VacationsAdmin.list",
+        "Persons.list",
+        "Persons.edit",
+        "Contracts.personContracts",
+        "Absences.manageAttachmentsPerCode",
+        "Absences.absenceInPeriod",
+        "Absences.showGeneralMonthlyAbsences",
+        "Absences.yearlyAbsences",
+        "Competences.showCompetences",
+        "Competences.totalOvertimeHours",
+        "Competences.enabledCompetences",
+        "Competences.approvedCompetenceInYear",
+        "Competences.exportCompetences",
+        "MonthRecaps.show",
+        "MonthRecaps.showRecaps",
+        "MonthRecaps.customRecap",
+        "UploadSituation.uploadData",
+        "MealTickets.recapMealTickets",
+        "MealTickets.returnedMealTickets",
+        "Configurations.show");
 
-      if (action.equals("Stampings.holidaySituation")) {
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.holidaySituation";
-      }
+    final Collection<String> dropDownConfigurationActions = ImmutableList.of(
+        "WorkingTimes.manageWorkingTime",
+        "WorkingTimes.manageOfficeWorkingTime");
 
-      if (action.equals("Stampings.dailyPresence")) {
-
-        renderArgs.put("switchDay", true);
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Stampings.dailyPresence";
-      }
-
-      if (action.equals("Stampings.dailyPresenceForPersonInCharge")) {
-
-        renderArgs.put("switchDay", true);
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        return "Stampings.dailyPresenceForPersonInCharge";
-      }
+    if (dayMonthYearSwitcher.contains(currentAction)) {
+      renderArgs.put("switchDay", true);
+      renderArgs.put("switchMonth", true);
+      renderArgs.put("switchYear", true);
+    }
+    if (monthYearSwitcher.contains(currentAction)) {
+      renderArgs.put("switchMonth", true);
+      renderArgs.put("switchYear", true);
+    }
+    if (yearSwitcher.contains(currentAction)) {
+      renderArgs.put("switchYear", true);
     }
 
-    if (action.startsWith("PersonMonths.")) {
+    if (personSwitcher.contains(currentAction)) {
 
-      if (action.equals("PersonMonths.trainingHours")) {
-
-
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "PersonMonths.trainingHours";
+      for (UsersRolesOffices u : user.usersRolesOffices) {
+        if (u.role.name.equals(Role.ADMIN)
+            || u.role.name.equals(Role.DEVELOPER)
+            || u.role.name.equals(Role.PERSONNEL_ADMIN)
+            || u.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+          List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+          session.put("personSelected", persons.iterator().next().id);
+          renderArgs.put("navPersons", persons);
+          break;
+        }
       }
-
-      if (action.equals("PersonMonths.hourRecap")) {
-
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "PersonMonths.hourRecap";
-      }
+      renderArgs.put("switchPerson", true);
+    }
+    if (officeSwitcher.contains(currentAction)) {
+      renderArgs.put("navOffices", offices);
+      renderArgs.put("switchOffice", true);
+    }
+    if (dropDownEmployeeActions.contains(currentAction)) {
+      renderArgs.put("dropDown", "dropDownEmployee");
+    }
+    if (dropDownAdministrationActions.contains(currentAction)) {
+      renderArgs.put("dropDown", "dropDownAdministration");
+    }
+    if (dropDownConfigurationActions.contains(currentAction)) {
+      renderArgs.put("dropDown", "dropDownConfiguration");
     }
 
-    if (action.startsWith("Vacations.")) {
-
-      if (action.equals("Vacations.show")) {
-
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "Vacations.show";
-      }
-    }
-
-    if (action.startsWith("VacationsAdmin.")) {
-
-      if (action.equals("VacationsAdmin.list")) {
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "VacationsAdmin.list";
-      }
-    }
-
-    if (action.startsWith("Persons.")) {
-
-      if (action.equals("Persons.changePassword")) {
-
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "Persons.changePassword";
-      }
-      if (action.equals("Persons.list")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Persons.list";
-      }
-
-      if (action.equals("Persons.edit")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Persons.edit";
-      }
-    }
-
-    if (action.startsWith("Contracts.")) {
-      if (action.equals("Contracts.personContracts")) {
-
-        renderArgs.put("switchPerson", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Contracts.personContracts";
-      }
-    }
-
-    if (action.startsWith("Absences.")) {
-
-      if (action.equals("Absences.absences")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "Absences.absences";
-      }
-
-      if (action.equals("Absences.manageAttachmentsPerCode")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.manageAttachmentsPerCode";
-      }
-
-      if (action.equals("Absences.manageAttachmentsPerPerson")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchPerson", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.manageAttachmentsPerPerson";
-      }
-
-      if (action.equals("Absences.absenceInPeriod")) {
-        renderArgs.put("switchPerson", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.absenceInPeriod";
-      }
-      if (action.equals("Absences.absencesPerPerson")) {
-
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "Absences.absencesPerPerson";
-      }
-
-      if (action.equals("Absences.showGeneralMonthlyAbsences")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.showGeneralMonthlyAbsences";
-      }
-
-      if (action.equals("Absences.yearlyAbsences")) {
-
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchPerson", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Absences.yearlyAbsences";
-      }
-    }
-
-    if (action.startsWith("Competences.")) {
-
-      if (action.equals("Competences.competences")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownEmployee");
-        return "Competences.competences";
-      }
-
-      if (action.equals("Competences.showCompetences")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.showCompetences";
-      }
-
-      if (action.equals("Competences.monthlyOvertime")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        return "Competences.monthlyOvertime";
-      }
-
-      if (action.equals("Competences.totalOvertimeHours")) {
-
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.totalOvertimeHours";
-      }
-
-      if (action.equals("Competences.enabledCompetences")) {
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.enabledCompetences";
-      }
-
-      if (action.equals("Competences.approvedCompetenceInYear")) {
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.approvedCompetenceInYear";
-      }
-
-      if (action.equals("Competences.exportCompetences")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "Competences.exportCompetences";
-      }
-
-    }
-
-    if (action.startsWith("MonthRecaps.")) {
-
-      if (action.equals("MonthRecaps.show")) {
-
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "MonthRecaps.show";
-      }
-
-      if (action.equals("MonthRecaps.showRecaps")) {
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "MonthRecaps.showRecaps";
-      }
-
-      if (action.equals("MonthRecaps.customRecap")) {
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "MonthRecaps.customRecap";
-      }
-    }
-
-    if (action.startsWith("UploadSituation.")) {
-
-      if (action.equals("UploadSituation.uploadData")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        return "UploadSituation.uploadData";
-      }
-
-    }
-
-    if (action.startsWith("WorkingTimes.")) {
-
-      if (action.equals("WorkingTimes.manageWorkingTime")) {
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownConfiguration");
-        return "WorkingTimes.manageWorkingTime";
-      }
-      if (action.equals("WorkingTimes.manageOfficeWorkingTime")) {
-        renderArgs.put("switchOffice", true);
-        renderArgs.put("dropDown", "dropDownConfiguration");
-        return "WorkingTimes.manageOfficeWorkingTime";
-      }
-    }
-
-    if (action.startsWith("MealTickets.")) {
-
-      if (action.equals("MealTickets.recapMealTickets")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        renderArgs.put("switchMonth", true);
-        renderArgs.put("switchYear", true);
-        renderArgs.put("switchOffice", true);
-        return "MealTickets.recapMealTickets";
-      }
-      if (action.equals("MealTickets.returnedMealTickets")) {
-
-        renderArgs.put("dropDown", "dropDownAdministration");
-        renderArgs.put("switchOffice", true);
-        return "MealTickets.returnedMealTickets";
-      }
-    }
-    
-    if (action.startsWith("Configurations.")) {
-      if (action.equals("Configurations.show")) {
-        renderArgs.put("dropDown", "dropDownAdministration");
-        renderArgs.put("switchOffice", true);
-        return "Configurations.show";
-      }
-    }
-
-    return session.get("actionSelected");
   }
 
   /**

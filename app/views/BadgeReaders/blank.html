@@ -16,8 +16,8 @@
 
   #{f.selectModel 'office', items:templateUtility.officeForBadgeReaders(), required:true /}
 
-  #{f.input 'badgeReader.user.username' /}
-  #{f.input 'badgeReader.user.password', type:'password' /}
+  #{f.input 'user.username' /}
+  #{f.input 'user.password', type:'password' /}
 
   #{b.buttons center:true}
     #{b.cancel @index() /}

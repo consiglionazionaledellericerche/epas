@@ -34,6 +34,6 @@ public class VacationPeriodDao extends DaoBase {
     final QVacationPeriod vacationPeriod = QVacationPeriod.vacationPeriod;
     final JPQLQuery query = getQueryFactory().from(vacationPeriod)
             .where(vacationPeriod.contract.eq(contract));
-    return query.orderBy(vacationPeriod.beginFrom.asc()).list(vacationPeriod);
+    return query.orderBy(vacationPeriod.beginDate.asc()).list(vacationPeriod);
   }
 }

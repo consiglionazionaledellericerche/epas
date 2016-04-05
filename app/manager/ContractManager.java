@@ -3,20 +3,21 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import dao.VacationCodeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -37,7 +38,6 @@ public class ContractManager {
 
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
-  private final VacationCodeDao vacationCodeDao;
   private final PeriodManager periodManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
 
@@ -50,12 +50,11 @@ public class ContractManager {
    */
   @Inject
   public ContractManager(
-      final ConsistencyManager consistencyManager, final VacationCodeDao vacationCodeDao,
+      final ConsistencyManager consistencyManager,
       final PeriodManager periodManager, final PersonDayInTroubleManager personDayInTroubleManager, 
       final IWrapperFactory wrapperFactory) {
 
     this.consistencyManager = consistencyManager;
-    this.vacationCodeDao = vacationCodeDao;
     this.periodManager = periodManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.wrapperFactory = wrapperFactory;
@@ -134,7 +133,10 @@ public class ContractManager {
 
     contract.save();
 
-    setContractVacationPeriod(contract);
+    contract.vacationPeriods.addAll(contractVacationPeriods(contract));
+    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+      vacationPeriod.save();
+    }
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
     cwtt.beginDate = contract.getBeginDate();
@@ -175,9 +177,9 @@ public class ContractManager {
    */
   public final void properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
-    setContractVacationPeriod(contract);
-    periodManager.updatePropertiesInPeriodOwner(contract, ContractWorkingTimeType.class);
-    periodManager.updatePropertiesInPeriodOwner(contract, ContractStampProfile.class);
+    
+    contract.save();
+    periodManager.updatePropertiesInPeriodOwner(contract);
     personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
     
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
@@ -232,8 +234,8 @@ public class ContractManager {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
     vacationPeriod.contract = contract;
-    vacationPeriod.beginFrom = beginFrom;
-    vacationPeriod.endTo = endTo;
+    vacationPeriod.setBeginDate(beginFrom);
+    vacationPeriod.setEndDate(endTo);
     vacationPeriod.vacationCode = vacationCode;
     return vacationPeriod;
   }
@@ -248,9 +250,9 @@ public class ContractManager {
   public List<VacationPeriod> contractVacationPeriods(Contract contract)  {
 
     List<VacationPeriod> vacationPeriods = Lists.newArrayList();
-
-    VacationCode v26 = vacationCodeDao.getVacationCodeByDescription("26+4");
-    VacationCode v28 = vacationCodeDao.getVacationCodeByDescription("28+4");
+    
+    VacationCode v26 = VacationCode.CODE_26_4;
+    VacationCode v28 = VacationCode.CODE_28_4;
 
     if (contract.getEndDate() == null) {
 
@@ -276,33 +278,6 @@ public class ContractManager {
       }
     }
     return vacationPeriods;
-  }
-  
-  /**
-   * Assegna i vacationPeriod di default al contratto, eliminando quelli precedentemente impostati.
-   * 
-   * @param contract contratto.
-   */
-  public void setContractVacationPeriod(final Contract contract) {
-
-    // TODO: Quando verrà implementata la crud per modificare manualmente
-    // i piani ferie non sarà sufficiente cancellare la storia, ma dare
-    // conflitto.
-
-    for (VacationPeriod oldVacation : contract.vacationPeriods) {
-      oldVacation.delete();
-    }
-
-    contract.save();
-    contract.refresh();
-
-    contract.vacationPeriods = Lists.newArrayList();
-    contract.vacationPeriods.addAll(contractVacationPeriods(contract));
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
-      vacationPeriod.save();
-    }
-  
-    contract.save();
   }
 
   /**

@@ -28,9 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.StampingManager;
-import manager.recaps.personStamping.PersonStampingDayRecap;
-import manager.recaps.personStamping.PersonStampingRecap;
-import manager.recaps.personStamping.PersonStampingRecapFactory;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 
@@ -131,8 +131,7 @@ public class Stampings extends Controller {
    * @param year     anno
    * @param month    mese
    */
-  public static void personStamping(final Long personId,
-                                    final int year, final int month) {
+  public static void personStamping(final Long personId, final int year, final int month) {
 
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
@@ -366,8 +365,7 @@ public class Stampings extends Controller {
         activePersonsInDay, date, numberOfInOut);
 
     boolean showLink = false;
-    
-    render(daysRecap, year, month, day, numberOfInOut, showLink);
+    render(daysRecap, office, date, numberOfInOut, showLink);
   }
   
   /**
@@ -397,7 +395,7 @@ public class Stampings extends Controller {
     boolean showLink = false;
     boolean groupView = true;
     
-    render("@dailyPresence", year, month, day, numberOfInOut, showLink, daysRecap, groupView);
+    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
 
 
 

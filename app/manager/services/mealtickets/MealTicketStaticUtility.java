@@ -1,4 +1,4 @@
-package manager.services.mealTickets;
+package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -6,6 +6,8 @@ import com.google.gdata.util.common.base.Preconditions;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import lombok.extern.slf4j.Slf4j;
 
 import models.Contract;
 import models.MealTicket;
@@ -36,7 +38,7 @@ public class MealTicketStaticUtility {
           && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
         continue;
       }
-
+      
       //Primo buono pasto
       if (currentBlock == null) {
         previousMealTicket = mealTicket;

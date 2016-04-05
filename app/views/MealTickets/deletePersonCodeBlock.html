@@ -9,7 +9,7 @@
 	  
 	  <div id="deleteData">
 	  #{form action:@performDeletePersonCodeBlock(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#asyncHistory',
+		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#deleteData', 'data-spinner':'#defaultSpinner'}
 	
 	  #{f.hidden 'contractId', value:contract.id /}

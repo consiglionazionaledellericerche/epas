@@ -289,7 +289,7 @@ public class WorkingTimes extends Controller {
     if (submit) {
       // TODO: validatore
       workingTimeTypeManager.saveVerticalWorkingTimeType(vwtProcessedList, office, name);
-      flash.success("Salvato correttamente orario di lavoro %s", name);
+      flash.success("Il nuovo tipo orario è stato inserito correttamente.");
       manageOfficeWorkingTime(office.id);
     }
 
@@ -380,8 +380,7 @@ public class WorkingTimes extends Controller {
     workingTimeTypeManager.saveWorkingTimeType(wttd6, wtt, 6);
     workingTimeTypeManager.saveWorkingTimeType(wttd7, wtt, 7);
 
-    flash.success("Inserito nuovo orario di lavoro %s per la sede %s.",
-        wtt.description, wtt.office.name);
+    flash.success("Il nuovo tipo orario è stato inserito correttamente.");
 
     manageWorkingTime(wtt.office.id);
 

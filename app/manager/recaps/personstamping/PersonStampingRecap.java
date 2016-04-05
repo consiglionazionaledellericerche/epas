@@ -1,4 +1,4 @@
-package manager.recaps.personStamping;
+package manager.recaps.personstamping;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
