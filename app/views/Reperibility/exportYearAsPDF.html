@@ -2,16 +2,19 @@
 
 <html>
     <head>
-        <title>Istituto di Informatica e Telematica - Piano delle Reperibilità ${year}</title>
+        <title>Istituto di Informatica e Telematica Piano delle Reperibilità ${year} Gruppo ${description}</title>
+        
         <link rel="stylesheet" href="@{'/public/stylesheets/sistorgReportPDF.css'}" type="text/css" />
         <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" />
     </head>
     <body>
-        <h1>Istituto di Informatica e Telematica - Piano delle Reperibilità ${year} </h1>
+        <h1>Istituto di Informatica e Telematica </h1>
+        <h2>Piano delle Reperibilità ${year} <br/>  <em>${description}</em> </h2>
         	
 %{
 	int mm = 0;
 	int gg = 0;
+	int day = 0;
 }%
 
 #{list reperibilityMonths,as:'reperibilityMonth'}
@@ -21,11 +24,12 @@
 	<table class="month">
 		<caption>Reperibilità ${firstOfYear.plusMonths(mm).monthOfYear().getAsText()} ${year}</caption>
 		
-		<tr>
+		<tr>	
 			<th>Nome dipendente</th>
-			#{list reperibilityMonth.columnKeySet(),as:'dayOfMonth'}
-				<th>${firstOfYear.plusDays(gg).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
-				%{gg++;}%
+			
+			#{list items:1..firstOfYear.plusMonths(mm).plusDays(day).dayOfMonth().getMaximumValue(),as:'dd'}
+			 <th>${dd} <br/> ${firstOfYear.plusMonths(mm).plusDays(dd-1).dayOfWeek().getAsText().toString().substring(0,1)}</th>
+				%{dd++;}%
 			#{/list}
 		</tr>
 		
@@ -35,6 +39,7 @@
 				%{
 					nfr = 0;
 					nfs = 0;
+					dd = 0;
 				}%
 				#{list reperibilityMonth.columnKeySet(),as:'dayOfMonth'}
 					%{
@@ -45,9 +50,16 @@
 							nfr++;
 						}
 					}%	
-						<td class="${reperibilityMonth.get(person, dayOfMonth)}">${reperibilityMonth.contains(person, dayOfMonth) ? reperibilityMonth.get(person, dayOfMonth) : ''}</td>
 				#{/list}
 				
+				#{list items:1..firstOfYear.plusMonths(mm).plusDays(dd).dayOfMonth().getMaximumValue(),as:'dd'}
+					<td class="${reperibilityMonth.get(person, dd)}">
+							${reperibilityMonth.contains(person, dd) ? reperibilityMonth.get(person, dd) : ''}
+					</td>
+					%{dd++;}%
+				#{/list}
+					
+
 				<td class="label no-border">
 					Feriali=
 				</td>
