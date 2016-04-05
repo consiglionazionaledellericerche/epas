@@ -192,7 +192,7 @@ public class PersonStampingDayRecap {
         if (thereAreAllDayAbsences) {
           this.mealTicket = MEALTICKET_NO;
         } else {
-          this.mealTicket = MEALTICKET_NOT_YET;
+          this.mealTicket = MEALTICKET_YES;
         }
         return;
       }
