@@ -1,0 +1,50 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(session.get('yearSelected'),
+session.get('monthSelected'), session.get('officeSelected')), (person.fullname):null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+  #{mealTickets.personMealTicketsTabs person:recap.contract.person, activeAction:'editPersonMealTickets' /}
+
+  <!-- Consegnati -->
+  #{alert color:'info'}
+  <p>Elenco dei blocchi consegnati a <strong>${recap.contract.person.fullname}</strong>.</p>
+  <p><i class="fa fa-lightbulb-o"></i> Cliccando sui titoli delle colonne è possibile ordinare
+    i blocchi consegnati per <em>Codice Blocco</em>, <em>Data Consegna</em> e <em>Data Scadenza</em></p>
+  <p><i class="fa fa-info-circle"></i> Per aprire la form di modifica dei blocchi (<em>Restituzione / Cancellazione</em>)
+    cliccare sui tasti <strong>Riconsegna</strong> e <strong>Rimuovi</strong>.</p>
+  #{/alert}
+  #{if recap.getBlockMealTicketReceivedDeliveryDesc().empty}
+  <br>
+  <p class="center">Nessun Blocco consegnato per <strong>${recap.contract.person.fullname}</strong></p>
+  #{/if}
+  #{else}
+  #{mealTickets.showBlockList blocks:recap.getBlockMealTicketReceivedDeliveryDesc(), showType:'delivered' /}
+  #{/else}
+  #{ifnot recap.getBlockPreviousInitialization().empty}
+    <br>
+    #{alert color:'warning'}
+      <p>Elenco dei blocchi consegnati prima dell'inizializzazione del <strong>${recap.contract?.sourceDateMealTicket.format()}</strong></p>
+      <p>I seguenti blocchi vengono ignorati dai conteggi a causa dell'inizializzazione inserita.</p>
+    #{/alert}
+  #{mealTickets.showBlockList blocks:recap.getBlockPreviousInitialization() , showType:'delivered' /}
+  #{/ifnot}
+
+  <!-- Riconsegnati -->
+  #{if recap.getBlockMealTicketReturnedDeliveryDesc().empty}
+
+  #{/if}
+  #{else}
+  #{alert color:'info'}
+  <p>Elenco dei buoni pasto di <strong>${recap.contract.person.fullname}</strong> riconsegnati alla Sede Centrale.</p>
+  #{/alert}
+
+  #{mealTickets.showBlockList blocks:recap.getBlockMealTicketReturnedDeliveryDesc(), showType:'returned' /}
+  #{/else}
+
+</div>

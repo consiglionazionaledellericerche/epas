@@ -18,7 +18,6 @@ SELECT SETVAL('public.seq_person_days', COALESCE(MAX(id), 1), MAX(id) IS NOT NUL
 SELECT SETVAL('public.seq_person_days_in_trouble', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_days_in_trouble;
 SELECT SETVAL('public.seq_person_hour_for_overtime', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_hour_for_overtime;
 SELECT SETVAL('public.seq_person_months_recap', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_months_recap;
-SELECT SETVAL('public.seq_person_years', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_years;
 SELECT SETVAL('public.seq_persons', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.persons;
 SELECT SETVAL('public.seq_persons_working_time_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.persons_working_time_types;
 SELECT SETVAL('public.seq_qualifications', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.qualifications;
@@ -28,7 +27,6 @@ SELECT SETVAL('public.seq_stamp_modification_types', COALESCE(MAX(id), 1), MAX(i
 SELECT SETVAL('public.seq_stampings', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.stampings;
 SELECT SETVAL('public.seq_total_overtime', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.total_overtime;
 SELECT SETVAL('public.seq_users', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.users;
-SELECT SETVAL('public.seq_vacation_codes', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.vacation_codes;
 SELECT SETVAL('public.seq_vacation_periods', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.vacation_periods;
 SELECT SETVAL('public.seq_working_time_type_days', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.working_time_type_days;
 SELECT SETVAL('public.seq_working_time_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.working_time_types;

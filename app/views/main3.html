@@ -80,7 +80,7 @@
         <ul class="nav navbar-nav">
           #{if dropDown.equals("dropDownEmployee") }
           <li class="dropdown active">
-            #{/if}
+          #{/if}
             #{else}
           <li class="dropdown">
             #{/else}
@@ -172,6 +172,7 @@
               Tools <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="@{Administration.utilities()}">Utilities</a></li>
+              <li><a href="@{Administration.playConfiguration()}">&{'application.data'}</a></li>
             </ul>
           </li>
         </ul>
@@ -268,7 +269,7 @@
     
     #{pnotify /}
 
-    <div id="defaultModal" class="modal container" tabindex="-1"></div>
+    <div id="defaultModal" class="modal fade container" tabindex="-1"></div>
 
     <i id="defaultSpinner" class="fa fa-circle-o-notch fa-3x fa-spin hidden"></i>
 

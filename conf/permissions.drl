@@ -382,6 +382,8 @@ when
      	
      	"MealTickets.recapMealTickets",
      	"MealTickets.personMealTickets",
+     	"MealTickets.recapPersonMealTickets",
+        "MealTickets.editPersonMealTickets",
      	"MealTickets.returnedMealTickets",
         "MealTickets.findCodeBlock",
 		
@@ -428,6 +430,8 @@ when
        
        "MealTickets.recapMealTickets",
        "MealTickets.personMealTickets",
+       "MealTickets.recapPersonMealTickets",
+       "MealTickets.editPersonMealTickets",
        "MealTickets.returnedMealTickets",
        "MealTickets.findCodeBlock",
        
@@ -538,6 +542,8 @@ when
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
      	
      	"Persons.children",
      	"Persons.editChild",
@@ -548,11 +554,6 @@ when
      	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
-     	
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
      	
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
@@ -619,9 +620,6 @@ when
         /* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
         "Absences.editCode",
-        "Absences.insertCode",
-     	"Absences.saveCode",
-     	"Absences.updateCode",
      	
      	"Configurations.show",
      	"Configurations.edit",
@@ -667,6 +665,8 @@ when
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
      	
      	"Persons.children",
      	"Persons.editChild",
@@ -677,11 +677,6 @@ when
      	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
-   
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
      	
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
@@ -755,9 +750,6 @@ when
         /* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode*/
         "Absences.editCode",
-     	"Absences.insertCode",
-     	"Absences.saveCode",
-     	"Absences.updateCode",
      	
      	"Configurations.show",
      	"Configurations.edit",

@@ -53,7 +53,9 @@ public class Persons extends Controller {
   @BasicAuth
   public static void days(String email, LocalDate start, LocalDate end) {
 
-    //Person person = personDao.getPersonByPerseoId(perseoId);
+    if (email == null) {
+      email = "cristian.lucchesi@iit.cnr.it";
+    }
     Person person = personDao.getPersonByEmail(email);
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
@@ -71,14 +73,11 @@ public class Persons extends Controller {
               public DayRecap apply(PersonDay personday) {
                 DayRecap dayRecap = new DayRecap();
                 
-                dayRecap.workingMinutes = 0; //FIXME richiamare il metodo updateTimeAtWork 
-                    //personDayManager.workingMinutes(wrapperFactory.create(personday));
-                    
+                dayRecap.workingMinutes = personday.getAssignableTime();
                 dayRecap.date = personday.date.toString();
                 dayRecap.mission = personDayManager.isOnMission(personday);
                 dayRecap.workingTime =
                     wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
-
                 return dayRecap;
               }
             }).toList();
@@ -89,13 +88,14 @@ public class Persons extends Controller {
   @BasicAuth
   public static void missions(String email, LocalDate start, LocalDate end, boolean forAttachment) {
 
-    //Person person = personDao.getPersonByPerseoId(perseoId);
+    if (email == null) {
+      email = "cristian.lucchesi@iit.cnr.it";
+    }
     Person person = personDao.getPersonByEmail(email);
     List<DayRecap> personDays = Lists.newArrayList();
     if (person != null) {
 
-      personDays = FluentIterable.from(
-              absenceDao.getAbsencesInPeriod(
+      personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
                   Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
               .transform(new Function<Absence, DayRecap>() {
                 @Override

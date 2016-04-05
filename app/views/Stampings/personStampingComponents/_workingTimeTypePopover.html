@@ -6,4 +6,12 @@
 	    		'<br>Durata minima intervallo pranzo: <strong>'+dayRecap.wttd.get().breakTicketTime.printHourMinute()+'</strong>'+
 	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.lunchInterval+'</strong>'+' (estremi compresi)'+
 	    		'<br>Finestra apertura/chiusura sede: <strong>'+dayRecap.workInterval+'</strong>'+' (estremi compresi)').escape()}"
-         title="Info orario giornaliero">${dayRecap.wttd.get().workingTimeType.description}</a>
+         title="<strong>${dayRecap.wttd.get().workingTimeType.description}</strong> Info orario giornaliero">
+       
+       #{if dayRecap.wttd.get().workingTimeType.description.length() > 8 }
+            ${dayRecap.wttd.get().workingTimeType.description.substring(0, 8)}.
+       #{/if}
+       #{else}  
+       		${dayRecap.wttd.get().workingTimeType.description}
+       #{/else}
+       </a>

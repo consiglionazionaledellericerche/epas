@@ -15,7 +15,7 @@
    #{/alert}
 	  <div id="returnedData">
 	  #{form action:@performReturnPersonCodeBlock(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#asyncHistory',
+		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#returnedData', 'data-spinner':'#defaultSpinner'}
 	
 	  #{f.hidden 'contractId', value:contract.id /}

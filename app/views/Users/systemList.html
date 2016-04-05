@@ -2,8 +2,12 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione utenti'  /}
 
-#{user.usersTabs activeAction:'systemList' /}
 <div class="container"> 
+  	 
+   #{set breadcrumbs:['users':null, 'systemUsers':@Users.systemList()] /}
+   #{breadcrumbs breadcrumbs, noHome:'true' /}
+
+   #{user.usersTabs activeAction:'systemList' /}
   	 
     #{alert color:'info'}
 	<p>Elenco degli utenti di sistema. <br>
@@ -52,4 +56,4 @@
      
 </div>
 
-<div id="modalInsertUser" class="modal container" tabindex="-1"></div>
+<div id="modalInsertUser" class="modal fade container" tabindex="-1"></div>

@@ -1,4 +1,4 @@
-package manager.recaps.personStamping;
+package manager.recaps.personstamping;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -158,17 +158,16 @@ public class PersonStampingDayRecap {
       }
     }
     
-    this.computeMealTicket(personDay, personDayManager, thereAreAllDayAbsences);
+    this.computeMealTicket(personDay, thereAreAllDayAbsences);
   }
 
 
   /**
    * Imposta il valore della colonna buono pasto nel tabellone timbrature.
-   *
-   * @param mealTicket ottenuto si/no
+   * @param personDay giorno sul quale impostare il valore relativo al buono
+   * @param thereAreAllDayAbsences specifica se sono presenti assenze giornaliere
    */
-  private void computeMealTicket(PersonDay personDay, PersonDayManager personDayManager, 
-      boolean thereAreAllDayAbsences) {
+  private void computeMealTicket(PersonDay personDay, boolean thereAreAllDayAbsences) {
 
     if (this.ignoreDay || !this.personDay.isPersistent()) {
       this.mealTicket = MEALTICKET_EMPTY;
@@ -195,6 +194,7 @@ public class PersonStampingDayRecap {
         } else {
           this.mealTicket = MEALTICKET_NOT_YET;
         }
+        return;
       }
       this.mealTicket = MEALTICKET_YES;
       return;
@@ -202,14 +202,12 @@ public class PersonStampingDayRecap {
     if (!personDay.isTicketAvailable) {
       if (personDay.isPast()) {
         this.mealTicket = MEALTICKET_NO;
-      }
-      else if (personDay.isToday() || !thereAreAllDayAbsences) {
+      } else if (personDay.isToday() || !thereAreAllDayAbsences) {
         this.mealTicket = MEALTICKET_NOT_YET;
       } else {
         this.mealTicket = MEALTICKET_NO;
       }
     }
-
   }
 
   /**

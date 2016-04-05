@@ -53,10 +53,20 @@
     <tr>
       <td class="alignLeft success">
         <a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
-        #{if person.currentContractMonthRecapMissing()}
-        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"
-              title="mancano i riepiloghi"></span>
+        
+        #{if person.currentContractInitializationMissing()}
+          <a href="#" popover-hover
+            data-html="true"
+            data-content="${('Il contratto attuale non è correttamente inizializzato.').escape()}"
+            *{ title="Configurazione ${person.value.fullname}" }*><i class="fa fa-exclamation-triangle text-danger"></i></a>
         #{/if}
+        #{elseif person.currentContractMonthRecapMissing()}
+	        <a href="#" popover-hover
+            data-html="true"
+            data-content="${('Il database non è sincronizzato. Possibile causa, malfunzionamento durante la procedura notturna di chiusura giorno. Questo problema si risolverà automaticamente non appena perverranno nuove timbrature.').escape()}"
+            *{ title="Configurazione ${person.value.fullname}" }*><i class="fa fa-exclamation-triangle text-muted"></i></a>
+        #{/elseif}
+        
       <td><font color="#000000">${person.value.number}</font></td>
       <td data-order="${person.currentContract.get().beginDate}"><font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
       </td>
@@ -75,7 +85,7 @@
       <td>
         #{if person.currentVacationPeriod.present }
         <a href="@{Persons.showCurrentVacation(person.value.id)}" data-async-modal="#defaultModal">
-          ${person.currentVacationPeriod.get().vacationCode.description}
+          ${person.currentVacationPeriod.get().vacationCode.label()}
         </a>
         #{/if}
       </td>

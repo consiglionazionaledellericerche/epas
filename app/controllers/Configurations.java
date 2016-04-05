@@ -309,7 +309,7 @@ public class Configurations extends Controller {
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(configuration.office.getBeginDate(),
             Optional.fromNullable(LocalDate.now()),
-            periodRecaps);
+            periodRecaps, Optional.<LocalDate>absent());
     recomputeRecap.configuration = configuration;
     
     if (!confirmed) {

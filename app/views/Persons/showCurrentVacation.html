@@ -2,9 +2,9 @@
 
 <div class="alert alert-success">Validità piano ferie attuale: 
 
-	<strong>Dal </strong>${vp.beginFrom.format()}
-	#{if vp.endTo}
-		<strong>Al </strong>${vp.endTo.format()}
+	<strong>Dal </strong>${vp.beginDate.format()}
+	#{if vp.endDate}
+		<strong>Al </strong>${vp.endDate.format()}
 	#{/if}	 
 </div>
 
@@ -15,9 +15,9 @@
 		<th>Giorni permesso</th>
 	</tr>
 	<tr>
-		<td>${vp.vacationCode.description}</td>
-		<td>${vp.vacationCode.vacationDays}</td>
-		<td>${vp.vacationCode.permissionDays}</td>
+		<td>${vp.vacationCode.label()}</td>
+		<td>${vp.vacationCode.vacations}</td>
+		<td>${vp.vacationCode.permissions}</td>
 	</tr>
 </table>
 

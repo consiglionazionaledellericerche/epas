@@ -2,11 +2,10 @@
 	activeAction: la action tab attiva
 }*
 
-<div class="container">
-  #{title title:'Utenti' /}
-</div>
 
-<div id="container-nav-tabs" class="container">
+#{title title:'Gestione Utenti' /}
+
+<div id="container-nav-tabs">
   <ul class="nav nav-tabs">
     <li #{if _activeAction.equals("list")} class="active" #{/if}>
       <a href="@{Users.list()}">Utenti con associata persona</a>

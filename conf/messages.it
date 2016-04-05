@@ -24,6 +24,12 @@ administrator=Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
+Administration.playConfiguration.table= Parametri di Configurazione Play! framework
+Administration.jvmConfiguration.table= Parametri Jvm
+Administration.runtimeData.table= Valori di Runtime
+
+application.data= Informazioni applicazione
+
 badge.badgeReader= Lettore badge associato
 badge.begin= Inzio
 badge.code= Numero badge
@@ -67,7 +73,11 @@ competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
 
+configuration.entry= Parametro
+configuration.entry.value= Valore parametro
 configurations= Configurazione
+configurations.entries= Parametri di Configurazione Play
+
 
 contract.beginDate=Inizio Contratto
 contract=Contratto
@@ -86,8 +96,6 @@ contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
 contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
 
 contract.mealTicketInitBeforeGeneralInit = Per il contratto attuale è stata definita una inizializzazione buoni pasto precedente all'inizializzazione generale. Questo potrebbe portare	a calcoli errati o inattesi circa il residuo dei buoni pasto per il dipendente.
-
-
 
 contractStampProfile.fixedworkingtime=Presenza Automatica
 ContractStampProfile=Periodo Presenza Automatica
@@ -119,6 +127,19 @@ csp.fixedworkingtime=Presenza Automatica
 cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
 cwtt.workingTimeType= Tipo Orario
+
+vp.beginDate= Data Inizio
+vp.endDate= Data Fine
+vp.vacationCode=Piano Ferie
+
+VacationCode.CODE_28_4= 28+4
+VacationCode.CODE_26_4= 26+4
+VacationCode.CODE_25_4= 25+4
+VacationCode.CODE_21_4= 21+4
+VacationCode.CODE_22_3= 22+3
+VacationCode.CODE_21_3= 21+3
+VacationCode.CODE_30_4= 30+4
+VacationCode.CODE_32_4= 32+4
 
 date.modified= Data della Modifica
 dateFrom=Dal
@@ -173,6 +194,9 @@ block.first=Dal
 block.last=Al
 
 MOD= Modifica
+
+modification.date= Data Modifica
+modification.type= Tipo Operazione
 
 Month.10=Ottobre
 Month.11=Novembre
@@ -284,6 +308,9 @@ User.blank= Nuovo utente
 User.systemBlank= Nuovo utente di sistema
 user.person= Persona associata
 users= Utenti
+personUsers=Utenti Persone
+systemUsers=Utenti Di Sistema
+disabledUsers=Utenti Disabilitati
 
 yearAtt=Anno Attestato
 monthAtt=Mese Attestato
@@ -482,3 +509,5 @@ office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attest
 office.joiningDate.popover= Data di affiliazione della sede
 
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it

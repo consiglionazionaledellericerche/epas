@@ -2,8 +2,11 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione utenti'  /}
 
-#{user.usersTabs activeAction:'list' /}
 <div class="container">
+  #{set breadcrumbs:['users':null, 'personUsers':@Users.list()] /}
+  #{breadcrumbs breadcrumbs, noHome:'true' /}
+
+  #{user.usersTabs activeAction:'list' /}
 
   	
 	#{alert color:'info'}
@@ -46,4 +49,4 @@
      </div>
 
 
-<div id="modalInsertUser" class="modal container" tabindex="-1"></div>
+<div id="modalInsertUser" class="modal fade container" tabindex="-1"></div>
