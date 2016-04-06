@@ -1,4 +1,5 @@
-      <a href="#" popover-hover
+      <div class="text-primary" 
+         popover-hover
          data-html="true"
          data-content="${(
 	    		'Tempo Lavoro: <strong>'+dayRecap.wttd.get().workingTime.printHourMinute()+'</strong>'+
@@ -14,4 +15,4 @@
        #{else}  
        		${dayRecap.wttd.get().workingTimeType.description}
        #{/else}
-       </a>
+       </div>
