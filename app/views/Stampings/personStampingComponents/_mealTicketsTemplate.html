@@ -1,28 +1,31 @@
 
 #{if dayRecap.personDay.isTicketForcedByAdmin} 
 
-  <td class="default-single">
+      <td class="default-single" popover-hover
       #{if dayRecap.mealTicket.equals("NO")}
-      <i class="fa fa-ban forced" popover-hover data-content="&{'mealTicket.forcedNotAquired'}"></i>
+        data-content="&{'mealTicket.forcedNotAquired'}"><i class="fa fa-ban forced"></i>
       #{/if}
       #{if dayRecap.mealTicket.equals("YES")}
-      <i class="fa fa-cutlery forced" popover-hover data-content="&{'mealTicket.forcedAquired'}"></i>
+        data-content="&{'mealTicket.forcedAquired'}"><i class="fa fa-cutlery forced"></i>
       #{/if}
-  </td>
+      </td>
 #{/if}
 #{else}
-
-    <td class="default-single">
+    <td class="default-single" 
       #{if dayRecap.mealTicket.equals("NO")}
-      <i class="fa fa-ban" popover-hover data-content="&{'mealTicket.notAquired'}"></i>
+         popover-hover data-content="&{'mealTicket.notAquired'}"><i class="fa fa-ban"></i> 
       #{/if}
       #{if dayRecap.mealTicket.equals("NOT_YET")}
-      <i class="fa fa-spinner fa-spin" popover-hover data-content="&{'mealTicket.notYetAquired'}"></i>
+         popover-hover data-content="&{'mealTicket.notYetAquired'}"><i class="fa fa-cutlery notyet"></i> 
       #{/if}
       #{if dayRecap.mealTicket.equals("YES")}
-      <i class="fa fa-cutlery" popover-hover data-content="&{'mealTicket.aquired'}"></i>
+         popover-hover data-content="&{'mealTicket.aquired'}"><i class="fa fa-cutlery"></i>
+      #{/if}
+      #{if dayRecap.mealTicket.equals("YES_IF_EXIT_NOW")}
+        popover-hover data-content="&{'mealTicket.aquiredExitingNow'}"><i class="fa fa-cutlery exitingnow"></i> 
+      #{/if}
+      #{if dayRecap.mealTicket.equals("")}
+      >
       #{/if}
     </td>
-
-
 #{/else}    
