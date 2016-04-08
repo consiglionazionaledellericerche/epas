@@ -37,12 +37,13 @@ public class ConsumerTest extends Controller {
     return personDto;
   }
 
-  private static List<SimplePersonDto> people() {
+  public static List<SimplePersonDto> people() {
 
     List<SimplePersonDto> people = Lists.newArrayList();
 
     try {
       people = peopleConsumer.getPeople().get();
+      
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

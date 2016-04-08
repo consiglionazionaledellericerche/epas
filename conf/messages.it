@@ -292,6 +292,9 @@ stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
 stampType= Causale
 
+synch.offices=Sincronizza sedi
+synch.people=Sincronizza persone
+
 ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario

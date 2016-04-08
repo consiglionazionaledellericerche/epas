@@ -39,6 +39,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
 
+  @Column(name="perseo_id")
+  public Long perseoId;
+  
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket

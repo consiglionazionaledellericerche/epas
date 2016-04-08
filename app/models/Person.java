@@ -51,6 +51,9 @@ public class Person extends MutableModel implements Comparable<Person> {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
+  @Column(name="perseo_id")
+  public Long perseoId;
+  
   @Version
   public Integer version;
 
