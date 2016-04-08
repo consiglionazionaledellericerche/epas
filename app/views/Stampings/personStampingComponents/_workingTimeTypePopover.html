@@ -1,4 +1,5 @@
-      <div class="text-primary" 
+<td class="default-single"
+        #{if dayRecap.wttd.present}
          popover-hover
          data-html="true"
          data-content="${(
@@ -8,11 +9,14 @@
 	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.lunchInterval+'</strong>'+' (estremi compresi)'+
 	    		'<br>Finestra apertura/chiusura sede: <strong>'+dayRecap.workInterval+'</strong>'+' (estremi compresi)').escape()}"
          title="<strong>${dayRecap.wttd.get().workingTimeType.description}</strong> Info orario giornaliero">
-       
-       #{if dayRecap.wttd.get().workingTimeType.description.length() > 8 }
-            ${dayRecap.wttd.get().workingTimeType.description.substring(0, 8)}.
+              #{if dayRecap.wttd.get().workingTimeType.description.length() > 8 }
+              <span class="text-primary">${dayRecap.wttd.get().workingTimeType.description.substring(0, 8)}.</span>
+              #{/if}
+              #{else}
+       		    <span class="text-primary">${dayRecap.wttd.get().workingTimeType.description}</span>
+              #{/else}
        #{/if}
-       #{else}  
-       		${dayRecap.wttd.get().workingTimeType.description}
+       #{else}
+       >
        #{/else}
-       </div>
+</td>
