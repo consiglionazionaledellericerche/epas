@@ -228,7 +228,8 @@ public class RequestInit extends Controller {
         "WorkingTimes.manageOfficeWorkingTime",
         "MealTickets.recapMealTickets",
         "MealTickets.returnedMealTickets",
-        "Configurations.show");
+        "Configurations.show",
+        "Synchronizations.people");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",

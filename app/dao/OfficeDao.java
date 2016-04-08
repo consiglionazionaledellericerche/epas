@@ -159,7 +159,7 @@ public class OfficeDao extends DaoBase {
     return PerseoModelQuery.wrap(query, office);
 
   }
-
+  
   /**
    * Le sedi sulle quali l'user ha il ruolo role.
    */
@@ -197,12 +197,19 @@ public class OfficeDao extends DaoBase {
 
   }
 
+  
   public Optional<Institute> byCds(String cds) {
 
     final QInstitute institute = QInstitute.institute;
-
     final JPQLQuery query = queryFactory.from(institute).where(institute.cds.eq(cds));
-
     return Optional.fromNullable(query.singleResult(institute));
   }
+  
+  public Optional<Institute> instituteById(Long id) {
+
+    final QInstitute institute = QInstitute.institute;
+    final JPQLQuery query = queryFactory.from(institute).where(institute.id.eq(id));
+    return Optional.fromNullable(query.singleResult(institute));
+  }
+
 }

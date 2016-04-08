@@ -42,6 +42,9 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -8689432709728656660L;
 
+  @Column(name="perseo_id")
+  public Long perseoId;
+  
   @Required
   @Unique
   @NotNull
