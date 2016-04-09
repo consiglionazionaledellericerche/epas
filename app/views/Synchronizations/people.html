@@ -2,24 +2,41 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Import istituti da Anagrafica'  /}
 
+#{synch.synchPeopleTabs activeAction:'people' /}
+
 <div class="container">
   
   <table class="table table-bordered" datatable>
   <thead>
 	<tr>
 	  <th>Persona Epas</th>
+  	  <th>Persona Perseo</th>
 	  <th>Attiva</th>
 	  <th>Sincronizzate</th>
-	  <th>Persona Perseo</th>
 	</tr>
   </thead>
   <tbody>
 	#{list items:wrapperedPeople, as:'wrPerson'}
 	<tr>
 	  <td>
-	    <span class="label label-primary">${wrPerson.value.number}</span>
+	    <span class="label label-danger">${wrPerson.value.number}</span>
 	    <span class="label label-primary">${wrPerson.value.name}</span>
 	    <span class="label label-primary">${wrPerson.value.surname}</span>
+	  </td>
+	  <td>
+	    %{ perseoPerson = perseoPeopleByNumber.get(wrPerson.value.number); }%
+	    #{if perseoPerson}
+	      <span class="label label-danger">${perseoPerson.number}</span>
+	      <span class="label label-primary">${perseoPerson.name}</span>
+	      <span class="label label-primary">${perseoPerson.surname}</span>
+	      <span class="label label-success">${perseoPerson.perseoId}</span>
+	      #{if wrPerson.value.perseoId == null}
+	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson.perseoId)}">Associa</a>
+	      #{/if}
+	    #{/if}
+	    #{else}
+	      <em>Nessun suggerimento... controllare la matricola.</em>
+	    #{/else}
 	  </td>
 	  <td>
 	    #{if wrPerson.currentContract.present}
@@ -36,25 +53,18 @@
 	    #{else}
 	      <div class="text-danger">Not Synch</div>	      
 	    #{/else}
-	  </td>
-	  <td>
-	    %{ perseoPerson = perseoPeopleByNumber.get(wrPerson.value.number); }%
-	    #{if perseoPerson}
-	      <span class="label label-primary">${perseoPerson.number}</span>
-	      <span class="label label-primary">${perseoPerson.name}</span>
-	      <span class="label label-primary">${perseoPerson.surname}</span>
-	      <span class="label label-success">${perseoPerson.perseoId}</span>
-	    #{/if}
-	    #{else}
-	      <em>Nessun suggerimento... controllare la matricola.</em>
-	    #{/else}
 	  </td>		    
 
     </tr>
    #{/list}
   </tbody>
 </table>
-  
+
+#{alert color:'info'}
+  <p>Associa tutte le persone non ancora associate. Verificare bene per tutti il join suggerito sulla base della matricola.
+    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllPersonInOffice(office.id)}">Associa</a>
+  </p>
+#{/alert}  
 </div>
 
 
