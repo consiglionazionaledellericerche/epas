@@ -294,6 +294,7 @@ stampType= Causale
 
 synch.offices=Sincronizza sedi
 synch.people=Sincronizza persone
+synch.contracts=Sincronizza contratti
 
 ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero

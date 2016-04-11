@@ -70,7 +70,6 @@ public class OfficeDao extends DaoBase {
   public Optional<Office> byCode(String code) {
 
     final QOffice office = QOffice.office;
-
     final JPQLQuery query = getQueryFactory().from(office)
             .where(office.code.eq(code));
     return Optional.fromNullable(query.singleResult(office));
@@ -81,13 +80,20 @@ public class OfficeDao extends DaoBase {
    * @return l'ufficio associato al codice passato come parametro.
    */
   public Optional<Office> byCodeId(String codeId) {
-
     final QOffice office = QOffice.office;
-
     final JPQLQuery query = getQueryFactory().from(office)
             .where(office.codeId.eq(codeId));
     return Optional.fromNullable(query.singleResult(office));
-
+  }
+  
+  /**
+   * @return l'ufficio associato al perseoId
+   */
+  public Optional<Office> byPerseoId(Long perseoId) {
+    final QOffice office = QOffice.office;
+    final JPQLQuery query = getQueryFactory().from(office)
+            .where(office.perseoId.eq(perseoId));
+    return Optional.fromNullable(query.singleResult(office));
   }
 
 

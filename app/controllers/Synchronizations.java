@@ -3,33 +3,48 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import com.mysema.query.SearchResults;
 import com.sun.org.apache.xerces.internal.impl.validation.ValidationState;
 import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation;
 
+import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
+import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import injection.StaticInject;
 
+import jobs.FixUserPermission;
+
 import lombok.extern.slf4j.Slf4j;
 
+import manager.ContractManager;
+import manager.OfficeManager;
 import manager.PeriodManager;
+import manager.UserManager;
 
+import models.Contract;
 import models.Institute;
 import models.Office;
 import models.Person;
 import models.Role;
 import models.User;
+import models.WorkingTimeType;
 
+import org.apache.commons.lang.WordUtils;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
+import org.drools.agent.conf.ValidationTimeoutOption;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -39,6 +54,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.office.OfficePerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
 
@@ -50,6 +66,8 @@ public class Synchronizations extends Controller {
   static OfficeDao officeDao;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static ContractDao contractDao;
   @Inject 
   static RoleDao roleDao;
   @Inject
@@ -57,7 +75,17 @@ public class Synchronizations extends Controller {
   @Inject
   static PeoplePerseoConsumer peoplePerseoConsumer;
   @Inject
+  static ContractPerseoConsumer contractPerseoConsumer;
+  @Inject
   static PeriodManager periodManager;
+  @Inject
+  static UserManager userManager;
+  @Inject
+  static OfficeManager officeManager;
+  @Inject
+  static ContractManager contractManager;
+  @Inject
+  static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   
@@ -214,6 +242,8 @@ public class Synchronizations extends Controller {
     seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
     periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
+    // Per i permessi di developer e admin...
+    FixUserPermission.doJob();
     
     flash.success("La sede %s è stata importata con successo da Perseo!", seat.toString());
     
@@ -236,6 +266,7 @@ public class Synchronizations extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
     
+    @SuppressWarnings("deprecation")
     List<Person> people = personDao
         .listFetched(Optional.<String>absent(), offices, false, null, null, false)
         .list();
@@ -245,7 +276,7 @@ public class Synchronizations extends Controller {
     
     Map<Integer, Person> perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
     
-    render(wrapperedPeople, perseoPeopleByNumber);
+    render(wrapperedPeople, perseoPeopleByNumber, office);
   }
   
   /**
@@ -260,24 +291,372 @@ public class Synchronizations extends Controller {
     } else {
       office = officeDao.allOffices().list().get(0);
     }
+    if (office.perseoId == null) {
+      Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
+      Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
+      flash.error("Selezionare una sede già sincronizzata... %s non lo è ancora.", office.toString());
+      render(perseoPeopleByPerseoId, epasPeopleByPerseoId);
+    }
+    
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
-    
-    
+
+    Map<Long, Person> perseoPeopleByPerseoId = peoplePerseoConsumer.perseoDepartmentPeopleByPerseoId(office.perseoId);
+    @SuppressWarnings("deprecation")
     List<Person> people = personDao
-        .listFetched(Optional.<String>absent(), offices, false, null, null, false)
-        .list();
+    .listFetched(Optional.<String>absent(), offices, false, null, null, false)
+    .list();
+    Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
+    for (Person person : people) {
+      if (person.perseoId != null) {
+        epasPeopleByPerseoId.put(person.perseoId, person);
+      }
+    }
+
+    render(perseoPeopleByPerseoId, epasPeopleByPerseoId, office);
+  }
+
+  /**
+   * Esegue il join per una persona specifica.
+   * @param epasPersonId
+   * @param perseoId
+   */
+  public static void joinPerson(Long epasPersonId, Long perseoId) {
+    
+    Person person = personDao.getPersonById(epasPersonId);
+    Verify.verifyNotNull(person);
+    Verify.verifyNotNull(perseoId);
+    
+    Optional<Person> personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
+    Verify.verify(personInPerseo.isPresent());
+    
+    join(person, personInPerseo.get());
+
+    flash.success("Operazione effettuata correttamente");
+    people(person.office.id);
+  }
+  
+  /**
+   * TODO: spostare nell'updater?
+   * @param epasPerson
+   * @param perseoPerson
+   */
+  private static void join(Person epasPerson, Person perseoPerson) {
+    //copy ( TODO: update method)
+    epasPerson.name = perseoPerson.name;
+    epasPerson.surname = perseoPerson.surname;
+    epasPerson.number = perseoPerson.number;
+    //epasPerson.email = perseoPerson.email; per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    //epasPerson.eppn = perseoPerson.email;
+    epasPerson.qualification = perseoPerson.qualification;
+    epasPerson.perseoId = perseoPerson.perseoId;
+    epasPerson.save();
+    log.info("Associata persona={} al perseoId={}", epasPerson.toString(), epasPerson.perseoId);
+  }
+   
+  /**
+   * Esegue il join per tutte le persone non ancora associate (se esiste un suggerimento perseo via matricola).
+   * @param epasOfficeId
+   */
+  public static void joinAllPersonInOffice(Long epasOfficeId) {
+    
+    Office office = officeDao.getOfficeById(epasOfficeId);
+    notFoundIfNull(office);
+
+    @SuppressWarnings("deprecation")
+    List<Person> people = personDao.listFetched(Optional.<String>absent(), 
+            Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
     
     Map<Integer, Person> perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
     
-    render(people, perseoPeopleByNumber);
+    for (Person person : people) {
+      if (person.perseoId == null) {
+        Person perseoPerson = perseoPeopleByNumber.get(person.number);
+        if (perseoPerson != null) {
+          join(person, perseoPerson);
+        }
+      }
+    }
+    
+    flash.success("Operazione effettuata correttamente");
+    people(office.id);
+    
   }
   
-  public static void joinPerson(Long epasPersonId, Long perseoId) {
-    renderText("ok");
+  /**
+   * Posso importare una persona da perseo.. purchè non esista già una persona con quella matricola.
+   * 
+   * TODO: da perseo arriveranno persone strutturate senza matricola (i neo assunti). Da implementare
+   * il caso.
+   * @param perseoId
+   */
+  public static void importPerson(Long perseoId) {
+    
+    //Prendere da perseo quella persona.
+    Optional<Person> personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
+    Verify.verify(personInPerseo.isPresent());
+    
+    //Caricare dalla persona l'office.
+    Optional<Office> office = officeDao.byPerseoId(personInPerseo.get().perseoOfficeId);
+    Verify.verify(office.isPresent());
+    
+    personInPerseo.get().office = office.get();
+    validation.valid(personInPerseo.get());
+    if (validation.hasErrors()){
+      // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
+      log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
+          + "nella persona. errors={}.", perseoId, validation.errors());
+      flash.error("La persona selezionata non può essere importata a causa di errori.");
+      otherPeople(office.get().id);
+    } 
+
+    // Creazione!
+    if (!personCreator(personInPerseo.get()).isPresent()) {
+      flash.error("La persona selezionata non può essere importata a causa di errori.");
+    } else {
+      flash.success("La persona %s è stata importata con successo da Perseo!", 
+          personInPerseo.get().toString());
+    }
+    
+    otherPeople(office.get().id);
+    
   }
   
+  /**
+   * Da spostare in un updater.
+   * @param person
+   * @return
+   */
+  private static Optional<Person> personCreator(Person person) {
+    
+    try {
+    // FIXME: patch da sistemare quando si creeranno i periodi 
+    person.createdAt = LocalDateTime.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    person.user = userManager.createUser(person);
+    person.save();
+
+    Role employee = Role.find("byName", Role.EMPLOYEE).first();
+    officeManager.setUro(person.user, person.office, employee);
+    person.save();
+    } catch (Exception e) {
+      return Optional.<Person>absent();
+    }
+    
+    return Optional.fromNullable(person);
+  }
   
+  /**
+   * 
+   */
+  public static void importAllPersonInOffice(Long epasOfficeId) {
+    
+    Office office = officeDao.getOfficeById(epasOfficeId);
+    notFoundIfNull(office);
+    
+    Map<Long, Person> perseoPeopleByPerseoId = peoplePerseoConsumer.perseoDepartmentPeopleByPerseoId(office.perseoId);
+
+    @SuppressWarnings("deprecation")
+    List<Person> people = personDao.listFetched(Optional.<String>absent(), 
+        Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
+
+    // questa operazione si può fare solo se non ci sono persone in epas
+    // attualmente non associate a perseo.
+    
+    Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
+    for (Person person : people) {
+      if (person.perseoId != null) {
+        epasPeopleByPerseoId.put(person.perseoId, person);
+      } else {
+        flash.error("Per fare questa operazione tutte le persone già esistenti della sede "
+            + "devono essere correttamente sincronizzate. "
+            + "Esempio %s non lo è. Operazione annullata.", person.toString());
+        otherPeople(office.id);
+      }
+    }
+    
+    for (Person perseoPerson : perseoPeopleByPerseoId.values()) {
+      if (epasPeopleByPerseoId.get(perseoPerson.perseoId) == null) {
+        
+        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}", perseoPerson.fullName(), perseoPerson.number, 
+            perseoPerson.qualification, perseoPerson.perseoId);
+        
+        // join dell'office (in automatico ancora non c'è...)
+        perseoPerson.office = office;
+        
+        validation.valid(perseoPerson);
+        if (validation.hasErrors()){
+          // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
+          log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
+              + "nella persona. errors={}.", perseoPerson.perseoId, validation.errorsMap());
+          validation.clear();
+          continue;
+        } 
+
+        // Creazione!
+        if (!personCreator(perseoPerson).isPresent()) {
+          // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
+          log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
+              + "nella persona. errors={}.", perseoPerson.perseoId, validation.errorsMap());
+          validation.clear();
+          continue;
+        }
+      }
+    }
+    
+    flash.success("Operazione effettuata correttamente");
+    otherPeople(office.id);
+  }
   
+  /**
+   * I contratti attivi in epas da sincronizzare.
+   */
+  public static void activeContracts(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    Map<Long, Contract> activeContractsEpasByPersonPerseoId = 
+        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
+    
+    //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+        .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    
+    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
+  }
+
   
+  /**
+   * Le persone non in epas si possono importare.
+   */
+  public static void otherContracts(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    Map<Long, Contract> activeContractsEpasByPersonPerseoId = 
+        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
+    
+    //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+        .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    
+    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
+    
+  }
+  
+  /**
+   * Esegue il join per una persona specifica.
+   * @param epasPersonId
+   * @param perseoId
+   */
+  public static void joinContract(Long epasContractId, Long perseoId) {
+    
+    Contract contract = contractDao.getContractById(epasContractId);
+    Verify.verifyNotNull(contract);
+    Verify.verifyNotNull(perseoId);
+    
+    Optional<Contract> contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, contract.person);
+    Verify.verify(contractInPerseo.isPresent());
+    
+    joinUpdateContract(contract, contractInPerseo.get());
+
+    flash.success("Operazione effettuata correttamente");
+    activeContracts(contract.person.office.id);
+  }
+  
+  /**
+   * TODO: spostare nell'updater?
+   * @param epasPerson
+   * @param perseoPerson
+   */
+  private static void joinUpdateContract(Contract epasContract, Contract perseoContract) {
+    //copy ( TODO: update method)
+    
+    epasContract.beginDate = perseoContract.beginDate;
+    if (perseoContract.isTemporary && perseoContract.endDate == null) {
+       //caso particolare
+    } else {
+      epasContract.endDate = perseoContract.endDate;
+    }
+    epasContract.endContract = perseoContract.endContract;
+    epasContract.isTemporary = perseoContract.isTemporary;
+    epasContract.perseoId = perseoContract.perseoId;
+    
+    // TODO: update periods e ricalcoli!!!
+    
+    epasContract.save();
+    
+    log.info("Associata contratto={} al perseoId={}", epasContract.toString(), epasContract.perseoId);
+  }
+  
+  /**
+   * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e 
+   * non conflitti con le date dei contratti epas.
+   * 
+   * @param perseoId
+   */
+  @SuppressWarnings("deprecation")
+  public static void importContract(Long perseoId, Long epasPersonId) {
+    
+    Person person = personDao.getPersonById(epasPersonId);
+    Verify.verifyNotNull(person);
+    Verify.verifyNotNull(person.perseoId);
+    
+    Optional<Contract> contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
+    Verify.verify(contractInPerseo.isPresent());
+    
+    WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+    
+    // Salvare il contratto.
+    if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
+      flash.error("Il contratto non può essere importato a causa di errori");
+      otherContracts(person.office.id);
+    }
+    flash.success("Il contratto di %s è stato importato con successo da Perseo!", person.toString()); 
+  
+    otherContracts(person.office.id);
+  }
+  
+  /**
+   * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e 
+   * non conflitti con le date dei contratti epas.
+   * 
+   * @param perseoId
+   */
+  @SuppressWarnings("deprecation")
+  public static void importAllContractsInOffice(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    Map<Long, Contract> activeContractsEpasByPersonPerseoId = 
+        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
+    
+    //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+        .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    
+    WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+    
+    for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
+      Contract epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
+      if (epasContract != null) {
+        continue;
+      }
+      
+      // Salvare il contratto.
+      if (!contractManager.properContractCreate(perseoContract, normal, false)) {
+        // segnalare il conflitto
+        continue;
+      }
+    }
+
+    flash.success("Operazione effettuata correttamente");
+  
+    otherContracts(office.id);
+  }
 }

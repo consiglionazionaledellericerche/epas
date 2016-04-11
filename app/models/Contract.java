@@ -42,6 +42,13 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Column(name="perseo_id")
   public Long perseoId;
   
+  /**
+   * Patch per gestire i contratti con dati mancanti da dcp.
+   * E' true unicamente per segnalare tempo determinato senza data fine specificata.
+   */
+  @Column(name="is_temporary")
+  public boolean isTemporary = false;
+  
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
@@ -85,7 +92,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
   public Person person;
-
+  
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
