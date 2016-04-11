@@ -174,7 +174,8 @@
               <li><a href="@{Administration.utilities()}">Utilities</a></li>
               <li><a href="@{Administration.playConfiguration()}">&{'application.data'}</a></li>
               <li><a href="@{Synchronizations.institutes()}">&{'synch.offices'}</a></li>
-              <li><a href="@{Synchronizations.people()}">&{'synch.people'}</a></li>
+              <li><a href="@{Synchronizations.people(session.get("officeSelected"))}">&{'synch.people'}</a></li>
+              <li><a href="@{Synchronizations.activeContracts(session.get("officeSelected"))}">&{'synch.contracts'}</a></li>
             </ul>
           </li>
         </ul>
