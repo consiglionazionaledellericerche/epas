@@ -1,8 +1,5 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.gdata.util.common.base.Preconditions;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UserDao;
@@ -11,14 +8,11 @@ import helpers.Web;
 
 import models.Institute;
 import models.Office;
-import models.Person;
-import models.User;
 import models.UsersRolesOffices;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.Play;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -29,9 +23,6 @@ import javax.inject.Inject;
 
 @With({Resecure.class, RequestInit.class})
 public class Administrators extends Controller {
-
-  private static final String SUDO_USERNAME = "sudo.username";
-  private static final String USERNAME = "username";
 
   private static final Logger log = LoggerFactory.getLogger(Institutes.class);
 
@@ -106,45 +97,5 @@ public class Administrators extends Controller {
 
   }
 
-
-  /**
-   * Switch in un'altro user.
-   */
-  public static void switchUserTo(long id) {
-
-    final User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
-    notFoundIfNull(user);
-
-    // salva il precedente
-    session.put(SUDO_USERNAME, session.get(USERNAME));
-    // recupera
-    session.put(USERNAME, user.username);
-    // redirect alla radice
-    session.remove("officeSelected");
-    redirect(Play.ctxPath + "/");
-  }
-
-  /**
-   * Switch nell'user di una persona.
-   */
-  public static void switchUserToPersonUser(long id) {
-
-    final Person person = personDao.getPersonById(id);
-    notFoundIfNull(person);
-    Preconditions.checkNotNull(person.user);
-    switchUserTo(person.user.id);
-  }
-
-  /**
-   * ritorna alla precedente persona.
-   */
-  public static void restoreUser() {
-    if (session.contains(SUDO_USERNAME)) {
-      session.put(USERNAME, session.get(SUDO_USERNAME));
-      session.remove(SUDO_USERNAME);
-    }
-    // redirect alla radice
-    redirect(Play.ctxPath + "/");
-  }
 
 }
