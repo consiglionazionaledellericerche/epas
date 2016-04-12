@@ -12,44 +12,44 @@
 <tr><td rowspan="1" colspan="3">Login/Logout test</td></tr>
 </thead><tbody>
 <tr>
-	<td>open</td>
-	<td>/login</td>
-	<td></td>
+  <td>open</td>
+  <td>/login</td>
+  <td></td>
 </tr>
 <tr>
-	<td>type</td>
-	<td>id=username</td>
-	<td>cristian.lucchesi</td>
+  <td>type</td>
+  <td>name=username</td>
+  <td>cristian.lucchesi</td>
 </tr>
 <tr>
-	<td>type</td>
-	<td>id=password</td>
-	<td>epas2014</td>
+  <td>type</td>
+  <td>name=password</td>
+  <td>epas2016</td>
 </tr>
 <tr>
-	<td>clickAndWait</td>
-	<td>id=signin</td>
-	<td></td>
+  <td>clickAndWait</td>
+  <td>id=signin</td>
+  <td></td>
 </tr>
 <tr>
-	<td>assertLocation</td>
-	<td>*/presenze</td>
-	<td></td>
+  <td>assertLocation</td>
+  <td>*/stampings/stampings?month=*&year=*</td>
+  <td></td>
 </tr>
 <tr>
-	<td>assertText</td>
-	<td>link=Logout</td>
-	<td>Logout</td>
+  <td>assertText</td>
+  <td>id=logout</td>
+  <td>Esci</td>
 </tr>
 <tr>
-	<td>clickAndWait</td>
-	<td>link=Logout</td>
-	<td></td>
+  <td>clickAndWait</td>
+  <td>id=logout</td>
+  <td></td>
 </tr>
 <tr>
-	<td>assertLocation</td>
-	<td>*/login</td>
-	<td></td>
+  <td>assertLocation</td>
+  <td>*/login</td>
+  <td></td>
 </tr>
 
 </tbody></table>
