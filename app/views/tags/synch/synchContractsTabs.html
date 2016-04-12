@@ -1,0 +1,25 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+<div class="container">
+  #{title title:'Sincronizzazione Perseo' /}
+</div>
+
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("activeContracts")} class="active" #{/if}>
+      <a href="@{Synchronizations.activeContracts(session.get("officeSelected"))}">Contratti Epas Attivi</a>
+    </li>
+    <li #{if _activeAction.equals("otherContracts")} class="active" #{/if}>
+      <a href="@{Synchronizations.otherContracts(session.get("officeSelected"))}">Altri Contratti Perseo Attivi</a>
+    </li>
+    *{
+    <li #{if _activeAction.equals("otherContracts")} class="active" #{/if}>
+      <a href="@{Synchronizations.otherContracts(session.get("officeSelected"))}">Contratti Sincronizzati</a>
+    </li>
+    }*
+  </ul>
+</div>
+<br>
