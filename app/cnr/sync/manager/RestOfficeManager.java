@@ -5,9 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
-import cnr.sync.dto.InstituteDto;
-import cnr.sync.dto.OfficeDto;
-
 import dao.OfficeDao;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +13,8 @@ import manager.OfficeManager;
 
 import models.Institute;
 import models.Office;
+
+import org.joda.time.LocalDate;
 
 import play.data.validation.Validation;
 
@@ -32,20 +31,27 @@ public class RestOfficeManager {
   @Inject
   private OfficeManager officeManager;
 
-  public int saveImportedSeats(Collection<OfficeDto> officeDtoList) {
+  /**
+   * Importa in ePAS gli offices. 
+   * @param officeDtoList
+   * @return
+   */
+  
+  /*
+  public int saveImportedSeats(Collection<PerseoOffice> officeDtoList) {
 
     Preconditions.checkNotNull(officeDtoList);
 
-    Set<InstituteDto> institutesDto = Sets.newHashSet();
+    Set<PerseoInstitute> institutesDto = Sets.newHashSet();
 
     //  Estrazione senza doppioni di tutti gli istituti dalla lista degli uffici
-    for (OfficeDto office : officeDtoList) {
+    for (PerseoOffice office : officeDtoList) {
       institutesDto.add(office.institute);
     }
 
     //  Conversione dei DTO in istituti
     Set<Institute> institutes = FluentIterable.from(institutesDto)
-            .transform(InstituteDto.ToInstitute.ISTANCE).toSet();
+            .transform(PerseoInstitute.ToInstitute.ISTANCE).toSet();
 
     for (Institute institute : institutes) {
       institute.validateAndCreate();
@@ -70,10 +76,11 @@ public class RestOfficeManager {
 
     int syncedOffices = 0;
 
-    for (OfficeDto officeDto : officeDtoList) {
+    for (PerseoOffice officeDto : officeDtoList) {
 
       Office office = new Office();
       officeDto.copyInto(office);
+      office.beginDate = new LocalDate(2015, 12, 31);
 
       Optional<Institute> institute = officeDao.byCds(officeDto.institute.cds);
 
@@ -107,4 +114,5 @@ public class RestOfficeManager {
     }
     return syncedOffices;
   }
+  */
 }

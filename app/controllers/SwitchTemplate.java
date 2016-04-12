@@ -162,6 +162,18 @@ public class SwitchTemplate extends Controller {
     if (action.equals("MealTickets.recapPersonMealTickets")) {
       MealTickets.recapPersonMealTickets(personId);
     }
+    if (action.equals("Synchronizations.people")) {
+      Synchronizations.people(officeId);
+    }
+    if (action.equals("Synchronizations.otherPeople")) {
+      Synchronizations.otherPeople(officeId);
+    }
+    if (action.equals("Synchronizations.activeContracts")) {
+      Synchronizations.activeContracts(officeId);
+    }
+    if (action.equals("Synchronizations.otherContracts")) {
+      Synchronizations.otherContracts(officeId);
+    }
 
   }
 
