@@ -75,6 +75,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<Person, QPerson> people = this.<Person, QPerson>createList("people", Person.class, QPerson.class, PathInits.DIRECT2);
 
+    public final NumberPath<Long> perseoId = createNumber("perseoId", Long.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
