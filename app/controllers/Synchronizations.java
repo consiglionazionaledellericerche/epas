@@ -384,10 +384,9 @@ public class Synchronizations extends Controller {
   }
   
   /**
-   * Posso importare una persona da perseo.. purchè non esista già una persona con quella matricola.
+   * Posso importare una persona da perseo.. 
+   * purchè non esista già una persona con quella matricola.
    * 
-   * TODO: da perseo arriveranno persone strutturate senza matricola (i neo assunti). Da implementare
-   * il caso.
    * @param perseoId
    */
   public static void importPerson(Long perseoId) {
