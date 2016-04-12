@@ -39,6 +39,8 @@ public class QInstitute extends EntityPathBase<Institute> {
 
     public final StringPath name = createString("name");
 
+    public final NumberPath<Long> perseoId = createNumber("perseoId", Long.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
