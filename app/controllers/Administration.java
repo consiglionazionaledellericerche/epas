@@ -384,10 +384,10 @@ public class Administration extends Controller {
       }
     } else {
       Play.configuration.setProperty(name, value);
-      flash.success("Parametro di configurazione correttamente salvato: %s=%s", name, value);
       // Questo metodo viene chiamato sia tramite x-editable che tramite form nel modale
       // il booleano newParam viene usato per discriminare la provenienza della chiamata
       if (newParam) {
+        flash.success("Parametro di configurazione correttamente salvato: %s=%s", name, value);
         playConfiguration();
       }
     }
