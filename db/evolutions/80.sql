@@ -1,31 +1,31 @@
-# ---!Ups
+# --- !Ups
 
-# -- Chiavi primarie mancanti
+ALTER TABLE institutes ADD COLUMN perseo_id BIGINT;
+ALTER TABLE institutes_history ADD COLUMN perseo_id BIGINT;
 
-ALTER TABLE conf_period ADD PRIMARY KEY(id);
-ALTER TABLE configurations_history ADD PRIMARY KEY (id, _revision);
-ALTER TABLE shift_type_history ADD PRIMARY KEY (id, _revision);
+ALTER TABLE office ADD COLUMN perseo_id BIGINT;
+ALTER TABLE office_history ADD COLUMN perseo_id BIGINT;
 
-DROP TABLE persons_working_time_types;
+ALTER TABLE persons ADD COLUMN perseo_id BIGINT;
+ALTER TABLE persons_history ADD COLUMN perseo_id BIGINT;
 
-ALTER TABLE contract_month_recap DROP COLUMN abs_fap_usate;
-ALTER TABLE contract_month_recap DROP COLUMN abs_fac_usate;
-ALTER TABLE contract_month_recap DROP COLUMN abs_p_usati;
+ALTER TABLE contracts ADD COLUMN perseo_id BIGINT;
 
-# ---!Downs
+ALTER TABLE contracts ADD COLUMN is_temporary BOOLEAN default false;
 
-ALTER TABLE conf_period DROP CONSTRAINT conf_period_pkey;
-ALTER TABLE configurations_history DROP CONSTRAINT configurations_history_pkey;
-ALTER TABLE shift_type_history DROP CONSTRAINT shift_type_history_pkey;
+UPDATE contracts SET is_temporary = true WHERE end_date is not null;
 
-CREATE TABLE persons_working_time_types (
-  id SERIAL PRIMARY KEY,
-  begin_date DATE,
-  end_date DATE,
-  working_time_type_id INT REFERENCES working_time_types(id),
-  person_id REFERENCES persons(id)
-);
+# --- !Downs
 
-ALTER TABLE contract_month_recap ADD COLUMN abs_fap_usate INT;
-ALTER TABLE contract_month_recap ADD COLUMN abs_fac_usate INT;
-ALTER TABLE contract_month_recap ADD COLUMN abs_p_usati INT;
+ALTER TABLE institutes DROP COLUMN perseo_id;
+ALTER TABLE institutes_history DROP COLUMN perseo_id;
+
+ALTER TABLE office DROP COLUMN perseo_id;
+ALTER TABLE office_history DROP COLUMN perseo_id;
+
+ALTER TABLE persons DROP COLUMN perseo_id;
+ALTER TABLE persons_history DROP COLUMN perseo_id;
+
+ALTER TABLE contracts DROP COLUMN perseo_id;
+
+ALTER TABLE contracts DROP COLUMN is_temporary;
