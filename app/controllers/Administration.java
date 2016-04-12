@@ -33,6 +33,7 @@ import org.joda.time.LocalDate;
 
 import play.Play;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -364,6 +365,27 @@ public class Administration extends Controller {
         "Total Memory", String.format("%s Mb", runtime.totalMemory() / mb)).entrySet();
 
     render("@data", entries);
+  }
+
+  public static void addConfiguration() {
+    render();
+  }
+
+  public static void saveConfiguration(@Required String name, @Required String value, boolean newParam) {
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      if (newParam) {
+        render("@addConfiguration", name, value);
+      }
+    } else {
+      Play.configuration.setProperty(name, value);
+      flash.success("Parametro di configurazione correttamente salvato: %s=%s", name, value);
+      // Questo metodo viene chiamato sia tramite x-editable che tramite form nel modale
+      // il booleano newParam viene usato per discriminare la provenienza della chiamata
+      if (newParam) {
+        playConfiguration();
+      }
+    }
   }
 
 }

@@ -1,0 +1,16 @@
+#{modalAsync id:'defaultModal', title:'Nuovo parametro di Configurazione' }
+<div class="container" id="addConfiguration">
+  #{form action:@Administration.saveConfiguration(), class:'form-horizontal', method:'POST', autocomplete:false,
+  'data-async':'#page_content', 'data-async-error':'#addConfiguration'}
+
+  #{f.hidden 'newParam', value:true /}
+  #{f.input 'name', label:messages.get('configuration.entry') /}
+  #{f.input 'value', label:messages.get('configuration.entry.value') /}
+
+  #{b.buttons center:true}
+    #{b.submit 'Salva'/}
+  #{/b.buttons}
+
+  #{/form}
+</div>
+#{/modalAsync}
