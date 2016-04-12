@@ -55,10 +55,6 @@ public class WorkingTimeType extends BaseModel {
 
   @NotAudited
   @OneToMany(mappedBy = "workingTimeType")
-  public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
-
-  @NotAudited
-  @OneToMany(mappedBy = "workingTimeType")
   public List<ContractWorkingTimeType> contractWorkingTimeType = Lists.newArrayList();
 
   //@Required
