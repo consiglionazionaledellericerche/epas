@@ -6,6 +6,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
 import dao.PersonDao;
@@ -26,6 +27,7 @@ import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
+import models.User;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
@@ -50,6 +52,9 @@ import javax.inject.Inject;
 @Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Administration extends Controller {
+
+  static final String SUDO_USERNAME = "sudo.username";
+  static final String USERNAME = "username";
 
   @Inject
   static SecureManager secureManager;
@@ -388,4 +393,43 @@ public class Administration extends Controller {
     }
   }
 
+  /**
+   * Switch in un'altro user.
+   */
+  public static void switchUserTo(long id) {
+
+    final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
+    notFoundIfNull(user);
+
+    // salva il precedente
+    session.put(SUDO_USERNAME, session.get(USERNAME));
+    // recupera
+    session.put(USERNAME, user.username);
+    // redirect alla radice
+    session.remove("officeSelected");
+    redirect(Play.ctxPath + "/");
+  }
+
+  /**
+   * Switch nell'user di una persona.
+   */
+  public static void switchUserToPersonUser(long id) {
+
+    final Person person = Administrators.personDao.getPersonById(id);
+    notFoundIfNull(person);
+    Preconditions.checkNotNull(person.user);
+    switchUserTo(person.user.id);
+  }
+
+  /**
+   * ritorna alla precedente persona.
+   */
+  public static void restoreUser() {
+    if (session.contains(SUDO_USERNAME)) {
+      session.put(USERNAME, session.get(SUDO_USERNAME));
+      session.remove(SUDO_USERNAME);
+    }
+    // redirect alla radice
+    redirect(Play.ctxPath + "/");
+  }
 }
