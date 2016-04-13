@@ -1,4 +1,4 @@
-package controllers.rest.attestati;
+package manager.attestati;
 
 public class RigaFormazione {
 
