@@ -1,0 +1,357 @@
+# subject; condition;  limit; restrictions
+persons; id=146; ; .embedded
+
+# from A (or association name); to B; restriction-condition
+inverse-fk6674c5d65b5f15b1; ; ignore
+inverse-badges_badge_reader_id_fkey; ; ignore
+badge_readers_user_id_fkey; ; ignore
+inverse-badge_readers_badge_systems_badgesystems_id_fkey; ; ignore
+inverse-badges_badge_system_id_fkey; ; ignore
+badges_badge_reader_id_fkey; ; ignore
+badges_badge_system_id_fkey; ; ignore
+badges_person_id_fkey; ; ignore
+fkca05bafce7a7b1be; ; ignore
+inverse-fkbe7a61ca62728bb1; ; ignore
+inverse-fk218a96913c1ea3e; ; ignore
+contract_contract_month_recap; ; ignore
+contract_stamp_profiles_contract_id_fkey; ; ignore
+inverse-meal_ticket_contract_id_fkey; ; ignore
+fke86d11a1e7a7b1be; ; ignore
+fk353559b3fb1f039e; ; ignore
+fk353559b335555570; ; ignore
+inverse-office_institute_id_fkey; ; ignore
+meal_ticket_admin_id_fkey; ; ignore
+inverse-badge_systems_office_id_fkey; ; ignore
+inverse-conf_general_tmp_fkey; ; ignore
+inverse-conf_period_office_id_fkey; ; ignore
+inverse-conf_year_tmp_fkey; ; ignore
+inverse-configurations_office_id_fkey; ; ignore
+inverse-fkd78fcfbe2d0fa45e; ; ignore
+inverse-totalovertime_office_key; ; ignore
+inverse-users_office_owner_id_fkey; ; ignore
+inverse-users_roles_offices_office_id_fkey; ; ignore
+inverse-wtt_office_key; ; ignore
+fk6ace3a9e7a7b1be; ; ignore
+inverse-fk6674c5d6fbe89596; ; ignore
+fke69adb01e7a7b1be; ; ignore
+fke69adb0135175bce; ; ignore
+inverse-fkb20b55e41df6de9; ; ignore
+inverse-fk7ab49e924e498a6e; ; ignore
+inverse-fkb20b55e47d5fd20c; ; ignore
+inverse-fk3075811eda784c2b; ; ignore
+inverse-fk7757fc5e29b090bd; ; ignore
+inverse-fkbe7a61cae7a7b1be; ; ignore
+fkd78fcfbe2d0fa45e; ; ignore
+inverse-fk7ab49e92e7a7b1be; ; ignore
+inverse-person_reperibility_types_supervisor_fkey; ; ignore
+inverse-fked96d718e7a7b1be; ; ignore
+person_in_charge_fk; ; ignore
+fkd78fcfbe786a4ab6; ; ignore
+inverse-shift_categories_supervisor_fkey; ; ignore
+inverse-shift_categories_history_supervisor_fkey; ; ignore
+fk218a96913c1ea3e; ; ignore
+fk218a9691dd4eb8b5; ; ignore
+persons_working_time_types_person_id; ; ignore
+fkb943247635555570; ; ignore
+inverse-fk16765acbce1b821; ; ignore
+inverse-fkd78fcfbe786a4ab6; ; ignore
+inverse-fk82ea23ccd54d10ea; ; ignore
+inverse-fk2631804cd54d10ea; ; ignore
+inverse-fkbfc8501d54d10ea; ; ignore
+inverse-fk10e41b2bd54d10ea; ; ignore
+inverse-badge_readers_badge_systems_history__revision_fkey; ; ignore
+inverse-badge_readers_history__revision_fkey; ; ignore
+inverse-badge_systems_history__revision_fkey; ; ignore
+inverse-badges_history__revision_fkey; ; ignore
+inverse-fk64d88a51d54d10ea; ; ignore
+inverse-revinfo_conf_general_tmp_history_fkey; ; ignore
+inverse-conf_period_history__revision_fkey; ; ignore
+inverse-revinfo_conf_year_tmp_history_fkey; ; ignore
+inverse-configurations_history__revision_fkey; ; ignore
+inverse-institutes_history__revision_fkey; ; ignore
+inverse-meal_ticket_history__revision_fkey; ; ignore
+inverse-fkd52a4e11d54d10ea; ; ignore
+inverse-fkee16b5fed54d10ea; ; ignore
+inverse-fk8fa3d556d54d10ea; ; ignore
+inverse-person_days_in_trouble_history__revision_fkey; ; ignore
+inverse-revinfo_person_months_recap_history_fkey; ; ignore
+inverse-fka8bd39d54d10ea; ; ignore
+inverse-fk160d77e7d54d10ea; ; ignore
+inverse-fkc5a3e3e1d54d10ea; ; ignore
+inverse-fkfceabd13d54d10ea; ; ignore
+inverse-fk68e007b9d54d10ea; ; ignore
+inverse-roles_history__revision_fkey; ; ignore
+inverse-shift_categories_history__revision_fkey; ; ignore
+inverse-revinfo_shift_type_history_fkey; ; ignore
+inverse-fk5c3f2f67d54d10ea; ; ignore
+inverse-fkcd87c669d54d10ea; ; ignore
+inverse-fk5c2b915dd54d10ea; ; ignore
+inverse-fk1fe1fac5d54d10ea; ; ignore
+inverse-fk18bdcd6dd54d10ea; ; ignore
+inverse-fk94fa58aad54d10ea; ; ignore
+inverse-users_roles_offices_role_id_fkey; ; ignore
+inverse-shift_type_shift_categories_id_fkey; ; ignore
+inverse-fke69adb0135175bce; ; ignore
+inverse-fk785e8f1435175bce; ; ignore
+fk785e8f1435175bce; ; ignore
+inverse-fkd78fcfbe47140efe; ; ignore
+inverse-revinfo_owner_id_fkey; ; ignore
+users_roles_offices_office_id_fkey; ; ignore
+users_roles_offices_role_id_fkey; ; ignore
+users_roles_offices_user_id_fkey; ; ignore
+fk5170df70e7a7b1be; ; ignore
+fk74fdda1835555570; ; ignore
+inverse-fk353559b335555570; ; ignore
+inverse-fk74fdda1835555570; ; ignore
+
+#! block xml-mapping
+conf_period_office_id_fkey;conf_period_office_id_fkey;NONE
+fk5170df70e7a7b1be;fk5170df70e7a7b1be;NONE
+shift_categories_supervisor_fkey;shift_categories_supervisor_fkey;NONE
+inverse-shift_type_shift_categories_id_fkey;shift_type;NONE
+fk6ace3a9e7a7b1be;fk6ace3a9e7a7b1be;NONE
+configurations_office_id_fkey;configurations_office_id_fkey;NONE
+fk353559b3fb1f039e;fk353559b3fb1f039e;NONE
+fk353559b335555570;fk353559b335555570;NONE
+fk64d88a51d54d10ea;fk64d88a51d54d10ea;NONE
+fk7757fc5e29b090bd;fk7757fc5e29b090bd;NONE
+fk7757fc5ebbfca55b;fk7757fc5ebbfca55b;NONE
+inverse-badge_systems_office_id_fkey;badge_systems;NONE
+inverse-conf_general_tmp_fkey;conf_general;NONE
+inverse-conf_period_office_id_fkey;conf_period;NONE
+inverse-conf_year_tmp_fkey;conf_year;NONE
+inverse-configurations_office_id_fkey;configurations;NONE
+office_institute_id_fkey;office_institute_id_fkey;NONE
+inverse-fkd78fcfbe2d0fa45e;persons;NONE
+inverse-totalovertime_office_key;total_overtime;NONE
+inverse-users_office_owner_id_fkey;users;NONE
+inverse-users_roles_offices_office_id_fkey;users_roles_offices;NONE
+inverse-wtt_office_key;working_time_types;NONE
+fked96d718e7a7b1be;fked96d718e7a7b1be;NONE
+inverse-fk3075811eda784c2b;person_shift_days;NONE
+inverse-fk7757fc5e29b090bd;person_shift_shift_type;NONE
+fka8bd39d54d10ea;fka8bd39d54d10ea;NONE
+inverse-fk16765acbce1b821;absence_types_qualifications;NONE
+inverse-fkd78fcfbe786a4ab6;persons;NONE
+inverse-fk71b9ff7730325be3;absence_type_groups;NONE
+fkfe65dbf7ca0a1c8a;fkfe65dbf7ca0a1c8a;NONE
+inverse-fk16765acd966a951;absence_types_qualifications;NONE
+inverse-fk6674c5d65b5f15b1;absences;NONE
+inverse-fk3075811e3df511bb;person_shift_days;NONE
+inverse-fk7757fc5ebbfca55b;person_shift_shift_type;NONE
+inverse-fk3f7a55d43df511bb;shift_cancelled;NONE
+shift_type_shift_categories_id_fkey;shift_type_shift_categories_id_fkey;NONE
+shift_type_shift_time_table_id_fkey;shift_type_shift_time_table_id_fkey;NONE
+meal_ticket_contract_id_fkey;meal_ticket_contract_id_fkey;NONE
+meal_ticket_admin_id_fkey;meal_ticket_admin_id_fkey;NONE
+contract_contract_month_recap;contract_contract_month_recap;NONE
+inverse-fk6674c5d6fbe89596;absences;NONE
+fke69adb01e7a7b1be;fke69adb01e7a7b1be;NONE
+fke69adb0135175bce;fke69adb0135175bce;NONE
+inverse-fk4b732cdbfbe89596;person_days_in_trouble;NONE
+inverse-fk785e8f14fbe89596;stampings;NONE
+fk218a96913c1ea3e;fk218a96913c1ea3e;NONE
+fk218a9691dd4eb8b5;fk218a9691dd4eb8b5;NONE
+configurations_history__revision_fkey;configurations_history__revision_fkey;NONE
+fk6674c5d65b5f15b1;fk6674c5d65b5f15b1;NONE
+fk6674c5d6fbe89596;fk6674c5d6fbe89596;NONE
+inverse-fkbe7a61ca62728bb1;competences;NONE
+inverse-fk218a96913c1ea3e;persons_competence_codes;NONE
+conf_period_history__revision_fkey;conf_period_history__revision_fkey;NONE
+fk1fe1fac5d54d10ea;fk1fe1fac5d54d10ea;NONE
+fk82ea23ccd54d10ea;fk82ea23ccd54d10ea;NONE
+institutes_history__revision_fkey;institutes_history__revision_fkey;NONE
+fk7ab49e924e498a6e;fk7ab49e924e498a6e;NONE
+fk7ab49e92e7a7b1be;fk7ab49e92e7a7b1be;NONE
+inverse-fkb20b55e41df6de9;person_reperibility_days;NONE
+fk4b732cdbfbe89596;fk4b732cdbfbe89596;NONE
+badge_readers_badge_systems_history__revision_fkey;badge_readers_badge_systems_history__revision_fkey;NONE
+fk3f7a55d43df511bb;fk3f7a55d43df511bb;NONE
+inverse-badge_readers_user_id_fkey;badge_readers;NONE
+inverse-fkd78fcfbe47140efe;persons;NONE
+inverse-revinfo_owner_id_fkey;revinfo;NONE
+users_office_owner_id_fkey;users_office_owner_id_fkey;NONE
+inverse-users_roles_offices_user_id_fkey;users_roles_offices;NONE
+users_roles_offices_office_id_fkey;users_roles_offices_office_id_fkey;NONE
+users_roles_offices_role_id_fkey;users_roles_offices_role_id_fkey;NONE
+users_roles_offices_user_id_fkey;users_roles_offices_user_id_fkey;NONE
+fkbe7a61ca62728bb1;fkbe7a61ca62728bb1;NONE
+fkbe7a61cae7a7b1be;fkbe7a61cae7a7b1be;NONE
+inverse-persons_working_time_types_person_id;persons_working_time_types;NONE
+inverse-badges_person_id_fkey;badges;NONE
+inverse-fkca05bafce7a7b1be;certificated_data;NONE
+inverse-fkbe7a61cae7a7b1be;competences;NONE
+inverse-fke86d11a1e7a7b1be;contracts;NONE
+inverse-meal_ticket_admin_id_fkey;meal_ticket;NONE
+inverse-fk6ace3a9e7a7b1be;person_children;NONE
+inverse-fke69adb01e7a7b1be;person_days;NONE
+inverse-fk20975c68e7a7b1be;person_hour_for_overtime;NONE
+inverse-person_person_months_recap_fkey;person_months_recap;NONE
+inverse-fk7ab49e92e7a7b1be;person_reperibility;NONE
+inverse-person_reperibility_types_supervisor_fkey;person_reperibility_types;NONE
+inverse-fked96d718e7a7b1be;person_shift;NONE
+fkd78fcfbe2d0fa45e;fkd78fcfbe2d0fa45e;NONE
+person_in_charge_fk;person_in_charge_fk;NONE
+inverse-person_in_charge_fk;persons;NONE
+fkd78fcfbe786a4ab6;fkd78fcfbe786a4ab6;NONE
+fkd78fcfbe47140efe;fkd78fcfbe47140efe;NONE
+inverse-fk218a9691dd4eb8b5;persons_competence_codes;NONE
+inverse-shift_categories_supervisor_fkey;shift_categories;NONE
+inverse-shift_categories_history_supervisor_fkey;shift_categories_history;NONE
+persons_working_time_types_person_id;persons_working_time_types_person_id;NONE
+fkb943247635555570;fkb943247635555570;NONE
+person_person_months_recap_fkey;person_person_months_recap_fkey;NONE
+inverse-office_institute_id_fkey;office;NONE
+badge_readers_badge_systems_badgereaders_id_fkey;badge_readers_badge_systems_badgereaders_id_fkey;NONE
+badge_readers_badge_systems_badgesystems_id_fkey;badge_readers_badge_systems_badgesystems_id_fkey;NONE
+conf_general_tmp_fkey;conf_general_tmp_fkey;NONE
+badge_readers_user_id_fkey;badge_readers_user_id_fkey;NONE
+inverse-badge_readers_badge_systems_badgereaders_id_fkey;badge_readers_badge_systems;NONE
+inverse-badges_badge_reader_id_fkey;badges;NONE
+fkd52a4e11d54d10ea;fkd52a4e11d54d10ea;NONE
+contract_stamp_profiles_contract_id_fkey;contract_stamp_profiles_contract_id_fkey;NONE
+inverse-fk82ea23ccd54d10ea;absence_type_groups_history;NONE
+inverse-fk2631804cd54d10ea;absence_types_history;NONE
+inverse-fkbfc8501d54d10ea;absence_types_qualifications_history;NONE
+inverse-fk10e41b2bd54d10ea;absences_history;NONE
+inverse-badge_readers_badge_systems_history__revision_fkey;badge_readers_badge_systems_history;NONE
+inverse-badge_readers_history__revision_fkey;badge_readers_history;NONE
+inverse-badge_systems_history__revision_fkey;badge_systems_history;NONE
+inverse-badges_history__revision_fkey;badges_history;NONE
+inverse-fk64d88a51d54d10ea;certificated_data_history;NONE
+inverse-revinfo_conf_general_tmp_history_fkey;conf_general_history;NONE
+inverse-conf_period_history__revision_fkey;conf_period_history;NONE
+inverse-revinfo_conf_year_tmp_history_fkey;conf_year_history;NONE
+inverse-configurations_history__revision_fkey;configurations_history;NONE
+inverse-institutes_history__revision_fkey;institutes_history;NONE
+inverse-meal_ticket_history__revision_fkey;meal_ticket_history;NONE
+inverse-fkd52a4e11d54d10ea;office_history;NONE
+inverse-fkee16b5fed54d10ea;person_children_history;NONE
+inverse-fk8fa3d556d54d10ea;person_days_history;NONE
+inverse-person_days_in_trouble_history__revision_fkey;person_days_in_trouble_history;NONE
+inverse-revinfo_person_months_recap_history_fkey;person_months_recap_history;NONE
+inverse-fka8bd39d54d10ea;person_reperibility_days_history;NONE
+inverse-fk160d77e7d54d10ea;person_reperibility_history;NONE
+inverse-fkc5a3e3e1d54d10ea;person_reperibility_types_history;NONE
+inverse-fkfceabd13d54d10ea;persons_history;NONE
+inverse-fk68e007b9d54d10ea;qualifications_history;NONE
+revinfo_owner_id_fkey;revinfo_owner_id_fkey;NONE
+inverse-roles_history__revision_fkey;roles_history;NONE
+inverse-shift_categories_history__revision_fkey;shift_categories_history;NONE
+inverse-revinfo_shift_type_history_fkey;shift_type_history;NONE
+inverse-fk5c3f2f67d54d10ea;stamp_modification_types_history;NONE
+inverse-fkcd87c669d54d10ea;stampings_history;NONE
+inverse-fk5c2b915dd54d10ea;users_history;NONE
+inverse-fk1fe1fac5d54d10ea;vacation_periods_history;NONE
+inverse-fk18bdcd6dd54d10ea;working_time_type_days_history;NONE
+inverse-fk94fa58aad54d10ea;working_time_types_history;NONE
+fkc5a3e3e1d54d10ea;fkc5a3e3e1d54d10ea;NONE
+inverse-fk7ab49e924e498a6e;person_reperibility;NONE
+inverse-fkb20b55e47d5fd20c;person_reperibility_days;NONE
+person_reperibility_types_supervisor_fkey;person_reperibility_types_supervisor_fkey;NONE
+inverse-users_roles_offices_role_id_fkey;users_roles_offices;NONE
+inverse-fke69adb0135175bce;person_days;NONE
+inverse-fk785e8f1435175bce;stampings;NONE
+fk785e8f14fbe89596;fk785e8f14fbe89596;NONE
+fk785e8f1435175bce;fk785e8f1435175bce;NONE
+fk16765acd966a951;fk16765acd966a951;NONE
+fk16765acbce1b821;fk16765acbce1b821;NONE
+badge_readers_history__revision_fkey;badge_readers_history__revision_fkey;NONE
+inverse-contract_contract_month_recap;contract_month_recap;NONE
+inverse-contract_stamp_profiles_contract_id_fkey;contract_stamp_profiles;NONE
+fke86d11a1e7a7b1be;fke86d11a1e7a7b1be;NONE
+inverse-fk353559b3fb1f039e;contracts_working_time_types;NONE
+inverse-meal_ticket_contract_id_fkey;meal_ticket;NONE
+inverse-fk5170df70e7a7b1be;vacation_periods;NONE
+fk71b9ff7730325be3;fk71b9ff7730325be3;NONE
+inverse-fkfe65dbf7ca0a1c8a;absence_types;NONE
+badge_systems_history__revision_fkey;badge_systems_history__revision_fkey;NONE
+revinfo_conf_year_tmp_history_fkey;revinfo_conf_year_tmp_history_fkey;NONE
+fk10e41b2bd54d10ea;fk10e41b2bd54d10ea;NONE
+fk18bdcd6dd54d10ea;fk18bdcd6dd54d10ea;NONE
+fk94fa58aad54d10ea;fk94fa58aad54d10ea;NONE
+person_days_in_trouble_history__revision_fkey;person_days_in_trouble_history__revision_fkey;NONE
+totalovertime_office_key;totalovertime_office_key;NONE
+inverse-badge_readers_badge_systems_badgesystems_id_fkey;badge_readers_badge_systems;NONE
+badge_systems_office_id_fkey;badge_systems_office_id_fkey;NONE
+inverse-badges_badge_system_id_fkey;badges;NONE
+inverse-fk353559b335555570;contracts_working_time_types;NONE
+inverse-fkb943247635555570;persons_working_time_types;NONE
+inverse-fk74fdda1835555570;working_time_type_days;NONE
+wtt_office_key;wtt_office_key;NONE
+inverse-shift_type_shift_time_table_id_fkey;shift_type;NONE
+revinfo_conf_general_tmp_history_fkey;revinfo_conf_general_tmp_history_fkey;NONE
+revinfo_person_months_recap_history_fkey;revinfo_person_months_recap_history_fkey;NONE
+fk5c3f2f67d54d10ea;fk5c3f2f67d54d10ea;NONE
+fk68e007b9d54d10ea;fk68e007b9d54d10ea;NONE
+revinfo_shift_type_history_fkey;revinfo_shift_type_history_fkey;NONE
+meal_ticket_history__revision_fkey;meal_ticket_history__revision_fkey;NONE
+fk74fdda1835555570;fk74fdda1835555570;NONE
+fkee16b5fed54d10ea;fkee16b5fed54d10ea;NONE
+fk160d77e7d54d10ea;fk160d77e7d54d10ea;NONE
+fk3075811eda784c2b;fk3075811eda784c2b;NONE
+fk3075811e3df511bb;fk3075811e3df511bb;NONE
+fkcd87c669d54d10ea;fkcd87c669d54d10ea;NONE
+fkb20b55e41df6de9;fkb20b55e41df6de9;NONE
+fkb20b55e47d5fd20c;fkb20b55e47d5fd20c;NONE
+shift_categories_history_supervisor_fkey;shift_categories_history_supervisor_fkey;NONE
+shift_categories_history__revision_fkey;shift_categories_history__revision_fkey;NONE
+badges_badge_reader_id_fkey;badges_badge_reader_id_fkey;NONE
+badges_badge_system_id_fkey;badges_badge_system_id_fkey;NONE
+badges_person_id_fkey;badges_person_id_fkey;NONE
+conf_year_tmp_fkey;conf_year_tmp_fkey;NONE
+roles_history__revision_fkey;roles_history__revision_fkey;NONE
+fk8fa3d556d54d10ea;fk8fa3d556d54d10ea;NONE
+fk5c2b915dd54d10ea;fk5c2b915dd54d10ea;NONE
+badges_history__revision_fkey;badges_history__revision_fkey;NONE
+fkca05bafce7a7b1be;fkca05bafce7a7b1be;NONE
+fkfceabd13d54d10ea;fkfceabd13d54d10ea;NONE
+fk2631804cd54d10ea;fk2631804cd54d10ea;NONE
+fkbfc8501d54d10ea;fkbfc8501d54d10ea;NONE
+fk20975c68e7a7b1be;fk20975c68e7a7b1be;NONE
+
+#! block datamodelfolder
+ePAS
+
+#! block export modus
+DBUNIT_FLAT_XML
+
+#! block xml settings
+yyyy-MM-dd;yyyy-MM-dd-HH.mm.ss;rowset
+#! block xml column mapping
+#! block upserts
+
+#! block filters
+persons;id;id=146
+
+#! block layout
+persons; vacation_periods; -199.72459411621094; -273.40911865234375; 0.0
+persons; person_children; 80.7616958618164; -199.89768981933594; 0.0
+persons; contracts_working_time_types; -300.60066642181766; -159.93911127635167; 1.0
+persons; stamp_modification_types; 336.81268310546875; 376.08795166015625; 0.0
+persons; roles; -402.4454040527344; 362.2507019042969; 0.0
+persons; stampings; 321.48028564453125; 270.6585693359375; 1.0
+persons; office; -218.12362670898438; 97.88977813720703; 1.0
+persons; contracts; -108.31282806396484; -67.73432159423828; 1.0
+persons; working_time_types; -432.20203153918186; -95.46347923471964; 1.0
+persons; meal_ticket; -35.96570587158203; -142.25704956054688; 0.0
+persons; person_days; 191.5133819580078; 274.8698425292969; 0.0
+persons; persons_competence_codes; 200.9408416748047; -161.5917205810547; 1.0
+persons; contract_month_recap; -64.54059600830078; -294.53961181640625; 0.0
+persons; working_time_type_days; -591.5017700195312; -150.6676483154297; 0.0
+persons; person_days_in_trouble; 182.4905242919922; 444.1189270019531; 0.0
+persons; inverse-person_in_charge_fk#; 95.01036834716797; -38.6715202331543; 0.0
+persons; users; -142.83242797851562; 211.56375122070312; 0.0
+persons; users_roles_offices; -282.8583679199219; 234.3933563232422; 1.0
+persons; badges; 5.081045150756836; 140.08230590820312; 1.0
+persons; persons; 0.0; 0.0; 1.0
+persons; $ZOOMBOX; 0.0; 0.0; 1.0
+persons; persons_working_time_types; -422.69893234446795; 68.05233244172939; 1.0
+persons; person_months_recap; 236.0883331298828; -28.417583465576172; 0.0
+persons; certificated_data; -258.70338845868054; -10.527204378451302; 1.0
+persons; badge_readers; -139.69996643066406; 385.7870178222656; 0.0
+persons; contract_stamp_profiles; -283.4417577248996; -54.95507624160655; 1.0
+persons; person_hour_for_overtime; 165.24057635475424; 72.80054650702715; 1.0
+
+#! block version
+5.3

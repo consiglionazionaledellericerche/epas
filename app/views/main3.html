@@ -126,7 +126,7 @@
               <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
               <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
               <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
-			  <li><a href="@{Users.list()}">Gestione utenti</a></li>
+        <li><a href="@{Users.list()}">Gestione utenti</a></li>
               #{/if}
               #{if ip.viewWorkingTimeType}
 
@@ -172,6 +172,10 @@
               Tools <b class="caret"></b></a>
             <ul class="dropdown-menu">
               <li><a href="@{Administration.utilities()}">Utilities</a></li>
+              <li><a href="@{Administration.playConfiguration()}">&{'application.data'}</a></li>
+              <li><a href="@{Synchronizations.institutes()}">&{'synch.offices'}</a></li>
+              <li><a href="@{Synchronizations.people(session.get("officeSelected"))}">&{'synch.people'}</a></li>
+              <li><a href="@{Synchronizations.activeContracts(session.get("officeSelected"))}">&{'synch.contracts'}</a></li>
             </ul>
           </li>
         </ul>
@@ -201,7 +205,7 @@
           </li>
           #{/if}
           <li>
-            <a href="@{Administrators.restoreUser()}">
+            <a href="@{Administration.restoreUser()}">
               &{'restoreUser'}&nbsp<i class="fa fa-sign-out"></i>
             </a>
           </li>
@@ -221,7 +225,7 @@
           #{/if}
 
           <li>
-            <a href="@{secure.logout()}">
+            <a id="logout" href="@{secure.logout()}">
               &{'logout'}&nbsp<i class="fa fa-sign-out"></i>
             </a>
           </li>
@@ -231,21 +235,6 @@
         <div class="clearfix">
           #{get 'pagemenu' /}
         </div>
-
-        <!-- flash error icon
-          <div class=container>
-            #{if flash.error}
-              <ul class="nav navbar-nav navbar-right">
-                <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: red;"></i></a></li>
-              </ul>
-            #{/if}
-            #{if flash.success}
-              <ul class="nav navbar-nav navbar-right">
-                <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: green;"></i></a></li>
-              </ul>
-            #{/if}
-          </div>
-          -->
       </div>
     </div>
   </div> <!-- End Fixed navbar -->
@@ -265,10 +254,10 @@
 
     <!-- do layout -->
     #{doLayout /}
-    
+
     #{pnotify /}
 
-    <div id="defaultModal" class="modal container" tabindex="-1"></div>
+    <div id="defaultModal" class="modal fade container" tabindex="-1"></div>
 
     <i id="defaultSpinner" class="fa fa-circle-o-notch fa-3x fa-spin hidden"></i>
 

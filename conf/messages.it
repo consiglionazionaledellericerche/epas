@@ -24,6 +24,12 @@ administrator=Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
+Administration.playConfiguration.table= Parametri di Configurazione Play! framework
+Administration.jvmConfiguration.table= Parametri Jvm
+Administration.runtimeData.table= Valori di Runtime
+
+application.data= Informazioni applicazione
+
 badge.badgeReader= Lettore badge associato
 badge.begin= Inzio
 badge.code= Numero badge
@@ -67,7 +73,11 @@ competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
 
+configuration.entry= Parametro
+configuration.entry.value= Valore parametro
 configurations= Configurazione
+configurations.entries= Parametri di Configurazione Play
+
 
 contract.beginDate=Inizio Contratto
 contract=Contratto
@@ -86,8 +96,6 @@ contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
 contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
 
 contract.mealTicketInitBeforeGeneralInit = Per il contratto attuale è stata definita una inizializzazione buoni pasto precedente all'inizializzazione generale. Questo potrebbe portare	a calcoli errati o inattesi circa il residuo dei buoni pasto per il dipendente.
-
-
 
 contractStampProfile.fixedworkingtime=Presenza Automatica
 ContractStampProfile=Periodo Presenza Automatica
@@ -169,6 +177,7 @@ logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
 
+mealTicket.aquiredExitingNow= Buono Pasto maturato (uscendo in questo momento).
 mealTicket.aquired= Buono Pasto maturato
 mealTicket.notAquired= Buono Pasto non maturato
 mealTicket.forcedAquired= Buono Pasto maturato (forzato dall'amministratore)
@@ -186,6 +195,9 @@ block.first=Dal
 block.last=Al
 
 MOD= Modifica
+
+modification.date= Data Modifica
+modification.type= Tipo Operazione
 
 Month.10=Ottobre
 Month.11=Novembre
@@ -279,6 +291,10 @@ stamping.stampType= Causale Timbratura
 stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
 stampType= Causale
+
+synch.offices=Sincronizza sedi
+synch.people=Sincronizza persone
+synch.contracts=Sincronizza contratti
 
 ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
@@ -498,3 +514,5 @@ office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attest
 office.joiningDate.popover= Data di affiliazione della sede
 
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it

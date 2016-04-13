@@ -1,0 +1,50 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+#{synch.synchContractsTabs activeAction:'otherContracts' /}
+
+<div class="container">
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Contratto Perseo</th>
+	  <th>Sincronizzato</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:perseoDepartmentActiveContractsByPersonPerseoId.values(), as:'perseoContract'}
+	<tr>
+	  <td>
+	    <span class="label label-default">${perseoContract.person.fullname}</span>
+	    <span class="label label-primary">${perseoContract.beginDate}</span>
+	    <span class="label label-primary">${perseoContract.endDate}</span>
+	    <span class="label label-danger">${perseoContract.endContract}</span>
+	    #{if perseoContract.isTemporary && perseoContract.endDate == null}
+	      <span class="label label-warning">Temporary</span>
+	    #{/if}
+	  </td>
+	  <td>
+	    %{ epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId); }%
+	    #{if epasContract}
+	      <span class="label label-success">${perseoContract.perseoId}</span>
+	      <em>Synchronized</em>
+	    #{/if}
+	    #{else}
+	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importContract(perseoContract.perseoId, perseoContract.person.id)}">Importa</a>
+	    #{/else}
+	  </td>
+    </tr>
+   #{/list}
+  </tbody>
+</table>
+
+  #{alert color:'info'}
+  <p>Importa tutti i contratti non ancora importati.
+    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllContractsInOffice(office.id)}">Importa</a>
+  </p>
+  #{/alert}  
+</div>
+
+

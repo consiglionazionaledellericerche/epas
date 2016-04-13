@@ -1,0 +1,50 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Dati applicazione' /}
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li#{if actionSelected.equals("Administration.playConfiguration")} class="active"#{set editable:true /}#{/if}>
+      <a href="@{Administration.playConfiguration()}">Play!</a>
+    </li>
+    <li#{if actionSelected.equals("Administration.jvmConfiguration")} class="active"#{/if}>
+      <a href="@{Administration.jvmConfiguration()}">Jvm</a>
+    </li>
+    <li#{if actionSelected.equals("Administration.runtimeData")} class="active"#{/if}>
+      <a href="@{Administration.runtimeData()}">Runtime</a>
+    </li>
+  </ul>
+</div>
+<br>
+<div class="container">
+  <table datatable class="table table-bordered table-hover">
+    <caption><h2>&{actionSelected+'.table'}</h2></caption>
+    <thead>
+    <tr>
+      <th>&{'configuration.entry'}</th>
+      <th>&{'configuration.entry.value'}</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list entries}
+    <tr>
+      <td>${_.getKey()}</td>
+      <td>
+        #{if editable}
+          <a data-x-editable href="#" data-pk="" data-type="text" data-name="${_.getKey()}" data-url="@{saveConfiguration()}" data-title="Modifica Valore">${_.getValue()}</a>
+        #{/if}
+        #{else}
+          ${_.getValue()}
+        #{/else}
+      </td>
+    </tr>
+    #{/list}
+    </tbody>
+  </table>
+
+  #{if editable}
+  <a class="btn btn-success" href="@{addConfiguration()}" data-async-modal="#defaultModal">
+    <i class="fa fa-plus" aria-hidden="true"></i> Inserisci Nuovo Parametro
+  </a>
+  #{/if}
+</div>

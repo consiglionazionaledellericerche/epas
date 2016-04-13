@@ -384,6 +384,7 @@ public class Reperibility extends Controller {
   @BasicAuth
   public static void exportYearAsPDF(int year, Long type) {
 
+	  log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
     PersonReperibilityType reperibilityType =
         personReperibilityDayDao.getPersonReperibilityTypeById(type);
     notFoundIfNull(
@@ -398,18 +399,17 @@ public class Reperibility extends Controller {
     Table<Person, String, Integer> reperibilitySumDays =
         HashBasedTable.<Person, String, Integer>create();
     reperibilitySumDays = reperibilityManager.buildYearlyReperibilityReport(reperibilityMonths);
-    log.info(
-        "Creazione del documento PDF con il calendario annuale delle reperibilità per l'anno %s",
-        year);
+    log.info("Creazione del documento PDF con il calendario annuale delle reperibilità per l'anno %s", year);
 
 
     LocalDate firstOfYear = new LocalDate(year, 1, 1);
     Options options = new Options();
     options.pageSize = IHtmlToPdfTransformer.A4L;
+    final String description = reperibilityType.description;
     String supervisor =
             reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
     
-    renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, supervisor);
+    renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, description, supervisor);
   }
 
 
@@ -454,7 +454,7 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportMonthAsPDF(
+  public static void exportMonthAsPDF (
       @Required int year, @Required int month, @Required Long type) {
 
     if (validation.hasErrors()) {
@@ -541,11 +541,12 @@ public class Reperibility extends Controller {
     final String cFs = codFs;
     final String thNoStamp = Messages.get("PDFReport.thNoStampings");
     final String thAbs = Messages.get("PDFReport.thAbsences");
+    final String description = reperibilityType.description;
     final String supervisor =
             reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
 
     renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays,
-        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, supervisor);
+        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, supervisor);
   }
 
   /**

@@ -52,7 +52,6 @@
 
         <th class="group-single">Codice <br>assenza</th>
 
-
         #{list items:1..numberOfInOut, as:'i'}
         <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
         <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
@@ -83,22 +82,12 @@
       </td>
 
       #{include 'Stampings/personStampingComponents/_mealTicketsTemplate.html' /}
-
       <td class="invisible"></td>
-
       #{include 'Stampings/personStampingComponents/_absencesTemplate.html' /}
-
       #{include 'Stampings/personStampingComponents/_stampingsTemplate.html' /}
-
       <td class="invisible"></td>
-
       #{include 'Stampings/personStampingComponents/_workTimeDifferenceProgressive.html' /}
-
-      <td class="default-single">
-        #{if dayRecap.wttd.present}
-        #{include 'Stampings/personStampingComponents/_workingTimeTypePopover.html' /}
-        #{/if}
-      </td>
+      #{include 'Stampings/personStampingComponents/_workingTimeTypePopover.html' /}
 
       <td class="default-single note">
         #{if dayRecap.note.size != 0}

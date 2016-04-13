@@ -64,12 +64,8 @@
 	    <td class="invisible"></td>
 	
 	    #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
-	    
-	    <td class="default-single">
-	      #{if dayRecap.wttd.present}
-	        #{include './personStampingComponents/_workingTimeTypePopover.html' /}
-	      #{/if}
-	    </td>
+
+		  #{include './personStampingComponents/_workingTimeTypePopover.html' /}
 	    
 	    <td class="default-single note">
 	      #{if dayRecap.note.size != 0}
@@ -101,8 +97,8 @@
 </div>
 
 
-<div id="modalStamping" class="modal container" tabindex="-1"></div>
+<div id="modalStamping" class="modal fade container" tabindex="-1"></div>
 
-<div id="modalAbsence" class="modal container" tabindex="-1"></div>
+<div id="modalAbsence" class="modal fade container" tabindex="-1"></div>
 
 

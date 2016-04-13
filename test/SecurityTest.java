@@ -4,6 +4,8 @@ import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;
 
+import java.time.YearMonth;
+
 /**
  * @author cristian
  *
@@ -19,13 +21,24 @@ public class SecurityTest extends FunctionalTest {
 
   @Test
   public void testThatUserCanLogin() {
-    loginAs("cristian.lucchesi", "epas2014");
+    loginAs("cristian.lucchesi", "epas2016");
     Response responseRedirect = GET("/");
     assertStatus(302, responseRedirect);
-    assertLocationRedirect("/presenze", responseRedirect);
+
+    YearMonth ym = YearMonth.now();
+    //ex. stampings/stampings?month=4&year=2016
+    String urlSituazioneMensile =
+        String.format(
+            "/stampings/stampings?month=%d&year=%d",
+            ym.getMonthValue(), ym.getYear());
+
+    assertLocationRedirect(
+        urlSituazioneMensile, responseRedirect);
 
     Response responsePresente = GET("/", true);
-    assertContentMatch("Amministrazione del personale", responsePresente);
+    assertContentMatch("ePAS - Timbrature", responsePresente);
+    assertContentMatch("cristian.lucchesi", responsePresente);
+
   }
 
   private void assertLocationRedirect(String location, Response resp) {

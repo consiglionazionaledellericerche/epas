@@ -1,0 +1,81 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+#{synch.synchTabs activeAction:'institutes' /}
+
+<div class="container">
+  *{ #{form @Import.importOffices(),class:'form-horizontal'} }*
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Istituto</th>
+	  <th>Sedi</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:institutes, as:'institute'}
+	<tr>
+	  <td>
+	    <span class="label label-primary">${institute.cds}</span>
+	    <span class="label label-primary">${institute.name}</span>
+	    <span class="label label-primary">${institute.code}</span>
+	    #{if institute.perseoId == null }
+            <em>Not Synchronized</em>
+            <br>
+            %{ suggested = perseoInstitutesByCds.get(institute.cds) }%
+            #{if suggested}
+              <span class="label label-default">${suggested.cds}</span>
+	          <span class="label label-default">${suggested.name}</span>
+	          <span class="label label-default">${suggested.code}</span>
+	          <em>PerseoId </em><span class="label label-success">${suggested.perseoId}</span>
+	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinInstitute(institute.id, suggested.perseoId)}">Associa</a>
+	        #{/if}
+	        #{else}
+	          <em>Nessun suggerimento cds</em>
+	        #{/else}
+        #{/if}
+        #{else}
+           <em>Synchronized </em><span class="label label-success">${institute.perseoId}</span>
+        #{/else}
+	  </td>
+	  <td>
+      #{list institute.seats, as:'seat'}
+        <p>
+          <span class="label label-primary">${seat.codeId}</span>
+          <span class="label label-primary" >${seat.code}</span>
+          <span class="label label-primary">${seat.name}</span>
+          <span class="label label-primary">${seat.address}</span>
+          #{if seat.perseoId == null }
+            <em>Not Synchronized</em>
+            <br>
+            %{ suggested = perseoOfficeByCodeId.get(seat.codeId) }%
+            #{if suggested}
+              <span class="label label-default">${suggested.codeId}</span>
+	          <span class="label label-default">${suggested.code}</span>
+	          <span class="label label-default">${suggested.name}</span>
+	          <span class="label label-default">${suggested.address}</span>
+	          <em>PerseoId </em><span class="label label-success">${suggested.perseoId}</span>
+	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinOffice(seat.id, suggested.perseoId)}">Associa</a>
+	        #{/if}
+	        #{else}
+	          <em>Nessun suggerimento codiceSede</em>
+	        #{/else}
+          #{/if}
+          #{else}
+           <em>Synchronized </em><span class="label label-success">${seat.perseoId}</span>
+          #{/else}
+        </p>
+     #{/list}
+	  </td>
+    </tr>
+   #{/list}
+  </tbody>
+</table>
+  
+  
+  *{ #{/form} }*
+</div>
+
+

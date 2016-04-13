@@ -32,6 +32,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 /**
@@ -51,6 +52,9 @@ public class Person extends MutableModel implements Comparable<Person> {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
+  @Column(name="perseo_id")
+  public Long perseoId;
+  
   @Version
   public Integer version;
 
@@ -167,12 +171,6 @@ public class Person extends MutableModel implements Comparable<Person> {
   public List<PersonMonthRecap> personMonths = Lists.newArrayList();
 
   /**
-   * relazione con la nuova tabella dei person_year.
-   */
-  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
-  public List<PersonYear> personYears = Lists.newArrayList();
-
-  /**
    * relazione con la tabella Competence.
    */
   @NotAudited
@@ -205,6 +203,13 @@ public class Person extends MutableModel implements Comparable<Person> {
   @JoinColumn(name = "office_id")
   @Required
   public Office office;
+  
+  /**
+   * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede
+   * per adesso è popolato dal valore su perseo alla costruzione dell'oggetto.
+   */
+  @Transient 
+  public Long perseoOfficeId = null;
 
   /**
    * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge alla tabella badges.

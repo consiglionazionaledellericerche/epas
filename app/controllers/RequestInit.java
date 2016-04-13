@@ -4,7 +4,6 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -15,6 +14,7 @@ import manager.SecureManager;
 import models.Office;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 
@@ -64,10 +64,11 @@ public class RequestInit extends Controller {
       return;
     }
 
-    if (user.get().person != null) {
-      renderArgs.put("isPersonInCharge", user.get().person.isPersonInCharge);
+    final User currentUser = user.get();
+
+    if (currentUser.person != null) {
+      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
     }
-    computeActionSelected();
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
@@ -84,13 +85,10 @@ public class RequestInit extends Controller {
     // month init ////////////////////////////////////////////////////////////////
     Integer month;
     if (params.get("month") != null) {
-
       month = Integer.valueOf(params.get("month"));
     } else if (session.get("monthSelected") != null) {
-
       month = Integer.valueOf(session.get("monthSelected"));
     } else {
-
       month = LocalDate.now().getMonthOfYear();
     }
 
@@ -108,59 +106,35 @@ public class RequestInit extends Controller {
 
     session.put("daySelected", day);
 
+    // Tutti gli uffici sui quali si ha almeno un ruolo (qualsiasi)
+    Set<Office> offices = secureManager.ownOffices(currentUser);
+
     // person init //////////////////////////////////////////////////////////////
-    Integer personId;
+    Long personId;
     if (params.get("personId") != null) {
-      personId = Integer.valueOf(params.get("personId"));
-      session.put("personSelected", personId);
+      personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
-      personId = Integer.valueOf(session.get("personSelected"));
-    } else if (user.get().person != null) {
-      session.put("personSelected", user.get().person.id);
+      personId = Long.parseLong(session.get("personSelected"));
+    } else if (currentUser.person != null) {
+      personId = currentUser.person.id;
     } else {
-      session.put("personSelected", 1);
+      personId = personDao.liteList(offices, year, month).iterator().next().id;
     }
 
-    Optional<Office> first = Optional.<Office>absent();
-    Set<Office> officeList = Sets.newHashSet();
+    session.put("personSelected", personId);
 
-    if (user.get().person != null) {
-
-      officeList = secureManager.officesReadAllowed(user.get());
-      if (!officeList.isEmpty()) {
-        // List<Person> persons = personDao
-        // .getActivePersonInMonth(officeList, new YearMonth(year, month));
-        List<PersonDao.PersonLite> persons = personDao.liteList(officeList, year, month);
-        renderArgs.put("navPersons", persons);
-        first = Optional.fromNullable(officeList.iterator().next());
-        renderArgs.put("navOffices", officeList);
-      }
-    } else {
-
-      officeList = Sets.newHashSet(officeDao.getAllOffices());
-      if (officeList != null && !officeList.isEmpty()) {
-        // List<Person> persons = personDao.getActivePersonInMonth(
-        // Sets.newHashSet(allOffices), new YearMonth(year, month));
-        List<PersonDao.PersonLite> persons = personDao.liteList(Sets.newHashSet(officeList), year, month);
-        renderArgs.put("navPersons", persons);
-        first = Optional.fromNullable(officeList.iterator().next());
-        renderArgs.put("navOffices", officeList);
-      }
-    }
-
+    // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
-    int minYear = 0;
+    int minYear = LocalDate.now().getYear();
 
-    for (Office office : officeList) {
-      if (minYear == 0 || office.beginDate.getYear() < minYear) {
+    for (Office office : offices) {
+      if (office.beginDate.getYear() < minYear) {
         minYear = office.beginDate.getYear();
       }
     }
-
     for (int i = minYear; i <= LocalDate.now().getYear(); i++) {
       years.add(i);
     }
-
     renderArgs.put("navYears", years);
 
     // office init (l'office selezionato, andrà combinato con la lista persone sopra)
@@ -170,11 +144,8 @@ public class RequestInit extends Controller {
       officeId = Long.valueOf(params.get("officeId"));
     } else if (session.get("officeSelected") != null) {
       officeId = Long.valueOf(session.get("officeSelected"));
-    } else if (first.isPresent()) {
-
-      officeId = first.get().id;
     } else {
-      officeId = -1L;
+      officeId = offices.iterator().next().id;
     }
 
     session.put("officeSelected", officeId);
@@ -189,14 +160,11 @@ public class RequestInit extends Controller {
       //FIXME: perché è previsto il tracciamento di questa eccezione??
     }
 
-    renderArgs.put("currentData",
-        new CurrentData(year, month, day,
-            Long.valueOf(session.get("personSelected")),
-            Long.valueOf(session.get("officeSelected"))));
-
+    computeActionSelected(currentUser, offices, year, month);
+    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
 
-  private static void computeActionSelected() {
+  private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
 
     final String currentAction = Http.Request.current().action;
 
@@ -260,7 +228,11 @@ public class RequestInit extends Controller {
         "WorkingTimes.manageOfficeWorkingTime",
         "MealTickets.recapMealTickets",
         "MealTickets.returnedMealTickets",
-        "Configurations.show");
+        "Configurations.show",
+        "Synchronizations.people",
+        "Synchronizations.otherPeople",
+        "Synchronizations.activeContracts",
+        "Synchronizations.otherContracts");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
@@ -317,9 +289,21 @@ public class RequestInit extends Controller {
     }
 
     if (personSwitcher.contains(currentAction)) {
+
+      for (UsersRolesOffices u : user.usersRolesOffices) {
+        if (u.role.name.equals(Role.ADMIN)
+            || u.role.name.equals(Role.DEVELOPER)
+            || u.role.name.equals(Role.PERSONNEL_ADMIN)
+            || u.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+          List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+          renderArgs.put("navPersons", persons);
+          break;
+        }
+      }
       renderArgs.put("switchPerson", true);
     }
     if (officeSwitcher.contains(currentAction)) {
+      renderArgs.put("navOffices", offices);
       renderArgs.put("switchOffice", true);
     }
     if (dropDownEmployeeActions.contains(currentAction)) {
@@ -331,74 +315,6 @@ public class RequestInit extends Controller {
     if (dropDownConfigurationActions.contains(currentAction)) {
       renderArgs.put("dropDown", "dropDownConfiguration");
     }
-
-  }
-
-  private static void switchYear() {
-
-    Set<Office> officeList = secureManager.officesReadAllowed(Security.getUser().get());
-
-    List<Integer> years = Lists.newArrayList();
-    int minYear = 0;
-
-    for (Office office : officeList) {
-      if (minYear == 0 || office.beginDate.getYear() < minYear) {
-        minYear = office.beginDate.getYear();
-      }
-
-      for (int i = minYear; i <= LocalDate.now().getYear(); i++) {
-        years.add(i);
-      }
-
-      renderArgs.put("navYears", years);
-      renderArgs.put("switchYear", true);
-    }
-  }
-
-  private static void officeSwitcher() {
-
-
-//    Optional<Office> first = Optional.<Office>absent();
-
-//    int minYear = 0;
-//
-//    if (user.get().person != null) {
-//
-//      Set<Office> officeList = secureManager.officesReadAllowed(user.get());
-//
-//      for (Office office : officeList) {
-//        if (minYear == 0 || office.beginDate.getYear() < minYear) {
-//          minYear = office.beginDate.getYear();
-//        }
-//      }
-//
-//      if (!officeList.isEmpty()) {
-//        // List<Person> persons = personDao
-//        // .getActivePersonInMonth(officeList, new YearMonth(year, month));
-//        List<PersonLite> persons = personDao.liteList(officeList, year, month);
-//        renderArgs.put("navPersons", persons);
-//        first = Optional.fromNullable(officeList.iterator().next());
-//        renderArgs.put("navOffices", officeList);
-//      }
-//    } else {
-//
-//      List<Office> allOffices = officeDao.getAllOffices();
-//
-//      for (Office office : allOffices) {
-//        if (minYear == 0 || office.beginDate.getYear() < minYear) {
-//          minYear = office.beginDate.getYear();
-//        }
-//      }
-//
-//      if (allOffices != null && !allOffices.isEmpty()) {
-//        // List<Person> persons = personDao.getActivePersonInMonth(
-//        // Sets.newHashSet(allOffices), new YearMonth(year, month));
-//        List<PersonLite> persons = personDao.liteList(Sets.newHashSet(allOffices), year, month);
-//        renderArgs.put("navPersons", persons);
-//        first = Optional.fromNullable(allOffices.iterator().next());
-//        renderArgs.put("navOffices", allOffices);
-//      }
-//    }
 
   }
 

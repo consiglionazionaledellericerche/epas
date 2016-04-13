@@ -1,17 +1,23 @@
 
 
-<td class="tempoLavoro default-single">
+<td class="tempoLavoro default-single"
    #{if dayRecap.personDay.past || dayRecap.personDay.today}
-      ${dayRecap.personDay.timeAtWork.printHourMinute()}
-      
-      <!-- info tempo lavorato (i) -->
+      *{  info tempo lavorato (i) }*
       #{if !dayRecap.workTimeExplanation.empty}
-	      <a href="#" popover-hover
+	         popover-hover
 	         data-html="true"
 	         data-content="${(dayRecap.workTimeExplanation).escape()}"
-	         title="Riepilogo Tempo a lavoro"><i class="fa fa-info"></i>
-	      </a>
+	         title="<strong>Riepilogo Tempo a lavoro </strong>#{if dayRecap.personDay.isConsideredExitingNow}<br><br> <em>Stima calcolata considerando l'uscita in questo momento</em> #{/if}" >
+	         #{if dayRecap.personDay.isConsideredExitingNow}
+	           <em class="text-primary">${dayRecap.personDay.timeAtWork.printHourMinute()}</em>
+	         #{/if}
+	         #{else}
+	           <span class="text-primary">${dayRecap.personDay.timeAtWork.printHourMinute()}</span>
+	         #{/else}
       #{/if}
+      #{else}
+        >${dayRecap.personDay.timeAtWork.printHourMinute()}
+      #{/else}
 
 	  <!-- marcatori -->
       #{ifnot dayRecap.todayLunchTimeCode.equals("")}
@@ -38,8 +44,6 @@
       #{/if}
       
    #{/if}
-      
-     
 
 </td>
 
