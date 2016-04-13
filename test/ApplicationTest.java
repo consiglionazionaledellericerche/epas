@@ -10,7 +10,7 @@ public class ApplicationTest extends FunctionalTest {
 
   @Test
   public void testThatLoginPageWorks() {
-    Response response = GET("/", true);
+    Response response = GET("/login", true);
     assertIsOk(response);
     log.debug("contentType = {}", response.contentType);
     log.debug("Response content = {}", getContent(response));
