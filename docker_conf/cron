@@ -1,1 +1,1 @@
-{{BACKUP_MINUTES}} {{BACKUP_HOURS}} * * *  /home/epas/epas/tools/backupdb.sh >/dev/null 2>&1
+{{BACKUP_CRON}} /home/epas/epas/tools/backupdb.sh >/dev/null 2>&1
