@@ -233,7 +233,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * @return la lista delle assenze contenenti un tipo di assenza con uso interno = false relative a
-   *     una persona nel periodo compreso tra begin e end ordinate per codice di assenza e per data.
+   *     una persona nel periodo compreso tra begin e end ordinate per per data.
    */
   public List<Absence> getAbsenceWithNotInternalUseInMonth(
       Person person, LocalDate begin, LocalDate end) {
@@ -244,7 +244,7 @@ public class AbsenceDao extends DaoBase {
             .where(absence.personDay.person.eq(person)
                     .and(absence.personDay.date.between(begin, end)
                             .and(absence.absenceType.internalUse.eq(false))))
-            .orderBy(absence.absenceType.code.asc(), absence.personDay.date.asc());
+            .orderBy(absence.personDay.date.asc());
     return query.list(absence);
   }
 
