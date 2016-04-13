@@ -10,24 +10,23 @@
 
 <div class="container">
 
-	#{form @UploadSituation.inserisciAssenza(), class:'form-horizontal'}
+	#{form @Certifications.personCertificated(), class:'form-horizontal'}
 		
 		#{alert color:'info'}
-		<p>Test per verificare connessione al nuovo attestati
-		</p>
-		<p>Scegli <strong>anno</strong> e <strong>mese</strong> di assenze e competenze per i quali vuoi popolare
-		 il file da inviare agli attestati di presenza.</p>
+		<p>La situazione della persona con matricola '9891'</p>
 		#{/alert}
 
         #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
 
 		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
 		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
-
+		
+		#{f.hidden 'token', value:token.get() /}
+		
 		<br>
 		#{b.buttons center:true}
             
-            #{b.submit 'Nuovo attestati'/}
+            #{b.submit 'Invio'/}
           #{/b.buttons}
 	#{/form}
 </div>

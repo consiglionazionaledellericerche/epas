@@ -1,4 +1,4 @@
-package manager.attestati;
+package manager.attestati.dto;
 
 public class RigaAssenza {
 

@@ -14,19 +14,16 @@ import dao.wrapper.IWrapperOffice;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.UploadSituationManager;
-import manager.attestati.NuovoAttestatiManager;
 import manager.attestati.old.AttestatiClient;
+import manager.attestati.old.AttestatiClient.DipendenteComparedRecap;
+import manager.attestati.old.AttestatiClient.SessionAttestati;
 import manager.attestati.old.AttestatiException;
 import manager.attestati.old.Dipendente;
 import manager.attestati.old.RispostaElaboraDati;
-import manager.attestati.old.AttestatiClient.DipendenteComparedRecap;
-import manager.attestati.old.AttestatiClient.SessionAttestati;
 
 import models.CertificatedData;
 import models.Office;
-import models.enumerate.Parameter;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.YearMonth;
