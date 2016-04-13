@@ -201,10 +201,14 @@ public class Certifications extends Controller {
       monthToUpload = Optional.fromNullable(new YearMonth(year, month));
     }
     
+    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    year = monthToUpload.get().getYear();
+    month = monthToUpload.get().getMonthOfYear();
+    
     @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(Lists.newArrayList(office)), false, new LocalDate(year, month, 1),
-        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
     
     Map<Person, List<Certification>> personCertifications = Maps.newHashMap();
     
@@ -222,7 +226,7 @@ public class Certifications extends Controller {
 
     }
     
-    render(office, people);
+    render(office, personCertifications);
   }
   
   /**
@@ -267,10 +271,15 @@ public class Certifications extends Controller {
    */
   private static List<Certification> absences(Person person, int year, int month) {
     
+    log.info("Persona {}", person);
+
+    List<Certification> certifications = Lists.newArrayList();
+    
     List<Absence> absences = absenceDao
         .getAbsencesNotInternalUseInMonth(person, year, month);
-    
-    List<Certification> certifications = Lists.newArrayList();
+    if (absences.isEmpty()) {
+      return certifications;
+    }
 
     Certification certification = null;
     LocalDate previousDate = null;
@@ -285,50 +294,47 @@ public class Certifications extends Controller {
         continue;
       }
       
-      //codice per attestati
+      //Codice per attestati
       String absenceCodeToSend = absence.absenceType.code.toUpperCase();
       if (absence.absenceType.certificateCode != null 
           && !absence.absenceType.certificateCode.trim().isEmpty()) { 
         absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
       }
-
-      // Nuovo Item  
-      if (previousDate == null) {
-        dayBegin =  absence.personDay.date.getDayOfMonth();
-        dayEnd = absence.personDay.date.getDayOfMonth();
-        previousDate = absence.personDay.date;
-        previousAbsenceCode = absenceCodeToSend;
-        
-        certification = new Certification();
-        certification.person = person;
-        certification.year = year;
-        certification.month = month;
-        certification.certificationType = CertificationType.ABSENCE;
-        // TODO: serializer e deserializer
-        certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
-        continue;
-      }
-
-      //Assenza più giorni
-      if (previousDate.plusDays(1).equals(absence.personDay.date)
+      
+      // 1) Continua Assenza più giorni
+      if (previousDate != null && previousDate.plusDays(1).equals(absence.personDay.date)
           && previousAbsenceCode.equals(absenceCodeToSend)) {
         dayEnd = absence.personDay.date.getDayOfMonth();
+        previousDate = absence.personDay.date;
         certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
-      } else {
+        continue;
+      } 
+      
+      // 2) Fine Assenza più giorni
+      if (previousDate != null) {
         //Inserimento Item
         // TODO: il content va cercato fra quelle già presenti se ci sono...
         certifications.add(certification);
-        certification = null;
         previousDate = null;
       }
+
+      // 3) Nuova Assenza  
+      dayBegin =  absence.personDay.date.getDayOfMonth();
+      dayEnd = absence.personDay.date.getDayOfMonth();
       previousDate = absence.personDay.date;
+      previousAbsenceCode = absenceCodeToSend;
+
+      certification = new Certification();
+      certification.person = person;
+      certification.year = year;
+      certification.month = month;
+      certification.certificationType = CertificationType.ABSENCE;
+      // TODO: serializer e deserializer
+      certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
     }
+
+    certifications.add(certification);
     
-    //Ultimo elemento
-    if (certification != null) {
-      // TODO: il content va cercato fra quelle già presenti se ci sono...
-      certifications.add(certification);
-    }
     
    
 

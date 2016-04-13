@@ -9,7 +9,7 @@
 #{uploadSituation.uploadSituationTabs activeAction:'newAttestati' /}
 
 <div class="container">
-
+*{
 	#{form @Certifications.personCertificated(), class:'form-horizontal'}
 		
 		#{alert color:'info'}
@@ -29,4 +29,23 @@
             #{b.submit 'Invio'/}
           #{/b.buttons}
 	#{/form}
+}*
+  <table class="table"> 
+    <tr>
+      <th>Persona</th>
+      <th>Dati</th>
+    <tr>
+  #{list items:personCertifications.keySet(), as:'person' }
+    <tr>
+      <td>${person.fullname}</td>
+      <td>
+	    #{list items:personCertifications.get(person), as:'certification'}
+	      ${certification.certificationType}
+	      ${certification.content}
+	      <br>
+	    #{/list}
+      <td>
+    </tr>
+  #{/list}  
+  </table>
 </div>
