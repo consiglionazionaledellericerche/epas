@@ -37,8 +37,8 @@
 
   <badges id="161" code="9802" person_id="146" badge_reader_id="1" badge_system_id="1"/>
 
-  <contracts id="258" begin_date="2004-07-26" end_date="2010-01-31" oncertificate="true" person_id="146" source_remaining_meal_ticket="0" source_by_admin="true"/>
-  <contracts id="259" begin_date="2010-02-01" oncertificate="true" person_id="146" source_date_residual="2012-12-31" source_permission_used="0" source_recovery_day_used="0" source_remaining_minutes_current_year="264" source_remaining_minutes_last_year="0" source_vacation_current_year_used="0" source_vacation_last_year_used="0" source_remaining_meal_ticket="0" source_by_admin="true" source_date_meal_ticket="2012-12-31"/>
+  <contracts id="258" is_temporary="true" begin_date="2004-07-26" end_date="2010-01-31" oncertificate="true" person_id="146" source_remaining_meal_ticket="0" source_by_admin="true"/>
+  <contracts id="259" is_temporary="false" begin_date="2010-02-01" oncertificate="true" person_id="146" source_date_residual="2012-12-31" source_permission_used="0" source_recovery_day_used="0" source_remaining_minutes_current_year="264" source_remaining_minutes_last_year="0" source_vacation_current_year_used="0" source_vacation_last_year_used="0" source_remaining_meal_ticket="0" source_by_admin="true" source_date_meal_ticket="2012-12-31"/>
 
   <vacation_periods id="713" begin_date="2010-02-01" end_date="2013-01-31" contract_id="259" vacation_code="CODE_26_4"/>
   <vacation_periods id="714" begin_date="2013-02-01" contract_id="259" vacation_code="CODE_28_4"/>
