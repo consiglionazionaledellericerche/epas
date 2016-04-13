@@ -67,92 +67,71 @@ public class Startup extends Job<Void> {
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "absence-type-and-qualification-phase1.xml")));
+            Resources.getResource(Startup.class, "data/absence-type-and-qualification-phase1.xml")));
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "absence-type-and-qualification-phase2.xml")));
+            Resources.getResource(Startup.class, "data/absence-type-and-qualification-phase2.xml")));
 
     //competenceCode
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "competence-codes.xml")));
+            Resources.getResource(Startup.class, "data/competence-codes.xml")));
+    //competenceCode
+    session.doWork(
+        new DatasetImport(
+            DatabaseOperation.INSERT,
+            Resources.getResource(Startup.class, "data/stamp-modification-types.xml")));
+
+    //competenceCode
+    session.doWork(
+        new DatasetImport(
+            DatabaseOperation.INSERT,
+            Resources.getResource(Startup.class, "data/roles.xml")));
 
     //office
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "office.xml")));
-
-    //permissions
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "permissions.xml")));
-
-    //stampModificationType
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "stamp-modification-types.xml")));
-
-    //stampType
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "stamp-types.xml")));
-
-    //vacationCode
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "vacation-codes.xml")));
+            Resources.getResource(Startup.class, "data/office-with-deps.xml")));
 
     //workingTimeType workingTimeTypeDay
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "working-time-types.xml")));
+            Resources.getResource(Startup.class, "data/working-time-types.xml")));
 
-    //confGeneral confYear
+
+    //lucchesi slim 2016-04
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "conf-general.xml")));
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT, Resources.getResource(Startup.class, "conf-year.xml")));
-
-    //lucchesi slim 2014-03
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "lucchesi-situation-slim-2014-03.xml")));
-
-    //santerini slim 2014-03
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "santerini-situation-slim-2014-03.xml")));
-
-    //martinelli slim 2014-03
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "martinelli-situation-slim-2014-03.xml")));
-
-    //succurro slim 2014-03
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "succurro-situation-slim-2014-03.xml")));
-
-    //abba slim 2014-03
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "abba-situation-slim-2014-03.xml")));
+            Resources.getResource(Startup.class, "data/lucchesi-situation-2016-04.xml")));
+//
+//    //santerini slim 2014-03
+//    session.doWork(
+//        new DatasetImport(
+//            DatabaseOperation.INSERT,
+//            Resources.getResource(Startup.class, "santerini-situation-slim-2014-03.xml")));
+//
+//    //martinelli slim 2014-03
+//    session.doWork(
+//        new DatasetImport(
+//            DatabaseOperation.INSERT,
+//            Resources.getResource(Startup.class, "martinelli-situation-slim-2014-03.xml")));
+//
+//    //succurro slim 2014-03
+//    session.doWork(
+//        new DatasetImport(
+//            DatabaseOperation.INSERT,
+//            Resources.getResource(Startup.class, "succurro-situation-slim-2014-03.xml")));
+//
+//    //abba slim 2014-03
+//    session.doWork(
+//        new DatasetImport(
+//            DatabaseOperation.INSERT,
+//            Resources.getResource(Startup.class, "abba-situation-slim-2014-03.xml")));
 
   }
 }

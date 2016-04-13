@@ -4,7 +4,7 @@
 
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
-    <li#{if actionSelected.equals("Administration.playConfiguration")} class="active"#{/if}>
+    <li#{if actionSelected.equals("Administration.playConfiguration")} class="active"#{set editable:true /}#{/if}>
       <a href="@{Administration.playConfiguration()}">Play!</a>
     </li>
     <li#{if actionSelected.equals("Administration.jvmConfiguration")} class="active"#{/if}>
@@ -29,9 +29,22 @@
     #{list entries}
     <tr>
       <td>${_.getKey()}</td>
-      <td>${_.getValue()}</td>
+      <td>
+        #{if editable}
+          <a data-x-editable href="#" data-pk="" data-type="text" data-name="${_.getKey()}" data-url="@{saveConfiguration()}" data-title="Modifica Valore">${_.getValue()}</a>
+        #{/if}
+        #{else}
+          ${_.getValue()}
+        #{/else}
+      </td>
     </tr>
     #{/list}
     </tbody>
   </table>
+
+  #{if editable}
+  <a class="btn btn-success" href="@{addConfiguration()}" data-async-modal="#defaultModal">
+    <i class="fa fa-plus" aria-hidden="true"></i> Inserisci Nuovo Parametro
+  </a>
+  #{/if}
 </div>
