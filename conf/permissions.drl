@@ -40,7 +40,7 @@ when
   Role(name == Role.EMPLOYEE) from $uro.role
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
-     	"Administrators.restoreUser",
+     	"Administration.restoreUser",
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
