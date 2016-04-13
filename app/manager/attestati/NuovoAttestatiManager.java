@@ -1,4 +1,4 @@
-package controllers.rest.attestati;
+package manager.attestati;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
