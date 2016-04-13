@@ -23,7 +23,6 @@ public class SecureManager {
 
   @Inject
   private RoleDao roleDao;
-
   @Inject
   private OfficeDao officeDao;
 
@@ -41,10 +40,7 @@ public class SecureManager {
         .filter(new Predicate<UsersRolesOffices>() {
           @Override
           public boolean apply(UsersRolesOffices input) {
-            if (!roles.contains(input.role)) {
-              return false;
-            }
-            return true;
+            return roles.contains(input.role);
           }
         }).transform(new Function<UsersRolesOffices, Office>() {
           @Override
@@ -55,7 +51,6 @@ public class SecureManager {
             return null;
           }
         }).toSet();
-
   }
 
   /**
@@ -109,6 +104,19 @@ public class SecureManager {
 
   public Set<Office> officesTecnicalAdminAllowed(User user) {
     ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN);
+
+    return getOfficeAllowed(user, roles);
+  }
+
+  /**
+   * @param user L'utente per il quale restituire la lista delle sedi
+   * @return un Set contenente tutti gli uffici sul quale si ha un ruolo qualsiasi.
+   */
+  public Set<Office> ownOffices(User user) {
+    ImmutableList<String> roles = ImmutableList.of(
+        Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.EMPLOYEE,
+        Role.BADGE_READER, Role.REST_CLIENT, Role.TECNICAL_ADMIN, Role.SHIFT_MANAGER,
+        Role.REPERIBILITY_MANAGER, Role.TECNICAL_ADMIN);
 
     return getOfficeAllowed(user, roles);
   }

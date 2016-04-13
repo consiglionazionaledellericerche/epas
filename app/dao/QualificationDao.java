@@ -13,6 +13,7 @@ import models.Qualification;
 import models.query.QQualification;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -76,6 +77,15 @@ public class QualificationDao extends DaoBase {
     QQualification qual = QQualification.qualification1;
     final JPQLQuery query = getQueryFactory().from(qual);
     return query.list(qual);
+  }
+  
+  /**
+   * Tutte le qualifiche epas come mappa qualification.qualification -> qualification
+   * @return
+   */
+  public Map<Integer, Qualification> allQualificationMap() {
+    QQualification qualification = QQualification.qualification1;
+    return getQueryFactory().from(qualification).map(qualification.qualification, qualification);
   }
 
   /**

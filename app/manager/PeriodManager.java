@@ -231,16 +231,20 @@ public class PeriodManager {
     DateInterval ownerInterval = new DateInterval(owner.getBeginDate(), owner.calculatedEnd());
     
     for (Object type : owner.types()) {
+      boolean toRefresh = false;
       // 1) Cancello quelli che non appartengono più a contract
       for (IPropertyInPeriod propertyInPeriod: owner.periods(type)) {
         if (DateUtility.intervalIntersection(ownerInterval, 
             new DateInterval(propertyInPeriod.getBeginDate(), propertyInPeriod.getEndDate())) 
             == null) {
           propertyInPeriod._delete();
+          toRefresh = true;
         }
       }
-
-      JPA.em().flush();
+      if (toRefresh) {
+        JPA.em().refresh(owner);
+        JPA.em().flush();
+      }
 
       final List<IPropertyInPeriod> periods = Lists.newArrayList(owner.periods(type));
       if (periods.isEmpty()) {

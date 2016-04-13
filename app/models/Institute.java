@@ -11,6 +11,7 @@ import play.data.validation.Unique;
 
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -24,6 +25,9 @@ import javax.validation.constraints.NotNull;
 @Table(name = "institutes")
 public class Institute extends MutableModel {
 
+  @Column(name="perseo_id")
+  public Long perseoId;
+  
   @Unique
   @Required
   @NotNull
@@ -44,4 +48,5 @@ public class Institute extends MutableModel {
 
   @OneToMany(mappedBy = "institute")
   public Set<Office> seats = Sets.newHashSet();
+
 }

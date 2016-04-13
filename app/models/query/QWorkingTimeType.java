@@ -47,8 +47,6 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.PersonWorkingTimeType, QPersonWorkingTimeType> personWorkingTimeType = this.<models.PersonWorkingTimeType, QPersonWorkingTimeType>createList("personWorkingTimeType", models.PersonWorkingTimeType.class, QPersonWorkingTimeType.class, PathInits.DIRECT2);
-
     public final BooleanPath shift = createBoolean("shift");
 
     public final ListPath<models.WorkingTimeTypeDay, QWorkingTimeTypeDay> workingTimeTypeDays = this.<models.WorkingTimeTypeDay, QWorkingTimeTypeDay>createList("workingTimeTypeDays", models.WorkingTimeTypeDay.class, QWorkingTimeTypeDay.class, PathInits.DIRECT2);

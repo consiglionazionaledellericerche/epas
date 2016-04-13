@@ -18,9 +18,7 @@ SELECT SETVAL('public.seq_person_days', COALESCE(MAX(id), 1), MAX(id) IS NOT NUL
 SELECT SETVAL('public.seq_person_days_in_trouble', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_days_in_trouble;
 SELECT SETVAL('public.seq_person_hour_for_overtime', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_hour_for_overtime;
 SELECT SETVAL('public.seq_person_months_recap', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_months_recap;
-SELECT SETVAL('public.seq_person_years', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.person_years;
 SELECT SETVAL('public.seq_persons', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.persons;
-SELECT SETVAL('public.seq_persons_working_time_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.persons_working_time_types;
 SELECT SETVAL('public.seq_qualifications', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.qualifications;
 SELECT SETVAL('public.seq_revinfo', COALESCE(MAX(rev), 1) ) FROM public.revinfo;
 SELECT SETVAL('public.seq_shift_time_table', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.shift_time_table;

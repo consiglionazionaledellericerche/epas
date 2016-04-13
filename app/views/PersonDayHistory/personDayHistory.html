@@ -1,12 +1,7 @@
 #{modalAsync id:'modalStamping', title:('Gestione Del Giorno') }
 
 <div class="container-fluid" id="showDay">
-  
-  
-  %{
-  activeAction = "personDayHistory";
-  }%
-  
+
   #{include 'Stampings/_showDayTabs.html' /}
   
   #{accordionGroup 'info'}
@@ -20,10 +15,10 @@
   <table class="table table-condensed table-bordered">
 
     <tr class="success">
-      <th>Timbratura</th>
-      <th>Data modifica</th>
-      <th>Effettuata da</th>
-      <th>Operazione</th>
+      <th>&{'stamping'}</th>
+      <th>&{'modification.date'}</th>
+      <th>&{'done.by'}</th>
+      <th>&{'modification.type'}</th>
     </tr>
 
     #{list items:historyStamping, as:'stamping'}
@@ -47,25 +42,21 @@
   #{else}
   <!-- Per ogni assenza una tabella -->
   #{list items:historyAbsencesList, as:'historyAbsence'}
-  <h5>Storico assenza codice ${historyAbsence.get(0).value.absenceType.code}
-    (id=${historyAbsence.get(0).value.id})</h5>
+  <h5>Storico assenza codice ${historyAbsence.get(0).value?.absenceType.code}
+    (id=${historyAbsence.get(0).value?.id})</h5>
 
   <table class="table table-condensed table-bordered">
 
     <tr class="success">
-      <th>Codice Assenza</th>
-      <th>Data modifica</th>
+      <th>&{'absenceType.code'}</th>
+      <th>&{'modification.date'}</th>
       <th>&{'done.by'}</th>
-      <th>Operazione</th>
+      <th>&{'modification.type'}</th>
     </tr>
 
     #{list items:historyAbsence, as:'absence'}
     <tr class="warning">
-      <td>
-        #{if absence.value.absenceType != null}
-        ${absence.value.absenceType.code}
-        #{/if}
-      </td>
+      <td>${absence.value.absenceType?.code}</td>
       <td>${absence.formattedRevisionDate()}</td>
       <td>${absence.formattedOwner()}</td>
       <td class="${absence.type}">&{absence.type}</td>

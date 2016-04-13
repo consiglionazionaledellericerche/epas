@@ -162,23 +162,20 @@ public class SwitchTemplate extends Controller {
     if (action.equals("MealTickets.recapPersonMealTickets")) {
       MealTickets.recapPersonMealTickets(personId);
     }
-
-  }
-
-  public static void updateDay(Integer day, final String actionSelected) throws Throwable {
-
-    if (actionSelected == null) {
-      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-      Secure.login();
+    if (action.equals("Synchronizations.people")) {
+      Synchronizations.people(officeId);
+    }
+    if (action.equals("Synchronizations.otherPeople")) {
+      Synchronizations.otherPeople(officeId);
+    }
+    if (action.equals("Synchronizations.activeContracts")) {
+      Synchronizations.activeContracts(officeId);
+    }
+    if (action.equals("Synchronizations.otherContracts")) {
+      Synchronizations.otherContracts(officeId);
     }
 
-    if (day == null || day < 1 || day > 31) {
-      Application.index();
-    }
-
-    executeAction(actionSelected);
   }
-
 
   public static void updateMonth(Integer month) throws Throwable {
 
@@ -199,6 +196,27 @@ public class SwitchTemplate extends Controller {
     executeAction(action);
 
   }
+  
+  public static void updateDay(Integer day) throws Throwable {
+
+    String action = session.get("actionSelected");
+    if (action == null) {
+
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
+
+    if (day == null || day < 1 || day > 31) {
+
+      Application.index();
+    }
+    
+    session.put("daySelected", day);
+
+    executeAction(action);
+
+  }
+
 
   // esempio se si volesse utilizzare l'anno nei parametri.
   public static int currentYear() {
