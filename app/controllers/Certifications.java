@@ -1,19 +1,36 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
+import dao.AbsenceDao;
+import dao.CompetenceDao;
 import dao.OfficeDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.PersonDayManager;
 import manager.attestati.dto.SeatCertification;
 import manager.attestati.dto.TokenDTO;
 
+import models.Absence;
+import models.Certification;
+import models.Competence;
 import models.Office;
+import models.Person;
+import models.PersonMonthRecap;
+import models.enumerate.CertificationType;
 
+import org.assertj.core.util.Maps;
+import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.libs.WS;
@@ -23,6 +40,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
+
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -57,12 +77,22 @@ public class Certifications extends Controller {
   
   @Inject
   private static SecurityRules rules;
-  
   @Inject
   private static OfficeDao officeDao;
-  
   @Inject
   private static IWrapperFactory factory;
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static PersonMonthRecapDao personMonthRecapDao;
+  @Inject
+  private static PersonDayDao personDayDao;
+  @Inject
+  private static PersonDayManager personDayManager;
+  @Inject
+  private static CompetenceDao competenceDao;
+  @Inject
+  private static AbsenceDao absenceDao;
   
   public static void newAttestati(Long officeId){
     
@@ -146,14 +176,212 @@ public class Certifications extends Controller {
    * @return
    */
   private static WSRequest prepareOAuthRequest(String token, String url, String contentType) {
-    
-  
     WSRequest wsRequest = WS.url( BASE_URL + url)
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer "+ token);
     return wsRequest;
-    
   }
   
+  /**
+   * Pagina principale nuovo invio attestati.
+   * @param officeId
+   * @param year
+   * @param month
+   */
+  public static void certifications(Long officeId, Integer year, Integer month) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
+    Verify.verify(monthToUpload.isPresent());
+    
+    if (year != null && month != null) {
+      monthToUpload = Optional.fromNullable(new YearMonth(year, month));
+    }
+    
+    @SuppressWarnings("deprecation")
+    List<Person> people = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+    
+    Map<Person, List<Certification>> personCertifications = Maps.newHashMap();
+    
+    //TODO: costruire la certificated situatione delle persone.
+    for (Person person : people) {
+
+      List<Certification> certifications = Lists.newArrayList();
+      
+      certifications.addAll(trainingHours(person, year, month));
+      certifications.addAll(absences(person, year, month));
+      certifications.addAll(competences(person, year, month));
+      certifications.add(mealTicket(person, year, month));
+        
+      personCertifications.put(person, certifications);
+
+    }
+    
+    render(office, people);
+  }
+  
+  /**
+   * Produce le certification delle ore di formazione per la persona.
+   * @param person
+   * @param year
+   * @param month
+   * @return
+   */
+  private static List<Certification> trainingHours(Person person, int year, int month) {
+ 
+    List<Certification> certifications = Lists.newArrayList();
+    
+    List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+            Optional.fromNullable(month), Optional.<Boolean>absent());
+    for (PersonMonthRecap personMonthRecap : trainingHoursList) {
+      
+      Certification certification = new Certification();
+      certification.person = person;
+      certification.year = year;
+      certification.month = month;
+      certification.certificationType = CertificationType.FORMATION;
+      // TODO: serializer e deserializer
+      certification.content = personMonthRecap.fromDate + ";" + 
+          personMonthRecap.toDate + ";" + personMonthRecap.trainingHours;
+      
+      // TODO: il content va cercato fra quelle già presenti se ci sono...
+      
+      certifications.add(certification);
+    }
+    
+    return certifications;
+  }
+  
+  /**
+   * Produce le certification delle assenze per la persona.
+   * @param person
+   * @param year
+   * @param month
+   * @return
+   */
+  private static List<Certification> absences(Person person, int year, int month) {
+    
+    List<Absence> absences = absenceDao
+        .getAbsencesNotInternalUseInMonth(person, year, month);
+    
+    List<Certification> certifications = Lists.newArrayList();
+
+    Certification certification = null;
+    LocalDate previousDate = null;
+    String previousAbsenceCode = null;
+    Integer dayBegin = null;
+    Integer dayEnd = null;
+
+    for (Absence absence : absences) {
+      
+      //codici a uso interno li salto
+      if (absence.absenceType.internalUse) {
+        continue;
+      }
+      
+      //codice per attestati
+      String absenceCodeToSend = absence.absenceType.code.toUpperCase();
+      if (absence.absenceType.certificateCode != null 
+          && !absence.absenceType.certificateCode.trim().isEmpty()) { 
+        absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
+      }
+
+      // Nuovo Item  
+      if (previousDate == null) {
+        dayBegin =  absence.personDay.date.getDayOfMonth();
+        dayEnd = absence.personDay.date.getDayOfMonth();
+        previousDate = absence.personDay.date;
+        previousAbsenceCode = absenceCodeToSend;
+        
+        certification = new Certification();
+        certification.person = person;
+        certification.year = year;
+        certification.month = month;
+        certification.certificationType = CertificationType.ABSENCE;
+        // TODO: serializer e deserializer
+        certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
+        continue;
+      }
+
+      //Assenza più giorni
+      if (previousDate.plusDays(1).equals(absence.personDay.date)
+          && previousAbsenceCode.equals(absenceCodeToSend)) {
+        dayEnd = absence.personDay.date.getDayOfMonth();
+        certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
+      } else {
+        //Inserimento Item
+        // TODO: il content va cercato fra quelle già presenti se ci sono...
+        certifications.add(certification);
+        certification = null;
+        previousDate = null;
+      }
+      previousDate = absence.personDay.date;
+    }
+    
+    //Ultimo elemento
+    if (certification != null) {
+      // TODO: il content va cercato fra quelle già presenti se ci sono...
+      certifications.add(certification);
+    }
+    
+   
+
+    return certifications;
+  }
+  
+  private static List<Certification> competences(Person person, int year, int month) {
+
+    List<Certification> certifications = Lists.newArrayList();
+    
+    List<Competence> competences = competenceDao
+        .getCompetenceInMonthForUploadSituation(person, year, month);
+    
+    for (Competence competence : competences) {
+      Certification certification = new Certification();
+      certification.person = person;
+      certification.year = year;
+      certification.month = month;
+      certification.certificationType = CertificationType.COMPETENCE;
+      // TODO: serializer e deserializer
+      certification.content = competence.competenceCode.code + ";" + competence.valueApproved;
+      
+      // TODO: il content va cercato fra quelle già presenti se ci sono...
+      certifications.add(certification);
+    }
+    
+    return certifications;
+  }
+  
+  /**
+   * Produce la certificazione buoni pasto della persona.
+   * @param person
+   * @param year
+   * @param month
+   * @return
+   */
+  private static Certification mealTicket(Person person, int year, int month) {
+    
+    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
+        .getPersonDayInMonth(person, new YearMonth(year, month)));
+    
+    Certification certification = new Certification();
+    certification.person = person;
+    certification.year = year;
+    certification.month = month;
+    certification.certificationType = CertificationType.MEAL;
+    
+    // TODO: serializer e deserializer
+    certification.content = year + ";" + month + ";" + mealTicket;
+    
+    // TODO: il content va cercato fra quelle già presenti se ci sono...
+    
+    return certification;
+  }
   
 }
