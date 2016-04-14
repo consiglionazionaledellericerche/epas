@@ -24,95 +24,93 @@ import java.util.Map;
 @Slf4j
 public class OfficePerseoConsumer {
 
-  @Inject
-  public OfficePerseoConsumer() {}
-  
-  private static final String URL_BASE = Play.configuration.getProperty("perseo.base");
-  private static final String OFFICES_ENDPOINT = 
+  private static final String PERSEO_BASE_URL = "perseo.base";
+  private static final String OFFICES_ENDPOINT =
       Play.configuration.getProperty("perseo.rest.departments");
-  private static final String OFFICE_ENDPOINT = 
+  private static final String OFFICE_ENDPOINT =
       Play.configuration.getProperty("perseo.rest.departmentbyperseoid");
-  private static final String INSTITUTE_ENDPOINT = 
+  private static final String INSTITUTE_ENDPOINT =
       Play.configuration.getProperty("perseo.rest.institutebyperseoid");
 
-  
+  @Inject
+  public OfficePerseoConsumer() {
+  }
+
+  private static String getPerseoBaseUrl() {
+    return Play.configuration.getProperty(PERSEO_BASE_URL);
+  }
+
   /**
    * Perseo Json relativo agli istituti.
-   * @return
    */
   private Optional<String> perseoOfficesJson() {
 
-    String endPoint = URL_BASE + OFFICES_ENDPOINT + "list";
+    String endPoint = getPerseoBaseUrl() + OFFICES_ENDPOINT + "list";
     HttpResponse restResponse = WS.url(endPoint).get();
     log.info("Perseo: prelevo la lista di tutti gli istituti presenti da {}.", endPoint);
-    
+
     if (!restResponse.success()) {
       log.error("Impossibile prelevare la lista degli istituti presenti da {}", endPoint);
       return Optional.<String>absent();
     }
-    
+
     try {
       return Optional.fromNullable(restResponse.getJson().toString());
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.info("Url={} non json.", endPoint);
     }
-    
+
     return null;
   }
-  
+
   /**
    * Perseo Json relativo alla sede con perseoId.
-   * @param perseoId
-   * @return
    */
   private Optional<String> perseoOfficeByPerseoIdJson(Long perseoId) {
 
-    String endPoint = URL_BASE + OFFICE_ENDPOINT + perseoId;
+    String endPoint = getPerseoBaseUrl() + OFFICE_ENDPOINT + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
     log.info("Perseo: prelevo la sede da perseo da {}.", endPoint);
-    
+
     if (!restResponse.success()) {
       log.error("Impossibile prelevare la sede da perseo da {}", endPoint);
       return Optional.<String>absent();
     }
-    
+
     try {
       return Optional.fromNullable(restResponse.getJson().toString());
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.info("Url={} non json.", endPoint);
     }
-    
+
     return null;
   }
-  
+
   /**
    * Perseo Json relativo all istituto con perseoId.
-   * @param perseoId
-   * @return
    */
   private Optional<String> perseoInstituteByPerseoIdJson(Long perseoId) {
 
-    String endPoint = URL_BASE + INSTITUTE_ENDPOINT + perseoId;
+    String endPoint = getPerseoBaseUrl() + INSTITUTE_ENDPOINT + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
     log.info("Perseo: prelevo la sede da perseo da {}.", endPoint);
-    
+
     if (!restResponse.success()) {
       log.error("Impossibile prelevare la sede da perseo da {}", endPoint);
       return Optional.<String>absent();
     }
-    
+
     try {
       return Optional.fromNullable(restResponse.getJson().toString());
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.info("Url={} non json.", endPoint);
     }
-    
+
     return null;
   }
-  
+
   /**
    * La lista dei PerseoOffice da perseo.
-   * @return
    */
   private List<PerseoOffice> getPerseoOffices() {
 
@@ -121,36 +119,36 @@ public class OfficePerseoConsumer {
     if (json == null || !json.isPresent()) {
       return null;
     }
-    
+
     List<PerseoOffice> perseoOffices = null;
     try {
-      perseoOffices = new Gson().fromJson(json.get(), new TypeToken<List<PerseoOffice>>(){}.getType());
-    } catch(Exception e) {
+      perseoOffices = new Gson().fromJson(json.get(), new TypeToken<List<PerseoOffice>>() {
+      }.getType());
+    } catch (Exception e) {
       log.info("Impossibile caricare da perseo la lista degli istituti.");
       return Lists.newArrayList();
     }
-    
+
     return perseoOffices;
-    
+
   }
-  
+
   /**
    * Il perseoOffice con perseoId
-   * @param perseoId
-   * @return
    */
   private Optional<PerseoOffice> getPerseoOfficeByPerseoId(Long perseoId) {
-  
+
     //Json della richiesta
     Optional<String> json = perseoOfficeByPerseoIdJson(perseoId);
     if (json == null || !json.isPresent()) {
       return null;
     }
-    
+
     PerseoOffice perseoOffice = null;
     try {
-      perseoOffice = new Gson().fromJson(json.get(), new TypeToken<PerseoOffice>(){}.getType());
-    } catch(Exception e) {
+      perseoOffice = new Gson().fromJson(json.get(), new TypeToken<PerseoOffice>() {
+      }.getType());
+    } catch (Exception e) {
       log.info("Impossibile caricare da perseo la sede con perseoId={}.", perseoId);
       return Optional.<PerseoOffice>absent();
     }
@@ -158,26 +156,25 @@ public class OfficePerseoConsumer {
       return Optional.<PerseoOffice>absent();
     }
     return Optional.fromNullable(perseoOffice);
-    
+
   }
-  
+
   /**
    * Il perseoOffice con perseoId
-   * @param perseoId
-   * @return
    */
   private Optional<PerseoInstitute> getPerseoInstituteByPerseoId(Long perseoId) {
-  
+
     //Json della richiesta
     Optional<String> json = perseoInstituteByPerseoIdJson(perseoId);
     if (json == null || !json.isPresent()) {
       return null;
     }
-    
+
     PerseoInstitute perseoInstitute = null;
     try {
-      perseoInstitute = new Gson().fromJson(json.get(), new TypeToken<PerseoInstitute>(){}.getType());
-    } catch(Exception e) {
+      perseoInstitute = new Gson().fromJson(json.get(), new TypeToken<PerseoInstitute>() {
+      }.getType());
+    } catch (Exception e) {
       log.info("Impossibile caricare da perseo la sede con perseoId={}.", perseoId);
       return Optional.<PerseoInstitute>absent();
     }
@@ -185,16 +182,14 @@ public class OfficePerseoConsumer {
       return Optional.<PerseoInstitute>absent();
     }
     return Optional.fromNullable(perseoInstitute);
-    
+
   }
-  
+
   /**
    * Conversione a oggetti epas. PerseoInstitute.
-   * @param perseoInstitute
-   * @return
    */
   private Institute epasConverter(PerseoInstitute perseoInstitute) {
-    
+
     Institute institute = new Institute();
     institute.perseoId = new Long(perseoInstitute.id);
     institute.cds = perseoInstitute.cds;
@@ -202,10 +197,9 @@ public class OfficePerseoConsumer {
     institute.code = perseoInstitute.code;
     return institute;
   }
-  
+
   /**
    * Conversione a oggetti epas.
-   * @return
    */
   private Map<Integer, Institute> epasConverter(List<PerseoOffice> perseoOffices) {
     Map<Integer, Institute> institutesMap = Maps.newHashMap();
@@ -217,7 +211,7 @@ public class OfficePerseoConsumer {
       } else {
         institute = institutesMap.get(perseoOffice.institute.id);
       }
-      
+
       Office office = new Office();
       office.perseoId = new Long(perseoOffice.id);
       office.codeId = perseoOffice.codeId;
@@ -229,28 +223,26 @@ public class OfficePerseoConsumer {
     }
     return institutesMap;
   }
+
   /**
    * Importa tutti gli istutiti da perseo come mappa perseoId -> istituto.
-   * @return
    */
   public Map<Integer, Institute> perseoInstitutesByPerseoId() {
     List<PerseoOffice> perseoOffices = getPerseoOffices();
     return epasConverter(perseoOffices);
   }
-  
+
   /**
    * Importa tutti gli istituti da perseo come lista.
-   * @return
    */
   public List<Institute> perseoInstitutes() {
-    
+
     Map<Integer, Institute> institutesMap = perseoInstitutesByPerseoId();
     return Lists.newArrayList(institutesMap.values());
   }
-  
+
   /**
    * Importa tutti gli istutiti da perseo come mappa cds -> istituto.
-   * @return
    */
   public Map<String, Institute> perseoInstitutesByCds() {
     Map<String, Institute> institutesMap = Maps.newHashMap();
@@ -259,12 +251,10 @@ public class OfficePerseoConsumer {
     }
     return institutesMap;
   }
-  
+
   /**
-   * Importa istituto e sede della sede con officePerseoId. Absent se almeno uno dei due 
-   * non è disponibile.
-   * @param perseoId
-   * @return
+   * Importa istituto e sede della sede con officePerseoId. Absent se almeno uno dei due non è
+   * disponibile.
    */
   public Optional<Institute> perseoInstituteByOfficePerseoId(Long officePerseoId) {
     Optional<PerseoOffice> perseoOffice = getPerseoOfficeByPerseoId(officePerseoId);
@@ -273,17 +263,15 @@ public class OfficePerseoConsumer {
     }
     Optional<Institute> institute = Optional.fromNullable(epasConverter(
         Lists.newArrayList(perseoOffice.get())).values().iterator().next());
-    
+
     if (!institute.isPresent() || institute.get().seats.isEmpty()) {
       return Optional.<Institute>absent();
     }
     return institute;
   }
-  
+
   /**
    * Importa l'istituto institutePerseoId. Absent se non è disponibile.
-   * @param perseoId
-   * @return
    */
   public Optional<Institute> perseoInstituteByInstitutePerseoId(Long institutePerseoId) {
     Optional<PerseoInstitute> perseoInstitute = getPerseoInstituteByPerseoId(institutePerseoId);
@@ -292,7 +280,5 @@ public class OfficePerseoConsumer {
     }
     return Optional.fromNullable(epasConverter(perseoInstitute.get()));
   }
-  
 
-  
 }
