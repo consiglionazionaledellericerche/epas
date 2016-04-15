@@ -4,8 +4,6 @@ import com.google.common.base.MoreObjects;
 
 import com.beust.jcommander.internal.Lists;
 
-import models.Contract;
-
 import java.util.List;
 
 /**
@@ -32,33 +30,19 @@ public class SeatCertification {
   
   public static class PersonCertification {
     public int matricola;
-    public List<RigaAssenza> righeAssenza;
+    public int numBuoniPasto;
+    public List<RigaAssenza> righeAssenza = Lists.newArrayList();
+    public List<RigaCompetenza> righeCompetenza = Lists.newArrayList(); //??
+    public List<RigaFormazione> righeFormazione = Lists.newArrayList();
     
     @Override
     public String toString() {
       return MoreObjects.toStringHelper(PersonCertification.class)
           .add("matricola", matricola)
+          .add("numBuoniPasto", numBuoniPasto)
           .add("righeAssenza", righeAssenza)
           .toString();
     }
-  }
-  
-  public static class RigaAssenza {
-    public int id;
-    public String codiceAssenza;
-    public int giornoInizio;
-    public int giornoFine;
-    
-    @Override
-    public String toString() {
-      return MoreObjects.toStringHelper(RigaAssenza.class)
-          .add("id", id)
-          .add("codiceAssenza", codiceAssenza)
-          .add("giornoInizio", giornoInizio)
-          .add("giornoFine", giornoFine)
-          .toString();
-    }
-    
   }
   
 }

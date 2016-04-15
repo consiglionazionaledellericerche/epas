@@ -33,18 +33,54 @@
   <table class="table"> 
     <tr>
       <th>Persona</th>
-      <th>Dati</th>
+      <th>Dati Epas</th>
+      <th>Dati Attestati</th>
     <tr>
   #{list items:personCertifications.keySet(), as:'person' }
     <tr>
       <td>${person.fullname}</td>
       <td>
 	    #{list items:personCertifications.get(person), as:'certification'}
+	    
+	      %{ attestatiCertification = attestatiPersonCertifications.get(person).get(certification.aMapKey()); }%
+	      
 	      ${certification.certificationType}
 	      ${certification.content}
+	      #{if certification.toSend}
+	        #{if attestatiCertification != null}
+	          <span class="label label-info">Non Inviata Da ePAS</span>
+	        #{/if}
+	        #{else}
+	          <span class="label label-primary">Da Inviare</span>
+	        #{/else}
+	      #{/if}
 	      <br>
 	    #{/list}
-      <td>
+	    
+	    #{list items:epasPersonCertifications.get(person).values(), as:'epasCertification'}
+	      #{if attestatiCertification.confirmed == false}
+	        ${certification.certificationType} 
+	        ${certification.content}
+	        <span class="label label-danger">Da Cancellare</span>
+	      #{/if}
+	    #{/list}
+	  </td>
+	  <td>
+	    #{list items:attestatiPersonCertifications.get(person).values(), as:'attestatiCertification'}
+	      #{if attestatiCertification.confirmed == false}
+	        ${attestatiCertification.certificationType} 
+	        ${attestatiCertification.content}
+	        <span class="label label-danger">Dato Errato</span>
+	        <br>
+	      #{/if}
+	      #{if attestatiCertification.confirmed}
+	        ${attestatiCertification.certificationType} 
+	        ${attestatiCertification.content}
+	        <span class="label label-success">Corretta</span>
+	        <br>
+	      #{/if}
+	    #{/list}
+      </td>
     </tr>
   #{/list}  
   </table>
