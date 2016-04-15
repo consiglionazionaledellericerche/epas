@@ -53,7 +53,7 @@
 	    #{/list}
 	  
 	    #{list items:personCertificationStatus.epasProblemsTryAgain.values(), as:'certification'}
-	      ${certification.certificationType} ${certification.content} 
+	      ${certification.certificationType} ${certification.content} ${certification.problems} 
 	      <span class="label label-warning">Problemi Riprovare</span>
 	      <br>
 	    #{/list}	    

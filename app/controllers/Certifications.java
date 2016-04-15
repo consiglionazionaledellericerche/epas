@@ -19,10 +19,12 @@ import dao.wrapper.IWrapperOffice;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.InserimentoRigaAssenza;
 import manager.attestati.dto.PersonCertificationStatus;
 import manager.attestati.dto.RigaAssenza;
 import manager.attestati.dto.RigaCompetenza;
 import manager.attestati.dto.RigaFormazione;
+import manager.attestati.dto.RispostaAttestati;
 import manager.attestati.dto.SeatCertification;
 import manager.attestati.dto.SeatCertification.PersonCertification;
 import manager.attestati.dto.TokenDTO;
@@ -65,6 +67,7 @@ public class Certifications extends Controller {
   private final static String BASE_URL = "http://as2dock.si.cnr.it";
   private final static String ATTESTATO_URL = "/api/ext/attestato";
   private final static String API_URL = "/api/ext";
+  private final static String API_URL_ASSENZA = "/rigaAssenza";
   private final static String JSON_CONTENT_TYPE = "application/json";
   
   //OAuh
@@ -175,14 +178,21 @@ public class Certifications extends Controller {
     
   }
   
-  private static Optional<SeatCertification> personSeatCertification(Person person, 
-      int month, int year, Optional<String> token) {
-   
+  private static Optional<String> reloadToken(Optional<String> token) {
     if (!token.isPresent()) {
       token = getToken();
       if (!token.isPresent()) {
-        return Optional.<SeatCertification>absent();
+        return Optional.<String>absent();
       }
+    }
+    return token;
+  }
+  
+  private static Optional<SeatCertification> personSeatCertification(Person person, 
+      int month, int year, Optional<String> token) {
+   
+    if (!reloadToken(token).isPresent()) {
+      return Optional.<SeatCertification>absent();
     }
 
     try {
@@ -203,6 +213,37 @@ public class Certifications extends Controller {
 
     return Optional.<SeatCertification>absent();
 
+  }
+  
+  public static Certification sendCertification(Certification certification, Optional<String> token) {
+    
+    if (certification.certificationType.equals(CertificationType.ABSENCE)) {
+      if (!reloadToken(token).isPresent()) {
+        return null;
+      }
+
+      String url = API_URL + API_URL_ASSENZA;
+      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+
+      InserimentoRigaAssenza riga = new InserimentoRigaAssenza(certification);
+      String json = new Gson().toJson(riga);
+      wsRequest.body(json);
+
+      HttpResponse httpResponse = wsRequest.post();
+      
+      RispostaAttestati rispostaAttestati = 
+          new Gson().fromJson(httpResponse.getJson(), RispostaAttestati.class);
+
+      if (httpResponse.getStatus() == 200) {
+        certification.problems = "";
+      } else if (httpResponse.getStatus() == 500) {
+        certification.problems = "Errore interno al server";
+      } else {
+        certification.problems = rispostaAttestati.message;
+      }
+
+    }
+    return certification;
   }
   
   /**
@@ -355,6 +396,18 @@ public class Certifications extends Controller {
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus(
           person, year, month, certifications, epasCertifications, attestatiCertifications);
+      
+      // Invio le toSend (da spostare)
+      for (Certification certification : personCertificationStatus.notSendedYet.values()) {
+        sendCertification(certification, token);
+        certification.save();
+      }
+      
+      // Invio retry (da spostare)
+      for (Certification certification : personCertificationStatus.epasProblemsTryAgain.values()) {
+        sendCertification(certification, token);
+        certification.save();
+      }
       
       peopleCertificationStatus.add(personCertificationStatus);
     }
