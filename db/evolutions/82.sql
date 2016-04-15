@@ -9,7 +9,8 @@ CREATE TABLE certifications (
   month INT NOT NULL,
   content TEXT NOT NULL,
   certification_type TEXT NOT NULL,
-  problems TEXT
+  problems TEXT,
+  warnings TEXT
 );
 
 CREATE TABLE certifications_history (
@@ -24,6 +25,7 @@ CREATE TABLE certifications_history (
   content TEXT,
   certification_type TEXT,
   problems TEXT,
+  warnings TEXT,
   
   PRIMARY KEY (id, _revision)
 );

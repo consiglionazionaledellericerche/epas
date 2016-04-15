@@ -33,54 +33,44 @@
   <table class="table"> 
     <tr>
       <th>Persona</th>
-      <th>Dati Epas</th>
+      <th>Stato</th>
       <th>Dati Attestati</th>
     <tr>
-  #{list items:personCertifications.keySet(), as:'person' }
+  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }
     <tr>
-      <td>${person.fullname}</td>
+      <td>${personCertificationStatus.person.fullname}</td>
       <td>
-	    #{list items:personCertifications.get(person), as:'certification'}
-	    
-	      %{ attestatiCertification = attestatiPersonCertifications.get(person).get(certification.aMapKey()); }%
-	      
-	      ${certification.certificationType}
-	      ${certification.content}
-	      #{if certification.toSend}
-	        #{if attestatiCertification != null}
-	          <span class="label label-info">Non Inviata Da ePAS</span>
-	        #{/if}
-	        #{else}
-	          <span class="label label-primary">Da Inviare</span>
-	        #{/else}
-	      #{/if}
+	    #{list items:personCertificationStatus.notSendedYet.values(), as:'certification'}
+	      ${certification.certificationType} ${certification.content} 
+	      <span class="label label-primary">Da Inviare</span>
+	      <br>
+	  	#{/list}
+
+	    #{list items:personCertificationStatus.epasCorrect.values(), as:'certification'}
+	      ${certification.certificationType} ${certification.content} 
+	      <span class="label label-success">OK</span>
 	      <br>
 	    #{/list}
-	    
-	    #{list items:epasPersonCertifications.get(person).values(), as:'epasCertification'}
-	      #{if attestatiCertification.confirmed == false}
-	        ${certification.certificationType} 
-	        ${certification.content}
-	        <span class="label label-danger">Da Cancellare</span>
-	      #{/if}
+	  
+	    #{list items:personCertificationStatus.epasProblemsTryAgain.values(), as:'certification'}
+	      ${certification.certificationType} ${certification.content} 
+	      <span class="label label-warning">Problemi Riprovare</span>
+	      <br>
+	    #{/list}	    
+	  
+	    #{list items:personCertificationStatus.epasOutdateNotErasable.values(), as:'certification'}
+	      ${certification.certificationType} ${certification.content} 
+	      <span class="label label-warning">Scaduta Non Eliminabile</span>
+	      <br>
 	    #{/list}
+	  
+	    #{list items:personCertificationStatus.attestatiIncorrectNotErasable.values(), as:'certification'}
+	      ${certification.certificationType} ${certification.content} 
+	      <span class="label label-danger">Errata Non Eliminabile</span>
+	      <br>
+	    #{/list}
+	      
 	  </td>
-	  <td>
-	    #{list items:attestatiPersonCertifications.get(person).values(), as:'attestatiCertification'}
-	      #{if attestatiCertification.confirmed == false}
-	        ${attestatiCertification.certificationType} 
-	        ${attestatiCertification.content}
-	        <span class="label label-danger">Dato Errato</span>
-	        <br>
-	      #{/if}
-	      #{if attestatiCertification.confirmed}
-	        ${attestatiCertification.certificationType} 
-	        ${attestatiCertification.content}
-	        <span class="label label-success">Corretta</span>
-	        <br>
-	      #{/if}
-	    #{/list}
-      </td>
     </tr>
   #{/list}  
   </table>

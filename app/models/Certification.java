@@ -48,19 +48,19 @@ public class Certification extends BaseModel {
   @Column(name = "problems")
   public String problems = null;
   
-  /**
-   * Se la certificazione da inviare ad attestati.
-   */
-  @Transient
-  public boolean toSend = true;
+  @Column(name = "warnings")
+  public String warnings = null;
   
-  /**
-   * Se la certificazione già presente è stata confermata.
-   */
   @Transient
-  public boolean confirmed = false;
+  public boolean containProblems() {
+    return this.problems != null && !this.problems.isEmpty();
+  }
   
-
+  @Transient
+  public boolean containWarnings() {
+    return this.warnings != null && !this.warnings.isEmpty();
+  }
+  
   /**
    * Una chiave che identifica in modo univoco la certificazione di una persona.
    * es. ABSENCE 92;14;15 
