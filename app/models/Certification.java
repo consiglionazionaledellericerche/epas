@@ -14,6 +14,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 
 /**
@@ -47,6 +48,41 @@ public class Certification extends BaseModel {
   @Column(name = "problems")
   public String problems = null;
   
+  /**
+   * Se la certificazione da inviare ad attestati.
+   */
+  @Transient
+  public boolean toSend = true;
+  
+  /**
+   * Se la certificazione già presente è stata confermata.
+   */
+  @Transient
+  public boolean confirmed = false;
+  
+
+  /**
+   * Una chiave che identifica in modo univoco la certificazione di una persona.
+   * es. ABSENCE 92;14;15 
+   * @return
+   */
+  @Transient
+  public String aMapKey() {
+    return this.certificationType.name() + this.content;
+  }
+  
+  public static String serializeTrainingHours(int begin, int end, int value) {
+    return begin + ";" + end + ";" + value; 
+  }
+
+  public static String serializeAbsences(String code, int begin, int end) {
+    return code + ";" + begin + ";" + end; 
+  }
+  
+  public static String serializeCompetences(String code, int value) {
+    return code + ";" + value; 
+  }
+
 
 
 }

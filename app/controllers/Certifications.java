@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
 import dao.AbsenceDao;
+import dao.CertificationDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -18,7 +19,11 @@ import dao.wrapper.IWrapperOffice;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.RigaAssenza;
+import manager.attestati.dto.RigaCompetenza;
+import manager.attestati.dto.RigaFormazione;
 import manager.attestati.dto.SeatCertification;
+import manager.attestati.dto.SeatCertification.PersonCertification;
 import manager.attestati.dto.TokenDTO;
 
 import models.Absence;
@@ -93,6 +98,8 @@ public class Certifications extends Controller {
   private static CompetenceDao competenceDao;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static CertificationDao certificationDao;
   
   public static void newAttestati(Long officeId){
     
@@ -167,6 +174,108 @@ public class Certifications extends Controller {
     
   }
   
+  private static Optional<SeatCertification> personSeatCertification(Person person, 
+      int month, int year, Optional<String> token) {
+   
+    if (!token.isPresent()) {
+      token = getToken();
+      if (!token.isPresent()) {
+        return Optional.<SeatCertification>absent();
+      }
+    }
+
+    try {
+      String url = ATTESTATO_URL + "/" + person.office.codeId 
+          + "/" + person.number + "/" + year + "/" + month;
+
+      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+      HttpResponse httpResponse = wsRequest.get();
+
+      SeatCertification seatCertification = 
+          new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
+      
+      Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
+      
+      return Optional.fromNullable(seatCertification);
+
+    } catch (Exception ex) {}
+
+    return Optional.<SeatCertification>absent();
+
+  }
+  
+  /**
+   * Le certificazioni già presenti su attestati. 
+   * @param person
+   * @param year
+   * @param month
+   * @param token
+   * @return null in caso di errore.
+   */
+  public static Map<String, Certification> personAttestatiCertifications(Person person, 
+      int year, int month, Optional<String> token) {
+    
+    Optional<SeatCertification> seatCertification = 
+        personSeatCertification(person, month, year, token);
+    
+    if (!seatCertification.isPresent()) {
+      return null;
+    }
+    PersonCertification personCertification = seatCertification.get().dipendenti.get(0);
+    Map<String, Certification> certifications = Maps.newHashMap();
+    
+    // Assenze accettate
+    for (RigaAssenza rigaAssenza : personCertification.righeAssenza) {
+      
+      Certification certification = new Certification();
+      certification.person = person;
+      certification.year = year;
+      certification.month = month;
+      certification.certificationType = CertificationType.ABSENCE;
+      certification.content = rigaAssenza.serializeContent();
+    
+      certifications.put(certification.aMapKey(), certification);
+    }
+    
+    // Competenze accettate
+    for (RigaCompetenza rigaCompetenza : personCertification.righeCompetenza) {
+      
+      Certification certification = new Certification();
+      certification.person = person;
+      certification.year = year;
+      certification.month = month;
+      certification.certificationType = CertificationType.COMPETENCE;
+      certification.content = rigaCompetenza.serializeContent();
+      
+      certifications.put(certification.aMapKey(), certification);
+    }
+    
+    // Formazioni accettate
+    for (RigaFormazione rigaFormazione : personCertification.righeFormazione) {
+      
+      Certification certification = new Certification();
+      certification.person = person;
+      certification.year = year;
+      certification.month = month;
+      certification.certificationType = CertificationType.FORMATION;
+      certification.content = rigaFormazione.serializeContent();
+          
+      certifications.put(certification.aMapKey(), certification);
+    }
+   
+    // Buoni pasto
+    Certification certification = new Certification();
+    certification.person = person;
+    certification.year = year;
+    certification.month = month;
+    certification.certificationType = CertificationType.MEAL;
+    certification.content = personCertification.numBuoniPasto + "";
+  
+    certifications.put(certification.aMapKey(), certification);
+    
+    return certifications;
+    
+  }
   
   /**
    * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.
@@ -212,21 +321,92 @@ public class Certifications extends Controller {
     
     Map<Person, List<Certification>> personCertifications = Maps.newHashMap();
     
-    //TODO: costruire la certificated situatione delle persone.
+    Map<Person, Map<String, Certification>> epasPersonCertifications = Maps.newHashMap();
+    Map<Person, Map<String, Certification>> attestatiPersonCertifications = Maps.newHashMap();
+    
+    Optional<String> token = getToken();
+    
     for (Person person : people) {
-
+      
+      if (person.surname.equals("Pagano")) {
+        int i = 0;
+        log.info("Ecco pagano");
+      }
+      // Le certificazioni in attestati.
+      Map<String, Certification> attesatiCertifications = 
+          personAttestatiCertifications(person, year, month, token);
+      if (attesatiCertifications == null) {
+        log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
+        attesatiCertifications = Maps.newHashMap(); //TODO: da segnalare in qualche modo all'user 
+      }
+      
+      // Le certificazioni in epas
+      Map<String, Certification> epasCertifications = Maps.newHashMap();
+      for (Certification certification : certificationDao.personCertifications(person, year, month)) {
+        epasCertifications.put(certification.aMapKey(), certification);
+      }
+      
       List<Certification> certifications = Lists.newArrayList();
       
-      certifications.addAll(trainingHours(person, year, month));
-      certifications.addAll(absences(person, year, month));
-      certifications.addAll(competences(person, year, month));
-      certifications.add(mealTicket(person, year, month));
+      certifications.addAll(trainingHours(person, year, month, 
+          attesatiCertifications, epasCertifications));
+      certifications.addAll(absences(person, year, month,
+          attesatiCertifications, epasCertifications));
+      certifications.addAll(competences(person, year, month,
+          attesatiCertifications, epasCertifications));
+      certifications.add(mealTicket(person, year, month,
+          attesatiCertifications, epasCertifications));
         
       personCertifications.put(person, certifications);
+      
+      epasPersonCertifications.put(person, epasCertifications);
+      attestatiPersonCertifications.put(person, attesatiCertifications);
 
     }
     
-    render(office, personCertifications);
+    render(office, personCertifications, epasPersonCertifications, attestatiPersonCertifications);
+  }
+  
+  /**
+   * Imposta lo stato della nuova occorrenza combinata con lo stato epas e quello attestati.
+   * @param certification
+   * @param attestatiCertifications
+   * @param epasCertifications
+   * @return
+   */
+  private static Certification setStatus(Certification certification, 
+      Map<String, Certification> attestatiCertifications, 
+      Map<String, Certification> epasCertifications ) {
+    
+    Certification epasCertification = epasCertifications.get(certification.aMapKey());
+    Certification attestatiCertification = attestatiCertifications.get(certification.aMapKey());
+    
+    // Gestione dei casi
+    if (epasCertification != null && attestatiCertification != null) {
+      epasCertification.confirmed = true;
+      epasCertification.toSend = false;
+      attestatiCertification.confirmed = true;
+      epasCertification.toSend = false;
+      certification = epasCertification;
+    }
+    
+    else if (epasCertification == null && attestatiCertification != null) {
+      attestatiCertification.toSend = false;
+      attestatiCertification.confirmed = true;
+    }
+    
+    else if (epasCertification != null && attestatiCertification == null) {
+      // Questo caso succede solo se l'amministratore modifica un record di epas direttamente
+      // da attestati.
+      epasCertification.toSend = true;
+      certification = epasCertification;
+    }
+    
+    else if (epasCertification == null && attestatiCertification == null) {
+      certification.toSend = true;
+    }
+    
+    return certification;
   }
   
   /**
@@ -236,7 +416,9 @@ public class Certifications extends Controller {
    * @param month
    * @return
    */
-  private static List<Certification> trainingHours(Person person, int year, int month) {
+  private static List<Certification> trainingHours(Person person, int year, int month,
+      Map<String, Certification> attestatiCertifications, 
+      Map<String, Certification> epasCertifications ) {
  
     List<Certification> certifications = Lists.newArrayList();
     
@@ -245,22 +427,26 @@ public class Certifications extends Controller {
             Optional.fromNullable(month), Optional.<Boolean>absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
       
+      // Nuova certificazione
       Certification certification = new Certification();
       certification.person = person;
       certification.year = year;
       certification.month = month;
       certification.certificationType = CertificationType.FORMATION;
-      // TODO: serializer e deserializer
-      certification.content = personMonthRecap.fromDate + ";" + 
-          personMonthRecap.toDate + ";" + personMonthRecap.trainingHours;
+      certification.content = Certification
+          .serializeTrainingHours(personMonthRecap.fromDate.getDayOfMonth(),
+          personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
       
-      // TODO: il content va cercato fra quelle già presenti se ci sono...
+      certification = Certifications.setStatus(certification, 
+          attestatiCertifications, epasCertifications);
       
       certifications.add(certification);
     }
     
     return certifications;
   }
+  
+ 
   
   /**
    * Produce le certification delle assenze per la persona.
@@ -269,7 +455,9 @@ public class Certifications extends Controller {
    * @param month
    * @return
    */
-  private static List<Certification> absences(Person person, int year, int month) {
+  private static List<Certification> absences(Person person, int year, int month,
+      Map<String, Certification> attestatiCertifications, 
+      Map<String, Certification> epasCertifications ) {
     
     log.info("Persona {}", person);
 
@@ -312,8 +500,10 @@ public class Certifications extends Controller {
       
       // 2) Fine Assenza più giorni
       if (previousDate != null) {
-        //Inserimento Item
-        // TODO: il content va cercato fra quelle già presenti se ci sono...
+        
+        certification = Certifications.setStatus(certification, 
+            attestatiCertifications, epasCertifications);
+        
         certifications.add(certification);
         previousDate = null;
       }
@@ -329,10 +519,13 @@ public class Certifications extends Controller {
       certification.year = year;
       certification.month = month;
       certification.certificationType = CertificationType.ABSENCE;
-      // TODO: serializer e deserializer
-      certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
+      certification.content = Certification.serializeAbsences(absenceCodeToSend,
+          dayBegin, dayEnd);
     }
 
+    certification = Certifications.setStatus(certification, 
+        attestatiCertifications, epasCertifications);
+    
     certifications.add(certification);
     
     
@@ -341,7 +534,9 @@ public class Certifications extends Controller {
     return certifications;
   }
   
-  private static List<Certification> competences(Person person, int year, int month) {
+  private static List<Certification> competences(Person person, int year, int month,
+      Map<String, Certification> attestatiCertifications, 
+      Map<String, Certification> epasCertifications ) {
 
     List<Certification> certifications = Lists.newArrayList();
     
@@ -354,10 +549,12 @@ public class Certifications extends Controller {
       certification.year = year;
       certification.month = month;
       certification.certificationType = CertificationType.COMPETENCE;
-      // TODO: serializer e deserializer
-      certification.content = competence.competenceCode.code + ";" + competence.valueApproved;
+      certification.content = Certification.serializeCompetences(competence.competenceCode.code,
+          competence.valueApproved);
       
-      // TODO: il content va cercato fra quelle già presenti se ci sono...
+      certification = Certifications.setStatus(certification, 
+          attestatiCertifications, epasCertifications);
+      
       certifications.add(certification);
     }
     
@@ -371,7 +568,9 @@ public class Certifications extends Controller {
    * @param month
    * @return
    */
-  private static Certification mealTicket(Person person, int year, int month) {
+  private static Certification mealTicket(Person person, int year, int month,
+      Map<String, Certification> attestatiCertifications, 
+      Map<String, Certification> epasCertifications ) {
     
     Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
         .getPersonDayInMonth(person, new YearMonth(year, month)));
@@ -382,10 +581,10 @@ public class Certifications extends Controller {
     certification.month = month;
     certification.certificationType = CertificationType.MEAL;
     
-    // TODO: serializer e deserializer
-    certification.content = year + ";" + month + ";" + mealTicket;
+    certification.content = mealTicket + "";
     
-    // TODO: il content va cercato fra quelle già presenti se ci sono...
+    certification = Certifications.setStatus(certification, 
+        attestatiCertifications, epasCertifications);
     
     return certification;
   }
