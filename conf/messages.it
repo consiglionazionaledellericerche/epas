@@ -150,6 +150,7 @@ deliveryDate=Consegnato il
 
 DEL= Eliminazione
 
+domain= Dominio
 done.by= Effettuata da
 
 emailToContact= Indirizzo email dell&#39;amministrazione
@@ -516,3 +517,5 @@ office.joiningDate.popover= Data di affiliazione della sede
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
+
+domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
