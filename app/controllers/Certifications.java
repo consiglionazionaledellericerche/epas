@@ -19,6 +19,7 @@ import dao.wrapper.IWrapperOffice;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.PersonCertificationStatus;
 import manager.attestati.dto.RigaAssenza;
 import manager.attestati.dto.RigaCompetenza;
 import manager.attestati.dto.RigaFormazione;
@@ -319,10 +320,7 @@ public class Certifications extends Controller {
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
     
-    Map<Person, List<Certification>> personCertifications = Maps.newHashMap();
-    
-    Map<Person, Map<String, Certification>> epasPersonCertifications = Maps.newHashMap();
-    Map<Person, Map<String, Certification>> attestatiPersonCertifications = Maps.newHashMap();
+    List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
     
     Optional<String> token = getToken();
     
@@ -332,12 +330,13 @@ public class Certifications extends Controller {
         int i = 0;
         log.info("Ecco pagano");
       }
+      
       // Le certificazioni in attestati.
-      Map<String, Certification> attesatiCertifications = 
+      Map<String, Certification> attestatiCertifications = 
           personAttestatiCertifications(person, year, month, token);
-      if (attesatiCertifications == null) {
+      if (attestatiCertifications == null) {
         log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
-        attesatiCertifications = Maps.newHashMap(); //TODO: da segnalare in qualche modo all'user 
+        attestatiCertifications = Maps.newHashMap(); //TODO: da segnalare in qualche modo all'user 
       }
       
       // Le certificazioni in epas
@@ -348,65 +347,19 @@ public class Certifications extends Controller {
       
       List<Certification> certifications = Lists.newArrayList();
       
-      certifications.addAll(trainingHours(person, year, month, 
-          attesatiCertifications, epasCertifications));
-      certifications.addAll(absences(person, year, month,
-          attesatiCertifications, epasCertifications));
-      certifications.addAll(competences(person, year, month,
-          attesatiCertifications, epasCertifications));
-      certifications.add(mealTicket(person, year, month,
-          attesatiCertifications, epasCertifications));
+      certifications.addAll(trainingHours(person, year, month)); 
+      certifications.addAll(absences(person, year, month));
+      certifications.addAll(competences(person, year, month));
+      certifications.add(mealTicket(person, year, month));
         
-      personCertifications.put(person, certifications);
+      // Costruisco lo status generale
+      PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus(
+          person, year, month, certifications, epasCertifications, attestatiCertifications);
       
-      epasPersonCertifications.put(person, epasCertifications);
-      attestatiPersonCertifications.put(person, attesatiCertifications);
-
+      peopleCertificationStatus.add(personCertificationStatus);
     }
     
-    render(office, personCertifications, epasPersonCertifications, attestatiPersonCertifications);
-  }
-  
-  /**
-   * Imposta lo stato della nuova occorrenza combinata con lo stato epas e quello attestati.
-   * @param certification
-   * @param attestatiCertifications
-   * @param epasCertifications
-   * @return
-   */
-  private static Certification setStatus(Certification certification, 
-      Map<String, Certification> attestatiCertifications, 
-      Map<String, Certification> epasCertifications ) {
-    
-    Certification epasCertification = epasCertifications.get(certification.aMapKey());
-    Certification attestatiCertification = attestatiCertifications.get(certification.aMapKey());
-    
-    // Gestione dei casi
-    if (epasCertification != null && attestatiCertification != null) {
-      epasCertification.confirmed = true;
-      epasCertification.toSend = false;
-      attestatiCertification.confirmed = true;
-      epasCertification.toSend = false;
-      certification = epasCertification;
-    }
-    
-    else if (epasCertification == null && attestatiCertification != null) {
-      attestatiCertification.toSend = false;
-      attestatiCertification.confirmed = true;
-    }
-    
-    else if (epasCertification != null && attestatiCertification == null) {
-      // Questo caso succede solo se l'amministratore modifica un record di epas direttamente
-      // da attestati.
-      epasCertification.toSend = true;
-      certification = epasCertification;
-    }
-    
-    else if (epasCertification == null && attestatiCertification == null) {
-      certification.toSend = true;
-    }
-    
-    return certification;
+    render(office, peopleCertificationStatus);
   }
   
   /**
@@ -416,9 +369,7 @@ public class Certifications extends Controller {
    * @param month
    * @return
    */
-  private static List<Certification> trainingHours(Person person, int year, int month,
-      Map<String, Certification> attestatiCertifications, 
-      Map<String, Certification> epasCertifications ) {
+  private static List<Certification> trainingHours(Person person, int year, int month) {
  
     List<Certification> certifications = Lists.newArrayList();
     
@@ -437,9 +388,6 @@ public class Certifications extends Controller {
           .serializeTrainingHours(personMonthRecap.fromDate.getDayOfMonth(),
           personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
       
-      certification = Certifications.setStatus(certification, 
-          attestatiCertifications, epasCertifications);
-      
       certifications.add(certification);
     }
     
@@ -455,9 +403,7 @@ public class Certifications extends Controller {
    * @param month
    * @return
    */
-  private static List<Certification> absences(Person person, int year, int month,
-      Map<String, Certification> attestatiCertifications, 
-      Map<String, Certification> epasCertifications ) {
+  private static List<Certification> absences(Person person, int year, int month) {
     
     log.info("Persona {}", person);
 
@@ -500,10 +446,7 @@ public class Certifications extends Controller {
       
       // 2) Fine Assenza più giorni
       if (previousDate != null) {
-        
-        certification = Certifications.setStatus(certification, 
-            attestatiCertifications, epasCertifications);
-        
+      
         certifications.add(certification);
         previousDate = null;
       }
@@ -523,9 +466,6 @@ public class Certifications extends Controller {
           dayBegin, dayEnd);
     }
 
-    certification = Certifications.setStatus(certification, 
-        attestatiCertifications, epasCertifications);
-    
     certifications.add(certification);
     
     
@@ -534,9 +474,7 @@ public class Certifications extends Controller {
     return certifications;
   }
   
-  private static List<Certification> competences(Person person, int year, int month,
-      Map<String, Certification> attestatiCertifications, 
-      Map<String, Certification> epasCertifications ) {
+  private static List<Certification> competences(Person person, int year, int month) {
 
     List<Certification> certifications = Lists.newArrayList();
     
@@ -552,9 +490,6 @@ public class Certifications extends Controller {
       certification.content = Certification.serializeCompetences(competence.competenceCode.code,
           competence.valueApproved);
       
-      certification = Certifications.setStatus(certification, 
-          attestatiCertifications, epasCertifications);
-      
       certifications.add(certification);
     }
     
@@ -568,9 +503,7 @@ public class Certifications extends Controller {
    * @param month
    * @return
    */
-  private static Certification mealTicket(Person person, int year, int month,
-      Map<String, Certification> attestatiCertifications, 
-      Map<String, Certification> epasCertifications ) {
+  private static Certification mealTicket(Person person, int year, int month) {
     
     Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
         .getPersonDayInMonth(person, new YearMonth(year, month)));
@@ -582,10 +515,7 @@ public class Certifications extends Controller {
     certification.certificationType = CertificationType.MEAL;
     
     certification.content = mealTicket + "";
-    
-    certification = Certifications.setStatus(certification, 
-        attestatiCertifications, epasCertifications);
-    
+ 
     return certification;
   }
   
