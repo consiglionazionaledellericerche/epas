@@ -3,7 +3,6 @@ package synch.perseoconsumers.office;
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
 
 import com.beust.jcommander.internal.Maps;
 
@@ -14,9 +13,9 @@ import models.Office;
 
 import org.assertj.core.util.Lists;
 
-import play.Play;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
+import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
@@ -24,28 +23,13 @@ import java.util.Map;
 @Slf4j
 public class OfficePerseoConsumer {
 
-  private static final String PERSEO_BASE_URL = "perseo.base";
-  private static final String OFFICES_ENDPOINT =
-      Play.configuration.getProperty("perseo.rest.departments");
-  private static final String OFFICE_ENDPOINT =
-      Play.configuration.getProperty("perseo.rest.departmentbyperseoid");
-  private static final String INSTITUTE_ENDPOINT =
-      Play.configuration.getProperty("perseo.rest.institutebyperseoid");
-
-  @Inject
-  public OfficePerseoConsumer() {
-  }
-
-  private static String getPerseoBaseUrl() {
-    return Play.configuration.getProperty(PERSEO_BASE_URL);
-  }
 
   /**
    * Perseo Json relativo agli istituti.
    */
   private Optional<String> perseoOfficesJson() {
 
-    String endPoint = getPerseoBaseUrl() + OFFICES_ENDPOINT + "list";
+    String endPoint = PerseoApis.getOfficesEndpoint() + "list";
     HttpResponse restResponse = WS.url(endPoint).get();
     log.info("Perseo: prelevo la lista di tutti gli istituti presenti da {}.", endPoint);
 
@@ -68,7 +52,7 @@ public class OfficePerseoConsumer {
    */
   private Optional<String> perseoOfficeByPerseoIdJson(Long perseoId) {
 
-    String endPoint = getPerseoBaseUrl() + OFFICE_ENDPOINT + perseoId;
+    String endPoint = PerseoApis.getOfficeEndpoint() + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
     log.info("Perseo: prelevo la sede da perseo da {}.", endPoint);
 
@@ -91,7 +75,7 @@ public class OfficePerseoConsumer {
    */
   private Optional<String> perseoInstituteByPerseoIdJson(Long perseoId) {
 
-    String endPoint = getPerseoBaseUrl() + INSTITUTE_ENDPOINT + perseoId;
+    String endPoint = PerseoApis.getInstituteEndpoint() + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
     log.info("Perseo: prelevo la sede da perseo da {}.", endPoint);
 
