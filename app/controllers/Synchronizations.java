@@ -341,8 +341,8 @@ public class Synchronizations extends Controller {
     epasPerson.name = perseoPerson.name;
     epasPerson.surname = perseoPerson.surname;
     epasPerson.number = perseoPerson.number;
-    //epasPerson.email = perseoPerson.email; per adesso le email non combaciano @iit.cnr.it vs @cnr.it
-    //epasPerson.eppn = perseoPerson.email;
+    epasPerson.email = perseoPerson.email; // per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    epasPerson.eppn = perseoPerson.email;
     epasPerson.qualification = perseoPerson.qualification;
     epasPerson.perseoId = perseoPerson.perseoId;
     epasPerson.save();
