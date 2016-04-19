@@ -43,6 +43,9 @@ epas:
     - VIRTUAL_HOST=localhost
     - TZ=Europe/Rome
 #    - PROTOCOL=https                        # default: http -- Attiva l'utilizzo del protocollo HTTPS
+#    - PERSEO_BASE=                          # default: http://perseo.devel.iit.cnr.it
+#    - PERSEO_USER=                          # default:
+#    - PERSEO_PASS=                          # default:
 #    - URL_ATTESTATI=                        # default: https://attestati.rm.cnr.it/attestati/
 #    - CERT_NAME=epas                        # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
 #    - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato

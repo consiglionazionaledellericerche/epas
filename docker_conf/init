@@ -116,6 +116,20 @@ else
   sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${PERSEO_BASE}" ]; then
+  sed -n '/PERSEO_BASE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{PERSEO_BASE}}#'"${PERSEO_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${PERSEO_USER}" ]; then
+  sed -n '/PERSEO_USER/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/PERSEO_PASS/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{PERSEO_USER}}#'"${PERSEO_USER}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{PERSEO_PASS}}#'"${PERSEO_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
