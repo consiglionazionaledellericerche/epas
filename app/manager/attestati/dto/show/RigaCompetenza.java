@@ -1,4 +1,4 @@
-package manager.attestati.dto;
+package manager.attestati.dto.show;
 
 import com.google.common.base.MoreObjects;
 

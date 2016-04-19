@@ -1,5 +1,9 @@
 package models;
 
+import com.google.common.base.MoreObjects;
+
+import manager.attestati.dto.show.SeatCertification.PersonCertification;
+
 import models.base.BaseModel;
 import models.enumerate.CertificationType;
 
@@ -50,6 +54,9 @@ public class Certification extends BaseModel {
   
   @Column(name = "warnings")
   public String warnings = null;
+
+  @Column(name = "attestati_id")
+  public Integer attestatiId;
   
   @Transient
   public boolean containProblems() {
@@ -81,6 +88,17 @@ public class Certification extends BaseModel {
   
   public static String serializeCompetences(String code, int value) {
     return code + ";" + value; 
+  }
+  
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(PersonCertification.class)
+        .add("person", person.fullName())
+        .add("matricola", person.number)
+        .add("year", year)
+        .add("month", month)
+        .add("key", aMapKey())
+        .toString();
   }
 
 

@@ -1,31 +1,9 @@
-package manager.attestati.dto;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
+package manager.attestati.dto.insert;
 
 import models.Certification;
 
-import java.util.List;
+public class InserimentoRigaAssenza extends RichiestaInserimentoAttestati {
 
-public class InserimentoRigaAssenza {
-
-  public static class ItemRigaAssenza {
-    public String codiceAssenza;
-    public int giornoInizio;
-    public int giornoFine;
-  }
-  
-  public static class ItemDipendente {
-    public int matricola;
-    public List<ItemRigaAssenza> righeAssenza = Lists.newArrayList();
-  }
-  
-  public int codiceSede;
-  public int anno;
-  public int mese;
-  
-  public List<ItemDipendente> dipendenti = Lists.newArrayList();
-  
   /**
    * Constructor.
    * @param certification
@@ -39,7 +17,7 @@ public class InserimentoRigaAssenza {
     this.dipendenti.add(dipendente);
     
     dipendente.matricola = certification.person.number;
-    ItemRigaAssenza rigaAssenza = new ItemRigaAssenza();
+    InsertRigaAssenza rigaAssenza = new InsertRigaAssenza();
     rigaAssenza.codiceAssenza = deserializeCode(certification.content);
     rigaAssenza.giornoInizio = deserializeBegin(certification.content);
     rigaAssenza.giornoFine = deserializeEnd(certification.content);
