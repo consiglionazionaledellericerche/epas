@@ -55,6 +55,12 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList()),
+  
+  NEW_ATTESTATI("new_attestati",
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList()),
         
   /**
    * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema. 

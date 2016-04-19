@@ -10,12 +10,14 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
+import manager.ConfigurationManager;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
 
 import models.Certification;
 import models.Office;
 import models.Person;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -46,6 +48,8 @@ public class Certifications extends Controller {
   private static IWrapperFactory factory;
   @Inject
   private static PersonDao personDao;
+  @Inject 
+  private static ConfigurationManager configurationManager;
 
   @Inject 
   private static CertificationService certificationService;
@@ -79,6 +83,11 @@ public class Certifications extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
+    
+    //Nuovo attestati
+    if (!(Boolean)configurationManager.configValue(office, EpasParam.SEND_EMAIL)) {
+      
+    }
     
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
     Verify.verify(monthToUpload.isPresent());
