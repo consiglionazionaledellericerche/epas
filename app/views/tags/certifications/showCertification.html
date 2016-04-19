@@ -1,0 +1,42 @@
+<div class="row">
+  <div class="col-xs-6">
+  #{if _certification.certificationType.equals(models.enumerate.CertificationType.MEAL) }
+    <i class="fa fa-cutlery" aria-hidden="true"></i>
+    <em>Buoni Pasto</em>
+  #{/if}
+  #{if _certification.certificationType.equals(models.enumerate.CertificationType.ABSENCE) }
+    <i class="fa fa-paperclip" aria-hidden="true"></i>
+    <em>Assenza</em>
+  #{/if}
+  #{if _certification.certificationType.equals(models.enumerate.CertificationType.FORMATION) }
+    <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+    <em>Formazione</em>
+  #{/if}
+  #{if _certification.certificationType.equals(models.enumerate.CertificationType.COMPETENCE) }
+    <i class="fa fa-money" aria-hidden="true"></i>
+    <em>Competenza</em>
+  #{/if}
+  
+  <strong>${_certification.content}</strong>  
+    
+  </div>
+  <div class="col-xs-6"> 
+  #{if _type.equals('correct') }
+    <span class="label label-success">Ok</span>
+  #{/if}
+  #{if _type.equals('toSend') }
+    <span class="label label-primary">Da Inviare</span>
+  #{/if}
+  #{if _type.equals('problems') }
+    <span class="label label-danger">Da Reinviare</span>
+    <i class="fa fa-exclamation-triangle" style="color:#d9534f" popover-hover data-content="${_certification.problems}"></i>
+  #{/if}
+  #{if _type.equals('toDelete') }
+    <span class="label label-warning">Da Rimuovere</span>
+    #{if _staticView == false}
+      <span class="label label-warning">Non Cancellabile</span>
+    #{/if}
+  #{/if}             
+  
+  </div>
+</div>

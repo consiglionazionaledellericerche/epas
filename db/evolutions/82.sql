@@ -10,7 +10,8 @@ CREATE TABLE certifications (
   content TEXT NOT NULL,
   certification_type TEXT NOT NULL,
   problems TEXT,
-  warnings TEXT
+  warnings TEXT,
+  attestati_id INT
 );
 
 CREATE TABLE certifications_history (
@@ -26,7 +27,7 @@ CREATE TABLE certifications_history (
   certification_type TEXT,
   problems TEXT,
   warnings TEXT,
-  
+  attestati_id INT,
   PRIMARY KEY (id, _revision)
 );
 

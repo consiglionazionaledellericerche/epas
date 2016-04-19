@@ -30,48 +30,82 @@
           #{/b.buttons}
 	#{/form}
 }*
-  <table class="table"> 
-    <tr>
-      <th>Persona</th>
-      <th>Stato</th>
-      <th>Dati Attestati</th>
-    <tr>
-  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }
-    <tr>
-      <td>${personCertificationStatus.person.fullname}</td>
-      <td>
-	    #{list items:personCertificationStatus.notSendedYet.values(), as:'certification'}
-	      ${certification.certificationType} ${certification.content} 
-	      <span class="label label-primary">Da Inviare</span>
-	      <br>
-	  	#{/list}
 
-	    #{list items:personCertificationStatus.epasCorrect.values(), as:'certification'}
-	      ${certification.certificationType} ${certification.content} 
-	      <span class="label label-success">OK</span>
-	      <br>
-	    #{/list}
-	  
-	    #{list items:personCertificationStatus.epasProblemsTryAgain.values(), as:'certification'}
-	      ${certification.certificationType} ${certification.content} ${certification.problems} 
-	      <span class="label label-warning">Problemi Riprovare</span>
-	      <br>
-	    #{/list}	    
-	  
-	    #{list items:personCertificationStatus.epasOutdateNotErasable.values(), as:'certification'}
-	      ${certification.certificationType} ${certification.content} 
-	      <span class="label label-warning">Scaduta Non Eliminabile</span>
-	      <br>
-	    #{/list}
-	  
-	    #{list items:personCertificationStatus.attestatiIncorrectNotErasable.values(), as:'certification'}
-	      ${certification.certificationType} ${certification.content} 
-	      <span class="label label-danger">Errata Non Eliminabile</span>
-	      <br>
-	    #{/list}
+<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa</a>
+
+  
+<ul class="list-group">
+  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }
+  
+  
+  
+  <li class="list-group-item">
+    <div class="row">
+    <div class="col-xs-3">
+    <strong>${personCertificationStatus.person.fullname}</strong>
+    </div>
+    <div class="col-xs-3">
+        #{if personCertificationStatus.okProcessable}
+	      <p class="text-success"><i class="fa fa-check fa-2x"
+	      popover-hover data-content="Attestato processato correttamente."></i></p>
+	    #{/if}
+	    #{if personCertificationStatus.incompleteProcessable}
+	      <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
+	      popover-hover data-content="Attestato incompleto da processare."></i></p>
+	    #{/if}
+	    
+	
+	    #{if personCertificationStatus.okNotProcessable}
+	      <p class="text-muted"><i class="fa fa-check fa-2x"
+	      popover-hover data-content="Attestato processato correttamente, non modificabile."></i></p>
+	    #{/if}
+	    #{if personCertificationStatus.incompleteNotProcessable}
+	    <p class="text-danger"><i class="fa fa-frown-o fa-2x"
+         popover-hover data-content="Attestato incompleto non processabile. 
+         Fornire le credenziali di accesso o verificare la matricola."></i></p>
 	      
-	  </td>
-    </tr>
-  #{/list}  
-  </table>
+	    #{/if}
+    </div>
+    
+    <div class="col-xs-6">
+      
+      #{if personCertificationStatus.okProcessable}
+	
+	    #{/if}
+	    
+	
+	    #{if personCertificationStatus.incompleteProcessable}
+	    
+	      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'correct' /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toSend' /}
+	      #{/list}
+	      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'problems' /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toDelete', 
+	          staticView:personCertificationStatus.staticView /}
+	      #{/list}
+	    
+	    #{/if}
+	    
+	
+	    #{if personCertificationStatus.okNotProcessable}
+	
+	    #{/if}
+	    #{if personCertificationStatus.incompleteNotProcessable}
+	    #{/if}
+
+    </div>
+    </div>
+  </li>
+
+  #{/list}
+</ul>
+  
+  
+  
 </div>
