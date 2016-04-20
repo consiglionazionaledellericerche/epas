@@ -600,6 +600,9 @@ when
         "UploadSituation.checkData",
         "UploadSituation.performCheckData",
         
+        "Certifications.certifications",
+        "Certifications.processAll",
+        
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save",
@@ -722,6 +725,9 @@ when
         "UploadSituation.showCertificatedData",
         "UploadSituation.checkData",
         "UploadSituation.performCheckData",
+        
+        "Certifications.certifications",
+        "Certifications.processAll",
         
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
