@@ -180,7 +180,7 @@ public class CertificationsComunication {
    * @param certification
    * @return
    */
-  public HttpResponse sendRigaBuoniPasto(Optional<String> token, Certification certification) {
+  public HttpResponse sendRigaBuoniPasto(Optional<String> token, Certification certification, boolean update) {
     if (!reloadToken(token).isPresent()) {
       return null;
     }
@@ -192,6 +192,9 @@ public class CertificationsComunication {
     String json = new Gson().toJson(riga);
     wsRequest.body(json);
 
+    if (update) {
+      return wsRequest.put();
+    } 
     return wsRequest.post();
   }
   
