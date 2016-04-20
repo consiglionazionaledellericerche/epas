@@ -92,4 +92,19 @@
   #{/form}
   #{/panel}
 
+  <!-- Cambio del dominio email per le persone di un ufficio -->
+  #{panel title:'Cambio dominio email per un Ufficio', dim:12 }
+  #{alert color:'info'}
+  <p>Questa funzionalità sostituisce il dominio delle email per le persone dell'ufficio selezionato</p>
+  #{/alert}
+  #{form @Administration.changePeopleEmailDomain(),class:'form-horizontal'}
+  #{f.selectModel 'office', items:templateUtility.officesAllowed() /}
+  #{f.input 'domain', popover:true/}
+  #{f.checkbox 'sendMail' /}
+  #{b.buttons center:true}
+  <button type="submit" class="btn btn-default">Reimposta dominio email</button>
+  #{/b.buttons}
+  #{/form}
+  #{/panel}
+
 </div>
