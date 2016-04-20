@@ -48,7 +48,7 @@ public class ContractPerseoConsumer {
    * @param perseoId id perseo contracta
    * @return json
    */
-  private Optional<String> perseoContractJson(Long perseoId) {
+  private Optional<String> perseoContractJson(Long perseoId) throws NoSuchFieldException {
 
     String endPoint = PerseoApis.getContractForEpasEndpoint() + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
@@ -73,7 +73,7 @@ public class ContractPerseoConsumer {
    *
    * @return json
    */
-  private Optional<String> perseoContractsJson(Long perseoId) {
+  private Optional<String> perseoContractsJson(Long perseoId) throws NoSuchFieldException {
 
     String endPoint = PerseoApis.getAllDepartmentContractsForEpasEndpoint() + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
@@ -99,7 +99,7 @@ public class ContractPerseoConsumer {
    * @param perseoId perseo id department.
    * @return lista
    */
-  private List<PerseoContract> getAllPerseoDepartmentContracts(Long perseoId) {
+  private List<PerseoContract> getAllPerseoDepartmentContracts(Long perseoId) throws NoSuchFieldException {
 
     //Json della richiesta
     Optional<String> json = perseoContractsJson(perseoId);
@@ -127,7 +127,7 @@ public class ContractPerseoConsumer {
    * @param perseoId perseo id contract.
    * @return contract
    */
-  private Optional<PerseoContract> getPerseoContractByPerseoId(Long perseoId) {
+  private Optional<PerseoContract> getPerseoContractByPerseoId(Long perseoId) throws NoSuchFieldException {
 
     //Json della richiesta
     Optional<String> json = perseoContractJson(perseoId);
@@ -224,7 +224,7 @@ public class ContractPerseoConsumer {
    * @return mappa
    */
   public Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId(Long perseoDepartmentId,
-                                                                             Office office) {
+                                                                             Office office) throws NoSuchFieldException {
 
     @SuppressWarnings("deprecation")
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
@@ -245,7 +245,7 @@ public class ContractPerseoConsumer {
    *
    * @return contratto
    */
-  public Optional<Contract> perseoContractByPerseoId(Long contractPerseoId, Person person) {
+  public Optional<Contract> perseoContractByPerseoId(Long contractPerseoId, Person person) throws NoSuchFieldException {
     Optional<PerseoContract> perseoContract = getPerseoContractByPerseoId(contractPerseoId);
     if (!perseoContract.isPresent()) {
       return Optional.<Contract>absent();
