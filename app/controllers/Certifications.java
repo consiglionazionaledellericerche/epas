@@ -5,16 +5,19 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import controllers.RequestInit.CurrentData;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ConfigurationManager;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
 
-import models.Certification;
 import models.Office;
 import models.Person;
 import models.enumerate.EpasParam;
@@ -36,10 +39,10 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Certifications extends Controller {
-  
-  
+
   @Inject
   private static SecurityRules rules;
   @Inject
@@ -85,8 +88,8 @@ public class Certifications extends Controller {
     rules.checkIfPermitted(office);
     
     //Nuovo attestati
-    if (!(Boolean)configurationManager.configValue(office, EpasParam.SEND_EMAIL)) {
-      
+    if (!(Boolean)configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
+      forbidden();
     }
     
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
@@ -95,6 +98,17 @@ public class Certifications extends Controller {
     if (year != null && month != null) {
       monthToUpload = Optional.fromNullable(new YearMonth(year, month));
     }
+    
+    // Patch per la navigazione del menù ... ####################################
+    session.put("monthSelected", monthToUpload.get().getMonthOfYear());
+    session.put("yearSelected", monthToUpload.get().getYear());
+    renderArgs.put("currentData", new CurrentData(monthToUpload.get().getYear(), 
+        monthToUpload.get().getMonthOfYear(), 
+        Integer.parseInt(session.get("daySelected")), 
+        Long.parseLong(session.get("personSelected")), 
+        office.id));
+    // ##########################################################################
+    
     
     LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
@@ -128,6 +142,11 @@ public class Certifications extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     
+    //Nuovo attestati
+    if (!(Boolean)configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
+      forbidden();
+    }
+    
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
     Verify.verify(monthToUpload.isPresent());
     
@@ -149,11 +168,11 @@ public class Certifications extends Controller {
     Optional<String> token = certificationService.buildToken();
 
     for (Person person : people) {
-
+      
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
           .buildPersonStaticStatus(person, year, month, token);
-
+      
       // Applico il process
       certificationService.process(personCertificationStatus, token);
 

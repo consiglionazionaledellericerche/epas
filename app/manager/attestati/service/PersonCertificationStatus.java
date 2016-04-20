@@ -90,6 +90,43 @@ public class PersonCertificationStatus {
       }
     }
     
+    if (this.okProcessable) {
+      correctCertifications = epasCertifications;
+    }
+    
+    if (this.incompleteNotProcessable) {
+      
+      Set<String> allKey = Sets.newHashSet(); 
+      allKey.addAll(actualCertifications.keySet());
+      allKey.addAll(epasCertifications.keySet());
+      
+      for (String key : allKey) {
+        
+        Certification actualCertification = actualCertifications.get(key);
+        Certification epasCertification = epasCertifications.get(key);
+                
+        if (actualCertification == null && epasCertification != null) {
+          // Nelle toDelete inserisco quelle epas non in attuali
+          toDeleteCertifications.put(key, epasCertification);
+        }
+        
+        else if (actualCertification != null && epasCertification == null) {
+          // Nelle da inviare inserisco le attuali non in epas
+          toSendCertifications.put(key, actualCertification);
+        }
+        
+        else if (actualCertification != null && epasCertification != null) {
+          if (epasCertification.containProblems()) {
+            // Nelle corrette inserisco quelle epas in attuali senza problemi
+            problemCertifications.put(key, epasCertification);
+          } else {
+            // Nelle problematiche inserisco quelle epas in attuali con problemi
+            correctCertifications.put(key, epasCertification);
+          }
+        }
+      }
+    }
+    
     return this;
   }
   
