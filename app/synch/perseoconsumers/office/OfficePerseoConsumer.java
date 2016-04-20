@@ -1,11 +1,17 @@
 package synch.perseoconsumers.office;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
+import com.google.gson.JsonSyntaxException;
 
 import com.beust.jcommander.internal.Maps;
+
+import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,187 +20,168 @@ import models.Office;
 
 import org.assertj.core.util.Lists;
 
-import play.Play;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
+import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class OfficePerseoConsumer {
 
-  @Inject
-  public OfficePerseoConsumer() {}
-  
-  private static final String URL_BASE = Play.configuration.getProperty("perseo.base");
-  private static final String OFFICES_ENDPOINT = 
-      Play.configuration.getProperty("perseo.rest.departments");
-  private static final String OFFICE_ENDPOINT = 
-      Play.configuration.getProperty("perseo.rest.departmentbyperseoid");
-  private static final String INSTITUTE_ENDPOINT = 
-      Play.configuration.getProperty("perseo.rest.institutebyperseoid");
 
-  
   /**
    * Perseo Json relativo agli istituti.
-   * @return
    */
-  private Optional<String> perseoOfficesJson() {
+  private ListenableFuture<List<PerseoOffice>> perseoOffices() {
 
-    String endPoint = URL_BASE + OFFICES_ENDPOINT + "list";
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo la lista di tutti gli istituti presenti da {}.", endPoint);
-    
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare la lista degli istituti presenti da {}", endPoint);
-      return Optional.<String>absent();
-    }
-    
-    try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch(Exception e) {
-      log.info("Url={} non json.", endPoint);
-    }
-    
-    return null;
-  }
-  
-  /**
-   * Perseo Json relativo alla sede con perseoId.
-   * @param perseoId
-   * @return
-   */
-  private Optional<String> perseoOfficeByPerseoIdJson(Long perseoId) {
+    final String url;
+    final String user;
+    final String pass;
 
-    String endPoint = URL_BASE + OFFICE_ENDPOINT + perseoId;
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo la sede da perseo da {}.", endPoint);
-    
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare la sede da perseo da {}", endPoint);
-      return Optional.<String>absent();
-    }
-    
     try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch(Exception e) {
-      log.info("Url={} non json.", endPoint);
+      url = PerseoApis.getOfficesEndpoint() + "list";
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
-    
-    return null;
-  }
-  
-  /**
-   * Perseo Json relativo all istituto con perseoId.
-   * @param perseoId
-   * @return
-   */
-  private Optional<String> perseoInstituteByPerseoIdJson(Long perseoId) {
 
-    String endPoint = URL_BASE + INSTITUTE_ENDPOINT + perseoId;
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo la sede da perseo da {}.", endPoint);
-    
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare la sede da perseo da {}", endPoint);
-      return Optional.<String>absent();
-    }
-    
-    try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch(Exception e) {
-      log.info("Url={} non json.", endPoint);
-    }
-    
-    return null;
-  }
-  
-  /**
-   * La lista dei PerseoOffice da perseo.
-   * @return
-   */
-  private List<PerseoOffice> getPerseoOffices() {
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
-    //Json della richiesta
-    Optional<String> json = perseoOfficesJson();
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
-    
-    List<PerseoOffice> perseoOffices = null;
-    try {
-      perseoOffices = new Gson().fromJson(json.get(), new TypeToken<List<PerseoOffice>>(){}.getType());
-    } catch(Exception e) {
-      log.info("Impossibile caricare da perseo la lista degli istituti.");
-      return Lists.newArrayList();
-    }
-    
-    return perseoOffices;
-    
+    log.info("Invio richiesta lista istituti a Perseo: {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, new Function<HttpResponse, List<PerseoOffice>>() {
+      @Override
+      public List<PerseoOffice> apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente le sedi da Perseo: {} {}",
+            response.getStatus(), response.getStatusText());
+        try {
+          return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoOffice>>() {
+          }.getType());
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
-  
+
   /**
-   * Il perseoOffice con perseoId
-   * @param perseoId
-   * @return
+   * PerseoOffice relativo alla sede con perseoId.
    */
-  private Optional<PerseoOffice> getPerseoOfficeByPerseoId(Long perseoId) {
-  
-    //Json della richiesta
-    Optional<String> json = perseoOfficeByPerseoIdJson(perseoId);
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
-    
-    PerseoOffice perseoOffice = null;
+  private ListenableFuture<PerseoOffice> perseoOfficeByPerseoId(Long perseoId) {
+
+    final String url;
+    final String user;
+    final String pass;
+
     try {
-      perseoOffice = new Gson().fromJson(json.get(), new TypeToken<PerseoOffice>(){}.getType());
-    } catch(Exception e) {
-      log.info("Impossibile caricare da perseo la sede con perseoId={}.", perseoId);
-      return Optional.<PerseoOffice>absent();
+      url = PerseoApis.getOfficeEndpoint() + perseoId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
-    if (perseoOffice == null) {
-      return Optional.<PerseoOffice>absent();
-    }
-    return Optional.fromNullable(perseoOffice);
-    
+
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Invio richiesta Sede a Perseo: {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, new Function<HttpResponse, PerseoOffice>() {
+      @Override
+      public PerseoOffice apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente la Sede {} da Perseo: {} {}", perseoId,
+            response.getStatus(), response.getStatusText());
+        try {
+          return new Gson().fromJson(response.getJson(), PerseoOffice.class);
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
-  
+
   /**
-   * Il perseoOffice con perseoId
-   * @param perseoId
-   * @return
+   * PerseoInstitute relativo all'istituto con perseoId.
    */
-  private Optional<PerseoInstitute> getPerseoInstituteByPerseoId(Long perseoId) {
-  
-    //Json della richiesta
-    Optional<String> json = perseoInstituteByPerseoIdJson(perseoId);
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
-    
-    PerseoInstitute perseoInstitute = null;
+  private ListenableFuture<PerseoInstitute> perseoInstituteByPerseoId(Long perseoId) {
+
+    final String url;
+    final String user;
+    final String pass;
+
     try {
-      perseoInstitute = new Gson().fromJson(json.get(), new TypeToken<PerseoInstitute>(){}.getType());
-    } catch(Exception e) {
-      log.info("Impossibile caricare da perseo la sede con perseoId={}.", perseoId);
-      return Optional.<PerseoInstitute>absent();
+      url = PerseoApis.getInstituteEndpoint() + perseoId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
-    if (perseoInstitute == null) {
-      return Optional.<PerseoInstitute>absent();
-    }
-    return Optional.fromNullable(perseoInstitute);
-    
+
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Invio richiesta Istituto a Perseo: {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, new Function<HttpResponse, PerseoInstitute>() {
+      @Override
+      public PerseoInstitute apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente l'istituto {} da Perseo: {} {}", perseoId,
+            response.getStatus(), response.getStatusText());
+        try {
+          return new Gson().fromJson(response.getJson(), PerseoInstitute.class);
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
-  
+
   /**
    * Conversione a oggetti epas. PerseoInstitute.
-   * @param perseoInstitute
-   * @return
    */
   private Institute epasConverter(PerseoInstitute perseoInstitute) {
-    
+
     Institute institute = new Institute();
     institute.perseoId = new Long(perseoInstitute.id);
     institute.cds = perseoInstitute.cds;
@@ -202,10 +189,9 @@ public class OfficePerseoConsumer {
     institute.code = perseoInstitute.code;
     return institute;
   }
-  
+
   /**
    * Conversione a oggetti epas.
-   * @return
    */
   private Map<Integer, Institute> epasConverter(List<PerseoOffice> perseoOffices) {
     Map<Integer, Institute> institutesMap = Maps.newHashMap();
@@ -217,7 +203,7 @@ public class OfficePerseoConsumer {
       } else {
         institute = institutesMap.get(perseoOffice.institute.id);
       }
-      
+
       Office office = new Office();
       office.perseoId = new Long(perseoOffice.id);
       office.codeId = perseoOffice.codeId;
@@ -229,28 +215,36 @@ public class OfficePerseoConsumer {
     }
     return institutesMap;
   }
+
   /**
    * Importa tutti gli istutiti da perseo come mappa perseoId -> istituto.
-   * @return
    */
   public Map<Integer, Institute> perseoInstitutesByPerseoId() {
-    List<PerseoOffice> perseoOffices = getPerseoOffices();
+    List<PerseoOffice> perseoOffices = Lists.newArrayList();
+
+    try {
+      perseoOffices = perseoOffices().get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile recuperare la lista degli istituti - %s",
+          e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
     return epasConverter(perseoOffices);
   }
-  
+
   /**
    * Importa tutti gli istituti da perseo come lista.
-   * @return
    */
   public List<Institute> perseoInstitutes() {
-    
+
     Map<Integer, Institute> institutesMap = perseoInstitutesByPerseoId();
     return Lists.newArrayList(institutesMap.values());
   }
-  
+
   /**
    * Importa tutti gli istutiti da perseo come mappa cds -> istituto.
-   * @return
    */
   public Map<String, Institute> perseoInstitutesByCds() {
     Map<String, Institute> institutesMap = Maps.newHashMap();
@@ -259,40 +253,57 @@ public class OfficePerseoConsumer {
     }
     return institutesMap;
   }
-  
+
   /**
-   * Importa istituto e sede della sede con officePerseoId. Absent se almeno uno dei due 
-   * non è disponibile.
-   * @param perseoId
-   * @return
+   * Importa istituto e sede della sede con officePerseoId. Absent se almeno uno dei due non è
+   * disponibile.
    */
   public Optional<Institute> perseoInstituteByOfficePerseoId(Long officePerseoId) {
-    Optional<PerseoOffice> perseoOffice = getPerseoOfficeByPerseoId(officePerseoId);
-    if (!perseoOffice.isPresent()) {
+
+    PerseoOffice perseoOffice = null;
+
+    try {
+      perseoOffice = perseoOfficeByPerseoId(officePerseoId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile recuperare la sede da %d Perseo - %s",
+          officePerseoId, e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    if (perseoOffice == null) {
       return Optional.<Institute>absent();
     }
+
     Optional<Institute> institute = Optional.fromNullable(epasConverter(
-        Lists.newArrayList(perseoOffice.get())).values().iterator().next());
-    
+        Lists.newArrayList(perseoOffice)).values().iterator().next());
+
     if (!institute.isPresent() || institute.get().seats.isEmpty()) {
       return Optional.<Institute>absent();
     }
     return institute;
   }
-  
+
   /**
    * Importa l'istituto institutePerseoId. Absent se non è disponibile.
-   * @param perseoId
-   * @return
    */
   public Optional<Institute> perseoInstituteByInstitutePerseoId(Long institutePerseoId) {
-    Optional<PerseoInstitute> perseoInstitute = getPerseoInstituteByPerseoId(institutePerseoId);
-    if (!perseoInstitute.isPresent()) {
+
+    PerseoInstitute perseoInstitute = null;
+
+    try {
+      perseoInstitute = perseoInstituteByPerseoId(institutePerseoId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile l'istituto da %d Perseo - %s",
+          institutePerseoId, e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    if (perseoInstitute == null) {
       return Optional.<Institute>absent();
     }
-    return Optional.fromNullable(epasConverter(perseoInstitute.get()));
+    return Optional.fromNullable(epasConverter(perseoInstitute));
   }
-  
 
-  
 }

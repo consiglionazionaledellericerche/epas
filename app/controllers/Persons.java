@@ -63,31 +63,30 @@ import javax.inject.Inject;
 @With({Resecure.class, RequestInit.class})
 public class Persons extends Controller {
 
-
   @Inject
-  private static UserManager userManager;
+  static UserManager userManager;
   @Inject
-  private static EmailManager emailManager;
+  static EmailManager emailManager;
   @Inject
-  private static SecureManager secureManager;
+  static SecureManager secureManager;
   @Inject
-  private static OfficeManager officeManager;
+  static OfficeManager officeManager;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static WrapperModelFunctionFactory wrapperFunctionFactory;
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
-  private static ContractManager contractManager;
+  static ContractManager contractManager;
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
   @Inject
-  private static WorkingTimeTypeDao workingTimeTypeDao;
+  static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
-  private static UserDao userDao;
+  static UserDao userDao;
   @Inject
-  private static IWrapperFactory wrapperFactory;
+  static IWrapperFactory wrapperFactory;
   @Inject
-  private static PersonChildrenDao personChildrenDao;
+  static PersonChildrenDao personChildrenDao;
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -120,7 +119,8 @@ public class Persons extends Controller {
 
   /**
    * metodo che salva la persona inserita con il suo contratto.
-   * @param person la persona da inserire
+   *
+   * @param person   la persona da inserire
    * @param contract il contratto associato alla persona
    */
   public static void save(@Valid @Required Person person, @Valid Contract contract) {
@@ -164,17 +164,17 @@ public class Persons extends Controller {
     emailManager.newUserMail(person);
 
     log.info("Creata nuova persona: id[{}] - {}", person.id, person.fullName());
-    
+
     JPA.em().flush();
     JPA.em().clear();
-    
+
     //La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
     person.createdAt = LocalDateTime.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     person.save();
 
     contractManager.recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
-    
+
     flash.success("Persona inserita correttamente in anagrafica - %s", person.fullName());
 
     list(null);
@@ -182,6 +182,7 @@ public class Persons extends Controller {
 
   /**
    * metodo per visualizzare e modificare le informazioni di una persona.
+   *
    * @param personId l'id della persona da modificare
    */
   public static void edit(Long personId) {
@@ -196,6 +197,7 @@ public class Persons extends Controller {
 
   /**
    * il metodo che permette il salvataggio delle informazioni modificate di una persona.
+   *
    * @param person la persona da modificare
    */
   public static void update(@Valid Person person) {
@@ -222,6 +224,7 @@ public class Persons extends Controller {
 
   /**
    * metodo che permette la cancellazione di una persona.
+   *
    * @param personId l'id della persona da cancellare
    */
   public static void deletePerson(Long personId) {
@@ -238,6 +241,7 @@ public class Persons extends Controller {
 
   /**
    * il metodo che svolge l'effettiva cancellazione della persona.
+   *
    * @param personId l'id della persona da cancellare
    */
   @SuppressWarnings("deprecation")
@@ -283,6 +287,7 @@ public class Persons extends Controller {
 
   /**
    * metodo che mostra la situazione delle ferie secondo il corrente piano ferie.
+   *
    * @param personId l'id della persona di cui si intende vedere la situazione.
    */
   public static void showCurrentVacation(Long personId) {
@@ -303,6 +308,7 @@ public class Persons extends Controller {
 
   /**
    * metoto che mostra l'attuale contratto e orario di lavoro associato della persona.
+   *
    * @param personId l'id della persona di cui si intendono vedere queste informazioni
    */
   public static void showCurrentContractWorkingTimeType(Long personId) {
@@ -331,8 +337,8 @@ public class Persons extends Controller {
   }
 
   public static void savePassword(@Required String vecchiaPassword,
-      @MinLength(5) @Required String nuovaPassword,
-      @MinLength(5) @Required String confermaPassword) {
+                                  @MinLength(5) @Required String nuovaPassword,
+                                  @MinLength(5) @Required String confermaPassword) {
 
     User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional
         .fromNullable(Hashing.md5().hashString(vecchiaPassword, Charsets.UTF_8).toString()));
@@ -361,12 +367,12 @@ public class Persons extends Controller {
   /**
    * Salva la nuova password.
    *
-   * @param nuovaPassword nuovaPassword
+   * @param nuovaPassword    nuovaPassword
    * @param confermaPassword confermaPassword
    * @throws Throwable boh.
    */
   public static void resetPassword(@MinLength(5) @Required String nuovaPassword,
-      @MinLength(5) @Required String confermaPassword) throws Throwable {
+                                   @MinLength(5) @Required String confermaPassword) throws Throwable {
 
     User user = Security.getUser().get();
     if (user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now())) {

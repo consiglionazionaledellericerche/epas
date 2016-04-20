@@ -43,6 +43,9 @@ epas:
     - VIRTUAL_HOST=localhost
     - TZ=Europe/Rome
 #    - PROTOCOL=https                        # default: http -- Attiva l'utilizzo del protocollo HTTPS
+#    - PERSEO_BASE=                          # default: http://perseo.devel.iit.cnr.it
+#    - PERSEO_USER=                          # default:
+#    - PERSEO_PASS=                          # default:
 #    - URL_ATTESTATI=                        # default: https://attestati.rm.cnr.it/attestati/
 #    - CERT_NAME=epas                        # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
 #    - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato
@@ -57,9 +60,7 @@ epas:
 #    - SMTP_USER=                            # default:
 #    - SMTP_PASS=                            # default:
 #    - SMTP_PROTOCOL=                        # default: smtp. (smtp, smtps)
-#    - BACKUP=true                           # default: false
-#    - BACKUP_MINUTES=                       # default: 0
-#    - BACKUP_HOURS=6                        # default: 6,12,18 (3 volte al giorno: alle 6, alle 12 e alle 18)
+#    - BACKUP_CRON=                          # default: disattivato. (utilizzare il format del crontab. Es. 0 0 * * *)
 #    - LOG_LEVEL=                            # default: INFO
 #    - LOG_ON_FILE=                          # default: false (true, false)
 #    - JOBS_ACTIVE=false                     # default: true. Se impostato a false disabilita l'esecuzione di tutti i job
