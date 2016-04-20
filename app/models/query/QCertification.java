@@ -26,6 +26,8 @@ public class QCertification extends EntityPathBase<Certification> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final NumberPath<Integer> attestatiId = createNumber("attestatiId", Integer.class);
+
     public final EnumPath<models.enumerate.CertificationType> certificationType = createEnum("certificationType", models.enumerate.CertificationType.class);
 
     public final StringPath content = createString("content");
@@ -44,6 +46,8 @@ public class QCertification extends EntityPathBase<Certification> {
     public final QPerson person;
 
     public final StringPath problems = createString("problems");
+
+    public final StringPath warnings = createString("warnings");
 
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
