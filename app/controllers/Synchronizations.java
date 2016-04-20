@@ -13,6 +13,8 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+import helpers.rest.ApiRequestException;
+
 import jobs.FixUserPermission;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +77,7 @@ public class Synchronizations extends Controller {
   @Inject
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
-  private static WrapperModelFunctionFactory wrapperFunctionFactory;
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
 
   /**
    * Gli istituti in epas da sincronizzare.
@@ -85,12 +87,20 @@ public class Synchronizations extends Controller {
     List<Institute> institutes = officeDao.institutes(Optional.<String>fromNullable(name),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
 
-    Map<String, Institute> perseoInstitutesByCds = officePerseoConsumer.perseoInstitutesByCds();
+    Map<String, Institute> perseoInstitutesByCds = null;
+    try {
+      perseoInstitutesByCds = officePerseoConsumer.perseoInstitutesByCds();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
+    }
 
     Map<String, Office> perseoOfficeByCodeId = Maps.newHashMap();
-    for (Institute institute : perseoInstitutesByCds.values()) {
-      for (Office office : institute.seats) {
-        perseoOfficeByCodeId.put(office.codeId, office);
+
+    if (perseoInstitutesByCds != null) {
+      for (Institute institute : perseoInstitutesByCds.values()) {
+        for (Office office : institute.seats) {
+          perseoOfficeByCodeId.put(office.codeId, office);
+        }
       }
     }
 
@@ -102,7 +112,12 @@ public class Synchronizations extends Controller {
    */
   public static void otherInstitutes() {
 
-    List<Institute> perseoInstitutes = officePerseoConsumer.perseoInstitutes();
+    List<Institute> perseoInstitutes = null;
+    try {
+      perseoInstitutes = officePerseoConsumer.perseoInstitutes();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
+    }
 
     List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
@@ -135,8 +150,15 @@ public class Synchronizations extends Controller {
     Verify.verify(institute.isPresent());
     Verify.verifyNotNull(perseoId);
 
-    Optional<Institute> instituteInPerseo = officePerseoConsumer
-        .perseoInstituteByInstitutePerseoId(perseoId);
+    Optional<Institute> instituteInPerseo = null;
+
+    try {
+      instituteInPerseo = officePerseoConsumer
+          .perseoInstituteByInstitutePerseoId(perseoId);
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
+    }
+
     Verify.verify(instituteInPerseo.isPresent());
 
     //copy ( TODO: update method)
@@ -159,22 +181,29 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(office);
     Verify.verifyNotNull(perseoId);
 
-    Optional<Institute> instituteWithThatSeat =
-        officePerseoConsumer.perseoInstituteByOfficePerseoId(perseoId);
-    Verify.verify(instituteWithThatSeat.isPresent());
+    Optional<Institute> instituteWithThatSeat = Optional.absent();
+    try {
+      instituteWithThatSeat = officePerseoConsumer.perseoInstituteByOfficePerseoId(perseoId);
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
+      institutes(null);
+    }
 
-    Office perseoOffice = instituteWithThatSeat.get().seats.iterator().next();
+    if (instituteWithThatSeat.isPresent()) {
+      Office perseoOffice = instituteWithThatSeat.get().seats.iterator().next();
 
-    //copy ( TODO: update method)
-    office.perseoId = perseoOffice.perseoId;
-    office.code = perseoOffice.code;
-    office.name = perseoOffice.name;
-    office.address = perseoOffice.address;
+      //copy ( TODO: update method)
+      office.perseoId = perseoOffice.perseoId;
+      office.code = perseoOffice.code;
+      office.name = perseoOffice.name;
+      office.address = perseoOffice.address;
 
-    office.save();
+      office.save();
 
-    log.info("Associata sede={} al perseoId={}", office.toString(), perseoId);
-    flash.success("Operazione effettuata correttamente");
+      log.info("Associata sede={} al perseoId={}", office.toString(), perseoId);
+      flash.success("Operazione effettuata correttamente");
+    }
+
     institutes(null);
   }
 
@@ -186,8 +215,13 @@ public class Synchronizations extends Controller {
   public static void importOffice(Long seatPerseoId) {
 
     //Prendere da perseo quella sede.
-    Optional<Institute> instituteWithThatSeat =
-        officePerseoConsumer.perseoInstituteByOfficePerseoId(seatPerseoId);
+    Optional<Institute> instituteWithThatSeat = Optional.absent();
+    try {
+      instituteWithThatSeat = officePerseoConsumer.perseoInstituteByOfficePerseoId(seatPerseoId);
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
+    }
+
     if (!instituteWithThatSeat.isPresent()) {
       flash.error("Niente da fare :(((.");
       otherInstitutes();
@@ -200,11 +234,11 @@ public class Synchronizations extends Controller {
 
       //Istituto non presente
 
-      validation.valid(instituteWithThatSeat);
+      validation.valid("instituteWithThatSeat", instituteWithThatSeat.get());
       if (validation.hasErrors()) {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
         log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
-            + "nel suo istituto. errors={}.", seatPerseoId, validation.errors());
+            + "nel suo istituto. errors={}.", seatPerseoId, validation.errorsMap());
         flash.error("La sede selezionata non può essere importata a causa di errori.");
         otherInstitutes();
       }
@@ -223,7 +257,7 @@ public class Synchronizations extends Controller {
     if (validation.hasErrors()) {
       // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
-          + "nella sede. errors={}.", seatPerseoId, validation.errors());
+          + "nella sede. errors={}.", seatPerseoId, validation.errorsMap());
       flash.error("La sede selezionata non può essere importata a causa di errori.");
       otherInstitutes();
     }
@@ -265,7 +299,12 @@ public class Synchronizations extends Controller {
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)
         .transform(wrapperFunctionFactory.person()).toList();
 
-    Map<Integer, Person> perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
+    Map<Integer, Person> perseoPeopleByNumber = null;
+    try {
+      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
 
     render(wrapperedPeople, perseoPeopleByNumber, office);
   }
@@ -293,8 +332,13 @@ public class Synchronizations extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
 
-    Map<Long, Person> perseoPeopleByPerseoId = peoplePerseoConsumer
-        .perseoDepartmentPeopleByPerseoId(office.perseoId);
+    Map<Long, Person> perseoPeopleByPerseoId = null;
+    try {
+      perseoPeopleByPerseoId = peoplePerseoConsumer
+          .perseoDepartmentPeopleByPerseoId(office.perseoId);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
     @SuppressWarnings("deprecation")
     List<Person> people = personDao
         .listFetched(Optional.<String>absent(), offices, false, null, null, false)
@@ -321,7 +365,12 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(perseoId);
 
-    Optional<Person> personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
+    Optional<Person> personInPerseo = null;
+    try {
+      personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
     Verify.verify(personInPerseo.isPresent());
 
     join(person, personInPerseo.get());
@@ -364,7 +413,12 @@ public class Synchronizations extends Controller {
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
-    Map<Integer, Person> perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
+    Map<Integer, Person> perseoPeopleByNumber = null;
+    try {
+      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
 
     for (Person person : people) {
       if (person.perseoId == null) {
@@ -387,7 +441,12 @@ public class Synchronizations extends Controller {
   public static void importPerson(Long perseoId) {
 
     //Prendere da perseo quella persona.
-    Optional<Person> personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
+    Optional<Person> personInPerseo = null;
+    try {
+      personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
     Verify.verify(personInPerseo.isPresent());
 
     //Caricare dalla persona l'office.
@@ -399,7 +458,7 @@ public class Synchronizations extends Controller {
     if (validation.hasErrors()) {
       // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
-          + "nella persona. errors={}.", perseoId, validation.errors());
+          + "nella persona. errors={}.", perseoId, validation.errorsMap());
       flash.error("La persona selezionata non può essere importata a causa di errori.");
       otherPeople(office.get().id);
     }
@@ -446,7 +505,12 @@ public class Synchronizations extends Controller {
     Office office = officeDao.getOfficeById(epasOfficeId);
     notFoundIfNull(office);
 
-    Map<Long, Person> perseoPeopleByPerseoId = peoplePerseoConsumer.perseoDepartmentPeopleByPerseoId(office.perseoId);
+    Map<Long, Person> perseoPeopleByPerseoId = null;
+    try {
+      perseoPeopleByPerseoId = peoplePerseoConsumer.perseoDepartmentPeopleByPerseoId(office.perseoId);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
 
     @SuppressWarnings("deprecation")
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
@@ -513,8 +577,13 @@ public class Synchronizations extends Controller {
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
     //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-        .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = null;
+    try {
+      perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+          .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
 
     render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
   }
@@ -533,8 +602,13 @@ public class Synchronizations extends Controller {
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
     //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-        .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = null;
+    try {
+      perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+          .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
 
     render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
 
@@ -552,8 +626,13 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(contract);
     Verify.verifyNotNull(perseoId);
 
-    Optional<Contract> contractInPerseo = contractPerseoConsumer
-        .perseoContractByPerseoId(perseoId, contract.person);
+    Optional<Contract> contractInPerseo = null;
+    try {
+      contractInPerseo = contractPerseoConsumer
+          .perseoContractByPerseoId(perseoId, contract.person);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
     Verify.verify(contractInPerseo.isPresent());
 
     joinUpdateContract(contract, contractInPerseo.get());
@@ -601,7 +680,12 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(person.perseoId);
 
-    Optional<Contract> contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
+    Optional<Contract> contractInPerseo = null;
+    try {
+      contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
     Verify.verify(contractInPerseo.isPresent());
 
     WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
@@ -631,8 +715,13 @@ public class Synchronizations extends Controller {
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
     //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-        .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = null;
+    try {
+      perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+          .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    }
 
     WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 

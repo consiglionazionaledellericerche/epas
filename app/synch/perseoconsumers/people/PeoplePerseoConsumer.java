@@ -39,7 +39,7 @@ public class PeoplePerseoConsumer {
    * @param perseoId id perseo persona
    * @return json
    */
-  private Optional<String> perseoPersonJson(Long perseoId) {
+  private Optional<String> perseoPersonJson(Long perseoId) throws NoSuchFieldException {
 
     String endPoint = PerseoApis.getPersonForEpasEndpoint() + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
@@ -64,7 +64,7 @@ public class PeoplePerseoConsumer {
    *
    * @return json
    */
-  private Optional<String> perseoAllPeopleJson() {
+  private Optional<String> perseoAllPeopleJson() throws NoSuchFieldException {
 
     String endPoint = PerseoApis.getAllPeopleForEpasEndpoint();
     HttpResponse restResponse = WS.url(endPoint).get();
@@ -90,7 +90,7 @@ public class PeoplePerseoConsumer {
    * @param perseoId id perseo department
    * @return json
    */
-  private Optional<String> perseoAllDepartmentPeopleJson(Long perseoId) {
+  private Optional<String> perseoAllDepartmentPeopleJson(Long perseoId) throws NoSuchFieldException {
 
     String endPoint = PerseoApis.getAllDepartmentPeopleForEpasEndpoint() + perseoId;
     HttpResponse restResponse = WS.url(endPoint).get();
@@ -117,7 +117,7 @@ public class PeoplePerseoConsumer {
    * @param perseoId perseo id department.
    * @return lista
    */
-  private List<PerseoPerson> getAllPerseoDepartmentPeople(Long perseoId) {
+  private List<PerseoPerson> getAllPerseoDepartmentPeople(Long perseoId) throws NoSuchFieldException {
 
     //Json della richiesta
     Optional<String> json = perseoAllDepartmentPeopleJson(perseoId);
@@ -143,7 +143,7 @@ public class PeoplePerseoConsumer {
    *
    * @return lista
    */
-  private List<PerseoPerson> getAllPerseoPeople() {
+  private List<PerseoPerson> getAllPerseoPeople() throws NoSuchFieldException {
 
     //Json della richiesta
     Optional<String> json = perseoAllPeopleJson();
@@ -170,7 +170,7 @@ public class PeoplePerseoConsumer {
    * @param perseoId perseo id person.
    * @return persona
    */
-  private Optional<PerseoPerson> getPerseoPersonByPerseoId(Long perseoId) {
+  private Optional<PerseoPerson> getPerseoPersonByPerseoId(Long perseoId) throws NoSuchFieldException {
 
     //Json della richiesta
     Optional<String> json = perseoPersonJson(perseoId);
@@ -244,7 +244,7 @@ public class PeoplePerseoConsumer {
    *
    * @return mappa
    */
-  public Map<Long, Person> perseoPeopleByPerseoId() {
+  public Map<Long, Person> perseoPeopleByPerseoId() throws NoSuchFieldException {
     List<PerseoPerson> perseoPeople = getAllPerseoPeople();
     Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : epasConverter(perseoPeople)) {
@@ -258,7 +258,7 @@ public class PeoplePerseoConsumer {
    *
    * @return mappa
    */
-  public Map<Integer, Person> perseoPeopleByNumber() {
+  public Map<Integer, Person> perseoPeopleByNumber() throws NoSuchFieldException {
 
     Map<Integer, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : perseoPeopleByPerseoId().values()) {
@@ -273,7 +273,7 @@ public class PeoplePerseoConsumer {
    * @param perseoDepartmentId department perseo id
    * @return mappa
    */
-  public Map<Long, Person> perseoDepartmentPeopleByPerseoId(Long perseoDepartmentId) {
+  public Map<Long, Person> perseoDepartmentPeopleByPerseoId(Long perseoDepartmentId) throws NoSuchFieldException {
 
     List<PerseoPerson> perseoPeople = getAllPerseoDepartmentPeople(perseoDepartmentId);
     Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
@@ -290,7 +290,7 @@ public class PeoplePerseoConsumer {
    * @param perseoDepartmentId department perseo id
    * @return mappa
    */
-  public Map<Integer, Person> perseoDepartmentPeopleByNumber(Long perseoDepartmentId) {
+  public Map<Integer, Person> perseoDepartmentPeopleByNumber(Long perseoDepartmentId) throws NoSuchFieldException {
 
     Map<Integer, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : perseoDepartmentPeopleByPerseoId(perseoDepartmentId).values()) {
@@ -305,7 +305,7 @@ public class PeoplePerseoConsumer {
    *
    * @return persona
    */
-  public Optional<Person> perseoPersonByPerseoId(Long personPerseoId) {
+  public Optional<Person> perseoPersonByPerseoId(Long personPerseoId) throws NoSuchFieldException {
     Optional<PerseoPerson> perseoPerson = getPerseoPersonByPerseoId(personPerseoId);
     if (!perseoPerson.isPresent()) {
       return Optional.<Person>absent();
