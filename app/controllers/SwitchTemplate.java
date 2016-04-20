@@ -174,6 +174,9 @@ public class SwitchTemplate extends Controller {
     if (action.equals("Synchronizations.otherContracts")) {
       Synchronizations.otherContracts(officeId);
     }
+    if (action.equals("Certifications.certifications")) {
+      Certifications.certifications(officeId, year, month);
+    }
 
   }
 

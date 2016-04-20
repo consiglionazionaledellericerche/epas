@@ -1,0 +1,32 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
+
+<div class="container">
+#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
+</div>
+
+#{uploadSituation.uploadSituationTabs activeAction:'newAttestati' /}
+
+<div class="container">
+
+	#{form @Certifications.personCertificated(), class:'form-horizontal'}
+		
+		#{alert color:'info'}
+		<p>La situazione della persona con matricola '9891'</p>
+		#{/alert}
+
+        #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
+
+		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
+		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
+		
+		#{f.hidden 'token', value:token.get() /}
+		
+		<br>
+		#{b.buttons center:true}
+            
+            #{b.submit 'Invio'/}
+          #{/b.buttons}
+	#{/form}
+</div>
