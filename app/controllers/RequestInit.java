@@ -190,7 +190,8 @@ public class RequestInit extends Controller {
         "MonthRecaps.show",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
-        "MealTickets.recapMealTickets");
+        "MealTickets.recapMealTickets",
+        "Certifications.certifications");
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -201,7 +202,8 @@ public class RequestInit extends Controller {
         "PersonMonths.trainingHours",
         "PersonMonths.hourRecap",
         "Vacations.show",
-        "VacationsAdmin.list");
+        "VacationsAdmin.list",
+        "Certifications.certifications");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
@@ -232,7 +234,8 @@ public class RequestInit extends Controller {
         "Synchronizations.people",
         "Synchronizations.otherPeople",
         "Synchronizations.activeContracts",
-        "Synchronizations.otherContracts");
+        "Synchronizations.otherContracts",
+        "Certifications.certifications");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
@@ -269,7 +272,8 @@ public class RequestInit extends Controller {
         "UploadSituation.uploadData",
         "MealTickets.recapMealTickets",
         "MealTickets.returnedMealTickets",
-        "Configurations.show");
+        "Configurations.show",
+        "Certifications.certifications");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",

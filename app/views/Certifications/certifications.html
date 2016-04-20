@@ -6,9 +6,16 @@
 #{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
 </div>
 
-#{uploadSituation.uploadSituationTabs activeAction:'newAttestati' /}
+*{
+#{certifications.certificationsTabs activeAction:'certifications' /}
+}*
+
 
 <div class="container">
+
+ #{alert color:'info'}
+   <p>Da inserire lo stato di autenticazione ed eventualmente la form di login.</p>
+ #{/alert}
 *{
 	#{form @Certifications.personCertificated(), class:'form-horizontal'}
 		
@@ -39,10 +46,14 @@
   
   
   
-  <li class="list-group-item">
+  <li class="list-group-item 
+    #{if personCertificationStatus.okProcessable || personCertificationStatus.okNotProcessable} list-group-item-success#{/if}
+    #{if personCertificationStatus.incompleteNotProcessable} list-group-item-danger#{/if}
+    #{if personCertificationStatus.incompleteProcessable} list-group-item-warning#{/if}
+    ">
     <div class="row">
     <div class="col-xs-3">
-    <strong>${personCertificationStatus.person.fullname}</strong>
+    <strong>${personCertificationStatus.person.fullname}<br>${personCertificationStatus.person.number}</strong>
     </div>
     <div class="col-xs-3">
         #{if personCertificationStatus.okProcessable}
@@ -68,13 +79,9 @@
     </div>
     
     <div class="col-xs-6">
-      
-      #{if personCertificationStatus.okProcessable}
 	
-	    #{/if}
-	    
-	
-	    #{if personCertificationStatus.incompleteProcessable}
+	    #{if personCertificationStatus.incompleteProcessable 
+	    	|| personCertificationStatus.okProcessable}
 	    
 	      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
 	        #{certifications.showCertification certification:certification, type:'correct' /}
@@ -93,10 +100,23 @@
 	    #{/if}
 	    
 	
-	    #{if personCertificationStatus.okNotProcessable}
-	
-	    #{/if}
-	    #{if personCertificationStatus.incompleteNotProcessable}
+	    #{if personCertificationStatus.incompleteNotProcessable || 
+	    personCertificationStatus.okNotProcessable}
+	    
+	      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'correct', muted:true /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toSend', muted:true /}
+	      #{/list}
+	      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'problems', muted:true /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toDelete', 
+	          muted:true /}
+	      #{/list}
+	      
 	    #{/if}
 
     </div>
