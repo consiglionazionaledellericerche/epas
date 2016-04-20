@@ -146,7 +146,7 @@ public class Certifications extends Controller {
     if (!(Boolean)configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
       forbidden();
     }
-    
+
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
     Verify.verify(monthToUpload.isPresent());
     

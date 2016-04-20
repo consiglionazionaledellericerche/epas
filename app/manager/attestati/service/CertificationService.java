@@ -369,8 +369,12 @@ public class CertificationService {
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
       
     } else if (certification.certificationType.equals(CertificationType.MEAL)) {
-      httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification);
+      httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, false);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+      if (rispostaAttestati.message.contains("attestato_buoni_pasto_ukey")) {
+        httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, true);
+        rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+      }
       
     } else if (certification.certificationType.equals(CertificationType.COMPETENCE)) {
       httpResponse = certificationsComunication.sendRigaCompetenza(token, certification);
