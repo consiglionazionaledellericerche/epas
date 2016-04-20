@@ -24,14 +24,14 @@
 	    #{if institute.perseoId == null }
             <em>Not Synchronized</em>
             <br>
-            %{ suggested = perseoInstitutesByCds.get(institute.cds) }%
+            %{ suggested = perseoInstitutesByCds?.get(institute.cds) }%
             #{if suggested}
-              <span class="label label-default">${suggested.cds}</span>
+            <span class="label label-default">${suggested.cds}</span>
 	          <span class="label label-default">${suggested.name}</span>
 	          <span class="label label-default">${suggested.code}</span>
 	          <em>PerseoId </em><span class="label label-success">${suggested.perseoId}</span>
 	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinInstitute(institute.id, suggested.perseoId)}">Associa</a>
-	        #{/if}
+	          #{/if}
 	        #{else}
 	          <em>Nessun suggerimento cds</em>
 	        #{/else}
