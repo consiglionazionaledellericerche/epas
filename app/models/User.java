@@ -8,6 +8,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -40,6 +41,7 @@ public class User extends BaseModel {
   @Required
   public String username;
 
+  @MinSize(5)
   @Required
   public String password;
 
