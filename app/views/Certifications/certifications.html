@@ -47,7 +47,10 @@
 	 
 	#{if peopleCertificationStatus} *{ se è injettato è stato fatto lo stralcio }*  
 	
-	<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa</a>
+	<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
+	<a class="btn btn-primary" href="@{Certifications.certifications(office.id, year, month)}">Aggiorna <i class="fa fa-refresh" aria-hidden="true"></i></a>
+	
+	<a class="btn btn-danger pull-right" href="@{Certifications.emptyCertifications(office.id, year, month)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
 	  
 	<ul class="list-group">
 	  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }

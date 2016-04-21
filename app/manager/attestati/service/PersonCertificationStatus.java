@@ -150,8 +150,8 @@ public class PersonCertificationStatus {
     if (incompleteProcessable) {
       if (toDeleteCertifications.values().isEmpty() && problemCertifications.values().isEmpty() &&
           toSendCertifications.values().isEmpty() ) {
-        this.incompleteNotProcessable = false;
-        this.okNotProcessable = true;
+        this.incompleteProcessable = false;
+        this.okProcessable = true;
       }
     }
     return this;

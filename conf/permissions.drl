@@ -602,6 +602,7 @@ when
         
         "Certifications.certifications",
         "Certifications.processAll",
+        "Certifications.emptyCertifications",
         
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
@@ -728,6 +729,7 @@ when
         
         "Certifications.certifications",
         "Certifications.processAll",
+        "Certifications.emptyCertifications",
         
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",

@@ -40,6 +40,7 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Certifications extends Controller {
 
@@ -196,6 +197,10 @@ public class Certifications extends Controller {
     
     for (Person person : people) {
       
+      if (person.surname.equals("Lancia")) {
+        log.info("lancia");
+      }
+      
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
           .buildPersonStaticStatus(person, year, month, numbers, token);
@@ -218,6 +223,83 @@ public class Certifications extends Controller {
     
     renderTemplate("@certifications", office, year, month, numbers, peopleNotInAttestati,
         peopleCertificationStatus);
+  }
+  
+  /**
+   * 
+   * @param officeId
+   * @param year
+   * @param month
+   */
+  public static void emptyCertifications(Long officeId, int year, int month) {
+    
+    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    //Nuovo attestati
+    if (!(Boolean)configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
+      forbidden();
+    }
+
+    LocalDate monthBegin = new LocalDate(year, month, 1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
+    //Il mese selezionato è abilitato?
+    Optional<String> token = certificationService.buildToken();
+    boolean autenticate = certificationService.authentication(office, token, true);
+    if (!autenticate) {
+      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
+      renderTemplate("@certifications", office, year, month);
+    }
+    
+    //Lo stralcio è stato effettuato?
+    Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
+    if (numbers.isEmpty()) {
+      flash.error("E' necessario effettuare lo stralcio dei dati per processare "
+          + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
+      renderTemplate("@certifications", office, year, month, numbers);
+    }
+    
+    @SuppressWarnings("deprecation")
+    List<Person> people = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
+
+    List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
+    boolean peopleNotInAttestati = false;
+    
+    for (Person person : people) {
+      
+      // Costruisco lo status generale
+      PersonCertificationStatus personCertificationStatus = certificationService
+          .buildPersonStaticStatus(person, year, month, numbers, token);
+      
+      // Elimino ogni record
+      certificationService.emptyAttestati(personCertificationStatus, token);
+      
+      // Ricostruzione nuovo stato (coi record eliminati)
+      personCertificationStatus = certificationService
+          .buildPersonStaticStatus(person, year, month, numbers, token);
+      
+      if (personCertificationStatus.match()) {
+        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
+        numbers.remove(person.number);
+      }
+      
+      if (personCertificationStatus.notInAttestati) {
+        peopleNotInAttestati = true;
+      }
+      
+      peopleCertificationStatus.add(personCertificationStatus);
+    }
+    
+    flash.success("Elaborazione completata");
+    
+    renderTemplate("@certifications", office, year, month, numbers, peopleNotInAttestati,
+        peopleCertificationStatus);
+    
   }
   
   
