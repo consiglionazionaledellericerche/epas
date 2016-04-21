@@ -31,6 +31,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -87,11 +88,12 @@ public class Certifications extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     
-    //Nuovo attestati
+    //Nuovo attestati?
     if (!(Boolean)configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
       forbidden();
     }
-    
+  
+    //Mese selezionato
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
     Verify.verify(monthToUpload.isPresent());
     
@@ -99,7 +101,15 @@ public class Certifications extends Controller {
       monthToUpload = Optional.fromNullable(new YearMonth(year, month));
     }
     
+    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    year = monthToUpload.get().getYear();
+    month = monthToUpload.get().getMonthOfYear();
+    
     // Patch per la navigazione del menù ... ####################################
+    // Al primo accesso (da menù) dove non ho mese e anno devo prendere il default
+    // (NextMonthToUpload). In quel caso aggiorno la sessione nel cookie. Dovrebbe
+    // occuparsene la RequestInit.
     session.put("monthSelected", monthToUpload.get().getMonthOfYear());
     session.put("yearSelected", monthToUpload.get().getYear());
     renderArgs.put("currentData", new CurrentData(monthToUpload.get().getYear(), 
@@ -109,11 +119,21 @@ public class Certifications extends Controller {
         office.id));
     // ##########################################################################
     
+    //Il mese selezionato è abilitato?
+    Optional<String> token = certificationService.buildToken();
+    boolean autenticate = certificationService.authentication(office, token, true);
+    if (!autenticate) {
+      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
+      render(office, year, month, autenticate);
+    }
     
-    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
-    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-    year = monthToUpload.get().getYear();
-    month = monthToUpload.get().getMonthOfYear();
+    //Lo stralcio è stato effettuato?
+    Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
+    if (numbers.isEmpty()) {
+      flash.error("E' necessario effettuare lo stralcio dei dati per processare "
+          + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
+      render(office, year, month, autenticate, numbers);
+    }
     
     @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
@@ -121,18 +141,21 @@ public class Certifications extends Controller {
     
     List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
     
-    Optional<String> token = certificationService.buildToken();
-    
     for (Person person : people) {
       
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, token);
+          .buildPersonStaticStatus(person, year, month, numbers, token);
+
+      if (personCertificationStatus.match()) {
+        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
+        numbers.remove(person.number);        
+      }
       
       peopleCertificationStatus.add(personCertificationStatus);
     }
     
-    render(office, year, month, peopleCertificationStatus);
+    render(office, year, month, peopleCertificationStatus, numbers);
   }
   
   
@@ -147,40 +170,49 @@ public class Certifications extends Controller {
       forbidden();
     }
 
-    Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
-    Verify.verify(monthToUpload.isPresent());
-    
-    if (year != null && month != null) {
-      monthToUpload = Optional.fromNullable(new YearMonth(year, month));
-    }
-
-    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
+    LocalDate monthBegin = new LocalDate(year, month, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-    year = monthToUpload.get().getYear();
-    month = monthToUpload.get().getMonthOfYear();
 
+    //Il mese selezionato è abilitato?
+    Optional<String> token = certificationService.buildToken();
+    boolean autenticate = certificationService.authentication(office, token, true);
+    if (!autenticate) {
+      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
+      renderTemplate("@certifications", office, year, month, autenticate);
+    }
+    
+    //Lo stralcio è stato effettuato?
+    Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
+    if (numbers.isEmpty()) {
+      flash.error("E' necessario effettuare lo stralcio dei dati per processare "
+          + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
+      renderTemplate("@certifications", office, year, month, autenticate, numbers);
+    }
+    
     @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
     List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
 
-    Optional<String> token = certificationService.buildToken();
-
     for (Person person : people) {
       
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, token);
+          .buildPersonStaticStatus(person, year, month, numbers, token);
       
-      // Applico il process
-      certificationService.process(personCertificationStatus, token);
-
+      if (personCertificationStatus.match()) {
+        // Applico il process
+        certificationService.process(personCertificationStatus, token);
+        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
+        numbers.remove(person.number);
+      }
+      
       peopleCertificationStatus.add(personCertificationStatus);
 
     }
     
-    renderTemplate("@certifications", office, year, month, peopleCertificationStatus);
+    renderTemplate("@certifications", office, year, month, numbers, peopleCertificationStatus);
   }
   
   

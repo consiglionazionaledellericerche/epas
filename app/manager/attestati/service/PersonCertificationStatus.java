@@ -24,6 +24,9 @@ public class PersonCertificationStatus {
   public int year;
   public int month;
   
+  public boolean notInEpas = false;
+  public boolean notInAttestati = false;
+  
   public boolean staticView = true;
   
   public boolean okProcessable;             //Coerenza epas e attestati
@@ -43,6 +46,18 @@ public class PersonCertificationStatus {
   public Map<String, Certification> problemCertifications = Maps.newHashMap();
   public Map<String, Certification> toSendCertifications = Maps.newHashMap();
   public Certification attestatiMealToOverwrite;
+  
+  /**
+   * La matricola è presente sia in attestati che in epas.
+   * @return
+   */
+  public boolean match() {
+    if (this.notInAttestati || this.notInEpas) {
+      return false;
+    }
+    return true;
+  }
+   
   
   public PersonCertificationStatus computeStaticStatus() {
     
