@@ -421,17 +421,17 @@ public class Synchronizations extends Controller {
     }
 
     if (!people.isEmpty() && perseoPeopleByNumber != null) {
-      int synched = 0;
+      int synced = 0;
       for (Person person : people) {
         if (person.perseoId == null) {
           Person perseoPerson = perseoPeopleByNumber.get(person.number);
           if (perseoPerson != null) {
             join(person, perseoPerson);
-            synched++;
+            synced++;
           }
         }
       }
-      flash.success("Sincronizzate correttamente %d persone", synched);
+      flash.success("Sincronizzate correttamente %d persone", synced);
     }
     people(office.id);
   }
@@ -624,7 +624,6 @@ public class Synchronizations extends Controller {
     }
 
     render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
-
   }
 
   /**
@@ -739,20 +738,24 @@ public class Synchronizations extends Controller {
     WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
+      int synced = 0;
       for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
         Contract epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
         if (epasContract != null) {
           continue;
         }
-
         // Salvare il contratto.
         if (!contractManager.properContractCreate(perseoContract, normal, false)) {
-          // segnalare il conflitto
-          continue;
+          // TODO segnalare il conflitto
+        } else {
+          synced++;
         }
       }
-
-      flash.success("Operazione effettuata correttamente");
+      if (synced == 0) {
+        flash.success("Nessun contratto importato");
+      } else {
+        flash.success("Importati correttamente %d contratti", synced);
+      }
     }
 
     otherContracts(office.id);
