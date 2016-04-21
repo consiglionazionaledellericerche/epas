@@ -56,10 +56,12 @@ public class CertificationService {
   private final AbsenceDao absenceDao;
   private final CertificationDao certificationDao;
   
+  
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
       AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao, 
-      PersonDayManager personDayManager, PersonDayDao personDayDao, CertificationDao certificationDao) {
+      PersonDayManager personDayManager, PersonDayDao personDayDao, 
+      CertificationDao certificationDao) {
     this.certificationsComunication = certificationsComunication;
     this.absenceDao = absenceDao;
     this.competenceDao = competenceDao;
@@ -71,7 +73,7 @@ public class CertificationService {
   
   /**
    * Ritorna il token di comunicazione.
-   * @return
+   * @return token
    */
   public Optional<String> buildToken() {
     return certificationsComunication.getToken();
@@ -79,8 +81,10 @@ public class CertificationService {
   
   /**
    * Se il token è abilitato alla sede.
-   * @param token
-   * @return
+   * @param office sede
+   * @param token token 
+   * @param result result (da rimuovere)
+   * @return esito
    */
   public boolean authentication(Office office, Optional<String> token, boolean result) {
     
@@ -94,11 +98,11 @@ public class CertificationService {
    * Nota bene: se la lista è vuota significa che non è stato effettuato lo stralcio oppure
    * un errore nel protocollo di comunicazione con attestati. 
    * Es. Periodo 201603 non presente per la sede 224500. 
-   * @param office
-   * @param year
-   * @param month
-   * @param token
-   * @return
+   * @param office sede 
+   * @param year anno
+   * @param month mese 
+   * @param token token
+   * @return insieme di number
    */
   public Set<Integer> peopleList(Office office, int year, int month, Optional<String> token) {
     
@@ -108,10 +112,10 @@ public class CertificationService {
 
   /**
    * Le certificazioni già presenti su attestati. 
-   * @param person
-   * @param year
-   * @param month
-   * @param token
+   * @param person persona
+   * @param year anno
+   * @param month mese
+   * @param token token
    * @return null in caso di errore.
    */
   private Map<String, Certification> personAttestatiCertifications(Person person, 
@@ -182,13 +186,13 @@ public class CertificationService {
   }
   
   /**
-   * 
-   * @param person
-   * @param year
-   * @param month
-   * @param numbers
-   * @param token
-   * @return
+   * Costruisce la situazione attestati di una persona.
+   * @param person persona
+   * @param year anno
+   * @param month mese
+   * @param numbers numeri attestati in cui ricercarla
+   * @param token token
+   * @return lo stato
    */
   public PersonCertificationStatus buildPersonStaticStatus(Person person, int year, int month,
       Set<Integer> numbers, Optional<String> token) {
@@ -299,9 +303,10 @@ public class CertificationService {
       }
 
       if (epasCertification.attestatiId == null 
-          || epasCertification.attestatiId != attestatiCertification.attestatiId)
-      epasCertification.attestatiId = attestatiCertification.attestatiId;
-      epasCertification.save();
+          || epasCertification.attestatiId != attestatiCertification.attestatiId) {
+        epasCertification.attestatiId = attestatiCertification.attestatiId;
+        epasCertification.save();
+      }
 
     }
     
@@ -311,9 +316,9 @@ public class CertificationService {
 
   /**
    * Se le due mappe contententi certificazioni sono equivalenti e non contengono errori.
-   * @param map1
-   * @param map2
-   * @return
+   * @param map1 map1
+   * @param map2 map2
+   * @return esito
    */
   public boolean certificationsEquivalent(Map<String, Certification> map1, 
       Map<String, Certification> map2) {
@@ -339,6 +344,12 @@ public class CertificationService {
     return true;
   }
   
+  /**
+   * Elaborazione persona.
+   * @param personCertificationStatus il suo stato
+   * @param token token
+   * @return lo stato dopo l'elaborazione.
+   */
   public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus, 
       Optional<String> token) {
     
