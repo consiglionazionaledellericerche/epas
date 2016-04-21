@@ -415,23 +415,25 @@ public class Synchronizations extends Controller {
 
     Map<Integer, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.absent());
+      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.fromNullable(office.perseoId));
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
 
-    for (Person person : people) {
-      if (person.perseoId == null) {
-        Person perseoPerson = perseoPeopleByNumber.get(person.number);
-        if (perseoPerson != null) {
-          join(person, perseoPerson);
+    if (!people.isEmpty() && perseoPeopleByNumber != null) {
+      int synched = 0;
+      for (Person person : people) {
+        if (person.perseoId == null) {
+          Person perseoPerson = perseoPeopleByNumber.get(person.number);
+          if (perseoPerson != null) {
+            join(person, perseoPerson);
+            synched++;
+          }
         }
       }
+      flash.success("Sincronizzate correttamente %d persone", synched);
     }
-
-    flash.success("Operazione effettuata correttamente");
     people(office.id);
-
   }
 
   /**
@@ -577,15 +579,20 @@ public class Synchronizations extends Controller {
     Map<Long, Contract> activeContractsEpasByPersonPerseoId =
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
-    //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = null;
-    try {
-      perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-          .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
-    }
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = Maps.newHashMap();
 
+    if (office.perseoId == null) {
+      flash.error("Selezionare una sede già sincronizzata... "
+          + "%s non lo è ancora.", office.toString());
+    } else {
+      //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
+      try {
+        perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+            .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+      } catch (ApiRequestException e) {
+        flash.error("%s", e);
+      }
+    }
     render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
   }
 
@@ -603,12 +610,17 @@ public class Synchronizations extends Controller {
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
     //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = null;
-    try {
-      perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-          .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = Maps.newHashMap();
+    if (office.perseoId == null) {
+      flash.error("Selezionare una sede già sincronizzata... "
+          + "%s non lo è ancora.", office.toString());
+    } else {
+      try {
+        perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+            .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+      } catch (ApiRequestException e) {
+        flash.error("%s", e);
+      }
     }
 
     render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
@@ -631,8 +643,8 @@ public class Synchronizations extends Controller {
     try {
       contractInPerseo = contractPerseoConsumer
           .perseoContractByPerseoId(perseoId, contract.person);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
     Verify.verify(contractInPerseo.isPresent());
 
@@ -684,8 +696,8 @@ public class Synchronizations extends Controller {
     Optional<Contract> contractInPerseo = null;
     try {
       contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
     Verify.verify(contractInPerseo.isPresent());
 
@@ -720,26 +732,28 @@ public class Synchronizations extends Controller {
     try {
       perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
           .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
 
     WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 
-    for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
-      Contract epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
-      if (epasContract != null) {
-        continue;
+    if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
+      for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
+        Contract epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
+        if (epasContract != null) {
+          continue;
+        }
+
+        // Salvare il contratto.
+        if (!contractManager.properContractCreate(perseoContract, normal, false)) {
+          // segnalare il conflitto
+          continue;
+        }
       }
 
-      // Salvare il contratto.
-      if (!contractManager.properContractCreate(perseoContract, normal, false)) {
-        // segnalare il conflitto
-        continue;
-      }
+      flash.success("Operazione effettuata correttamente");
     }
-
-    flash.success("Operazione effettuata correttamente");
 
     otherContracts(office.id);
   }

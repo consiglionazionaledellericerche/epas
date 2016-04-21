@@ -1,9 +1,14 @@
 package synch.perseoconsumers.contracts;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.reflect.TypeToken;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 
 import com.beust.jcommander.internal.Maps;
@@ -11,6 +16,8 @@ import com.beust.jcommander.internal.Maps;
 import dao.PersonDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+
+import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +35,7 @@ import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ContractPerseoConsumer {
@@ -36,119 +44,109 @@ public class ContractPerseoConsumer {
   private final WrapperModelFunctionFactory wrapperFunctionFactory;
 
   @Inject
-  public ContractPerseoConsumer(PersonDao personDao, WrapperModelFunctionFactory wrapperFunctionFactory) {
+  public ContractPerseoConsumer(PersonDao personDao,
+                                WrapperModelFunctionFactory wrapperFunctionFactory) {
     this.personDao = personDao;
     this.wrapperFunctionFactory = wrapperFunctionFactory;
 
   }
 
   /**
-   * Json relativo alla contracta di perseo con id perseoId nel formato utile a epas.
-   *
-   * @param perseoId id perseo contracta
-   * @return json
+   * @param perseoContractId id di Perseo del contratto richiesta
+   * @return Il Contratto relativo all'id specificato.
    */
-  private Optional<String> perseoContractJson(Long perseoId) throws NoSuchFieldException {
+  private ListenableFuture<PerseoContract> perseoContractByPerseoId(Long perseoContractId) {
 
-    String endPoint = PerseoApis.getContractForEpasEndpoint() + perseoId;
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo il contract da {}.", endPoint);
-
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare il contract da {}", endPoint);
-      return Optional.<String>absent();
-    }
+    final String url;
+    final String user;
+    final String pass;
 
     try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch (Exception exp) {
-      log.info("Url={} non json.", endPoint);
+      url = PerseoApis.getContractForEpasEndpoint() + perseoContractId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
 
-    return null;
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Invio richiesta Contratto a Perseo: {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, new Function<HttpResponse, PerseoContract>() {
+      @Override
+      public PerseoContract apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente il contratto con id {} da Perseo", perseoContractId);
+        try {
+          return new Gson().fromJson(response.getJson(), PerseoContract.class);
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
 
   /**
-   * Json relativo a tutti i contratti del department di perseo nel formato utile a epas.
-   *
-   * @return json
+   * @param departmentPerseoId id (di Perseo) della sede sulla quale recuperare i contratti
+   * @return La Lista dei contratti delle persone appartenenti alla sede specificata.
    */
-  private Optional<String> perseoContractsJson(Long perseoId) throws NoSuchFieldException {
+  private ListenableFuture<List<PerseoContract>> perseoDepartmentContracts(Long departmentPerseoId) {
 
-    String endPoint = PerseoApis.getAllDepartmentContractsForEpasEndpoint() + perseoId;
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo i contratti del department da {}.", endPoint);
-
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare i contratti del department da {}", endPoint);
-      return Optional.<String>absent();
-    }
+    final String url;
+    final String user;
+    final String pass;
 
     try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch (Exception exp) {
-      log.info("Url={} non json.", endPoint);
+      url = PerseoApis.getAllDepartmentContractsForEpasEndpoint() + departmentPerseoId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
 
-    return null;
-  }
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
-  /**
-   * La lista dei PerseoContract nel perseoDepartment.
-   *
-   * @param perseoId perseo id department.
-   * @return lista
-   */
-  private List<PerseoContract> getAllPerseoDepartmentContracts(Long perseoId) throws NoSuchFieldException {
+    log.info("Invio richiesta contratti a Perseo: {}", request.url);
 
-    //Json della richiesta
-    Optional<String> json = perseoContractsJson(perseoId);
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
 
-    List<PerseoContract> perseoContracts = null;
-    try {
-      perseoContracts = new Gson()
-          .fromJson(json.get(), new TypeToken<List<PerseoContract>>() {
+    return Futures.transform(future, new Function<HttpResponse, List<PerseoContract>>() {
+      @Override
+      public List<PerseoContract> apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente i contratti da Perseo: {} {}",
+            response.getStatus(), response.getStatusText());
+        try {
+          return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoContract>>() {
           }.getType());
-    } catch (Exception exp) {
-      log.info("Impossibile caricare da perseo i contratti del department.");
-      return Lists.newArrayList();
-    }
-
-    return perseoContracts;
-  }
-
-
-  /**
-   * La PerseoContract con quel perseoId in Perseo.
-   *
-   * @param perseoId perseo id contract.
-   * @return contract
-   */
-  private Optional<PerseoContract> getPerseoContractByPerseoId(Long perseoId) throws NoSuchFieldException {
-
-    //Json della richiesta
-    Optional<String> json = perseoContractJson(perseoId);
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
-
-    PerseoContract perseoContract = null;
-    try {
-      perseoContract = new Gson()
-          .fromJson(json.get(), new TypeToken<PerseoContract>() {
-          }.getType());
-    } catch (Exception exp) {
-      log.info("Impossibile caricare da perseo il contratto con perseoId={}.", perseoId);
-      return Optional.<PerseoContract>absent();
-    }
-    if (perseoContract == null) {
-      return Optional.<PerseoContract>absent();
-    }
-    return Optional.fromNullable(perseoContract);
-
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
 
   /**
@@ -224,14 +222,23 @@ public class ContractPerseoConsumer {
    * @return mappa
    */
   public Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId(Long perseoDepartmentId,
-                                                                             Office office) throws NoSuchFieldException {
+                                                                             Office office) {
 
     @SuppressWarnings("deprecation")
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
+    List<PerseoContract> perseoContracts = Lists.newArrayList();
+
+    try {
+      perseoContracts = perseoDepartmentContracts(perseoDepartmentId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile recuperare i contratti della sede con id %d da Perseo - %s",
+          perseoDepartmentId, e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
     Map<Long, Person> departmentSyncrhonizedPeopleByPerseoId = epasSynchronizedPersonByPersonId(people);
-    List<PerseoContract> perseoContracts = getAllPerseoDepartmentContracts(perseoDepartmentId);
     Map<Long, Contract> perseoContractsMap = Maps.newHashMap();
     for (Contract contract : epasConverter(perseoContracts, departmentSyncrhonizedPeopleByPerseoId)) {
       perseoContractsMap.put(contract.person.perseoId, contract);
@@ -245,12 +252,21 @@ public class ContractPerseoConsumer {
    *
    * @return contratto
    */
-  public Optional<Contract> perseoContractByPerseoId(Long contractPerseoId, Person person) throws NoSuchFieldException {
-    Optional<PerseoContract> perseoContract = getPerseoContractByPerseoId(contractPerseoId);
-    if (!perseoContract.isPresent()) {
+  public Optional<Contract> perseoContractByPerseoId(Long contractPerseoId, Person person) {
+
+    PerseoContract perseoContract = null;
+    try {
+      perseoContract = perseoContractByPerseoId(contractPerseoId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile recuperare il contratto con id %d da Perseo - %s",
+          contractPerseoId, e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+    if (perseoContract == null) {
       return Optional.<Contract>absent();
     }
-    return Optional.fromNullable(epasConverter(perseoContract.get(), person));
+    return Optional.fromNullable(epasConverter(perseoContract, person));
   }
 
   /**
