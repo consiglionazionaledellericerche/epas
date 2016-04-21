@@ -366,6 +366,7 @@ public class CertificationService {
           certification.save();  
         } else {
           containProblemCertifications.put(certification.aMapKey(), certification);
+          certification.save();  
         }
       }
     }

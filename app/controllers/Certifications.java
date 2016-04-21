@@ -140,7 +140,7 @@ public class Certifications extends Controller {
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
     
     List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
-    
+    boolean peopleNotInAttestati = false;
     for (Person person : people) {
       
       // Costruisco lo status generale
@@ -152,10 +152,14 @@ public class Certifications extends Controller {
         numbers.remove(person.number);        
       }
       
+      if (personCertificationStatus.notInAttestati) {
+        peopleNotInAttestati = true;
+      }
+      
       peopleCertificationStatus.add(personCertificationStatus);
     }
     
-    render(office, year, month, peopleCertificationStatus, numbers);
+    render(office, year, month, peopleCertificationStatus, numbers, peopleNotInAttestati);
   }
   
   

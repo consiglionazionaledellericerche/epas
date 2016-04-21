@@ -15,22 +15,31 @@
 
 
  #{alert color:'info'}
-   <p>Da inserire lo stato di autenticazione ed eventualmente la form di login.</p>
+   <p> <strong>TODO:</strong> Da inserire lo stato di autenticazione ed eventualmente la form di login.</p>
  #{/alert} 
- *{ 
+ 
  #{if !numbers.empty}
    #{alert color:'danger'}
-   <p>Ci Sono matricole in attestati non inserite in epas.</p>
+     <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
+     #{list items:numbers, as:'number'}
+       <span class="label label-danger">${number}</span>
+     #{/list}
    #{/alert}
  #{/if}
   
- #{if !numbers.empty}
+ #{if peopleNotInAttestati}
    #{alert color:'danger'}
-   <p>Ci Sono matricole in attestati non inserite in epas.</p>
- #{/alert}
- }*
+     <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
+     #{list items:peopleCertificationStatus, as:'personCertificationStatus'}
+       #{if  personCertificationStatus.notInAttestati}
+       <span class="label label-danger">${personCertificationStatus.person.fullname}</span>
+       #{/if}
+     #{/list}
+   #{/alert}
+  #{/if}  
+ 
 
-*{
+ *{
 	#{form @Certifications.personCertificated(), class:'form-horizontal'}
 		
 		#{alert color:'info'}
