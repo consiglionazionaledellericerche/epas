@@ -174,6 +174,12 @@ public class SwitchTemplate extends Controller {
     if (action.equals("Synchronizations.otherContracts")) {
       Synchronizations.otherContracts(officeId);
     }
+    if (action.equals("Certifications.certifications")) {
+      Certifications.certifications(officeId, year, month);
+    }
+    if (action.equals("Certifications.processAll")) {
+      Certifications.certifications(officeId, year, month); //Voluto. Lo switch non processa.
+    }
 
   }
 

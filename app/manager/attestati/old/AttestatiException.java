@@ -1,4 +1,4 @@
-package helpers.attestati;
+package manager.attestati.old;
 
 /**
  * Sollevata per eventuali eccezioni di comunicazione con il sistema degli attestati.

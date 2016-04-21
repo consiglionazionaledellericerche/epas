@@ -1,4 +1,4 @@
-package helpers.attestati;
+package manager.attestati.old;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -543,6 +543,13 @@ public class AttestatiClient {
     
     List<RispostaElaboraDati> checks = Lists.newLinkedList();
 
+    /**
+     * In questo punto devo mettere le chiamate rest per ciascuno dei parametri da inviare ad attestati:
+     * invece di inviare persona per persona tutte le informazioni, occorre inviare per ciascuna informazione
+     * (assenze, competenze, ore di formazione, buoni pasto) la lista dei dipendenti con le rispettive info
+     * come da documento inviato da pagano 
+     * 
+     */
     for (Dipendente dipendente : dipendenti) {
 
       if (dipendente.getMatricola() == null || dipendente.getMatricola().isEmpty()) {
@@ -550,6 +557,7 @@ public class AttestatiClient {
       }
       Person person = personDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
 
+      
       //Ore formazione
       List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
           .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
