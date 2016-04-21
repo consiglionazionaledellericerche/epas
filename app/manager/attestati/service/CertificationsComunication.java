@@ -37,25 +37,25 @@ import java.util.Set;
 public class CertificationsComunication {
 
   //Attestati api
-  private final static String BASE_URL = "http://as2dock.si.cnr.it";
-  private final static String ATTESTATO_URL = "/api/ext/attestato";
-  private final static String API_URL = "/api/ext";
-  private final static String API_URL_LISTA_DIPENDENTI = "/listaDipendenti";
-  private final static String API_URL_ASSENZA = "/rigaAssenza";
-  private final static String API_URL_BUONI_PASTO = "/rigaBuoniPasto";
-  private final static String API_URL_FORMAZIONE = "/rigaFormazione";
-  private final static String API_URL_COMPETENZA = "/rigaCompetenza";
-  private final static String JSON_CONTENT_TYPE = "application/json";
+  private static final String BASE_URL = "http://as2dock.si.cnr.it";
+  private static final String ATTESTATO_URL = "/api/ext/attestato";
+  private static final String API_URL = "/api/ext";
+  private static final String API_URL_LISTA_DIPENDENTI = "/listaDipendenti";
+  private static final String API_URL_ASSENZA = "/rigaAssenza";
+  private static final String API_URL_BUONI_PASTO = "/rigaBuoniPasto";
+  private static final String API_URL_FORMAZIONE = "/rigaFormazione";
+  private static final String API_URL_COMPETENZA = "/rigaCompetenza";
+  private static final String JSON_CONTENT_TYPE = "application/json";
   
   //OAuh
-  private final static String OAUTH_CLIENT_SECRET = "mySecretOAuthSecret";
-  private final static String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
-  private final static String OAUTH_URL = "/oauth/token";
-  private final static String OAUTH_AUTHORIZATION = "YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ=";
-  private final static String OAUTH_USERNAME = "app.epas";
-  private final static String OAUTH_PASSWORD = "trapocolapuoicambiare";
-  private final static String OAUTH_GRANT_TYPE = "password";
-  private final static String OAUTH_CLIENT_ID= "attestatiapp";
+  private static final String OAUTH_CLIENT_SECRET = "mySecretOAuthSecret";
+  private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
+  private static final String OAUTH_URL = "/oauth/token";
+  private static final String OAUTH_AUTHORIZATION = "YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ=";
+  private static final String OAUTH_USERNAME = "app.epas";
+  private static final String OAUTH_PASSWORD = "trapocolapuoicambiare";
+  private static final String OAUTH_GRANT_TYPE = "password";
+  private static final String OAUTH_CLIENT_ID = "attestatiapp";
   
   @Inject
   public CertificationsComunication() {
@@ -64,29 +64,32 @@ public class CertificationsComunication {
   
   /**
    * Per l'ottenenere il Bearer Token:
-   * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" -H 
-   * "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="  -d 'username=app.epas&password=.............
-   * &grant_type=password&scope=read%20write&client_secret=mySecretOAuthSecret&client_id=attestatiapp' 
+   * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" 
+   * -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="  
+   * -d 'username=app.epas&password=.............
+   * &grant_type=password&scope=read%20write
+   * &client_secret=mySecretOAuthSecret&client_id=attestatiapp' 
    * "http://as2dock.si.cnr.it/oauth/token"
-   * @return
+   * @return il token
    */
-  public Optional<String> getToken(){
+  public Optional<String> getToken() {
 
     try {
       
-      String body = String.format("username=%s&password=%s&grant_type=%s&client_secret=%s&client_id=%s", 
+      String body = String
+          .format("username=%s&password=%s&grant_type=%s&client_secret=%s&client_id=%s", 
           OAUTH_USERNAME, OAUTH_PASSWORD, OAUTH_GRANT_TYPE, OAUTH_CLIENT_SECRET, OAUTH_CLIENT_ID);
       
       WSRequest req = WS.url(BASE_URL + OAUTH_URL)
           .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
-          .setHeader("Authorization", "Basic "+ OAUTH_AUTHORIZATION)
+          .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
           .body(body);
       HttpResponse response = req.post();
       Gson gson = new Gson();
       TokenDTO token = gson.fromJson(response.getJson(), TokenDTO.class);
 
       return Optional.fromNullable(token.access_token);
-    } catch(Exception e) {
+    } catch (Exception ex) {
       return Optional.<String>absent();
     }
   }
@@ -103,18 +106,26 @@ public class CertificationsComunication {
   
   /**
    * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.
-   * @param token
-   * @param url
-   * @param contentType
+   * @param token token
+   * @param url url 
+   * @param contentType contentType
    * @return
    */
   private WSRequest prepareOAuthRequest(String token, String url, String contentType) {
     WSRequest wsRequest = WS.url( BASE_URL + url)
         .setHeader("Content-Type", contentType)
-        .setHeader("Authorization", "Bearer "+ token);
+        .setHeader("Authorization", "Bearer " + token);
     return wsRequest;
   }
   
+  /**
+   * Preleva la lista delle matricole da attestati.
+   * @param office sede
+   * @param year anno
+   * @param month mese 
+   * @param token token
+   * @return insieme di numbers
+   */
   public Set<Integer> getPeopleList(Office office, int year, int month, 
       Optional<String> token) {
     
@@ -147,10 +158,10 @@ public class CertificationsComunication {
    * curl -X GET -H "Authorization: Bearer cf24c413-9cf7-485d-a10b-87776e5659c7" 
    * -H "Content-Type: application/json" 
    * http://as2dock.si.cnr.it/api/ext/attestato/{{CODICESEDE}}/{{MATRICOLA}}/{{ANNO}}/{{MESE}}
-   * @param person
-   * @param month
-   * @param year
-   * @param token
+   * @param person persona
+   * @param month mese
+   * @param year anno
+   * @param token token
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person, 
       int month, int year, Optional<String> token) {
@@ -181,8 +192,8 @@ public class CertificationsComunication {
   
   /**
    * Conversione del json di risposta da attestati.
-   * @param httpResponse
-   * @return
+   * @param httpResponse risposta
+   * @return rispostaAttestati
    */
   public RispostaAttestati parseRispostaAttestati(HttpResponse httpResponse) {
     return new Gson().fromJson(httpResponse.getJson(), RispostaAttestati.class);
@@ -191,9 +202,9 @@ public class CertificationsComunication {
   
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse sendRigaAssenza(Optional<String> token, Certification certification) {
     if (!reloadToken(token).isPresent()) {
@@ -212,9 +223,9 @@ public class CertificationsComunication {
   
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse sendRigaBuoniPasto(Optional<String> token, Certification certification, boolean update) {
     if (!reloadToken(token).isPresent()) {
@@ -236,9 +247,9 @@ public class CertificationsComunication {
   
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse sendRigaFormazione(Optional<String> token, Certification certification) {
     if (!reloadToken(token).isPresent()) {
@@ -257,9 +268,9 @@ public class CertificationsComunication {
   
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse sendRigaCompetenza(Optional<String> token, Certification certification) {
     if (!reloadToken(token).isPresent()) {
@@ -278,9 +289,9 @@ public class CertificationsComunication {
   
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse deleteRigaAssenza(Optional<String> token, Certification certification) {
     if (!reloadToken(token).isPresent()) {
@@ -297,32 +308,11 @@ public class CertificationsComunication {
     return wsRequest.delete();
   }
   
-//  /**
-//   * Invia la riga di assenza ad attestati.
-//   * @param token
-//   * @param certification
-//   * @return
-//   */
-//  public HttpResponse deleteRigaBuoniPasto(Optional<String> token, Certification certification) {
-//    if (!reloadToken(token).isPresent()) {
-//      return null;
-//    }
-//
-//    String url = API_URL + API_URL_BUONI_PASTO;
-//    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
-//
-//    CancellazioneRigaBuoniPasto riga = new CancellazioneRigaBuoniPasto(certification);
-//    String json = new Gson().toJson(riga);
-//    wsRequest.body(json);
-//
-//    return wsRequest.post();
-//  }
-  
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse deleteRigaFormazione(Optional<String> token, Certification certification) {
     if (!reloadToken(token).isPresent()) {
@@ -341,9 +331,9 @@ public class CertificationsComunication {
   
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token
-   * @param certification
-   * @return
+   * @param token token
+   * @param certification attestato
+   * @return risposta
    */
   public HttpResponse deleteRigaCompetenza(Optional<String> token, Certification certification) {
     if (!reloadToken(token).isPresent()) {

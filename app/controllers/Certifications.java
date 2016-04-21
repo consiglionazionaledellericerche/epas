@@ -40,7 +40,6 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
-@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Certifications extends Controller {
 
@@ -58,31 +57,16 @@ public class Certifications extends Controller {
   @Inject 
   private static CertificationService certificationService;
   
-  public static void newAttestati(Long officeId){
-    
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-    rules.checkIfPermitted(office);
-    
-    Optional<String> token = certificationService.buildToken();
-    if (!token.isPresent()) {
-      flash.error("Impossibile autenticarsi a attestati.");
-      UploadSituation.uploadData(officeId);
-    }
-    
-    IWrapperOffice wrOffice = factory.create(office);
-    Optional<YearMonth> monthToUpload = wrOffice.nextYearMonthToUpload();
-    
-    render(wrOffice, monthToUpload, token);
-  }
-  
+ 
   /**
    * Pagina principale nuovo invio attestati.
-   * @param officeId
-   * @param year
-   * @param month
+   * @param officeId sede 
+   * @param year anno
+   * @param month mese
    */
   public static void certifications(Long officeId, Integer year, Integer month) {
+    
+    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -100,12 +84,10 @@ public class Certifications extends Controller {
     if (year != null && month != null) {
       monthToUpload = Optional.fromNullable(new YearMonth(year, month));
     }
-    
-    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
-    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
     year = monthToUpload.get().getYear();
     month = monthToUpload.get().getMonthOfYear();
-    
+
     // Patch per la navigazione del menù ... ####################################
     // Al primo accesso (da menù) dove non ho mese e anno devo prendere il default
     // (NextMonthToUpload). In quel caso aggiorno la sessione nel cookie. Dovrebbe
@@ -119,12 +101,17 @@ public class Certifications extends Controller {
         office.id));
     // ##########################################################################
     
+    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(), 
+        monthToUpload.get().getMonthOfYear(), 1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
+    
     //Il mese selezionato è abilitato?
     Optional<String> token = certificationService.buildToken();
     boolean autenticate = certificationService.authentication(office, token, true);
     if (!autenticate) {
       flash.error("L'utente app.epas non è abilitato alla sede selezionata");
-      render(office, year, month, autenticate);
+      render(office, year, month);
     }
     
     //Lo stralcio è stato effettuato?
@@ -132,7 +119,7 @@ public class Certifications extends Controller {
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
           + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
-      render(office, year, month, autenticate, numbers);
+      render(office, year, month, numbers);
     }
     
     @SuppressWarnings("deprecation")
@@ -162,8 +149,15 @@ public class Certifications extends Controller {
     render(office, year, month, peopleCertificationStatus, numbers, peopleNotInAttestati);
   }
   
-  
+  /**
+   * Elaborazione.
+   * @param officeId sede
+   * @param year anno
+   * @param month mese
+   */
   public static void processAll(Long officeId, Integer year, Integer month) {
+    
+    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -182,7 +176,7 @@ public class Certifications extends Controller {
     boolean autenticate = certificationService.authentication(office, token, true);
     if (!autenticate) {
       flash.error("L'utente app.epas non è abilitato alla sede selezionata");
-      renderTemplate("@certifications", office, year, month, autenticate);
+      renderTemplate("@certifications", office, year, month);
     }
     
     //Lo stralcio è stato effettuato?
@@ -190,7 +184,7 @@ public class Certifications extends Controller {
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
           + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
-      renderTemplate("@certifications", office, year, month, autenticate, numbers);
+      renderTemplate("@certifications", office, year, month, numbers);
     }
     
     @SuppressWarnings("deprecation")
@@ -218,10 +212,11 @@ public class Certifications extends Controller {
       }
       
       peopleCertificationStatus.add(personCertificationStatus);
-
     }
     
-    renderTemplate("@certifications", office, year, month, numbers, peopleNotInAttestati, 
+    flash.success("Elaborazione completata");
+    
+    renderTemplate("@certifications", office, year, month, numbers, peopleNotInAttestati,
         peopleCertificationStatus);
   }
   
