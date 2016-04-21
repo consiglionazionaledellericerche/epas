@@ -18,7 +18,7 @@
    <p> <strong>TODO:</strong> Da inserire lo stato di autenticazione ed eventualmente la form di login.</p>
  #{/alert} 
  
- 
+ #{if numbers != null}  *{ se è injettato è stata ottenuta l'autenticazione }*  
 	 #{if !numbers.empty}
 	   #{alert color:'danger'}
 	     <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
@@ -38,6 +38,10 @@
 	     #{/list}
 	   #{/alert}
 	  #{/if}  
+	
+	#{/if}
+	
+	
 	 
 	#{if peopleCertificationStatus} *{ se è injettato è stato fatto lo stralcio }*  
 	
