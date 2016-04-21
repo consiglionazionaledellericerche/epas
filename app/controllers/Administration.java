@@ -6,6 +6,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
 import dao.PersonDao;
@@ -17,22 +18,28 @@ import it.cnr.iit.epas.CompetenceUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
+import manager.EmailManager;
 import manager.PersonDayInTroubleManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
+import manager.UserManager;
 
 import models.AbsenceType;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
+import models.User;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
+import org.assertj.core.util.Strings;
 import org.joda.time.LocalDate;
 
 import play.Play;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -41,6 +48,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -49,6 +57,9 @@ import javax.inject.Inject;
 @Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Administration extends Controller {
+
+  static final String SUDO_USERNAME = "sudo.username";
+  static final String USERNAME = "username";
 
   @Inject
   static SecureManager secureManager;
@@ -68,6 +79,10 @@ public class Administration extends Controller {
   static PersonDayManager personDayManager;
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
+  @Inject
+  static UserManager userManager;
+  @Inject
+  static EmailManager emailManager;
 
   /**
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
@@ -366,4 +381,96 @@ public class Administration extends Controller {
     render("@data", entries);
   }
 
+  public static void addConfiguration() {
+    render();
+  }
+
+  public static void saveConfiguration(@Required String name, @Required String value, boolean newParam) {
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      if (newParam) {
+        render("@addConfiguration", name, value);
+      }
+    } else {
+      Play.configuration.setProperty(name, value);
+      // Questo metodo viene chiamato sia tramite x-editable che tramite form nel modale
+      // il booleano newParam viene usato per discriminare la provenienza della chiamata
+      if (newParam) {
+        flash.success("Parametro di configurazione correttamente salvato: %s=%s", name, value);
+        playConfiguration();
+      }
+    }
+  }
+
+  /**
+   * Switch in un'altro user.
+   */
+  public static void switchUserTo(long id) {
+
+    final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
+    notFoundIfNull(user);
+
+    // salva il precedente
+    session.put(SUDO_USERNAME, session.get(USERNAME));
+    // recupera
+    session.put(USERNAME, user.username);
+    // redirect alla radice
+    session.remove("officeSelected");
+    redirect(Play.ctxPath + "/");
+  }
+
+  /**
+   * Switch nell'user di una persona.
+   */
+  public static void switchUserToPersonUser(long id) {
+
+    final Person person = Administrators.personDao.getPersonById(id);
+    notFoundIfNull(person);
+    Preconditions.checkNotNull(person.user);
+    switchUserTo(person.user.id);
+  }
+
+  /**
+   * ritorna alla precedente persona.
+   */
+  public static void restoreUser() {
+    if (session.contains(SUDO_USERNAME)) {
+      session.put(USERNAME, session.get(SUDO_USERNAME));
+      session.remove(SUDO_USERNAME);
+    }
+    // redirect alla radice
+    redirect(Play.ctxPath + "/");
+  }
+
+  public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
+                                             boolean sendMail) {
+
+    final Pattern domainPattern = Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
+
+    if (!Strings.isNullOrEmpty(domain) && domain.contains("@")) {
+      Validation.addError("domain", "Specificare il dominio senza il carattere @");
+    }
+    if (!domainPattern.matcher(domain).matches()) {
+      Validation.addError("domain", "Formato non corretto");
+    }
+    if (Validation.hasErrors()) {
+      render("@utilities", office, domain, sendMail);
+    }
+
+    final List<Person> people = personDao.byOffice(office);
+
+    people.forEach(person -> {
+      person.email = person.email.substring(0, person.email.indexOf("@") + 1) + domain;
+      person.save();
+      if (sendMail) {
+        userManager.generateRecoveryToken(person);
+        emailManager.newUserMail(person);
+      }
+    });
+
+    flash.success("Indirizzo email reimpostato per %s persone dell'ufficio %s",
+        people.size(), office);
+
+    utilities();
+  }
 }

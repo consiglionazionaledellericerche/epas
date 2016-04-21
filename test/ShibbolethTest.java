@@ -1,5 +1,7 @@
 import controllers.shib.MockShibboleth;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
 
 import org.hamcrest.core.IsNull;
@@ -12,6 +14,7 @@ import play.mvc.Http.Response;
 import play.mvc.Router;
 import play.test.FunctionalTest;
 
+@Slf4j
 public class ShibbolethTest extends FunctionalTest {
 
 
@@ -27,15 +30,14 @@ public class ShibbolethTest extends FunctionalTest {
     // will be used to authenticate the next user which
     // logins in.
     MockShibboleth.removeAll();
-    MockShibboleth.set("eppn","cristian.lucchesi@cnr.it");
+    MockShibboleth.set("eppn","cristian.lucchesi@iit.cnr.it");
 
     final String LOGIN_URL = Router.reverse("shib.Shibboleth.login").url;
     Response response = GET(LOGIN_URL,true);
     assertIsOk(response);
-    Logger.info("response = %s", response);
+    log.debug("response.contentType = {}", response.contentType);
     assertContentType("text/html", response);
-    assertTrue(response.cookies.get("PLAY_SESSION").value
-        .contains("cristian.lucchesi"));
+    assertTrue(response.cookies.get("PLAY_SESSION").value.contains("cristian.lucchesi"));
 
   }
 

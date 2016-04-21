@@ -190,7 +190,10 @@ public class RequestInit extends Controller {
         "MonthRecaps.show",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
-        "MealTickets.recapMealTickets");
+        "MealTickets.recapMealTickets",
+        "Certifications.certifications",
+        "Certifications.processAll",
+        "Certifications.emptyCertifications");
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -201,7 +204,10 @@ public class RequestInit extends Controller {
         "PersonMonths.trainingHours",
         "PersonMonths.hourRecap",
         "Vacations.show",
-        "VacationsAdmin.list");
+        "VacationsAdmin.list",
+        "Certifications.certifications",
+        "Certifications.processAll",
+        "Certifications.emptyCertifications");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
@@ -228,7 +234,14 @@ public class RequestInit extends Controller {
         "WorkingTimes.manageOfficeWorkingTime",
         "MealTickets.recapMealTickets",
         "MealTickets.returnedMealTickets",
-        "Configurations.show");
+        "Configurations.show",
+        "Synchronizations.people",
+        "Synchronizations.otherPeople",
+        "Synchronizations.activeContracts",
+        "Synchronizations.otherContracts",
+        "Certifications.certifications",
+        "Certifications.processAll",
+        "Certifications.emptyCertifications");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
@@ -265,7 +278,9 @@ public class RequestInit extends Controller {
         "UploadSituation.uploadData",
         "MealTickets.recapMealTickets",
         "MealTickets.returnedMealTickets",
-        "Configurations.show");
+        "Configurations.show",
+        "Certifications.certifications",
+        "Certifications.processAll");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",

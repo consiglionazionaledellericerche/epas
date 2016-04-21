@@ -8,8 +8,8 @@
 </style>
 #{/set}
 
-#{secure.checkAction 'Administrators.switchUserTo'}
-#{set switchUser:true /}
+#{secure.checkAction 'Administration.switchUserTo'}
+  #{set switchUser:true /}
 #{/secure.checkAction}
 
 <div class="container">
@@ -68,9 +68,19 @@
         #{/elseif}
         
       <td><font color="#000000">${person.value.number}</font></td>
-      <td data-order="${person.currentContract.get().beginDate}"><font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
+      <td data-order="${person.currentContract.get().beginDate}">
+        <font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
       </td>
-      <td data-order="${person.currentContract.get().endDate}"><font color="#000000">${person.currentContract.get().endDate?.format()}</font>
+      <td data-order="${person.currentContract.get().endDate}">
+        #{if person.currentContract.get().endDate}
+          <font color="#000000">${person.currentContract.get().endDate?.format()}</font>
+        #{/if}
+        #{else}
+          #{if person.currentContract.get().isTemporary}
+            <em class="text-danger">Data da inserire</em>
+          #{/if}
+        #{/else}
+        
       </td>
 
       <td>
@@ -105,7 +115,7 @@
       #{if switchUser}
       <td>
         <a class="btn btn-warning btn-xs"
-           href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+           href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
       </td>
       #{/if}
     </tr>
@@ -150,7 +160,7 @@
       #{if switchUser}
       <td>
         <a class="btn btn-warning btn-xs"
-           href="@{Administrators.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+           href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
       </td>
       #{/if}
     </tr>

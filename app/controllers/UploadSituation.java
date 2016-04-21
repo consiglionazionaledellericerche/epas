@@ -12,21 +12,18 @@ import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
-import helpers.attestati.AttestatiClient;
-import helpers.attestati.AttestatiClient.DipendenteComparedRecap;
-import helpers.attestati.AttestatiClient.SessionAttestati;
-import helpers.attestati.AttestatiException;
-import helpers.attestati.Dipendente;
-import helpers.attestati.RispostaElaboraDati;
-
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.UploadSituationManager;
+import manager.attestati.old.AttestatiClient;
+import manager.attestati.old.AttestatiClient.DipendenteComparedRecap;
+import manager.attestati.old.AttestatiClient.SessionAttestati;
+import manager.attestati.old.AttestatiException;
+import manager.attestati.old.Dipendente;
+import manager.attestati.old.RispostaElaboraDati;
 
 import models.CertificatedData;
 import models.Office;
-import models.enumerate.Parameter;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.YearMonth;
@@ -113,7 +110,7 @@ public class UploadSituation extends Controller {
 
     render(wrOffice, monthToUpload, sessionAttestati);
   }
-
+  
   /**
    * Modale Cambia il mese e la sede.
    *

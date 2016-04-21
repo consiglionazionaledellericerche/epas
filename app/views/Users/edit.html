@@ -29,7 +29,7 @@
 		    #{f.view 'user.person' /}
 		  #{/if}	
 		  #{f.input 'user.username', required:true /}
-		  #{f.input 'user.password', type:'password', required:true /}
+		  #{f.input 'user.password', value:'', type:'password', required:true /}
 		  #{if user.owner != null}
 		    #{f.input 'user.owner', readonly:true /}
 		  #{/if}
@@ -41,7 +41,7 @@
 		  	<th class="alert alert-info">Ruolo</th>
     		<th class="alert alert-info">Ufficio</th>
 		  </tr>    
-	      #{list items:uroList, as:'uro'}
+	      #{list items:user.usersRolesOffices, as:'uro'}
 	      <tr>
 	      	<td>${uro.role}</td>
 	      	<td>${uro.office}</td>

@@ -162,6 +162,27 @@ public class SwitchTemplate extends Controller {
     if (action.equals("MealTickets.recapPersonMealTickets")) {
       MealTickets.recapPersonMealTickets(personId);
     }
+    if (action.equals("Synchronizations.people")) {
+      Synchronizations.people(officeId);
+    }
+    if (action.equals("Synchronizations.otherPeople")) {
+      Synchronizations.otherPeople(officeId);
+    }
+    if (action.equals("Synchronizations.activeContracts")) {
+      Synchronizations.activeContracts(officeId);
+    }
+    if (action.equals("Synchronizations.otherContracts")) {
+      Synchronizations.otherContracts(officeId);
+    }
+    if (action.equals("Certifications.certifications")) {
+      Certifications.certifications(officeId, year, month);
+    }
+    if (action.equals("Certifications.processAll")) {
+      Certifications.certifications(officeId, year, month); //Voluto. Lo switch non processa.
+    }
+    if (action.equals("Certifications.emptyCertifications")) {
+      Certifications.certifications(officeId, year, month); //Voluto. Lo switch non svuota.
+    }
 
   }
 
