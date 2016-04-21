@@ -1,0 +1,153 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
+
+<div class="container">
+#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
+</div>
+
+*{
+#{certifications.certificationsTabs activeAction:'certifications' /}
+}*
+
+
+<div class="container">
+
+
+ #{alert color:'info'}
+   <p> <strong>TODO:</strong> Da inserire lo stato di autenticazione ed eventualmente la form di login.</p>
+ #{/alert} 
+ 
+ #{if !numbers.empty}
+   #{alert color:'danger'}
+     <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
+     #{list items:numbers, as:'number'}
+       <span class="label label-danger">${number}</span>
+     #{/list}
+   #{/alert}
+ #{/if}
+  
+ #{if peopleNotInAttestati}
+   #{alert color:'danger'}
+     <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
+     #{list items:peopleCertificationStatus, as:'personCertificationStatus'}
+       #{if  personCertificationStatus.notInAttestati}
+       <span class="label label-danger">${personCertificationStatus.person.fullname}</span>
+       #{/if}
+     #{/list}
+   #{/alert}
+  #{/if}  
+ 
+
+ *{
+	#{form @Certifications.personCertificated(), class:'form-horizontal'}
+		
+		#{alert color:'info'}
+		<p>La situazione della persona con matricola '9891'</p>
+		#{/alert}
+
+        #{f.selectModel 'office', items:templateUtility.officesAllowed(), value:wrOffice.value /}
+
+		#{f.selectEnum 'year', label:'Anno Attestato', items:wrOffice.yearUploadable, value:monthToUpload.get().year, byEquals:true /} 
+		#{f.selectEnum 'month', label:'Mese Attestato', items:wrOffice.monthUploadable, value:monthToUpload.get().monthOfYear, byEquals:true /}	
+		
+		#{f.hidden 'token', value:token.get() /}
+		
+		<br>
+		#{b.buttons center:true}
+            
+            #{b.submit 'Invio'/}
+          #{/b.buttons}
+	#{/form}
+}*
+
+<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa</a>
+
+  
+<ul class="list-group">
+  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }
+  
+  
+  
+  <li class="list-group-item 
+    #{if personCertificationStatus.okProcessable || personCertificationStatus.okNotProcessable} list-group-item-success#{/if}
+    #{if personCertificationStatus.incompleteNotProcessable} list-group-item-danger#{/if}
+    #{if personCertificationStatus.incompleteProcessable} list-group-item-warning#{/if}
+    ">
+    <div class="row">
+    <div class="col-xs-3">
+    <strong>${personCertificationStatus.person.fullname}<br>${personCertificationStatus.person.number}</strong>
+    </div>
+    <div class="col-xs-3">
+        #{if personCertificationStatus.okProcessable}
+	      <p class="text-success"><i class="fa fa-check fa-2x"
+	      popover-hover data-content="Attestato processato correttamente."></i></p>
+	    #{/if}
+	    #{if personCertificationStatus.incompleteProcessable}
+	      <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
+	      popover-hover data-content="Attestato incompleto da processare."></i></p>
+	    #{/if}
+	    
+	
+	    #{if personCertificationStatus.okNotProcessable}
+	      <p class="text-muted"><i class="fa fa-check fa-2x"
+	      popover-hover data-content="Attestato processato correttamente, non modificabile."></i></p>
+	    #{/if}
+	    #{if personCertificationStatus.incompleteNotProcessable}
+	    <p class="text-danger"><i class="fa fa-frown-o fa-2x"
+         popover-hover data-content="Attestato incompleto non processabile."></i></p>
+	      
+	    #{/if}
+    </div>
+    
+    <div class="col-xs-6">
+	
+	    #{if personCertificationStatus.incompleteProcessable 
+	    	|| personCertificationStatus.okProcessable}
+	    
+	      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'correct' /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toSend' /}
+	      #{/list}
+	      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'problems' /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toDelete', 
+	          staticView:personCertificationStatus.staticView /}
+	      #{/list}
+	    
+	    #{/if}
+	    
+	
+	    #{if personCertificationStatus.incompleteNotProcessable || 
+	    personCertificationStatus.okNotProcessable}
+	    
+	      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'correct', muted:true /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toSend', muted:true /}
+	      #{/list}
+	      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'problems', muted:true /}
+	      #{/list}
+	      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
+	        #{certifications.showCertification certification:certification, type:'toDelete', 
+	          muted:true /}
+	      #{/list}
+	      
+	    #{/if}
+
+    </div>
+    </div>
+  </li>
+
+  #{/list}
+</ul>
+  
+  
+  
+</div>

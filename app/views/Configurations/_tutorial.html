@@ -47,6 +47,11 @@
        
       
     #{/if}
+    
+    #{if configuration.epasParam.equals(models.enumerate.EpasParam.NEW_ATTESTATI) }
+      <p>Abilitando questa funzionalità la sede <strong>${configuration.office.name}</strong> 
+      passerà all'utilizzo della nuova piattaforma CNR di invio attestati.</p>
+    #{/if}
         
     #{if configuration.epasParam.equals(models.enumerate.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
       <p>Questo parametro configurabile su base annuale specifica il giorno di scadenza delle ferie anno precedente.
