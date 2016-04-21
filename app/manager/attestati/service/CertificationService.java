@@ -421,46 +421,56 @@ public class CertificationService {
   public Certification sendCertification(Certification certification, Optional<String> token) {
 
     try {
-    HttpResponse httpResponse;
-    RispostaAttestati rispostaAttestati;
+      HttpResponse httpResponse;
+      Optional<RispostaAttestati> rispostaAttestati;
 
-    if (certification.certificationType.equals(CertificationType.ABSENCE)) {
-      httpResponse = certificationsComunication.sendRigaAssenza(token, certification);
-      rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
-      
-    } else if (certification.certificationType.equals(CertificationType.FORMATION)) {
-      httpResponse = certificationsComunication.sendRigaFormazione(token, certification);
-      rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
-      
-    } else if (certification.certificationType.equals(CertificationType.MEAL)) {
-      httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, false);
-      rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
-      if (rispostaAttestati.message.contains("attestato_buoni_pasto_ukey")) {
-        httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, true);
+      if (certification.certificationType.equals(CertificationType.ABSENCE)) {
+        httpResponse = certificationsComunication.sendRigaAssenza(token, certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+
+      } else if (certification.certificationType.equals(CertificationType.FORMATION)) {
+        httpResponse = certificationsComunication.sendRigaFormazione(token, certification);
+        rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+
+      } else if (certification.certificationType.equals(CertificationType.MEAL)) {
+        httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, false);
+        rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+
+        if (rispostaAttestati.isPresent() 
+            && rispostaAttestati.get().message.contains("attestato_buoni_pasto_ukey")) {
+          httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, true);
+          rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+        }
+
+      } else if (certification.certificationType.equals(CertificationType.COMPETENCE)) {
+        httpResponse = certificationsComunication.sendRigaCompetenza(token, certification);
+        rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+
+      } else {
+        return null;
+
       }
-      
-    } else if (certification.certificationType.equals(CertificationType.COMPETENCE)) {
-      httpResponse = certificationsComunication.sendRigaCompetenza(token, certification);
-      rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else {
-      return null;
+      // Esito 
+      if (httpResponse.getStatus() == 200) {
+        certification.problems = "";
+      } else if (httpResponse.getStatus() == 500) {
 
-    }
+        if (rispostaAttestati.isPresent()) {
+          certification.problems = rispostaAttestati.get().message;
+        } else {
+          certification.problems = "Errore interno al server";
+        }
+      } else {
+        if (rispostaAttestati.isPresent()) {
+          certification.problems = rispostaAttestati.get().message;
+        } else {
+          certification.problems = "Impossibile prelevare l'esito dell'invio. Riprovare.";
+        }
+      }
 
-    // Esito 
-    if (httpResponse.getStatus() == 200) {
-      certification.problems = "";
-    } else if (httpResponse.getStatus() == 500) {
-      //certification.problems = "Errore interno al server";
-      certification.problems = rispostaAttestati.message;
-    } else {
-      certification.problems = rispostaAttestati.message;
-    }
+      return certification;
 
-    return certification;
-    
     } catch (Exception e) {
       log.error(e.toString());
       return null;
@@ -476,7 +486,7 @@ public class CertificationService {
   public boolean removeAttestati(Certification certification, Optional<String> token) {
     
     HttpResponse httpResponse;
-    RispostaAttestati rispostaAttestati;
+    Optional<RispostaAttestati> rispostaAttestati;
 
     if (certification.certificationType.equals(CertificationType.ABSENCE)) {
       httpResponse = certificationsComunication.deleteRigaAssenza(token, certification);
@@ -490,8 +500,17 @@ public class CertificationService {
       httpResponse = certificationsComunication.deleteRigaCompetenza(token, certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
+    } else if (certification.certificationType.equals(CertificationType.MEAL)) {
+      certification.content = "0";
+      httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, false);
+      rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+      if (rispostaAttestati.isPresent() 
+          && rispostaAttestati.get().message.contains("attestato_buoni_pasto_ukey")) {
+        httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, true);
+        rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
+      }
     } else {
-      throw new IllegalStateException("I record buoni pasto non si eliminano.");
+      return false;
     }
 
     // Esito 
@@ -504,10 +523,10 @@ public class CertificationService {
   
   /**
    * Produce le certification delle ore di formazione per la persona.
-   * @param person
-   * @param year
-   * @param month
-   * @return
+   * @param person persona
+   * @param year anno
+   * @param month mese
+   * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> trainingHours(Person person, int year, int month, 
       Map<String, Certification> certifications) {
@@ -537,10 +556,10 @@ public class CertificationService {
   
   /**
    * Produce le certification delle assenze per la persona.
-   * @param person
-   * @param year
-   * @param month
-   * @return
+   * @param person persona
+   * @param year anno
+   * @param month mese
+   * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> absences(Person person, int year, int month,
       Map<String, Certification> certifications) {
@@ -632,22 +651,22 @@ public class CertificationService {
   
   /**
    * Produce la certificazione buoni pasto della persona.
-   * @param person
-   * @param year
-   * @param month
-   * @return
+   * @param person persona
+   * @param year anno 
+   * @param month mese
+   * @return certification (sotto forma di mappa)
    */
   private Map<String, Certification> mealTicket(Person person, int year, int month,
       Map<String, Certification> certifications) {
-    
-    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
-        .getPersonDayInMonth(person, new YearMonth(year, month)));
-    
+
     Certification certification = new Certification();
     certification.person = person;
     certification.year = year;
     certification.month = month;
     certification.certificationType = CertificationType.MEAL;
+    
+    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
+        .getPersonDayInMonth(person, new YearMonth(year, month)));
     
     certification.content = mealTicket + "";
  
@@ -656,6 +675,45 @@ public class CertificationService {
     return certifications;
   }
 
+  /**
+   * Prova a rimuovere tutti i record presenti su attestati. 
+   * @param personCertificationStatus status
+   * @param token token
+   * @return il nuovo stato
+   */
+  public PersonCertificationStatus emptyAttestati(
+      PersonCertificationStatus personCertificationStatus, Optional<String> token) {
+
+    if (personCertificationStatus.attestatiCertifications != null) {
+      for (Certification certification : 
+        personCertificationStatus.attestatiCertifications.values()) {
+        if (certification.attestatiId != null 
+            || certification.certificationType.equals(CertificationType.MEAL)) {
+          removeAttestati(certification, token);
+        }
+      }
+    }
+    
+    if (personCertificationStatus.epasCertifications != null) {
+      for (Certification certification : personCertificationStatus.epasCertifications.values()) {
+        if (certification.attestatiId != null 
+            || certification.certificationType.equals(CertificationType.MEAL)) {
+          removeAttestati(certification, token);
+        }
+      }
+    }
+    
+    if (personCertificationStatus.actualCertifications != null) {
+      for (Certification certification : personCertificationStatus.actualCertifications.values()) {
+        if (certification.attestatiId != null 
+            || certification.certificationType.equals(CertificationType.MEAL)) {
+          removeAttestati(certification, token);
+        }
+      }
+    }
+     
+    return personCertificationStatus;
+  }
 
 
 }

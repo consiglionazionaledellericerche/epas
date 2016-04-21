@@ -195,8 +195,13 @@ public class CertificationsComunication {
    * @param httpResponse risposta
    * @return rispostaAttestati
    */
-  public RispostaAttestati parseRispostaAttestati(HttpResponse httpResponse) {
-    return new Gson().fromJson(httpResponse.getJson(), RispostaAttestati.class);
+  public Optional<RispostaAttestati> parseRispostaAttestati(HttpResponse httpResponse) {
+    try {
+      return Optional.fromNullable(new Gson()
+        .fromJson(httpResponse.getJson(), RispostaAttestati.class));
+    } catch (Exception ex) {
+      return Optional.<RispostaAttestati>absent();
+    }
   }
   
   

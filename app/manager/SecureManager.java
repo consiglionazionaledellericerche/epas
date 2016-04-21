@@ -103,7 +103,7 @@ public class SecureManager {
   }
 
   public Set<Office> officesTecnicalAdminAllowed(User user) {
-    ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN);
+    ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN, Role.DEVELOPER);
 
     return getOfficeAllowed(user, roles);
   }

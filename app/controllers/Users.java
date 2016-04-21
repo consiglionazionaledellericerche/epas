@@ -141,16 +141,17 @@ public class Users extends Controller{
    */
   public static void edit(Long id) {
     User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
-    List<UsersRolesOffices> uroList = user.usersRolesOffices;
-    render(user, uroList);
+    render(user);
   }
 
   /**
    * metodo che permette il salvataggio delle modifiche di un user.
    * @param user l'utente modificato da salvare
    */
-  public static void updateInfo(User user) {
+  public static void updateInfo(@Valid User user) {
+    
     rules.checkIfPermitted(user);
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", user, validation.errorsMap());
