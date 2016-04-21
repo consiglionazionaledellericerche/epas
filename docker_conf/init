@@ -37,108 +37,108 @@ else
 	DB_USER_PASS="$DB_USER:$DB_PASS"
 fi
 
-BACKUP_MINUTES=${BACKUP_MINUTES:-5}
-BACKUP_HOURS=${BACKUP_HOURS:-6,12,18}
-
-# LOGCHECK
-# LOGCHECK_ADDRESSES=${LOGCHECK_ADDRESSES:-cristian.lucchesi@iit.cnr.it,dario.tagliaferri@iit.cnr.it alessandro.martelli@iit.cnr.it, daniele.murgia@iit.cnr.it}
-
-# cp /home/epas/epas/docker_conf/logcheck/* /etc/logcheck/ignore.d.server/
-
-# echo 'epas: '${LOGCHECK_ADDRESSES} >> /etc/aliases
-# echo '/home/epas/epas/logs/epas.log' >> /etc/logcheck/logcheck.logfiles
-# sed  's#SENDMAILTO="logcheck"/SENDMAILTO="epas"/' -i /etc/logcheck/logcheck.conf
-
 # Backup db
-cp /home/epas/epas/docker_conf/backupdb.sh /home/epas/epas/tools/backupdb.sh 
+cp ${APP_HOME}/docker_conf/backupdb.sh ${APP_HOME}/tools/backupdb.sh
 
-sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/tools/backupdb.sh 
-sed 's#{{EPAS_HOST}}#'"${EPAS_HOST}"'#g' -i /home/epas/epas/tools/backupdb.sh
+sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{EPAS_HOST}}#'"${EPAS_HOST}"'#g' -i ${APP_HOME}/tools/backupdb.sh
 
-chmod +x /home/epas/epas/tools/backupdb.sh
+chmod +x ${APP_HOME}/tools/backupdb.sh
 
-cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron
-
-sed 's#{{BACKUP_MINUTES}}#'"${BACKUP_MINUTES}"'#' -i /home/epas/epas/tools/cron
-sed 's#{{BACKUP_HOURS}}#'"${BACKUP_HOURS}"'#' -i /home/epas/epas/tools/cron
-
-BACKUP=${BACKUP:-false}
-
-if [ "${BACKUP}" == true ]; then
-crontab /home/epas/epas/tools/cron
-cron
+if [ -z "${BACKUP_CRON}" ]; then
+  echo "Backup del database non attivo."
+else
+  cp ${APP_HOME}/docker_conf/cron ${APP_HOME}/tools/cron
+  sed 's#{{BACKUP_CRON}}#'"${BACKUP_CRON}"'#' -i ${APP_HOME}/tools/cron
+  crontab ${APP_HOME}/tools/cron
+  cron
+  echo "Backup del database attivato: ${BACKUP_CRON}."
 fi
 
 # configure ePAS
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 
-cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/
+cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
 
-sed 's#{{EPAS_APPLICATION_BASEURL}}#'"${EPAS_APPLICATION_BASEURL}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{EPAS_APPLICATION_BASEURL}}#'"${EPAS_APPLICATION_BASEURL}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Impostazione server smtp
 
 SMTP_FROM=${SMTP_FROM:-epas@cnr.it}
 SMTP_HOST=${SMTP_HOST:-smtp.cnr.it}
 
-sed 's#{{SMTP_FROM}}#'"${SMTP_FROM}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{SMTP_HOST}}#'"${SMTP_HOST}"'#' -i /home/epas/epas/conf/prod.conf
+sed 's#{{SMTP_FROM}}#'"${SMTP_FROM}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{SMTP_HOST}}#'"${SMTP_HOST}"'#' -i ${APP_HOME}/conf/prod.conf
 
 if [ -z "${SMTP_USER}" ]; then
-  sed -n '/SMTP_USER/!p' -i /home/epas/epas/conf/prod.conf
-  sed -n '/SMTP_PASS/!p' -i /home/epas/epas/conf/prod.conf
+  sed -n '/SMTP_USER/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/SMTP_PASS/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{SMTP_USER}}#'"${SMTP_USER}"'#' -i /home/epas/epas/conf/prod.conf
-  sed 's#{{SMTP_PASS}}#'"${SMTP_PASS}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_USER}}#'"${SMTP_USER}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{SMTP_PASS}}#'"${SMTP_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${SMTP_PORT}" ]; then
-  sed -n '/SMTP_PORT/!p'  -i /home/epas/epas/conf/prod.conf
+  sed -n '/SMTP_PORT/!p'  -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{SMTP_PORT}}#'"${SMTP_PORT}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_PORT}}#'"${SMTP_PORT}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${SMTP_CHANNEL}" ]; then
-  sed -n '/SMTP_CHANNEL/!p' -i /home/epas/epas/conf/prod.conf
+  sed -n '/SMTP_CHANNEL/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{SMTP_CHANNEL}}#'"${SMTP_CHANNEL}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_CHANNEL}}#'"${SMTP_CHANNEL}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${SMTP_PROTOCOL}" ]; then
-  sed -n '/SMTP_PROTOCOL/!p' -i /home/epas/epas/conf/prod.conf
+  sed -n '/SMTP_PROTOCOL/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${URL_ATTESTATI}" ]; then
-  sed -n '/URL_ATTESTATI/!p' -i /home/epas/epas/conf/prod.conf
+  sed -n '/URL_ATTESTATI/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{URL_ATTESTATI}}#'"${URL_ATTESTATI}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{URL_ATTESTATI}}#'"${URL_ATTESTATI}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${JOBS_ACTIVE}" ]; then
-  sed -n '/JOBS_ACTIVE/!p' -i /home/epas/epas/conf/prod.conf
+  sed -n '/JOBS_ACTIVE/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i /home/epas/epas/conf/prod.conf
+  sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
-sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i /home/epas/epas/conf/prod.conf
-sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i /home/epas/epas/conf/prod.conf
+if [ -z "${PERSEO_BASE}" ]; then
+  sed -n '/PERSEO_BASE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{PERSEO_BASE}}#'"${PERSEO_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
 
-cp /home/epas/epas/docker_conf/log4j.prod.properties /home/epas/epas/conf/
-sed 's#{{LOG_LEVEL}}#'"${LOG_LEVEL}"'#' -i /home/epas/epas/conf/log4j.prod.properties
+if [ -z "${PERSEO_USER}" ]; then
+  sed -n '/PERSEO_USER/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/PERSEO_PASS/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{PERSEO_USER}}#'"${PERSEO_USER}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{PERSEO_PASS}}#'"${PERSEO_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
+
+cp ${APP_HOME}/docker_conf/log4j.prod.properties ${APP_HOME}/conf/
+sed 's#{{LOG_LEVEL}}#'"${LOG_LEVEL}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
 
 case "${LOG_ON_FILE}" in
-  false) sed 's/{{FILE}}//g' -i /home/epas/epas/conf/log4j.prod.properties ;;
-  true) sed 's#{{FILE}}#'", file"'#' -i /home/epas/epas/conf/log4j.prod.properties ;;
+  false) sed 's/{{FILE}}//g' -i ${APP_HOME}/conf/log4j.prod.properties ;;
+  true) sed 's#{{FILE}}#'", file"'#' -i ${APP_HOME}/conf/log4j.prod.properties ;;
   *)
     echo "ERROR: "
     echo "  Please specify true or false in LOG_ON_FILE Env."
@@ -148,12 +148,12 @@ esac
 
 appRun () {
   echo "Applico eventuali evoluzioni al database..."
-  sudo -u epas -H play evolutions:apply --%prod
+  sudo -u ${user} -H play evolutions:apply --%prod
   echo ".... evoluzioni terminate"
   
-  echo "Avvio ePAS..."
-  sudo -u epas -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
-  echo "....ePAS avviato"
+  echo "Avvio ${APP}..."
+  sudo -u ${user} -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
+  echo "....${APP} avviato"
 }
 
 appPlay() {
@@ -161,7 +161,7 @@ appPlay() {
     echo "Per favore specifica almeno un'azione play da eseguire, es: evolutions, evolutions:apply, etc...."
     return 1
   fi
-  exec sudo -u epas -H play $@ --%prod
+  exec sudo -u ${user} -H play $@ --%prod
 }
 
 appHelp () {

@@ -150,6 +150,7 @@ deliveryDate=Consegnato il
 
 DEL= Eliminazione
 
+domain= Dominio
 done.by= Effettuata da
 
 emailToContact= Indirizzo email dell&#39;amministrazione
@@ -292,6 +293,10 @@ stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
 stampType= Causale
 
+synch.offices=Sincronizza sedi
+synch.people=Sincronizza persone
+synch.contracts=Sincronizza contratti
+
 ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario
@@ -432,7 +437,9 @@ ADDRESSES_ALLOWED=Indirizzi IP autorizzati per timbratura via web
 NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
 DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
 SEND_EMAIL=Invio email di avviso ai dipendenti
+NEW_ATTESTATI=Nuovo Attestati
 EMAIL_TO_CONTACT=Indirizzo email segreteria
+
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -512,3 +519,5 @@ office.joiningDate.popover= Data di affiliazione della sede
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
+
+domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)

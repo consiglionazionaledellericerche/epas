@@ -1,0 +1,69 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+#{synch.synchContractsTabs activeAction:'activeContracts' /}
+
+<div class="container">
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Contratto Epas</th>
+  	  <th>Contratto Perseo</th>
+	  <th>Sincronizzate</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:activeContractsEpasByPersonPerseoId.values(), as:'contract'}
+	<tr>
+	  <td>
+	    <span class="label label-default">${contract.person.fullname}</span>
+	    <span class="label label-primary">${contract.beginDate}</span>
+	    <span class="label label-primary">${contract.endDate}</span>
+	    <span class="label label-danger">${contract.endContract}</span>
+	  </td>
+	  <td>
+	    %{ perseoContract = perseoDepartmentActiveContractsByPersonPerseoId?.get(contract.person.perseoId); }%
+	    #{if perseoContract}
+	      <span class="label label-default">${perseoContract.person.fullname}</span>
+	      <span class="label label-primary">${perseoContract.beginDate}</span>
+	      <span class="label label-primary">${perseoContract.endDate}</span>
+	      <span class="label label-danger">${perseoContract.endContract}</span>
+	       #{if perseoContract.isTemporary && perseoContract.endDate == null}
+	        <span class="label label-warning">Temporary</span>
+	      #{/if}
+	      <span class="label label-success">${perseoContract.perseoId}</span>
+	      #{if contract.perseoId == null}
+	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinContract(contract.id, perseoContract.perseoId)}">Associa</a> Associa
+	      #{/if}
+	      #{/if}
+	    #{else}
+	      <em>Nessun suggerimento... controllare la matricola.</em>
+	    #{/else}
+	  </td>
+	  
+	  <td>
+	    #{if contract.perseoId}
+	      <div class="text-success">Synch <span class="label label-success">${contract.perseoId}</span></div>
+	    #{/if}
+	    #{else}
+	      <div class="text-danger">Not Synch</div>	      
+	    #{/else}
+	  </td>		    
+
+    </tr>
+   #{/list}
+  </tbody>
+</table>
+
+*{
+#{alert color:'info'}
+  <p>Associa tutte le persone non ancora associate. Verificare bene per tutti il join suggerito sulla base della matricola.
+    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllPersonInOffice(office.id)}">Associa</a>
+  </p>
+#{/alert}
+}*  
+</div>
+
+

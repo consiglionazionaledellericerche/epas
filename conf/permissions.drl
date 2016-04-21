@@ -40,7 +40,7 @@ when
   Role(name == Role.EMPLOYEE) from $uro.role
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
-     	"Administrators.restoreUser",
+     	"Administration.restoreUser",
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
@@ -600,6 +600,10 @@ when
         "UploadSituation.checkData",
         "UploadSituation.performCheckData",
         
+        "Certifications.certifications",
+        "Certifications.processAll",
+        "Certifications.emptyCertifications",
+        
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save",
@@ -722,6 +726,10 @@ when
         "UploadSituation.showCertificatedData",
         "UploadSituation.checkData",
         "UploadSituation.performCheckData",
+        
+        "Certifications.certifications",
+        "Certifications.processAll",
+        "Certifications.emptyCertifications",
         
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
