@@ -12,15 +12,22 @@ import manager.attestati.dto.insert.InserimentoRigaAssenza;
 import manager.attestati.dto.insert.InserimentoRigaBuoniPasto;
 import manager.attestati.dto.insert.InserimentoRigaCompetenza;
 import manager.attestati.dto.insert.InserimentoRigaFormazione;
+import manager.attestati.dto.show.ListaDipendenti;
+import manager.attestati.dto.show.ListaDipendenti.Matricola;
 import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 
 import models.Certification;
+import models.Office;
 import models.Person;
+
+import org.testng.collections.Sets;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
+
+import java.util.Set;
 
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
@@ -33,6 +40,7 @@ public class CertificationsComunication {
   private final static String BASE_URL = "http://as2dock.si.cnr.it";
   private final static String ATTESTATO_URL = "/api/ext/attestato";
   private final static String API_URL = "/api/ext";
+  private final static String API_URL_LISTA_DIPENDENTI = "/listaDipendenti";
   private final static String API_URL_ASSENZA = "/rigaAssenza";
   private final static String API_URL_BUONI_PASTO = "/rigaBuoniPasto";
   private final static String API_URL_FORMAZIONE = "/rigaFormazione";
@@ -105,6 +113,34 @@ public class CertificationsComunication {
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer "+ token);
     return wsRequest;
+  }
+  
+  public Set<Integer> getPeopleList(Office office, int year, int month, 
+      Optional<String> token) {
+    
+    if (!reloadToken(token).isPresent()) {
+      return Sets.newHashSet();
+    }
+    
+    try {
+      String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId 
+          + "/" + year + "/" + month;
+
+      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+      HttpResponse httpResponse = wsRequest.get();
+
+      String json = httpResponse.getJson().toString();
+      
+      ListaDipendenti listaDipendenti = new Gson().fromJson(json, ListaDipendenti.class);
+      Set<Integer> numbers = Sets.newHashSet(); 
+      for (Matricola matricola : listaDipendenti.dipendenti) {
+        numbers.add(matricola.matricola);
+      }
+      return numbers;
+
+    } catch (Exception ex) {}
+
+    return Sets.newHashSet();
   }
   
   /**

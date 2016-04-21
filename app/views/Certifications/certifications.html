@@ -13,9 +13,23 @@
 
 <div class="container">
 
+
  #{alert color:'info'}
    <p>Da inserire lo stato di autenticazione ed eventualmente la form di login.</p>
+ #{/alert} 
+ *{ 
+ #{if !numbers.empty}
+   #{alert color:'danger'}
+   <p>Ci Sono matricole in attestati non inserite in epas.</p>
+   #{/alert}
+ #{/if}
+  
+ #{if !numbers.empty}
+   #{alert color:'danger'}
+   <p>Ci Sono matricole in attestati non inserite in epas.</p>
  #{/alert}
+ }*
+
 *{
 	#{form @Certifications.personCertificated(), class:'form-horizontal'}
 		

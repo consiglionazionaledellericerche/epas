@@ -24,6 +24,7 @@ import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import models.Absence;
 import models.Certification;
 import models.Competence;
+import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.enumerate.CertificationType;
@@ -74,6 +75,35 @@ public class CertificationService {
    */
   public Optional<String> buildToken() {
     return certificationsComunication.getToken();
+  }
+  
+  /**
+   * Se il token è abilitato alla sede.
+   * @param token
+   * @return
+   */
+  public boolean authentication(Office office, Optional<String> token, boolean result) {
+    
+    // TODO: chiedere a Pagano come discriminare il caso.
+    
+    return result;
+  }
+  
+  /**
+   * Le matricole abilitate all'invio attestati per la sede nel mese.
+   * Nota bene: se la lista è vuota significa che non è stato effettuato lo stralcio oppure
+   * un errore nel protocollo di comunicazione con attestati. 
+   * Es. Periodo 201603 non presente per la sede 224500. 
+   * @param office
+   * @param year
+   * @param month
+   * @param token
+   * @return
+   */
+  public Set<Integer> peopleList(Office office, int year, int month, Optional<String> token) {
+    
+    return certificationsComunication.getPeopleList(office, year, month, token);
+    
   }
 
   /**
@@ -151,9 +181,34 @@ public class CertificationService {
     return certifications;
   }
   
+  /**
+   * 
+   * @param person
+   * @param year
+   * @param month
+   * @param numbers
+   * @param token
+   * @return
+   */
   public PersonCertificationStatus buildPersonStaticStatus(Person person, int year, int month,
-      Optional<String> token) {
+      Set<Integer> numbers, Optional<String> token) {
     
+    PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus();
+    personCertificationStatus.person = person;
+    personCertificationStatus.year = year;
+    personCertificationStatus.month = month;
+
+    // Esco perchè finchè non sistemo la matricola non ha senso fare altro.
+    if (person.number == null) {
+      personCertificationStatus.notInAttestati = true;
+      return personCertificationStatus;
+    } else {
+      if (!numbers.contains(person.number)) {
+        personCertificationStatus.notInAttestati = true;;
+        return personCertificationStatus;
+      }
+    }
+
     // Le certificazioni in attestati.
     Map<String, Certification> attestatiCertifications = 
         personAttestatiCertifications(person, year, month, token);
@@ -175,10 +230,7 @@ public class CertificationService {
     actualCertifications = competences(person, year, month, actualCertifications);
     actualCertifications = mealTicket(person, year, month, actualCertifications);
     
-    PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus();
-    personCertificationStatus.person = person;
-    personCertificationStatus.year = year;
-    personCertificationStatus.month = month;
+
 
     if (attestatiCertifications != null) {
       // Riesco a scaricare gli attestati della persona
