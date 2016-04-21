@@ -24,7 +24,7 @@
 	    <span class="label label-danger">${contract.endContract}</span>
 	  </td>
 	  <td>
-	    %{ perseoContract = perseoDepartmentActiveContractsByPersonPerseoId.get(contract.person.perseoId); }%
+	    %{ perseoContract = perseoDepartmentActiveContractsByPersonPerseoId?.get(contract.person.perseoId); }%
 	    #{if perseoContract}
 	      <span class="label label-default">${perseoContract.person.fullname}</span>
 	      <span class="label label-primary">${perseoContract.beginDate}</span>
