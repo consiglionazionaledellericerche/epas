@@ -33,7 +33,7 @@ public class OfficePerseoConsumer {
 
 
   /**
-   * Perseo Json relativo agli istituti.
+   * Preleva la lista di tutte le sedi presenti su Perseo
    */
   private ListenableFuture<List<PerseoOffice>> perseoOffices() {
 
@@ -53,7 +53,7 @@ public class OfficePerseoConsumer {
 
     final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
-    log.info("Invio richiesta lista istituti a Perseo: {}", request.url);
+    log.info("Invio richiesta lista sedi a Perseo: {}", request.url);
 
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
         .listenInPoolThread(request.getAsync());
@@ -116,8 +116,7 @@ public class OfficePerseoConsumer {
           log.warn(error);
           throw new ApiRequestException(error);
         }
-        log.info("Recuperato Json contenente la Sede {} da Perseo: {} {}", perseoId,
-            response.getStatus(), response.getStatusText());
+        log.info("Recuperato Json contenente la Sede con id {} da Perseo.", perseoId);
         try {
           return new Gson().fromJson(response.getJson(), PerseoOffice.class);
         } catch (JsonSyntaxException e) {
@@ -164,8 +163,7 @@ public class OfficePerseoConsumer {
           log.warn(error);
           throw new ApiRequestException(error);
         }
-        log.info("Recuperato Json contenente l'istituto {} da Perseo: {} {}", perseoId,
-            response.getStatus(), response.getStatusText());
+        log.info("Recuperato Json contenente l'istituto con id {} da Perseo", perseoId);
         try {
           return new Gson().fromJson(response.getJson(), PerseoInstitute.class);
         } catch (JsonSyntaxException e) {

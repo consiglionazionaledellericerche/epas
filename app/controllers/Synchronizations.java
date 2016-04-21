@@ -301,9 +301,9 @@ public class Synchronizations extends Controller {
 
     Map<Integer, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.absent());
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
 
     render(wrapperedPeople, perseoPeopleByNumber, office);
@@ -326,7 +326,7 @@ public class Synchronizations extends Controller {
       Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
       flash.error("Selezionare una sede già sincronizzata... "
           + "%s non lo è ancora.", office.toString());
-      render(perseoPeopleByPerseoId, epasPeopleByPerseoId);
+      render(perseoPeopleByPerseoId, epasPeopleByPerseoId, office);
     }
 
     Set<Office> offices = Sets.newHashSet();
@@ -335,9 +335,9 @@ public class Synchronizations extends Controller {
     Map<Long, Person> perseoPeopleByPerseoId = null;
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
-          .perseoDepartmentPeopleByPerseoId(office.perseoId);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+          .perseoPeopleByPerseoId(Optional.of(office.perseoId));
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
     @SuppressWarnings("deprecation")
     List<Person> people = personDao
@@ -368,8 +368,8 @@ public class Synchronizations extends Controller {
     Optional<Person> personInPerseo = null;
     try {
       personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
     Verify.verify(personInPerseo.isPresent());
 
@@ -415,9 +415,9 @@ public class Synchronizations extends Controller {
 
     Map<Integer, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber();
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.absent());
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
 
     for (Person person : people) {
@@ -444,8 +444,8 @@ public class Synchronizations extends Controller {
     Optional<Person> personInPerseo = null;
     try {
       personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
     }
     Verify.verify(personInPerseo.isPresent());
 
@@ -507,8 +507,9 @@ public class Synchronizations extends Controller {
 
     Map<Long, Person> perseoPeopleByPerseoId = null;
     try {
-      perseoPeopleByPerseoId = peoplePerseoConsumer.perseoDepartmentPeopleByPerseoId(office.perseoId);
-    } catch (NoSuchFieldException e) {
+      perseoPeopleByPerseoId = peoplePerseoConsumer
+          .perseoPeopleByPerseoId(Optional.fromNullable(office.perseoId));
+    } catch (ApiRequestException e) {
       e.printStackTrace();
     }
 

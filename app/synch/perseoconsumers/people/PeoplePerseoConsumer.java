@@ -1,13 +1,20 @@
 package synch.perseoconsumers.people;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 
 import com.beust.jcommander.internal.Maps;
 
 import dao.QualificationDao;
+
+import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +29,7 @@ import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class PeoplePerseoConsumer {
@@ -34,164 +42,106 @@ public class PeoplePerseoConsumer {
   }
 
   /**
-   * Json relativo alla persona di perseo con id perseoId nel formato utile a epas.
-   *
-   * @param perseoId id perseo persona
-   * @return json
+   * @param perseoId id di Perseo della persona richiesta
+   * @return La persona recuperata da Perseo.
    */
-  private Optional<String> perseoPersonJson(Long perseoId) throws NoSuchFieldException {
+  private ListenableFuture<PerseoPerson> perseoPerson(Long perseoId) {
 
-    String endPoint = PerseoApis.getPersonForEpasEndpoint() + perseoId;
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo la persona da {}.", endPoint);
-
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare la persona da {}", endPoint);
-      return Optional.<String>absent();
-    }
+    final String url;
+    final String user;
+    final String pass;
 
     try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch (Exception exp) {
-      log.info("Url={} non json.", endPoint);
+      url = PerseoApis.getPersonForEpasEndpoint() + perseoId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
 
-    return null;
-  }
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
-  /**
-   * Json relativo a tutte le persone di perseo nel formato utile a epas.
-   *
-   * @return json
-   */
-  private Optional<String> perseoAllPeopleJson() throws NoSuchFieldException {
+    log.info("Invio richiesta Persona a Perseo: {}", request.url);
 
-    String endPoint = PerseoApis.getAllPeopleForEpasEndpoint();
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo la lista di tutti gli istituti presenti da {}.", endPoint);
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
 
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare la lista degli istituti presenti da {}", endPoint);
-      return Optional.<String>absent();
-    }
-
-    try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch (Exception exp) {
-      log.info("Url={} non json.", endPoint);
-    }
-
-    return null;
-  }
-
-  /**
-   * Json relativo a tutte le persone di perseo nel perseoDepartment nel formato utile a epas.
-   *
-   * @param perseoId id perseo department
-   * @return json
-   */
-  private Optional<String> perseoAllDepartmentPeopleJson(Long perseoId) throws NoSuchFieldException {
-
-    String endPoint = PerseoApis.getAllDepartmentPeopleForEpasEndpoint() + perseoId;
-    HttpResponse restResponse = WS.url(endPoint).get();
-    log.info("Perseo: prelevo la lista di tutti gli istituti presenti da {}.", endPoint);
-
-    if (!restResponse.success()) {
-      log.error("Impossibile prelevare la lista degli istituti presenti da {}", endPoint);
-      return Optional.<String>absent();
-    }
-
-    try {
-      return Optional.fromNullable(restResponse.getJson().toString());
-    } catch (Exception exp) {
-      log.info("Url={} non json.", endPoint);
-    }
-
-    return null;
+    return Futures.transform(future, new Function<HttpResponse, PerseoPerson>() {
+      @Override
+      public PerseoPerson apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente la Persona con id {} da Perseo", perseoId);
+        try {
+          return new Gson().fromJson(response.getJson(), PerseoPerson.class);
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
 
 
   /**
-   * La lista delle PerseoPerson nel perseoDepartment.
-   *
-   * @param perseoId perseo id department.
-   * @return lista
+   * La lista delle persone presenti su Perseo relative alla sede specificata. Tutte le persone se
+   * non si specifica nessun id.
    */
-  private List<PerseoPerson> getAllPerseoDepartmentPeople(Long perseoId) throws NoSuchFieldException {
+  private ListenableFuture<List<PerseoPerson>> perseoPeople(Optional<Long> departmentPerseoId) {
 
-    //Json della richiesta
-    Optional<String> json = perseoAllDepartmentPeopleJson(perseoId);
-    if (json == null || !json.isPresent()) {
-      return null;
+    final String url;
+    final String user;
+    final String pass;
+
+    try {
+      if (departmentPerseoId.isPresent()) {
+        url = PerseoApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
+      } else {
+        url = PerseoApis.getAllPeopleForEpasEndpoint();
+      }
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
     }
 
-    List<PerseoPerson> perseoSimplePeople = null;
-    try {
-      perseoSimplePeople = new Gson()
-          .fromJson(json.get(), new TypeToken<List<PerseoPerson>>() {
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Invio richiesta lista persone a Perseo: {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, new Function<HttpResponse, List<PerseoPerson>>() {
+      @Override
+      public List<PerseoPerson> apply(WS.HttpResponse response) {
+        if (!response.success()) {
+          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+              response.getStatus(), response.getStatusText());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+        log.info("Recuperato Json contenente le persone da Perseo: {} {}",
+            response.getStatus(), response.getStatusText());
+        try {
+          return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoPerson>>() {
           }.getType());
-    } catch (Exception exp) {
-      log.info("Impossibile caricare da perseo la lista degli istituti.");
-      return Lists.newArrayList();
-    }
-
-    return perseoSimplePeople;
-  }
-
-  /**
-   * La lista delle PerseoPerson in Perseo.
-   *
-   * @return lista
-   */
-  private List<PerseoPerson> getAllPerseoPeople() throws NoSuchFieldException {
-
-    //Json della richiesta
-    Optional<String> json = perseoAllPeopleJson();
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
-
-    List<PerseoPerson> perseoSimplePeople = null;
-    try {
-      perseoSimplePeople = new Gson()
-          .fromJson(json.get(), new TypeToken<List<PerseoPerson>>() {
-          }.getType());
-    } catch (Exception exp) {
-      log.info("Impossibile caricare da perseo la lista degli istituti.");
-      return Lists.newArrayList();
-    }
-
-    return perseoSimplePeople;
-  }
-
-  /**
-   * La PerseoPerson con quel perseoId in Perseo.
-   *
-   * @param perseoId perseo id person.
-   * @return persona
-   */
-  private Optional<PerseoPerson> getPerseoPersonByPerseoId(Long perseoId) throws NoSuchFieldException {
-
-    //Json della richiesta
-    Optional<String> json = perseoPersonJson(perseoId);
-    if (json == null || !json.isPresent()) {
-      return null;
-    }
-
-    PerseoPerson perseoPerson = null;
-    try {
-      perseoPerson = new Gson()
-          .fromJson(json.get(), new TypeToken<PerseoPerson>() {
-          }.getType());
-    } catch (Exception exp) {
-      log.info("Impossibile caricare da perseo la sede con perseoId={}.", perseoId);
-      return Optional.<PerseoPerson>absent();
-    }
-    if (perseoPerson == null) {
-      return Optional.<PerseoPerson>absent();
-    }
-    return Optional.fromNullable(perseoPerson);
-
+        } catch (JsonSyntaxException e) {
+          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+          log.warn(error);
+          throw new ApiRequestException(error);
+        }
+      }
+    });
   }
 
   /**
@@ -209,7 +159,7 @@ public class PeoplePerseoConsumer {
     person.surname = perseoPerson.surname;
     person.number = perseoPerson.number;
     person.email = perseoPerson.email; //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
-    //person.eppn = perseoPerson.email;
+    person.eppn = perseoPerson.email;
     person.qualification = qualificationsMap.get(perseoPerson.qualification);
     person.perseoId = perseoPerson.id;
 
@@ -244,8 +194,17 @@ public class PeoplePerseoConsumer {
    *
    * @return mappa
    */
-  public Map<Long, Person> perseoPeopleByPerseoId() throws NoSuchFieldException {
-    List<PerseoPerson> perseoPeople = getAllPerseoPeople();
+  public Map<Long, Person> perseoPeopleByPerseoId(Optional<Long> departmentPerseoId) {
+
+    List<PerseoPerson> perseoPeople = Lists.newArrayList();
+    try {
+      perseoPeople = perseoPeople(departmentPerseoId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile recuperare le persone da Perseo - %s",
+          e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
     Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : epasConverter(perseoPeople)) {
       perseoPeopleMap.put(person.perseoId, person);
@@ -258,60 +217,36 @@ public class PeoplePerseoConsumer {
    *
    * @return mappa
    */
-  public Map<Integer, Person> perseoPeopleByNumber() throws NoSuchFieldException {
+  public Map<Integer, Person> perseoPeopleByNumber(Optional<Long> departmentPerseoId) {
 
     Map<Integer, Person> perseoPeopleMap = Maps.newHashMap();
-    for (Person person : perseoPeopleByPerseoId().values()) {
+    for (Person person : perseoPeopleByPerseoId(departmentPerseoId).values()) {
       perseoPeopleMap.put(person.number, person);
     }
     return perseoPeopleMap;
   }
-
-  /**
-   * Tutte le persone del department con quel perseoId.<br> Formato mappa: perseoId -> person
-   *
-   * @param perseoDepartmentId department perseo id
-   * @return mappa
-   */
-  public Map<Long, Person> perseoDepartmentPeopleByPerseoId(Long perseoDepartmentId) throws NoSuchFieldException {
-
-    List<PerseoPerson> perseoPeople = getAllPerseoDepartmentPeople(perseoDepartmentId);
-    Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
-    for (Person person : epasConverter(perseoPeople)) {
-      perseoPeopleMap.put(person.perseoId, person);
-    }
-
-    return perseoPeopleMap;
-  }
-
-  /**
-   * Tutte le persone del department con quel perseoId.<br> Formato mappa: number -> person
-   *
-   * @param perseoDepartmentId department perseo id
-   * @return mappa
-   */
-  public Map<Integer, Person> perseoDepartmentPeopleByNumber(Long perseoDepartmentId) throws NoSuchFieldException {
-
-    Map<Integer, Person> perseoPeopleMap = Maps.newHashMap();
-    for (Person person : perseoDepartmentPeopleByPerseoId(perseoDepartmentId).values()) {
-      perseoPeopleMap.put(person.number, person);
-    }
-    return perseoPeopleMap;
-  }
-
 
   /**
    * La persona con quel perseoId.
    *
    * @return persona
    */
-  public Optional<Person> perseoPersonByPerseoId(Long personPerseoId) throws NoSuchFieldException {
-    Optional<PerseoPerson> perseoPerson = getPerseoPersonByPerseoId(personPerseoId);
-    if (!perseoPerson.isPresent()) {
+  public Optional<Person> perseoPersonByPerseoId(Long personPerseoId) {
+    PerseoPerson perseoPerson = null;
+    try {
+      perseoPerson = perseoPerson(personPerseoId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String.format("Impossibile recuperare la persona con id %d da Perseo - %s",
+          personPerseoId, e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    if (perseoPerson == null) {
       return Optional.<Person>absent();
     }
     Map<Integer, Qualification> qualificationsMap = qualificationDao.allQualificationMap();
-    return Optional.fromNullable(epasConverter(perseoPerson.get(), qualificationsMap));
+    return Optional.fromNullable(epasConverter(perseoPerson, qualificationsMap));
   }
 
 }

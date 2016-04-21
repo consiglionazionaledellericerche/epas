@@ -24,14 +24,14 @@
 	    <span class="label label-primary">${wrPerson.value.surname}</span>
 	  </td>
 	  <td>
-	    %{ perseoPerson = perseoPeopleByNumber.get(wrPerson.value.number); }%
+	    %{ perseoPerson = perseoPeopleByNumber?.get(wrPerson.value.number) }%
 	    #{if perseoPerson}
 	      <span class="label label-danger">${perseoPerson.number}</span>
 	      <span class="label label-primary">${perseoPerson.name}</span>
 	      <span class="label label-primary">${perseoPerson.surname}</span>
 	      <span class="label label-success">${perseoPerson.perseoId}</span>
 	      #{if wrPerson.value.perseoId == null}
-	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson.perseoId)}">Associa</a>
+	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>
 	      #{/if}
 	    #{/if}
 	    #{else}
