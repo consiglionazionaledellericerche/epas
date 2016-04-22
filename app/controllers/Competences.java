@@ -146,11 +146,10 @@ public class Competences extends Controller {
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
     // TODO: togliere questa storpiaggine.
+    List<CompetenceCode> allCodeList = competenceCodeDao.getAllCompetenceCode();
+    
 
-    Table<Person, String, Boolean> tableRecapCompetence = competenceManager
-        .getTableForEnabledCompetence(personList);
-
-    render(tableRecapCompetence, office);
+    render(personList, allCodeList, office);
   }
 
   /**
