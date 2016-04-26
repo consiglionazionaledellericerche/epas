@@ -692,22 +692,23 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(person.perseoId);
 
-    Optional<Contract> contractInPerseo = null;
+    Optional<Contract> contractInPerseo = Optional.absent();
     try {
       contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
-    Verify.verify(contractInPerseo.isPresent());
 
-    WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+    if (contractInPerseo.isPresent()) {
+      WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 
-    // Salvare il contratto.
-    if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
-      flash.error("Il contratto non può essere importato a causa di errori");
-      otherContracts(person.office.id);
+      // Salvare il contratto.
+      if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
+        flash.error("Il contratto non può essere importato a causa di errori");
+        otherContracts(person.office.id);
+      }
+      flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
     }
-    flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
 
     otherContracts(person.office.id);
   }
