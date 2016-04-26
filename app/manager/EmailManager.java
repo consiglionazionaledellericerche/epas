@@ -3,10 +3,12 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
+import models.enumerate.EpasParam;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -20,6 +22,15 @@ import play.libs.Mail;
 @Slf4j
 public class EmailManager {
 
+  private final ConfigurationManager configurationManager;
+
+  @Inject
+  public EmailManager(ConfigurationManager configurationManager) {
+    this.configurationManager = configurationManager;
+    
+  }
+  
+  
   private static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
   private static final String RECOVERY_PATH = "lostpassword/lostpasswordrecovery?token=";
 
@@ -64,9 +75,21 @@ public class EmailManager {
     sendMail(Optional.<String>absent(), person.email, subject, message);
   }
 
+  /**
+   * Invia la email per il recovery password successiva a creazione persona. (Solo se
+   * il parametro send email della sua sede è attivo).  
+   * @param person
+   */
   public void newUserMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
 
+    if (!(Boolean)configurationManager.configValue(person.office, EpasParam.SEND_EMAIL)) {
+      log.info("Non verrà inviata la mail a {} in quanto "
+          + "la sua sede {} ha invio mail disabilitato",
+          person.getFullname(), person.office.name);
+      return;
+    }
+    
     final String message = String.format("Gentile %s,\r\n"
                     + "Ti informiamo che e' stato inserito il tuo nominativo nel sistema ePas "
                     + "raggiungibile all'indirizzo %s\r\n"

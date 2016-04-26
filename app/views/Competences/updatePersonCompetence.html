@@ -9,7 +9,7 @@
 
     #{list items:pcr.totalCompetenceCode, as:'comp'}
     <tr>
-      <td>${comp.description}</td>
+      <td><strong>${comp.code}</strong> ${comp.description}</td>
       <td>
         #{if pcr.personActiveCompetence.contains(comp)}
         Sì <input type="radio" value="true" name="competence.${comp.code}" checked="checked"/>
