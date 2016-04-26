@@ -75,6 +75,7 @@ public class Certifications extends Controller {
     
     //Nuovo attestati?
     if (!(Boolean)configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
+      flash.error("La sede non è configurata all'utilizzo del nuovo attestati.");
       forbidden();
     }
   
