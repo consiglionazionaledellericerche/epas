@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -197,44 +196,6 @@ public class CompetenceManager {
     tableFeature = builder.build();
     return tableFeature;
 
-  }
-
-  /**
-   * @return la tabella che contiene nelle righe le persone, nelle colonne le competenze e come
-   *     valori i booleani che determinano se per la persona è attiva la competenza come
-   *     rappresentata dalla stringa della descrizione della competenza stessa.
-   */
-  public Table<Person, String, Boolean> getTableForEnabledCompetence(List<Person> personList) {
-    ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
-    Table<Person, String, Boolean> tableRecapCompetence = null;
-
-    List<CompetenceCode> allCodeList = competenceCodeDao.getAllCompetenceCode();
-    List<CompetenceCode> codeList = new ArrayList<CompetenceCode>();
-    for (CompetenceCode compCode : allCodeList) {
-      if (compCode.persons.size() > 0) {
-        codeList.add(compCode);
-      }
-    }
-    if (codeList.size() == 0) {
-      for (Person p : personList) {
-        builder.put(p, "", false);
-      }
-      tableRecapCompetence = builder.build();
-      return tableRecapCompetence;
-    }
-    for (Person p : personList) {
-
-      for (CompetenceCode comp : codeList) {
-        if (p.competenceCode.contains(comp)) {
-          builder.put(p, comp.description + '\n' + comp.code, true);
-        } else {
-          builder.put(p, comp.description + '\n' + comp.code, false);
-        }
-      }
-    }
-
-    tableRecapCompetence = builder.build();
-    return tableRecapCompetence;
   }
 
   /**

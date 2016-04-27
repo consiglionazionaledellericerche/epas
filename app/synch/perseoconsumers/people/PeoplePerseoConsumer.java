@@ -2,6 +2,8 @@ package synch.perseoconsumers.people;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -9,8 +11,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-
-import com.beust.jcommander.internal.Maps;
 
 import dao.QualificationDao;
 
@@ -20,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
 import models.Qualification;
-
-import org.assertj.core.util.Lists;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;

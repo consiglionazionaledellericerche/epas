@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -14,8 +16,6 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.rest.ApiRequestException;
-
-import jobs.FixUserPermission;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,8 +31,6 @@ import models.Person;
 import models.Role;
 import models.WorkingTimeType;
 
-import org.assertj.core.util.Maps;
-import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -150,7 +148,7 @@ public class Synchronizations extends Controller {
     Verify.verify(institute.isPresent());
     Verify.verifyNotNull(perseoId);
 
-    Optional<Institute> instituteInPerseo = null;
+    Optional<Institute> instituteInPerseo = Optional.absent();
 
     try {
       instituteInPerseo = officePerseoConsumer
@@ -159,17 +157,18 @@ public class Synchronizations extends Controller {
       flash.error("%s", e);
     }
 
-    Verify.verify(instituteInPerseo.isPresent());
+    if (instituteInPerseo.isPresent()) {
+      //copy ( TODO: update method)
+      institute.get().perseoId = instituteInPerseo.get().perseoId;
+      institute.get().cds = instituteInPerseo.get().cds;
+      institute.get().code = instituteInPerseo.get().code;
+      institute.get().name = instituteInPerseo.get().name;
+      institute.get().save();
 
-    //copy ( TODO: update method)
-    institute.get().perseoId = instituteInPerseo.get().perseoId;
-    institute.get().cds = instituteInPerseo.get().cds;
-    institute.get().code = instituteInPerseo.get().code;
-    institute.get().name = instituteInPerseo.get().name;
-    institute.get().save();
+      log.info("Associato istituto={} al perseoId={}", institute.get().toString(), perseoId);
+      flash.success("Operazione effettuata correttamente");
+    }
 
-    log.info("Associato istituto={} al perseoId={}", institute.get().toString(), perseoId);
-    flash.success("Operazione effettuata correttamente");
     institutes(null);
   }
 
@@ -239,7 +238,8 @@ public class Synchronizations extends Controller {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
         log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
             + "nel suo istituto. errors={}.", seatPerseoId, validation.errorsMap());
-        flash.error("La sede selezionata non può essere importata a causa di errori.");
+        flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
+            validation.errorsMap());
         otherInstitutes();
       }
 
@@ -258,7 +258,8 @@ public class Synchronizations extends Controller {
       // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
           + "nella sede. errors={}.", seatPerseoId, validation.errorsMap());
-      flash.error("La sede selezionata non può essere importata a causa di errori.");
+      flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
+          validation.errorsMap());
       otherInstitutes();
     }
 
@@ -268,7 +269,7 @@ public class Synchronizations extends Controller {
     periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
     // Per i permessi di developer e admin...
-    FixUserPermission.doJob();
+    officeManager.setSystemUserPermission(seat);
 
     flash.success("La sede %s è stata importata con successo da Perseo!", seat.toString());
 
@@ -332,7 +333,7 @@ public class Synchronizations extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
 
-    Map<Long, Person> perseoPeopleByPerseoId = null;
+    Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
           .perseoPeopleByPerseoId(Optional.of(office.perseoId));
@@ -365,17 +366,18 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(perseoId);
 
-    Optional<Person> personInPerseo = null;
+    Optional<Person> personInPerseo = Optional.absent();
     try {
       personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
-    Verify.verify(personInPerseo.isPresent());
 
-    join(person, personInPerseo.get());
+    if (personInPerseo.isPresent()) {
+      join(person, personInPerseo.get());
+      flash.success("Operazione effettuata correttamente");
+    }
 
-    flash.success("Operazione effettuata correttamente");
     people(person.office.id);
   }
 
@@ -443,38 +445,45 @@ public class Synchronizations extends Controller {
   public static void importPerson(Long perseoId) {
 
     //Prendere da perseo quella persona.
-    Optional<Person> personInPerseo = null;
+    Optional<Person> personInPerseo = Optional.absent();
     try {
       personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
-    Verify.verify(personInPerseo.isPresent());
 
-    //Caricare dalla persona l'office.
-    Optional<Office> office = officeDao.byPerseoId(personInPerseo.get().perseoOfficeId);
-    Verify.verify(office.isPresent());
+    Optional<Office> office = Optional.absent();
 
-    personInPerseo.get().office = office.get();
-    validation.valid(personInPerseo.get());
-    if (validation.hasErrors()) {
-      // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
-      log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
-          + "nella persona. errors={}.", perseoId, validation.errorsMap());
-      flash.error("La persona selezionata non può essere importata a causa di errori.");
-      otherPeople(office.get().id);
-    }
+    if (personInPerseo.isPresent()) {
+////      Caricare dalla persona l'office.
+      office = officeDao.byPerseoId(personInPerseo.get().perseoOfficeId);
+      if (!office.isPresent()) {
+        flash.error("L'ufficio di appartenenza della persona selezionata non è "
+            + "ancora sincronizzato con Perseo");
+        otherPeople(null);
+      }
 
-    // Creazione!
-    if (!personCreator(personInPerseo.get()).isPresent()) {
-      flash.error("La persona selezionata non può essere importata a causa di errori.");
-    } else {
-      flash.success("La persona %s è stata importata con successo da Perseo!",
-          personInPerseo.get().toString());
+      personInPerseo.get().office = office.get();
+      validation.valid(personInPerseo.get());
+      if (validation.hasErrors()) {
+        // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
+        log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
+            + "nella persona. errors={}.", perseoId, validation.errorsMap());
+        flash.error("La persona selezionata non può essere importata a causa di errori. [%s]",
+            validation.errorsMap());
+        otherPeople(office.get().id);
+      }
+
+      // Creazione!
+      if (!personCreator(personInPerseo.get()).isPresent()) {
+        flash.error("La persona selezionata non può essere importata a causa di errori.");
+      } else {
+        flash.success("La persona %s è stata importata con successo da Perseo!",
+            personInPerseo.get().toString());
+      }
     }
 
     otherPeople(office.get().id);
-
   }
 
   /**
@@ -638,18 +647,18 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(contract);
     Verify.verifyNotNull(perseoId);
 
-    Optional<Contract> contractInPerseo = null;
+    Optional<Contract> contractInPerseo = Optional.absent();
     try {
       contractInPerseo = contractPerseoConsumer
           .perseoContractByPerseoId(perseoId, contract.person);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
-    Verify.verify(contractInPerseo.isPresent());
+    if (contractInPerseo.isPresent()) {
+      joinUpdateContract(contract, contractInPerseo.get());
+      flash.success("Operazione effettuata correttamente");
+    }
 
-    joinUpdateContract(contract, contractInPerseo.get());
-
-    flash.success("Operazione effettuata correttamente");
     activeContracts(contract.person.office.id);
   }
 
@@ -692,22 +701,23 @@ public class Synchronizations extends Controller {
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(person.perseoId);
 
-    Optional<Contract> contractInPerseo = null;
+    Optional<Contract> contractInPerseo = Optional.absent();
     try {
       contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
-    Verify.verify(contractInPerseo.isPresent());
 
-    WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+    if (contractInPerseo.isPresent()) {
+      WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 
-    // Salvare il contratto.
-    if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
-      flash.error("Il contratto non può essere importato a causa di errori");
-      otherContracts(person.office.id);
+      // Salvare il contratto.
+      if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
+        flash.error("Il contratto non può essere importato a causa di errori");
+        otherContracts(person.office.id);
+      }
+      flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
     }
-    flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
 
     otherContracts(person.office.id);
   }
