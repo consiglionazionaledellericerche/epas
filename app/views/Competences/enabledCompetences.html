@@ -16,28 +16,28 @@
 		<thead>
 		<tr>
 			<th>Nome</th>
-			#{list tableRecapCompetence.columnKeySet()}
-			<th>${_}</th>
-			#{/list}
+			<th>Competence Abilitate</th>
 		</tr>
 		</thead>
 		<tbody>
 
-	#{list tableRecapCompetence.rowMap().entrySet(),as:'entry'}
-	<tr>
-		<td>
-		  <a href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-async-modal="#updateCompetenceModal">
-		    ${entry.getKey().name} ${entry.getKey().surname}
+    #{list items:personList, as:'person'}
+    <tr>
+      <td>
+		  <a href="@{Competences.updatePersonCompetence(person.id)}" data-async-modal="#updateCompetenceModal">
+		    ${person.fullname}
 		  </a>
-		</td>
-		#{list tableRecapCompetence.columnKeySet(),as:'col'}
-			<td>	
-				#{if entry.getValue().get(col) == true}<span class="glyphicon glyphicon-ok"></span>#{/if}
-			</td>
-		#{/list}
-	</tr>	
-	#{/list}
-		</tbody>
+ 	  </td>
+ 	  <td>
+ 	   #{list items:allCodeList, as:'code'}
+ 	     #{if person.competenceCode.contains(code)}
+ 	       <span class="label label-primary">${code.code} - ${code.description}</span>
+ 	     #{/if}
+       #{/list}
+       </td>
+    #{/list}
+    </tr>
+  </tbody>
   </table>
 
 </div>

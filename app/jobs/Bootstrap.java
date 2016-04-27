@@ -283,7 +283,7 @@ public class Bootstrap extends Job<Void> {
       //BOH
     }
 
-    migrateConfiguration();
+//    migrateConfiguration();
 
   }
 

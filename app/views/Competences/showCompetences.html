@@ -24,25 +24,20 @@
 	<input type="hidden" name="year" value="${year}"/>
     <input type="hidden" name="month" value="${month}"/>
     <input type="hidden" name="officeId" value="${office.id}"/>
-    
-
-        #{f.input 'name', label:'Filtro nome', 'data-autochange':true, value:name, autofocus:true,
-            placeholder:'search'.label() /}
-        #{f.selectModel 'competenceCode', label:'Codice da assegnare', items:competenceCodeList,
+	
+	<div class="row">
+	  <div class="col-md-6">
+	    #{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
     		value:wrCompetenceCode.value /}
+	  </div>
+	   <div class="col-md-6">
+	    #{f.input 'name', label:'Nome', 'data-autochange':true, value:name, autofocus:true,
+            placeholder:'nome'.label() /}
+	  </div>
+	</div>    
     
     #{/form}
 
-
-  #{alert color:'warning'}
-  <strong>Totale competenze ${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}
-    assegnate nel mese per ${office.name}</strong>
-  <a data-tooltip data-toggle="tooltip" data-placement="right"
-     title="Per aggiornare questo valore ricaricare la pagina">
-    <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
-  </a>
-  #{/alert}
-    
     <section id="results">
    	#{paginate results} 
 	   
@@ -81,8 +76,20 @@
 	    #{/paginate}
 
 
-    </section>
+
   <br>
+  <br>
+  #{alert color:'warning'}
+  Totale competenze <strong>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</strong>
+    assegnate nel mese per <strong>${office.name}</strong>
+  <a data-tooltip data-toggle="tooltip" data-placement="right"
+     title="Per aggiornare questo valore ricaricare la pagina">
+    <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
+  </a>
+  #{/alert}
+  </section>
+  
+  #{title title:'Riepilogo Straordinari assegnati ' + year, color:'primary' /}
 
   #{alert color:'info'}
   <h4><strong>Riepilogo straordinari ${office.name}</strong></h4>
