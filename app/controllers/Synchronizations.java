@@ -17,8 +17,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.rest.ApiRequestException;
 
-import jobs.FixUserPermission;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -261,7 +259,7 @@ public class Synchronizations extends Controller {
       log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
           + "nella sede. errors={}.", seatPerseoId, validation.errorsMap());
       flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
-            validation.errorsMap());
+          validation.errorsMap());
       otherInstitutes();
     }
 
@@ -271,7 +269,7 @@ public class Synchronizations extends Controller {
     periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
     // Per i permessi di developer e admin...
-    FixUserPermission.doJob();
+    officeManager.setSystemUserPermission(seat);
 
     flash.success("La sede %s è stata importata con successo da Perseo!", seat.toString());
 
