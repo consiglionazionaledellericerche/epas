@@ -46,13 +46,11 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   public Long perseoId;
   
   @Required
-  @Unique
   @NotNull
   @Column(nullable = false)
   public String name;
 
   //Codice della sede, per esempio per la sede di Pisa è "044000"
-  @Unique
   @As(binder = NullStringBinder.class)
   @Column(nullable = false)
   public String code;
