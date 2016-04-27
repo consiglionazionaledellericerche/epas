@@ -240,7 +240,8 @@ public class Synchronizations extends Controller {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
         log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
             + "nel suo istituto. errors={}.", seatPerseoId, validation.errorsMap());
-        flash.error("La sede selezionata non può essere importata a causa di errori.");
+        flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
+            validation.errorsMap());
         otherInstitutes();
       }
 
@@ -259,7 +260,8 @@ public class Synchronizations extends Controller {
       // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
           + "nella sede. errors={}.", seatPerseoId, validation.errorsMap());
-      flash.error("La sede selezionata non può essere importata a causa di errori.");
+      flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
+            validation.errorsMap());
       otherInstitutes();
     }
 
@@ -469,7 +471,8 @@ public class Synchronizations extends Controller {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
         log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
             + "nella persona. errors={}.", perseoId, validation.errorsMap());
-        flash.error("La persona selezionata non può essere importata a causa di errori.");
+        flash.error("La persona selezionata non può essere importata a causa di errori. [%s]",
+            validation.errorsMap());
         otherPeople(office.get().id);
       }
 
