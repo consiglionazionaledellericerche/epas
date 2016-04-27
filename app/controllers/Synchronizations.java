@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -31,8 +33,6 @@ import models.Person;
 import models.Role;
 import models.WorkingTimeType;
 
-import org.assertj.core.util.Maps;
-import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -333,7 +333,7 @@ public class Synchronizations extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
 
-    Map<Long, Person> perseoPeopleByPerseoId = null;
+    Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
           .perseoPeopleByPerseoId(Optional.of(office.perseoId));
