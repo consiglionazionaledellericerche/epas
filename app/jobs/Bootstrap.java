@@ -283,7 +283,16 @@ public class Bootstrap extends Job<Void> {
       //BOH
     }
 
-//    migrateConfiguration();
+    // La migrateConfiguration và rimossa (e con lei anche tabelle e compagnia inerenti la vecchia 
+    // gestione delle configurazioni) appena verrà effettuato l'aggiornamento dell'ise.
+    migrateConfiguration();
+    
+    // Questo update permette di instanziare gli eventuali nuovi parametri enumerati epasParam 
+    // per ogni ufficio.
+    List<Office> offices = officeDao.allOffices().list();
+    for (Office office : offices) {
+      configurationManager.updateOfficeConfigurations(office);
+    }
 
   }
 
