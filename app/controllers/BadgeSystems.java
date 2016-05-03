@@ -13,6 +13,8 @@ import dao.PersonDao;
 
 import helpers.Web;
 
+import manager.BadgeManager;
+
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -44,6 +46,8 @@ public class BadgeSystems extends Controller {
   private static BadgeSystemDao badgeSystemDao;
   @Inject
   private static BadgeReaderDao badgeReaderDao;
+  @Inject
+  private static BadgeManager badgeManager;
   @Inject
   private static BadgeDao badgeDao;
   @Inject
@@ -233,6 +237,7 @@ public class BadgeSystems extends Controller {
       Badge badge = new Badge();
       badge.person = person;
       badge.code = code;
+      badgeManager.normalizeBadgeCode(badge, false);
       badge.badgeSystem = badgeSystem;
       badge.badgeReader = badgeReader;
 
@@ -297,6 +302,7 @@ public class BadgeSystems extends Controller {
         Badge badge = new Badge();
         badge.person = person;
         badge.code = person.badgeNumber.replaceFirst("^0+(?!$)", "");
+        badgeManager.normalizeBadgeCode(badge, false);
         badge.badgeSystem = badgeSystem;
         badge.badgeReader = badgeReader;
 
