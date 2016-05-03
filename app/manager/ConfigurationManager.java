@@ -13,6 +13,8 @@ import com.mysema.query.jpa.impl.JPAQueryFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Configuration;
 import models.Office;
 import models.enumerate.EpasParam;
@@ -32,6 +34,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+@Slf4j
 public class ConfigurationManager {
 
   protected final JPQLQueryFactory queryFactory;
@@ -333,8 +336,7 @@ public class ConfigurationManager {
   }
   
   /**
-   * La lista delle configurazioni della sede per la data. <br> 
-   * Se non esiste (inizializzazione parametro) applica il valore di default. 
+   * La lista delle configurazioni esistenti della sede per la data.  
    * @param office sede
    * @param date data
    * @return lista di configurazioni
@@ -343,21 +345,40 @@ public class ConfigurationManager {
 
     List<Configuration> list = Lists.newArrayList();
     for (EpasParam epasParam : EpasParam.values()) {
-      list.add(getOfficeConfiguration(office, epasParam, date));
+      for (Configuration configuration : office.configurations) {
+        if (!configuration.epasParam.equals(epasParam)) {
+          continue;
+        }
+        DateInterval interval = new DateInterval(configuration.beginDate, configuration.calculatedEnd()); 
+        if (!DateUtility.isDateIntoInterval(date, interval)) {
+          continue;
+        }
+        list.add(configuration);
+      }
     }
     return list;
   }
 
   /**
-   * Preleva la configurazione per la sede, il tipo e la data passata.
+   * Preleva il valore della configurazione per la sede, il tipo e la data passata.
+   * 
+   * Nota Bene: <br>
+   * 
+   * Nel caso il parametro di configurazione mancasse per la data specificata, si distinguono i casi:<br>
+   * 1) Parametro necessario (appartiene all'intervallo di vita della sede): eccezione. 
+   *    Questo stato non si verifica e non si deve verificare mai. 
+   *    E' giusto interrompere bruscamente la richiesta per evitare effetti collaterali.<br>
+   * 2) Parametro non necessario (data al di fuori della vita dell'office). Di norma è il chiamante
+   *    che dovrebbe occuparsi di fare questo controllo, siccome non è sempre così si ritorna un 
+   *    valore di cortesia (il default o il più prossimo fra quelli definiti nell'office).<br>    
    * @param office
    * @param epasParam
    * @param date
    * @return
    */
-  public Configuration getOfficeConfiguration(Office office, EpasParam epasParam, LocalDate date) {
+  public Object getOfficeConfigurationValue(Office office, EpasParam epasParam, LocalDate date) {
     
-    //TODO verificare se serve la cache .... forse no.
+    // Primo tentativo (caso generale)
     for (Configuration configuration : office.configurations) {
       if (!configuration.epasParam.equals(epasParam)) {
         continue;
@@ -366,9 +387,56 @@ public class ConfigurationManager {
       if (!DateUtility.isDateIntoInterval(date, interval)) {
         continue;
       }
-      return configuration;
+      return configuration.parseValue();
     }
-    return buildDefault(office, epasParam);
+    
+    // Parametro necessario inesistente
+    DateInterval officeInterval = new DateInterval(office.getBeginDate(), office.calculatedEnd());
+    if (DateUtility.isDateIntoInterval(date, officeInterval)) {
+      throw new IllegalStateException();
+    }
+    
+    // Parametro non necessario, risposta di cortesia.
+    
+    Object nearestValue = null;
+    Integer days = null;
+
+    for (Configuration configuration : office.configurations) {
+      if (!configuration.epasParam.equals(epasParam)) {
+        continue;
+      }
+
+      Integer daysInterval;
+      if (date.isBefore(configuration.getBeginDate())) {
+        daysInterval = DateUtility
+            .daysInInterval(new DateInterval(date, configuration.getBeginDate()));
+      } else {
+        daysInterval = DateUtility
+            .daysInInterval(new DateInterval(configuration.calculatedEnd(), date));
+      }
+      if (days == null) {
+        days = daysInterval;
+        nearestValue = EpasParamValueType
+            .parseValue(epasParam.epasParamValueType, configuration.fieldValue);
+      } else { 
+        if (days > daysInterval) {
+          days = daysInterval;
+          nearestValue = EpasParamValueType
+              .parseValue(epasParam.epasParamValueType, configuration.fieldValue);
+        }
+      }
+    }
+    
+    if (nearestValue != null) {
+      log.debug("Ritorno il valore non necessario più prossimo per {} {} {}: {}",
+          office.name, epasParam, date, nearestValue);
+      return nearestValue;
+    } else {
+      log.debug("Ritorno il valore non necessario default per {} {} {}: {}",
+          office.name, epasParam, date, nearestValue);
+      return epasParam.defaultValue; 
+    }
+
   }
   
   /**
@@ -381,7 +449,7 @@ public class ConfigurationManager {
    * @return
    */
   private Configuration buildDefault(Office office, EpasParam epasParam) {
-
+    
     return build(epasParam, office, (String)epasParam.defaultValue, 
         Optional.fromNullable(office.beginDate), Optional.<LocalDate>absent(), true, true);
 
@@ -396,9 +464,8 @@ public class ConfigurationManager {
    */
   public Object configValue(Office office, EpasParam epasParam) {
     Preconditions.checkArgument(epasParam.isGeneral());
-    Configuration configuration = getOfficeConfiguration(office, epasParam, LocalDate.now());
-    return EpasParamValueType.parseValue(configuration.epasParam.epasParamValueType, 
-        configuration.fieldValue);
+    return getOfficeConfigurationValue(office, epasParam, LocalDate.now());
+
   }
 
   /**
@@ -409,9 +476,10 @@ public class ConfigurationManager {
    * @return value
    */
   public Object configValue(Office office, EpasParam epasParam, LocalDate date) {
-    Configuration configuration = getOfficeConfiguration(office, epasParam, date);
-    return EpasParamValueType.parseValue(configuration.epasParam.epasParamValueType, 
-        configuration.fieldValue);
+    return getOfficeConfigurationValue(office, epasParam, date);
+    
+    //return EpasParamValueType.parseValue(configuration.epasParam.epasParamValueType, 
+    //    configuration.fieldValue);
   }
   
   /**
@@ -430,5 +498,24 @@ public class ConfigurationManager {
     return configValue(office, epasParam, date);
   }
   
+  /**
+   * Aggiunge i nuovi epasParam quando vengono definiti (coon il valore di default).
+   * Da chiamare al momento della creazione dell'office ed al bootstrap di epas.
+   * @param office
+   */
+  public void updateOfficeConfigurations(Office office) {
+    
+    for (EpasParam epasParam : EpasParam.values()) {
+      boolean toCreate = true;
+      for (Configuration configuration : office.configurations) {
+        if (configuration.epasParam.equals(epasParam)) {
+          toCreate = false;
+        }
+      }
+      if (toCreate) {
+        buildDefault(office, epasParam);
+      }
+    }
+  }
 
 }

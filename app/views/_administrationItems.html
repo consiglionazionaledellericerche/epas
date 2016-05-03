@@ -80,7 +80,7 @@
        
        #{if ip.uploadSituation }
        <li><a href="@{UploadSituation.uploadData(session.get("officeSelected"))}">Invio Attestati</a></li>
-       <li><a href="@{Certifications.certifications(session.get("officeSelected"))}">Invio Nuovo Attestati</a></li>
+       *{ <li><a href="@{Certifications.certifications(session.get("officeSelected"))}">Invio Nuovo Attestati</a></li> }*
        #{/if}
 
       </ul> *{ end items }*
