@@ -12,6 +12,8 @@ import dao.wrapper.IWrapperOffice;
 
 import helpers.Web;
 
+import manager.ConfigurationManager;
+import manager.OfficeManager;
 import manager.PeriodManager;
 
 import models.Institute;
@@ -37,6 +39,10 @@ public class Offices extends Controller {
   private static final Logger log = LoggerFactory.getLogger(Offices.class);
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static OfficeManager officeManager;
+  @Inject
+  static ConfigurationManager configurationManager;
   @Inject
   static IWrapperFactory wrapperFactory;
   @Inject
@@ -131,6 +137,13 @@ public class Offices extends Controller {
     } else {
       office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
+      
+      // Per i permessi di developer e admin...
+      officeManager.setSystemUserPermission(office);
+      
+      // Configurazione iniziale di default ...
+      configurationManager.updateOfficeConfigurations(office);
+      
       periodManager.updatePropertiesInPeriodOwner(office);
       flash.success(Web.msgSaved(Office.class));
       Institutes.index();
