@@ -19,6 +19,7 @@ import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.ConfigurationManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.PeriodManager;
@@ -70,6 +71,8 @@ public class Synchronizations extends Controller {
   static UserManager userManager;
   @Inject
   static OfficeManager officeManager;
+  @Inject
+  static ConfigurationManager configurationManager;
   @Inject
   static ContractManager contractManager;
   @Inject
@@ -270,6 +273,9 @@ public class Synchronizations extends Controller {
     seat.save();
     // Per i permessi di developer e admin...
     officeManager.setSystemUserPermission(seat);
+    
+    // Configurazione iniziale di default ...
+    configurationManager.updateOfficeConfigurations(seat);
 
     flash.success("La sede %s è stata importata con successo da Perseo!", seat.toString());
 
