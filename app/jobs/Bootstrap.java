@@ -9,11 +9,13 @@ import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.BadgeManager;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ConfigurationManager;
 import manager.PeriodManager;
 
+import models.Badge;
 import models.Office;
 import models.Qualification;
 import models.Role;
@@ -75,6 +77,8 @@ public class Bootstrap extends Job<Void> {
   static ConfGeneralManager confGeneralManager;
   @Inject
   static PeriodManager periodManager;
+  @Inject
+  static BadgeManager badgeManager;
 
   /**
    * Procedura abilitata solo all'utente developer per compiere la migrazione alla nuova gestione
@@ -292,6 +296,12 @@ public class Bootstrap extends Job<Void> {
     List<Office> offices = officeDao.allOffices().list();
     for (Office office : offices) {
       configurationManager.updateOfficeConfigurations(office);
+    }
+    
+    // Rimuove gli zeri iniziali se il codice badge è un intero.
+    List<Badge> badges = Badge.findAll();
+    for (Badge badge : badges) {
+      badgeManager.normalizeBadgeCode(badge, true);
     }
 
   }
