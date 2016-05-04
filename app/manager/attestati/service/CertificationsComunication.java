@@ -5,6 +5,10 @@ import com.google.common.base.Verify;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import helpers.rest.ApiRequestException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
 import manager.attestati.dto.drop.CancellazioneRigaCompetenza;
 import manager.attestati.dto.drop.CancellazioneRigaFormazione;
@@ -29,16 +33,18 @@ import play.libs.WS.WSRequest;
 
 import java.util.Set;
 
+import synch.perseoconsumers.PerseoApis;
+
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
  * @author alessandro
  *
  */
+@Slf4j
 public class CertificationsComunication {
 
   //Attestati api
-  private static final String BASE_URL = "http://as2dock.si.cnr.it";
-  private static final String ATTESTATO_URL = "/api/ext/attestato";
+  private static final String ATTESTATI_API_URL = "/api/ext/attestato";
   private static final String API_URL = "/api/ext";
   private static final String API_URL_LISTA_DIPENDENTI = "/listaDipendenti";
   private static final String API_URL_ASSENZA = "/rigaAssenza";
@@ -52,8 +58,6 @@ public class CertificationsComunication {
   private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
   private static final String OAUTH_URL = "/oauth/token";
   private static final String OAUTH_AUTHORIZATION = "YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ=";
-  private static final String OAUTH_USERNAME = "app.epas";
-  private static final String OAUTH_PASSWORD = "trapocolapuoicambiare";
   private static final String OAUTH_GRANT_TYPE = "password";
   private static final String OAUTH_CLIENT_ID = "attestatiapp";
   
@@ -74,13 +78,27 @@ public class CertificationsComunication {
    */
   public Optional<String> getToken() {
 
+    final String url;
+    final String user;
+    final String pass;
+    
+    try {
+      url = AttestatiApis.getAttestatiBaseUrl();
+      user = AttestatiApis.getAttestatiUser();
+      pass = AttestatiApis.getAttestatiPass();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+    
     try {
       
       String body = String
           .format("username=%s&password=%s&grant_type=%s&client_secret=%s&client_id=%s", 
-          OAUTH_USERNAME, OAUTH_PASSWORD, OAUTH_GRANT_TYPE, OAUTH_CLIENT_SECRET, OAUTH_CLIENT_ID);
+              user, pass, OAUTH_GRANT_TYPE, OAUTH_CLIENT_SECRET, OAUTH_CLIENT_ID);
       
-      WSRequest req = WS.url(BASE_URL + OAUTH_URL)
+      WSRequest req = WS.url(url + OAUTH_URL)
           .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
           .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
           .body(body);
@@ -112,7 +130,18 @@ public class CertificationsComunication {
    * @return
    */
   private WSRequest prepareOAuthRequest(String token, String url, String contentType) {
-    WSRequest wsRequest = WS.url( BASE_URL + url)
+    
+    final String baseUrl;
+    
+    try {
+      baseUrl = AttestatiApis.getAttestatiBaseUrl();
+    } catch (NoSuchFieldException e) {
+      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+    
+    WSRequest wsRequest = WS.url( baseUrl + url)
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer " + token);
     return wsRequest;
@@ -171,7 +200,7 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATO_URL + "/" + person.office.codeId 
+      String url = ATTESTATI_API_URL + "/" + person.office.codeId 
           + "/" + person.number + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
