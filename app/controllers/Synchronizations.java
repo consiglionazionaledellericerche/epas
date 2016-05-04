@@ -776,4 +776,36 @@ public class Synchronizations extends Controller {
 
     otherContracts(office.id);
   }
+  
+  /**
+   * Azzera la sincronizzazione del'istituto, delle sedi, delle persone e dei contratti.
+   * @param instituteId istituto
+   */
+  public static void unjoinInstitute(Long instituteId) {
+    
+    Optional<Institute> instituteOpt = officeDao.instituteById(instituteId);
+    if (!instituteOpt.isPresent()) {
+      notFound();
+    }
+    Institute institute = instituteOpt.get();
+    institute.perseoId = null;
+    institute.save();
+    for (Office office : institute.seats) {
+      
+      office.perseoId = null;
+      office.save();
+      for (Person person : office.persons) {
+        
+        person.perseoId = null;
+        person.save();
+        for (Contract contract : person.contracts) {
+          contract.perseoId = null;
+          contract.save();
+        }
+      }
+    }
+    
+    flash.success("Istituto %s desincronizzato.", institute.name);
+    institutes(null);
+  }
 }
