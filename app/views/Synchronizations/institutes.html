@@ -38,6 +38,7 @@
         #{/if}
         #{else}
            <em>Synchronized </em><span class="label label-success">${institute.perseoId}</span>
+           <a class="btn btn btn-danger btn-xs" href="@{Synchronizations.unjoinInstitute(institute.id)}">Disassocia</a>
         #{/else}
 	  </td>
 	  <td>
