@@ -58,7 +58,6 @@ public class Certifications extends Controller {
   @Inject 
   private static CertificationService certificationService;
   
- 
   /**
    * Pagina principale nuovo invio attestati.
    * @param officeId sede 
