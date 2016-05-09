@@ -160,6 +160,8 @@ public class RequestInit extends Controller {
       //FIXME: perché è previsto il tracciamento di questa eccezione??
     }
 
+    //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
+    
     computeActionSelected(currentUser, offices, year, month);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
@@ -224,6 +226,7 @@ public class RequestInit extends Controller {
         "Stampings.dailyPresence",
         "VacationsAdmin.list",
         "Absences.showGeneralMonthlyAbsences",
+        "Absences.manageAttachmentsPerCode",
         "Competences.showCompetences",
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",

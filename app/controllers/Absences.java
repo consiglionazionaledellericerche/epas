@@ -412,19 +412,31 @@ public class Absences extends Controller {
 
   /**
    * Gli allegati alle assenze nel mese. Bisogna renderlo parametrico alla sede.
-   * TODO per sede.
    * @param year anno
    * @param month mese
+   * @param office office
    */
-  public static void manageAttachmentsPerCode(Integer year, Integer month) {
+  public static void manageAttachmentsPerCode(Integer year, Integer month, Long officeId) {
 
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    rules.checkIfPermitted(office);
+    
     LocalDate beginMonth = new LocalDate(year, month, 1);
 
     //Prendere le assenze ordinate per tipo
-    List<Absence> absenceList = absenceDao.getAbsencesInPeriod(
+    List<Absence> absenceListAux = absenceDao.getAbsencesInPeriod(
         Optional.<Person>absent(), beginMonth,
         Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
 
+    //Provvisoriamente mangengo solo quelle di persone dell'office
+    List<Absence> absenceList = Lists.newArrayList();
+    for(Absence absence : absenceListAux) {
+      if (absence.personDay.person.office.equals(office)) {
+        absenceList.add(absence);
+      }
+    }
     List<AttachmentsPerCodeRecap> attachmentRecapList = new ArrayList<AttachmentsPerCodeRecap>();
     AttachmentsPerCodeRecap currentRecap = new AttachmentsPerCodeRecap();
     AbsenceType currentAbt = null;
