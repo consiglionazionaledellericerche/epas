@@ -170,15 +170,22 @@ public class PersonStampingDayRecap {
    */
   private void computeMealTicket(PersonDay personDay, boolean thereAreAllDayAbsences) {
 
+    // ##### Giorno ignorato (fuori contratto)
+    
     if (this.ignoreDay || !this.personDay.isPersistent()) {
       this.mealTicket = MEALTICKET_EMPTY;
       return;
     }
+    
+    // ##### Giorno festivo
+    
     if (personDay.isHoliday()) {
       this.mealTicket = MEALTICKET_EMPTY;
       return;
     }
-    // GIORNI FUTURI
+    
+    // ##### Giorni futuri
+    
     if (personDay.isFuture()) {
       if (thereAreAllDayAbsences) {
         this.mealTicket = MEALTICKET_NO;
@@ -187,34 +194,50 @@ public class PersonStampingDayRecap {
       }
       return;
     }
-    // Giorni Passati e giorno attuale
+    
+    // ##### Giorni Passati e giorno attuale
+    // ##### Available
+    
     if (personDay.isTicketAvailable()) {
-      if (personDay.isToday()) {
+      if (personDay.isTicketForcedByAdmin) {
+        // si e forzato
+        this.mealTicket = MEALTICKET_YES; 
+      } else if (personDay.isToday()) {
         if (thereAreAllDayAbsences) {
+          // si non forzato oggi con assenze giornalire FIXME: perchè decido qua no?
           this.mealTicket = MEALTICKET_NO;
         } else {
           if (personDay.isConsideredExitingNow()) {
+            // si non forzato oggi considerando l'uscita in questo momento
             this.mealTicket = MEALTICKET_YES_IF_EXIT_NOW;
           } else {
+            // si non forzato oggi senza considerare l'uscita in questo momento
             this.mealTicket = MEALTICKET_YES;
           }
         }
-        return;
+      } else {
+        // si non forzato giorni passati
+        this.mealTicket = MEALTICKET_YES;
       }
-      this.mealTicket = MEALTICKET_YES;
       return;
     }
+    
+    // ##### Giorni Passati e giorno attuale
+    // ##### Not Available
+    
     if (!personDay.isTicketAvailable) {
       if (personDay.isTicketForcedByAdmin) {
         // no forzato
         this.mealTicket = MEALTICKET_NO;
       } else {
-        // no non forzato
         if (personDay.isPast()) {
+          // no non forzato giorni passati
           this.mealTicket = MEALTICKET_NO;
         } else if (personDay.isToday() || !thereAreAllDayAbsences) {
+          // no non forzato oggi senza assenze giornaliere
           this.mealTicket = MEALTICKET_NOT_YET;
         } else {
+          // no non forzato oggi con assenze giornaliere
           this.mealTicket = MEALTICKET_NO;
         }
       }
