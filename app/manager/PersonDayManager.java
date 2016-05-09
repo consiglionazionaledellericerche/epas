@@ -654,11 +654,10 @@ public class PersonDayManager {
       }
     }
 
-    //persona fixed
+    setValidPairStampings(pd.getValue());
+   
     if (pd.isFixedTimeAtWork()) {
-
-      setValidPairStampings(pd.getValue());
-
+      //persona fixed
       if (allValidStampings(pd.getValue())) {
         troubles.put(Troubles.UNCOUPLED_FIXED, Boolean.FALSE);
       } else {
@@ -668,46 +667,48 @@ public class PersonDayManager {
 
       //persona not fixed
 
-      //caso no festa, no assenze, no timbrature
-      if (!isAllDayAbsences(pd.getValue()) && pd.getValue().stampings.isEmpty()
-          && !pd.getValue().isHoliday && !isEnoughHourlyAbsences(pd.getValue())) {
+      // ### CASO 1
+      //caso no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa) 
+      if (!pd.getValue().isHoliday 
+          && !isAllDayAbsences(pd.getValue()) 
+          && pd.getValue().stampings.isEmpty()
+          && !isEnoughHourlyAbsences(pd.getValue())) {
 
         troubles.put(Troubles.NO_ABS_NO_STAMP, Boolean.TRUE);
       } else {
         troubles.put(Troubles.NO_ABS_NO_STAMP, Boolean.FALSE);
       }
 
-      //caso no festa, no assenze, timbrature disaccoppiate
-      if (!pd.getValue().isHoliday && !isAllDayAbsences(pd.getValue())) {
+      // ### CASO 2
+      //caso no festa + no assenze giornaliere + timbrature disaccoppiate
+      if (!pd.getValue().isHoliday 
+          && !isAllDayAbsences(pd.getValue()) 
+          && !allValidStampings(pd.getValue())) {
 
-        setValidPairStampings(pd.getValue());
+        troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.TRUE);
+      } else {
+        troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.FALSE);
+      }
 
-        if (allValidStampings(pd.getValue())) {
-          troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.FALSE);
-        } else {
-          troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.TRUE);
-        }
-      } else if (!isAllDayAbsences(pd.getValue()) && pd.getValue().isHoliday) {
-        //caso festa, no assenze, timbrature disaccoppiate
+      // ### CASO 3
+      //caso è festa + no assenze giornaliere + timbrature disaccoppiate
+      if (pd.getValue().isHoliday 
+          && !isAllDayAbsences(pd.getValue()) 
+          && !allValidStampings(pd.getValue())) {
 
-        setValidPairStampings(pd.getValue());
-
-        if (allValidStampings(pd.getValue())) {
-          troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.FALSE);
-        } else {
-          troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.TRUE);
-        }
+        troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.TRUE);
+      } else {
+        troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.FALSE);
       }
     }
 
     //INSERIMENTO/RIMOZIONE dei personDayInTrouble
-    for (Troubles t : troubles.keySet()) {
+    for (Troubles trouble : troubles.keySet()) {
       //Se valore e' true e quindi inserisco il personDayinTrouble
-      if (troubles.get(t)) {
-        personDayInTroubleManager.setTrouble(
-            pd.getValue(), t);
+      if (troubles.get(trouble)) {
+        personDayInTroubleManager.setTrouble(pd.getValue(), trouble);
       } else {
-        personDayInTroubleManager.fixTrouble(pd.getValue(), t);
+        personDayInTroubleManager.fixTrouble(pd.getValue(), trouble);
       }
     }
 
