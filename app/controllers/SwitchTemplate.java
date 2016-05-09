@@ -116,7 +116,7 @@ public class SwitchTemplate extends Controller {
     }
 
     if (action.equals("Absences.manageAttachmentsPerCode")) {
-      Absences.manageAttachmentsPerCode(year, month);
+      Absences.manageAttachmentsPerCode(year, month, officeId);
     }
 
     if (action.equals("Absences.manageAttachmentsPerPerson")) {
