@@ -229,7 +229,7 @@ public class Competences extends Controller {
       renderTemplate("Application/indexAdmin.html");
     }
 
-    PersonMonthCompetenceRecap personMonthCompetenceRecap =
+    Optional<PersonMonthCompetenceRecap> personMonthCompetenceRecap =
         personMonthCompetenceRecapFactory.create(contract.get(), month, year);
 
     render(personMonthCompetenceRecap, person, year, month);

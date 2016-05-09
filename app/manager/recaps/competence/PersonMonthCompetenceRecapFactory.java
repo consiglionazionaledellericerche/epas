@@ -1,5 +1,7 @@
 package manager.recaps.competence;
 
+import com.google.common.base.Optional;
+
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.wrapper.IWrapperFactory;
@@ -27,11 +29,17 @@ public class PersonMonthCompetenceRecapFactory {
    *
    * @param contract requires not null.
    */
-  public PersonMonthCompetenceRecap create(Contract contract, int month,
-                                           int year) {
+  public Optional<PersonMonthCompetenceRecap> create(Contract contract, int month, int year) {
 
-    return new PersonMonthCompetenceRecap(competenceCodeDao,
-            competenceDao, wrapperFactory, contract, month, year);
+    try {
+      return Optional.fromNullable(new PersonMonthCompetenceRecap(competenceCodeDao,
+          competenceDao, wrapperFactory, contract, month, year));
+
+    } catch (Exception ex) {
+      
+      //impossibile costruire il recap... inizializzazione mancante.
+      return Optional.<PersonMonthCompetenceRecap>absent();
+    }
   }
 
 }

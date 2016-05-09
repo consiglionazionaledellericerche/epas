@@ -9,7 +9,14 @@
 <div class="container">
 
 #{title title:('Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year) /}
-      
+
+  #{if absenceTypeInMonth.entrySet().empty}
+    #{alert color:'info'}
+    <p>Nessuna assenza da visualizzare per il mese selezionato.</p>
+    #{/alert}
+  #{/if}
+  #{else}
+        
       <table class="table table-striped table-border table-condensed">
 	    <tr class="warning">
 		  <th>Descrizione</th>
@@ -27,5 +34,7 @@
 		</tr>
 		 #{/list}
      </table>
+     
+   #{/else}  
      
 </div>
