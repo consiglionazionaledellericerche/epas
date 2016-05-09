@@ -29,7 +29,15 @@
 <div class="container">
   
   #{title title:('Riepilogo Ore ' + year) /}
-
+  
+  #{if recaps.empty}
+    #{alert color:'info'}
+    <p>Nessun riepilogo da visualizzare per l'anno selezionato.</p>
+    #{/alert}
+   
+  #{/if}
+  #{else}
+  
     <table class="table hour-recap table-condensed center">
     <tr class="warning">
 	  <th rowspan=2>Mese</th>
@@ -87,6 +95,7 @@
 	#{/list}
 	
     </table>
+    #{/else}
 
 </div>
 

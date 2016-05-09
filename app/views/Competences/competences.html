@@ -5,6 +5,14 @@
 <div class="container">
   #{title title:('Riepilogo straordinari e altre competenze ' + templateUtility.monthName(session.get("monthSelected")) + ' ' + year) /}
 
+  #{if !personMonthCompetenceRecap.present}
+    #{alert color:'danger'}
+       <p>Risultano non correttamente inizializzati i dati sulle competenze effettuate nell'anno selezionato.</p>
+       <p>Impossibile costruire la situazione richiesta.</p>
+     #{/alert}
+  #{/if}
+  #{else}
+  
       
       <table class="table table-bordered table-hover">
         
@@ -15,32 +23,32 @@
         
         <tr>
           <td>Ind.tà rep.tà feriale (207)</td>
-          <td>${personMonthCompetenceRecap.weekDayAvailability}</td>
+          <td>${personMonthCompetenceRecap.get().weekDayAvailability}</td>
         </tr>
         
         <tr>
           <td>Ind.tà rep.tà festiva (208)</td>
-          <td>${personMonthCompetenceRecap.holidaysAvailability}</td>
+          <td>${personMonthCompetenceRecap.get().holidaysAvailability}</td>
         </tr>
         
         <tr>
           <td>Straordinario diurno nei giorni lavorativi</td>
-          <td>(${personMonthCompetenceRecap.progressivoFinalePositivoMese.toHour()}) ${personMonthCompetenceRecap.daylightWorkingDaysOvertime}</td>
+          <td>(${personMonthCompetenceRecap.get().progressivoFinalePositivoMese.toHour()}) ${personMonthCompetenceRecap.get().daylightWorkingDaysOvertime}</td>
         </tr>
         
         <tr>
           <td>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</td>
-          <td>${personMonthCompetenceRecap.daylightholidaysOvertime}</td>
+          <td>${personMonthCompetenceRecap.get().daylightholidaysOvertime}</td>
         </tr>
         
         <tr>
           <td>Turno ordinario (T1)</td>
-          <td>${personMonthCompetenceRecap.ordinaryShift}</td>
+          <td>${personMonthCompetenceRecap.get().ordinaryShift}</td>
         </tr>
         
         <tr>
           <td>Turno notturno (T2)</td>
-          <td>${personMonthCompetenceRecap.nightShift}</td>
+          <td>${personMonthCompetenceRecap.get().nightShift}</td>
         </tr>
 
       </table>
@@ -51,7 +59,7 @@
       fatte in più nel mese sulle quali possono essere pagati gli straordinari.</p>
       #{/alert}
       
-
+   #{/else}
     
 </div> 
 
