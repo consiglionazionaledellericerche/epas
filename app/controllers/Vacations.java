@@ -58,17 +58,21 @@ public class Vacations extends Controller {
 
     List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
 
+    List<Contract> notInitializedContracts = Lists.newArrayList();
+    
     for (Contract contract : contractList) {
       Optional<VacationsRecap> vacationsRecap;
 
       vacationsRecap = vacationsService.create(year, contract);
 
-      Preconditions.checkState(vacationsRecap.isPresent());
-
-      vacationsRecapList.add(vacationsRecap.get());
+      if (!vacationsRecap.isPresent()) {
+        notInitializedContracts.add(contract);
+      } else {
+        vacationsRecapList.add(vacationsRecap.get());
+      }
     }
 
-    render(vacationsRecapList);
+    render(vacationsRecapList, notInitializedContracts);
   }
 
   /**

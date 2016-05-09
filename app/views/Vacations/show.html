@@ -6,7 +6,19 @@
 <div class="container">
 
 #{title title:('Ferie e Permessi ' + session.get("yearSelected")) /}
-
+   
+   #{if !notInitializedContracts.empty}
+     #{alert color:'danger'}
+       <p>Risultano non correttamente inizializzati i dati su ferie e permessi per i seguenti 
+       contratti attivi nell'anno selezionato.</p>
+       <ul>
+       #{list items:notInitializedContracts, as:'contract'}
+         <li>Contratto iniziato il <strong>${contract.beginDate.format()}</strong></li>
+       #{/list}
+        </ul>
+        <p>Impossibile costruire la situazione richiesta.</p>
+     #{/alert}
+   #{/if}
    
    #{list items:vacationsRecapList, as:'vacationsRecap'}
 	
