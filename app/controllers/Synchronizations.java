@@ -83,9 +83,9 @@ public class Synchronizations extends Controller {
   /**
    * Gli istituti in epas da sincronizzare.
    */
-  public static void institutes(String name) {
+  public static void institutes() {
 
-    List<Institute> institutes = officeDao.institutes(Optional.<String>fromNullable(name),
+    List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
 
     Map<String, Institute> perseoInstitutesByCds = null;
@@ -172,7 +172,7 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    institutes(null);
+    institutes();
   }
 
   /**
@@ -188,7 +188,7 @@ public class Synchronizations extends Controller {
       instituteWithThatSeat = officePerseoConsumer.perseoInstituteByOfficePerseoId(perseoId);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
-      institutes(null);
+      institutes();
     }
 
     if (instituteWithThatSeat.isPresent()) {
@@ -206,7 +206,7 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    institutes(null);
+    institutes();
   }
 
   /**
@@ -297,6 +297,11 @@ public class Synchronizations extends Controller {
     }
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
+    
+    if (office.perseoId == null) {
+      flash.error("Per sincronizzare le persone occorre che la sede sia anch'essa sincronizzata");
+      institutes();
+    }
 
     @SuppressWarnings("deprecation")
     List<Person> people = personDao
@@ -308,7 +313,7 @@ public class Synchronizations extends Controller {
 
     Map<Integer, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.absent());
+      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.perseoId));
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
@@ -423,7 +428,8 @@ public class Synchronizations extends Controller {
 
     Map<Integer, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.fromNullable(office.perseoId));
+      perseoPeopleByNumber = peoplePerseoConsumer
+          .perseoPeopleByNumber(Optional.fromNullable(office.perseoId));
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
@@ -806,6 +812,6 @@ public class Synchronizations extends Controller {
     }
     
     flash.success("Istituto %s desincronizzato.", institute.name);
-    institutes(null);
+    institutes();
   }
 }

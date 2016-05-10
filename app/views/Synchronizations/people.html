@@ -11,13 +11,13 @@
 	<tr>
 	  <th>Persona Epas</th>
   	  <th>Persona Perseo</th>
-	  <th>Attiva</th>
-	  <th>Sincronizzate</th>
+	  <th>Contratto Epas</th>
+	  <th>Sincronizzata</th>
 	</tr>
   </thead>
   <tbody>
 	#{list items:wrapperedPeople, as:'wrPerson'}
-	<tr>
+	<tr #{if wrPerson.value.perseoId != null} class="bg-success"#{/if}>
 	  <td>
 	    <span class="label label-danger">${wrPerson.value.number}</span>
 	    <span class="label label-primary">${wrPerson.value.name}</span>
@@ -35,24 +35,24 @@
 	      #{/if}
 	    #{/if}
 	    #{else}
-	      <em>Nessun suggerimento... controllare la matricola.</em>
+	      <i class="fa fa-times fa-2x text-danger"
+	        popover-hover-2 data-content="Nessun suggerimento via matricola da Perseo." 
+	        aria-hidden="true"></i>
 	    #{/else}
 	  </td>
 	  <td>
 	    #{if wrPerson.currentContract.present}
-	      <em>Si</em>
+	      <span class="label label-info">Attivo</span>
 	    #{/if}
 	    #{else}
-	      <em>No</em>
+	      <span class="label label-default">Inattivo</span>
 	    #{/else}
 	  </td>
 	  <td>
 	    #{if wrPerson.value.perseoId}
-	      <div class="text-success">Synch <span class="label label-success">${wrPerson.value.perseoId}</span></div>
+	      <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${wrPerson.value.perseoId}"></i>
 	    #{/if}
-	    #{else}
-	      <div class="text-danger">Not Synch</div>	      
-	    #{/else}
 	  </td>		    
 
     </tr>
