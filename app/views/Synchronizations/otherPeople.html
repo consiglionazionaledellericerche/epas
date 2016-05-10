@@ -15,17 +15,18 @@
   </thead>
   <tbody>
 	#{list items:perseoPeopleByPerseoId.values(), as:'perseoPerson'}
-	<tr>
+	%{ epasPerson = epasPeopleByPerseoId.get(perseoPerson.perseoId); }%
+	
+	<tr #{if epasPerson != null} class="bg-success"#{/if}>
 	  <td>
 	    <span class="label label-danger">${perseoPerson.number}</span>
 	    <span class="label label-primary">${perseoPerson.name}</span>
 	    <span class="label label-primary">${perseoPerson.surname}</span>
 	  </td>
 	  <td>
-	    %{ epasPerson = epasPeopleByPerseoId.get(perseoPerson.perseoId); }%
+	    
 	    #{if epasPerson}
 	      <span class="label label-success">${perseoPerson.perseoId}</span>
-	      <em>Synchronized</em>
 	    #{/if}
 	    #{else}
 	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importPerson(perseoPerson.perseoId)}">Importa</a>
