@@ -22,6 +22,10 @@
 	    <span class="label label-danger">${wrPerson.value.number}</span>
 	    <span class="label label-primary">${wrPerson.value.name}</span>
 	    <span class="label label-primary">${wrPerson.value.surname}</span>
+	    <span class="label label-default">${wrPerson.value.qualification}</span>
+	    #{if wrPerson.value.perseoId == null}
+	      <a href="@{Persons.edit(wrPerson.value.id)}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+	    #{/if}
 	  </td>
 	  <td>
 	    %{ perseoPerson = perseoPeopleByNumber?.get(wrPerson.value.number) }%
@@ -29,6 +33,7 @@
 	      <span class="label label-danger">${perseoPerson.number}</span>
 	      <span class="label label-primary">${perseoPerson.name}</span>
 	      <span class="label label-primary">${perseoPerson.surname}</span>
+	      <span class="label label-default">${perseoPerson.qualification}</span>
 	      <span class="label label-success">${perseoPerson.perseoId}</span>
 	      #{if wrPerson.value.perseoId == null}
 	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>

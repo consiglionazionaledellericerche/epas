@@ -673,6 +673,44 @@ public class Synchronizations extends Controller {
 
     activeContracts(contract.person.office.id);
   }
+  
+  public static void joinAllActiveContractsInOffice(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    Map<Long, Contract> activeContractsEpasByPersonPerseoId =
+        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
+
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = Maps.newHashMap();
+
+    if (office.perseoId == null) {
+      flash.error("Selezionare una sede già sincronizzata... "
+          + "%s non lo è ancora.", office.toString());
+    } else {
+      //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
+      try {
+        perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+            .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+      } catch (ApiRequestException e) {
+        flash.error("%s", e);
+      }
+    }
+    
+    for (Contract epasContract : activeContractsEpasByPersonPerseoId.values()) {
+      if (epasContract.perseoId == null) {
+        Contract perseoContract = 
+            perseoDepartmentActiveContractsByPersonPerseoId.get(epasContract.person.perseoId);
+        if (perseoContract != null) {
+          joinUpdateContract(epasContract, perseoContract);
+        }
+      }
+    }
+    
+    flash.success("Operazione effettuata correttamente");
+    activeContracts(office.id);
+  }
 
 
   // TODO: spostare nell'updater?

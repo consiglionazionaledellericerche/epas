@@ -90,6 +90,7 @@
           <span class="label label-primary">${seat.name}</span>
           <span class="label label-primary">${seat.address}</span>
           #{if seat.perseoId == null }
+            <a href="@{Offices.edit(seat.id)}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
             <br>
             #{if suggested}
               <i class="fa fa-question fa-2x text-info" aria-hidden="true"></i>
