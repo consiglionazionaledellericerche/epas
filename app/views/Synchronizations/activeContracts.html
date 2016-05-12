@@ -45,6 +45,10 @@
 	      <span class="label label-success">${perseoContract.perseoId}</span>
 	      #{if contract.perseoId == null}
 	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinContract(contract.id, perseoContract.perseoId)}">Associa</a>
+	        #{if !contract.beginDate.isEqual(perseoContract.beginDate) }
+	          <i class="fa fa-warning text-danger" aria-hidden="true"
+	           popover-hover-2 data-content="Le date inizio non corrispondono..."></i> 
+	        #{/if}
 	      #{/if}
 	      #{/if}
 	    #{else}
