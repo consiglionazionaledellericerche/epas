@@ -163,16 +163,16 @@ public class SwitchTemplate extends Controller {
       MealTickets.recapPersonMealTickets(personId);
     }
     if (action.equals("Synchronizations.people")) {
-      Synchronizations.people(officeId);
+      Synchronizations.oldPeople(officeId);
     }
     if (action.equals("Synchronizations.otherPeople")) {
-      Synchronizations.otherPeople(officeId);
+      Synchronizations.people(officeId);
     }
     if (action.equals("Synchronizations.activeContracts")) {
-      Synchronizations.activeContracts(officeId);
+      Synchronizations.oldActiveContracts(officeId);
     }
     if (action.equals("Synchronizations.otherContracts")) {
-      Synchronizations.otherContracts(officeId);
+      Synchronizations.activeContracts(officeId);
     }
     if (action.equals("Certifications.certifications")) {
       Certifications.certifications(officeId, year, month);

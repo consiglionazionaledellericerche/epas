@@ -45,6 +45,7 @@ public class RequestInit extends Controller {
   static TemplateUtility templateUtility;
   @Inject
   static UsersRolesOfficesDao uroDao;
+ 
 
   @Before(priority = 1)
   static void injectUtility() {

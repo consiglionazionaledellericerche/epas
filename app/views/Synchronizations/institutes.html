@@ -7,7 +7,7 @@
 <div class="container">
   *{ #{form @Import.importOffices(),class:'form-horizontal'} }*
   
-  <table class="table table-bordered" datatable>
+  <table class="table table-bordered"  datatable>
   <thead>
 	<tr>
 	  <th>Istituto</th>
@@ -15,101 +15,45 @@
 	</tr>
   </thead>
   <tbody>
-	#{list items:institutes, as:'institute'}
+	#{list perseoInstitutes, as:'institute'}
 	<tr>
 	  <td>
-	  
-	    %{ suggested = perseoInstitutesByCds?.get(institute.cds) }%
-	    
-	    #{if institute.perseoId != null }
-	      <i class="fa fa-check fa-2x text-success" aria-hidden="true"
-	         popover-hover-2 data-content="Sincronizzato con perseoId ${institute.perseoId}"></i>
-	    #{/if}
-	    #{else}
-	    
-	      #{if suggested == null}
-	        <i class="fa fa-times fa-2x text-danger"
-	        popover-hover-2 data-content="Nessun suggerimento via CDS da Perseo." 
-	        aria-hidden="true"></i>
-	      #{/if}
-	      #{else}
-	        <i class="fa fa-question fa-2x text-info" aria-hidden="true"></i>
-	      #{/else}
-	    #{/else}
-	    
+	    <span class="label label-success">${institute.perseoId}</span>
 	    <span class="label label-primary">${institute.cds}</span>
-	    *{ <span class="label label-primary">${institute.name}</span> }*
 	    <span class="label label-primary" popover-hover-2 data-content="${institute.name}">${institute.code}</span>
-	    #{if institute.perseoId == null }
-            
-            #{if suggested}
-            <br>
-              <i class="fa fa-question fa-2x text-info" aria-hidden="true"></i>
-              <span class="label label-default">${suggested.cds}</span>
-	          <span class="label label-default" popover-hover-2 data-content="${suggested.name}">${suggested.code}</span>
-	          <span class="label label-success">${suggested.perseoId}</span>
-	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinInstitute(institute.id, suggested.perseoId)}">Associa</a>
+	    
+	        %{ epasSeat = epasInstituteByPerseoId.get(institute.perseoId) }%
+            #{if epasSeat}
+              <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${institute.perseoId}"></i>
 	        #{/if}
-
-        #{/if}
-        #{else}
-           <span class="label label-success">${institute.perseoId}</span>
-           <a class="btn btn btn-warning btn-xs"
-              popover-hover-2 data-content="Unjoin PerseoId Istituto-Sede-Persone-Contratti"
-              href="@{Synchronizations.unjoinInstitute(institute.id)}"><i class="fa fa-times" aria-hidden="true"></i></a>
-        #{/else}
 	  </td>
-	  
-	  
-	  
-	  
-	  
-	  
 	  <td>
       #{list institute.seats, as:'seat'}
-        %{ suggested = perseoOfficeByCodeId.get(seat.codeId) }%
         <p>
-          #{if seat.perseoId != null}
-           <i class="fa fa-check fa-2x text-success" aria-hidden="true"
-	         popover-hover-2 data-content="Sincronizzato con perseoId ${seat.perseoId}"></i>
-          #{/if}
-          #{else}
-	    
-	        #{if suggested == null}
-	          <i class="fa fa-times fa-2x text-danger"
-	          popover-hover-2 data-content="Nessun suggerimento via sedeId da Perseo." 
-	          aria-hidden="true"></i>
-	        #{/if}
-	        #{else}
- 	          <i class="fa fa-question fa-2x text-info" aria-hidden="true"></i>
-	        #{/else}
-	      #{/else}
-	      
           <span class="label label-primary">${seat.codeId}</span>
           <span class="label label-primary" >${seat.code}</span>
           <span class="label label-primary">${seat.name}</span>
-          <span class="label label-primary">${seat.address}</span>
-          #{if seat.perseoId == null }
-            <a href="@{Offices.edit(seat.id)}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-            <br>
-            #{if suggested}
-              <i class="fa fa-question fa-2x text-info" aria-hidden="true"></i>
-              <span class="label label-default">${suggested.codeId}</span>
-	          <span class="label label-default">${suggested.code}</span>
-	          <span class="label label-default">${suggested.name}</span>
-	          <span class="label label-default">${suggested.address}</span>
-	          <span class="label label-success">${suggested.perseoId}</span>
-	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinOffice(seat.id, suggested.perseoId)}">Associa</a>
-	        #{/if}
-          #{/if}
-          #{else}
-           <span class="label label-success">${seat.perseoId}</span>
-           <a href="@{Synchronizations.people(seat.id)}">
-           <i class="fa fa-users text-primary"
-	          popover-hover-2 data-content="Vai a Sincronizza Persone" 
+          <span class="label label-success">${seat.perseoId}</span>
+          %{ epasSeat = epasOfficesByPerseoId.get(seat.perseoId) }%
+          #{if epasSeat}
+             <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${seat.perseoId}"></i>
+	         <a href="@{Synchronizations.people(epasSeat.id)}">
+             <i class="fa fa-users text-primary"
+	          popover-hover-2 data-content="Vai a Sincronizza Persone ${epasSeat.name}" 
 	          aria-hidden="true"></i>
-	       </a>
-          #{/else}
+	         </a>
+	         
+	         <a href="@{Synchronizations.activeContracts(epasSeat.id)}">
+             <i class="fa fa-files-o text-primary"
+	          popover-hover-2 data-content="Vai a Sincronizza Contratti Attivi ${epasSeat.name}" 
+	          aria-hidden="true"></i>
+	         </a>
+	      #{/if}
+	      #{else}
+	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importOffice(seat.perseoId)}">Importa</a>
+	      #{/else}
         </p>
      #{/list}
 	  </td>
