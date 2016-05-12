@@ -1,0 +1,84 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+#{synch.synchContractsTabs activeAction:'oldActiveContracts' /}
+
+<div class="container">
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Contratto Epas</th>
+  	  <th>Contratto Perseo</th>
+	  <th>Sincronizzate</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:activeContractsEpasByPersonPerseoId.values(), as:'contract'}
+	
+	#{if contract.perseoId == null}
+	%{ perseoContract = perseoDepartmentActiveContractsByPersonPerseoId?.get(contract.person.perseoId); }%
+	<tr #{if contract.perseoId != null} class="bg-success"#{/if}>
+	  
+	  <td>
+	    <span class="label label-default">${contract.person.fullname}</span>
+	    <span class="label label-primary">${contract.beginDate}</span>
+	    <span class="label label-primary">${contract.endDate}</span>
+	    <span class="label label-danger">${contract.endContract}</span>
+	    <span class="label label-success">${contract.perseoId}</span>
+	    
+	    #{if contract.perseoId == null}
+	    <a href="@{Contracts.edit(contract.id)}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+	    #{/if}
+	    </a>
+	  </td>
+	  <td>
+	  
+	    #{if perseoContract}
+	      <span class="label label-default">${perseoContract.person.fullname}</span>
+	      <span class="label label-primary">${perseoContract.beginDate}</span>
+	      <span class="label label-primary">${perseoContract.endDate}</span>
+	      <span class="label label-danger">${perseoContract.endContract}</span>
+	       #{if perseoContract.isTemporary && perseoContract.endDate == null}
+	        <span class="label label-warning">Temporary</span>
+	      #{/if}
+	      <span class="label label-success">${perseoContract.perseoId}</span>
+	      #{if contract.perseoId == null}
+	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinContract(contract.id, perseoContract.perseoId)}">Associa</a>
+	        #{if !contract.beginDate.isEqual(perseoContract.beginDate) }
+	          <i class="fa fa-warning text-danger" aria-hidden="true"
+	           popover-hover-2 data-content="Le date inizio non corrispondono..."></i> 
+	        #{/if}
+	      #{/if}
+	      #{/if}
+	    #{else}
+	      <em>Nessun suggerimento... controllare la matricola.</em>
+	    #{/else}
+	  </td>
+	  
+	  <td>
+	    #{if contract.perseoId}
+	      <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${contract.perseoId}"></i>
+	    #{/if}
+	  </td>		    
+
+    </tr>
+   #{/if} 
+   #{/list}
+  </tbody>
+</table>
+
+
+#{alert color:'info'}
+  <p>Associa tutti i contratti attivi in epas non ancora associati. 
+  Verificare bene per tutti il join suggerito sulla base del contratto attivo in perseo.
+    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllActiveContractsInOffice(office.id)}">Associa</a>
+  </p>
+#{/alert}
+
+  
+</div>
+
+

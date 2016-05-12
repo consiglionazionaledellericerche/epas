@@ -35,6 +35,8 @@ import models.WorkingTimeType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import synch.perseoconsumers.contracts.ContractPerseoConsumer;
@@ -81,37 +83,9 @@ public class Synchronizations extends Controller {
   static WrapperModelFunctionFactory wrapperFunctionFactory;
 
   /**
-   * Gli istituti in epas da sincronizzare.
+   * Gli istituti perseo.
    */
   public static void institutes() {
-
-    List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
-        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
-
-    Map<String, Institute> perseoInstitutesByCds = null;
-    try {
-      perseoInstitutesByCds = officePerseoConsumer.perseoInstitutesByCds();
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
-    }
-
-    Map<String, Office> perseoOfficeByCodeId = Maps.newHashMap();
-
-    if (perseoInstitutesByCds != null) {
-      for (Institute institute : perseoInstitutesByCds.values()) {
-        for (Office office : institute.seats) {
-          perseoOfficeByCodeId.put(office.codeId, office);
-        }
-      }
-    }
-
-    render(institutes, perseoInstitutesByCds, perseoOfficeByCodeId);
-  }
-
-  /**
-   * Gli istituti non in epas, si possono importare.
-   */
-  public static void otherInstitutes() {
 
     List<Institute> perseoInstitutes = null;
     try {
@@ -138,6 +112,36 @@ public class Synchronizations extends Controller {
 
     render(perseoInstitutes, epasInstituteByPerseoId, epasOfficesByPerseoId);
   }
+  
+  /**
+   * Gli istituti in epas non sincronizzare.
+   */
+  public static void oldInstitutes() {
+
+    List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
+
+    Map<String, Institute> perseoInstitutesByCds = null;
+    try {
+      perseoInstitutesByCds = officePerseoConsumer.perseoInstitutesByCds();
+    } catch (ApiRequestException e) {
+      flash.error("%s", e);
+    }
+
+    Map<String, Office> perseoOfficeByCodeId = Maps.newHashMap();
+
+    if (perseoInstitutesByCds != null) {
+      for (Institute institute : perseoInstitutesByCds.values()) {
+        for (Office office : institute.seats) {
+          perseoOfficeByCodeId.put(office.codeId, office);
+        }
+      }
+    }
+
+    render(institutes, perseoInstitutesByCds, perseoOfficeByCodeId);
+  }
+
+
 
 
   /**
@@ -172,7 +176,7 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    institutes();
+    oldInstitutes();
   }
 
   /**
@@ -188,7 +192,7 @@ public class Synchronizations extends Controller {
       instituteWithThatSeat = officePerseoConsumer.perseoInstituteByOfficePerseoId(perseoId);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
-      institutes();
+      oldInstitutes();
     }
 
     if (instituteWithThatSeat.isPresent()) {
@@ -206,7 +210,7 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    institutes();
+    oldInstitutes();
   }
 
   /**
@@ -226,7 +230,7 @@ public class Synchronizations extends Controller {
 
     if (!instituteWithThatSeat.isPresent()) {
       flash.error("Niente da fare :(((.");
-      otherInstitutes();
+      institutes();
     }
     Office seat = instituteWithThatSeat.get().seats.iterator().next();
 
@@ -243,7 +247,7 @@ public class Synchronizations extends Controller {
             + "nel suo istituto. errors={}.", seatPerseoId, validation.errorsMap());
         flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
             validation.errorsMap());
-        otherInstitutes();
+        institutes();
       }
 
       instituteWithThatSeat.get().save();
@@ -263,7 +267,7 @@ public class Synchronizations extends Controller {
           + "nella sede. errors={}.", seatPerseoId, validation.errorsMap());
       flash.error("La sede selezionata non può essere importata a causa di errori. [%s]",
           validation.errorsMap());
-      otherInstitutes();
+      institutes();
     }
 
     // TODO: spostare in un creator epas che venga utilizzato anche nelle crud
@@ -276,17 +280,24 @@ public class Synchronizations extends Controller {
     
     // Configurazione iniziale di default ...
     configurationManager.updateOfficeConfigurations(seat);
-
+    
+    // Importato correttamente importo tutte le persone e tutti i contratti ...
+    managerImportAllPersonInOffice(seat);
+    JPAPlugin.closeTx(false);
+    JPAPlugin.startTx(false);
+    JPA.em().merge(seat);
+    managerImportAllActiveContractsInOffice(seat);
+    
     flash.success("La sede %s è stata importata con successo da Perseo!", seat.toString());
 
-    otherInstitutes();
+    institutes();
   }
 
 
   /**
-   * Le persone in epas da sincronizzare.
+   * Le persone in epas non sincronizzare.
    */
-  public static void people(Long officeId) {
+  public static void oldPeople(Long officeId) {
 
     Office office;
     if (officeId != null) {
@@ -300,7 +311,7 @@ public class Synchronizations extends Controller {
     
     if (office.perseoId == null) {
       flash.error("Per sincronizzare le persone occorre che la sede sia anch'essa sincronizzata");
-      institutes();
+      oldInstitutes();
     }
 
     @SuppressWarnings("deprecation")
@@ -322,9 +333,9 @@ public class Synchronizations extends Controller {
   }
 
   /**
-   * Le persone non in epas si possono importare.
+   * Le persone perseo.
    */
-  public static void otherPeople(Long officeId) {
+  public static void people(Long officeId) {
 
     Office office;
     if (officeId != null) {
@@ -389,7 +400,7 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    people(person.office.id);
+    oldPeople(person.office.id);
   }
 
   // TODO: spostare nell'updater?
@@ -400,6 +411,13 @@ public class Synchronizations extends Controller {
    */
   private static void join(Person epasPerson, Person perseoPerson) {
     //copy ( TODO: update method)
+    
+    if (perseoPerson.qualification == null) {
+      log.info("Impossibile associare la persona {} con qualifica nulla perseoId={}", 
+          epasPerson.toString(), epasPerson.perseoId);
+      return;
+    }
+    
     epasPerson.name = perseoPerson.name;
     epasPerson.surname = perseoPerson.surname;
     epasPerson.number = perseoPerson.number;
@@ -447,7 +465,7 @@ public class Synchronizations extends Controller {
       }
       flash.success("Sincronizzate correttamente %d persone", synced);
     }
-    people(office.id);
+    oldPeople(office.id);
   }
 
   /**
@@ -472,7 +490,7 @@ public class Synchronizations extends Controller {
       if (!office.isPresent()) {
         flash.error("L'ufficio di appartenenza della persona selezionata non è "
             + "ancora sincronizzato con Perseo");
-        otherPeople(null);
+        people(null);
       }
 
       personInPerseo.get().office = office.get();
@@ -483,7 +501,7 @@ public class Synchronizations extends Controller {
             + "nella persona. errors={}.", perseoId, validation.errorsMap());
         flash.error("La persona selezionata non può essere importata a causa di errori. [%s]",
             validation.errorsMap());
-        otherPeople(office.get().id);
+        people(office.get().id);
       }
 
       // Creazione!
@@ -495,7 +513,7 @@ public class Synchronizations extends Controller {
       }
     }
 
-    otherPeople(office.get().id);
+    people(office.get().id);
   }
 
   /**
@@ -519,15 +537,13 @@ public class Synchronizations extends Controller {
     return Optional.fromNullable(person);
   }
 
-
   /**
-   * @param epasOfficeId id dell'ufficio.
+   * Importa tutte le persone di perseo non ancora presenti in epas.
+   * @param office
+   * @return
    */
-  public static void importAllPersonInOffice(Long epasOfficeId) {
-
-    Office office = officeDao.getOfficeById(epasOfficeId);
-    notFoundIfNull(office);
-
+  private static boolean managerImportAllPersonInOffice(Office office) {
+    
     Map<Long, Person> perseoPeopleByPerseoId = null;
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
@@ -548,10 +564,7 @@ public class Synchronizations extends Controller {
       if (person.perseoId != null) {
         epasPeopleByPerseoId.put(person.perseoId, person);
       } else {
-        flash.error("Per fare questa operazione tutte le persone già esistenti della sede "
-            + "devono essere correttamente sincronizzate. "
-            + "Esempio %s non lo è. Operazione annullata.", person.toString());
-        otherPeople(office.id);
+        return false;
       }
     }
 
@@ -583,45 +596,35 @@ public class Synchronizations extends Controller {
         }
       }
     }
-
-    flash.success("Operazione effettuata correttamente");
-    otherPeople(office.id);
+    return true;
+    
   }
 
   /**
-   * I contratti attivi in epas da sincronizzare.
+   * @param epasOfficeId id dell'ufficio.
    */
-  public static void activeContracts(Long officeId) {
+  public static void importAllPersonInOffice(Long epasOfficeId) {
 
-    Office office = officeDao.getOfficeById(officeId);
+    Office office = officeDao.getOfficeById(epasOfficeId);
     notFoundIfNull(office);
 
-    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
-    Map<Long, Contract> activeContractsEpasByPersonPerseoId =
-        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
-
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = Maps.newHashMap();
-
-    if (office.perseoId == null) {
-      flash.error("Selezionare una sede già sincronizzata... "
-          + "%s non lo è ancora.", office.toString());
-    } else {
-      //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-      try {
-        perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-            .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-      } catch (ApiRequestException e) {
-        flash.error("%s", e);
-      }
-    }
-    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
+     boolean result = managerImportAllPersonInOffice(office); 
+         
+     if (result == false) {
+       flash.error("Per fare questa operazione tutte le persone già esistenti della sede "
+           + "devono essere correttamente sincronizzate. Operazione annullata.");
+       people(office.id);
+     }
+     
+     flash.success("Operazione effettuata correttamente");
+     people(office.id); 
+      
   }
 
-
   /**
-   * Le persone non in epas si possono importare.
+   * I contratti attivi perseo.
    */
-  public static void otherContracts(Long officeId) {
+  public static void activeContracts(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -644,6 +647,35 @@ public class Synchronizations extends Controller {
       }
     }
 
+    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
+  }
+  
+  /**
+   * I contratti attivi in epas non sincronizzati.
+   */
+  public static void oldActiveContracts(Long officeId) {
+
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    Map<Long, Contract> activeContractsEpasByPersonPerseoId =
+        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
+
+    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = Maps.newHashMap();
+
+    if (office.perseoId == null) {
+      flash.error("Selezionare una sede già sincronizzata... "
+          + "%s non lo è ancora.", office.toString());
+    } else {
+      //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
+      try {
+        perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
+            .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
+      } catch (ApiRequestException e) {
+        flash.error("%s", e);
+      }
+    }
     render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
   }
 
@@ -671,7 +703,7 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    activeContracts(contract.person.office.id);
+    oldActiveContracts(contract.person.office.id);
   }
   
   public static void joinAllActiveContractsInOffice(Long officeId) {
@@ -709,7 +741,7 @@ public class Synchronizations extends Controller {
     }
     
     flash.success("Operazione effettuata correttamente");
-    activeContracts(office.id);
+    oldActiveContracts(office.id);
   }
 
 
@@ -764,24 +796,21 @@ public class Synchronizations extends Controller {
       // Salvare il contratto.
       if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
         flash.error("Il contratto non può essere importato a causa di errori");
-        otherContracts(person.office.id);
+        activeContracts(person.office.id);
       }
       flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
     }
 
-    otherContracts(person.office.id);
+    activeContracts(person.office.id);
   }
-
+  
   /**
-   * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e non
-   * conflitti con le date dei contratti epas.
+   * Importa tutti i contratti attivi delle persone sincronizzate della sede.
+   * @param office
+   * @return
    */
-  @SuppressWarnings("deprecation")
-  public static void importAllContractsInOffice(Long officeId) {
-
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-
+  private static Optional<Exception> managerImportAllActiveContractsInOffice(Office office) {
+    
     //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
     Map<Long, Contract> activeContractsEpasByPersonPerseoId =
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
@@ -792,13 +821,12 @@ public class Synchronizations extends Controller {
       perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
           .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
     } catch (ApiRequestException e) {
-      flash.error("%s", e);
+      return Optional.of(e);
     }
 
     WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
-      int synced = 0;
       for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
         Contract epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
         if (epasContract != null) {
@@ -807,18 +835,30 @@ public class Synchronizations extends Controller {
         // Salvare il contratto.
         if (!contractManager.properContractCreate(perseoContract, normal, false)) {
           // TODO segnalare il conflitto
-        } else {
-          synced++;
-        }
-      }
-      if (synced == 0) {
-        flash.success("Nessun contratto importato");
-      } else {
-        flash.success("Importati correttamente %d contratti", synced);
+        } 
       }
     }
 
-    otherContracts(office.id);
+    return Optional.absent();
+  }
+
+  /**
+   * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e non
+   * conflitti con le date dei contratti epas.
+   */
+  public static void importAllContractsInOffice(Long officeId) {
+
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    Optional<Exception> errors = managerImportAllActiveContractsInOffice(office); 
+    if (errors.isPresent()) {
+      flash.error("%s", errors.get());
+    } else {
+      flash.error("Tutti i contratti importabili sono stati importati.");
+    }
+    
+    activeContracts(office.id);
   }
   
   /**
@@ -850,6 +890,6 @@ public class Synchronizations extends Controller {
     }
     
     flash.success("Istituto %s desincronizzato.", institute.name);
-    institutes();
+    oldInstitutes();
   }
 }
