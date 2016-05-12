@@ -35,8 +35,13 @@
 	      <span class="label label-primary">${perseoPerson.surname}</span>
 	      <span class="label label-default">${perseoPerson.qualification}</span>
 	      <span class="label label-success">${perseoPerson.perseoId}</span>
-	      #{if wrPerson.value.perseoId == null}
-	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>
+	      #{if wrPerson.value.perseoId == null && perseoPerson.qualification != null}
+	        <!-- Associa e warning-->
+	       <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>
+	       #{if wrPerson.value.qualification == null || wrPerson.value.qualification.qualification != perseoPerson.qualification.qualification }
+	          <i class="fa fa-warning text-danger" aria-hidden="true"
+	           popover-hover-2 data-content="Le qualifiche non corrispondono..."></i> 
+	        #{/if}
 	      #{/if}
 	    #{/if}
 	    #{else}
