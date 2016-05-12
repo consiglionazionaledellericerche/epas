@@ -240,9 +240,9 @@ public class RequestInit extends Controller {
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Synchronizations.people",
-        "Synchronizations.otherPeople",
+        "Synchronizations.oldPeople",
         "Synchronizations.activeContracts",
-        "Synchronizations.otherContracts",
+        "Synchronizations.oldActiveContracts",
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications");

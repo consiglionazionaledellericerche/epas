@@ -104,9 +104,9 @@
           #{/if}
           #{else}
            <span class="label label-success">${seat.perseoId}</span>
-           <a href="@{Synchronizations.people(seat.id)}">
-           <i class="fa fa-users text-primary"
-	          popover-hover-2 data-content="Vai a Sincronizza Persone" 
+           <a href="@{Synchronizations.oldPeople(seat.id)}">
+           <i class="fa fa-users text-danger"
+	          popover-hover-2 data-content="Vai a Persone Non Sincronizzate" 
 	          aria-hidden="true"></i>
 	       </a>
           #{/else}
