@@ -293,21 +293,42 @@ public class Synchronizations extends Controller {
     institutes();
   }
 
+  public static void people2(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    if (office.perseoId == null) {
+      flash.error("Selezionare una sede già sincronizzata... "
+          + "%s non lo è ancora.", office.toString());
+      institutes();
+    }
+    
+    Map<Long, Person> perseoPeople = peoplePerseoConsumer
+        .perseoPeopleByPerseoId(Optional.of(office.perseoId));
+    
+    Map<Long, Person> epasSynchronizedPeople = personDao.mapSynchronized(Optional.of(office));
+    
+    Map<Long, List<Contract>> perseoPeopleContract = contractPerseoConsumer
+        .perseoPeopleContractsMap(Optional.of(office));
+    
+    Map<Long, IWrapperPerson> epasWrapperedPeople = Maps.newHashMap();
+    for (IWrapperPerson person : FluentIterable.from(personDao
+        .list(Optional.of(office)).list()).transform(wrapperFunctionFactory.person()).toList()) {
+      epasWrapperedPeople.put(person.getValue().id, person);
+    }
+        
+    render(perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople);
+    
+  }
 
   /**
    * Le persone in epas non sincronizzare.
    */
   public static void oldPeople(Long officeId) {
 
-    Office office;
-    if (officeId != null) {
-      office = officeDao.getOfficeById(officeId);
-      notFoundIfNull(office);
-    } else {
-      office = officeDao.allOffices().list().get(0);
-    }
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(office);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
     
     if (office.perseoId == null) {
       flash.error("Per sincronizzare le persone occorre che la sede sia anch'essa sincronizzata");
@@ -316,7 +337,7 @@ public class Synchronizations extends Controller {
 
     @SuppressWarnings("deprecation")
     List<Person> people = personDao
-        .listFetched(Optional.<String>absent(), offices, false, null, null, false)
+        .listFetched(Optional.<String>absent(), Sets.newHashSet(office), false, null, null, false)
         .list();
 
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)
@@ -334,28 +355,23 @@ public class Synchronizations extends Controller {
 
   /**
    * Le persone perseo.
+   * 
+   * Questa vista sarà sostitutita dalla nuova people2.
    */
   public static void people(Long officeId) {
 
-    Office office;
-    if (officeId != null) {
-      office = officeDao.getOfficeById(officeId);
-      notFoundIfNull(office);
-    } else {
-      office = officeDao.allOffices().list().get(0);
-    }
+    Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
+    Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
     if (office.perseoId == null) {
-      Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
-      Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
       flash.error("Selezionare una sede già sincronizzata... "
           + "%s non lo è ancora.", office.toString());
       render(perseoPeopleByPerseoId, epasPeopleByPerseoId, office);
     }
-
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(office);
-
-    Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
+    
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
           .perseoPeopleByPerseoId(Optional.of(office.perseoId));
@@ -363,10 +379,9 @@ public class Synchronizations extends Controller {
       flash.error("%s", e);
     }
     @SuppressWarnings("deprecation")
-    List<Person> people = personDao
-        .listFetched(Optional.<String>absent(), offices, false, null, null, false)
-        .list();
-    Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
+    List<Person> people = personDao.listFetched(Optional.<String>absent(), Sets.newHashSet(office), 
+        false, null, null, false).list();
+    
     for (Person person : people) {
       if (person.perseoId != null) {
         epasPeopleByPerseoId.put(person.perseoId, person);
@@ -623,6 +638,8 @@ public class Synchronizations extends Controller {
 
   /**
    * I contratti attivi perseo.
+   * 
+   * Questa vista sarà sostitutita dalla nuova people2.
    */
   public static void activeContracts(Long officeId) {
 
@@ -694,7 +711,7 @@ public class Synchronizations extends Controller {
     Optional<Contract> contractInPerseo = Optional.absent();
     try {
       contractInPerseo = contractPerseoConsumer
-          .perseoContractByPerseoId(perseoId, contract.person);
+          .perseoContractPerseoId(perseoId, contract.person);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }
@@ -785,7 +802,7 @@ public class Synchronizations extends Controller {
 
     Optional<Contract> contractInPerseo = Optional.absent();
     try {
-      contractInPerseo = contractPerseoConsumer.perseoContractByPerseoId(perseoId, person);
+      contractInPerseo = contractPerseoConsumer.perseoContractPerseoId(perseoId, person);
     } catch (ApiRequestException e) {
       flash.error("%s", e);
     }

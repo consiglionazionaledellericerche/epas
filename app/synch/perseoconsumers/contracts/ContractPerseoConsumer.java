@@ -43,6 +43,11 @@ public class ContractPerseoConsumer {
   private final PersonDao personDao;
   private final WrapperModelFunctionFactory wrapperFunctionFactory;
 
+  /**
+   * Costruttore.
+   * @param personDao inject
+   * @param wrapperFunctionFactory inject
+   */
   @Inject
   public ContractPerseoConsumer(PersonDao personDao,
                                 WrapperModelFunctionFactory wrapperFunctionFactory) {
@@ -103,14 +108,19 @@ public class ContractPerseoConsumer {
    * @param departmentPerseoId id (di Perseo) della sede sulla quale recuperare i contratti
    * @return La Lista dei contratti delle persone appartenenti alla sede specificata.
    */
-  private ListenableFuture<List<PerseoContract>> perseoDepartmentContracts(Long departmentPerseoId) {
+  private ListenableFuture<List<PerseoContract>> perseoContracts(
+      Optional<Long> departmentPerseoId) {
 
     final String url;
     final String user;
     final String pass;
 
     try {
-      url = PerseoApis.getAllDepartmentContractsForEpasEndpoint() + departmentPerseoId;
+      if (departmentPerseoId.isPresent()) {
+        url = PerseoApis.getAllDepartmentContractsForEpasEndpoint() + departmentPerseoId.get();
+      } else {
+        url = PerseoApis.getAllContractsForEpasEndpoint();
+      }
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
     } catch (NoSuchFieldException e) {
@@ -158,9 +168,12 @@ public class ContractPerseoConsumer {
   private Contract epasConverter(PerseoContract perseoContract, Person person) {
 
     Contract contract = new Contract();
-    contract.beginDate = perseoContract.beginContract != null ? new LocalDate(perseoContract.beginContract) : null;
-    contract.endDate = perseoContract.expireContract != null ? new LocalDate(perseoContract.expireContract) : null;
-    contract.endContract = perseoContract.endContract != null ? new LocalDate(perseoContract.endContract) : null;
+    contract.beginDate = perseoContract.beginContract != null 
+        ? new LocalDate(perseoContract.beginContract) : null;
+    contract.endDate = perseoContract.expireContract != null 
+        ? new LocalDate(perseoContract.expireContract) : null;
+    contract.endContract = perseoContract.endContract != null 
+        ? new LocalDate(perseoContract.endContract) : null;
     contract.isTemporary = perseoContract.temporary;
     contract.perseoId = perseoContract.id;
     contract.person = person;
@@ -190,69 +203,63 @@ public class ContractPerseoConsumer {
     }
     return contracts;
   }
-
-//  /**
-//   * Tutti i contratti attivi del department con quel perseoId.<br>
-//   * I contratti di persone non sincronizzate vengono scartati.<br>
-//   * Formato mappa: perseoId -> contract
-//   * @param perseoDepartmentId department perseo id
-//   * @param departmentSynchronizedPeople  mappa personeEpas per perseoId
-//   * @return mappa
-//   */
-//  public Map<Long, Contract> perseoDepartmentActiveContractsByPerseoId(Long perseoDepartmentId, 
-//      Map<Long, Contract> departmentSynchronizedPeople) {
-//    
-//    List<PerseoContract> perseoContracts = getAllPerseoDepartmentContracts(perseoDepartmentId);
-//    Map<Long, Contract> perseoContractsMap = Maps.newHashMap();
-//    for (Contract contract : epasConverter(perseoContracts, departmentSynchronizedPeople)) {
-//      perseoContractsMap.put(contract.perseoId, contract);
-//    }
-//   
-//    return perseoContractsMap;
-//  }
-
+  
   /**
-   * Serve per sincronizzare i contratti attivi già presenti in epas non sincronizzati.
-   *
-   * Tutti i contratti attivi del department con quel perseoId.<br> I contratti di persone non
-   * sincronizzate vengono scartati.<br> Formato mappa: person.perseoId -> contract
-   *
-   * @param perseoDepartmentId department perseo id
-   * @param office             ?
-   * @return mappa
+   * Le persone di perseo sincronizzate con i loro contratti perseo.
+   * 
+   * Mappa: chiave -> personPerseoId
+   *        valore -> lista dei suoi contratti perseo 
+   *        
+   * @param office se presente le sole persone della sede altrimenti tutte.
+   * @return map
    */
-  public Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId(Long perseoDepartmentId,
-                                                                             Office office) {
-
-    @SuppressWarnings("deprecation")
-    List<Person> people = personDao.listFetched(Optional.<String>absent(),
-        Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
-
+  public Map<Long, List<Contract>> perseoPeopleContractsMap(Optional<Office> office) {
+    
+    Optional<Long> officePerseoId = Optional.<Long>absent();
+    if (office.isPresent()) {
+      officePerseoId = Optional.of(office.get().perseoId);
+    }
+    
     List<PerseoContract> perseoContracts = Lists.newArrayList();
-
+    
     try {
-      perseoContracts = perseoDepartmentContracts(perseoDepartmentId).get();
+      perseoContracts = perseoContracts(officePerseoId).get();
     } catch (InterruptedException | ExecutionException e) {
-      String error = String.format("Impossibile recuperare i contratti della sede con id %d da Perseo - %s",
-          perseoDepartmentId, e.getMessage());
+      String error = String
+          .format("Impossibile recuperare i contratti richiesti da Perseo - %s", e.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
-    Map<Long, Person> departmentSyncrhonizedPeopleByPerseoId = epasSynchronizedPersonByPersonId(people);
-    Map<Long, Contract> perseoContractsMap = Maps.newHashMap();
-    for (Contract contract : epasConverter(perseoContracts, departmentSyncrhonizedPeopleByPerseoId)) {
-      perseoContractsMap.put(contract.person.perseoId, contract);
+    
+    Map<Long, Person> departmentSyncrhonizedPeopleByPerseoId = 
+        personDao.mapSynchronized(office);
+    
+    Map<Long, List<Contract>> maps = Maps.newHashMap();
+    
+    for (Contract contract : epasConverter(perseoContracts, 
+        departmentSyncrhonizedPeopleByPerseoId)) {
+      List<Contract> list = maps.get(contract.person.perseoId);
+      if (list == null) {
+        maps.put(contract.person.perseoId, Lists.newArrayList(contract));
+      } else {
+        list.add(contract);
+      }
     }
-
-    return perseoContractsMap;
+    
+    return maps;
+    
   }
+  
+  
+  
+  
 
   /**
    * Il contratto con quel perseoId.
    *
-   * @return contratto
+   * @return contratto contratto
    */
-  public Optional<Contract> perseoContractByPerseoId(Long contractPerseoId, Person person) {
+  public Optional<Contract> perseoContractPerseoId(Long contractPerseoId, Person person) {
 
     PerseoContract perseoContract = null;
     try {
@@ -270,23 +277,10 @@ public class ContractPerseoConsumer {
   }
 
   /**
-   *
-   * @return
-   */
-  public Map<Long, Person> epasSynchronizedPersonByPersonId(List<Person> people) {
-    Map<Long, Person> maps = Maps.newHashMap();
-    for (Person person : people) {
-      if (person.perseoId != null) {
-        maps.put(person.perseoId, person);
-      }
-    }
-    return maps;
-  }
-
-  /**
    * La lista di tutti i contratti attivi delle persone sincronizzate con perseo. La chiave è il
    * person.perseoId.
    */
+  @Deprecated
   public Map<Long, Contract> activeContractsEpasByPersonPerseoId(Office office) {
     //Costruisco La mappa di tutte le persone attive epas sincronizzate.
     @SuppressWarnings("deprecation")
@@ -298,9 +292,45 @@ public class ContractPerseoConsumer {
     Map<Long, Contract> activeSynchronizedEpas = Maps.newHashMap();
     for (IWrapperPerson wrPerson : wrapperedPeople) {
       if (wrPerson.getCurrentContract().isPresent() && wrPerson.getValue().perseoId != null) {
-        activeSynchronizedEpas.put(wrPerson.getValue().perseoId, wrPerson.getCurrentContract().get());
+        activeSynchronizedEpas
+        .put(wrPerson.getValue().perseoId, wrPerson.getCurrentContract().get());
       }
     }
     return activeSynchronizedEpas;
+  }
+  
+  /**
+   * Serve per sincronizzare i contratti attivi già presenti in epas non sincronizzati.
+   * Tutti i contratti attivi del department con quel perseoId.<br> I contratti di persone non
+   * sincronizzate vengono scartati.<br> Formato mappa: person.perseoId -> contract
+   *
+   * @param perseoDepartmentId department perseo id
+   * @param office             ?
+   * @return mappa
+   */
+  public Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId(
+      Long perseoDepartmentId, Office office) {
+
+    List<PerseoContract> perseoContracts = Lists.newArrayList();
+
+    try {
+      perseoContracts = perseoContracts(Optional.of(perseoDepartmentId)).get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String
+          .format("Impossibile recuperare i contratti della sede con id %d da Perseo - %s",
+          perseoDepartmentId, e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+    Map<Long, Person> departmentSyncrhonizedPeopleByPerseoId = 
+        personDao.mapSynchronized(Optional.of(office));
+    
+    Map<Long, Contract> perseoContractsMap = Maps.newHashMap();
+    for (Contract contract : epasConverter(perseoContracts, 
+        departmentSyncrhonizedPeopleByPerseoId)) {
+      perseoContractsMap.put(contract.person.perseoId, contract);
+    }
+
+    return perseoContractsMap;
   }
 }

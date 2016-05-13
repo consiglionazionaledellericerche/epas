@@ -9,6 +9,9 @@
 
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("people2")} class="active" #{/if}>
+      <a href="@{Synchronizations.people2(session.get("officeSelected"))}">Persone Perseo Nuovo</a>
+    </li>
     <li #{if _activeAction.equals("people")} class="active" #{/if}>
       <a href="@{Synchronizations.people(session.get("officeSelected"))}">Persone Perseo</a>
     </li>

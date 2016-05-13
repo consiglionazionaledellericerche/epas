@@ -188,7 +188,8 @@ public class PeoplePerseoConsumer {
   }
 
   /**
-   * Tutte le persone in perseo.<br> Formato mappa: perseoId -> person
+   * Tutte le persone in perseo, possibile filtrare su una sede.
+   * <br> Formato mappa: perseoId -> person
    *
    * @return mappa
    */

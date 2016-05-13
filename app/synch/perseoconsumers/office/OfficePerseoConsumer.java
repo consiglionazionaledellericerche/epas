@@ -206,7 +206,7 @@ public class OfficePerseoConsumer {
       office.perseoId = new Long(perseoOffice.id);
       office.codeId = perseoOffice.codeId;
       office.code = perseoOffice.code;
-      office.name = institute.code + " - " + perseoOffice.city;
+      office.name = perseoOffice.shortName;
       office.address = perseoOffice.street;
       office.institute = institute;
       institute.seats.add(office);
