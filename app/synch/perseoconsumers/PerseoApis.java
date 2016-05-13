@@ -14,6 +14,8 @@ public class PerseoApis {
   private static final String INSTITUTE_ENDPOINT = "perseo.rest.institutebyperseoid";
   private static final String ALL_DEPARTMENT_CONTRACTS_FOR_EPAS_ENDPOINT =
       "perseo.rest.allcontractsindepartmentforepas";
+  private static final String ALL_CONTRACTS_FOR_EPAS_ENDPOINT =
+      "perseo.rest.allcontractsforepas";
   private static final String CONTRACT_FOR_EPAS_ENDPOINT =
       "perseo.rest.contractforepasbyperseoid";
   private static final String ALL_DEPARTMENT_PEOPLE_FOR_EPAS_ENDPOINT =
@@ -56,6 +58,11 @@ public class PerseoApis {
     return getPerseoBaseUrl() + Play.configuration.getProperty(INSTITUTE_ENDPOINT);
   }
 
+  public static String getAllContractsForEpasEndpoint() throws NoSuchFieldException {
+    return getPerseoBaseUrl()
+        + Play.configuration.getProperty(ALL_CONTRACTS_FOR_EPAS_ENDPOINT);
+  }
+  
   public static String getAllDepartmentContractsForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl()
         + Play.configuration.getProperty(ALL_DEPARTMENT_CONTRACTS_FOR_EPAS_ENDPOINT);
