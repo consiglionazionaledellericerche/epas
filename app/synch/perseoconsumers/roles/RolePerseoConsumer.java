@@ -128,6 +128,9 @@ public class RolePerseoConsumer {
     
     for (PerseoRole perseoRole : perseoRoles) {
       Office officeRole = mapOffices.get(perseoRole.perseoDepartmentId);
+      if (officeRole == null) {
+        continue;
+      }
       String roleName = null;
       if (perseoRole.roleName.equals("Responsabile Presenze")) {
         roleName = "Amministratore Personale";
