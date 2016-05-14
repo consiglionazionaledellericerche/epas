@@ -39,15 +39,9 @@
           #{if epasSeat}
              <i class="fa fa-check fa-2x text-success" aria-hidden="true"
 	         popover-hover-2 data-content="Sincronizzato con perseoId ${seat.perseoId}"></i>
-	         <a href="@{Synchronizations.people2(epasSeat.id)}">
+	         <a href="@{Synchronizations.people(epasSeat.id)}">
              <i class="fa fa-users text-primary"
 	          popover-hover-2 data-content="Vai a Sincronizza Persone ${epasSeat.name}" 
-	          aria-hidden="true"></i>
-	         </a>
-	         
-	         <a href="@{Synchronizations.activeContracts(epasSeat.id)}">
-             <i class="fa fa-files-o text-primary"
-	          popover-hover-2 data-content="Vai a Sincronizza Contratti Attivi ${epasSeat.name}" 
 	          aria-hidden="true"></i>
 	         </a>
 	      #{/if}
