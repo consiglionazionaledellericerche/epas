@@ -458,7 +458,7 @@ public class WrapperPerson implements IWrapperPerson {
       return null;
     }
     for (Contract contract : this.value.contracts) {
-      if (contract.perseoId == perseoId) {
+      if (contract.perseoId.equals(perseoId)) {
         return contract;
       }
     }

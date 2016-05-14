@@ -64,6 +64,7 @@
 	        #{if perseoContract.isTemporary && perseoContract.endDate == null}
 	          <span class="label label-warning">Temporary</span>
 	        #{/if}
+	        <span class="label label-success">${perseoContract.perseoId}</span>
 	        
 	        #{if epasContract}
 	          #{if templateUtility.syncDiagnostic.contractEquals(epasContract, perseoContract) == false}
@@ -87,8 +88,7 @@
 	        
 	        #{if epasPerson}
 	          #{list items:epasPeopleUros.get(epasPerson.perseoId), as:'uro'}
-	            <span class="label label-info" popover-hover-2 data-content="${uro.office.name}">
-	            ${uro.role.toString()}</span>
+	            <span class="label label-info">${uro}</span><br>
 	          #{/list}
 	        #{/if}
 	        
