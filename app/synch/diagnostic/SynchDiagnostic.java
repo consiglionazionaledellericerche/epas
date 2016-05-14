@@ -261,7 +261,7 @@ public class SynchDiagnostic {
    */
   private boolean contractEquals(Contract epasContract, Contract perseoContract) {
     
-    if (epasContract.perseoId != perseoContract.perseoId) {
+    if (!epasContract.perseoId.equals(perseoContract.perseoId)) {
       return false;
     }
     

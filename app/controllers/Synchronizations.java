@@ -31,7 +31,6 @@ import models.Institute;
 import models.Office;
 import models.Person;
 import models.Role;
-import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 
@@ -42,15 +41,16 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import synch.perseoconsumers.contracts.ContractPerseoConsumer;
-import synch.perseoconsumers.office.OfficePerseoConsumer;
-import synch.perseoconsumers.people.PeoplePerseoConsumer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+
+import synch.perseoconsumers.contracts.ContractPerseoConsumer;
+import synch.perseoconsumers.office.OfficePerseoConsumer;
+import synch.perseoconsumers.people.PeoplePerseoConsumer;
 
 @Slf4j
 @With({Resecure.class, RequestInit.class})
@@ -323,41 +323,12 @@ public class Synchronizations extends Controller {
       epasWrapperedPeople.put(person.getValue().id, person);
     }
     
-    
-    
-    Map<Long, List<UsersRolesOffices>> epasPeopleUros = Maps.newHashMap();
-    for (Person person : epasSynchronizedPeople.values()) {
-      
-      User user = usersRolesOfficesDao.fetchUser(person);
-      
-      log.info(person.toString());
-      log.info(person.user.toString());
-      for (UsersRolesOffices uro : person.user.usersRolesOffices) {
-        log.info(uro.user.toString());
-        log.info(uro.office.toString());
-        log.info(uro.role.toString());
-      }
-      epasPeopleUros.put(person.perseoId, person.user.usersRolesOffices);
-    }
-    
-    /*
-    // Tutti i ruoli assegnati alle persone della sede.... che trasformo in mappa funzione delle persone.
-    List<UsersRolesOffices> officeUros = usersRolesOfficesDao.getUsersRolesOfficesByPersonInOffice(office);
-    
-    
-    Map<Long, List<UsersRolesOffices>> epasPeopleUros = Maps.newHashMap();
-    for (UsersRolesOffices uro : officeUros) {
-      if (uro.user.person == null || uro.user.person.perseoId == null) {
-        continue; 
-      }
-      List<UsersRolesOffices> personUros = epasPeopleUros.get(uro.user.person.perseoId);
-      if (personUros == null) {
-        epasPeopleUros.put(uro.user.person.perseoId, Lists.newArrayList(uro));
-      } else {
-        personUros.add(uro);
-      }
-    }
-    */
+
+    // Tutti i ruoli epas formato Map<perseoPersonId, Set<String>> Contenente tutti gli 
+    // i ruoli (amministrativi) che ogni persona dell'office ha (anche in altri office).
+        
+    Map<Long, Set<String>> epasPeopleUros = usersRolesOfficesDao.getEpasRoles(Optional.fromNullable(office));
+
    
     render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople, epasPeopleUros);
     
