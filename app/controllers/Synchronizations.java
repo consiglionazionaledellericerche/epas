@@ -51,6 +51,7 @@ import javax.inject.Inject;
 import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.office.OfficePerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
+import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 @Slf4j
 @With({Resecure.class, RequestInit.class})
@@ -70,6 +71,8 @@ public class Synchronizations extends Controller {
   static PeoplePerseoConsumer peoplePerseoConsumer;
   @Inject
   static ContractPerseoConsumer contractPerseoConsumer;
+  @Inject
+  static RolePerseoConsumer rolePerseoCunsomer;
   @Inject
   static PeriodManager periodManager;
   @Inject
@@ -329,8 +332,9 @@ public class Synchronizations extends Controller {
         
     Map<Long, Set<String>> epasPeopleUros = usersRolesOfficesDao.getEpasRoles(Optional.fromNullable(office));
 
+    Map<Long, Set<String>> perseoPeopleUros = rolePerseoCunsomer.perseoRoles(Optional.of(office));
    
-    render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople, epasPeopleUros);
+    render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople, epasPeopleUros, perseoPeopleUros);
     
   }
 

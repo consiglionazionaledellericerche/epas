@@ -24,6 +24,7 @@ public class PerseoApis {
       "perseo.rest.allpeopleforepas";
   private static final String PERSON_FOR_EPAS_ENDPOINT =
       "perseo.rest.personforepasbyperseoid";
+  private static final String ALL_ROLES_ENDPOINT = "perseo.rest.allrolesforepas";
 
   private static String getPerseoBaseUrl() throws NoSuchFieldException {
     if (Strings.isNullOrEmpty(Play.configuration.getProperty(PERSEO_BASE_URL))) {
@@ -83,6 +84,10 @@ public class PerseoApis {
 
   public static String getPersonForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl() + Play.configuration.getProperty(PERSON_FOR_EPAS_ENDPOINT);
+  }
+  
+  public static String getAllRolesEpasEndpoint() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(ALL_ROLES_ENDPOINT);
   }
 
 }

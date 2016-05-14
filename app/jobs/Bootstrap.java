@@ -232,9 +232,6 @@ public class Bootstrap extends Job<Void> {
 
   public void doJob() throws IOException {
 
-    if (true) {
-      return;
-    }
     if (Play.runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
