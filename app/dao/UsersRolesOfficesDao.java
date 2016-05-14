@@ -11,13 +11,22 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.ModelQuery;
 
 import models.Office;
+import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.query.QBadgeReader;
+import models.query.QPerson;
+import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibility;
+import models.query.QPersonShift;
+import models.query.QQualification;
 import models.query.QRole;
+import models.query.QUser;
 import models.query.QUsersRolesOffices;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -92,5 +101,58 @@ public class UsersRolesOfficesDao extends DaoBase {
 
     return ModelQuery.simpleResults(query, qr).list();
   }
+
+  /**
+   * Tutti i ruoli assegnati per quella sede.
+   * @param office
+   * @return
+   */
+  public List<UsersRolesOffices> getUsersRolesOfficesByPersonInOffice(Office office) {
+    
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    final QUser user = QUser.user;
+    final QPerson person = QPerson.person;
+    final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+    
+    final JPQLQuery query = getQueryFactory().from(uro)
+        
+        // Fetch necessarie per costruire con una query sola uro->user->person
+        // TODO: metterle in un queryFactory e renderla disponibile ad altre chiamate
+        
+        .leftJoin(uro.user, user).fetch()
+        .leftJoin(user.badgeReader, badgeReader).fetch()
+        .leftJoin(user.badgeReader.user, user).fetch()
+        .leftJoin(uro.user.person, person).fetch()
+        .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
+        .leftJoin(person.personShift, QPersonShift.personShift).fetch()
+        .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+        .leftJoin(person.qualification, QQualification.qualification1).fetch();
+//        .leftJoin(user.person, person).fetch()
+//        .leftJoin(user.person.reperibility, QPersonReperibility.personReperibility).fetch()
+//        .leftJoin(user.person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+//        .leftJoin(user.person.personShift, QPersonShift.personShift).fetch()
+//        .leftJoin(user.person.qualification, QQualification.qualification1).fetch()
+//
+//        .where(person.office.eq(office));
+    
+    return query.list(uro);
+        
+  }
+  
+  public User fetchUser(Person person) {
+    
+    final QUser user = QUser.user;
+    
+    final JPQLQuery query = getQueryFactory()
+        .from(user)
+        .leftJoin(user.person, QPerson.person)
+        .where(user.person.eq(person));
+    
+    return query.list(user).get(0);
+    
+  }
+  
+  
+  
 
 }

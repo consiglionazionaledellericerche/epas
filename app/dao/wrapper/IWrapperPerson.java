@@ -119,6 +119,12 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    * Ha perseoId null oppure uno dei suoi contratti attivi o futuri ha perseoId null.
    */
   public boolean isProperSynchronized();
+  /**
+   * Il contratto della persona con quel perseoId.
+   * @param perseoId perseoId
+   * @return contratto
+   */
+  public Contract perseoContract(Long perseoId);
   
 
 }

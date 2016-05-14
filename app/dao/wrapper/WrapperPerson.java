@@ -447,4 +447,21 @@ public class WrapperPerson implements IWrapperPerson {
     this.properSynchronized = Optional.of(true);
     return this.properSynchronized.get();
   }
+  
+  /**
+   * Il contratto della persona con quel perseoId.
+   * @param perseoId
+   * @return
+   */
+  public Contract perseoContract(Long perseoId) {
+    if (perseoId == null) {
+      return null;
+    }
+    for (Contract contract : this.value.contracts) {
+      if (contract.perseoId == perseoId) {
+        return contract;
+      }
+    }
+    return null;
+  }
 }

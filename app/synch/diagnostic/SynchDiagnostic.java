@@ -280,7 +280,7 @@ public class SynchDiagnostic {
       // Unico caso in cui comanda il dato in epas che è corretto.
       return true;
     }
-    if (!epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd())) {
+    if (epasContract.calculatedEnd() != null && !epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd())) {
       return false;
     }
     return true;

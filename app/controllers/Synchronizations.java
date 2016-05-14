@@ -11,6 +11,7 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -30,6 +31,8 @@ import models.Institute;
 import models.Office;
 import models.Person;
 import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
@@ -81,6 +84,8 @@ public class Synchronizations extends Controller {
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static WrapperModelFunctionFactory wrapperFunctionFactory;
+  @Inject
+  static UsersRolesOfficesDao usersRolesOfficesDao;
 
   /**
    * Gli istituti perseo.
@@ -293,7 +298,7 @@ public class Synchronizations extends Controller {
     institutes();
   }
 
-  public static void people2(Long officeId) {
+  public static void people(Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -317,8 +322,44 @@ public class Synchronizations extends Controller {
         .list(Optional.of(office)).list()).transform(wrapperFunctionFactory.person()).toList()) {
       epasWrapperedPeople.put(person.getValue().id, person);
     }
-        
-    render(perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople);
+    
+    
+    
+    Map<Long, List<UsersRolesOffices>> epasPeopleUros = Maps.newHashMap();
+    for (Person person : epasSynchronizedPeople.values()) {
+      
+      User user = usersRolesOfficesDao.fetchUser(person);
+      
+      log.info(person.toString());
+      log.info(person.user.toString());
+      for (UsersRolesOffices uro : person.user.usersRolesOffices) {
+        log.info(uro.user.toString());
+        log.info(uro.office.toString());
+        log.info(uro.role.toString());
+      }
+      epasPeopleUros.put(person.perseoId, person.user.usersRolesOffices);
+    }
+    
+    /*
+    // Tutti i ruoli assegnati alle persone della sede.... che trasformo in mappa funzione delle persone.
+    List<UsersRolesOffices> officeUros = usersRolesOfficesDao.getUsersRolesOfficesByPersonInOffice(office);
+    
+    
+    Map<Long, List<UsersRolesOffices>> epasPeopleUros = Maps.newHashMap();
+    for (UsersRolesOffices uro : officeUros) {
+      if (uro.user.person == null || uro.user.person.perseoId == null) {
+        continue; 
+      }
+      List<UsersRolesOffices> personUros = epasPeopleUros.get(uro.user.person.perseoId);
+      if (personUros == null) {
+        epasPeopleUros.put(uro.user.person.perseoId, Lists.newArrayList(uro));
+      } else {
+        personUros.add(uro);
+      }
+    }
+    */
+   
+    render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople, epasPeopleUros);
     
   }
 
@@ -351,44 +392,6 @@ public class Synchronizations extends Controller {
     }
 
     render(wrapperedPeople, perseoPeopleByNumber, office);
-  }
-
-  /**
-   * Le persone perseo.
-   * 
-   * Questa vista sarà sostitutita dalla nuova people2.
-   */
-  public static void people(Long officeId) {
-
-    Map<Long, Person> perseoPeopleByPerseoId = Maps.newHashMap();
-    Map<Long, Person> epasPeopleByPerseoId = Maps.newHashMap();
-    
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-    
-    if (office.perseoId == null) {
-      flash.error("Selezionare una sede già sincronizzata... "
-          + "%s non lo è ancora.", office.toString());
-      render(perseoPeopleByPerseoId, epasPeopleByPerseoId, office);
-    }
-    
-    try {
-      perseoPeopleByPerseoId = peoplePerseoConsumer
-          .perseoPeopleByPerseoId(Optional.of(office.perseoId));
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
-    }
-    @SuppressWarnings("deprecation")
-    List<Person> people = personDao.listFetched(Optional.<String>absent(), Sets.newHashSet(office), 
-        false, null, null, false).list();
-    
-    for (Person person : people) {
-      if (person.perseoId != null) {
-        epasPeopleByPerseoId.put(person.perseoId, person);
-      }
-    }
-
-    render(perseoPeopleByPerseoId, epasPeopleByPerseoId, office);
   }
 
   /**
@@ -637,37 +640,6 @@ public class Synchronizations extends Controller {
   }
 
   /**
-   * I contratti attivi perseo.
-   * 
-   * Questa vista sarà sostitutita dalla nuova people2.
-   */
-  public static void activeContracts(Long officeId) {
-
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-
-    //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
-    Map<Long, Contract> activeContractsEpasByPersonPerseoId =
-        contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
-
-    //Costruisco la mappa di tutti i contratti attivi perseo per le persone sincronizzate epas.
-    Map<Long, Contract> perseoDepartmentActiveContractsByPersonPerseoId = Maps.newHashMap();
-    if (office.perseoId == null) {
-      flash.error("Selezionare una sede già sincronizzata... "
-          + "%s non lo è ancora.", office.toString());
-    } else {
-      try {
-        perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
-            .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-      } catch (ApiRequestException e) {
-        flash.error("%s", e);
-      }
-    }
-
-    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
-  }
-  
-  /**
    * I contratti attivi in epas non sincronizzati.
    */
   public static void oldActiveContracts(Long officeId) {
@@ -813,12 +785,12 @@ public class Synchronizations extends Controller {
       // Salvare il contratto.
       if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
         flash.error("Il contratto non può essere importato a causa di errori");
-        activeContracts(person.office.id);
+        people(person.office.id);
       }
       flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
     }
 
-    activeContracts(person.office.id);
+    people(person.office.id);
   }
   
   /**
@@ -875,7 +847,7 @@ public class Synchronizations extends Controller {
       flash.error("Tutti i contratti importabili sono stati importati.");
     }
     
-    activeContracts(office.id);
+    people(office.id);
   }
   
   /**
