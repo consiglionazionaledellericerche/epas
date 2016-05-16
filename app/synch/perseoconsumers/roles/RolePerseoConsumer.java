@@ -2,6 +2,7 @@ package synch.perseoconsumers.roles;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -13,11 +14,20 @@ import com.google.inject.Inject;
 import com.beust.jcommander.internal.Maps;
 import com.beust.jcommander.internal.Sets;
 
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
+import dao.wrapper.IWrapperPerson;
+
 import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
 import models.Office;
+import models.Person;
+import models.Role;
+import models.UsersRolesOffices;
 
 import org.assertj.core.util.Lists;
 
@@ -34,14 +44,23 @@ import synch.perseoconsumers.PerseoApis;
 @Slf4j
 public class RolePerseoConsumer {
 
+  private final PersonDao personDao;
+  private final OfficeDao officeDao;
+  private final RoleDao roleDao;
+  private final UsersRolesOfficesDao uroDao;
+
   /**
    * Costruttore.
    * @param personDao inject
    * @param wrapperFunctionFactory inject
    */
   @Inject
-  public RolePerseoConsumer() {
-    
+  public RolePerseoConsumer(PersonDao personDao, OfficeDao officeDao, RoleDao roleDao,
+      UsersRolesOfficesDao uroDao) {
+    this.personDao = personDao;
+    this.officeDao = officeDao;
+    this.roleDao = roleDao;
+    this.uroDao = uroDao;
   }
 
  
@@ -49,7 +68,7 @@ public class RolePerseoConsumer {
   /**
    * @return La lista dei ruoli assegnati su perseo alle sedi.
    */
-  private ListenableFuture<List<PerseoRole>> perseoContracts() {
+  private ListenableFuture<List<PerseoRole>> perseoRoles() {
 
     final String url;
     final String user;
@@ -107,7 +126,7 @@ public class RolePerseoConsumer {
     List<PerseoRole> perseoRoles = Lists.newArrayList();
 
     try {
-      perseoRoles = perseoContracts().get();
+      perseoRoles = perseoRoles().get();
     } catch (InterruptedException | ExecutionException e) {
       String error = String
           .format("Impossibile recuperare i ruoli da Perseo - %s", e.getMessage());
@@ -131,15 +150,8 @@ public class RolePerseoConsumer {
       if (officeRole == null) {
         continue;
       }
-      String roleName = null;
-      if (perseoRole.roleName.equals("Responsabile Presenze")) {
-        roleName = "Amministratore Personale";
-      } else if (perseoRole.roleName.equals("Responsabile Presenze sola lettura")) {
-        roleName = "Amministratore Personale Sola lettura";
-      } else if (perseoRole.roleName.equals("Admin Sede")) {
-        roleName = "Amministratore Tecnico";
-      }
-      if (roleName == null) {
+      Role role = roleFromPerseo(perseoRole.roleName);
+      if (role == null) {
         // Non dovrebbero arrivare ruoli non epas....
         continue;
       }
@@ -147,13 +159,90 @@ public class RolePerseoConsumer {
       Set<String> personRoles = peoplePerseoRoles.get(perseoRole.personPerseoId);
       if (personRoles == null) {
         personRoles = Sets.newHashSet();
-        personRoles.add(roleName + " - " + officeRole.name);
+        personRoles.add(role.toString() + " - " + officeRole.name);
         peoplePerseoRoles.put(perseoRole.personPerseoId, personRoles);
       } else {
-        personRoles.add(roleName + " - " + officeRole.name);
+        personRoles.add(role.toString() + " - " + officeRole.name);
       }
     }
     
     return peoplePerseoRoles;
+  }
+  
+  
+  /**
+   * La lista dei ruoli in perseo per l'office, sotto forma di usersRolesOffices
+   * @param office
+   * @return la lista
+   */
+  public List<UsersRolesOffices> perseoUsersRolesOffices(Office office) {
+    
+    // Ruoli sede di perseo
+    List<PerseoRole> perseoRoles = Lists.newArrayList();
+    try {
+      perseoRoles = perseoRoles().get();
+    } catch (InterruptedException | ExecutionException e) {
+      String error = String
+          .format("Impossibile recuperare i ruoli da Perseo - %s", e.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+   
+    //Persone epas per perseoId.
+    Map<Long, Person> epasPeople = Maps.newHashMap();
+    for (Person person : personDao.list(Optional.of(office)).list()) {
+      if (person.perseoId != null) {
+        epasPeople.put(person.perseoId, person);
+      }
+    }
+    
+    // Sedi per perseoId
+    Map<Long, Office> epasOffices = Maps.newHashMap();
+    for (Office seat: officeDao.allOffices().list()) {
+      if (seat.perseoId != null) {
+        epasOffices.put(seat.perseoId, seat);
+      }
+    }
+    
+    List<UsersRolesOffices> uroList = Lists.newArrayList();
+    
+    for (PerseoRole perseoRole : perseoRoles) {
+      Person epasPerson = epasPeople.get(perseoRole.personPerseoId);
+      if (epasPerson == null) {
+        continue;
+      }
+      Office epasOffice = epasOffices.get(perseoRole.perseoDepartmentId);
+      if (epasOffice == null) {
+        continue;
+      }
+      Role role  = roleFromPerseo(perseoRole.roleName);
+      if (role == null) {
+        continue;
+      }
+      Optional<UsersRolesOffices> uroOpt = uroDao
+          .getUsersRolesOffices(epasPerson.user, role, epasOffice); 
+      if(uroOpt.isPresent()) {
+        uroList.add(uroOpt.get());
+      } else {
+        UsersRolesOffices uro = new UsersRolesOffices();
+        uro.user = epasPerson.user;
+        uro.office = epasOffice;
+        uro.role = role;
+        uroList.add(uro);
+      }
+    }
+    return uroList;
+  }
+
+  private Role roleFromPerseo(String perseoName) {
+
+    if (perseoName.equals("Responsabile Presenze")) {
+      return roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+    } else if (perseoName.equals("Responsabile Presenze sola lettura")) {
+      return roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+    } else if (perseoName.equals("Admin Sede")) {
+      return roleDao.getRoleByName(Role.TECNICAL_ADMIN);
+    }
+    return null;
   }
 }
