@@ -247,7 +247,6 @@ public class Synchronizations extends Controller {
     if (!institute.isPresent()) {
 
       //Istituto non presente
-
       validation.valid("instituteWithThatSeat", instituteWithThatSeat.get());
       if (validation.hasErrors()) {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
@@ -295,6 +294,16 @@ public class Synchronizations extends Controller {
     JPAPlugin.startTx(false);
     JPA.em().merge(seat);
     managerImportAllActiveContractsInOffice(seat);
+    JPAPlugin.closeTx(false);
+    JPAPlugin.startTx(false);
+    
+    // Importazione dei ruoli ...
+    List<UsersRolesOffices> uroList = rolePerseoCunsomer.perseoUsersRolesOffices(seat);
+    for (UsersRolesOffices uro : uroList) {
+      if (!uro.isPersistent()) {
+        uro.save();
+      }
+    }
     
     flash.success("La sede %s è stata importata con successo da Perseo!", seat.toString());
 
@@ -330,11 +339,13 @@ public class Synchronizations extends Controller {
     // Tutti i ruoli epas formato Map<perseoPersonId, Set<String>> Contenente tutti gli 
     // i ruoli (amministrativi) che ogni persona dell'office ha (anche in altri office).
         
-    Map<Long, Set<String>> epasPeopleUros = usersRolesOfficesDao.getEpasRoles(Optional.fromNullable(office));
+    Map<Long, Set<String>> epasPeopleUros = usersRolesOfficesDao
+        .getEpasRoles(Optional.fromNullable(office));
 
     Map<Long, Set<String>> perseoPeopleUros = rolePerseoCunsomer.perseoRoles(Optional.of(office));
    
-    render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople, epasPeopleUros, perseoPeopleUros);
+    render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople, 
+        epasPeopleUros, perseoPeopleUros);
     
   }
 
