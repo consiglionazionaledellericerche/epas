@@ -130,7 +130,7 @@ public class UsersRolesOfficesDao extends DaoBase {
     Map<Long, Set<String>> urosMap = Maps.newHashMap();
     
     for (UsersRolesOffices uroItem : uroList) {
-      if (uroItem.user.person == null && uroItem.user.person.perseoId == null) {
+      if (uroItem.user.person == null || uroItem.user.person.perseoId == null) {
         continue;
       }
       if (office.isPresent() && !office.get().equals(uroItem.user.person.office)) {
