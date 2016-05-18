@@ -443,11 +443,11 @@ public final class PersonDao extends DaoBase {
    * @param perseoId l'id della persona sull'applicazione perseo.
    * @return la persona identificata dall'id con cui è salvata sul db di perseo.
    */
-  public Person getPersonByPerseoId(Integer perseoId) {
+  public Person getPersonByPerseoId(Long perseoId) {
 
     final QPerson person = QPerson.person;
 
-    final JPQLQuery query = getQueryFactory().from(person).where(person.iId.eq(perseoId));
+    final JPQLQuery query = getQueryFactory().from(person).where(person.perseoId.eq(perseoId));
 
     return query.singleResult(person);
   }
