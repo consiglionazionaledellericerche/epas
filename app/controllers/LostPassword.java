@@ -12,6 +12,7 @@ import models.User;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Email;
+import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 
@@ -34,7 +35,7 @@ public class LostPassword extends Controller {
    * @param email la mail della persona
    * @throws Throwable eccezione
    */
-  public static void sendTokenRecoveryPassword(@Email String email) throws Throwable {
+  public static void sendTokenRecoveryPassword(@Required @Email String email) throws Throwable {
     if (Validation.hasErrors()) {
       flash.error("Fornire un indirizzo email valido, operazione annullata.");
       LostPassword.lostPassword();

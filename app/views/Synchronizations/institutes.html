@@ -7,7 +7,7 @@
 <div class="container">
   *{ #{form @Import.importOffices(),class:'form-horizontal'} }*
   
-  <table class="table table-bordered" datatable>
+  <table class="table table-bordered"  datatable>
   <thead>
 	<tr>
 	  <th>Istituto</th>
@@ -15,31 +15,18 @@
 	</tr>
   </thead>
   <tbody>
-	#{list items:institutes, as:'institute'}
+	#{list perseoInstitutes, as:'institute'}
 	<tr>
 	  <td>
+	    <span class="label label-success">${institute.perseoId}</span>
 	    <span class="label label-primary">${institute.cds}</span>
-	    <span class="label label-primary">${institute.name}</span>
-	    <span class="label label-primary">${institute.code}</span>
-	    #{if institute.perseoId == null }
-            <em>Not Synchronized</em>
-            <br>
-            %{ suggested = perseoInstitutesByCds?.get(institute.cds) }%
-            #{if suggested}
-            <span class="label label-default">${suggested.cds}</span>
-	          <span class="label label-default">${suggested.name}</span>
-	          <span class="label label-default">${suggested.code}</span>
-	          <em>PerseoId </em><span class="label label-success">${suggested.perseoId}</span>
-	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinInstitute(institute.id, suggested.perseoId)}">Associa</a>
-	          #{/if}
-	        #{else}
-	          <em>Nessun suggerimento cds</em>
-	        #{/else}
-        #{/if}
-        #{else}
-           <em>Synchronized </em><span class="label label-success">${institute.perseoId}</span>
-           <a class="btn btn btn-danger btn-xs" href="@{Synchronizations.unjoinInstitute(institute.id)}">Disassocia</a>
-        #{/else}
+	    <span class="label label-primary" popover-hover-2 data-content="${institute.name}">${institute.code}</span>
+	    
+	        %{ epasSeat = epasInstituteByPerseoId.get(institute.perseoId) }%
+            #{if epasSeat}
+              <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${institute.perseoId}"></i>
+	        #{/if}
 	  </td>
 	  <td>
       #{list institute.seats, as:'seat'}
@@ -47,26 +34,20 @@
           <span class="label label-primary">${seat.codeId}</span>
           <span class="label label-primary" >${seat.code}</span>
           <span class="label label-primary">${seat.name}</span>
-          <span class="label label-primary">${seat.address}</span>
-          #{if seat.perseoId == null }
-            <em>Not Synchronized</em>
-            <br>
-            %{ suggested = perseoOfficeByCodeId.get(seat.codeId) }%
-            #{if suggested}
-              <span class="label label-default">${suggested.codeId}</span>
-	          <span class="label label-default">${suggested.code}</span>
-	          <span class="label label-default">${suggested.name}</span>
-	          <span class="label label-default">${suggested.address}</span>
-	          <em>PerseoId </em><span class="label label-success">${suggested.perseoId}</span>
-	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinOffice(seat.id, suggested.perseoId)}">Associa</a>
-	        #{/if}
-	        #{else}
-	          <em>Nessun suggerimento codiceSede</em>
-	        #{/else}
-          #{/if}
-          #{else}
-           <em>Synchronized </em><span class="label label-success">${seat.perseoId}</span>
-          #{/else}
+          <span class="label label-success">${seat.perseoId}</span>
+          %{ epasSeat = epasOfficesByPerseoId.get(seat.perseoId) }%
+          #{if epasSeat}
+             <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${seat.perseoId}"></i>
+	         <a href="@{Synchronizations.people(epasSeat.id)}">
+             <i class="fa fa-users text-primary"
+	          popover-hover-2 data-content="Vai a Sincronizza Persone ${epasSeat.name}" 
+	          aria-hidden="true"></i>
+	         </a>
+	      #{/if}
+	      #{else}
+	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importOffice(seat.perseoId)}">Importa</a>
+	      #{/else}
         </p>
      #{/list}
 	  </td>

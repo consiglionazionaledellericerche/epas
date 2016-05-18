@@ -42,6 +42,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import synch.diagnostic.SynchDiagnostic;
+
 /**
  * Metodi usabili nel template.
  *
@@ -60,13 +62,14 @@ public class TemplateUtility {
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final IWrapperFactory wrapperFactory;
   private final BadgeSystemDao badgeSystemDao;
+  private final SynchDiagnostic synchDiagnostic;
 
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
       QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
-      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao) {
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao, SynchDiagnostic synchDiagnostic) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -78,6 +81,7 @@ public class TemplateUtility {
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
     this.badgeSystemDao = badgeSystemDao;
+    this.synchDiagnostic = synchDiagnostic;
   }
 
 
@@ -335,5 +339,9 @@ public class TemplateUtility {
    */
   public IWrapperFactory getWrapperFactory() {
     return this.wrapperFactory;
+  }
+  
+  public SynchDiagnostic getSyncDiagnostic() {
+    return this.synchDiagnostic;
   }
 }
