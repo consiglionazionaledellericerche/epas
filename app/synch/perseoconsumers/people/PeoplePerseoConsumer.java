@@ -23,11 +23,12 @@ import models.Qualification;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import synch.perseoconsumers.PerseoApis;
 
 @Slf4j
 public class PeoplePerseoConsumer {
@@ -188,7 +189,8 @@ public class PeoplePerseoConsumer {
   }
 
   /**
-   * Tutte le persone in perseo.<br> Formato mappa: perseoId -> person
+   * Tutte le persone in perseo, possibile filtrare su una sede.
+   * <br> Formato mappa: perseoId -> person
    *
    * @return mappa
    */

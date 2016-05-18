@@ -44,12 +44,6 @@
 	          popover-hover-2 data-content="Vai a Sincronizza Persone ${epasSeat.name}" 
 	          aria-hidden="true"></i>
 	         </a>
-	         
-	         <a href="@{Synchronizations.activeContracts(epasSeat.id)}">
-             <i class="fa fa-files-o text-primary"
-	          popover-hover-2 data-content="Vai a Sincronizza Contratti Attivi ${epasSeat.name}" 
-	          aria-hidden="true"></i>
-	         </a>
 	      #{/if}
 	      #{else}
 	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importOffice(seat.perseoId)}">Importa</a>

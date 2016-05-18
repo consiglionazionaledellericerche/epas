@@ -2,7 +2,7 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Import istituti da Anagrafica'  /}
 
-#{synch.synchContractsTabs activeAction:'oldActiveContracts' /}
+#{synch.synchPeopleTabs activeAction:'oldActiveContracts' /}
 
 <div class="container">
   
@@ -73,7 +73,7 @@
 
 #{alert color:'info'}
   <p>Associa tutti i contratti attivi in epas non ancora associati. 
-  Verificare bene per tutti il join suggerito sulla base del contratto attivo in perseo.
+  Verificare bene per tutti l'associazione suggerita sulla base del contratto attivo in perseo.
     <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllActiveContractsInOffice(office.id)}">Associa</a>
   </p>
 #{/alert}

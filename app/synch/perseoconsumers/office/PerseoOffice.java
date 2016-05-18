@@ -5,7 +5,7 @@ import com.google.common.base.MoreObjects;
 public class PerseoOffice {
   
   public int id; //perseoId
-  public String name;
+  public String shortName;
   public String code;
   public String codeId;
   public String city;
@@ -16,7 +16,7 @@ public class PerseoOffice {
 
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("id", id).add("name", name).add("code", code).add("codeId", codeId)
+        .add("id", id).add("shortName", shortName).add("code", code).add("codeId", codeId)
         .toString();
   }
 }
