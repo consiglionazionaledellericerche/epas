@@ -4,60 +4,177 @@
 
 #{synch.synchPeopleTabs activeAction:'people' /}
 
+
 <div class="container">
   
   <table class="table table-bordered" datatable>
   <thead>
 	<tr>
-	  <th>Persona Perseo</th>
-	  <th>Persona Epas</th>
-	  <th>Sincronizzata</th>
+	  <th>Persone Perseo</th>
+	  <th>Contratti</th>
+	  <th>Ruoli</th>
 	</tr>
   </thead>
   <tbody>
-	#{list items:perseoPeopleByPerseoId.values(), as:'perseoPerson'}
-	%{ epasPerson = epasPeopleByPerseoId.get(perseoPerson.perseoId); }%
+	#{list items:perseoPeople.values(), as:'perseoPerson'}
 	
-	<tr #{if epasPerson != null} class="bg-success"#{/if}>
-	  <td>
-	    <span class="label label-danger">${perseoPerson.number}</span>
-	    <span class="label label-primary">${perseoPerson.name}</span>
-	    <span class="label label-primary">${perseoPerson.surname}</span>
-	    <span class="label label-default">${perseoPerson.qualification}</span>
-	  </td>
-	  <td>
-	    #{if epasPerson}
-	    <span class="label label-danger">${epasPerson.number}</span>
-	    <span class="label label-primary">${epasPerson.name}</span>
-	    <span class="label label-primary">${epasPerson.surname}</span>
-	    <span class="label label-default">${epasPerson.qualification}</span>
-	    #{/if}
-	  </td>
-	  <td>
-	    
-	    #{if epasPerson}
-	      <span class="label label-success">${perseoPerson.perseoId}</span>
-	      #{if templateUtility.syncDiagnostic.personEquals(epasPerson, perseoPerson) == false}
-	        <i class="fa fa-times fa-2x text-danger" aria-hidden="true"
-	         popover-hover-2 data-content="Dissimili... eventi mancati."></i>
-	      #{/if}
-	    #{/if}
-	    #{else}
-	      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importPerson(perseoPerson.perseoId)}">Importa</a>
-	    #{/else}
-	  </td>		    
+		*{ ispezione se la persona in epas è importata e nel caso se è correttamente sincronizzata }*
+		%{ 
+		  epasPerson = epasSynchronizedPeople.get(perseoPerson.perseoId);
+		  properSynchronized = true;
+		  if (epasPerson) {
+		    properSynchronized = epasWrapperedPeople.get(epasPerson.id).isProperSynchronized();
+		  }
+		}%
+		
+    <tr>
+	      <td>
+	        <span class="label label-danger">${perseoPerson.number}</span>
+	        <span class="label label-primary">${perseoPerson.name}</span>
+	        <span class="label label-primary">${perseoPerson.surname}</span>
+	        <span class="label label-primary">${perseoPerson.qualification}</span>
+	        <span class="label label-success">${perseoPerson.perseoId}</span>
+	        #{if epasPerson == null}
+	         <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importPerson(perseoPerson.perseoId)}">Importa</a>
+	        #{/if}#{else}
+	           #{if !properSynchronized}
+	            <i class="fa fa-warning fa-2x text-danger" aria-hidden="true"
+		           popover-hover-2 data-content="Associato a Perseo con errori..."></i>
+		       #{/if}
+	           #{if templateUtility.syncDiagnostic.personEquals(epasPerson, perseoPerson) == false}
+	             <i class="fa fa-times fa-2x text-danger" aria-hidden="true"
+	               popover-hover-2 data-content="Dissimili... eventi mancati."></i>
+	             <span class="label label-default">${epasPerson.number}</span>
+	             <span class="label label-default">${epasPerson.name}</span>
+	             <span class="label label-default">${epasPerson.surname}</span>
+	             <span class="label label-default">${epasPerson.qualification}</span>  
+	           #{/if}
+	        #{/else}
+	      </td>
+	      
+	      <td>
+	      
+	      #{list items:perseoPeopleContract.get(perseoPerson.perseoId), as:'perseoContract'}
+	        %{ 
+	          epasContract = epasWrapperedPeople.get(epasPerson.id).perseoContract(perseoContract.perseoId);
+	        }%
+	        <span class="label label-primary">${perseoContract.beginDate}</span>
+	        <span class="label label-primary">${perseoContract.endDate}</span>
+	        <span class="label label-danger">${perseoContract.endContract}</span>
+	        #{if perseoContract.isTemporary && perseoContract.endDate == null}
+	          <span class="label label-warning">Temporary</span>
+	        #{/if}
+	        <span class="label label-success">${perseoContract.perseoId}</span>
+	        
+	        #{if epasContract}
+	          #{if templateUtility.syncDiagnostic.contractEquals(epasContract, perseoContract) == false}
+	             <i class="fa fa-times fa-2x text-danger" aria-hidden="true"
+	               popover-hover-2 data-content="Dissimili... eventi mancati."></i>
+	             <span class="label label-primary">${epasContract.beginDate}</span>
+	             <span class="label label-primary">${epasContract.endDate}</span>
+	             <span class="label label-danger">${epasContract.endContract}</span>
+	             #{if epasContract.isTemporary && epasContract.endDate == null}
+	               <span class="label label-warning">Temporary</span>
+	             #{/if} 
+	           #{/if}
+	        #{/if}#{else}
+	          <a class="btn btn btn-info btn-xs" 
+	          href="@{Synchronizations.importContract(perseoContract.perseoId, perseoContract.person.id)}">Importa</a>
+	        #{/else}
+	      #{/list}
+	      </td>
+	      
+	      <td>
+	        
+	        #{if epasPerson}
+	        %{
+	          perseoUros = perseoPeopleUros.get(epasPerson.perseoId);
+	          epasUros = epasPeopleUros.get(epasPerson.perseoId);
+	        }%
+	          #{list items:perseoUros, as:'uro'}
+	            <span class="label label-primary">${uro}</span>
+	            #{if epasUros != null && epasUros.contains(uro)}
+	               <i class="fa fa-check text-success"></i>
+	            #{/if} #{else}
+	              <i class="fa fa-times text-danger" aria-hidden="true"
+		           popover-hover-2 data-content="Permesso mancante in ePas."></i> 
+	            #{/else}
+	            <br>
+	          #{/list}
+	          #{list items:epasUros, as:'uro'}
+	            #{if perseoUros != null && perseoUros.contains(uro)}
 
-    </tr>
-   #{/list}
+	            #{/if} #{else}
+	              <span class="label label-warning">${uro}</span>
+	                <i class="fa fa-times text-danger" aria-hidden="true"
+		             popover-hover-2 data-content="Permesso mancante in Perseo."></i> 
+	              <br>
+	            #{/else}
+	          #{/list}
+	        #{/if}
+	        
+	      </td>
+	    
+	    </tr>
+
+	#{/list}    
   </tbody>
-</table>
+  </table>
 
   #{alert color:'info'}
-  <p>Importa tutte le persone non ancora importate. Verificare che tutte le persone già esistenti siano sincronizzate.
-    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllPersonInOffice(office.id)}">Importa</a>
-  </p>
+    <p>Importa tutte le persone non ancora importate. Verificare che tutte le persone strutturate siano correttamente associate.
+      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllPersonInOffice(office.id)}">Importa</a>
+    </p>
+    <p>Importa tutti i contratti non ancora importati.
+      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllContractsInOffice(office.id)}">Importa</a>
+    </p>
   #{/alert}  
   
+  
+  #{alert color:'warning'}
+    <p>La <strong>tabella sottostante</strong> contiene tutte le persone ePAS non associate a Perseo, oppure, che hanno contratti
+    attivi o futuri anch'essi non associati a Perseo.</p>
+    <p>Una volta completate le procedure di associazione conterrà l'eventuale personale non strutturato gestito
+    da ePAS per la sede selezionata.</p>
+  #{/alert}
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Persone in ePAS non associate</th>
+	  <th>Contratti In ePAS non associati</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:epasWrapperedPeople.values(), as:'epasWrapperedPerson'}
+      #{if !epasWrapperedPerson.isProperSynchronized() }
+        <tr>
+          <td>
+           <span class="label label-danger">${epasWrapperedPerson.value.number}</span>
+	       <span class="label label-default">${epasWrapperedPerson.value.name}</span>
+	       <span class="label label-default">${epasWrapperedPerson.value.surname}</span>
+	       <span class="label label-default">${epasWrapperedPerson.value.qualification}</span>
+	       #{if epasWrapperedPerson.value.perseoId == null}
+	         <i class="fa fa-times text-danger" aria-hidden="true"
+		           popover-hover-2 data-content="Persona non associata."></i> 
+	       #{/if}
+          </td>
+          <td>
+            #{list items:epasWrapperedPerson.value.contracts, as:'contract'}
+              #{if !contract.isProperSynchronized()}
+                <span class="label label-primary">${contract.beginDate}</span>
+	            <span class="label label-primary">${contract.endDate}</span>
+	            <span class="label label-danger">${contract.endContract}</span>
+	            <i class="fa fa-times text-danger" aria-hidden="true"
+		           popover-hover-2 data-content="Contratto non associato."></i> 
+              #{/if}
+            #{/list}
+          </td>
+        </tr>
+      #{/if}
+  	#{/list}
+  </tbody>
+  </table>
 </div>
 
 

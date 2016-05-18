@@ -261,7 +261,7 @@ public class SynchDiagnostic {
    */
   private boolean contractEquals(Contract epasContract, Contract perseoContract) {
     
-    if (epasContract.perseoId != perseoContract.perseoId) {
+    if (!epasContract.perseoId.equals(perseoContract.perseoId)) {
       return false;
     }
     
@@ -280,7 +280,7 @@ public class SynchDiagnostic {
       // Unico caso in cui comanda il dato in epas che è corretto.
       return true;
     }
-    if (!epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd())) {
+    if (epasContract.calculatedEnd() != null && !epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd())) {
       return false;
     }
     return true;
