@@ -36,6 +36,9 @@ public class ReportCentre extends Controller {
         .fromJson(new InputStreamReader(request.body), ReportData.class);
 
     ReportMailer.feedback(data, session, Security.getUser());
+    if (Security.getUser().isPresent()) {
+      OilMailer.sendFeedbackToOil(data, session, Security.getUser().get());
+    }
   }
 
 
