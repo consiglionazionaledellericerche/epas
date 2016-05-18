@@ -10,10 +10,10 @@
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
     <li #{if _activeAction.equals("institutes")} class="active" #{/if}>
-      <a href="@{Synchronizations.institutes()}">Sedi Epas</a>
+      <a href="@{Synchronizations.institutes()}">Sedi Perseo</a>
     </li>
-    <li #{if _activeAction.equals("otherInstitutes")} class="active" #{/if}>
-      <a href="@{Synchronizations.otherInstitutes()}">Altre Sedi Perseo</a>
+    <li #{if _activeAction.equals("oldInstitutes")} class="active" #{/if}>
+      <a href="@{Synchronizations.oldInstitutes()}">Altre Sedi Epas Non Sincronizzate</a>
     </li>
   </ul>
 </div>

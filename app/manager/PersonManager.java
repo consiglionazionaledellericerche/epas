@@ -75,7 +75,7 @@ public class PersonManager {
 
     MonthDay patron = (MonthDay)configurationManager
         .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
-    
+
     if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
       return true;
     }
@@ -150,7 +150,7 @@ public class PersonManager {
         AbsenceType.find(
             "Select abt from AbsenceType abt, Absence ab, PersonDay pd where ab.personDay = pd "
                 + "and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?",
-            person, beginMonth, endMonth).fetch();
+                person, beginMonth, endMonth).fetch();
     Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
     int index = 0;
     for (AbsenceType abt : abtList) {
@@ -171,17 +171,28 @@ public class PersonManager {
   /**
    * @return il numero di giorni lavorati in sede.
    */
-  public int basedWorkingDays(List<PersonDay> personDays) {
+  public int basedWorkingDays(List<PersonDay> personDays, 
+      List<Contract> contracts, LocalDate end) {
 
     int basedDays = 0;
+    
     for (PersonDay pd : personDays) {
-
-      IWrapperPersonDay day = wrapperFactory.create(pd);
-      boolean fixed = day.isFixedTimeAtWork();
 
       if (pd.isHoliday) {
         continue;
       }
+      boolean find = false;
+      for (Contract contract : contracts) {
+        if (DateUtility.isDateIntoInterval(pd.date, contract.periodInterval())) {         
+          find = true;
+        }        
+      }
+      
+      if (!find) {
+        continue;
+      }
+      IWrapperPersonDay day = wrapperFactory.create(pd);
+      boolean fixed = day.isFixedTimeAtWork();
 
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
@@ -189,7 +200,9 @@ public class PersonManager {
           && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
       }
+
     }
+
     return basedDays;
   }
 
