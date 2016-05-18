@@ -99,8 +99,10 @@ public class PersonStampingRecap {
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate end = begin.dayOfMonth().withMaximumValue();
 
+
     List<PersonDay> personDays = personDayDao.getPersonDayInPeriod(person, begin,
         Optional.fromNullable(end));
+    
 
     this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager
         .getMaximumCoupleOfStampings(personDays));
@@ -194,8 +196,9 @@ public class PersonStampingRecap {
 
     this.numberOfCompensatoryRestUntilToday = personManager
         .numberOfCompensatoryRestUntilToday(person, year, month);
-
-    this.basedWorkingDays = personManager.basedWorkingDays(personDays);
+    
+    
+    this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
 
   }
