@@ -41,6 +41,8 @@ import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import security.SecurityRules;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,6 +64,8 @@ public class Absences extends Controller {
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static AbsenceTypeManager absenceTypeManager;
+  @Inject
+  private static SecurityRules rules;
 
   @BasicAuth
   public static void absencesInPeriod(String email, LocalDate begin, LocalDate end) {
@@ -70,6 +74,9 @@ public class Absences extends Controller {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
+    
+    rules.checkIfPermitted(person.user);
+    
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -98,6 +105,9 @@ public class Absences extends Controller {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
+    
+    rules.checkIfPermitted(person.user);
+    
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -132,6 +142,9 @@ public class Absences extends Controller {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
+    
+    rules.checkIfPermitted(person.get().user);
+    
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -181,6 +194,9 @@ public class Absences extends Controller {
     if (person == null) {
       JsonResponse.notFound("Persona con perseoId " + personPerseoId + " non trovata.");
     }
+    
+    rules.checkIfPermitted(person.user);
+    
     Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
     if (!absenceType.isPresent()) {
       JsonResponse.notFound("Codice Assenza non trovato.");
@@ -234,6 +250,9 @@ public class Absences extends Controller {
     if (person == null) {
       JsonResponse.notFound("Persona con perseoId " + personPerseoId + " non trovata.");
     }
+    
+    rules.checkIfPermitted(person.user);
+    
     Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
     if (!absenceType.isPresent()) {
       JsonResponse.notFound("Codice Assenza non trovato.");
