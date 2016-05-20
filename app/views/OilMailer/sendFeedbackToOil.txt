@@ -1,4 +1,3 @@
-Descrizione:
 ${data.note}
 
 URL: ${data.url}
