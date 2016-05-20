@@ -64,7 +64,7 @@ epas:
 #    - LOG_LEVEL=                            # default: INFO
 #    - LOG_ON_FILE=                          # default: false (true, false)
 #    - JOBS_ACTIVE=false                     # default: true. Se impostato a false disabilita l'esecuzione di tutti i job
-
+#    - OIL_ENABLED=true                      # default: false. Se impostato abilita l'invio delle segnalazioni ad OIL	
   links:
     - postgres
 

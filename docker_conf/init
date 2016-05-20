@@ -116,6 +116,12 @@ else
   sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${OIL_ENABLED}" ]; then
+  sed -n '/OIL_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{OIL_ENABLED}}#'"${OIL_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ -z "${PERSEO_BASE}" ]; then
   sed -n '/PERSEO_BASE/!p' -i ${APP_HOME}/conf/prod.conf
 else
