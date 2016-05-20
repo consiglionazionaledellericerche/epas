@@ -30,7 +30,7 @@ public class DarkNightJob extends Job {
   public void doJob() {
 
     //in modo da inibire l'esecuzione dei job in base alla configurazione
-    if ("false".equals(Play.configuration.getProperty(JOBS_CONF))) {
+    if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("DarkNightJob Interrotto. Disattivato dalla configurazione.");
       return;
     }
