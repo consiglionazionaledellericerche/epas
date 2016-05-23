@@ -33,6 +33,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author marco
@@ -54,6 +55,8 @@ public class WrapperPerson implements IWrapperPerson {
   private Optional<VacationPeriod> currentVacationPeriod = null;
   private Optional<ContractStampProfile> currentContractStampProfile = null;
   private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
+  
+  private Optional<Boolean> properSynchronized = Optional.<Boolean>absent(); 
 
 
   @Inject
@@ -416,5 +419,52 @@ public class WrapperPerson implements IWrapperPerson {
   public List<PersonDay> holidyWorkingTimeDay(Integer year) {
     return personDayDao.getHolidayWorkingTime(this.value,
             Optional.fromNullable(year), Optional.<Integer>absent());
+  }
+
+  /**
+   * Diagnostiche sullo stato di sincronizzazione della persona.
+   * 
+   * Ha perseoId null oppure uno dei suoi contratti attivi o futuri ha perseoId null.
+   */
+  public boolean isProperSynchronized() {
+    
+    if (this.properSynchronized.isPresent()) {
+      return this.properSynchronized.get();
+    }
+
+    this.properSynchronized = Optional.of(false);
+    
+    if (this.value.perseoId == null) {
+      return this.properSynchronized.get();
+    }
+    
+    for (Contract contract : this.value.contracts) {
+      if (!contract.isProperSynchronized()) {
+        return this.properSynchronized.get();
+      }
+    }
+    
+    this.properSynchronized = Optional.of(true);
+    return this.properSynchronized.get();
+  }
+  
+  /**
+   * Il contratto della persona con quel perseoId.
+   * @param perseoId
+   * @return
+   */
+  public Contract perseoContract(Long perseoId) {
+    if (perseoId == null) {
+      return null;
+    }
+    for (Contract contract : this.value.contracts) {
+      if (contract.perseoId == null) {
+        continue;
+      }
+      if (contract.perseoId.equals(perseoId)) {
+        return contract;
+      }
+    }
+    return null;
   }
 }

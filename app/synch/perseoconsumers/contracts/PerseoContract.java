@@ -1,7 +1,5 @@
 package synch.perseoconsumers.contracts;
 
-import org.joda.time.LocalDate;
-
 public class PerseoContract {
 
   public Long id;

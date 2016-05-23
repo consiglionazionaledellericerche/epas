@@ -10,16 +10,11 @@
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
     <li #{if _activeAction.equals("activeContracts")} class="active" #{/if}>
-      <a href="@{Synchronizations.activeContracts(session.get("officeSelected"))}">Contratti Epas Attivi</a>
+      <a href="@{Synchronizations.activeContracts(session.get("officeSelected"))}">Contratti Perseo Attivi</a>
     </li>
-    <li #{if _activeAction.equals("otherContracts")} class="active" #{/if}>
-      <a href="@{Synchronizations.otherContracts(session.get("officeSelected"))}">Altri Contratti Perseo Attivi</a>
+    <li #{if _activeAction.equals("oldActiveContracts")} class="active" #{/if}>
+      <a href="@{Synchronizations.oldActiveContracts(session.get("officeSelected"))}">Contratti Epas Attivi Non Sincronizzati</a>
     </li>
-    *{
-    <li #{if _activeAction.equals("otherContracts")} class="active" #{/if}>
-      <a href="@{Synchronizations.otherContracts(session.get("officeSelected"))}">Contratti Sincronizzati</a>
-    </li>
-    }*
   </ul>
 </div>
 <br>

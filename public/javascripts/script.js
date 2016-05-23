@@ -196,6 +196,11 @@ $(function($) {
       placement: 'right auto',
       container: 'body'
     });
+    $('[popover-hover-2]').popover({	/*per non avere il cambio di sfondo */
+        trigger: "hover",
+        placement: 'top auto',
+        container: 'body'
+      });
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [

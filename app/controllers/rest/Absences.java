@@ -29,6 +29,7 @@ import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 
 import models.Absence;
+import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -39,6 +40,8 @@ import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import security.SecurityRules;
 
 import java.util.List;
 
@@ -61,6 +64,8 @@ public class Absences extends Controller {
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static AbsenceTypeManager absenceTypeManager;
+  @Inject
+  private static SecurityRules rules;
 
   @BasicAuth
   public static void absencesInPeriod(String email, LocalDate begin, LocalDate end) {
@@ -69,6 +74,9 @@ public class Absences extends Controller {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
+    
+    rules.checkIfPermitted(person.office);
+    
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -97,6 +105,9 @@ public class Absences extends Controller {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
+    
+    rules.checkIfPermitted(person.office);
+    
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -123,13 +134,17 @@ public class Absences extends Controller {
   }
 
   @BasicAuth
-  public static void checkAbsence(String email, String absenceCode,
-                                  LocalDate begin, LocalDate end) throws JsonProcessingException {
+  public static void checkAbsence(String email, String absenceCode, LocalDate begin, LocalDate end) 
+      throws JsonProcessingException {
+    
     Optional<Person> person = personDao.byEmail(email);
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
+    
+    rules.checkIfPermitted(person.get().office);
+    
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -158,5 +173,125 @@ public class Absences extends Controller {
               .writeValueAsString(air.getAbsences()));
     }
   }
+  
+  @BasicAuth
+  public static void checkAbsenceByPerseoId(Long personPerseoId, String absenceCode, 
+      LocalDate begin, LocalDate end) throws JsonProcessingException {
+    
+    //Bad request
+    if (personPerseoId == null) {
+      JsonResponse.badRequest("personPerseoId null");
+    }
+    if (begin == null || end == null || begin.isAfter(end)) {
+      JsonResponse.badRequest("Date non valide");
+    }
+    if (absenceCode == null) {
+      JsonResponse.badRequest("absenceCode null");
+    }
+    
+    //Not found
+    Person person = personDao.getPersonByPerseoId(personPerseoId);
+    if (person == null) {
+      JsonResponse.notFound("Persona con perseoId " + personPerseoId + " non trovata.");
+    }
+    
+    rules.checkIfPermitted(person.office);
+    
+    Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
+    if (!absenceType.isPresent()) {
+      JsonResponse.notFound("Codice Assenza non trovato.");
+    }
+    
+    Optional<Contract> contract = wrapperFactory
+            .create(person).getCurrentContract();
+    Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
+            .getContractMonthRecap(new YearMonth(end.getYear(),
+                    end.getMonthOfYear()));
 
+    if (!recap.isPresent()) {
+      JsonResponse.notFound("Impossibile completare la richiesta" + person.name + " "
+              + person.surname + " da cui prender le informazioni per il calcolo");
+    }
+
+    AbsenceInsertReport air = absenceManager.insertAbsenceSimulation(
+            person, begin, Optional.fromNullable(end), absenceType.get(),
+            Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
+
+    renderJSON(mapper.writer(JacksonModule.filterProviderFor(SimpleBeanPropertyFilter
+            .serializeAllExcept("absenceAdded"))).writeValueAsString(air.getAbsences()));
+
+  }
+
+  /**
+   * TODO: o tutte o nessuna ?...
+   * @param personPerseoId
+   * @param absenceCode
+   * @param begin
+   * @param end
+   * @throws JsonProcessingException
+   */
+  @BasicAuth
+  public static void insertAbsenceByPerseoId(Long personPerseoId, String absenceCode, 
+      LocalDate begin, LocalDate end) throws JsonProcessingException {
+    
+    //Bad request
+    if (personPerseoId == null) {
+      JsonResponse.badRequest("personPerseoId null");
+    }
+    if (begin == null || end == null || begin.isAfter(end)) {
+      JsonResponse.badRequest("Date non valide");
+    }
+    if (absenceCode == null) {
+      JsonResponse.badRequest("absenceCode null");
+    }
+    
+    //Not found
+    Person person = personDao.getPersonByPerseoId(personPerseoId);
+    if (person == null) {
+      JsonResponse.notFound("Persona con perseoId " + personPerseoId + " non trovata.");
+    }
+    
+    rules.checkIfPermitted(person.office);
+    
+    Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
+    if (!absenceType.isPresent()) {
+      JsonResponse.notFound("Codice Assenza non trovato.");
+    }
+    
+    Optional<Contract> contract = wrapperFactory
+            .create(person).getCurrentContract();
+    Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
+            .getContractMonthRecap(new YearMonth(end.getYear(),
+                    end.getMonthOfYear()));
+
+    if (!recap.isPresent()) {
+      JsonResponse.notFound("Impossibile completare la richiesta" + person.name + " "
+              + person.surname + " da cui prender le informazioni per il calcolo");
+    }
+
+    try {
+      AbsenceInsertReport air = absenceManager
+          .insertAbsenceRecompute(person, begin, Optional.fromNullable(end), absenceType.get(),
+              Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
+
+      List<AbsenceAddedRest> absencesAdded = Lists.newArrayList();
+      for (AbsencesResponse absenceResponse : air.getAbsences()) {
+        AbsenceAddedRest absenceAddedRest = new AbsenceAddedRest();
+        absenceAddedRest.absenceCode = absenceResponse.getAbsenceCode();
+        absenceAddedRest.date = absenceResponse.getDate().toString();
+        absenceAddedRest.isOk = absenceResponse.isInsertSucceeded();
+        absenceAddedRest.reason = absenceResponse.getWarning();
+        absencesAdded.add(absenceAddedRest);
+      }
+      renderJSON(absencesAdded);
+      renderJSON(mapper.writer(JacksonModule.filterProviderFor(SimpleBeanPropertyFilter
+          .serializeAllExcept("absenceAdded"))).writeValueAsString(air.getAbsences()));
+      
+    } catch (Exception e) {
+      JsonResponse.badRequest("Errore nei parametri passati al server");
+    }
+
+  }
+
+  
 }
