@@ -75,7 +75,7 @@ public class Absences extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
     
-    rules.checkIfPermitted(person.user);
+    rules.checkIfPermitted(person.office);
     
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -106,7 +106,7 @@ public class Absences extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
     
-    rules.checkIfPermitted(person.user);
+    rules.checkIfPermitted(person.office);
     
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -143,7 +143,7 @@ public class Absences extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
     
-    rules.checkIfPermitted(person.get().user);
+    rules.checkIfPermitted(person.get().office);
     
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -195,7 +195,7 @@ public class Absences extends Controller {
       JsonResponse.notFound("Persona con perseoId " + personPerseoId + " non trovata.");
     }
     
-    rules.checkIfPermitted(person.user);
+    rules.checkIfPermitted(person.office);
     
     Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
     if (!absenceType.isPresent()) {
@@ -251,7 +251,7 @@ public class Absences extends Controller {
       JsonResponse.notFound("Persona con perseoId " + personPerseoId + " non trovata.");
     }
     
-    rules.checkIfPermitted(person.user);
+    rules.checkIfPermitted(person.office);
     
     Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
     if (!absenceType.isPresent()) {
