@@ -1,0 +1,9 @@
+${data.note}
+
+URL: ${data.url}
+Utente: ${user}
+Sede: ${user.person.office}
+User Agent: ${data.browser.userAgent}
+#{list items:session.all(), as:'item'}Session.${item.key}: ${item.value}#{/list}
+
+Utente: ${user.person.name} ${user.person.surname}  Email: ${user.person.email}  Data: ${new Date().format('dd.MM.yyyy (hh:mm:ss)')}

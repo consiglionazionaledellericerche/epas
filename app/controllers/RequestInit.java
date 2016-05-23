@@ -45,6 +45,7 @@ public class RequestInit extends Controller {
   static TemplateUtility templateUtility;
   @Inject
   static UsersRolesOfficesDao uroDao;
+ 
 
   @Before(priority = 1)
   static void injectUtility() {
@@ -239,9 +240,9 @@ public class RequestInit extends Controller {
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Synchronizations.people",
-        "Synchronizations.otherPeople",
+        "Synchronizations.oldPeople",
         "Synchronizations.activeContracts",
-        "Synchronizations.otherContracts",
+        "Synchronizations.oldActiveContracts",
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications");

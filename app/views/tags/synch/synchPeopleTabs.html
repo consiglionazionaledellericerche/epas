@@ -10,10 +10,13 @@
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
     <li #{if _activeAction.equals("people")} class="active" #{/if}>
-      <a href="@{Synchronizations.people(session.get("officeSelected"))}">Persone Epas</a>
+      <a href="@{Synchronizations.people(session.get("officeSelected"))}">Persone Perseo</a>
     </li>
-    <li #{if _activeAction.equals("otherPeople")} class="active" #{/if}>
-      <a href="@{Synchronizations.otherPeople(session.get("officeSelected"))}">Altre Persone Perseo</a>
+    <li #{if _activeAction.equals("oldPeople")} class="active" #{/if}>
+      <a href="@{Synchronizations.oldPeople(session.get("officeSelected"))}">Persone Epas Non Associate</a>
+    </li>
+    <li #{if _activeAction.equals("oldActiveContracts")} class="active" #{/if}>
+      <a href="@{Synchronizations.oldActiveContracts(session.get("officeSelected"))}">Contratti Epas Non Associati</a>
     </li>
   </ul>
 </div>

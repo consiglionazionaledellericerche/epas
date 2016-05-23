@@ -195,6 +195,16 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     }
     return endDate;
   }
+  
+  @Transient
+  public boolean isProperSynchronized() {
+    if (this.calculatedEnd() == null || !this.calculatedEnd().isBefore(LocalDate.now())) {
+      if (this.perseoId == null) {
+        return false;
+      }
+    }
+    return true;
+  }
 
 
 }

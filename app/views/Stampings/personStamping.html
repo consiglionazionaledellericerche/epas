@@ -24,7 +24,7 @@
       
       #{if showLink}
       <th class="group-single">Inserisci<br>timbratura</th>
-	  #{/if}
+	    #{/if}
 
       <th class="invisible"></th>
 
@@ -41,8 +41,9 @@
 	    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
 	    
 	    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+	    #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" popover-hover data-content="&{'firstDay'}"></i>#{/if}
 	    #{if showLink}
-	      #{if dayRecap.firstDay }F#{/if}
+	      
 	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), modal:'#defaultModal'} 
 	      *{ #{secure.link @Stampings.forceMealTicket(dayRecap.personDay.id), modal:'#defaultModal'} }*
 	      ${dayRecap.personDay.date.shortDayName()}

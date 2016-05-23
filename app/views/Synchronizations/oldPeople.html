@@ -1,0 +1,89 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+#{synch.synchPeopleTabs activeAction:'oldPeople' /}
+
+<div class="container">
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Persona Epas</th>
+  	  <th>Persona Perseo</th>
+	  <th>Contratto Epas</th>
+	  <th>Sincronizzata</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:wrapperedPeople, as:'wrPerson'}
+	#{if wrPerson.value.perseoId == null } 
+	<tr>
+	  <td>
+	    <span class="label label-danger">${wrPerson.value.number}</span>
+	    <span class="label label-primary">${wrPerson.value.name}</span>
+	    <span class="label label-primary">${wrPerson.value.surname}</span>
+	    <span class="label label-default">${wrPerson.value.qualification}</span>
+	    #{if wrPerson.value.perseoId == null}
+	      <a href="@{Persons.edit(wrPerson.value.id)}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+	    #{/if}
+	  </td>
+	  <td>
+	    %{ perseoPerson = perseoPeopleByNumber?.get(wrPerson.value.number) }%
+	    #{if perseoPerson}
+	      <span class="label label-danger">${perseoPerson.number}</span>
+	      <span class="label label-primary">${perseoPerson.name}</span>
+	      <span class="label label-primary">${perseoPerson.surname}</span>
+	      <span class="label label-default">${perseoPerson.qualification}</span>
+	      <span class="label label-success">${perseoPerson.perseoId}</span>
+	      #{if wrPerson.value.perseoId == null}
+	         #{if  perseoPerson.qualification != null}
+		       <!-- Associa e warning-->
+		       <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>
+		       #{if wrPerson.value.qualification == null || wrPerson.value.qualification.qualification != perseoPerson.qualification.qualification }
+		          <i class="fa fa-warning text-danger" aria-hidden="true"
+		           popover-hover-2 data-content="Le qualifiche non corrispondono..."></i> 
+		       #{/if}
+		     #{/if}
+		     #{else}
+		        <i class="fa fa-times fa-2x text-danger"
+		        popover-hover-2 data-content="Qualifica su perseo non valorizzata correttamente." 
+		        aria-hidden="true"></i>
+		     #{/else}  
+		  #{/if}
+		#{/if}
+	    #{else}
+	      <i class="fa fa-times fa-2x text-danger"
+	        popover-hover-2 data-content="Nessun suggerimento via matricola da Perseo." 
+	        aria-hidden="true"></i>
+	    #{/else}
+	  </td>
+	  <td>
+	    #{if wrPerson.currentContract.present}
+	      <span class="label label-info">Attivo</span>
+	    #{/if}
+	    #{else}
+	      <span class="label label-default">Inattivo</span>
+	    #{/else}
+	  </td>
+	  <td>
+	    #{if wrPerson.value.perseoId}
+	      <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${wrPerson.value.perseoId}"></i>
+	    #{/if}
+	  </td>		    
+
+    </tr>
+   #{/if} 
+   #{/list}
+  </tbody>
+</table>
+
+#{alert color:'info'}
+  <p>Associa tutte le persone non ancora associate. Verificare bene per tutti il join suggerito sulla base della matricola.
+    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllPersonInOffice(office.id)}">Associa</a>
+  </p>
+#{/alert}  
+</div>
+
+

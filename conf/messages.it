@@ -161,6 +161,7 @@ expireDate=Data Scadenza
 feedback.subject =EPAS - Segnalazione utente
 feedback.staff =Lo staff di EPAS
 
+firstDay= Giorno inizio contratto
 
 history.back= Indietro
 history.type= Operazione

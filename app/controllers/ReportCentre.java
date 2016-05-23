@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import helpers.deserializers.ImageToByteArrayDeserializer;
 
 import models.exports.ReportData;
-
+import play.Play;
 import play.mvc.Controller;
 
 import java.io.InputStreamReader;
@@ -36,6 +36,9 @@ public class ReportCentre extends Controller {
         .fromJson(new InputStreamReader(request.body), ReportData.class);
 
     ReportMailer.feedback(data, session, Security.getUser());
+    if ("true".equals(Play.configuration.getProperty("oil.enabled")) && Security.getUser().isPresent()) {
+      OilMailer.sendFeedbackToOil(data, session, Security.getUser().get());
+    }
   }
 
 

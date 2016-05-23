@@ -3,10 +3,10 @@
 #{set title:'ePAS - Codici di assenza' /}
 
 #{secure.checkAction 'Absences.insertCode' }
-<div class="row">
-	<a class="btn btn-primary col-sm-4 col-sm-offset-4" href="">
-	 <strong><em>Definisci nuovo codice di assenza</em></strong>
-	</a>
+<div class="row text-center">
+	#{secure.link @Absences.insertCode(), class:'btn btn-primary',fa:'plus' }
+		<em>Definisci nuovo codice di assenza</em>
+	#{/secure.link}
 </div>
 #{/secure.checkAction}
 
