@@ -214,7 +214,7 @@
 
           #{if !ip.isEmployeeVisible()}
           <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS">
-            <a style="color: red"><span class="glyphicon glyphicon-user"></span>#{if session.username == 'developer'} Admin#{/if}#{else}${session.username}#{/else} </a>
+            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
           </li>
           #{/if}
           #{if loginResponse != null}
