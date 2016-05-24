@@ -409,7 +409,12 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-
+    
+    // Se il buono pasto è forzato a no non effettuo ulteriori calcoli e ho finito ...
+    if (personDay.isTicketForcedByAdmin && !personDay.isTicketAvailable) {
+      return personDay;
+    }
+    
     // #######################################################################################
     // IL PRANZO E' SERVITOOOOO????
     // Questa parte determina se il buono pasto è ottenuto e la eventuale quantità decurtata
