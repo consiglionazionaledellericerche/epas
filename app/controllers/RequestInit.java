@@ -196,7 +196,8 @@ public class RequestInit extends Controller {
         "MealTickets.recapMealTickets",
         "Certifications.certifications",
         "Certifications.processAll",
-        "Certifications.emptyCertifications");
+        "Certifications.emptyCertifications",
+        "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -245,7 +246,8 @@ public class RequestInit extends Controller {
         "Synchronizations.oldActiveContracts",
         "Certifications.certifications",
         "Certifications.processAll",
-        "Certifications.emptyCertifications");
+        "Certifications.emptyCertifications",
+        "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
@@ -284,7 +286,8 @@ public class RequestInit extends Controller {
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Certifications.certifications",
-        "Certifications.processAll");
+        "Certifications.processAll",
+        "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",

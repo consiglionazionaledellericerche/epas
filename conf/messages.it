@@ -222,6 +222,9 @@ note= Note
 notify.error =Attenzione
 notify.success =Ok
 
+notSentToAttestati= le ore di formazione sono state inserite dopo l'ultima validazione degli attestati o non sono ancora state inviate ad attestati. 
+sentToAttestati= le ore di formazione sono state inviate correttamente ad attestati.
+
 office.address=Indirizzo
 office.code= Codice
 office.codeId= Sede Id

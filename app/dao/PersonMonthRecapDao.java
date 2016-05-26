@@ -8,6 +8,7 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.CertificatedData;
+import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.query.QCertificatedData;
@@ -76,6 +77,23 @@ public class PersonMonthRecapDao extends DaoBase {
               .andAnyOf(personMonthRecap.fromDate.loe(begin).and(personMonthRecap.toDate.goe(end)),
                         personMonthRecap.fromDate.loe(end)
                         .and(personMonthRecap.toDate.goe(end))))));
+    return query.list(personMonthRecap);
+  }
+  
+  /**
+   * 
+   * @param year
+   * @param month
+   * @param office
+   * @return la lista dei personMonthRecap di tutte le persone che appartengono all'ufficio
+   * office nell'anno year e nel mese month passati come parametro.
+   */
+  public List<PersonMonthRecap> getPeopleMonthRecaps(Integer year, Integer month, Office office) {
+    QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+    final JPQLQuery query = getQueryFactory().from(personMonthRecap)
+        .where(personMonthRecap.month.eq(month)
+            .and(personMonthRecap.year.eq(year)
+                .and(personMonthRecap.person.office.eq(office))));
     return query.list(personMonthRecap);
   }
 

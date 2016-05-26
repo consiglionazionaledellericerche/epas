@@ -1,5 +1,9 @@
 package models;
 
+import com.google.common.base.MoreObjects;
+
+import manager.attestati.dto.show.SeatCertification.PersonCertification;
+
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
@@ -59,6 +63,15 @@ public class PersonMonthRecap extends BaseModel {
     this.month = month;
   }
   
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(PersonMonthRecap.class)
+        .add("person", person.fullName())
+        .add("matricola", person.number)
+        .add("year", year)
+        .add("month", month)        
+        .toString();
+  }
   /**
    * Ritorna true se le ore si riferiscono al mese attuale od al mese precedente 
    * e non sono ancora state approvate.

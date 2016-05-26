@@ -180,6 +180,9 @@ public class SwitchTemplate extends Controller {
     if (action.equals("Certifications.emptyCertifications")) {
       Certifications.certifications(officeId, year, month); //Voluto. Lo switch non svuota.
     }
+    if (action.equals("PersonMonths.visualizePeopleTrainingHours")) {
+      PersonMonths.visualizePeopleTrainingHours(year, month, officeId);
+    }
 
   }
 

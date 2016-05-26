@@ -69,6 +69,8 @@
        #{if ip.viewPersonDay }
        <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
          session.get("monthSelected"))}">Stampa Cartellino</a></li>
+       <li><a href="@{PersonMonths.visualizePeopleTrainingHours(session.get("yearSelected"),
+         session.get("monthSelected"), session.get("officeSelected") )}">Ore di formazione</a></li>
        <li><a href="@{Charts.indexCharts()}">Utility</a></li>
        #{/if}
        
