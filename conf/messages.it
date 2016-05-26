@@ -224,6 +224,8 @@ notify.success =Ok
 
 notSentToAttestati= le ore di formazione sono state inserite dopo l'ultima validazione degli attestati o non sono ancora state inviate ad attestati. 
 sentToAttestati= le ore di formazione sono state inviate correttamente ad attestati.
+errorsInSendingToOldAttestati= Ci sono stati errori nell'invio dei dati al vecchio attestati. Controllare tra i certificated_data.
+errorsInSendingToNewAttestati= Ci sono stati dei problemi nell'invio delle informazioni al nuovo attestati. Controllare tra i certifications.
 
 office.address=Indirizzo
 office.code= Codice
