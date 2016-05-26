@@ -1,22 +1,77 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
+import dao.CertificationDao;
 import dao.PersonMonthRecapDao;
 
+import manager.recaps.trainingHours.DayAndHourRecap;
+import manager.recaps.trainingHours.TrainingHoursRecap;
+
+import models.AbsenceType;
+import models.CertificatedData;
+import models.Certification;
 import models.Person;
 import models.PersonMonthRecap;
+import models.enumerate.CertificationType;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 public class PersonMonthsManager {
 
+  private static final String SPLIT = " ";
+  private static final String SPLIT_SUBELEMENT_CERTIFICATION = ";";
+  private static final String SPLIT_SUBELEMENT_CERTIFICATED_DATA = ",";
+  private static final String TRAINING_HOURS = "Ore di formazione";
+
+  private static final Logger log = LoggerFactory.getLogger(PersonMonthsManager.class);
+
+  private final PersonMonthRecapDao personMonthRecapDao;  
+  private final CertificationDao certificationDao;
+
+  public Comparator<Person> personNameComparator = new Comparator<Person>() {
+
+    public int compare(Person person1, Person person2) {
+
+      String name1 = person1.surname.toUpperCase();
+      String name2 = person2.surname.toUpperCase();
+
+      if (name1.equals(name2)) {
+        return person1.name.toUpperCase().compareTo(person2.name.toUpperCase());
+      }
+      return name1.compareTo(name2);
+
+    }
+
+  };
+  public Comparator<String> stringComparator = new Comparator<String>() {
+
+    public int compare(String string1, String string2) {
+      return string1.compareTo(string2);
+
+    }
+
+  };
+
+
   @Inject
-  private PersonMonthRecapDao personMonthRecapDao;
+  public PersonMonthsManager(PersonMonthRecapDao personMonthRecapDao, 
+      CertificationDao certificationDao) {
+    this.certificationDao = certificationDao;
+    this.personMonthRecapDao = personMonthRecapDao;
+  }
 
   /**
    * salva le ore di formazione per il periodo specificato.
@@ -51,7 +106,7 @@ public class PersonMonthsManager {
         || value > 24 * (endDate.getDayOfMonth() - beginDate.getDayOfMonth() + 1)) {
       rr.message =
           "Non sono valide le ore di formazione negative, testuali o che superino la quantità "
-          + "massima di ore nell'intervallo temporale inserito.";
+              + "massima di ore nell'intervallo temporale inserito.";
       rr.result = false;
     }
     return rr;
@@ -63,12 +118,12 @@ public class PersonMonthsManager {
    */
   public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month,
       LocalDate beginDate, LocalDate endDate) {
-    
+
     List<PersonMonthRecap> pmList = personMonthRecapDao
         .getPersonMonthRecaps(person, year, month, beginDate, endDate);
-    
+
     Insertable rr = new Insertable(true, "");
-    
+
     if (pmList != null && pmList.size() > 0) {
       rr.message = "Esiste un periodo di ore di formazione "
           + "che contiene uno o entrambi i giorni specificati.";
@@ -91,7 +146,7 @@ public class PersonMonthsManager {
     if (list.size() > 0) {
       rr.message =
           "Impossibile inserire ore di formazione per il mese precedente poichè gli "
-          + "attestati per quel mese sono già stati inviati";
+              + "attestati per quel mese sono già stati inviati";
       rr.result = false;
 
     }
@@ -130,5 +185,140 @@ public class PersonMonthsManager {
       return this.result;
     }
   }
+
+  /**
+   * 
+   * @param personList la lista di persone
+   * @param year l'anno
+   * @param month il mese
+   * @return la mappa contenente per ogni persona la propria situazione in termini di ore di
+   *     formazione approvate o no.
+   */
+  public Table<Person, String, List<TrainingHoursRecap>> createTable(
+      List<Person> personList, int year, int month) {
+
+    Table<Person, String, List<TrainingHoursRecap>> table =
+        TreeBasedTable.create(personNameComparator, stringComparator);
+
+    for (Person person : personList) {
+
+      List<TrainingHoursRecap> listHourRecap = Lists.newArrayList();
+
+      List<PersonMonthRecap> pmrList = personMonthRecapDao
+          .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+              Optional.fromNullable(month), Optional.<Boolean>absent());
+      boolean foundCertification = false;
+      if (!pmrList.isEmpty()) {
+
+        for (PersonMonthRecap pmr : pmrList) {
+
+          TrainingHoursRecap recap = null;
+          List<Certification> certifications = certificationDao
+              .personCertificationsByType(person, year, month, CertificationType.FORMATION);
+          if (!certifications.isEmpty()) {            
+            /**
+             * sono stati inviati i dati con nuovo attestati e stanno su certifications
+             */
+            for (Certification cert : certifications) {
+              if (!cert.content.equals("") && !cert.containProblems()) {
+                foundCertification = true;
+                List<DayAndHourRecap> list = parseTrainingHourString(cert.content, 
+                    SPLIT, SPLIT_SUBELEMENT_CERTIFICATION, year, month);
+                for (DayAndHourRecap dhr : list) {
+                  if (pmr.trainingHours.equals(dhr.trainingHours) 
+                      && pmr.fromDate.isEqual(dhr.begin) 
+                      && pmr.toDate.isEqual(dhr.end)) {
+                    recap = new TrainingHoursRecap(person, dhr.trainingHours, 
+                        dhr.begin, dhr.end, pmr.hoursApproved);
+                    listHourRecap.add(recap); 
+                  }                                
+                }
+              } else {
+                log.info("Ci sono stati dei problemi nell'invio delle informazioni "
+                    + "al nuovo attestati. Controllare tra i certifications.");
+              }
+            }
+          } else {
+            /**
+             * controllo se stanno tra i certificated data, vecchia implementazione
+             */
+            CertificatedData data = personMonthRecapDao
+                .getPersonCertificatedData(person, month, year);
+            if (data != null) {
+              /**
+               * se non è nullo verifico che sia stato inviato e approvato ad attestati
+               * il trainingHour
+               */
+              if (data.trainingHoursSent != null && data.problems == null && data.isOk) {
+                foundCertification = true;
+                List<DayAndHourRecap> list = parseTrainingHourString(data.trainingHoursSent, 
+                    SPLIT, SPLIT_SUBELEMENT_CERTIFICATED_DATA, year, month);
+                for (DayAndHourRecap dhr : list) {
+                  if (pmr.trainingHours.equals(dhr.trainingHours) 
+                      && pmr.fromDate.isEqual(dhr.begin) 
+                      && pmr.toDate.isEqual(dhr.end)) {
+                    recap = new TrainingHoursRecap(person, dhr.trainingHours, 
+                        dhr.begin, dhr.end, pmr.hoursApproved);
+                    listHourRecap.add(recap);  
+                  }                  
+                }                
+              } else {
+                log.info("Ci sono stati errori nell'invio dei dati al vecchio attestati. "
+                    + "Controllare tra i certificated_data.");
+              }
+            } 
+          }
+          if (!foundCertification) {
+            /**
+             * i dati non sono stati inviati ad attestati, li evidenzio come non approvati.
+             */
+            recap = new TrainingHoursRecap(person, pmr.trainingHours, 
+                pmr.fromDate, pmr.toDate, pmr.hoursApproved);
+            listHourRecap.add(recap); 
+          }         
+        }        
+      } else {
+        log.info("La persona {} {} non ha ore di formazione per questo mese", 
+            person.name, person.surname);
+      }
+      table.put(person, TRAINING_HOURS, listHourRecap);
+    }
+    return table;
+  }
+
+  /**
+   * 
+   * @param string la stringa da parsare
+   * @param year l'anno
+   * @param month il mese
+   * @return la lista di dayhourrecap da passare al chiamante.
+   */
+  private List<DayAndHourRecap> parseTrainingHourString(String string, String split, 
+      String subSplit, int year, int month) {
+    List<DayAndHourRecap> list = Lists.newArrayList();
+    String[] tokens = separateTrainingHours(string, split);
+
+    for (int i = 0; i < tokens.length; i++) {
+      DayAndHourRecap dhr = new DayAndHourRecap();
+      String[] elements = tokens[i].split(subSplit);
+      dhr.begin = new LocalDate(year, month, new Integer(elements[0]));
+      dhr.end = new LocalDate(year, month, new Integer(elements[1]));
+      dhr.trainingHours = new Integer(elements[2].substring(0, 1));
+      list.add(dhr);      
+    }
+    return list;
+  }
+
+  /**
+   * 
+   * @param string la stringa da splittare
+   * @return un array di stringhe contenenti ciascuna una stringa nel formato 
+   "orediformazione;giornoinizio;giornofine".
+   */
+  private String[] separateTrainingHours(String string, String split) {
+    String[] elements = string.split(split);
+    return elements;
+  }
+
 
 }

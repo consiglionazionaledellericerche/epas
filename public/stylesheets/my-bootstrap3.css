@@ -414,11 +414,23 @@ td.default-single > i.fa-spinner{
 
 *[popover-hover]:hover  {
 	cursor: help;
+	
+}
+
+td[popover-hover]:hover {
 	background: #F1F1F1;
 }
 
 
 @keyframes blinker {
  50% { opacity: 0.0; }
+}
+
+i[green] {
+	color: green;
+}
+
+i[red] {
+	color: red;
 }
 
