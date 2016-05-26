@@ -23,6 +23,8 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.i18n.Messages;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -234,8 +236,7 @@ public class PersonMonthsManager {
                   }                                
                 }
               } else {
-                log.info("Ci sono stati dei problemi nell'invio delle informazioni "
-                    + "al nuovo attestati. Controllare tra i certifications.");
+                log.info(Messages.get("errorsInSendingToNewAttestati"));
               }
             }
           } else {
@@ -263,8 +264,7 @@ public class PersonMonthsManager {
                   }                  
                 }                
               } else {
-                log.info("Ci sono stati errori nell'invio dei dati al vecchio attestati. "
-                    + "Controllare tra i certificated_data.");
+                log.info(Messages.get("errorsInSendingToOldAttestati"));
               }
             } 
           }
