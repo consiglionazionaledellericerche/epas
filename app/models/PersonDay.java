@@ -217,9 +217,9 @@ public class PersonDay extends BaseModel {
   public String toString() {
     return String.format(
         "PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, "
-            + "modificationType = %s, progressive = %s, timeAtWork = %s",
-        id, person.id, date, difference, isTicketAvailable, stampModificationType,
-        progressive, timeAtWork);
+        + "isTicketForcedByAdmin = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
+        id, person.id, date, difference, isTicketAvailable, isTicketForcedByAdmin, 
+        stampModificationType, progressive, timeAtWork);
   }
 
 }
