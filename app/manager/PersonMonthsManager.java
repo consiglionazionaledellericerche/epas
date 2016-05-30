@@ -196,94 +196,20 @@ public class PersonMonthsManager {
    * @return la mappa contenente per ogni persona la propria situazione in termini di ore di
    *     formazione approvate o no.
    */
-  public Table<Person, String, List<TrainingHoursRecap>> createTable(
+  public Map<Person, List<PersonMonthRecap>> createMap(
       List<Person> personList, int year, int month) {
 
-    Table<Person, String, List<TrainingHoursRecap>> table =
-        TreeBasedTable.create(personNameComparator, stringComparator);
-
+    Map<Person, List<PersonMonthRecap>> map = Maps.newHashMap();
     for (Person person : personList) {
-
-      List<TrainingHoursRecap> listHourRecap = Lists.newArrayList();
 
       List<PersonMonthRecap> pmrList = personMonthRecapDao
           .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
               Optional.fromNullable(month), Optional.<Boolean>absent());
-      boolean foundCertification = false;
       if (!pmrList.isEmpty()) {
-
-        for (PersonMonthRecap pmr : pmrList) {
-
-          TrainingHoursRecap recap = null;
-          List<Certification> certifications = certificationDao
-              .personCertificationsByType(person, year, month, CertificationType.FORMATION);
-          if (!certifications.isEmpty()) {            
-            /**
-             * sono stati inviati i dati con nuovo attestati e stanno su certifications
-             */
-            for (Certification cert : certifications) {
-              if (!cert.content.equals("") && !cert.containProblems()) {
-                foundCertification = true;
-                List<DayAndHourRecap> list = parseTrainingHourString(cert.content, 
-                    SPLIT, SPLIT_SUBELEMENT_CERTIFICATION, year, month);
-                for (DayAndHourRecap dhr : list) {
-                  if (pmr.trainingHours.equals(dhr.trainingHours) 
-                      && pmr.fromDate.isEqual(dhr.begin) 
-                      && pmr.toDate.isEqual(dhr.end)) {
-                    recap = new TrainingHoursRecap(person, dhr.trainingHours, 
-                        dhr.begin, dhr.end, pmr.hoursApproved);
-                    listHourRecap.add(recap); 
-                  }                                
-                }
-              } else {
-                log.info(Messages.get("errorsInSendingToNewAttestati"));
-              }
-            }
-          } else {
-            /**
-             * controllo se stanno tra i certificated data, vecchia implementazione
-             */
-            CertificatedData data = personMonthRecapDao
-                .getPersonCertificatedData(person, month, year);
-            if (data != null) {
-              /**
-               * se non è nullo verifico che sia stato inviato e approvato ad attestati
-               * il trainingHour
-               */
-              if (data.trainingHoursSent != null && data.problems == null && data.isOk) {
-                foundCertification = true;
-                List<DayAndHourRecap> list = parseTrainingHourString(data.trainingHoursSent, 
-                    SPLIT, SPLIT_SUBELEMENT_CERTIFICATED_DATA, year, month);
-                for (DayAndHourRecap dhr : list) {
-                  if (pmr.trainingHours.equals(dhr.trainingHours) 
-                      && pmr.fromDate.isEqual(dhr.begin) 
-                      && pmr.toDate.isEqual(dhr.end)) {
-                    recap = new TrainingHoursRecap(person, dhr.trainingHours, 
-                        dhr.begin, dhr.end, pmr.hoursApproved);
-                    listHourRecap.add(recap);  
-                  }                  
-                }                
-              } else {
-                log.info(Messages.get("errorsInSendingToOldAttestati"));
-              }
-            } 
-          }
-          if (!foundCertification) {
-            /**
-             * i dati non sono stati inviati ad attestati, li evidenzio come non approvati.
-             */
-            recap = new TrainingHoursRecap(person, pmr.trainingHours, 
-                pmr.fromDate, pmr.toDate, pmr.hoursApproved);
-            listHourRecap.add(recap); 
-          }         
-        }        
-      } else {
-        log.info("La persona {} {} non ha ore di formazione per questo mese", 
-            person.name, person.surname);
-      }
-      table.put(person, TRAINING_HOURS, listHourRecap);
+        map.put(person, pmrList);
+      }      
     }
-    return table;
+    return map;
   }
 
   /**
