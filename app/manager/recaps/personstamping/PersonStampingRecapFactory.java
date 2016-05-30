@@ -35,11 +35,12 @@ public class PersonStampingRecapFactory {
   /**
    * Costruisce il riepilogo mensile delle timbrature.
    */
-  public PersonStampingRecap create(Person person, int year, int month) {
+  public PersonStampingRecap create(Person person, int year, int month, 
+      boolean considerExitingNow) {
 
     return new PersonStampingRecap(personDayManager, personDayDao,
         personManager, stampingDayRecapFactory,
-        wrapperFactory, year, month, person);
+        wrapperFactory, year, month, person, considerExitingNow);
   }
 
 }

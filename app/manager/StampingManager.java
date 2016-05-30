@@ -202,7 +202,7 @@ public class StampingManager {
 
       personDayManager.setValidPairStampings(personDay);
       daysRecap.add(stampingDayRecapFactory
-              .create(personDay, numberOfInOut, Optional.<List<Contract>>absent()));
+              .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent()));
 
     }
     return daysRecap;
