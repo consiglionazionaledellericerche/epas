@@ -209,6 +209,8 @@ $(function($) {
      placement:'auto',
      trigger:'hover',
      type:'html',
+     style:'inverse',
+     animation:'pop',
      dismissible:true,
      delay: {//show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
         show: null,
