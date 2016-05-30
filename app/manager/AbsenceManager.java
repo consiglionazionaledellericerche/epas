@@ -697,8 +697,9 @@ public class AbsenceManager {
           log.info("Rimossa assenza del {} per {}", actualDate, person.getFullname());
         }
       }
-      if (pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()) {
-        pd.delete();
+      if (pd.date.isAfter(today) && pd.absences.isEmpty() && pd.stampings.isEmpty()) {
+        //pd.delete();
+        pd.reset();
       }
       actualDate = actualDate.plusDays(1);
     }
