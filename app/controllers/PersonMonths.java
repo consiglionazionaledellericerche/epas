@@ -312,12 +312,13 @@ public class PersonMonths extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
     List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year,month));
-    Table<Person, String, List<TrainingHoursRecap>> table = TreeBasedTable
-        .create(personMonthsManager.personNameComparator,
-            personMonthsManager.stringComparator);
+//    Table<Person, String, List<TrainingHoursRecap>> table = TreeBasedTable
+//        .create(personMonthsManager.personNameComparator,
+//            personMonthsManager.stringComparator);
+//    
+//    table = personMonthsManager.createTable(personList, year, month); 
+    Map<Person, List<PersonMonthRecap>> map = personMonthsManager.createMap(personList, year, month);
     
-    table = personMonthsManager.createTable(personList, year, month);     
-    
-    render(table, year, month, office);
+    render(map, year, month, office);
   }
 }
