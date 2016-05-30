@@ -12,7 +12,7 @@
   
     #{if showLink}
 	     #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
-	      ${absence.absenceType.code}
+	      <span webui-popover-hover data-content="${absence.absenceType.description}">${absence.absenceType.code}</span>
 	      #{if absence.justifiedMinutes}
 	      ${absence.justifiedMinutes}min
 	      #{/if}
@@ -24,7 +24,7 @@
 	     #{/if}
     #{/if}
     #{else}
-      ${absence.absenceType.code}
+      <span webui-popover-hover data-content="${absence.absenceType.description}">${absence.absenceType.code}</span>
 	  #{if absence.justifiedMinutes}
 	    ${absence.justifiedMinutes}min
 	  #{/if}
