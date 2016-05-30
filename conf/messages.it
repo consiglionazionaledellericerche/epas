@@ -435,6 +435,7 @@ StampTypes.REPERIBILITA= Reperibilità
 StampTypes.INTRAMOENIA= Intramoenia
 StampTypes.GUARDIA_MEDICA= Guardia Medica
 StampTypes.PAUSA_PRANZO= Pausa Pranzo
+StampTypes.LAVORO_FUORI_SEDE= Lavoro fuori sede
 
 # Parametri di configurazione
 
