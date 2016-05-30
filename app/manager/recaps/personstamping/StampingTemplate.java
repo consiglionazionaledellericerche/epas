@@ -5,6 +5,7 @@ import manager.cache.StampTypeManager;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
+import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -22,12 +23,13 @@ public class StampingTemplate {
   public int pairId;
   public String pairPosition;            //left center right none
   public LocalDateTime date;
+  
   public String way;
-  public String hour;
-  public String markedByAdminCode;
-  public String markedByEmployeeCode;
-  public String identifier;
-  public String missingExitStampBeforeMidnightCode;
+  public String hour = "";
+  public StampModificationType markedByAdmin = null;
+  public StampModificationType markedByEmployee = null;
+  public StampModificationType missingExitStampBeforeMidnight = null;
+  public StampTypes stampType = null;
   public boolean valid;
 
   private static final String STAMPING_FORMAT = "HH:mm";
@@ -50,11 +52,6 @@ public class StampingTemplate {
 
     //stamping nulle o exiting now non sono visualizzate
     if (stamping.date == null || stamping.exitingNow) {
-      this.hour = "";
-      this.markedByAdminCode = "";
-      this.markedByEmployeeCode = "";
-      this.identifier = "";
-      this.missingExitStampBeforeMidnightCode = "";
       this.valid = true;
       setColor(stamping);
       return;
@@ -67,35 +64,29 @@ public class StampingTemplate {
     this.hour = stamping.date.toString(STAMPING_FORMAT);
 
     //timbratura di servizio
-    this.identifier = "";
     if (stamping.stampType != null) {
-      this.identifier = stamping.stampType.getIdentifier();
+      this.stampType = stamping.stampType;
     }
 
     //timbratura modificata dall'amministatore
-    this.markedByAdminCode = "";
     if (stamping.markedByAdmin) {
       StampModificationType smt = stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_ADMIN);
-      this.markedByAdminCode = smt.code;
+      this.markedByAdmin = smt;
     }
 
     //timbratura modificata dal dipendente
-    this.markedByEmployeeCode = "";
     if (stamping.markedByEmployee != null && stamping.markedByEmployee) {
       StampModificationType smt = stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_EMPLOYEE);
-      this.markedByEmployeeCode = smt.code;
+      this.markedByEmployee = smt;
     }
 
     //timbratura di mezzanotte
-    this.missingExitStampBeforeMidnightCode = "";
     if (stamping.stampModificationType != null
         && stamping.stampModificationType.code.equals(StampModificationTypeCode
         .TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
-
-      this.missingExitStampBeforeMidnightCode = stamping
-          .stampModificationType.code;
+      this.missingExitStampBeforeMidnight = stamping.stampModificationType;
     }
 
     //timbratura valida (colore cella)

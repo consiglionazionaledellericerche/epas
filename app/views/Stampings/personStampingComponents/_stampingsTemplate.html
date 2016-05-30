@@ -24,18 +24,18 @@
               class="icon-warning-sign"></i></abbr>
       #{/elseif}
 
-      #{ifnot stampingTemplate.identifier.equals("")}
-      <strong>${stampingTemplate.identifier}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.markedByAdminCode.equals("")}
-      <strong>${stampingTemplate.markedByAdminCode}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
-      <strong>${stampingTemplate.markedByEmployeeCode}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
-      <strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-      #{/ifnot}
+      #{if stampingTemplate.stampType}
+      <strong popover-hover data-content="${stampingTemplate.stampType.description}">${stampingTemplate.stampType.identifier}</strong>
+      #{/if}
+      #{if stampingTemplate.markedByAdmin}
+        <strong popover-hover data-content="${stampingTemplate.markedByAdmin.description}">${stampingTemplate.markedByAdmin.code}</strong>
+      #{/if}
+      #{if stampingTemplate.markedByEmployee}
+      <strong popover-hover data-content="${stampingTemplate.markedByEmployee.description}">${stampingTemplate.markedByEmployee.code}</strong>
+      #{/if}
+      #{if stampingTemplate.missingExitStampBeforeMidnight}
+      <strong popover-hover data-html="true" data-content="${('Ora inserita automaticamente per considerare <br>il tempo di lavoro a cavallo della mezzanotte').escape()}">${stampingTemplate.missingExitStampBeforeMidnight.code}</strong>
+      #{/if}
       <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
     </td>
     #{/list}
