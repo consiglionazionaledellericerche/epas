@@ -201,14 +201,19 @@ $(function($) {
         placement: 'top auto',
         container: 'body'
       });
+    /**
+     * Esempio utilizzo <div webui-popover-over data-url="#id"
+     * https://github.com/sandywalker/webui-popover
+     **/
     $('[webui-popover-hover]').webuiPopover({
      placement:'auto',
      trigger:'hover',
-     style:'inverse',
-     animation:'pop',
-     closeable:'true',
      type:'html',
-     dismissible:true
+     dismissible:true,
+     delay: {//show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
+        show: null,
+        hide: null
+     }
     });
     this.find('[datatable]').DataTable({
       "pageLength": 15,
