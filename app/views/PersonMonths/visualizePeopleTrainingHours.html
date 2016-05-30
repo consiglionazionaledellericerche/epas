@@ -8,46 +8,27 @@
 	<table class="table table-striped table-hover" width="100%" datatable>
 		<thead>
 			<tr>
-				<th>Nome</th>
-				<th>Ore di formazione</th>
-				<th>Approvate</th>
+				<th class="col-md-4">Nome</th>
+				<th class="center">Ore di formazione</th>
+				
 			</tr>
 		</thead>
 		<tbody>
-			#{list table.rowMap().entrySet(),as:'entry'}
-
+			#{list items:map.entrySet(), as:'key'}				
+		
 			<tr>
-				<td class="warning">${entry.getKey().surname} ${entry.getKey().name}</td>
-				#{list table.columnKeySet(),as:'col'}
-					<td data-order="${entry.getValue().get(col)}">
-						#{list items:entry.getValue().get(col), as: 'item'}
-							<strong>${item.trainingHours}</strong> ore dal <strong>${item.begin}</strong> al <strong>${item.end}</strong><br>
-						#{/list}
-					</td>
-					
-					<td data-order="${entry.getValue().get(col)}">
-						#{list items:entry.getValue().get(col), as: 'item'}
-							
-								#{if item.sentToAttestati}
-								<i class="fa fa-check" green aria-hidden="true"></i>
-								#{/if}
-								#{else}
-								
-								<i class="fa fa-times" red aria-hidden="true" ></i>
-								#{/else}
-								<br>
-						#{/list}
-					</td>
-				#{/list}
+				<td class="warning">${key.getKey().surname} ${key.getKey().name}</td>
+				
+				<td class="center" data-order="${key.getValue()}">	
+				#{list items:key.getValue(), as:'pmr'}
+					<strong>${pmr.trainingHours}</strong> ore dal <strong>${pmr.fromDate.format()}</strong> al <strong>${pmr.toDate.format()}</strong><br>
+				#{/list}	
+				</td>				
 			</tr>
 
 			#{/list}
 		</tbody>
 
 	</table>
-
-	#{alert color:'info'}
-     <p><i class="fa fa-times" red aria-hidden="true"></i> : &{'notSentToAttestati'}</p> 
-     <p><i class="fa fa-check" green aria-hidden="true"></i> : &{'sentToAttestati'}</p>  	
-    #{/alert}
+	
 </div>

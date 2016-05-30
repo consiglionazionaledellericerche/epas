@@ -201,6 +201,15 @@ $(function($) {
         placement: 'top auto',
         container: 'body'
       });
+    $('[webui-popover-hover]').webuiPopover({
+     placement:'auto',
+     trigger:'hover',
+     style:'inverse',
+     animation:'pop',
+     closeable:'true',
+     type:'html',
+     dismissible:true
+    });
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
