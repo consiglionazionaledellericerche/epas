@@ -7,8 +7,11 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.enumerate.StampTypes;
 
+import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+
+import java.util.List;
 
 /**
  * Oggetto che modella la singola timbratura nelle viste personStamping e stampings.
@@ -26,10 +29,9 @@ public class StampingTemplate {
   
   public String way;
   public String hour = "";
-  public StampModificationType markedByAdmin = null;
-  public StampModificationType markedByEmployee = null;
-  public StampModificationType missingExitStampBeforeMidnight = null;
-  public StampTypes stampType = null;
+  
+  List<StampModificationType> stampModificationTypes = Lists.newArrayList();
+
   public boolean valid;
 
   private static final String STAMPING_FORMAT = "HH:mm";
@@ -63,30 +65,21 @@ public class StampingTemplate {
 
     this.hour = stamping.date.toString(STAMPING_FORMAT);
 
-    //timbratura di servizio
-    if (stamping.stampType != null) {
-      this.stampType = stamping.stampType;
-    }
-
     //timbratura modificata dall'amministatore
     if (stamping.markedByAdmin) {
-      StampModificationType smt = stampTypeManager.getStampMofificationType(
-          StampModificationTypeCode.MARKED_BY_ADMIN);
-      this.markedByAdmin = smt;
+      stampModificationTypes.add(stampTypeManager.getStampMofificationType(
+          StampModificationTypeCode.MARKED_BY_ADMIN));
     }
 
     //timbratura modificata dal dipendente
     if (stamping.markedByEmployee != null && stamping.markedByEmployee) {
-      StampModificationType smt = stampTypeManager.getStampMofificationType(
-          StampModificationTypeCode.MARKED_BY_EMPLOYEE);
-      this.markedByEmployee = smt;
+      stampModificationTypes.add(stampTypeManager.getStampMofificationType(
+          StampModificationTypeCode.MARKED_BY_EMPLOYEE));
     }
 
     //timbratura di mezzanotte
-    if (stamping.stampModificationType != null
-        && stamping.stampModificationType.code.equals(StampModificationTypeCode
-        .TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
-      this.missingExitStampBeforeMidnight = stamping.stampModificationType;
+    if (stamping.stampModificationType != null) {
+      stampModificationTypes.add(stamping.stampModificationType);
     }
 
     //timbratura valida (colore cella)
@@ -107,6 +100,17 @@ public class StampingTemplate {
     if (!this.valid) {
       this.colour = "warn";
     }
+  }
+  
+  /**
+   * Se stampare il popover sulla stampingTemplate
+   * @return
+   */
+  public boolean showPopover() {
+    if (!stampModificationTypes.isEmpty() || stamping.stampType != null) {
+      return true;
+    }
+    return false;
   }
 
 }

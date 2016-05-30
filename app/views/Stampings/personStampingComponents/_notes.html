@@ -44,35 +44,6 @@
   #{/accordionGroup}
 #{/list}
   
-  #{accordionGroup 'notes'}
-  #{accordionItem 'accordion_notes', parent:'notes', 
-                  title:'Legenda', open:false, color:'primary'} 
- 
- 	  #{if !psDto.stampModificationTypeSet.isEmpty() }
-      <table class="table table-condensed table-bordered">
-		<tr>
-			<th width="80">Codice</th>
-			<th width="400">Descrizione</th>
-				
-		</tr>
-		#{list items:psDto.stampModificationTypeSet, as:'smt'}
-		  <tr>
-			<td>${smt.code}</td>     
-			<td>${smt.description}</td>		
-		  </tr>
-		#{/list}
-		
-		#{list stampTypeList, as:'type'}
-		  <tr>
-			<td>${type.identifier}</td>
-			<td>${type.description}</td>
-		  </tr>
-		#{/list}
-	    </table>
-       #{/if}
-  #{/accordionItem}
-  #{/accordionGroup}
-
   #{accordionGroup 'absenceRecap'}
   #{accordionItem 'accordion_absence', parent:'absenceRecap', 
                   title:'Riepilogo Assenze', open:false, color:'primary'} 
