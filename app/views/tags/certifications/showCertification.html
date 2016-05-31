@@ -25,7 +25,7 @@
     <span class="label label-success" webui-popover-hover data-content="<strong>OK</strong> elemento presente su ePAS e caricato in attestati.">Ok</span>
   #{/if}
   #{if _type.equals('toSend') }
-    <span class="label label-primary">Da Inviare</span>
+    <span class="label label-primary" webui-popover-hover data-content="<strong>Da Inviare</strong> elemento presente su ePAS da caricare in attestati.">Da Inviare</span>
   #{/if}
   #{if _type.equals('problems') }
     <span class="label label-danger" webui-popover-hover data-content="<strong>Non Inviato</strong> elemento presente su ePAS ma respinto da attestati a causa di errori.">Non Inviato</span>
