@@ -50,7 +50,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -62,6 +61,7 @@ import javax.inject.Inject;
 
 /**
  * Controller per la gestione delle timbrature.
+ *
  * @author alessandro
  */
 @Slf4j
@@ -116,10 +116,10 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(person.getValue(), year, month, true);
-    
+
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = false;
-    
+
     render("@personStamping", psDto, person, showLink);
   }
 
@@ -153,14 +153,15 @@ public class Stampings extends Controller {
 
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = true;
-    
+
     render(psDto, person, showLink);
   }
-  
+
   /**
    * Nuova timbratura inserita dall'amministratore.
+   *
    * @param person persona
-   * @param date data
+   * @param date   data
    */
   public static void blank(@Required Person person, @Required LocalDate date) {
 
@@ -177,6 +178,7 @@ public class Stampings extends Controller {
 
   /**
    * Modifica timbratura dall'amministratore.
+   *
    * @param stamping timbratura
    */
   public static void edit(@Valid Stamping stamping) {
@@ -198,13 +200,14 @@ public class Stampings extends Controller {
 
   /**
    * Salva timbratura.
-   * @param person persona
-   * @param date data
+   *
+   * @param person   persona
+   * @param date     data
    * @param stamping timbratura
-   * @param time orario
+   * @param time     orario
    */
   public static void save(@Required Person person, @Required LocalDate date,
-                          @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
+      @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
@@ -246,6 +249,7 @@ public class Stampings extends Controller {
 
   /**
    * Elimina la timbratura.
+   *
    * @param id timbratura
    */
   public static void delete(Long id) {
@@ -269,8 +273,9 @@ public class Stampings extends Controller {
 
   /**
    * L'impiegato può impostare la causale.
+   *
    * @param stampingId timbratura
-   * @param note note
+   * @param note       note
    */
   public static void updateEmployee(Long stampingId,
       @As(binder = NullStringBinder.class) String note) {
@@ -344,7 +349,7 @@ public class Stampings extends Controller {
    * @param officeId sede
    */
   public static void dailyPresence(final Integer year, final Integer month,
-                                   final Integer day, final Long officeId) {
+      final Integer day, final Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -367,12 +372,13 @@ public class Stampings extends Controller {
     boolean showLink = false;
     render(daysRecap, office, date, numberOfInOut, showLink);
   }
-  
+
   /**
    * La presenza giornaliera del responsabile gruppo.
-   * @param year anno
+   *
+   * @param year  anno
    * @param month mese
-   * @param day giorno
+   * @param day   giorno
    */
   public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
@@ -394,15 +400,15 @@ public class Stampings extends Controller {
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;
     boolean groupView = true;
-    
-    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
 
+    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
 
 
   }
 
   /**
    * La presenza festiva nell'anno.
+   *
    * @param year anno
    */
   public static void holidaySituation(int year) {
@@ -421,8 +427,9 @@ public class Stampings extends Controller {
 
   /**
    * La presenza festiva della persona nell'anno.
-   * @param personId persona 
-   * @param year anno
+   *
+   * @param personId persona
+   * @param year     anno
    */
   public static void personHolidaySituation(Long personId, int year) {
 
@@ -436,9 +443,10 @@ public class Stampings extends Controller {
     render(person, year);
   }
 
-  
+
   /**
    * Abilita / disabilita l'orario festivo.
+   *
    * @param personDayId giorno
    */
   public static void toggleWorkingHoliday(Long personDayId) {
@@ -461,21 +469,21 @@ public class Stampings extends Controller {
 
     Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
   }
-  
-  public static void forceMealTicket(Long personDayId, boolean confirmed, 
+
+  public static void forceMealTicket(Long personDayId, boolean confirmed,
       MealTicketDecision mealTicketDecision) {
-    
+
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
-    
+
     rules.checkIfPermitted(personDay.person.office);
-    
+
     if (!confirmed) {
       confirmed = true;
-      
+
       mealTicketDecision = MealTicketDecision.COMPUTED;
-          
+
       if (personDay.isTicketForcedByAdmin) {
         if (personDay.isTicketAvailable) {
           mealTicketDecision = MealTicketDecision.FORCED_TRUE;
@@ -483,10 +491,10 @@ public class Stampings extends Controller {
           mealTicketDecision = MealTicketDecision.FORCED_FALSE;
         }
       }
-      
-      render(personDay, confirmed, mealTicketDecision);  
+
+      render(personDay, confirmed, mealTicketDecision);
     }
-    
+
     if (mealTicketDecision.equals(MealTicketDecision.COMPUTED)) {
       personDay.isTicketForcedByAdmin = false;
     } else {
@@ -498,22 +506,22 @@ public class Stampings extends Controller {
         personDay.isTicketAvailable = true;
       }
     }
-    
+
     personDay.save();
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
-    
+
     flash.success("Buono Pasto impostato correttamente.");
-    
-    Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
+
+    Stampings.personStamping(personDay.person.id, personDay.date.getYear(),
         personDay.date.getMonthOfYear());
-    
+
   }
-  
+
   public static enum MealTicketDecision {
 
     COMPUTED, FORCED_TRUE, FORCED_FALSE;
   }
-  
+
 
 }
 
