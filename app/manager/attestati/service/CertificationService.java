@@ -115,19 +115,12 @@ public class CertificationService {
    * @param person persona
    * @param year anno
    * @param month mese
-   * @param token token
+   * @param seatCertification situazione della persona in attestati.
    * @return null in caso di errore.
    */
   private Map<String, Certification> personAttestatiCertifications(Person person, 
-      int year, int month, Optional<String> token) {
+      int year, int month, PersonCertification personCertification) {
     
-    Optional<SeatCertification> seatCertification = certificationsComunication
-        .getPersonSeatCertification(person, month, year, token);
-    
-    if (!seatCertification.isPresent()) {
-      return null;
-    }
-    PersonCertification personCertification = seatCertification.get().dipendenti.get(0);
     Map<String, Certification> certifications = Maps.newHashMap();
     
     // Assenze accettate
@@ -208,19 +201,27 @@ public class CertificationService {
       return personCertificationStatus;
     } else {
       if (!numbers.contains(person.number)) {
-        personCertificationStatus.notInAttestati = true;;
+        personCertificationStatus.notInAttestati = true;
         return personCertificationStatus;
       }
     }
 
-    // Le certificazioni in attestati.
-    Map<String, Certification> attestatiCertifications = 
-        personAttestatiCertifications(person, year, month, token);
-    if (attestatiCertifications == null) {
-      log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
-      //attestatiCertifications = Maps.newHashMap(); //TODO: da segnalare in qualche modo all'user 
-    }
+    // Le certificazioni in attestati e lo stato di validazione ...
+    Map<String, Certification> attestatiCertifications = Maps.newHashMap();
     
+    Optional<SeatCertification> seatCertification = certificationsComunication
+        .getPersonSeatCertification(person, month, year, token);
+    if (seatCertification.isPresent()) {
+      PersonCertification personCertification = seatCertification.get().dipendenti.get(0);
+      attestatiCertifications = 
+          personAttestatiCertifications(person, year, month, personCertification); 
+      if (attestatiCertifications == null) {
+        log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
+        //attestatiCertifications = Maps.newHashMap(); //TODO: da segnalare in qualche modo all'user 
+      }
+      personCertificationStatus.validate = personCertification.validato;
+    }
+
     // Le certificazioni in epas
     Map<String, Certification> epasCertifications = Maps.newHashMap();
     for (Certification certification : certificationDao.personCertifications(person, year, month)) {
@@ -233,8 +234,6 @@ public class CertificationService {
     actualCertifications = absences(person, year, month, actualCertifications);
     actualCertifications = competences(person, year, month, actualCertifications);
     actualCertifications = mealTicket(person, year, month, actualCertifications);
-    
-
 
     if (attestatiCertifications != null) {
       // Riesco a scaricare gli attestati della persona
