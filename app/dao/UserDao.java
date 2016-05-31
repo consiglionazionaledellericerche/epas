@@ -12,19 +12,15 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import helpers.jpa.PerseoModelQuery;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery;
+import helpers.jpa.ModelQuery.SimpleResults;
 
-import models.BadgeReader;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.query.QBadgeReader;
-import models.query.QOffice;
 import models.query.QPerson;
 import models.query.QUser;
-import models.query.QUsersRolesOffices;
 
 import java.util.List;
 import java.util.Set;
@@ -38,7 +34,7 @@ public class UserDao extends DaoBase {
 
   public static final String ADMIN_USERNAME = "admin";
   public static final String DEVELOPER_USERNAME = "developer";
-  
+
   @Inject
   public UsersRolesOfficesDao usersRolesOfficesDao;
 
@@ -48,7 +44,7 @@ public class UserDao extends DaoBase {
   }
 
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
-  
+
   /**
    * @return lo user  identificato dall'id passato come parametro
    */
@@ -59,7 +55,7 @@ public class UserDao extends DaoBase {
       condition.and(user.password.eq(password.get()));
     }
     final JPQLQuery query = getQueryFactory().from(user)
-            .where(condition.and(user.id.eq(id)));
+        .where(condition.and(user.id.eq(id)));
     return query.singleResult(user);
   }
 
@@ -69,7 +65,7 @@ public class UserDao extends DaoBase {
   public User getUserByRecoveryToken(String recoveryToken) {
     final QUser user = QUser.user;
     final JPQLQuery query = getQueryFactory().from(user)
-            .where(user.recoveryToken.eq(recoveryToken));
+        .where(user.recoveryToken.eq(recoveryToken));
     return query.singleResult(user);
   }
 
@@ -83,7 +79,7 @@ public class UserDao extends DaoBase {
       condition.and(user.password.eq(password.get()));
     }
     final JPQLQuery query = getQueryFactory().from(user)
-            .where(condition.and(user.username.eq(username)));
+        .where(condition.and(user.username.eq(username)));
     return query.singleResult(user);
   }
 
@@ -91,25 +87,21 @@ public class UserDao extends DaoBase {
 
     final QUser user = QUser.user;
     final JPQLQuery query = getQueryFactory()
-            .from(user)
-            .where(user.username.eq(username));
+        .from(user)
+        .where(user.username.eq(username));
     return query.singleResult(user);
   }
 
 
   /**
    * Se l'utente è admin.
-   * @param user
-   * @return
    */
   public boolean isAdmin(User user) {
     return user.username.equals(ADMIN_USERNAME);
   }
-  
+
   /**
    * Se l'utente è developer.
-   * @param user
-   * @return
    */
   public boolean isDeveloper(User user) {
     return user.username.equals(DEVELOPER_USERNAME);
@@ -138,34 +130,34 @@ public class UserDao extends DaoBase {
 
     return getQueryFactory().from(user).where(user.username.contains(username)).list(user.username);
   }
-  
+
   public static enum UserType {
     PERSON, SYSTEM_WITH_OWNER, SYSTEM_WITHOUT_OWNER;
   }
-  
+
   public static enum EnabledType {
     ONLY_ENABLED, ONLY_DISABLED, BOTH;
   }
-  
+
   /**
-   * 
-   * @param name opzionale il nome su cui filtrare
-   * @param office l'ufficio per cui si vogliono gli utenti
-   * @param associated se si vogliono solo gli utenti con persona associata o anche quelli di sistema
+   * @param name       opzionale il nome su cui filtrare
+   * @param office     l'ufficio per cui si vogliono gli utenti
+   * @param associated se si vogliono solo gli utenti con persona associata o anche quelli di
+   *                   sistema
    * @return la lista di utenti che soddisfano i parametri passati.
    */
-  public PerseoSimpleResults<User> listUsersByOffice(Optional<String> name, Set<Office> offices, 
+  public SimpleResults<User> listUsersByOffice(Optional<String> name, Set<Office> offices,
       EnabledType enableType, List<UserType> types) {
-    
+
     final QUser user = QUser.user;
     final QPerson person = QPerson.person;
     JPQLQuery query = getQueryFactory().from(user)
         .leftJoin(user.person, person);
-    
+
     BooleanBuilder condition = new BooleanBuilder();
-    
+
     // Tipi
-    
+
     if (types.contains(UserType.PERSON)) {
       condition.or(person.office.in(offices));
     }
@@ -176,24 +168,23 @@ public class UserDao extends DaoBase {
       condition.or(person.office.isNull().and(user.owner.isNull()));
     }
     // Abilitato / Disabilitato
-    
+
     if (enableType.equals(EnabledType.ONLY_ENABLED)) {
       condition.and(user.disabled.isFalse());
-    } 
-    else if (enableType.equals(EnabledType.ONLY_DISABLED)) {
+    } else if (enableType.equals(EnabledType.ONLY_DISABLED)) {
       condition.and(user.disabled.isTrue());
     }
-    
+
     // Filtro nome
     if (name.isPresent()) {
       condition.and(matchUserName(user, name.get()));
     }
-   
-    query.where(condition).distinct().orderBy(user.username.asc());   
-        
-    return PerseoModelQuery.wrap(query, user);
+
+    query.where(condition).distinct().orderBy(user.username.asc());
+
+    return ModelQuery.wrap(query, user);
   }
-  
+
   private BooleanBuilder matchUserName(QUser user, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();
     for (String token : TOKEN_SPLITTER.split(name)) {

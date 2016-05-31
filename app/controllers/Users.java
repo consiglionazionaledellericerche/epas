@@ -12,16 +12,12 @@ import dao.UserDao;
 import dao.UserDao.EnabledType;
 import dao.UserDao.UserType;
 import dao.UsersRolesOfficesDao;
-import dao.history.HistoryValue;
-import dao.history.UserHistoryDao;
 
 import helpers.Web;
 
 import manager.SecureManager;
 import manager.UserManager;
 
-import models.BadgeReader;
-import models.BadgeSystem;
 import models.Office;
 import models.Role;
 import models.User;
@@ -34,14 +30,11 @@ import org.testng.collections.Lists;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 

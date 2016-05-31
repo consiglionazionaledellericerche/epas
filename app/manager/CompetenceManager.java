@@ -13,7 +13,7 @@ import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import models.Competence;
 import models.CompetenceCode;
@@ -51,12 +51,13 @@ public class CompetenceManager {
 
   /**
    * Costruttore.
+   *
    * @param competenceCodeDao competenceCodeDao
-   * @param officeDao officeDao
-   * @param competenceDao competenceDao
-   * @param personDayDao personDayDao
-   * @param wrapperFactory wrapperFactory
-   * @param personDayManager personDayManager
+   * @param officeDao         officeDao
+   * @param competenceDao     competenceDao
+   * @param personDayDao      personDayDao
+   * @param wrapperFactory    wrapperFactory
+   * @param personDayManager  personDayManager
    */
   @Inject
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
@@ -119,9 +120,10 @@ public class CompetenceManager {
 
   /**
    * Salva gli straordinari.
-   * @param year anno
+   *
+   * @param year      anno
    * @param numeroOre numeroOre
-   * @param officeId sede
+   * @param officeId  sede
    * @return esito
    */
   public boolean saveOvertime(Integer year, String numeroOre, Long officeId) {
@@ -152,13 +154,13 @@ public class CompetenceManager {
 
   /**
    * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su
-   *     orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per
-   *     le persone dell'ufficio office.
+   * orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per le
+   * persone dell'ufficio office.
    */
   public Table<Person, String, Integer> composeTableForOvertime(
       int year, int month, Integer page,
       String name, Office office, LocalDate beginMonth,
-      PerseoSimpleResults<Person> simpleResults, CompetenceCode code) {
+      SimpleResults<Person> simpleResults, CompetenceCode code) {
 
     ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
     Table<Person, String, Integer> tableFeature = null;
@@ -171,7 +173,7 @@ public class CompetenceManager {
       Integer overtime = 0;
 
       List<PersonDay> personDayList = personDayDao.getPersonDayInPeriod(p,
-              beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
+          beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()));
       for (PersonDay pd : personDayList) {
         if (pd.stampings.size() > 0) {
           daysAtWork = daysAtWork + 1;
@@ -180,7 +182,7 @@ public class CompetenceManager {
         difference = difference + pd.difference;
       }
       Optional<Competence> comp = competenceDao
-              .getCompetence(p, year, month, code);
+          .getCompetence(p, year, month, code);
       if (comp.isPresent()) {
         overtime = comp.get().valueApproved;
       } else {
@@ -200,7 +202,7 @@ public class CompetenceManager {
 
   /**
    * @return true se avviene correttamente il cambiamento della lista di competenze attive per la
-   *     persona Person passata come parametro.
+   * persona Person passata come parametro.
    */
   public boolean saveNewCompetenceEnabledConfiguration(
       Map<String, Boolean> competence,
@@ -232,7 +234,7 @@ public class CompetenceManager {
 
   /**
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
-   *     personList nell'anno year.
+   * personList nell'anno year.
    */
   public FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException {
     FileInputStream inputStream = null;
@@ -275,7 +277,7 @@ public class CompetenceManager {
   public Integer positiveResidualInMonth(Person person, int year, int month) {
 
     List<Contract> monthContracts = wrapperFactory
-            .create(person).getMonthContracts(year, month);
+        .create(person).getMonthContracts(year, month);
     int differenceForShift = 0;
     List<PersonDay> pdList = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     for (Contract contract : monthContracts) {
@@ -285,7 +287,7 @@ public class CompetenceManager {
       if (wrContract.isLastInMonth(month, year)) {
 
         Optional<ContractMonthRecap> recap =
-                wrContract.getContractMonthRecap(new YearMonth(year, month));
+            wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent()) {
           /**
            * FIXME: in realtà bisogna controllare che la persona nell'arco
@@ -312,7 +314,7 @@ public class CompetenceManager {
     List<CompetenceCode> competenceCodeList = Lists.newArrayList();
 
     List<Competence> competenceList =
-            competenceDao.getCompetenceInYear(year, Optional.<Office>absent());
+        competenceDao.getCompetenceInYear(year, Optional.<Office>absent());
 
     for (Competence comp : competenceList) {
       if (!competenceCodeList.contains(comp.competenceCode)) {

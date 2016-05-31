@@ -1,23 +1,25 @@
 package controllers;
 
+import com.google.common.base.Verify;
+
+import helpers.deserializers.InlineStreamHandler;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.User;
+import models.exports.ReportData;
+
+import org.apache.commons.mail.EmailAttachment;
+
+import play.Play;
+import play.mvc.Mailer;
+import play.mvc.Scope;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.zip.GZIPOutputStream;
-
-import org.apache.commons.mail.EmailAttachment;
-
-import com.google.common.base.Verify;
-
-import helpers.deserializers.InlineStreamHandler;
-import lombok.extern.slf4j.Slf4j;
-import models.User;
-import models.exports.ReportData;
-import play.Play;
-import play.mvc.Mailer;
-import play.mvc.Scope;
 
 /**
  * Invio delle segnalazioni per email al sistema CNR OIL.

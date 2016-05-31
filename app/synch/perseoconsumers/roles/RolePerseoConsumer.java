@@ -2,7 +2,6 @@ package synch.perseoconsumers.roles;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -18,7 +17,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
-import dao.wrapper.IWrapperPerson;
 
 import helpers.rest.ApiRequestException;
 
@@ -33,13 +31,12 @@ import org.assertj.core.util.Lists;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
+import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
-import synch.perseoconsumers.PerseoApis;
 
 @Slf4j
 public class RolePerseoConsumer {

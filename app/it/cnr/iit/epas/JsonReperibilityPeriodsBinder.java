@@ -7,8 +7,6 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
-import injection.StaticInject;
-
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
@@ -17,6 +15,7 @@ import models.exports.ReperibilityPeriods;
 
 import org.joda.time.LocalDate;
 
+import injection.StaticInject;
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;

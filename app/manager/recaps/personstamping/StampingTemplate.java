@@ -5,7 +5,6 @@ import manager.cache.StampTypeManager;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
-import models.enumerate.StampTypes;
 
 import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
