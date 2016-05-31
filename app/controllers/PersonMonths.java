@@ -4,11 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 import com.google.gdata.util.common.base.Preconditions;
 
-import dao.CertificationDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
@@ -17,11 +14,7 @@ import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
 import manager.PersonMonthsManager;
-import manager.recaps.trainingHours.TrainingHoursRecap;
 
-import models.AbsenceType;
-import models.CertificatedData;
-import models.Certification;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -31,12 +24,10 @@ import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.testng.collections.Maps;
 
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;

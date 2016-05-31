@@ -2,8 +2,6 @@ package manager.attestati.old;
 
 import lombok.Data;
 
-import models.Person;
-
 /**
  * Contiene le informazioni relative alla richiesta/risposta di elaborazione dati delle
  * assenze/competenze/buoni mensa inviati al sistema degli attestati del CNR.

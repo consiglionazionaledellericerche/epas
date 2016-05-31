@@ -14,8 +14,6 @@ import com.mysema.query.types.QBean;
 
 import dao.filter.QFilters;
 
-import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
 import helpers.jpa.PerseoModelQuery;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
@@ -86,16 +84,15 @@ public final class PersonDao extends DaoBase {
     JPQLQuery query = personQuery(Optional.<String>absent(), offices, false, beginMonth, endMonth,
         true, Optional.<CompetenceCode>absent(), Optional.<Person>absent(), false);
 
-    return ModelQuery.simpleResults(query, person).list();
+    return query.list(person);
   }
 
 
   /**
    * La lista di persone una volta applicati i filtri dei parametri. (Dovrà sostituire list
-   * deprecata).
-   * TODO: Perseo significa che utilizza i metodi puliti di paginazione implementati da Marco
-   *  (PerseoSimpleResult e PerseoModelQuery) che dovranno sostituire i deprecati SimpleResult
-   *  e ModelQuery di epas.
+   * deprecata). TODO: Perseo significa che utilizza i metodi puliti di paginazione implementati da
+   * Marco (PerseoSimpleResult e PerseoModelQuery) che dovranno sostituire i deprecati SimpleResult
+   * e ModelQuery di epas.
    */
   public PerseoSimpleResults<Person> listPerseo(Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
@@ -110,10 +107,9 @@ public final class PersonDao extends DaoBase {
         // Expression
         person);
   }
-  
+
   /**
    * Tutte le persone di epas (possibile filtrare sulla sede).
-   * @return
    */
   public PerseoSimpleResults<Person> list(Optional<Office> office) {
     final QPerson person = QPerson.person;
@@ -131,17 +127,17 @@ public final class PersonDao extends DaoBase {
         person);
 
   }
-  
+
 
   /**
    * La lista di persone una volta applicati i filtri dei parametri.
    */
-  public SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
+  public PerseoSimpleResults<Person> list(Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 
     final QPerson person = QPerson.person;
 
-    return ModelQuery.simpleResults(
+    return PerseoModelQuery.wrap(
         // JPQLQuery
         personQuery(name, offices, onlyTechnician, Optional.fromNullable(start),
             Optional.fromNullable(end), onlyOnCertificate, Optional.<CompetenceCode>absent(),
@@ -175,7 +171,7 @@ public final class PersonDao extends DaoBase {
    * @param onlyOnCertificate true se voglio solo gli strutturati, false altrimenti
    * @return la lista delle persone trovate con queste retrizioni
    */
-  public SimpleResults<Person> listFetched(Optional<String> name, Set<Office> offices,
+  public PerseoSimpleResults<Person> listFetched(Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 
     final QPerson person = QPerson.person;
@@ -184,7 +180,7 @@ public final class PersonDao extends DaoBase {
         Optional.fromNullable(end), onlyOnCertificate, Optional.<CompetenceCode>absent(),
         Optional.<Person>absent(), false);
 
-    SimpleResults<Person> result = ModelQuery.simpleResults(
+    PerseoSimpleResults<Person> result = PerseoModelQuery.wrap(
         // JPQLQuery
         query,
         // Expression
@@ -223,14 +219,15 @@ public final class PersonDao extends DaoBase {
         Optional.fromNullable(competenceCode), personInCharge, false), person);
 
   }
-  
+
   /**
    * Una mappa contenente le persone con perseoId valorizzato. La chiave è il perseoId.
+   *
    * @param office sede opzionale, se absente tutte le persone.
    * @return mappa
    */
   public Map<Long, Person> mapSynchronized(Optional<Office> office) {
-    
+
     final QPerson person = QPerson.person;
 
     //Il metodo personQuery considera la lista solo se non è ne null ne vuota.
@@ -238,11 +235,11 @@ public final class PersonDao extends DaoBase {
     if (office.isPresent()) {
       offices.add(office.get());
     }
-    
+
     return personQuery(Optional.<String>absent(), offices, false, Optional.<LocalDate>absent(),
-            Optional.<LocalDate>absent(), false, Optional.<CompetenceCode>absent(),
-            Optional.<Person>absent(), true).map(person.perseoId, person);
-    
+        Optional.<LocalDate>absent(), false, Optional.<CompetenceCode>absent(),
+        Optional.<Person>absent(), true).map(person.perseoId, person);
+
   }
 
   /**
@@ -318,7 +315,7 @@ public final class PersonDao extends DaoBase {
    * @return la lista dei personday che soddisfano i parametri
    */
   public List<PersonDay> getPersonDayIntoInterval(Person person, DateInterval interval,
-                                                  boolean onlyWithMealTicket) {
+      boolean onlyWithMealTicket) {
 
     final QPersonDay qpd = QPersonDay.personDay;
 
@@ -569,7 +566,7 @@ public final class PersonDao extends DaoBase {
         true, Optional.<CompetenceCode>absent(), Optional.<Person>absent(), false)
         .where(person.badgeNumber.isNotNull().and(person.badgeNumber.isNotEmpty()));
 
-    return ModelQuery.simpleResults(query, person).list();
+    return query.list(person);
   }
 
   /**
@@ -586,7 +583,7 @@ public final class PersonDao extends DaoBase {
         true, Optional.<CompetenceCode>absent(), Optional.<Person>absent(), false)
         .where(person.number.isNotNull());
 
-    return ModelQuery.simpleResults(query, person).list();
+    return query.list(person);
 
   }
 
@@ -597,7 +594,7 @@ public final class PersonDao extends DaoBase {
    */
   private JPQLQuery personQuery(JPQLQuery injectedQuery, Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, Optional<LocalDate> start, Optional<LocalDate> end,
-      boolean onlyOnCertificate, Optional<CompetenceCode> compCode, 
+      boolean onlyOnCertificate, Optional<CompetenceCode> compCode,
       Optional<Person> personInCharge, boolean onlySynchronized) {
 
     final BooleanBuilder condition = new BooleanBuilder();
@@ -631,7 +628,7 @@ public final class PersonDao extends DaoBase {
    */
   private JPQLQuery personQuery(Optional<String> name, Set<Office> offices, boolean onlyTechnician,
       Optional<LocalDate> start, Optional<LocalDate> end, boolean onlyOnCertificate,
-      Optional<CompetenceCode> compCode, Optional<Person> personInCharge, 
+      Optional<CompetenceCode> compCode, Optional<Person> personInCharge,
       boolean onlySynchronized) {
 
     final QPerson person = QPerson.person;
@@ -646,7 +643,7 @@ public final class PersonDao extends DaoBase {
         .distinct();
 
     final BooleanBuilder condition = new BooleanBuilder();
-    
+
     filterOffices(condition, offices);
     filterOnlyTechnician(condition, onlyTechnician);
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
@@ -655,11 +652,9 @@ public final class PersonDao extends DaoBase {
     filterCompetenceCodeEnabled(condition, compCode);
     filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
-    
+
     return query.where(condition);
   }
-  
-  
 
 
   /**
@@ -682,7 +677,7 @@ public final class PersonDao extends DaoBase {
    * @param end       absent() no limit
    */
   private void filterContract(BooleanBuilder condition, Optional<LocalDate> start,
-                              Optional<LocalDate> end) {
+      Optional<LocalDate> end) {
 
     final QContract contract = QContract.contract;
 
@@ -715,14 +710,14 @@ public final class PersonDao extends DaoBase {
       condition.and(contract.onCertificate.isTrue());
     }
   }
-  
+
   private void filterPersonInCharge(BooleanBuilder condition, Optional<Person> personInCharge) {
     if (personInCharge.isPresent()) {
       final QPerson person = QPerson.person;
       condition.and(person.personInCharge.eq(personInCharge.get()));
     }
   }
-  
+
   private void filterOnlySynchronized(BooleanBuilder condition, boolean value) {
     if (value == true) {
       final QPerson person = QPerson.person;
@@ -734,9 +729,9 @@ public final class PersonDao extends DaoBase {
   /**
    * Filtro su competenza abilitata.
    */
-  private void filterCompetenceCodeEnabled(BooleanBuilder condition, 
+  private void filterCompetenceCodeEnabled(BooleanBuilder condition,
       Optional<CompetenceCode> compCode) {
-    
+
     if (compCode.isPresent()) {
       final QPerson person = QPerson.person;
       condition.and(person.competenceCode.contains(compCode.get()));
@@ -749,7 +744,7 @@ public final class PersonDao extends DaoBase {
    * numero di accessi al db.
    */
   public Person fetchPersonForComputation(Long id, Optional<LocalDate> begin,
-                                          Optional<LocalDate> end) {
+      Optional<LocalDate> end) {
 
 
     QPerson qperson = QPerson.person;
@@ -776,7 +771,7 @@ public final class PersonDao extends DaoBase {
    * su una specifica persona.
    */
   private void fetchContracts(Optional<Person> person, Optional<LocalDate> start,
-                              Optional<LocalDate> end) {
+      Optional<LocalDate> end) {
 
 
     // Fetch dei contratti appartenenti all'intervallo
@@ -836,11 +831,10 @@ public final class PersonDao extends DaoBase {
     lightQuery = personQuery(lightQuery, Optional.<String>absent(), offices, false, beginMonth,
         endMonth, true, Optional.<CompetenceCode>absent(), Optional.<Person>absent(), false);
 
-
     QBean<PersonLite> bean =
         Projections.bean(PersonLite.class, person.id, person.name, person.surname);
 
-    return ModelQuery.simpleResults(lightQuery, bean).list();
+    return lightQuery.list(bean);
 
   }
 

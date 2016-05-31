@@ -10,7 +10,6 @@ import lombok.Getter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
-import models.enumerate.EpasParam;
 
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;

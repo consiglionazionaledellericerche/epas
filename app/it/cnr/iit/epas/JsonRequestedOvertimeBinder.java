@@ -8,8 +8,6 @@ import com.google.gson.JsonParser;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
 
-import injection.StaticInject;
-
 import lombok.extern.slf4j.Slf4j;
 
 import models.Competence;
@@ -17,6 +15,7 @@ import models.CompetenceCode;
 import models.Person;
 import models.exports.PersonsCompetences;
 
+import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
