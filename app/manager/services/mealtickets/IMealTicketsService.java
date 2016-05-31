@@ -1,24 +1,13 @@
 package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
-import dao.wrapper.IWrapperContract;
 
 import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
-import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Contract;
-import models.ContractMonthRecap;
 import models.MealTicket;
-import models.PersonDay;
-import models.enumerate.Parameter;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import java.util.List;
 

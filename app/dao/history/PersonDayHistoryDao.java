@@ -5,13 +5,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import models.Absence;
-import models.Person;
 import models.Stamping;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
-import org.joda.time.LocalDate;
 
 import java.util.List;
 

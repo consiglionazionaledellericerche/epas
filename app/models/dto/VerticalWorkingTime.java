@@ -1,13 +1,9 @@
 package models.dto;
 
 import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
 
 import play.data.validation.Max;
 import play.data.validation.Min;
-import play.data.validation.Required;
-
-import java.util.List;
 
 public class VerticalWorkingTime {
   

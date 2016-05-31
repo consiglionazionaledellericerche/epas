@@ -33,16 +33,15 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
+
+import synch.diagnostic.SynchDiagnostic;
 
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-
-import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.

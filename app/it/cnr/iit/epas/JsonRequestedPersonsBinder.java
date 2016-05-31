@@ -7,13 +7,12 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
-import injection.StaticInject;
-
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
 import models.exports.PersonsList;
 
+import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 

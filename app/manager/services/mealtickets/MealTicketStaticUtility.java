@@ -7,8 +7,6 @@ import com.google.gdata.util.common.base.Preconditions;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import lombok.extern.slf4j.Slf4j;
-
 import models.Contract;
 import models.MealTicket;
 

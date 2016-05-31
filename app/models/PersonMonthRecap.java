@@ -2,8 +2,6 @@ package models;
 
 import com.google.common.base.MoreObjects;
 
-import manager.attestati.dto.show.SeatCertification.PersonCertification;
-
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;

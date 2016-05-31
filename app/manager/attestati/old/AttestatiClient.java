@@ -42,7 +42,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import play.Logger;
-import play.Play;
 
 import java.io.IOException;
 import java.io.Serializable;

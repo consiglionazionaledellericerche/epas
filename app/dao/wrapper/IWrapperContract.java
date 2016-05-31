@@ -6,12 +6,9 @@ import it.cnr.iit.epas.DateInterval;
 
 import models.Contract;
 import models.ContractMonthRecap;
-import models.ContractWorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
 
 public interface IWrapperContract extends IWrapperModel<Contract> {
 

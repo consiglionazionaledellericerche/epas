@@ -9,8 +9,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.gson.Gson;
 
-import injection.StaticInject;
-
 import it.cnr.iit.epas.DateUtility;
 
 import models.base.BaseModel;
@@ -26,6 +24,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
+import injection.StaticInject;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.Crypto;

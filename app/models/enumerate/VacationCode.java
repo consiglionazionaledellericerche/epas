@@ -1,11 +1,5 @@
 package models.enumerate;
 
-import models.enumerate.EpasParam.EpasParamTimeType;
-import models.enumerate.EpasParam.EpasParamValueType;
-import models.enumerate.EpasParam.RecomputationType;
-
-import java.util.List;
-
 public enum VacationCode {
   
   CODE_28_4("28+4", 28, 4),

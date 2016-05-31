@@ -2,8 +2,6 @@ package jobs;
 
 import com.google.common.collect.Lists;
 
-import injection.StaticInject;
-
 import manager.OfficeManager;
 
 import models.Office;
@@ -12,6 +10,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 
+import injection.StaticInject;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
