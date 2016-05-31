@@ -4,10 +4,9 @@ import com.google.gson.GsonBuilder;
 
 import helpers.deserializers.AbsenceFromClientDeserializer;
 
-import injection.StaticInject;
-
 import models.exports.AbsenceFromClient;
 
+import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 

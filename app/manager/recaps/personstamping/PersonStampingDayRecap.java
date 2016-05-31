@@ -9,7 +9,6 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfigurationManager;
@@ -17,7 +16,6 @@ import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.cache.StampTypeManager;
 
-import models.Absence;
 import models.Contract;
 import models.PersonDay;
 import models.StampModificationType;

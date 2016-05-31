@@ -10,8 +10,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import helpers.jpa.PerseoModelQuery;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import models.Badge;
 import models.BadgeReader;
@@ -61,8 +61,8 @@ public class BadgeSystemDao extends DaoBase {
     return query.singleResult(badgeSystem);
   }
 
-  public PerseoSimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
-                                                       Optional<BadgeReader> badgeReader) {
+  public SimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
+      Optional<BadgeReader> badgeReader) {
 
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
     final QBadgeReader qBadgeReader = QBadgeReader.badgeReader;
@@ -84,7 +84,7 @@ public class BadgeSystemDao extends DaoBase {
 
     query.where(condition).distinct();
 
-    return PerseoModelQuery.wrap(query, badgeSystem);
+    return ModelQuery.wrap(query, badgeSystem);
 
   }
 

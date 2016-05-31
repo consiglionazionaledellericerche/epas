@@ -4,8 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
@@ -16,6 +14,7 @@ import models.base.IPropertyInPeriod;
 
 import org.joda.time.LocalDate;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import play.db.jpa.JPA;
 
 import java.util.List;

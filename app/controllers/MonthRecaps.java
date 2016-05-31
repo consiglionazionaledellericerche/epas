@@ -29,7 +29,6 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;
@@ -70,12 +69,12 @@ public class MonthRecaps extends Controller {
     LocalDate monthEnd = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
 
     List<Person> simplePersonList = personDao.list(
-            Optional.<String>absent(), Sets.newHashSet(office),
-            false, monthBegin, monthEnd, false).list();
+        Optional.<String>absent(), Sets.newHashSet(office),
+        false, monthBegin, monthEnd, false).list();
 
     List<IWrapperPerson> personList = FluentIterable
-            .from(simplePersonList)
-            .transform(wrapperFunctionFactory.person()).toList();
+        .from(simplePersonList)
+        .transform(wrapperFunctionFactory.person()).toList();
 
     List<ContractMonthRecap> recaps = Lists.newArrayList();
 
@@ -107,10 +106,10 @@ public class MonthRecaps extends Controller {
    * @param officeId sede
    */
   public static void customRecap(final int year, final int month,
-                                 Long officeId) {
+      Long officeId) {
 
     Set<Office> offices = secureManager
-            .officesReadAllowed(Security.getUser().get());
+        .officesReadAllowed(Security.getUser().get());
     if (offices.isEmpty()) {
       forbidden();
     }
@@ -119,13 +118,13 @@ public class MonthRecaps extends Controller {
     rules.checkIfPermitted(office);
 
     LocalDate monthBegin = new LocalDate().withYear(year)
-            .withMonthOfYear(month).withDayOfMonth(1);
+        .withMonthOfYear(month).withDayOfMonth(1);
     LocalDate monthEnd = new LocalDate().withYear(year)
-            .withMonthOfYear(month).dayOfMonth().withMaximumValue();
+        .withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
     List<Person> activePersons = personDao.list(Optional.<String>absent(),
-            Sets.newHashSet(office), false, monthBegin, monthEnd, true)
-            .list();
+        Sets.newHashSet(office), false, monthBegin, monthEnd, true)
+        .list();
 
     List<CustomRecapDTO> customRecapList = Lists.newArrayList();
 
@@ -134,32 +133,32 @@ public class MonthRecaps extends Controller {
       IWrapperPerson wrPerson = wrapperFactory.create(person);
 
       for (Contract contract : wrPerson.getMonthContracts(year, month)) {
-        
+
         Optional<VacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
 
         CustomRecapDTO danilaDto = new CustomRecapDTO();
         danilaDto.ferieAnnoCorrente = vr.get().getVacationsCurrentYear().getNotYetUsedTotal();
-        
+
         danilaDto.ferieAnnoPassato = vr.get().getVacationsLastYear().getNotYetUsedTotal();
-        
+
         danilaDto.permessi = vr.get().getPermissions().getNotYetUsedTotal();
 
         Optional<ContractMonthRecap> recap =
-                wrapperFactory.create(contract).getContractMonthRecap(
-                        new YearMonth(year, month));
+            wrapperFactory.create(contract).getContractMonthRecap(
+                new YearMonth(year, month));
 
         danilaDto.monteOreAnnoPassato = recap.get()
-                .remainingMinutesLastYear;
+            .remainingMinutesLastYear;
         danilaDto.monteOreAnnoCorrente = recap.get()
-                .remainingMinutesCurrentYear;
+            .remainingMinutesCurrentYear;
         danilaDto.giorni = 22 - personManager
-                .numberOfCompensatoryRestUntilToday(person,
-                        year, month);
+            .numberOfCompensatoryRestUntilToday(person,
+                year, month);
 
         danilaDto.straordinariFeriali = recap.get()
-                .straordinariMinutiS1Print;
+            .straordinariMinutiS1Print;
         danilaDto.straordinariFestivi = recap.get()
-                .straordinariMinutiS2Print;
+            .straordinariMinutiS2Print;
         danilaDto.person = person;
         customRecapList.add(danilaDto);
       }
