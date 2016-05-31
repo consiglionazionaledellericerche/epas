@@ -86,11 +86,11 @@
 	    <strong>${personCertificationStatus.person.fullname}<br>${personCertificationStatus.person.number}</strong>
 	    </div>
 	    <div class="col-xs-3">
-	      #{if !personCertificationStatus.validate}
+	      #{if personCertificationStatus.validate}
 	       
 	        #{if personCertificationStatus.okProcessable}
 		      <p class="text-success"><i class="fa fa-check fa-2x"
-		      popover-hover data-content="Attestato processato correttamente."></i>
+		      popover-hover data-content="Attestato processato correttamente in attesa di validazione."></i>
 		    #{/if}
 		    #{if personCertificationStatus.incompleteProcessable}
 		      <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
