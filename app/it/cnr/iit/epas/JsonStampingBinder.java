@@ -84,13 +84,18 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       if (jsonObject.has("causale") && !jsonObject.get("causale").isJsonNull()) {
         final String causale = jsonObject.get("causale").getAsString();
         if (!Strings.isNullOrEmpty(causale)) {
-          stamping.stampType = StampTypes.byCode(causale);
-
-          if (stamping.stampType == null) {
-            throw new IllegalArgumentException(String
-                .format("Causale con codice %s sconosciuta.", causale));
+          
+          if (StampTypes.isActive(causale)) {
+            stamping.stampType = StampTypes.byCode(causale);
           }
-
+          
+          if (stamping.stampType == null) {
+            
+            log.error(String
+                .format("Causale con codice %s sconosciuta.", causale));
+            return null;
+          }
+          
         }
       }
 
