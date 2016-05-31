@@ -59,8 +59,7 @@ public class PersonStampingDayRecap {
   public String workTimeExplanation = "";
   public String mealTicket;
 
-  public String todayLunchTimeCode = "";
-  public String fixedWorkingTimeCode = "";
+  public StampModificationType fixedWorkingTimeCode = null;
   public String exitingNowCode = "";
 
   public List<String> note = Lists.newArrayList();
@@ -120,16 +119,11 @@ public class PersonStampingDayRecap {
             stampTypeManager.getStampMofificationType(
                 StampModificationTypeCode.FIXED_WORKINGTIME);
       }
-      this.fixedWorkingTimeCode = fixedStampModificationType.code;
+      this.fixedWorkingTimeCode = fixedStampModificationType;
     }
     
     this.computeWorkTime(personDay.getTimeAtWork());
 
-    // lunch (p,e) (parte obsoleta che serve per i mesi antichi di IIT)
-    if (personDay.getStampModificationType() != null && !personDay.isFuture()) {
-      this.todayLunchTimeCode = personDay.getStampModificationType().code;
-    }
-    
     // is sourceContract (solo se monthContracts presente)
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {
@@ -302,6 +296,11 @@ public class PersonStampingDayRecap {
    */
   private void computeWorkTime(int workTime) {
 
+    if (this.fixedWorkingTimeCode != null) {
+      this.workTimeExplanation = this.workTimeExplanation 
+          + "<br>" + italic(this.fixedWorkingTimeCode.description);
+    }
+    
     if (personDay.stampingsTime != null && personDay.stampingsTime > 0) {
       this.workTimeExplanation = this.workTimeExplanation
           + "<br>Da timbrature: " 
@@ -336,10 +335,15 @@ public class PersonStampingDayRecap {
           "Tempo a lavoro totale: " + stronger(DateUtility.fromMinuteToHourMinute(workTime)) 
           + this.workTimeExplanation;
     }
+    
   }
 
   private String stronger(String string) {
     return "<strong>" + string + "</strong>";
+  }
+  
+  private String italic(String string) {
+    return "<em>" + string + "</em>";
   }
  
 }
