@@ -22,17 +22,17 @@
   </div>
   <div class="col-xs-6"> 
   #{if _type.equals('correct') }
-    <span class="label label-success" popover-hover data-content="OK: elemento presente su ePAS e su attestati.">Ok</span>
+    <span class="label label-success" webui-popover-hover data-content="<strong>OK</strong> elemento presente su ePAS e caricato in attestati.">Ok</span>
   #{/if}
   #{if _type.equals('toSend') }
     <span class="label label-primary">Da Inviare</span>
   #{/if}
   #{if _type.equals('problems') }
-    <span class="label label-danger" popover-hover data-content="Non inviato: elemento presente su ePAS ma respinto da attestati a causa di errori.">Non Inviato</span>
+    <span class="label label-danger" webui-popover-hover data-content="<strong>Non Inviato</strong> elemento presente su ePAS ma respinto da attestati a causa di errori.">Non Inviato</span>
     <i class="fa fa-exclamation-triangle" style="color:#d9534f" popover-hover data-content="${_certification.problems}"></i>
   #{/if}
   #{if _type.equals('toDelete') }
-    <span class="label label-warning" popover-hover data-content="Da rimuovere: elemento presente su attestati ma non presente in ePAS.">Da Rimuovere</span>
+    <span class="label label-warning" webui-popover-hover data-content="<strong>Da Rimuovere</strong> elemento caricato su attestati ma non presente in ePAS.">Da Rimuovere</span>
     #{if _staticView == false}
       <span class="label label-warning">Non Cancellabile</span>
     #{/if}
