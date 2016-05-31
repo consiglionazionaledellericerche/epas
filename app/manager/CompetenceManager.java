@@ -13,7 +13,7 @@ import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import models.Competence;
 import models.CompetenceCode;
@@ -160,7 +160,7 @@ public class CompetenceManager {
   public Table<Person, String, Integer> composeTableForOvertime(
       int year, int month, Integer page,
       String name, Office office, LocalDate beginMonth,
-      PerseoSimpleResults<Person> simpleResults, CompetenceCode code) {
+      SimpleResults<Person> simpleResults, CompetenceCode code) {
 
     ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
     Table<Person, String, Integer> tableFeature = null;

@@ -20,7 +20,7 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.Web;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -539,7 +539,7 @@ public class Competences extends Controller {
       beginMonth = new LocalDate(year, month, 1);
     }
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-    PerseoSimpleResults<Person> simpleResults = personDao.listForCompetence(code,
+    SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
         Optional.fromNullable(name),
         Sets.newHashSet(user.person.office),
         false,

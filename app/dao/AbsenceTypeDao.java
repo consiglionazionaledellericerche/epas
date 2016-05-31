@@ -10,7 +10,7 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
 
-import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.ModelQuery;
 
 import models.AbsenceType;
 import models.Person;
@@ -98,7 +98,7 @@ public class AbsenceTypeDao extends DaoBase {
         .where(absenceType.internalUse.eq(false)).list(absenceType);
   }
 
-  public PerseoModelQuery.PerseoSimpleResults<AbsenceType> getAbsences(Optional<String> name) {
+  public ModelQuery.SimpleResults<AbsenceType> getAbsences(Optional<String> name) {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
     final BooleanBuilder condition = new BooleanBuilder();
@@ -110,7 +110,7 @@ public class AbsenceTypeDao extends DaoBase {
           absenceType.description.toLowerCase().like("%" + Strings.toLowerCase(name.get()) + "%"));
     }
 
-    return PerseoModelQuery.wrap(query.where(condition), absenceType);
+    return ModelQuery.wrap(query.where(condition), absenceType);
   }
 
   /**

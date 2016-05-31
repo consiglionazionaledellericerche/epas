@@ -12,8 +12,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import helpers.jpa.PerseoModelQuery;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import models.Office;
 import models.Role;
@@ -146,7 +146,7 @@ public class UserDao extends DaoBase {
    *                   sistema
    * @return la lista di utenti che soddisfano i parametri passati.
    */
-  public PerseoSimpleResults<User> listUsersByOffice(Optional<String> name, Set<Office> offices,
+  public SimpleResults<User> listUsersByOffice(Optional<String> name, Set<Office> offices,
       EnabledType enableType, List<UserType> types) {
 
     final QUser user = QUser.user;
@@ -182,7 +182,7 @@ public class UserDao extends DaoBase {
 
     query.where(condition).distinct().orderBy(user.username.asc());
 
-    return PerseoModelQuery.wrap(query, user);
+    return ModelQuery.wrap(query, user);
   }
 
   private BooleanBuilder matchUserName(QUser user, String name) {
