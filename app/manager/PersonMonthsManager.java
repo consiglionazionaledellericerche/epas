@@ -33,45 +33,11 @@ import javax.inject.Inject;
 
 public class PersonMonthsManager {
 
-  private static final String SPLIT = " ";
-  private static final String SPLIT_SUBELEMENT_CERTIFICATION = ";";
-  private static final String SPLIT_SUBELEMENT_CERTIFICATED_DATA = ",";
-  private static final String TRAINING_HOURS = "Ore di formazione";
-
-  private static final Logger log = LoggerFactory.getLogger(PersonMonthsManager.class);
-
   private final PersonMonthRecapDao personMonthRecapDao;  
-  private final CertificationDao certificationDao;
-
-  public Comparator<Person> personNameComparator = new Comparator<Person>() {
-
-    public int compare(Person person1, Person person2) {
-
-      String name1 = person1.surname.toUpperCase();
-      String name2 = person2.surname.toUpperCase();
-
-      if (name1.equals(name2)) {
-        return person1.name.toUpperCase().compareTo(person2.name.toUpperCase());
-      }
-      return name1.compareTo(name2);
-
-    }
-
-  };
-  public Comparator<String> stringComparator = new Comparator<String>() {
-
-    public int compare(String string1, String string2) {
-      return string1.compareTo(string2);
-
-    }
-
-  };
-
 
   @Inject
-  public PersonMonthsManager(PersonMonthRecapDao personMonthRecapDao, 
-      CertificationDao certificationDao) {
-    this.certificationDao = certificationDao;
+  public PersonMonthsManager(PersonMonthRecapDao personMonthRecapDao) {
+  
     this.personMonthRecapDao = personMonthRecapDao;
   }
 
@@ -145,6 +111,8 @@ public class PersonMonthsManager {
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
 
+    // TODO & FIXME: lo stato di validazione deve essere intercettato da attestati.
+    
     if (list.size() > 0) {
       rr.message =
           "Impossibile inserire ore di formazione per il mese precedente poichè gli "
@@ -210,40 +178,6 @@ public class PersonMonthsManager {
       }      
     }
     return map;
-  }
-
-  /**
-   * 
-   * @param string la stringa da parsare
-   * @param year l'anno
-   * @param month il mese
-   * @return la lista di dayhourrecap da passare al chiamante.
-   */
-  private List<DayAndHourRecap> parseTrainingHourString(String string, String split, 
-      String subSplit, int year, int month) {
-    List<DayAndHourRecap> list = Lists.newArrayList();
-    String[] tokens = separateTrainingHours(string, split);
-
-    for (int i = 0; i < tokens.length; i++) {
-      DayAndHourRecap dhr = new DayAndHourRecap();
-      String[] elements = tokens[i].split(subSplit);
-      dhr.begin = new LocalDate(year, month, new Integer(elements[0]));
-      dhr.end = new LocalDate(year, month, new Integer(elements[1]));
-      dhr.trainingHours = new Integer(elements[2].substring(0, 1));
-      list.add(dhr);      
-    }
-    return list;
-  }
-
-  /**
-   * 
-   * @param string la stringa da splittare
-   * @return un array di stringhe contenenti ciascuna una stringa nel formato 
-   "orediformazione;giornoinizio;giornofine".
-   */
-  private String[] separateTrainingHours(String string, String split) {
-    String[] elements = string.split(split);
-    return elements;
   }
 
 
