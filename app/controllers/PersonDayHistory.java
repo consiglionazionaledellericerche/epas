@@ -10,11 +10,8 @@ import dao.history.PersonDayHistoryDao;
 import dao.history.StampingHistoryDao;
 
 import models.Absence;
-import models.Person;
 import models.PersonDay;
 import models.Stamping;
-
-import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;

@@ -6,7 +6,6 @@ import models.Person;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import javax.inject.Inject;

@@ -22,7 +22,6 @@ import play.data.binding.As;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import javax.inject.Inject;

@@ -31,12 +31,11 @@ import org.joda.time.LocalDate;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
+import synch.perseoconsumers.PerseoApis;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import synch.perseoconsumers.PerseoApis;
 
 @Slf4j
 public class ContractPerseoConsumer {

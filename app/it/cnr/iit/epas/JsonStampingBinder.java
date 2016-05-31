@@ -5,6 +5,8 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import controllers.Security;
+
 import dao.PersonDao;
 
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,6 @@ import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDateTime;
 
-import controllers.Security;
 import injection.StaticInject;
 import play.Logger;
 import play.data.binding.Global;

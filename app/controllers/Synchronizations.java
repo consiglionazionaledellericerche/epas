@@ -41,17 +41,16 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+import synch.perseoconsumers.contracts.ContractPerseoConsumer;
+import synch.perseoconsumers.office.OfficePerseoConsumer;
+import synch.perseoconsumers.people.PeoplePerseoConsumer;
+import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-
-import synch.perseoconsumers.contracts.ContractPerseoConsumer;
-import synch.perseoconsumers.office.OfficePerseoConsumer;
-import synch.perseoconsumers.people.PeoplePerseoConsumer;
-import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 @Slf4j
 @With({Resecure.class, RequestInit.class})
