@@ -23,6 +23,14 @@
      <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari 
      verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
   #{/alert}
+  
+  #{if wrappedContract.value.isTemporary && wrappedContract.value.endDate == null}
+    #{alert color:'danger'}
+      <p>Il contratto selezionato è stato automaticamente importato dai sistemi centrali CNR e 
+      risulta essere della tipologia Tempo Determinato. Per completare la configurazione
+      occorre specificare opportunamente la data di fine rapporto specificando il campo <strong>Data Fine</strong></p> 
+    #{/alert}
+  #{/if}  
 
   #{if wrappedContract.value.sourceDateResidual}  
   #{alert color:'info'}
