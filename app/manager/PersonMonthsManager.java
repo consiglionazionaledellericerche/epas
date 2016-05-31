@@ -1,22 +1,45 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
+import dao.CertificationDao;
 import dao.PersonMonthRecapDao;
 
+import manager.recaps.trainingHours.DayAndHourRecap;
+import manager.recaps.trainingHours.TrainingHoursRecap;
+
+import models.AbsenceType;
+import models.CertificatedData;
+import models.Certification;
 import models.Person;
 import models.PersonMonthRecap;
+import models.enumerate.CertificationType;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import play.i18n.Messages;
+
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 public class PersonMonthsManager {
 
+  private final PersonMonthRecapDao personMonthRecapDao;  
+
   @Inject
-  private PersonMonthRecapDao personMonthRecapDao;
+  public PersonMonthsManager(PersonMonthRecapDao personMonthRecapDao) {
+  
+    this.personMonthRecapDao = personMonthRecapDao;
+  }
 
   /**
    * salva le ore di formazione per il periodo specificato.
@@ -51,7 +74,7 @@ public class PersonMonthsManager {
         || value > 24 * (endDate.getDayOfMonth() - beginDate.getDayOfMonth() + 1)) {
       rr.message =
           "Non sono valide le ore di formazione negative, testuali o che superino la quantità "
-          + "massima di ore nell'intervallo temporale inserito.";
+              + "massima di ore nell'intervallo temporale inserito.";
       rr.result = false;
     }
     return rr;
@@ -63,12 +86,12 @@ public class PersonMonthsManager {
    */
   public Insertable checkIfPeriodAlreadyExists(Person person, int year, int month,
       LocalDate beginDate, LocalDate endDate) {
-    
+
     List<PersonMonthRecap> pmList = personMonthRecapDao
         .getPersonMonthRecaps(person, year, month, beginDate, endDate);
-    
+
     Insertable rr = new Insertable(true, "");
-    
+
     if (pmList != null && pmList.size() > 0) {
       rr.message = "Esiste un periodo di ore di formazione "
           + "che contiene uno o entrambi i giorni specificati.";
@@ -88,10 +111,12 @@ public class PersonMonthsManager {
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
 
+    // TODO & FIXME: lo stato di validazione deve essere intercettato da attestati.
+    
     if (list.size() > 0) {
       rr.message =
           "Impossibile inserire ore di formazione per il mese precedente poichè gli "
-          + "attestati per quel mese sono già stati inviati";
+              + "attestati per quel mese sono già stati inviati";
       rr.result = false;
 
     }
@@ -130,5 +155,30 @@ public class PersonMonthsManager {
       return this.result;
     }
   }
+
+  /**
+   * 
+   * @param personList la lista di persone
+   * @param year l'anno
+   * @param month il mese
+   * @return la mappa contenente per ogni persona la propria situazione in termini di ore di
+   *     formazione approvate o no.
+   */
+  public Map<Person, List<PersonMonthRecap>> createMap(
+      List<Person> personList, int year, int month) {
+
+    Map<Person, List<PersonMonthRecap>> map = Maps.newHashMap();
+    for (Person person : personList) {
+
+      List<PersonMonthRecap> pmrList = personMonthRecapDao
+          .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+              Optional.fromNullable(month), Optional.<Boolean>absent());
+      if (!pmrList.isEmpty()) {
+        map.put(person, pmrList);
+      }      
+    }
+    return map;
+  }
+
 
 }

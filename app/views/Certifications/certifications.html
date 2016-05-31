@@ -19,17 +19,23 @@
      Attraverso questa pagina è possibile popolare gli attestati CNR per il mese e sede selezionati nella nuova
      piattaforma. 
    </p>
-   <p>  
+ #{/alert}
+ 
+ #{alert color:'info'}
+    <p><strong>Guida</strong></p>
+    <p>  
      Dopo aver effettuato l'operazione di <em>Stralcio</em> in attestati, cliccare sul
      pulsante <strong>Processa</strong>. 
    </p>
    <p>
-     La procedura si occuperà di inviare i dati ancora non presenti
-     in attestati e rimuovere quelli obsoleti. <br>
-     E' possibile processare i dati più volte, fino a quando
-     l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in attestati.
+     La procedura si occuperà di inviare i dati ancora non presenti in attestati e di rimuovere quelli obsoleti.
    </p>
- #{/alert} 
+   <p><strong>Nota bene</strong><br>
+     E' possibile processare i dati più volte, fino a quando
+     l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in attestati.<br>
+     L'operazione Processa non ha effetti per ogni attestato già validato  <i class="fa fa-ban" aria-hidden="true" popover-hover data-content="Attestato validato su attestati non modificabile."></i> 
+   </p>
+ #{/alert}
  
  #{if numbers != null}  *{ se è injettato è stata ottenuta l'autenticazione }*  
 	 #{if !numbers.empty}
@@ -61,8 +67,10 @@
 	<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
 	<a class="btn btn-primary" href="@{Certifications.certifications(office.id, year, month)}">Aggiorna <i class="fa fa-refresh" aria-hidden="true"></i></a>
 	
+	*{
 	<a class="btn btn-danger pull-right" href="@{Certifications.emptyCertifications(office.id, year, month)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
-	  
+	}*
+	
 	<ul class="list-group">
 	  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }
 	  
@@ -78,25 +86,33 @@
 	    <strong>${personCertificationStatus.person.fullname}<br>${personCertificationStatus.person.number}</strong>
 	    </div>
 	    <div class="col-xs-3">
+	      #{if !personCertificationStatus.validate}
+	       
 	        #{if personCertificationStatus.okProcessable}
 		      <p class="text-success"><i class="fa fa-check fa-2x"
-		      popover-hover data-content="Attestato processato correttamente."></i></p>
+		      popover-hover data-content="Attestato processato correttamente in attesa di validazione."></i>
 		    #{/if}
 		    #{if personCertificationStatus.incompleteProcessable}
 		      <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
-		      popover-hover data-content="Attestato incompleto da processare."></i></p>
+		      popover-hover data-content="Attestato incompleto da processare."></i>
 		    #{/if}
 		    
 		
 		    #{if personCertificationStatus.okNotProcessable}
 		      <p class="text-muted"><i class="fa fa-check fa-2x"
-		      popover-hover data-content="Attestato processato correttamente, non modificabile."></i></p>
+		      popover-hover data-content="Attestato processato correttamente, non modificabile."></i>
 		    #{/if}
 		    #{if personCertificationStatus.incompleteNotProcessable}
 		    <p class="text-danger"><i class="fa fa-frown-o fa-2x"
-	         popover data-content="Attestato incompleto non processabile."></i></p>
-		      
+	         popover data-content="Attestato incompleto non processabile."></i>
 		    #{/if}
+		    
+	      #{/if}
+	      #{else}  
+	          <p class="text-danger"><i class="fa fa-ban fa-2x" aria-hidden="true" 
+	          popover-hover data-content="Attestato validato su attestati non modificabile."></i>
+	      #{/else}		    
+		    </p>
 	    </div>
 	    
 	    <div class="col-xs-6">

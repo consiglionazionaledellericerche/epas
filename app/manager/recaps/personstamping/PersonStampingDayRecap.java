@@ -59,8 +59,7 @@ public class PersonStampingDayRecap {
   public String workTimeExplanation = "";
   public String mealTicket;
 
-  public String todayLunchTimeCode = "";
-  public String fixedWorkingTimeCode = "";
+  public StampModificationType fixedWorkingTimeCode = null;
   public String exitingNowCode = "";
 
   public List<String> note = Lists.newArrayList();
@@ -76,6 +75,7 @@ public class PersonStampingDayRecap {
    * @param configurationManager    injected
    * @param personDay               personDay
    * @param numberOfInOut           numero di colonne del tabellone a livello mensile.
+   * @param considerExitingNow      se considerare nel calcolo l'uscita in questo momento
    * @param monthContracts          il riepiloghi del mese
    */
   public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
@@ -83,7 +83,8 @@ public class PersonStampingDayRecap {
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
                                 WorkingTimeTypeDao workingTimeTypeDao,
                                 ConfigurationManager configurationManager, PersonDay personDay,
-                                int numberOfInOut, Optional<List<Contract>> monthContracts) {
+                                int numberOfInOut, boolean considerExitingNow, 
+                                Optional<List<Contract>> monthContracts) {
 
     this.personDay = personDay;
 
@@ -99,7 +100,7 @@ public class PersonStampingDayRecap {
     this.wrPersonDay = wrapperFactory.create(personDay);
 
     this.stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory, 
-        personDayManager, numberOfInOut);
+        personDayManager, numberOfInOut, considerExitingNow);
     
     this.note.addAll(getStampingsNote(this.stampingsTemplate));
 
@@ -118,23 +119,10 @@ public class PersonStampingDayRecap {
             stampTypeManager.getStampMofificationType(
                 StampModificationTypeCode.FIXED_WORKINGTIME);
       }
-      this.fixedWorkingTimeCode = fixedStampModificationType.code;
+      this.fixedWorkingTimeCode = fixedStampModificationType;
     }
     
     this.computeWorkTime(personDay.getTimeAtWork());
-
-    // lunch (p,e) (parte obsoleta che serve per i mesi antichi di IIT)
-    if (personDay.getStampModificationType() != null && !personDay.isFuture()) {
-      this.todayLunchTimeCode = personDay.getStampModificationType().code;
-    }
-    
-    // uscita adesso f
-    if (personDay.isToday() && !personDay.isHoliday && thereAreAllDayAbsences) {
-      StampModificationType smt =
-          stampTypeManager.getStampMofificationType(
-              StampModificationTypeCode.ACTUAL_TIME_AT_WORK);
-      this.exitingNowCode = smt.code;
-    }
 
     // is sourceContract (solo se monthContracts presente)
     if (monthContracts.isPresent()) {
@@ -255,10 +243,10 @@ public class PersonStampingDayRecap {
    */
   private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay, 
       StampingTemplateFactory stampingTemplateFactory, PersonDayManager personDayManager, 
-      int numberOfInOut) {
+      int numberOfInOut, boolean considerExitingNow) {
 
     List<Stamping> stampings = personDayManager
-        .getStampingsForTemplate(wrPersonDay, numberOfInOut);
+        .getStampingsForTemplate(wrPersonDay, numberOfInOut, considerExitingNow);
 
     List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
 
@@ -308,6 +296,11 @@ public class PersonStampingDayRecap {
    */
   private void computeWorkTime(int workTime) {
 
+    if (this.fixedWorkingTimeCode != null) {
+      this.workTimeExplanation = this.workTimeExplanation 
+          + "<br>" + italic(this.fixedWorkingTimeCode.description);
+    }
+    
     if (personDay.stampingsTime != null && personDay.stampingsTime > 0) {
       this.workTimeExplanation = this.workTimeExplanation
           + "<br>Da timbrature: " 
@@ -342,10 +335,15 @@ public class PersonStampingDayRecap {
           "Tempo a lavoro totale: " + stronger(DateUtility.fromMinuteToHourMinute(workTime)) 
           + this.workTimeExplanation;
     }
+    
   }
 
   private String stronger(String string) {
     return "<strong>" + string + "</strong>";
+  }
+  
+  private String italic(String string) {
+    return "<em>" + string + "</em>";
   }
  
 }
