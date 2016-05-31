@@ -145,14 +145,6 @@ public class PersonStampingRecap {
 
       this.totalWorkingTime += pd.timeAtWork;
 
-      if (stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()) {
-        StampModificationType smt = stampingDayRecapFactory
-            .stampTypeManager.getStampMofificationType(
-                StampModificationTypeCode.FIXED_WORKINGTIME);
-
-        stampModificationTypeSet.add(smt);
-      }
-
       if (pd.stampModificationType != null && !pd.date.isAfter(today)) {
 
         stampModificationTypeSet.add(pd.stampModificationType);
