@@ -283,7 +283,7 @@ public class ContractPerseoConsumer {
   @Deprecated
   public Map<Long, Contract> activeContractsEpasByPersonPerseoId(Office office) {
     //Costruisco La mappa di tutte le persone attive epas sincronizzate.
-    @SuppressWarnings("deprecation")
+
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)

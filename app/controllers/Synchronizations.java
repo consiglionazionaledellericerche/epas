@@ -361,11 +361,9 @@ public class Synchronizations extends Controller {
       oldInstitutes();
     }
 
-    @SuppressWarnings("deprecation")
-    List<Person> people = personDao
-        .listFetched(Optional.<String>absent(), Sets.newHashSet(office), false, null, null, false)
-        .list();
-
+    List<Person> people = personDao.listFetched(Optional.<String>absent(), Sets.newHashSet(office), 
+        false, null, null, false).list();
+    
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)
         .transform(wrapperFunctionFactory.person()).toList();
 
@@ -443,7 +441,6 @@ public class Synchronizations extends Controller {
     Office office = officeDao.getOfficeById(epasOfficeId);
     notFoundIfNull(office);
 
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
@@ -555,7 +552,6 @@ public class Synchronizations extends Controller {
       e.printStackTrace();
     }
 
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
@@ -633,6 +629,7 @@ public class Synchronizations extends Controller {
     notFoundIfNull(office);
 
     //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    @SuppressWarnings("deprecation") 
     Map<Long, Contract> activeContractsEpasByPersonPerseoId =
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
@@ -686,6 +683,7 @@ public class Synchronizations extends Controller {
     notFoundIfNull(office);
     
     //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    @SuppressWarnings("deprecation")
     Map<Long, Contract> activeContractsEpasByPersonPerseoId =
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
@@ -786,6 +784,7 @@ public class Synchronizations extends Controller {
   private static Optional<Exception> managerImportAllActiveContractsInOffice(Office office) {
     
     //La mappa di tutti i contratti attivi delle persone sincronizzate epas.
+    @SuppressWarnings("deprecation")
     Map<Long, Contract> activeContractsEpasByPersonPerseoId =
         contractPerseoConsumer.activeContractsEpasByPersonPerseoId(office);
 
@@ -798,6 +797,7 @@ public class Synchronizations extends Controller {
       return Optional.of(e);
     }
 
+    @SuppressWarnings("deprecation")
     WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {

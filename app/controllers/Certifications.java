@@ -11,8 +11,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.ConfigurationManager;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
@@ -26,6 +24,7 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -38,7 +37,6 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
-@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Certifications extends Controller {
 
@@ -126,7 +124,6 @@ public class Certifications extends Controller {
       render(office, year, month, numbers);
     }
     
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
     
@@ -191,7 +188,6 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month, numbers);
     }
     
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
@@ -265,7 +261,6 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month, numbers);
     }
     
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
