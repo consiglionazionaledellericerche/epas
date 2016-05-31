@@ -1,15 +1,19 @@
+ 
  #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
-    #{if stampingTemplate.colour.equals("in")}
-      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
-    #{/if}
-    #{elseif stampingTemplate.colour.equals("out")}
-      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
-    #{/elseif}
-    #{elseif stampingTemplate.colour.equals("warn")}
-      <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
-    #{/elseif}
+    
+    *{ posizione timbratura }*
+    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId}
+       
+    *{ colore timbratura }*
+    #{if stampingTemplate.colour.equals("in")}       default-left"  #{/if}
+    #{elseif stampingTemplate.colour.equals("out")}  default-right" #{/elseif}
+    #{elseif stampingTemplate.colour.equals("warn")} warn"          #{/elseif}
 
-      #{if stampingTemplate.date!=null}
+    *{ popover }*    
+    #{if stampingTemplate.showPopover()} webui-popover-hover data-url="#${stampingTemplate.stamping.id}" #{/if}
+    >
+
+      #{if stampingTemplate.date}
 	      #{if showLink}
 		      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping'}
 		        ${stampingTemplate.hour}
@@ -24,18 +28,25 @@
               class="icon-warning-sign"></i></abbr>
       #{/elseif}
 
-      #{ifnot stampingTemplate.identifier.equals("")}
-      <strong>${stampingTemplate.identifier}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.markedByAdminCode.equals("")}
-      <strong>${stampingTemplate.markedByAdminCode}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.markedByEmployeeCode.equals("")}
-      <strong>${stampingTemplate.markedByEmployeeCode}</strong>
-      #{/ifnot}
-      #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
-      <strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-      #{/ifnot}
+
+      #{if stampingTemplate.showPopover()}
+        <div class="webui-popover-content" id="${stampingTemplate.stamping.id}">
+          #{if stampingTemplate.stamping.stampType}
+            <p><strong>${stampingTemplate.stamping.stampType.identifier}</strong> ${stampingTemplate.stamping.stampType.description}</p>
+          #{/if}
+          #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+            <p><strong>${smt.code}</strong> ${smt.description}</p>
+          #{/list}
+        </div>
+      #{/if}
+      
+      #{if stampingTemplate.stamping.stampType}
+        <strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+      #{/if}
+      #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+        <strong>${smt.code}</strong>
+      #{/list}
+
       <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->
     </td>
     #{/list}

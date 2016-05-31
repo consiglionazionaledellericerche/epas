@@ -76,6 +76,7 @@ public class PersonStampingDayRecap {
    * @param configurationManager    injected
    * @param personDay               personDay
    * @param numberOfInOut           numero di colonne del tabellone a livello mensile.
+   * @param considerExitingNow      se considerare nel calcolo l'uscita in questo momento
    * @param monthContracts          il riepiloghi del mese
    */
   public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
@@ -83,7 +84,8 @@ public class PersonStampingDayRecap {
                                 StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
                                 WorkingTimeTypeDao workingTimeTypeDao,
                                 ConfigurationManager configurationManager, PersonDay personDay,
-                                int numberOfInOut, Optional<List<Contract>> monthContracts) {
+                                int numberOfInOut, boolean considerExitingNow, 
+                                Optional<List<Contract>> monthContracts) {
 
     this.personDay = personDay;
 
@@ -99,7 +101,7 @@ public class PersonStampingDayRecap {
     this.wrPersonDay = wrapperFactory.create(personDay);
 
     this.stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory, 
-        personDayManager, numberOfInOut);
+        personDayManager, numberOfInOut, considerExitingNow);
     
     this.note.addAll(getStampingsNote(this.stampingsTemplate));
 
@@ -128,14 +130,6 @@ public class PersonStampingDayRecap {
       this.todayLunchTimeCode = personDay.getStampModificationType().code;
     }
     
-    // uscita adesso f
-    if (personDay.isToday() && !personDay.isHoliday && thereAreAllDayAbsences) {
-      StampModificationType smt =
-          stampTypeManager.getStampMofificationType(
-              StampModificationTypeCode.ACTUAL_TIME_AT_WORK);
-      this.exitingNowCode = smt.code;
-    }
-
     // is sourceContract (solo se monthContracts presente)
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {
@@ -255,10 +249,10 @@ public class PersonStampingDayRecap {
    */
   private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay, 
       StampingTemplateFactory stampingTemplateFactory, PersonDayManager personDayManager, 
-      int numberOfInOut) {
+      int numberOfInOut, boolean considerExitingNow) {
 
     List<Stamping> stampings = personDayManager
-        .getStampingsForTemplate(wrPersonDay, numberOfInOut);
+        .getStampingsForTemplate(wrPersonDay, numberOfInOut, considerExitingNow);
 
     List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
 

@@ -48,16 +48,17 @@ public class PersonStampingDayRecapFactory {
    * Costruisce l'oggetto che rappresenta un giorno nel tabellone timbrature.
    * @param personDay personDay
    * @param numberOfInOut numero di colonne del tabellone a livello mensile.
+   * @param considerExitingNow se considerare nel calcolo l'uscita in questo momento
    * @param monthContracts riepiloghi mensili (servono a capire se il giorno è da considere).  
    * @return personStampingDayRecap
    */
-  public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut,
-                                       Optional<List<Contract>> monthContracts) {
+  public PersonStampingDayRecap create(PersonDay personDay, int numberOfInOut, 
+      boolean considerExitingNow, Optional<List<Contract>> monthContracts) {
 
     return new PersonStampingDayRecap(personDayManager, personManager,
             stampingTemplateFactory, stampTypeManager, wrapperFactory,
             workingTimeTypeDao, configurationManager,
-            personDay, numberOfInOut, monthContracts);
+            personDay, numberOfInOut, considerExitingNow, monthContracts);
   }
 
 }
