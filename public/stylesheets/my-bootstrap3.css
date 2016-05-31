@@ -414,13 +414,19 @@ td.default-single > i.fa-spinner{
 
 *[popover-hover]:hover  {
 	cursor: help;
-	
 }
 
 td[popover-hover]:hover {
 	background: #F1F1F1;
 }
 
+*[webui-popover-hover]:hover  {
+	cursor: help;
+}
+
+td[webui-popover-hover]:hover {
+	background: #F1F1F1;
+}
 
 @keyframes blinker {
  50% { opacity: 0.0; }

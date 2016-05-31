@@ -81,10 +81,13 @@
 	      #{if _.date}
 	      ${_.hour}
 	      #{/if}
-	      <strong>${_.identifier}</strong>
-	      <strong>${_.markedByAdminCode}</strong>
-	      <strong>${_.missingExitStampBeforeMidnightCode}</strong>
+	      
+	      #{if _.stamping.stampType} <strong>${_.stamping.stampType.identifier}</strong> #{/if}
+	        #{list _.stampModificationTypes, as:'smt'}
+	          <strong>${smt.code}</strong>
+	        #{/list}
 	      #{/ifnot}
+	      
 	    </td>
 	    #{/list}
 	    <td>

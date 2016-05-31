@@ -115,7 +115,7 @@ public class Stampings extends Controller {
     }
 
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(person.getValue(), year, month);
+        .create(person.getValue(), year, month, true);
     
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = false;
@@ -149,7 +149,7 @@ public class Stampings extends Controller {
       personStamping(personId, last.getYear(), last.getMonthOfYear());
     }
 
-    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, true);
 
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = true;

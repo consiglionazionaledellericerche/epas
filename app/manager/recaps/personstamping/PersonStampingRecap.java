@@ -80,13 +80,14 @@ public class PersonStampingRecap {
    * @param year                    year
    * @param month                   month
    * @param person                  person
+   * @param considerExitingNow      se considerare nel calcolo l'uscita in questo momento
    */
   public PersonStampingRecap(PersonDayManager personDayManager,
                              PersonDayDao personDayDao,
                              PersonManager personManager,
                              PersonStampingDayRecapFactory stampingDayRecapFactory,
                              IWrapperFactory wrapperFactory,
-                             int year, int month, Person person) {
+                             int year, int month, Person person, boolean considerExitingNow) {
 
     this.person = person;
     this.month = month;
@@ -139,11 +140,10 @@ public class PersonStampingRecap {
       personDayManager.setValidPairStampings(pd);
 
       PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd, this.numberOfInOut,
-          Optional.fromNullable(monthContracts));
+          considerExitingNow, Optional.fromNullable(monthContracts));
       this.daysRecap.add(dayRecap);
 
       this.totalWorkingTime += pd.timeAtWork;
-
 
       if (stampingDayRecapFactory.wrapperFactory.create(pd).isFixedTimeAtWork()) {
         StampModificationType smt = stampingDayRecapFactory
@@ -153,13 +153,6 @@ public class PersonStampingRecap {
         stampModificationTypeSet.add(smt);
       }
 
-      if (pd.date.equals(today) && !pd.isHoliday && !personDayManager.isAllDayAbsences(pd)) {
-
-        StampModificationType smt = stampingDayRecapFactory
-            .stampTypeManager.getStampMofificationType(
-                StampModificationTypeCode.ACTUAL_TIME_AT_WORK);
-        stampModificationTypeSet.add(smt);
-      }
       if (pd.stampModificationType != null && !pd.date.isAfter(today)) {
 
         stampModificationTypeSet.add(pd.stampModificationType);
@@ -196,7 +189,6 @@ public class PersonStampingRecap {
 
     this.numberOfCompensatoryRestUntilToday = personManager
         .numberOfCompensatoryRestUntilToday(person, year, month);
-    
     
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
