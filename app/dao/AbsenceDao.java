@@ -12,7 +12,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.wrapper.IWrapperFactory;
 
-import helpers.jpa.PerseoModelQuery;
+import helpers.jpa.ModelQuery;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -155,7 +155,7 @@ public class AbsenceDao extends DaoBase {
     }
   }
 
-  public PerseoModelQuery.PerseoSimpleResults<Absence> findByPersonAndDate(Person person,
+  public ModelQuery.SimpleResults<Absence> findByPersonAndDate(Person person,
       LocalDate fromDate, Optional<LocalDate> toDate, Optional<AbsenceType> absenceType) {
 
     Preconditions.checkNotNull(person);
@@ -170,7 +170,7 @@ public class AbsenceDao extends DaoBase {
       conditions.and(absence.absenceType.eq(absenceType.get()));
     }
 
-    return PerseoModelQuery.wrap(getQueryFactory().from(absence).where(conditions), absence);
+    return ModelQuery.wrap(getQueryFactory().from(absence).where(conditions), absence);
   }
 
   /**
