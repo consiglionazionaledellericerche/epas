@@ -14,8 +14,8 @@ import com.mysema.query.types.QBean;
 
 import dao.filter.QFilters;
 
-import helpers.jpa.PerseoModelQuery;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import it.cnr.iit.epas.DateInterval;
 
@@ -91,15 +91,15 @@ public final class PersonDao extends DaoBase {
   /**
    * La lista di persone una volta applicati i filtri dei parametri. (Dovrà sostituire list
    * deprecata). TODO: Perseo significa che utilizza i metodi puliti di paginazione implementati da
-   * Marco (PerseoSimpleResult e PerseoModelQuery) che dovranno sostituire i deprecati SimpleResult
-   * e ModelQuery di epas.
+   * Marco (PerseoSimpleResult e ModelQuery) che dovranno sostituire i deprecati SimpleResult e
+   * ModelQuery di epas.
    */
-  public PerseoSimpleResults<Person> listPerseo(Optional<String> name, Set<Office> offices,
+  public SimpleResults<Person> listPerseo(Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 
     final QPerson person = QPerson.person;
 
-    return PerseoModelQuery.wrap(
+    return ModelQuery.wrap(
         // JPQLQuery
         personQuery(name, offices, onlyTechnician, Optional.fromNullable(start),
             Optional.fromNullable(end), onlyOnCertificate, Optional.<CompetenceCode>absent(),
@@ -111,14 +111,14 @@ public final class PersonDao extends DaoBase {
   /**
    * Tutte le persone di epas (possibile filtrare sulla sede).
    */
-  public PerseoSimpleResults<Person> list(Optional<Office> office) {
+  public SimpleResults<Person> list(Optional<Office> office) {
     final QPerson person = QPerson.person;
 
     Set<Office> offices = Sets.newHashSet();
     if (office.isPresent()) {
       offices.add(office.get());
     }
-    return PerseoModelQuery.wrap(
+    return ModelQuery.wrap(
         // JPQLQuery
         personQuery(Optional.<String>absent(), offices, false, Optional.<LocalDate>absent(),
             Optional.<LocalDate>absent(), false, Optional.<CompetenceCode>absent(),
@@ -132,12 +132,12 @@ public final class PersonDao extends DaoBase {
   /**
    * La lista di persone una volta applicati i filtri dei parametri.
    */
-  public PerseoSimpleResults<Person> list(Optional<String> name, Set<Office> offices,
+  public SimpleResults<Person> list(Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 
     final QPerson person = QPerson.person;
 
-    return PerseoModelQuery.wrap(
+    return ModelQuery.wrap(
         // JPQLQuery
         personQuery(name, offices, onlyTechnician, Optional.fromNullable(start),
             Optional.fromNullable(end), onlyOnCertificate, Optional.<CompetenceCode>absent(),
@@ -171,7 +171,7 @@ public final class PersonDao extends DaoBase {
    * @param onlyOnCertificate true se voglio solo gli strutturati, false altrimenti
    * @return la lista delle persone trovate con queste retrizioni
    */
-  public PerseoSimpleResults<Person> listFetched(Optional<String> name, Set<Office> offices,
+  public SimpleResults<Person> listFetched(Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 
     final QPerson person = QPerson.person;
@@ -180,7 +180,7 @@ public final class PersonDao extends DaoBase {
         Optional.fromNullable(end), onlyOnCertificate, Optional.<CompetenceCode>absent(),
         Optional.<Person>absent(), false);
 
-    PerseoSimpleResults<Person> result = PerseoModelQuery.wrap(
+    SimpleResults<Person> result = ModelQuery.wrap(
         // JPQLQuery
         query,
         // Expression
@@ -205,7 +205,7 @@ public final class PersonDao extends DaoBase {
    * @param end            attivi a
    * @return model query delle persone selezionte.
    */
-  public PerseoSimpleResults<Person> listForCompetence(CompetenceCode competenceCode,
+  public SimpleResults<Person> listForCompetence(CompetenceCode competenceCode,
       Optional<String> name, Set<Office> offices, boolean onlyTechnician,
       LocalDate start, LocalDate end, Optional<Person> personInCharge) {
 
@@ -214,7 +214,7 @@ public final class PersonDao extends DaoBase {
 
     final QPerson person = QPerson.person;
 
-    return PerseoModelQuery.wrap(personQuery(name, offices, onlyTechnician,
+    return ModelQuery.wrap(personQuery(name, offices, onlyTechnician,
         Optional.fromNullable(start), Optional.fromNullable(end), true,
         Optional.fromNullable(competenceCode), personInCharge, false), person);
 

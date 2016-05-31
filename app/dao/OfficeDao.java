@@ -9,8 +9,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import helpers.jpa.PerseoModelQuery;
-import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
+import helpers.jpa.ModelQuery;
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import models.Institute;
 import models.Office;
@@ -119,7 +119,7 @@ public class OfficeDao extends DaoBase {
   /**
    * Gli istituti che contengono sede sulle quali l'user ha il ruolo role.
    */
-  public PerseoSimpleResults<Institute> institutes(Optional<String> name, User user, Role role) {
+  public SimpleResults<Institute> institutes(Optional<String> name, User user, Role role) {
 
     final QInstitute institute = QInstitute.institute;
     final QOffice office = QOffice.office;
@@ -134,7 +134,7 @@ public class OfficeDao extends DaoBase {
       final JPQLQuery query = getQueryFactory()
           .from(institute)
           .where(condition);
-      return PerseoModelQuery.wrap(query, institute);
+      return ModelQuery.wrap(query, institute);
     }
 
     final JPQLQuery query = getQueryFactory()
@@ -144,7 +144,7 @@ public class OfficeDao extends DaoBase {
         .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
         .distinct();
 
-    return PerseoModelQuery.wrap(query, institute);
+    return ModelQuery.wrap(query, institute);
 
   }
 
@@ -152,7 +152,7 @@ public class OfficeDao extends DaoBase {
    * Tutte le sedi. //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
    * ordinamento sugli istituti.
    */
-  public PerseoSimpleResults<Office> allOffices() {
+  public SimpleResults<Office> allOffices() {
 
     final QOffice office = QOffice.office;
 
@@ -161,14 +161,14 @@ public class OfficeDao extends DaoBase {
         .distinct()
         .orderBy(office.name.asc());
 
-    return PerseoModelQuery.wrap(query, office);
+    return ModelQuery.wrap(query, office);
 
   }
 
   /**
    * Le sedi sulle quali l'user ha il ruolo role.
    */
-  public PerseoSimpleResults<Office> offices(Optional<String> name, User user, Role role) {
+  public SimpleResults<Office> offices(Optional<String> name, User user, Role role) {
 
     final QOffice office = QOffice.office;
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
@@ -187,7 +187,7 @@ public class OfficeDao extends DaoBase {
           .where(condition)
           .distinct()
           .orderBy(office.institute.name.asc());
-      return PerseoModelQuery.wrap(query, office);
+      return ModelQuery.wrap(query, office);
     }
 
     final JPQLQuery query = getQueryFactory()
@@ -198,7 +198,7 @@ public class OfficeDao extends DaoBase {
         .distinct()
         .orderBy(office.institute.name.asc());
 
-    return PerseoModelQuery.wrap(query, office);
+    return ModelQuery.wrap(query, office);
 
   }
 
