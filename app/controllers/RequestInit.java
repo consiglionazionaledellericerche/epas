@@ -151,20 +151,41 @@ public class RequestInit extends Controller {
 
     session.put("officeSelected", officeId);
 
-    // day lenght (provvisorio)
-    try {
-
-      Integer dayLenght =
-          new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
-      renderArgs.put("dayLenght", dayLenght);
-    } catch (Exception e) {
-      //FIXME: perché è previsto il tracciamento di questa eccezione??
-    }
-
+    patchSwitchDate();
+    
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
     
     computeActionSelected(currentUser, offices, year, month);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
+  }
+  
+  /**
+   * Gestisce i casi di salto ad una data che non esiste.
+   */
+  private static void patchSwitchDate() {
+    
+    Integer year = Integer.parseInt(session.get("yearSelected"));
+    Integer month = Integer.parseInt(session.get("monthSelected"));
+    Integer day = Integer.parseInt(session.get("daySelected"));
+    
+    LocalDate date = null;
+    
+    // Tentativo generale
+    try {
+      date = new LocalDate(year, month, day);
+    } catch (Exception ex) {
+      try {
+        date = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+      } catch (Exception ex2) {
+        date = LocalDate.now();
+      }
+      session.put("yearSelected", date.getYear());
+      session.put("monthSelected", date.getMonthOfYear());
+      session.put("daySelected", date.getDayOfMonth());
+    }
+    
+    renderArgs.put("dayLenght", date.dayOfMonth().withMaximumValue().getDayOfMonth());
+
   }
 
   private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
