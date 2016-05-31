@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author marco
  */
-public class PerseoModelQuery {
+public class ModelQuery {
 
   /**
    * Nome dell'argomento da fornire via request per indicare il numero di elementi per pagina.
@@ -29,7 +29,7 @@ public class PerseoModelQuery {
   private static final String PAGE_SIZE_PARAM = "limit";
   private static final long DEFAULT_PAGE_SIZE = 10L;
 
-  private PerseoModelQuery() {
+  private ModelQuery() {
   }
 
   public static JPQLQuery createQuery() {
@@ -52,9 +52,9 @@ public class PerseoModelQuery {
   /**
    * @return a simplequery object, wrap list or listResults.
    */
-  public static <T> PerseoSimpleResults<T> wrap(JPQLQuery query,
+  public static <T> SimpleResults<T> wrap(JPQLQuery query,
       Expression<T> expression) {
-    return new PerseoSimpleResults<T>(query, expression);
+    return new SimpleResults<T>(query, expression);
   }
 
   /**
@@ -100,11 +100,11 @@ public class PerseoModelQuery {
   /**
    * @author marco
    */
-  public static class PerseoSimpleResults<T> {
+  public static class SimpleResults<T> {
     private final Expression<T> expression;
     private final JPQLQuery query;
 
-    PerseoSimpleResults(JPQLQuery query, Expression<T> expression) {
+    SimpleResults(JPQLQuery query, Expression<T> expression) {
       this.query = query;
       this.expression = expression;
     }
