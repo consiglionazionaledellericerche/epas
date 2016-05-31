@@ -86,7 +86,7 @@
 	    <strong>${personCertificationStatus.person.fullname}<br>${personCertificationStatus.person.number}</strong>
 	    </div>
 	    <div class="col-xs-3">
-	      #{if personCertificationStatus.validate}
+	      #{if !personCertificationStatus.validate}
 	       
 	        #{if personCertificationStatus.okProcessable}
 		      <p class="text-success"><i class="fa fa-check fa-2x"
