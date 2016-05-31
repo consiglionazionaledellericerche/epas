@@ -337,8 +337,8 @@ public class Persons extends Controller {
   }
 
   public static void savePassword(@Required String vecchiaPassword,
-                                  @MinLength(5) @Required String nuovaPassword,
-                                  @MinLength(5) @Required String confermaPassword) {
+      @MinLength(5) @Required String nuovaPassword,
+      @MinLength(5) @Required String confermaPassword) {
 
     User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional
         .fromNullable(Hashing.md5().hashString(vecchiaPassword, Charsets.UTF_8).toString()));
@@ -372,7 +372,7 @@ public class Persons extends Controller {
    * @throws Throwable boh.
    */
   public static void resetPassword(@MinLength(5) @Required String nuovaPassword,
-                                   @MinLength(5) @Required String confermaPassword) throws Throwable {
+      @MinLength(5) @Required String confermaPassword) throws Throwable {
 
     User user = Security.getUser().get();
     if (user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now())) {

@@ -38,11 +38,11 @@ public class PerseoModelQuery {
 
   public static JPQLQuery paginatedQuery(JPQLQuery query) {
     final Integer page = Optional.fromNullable(Scope.Params.current()
-            .get(Paginator.PAGE_PARAM, Integer.class)).or(1);
+        .get(Paginator.PAGE_PARAM, Integer.class)).or(1);
     final long limit = Optional.fromNullable(Scope.Params.current()
-            .get(PAGE_SIZE_PARAM, Long.class)).or(DEFAULT_PAGE_SIZE);
+        .get(PAGE_SIZE_PARAM, Long.class)).or(DEFAULT_PAGE_SIZE);
     return query.restrict(new QueryModifiers(limit,
-            (page - 1L) * DEFAULT_PAGE_SIZE));
+        (page - 1L) * DEFAULT_PAGE_SIZE));
   }
 
   public static JPQLQuery createPaginatedQuery() {
@@ -53,7 +53,7 @@ public class PerseoModelQuery {
    * @return a simplequery object, wrap list or listResults.
    */
   public static <T> PerseoSimpleResults<T> wrap(JPQLQuery query,
-                                                Expression<T> expression) {
+      Expression<T> expression) {
     return new PerseoSimpleResults<T>(query, expression);
   }
 

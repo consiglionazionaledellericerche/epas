@@ -62,7 +62,7 @@ public class BadgeSystemDao extends DaoBase {
   }
 
   public PerseoSimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
-                                                       Optional<BadgeReader> badgeReader) {
+      Optional<BadgeReader> badgeReader) {
 
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
     final QBadgeReader qBadgeReader = QBadgeReader.badgeReader;

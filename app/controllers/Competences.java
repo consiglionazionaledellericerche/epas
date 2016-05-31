@@ -19,7 +19,6 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
-import helpers.ModelQuery.SimpleResults;
 import helpers.Web;
 import helpers.jpa.PerseoModelQuery.PerseoSimpleResults;
 
@@ -47,7 +46,6 @@ import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.io.FileInputStream;
@@ -104,6 +102,7 @@ public class Competences extends Controller {
 
   /**
    * Modifica codice competence.
+   *
    * @param competenceCodeId codice
    */
   public static void edit(Long competenceCodeId) {
@@ -114,6 +113,7 @@ public class Competences extends Controller {
 
   /**
    * Salva codice competenza.
+   *
    * @param competenceCode codice
    */
   public static void save(@Valid final CompetenceCode competenceCode) {
@@ -141,19 +141,20 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
     LocalDate date = new LocalDate();
-    List<Person> personList  = personDao.list(Optional.<String>absent(),
+    List<Person> personList = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(office),
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
     // TODO: togliere questa storpiaggine.
     List<CompetenceCode> allCodeList = competenceCodeDao.getAllCompetenceCode();
-    
+
 
     render(personList, allCodeList, office);
   }
 
   /**
    * Crud per abilitare le competenze alla persona.
+   *
    * @param personId persona
    */
   public static void updatePersonCompetence(Long personId) {
@@ -174,7 +175,7 @@ public class Competences extends Controller {
   /**
    * Salva la nuova configurazione delle competenze abilitate per la persona.
    *
-   * @param personId personId
+   * @param personId   personId
    * @param competence mappa con i valori per ogni competenza
    */
   public static void saveNewCompetenceConfiguration(Long personId,
@@ -199,7 +200,7 @@ public class Competences extends Controller {
   /**
    * Riepilgo competenze del dipendente.
    *
-   * @param year year
+   * @param year  year
    * @param month month
    */
   public static void competences(int year, int month) {
@@ -239,12 +240,12 @@ public class Competences extends Controller {
   /**
    * Competenze assegnate nel mese nell'officeId col codice specificato.
    *
-   * @param year year
-   * @param month month
-   * @param officeId officeId
-   * @param name filtro nome
+   * @param year           year
+   * @param month          month
+   * @param officeId       officeId
+   * @param name           filtro nome
    * @param competenceCode filtro competenceCode
-   * @param page filtro pagina
+   * @param page           filtro pagina
    */
   public static void showCompetences(Integer year, Integer month, Long officeId,
       String name, CompetenceCode competenceCode, Integer page) {
@@ -275,7 +276,8 @@ public class Competences extends Controller {
     }
 
     if (competenceCode == null || !competenceCode.isPersistent()) {
-      competenceCode = competenceCodeList.get(0);;
+      competenceCode = competenceCodeList.get(0);
+      ;
       notFoundIfNull(competenceCode);
     }
     IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
@@ -283,7 +285,7 @@ public class Competences extends Controller {
     //Per permettere la modifica delle competenze nel template.
     // TODO: usare qualche tag.
     boolean editCompetence = false;
-    if (secureManager.officesWriteAllowed(Security.getUser().get()).contains(office) ) {
+    if (secureManager.officesWriteAllowed(Security.getUser().get()).contains(office)) {
       editCompetence = true;
     }
     renderArgs.put("editCompetence", editCompetence);
@@ -322,8 +324,8 @@ public class Competences extends Controller {
   /**
    * Aggiorna la competenza.
    *
-   * @param pk pk
-   * @param name name
+   * @param pk    pk
+   * @param name  name
    * @param value value
    */
   public static void updateCompetence(long pk, String name, Integer value) {
@@ -355,7 +357,8 @@ public class Competences extends Controller {
 
   /**
    * Pagina riepilogo monte ore per anno e sede.
-   * @param year year
+   *
+   * @param year     year
    * @param officeId sede
    */
   public static void totalOvertimeHours(int year, Long officeId) {
@@ -373,9 +376,10 @@ public class Competences extends Controller {
 
   /**
    * Salva la nuova posta per straordinari.
-   * @param year anno
+   *
+   * @param year      anno
    * @param numeroOre valore
-   * @param officeId sede
+   * @param officeId  sede
    */
   public static void saveOvertime(Integer year, String numeroOre, Long officeId) {
 
@@ -401,8 +405,9 @@ public class Competences extends Controller {
   }
 
   /**
-   * Esporta in formato .csv la situazione annuale degli straordinari.
-   * TODO: parametrico all'office.
+   * Esporta in formato .csv la situazione annuale degli straordinari. TODO: parametrico
+   * all'office.
+   *
    * @param year anno
    */
   public static void getOvertimeInYear(int year) throws IOException {
@@ -421,12 +426,12 @@ public class Competences extends Controller {
   }
 
   /**
-   * Le competence approvate nell'anno alle persone della sede.
-   * TODO: implementare un metodo nel manager nel quale spostare la business logic di questa
-   * azione.
-   * @param year anno
+   * Le competence approvate nell'anno alle persone della sede. TODO: implementare un metodo nel
+   * manager nel quale spostare la business logic di questa azione.
+   *
+   * @param year        anno
    * @param onlyDefined solo per determinati
-   * @param officeId sede
+   * @param officeId    sede
    */
   public static void approvedCompetenceInYear(int year, boolean onlyDefined, Long officeId) {
 
@@ -506,12 +511,13 @@ public class Competences extends Controller {
 
 
   /**
-   * restituisce il template per il responsabile di gruppo di lavoro contenente le informazioni
-   * su giorni di presenza, straordinari, ore a lavoro...
-   * @param year l'anno di riferimento
+   * restituisce il template per il responsabile di gruppo di lavoro contenente le informazioni su
+   * giorni di presenza, straordinari, ore a lavoro...
+   *
+   * @param year  l'anno di riferimento
    * @param month il mese di riferimento
-   * @param name il nome su cui filtrare
-   * @param page la pagina su cui filtrare
+   * @param name  il nome su cui filtrare
+   * @param page  la pagina su cui filtrare
    */
   public static void monthlyOvertime(Integer year, Integer month, String name, Integer page) {
 
