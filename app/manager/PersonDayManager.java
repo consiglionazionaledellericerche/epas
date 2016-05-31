@@ -739,13 +739,15 @@ public class PersonDayManager {
    *
    * @param wrPersonDay   personDay
    * @param numberOfInOut numero minimo di coppie  da visualizzare.
+   * @param considerExitingNow se voglio considerare la timbratura uscendo adesso.
    * @return lista di stampings per il template.
    */
-  public List<Stamping> getStampingsForTemplate(IWrapperPersonDay wrPersonDay, int numberOfInOut) {
+  public List<Stamping> getStampingsForTemplate(IWrapperPersonDay wrPersonDay, int numberOfInOut,
+      boolean considerExitingNow) {
 
     PersonDay personDay = wrPersonDay.getValue();
 
-    if (personDay.isToday()) {
+    if (personDay.isToday() && considerExitingNow) {
       //aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio
       boolean lastStampingIsIn = false;
 

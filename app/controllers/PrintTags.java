@@ -52,7 +52,7 @@ public class PrintTags extends Controller {
 
     rules.checkIfPermitted(person);
 
-    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
 
     List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
     if (includeStampingDetails) {

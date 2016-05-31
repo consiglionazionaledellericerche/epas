@@ -156,7 +156,7 @@ public class Clocks extends Controller {
     int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay) + 1;
 
     PersonStampingDayRecap dayRecap = stampingDayRecapFactory
-        .create(personDay, numberOfInOut, Optional.<List<Contract>>absent());
+        .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent());
 
     render(user, dayRecap, numberOfInOut);
 

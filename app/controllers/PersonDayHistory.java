@@ -3,14 +3,18 @@ package controllers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.PersonDayDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;
 import dao.history.StampingHistoryDao;
 
 import models.Absence;
+import models.Person;
 import models.PersonDay;
 import models.Stamping;
+
+import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -35,6 +39,8 @@ public class PersonDayHistory extends Controller {
   static StampingHistoryDao stampingHistoryDao;
   @Inject
   static AbsenceHistoryDao absenceHistoryDao;
+  @Inject
+  static PersonDayDao personDayDao;
 
 
   /**
@@ -44,8 +50,13 @@ public class PersonDayHistory extends Controller {
    */
   public static void personDayHistory(long personDayId) {
 
+    boolean found = false;
     final PersonDay personDay = PersonDay.findById(personDayId);
+    if (personDay == null) {
 
+      render(found);
+    }
+    found = true;
     List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
             .absences(personDayId);
 
@@ -87,6 +98,6 @@ public class PersonDayHistory extends Controller {
               .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-    render(historyStampingsList, historyAbsencesList, personDay);
+    render(historyStampingsList, historyAbsencesList, personDay, found);
   }
 }
