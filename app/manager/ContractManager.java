@@ -9,8 +9,6 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import lombok.extern.slf4j.Slf4j;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;

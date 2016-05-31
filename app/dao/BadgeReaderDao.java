@@ -26,9 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
- *
  * @author alessandro
- *
  */
 public class BadgeReaderDao extends DaoBase {
 
@@ -63,10 +61,9 @@ public class BadgeReaderDao extends DaoBase {
 
   /**
    * Il simple result dei badgeReaders.
-   *
    */
   public PerseoSimpleResults<BadgeReader> badgeReaders(Optional<String> name,
-                                                       Optional<BadgeSystem> badgeSystem) {
+      Optional<BadgeSystem> badgeSystem) {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
     final QBadgeSystem qBadgeSystem = QBadgeSystem.badgeSystem;

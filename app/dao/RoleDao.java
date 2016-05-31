@@ -1,6 +1,5 @@
 package dao;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
@@ -9,10 +8,7 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Role;
-import models.User;
 import models.query.QRole;
-import models.query.QUser;
-import models.query.QUsersRolesOffices;
 
 import java.util.List;
 

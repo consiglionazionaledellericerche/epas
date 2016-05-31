@@ -51,7 +51,6 @@ import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.io.File;
@@ -104,17 +103,18 @@ public class Absences extends Controller {
     Map<AbsenceType, Long> absenceTypeInMonth =
         absenceTypeDao.getAbsenceTypeInPeriod(person,
             DateUtility.getMonthFirstDay(yearMonth), Optional
-            .fromNullable(DateUtility.getMonthLastDay(yearMonth)));
+                .fromNullable(DateUtility.getMonthLastDay(yearMonth)));
 
     render(absenceTypeInMonth, year, month);
   }
 
   /**
-   * metodo che renderizza la pagina di visualizzazione delle assenze in un anno e
-   *     in mese specifico.
+   * metodo che renderizza la pagina di visualizzazione delle assenze in un anno e in mese
+   * specifico.
+   *
    * @param absenceCode il codice di assenza
-   * @param year l'anno
-   * @param month il mese
+   * @param year        l'anno
+   * @param month       il mese
    */
   public static void absenceInMonth(String absenceCode, int year, int month) {
     Person person = Security.getUser().get().person;
@@ -145,8 +145,7 @@ public class Absences extends Controller {
   }
 
   /**
-   * metodo che chiama la render della edit code per modificare/inserire
-   *     un codice di assenza.
+   * metodo che chiama la render della edit code per modificare/inserire un codice di assenza.
    */
   public static void insertCode() {
 
@@ -155,6 +154,7 @@ public class Absences extends Controller {
 
   /**
    * metodo che renderizza la pagina per gestire/inserire un codice di assenza.
+   *
    * @param absenceCodeId l'id del codice di assenza che si intende modificare/inserire
    */
   public static void editCode(@Required Long absenceCodeId) {
@@ -175,10 +175,11 @@ public class Absences extends Controller {
 
   /**
    * metodo che salva il nuovo/modificato codice di assenza.
-   * @param absenceType il tipo di assenza
+   *
+   * @param absenceType      il tipo di assenza
    * @param absenceTypeGroup il gruppo a cui fa riferimento un codice di assenza
-   * @param tecnologi se il codice di assenza è valido per i tecnologi
-   * @param tecnici se il codice di assenza è valido per i tecnici
+   * @param tecnologi        se il codice di assenza è valido per i tecnologi
+   * @param tecnici          se il codice di assenza è valido per i tecnici
    */
   public static void saveCode(@Valid AbsenceType absenceType,
       AbsenceTypeGroup absenceTypeGroup,
@@ -227,6 +228,7 @@ public class Absences extends Controller {
 
   /**
    * metodo che renderizza la pagina di inserimento di una nuova assenza.
+   *
    * @param personId l'id della persona di cui si vuole inserire l'assenza
    * @param dateFrom la data da cui si vuole inserire l'assenza
    */
@@ -247,13 +249,14 @@ public class Absences extends Controller {
   }
 
   /**
-   * metodo che permette il salvataggio di un certo codice di assenza per una persona
-   *     per un giorno o un periodo temporale.
-   * @param person la persona per cui si vuole salvare l'assenza
-   * @param dateFrom la data da cui si vuole salvare l'assenza
-   * @param dateTo la data entro cui si vuole salvare l'assenza
+   * metodo che permette il salvataggio di un certo codice di assenza per una persona per un giorno
+   * o un periodo temporale.
+   *
+   * @param person      la persona per cui si vuole salvare l'assenza
+   * @param dateFrom    la data da cui si vuole salvare l'assenza
+   * @param dateTo      la data entro cui si vuole salvare l'assenza
    * @param absenceType il tipo di assenza da salvare
-   * @param file l'eventuale allegato
+   * @param file        l'eventuale allegato
    */
   public static void save(@Required Person person,
       @Required LocalDate dateFrom, @Required LocalDate dateTo,
@@ -311,6 +314,7 @@ public class Absences extends Controller {
 
   /**
    * metodo che renderizza la pagina di modifica di un certo codice di assenza.
+   *
    * @param absenceId l'id della assenza
    */
   public static void edit(@Required Long absenceId) {
@@ -334,8 +338,9 @@ public class Absences extends Controller {
 
   /**
    * metodo che cancella una certa assenza fino ad un certo periodo.
+   *
    * @param absence l'assenza
-   * @param dateTo la data di fine periodo
+   * @param dateTo  la data di fine periodo
    */
   public static void delete(@Required Absence absence, @Valid LocalDate dateTo
       /*@Required String absenceCode, Blob absencefile, String mealTicket*/) {
@@ -368,7 +373,8 @@ public class Absences extends Controller {
 
   /**
    * metodo che permette l'attachment di un file a una assenza.
-   * @param absence l'assenza
+   *
+   * @param absence     l'assenza
    * @param absenceFile il file associato a quella assenza
    */
   public static void addAttach(@Required Absence absence, Blob absenceFile) {
@@ -391,6 +397,7 @@ public class Absences extends Controller {
 
   /**
    * metodo che permette di rimuovere un attachment da una assenza.
+   *
    * @param absenceId l'id della assenza
    */
   public static void removeAttach(@Required Long absenceId) {
@@ -412,17 +419,18 @@ public class Absences extends Controller {
 
   /**
    * Gli allegati alle assenze nel mese. Bisogna renderlo parametrico alla sede.
-   * @param year anno
-   * @param month mese
+   *
+   * @param year   anno
+   * @param month  mese
    * @param office office
    */
   public static void manageAttachmentsPerCode(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
-    
+
     LocalDate beginMonth = new LocalDate(year, month, 1);
 
     //Prendere le assenze ordinate per tipo
@@ -432,7 +440,7 @@ public class Absences extends Controller {
 
     //Provvisoriamente mangengo solo quelle di persone dell'office
     List<Absence> absenceList = Lists.newArrayList();
-    for(Absence absence : absenceListAux) {
+    for (Absence absence : absenceListAux) {
       if (absence.personDay.person.office.equals(office)) {
         absenceList.add(absence);
       }
@@ -473,6 +481,7 @@ public class Absences extends Controller {
 
   /**
    * metodo che permette lo scaricamento di un determinato allegato in formato pdf.
+   *
    * @param id l'id dell'allegato da scaricare
    */
   public static void downloadAttachment(long id) {
@@ -490,8 +499,9 @@ public class Absences extends Controller {
 
   /**
    * metodo che ritorna un file .zip contenente tutti gli allegati di un certo mese/anno.
-   * @param code il codice di assenza
-   * @param year l'anno
+   *
+   * @param code  il codice di assenza
+   * @param year  l'anno
    * @param month il mese
    * @throws IOException eccezione di IO
    */
@@ -538,8 +548,8 @@ public class Absences extends Controller {
    * Gli allegati del dipendente nel mese selezionato.
    *
    * @param personId dipendente
-   * @param year anno
-   * @param month mese
+   * @param year     anno
+   * @param month    mese
    */
   public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month) {
 
@@ -564,9 +574,10 @@ public class Absences extends Controller {
 
   /**
    * Vista delle assenze nel periodo.
+   *
    * @param personId dipendente
-   * @param from da
-   * @param to a
+   * @param from     da
+   * @param to       a
    */
   public static void absenceInPeriod(Long personId, LocalDate from, LocalDate to) {
 
@@ -621,12 +632,13 @@ public class Absences extends Controller {
 
   /**
    * Le assenze effettuate nell'anno dalla persona.
+   *
    * @param personId persona
-   * @param year anno
+   * @param year     anno
    */
   public static void yearlyAbsences(Long personId, int year) {
 
-    Person  person = personDao.getPersonById(personId);
+    Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
     rules.checkIfPermitted(person.office);
@@ -638,8 +650,9 @@ public class Absences extends Controller {
 
   /**
    * Le assenze effettuate nel mese dei dipendenti della sede.
-   * @param year year
-   * @param month month
+   *
+   * @param year     year
+   * @param month    month
    * @param officeId sede
    */
   public static void showGeneralMonthlyAbsences(int year, int month, Long officeId) {
@@ -700,9 +713,10 @@ public class Absences extends Controller {
 
   /**
    * metodo che renderizza la pagina di visualizzazione delle assenze mensili di una persona.
-   * @param personId id della persona
-   * @param year l'anno
-   * @param month il mese
+   *
+   * @param personId        id della persona
+   * @param year            l'anno
+   * @param month           il mese
    * @param absenceTypeCode il codice di assenza
    * @throws InstantiationException eventuale eccezione di instanziazione gestita
    * @throws IllegalAccessException eventuale eccezione di accesso illegale gestita

@@ -10,7 +10,6 @@ import controllers.RequestInit.CurrentData;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +26,6 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;

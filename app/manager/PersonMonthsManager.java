@@ -1,31 +1,15 @@
 package manager;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 
-import dao.CertificationDao;
 import dao.PersonMonthRecapDao;
 
-import manager.recaps.trainingHours.DayAndHourRecap;
-import manager.recaps.trainingHours.TrainingHoursRecap;
-
-import models.AbsenceType;
-import models.CertificatedData;
-import models.Certification;
 import models.Person;
 import models.PersonMonthRecap;
-import models.enumerate.CertificationType;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import play.i18n.Messages;
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 

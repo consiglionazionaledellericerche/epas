@@ -32,7 +32,7 @@ import javax.persistence.EntityManager;
 public class OfficeDao extends DaoBase {
 
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ')
-          .trimResults().omitEmptyStrings();
+      .trimResults().omitEmptyStrings();
 
   @Inject
   OfficeDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -47,7 +47,7 @@ public class OfficeDao extends DaoBase {
     final QOffice office = QOffice.office;
 
     final JPQLQuery query = getQueryFactory().from(office)
-            .where(office.id.eq(id));
+        .where(office.id.eq(id));
     return query.singleResult(office);
   }
 
@@ -71,7 +71,7 @@ public class OfficeDao extends DaoBase {
 
     final QOffice office = QOffice.office;
     final JPQLQuery query = getQueryFactory().from(office)
-            .where(office.code.eq(code));
+        .where(office.code.eq(code));
     return Optional.fromNullable(query.singleResult(office));
 
   }
@@ -82,17 +82,17 @@ public class OfficeDao extends DaoBase {
   public Optional<Office> byCodeId(String codeId) {
     final QOffice office = QOffice.office;
     final JPQLQuery query = getQueryFactory().from(office)
-            .where(office.codeId.eq(codeId));
+        .where(office.codeId.eq(codeId));
     return Optional.fromNullable(query.singleResult(office));
   }
-  
+
   /**
    * @return l'ufficio associato al perseoId
    */
   public Optional<Office> byPerseoId(Long perseoId) {
     final QOffice office = QOffice.office;
     final JPQLQuery query = getQueryFactory().from(office)
-            .where(office.perseoId.eq(perseoId));
+        .where(office.perseoId.eq(perseoId));
     return Optional.fromNullable(query.singleResult(office));
   }
 
@@ -101,10 +101,10 @@ public class OfficeDao extends DaoBase {
     final BooleanBuilder nameCondition = new BooleanBuilder();
     for (String token : TOKEN_SPLITTER.split(name)) {
       nameCondition.and(institute.name.containsIgnoreCase(token)
-              .or(institute.code.containsIgnoreCase(token)));
+          .or(institute.code.containsIgnoreCase(token)));
     }
     return nameCondition.or(institute.name.startsWithIgnoreCase(name))
-            .or(institute.code.startsWithIgnoreCase(name));
+        .or(institute.code.startsWithIgnoreCase(name));
   }
 
   private BooleanBuilder matchOfficeName(QOffice office, String name) {
@@ -132,25 +132,24 @@ public class OfficeDao extends DaoBase {
 
     if (user.isSystemUser()) {
       final JPQLQuery query = getQueryFactory()
-              .from(institute)
-              .where(condition);
+          .from(institute)
+          .where(condition);
       return PerseoModelQuery.wrap(query, institute);
     }
 
     final JPQLQuery query = getQueryFactory()
-            .from(institute)
-            .rightJoin(institute.seats, office)
-            .rightJoin(office.usersRolesOffices, uro)
-            .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
-            .distinct();
+        .from(institute)
+        .rightJoin(institute.seats, office)
+        .rightJoin(office.usersRolesOffices, uro)
+        .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+        .distinct();
 
     return PerseoModelQuery.wrap(query, institute);
 
   }
 
   /**
-   * Tutte le sedi.
-   * //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
+   * Tutte le sedi. //TODO sarebbe meglio usare la offices definita sotto in modo da avere un
    * ordinamento sugli istituti.
    */
   public PerseoSimpleResults<Office> allOffices() {
@@ -165,7 +164,7 @@ public class OfficeDao extends DaoBase {
     return PerseoModelQuery.wrap(query, office);
 
   }
-  
+
   /**
    * Le sedi sulle quali l'user ha il ruolo role.
    */
@@ -183,34 +182,34 @@ public class OfficeDao extends DaoBase {
 
     if (user.isSystemUser()) {
       final JPQLQuery query = getQueryFactory()
-              .from(office)
-              .leftJoin(office.institute, institute).fetch()
-              .where(condition)
-              .distinct()
-              .orderBy(office.institute.name.asc());
+          .from(office)
+          .leftJoin(office.institute, institute).fetch()
+          .where(condition)
+          .distinct()
+          .orderBy(office.institute.name.asc());
       return PerseoModelQuery.wrap(query, office);
     }
 
     final JPQLQuery query = getQueryFactory()
-            .from(office)
-            .leftJoin(office.usersRolesOffices, uro)
-            .leftJoin(office.institute, institute).fetch()
-            .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
-            .distinct()
-            .orderBy(office.institute.name.asc());
+        .from(office)
+        .leftJoin(office.usersRolesOffices, uro)
+        .leftJoin(office.institute, institute).fetch()
+        .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+        .distinct()
+        .orderBy(office.institute.name.asc());
 
     return PerseoModelQuery.wrap(query, office);
 
   }
 
-  
+
   public Optional<Institute> byCds(String cds) {
 
     final QInstitute institute = QInstitute.institute;
     final JPQLQuery query = queryFactory.from(institute).where(institute.cds.eq(cds));
     return Optional.fromNullable(query.singleResult(institute));
   }
-  
+
   public Optional<Institute> instituteById(Long id) {
 
     final QInstitute institute = QInstitute.institute;

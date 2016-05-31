@@ -1,7 +1,5 @@
 package controllers;
 
-import static play.modules.pdf.PDF.renderPDF;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
@@ -33,6 +31,7 @@ import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.binding.As;
+import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 
 import javax.inject.Inject;

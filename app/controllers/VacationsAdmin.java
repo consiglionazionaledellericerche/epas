@@ -26,7 +26,6 @@ import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;
@@ -54,7 +53,8 @@ public class VacationsAdmin extends Controller {
 
   /**
    * Riepiloghi ferie della sede.
-   * @param year anno
+   *
+   * @param year     anno
    * @param officeId sede
    */
   public static void list(Integer year, Long officeId) {
@@ -75,7 +75,7 @@ public class VacationsAdmin extends Controller {
     DateInterval yearInterval = new DateInterval(beginYear, endYear);
 
     List<Person> personList = personDao.list(Optional.<String>absent(),
-            Sets.newHashSet(office), false, beginYear, endYear, true).list();
+        Sets.newHashSet(office), false, beginYear, endYear, true).list();
 
     //List<Person> personList = simpleResults.paginated(page).getResults();
 
@@ -89,7 +89,7 @@ public class VacationsAdmin extends Controller {
 
         IWrapperContract cwrContract = wrapperFactory.create(contract);
         if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
-                yearInterval) == null) {
+            yearInterval) == null) {
 
           //Questo evento andrebbe segnalato... la list dovrebbe caricare
           // nello heap solo i contratti attivi nel periodo specificato.
@@ -107,25 +107,26 @@ public class VacationsAdmin extends Controller {
       }
     }
 
-    boolean isVacationLastYearExpired = vacationsService.isVacationsLastYearExpired(year, 
+    boolean isVacationLastYearExpired = vacationsService.isVacationsLastYearExpired(year,
         vacationsService.vacationsLastYearExpireDate(year, office));
-    
+
     boolean isVacationCurrentYearExpired = vacationsService.isVacationsLastYearExpired(year + 1,
-        vacationsService.vacationsLastYearExpireDate(year+1, office));
-    
+        vacationsService.vacationsLastYearExpireDate(year + 1, office));
+
     boolean isPermissionCurrentYearExpired = false;
-    if (new LocalDate(year,12,31).isBefore(LocalDate.now())) {
+    if (new LocalDate(year, 12, 31).isBefore(LocalDate.now())) {
       isPermissionCurrentYearExpired = true;
     }
 
-    render(vacationsList, isVacationLastYearExpired, isVacationCurrentYearExpired, 
+    render(vacationsList, isVacationLastYearExpired, isVacationCurrentYearExpired,
         isPermissionCurrentYearExpired, contractsWithVacationsProblems, year, offices, office);
   }
 
   /**
-   * Riepilogo ferie anno corrente. 
+   * Riepilogo ferie anno corrente.
+   *
    * @param contractId contratto
-   * @param anno anno
+   * @param anno       anno
    */
   public static void vacationsCurrentYear(Long contractId, Integer anno) {
 
@@ -146,9 +147,10 @@ public class VacationsAdmin extends Controller {
   }
 
   /**
-   * Riepilogo ferie anno passato. 
+   * Riepilogo ferie anno passato.
+   *
    * @param contractId contratto
-   * @param anno anno
+   * @param anno       anno
    */
   public static void vacationsLastYear(Long contractId, Integer anno) {
 
@@ -170,9 +172,10 @@ public class VacationsAdmin extends Controller {
 
 
   /**
-   * Riepilogo permessi anno corrente. 
+   * Riepilogo permessi anno corrente.
+   *
    * @param contractId contratto
-   * @param anno anno
+   * @param anno       anno
    */
   public static void permissionCurrentYear(Long contractId, Integer anno) {
 
