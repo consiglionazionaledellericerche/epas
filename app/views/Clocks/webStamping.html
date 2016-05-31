@@ -14,7 +14,7 @@ currentPerson.fullname) }
 
 #{f.hidden 'way', value:wayType /}
 
-#{f.selectEnum 'stampType', items:models.enumerate.StampTypes /}
+#{f.selectEnum 'stampType', items:models.enumerate.StampTypes.onlyActive() /}
 #{f.input 'note' /}
 
 #{b.buttons center:true}
