@@ -52,6 +52,5 @@ public class PersonDayHistoryDao {
             .transform(HistoryValue.fromTuple(Absence.class))
             .toList();
   }
-
-
+  
 }

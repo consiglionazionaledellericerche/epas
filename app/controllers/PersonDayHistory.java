@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.PersonDayDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;
@@ -35,6 +36,8 @@ public class PersonDayHistory extends Controller {
   static StampingHistoryDao stampingHistoryDao;
   @Inject
   static AbsenceHistoryDao absenceHistoryDao;
+  @Inject
+  static PersonDayDao personDayDao;
 
 
   /**
@@ -44,8 +47,13 @@ public class PersonDayHistory extends Controller {
    */
   public static void personDayHistory(long personDayId) {
 
+    boolean found = false;
     final PersonDay personDay = PersonDay.findById(personDayId);
+    if (personDay == null) {
 
+      render(found);
+    }
+    found = true;
     List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
             .absences(personDayId);
 
@@ -87,6 +95,6 @@ public class PersonDayHistory extends Controller {
               .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-    render(historyStampingsList, historyAbsencesList, personDay);
+    render(historyStampingsList, historyAbsencesList, personDay, found);
   }
 }

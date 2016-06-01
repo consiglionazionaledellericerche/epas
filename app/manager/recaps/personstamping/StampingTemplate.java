@@ -6,8 +6,11 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 
+import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+
+import java.util.List;
 
 /**
  * Oggetto che modella la singola timbratura nelle viste personStamping e stampings.
@@ -22,12 +25,12 @@ public class StampingTemplate {
   public int pairId;
   public String pairPosition;            //left center right none
   public LocalDateTime date;
+  
   public String way;
-  public String hour;
-  public String markedByAdminCode;
-  public String markedByEmployeeCode;
-  public String identifier;
-  public String missingExitStampBeforeMidnightCode;
+  public String hour = "";
+  
+  List<StampModificationType> stampModificationTypes = Lists.newArrayList();
+
   public boolean valid;
 
   private static final String STAMPING_FORMAT = "HH:mm";
@@ -50,11 +53,6 @@ public class StampingTemplate {
 
     //stamping nulle o exiting now non sono visualizzate
     if (stamping.date == null || stamping.exitingNow) {
-      this.hour = "";
-      this.markedByAdminCode = "";
-      this.markedByEmployeeCode = "";
-      this.identifier = "";
-      this.missingExitStampBeforeMidnightCode = "";
       this.valid = true;
       setColor(stamping);
       return;
@@ -66,36 +64,21 @@ public class StampingTemplate {
 
     this.hour = stamping.date.toString(STAMPING_FORMAT);
 
-    //timbratura di servizio
-    this.identifier = "";
-    if (stamping.stampType != null) {
-      this.identifier = stamping.stampType.getIdentifier();
-    }
-
     //timbratura modificata dall'amministatore
-    this.markedByAdminCode = "";
     if (stamping.markedByAdmin) {
-      StampModificationType smt = stampTypeManager.getStampMofificationType(
-          StampModificationTypeCode.MARKED_BY_ADMIN);
-      this.markedByAdminCode = smt.code;
+      stampModificationTypes.add(stampTypeManager.getStampMofificationType(
+          StampModificationTypeCode.MARKED_BY_ADMIN));
     }
 
     //timbratura modificata dal dipendente
-    this.markedByEmployeeCode = "";
     if (stamping.markedByEmployee != null && stamping.markedByEmployee) {
-      StampModificationType smt = stampTypeManager.getStampMofificationType(
-          StampModificationTypeCode.MARKED_BY_EMPLOYEE);
-      this.markedByEmployeeCode = smt.code;
+      stampModificationTypes.add(stampTypeManager.getStampMofificationType(
+          StampModificationTypeCode.MARKED_BY_EMPLOYEE));
     }
 
     //timbratura di mezzanotte
-    this.missingExitStampBeforeMidnightCode = "";
-    if (stamping.stampModificationType != null
-        && stamping.stampModificationType.code.equals(StampModificationTypeCode
-        .TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
-
-      this.missingExitStampBeforeMidnightCode = stamping
-          .stampModificationType.code;
+    if (stamping.stampModificationType != null) {
+      stampModificationTypes.add(stamping.stampModificationType);
     }
 
     //timbratura valida (colore cella)
@@ -116,6 +99,17 @@ public class StampingTemplate {
     if (!this.valid) {
       this.colour = "warn";
     }
+  }
+  
+  /**
+   * Se stampare il popover sulla stampingTemplate
+   * @return
+   */
+  public boolean showPopover() {
+    if (!stampModificationTypes.isEmpty() || stamping.stampType != null) {
+      return true;
+    }
+    return false;
   }
 
 }

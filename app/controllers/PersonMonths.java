@@ -3,8 +3,11 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
+import dao.OfficeDao;
+import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
@@ -14,6 +17,7 @@ import manager.PersonMonthsManager;
 
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
@@ -24,8 +28,11 @@ import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -40,6 +47,13 @@ public class PersonMonths extends Controller {
   private static PersonMonthRecapDao personMonthRecapDao;
   @Inject
   private static PersonMonthsManager personMonthsManager;
+  @Inject
+  private static OfficeDao officeDao;
+  @Inject
+  private static PersonDao personDao;
+
+  @Inject
+  private static SecurityRules rules;
 
   /**
    * metodo che renderizza la visualizzazione del riepilogo orario.
@@ -274,5 +288,28 @@ public class PersonMonths extends Controller {
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
     PersonMonths.trainingHours(pm.year);
+  }
+  
+  /**
+   * 
+   * @param year
+   * @param month
+   * @param officeId
+   */
+  public static void visualizePeopleTrainingHours(int year, int month, Long officeId){
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> offices = Sets.newHashSet();
+    offices.add(office);
+    List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year,month));
+//    Table<Person, String, List<TrainingHoursRecap>> table = TreeBasedTable
+//        .create(personMonthsManager.personNameComparator,
+//            personMonthsManager.stringComparator);
+//    
+//    table = personMonthsManager.createTable(personList, year, month); 
+    Map<Person, List<PersonMonthRecap>> map = personMonthsManager.createMap(personList, year, month);
+    
+    render(map, year, month, office);
   }
 }

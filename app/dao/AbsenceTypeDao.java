@@ -10,8 +10,7 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
 
-import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
+import helpers.jpa.ModelQuery;
 
 import models.AbsenceType;
 import models.Person;
@@ -42,11 +41,11 @@ public class AbsenceTypeDao extends DaoBase {
     final QAbsence absence = QAbsence.absence;
 
     return getQueryFactory().from(absenceType)
-            .join(absenceType.absences, absence)
-            .groupBy(absenceType)
-            .orderBy(absence.count().desc())
-            .list(Projections.bean(AbsenceTypeDto.class,
-                    absenceType.code, absence.count()));
+        .join(absenceType.absences, absence)
+        .groupBy(absenceType)
+        .orderBy(absence.count().desc())
+        .list(Projections.bean(AbsenceTypeDto.class,
+            absenceType.code, absence.count()));
   }
 
   public Map<AbsenceType, Long> counters() {
@@ -55,10 +54,10 @@ public class AbsenceTypeDao extends DaoBase {
     final QAbsence absence = QAbsence.absence;
 
     return getQueryFactory().from(absenceType)
-            .join(absenceType.absences, absence)
-            .groupBy(absenceType)
-            .orderBy(absence.count().desc())
-            .map(absenceType, absence.count());
+        .join(absenceType.absences, absence)
+        .groupBy(absenceType)
+        .orderBy(absence.count().desc())
+        .map(absenceType, absence.count());
   }
 
   /**
@@ -99,21 +98,19 @@ public class AbsenceTypeDao extends DaoBase {
         .where(absenceType.internalUse.eq(false)).list(absenceType);
   }
 
-  public SimpleResults<AbsenceType> getAbsences(Optional<String> name) {
+  public ModelQuery.SimpleResults<AbsenceType> getAbsences(Optional<String> name) {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
     final BooleanBuilder condition = new BooleanBuilder();
 
-    final JPQLQuery query = getQueryFactory().from(absenceType)
-            .orderBy(absenceType.code.asc());
+    final JPQLQuery query = getQueryFactory().from(absenceType).orderBy(absenceType.code.asc());
+
     if (name.isPresent() && !name.get().trim().isEmpty()) {
-      condition.andAnyOf(
-          absenceType.code.startsWithIgnoreCase(name.get()),
+      condition.andAnyOf(absenceType.code.startsWithIgnoreCase(name.get()),
           absenceType.description.toLowerCase().like("%" + Strings.toLowerCase(name.get()) + "%"));
-      query.where(condition);
     }
 
-    return ModelQuery.simpleResults(query, absenceType);
+    return ModelQuery.wrap(query.where(condition), absenceType);
   }
 
   /**
@@ -124,7 +121,7 @@ public class AbsenceTypeDao extends DaoBase {
     QAbsenceType absenceType = QAbsenceType.absenceType;
 
     final JPQLQuery query = getQueryFactory().from(absenceType)
-            .where(absenceType.id.eq(long1));
+        .where(absenceType.id.eq(long1));
 
     return query.singleResult(absenceType);
 
@@ -132,16 +129,16 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * @return la lista di codici di assenza che sono validi da una certa data in poi ordinati per
-   *     codice di assenza crescente.
+   * codice di assenza crescente.
    */
   public List<AbsenceType> getAbsenceTypeFromEffectiveDate(
-          LocalDate date) {
+      LocalDate date) {
 
     QAbsenceType absenceType = QAbsenceType.absenceType;
 
     final JPQLQuery query = getQueryFactory().from(absenceType)
-            .where(absenceType.validTo.after(date).or(absenceType.validTo.isNull()))
-            .orderBy(absenceType.code.asc());
+        .where(absenceType.validTo.after(date).or(absenceType.validTo.isNull()))
+        .orderBy(absenceType.code.asc());
 
     return query.list(absenceType);
   }
@@ -154,7 +151,7 @@ public class AbsenceTypeDao extends DaoBase {
     QAbsenceType absenceType = QAbsenceType.absenceType;
 
     final JPQLQuery query = getQueryFactory().from(absenceType)
-            .where(absenceType.code.eq(string));
+        .where(absenceType.code.eq(string));
 
     return Optional.fromNullable(query.singleResult(absenceType));
 
@@ -173,11 +170,11 @@ public class AbsenceTypeDao extends DaoBase {
     QAbsence absence = QAbsence.absence;
 
     return getQueryFactory().from(absenceType)
-            .join(absenceType.absences, absence).where(absence.personDay.person.eq(person).and(
-                    absence.personDay.date.between(fromDate, toDate.or(fromDate))))
-            .groupBy(absenceType)
-            .orderBy(absence.count().desc())
-            .map(absenceType, absence.count());
+        .join(absenceType.absences, absence).where(absence.personDay.person.eq(person).and(
+            absence.personDay.date.between(fromDate, toDate.or(fromDate))))
+        .groupBy(absenceType)
+        .orderBy(absence.count().desc())
+        .map(absenceType, absence.count());
   }
 
   public class AbsenceTypeDto {

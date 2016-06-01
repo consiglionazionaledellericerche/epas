@@ -5,11 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import helpers.ModelQuery;
 
 import models.Office;
 import models.Role;
@@ -41,7 +38,7 @@ public class UsersRolesOfficesDao extends DaoBase {
   public UsersRolesOffices getById(Long id) {
     QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     final JPQLQuery query = getQueryFactory().from(uro)
-            .where(uro.id.eq(id));
+        .where(uro.id.eq(id));
     return query.singleResult(uro);
   }
 
@@ -51,9 +48,9 @@ public class UsersRolesOfficesDao extends DaoBase {
   public Optional<UsersRolesOffices> getUsersRolesOffices(User user, Role role, Office office) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     final JPQLQuery query = getQueryFactory().from(uro)
-            .where(uro.user.eq(user)
-                    .and(uro.role.eq(role)
-                            .and(uro.office.eq(office))));
+        .where(uro.user.eq(user)
+            .and(uro.role.eq(role)
+                .and(uro.office.eq(office))));
 
     return Optional.fromNullable(query.singleResult(uro));
   }
@@ -65,15 +62,13 @@ public class UsersRolesOfficesDao extends DaoBase {
   public Optional<UsersRolesOffices> getUsersRolesOfficesByUserAndOffice(User user, Office office) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     final JPQLQuery query = getQueryFactory().from(uro)
-            .where(uro.user.eq(user)
-                    .and(uro.office.eq(office)));
+        .where(uro.user.eq(user)
+            .and(uro.office.eq(office)));
 
     return Optional.fromNullable(query.singleResult(uro));
   }
-  
+
   /**
-   * 
-   * @param user
    * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
    */
   public List<UsersRolesOffices> getUsersRolesOfficesByUser(User user) {
@@ -88,24 +83,12 @@ public class UsersRolesOfficesDao extends DaoBase {
   public List<Role> getUserRole(User user) {
 
     final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
-    final QRole qr = QRole.role;
 
-    final JPQLQuery query = getQueryFactory().from(qr)
-            .leftJoin(qr.usersRolesOffices, quro).fetch()
-            .distinct();
-
-    final BooleanBuilder condition = new BooleanBuilder();
-    condition.and(quro.user.eq(user));
-
-    query.where(condition);
-
-    return ModelQuery.simpleResults(query, qr).list();
+    return getQueryFactory().from(quro).where(quro.user.eq(user)).distinct().list(quro.role);
   }
 
   /**
    * Metodo per effettuare check dello stato ruoli epas <-> perseo.
-   * @param office
-   * @return
    */
   public Map<Long, Set<String>> getEpasRoles(Optional<Office> office) {
 
@@ -124,11 +107,11 @@ public class UsersRolesOfficesDao extends DaoBase {
         .leftJoin(user.badgeReader, QBadgeReader.badgeReader).fetch()
         .leftJoin(uro.role, role)
         .where(uro.role.in(roles));
-      
+
     List<UsersRolesOffices> uroList = query.list(uro);
-    
+
     Map<Long, Set<String>> urosMap = Maps.newHashMap();
-    
+
     for (UsersRolesOffices uroItem : uroList) {
       if (uroItem.user.person == null || uroItem.user.person.perseoId == null) {
         continue;
@@ -149,12 +132,10 @@ public class UsersRolesOfficesDao extends DaoBase {
     return urosMap;
 
   }
-  
+
   public String formatUro(UsersRolesOffices uro) {
     return uro.role.toString() + " - " + uro.office.name;
   }
-  
-  
-  
+
 
 }

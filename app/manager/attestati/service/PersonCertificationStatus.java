@@ -24,6 +24,8 @@ public class PersonCertificationStatus {
   public int year;
   public int month;
   
+  public boolean validate = false;
+  
   public boolean notInEpas = false;
   public boolean notInAttestati = false;
   

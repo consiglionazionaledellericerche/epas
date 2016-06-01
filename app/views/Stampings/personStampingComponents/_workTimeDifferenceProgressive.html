@@ -18,18 +18,6 @@
       #{else}
         >${dayRecap.personDay.timeAtWork.printHourMinute()}
       #{/else}
-
-	  <!-- marcatori -->
-      #{ifnot dayRecap.todayLunchTimeCode.equals("")}
-      <strong>${dayRecap.todayLunchTimeCode}</strong>
-      #{/ifnot}
-      #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
-      <strong>${dayRecap.fixedWorkingTimeCode}</strong>
-      #{/ifnot}
-      #{ifnot dayRecap.exitingNowCode.equals("")}
-      <strong>${dayRecap.exitingNowCode}</strong>
-      #{/ifnot}
-	  
 	  	
       <!-- toggle holidayWork-->
       #{if showLink}

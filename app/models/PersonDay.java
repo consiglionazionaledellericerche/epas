@@ -2,15 +2,18 @@ package models;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import models.base.BaseModel;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +41,7 @@ import javax.persistence.UniqueConstraint;
     uniqueConstraints = {@UniqueConstraint(columnNames = {"person_id", "date"})})
 @Getter
 @Setter
+@Slf4j
 public class PersonDay extends BaseModel {
 
   private static final long serialVersionUID = -5013385113251848310L;
@@ -213,13 +217,31 @@ public class PersonDay extends BaseModel {
     return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
   }
   
+  
+  /**
+   * metodo che resetta un personday azzerando i valori in esso contenuti.
+   */
+  @Transient
+  public void reset(){
+    long id = this.id;
+    try {
+      BeanUtils.copyProperties(this, new PersonDay(this.person, this.date));
+      this.id = id;
+      this.save();
+    } catch (IllegalAccessException e) {
+      log.error("Impossibile accedere all'istanza dell'oggetto {}", this.getClass());      
+    } catch (InvocationTargetException e) {      
+      log.error("Errore sulla chiamata del metodo");
+    }
+  }
+  
   @Override
   public String toString() {
     return String.format(
         "PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, "
-            + "modificationType = %s, progressive = %s, timeAtWork = %s",
-        id, person.id, date, difference, isTicketAvailable, stampModificationType,
-        progressive, timeAtWork);
+        + "isTicketForcedByAdmin = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
+        id, person.id, date, difference, isTicketAvailable, isTicketForcedByAdmin, 
+        stampModificationType, progressive, timeAtWork);
   }
 
 }
