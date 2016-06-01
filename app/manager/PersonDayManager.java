@@ -104,31 +104,32 @@ public class PersonDayManager {
   }
 
   /**
-   * Se nel giorno c'è un'assenza oraria che giustifica una quantità oraria sufficiente
-   *     a decretare la persona "presente" a lavoro.
-   *  TODO: documentare meglio non si capisce.
+   * Se le assenze orarie giustificano abbanstanza per ritenere il dipendente a lavoro.
    * @return  esito.
    */
-  public boolean isEnoughHourlyAbsences(PersonDay pd) {
+  public boolean isEnoughHourlyAbsences(IWrapperPersonDay pd) {
+    
+    Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
 
-    if (pd.person.qualification.qualification > 3) {
-      for (Absence abs : pd.absences) {
-        if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours)
-            || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours)
-            || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours)
-            || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours)) {
-          return true;
-        }
+    // Calcolo i minuti giustificati dalle assenze.
+    int justifiedTime = 0;
+    for (Absence abs : pd.getValue().absences) {
+      if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
+        justifiedTime = justifiedTime + abs.absenceType.justifiedTimeAtWork.minutes;
       }
-      return false;
+    }
+    
+    // Livelli VI - VIII
+    if (pd.getValue().person.qualification.qualification > 3) {
+      return pd.getWorkingTimeTypeDay().get().workingTime / 2 < justifiedTime;
     } else {
-      if (pd.absences.size() >= 1) {
+      // Livelli I - III (decidere meglio)
+      if (pd.getValue().absences.size() >= 1) {
         return true;
       } else {
         return false;
       }
     }
-
   }
 
   /**
@@ -677,7 +678,7 @@ public class PersonDayManager {
       if (!pd.getValue().isHoliday 
           && !isAllDayAbsences(pd.getValue()) 
           && pd.getValue().stampings.isEmpty()
-          && !isEnoughHourlyAbsences(pd.getValue())) {
+          && !isEnoughHourlyAbsences(pd)) {
 
         troubles.put(Troubles.NO_ABS_NO_STAMP, Boolean.TRUE);
       } else {
