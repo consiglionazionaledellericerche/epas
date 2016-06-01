@@ -34,9 +34,7 @@ $(function() {
           				'<div id="feedback-overview-error">Inserire una descrizione e selezionare una tipologia.</div> ' + 
           				'<div class="feedback-wizard-close">' + 
           				'</div>' +
-          			'</div>' + 
-          		'</div>' + 
-          	'</div>',
+          			'</div>',
           submitSuccess:	'<div id="feedback-submit-success"><div class="feedback-logo">Segnalazione</div><p>La tua segnalazione è stata registrata con successo.</p><button class="feedback-close-btn feedback-btn-blue">OK</button><div class="feedback-wizard-close"></div></div>',
           submitError:	'<div id="feedback-submit-error"><div class="feedback-logo">Segnalazione</div><p>Grazie per la collaborazione, la tua segnalazione è stata registrata con successo.</p><button class="feedback-close-btn feedback-btn-blue">OK</button><div class="feedback-wizard-close"></div></div>'
           },
