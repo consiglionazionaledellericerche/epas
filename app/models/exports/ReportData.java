@@ -30,4 +30,5 @@ public class ReportData {
   private byte[] img;
   private String note;
   private String url;
+  private String category;
 }
