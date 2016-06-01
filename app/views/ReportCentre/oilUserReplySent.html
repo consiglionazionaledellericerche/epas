@@ -1,0 +1,31 @@
+#{extends 'main3.html' /}
+#{set header:'banner' /}
+#{set title: 'ePAS - Messaggio a HelpDesk'  /}
+
+#{set 'moreStyles'}
+<style>
+    #intro{
+        padding-top: 2em;
+        text-align: center
+    }
+</style>
+
+#{/set}
+
+
+<div class="container">
+
+<h2 id="intro">HelpDesk ePAS</h2>
+
+#{panel title:'Risposta alla segnalazione n. ' + id, color:'success'}
+  #{alert color:'info'}
+    <p>Il tuo messaggio relativo alla segnalazione N. ${id} è stato inviato correttamente all'HelpDesk. 
+    </p>
+  #{/alert}
+  
+  #{b.buttons center:true}
+    #{b.cancel @Application.index(), label:'Torna alla home' /}
+  #{/b.buttons}
+#{/panel}
+
+</div>

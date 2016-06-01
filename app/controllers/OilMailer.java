@@ -4,18 +4,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.mail.EmailAttachment;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 
+import helpers.OilConfig;
 import helpers.deserializers.InlineStreamHandler;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import models.User;
 import models.exports.ReportData;
-import play.Play;
 import play.mvc.Mailer;
 import play.mvc.Scope;
 
@@ -23,10 +24,9 @@ import play.mvc.Scope;
  * Invio delle segnalazioni per email al sistema CNR OIL.
  * Nella configurazione ci possono essere:
  * <dl>
+ *  <dt>oil.app.name</dt><dd>Nome dell'instanza OIL, utilizzato nel subject del messaggio</dd>
  *  <dt>oil.email.to</dt><dd>Indirizzo email di OIL a cui inviare le segnalazioni</dd>
  *  <dt>oil.email.subject</dt><dd>Oggetto delle segnalazioni</dd>
- *  <dt>oil.category.id</dt><dd>id della categoria ePAS inviata a OIL</dd>
- *  <dt>oil.category.name</dt><dd>nome della categoria inviata a OIL</dd>
  * </dl>
  * Comunque ci sono dei default.
  *
@@ -35,26 +35,14 @@ import play.mvc.Scope;
  */
 @Slf4j
 public class OilMailer extends Mailer {
-
-  /**
-   * È possibile configurare l'integrazione con OIL inserendo questi parametri nella
-   * configurazione del play.
-   */
-  private static final String OIL_EMAIL_TO = "oil.email.to";
-  private static final String OIL_EMAIL_SUBJECT = "oil.email.subject";
-  private static final String OIL_CATEGORY_ID = "oil.category.id";
-  private static final String OIL_CATEGORY_NAME = "oil.category.name";
-  
-  // default per parametri integrazione OIL
-  
-  private static final String OIL_DEFAULT_EMAIL_TO = "oil.cert@cnr.it";
-  private static final String OIL_DEFAULT_EMAIL_SUBJECT = "Segnalazione tecnica ePAS";
-  private static final String OIL_DEFAULT_CATEGORY_ID = "4";
-  private static final String OIL_DEFAULT_CATEGORY_NAME = "ePAS";
   
   //[adp]~~X~~YYYYYYYYYYYYYYY~~oggetto~~nome~~cognome~~email
   private static final String OIL_EMAIL_SUBJECT_PATTERN = 
-      "[adp]~~%s~~%s~~%s~~%s~~%s~~%s";
+      "[%s]~~%s~~%s~~%s~~%s~~%s~~%s";
+  
+  //[adp]~~azione~~Id
+  private static final String OIL_EMAIL_REPLAY_SUBJECT_PATTER = 
+      "[%s]~~%s~~%s";
   
   /**
    * Costruisce e invia il report agli utenti indicati nella configurazione.
@@ -70,19 +58,21 @@ public class OilMailer extends Mailer {
     Verify.verifyNotNull(user.person);
     Verify.verifyNotNull(user.person.email);
     
-    addRecipient(Play.configuration.getProperty(OIL_EMAIL_TO, OIL_DEFAULT_EMAIL_TO));
+    addRecipient(OilConfig.emailTo());
     setFrom(user.person.email);
     
     //[adp]~~X~~YYYYYYYYYYYYYYY~~oggetto~~nome~~cognome~~email
     String subject = 
         String.format(OIL_EMAIL_SUBJECT_PATTERN,
-            Play.configuration.getProperty(OIL_CATEGORY_ID, OIL_DEFAULT_CATEGORY_ID),
-            Play.configuration.getProperty(OIL_CATEGORY_NAME, OIL_DEFAULT_CATEGORY_NAME),
-            Play.configuration.getProperty(OIL_EMAIL_SUBJECT, OIL_DEFAULT_EMAIL_SUBJECT),
+            OilConfig.appName(),
+            data.getCategory(),
+            OilConfig.categoryMap().get(data.getCategory()),
+            OilConfig.emailSubject(),
             user.person.name, user.person.surname, user.person.email);
     setSubject(subject);
 
     try {
+      //HTML della pagina da cui è stata fatta la segnalazione in Attachment
       ByteArrayOutputStream htmlGz = new ByteArrayOutputStream();
       GZIPOutputStream gz = new GZIPOutputStream(htmlGz);
       gz.write(data.getHtml().getBytes());
@@ -97,6 +87,27 @@ public class OilMailer extends Mailer {
       html.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(html);
 
+      //Informazioni di debug in Attachment
+      ByteArrayOutputStream debugGz = new ByteArrayOutputStream();
+      GZIPOutputStream debugStream = new GZIPOutputStream(debugGz);
+      debugStream.write(String.format("User Agent: %s\n\n", data.getBrowser().getUserAgent()).getBytes());
+
+      for (val s : session.all().entrySet()) {
+        debugStream.write(String.format("Session.%s: %s\n", s.getKey(), s.getValue()).getBytes());
+      }
+      
+      debugStream.close();
+
+      URL debugUrl = new URL(null, "inline:///text",
+          new InlineStreamHandler(debugGz.toByteArray(), "text/plain"));
+      EmailAttachment debugAttachment = new EmailAttachment();
+      debugAttachment.setDescription("Debug Info");
+      debugAttachment.setName("debug.txt.gz");
+      debugAttachment.setURL(debugUrl);
+      debugAttachment.setDisposition(EmailAttachment.ATTACHMENT);
+      addAttachment(debugAttachment);
+      
+      //Screenshot in Attachment
       URL imgUrl =
           new URL(null, "inline://image", new InlineStreamHandler(data.getImg(), "image/png"));
       EmailAttachment img = new EmailAttachment();
@@ -105,11 +116,52 @@ public class OilMailer extends Mailer {
       img.setURL(imgUrl);
       img.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(img);
+      log.info("Invio segnalazione ad OIL, suject: {}", subject);
       send(user, data, session);
     } catch (MalformedURLException e) {
       log.error("malformed url", e);
     } catch (IOException e) {
       log.error("io error", e);
     }
+  }
+  
+  /**
+   * Formato mail di risposta alle richieste dell’esperto (ticket già aperto)
+   * L'oggetto è tokenizzato, dove il separatore è la doppia tilde, ed ha il seguente formato:
+   * [adp]~~azione~~Id
+   * dove i valori di azione ed Id vengono trasmessi al form tramite query-string, e così come sono vanno riportati nella mail.
+   * Un esempio di query-string generata potrebbe essere:
+   * http://indirizzoformdirisposta.it?id=9999&azione=c1
+   * Il destinatario è sempre oil.cert@cnr.it
+   * La descrizione contiene la risposta dell’utente.
+   *
+   * @param user
+   * @param oilId
+   * @param action
+   * @param description
+   */
+  public static void sendUserReply(Optional<User> user, String oilId, String action, String description) {
+    Verify.verifyNotNull(user);
+    Verify.verifyNotNull(oilId);
+    Verify.verifyNotNull(action);
+    Verify.verifyNotNull(description);
+    String email;
+    if (user.isPresent()) {
+      Verify.verifyNotNull(user.get().person);
+      Verify.verifyNotNull(user.get().person.email);
+      email = user.get().person.email;
+    } else {
+      email =  OilConfig.defaultEmailFromForUserReply();
+    }
+    addRecipient(OilConfig.emailTo());
+    setFrom(email);
+    
+  //[adp]~~azione~~Id
+    String subject = 
+        String.format(OIL_EMAIL_REPLAY_SUBJECT_PATTER,
+            OilConfig.appName(), action, oilId);
+    setSubject(subject);
+    log.info("Invio risposta utente ad OIL, subject = {}", subject);
+    send(description);
   }
 }
