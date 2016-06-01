@@ -23,7 +23,7 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span><span class="caret"></span></a>
     <ul class="dropdown-menu">
       #{list items:1..12, as:'month'}
-      <li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.day}">&{'Month.'+month}</a></li>
+      <li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.getDayOfMonth(month)}">&{'Month.'+month}</a></li>
       #{/list}
     </ul>
   </li>
@@ -42,7 +42,7 @@
 <div class="form-group">
   <!-- Lista giorni -->
   #{select 'day', value:session.get("daySelected"), class:'form-control', id:'day', onChange:'javascript:this.form.submit()'}
-  #{list items:1..dayLenght, as:'d'}
+  #{list items:1..currentData.daysInMonth(), as:'d'}
   #{option d}${d}#{/option}
   #{/list}
   #{/select}
