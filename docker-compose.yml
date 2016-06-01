@@ -64,7 +64,13 @@ epas:
 #    - LOG_LEVEL=                            # default: INFO
 #    - LOG_ON_FILE=                          # default: false (true, false)
 #    - JOBS_ACTIVE=false                     # default: true. Se impostato a false disabilita l'esecuzione di tutti i job
-#    - OIL_ENABLED=true                      # default: false. Se impostato abilita l'invio delle segnalazioni ad OIL	
+#    - OIL_ENABLED=true                      # default: false. Se impostato abilita l'invio delle segnalazioni ad OIL
+#    - OIL_CATEGORIES                        # default: 4:epas. Specifica le categorie utilizzate in OIL. 
+#                                                       La lista delle categorie è suddivisa da ",", il campo ":" è utilizzato invece
+#                                                       come separatore tra l'id della categoria ed il nome visualizzato all'utente, 
+#                                                       es.: 1:Registrazione Timbrature,2:Gestione Assenze,3:Gestione Competenze,4:Altro
+#    - OIL_CATEGORIES_SELECTED               # default: 4. Questo default è dato dall'ambiente di test di OIL. 
+#                                                       Contiene l'id della categoria da mostrare già selezionata all'utente finale. 
   links:
     - postgres
 
