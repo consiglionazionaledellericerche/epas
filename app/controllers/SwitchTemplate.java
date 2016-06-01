@@ -187,7 +187,7 @@ public class SwitchTemplate extends Controller {
     }
 
   }
-  
+
   public static void updateDay(Integer day) throws Throwable {
 
     String action = session.get("actionSelected");
