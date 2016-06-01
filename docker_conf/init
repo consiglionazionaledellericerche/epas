@@ -128,6 +128,18 @@ else
   sed 's#{{OIL_ENABLED}}#'"${OIL_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${OIL_CATEGORIES}" ]; then
+  sed -n '/OIL_CATEGORIES/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{OIL_CATEGORIES}}#'"${OIL_CATEGORIES}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${OIL_CATEGORIES_DEFAULT}" ]; then
+  sed -n '/OIL_CATEGORIES_DEFAULT/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{OIL_CATEGORIES_DEFAULT}}#'"${OIL_CATEGORIES_DEFAULT}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ -z "${PERSEO_BASE}" ]; then
   sed -n '/PERSEO_BASE/!p' -i ${APP_HOME}/conf/prod.conf
 else

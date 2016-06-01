@@ -1,0 +1,42 @@
+#{extends 'main3.html' /}
+#{set header:'banner' /}
+#{set title: 'ePAS - Risposta a HelpDesk'  /}
+
+#{set 'moreStyles'}
+<style>
+    #intro{
+        padding-top: 2em;
+        text-align: center
+    }
+</style>
+
+#{/set}
+
+
+<div class="container">
+
+<h2 id="intro">HelpDesk ePAS</h2>
+
+#{panel title:'Messaggio di risposta alla segnalazione n. ' + id, color:'primary'}
+  #{alert color:'info'}
+    <p>Compilando il campo sottostante puoi inviare maggiori informazioni relative 
+    alla segnalazione N. ${id}. 
+    </p>
+  #{/alert}
+  
+		#{form action:@sendOilUserReplay(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }			
+
+		  #{f.hidden 'id' /}
+		  #{f.hidden 'azione' /}
+		  #{f.textArea 'description', label:'Messaggio', required:true /}
+		  
+		  
+ 	  	  #{b.buttons center:true}
+    		#{b.submit 'Invia' /}
+    		#{b.cancel @Application.index(), label:'Annulla' /}
+  		  #{/b.buttons}
+ 	  #{/form}
+#{/panel}
+
+</div>

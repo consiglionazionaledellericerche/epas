@@ -1,3 +1,7 @@
+*{
+   arg: href
+   label: optional, default crud.cancel
+ }*
 <a href="${_arg}" class="btn btn-default" data-confirm="&{'confirm.cancel'}">
-    <i class="fa fa-times"></i><span class="hidden-xs"> &{'crud.cancel'}</span>
+    <i class="fa fa-times"></i><span class="hidden-xs"> #{if _label}&{_label}#{/if}#{else}&{'crud.cancel'}#{/else} </span>
 </a>
