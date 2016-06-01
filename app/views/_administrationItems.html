@@ -24,7 +24,7 @@
        <li class="divider"></li>
        #{/if}
 
-       *{ Gestione Presenze Timbrature / Assenze / Competenze / Ferie e Permessi / Buoni Pasto }*
+       *{ Gestione Presenze Timbrature / Assenze / Competenze / Ferie e Permessi / Buoni Pasto / Ore di formazione }*
        
        #{if ip.viewPersonDay }
        <li><a href="@{Stampings.personStamping(session.get("personSelected"),
@@ -41,6 +41,8 @@
        #{if ip.viewPersonDay }
        <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
          session.get("monthSelected"), session.get("officeSelected") )}">Buoni Pasto</a></li>
+       <li><a href="@{PersonMonths.visualizePeopleTrainingHours(session.get("yearSelected"),
+         session.get("monthSelected"), session.get("officeSelected") )}">Ore di formazione</a></li>
        #{/if}
        #{if ip.viewPersonDay || ip.viewCompetence}
        <li class="divider"></li>
@@ -69,7 +71,6 @@
        #{if ip.viewPersonDay }
        <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
          session.get("monthSelected"))}">Stampa Cartellino</a></li>
-       <li><a href="@{Charts.indexCharts()}">Utility</a></li>
        #{/if}
        
        #{if ip.viewPersonDay}
@@ -79,8 +80,8 @@
        *{ Invio Attestati }*
        
        #{if ip.uploadSituation }
-       <li><a href="@{UploadSituation.uploadData(session.get("officeSelected"))}">Invio Attestati</a></li>
-       <li><a href="@{Certifications.certifications(session.get("officeSelected"))}">Invio Nuovo Attestati</a></li>
+       *{ <li><a href="@{UploadSituation.uploadData(session.get("officeSelected"))}">Invio Attestati</a></li> }*
+       <li><a href="@{Certifications.certifications(session.get("officeSelected"))}">Invio Attestati</a></li>
        #{/if}
 
       </ul> *{ end items }*

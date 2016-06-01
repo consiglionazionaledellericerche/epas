@@ -14,9 +14,9 @@ import dao.PersonDayDao;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.services.PairStamping;
 import manager.PersonDayManager;
 import manager.PersonManager;
+import manager.services.PairStamping;
 
 import models.Absence;
 import models.Competence;

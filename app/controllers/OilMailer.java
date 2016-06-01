@@ -20,6 +20,7 @@ import models.exports.ReportData;
 import play.mvc.Mailer;
 import play.mvc.Scope;
 
+
 /**
  * Invio delle segnalazioni per email al sistema CNR OIL.
  * Nella configurazione ci possono essere:

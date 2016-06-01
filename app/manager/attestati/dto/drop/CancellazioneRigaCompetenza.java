@@ -2,9 +2,6 @@ package manager.attestati.dto.drop;
 
 import com.google.common.collect.Lists;
 
-import manager.attestati.dto.drop.CancellazioneRigaAssenza.DropItem;
-import manager.attestati.dto.drop.CancellazioneRigaAssenza.ItemDipendente;
-
 import models.Certification;
 
 import java.util.List;

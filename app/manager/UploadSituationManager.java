@@ -6,42 +6,20 @@ import com.google.inject.Inject;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
-import dao.StampingDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 
-import manager.recaps.personstamping.PersonStampingDayRecap;
-import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Absence;
 import models.Competence;
-import models.Contract;
-import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
-import models.PersonDay;
-import models.PersonHourForOvertime;
 import models.PersonMonthRecap;
-import models.Stamping;
-import models.Stamping.WayType;
-import models.exports.StampingFromClient;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.Play;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 public class UploadSituationManager {
@@ -105,7 +83,7 @@ public class UploadSituationManager {
         body = body + person.number + " F " + pmr.fromDate.getDayOfMonth() + " " 
             + pmr.toDate.getDayOfMonth() + " " + pmr.trainingHours + " \r\n";
       }
-      PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month);
+      PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
       for(IWrapperContractMonthRecap cmr : psDto.contractMonths){
         body = body + person.number + " B " + cmr.getValue().buoniPastoUsatiNelMese + " " 
             + cmr.getValue().buoniPastoUsatiNelMese + " \r\n";

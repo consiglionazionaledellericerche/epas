@@ -7,7 +7,6 @@ if [ -z "${VIRTUAL_HOST}" ]; then
     exit 1
 fi
 
-EPAS_HOST=${VIRTUAL_HOST}
 PROTOCOL=${PROTOCOL:-http}
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
 LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -24,10 +23,16 @@ case "${PROTOCOL}" in
     ;;
 esac
 
-EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${EPAS_HOST}"
+EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${VIRTUAL_HOST}"
+
+if [ -z "${DB_HOST}" ]; then
+  DEFAULT_PORT=$POSTGRES_PORT_5432_TCP_PORT
+else
+  DEFAULT_PORT=5432
+fi
 
 DB_HOST=${DB_HOST:-$POSTGRES_PORT_5432_TCP_ADDR}
-DB_PORT=${DB_PORT:-$POSTGRES_PORT_5432_TCP_PORT}
+DB_PORT=${DB_PORT:-$DEFAULT_PORT}
 DB_NAME=${DB_NAME:-epas}
 DB_USER=${DB_USER:-postgres}
 
@@ -44,7 +49,7 @@ sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/tools/backupdb.sh
-sed 's#{{EPAS_HOST}}#'"${EPAS_HOST}"'#g' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{EPAS_HOST}}#'"${VIRTUAL_HOST}"'#g' -i ${APP_HOME}/tools/backupdb.sh
 
 chmod +x ${APP_HOME}/tools/backupdb.sh
 
@@ -65,6 +70,7 @@ cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
 
 sed 's#{{EPAS_APPLICATION_BASEURL}}#'"${EPAS_APPLICATION_BASEURL}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/conf/prod.conf
+
 sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/conf/prod.conf

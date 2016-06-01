@@ -7,14 +7,13 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
-import injection.StaticInject;
-
 import models.Person;
 import models.exports.PersonEmailFromJson;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 

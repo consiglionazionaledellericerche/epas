@@ -1,5 +1,7 @@
 package controllers;
 
+import com.google.common.base.Optional;
+
 import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
@@ -15,7 +17,7 @@ public class SwitchTemplate extends Controller {
     Integer day = Integer.parseInt(session.get("daySelected"));
     Long personId = Long.parseLong(session.get("personSelected"));
     Long officeId = Long.parseLong(session.get("officeSelected"));
-
+    
     session.put("actionSelected", action);
 
     if (action.equals("Stampings.stampings")) {
@@ -180,29 +182,12 @@ public class SwitchTemplate extends Controller {
     if (action.equals("Certifications.emptyCertifications")) {
       Certifications.certifications(officeId, year, month); //Voluto. Lo switch non svuota.
     }
+    if (action.equals("PersonMonths.visualizePeopleTrainingHours")) {
+      PersonMonths.visualizePeopleTrainingHours(year, month, officeId);
+    }
 
   }
 
-  public static void updateMonth(Integer month) throws Throwable {
-
-    String action = session.get("actionSelected");
-    if (action == null) {
-
-      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-      Secure.login();
-    }
-
-    if (month == null || month < 1 || month > 12) {
-
-      Application.index();
-    }
-
-    session.put("monthSelected", month);
-
-    executeAction(action);
-
-  }
-  
   public static void updateDay(Integer day) throws Throwable {
 
     String action = session.get("actionSelected");
@@ -211,41 +196,8 @@ public class SwitchTemplate extends Controller {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
-
-    if (day == null || day < 1 || day > 31) {
-
-      Application.index();
-    }
     
     session.put("daySelected", day);
-
-    executeAction(action);
-
-  }
-
-
-  // esempio se si volesse utilizzare l'anno nei parametri.
-  public static int currentYear() {
-    Integer year = request.params.get("year", Integer.class);
-    if (year == null) {
-      return LocalDate.now().getYear();
-    } else {
-      return year;
-    }
-  }
-
-  public static void updateYear(Integer year) throws Throwable {
-    String action = session.get("actionSelected");
-    if (action == null) {
-      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-      Secure.login();
-    }
-
-    if (year == null) { /* TODO check bound year */
-      Application.index();
-    }
-
-    session.put("yearSelected", year);
 
     executeAction(action);
 
@@ -283,7 +235,7 @@ public class SwitchTemplate extends Controller {
 
     executeAction(actionSelected);
   }
-
+  
 }
 
 

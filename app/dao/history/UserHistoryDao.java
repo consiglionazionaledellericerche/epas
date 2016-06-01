@@ -4,7 +4,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import models.Stamping;
 import models.User;
 
 import org.hibernate.envers.AuditReader;

@@ -33,8 +33,6 @@ import play.libs.WS.WSRequest;
 
 import java.util.Set;
 
-import synch.perseoconsumers.PerseoApis;
-
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
  * @author alessandro

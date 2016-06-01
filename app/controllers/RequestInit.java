@@ -151,22 +151,12 @@ public class RequestInit extends Controller {
 
     session.put("officeSelected", officeId);
 
-    // day lenght (provvisorio)
-    try {
-
-      Integer dayLenght =
-          new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
-      renderArgs.put("dayLenght", dayLenght);
-    } catch (Exception e) {
-      //FIXME: perché è previsto il tracciamento di questa eccezione??
-    }
-
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
     
     computeActionSelected(currentUser, offices, year, month);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
-
+  
   private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
 
     final String currentAction = Http.Request.current().action;
@@ -196,7 +186,8 @@ public class RequestInit extends Controller {
         "MealTickets.recapMealTickets",
         "Certifications.certifications",
         "Certifications.processAll",
-        "Certifications.emptyCertifications");
+        "Certifications.emptyCertifications",
+        "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -245,7 +236,8 @@ public class RequestInit extends Controller {
         "Synchronizations.oldActiveContracts",
         "Certifications.certifications",
         "Certifications.processAll",
-        "Certifications.emptyCertifications");
+        "Certifications.emptyCertifications",
+        "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
@@ -284,7 +276,8 @@ public class RequestInit extends Controller {
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Certifications.certifications",
-        "Certifications.processAll");
+        "Certifications.processAll",
+        "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",
@@ -457,6 +450,28 @@ public class RequestInit extends Controller {
       this.day = day;
       this.personId = personId;
       this.officeId = officeId;
+    }
+    
+    /**
+     * Il day in sessione per il mese passato, oppure il massimo se non appartiene al range.
+     * @param month
+     * @return
+     */
+    public Integer getDayOfMonth(Integer month) {
+      try {
+        new LocalDate(year, month, day);
+      } catch (Exception e) {
+        return new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
+      }
+      return day;
+    }
+    
+    /**
+     * Il numero massimo di giorni per il mese in sessione.
+     * @return
+     */
+    public Integer daysInMonth() {
+      return new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
     }
 
     public String getMonthLabel() {

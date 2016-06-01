@@ -30,6 +30,7 @@ public class SeatCertification {
   
   public static class PersonCertification {
     public int matricola;
+    public boolean validato;
     public int numBuoniPasto;
     public List<RigaAssenza> righeAssenza = Lists.newArrayList();
     public List<RigaCompetenza> righeCompetenza = Lists.newArrayList(); //??
@@ -39,6 +40,7 @@ public class SeatCertification {
     public String toString() {
       return MoreObjects.toStringHelper(PersonCertification.class)
           .add("matricola", matricola)
+          .add("validato", validato)
           .add("numBuoniPasto", numBuoniPasto)
           .add("righeAssenza", righeAssenza)
           .toString();

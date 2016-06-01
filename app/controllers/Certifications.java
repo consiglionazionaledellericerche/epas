@@ -10,9 +10,6 @@ import controllers.RequestInit.CurrentData;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperOffice;
-
-import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfigurationManager;
 import manager.attestati.service.CertificationService;
@@ -40,7 +37,6 @@ import javax.inject.Inject;
  * @author alessandro
  *
  */
-@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class Certifications extends Controller {
 
@@ -109,6 +105,11 @@ public class Certifications extends Controller {
     
     //Il mese selezionato è abilitato?
     Optional<String> token = certificationService.buildToken();
+    if (!token.isPresent()) {
+      flash.error("Impossibile instaurare il collegamento col server di attestati."
+          + " Effettuare una segnalazione.");
+      render(office, year, month);
+    }
     boolean autenticate = certificationService.authentication(office, token, true);
     if (!autenticate) {
       flash.error("L'utente app.epas non è abilitato alla sede selezionata");
@@ -123,7 +124,6 @@ public class Certifications extends Controller {
       render(office, year, month, numbers);
     }
     
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
     
@@ -188,7 +188,6 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month, numbers);
     }
     
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
@@ -197,17 +196,16 @@ public class Certifications extends Controller {
     
     for (Person person : people) {
       
-      if (person.surname.equals("Lancia")) {
-        log.info("lancia");
-      }
-      
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
           .buildPersonStaticStatus(person, year, month, numbers, token);
       
       if (personCertificationStatus.match()) {
-        // Applico il process
-        certificationService.process(personCertificationStatus, token);
+
+        if (!personCertificationStatus.validate) {
+          // Se l'attestato non è stato validato applico il process
+          certificationService.process(personCertificationStatus, token);
+        }
         // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
         numbers.remove(person.number);
       }
@@ -263,7 +261,6 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month, numbers);
     }
     
-    @SuppressWarnings("deprecation")
     List<Person> people = personDao.list(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
