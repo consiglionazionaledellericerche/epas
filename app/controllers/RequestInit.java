@@ -151,43 +151,12 @@ public class RequestInit extends Controller {
 
     session.put("officeSelected", officeId);
 
-    patchSwitchDate();
-    
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
     
     computeActionSelected(currentUser, offices, year, month);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
   
-  /**
-   * Gestisce i casi di salto ad una data che non esiste.
-   */
-  private static void patchSwitchDate() {
-    
-    Integer year = Integer.parseInt(session.get("yearSelected"));
-    Integer month = Integer.parseInt(session.get("monthSelected"));
-    Integer day = Integer.parseInt(session.get("daySelected"));
-    
-    LocalDate date = null;
-    
-    // Tentativo generale
-    try {
-      date = new LocalDate(year, month, day);
-    } catch (Exception ex) {
-      try {
-        date = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
-      } catch (Exception ex2) {
-        date = LocalDate.now();
-      }
-      session.put("yearSelected", date.getYear());
-      session.put("monthSelected", date.getMonthOfYear());
-      session.put("daySelected", date.getDayOfMonth());
-    }
-    
-    renderArgs.put("dayLenght", date.dayOfMonth().withMaximumValue().getDayOfMonth());
-
-  }
-
   private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
 
     final String currentAction = Http.Request.current().action;
@@ -481,6 +450,28 @@ public class RequestInit extends Controller {
       this.day = day;
       this.personId = personId;
       this.officeId = officeId;
+    }
+    
+    /**
+     * Il day in sessione per il mese passato, oppure il massimo se non appartiene al range.
+     * @param month
+     * @return
+     */
+    public Integer getDayOfMonth(Integer month) {
+      try {
+        new LocalDate(year, month, day);
+      } catch (Exception e) {
+        return new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
+      }
+      return day;
+    }
+    
+    /**
+     * Il numero massimo di giorni per il mese in sessione.
+     * @return
+     */
+    public Integer daysInMonth() {
+      return new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
     }
 
     public String getMonthLabel() {
