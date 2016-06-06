@@ -446,6 +446,7 @@ DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
 SEND_EMAIL=Invio email di avviso ai dipendenti
 NEW_ATTESTATI=Nuovo Attestati
 EMAIL_TO_CONTACT=Indirizzo email segreteria
+WORKING_OFF_SITE=Lavoro fuori sede
 
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente

@@ -42,6 +42,9 @@ when
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
      	
+     	/* Eventuale inserimento di timbratura per lavoro fuori sede*/
+     	"Stampings.insertWorkingOffSitePresence",
+     	
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	"Stampings.dailyPresenceForPersonInCharge",

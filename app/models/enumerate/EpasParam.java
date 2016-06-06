@@ -71,6 +71,16 @@ public enum EpasParam {
       EpasParamValueType.formatValue(""),
       Lists.<RecomputationType>newArrayList()),
   
+  /**
+   * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi 
+   * l'orario di lavoro fuori sede.
+   */
+  WORKING_OFF_SITE("working_off_site",
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList()),
+  
   //#######################################
   // YEARLY PARAMS
   

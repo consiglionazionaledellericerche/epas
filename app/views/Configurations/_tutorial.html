@@ -33,6 +33,13 @@
       <p><i class="fa fa-info-circle"></i> Inserire per esempio un indirizzo di segreteria amministrativa.</p>
     #{/if}
     
+    #{if configuration.epasParam.equals(models.enumerate.EpasParam.WORKING_OFF_SITE) }
+      <p>Tramite questo parametro è possibile permettere ai dipendenti che lavorano fuori sede di giustificare l'intera giornata
+      lavorativa o inserire le proprie timbrature con causale "Lavoro fuori sede".</p>
+      <p><i class="fa fa-info-circle"></i> Selezionando "sì", sarà permesso ai dipendenti di specificare le proprie timbrature con causale preimpostata "lavoro fuori sede"
+      o di inserire il codice giustificativo giornaliero "105BP".</p>
+    #{/if}
+    
     
     #{if configuration.epasParam.equals(models.enumerate.EpasParam.SEND_EMAIL) }
       <p>Abilitando questa funzionalità sarà possibile notificare a tutti i dipendenti di <strong>${configuration.office.name}</strong> 
