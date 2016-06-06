@@ -523,5 +523,15 @@ public class Stampings extends Controller {
   }
 
 
+  /**
+   * funzionalità di inserimento della presenza per lavoro fuori sede.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimentos
+   */
+  public static void insertWorkingOffSitePresence(final Integer year, final Integer month){
+    Person person = Security.getUser().get().person;
+    render(person);
+  }
+
 }
 

@@ -170,6 +170,7 @@ public class RequestInit extends Controller {
 
     final Collection<String> monthYearSwitcher = ImmutableList.of(
         "Stampings.stampings",
+        "Stampings.insertWorkingOffSitePresence",
         "Absences.absences",
         "Competences.competences",
         "Stampings.personStamping",
@@ -240,6 +241,7 @@ public class RequestInit extends Controller {
         "PersonMonths.visualizePeopleTrainingHours");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
+        "Stampings.insertWorkingOffSitePresence",
         "Stampings.stampings",
         "Absences.absences",
         "Competences.competences",
