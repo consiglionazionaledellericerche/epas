@@ -87,7 +87,7 @@ public class OilConfig {
   }
   
   public static String selectedCategory() {
-    return Play.configuration.getProperty(OIL_SELECTED_CATEGORY, "");
+    return Play.configuration.getProperty(OIL_SELECTED_CATEGORY, OIL_DEFAULT_SELECTED_CATEGORY);
   }
   
   public static String defaultEmailFromForUserReply() {
