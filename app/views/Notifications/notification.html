@@ -1,0 +1,25 @@
+ <li class="list-group-item" id="notification_${notification.id}">
+ <p>
+   <span class="pull-right label label-info">
+      <time datetime="${notification.createdAt}" title="${notification.createdAt.format()}">
+         ${notification.createdAt.toDate().since()}
+      </time>
+   </span>
+   ${notification.message}
+ </p>
+      #{if notification.redirect}
+       <a href="${notification.url}" class="btn btn-primary">
+         <i class="fa fa-arrow-circle-right"></i> <span class="hidden-xs">&{'notification.show'}</span>
+       </a>
+      #{/if}
+ <span class="pull-right">
+      #{if notification.read}
+       <i class="fa fa-check"></i>
+      #{/if} #{else}
+       <a href="@{Notifications.read(notification.id)}" class="btn btn-default"
+        data-async="#notification_${notification.id}" data-method="POST"
+        rel="nofollow"><i class="fa fa-check-circle"></i> <span class="hidden-xs">&{'notification.archive'}</span></a>
+     #{/else}
+</span>
+<span class="clearfix"></span>
+</li>

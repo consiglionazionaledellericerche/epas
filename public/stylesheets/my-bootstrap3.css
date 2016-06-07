@@ -444,3 +444,7 @@ i[red] {
 	color: red;
 }
 
+.label-badge {
+    border-radius: 1em;
+}
+

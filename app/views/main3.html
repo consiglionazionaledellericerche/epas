@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="">
-  <link rel="shortcut icon" type="image/png" href="@{'/public/favicon.ico'}">
+  <link rel="shortcut icon" type="image/png" href="@{'/public/ePas.ico'}">
 
   <title>#{get 'title' /}</title>
 
@@ -87,9 +87,42 @@
             #{/else}
 
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
-              <div class="visible-lg-inline visible-xs-inline"> ${session.username}<span class="caret"></span></div>
+              <div class="visible-lg-inline visible-xs-inline"> ${session.username}
+                #{if templateUtility.notifications.count > 0}
+                <span class="label label-danger label-badge">
+                  ${templateUtility.notifications.count}
+                </span>
+                #{/if}
+                <span class="caret"></span>
+              </div>
             </a>
             <ul class="dropdown-menu">
+              #{if templateUtility.notifications.count > 0}
+              <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#dropdownMenu1">
+                  <i class="fa fa-bell fa-fw"></i><sup>${templateUtility.notifications.count}</sup>
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                  #{list items:templateUtility.notifications.partialList, as:'notification'}
+                  <li>
+                    <a href="@{Notifications.readAndRedirect(notification.id)}">
+                      <i class="fa fa-comment fa-fw"></i>
+                      ${notification.message} - <time datetime="${notification.createdAt}"
+                      title="${notification.createdAt.format()}">${notification.createdAt.toDate().since()}</time>
+                    </a>
+                  </li>
+                  #{/list}
+                  *{#{secure.check 'Notifications.list'}
+                  #{menuitem @Notifications.list()}<i class="fa fa-bell fa-fw"></i> &{'notification.list'}#{/menuitem}
+                  #{menuitem @Notifications.archiveds()}<i class="fa fa-bell-o fa-fw"></i> &{'notification.archiveds'}#{/menuitem}
+                  #{/secure.check}}*
+                </ul>
+              </li>
+              #{/if}
+              *{
+              <li><a href="@{Notifications.list()}"><span class="label label-danger label-badge">${templateUtility.notifications.count}</span> Notifiche </a></li>
+              <li class="divider"></li>}*
               <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
 
               <li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>

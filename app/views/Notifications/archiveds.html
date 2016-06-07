@@ -1,0 +1,10 @@
+#{extends 'main3.html' /}
+#{set title:messages.get(request.action.endsWith('list') ? 'notification.list' : 'notification.archiveds') /}
+
+#{paginate notifications, 'data-remote':'#notifications'}
+ <ul class="list-group">
+   #{list items:notifications.results, as:'notification'}
+           #{include './notification.html' /}
+   #{/list}
+  </ul>
+#{/paginate}
