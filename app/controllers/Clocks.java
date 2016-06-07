@@ -19,12 +19,14 @@ import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 
 import models.Contract;
+import models.Notification;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+import models.enumerate.NotificationSubject;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -216,6 +218,10 @@ public class Clocks extends Controller {
     stamping.markedByAdmin = false;
 
     stamping.save();
+
+    new Notification.NotificationBuilder().destination(personDao.getPersonById(121L).user)
+        .message(String.format("Il Tizio %s ha appena eseguito una timbratura web!!!", user.username))
+        .subject(NotificationSubject.MESSAGE).create();
 
     consistencyManager.updatePersonSituation(user.person.id, stamping.personDay.date);
 

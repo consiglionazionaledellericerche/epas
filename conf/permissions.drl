@@ -23,7 +23,8 @@ rule AnyUser
 when
   $c: PermissionCheck(action in (
      	"Application.index",
-     	"Version.showVersion"
+     	"Version.showVersion",
+     	"Notifications.list"
        ), target == null, granted == false)
 then
  $c.grant();
