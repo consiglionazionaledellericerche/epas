@@ -26,6 +26,7 @@ import org.joda.time.MonthDay;
 
 import play.db.jpa.JPA;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,21 +45,22 @@ public class PersonManager {
 
   /**
    * Costrutture.
-   * @param contractDao contractDao
-   * @param personChildrenDao personChildrenDao
-   * @param personDayDao personDayDao
-   * @param absenceDao absenceDao
-   * @param personDayManager personDayManager
-   * @param wrapperFactory wrapperFactory
+   *
+   * @param contractDao          contractDao
+   * @param personChildrenDao    personChildrenDao
+   * @param personDayDao         personDayDao
+   * @param absenceDao           absenceDao
+   * @param personDayManager     personDayManager
+   * @param wrapperFactory       wrapperFactory
    * @param configurationManager configurationManager
    */
   @Inject
   public PersonManager(ContractDao contractDao,
-      PersonChildrenDao personChildrenDao, 
-      PersonDayDao personDayDao, 
+      PersonChildrenDao personChildrenDao,
+      PersonDayDao personDayDao,
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
-      IWrapperFactory wrapperFactory, 
+      IWrapperFactory wrapperFactory,
       ConfigurationManager configurationManager) {
     this.contractDao = contractDao;
     this.personDayDao = personDayDao;
@@ -73,7 +75,7 @@ public class PersonManager {
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
-    MonthDay patron = (MonthDay)configurationManager
+    MonthDay patron = (MonthDay) configurationManager
         .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
 
     if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
@@ -106,8 +108,9 @@ public class PersonManager {
   }
 
   /**
-   * Calcola se la persona nel giorno non è nè in turno nè in reperibilità e quindi può prendere 
+   * Calcola se la persona nel giorno non è nè in turno nè in reperibilità e quindi può prendere
    * l'assenza.
+   *
    * @return esito
    */
   public boolean canPersonTakeAbsenceInShiftOrReperibility(Person person, LocalDate date) {
@@ -150,7 +153,7 @@ public class PersonManager {
         AbsenceType.find(
             "Select abt from AbsenceType abt, Absence ab, PersonDay pd where ab.personDay = pd "
                 + "and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?",
-                person, beginMonth, endMonth).fetch();
+            person, beginMonth, endMonth).fetch();
     Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
     int index = 0;
     for (AbsenceType abt : abtList) {
@@ -171,11 +174,11 @@ public class PersonManager {
   /**
    * @return il numero di giorni lavorati in sede.
    */
-  public int basedWorkingDays(List<PersonDay> personDays, 
+  public int basedWorkingDays(List<PersonDay> personDays,
       List<Contract> contracts, LocalDate end) {
 
     int basedDays = 0;
-    
+
     for (PersonDay pd : personDays) {
 
       if (pd.isHoliday) {
@@ -183,11 +186,11 @@ public class PersonManager {
       }
       boolean find = false;
       for (Contract contract : contracts) {
-        if (DateUtility.isDateIntoInterval(pd.date, contract.periodInterval())) {         
+        if (DateUtility.isDateIntoInterval(pd.date, contract.periodInterval())) {
           find = true;
-        }        
+        }
       }
-      
+
       if (!find) {
         continue;
       }
@@ -211,22 +214,33 @@ public class PersonManager {
    */
   public int numberOfCompensatoryRestUntilToday(Person person, int year, int month) {
 
-    // TODO: andare a fare bound con sourceDate e considerare quelli da
-    // inizializzazione
-
     LocalDate begin = new LocalDate(year, 1, 1);
     LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+
+    List<Contract> contractsInPeriod = contractDao
+        .getActiveContractsInPeriod(person, begin, Optional.of(end));
+
+    Contract newerContract = contractsInPeriod.stream()
+        .max(Comparator.comparing(Contract::getSourceDateResidual)).get();
+
+    if (newerContract != null && !newerContract.sourceDateResidual.isBefore(begin)
+        && !newerContract.sourceDateResidual.isAfter(end)) {
+      return newerContract.sourceRecoveryDayUsed +
+          absenceDao.absenceInPeriod(person, newerContract.sourceDateResidual, end, "91").size();
+    }
+
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();
   }
 
   /**
    * Minuti di presenza festiva non accettata.
-   * @param person persona 
-   * @param year anno
-   * @param month mese
+   *
+   * @param person persona
+   * @param year   anno
+   * @param month  mese
    * @return minuti
    */
-  public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year, 
+  public int holidayWorkingTimeNotAccepted(Person person, Optional<Integer> year,
       Optional<Integer> month) {
 
     List<PersonDay> pdList = personDayDao
@@ -242,12 +256,13 @@ public class PersonManager {
 
   /**
    * Minuti di presenza festiva accettata.
+   *
    * @param person persona
-   * @param year anno
-   * @param month mese 
+   * @param year   anno
+   * @param month  mese
    * @return minuti
    */
-  public int holidayWorkingTimeAccepted(Person person, Optional<Integer> year, 
+  public int holidayWorkingTimeAccepted(Person person, Optional<Integer> year,
       Optional<Integer> month) {
 
     List<PersonDay> pdList = personDayDao
@@ -263,9 +278,10 @@ public class PersonManager {
 
   /**
    * Minuti di presenza festiva totali.
+   *
    * @param person persona
-   * @param year anno
-   * @param month mese 
+   * @param year   anno
+   * @param month  mese
    * @return minuti
    */
   public int holidayWorkingTimeTotal(
