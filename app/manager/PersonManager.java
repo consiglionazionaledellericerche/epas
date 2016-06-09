@@ -210,12 +210,10 @@ public class PersonManager {
   }
 
   /**
-   * Il numero di riposi compensativi utilizzati nell'anno dalla persona.
+   * Il numero di riposi compensativi utilizzati tra 2 date
+   * (in linea di massima ha senso dall'inizio dell'anno a una certa data)
    */
-  public int numberOfCompensatoryRestUntilToday(Person person, int year, int month) {
-
-    LocalDate begin = new LocalDate(year, 1, 1);
-    LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+  public int numberOfCompensatoryRestUntilToday(Person person, LocalDate begin, LocalDate end) {
 
     List<Contract> contractsInPeriod = contractDao
         .getActiveContractsInPeriod(person, begin, Optional.of(end));
@@ -230,6 +228,16 @@ public class PersonManager {
     }
 
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();
+  }
+
+  /**
+   * Il numero di riposi compensativi utilizzati nell'anno dalla persona.
+   */
+  public int numberOfCompensatoryRestUntilToday(Person person, int year, int month) {
+
+    LocalDate begin = new LocalDate(year, 1, 1);
+    LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+    return numberOfCompensatoryRestUntilToday(person, begin, end);
   }
 
   /**
