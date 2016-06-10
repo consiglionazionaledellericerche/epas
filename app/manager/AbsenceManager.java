@@ -143,22 +143,22 @@ public class AbsenceManager {
     // (1) Se voglio inserire un riposo compensativo per il mese successivo considero il residuo
     // a ieri.
     //N.B Non posso inserire un riposo compensativo oltre il mese successivo.
-    LocalDate dateToCheck = date;
+    LocalDate dateForRecap = date;
     //Caso generale
-    if (dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) {
-      dateToCheck = LocalDate.now();
-    } else if (dateToCheck.getYear() == LocalDate.now().getYear() + 1
-        && dateToCheck.getMonthOfYear() == 1 && LocalDate.now().getMonthOfYear() == 12) {
+    if (dateForRecap.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) {
+      dateForRecap = LocalDate.now();
+    } else if (dateForRecap.getYear() == LocalDate.now().getYear() + 1
+        && dateForRecap.getMonthOfYear() == 1 && LocalDate.now().getMonthOfYear() == 12) {
       //Caso particolare dicembre - gennaio
-      dateToCheck = LocalDate.now();
+      dateForRecap = LocalDate.now();
     }
 
     // (2) Calcolo il residuo alla data precedente di quella che voglio considerare.
-    if (dateToCheck.getDayOfMonth() > 1) {
-      dateToCheck = dateToCheck.minusDays(1);
+    if (dateForRecap.getDayOfMonth() > 1) {
+      dateForRecap = dateForRecap.minusDays(1);
     }
 
-    Contract contract = contractDao.getContract(dateToCheck, person);
+    Contract contract = contractDao.getContract(dateForRecap, person);
 
     Optional<YearMonth> firstContractMonthRecap = wrapperFactory
         .create(contract).getFirstMonthToRecap();
@@ -168,11 +168,11 @@ public class AbsenceManager {
     }
 
     ContractMonthRecap cmr = new ContractMonthRecap();
-    cmr.year = dateToCheck.getYear();
-    cmr.month = dateToCheck.getMonthOfYear();
+    cmr.year = dateForRecap.getYear();
+    cmr.month = dateForRecap.getMonthOfYear();
     cmr.contract = contract;
 
-    YearMonth yearMonth = new YearMonth(date);
+    YearMonth yearMonth = new YearMonth(dateForRecap);
 
     //Se serve il riepilogo precedente devo recuperarlo.
     Optional<ContractMonthRecap> previousMonthRecap = Optional.<ContractMonthRecap>absent();
@@ -187,7 +187,7 @@ public class AbsenceManager {
     }
 
     Optional<ContractMonthRecap> recap = contractMonthRecapManager.computeResidualModule(cmr,
-        previousMonthRecap, yearMonth, dateToCheck, otherCompensatoryRest);
+        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest);
 
     if (recap.isPresent()) {
       int residualMinutes = recap.get().remainingMinutesCurrentYear
