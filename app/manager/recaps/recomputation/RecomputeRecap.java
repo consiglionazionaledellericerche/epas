@@ -3,8 +3,8 @@ package manager.recaps.recomputation;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import models.Configuration;
 import models.base.IPropertyInPeriod;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 
@@ -22,7 +22,7 @@ public class RecomputeRecap {
   public boolean initMissing;
   
   //Dato da utilizzare in caso di modifica configurazione.
-  public Configuration configuration;
+  public EpasParam epasParam; 
   
   
   public boolean needRecomputation;

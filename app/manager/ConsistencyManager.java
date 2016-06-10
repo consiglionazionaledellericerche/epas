@@ -29,6 +29,7 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+import models.base.IPropertiesInPeriodOwner;
 import models.enumerate.EpasParam;
 import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.enumerate.EpasParam.RecomputationType;
@@ -233,18 +234,25 @@ public class ConsistencyManager {
   /**
    * Effettua la ricomputazione.
    */
-  public void performRecomputation(Office office, List<RecomputationType> recomputationTypes,
-                                   LocalDate recomputeFrom) {
+  public void performRecomputation(IPropertiesInPeriodOwner target, 
+      List<RecomputationType> recomputationTypes, LocalDate recomputeFrom) {
 
     if (recomputationTypes.isEmpty()) {
       return;
     }
-
     if (recomputeFrom == null) {
       return;
     }
 
-    for (Person person : office.persons) {
+    List<Person> personToRecompute = Lists.newArrayList();
+    
+    if (target instanceof Office) {
+      personToRecompute = ((Office)target).persons;
+    } else if (target instanceof Person) {
+      personToRecompute.add((Person)target);
+    }
+    
+    for (Person person : personToRecompute) {
       if (recomputationTypes.contains(RecomputationType.DAYS)) {
         updatePersonSituation(person.id, recomputeFrom);
       } else if (recomputationTypes.contains(RecomputationType.RESIDUAL_HOURS)
@@ -253,8 +261,7 @@ public class ConsistencyManager {
       }
       JPA.em().flush();
       JPA.em().clear();
-    }
-
+    }  
   }
 
 

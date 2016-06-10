@@ -141,7 +141,7 @@ public class Offices extends Controller {
       officeManager.setSystemUserPermission(office);
       
       // Configurazione iniziale di default ...
-      configurationManager.updateOfficeConfigurations(office);
+      configurationManager.updateConfigurations(office);
       
       periodManager.updatePropertiesInPeriodOwner(office);
       flash.success(Web.msgSaved(Office.class));
