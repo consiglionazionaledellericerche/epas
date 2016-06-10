@@ -135,7 +135,7 @@ public class PersonStampingDayRecap {
         if (contract.getBeginDate().isAfter(personDay.getDate()) 
             || (contract.getSourceDateResidual() != null 
             && !personDay.getDate().isAfter(contract.getSourceDateResidual())) 
-            || personDay.getDate().isBefore(personDay.getPerson().createdAt.toLocalDate())) {
+            || personDay.getDate().isBefore(personDay.getPerson().beginDate)) {
           this.ignoreDay = true;
         }
 
