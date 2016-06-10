@@ -17,6 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import models.Configuration;
 import models.Office;
+import models.Person;
+import models.PersonConfiguration;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
 import models.enumerate.EpasParam;
 import models.enumerate.EpasParam.EpasParamTimeType;
 import models.enumerate.EpasParam.EpasParamValueType;
@@ -68,7 +72,7 @@ public class ConfigurationManager {
    * @param end fine 
    * @return configurazione
    */
-  public Configuration updateLocalTime(EpasParam epasParam, Office office, LocalTime localTime, 
+  public IPropertyInPeriod updateLocalTime(EpasParam epasParam, Office office, LocalTime localTime, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME));
     return build(epasParam, office,
@@ -85,7 +89,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateLocalTimeInterval(EpasParam epasParam, Office office, 
+  public IPropertyInPeriod updateLocalTimeInterval(EpasParam epasParam, Office office, 
       LocalTime from, LocalTime to, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType
@@ -103,7 +107,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateLocalDate(EpasParam epasParam, Office office, LocalDate localDate, 
+  public IPropertyInPeriod updateLocalDate(EpasParam epasParam, Office office, LocalDate localDate, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE));
     return build(epasParam, office, 
@@ -120,7 +124,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateDayMonth(EpasParam epasParam, Office office, int day, int month, 
+  public IPropertyInPeriod updateDayMonth(EpasParam epasParam, Office office, int day, int month, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
     return build(epasParam, office, 
@@ -137,7 +141,7 @@ public class ConfigurationManager {
    * @param applyToTheEnd se voglio applicare la configurazione anche per gli anni successivi.
    * @return configurazione
    */
-  public Configuration updateYearlyDayMonth(EpasParam epasParam, Office office, int day, int month, 
+  public IPropertyInPeriod updateYearlyDayMonth(EpasParam epasParam, Office office, int day, int month, 
       int year, boolean applyToTheEnd, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH));
     return build(epasParam, office, EpasParamValueType.formatValue(new MonthDay(month, day)), 
@@ -155,7 +159,7 @@ public class ConfigurationManager {
    * @param applyToTheEnd se voglio applicare la configurazione anche per gli anni successivi.
    * @return configurazione
    */
-  public Configuration updateMonth(EpasParam epasParam, Office office, int month, 
+  public IPropertyInPeriod updateMonth(EpasParam epasParam, Office office, int month, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     // TODO: validare il valore 1-12 o fare un tipo specifico.
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.MONTH));
@@ -172,7 +176,7 @@ public class ConfigurationManager {
    * @param applyToTheEnd se voglio applicare la configurazione anche per gli anni successivi.
    * @return configurazione
    */
-  public Configuration updateYearlyMonth(EpasParam epasParam, Office office, int month, 
+  public IPropertyInPeriod updateYearlyMonth(EpasParam epasParam, Office office, int month, 
       int year, boolean applyToTheEnd, boolean persist) {
     // TODO: validare il valore 1-12 o fare un tipo specifico.
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.MONTH));
@@ -190,7 +194,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateBoolean(EpasParam epasParam, Office office, boolean value, 
+  public IPropertyInPeriod updateBoolean(EpasParam epasParam, Office office, boolean value, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN));
     return build(epasParam, office, EpasParamValueType.formatValue(value), 
@@ -206,7 +210,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateInteger(EpasParam epasParam, Office office, Integer value, 
+  public IPropertyInPeriod updateInteger(EpasParam epasParam, Office office, Integer value, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER));
     return build(epasParam, office, 
@@ -222,7 +226,7 @@ public class ConfigurationManager {
    * @param applyToTheEnd se voglio applicare la configurazione anche per gli anni successivi.
    * @return configurazione
    */
-  public Configuration updateYearlyInteger(EpasParam epasParam, Office office, 
+  public IPropertyInPeriod updateYearlyInteger(EpasParam epasParam, Office office, 
       int value, int year, boolean applyToTheEnd, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER));
     return build(epasParam, office, EpasParamValueType.formatValue(value), 
@@ -239,7 +243,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateIpList(EpasParam epasParam, Office office, List<String> values, 
+  public IPropertyInPeriod updateIpList(EpasParam epasParam, Office office, List<String> values, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST));
     return build(epasParam, office, EpasParamValueType.formatValue(new IpList(values)), 
@@ -255,7 +259,7 @@ public class ConfigurationManager {
    * @param end fine
    * @return configurazione
    */
-  public Configuration updateEmail(EpasParam epasParam, Office office, String email, 
+  public IPropertyInPeriod updateEmail(EpasParam epasParam, Office office, String email, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     // TODO: validare il valore o fare un tipo specifico.
     Preconditions.checkState(epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL));
@@ -266,29 +270,50 @@ public class ConfigurationManager {
   /**
    * Costruttore generico di una configurazione periodica. Effettua tutti i passaggi di validazione.
    */
-  private Configuration build(EpasParam epasParam, Office office, String fieldValue, 
+  private IPropertyInPeriod build(EpasParam epasParam, IPropertiesInPeriodOwner target, String fieldValue, 
       Optional<LocalDate> begin, Optional<LocalDate> end, boolean applyToTheEnd, boolean persist) {
     if (applyToTheEnd) {
-      end = Optional.fromNullable(office.calculatedEnd());
+      end = Optional.fromNullable(target.calculatedEnd());
     }
-    Configuration configuration = new Configuration();
-    configuration.office = office;
-    configuration.fieldValue = fieldValue;
-    configuration.epasParam = epasParam;
-    configuration.beginDate = office.beginDate;
-    if (begin.isPresent()) {
-      configuration.beginDate = begin.get();
+    
+    IPropertyInPeriod configurationInPeriod = null;
+    
+    if (epasParam.target.equals(Office.class)) {
+      Configuration configuration = new Configuration();
+      configuration.office = (Office)target;
+      configuration.fieldValue = fieldValue;
+      configuration.epasParam = epasParam;
+      configuration.beginDate = configuration.office.beginDate;
+      if (begin.isPresent()) {
+        configuration.beginDate = begin.get();
+      }
+      if (end.isPresent()) {
+        configuration.endDate = end.get();
+      }
+      configurationInPeriod = configuration;
     }
-    if (end.isPresent()) {
-      configuration.endDate = end.get();
+    
+    if (epasParam.target.equals(Person.class)) {
+      PersonConfiguration configuration = new PersonConfiguration();
+      configuration.person = (Person)target;
+      configuration.fieldValue = fieldValue;
+      configuration.epasParam = epasParam;
+      configuration.beginDate = configuration.person.beginDate;
+      if (begin.isPresent()) {
+        configuration.beginDate = begin.get();
+      }
+      if (end.isPresent()) {
+        configuration.endDate = end.get();
+      }
     }
+
 
     //Controllo sul fatto di essere un parametro generale, annuale, o periodico.
     //Decidere se rimandare un errore al chiamante.
-    Verify.verify(validateTimeType(configuration));
+    Verify.verify(validateTimeType(epasParam, configurationInPeriod));
 
-    periodManager.updatePeriods(configuration, persist);
-    return configuration;
+    periodManager.updatePeriods(configurationInPeriod, persist);
+    return configurationInPeriod;
   }
 
   /**
@@ -296,14 +321,14 @@ public class ConfigurationManager {
    * @param configuration parametro
    * @return esito.
    */
-  public boolean validateTimeType(Configuration configuration) {
+  public boolean validateTimeType(EpasParam epasParam, IPropertyInPeriod configuration) {
 
-    if (configuration.epasParam.epasParamTimeType.equals(EpasParamTimeType.GENERAL)) {
+    if (epasParam.epasParamTimeType.equals(EpasParamTimeType.GENERAL)) {
       //il parametro deve coprire tutta la durata di un owner.
       return DateUtility.areIntervalsEquals(
           new DateInterval(configuration.getBeginDate(), configuration.calculatedEnd()),
-          new DateInterval(configuration.office.getBeginDate(), 
-              configuration.office.calculatedEnd()));
+          new DateInterval(configuration.getOwner().getBeginDate(), 
+              configuration.getOwner().calculatedEnd()));
     }
 
     //il parametro PERIODIC non ha vincoli, il parametro YEARLY lo costruisco opportunamente 
@@ -386,7 +411,7 @@ public class ConfigurationManager {
       if (!DateUtility.isDateIntoInterval(date, interval)) {
         continue;
       }
-      return configuration.parseValue();
+      return parseValue(configuration.epasParam, configuration.fieldValue);
     }
     
     // Parametro necessario inesistente
@@ -447,7 +472,7 @@ public class ConfigurationManager {
    * @param epasParam
    * @return
    */
-  private Configuration buildDefault(Office office, EpasParam epasParam) {
+  private IPropertyInPeriod buildDefault(Office office, EpasParam epasParam) {
     
     return build(epasParam, office, (String)epasParam.defaultValue, 
         Optional.fromNullable(office.beginDate), Optional.<LocalDate>absent(), true, true);
@@ -516,5 +541,14 @@ public class ConfigurationManager {
       }
     }
   }
+  
+  /**
+  *
+  * @return
+  */
+ public Object parseValue(EpasParam epasParam, String fieldValue) {
+   return epasParam.epasParamValueType
+       .parseValue(epasParam.epasParamValueType, fieldValue);
+ }
 
 }
