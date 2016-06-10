@@ -285,7 +285,7 @@ public class Synchronizations extends Controller {
     officeManager.setSystemUserPermission(seat);
     
     // Configurazione iniziale di default ...
-    configurationManager.updateOfficeConfigurations(seat);
+    configurationManager.updateConfigurations(seat);
     
     // Importato correttamente importo tutte le persone e tutti i contratti ...
     managerImportAllPersonInOffice(seat);
