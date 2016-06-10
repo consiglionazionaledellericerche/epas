@@ -19,6 +19,7 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateUtility;
 
+import manager.ConfigurationManager;
 import manager.SecureManager;
 
 import models.AbsenceType;
@@ -33,6 +34,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 
@@ -62,13 +64,15 @@ public class TemplateUtility {
   private final IWrapperFactory wrapperFactory;
   private final BadgeSystemDao badgeSystemDao;
   private final SynchDiagnostic synchDiagnostic;
+  private final ConfigurationManager configurationManager;
 
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
       QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
-      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao, SynchDiagnostic synchDiagnostic) {
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao, 
+      SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -81,6 +85,7 @@ public class TemplateUtility {
     this.wrapperFactory = wrapperFactory;
     this.badgeSystemDao = badgeSystemDao;
     this.synchDiagnostic = synchDiagnostic;
+    this.configurationManager = configurationManager;
   }
 
 
@@ -342,5 +347,9 @@ public class TemplateUtility {
   
   public SynchDiagnostic getSyncDiagnostic() {
     return this.synchDiagnostic;
+  }
+  
+  public Object getObjectInConfiguration(EpasParam epasParam, String fieldValue) {
+    return configurationManager.parseValue(epasParam, fieldValue);
   }
 }
