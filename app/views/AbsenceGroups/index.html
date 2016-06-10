@@ -4,6 +4,26 @@
 
 <div class="container">
 
-Puppare
-
+  <table class="table">
+    <tr>
+      <th>Label</th>
+      <th>Eccesso (minuti)</th>
+      <th>Limite (minuti)</th>
+      <th>Tipo Accumulo</th>
+      <th>Comportamento</th>
+      <th>Rimpiazzo</th>
+    </tr>
+    #{list items:groups, as:'group'}
+      <tr>
+        <td>${group.label}</td>
+        <td>${group.minutesExcess}</td>
+        <td>${group.limitInMinute}</td>
+        <td>${group.accumulationType.description}</td>
+        <td>${group.accumulationBehaviour.description}</td>
+        <td>${group.replacingAbsenceType?.code}</td>
+        
+      </tr>
+      
+    #{/list}
+  </table>
 </div>

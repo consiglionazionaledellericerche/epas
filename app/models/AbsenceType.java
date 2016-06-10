@@ -87,6 +87,14 @@ public class AbsenceType extends BaseModel {
     }
     return description;
   }
+  
+  @Transient
+  public boolean isExpired() {
+    if (validTo == null) {
+      return false;
+    }
+    return LocalDate.now().isAfter(validTo);
+  }
 
   @Override
   public String toString() {
