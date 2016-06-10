@@ -2,6 +2,8 @@ package manager.attestati.service;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
@@ -16,6 +18,7 @@ import manager.attestati.dto.insert.InserimentoRigaAssenza;
 import manager.attestati.dto.insert.InserimentoRigaBuoniPasto;
 import manager.attestati.dto.insert.InserimentoRigaCompetenza;
 import manager.attestati.dto.insert.InserimentoRigaFormazione;
+import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.ListaDipendenti.Matricola;
 import manager.attestati.dto.show.RispostaAttestati;
@@ -31,7 +34,10 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 
+import java.util.List;
 import java.util.Set;
+
+import synch.perseoconsumers.office.PerseoOffice;
 
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
@@ -49,6 +55,12 @@ public class CertificationsComunication {
   private static final String API_URL_BUONI_PASTO = "/rigaBuoniPasto";
   private static final String API_URL_FORMAZIONE = "/rigaFormazione";
   private static final String API_URL_COMPETENZA = "/rigaCompetenza";
+  
+  private static final String API_URL_ASSENZE_PER_CONTRATTO = "/contratto/codiciAssenza";
+  
+  
+  //http://attestativ2.rm.cnr.it/api/ext/contratto/codiciAssenza/{CODICE_CONTRATTO}
+  
   private static final String JSON_CONTENT_TYPE = "application/json";
   
   //OAuh
@@ -380,6 +392,35 @@ public class CertificationsComunication {
     wsRequest.body(json);
 
     return wsRequest.delete();
+  }
+  
+  /**
+   * Preleva da attestati la lista dei codici assenza (per il tipo contratto CL0609)
+   * @param token token
+   * @return lista dei codici assenza
+   */
+  public List<CodiceAssenza> getAbsencesList(Optional<String> token) {
+    
+    if (!reloadToken(token).isPresent()) {
+      return Lists.newArrayList();
+    }
+    
+    try {
+      String url = API_URL + API_URL_ASSENZE_PER_CONTRATTO + "/" + "CL0609";
+
+      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+      HttpResponse httpResponse = wsRequest.get();
+
+      String json = httpResponse.getJson().toString();
+      
+      List<CodiceAssenza> listaCodiciAssenza = new Gson().fromJson(json, 
+          new TypeToken<List<CodiceAssenza>>() {}.getType());
+      
+      return listaCodiciAssenza;
+
+    } catch (Exception ex) {}
+
+    return Lists.newArrayList();
   }
 
 }

@@ -198,22 +198,6 @@ public class AbsenceDao extends DaoBase {
 
 
   /**
-   * @return la lista dei codici di rimpiazzamento presenti nel periodo specificato da begin e end
-   * utilizzati dalla persona person.
-   */
-  public List<Absence> getReplacingAbsenceOccurrenceListInPeriod(
-      AbsenceType abt, Person person, LocalDate begin, LocalDate end) {
-
-    final QAbsence absence = QAbsence.absence;
-
-    final JPQLQuery query = getQueryFactory().from(absence)
-        .where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
-            .and(absence.personDay.person.eq(person)
-                .and(absence.personDay.date.between(begin, end))));
-    return query.list(absence);
-  }
-
-  /**
    * @return la lista dei codici di assenza accomunati dallo stesso label relativo al codice di
    * gruppo nel periodo begin-end per la persona person.
    */
@@ -395,8 +379,4 @@ public class AbsenceDao extends DaoBase {
         new LocalDate(year, 1, 1), Optional.of(new LocalDate(year, 12, 31)), false);
   }
   
-  
-  public List<AbsenceType>
-
-
 }

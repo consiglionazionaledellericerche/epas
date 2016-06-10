@@ -1,6 +1,7 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import dao.AbsenceDao;
@@ -155,8 +156,8 @@ public class AbsenceGroupManager {
       }
     } else {
 
-      absList = absenceDao.getReplacingAbsenceOccurrenceListInPeriod(
-          absenceType, person, new LocalDate(date.getYear(), 1, 1), date);
+      absList = absenceDao.getAllAbsencesWithSameLabel(absenceType, person, 
+          new LocalDate(date.getYear(), 1, 1), date);
 
       for (Absence abs : absList) {
         totalMinutesJustified = totalMinutesJustified + abs.absenceType.justifiedTimeAtWork.minutes;
@@ -187,84 +188,9 @@ public class AbsenceGroupManager {
     return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);
   }
 
-  /**
-   * @return true se è possibile prendere il codice d'assenza passato come parametro dopo aver
-   *     controllato di non aver ecceduto in quantità nel periodo di tempo previsto dal tipo di
-   *     accumulo.
-   */
-  private CheckMessage canTakeAbsenceWithNoMoreAbsencesAccepted(
-      AbsenceType absenceType, Person person, LocalDate date) {
+  
+  
 
-    int totalMinutesJustified = 0;
-    List<Absence> absList = null;
-    /* controllo che il tipo di accumulo sia su base mensile cercando nel mese 
-     * tutte le occorrenze di codici di assenza che hanno lo stesso gruppo identificativo 
-     */
-    
-    if (absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.monthly)) {
-      absList = absenceDao.getAllAbsencesWithSameLabel(
-          absenceType, person, date.dayOfMonth().withMinimumValue(), date);
-
-      Logger.debug("La lista di codici di assenza con gruppo %s contiene "
-          + "%d elementi", absenceType.absenceTypeGroup.label, absList.size());
-      for (Absence abs : absList) {
-        totalMinutesJustified = totalMinutesJustified + abs.absenceType.justifiedTimeAtWork.minutes;
-      }
-      if (absenceType.absenceTypeGroup.limitInMinute 
-          >= totalMinutesJustified + absenceType.justifiedTimeAtWork.minutes) {
-        return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
-      } else {
-        return new CheckMessage(false, "La quantità usata nell'arco del mese "
-            + "per questo codice ha raggiunto il limite. "
-            + "Non si può usarne un altro.", null);
-      }
-    } else {
-      /* controllo che il tipo di accumulo sia su base annuale cercando nel mese tutte le 
-       * occorrenze di codici di assenza che hanno lo stesso gruppo identificativo
-       */
-    
-      absList = absenceDao.getReplacingAbsenceOccurrenceListInPeriod(
-          absenceType, person, 
-          date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date);
-
-      Logger.debug("List size: %d", absList.size());
-      for (Absence abs : absList) {
-        if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
-          totalMinutesJustified = totalMinutesJustified + workingTimeTypeDao
-          .getWorkingTimeType(date, person).get()
-          .workingTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
-        } else {
-
-          totalMinutesJustified = totalMinutesJustified 
-              + abs.absenceType.justifiedTimeAtWork.minutes;
-          
-        }
-
-      }
-      Logger.debug("TotalMinutesJustified= %d. Minuti giustificati: %d",
-          totalMinutesJustified, absenceType.justifiedTimeAtWork.minutes);
-      int quantitaGiustificata;
-      //FIXME non c'è solo il tipo AllDay da considerare, ci sono anche altri valori 
-      //che non indicano un valore in minuti sui quali va calcolato il quantitativo da giustificare
-      if (absenceType.justifiedTimeAtWork != JustifiedTimeAtWork.AllDay) {
-        quantitaGiustificata = absenceType.justifiedTimeAtWork.minutes;
-      } else {
-        quantitaGiustificata = workingTimeTypeDao
-        .getWorkingTimeType(date, person).get().workingTimeTypeDays
-        .get(date.getDayOfWeek() - 1).workingTime;
-      }
-
-      if (absenceType.absenceTypeGroup.limitInMinute 
-          >= totalMinutesJustified + quantitaGiustificata) {
-        return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
-      } else {
-        return new CheckMessage(false, "La quantità usata nell'arco dell'anno "
-            + "per questo codice ha raggiunto il limite. "
-            + "Non si può usarne un altro.", null);
-      }
-    }
-
-  }
 
   /**
    * @return i minuti in eccesso, se ci sono, relativi all'inserimento del precedente codice di
@@ -280,8 +206,8 @@ public class AbsenceGroupManager {
       return 0;
     }
 
-    List<Absence> absList = absenceDao.getReplacingAbsenceOccurrenceListInPeriod(abt, 
-        person, new LocalDate(date.getYear(), 1, 1), date);
+    List<Absence> absList = absenceDao.getAllAbsencesWithSameLabel(abt, person, 
+        new LocalDate(date.getYear(), 1, 1), date);
 
     int minutesExcess = 0;
     int minutesJustified = 0;
@@ -295,5 +221,63 @@ public class AbsenceGroupManager {
     }
 
     return minutesExcess;
+  }
+  
+  
+  private int justifiedMinutes(int workingMinutes, AbsenceType absenceType) {
+    
+    // TODO: trattare anche gli altri enumerati.....
+    if (absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+      return workingMinutes;
+    } else {
+      return absenceType.justifiedTimeAtWork.minutes;
+    }
+  }
+  
+  
+  /**
+   * @return true se è possibile prendere il codice d'assenza passato come parametro dopo aver
+   *     controllato di non aver ecceduto in quantità nel periodo di tempo previsto dal tipo di
+   *     accumulo.
+   */
+  private CheckMessage canTakeAbsenceWithNoMoreAbsencesAccepted(AbsenceType absenceType,
+      Person person, LocalDate date) {
+
+    int workingMinutes = workingTimeTypeDao
+        .getWorkingTimeType(date, person).get()
+        .workingTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
+    
+    int totalMinutesJustified = 0;
+    int toAddMinutes = justifiedMinutes(workingMinutes, absenceType);
+    int limitInMinute = absenceType.absenceTypeGroup.limitInMinute;
+    
+    LocalDate from = date;
+
+    if (absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.monthly)) {
+      // Accumulo Mensile (inizio mese)
+      from = date.dayOfMonth().withMinimumValue();
+    } else if (absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)) {
+      // Accumulo Annuale (inizio anno)
+      from = date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
+    } else {
+      // TODO: To implement
+      return new CheckMessage(false, "Caso non gestito effettuare una segnalazione.", null);
+    }
+
+    List<Absence> absList = absenceDao.getAllAbsencesWithSameLabel(absenceType, person, 
+        from, date);
+
+    for (Absence abs : absList) {
+      totalMinutesJustified = totalMinutesJustified +
+          justifiedMinutes(workingMinutes, abs.absenceType);
+    }
+
+    if (limitInMinute >= totalMinutesJustified + toAddMinutes) {
+      return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
+    } else {
+      return new CheckMessage(false, "La quantità usata nell'arco del mese "
+          + "per questo codice ha raggiunto il limite. "
+          + "Non si può usarne un altro.", null);
+    }
   }
 }

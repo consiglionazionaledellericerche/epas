@@ -54,4 +54,8 @@ public class AbsenceTypeGroup extends BaseModel {
   @OneToOne
   @JoinColumn(name = "replacing_absence_type_id")
   public AbsenceType replacingAbsenceType;
+  
+  public String toString() {
+    return label;
+  }
 }

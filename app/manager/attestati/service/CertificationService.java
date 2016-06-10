@@ -14,6 +14,7 @@ import dao.PersonMonthRecapDao;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.RigaAssenza;
 import manager.attestati.dto.show.RigaCompetenza;
 import manager.attestati.dto.show.RigaFormazione;
@@ -712,6 +713,21 @@ public class CertificationService {
     }
      
     return personCertificationStatus;
+  }
+  
+  /**
+   * La lista dei codici assenza... TODO: conversione al tipo epas??
+   * @param token token
+   * @return lista
+   */
+  public Map<String, CodiceAssenza> absenceCodes(Optional<String> token) {
+    
+    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList(token);
+    Map<String, CodiceAssenza> map = Maps.newConcurrentHashMap();
+    for (CodiceAssenza codiceAssenza : codiciAssenza) {
+      map.put(codiceAssenza.codice.trim().toUpperCase(), codiceAssenza);
+    }
+    return map;
   }
 
 

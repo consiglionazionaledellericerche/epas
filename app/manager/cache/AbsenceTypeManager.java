@@ -121,10 +121,11 @@ public class AbsenceTypeManager {
 
     JPQLQuery query = queryFactory.from(absenceType)
             .where(absenceType.code.startsWith("24")
-                    .or(absenceType.code.startsWith("25")
-                            .or(absenceType.code.startsWith("17C")
-                                    .or(absenceType.code.startsWith("C17")
-                                            .or(absenceType.code.startsWith("C18"))))));
+            .or(absenceType.code.startsWith("25")
+            .or(absenceType.code.startsWith("34")
+            .or(absenceType.code.startsWith("17C")
+            .or(absenceType.code.startsWith("C17")
+            .or(absenceType.code.startsWith("C18")))))));
     return query.list(absenceType);
 
   }
